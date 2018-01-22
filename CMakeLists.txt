@@ -1,11 +1,10 @@
-cmake_minimum_required (VERSION 2.8.7) # >= 2.8.8 necessary for $<TARGET_OBJECTS:objlib>
+cmake_minimum_required (VERSION 3.1)
 include (CheckSymbolExists)
 include (CheckCXXSymbolExists)
 include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
-include (UsePkgConfig)
 include (ProcessorCount)
 
 project (oofem CXX C)
@@ -36,14 +35,8 @@ else ()
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -fPIC")
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 endif ()
-# Check with more compilers as time go on
-if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_COMPILER_IS_GNUCXX)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif (MSVC)
-    # Nothing to do for MSVC.
-endif ()
+
+set (CMAKE_CXX_STANDARD 14)
 
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
@@ -75,11 +68,7 @@ set (PARDISO_ORG_DIR CACHE PATH "Manual pardiso-project.org directory (sparse di
 ######################## Options ######################################
 #######################################################################
 option (USE_OOFEG "Enable OOFEG" OFF)
-if (${CMAKE_VERSION} VERSION_GREATER "2.8.7") # Compability with older version of cmake
-    option (USE_SHARED_LIB "Build shared library" ON)
-else ()
-    set (USE_SHARED_LIB OFF)
-endif ()
+option (USE_SHARED_LIB "Build shared library" ON)
 
 # Parallel stuff
 option (USE_PARALLEL "Enable parallel support" OFF)
@@ -119,38 +108,30 @@ endif ()
 
 # Enable coverage testing
 if (CMAKE_COMPILER_IS_GNUCC)
-  option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
+    option(ENABLE_COVERAGE "Enable coverage reporting for gcc/clang" FALSE)
 
-  if (ENABLE_COVERAGE)
-    add_compile_options(--coverage -O0)
-    list (APPEND EXT_LIBS --coverage)
-    
-  endif()
+    if (ENABLE_COVERAGE)
+        add_compile_options(--coverage -O0)
+        list (APPEND EXT_LIBS --coverage)
+    endif()
 endif ()
 
 #######################################################################
 ######################## Internal libraries ###########################
 #######################################################################
 # I believe the subdirs should be used when including instead.
+include_directories ("${oofem_SOURCE_DIR}/src")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib")
 include_directories ("${oofem_SOURCE_DIR}/src/oofemlib/T3d/src")
 include_directories ("${oofem_BINARY_DIR}")
 
 # Is there really any reason not to compile all of them? Some has cross dependencies.
-if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    list (APPEND LIBS core)
-else ()
-    list (APPEND LIBS $<TARGET_OBJECTS:core>)
-endif ()
+list (APPEND LIBS $<TARGET_OBJECTS:core>)
 
 if (USE_FM)
     include_directories ("${oofem_SOURCE_DIR}/src/fm")
     add_definitions (-D__FM_MODULE)
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        list (APPEND LIBS fm)
-    else ()
-        list (APPEND LIBS $<TARGET_OBJECTS:fm>)
-    endif ()
+    list (APPEND LIBS $<TARGET_OBJECTS:fm>)
     list (APPEND MODULE_LIST "fm")
     if (USE_PFEM)
         add_definitions (-D__PFEM_MODULE)
@@ -160,11 +141,7 @@ endif ()
 if (USE_TM)
     include_directories ("${oofem_SOURCE_DIR}/src/tm")
     add_definitions (-D__TM_MODULE)
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        list (APPEND LIBS tm)
-    else ()
-        list (APPEND LIBS $<TARGET_OBJECTS:tm>)
-    endif ()
+    list (APPEND LIBS $<TARGET_OBJECTS:tm>)
     list (APPEND MODULE_LIST "tm")
     if (USE_CEMHYD)
         add_definitions (-D__CEMHYD_MODULE)
@@ -175,11 +152,7 @@ endif ()
 if (USE_SM)
     include_directories ("${oofem_SOURCE_DIR}/src/sm")
     add_definitions (-D__SM_MODULE)
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        list (APPEND LIBS sm)
-    else ()
-        list (APPEND LIBS $<TARGET_OBJECTS:sm>)
-    endif ()
+    list (APPEND LIBS $<TARGET_OBJECTS:sm>)
     list (APPEND MODULE_LIST "sm")
 
     if (NOT MSVC AND NOT MINGW)
@@ -196,11 +169,7 @@ endif ()
 
 if (USE_DSS)
     include_directories ("${oofem_SOURCE_DIR}/src/dss")
-    if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-        list (APPEND LIBS dss)
-    else ()
-        list (APPEND LIBS $<TARGET_OBJECTS:dss>)
-    endif ()
+    list (APPEND LIBS $<TARGET_OBJECTS:dss>)
     list (APPEND MODULE_LIST "dss")
 endif ()
 
@@ -528,7 +497,7 @@ check_cxx_symbol_exists ("isnan" "cmath" HAVE_ISNAN)
 if (USE_SHARED_LIB)
     set (OOFEM_EXPORT_HEADER "#include \"oofem_export.h\"")
     # For consistant library on linux and windows platforms.
-    add_compiler_export_flags (LIBOOFEM_EXPORT_CFLAGS)
+    #add_compiler_export_flags (LIBOOFEM_EXPORT_CFLAGS)
 else ()
     set (OOFEM_EXPORT_HEADER "#define OOFEM_EXPORT\n#define OOFEM_NO_EXPORT")
 endif ()
@@ -541,12 +510,7 @@ configure_file (
 ######################## Targets ######################################
 #######################################################################
 # Subtargets
-if (${CMAKE_VERSION} VERSION_LESS "2.8.8")
-    # This won't work on windows, but windows users should have newer version than 2.8.7)
-    set (LIB_TYPE SHARED)
-else ()
-    set (LIB_TYPE OBJECT)
-endif ()
+set (LIB_TYPE OBJECT)
 add_subdirectory ("${oofem_SOURCE_DIR}/src/oofemlib")
 if (USE_DSS)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/dss")
@@ -609,9 +573,6 @@ endif ()
 if (USE_SHARED_LIB) # Prefer dynamic lib if available.
   add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
   target_link_libraries (oofem liboofem)
-elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility 
-  add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C)
-  target_link_libraries (oofem ${LIBS} ${EXT_LIBS})
 else ()
   add_executable (oofem ${oofem_SOURCE_DIR}/src/main/main.C ${LIBS})
   target_link_libraries (oofem ${EXT_LIBS})
@@ -624,9 +585,6 @@ if (USE_OOFEG)
     if (USE_SHARED_LIB)
         add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
         target_link_libraries (oofeg liboofem)
-    elseif (${CMAKE_VERSION} VERSION_LESS "2.8.8") # Hackish backwards compatibility
-        add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C)
-        target_link_libraries (oofeg ${LIBS} ${EXT_LIBS})
     else ()
         add_executable (oofeg ${oofem_SOURCE_DIR}/src/main/oofeg.C ${LIBS})
         target_link_libraries (oofeg ${EXT_LIBS})

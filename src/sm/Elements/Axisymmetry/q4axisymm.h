@@ -35,8 +35,8 @@
 #ifndef q4axisymm_h
 #define q4axisymm_h
 
-#include "Elements/structuralelement.h"
-#include "Elements/structural2delement.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 
 ///@name Input fields for Q4Axisymm

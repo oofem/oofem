@@ -45,17 +45,17 @@ namespace oofem {
 class OOFEM_EXPORT CompCol_ILUPreconditioner : public Preconditioner
 {
 private:
-    FloatArray l_val_;
-    IntArray l_colptr_;
-    IntArray l_rowind_;
-    int l_nz_;
+    FloatArray l_val;
+    IntArray l_colptr;
+    IntArray l_rowind;
+    int l_nz;
 
-    FloatArray u_val_;
-    IntArray u_colptr_;
-    IntArray u_rowind_;
-    int u_nz_;
+    FloatArray u_val;
+    IntArray u_colptr;
+    IntArray u_rowind;
+    int u_nz;
 
-    int dim_ [ 2 ];
+    int dim [ 2 ];
 
 public:
     /// Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
@@ -65,16 +65,16 @@ public:
     /// Destructor
     virtual ~CompCol_ILUPreconditioner(void) { }
 
-    virtual void init(const SparseMtrx &);
+    void init(const SparseMtrx &) override;
 
     void initialize(const CompCol &A);
     void initialize(const DynCompCol &A);
 
-    void solve(const FloatArray &x, FloatArray &y) const;
-    void trans_solve(const FloatArray &x, FloatArray &y) const;
+    void solve(const FloatArray &x, FloatArray &y) const override;
+    void trans_solve(const FloatArray &x, FloatArray &y) const override;
 
-    virtual const char *giveClassName() const { return "ILU"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "ILU"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 protected:
     void qsortRow(IntArray &, FloatArray &, int l, int r);

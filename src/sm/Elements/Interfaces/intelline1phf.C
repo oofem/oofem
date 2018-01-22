@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/Interfaces/intelline1phf.h"
-#include "CrossSections/structuralinterfacecrosssection.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
+#include "sm/Elements/Interfaces/intelline1phf.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -86,8 +86,8 @@ IntElLine1PhF :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        //integrationRulesArray[ 0 ].reset( new LobattoIntegrationRule (1,domain, 1, 2) );
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
+        //integrationRulesArray[ 0 ] = std::make_unique<LobattoIntegrationRule>(1,domain, 1, 2);
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(this->numberOfGaussPoints, _2dInterface);
     }
 }

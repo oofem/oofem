@@ -35,7 +35,7 @@
 
 
 #include "qcnode.h"
-#include "../sm/EngineeringModels/qclinearstatic.h"
+#include "sm/EngineeringModels/qclinearstatic.h"
 #include "hangingnode.h"
 #include "slavedof.h"
 #include "floatarray.h"

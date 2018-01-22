@@ -42,7 +42,7 @@ namespace oofem {
 class OOFEM_EXPORT DiagPreconditioner : public Preconditioner
 {
 private:
-    FloatArray diag_;
+    FloatArray diag;
 
 public:
     /// Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
@@ -52,15 +52,12 @@ public:
     /// Destructor
     virtual ~DiagPreconditioner(void) { }
 
-    virtual void init(const SparseMtrx &a);
+    void init(const SparseMtrx &a) override;
 
-    void solve(const FloatArray &rhs, FloatArray &solution) const;
-    void trans_solve(const FloatArray &rhs, FloatArray &solution) const;
+    void solve(const FloatArray &rhs, FloatArray &solution) const override;
+    void trans_solve(const FloatArray &rhs, FloatArray &solution) const override;
 
-    virtual const char *giveClassName() const { return "DiagPre"; }
-
-    const double &diag(int i) const { return diag_(i); }
-    double &diag(int i) { return diag_(i); }
+    const char *giveClassName() const override { return "DiagPre"; }
 };
 } // end namespace oofem
 #endif // diagpre_h

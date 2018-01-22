@@ -285,29 +285,28 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField.reset( new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1) );
+        VelocityPressureField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_VelocityPressure, 1);
     } else {
-        VelocityPressureField.reset( new PrimaryField(this, 1, FT_VelocityPressure, 1) );
+        VelocityPressureField = std::make_unique<PrimaryField>(this, 1, FT_VelocityPressure, 1);
     }
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_miflag);
     if ( val == 1 ) {
-        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
+        this->materialInterface = std::make_unique<LEPlic>( 1, this->giveDomain(1) );
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-        IntArray mask;
-        mask = {V_u, V_v, V_w};
+        IntArray mask = {V_u, V_v, V_w};
 
-        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField.get(), mask ) );
+        std :: shared_ptr< Field > _velocityField = std::make_shared<MaskedPrimaryField>( FT_Velocity, this->VelocityPressureField.get(), mask );
         fm->registerField(_velocityField, FT_Velocity);
 
         //fsflag = 0;
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
     } else if ( val == 2 ) {
         // positive coefficient scheme level set alg
-        this->materialInterface.reset( new LevelSetPCS( 1, this->giveDomain(1) ) );
+        this->materialInterface = std::make_unique<LevelSetPCS>( 1, this->giveDomain(1) );
         this->materialInterface->initializeFrom(ir);
     }
 
@@ -403,8 +402,7 @@ SUPG :: giveSolutionStepWhenIcApply(bool force)
     if ( !stepWhenIcApply ) {
         double dt = deltaT / this->giveVariableScale(VST_Time);
 
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
-                                       0.0, dt, 0) );
+        stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, dt, 0);
     }
 
     return stepWhenIcApply.get();
@@ -420,7 +418,7 @@ SUPG :: giveNextStep()
 
     if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
+        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
     }
 
     previousStep = std :: move(currentStep);
@@ -441,7 +439,7 @@ SUPG :: giveNextStep()
     // dt *= 0.6;
     dt /= this->giveVariableScale(VST_Time);
 
-    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
 
     OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", currentStep->giveNumber(), 
                     currentStep->giveTargetTime() * this->giveVariableScale(VST_Time), dt * this->giveVariableScale(VST_Time) );
@@ -619,27 +617,27 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 #if 1
         nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 #else
+        {
+            auto lhs_copy = lhs->clone();
 
-        SparseMtrx *__lhs = lhs->GiveCopy();
+            nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 
-        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
+            // check solver
+            FloatArray __rhs(neq);
+            double __absErr = 0., __relErr = 0.;
+            lhs_copy->times(incrementalSolutionVector, __rhs);
+            for ( int i = 1; i <= neq; i++ ) {
+                if ( fabs( __rhs.at(i) - rhs.at(i) ) > __absErr ) {
+                    __absErr = fabs( __rhs.at(i) - rhs.at(i) );
+                }
 
-        // check solver
-        FloatArray __rhs(neq);
-        double __absErr = 0., __relErr = 0.;
-        __lhs->times(incrementalSolutionVector, __rhs);
-        for ( int i = 1; i <= neq; i++ ) {
-            if ( fabs( __rhs.at(i) - rhs.at(i) ) > __absErr ) {
-                __absErr = fabs( __rhs.at(i) - rhs.at(i) );
+                if ( fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) ) > __relErr ) {
+                    __relErr = fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) );
+                }
             }
 
-            if ( fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) ) > __relErr ) {
-                __relErr = fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) );
-            }
+            OOFEM_LOG_INFO("SUPG: solver check: absoluteError %e, relativeError %e\n", __absErr, __relErr);
         }
-
-        OOFEM_LOG_INFO("SUPG: solver check: absoluteError %e, relativeError %e\n", __absErr, __relErr);
-        delete(__lhs);
 #endif
 
 
@@ -813,9 +811,7 @@ SUPG :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    VelocityPressureField->saveContext(stream);
 
     if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -840,9 +836,7 @@ SUPG :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    VelocityPressureField->restoreContext(stream);
 
     if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);

@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/PlaneStress/planestresselementevaluator.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/Elements/PlaneStress/planestresselementevaluator.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "domain.h"

@@ -372,8 +372,8 @@ StaggeredProblem :: giveSolutionStepWhenIcApply(bool force)
     } else {
         if ( !stepWhenIcApply ) {
             int nFirst = giveNumberOfFirstStep();
-            //stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0) );//previous version for [-dt, 0]
-            stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., giveDeltaT(nFirst), 0) );//now go from [0, dt]
+            //stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0); //previous version for [-dt, 0]
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., giveDeltaT(nFirst), 0); //now go from [0, dt]
         }
 
         return stepWhenIcApply.get();
@@ -400,7 +400,7 @@ StaggeredProblem :: giveNextStep()
 
     if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( *giveSolutionStepWhenIcApply() ) );
+        currentStep = std::make_unique<TimeStep>( *giveSolutionStepWhenIcApply() );
     }
 
     double dt = this->giveDeltaT(currentStep->giveNumber()+1);
@@ -408,20 +408,20 @@ StaggeredProblem :: giveNextStep()
     totalTime = currentStep->giveTargetTime() + this->giveDeltaT(istep);
     counter = currentStep->giveSolutionStateCounter() + 1;
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
 
     if ( ( totalTime >= this->endOfTimeOfInterest ) && this->adaptiveStepLength ) {
         totalTime = this->endOfTimeOfInterest;
         OOFEM_LOG_INFO("\n==================================================================\n");
         OOFEM_LOG_INFO( "\nAdjusting time step length to: %lf \n\n", totalTime - previousStep->giveTargetTime() );
-        currentStep.reset( new TimeStep(istep, this, 1, totalTime, totalTime - previousStep->giveTargetTime(), counter) );
+        currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, totalTime - previousStep->giveTargetTime(), counter);
         this->numberOfSteps = istep;
     } else {
         if ( this->adaptiveStepLength ) {
             OOFEM_LOG_INFO("\n==================================================================\n");
             OOFEM_LOG_INFO( "\nAdjusting time step length to: %lf \n\n", totalTime - previousStep->giveTargetTime() );
         }
-        currentStep.reset( new TimeStep(istep, this, 1, totalTime, totalTime - previousStep->giveTargetTime(), counter) );
+        currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, totalTime - previousStep->giveTargetTime(), counter);
     }
 
     // time and dt variables are set eq to 0 for statics - has no meaning

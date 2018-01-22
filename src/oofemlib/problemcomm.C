@@ -78,7 +78,7 @@ NodeCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCommF
 
     Domain *domain = pm->giveDomain(1);
     int nnodes = domain->giveNumberOfDofManagers();
-
+    int size = this->processComms.size();
     //
     // receive and send maps are same and are assembled locally
     // using DofManager's partition lists.
@@ -146,7 +146,8 @@ ElementCommunicator :: setUpCommunicationMaps(EngngModel *pm,  bool excludeSelfC
     OOFEM_LOG_RELEVANT("[%d] ElementCommunicator :: Setting up communication maps\n", rank);
 
     Domain *domain = pm->giveDomain(1);
-
+    int size = this->processComms.size();
+    
     /*
      * Initially, each partition knows for which nodes a receive
      * is needed (and can therefore compute easily the recv map),
@@ -221,13 +222,13 @@ ElementCommunicator :: setUpCommunicationMaps(EngngModel *pm,  bool excludeSelfC
 
 
 #ifdef __VERBOSE_PARALLEL
-    for (int i=0; i<size; i++) {
-      fprintf (stderr, "domain %d-%d: domainCommRecvsize is %d\n",rank,i,this->giveProcessCommunicator(i)->giveToRecvMap()->giveSize() );
-      printf ("domain %d-%d: reecv map:",rank,i);
-      this->giveProcessCommunicator(i)->giveToRecvMap()->printYourself();
+    for ( int i = 0; i < size; i++ ) {
+        fprintf(stderr, "domain %d-%d: domainCommRecvsize is %d\n", rank, i, this->giveProcessCommunicator(i)->giveToRecvMap().giveSize() );
+        printf("domain %d-%d: reecv map:", rank, i);
+        this->giveProcessCommunicator(i)->giveToRecvMap().printYourself();
     }
 #endif
-        
+
 
     // to assemble send maps, we must analyze broadcasted remote domain send lists
     // and we must also broadcast our send list.
@@ -347,12 +348,12 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
             this->setProcessCommunicatorToSendArry(this->giveProcessCommunicator(i), toSendMap);
 
 #ifdef __VERBOSE_PARALLEL
-            fprintf (stderr, "domain %d-%d: domainCommSendsize is %d\n",rank,i,this->giveProcessCommunicator(i)->giveToSendMap()->giveSize() );
-            printf ("domain %d-%d: send map:",rank,i);
-            this->giveProcessCommunicator(i)->giveToSendMap()->printYourself();
-            
+            fprintf(stderr, "domain %d-%d: domainCommSendsize is %d\n", rank, i, this->giveProcessCommunicator(i)->giveToSendMap().giveSize() );
+            printf("domain %d-%d: send map:", rank, i);
+            this->giveProcessCommunicator(i)->giveToSendMap().printYourself();
+
 #endif
-                
+
 
             //this->giveDomainCommunicator(i)->setToSendArry (this->engngModel, toSendMap);
         } // end receiving broadcasted lists
@@ -423,7 +424,6 @@ ProblemCommunicator :: quickSortPartition( IntArray &map, int l, int r, int ( Pr
 {
     int i = l - 1, j = r;
     int v = map.at(r);
-    int swap;
 
     for ( ; ; ) {
         while ( ( ( this->*cmp )(map.at(++i), v) ) < 0 ) {
@@ -440,14 +440,10 @@ ProblemCommunicator :: quickSortPartition( IntArray &map, int l, int r, int ( Pr
             break;
         }
 
-        swap = map.at(i);
-        map.at(i) = map.at(j);
-        map.at(j) = swap;
+        std::swap(map.at(i), map.at(j));
     }
 
-    swap = map.at(i);
-    map.at(i) = map.at(r);
-    map.at(r) = swap;
+    std::swap(map.at(i), map.at(r));
     return i;
 }
 

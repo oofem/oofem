@@ -35,14 +35,14 @@
 #include "concretedpm.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "gausspoint.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -284,26 +284,6 @@ ConcreteDPMStatus :: setIPValue(const FloatArray &value, InternalStateType type)
     }
 
     return 0;
-}
-
-void
-ConcreteDPMStatus :: restoreConsistency()
-{
-    ConcreteDPM *mat = static_cast< ConcreteDPM * >( gp->giveElement()->giveMaterial() );
-
-    // compute kappaD from damage
-    kappaD = mat->computeInverseDamage(damage, gp);
-    equivStrain = kappaD;
-
-    // compute plastic strain
-    // such that the given stress is obtained at zero total strain and given damage
-    if ( damage < 1. ) {
-        FloatMatrix D;
-        FloatArray effectiveStress = stressVector;
-        effectiveStress.times( -1. / ( 1. - damage ) );
-        mat->give3dMaterialStiffnessMatrix(D, ElasticStiffness, gp, NULL);
-        D.solveForRhs(effectiveStress, plasticStrain);
-    }
 }
 
 
@@ -1810,6 +1790,30 @@ ConcreteDPM :: computeDRDCosTheta(const double theta, const double ecc) const
     return dRDCostheta;
 }
 
+
+void
+ConcreteDPM :: restoreConsistency(GaussPoint *gp)
+{
+    ConcreteDPMStatus *status = giveStatus(gp);
+
+    // compute kappaD from damage
+    double kappaD = this->computeInverseDamage(status->giveDamage(), gp);
+    status->letKappaDBe(kappaD);
+    status->letEquivStrainBe(kappaD);
+
+    // compute plastic strain
+    // such that the given stress is obtained at zero total strain and given damage
+    if ( damage < 1. ) {
+        FloatMatrix D;
+        FloatArray plasticStrain, effectiveStress = status->giveStressVector();
+        effectiveStress.times( -1. / ( 1. - damage ) );
+        this->give3dMaterialStiffnessMatrix(D, ElasticStiffness, gp, nullptr);
+        D.solveForRhs(effectiveStress, plasticStrain);
+        status->letPlasticStrainBe(plasticStrain);
+    }
+}
+
+
 int
 ConcreteDPM :: setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type)
 {
@@ -1869,8 +1873,6 @@ ConcreteDPM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
 MaterialStatus *
 ConcreteDPM :: CreateStatus(GaussPoint *gp) const
 {
-    ConcreteDPMStatus *status =
-        new  ConcreteDPMStatus(1, StructuralMaterial :: giveDomain(), gp);
-    return status;
+    return new ConcreteDPMStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 } // end namespace oofem

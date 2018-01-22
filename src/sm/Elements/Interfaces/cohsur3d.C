@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Interfaces/cohsur3d.h"
+#include "sm/Elements/Interfaces/cohsur3d.h"
 #include "dof.h"
 #include "node.h"
 #include "particle.h"
@@ -41,7 +41,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -208,7 +208,7 @@ void CohesiveSurface3d :: computeGaussPoints()
     // The Gauss point is used only when methods from crosssection and/or material
     // classes are requested.
     integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this) );
+    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 }
 

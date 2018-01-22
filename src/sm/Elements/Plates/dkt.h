@@ -35,9 +35,9 @@
 #ifndef dkt_h
 #define dkt_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/CrossSections/layeredcrosssection.h"
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/CrossSections/layeredcrosssection.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "mathfem.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"

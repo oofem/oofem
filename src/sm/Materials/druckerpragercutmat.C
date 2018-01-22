@@ -33,7 +33,7 @@
  */
 
 #include "druckerpragercutmat.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "gausspoint.h"

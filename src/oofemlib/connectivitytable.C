@@ -73,7 +73,7 @@ ConnectivityTable :: instanciateConnectivityTable()
     // allocate Nodal connectivity table for domain
     nodalConnectivity.resize(ndofMan);
     for ( int i = 0; i < ndofMan; i++ ) {
-        nodalConnectivity[i].resize( dofManConnectivity(i) );
+        nodalConnectivity[i].resize( dofManConnectivity[i] );
     }
 
     // build Nodal connectivity table for domain

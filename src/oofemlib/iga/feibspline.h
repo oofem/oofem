@@ -63,28 +63,28 @@ protected:
     /// Number of spatial directions.
     int nsd;
     /// Degree in each direction.
-    int *degree;                                   // eg. 2
+    std::array<int, 3> degree;                                   // eg. 2
     /// Knot values [nsd]
-    FloatArray *knotValues;                        // eg. 0 1 2 3 4 5
+    std::array<FloatArray, 3> knotValues;                        // eg. 0 1 2 3 4 5
     /// Knot multiplicity [nsd]
-    IntArray *knotMultiplicity;                    // eg. 3 1 1 1 2 3
+    std::array<IntArray, 3> knotMultiplicity;                    // eg. 3 1 1 1 2 3
     /// numberOfControlPoints[nsd]
     /**
      * For TSpline this is filled by values corresponding to case when there are no T-junctions
      * (i.e. TSpline = BSpline)
      */
-    int *numberOfControlPoints;
+    std::array<int, 3> numberOfControlPoints;
     /// Knot vectors [nsd][knot_vector_size]
-    double **knotVector;                           // eg. 0 0 0 1 2 3 4 4 5 5 5
+    std::array<FloatArray, 3> knotVector;                           // eg. 0 0 0 1 2 3 4 4 5 5 5
     /// Nonzero spans in each directions [nsd]
-    int *numberOfKnotSpans;                        // eg. 5 (0-1,1-2,2-3,3-4,4-5)
+    std::array<int, 3> numberOfKnotSpans;                        // eg. 5 (0-1,1-2,2-3,3-4,4-5)
 public:
-    BSplineInterpolation(int nsd) : FEInterpolation(0) {
-        this->nsd = nsd;
-    }
-    virtual ~BSplineInterpolation();
+    BSplineInterpolation(int nsd) : FEInterpolation(0),
+        nsd(nsd)
+    {}
+    virtual ~BSplineInterpolation() {}
 
-    virtual integrationDomain giveIntegrationDomain() const {
+    integrationDomain giveIntegrationDomain() const override {
         if ( nsd == 3 ) {
             return _Cube;
         } else if ( nsd == 2 ) {
@@ -95,9 +95,9 @@ public:
             return _UnknownIntegrationDomain;
         }
     }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_unknown; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_unknown; }
 
-    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const {
+    integrationDomain giveBoundaryIntegrationDomain(int ib) const override {
         if ( nsd == 3 ) {
             return _Square;
         } else if ( nsd == 2 ) {
@@ -108,7 +108,7 @@ public:
             return _UnknownIntegrationDomain;
         }
     }
-    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const {
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override {
         if ( nsd == 3 ) {
             return _Square;
         } else if ( nsd == 2 ) {
@@ -117,7 +117,7 @@ public:
             return _UnknownIntegrationDomain;
         }
     }
-    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const {
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override {
         if ( nsd >= 2 ) {
             return _Line;
         } else {
@@ -125,89 +125,75 @@ public:
         }
     }
 
+    int giveNsd() override { return nsd; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    
-    virtual int giveNsd() { return nsd; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+    void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("Functions not supported for this interpolator.");
-      return 0.; }
-    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); return 0.; }
+    void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
 
 
     /**@name Surface interpolation services */
     //@{
-    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
-					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
-					     const FEICellGeometry &cellgeo)
+    void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
-					      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-							     const FEICellGeometry &cellgeo)
+    void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary)
+    double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-
+    void boundarySurfaceGiveNodes(IntArray &answer, int boundary) override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
     //@}
 
 
-
-    
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary)
+    void boundaryGiveNodes(IntArray &answer, int boundary) override
     { OOFEM_ERROR("Not implemented"); }
-    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Not implemented"); }
-    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("Not implemented");
-      return 0.; }
-    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("boundaryGiveTransformationJacobian - Not implemented");
-      return 0.; }
-    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
+    { OOFEM_ERROR("Not implemented"); return 0.; }
+    double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
+    { OOFEM_ERROR("boundaryGiveTransformationJacobian - Not implemented"); return 0.; }
+    void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("boundaryLocal2Global - Not implemented"); }
 
 
-    virtual int giveNumberOfKnotSpans(int dim) { return numberOfKnotSpans [ dim - 1 ]; }
+    int giveNumberOfKnotSpans(int dim) override { return numberOfKnotSpans [ dim - 1 ]; }
     virtual int giveNumberOfControlPoints(int dim) { return numberOfControlPoints [ dim - 1 ]; }
-    virtual const double *const *giveKnotVector() {
-        return this->knotVector;
+    const FloatArray *giveKnotVector() override {
+        return this->knotVector.data();
     }
-    virtual const IntArray *giveKnotMultiplicity(int dim) { return & this->knotMultiplicity [ dim - 1 ]; }
-    virtual const FloatArray *giveKnotValues(int dim) { return & this->knotValues [ dim - 1 ]; }
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
+    const IntArray *giveKnotMultiplicity(int dim) override { return & this->knotMultiplicity [ dim - 1 ]; }
+    const FloatArray *giveKnotValues(int dim) override { return & this->knotValues [ dim - 1 ]; }
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override {
         OOFEM_ERROR("Not yet implemented.");
         return 0;
     }
-    virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask);
-    virtual int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan);
+    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    int giveKnotSpanBasisFuncMask(const IntArray &knotSpan, IntArray &mask) override;
+    int giveNumberOfKnotSpanBasisFunctions(const IntArray &knotSpan) override;
 
-    virtual const char *giveClassName() const { return "BSplineInterpolation"; }
-    virtual bool hasSubPatchFormulation() { return true; }
+    const char *giveClassName() const { return "BSplineInterpolation"; }
+    bool hasSubPatchFormulation() override { return true; }
 
-    virtual IntegrationRule *giveIntegrationRule(int order)
-    { OOFEM_ERROR("Not supported.");
-      return NULL; }
-    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary)
-    { OOFEM_ERROR("Not supported.");
-      return NULL; }
-    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary)
-    { OOFEM_ERROR("Not supported.");
-      return NULL; }
+    IntegrationRule *giveIntegrationRule(int order) override
+    { OOFEM_ERROR("Not supported."); return NULL; }
+    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override
+    { OOFEM_ERROR("Not supported."); return NULL; }
+    IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) override
+    { OOFEM_ERROR("Not supported."); return NULL; }
 
 protected:
     /**
@@ -219,7 +205,7 @@ protected:
      * @param N Computed p+1 nonvanishing functions (N_{span-p,p}-N_{span,p})
      * @warning Parameter u and span must be in a valid range.
      */
-    void basisFuns(FloatArray &N, int span, double u, int p, const double *U);
+    void basisFuns(FloatArray &N, int span, double u, int p, const FloatArray &U);
     /**
      * Computes nonzero basis functions and their derivatives at u.
      *
@@ -241,7 +227,7 @@ protected:
      *
      * @warning Parameters n, u and span must be in a valid range.
      */
-    void dersBasisFuns(int n, double u, int span, int p, double *const U, FloatMatrix &ders);
+    void dersBasisFuns(int n, double u, int span, int p, const FloatArray &U, FloatMatrix &ders);
     /**
      * Determines the knot span index (Algorithm A2.1 from the NURBS book)
      *
@@ -256,7 +242,7 @@ protected:
      * @return Span index at u (zero based).
      * @warning Parameter u must be in a valid range.
      */
-    int findSpan(int n, int p, double u, const double *U) const;
+    int findSpan(int n, int p, double u, const FloatArray &U) const;
     /**
      * Returns the range of nonzero basis functions for given knot span and given degree.
      */

@@ -37,9 +37,9 @@
 
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for DustMaterial
 //@{
@@ -234,7 +234,7 @@ class DustMaterial : public StructuralMaterial
 {
 protected:
     /// Pointer for linear elastic material
-    IsotropicLinearElasticMaterial *LEMaterial;
+    IsotropicLinearElasticMaterial LEMaterial;
 
     /// Parameter determining shape of yield surface
     double alpha;
@@ -450,7 +450,7 @@ public:
     /// Constructor
     DustMaterial(int n, Domain * d);
     /// Destructor
-    virtual ~DustMaterial();
+    virtual ~DustMaterial() {}
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -475,7 +475,7 @@ public:
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
-        LEMaterial->giveThermalDilatationVector(answer, gp, tStep);
+        LEMaterial.giveThermalDilatationVector(answer, gp, tStep);
     }
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

@@ -35,7 +35,7 @@
 #ifndef j2mat_h
 #define j2mat_h
 
-#include "Materials/ConcreteMaterials/mplasticmaterial2.h"
+#include "sm/Materials/ConcreteMaterials/mplasticmaterial2.h"
 
 ///@name Input fields for J2Mat
 //@{

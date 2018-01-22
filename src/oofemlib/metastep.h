@@ -38,6 +38,8 @@
 #include "oofemcfg.h"
 #include "inputrecord.h"
 
+#include <memory>
+
 ///@name Input fields for meta step
 //@{
 #define _IFT_MetaStep_Name "metastep"
@@ -69,7 +71,7 @@ protected:
     /// Intrinsic time increment.
     double deltaT;
     /// Engineering model attributes.
-    InputRecord *attributes;
+    std::unique_ptr<InputRecord> attributes;
     /// Start solution step number for which receiver is responsible.
     int sindex;
     /// Receiver number.
@@ -82,8 +84,7 @@ public:
      */
     MetaStep(int n, EngngModel * e);
     MetaStep(int n, EngngModel * e, int nsteps, InputRecord & attrib);
-    /// Destructor.
-    ~MetaStep();
+    MetaStep(MetaStep &&ms) = default;
 
     /// Returns receiver's number.
     int giveNumber() { return number; }
@@ -92,7 +93,7 @@ public:
     /// Returns time increment.
     double giveTimeIncrement() { return this->deltaT; }
     /// Returns e-model attributes.
-    InputRecord *giveAttributesRecord() { return this->attributes; }
+    InputRecord *giveAttributesRecord() { return this->attributes.get(); }
     /**
      * Instanciates the receiver from input record.
      */

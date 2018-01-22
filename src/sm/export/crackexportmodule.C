@@ -40,7 +40,7 @@
 #include "timestep.h"
 #include "engngm.h"
 #include "classfactory.h"
-#include "Materials/structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "crosssection.h"
 #include "floatarray.h"
 

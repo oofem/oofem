@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/FETISolver/fetiboundarydofman.h"
+#include "sm/FETISolver/fetiboundarydofman.h"
 #include "error.h"
 
 using namespace std;

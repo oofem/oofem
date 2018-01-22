@@ -35,9 +35,9 @@
 #ifndef planstrss_h
 #define planstrss_h
 
-#include "Elements/structural2delement.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
+#include "sm/Elements/structural2delement.h"
+#include "sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"

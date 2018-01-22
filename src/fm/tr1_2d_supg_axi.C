@@ -47,7 +47,7 @@
 #include "timestep.h"
 #include "bodyload.h"
 #include "boundaryload.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "crosssection.h"
 #include "classfactory.h"
@@ -74,7 +74,7 @@ TR1_2D_SUPG_AXI :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 7, this);
     }
 }
@@ -234,7 +234,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
         double dV = this->computeVolumeAround(gp);
         this->computeBMtrx(_b, gp);
         eps.beProductOf(_b, u);
-        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+        mat->computeDeviatoricStressAxi(stress, gp, eps, tStep);
         answer.plusProduct(_b, stress, dV / Re);
 
 #if 1
@@ -273,7 +273,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         double dV = this->computeVolumeAround(gp);
         this->computeBMtrx(_b, gp);
-        mat->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
+        mat->computeTangentAxi(_d, mode, gp, tStep);
         _db.beProductOf(_d, _b);
         answer.plusProductUnsym(_b, _db, dV);
         //answer.plusProductSymmUpper (_bs,_db,dV*t_supg);
@@ -283,7 +283,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
         _r = this->computeRadiusAt(gp);
         this->computeNVector(n, gp);
         eps.beProductOf(_b, u);
-        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+        mat->computeDeviatoricStressAxi(stress, gp, eps, tStep);
         //_mu = mat->giveCharacteristicValue(MRM_Viscosity, gp, tStep);
 
         _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
@@ -475,7 +475,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tS
         double _r = this->computeRadiusAt(gp);
         this->computeBMtrx(_b, gp);
         eps.beProductOf(_b, u);
-        mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+        mat->computeDeviatoricStressAxi(stress, gp, eps, tStep);
         stress.times(1. / Re);
         for ( int i = 1; i <= 3; i++ ) {
             answer.at(i) -= t_pspg * ( b [ i - 1 ] * stress.at(1) + c [ i - 1 ] * stress.at(4) ) * dV / rho / _r;
@@ -503,7 +503,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
         double rho = mat->give('d', gp);
         double _r = this->computeRadiusAt(gp);
         this->computeBMtrx(_b, gp);
-        mat->giveDeviatoricStiffnessMatrix(_d, TangentStiffness, gp, tStep);
+        mat->computeTangentAxi(_d, TangentStiffness, gp, tStep);
         _db.beProductOf(_d, _b);
         //eps.beProductOf (_b, u);
         //mat->computeDeviatoricStressVector (stress,gp,eps,tStep);
@@ -573,16 +573,19 @@ TR1_2D_SUPG_AXI :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, T
     answer.beProductOf(_b, u);
 }
 
-void
-TR1_2D_SUPG_AXI :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-{
-    /* one should call material driver instead */
-    FloatArray eps;
 
-    this->computeDeviatoricStrain(eps, gp, tStep);
-    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressVector(answer, gp, eps, tStep);
+void
+TR1_2D_SUPG_AXI :: computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStressAxi(answer, gp, eps, tStep);
 }
 
+
+void
+TR1_2D_SUPG_AXI :: computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeTangentAxi(answer, mode, gp, tStep);
+}
 
 
 void

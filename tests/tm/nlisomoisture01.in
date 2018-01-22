@@ -1,0 +1,126 @@
+nlisomoisture01.out
+test of nonlinear isotropic material for moisture transport
+#
+TransientTransport nsteps 5 alpha 0.5 lumped forceScale 1 0 forceScaleDofs 1 14 rtolf 1e-5 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
+errorcheck
+# nmodules 1
+# vtkxml tstep_all domain_all primvars 1 3
+#
+domain mass1transfer
+OutputManager tsteps_out {5} dofman_output {1 7 13 19 25 31 37} element_output {1}
+ndofman 42 nelem 14 ncrosssect 7 nmat 7 nbc 1 nic 1 nltf 1 nset 2
+#
+node   1   coords 3  0.000  0.000  0.0
+node   2   coords 3  0.001  0.000  0.0
+node   3   coords 3  0.002  0.000  0.0
+node   4   coords 3  0.000  0.001  0.0
+node   5   coords 3  0.001  0.001  0.0
+node   6   coords 3  0.002  0.001  0.0
+#
+node   7   coords 3  0.000  0.002  0.0
+node   8   coords 3  0.001  0.002  0.0
+node   9   coords 3  0.002  0.002  0.0
+node   10  coords 3  0.000  0.003  0.0
+node   11  coords 3  0.001  0.003  0.0
+node   12  coords 3  0.002  0.003  0.0
+#
+node   13   coords 3  0.000  0.004  0.0
+node   14   coords 3  0.001  0.004  0.0
+node   15   coords 3  0.002  0.004  0.0
+node   16   coords 3  0.000  0.005  0.0
+node   17   coords 3  0.001  0.005  0.0
+node   18   coords 3  0.002  0.005  0.0
+#
+node   19   coords 3  0.000  0.006  0.0
+node   20   coords 3  0.001  0.006  0.0
+node   21   coords 3  0.002  0.006  0.0
+node   22   coords 3  0.000  0.007  0.0
+node   23   coords 3  0.001  0.007  0.0
+node   24   coords 3  0.002  0.007  0.0
+#
+node   25   coords 3  0.000  0.008  0.0
+node   26   coords 3  0.001  0.008  0.0
+node   27   coords 3  0.002  0.008  0.0
+node   28   coords 3  0.000  0.009  0.0
+node   29   coords 3  0.001  0.009  0.0
+node   30   coords 3  0.002  0.009  0.0
+#
+node   31   coords 3  0.000  0.010  0.0
+node   32   coords 3  0.001  0.010  0.0
+node   33   coords 3  0.002  0.010  0.0
+node   34   coords 3  0.000  0.011  0.0
+node   35   coords 3  0.001  0.011  0.0
+node   36   coords 3  0.002  0.011  0.0
+#
+node   37   coords 3  0.000  0.012  0.0
+node   38   coords 3  0.001  0.012  0.0
+node   39   coords 3  0.002  0.012  0.0
+node   40   coords 3  0.000  0.013  0.0
+node   41   coords 3  0.001  0.013  0.0
+node   42   coords 3  0.002  0.013  0.0
+#
+#
+quad1mt   1   nodes 4    4 5 2 1 crossSect 1
+quad1mt   2   nodes 4    5 6 3 2 crossSect 1
+# 
+quad1mt   3   nodes 4    10 11 8 7 crossSect 2
+quad1mt   4   nodes 4    11 12 9 8 crossSect 2
+#
+quad1mt   5   nodes 4    16 17 14 13 crossSect 3
+quad1mt   6   nodes 4    17 18 15 14 crossSect 3
+#
+quad1mt   7   nodes 4    22 23 20 19 crossSect 4
+quad1mt   8   nodes 4    23 24 21 20 crossSect 4
+#
+quad1mt   9   nodes 4    28 29 26 25 crossSect 5
+quad1mt   10  nodes 4    29 30 27 26 crossSect 5
+#
+quad1mt   11  nodes 4    34 35 32 31 crossSect 6
+quad1mt   12  nodes 4    35 36 33 32 crossSect 6
+#
+quad1mt   13  nodes 4    40 41 38 37 crossSect 7
+quad1mt   14  nodes 4    41 42 39 38 crossSect 7
+#
+SimpleTransportCS 1 thickness 1.0 mat 1
+SimpleTransportCS 2 thickness 1.0 mat 2
+SimpleTransportCS 3 thickness 1.0 mat 3
+SimpleTransportCS 4 thickness 1.0 mat 4
+SimpleTransportCS 5 thickness 1.0 mat 5
+SimpleTransportCS 6 thickness 1.0 mat 6
+SimpleTransportCS 7 thickness 1.0 mat 7
+#
+# 
+# constant capacity + BN permeability
+nlisomoisturemat 1 d 2400. isothermtype 0 permeabilitytype 1  capa 100. C1 15.e-4 alpha0 0.1 hC 0.75 n 10.
+# piecewise linear capacity + BN permeability
+nlisomoisturemat 2 d 2400. isothermtype 1 iso_h 6 0.0 0.2 0.6 0.8 0.9 1. iso_w(h) 6 0. 20. 40. 60. 80. 130.  permeabilitytype 1  C1 15.e-4 alpha0 0.1 hC 0.75 n 10.
+# Ricken capacity + BN permeability
+nlisomoisturemat 3 d 2400. isothermtype 2 dd 0.022 permeabilitytype 1  C1 15.e-4 alpha0 0.1 hC 0.75 n 10.
+# Kuenzel capacity + BN permeability
+nlisomoisturemat 4 d 2400. isothermtype 3 wf 130. b 1.3 permeabilitytype 1  C1 15.e-4 alpha0 0.1 hC 0.75 n 10.
+# Hansen capacity + BN permeability
+nlisomoisturemat 5 d 2400. isothermtype 4 rhodry 2000. uh 0.065 A 0.14 nn 1.3  permeabilitytype 1  C1 15.e-4 alpha0 0.1 hC 0.75 n 10.
+# BSB capacity + piecewise linear permeability
+nlisomoisturemat 6 d 2400. isothermtype 5 rhodry 2000. vm 0.01 c 20. k 0.85  permeabilitytype 1  C1 15.e-4 alpha0 0.1 hC 0.75 n 10.
+# BSB capacity + Xi permeability
+nlisomoisturemat 7 d 2400. isothermtype 5 rhodry 2000. vm 0.01 c 20. k 0.85  permeabilitytype 2 alphah 0.5e-3 betah 1e-3 gammah 3.8
+#
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 14 values 1 1. set 2
+InitialCondition 1 Conditions 1 u 0.99 dofs 1 14 set 1
+ConstantFunction 1 f(t) 0.5
+Set 1 noderanges {(1 42)}
+Set 2 nodes 14 3 6 9 12 15 18 21 24 27 30 33 36 39 42
+#
+#
+#
+#
+#%BEGIN_CHECK% tolerance 1.e-5
+#NODE tStep 5 number 1  dof 14 unknown d value 7.15801903e-01
+#NODE tStep 5 number 7  dof 14 unknown d value 7.62862593e-01
+#NODE tStep 5 number 13 dof 14 unknown d value 9.07642137e-01
+#NODE tStep 5 number 19 dof 14 unknown d value 7.93992624e-01
+#NODE tStep 5 number 25 dof 14 unknown d value 7.77698624e-01
+#NODE tStep 5 number 31 dof 14 unknown d value 7.82344910e-01
+#NODE tStep 5 number 37 dof 14 unknown d value 8.46765183e-01
+#%END_CHECK%
+

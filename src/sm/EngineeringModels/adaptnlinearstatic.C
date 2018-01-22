@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/adaptnlinearstatic.h"
+#include "sm/EngineeringModels/adaptnlinearstatic.h"
 #include "mathfem.h"
 #include "verbose.h"
 #include "timer.h"
@@ -248,9 +248,9 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         OOFEM_ERROR("source problem must also be AdaptiveNonlinearStatic.");
     }
 
-    this->currentStep.reset( new TimeStep( * ( sourceProblem->giveCurrentStep() ) ) );
+    this->currentStep = std::make_unique<TimeStep>( * ( sourceProblem->giveCurrentStep() ) );
     if ( sourceProblem->givePreviousStep() ) {
-        this->previousStep.reset( new TimeStep( * ( sourceProblem->givePreviousStep() ) ) );
+        this->previousStep = std::make_unique<TimeStep>( * ( sourceProblem->givePreviousStep() ) );
     }
 
     // map primary unknowns

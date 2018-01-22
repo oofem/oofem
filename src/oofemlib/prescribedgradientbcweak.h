@@ -62,39 +62,38 @@ class GaussPoint;
 class TracSegArray
 {
 public:
-	TracSegArray() {}
+    TracSegArray() {}
+    TracSegArray(TracSegArray &&src) = default;
     virtual ~TracSegArray() {}
 
     void printYourself() {
-    	printf("\nTracSegArray segments:\n");
-    	for(auto &l: mInteriorSegments) {
-    		printf("\n");
-    		l.giveVertex(1).printYourself();
-    		l.giveVertex(2).printYourself();
-    	}
+        printf("\nTracSegArray segments:\n");
+        for ( auto &l : mInteriorSegments ) {
+            printf("\n");
+            l.giveVertex(1).printYourself();
+            l.giveVertex(2).printYourself();
+        }
     }
 
     double giveLength() {
-    	double l = 0.0;
-    	for(Line &line : mInteriorSegments) {
-    		l += line.giveLength();
-    	}
+        double l = 0.0;
+        for( auto &line : mInteriorSegments ) {
+            l += line.giveLength();
+        }
 
-    	return l;
+        return l;
     }
 
     void giveTractionLocationArray(IntArray &rows, CharType type, const UnknownNumberingScheme &s);
 
     void setupIntegrationRuleOnEl();
 
-    std :: vector< Line >mInteriorSegments;
+    std :: vector< Line > mInteriorSegments;
 
     // Interior segments used for Gaussian quadrature
     std :: vector< Line > mInteriorSegmentsFine;
 
     std :: vector< FloatArray > mInteriorSegmentsPointsFine;
-
-
 
     std :: unique_ptr< Node > mFirstNode;
 
@@ -172,7 +171,7 @@ public:
 
     // Routines for postprocessing
     size_t giveNumberOfTractionElements() const { return mpTracElNew.size(); }
-    void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const { oStartCoord = mpTracElNew [ iElInd ]->mInteriorSegments[0].giveVertex(1); oEndCoord = mpTracElNew [ iElInd ]->mInteriorSegments.back().giveVertex(2); }
+    void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const { oStartCoord = mpTracElNew [ iElInd ].mInteriorSegments[0].giveVertex(1); oEndCoord = mpTracElNew [ iElInd ].mInteriorSegments.back().giveVertex(2); }
     void giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const;
     void giveTractionElArcPos(size_t iElInd, double &oXiStart, double &oXiEnd) const;
     void giveBoundaries(IntArray &oBoundaries);
@@ -253,7 +252,7 @@ protected:
 
 
     /// Lock displacements in one node if periodic
-    Node *mpDisplacementLock;
+    std::unique_ptr<Node> mpDisplacementLock;
     int mLockNodeInd;
     double mDispLockScaling;
 
@@ -264,7 +263,7 @@ protected:
 
 
     /// Elements for the independent traction discretization
-    std :: vector< TracSegArray * > mpTracElNew;
+    std :: vector< TracSegArray > mpTracElNew;
 
 
     /**
@@ -289,7 +288,7 @@ public:
 protected:
     void createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides);
 
-    void splitSegments(std :: vector< TracSegArray * > &ioElArray);
+    void splitSegments(std :: vector< TracSegArray > &ioElArray);
 
     bool damageExceedsTolerance(Element *el);
 

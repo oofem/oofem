@@ -37,7 +37,7 @@
 #include "timestep.h"
 #include "domain.h"
 #include "gausspoint.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "function.h"
 #include "classfactory.h"
 
@@ -105,8 +105,7 @@ void FluidMaterialEvaluator :: solveYourself()
     gps.clear();
     gps.reserve(d->giveNumberOfMaterialModels());
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        std :: unique_ptr< GaussPoint > gp(new GaussPoint(nullptr, i, FloatArray(), 1, mode));
-        gps.emplace_back( std :: move(gp));
+        gps.emplace_back( std::make_unique<GaussPoint>(nullptr, i, FloatArray(), 1, mode) );
         // Initialize the strain vector;
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(i) );
         FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus( &*gps[i-1] ) );
@@ -158,7 +157,12 @@ void FluidMaterialEvaluator :: solveYourself()
             }
 
             for ( int iter = 1; iter < maxiter; iter++ ) {
-                mat->computeDeviatoricStressVector(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                if ( ndim == 3 ) {
+                    mat->computeDeviatoricStress3D(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                } else {
+                    mat->computeDeviatoricStress2D(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                }
+
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressDevC.at(j) - stressDev.at( sControl.at(j) );
                 }
@@ -171,8 +175,11 @@ void FluidMaterialEvaluator :: solveYourself()
                 if ( res.computeNorm() <= tolerance && resVol <= tolerance ) { ///@todo More flexible control of convergence needed. Something relative?
                     break;
                 }
-
-                mat->giveStiffnessMatrices(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                if ( ndim == 3 ) {
+                    mat->computeTangents3D(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                } else {
+                    mat->computeTangents2D(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                }
                 if ( res.giveSize() > 0 ) {
                     // Add mean part to make it invertible
                     double norm = tangent.computeFrobeniusNorm();
@@ -255,11 +262,11 @@ TimeStep *FluidMaterialEvaluator :: giveNextStep()
 {
     if ( !currentStep ) {
         // first step -> generate initial step
-        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
-        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0) );
+        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
+        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0);
     }
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(*previousStep, this->deltaT) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, this->deltaT);
 
     return currentStep.get();
 

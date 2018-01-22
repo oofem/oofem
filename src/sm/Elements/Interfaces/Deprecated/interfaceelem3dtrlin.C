@@ -42,7 +42,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -93,8 +93,8 @@ InterfaceElement3dTrLin :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        //integrationRulesArray[0].reset( new LobattoIntegrationRule (1,domain, 1, 2) );
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        //integrationRulesArray[0] = std::make_unique<LobattoIntegrationRule>(1,domain, 1, 2);
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
         integrationRulesArray [ 0 ]->SetUpPointsOnTriangle(4, _3dInterface);
     }
 }

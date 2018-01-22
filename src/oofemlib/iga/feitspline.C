@@ -43,22 +43,6 @@ namespace oofem {
 #define OPTIMIZED_VERSION_A4dot4
 
 
-TSplineInterpolation :: ~TSplineInterpolation()
-{
-    for ( int i = 0; i <= numberOfControlPoints [ 0 ]; i++ ) {
-        for ( int j = 0; j < nsd; j++ ) {
-            delete [] localIndexKnotVector [ i ] [ j ];
-        }
-
-        delete [] localIndexKnotVector [ i ];
-    }
-
-    delete [] localIndexKnotVector;
-
-    delete [] openLocalKnotVector;
-}
-
-
 IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
@@ -66,8 +50,6 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
     BSplineInterpolation :: initializeFrom(ir);
 
     IntArray localIndexKnotVector_tmp;
-    int *indexKnotVec, indexKnotVal;
-    int pos, p;
 
     InputFieldType IFT_localIndexKnotVector [ 3 ] = {
         _IFT_TSplineInterpolation_localIndexKnotVectorU,
@@ -81,12 +63,9 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
         }
     }
 
-    openLocalKnotVector = new double [ 3 * max_deg + 2 ];
+    openLocalKnotVector.resize( 3 * max_deg + 2 );
 
-    localIndexKnotVector = new int ** [ totalNumberOfControlPoints ];
-    for ( int i = 0; i < totalNumberOfControlPoints; i++ ) {
-        localIndexKnotVector [ i ] = new int * [ nsd ];
-    }
+    localIndexKnotVector.resize( totalNumberOfControlPoints );
 
     for ( int n = 0; n < nsd; n++ ) {
         localIndexKnotVector_tmp.clear();
@@ -96,17 +75,18 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             return IRRT_BAD_FORMAT;
         }
 
-        pos = 0;
+        int pos = 0;
         for ( int i = 0; i < totalNumberOfControlPoints; i++ ) {
-            indexKnotVec = localIndexKnotVector [ i ] [ n ] = new int [ degree [ n ] + 2 ];
+            auto &indexKnotVec = localIndexKnotVector [ i ] [ n ];
+            indexKnotVec.resize( degree [ 2 ] + 2 );
 
-            p = 0;
+            int p = 0;
             for ( int j = 0; j < degree [ n ] + 2; j++ ) {
-                indexKnotVec [ p++ ] = localIndexKnotVector_tmp(pos++);
+                indexKnotVec [ p++ ] = localIndexKnotVector_tmp[pos++];
             }
 
             // check for monotonicity of local index knot vector with multiplicity
-            indexKnotVal = indexKnotVec [ 0 ];
+            int indexKnotVal = indexKnotVec [ 0 ];
             for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
                     OOFEM_WARNING("local index knot vector %s of control point %d is not monotonic",
@@ -144,7 +124,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
 void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatArray N(nsd);
     IntArray span(nsd);
     IntArray mask;
@@ -155,11 +135,11 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
         OOFEM_ERROR("implemented for nsd = %d", nsd);
     }
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
-            span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
+            span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
         }
     }
 
@@ -171,29 +151,26 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     if ( nsd == 2 ) {
         for ( int k = 0; k < count; k++ ) {
             for ( int i = 0; i < nsd; i++ ) {
-                N(i) = this->basisFunction(lcoords(i), degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask(k) - 1 ] [ i ]);
+                N[i] = this->basisFunction(lcoords[i], degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask[k] - 1 ] [ i ]);
             }
 
-            answer(k) = val = N(0) * N(1) * cellgeo.giveVertexCoordinates( mask(k) )->at(3);        // Nu*Nv*w
+            answer[k] = val = N[0] * N[1] * cellgeo.giveVertexCoordinates( mask[k] )->at(3);        // Nu*Nv*w
             sum += val;
         }
     }
 
-    while ( count ) {
-        answer.at(count--) /= sum;
-    }
+    answer.times(1./sum);
 }
 
 
 double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
-    const FloatArray *vertexCoordsPtr;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatMatrix jacobian(nsd, nsd);
     FloatArray temp(nsd);
     IntArray span(nsd);
     IntArray mask;
-    double Jacob = 0., product, w, xw, yw, weight;
+    double Jacob = 0.;
     int count;
     std :: vector< FloatArray > tmp_ders(nsd);
     std :: vector< FloatMatrix > ders(nsd);
@@ -208,11 +185,11 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
-            span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
+            span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
         }
     }
 
@@ -244,35 +221,36 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         for ( int k = 0; k < count; k++ ) {
             for ( int i = 0; i < nsd; i++ ) {
                 // it would be simpler if I could pass k-th column of ders[i] directly to dersBasisFunction HUHU array
-                this->dersBasisFunction(1, lcoords(i), degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask(k) - 1 ] [ i ], tmp_ders [ i ]);
-                ders [ i ](0, k) = tmp_ders [ i ](0);
-                ders [ i ](1, k) = tmp_ders [ i ](1);
+                this->dersBasisFunction(1, lcoords[i], degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask[k] - 1 ] [ i ], tmp_ders [ i ]);
+                ders [ i ](0, k) = tmp_ders [ i ][0];
+                ders [ i ](1, k) = tmp_ders [ i ][1];
             }
 
             // calculation of jacobian matrix in similar fashion as A4.4
             // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-            vertexCoordsPtr = cellgeo.giveVertexCoordinates( mask(k) );
-            w = vertexCoordsPtr->at(3);
-            xw = vertexCoordsPtr->at(1) * w;
-            yw = vertexCoordsPtr->at(2) * w;
+            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates( mask[k] );
+            double w = vertexCoords[2];
+            double xw = vertexCoords[0] * w;
+            double yw = vertexCoords[1] * w;
+            double product;
 
-            product = tmp_ders [ 0 ](0) * tmp_ders [ 1 ](0);       // Nu*Nv
+            product = tmp_ders [ 0 ][0] * tmp_ders [ 1 ][0];       // Nu*Nv
             Aders [ 0 ](0, 0) += product * xw;             // x=sum Nu*Nv*x*w
             Aders [ 1 ](0, 0) += product * yw;             // x=sum Nu*Nv*y*w
             wders(0, 0)    += product * w;                 // w=sum Nu*Nv*w
 
-            product = tmp_ders [ 0 ](1) * tmp_ders [ 1 ](0);       // dNu/du*Nv
+            product = tmp_ders [ 0 ][1] * tmp_ders [ 1 ][0];       // dNu/du*Nv
             Aders [ 0 ](1, 0) += product * xw; // dx/du=sum dNu/du*Nv*x*w
             Aders [ 1 ](1, 0) += product * yw; // dy/du=sum dNu/du*Nv*y*w
             wders(1, 0)    += product * w;                 // dw/du=sum dNu/du*Nv*w
 
-            product = tmp_ders [ 0 ](0) * tmp_ders [ 1 ](1);       // Nu*dNv/dv
+            product = tmp_ders [ 0 ][0] * tmp_ders [ 1 ][1];       // Nu*dNv/dv
             Aders [ 0 ](0, 1) += product * xw; // dx/dv=sum Nu*dNv/dv*x*w
             Aders [ 1 ](0, 1) += product * yw; // dy/dv=sum Nu*dNv/dv*y*w
             wders(0, 1)    += product * w; // dw/dv=sum Nu*dNv/dv*w
         }
 
-        weight = wders(0, 0);
+        double weight = wders(0, 0);
 
         // optimized version of A4.4 for d=1, binomial coefficients ignored
         /*
@@ -289,27 +267,27 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
          *      jacobian(1,1) = Sders[1](0,1);   // dy/dv
          */
 
-        temp(0) = Aders [ 0 ](0, 0) / weight;
-        temp(1) = Aders [ 1 ](0, 0) / weight;
-        jacobian(1, 0) = ( Aders [ 0 ](0, 1) - wders(0, 1) * temp(0) ) / weight; // dx/dv
-        jacobian(1, 1) = ( Aders [ 1 ](0, 1) - wders(0, 1) * temp(1) ) / weight; // dy/dv
-        jacobian(0, 0) = ( Aders [ 0 ](1, 0) - wders(1, 0) * temp(0) ) / weight; // dx/du
-        jacobian(0, 1) = ( Aders [ 1 ](1, 0) - wders(1, 0) * temp(1) ) / weight; // dy/du
+        temp[0] = Aders [ 0 ](0, 0) / weight;
+        temp[1] = Aders [ 1 ](0, 0) / weight;
+        jacobian(1, 0) = ( Aders [ 0 ](0, 1) - wders(0, 1) * temp[0] ) / weight; // dx/dv
+        jacobian(1, 1) = ( Aders [ 1 ](0, 1) - wders(0, 1) * temp[1] ) / weight; // dy/dv
+        jacobian(0, 0) = ( Aders [ 0 ](1, 0) - wders(1, 0) * temp[0] ) / weight; // dx/du
+        jacobian(0, 1) = ( Aders [ 1 ](1, 0) - wders(1, 0) * temp[1] ) / weight; // dy/du
 
         Jacob = jacobian.giveDeterminant();
 
         //calculation of derivatives of TSpline basis functions with respect to local parameters
-        product = Jacob * weight * weight;
+        double product = Jacob * weight * weight;
 
         for ( int k = 0; k < count; k++ ) {
-            w = cellgeo.giveVertexCoordinates( mask(k) )->at(3);
+            double w = cellgeo.giveVertexCoordinates( mask[k] )->at(3);
             // dNu/du*Nv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(dNu/du*Nv*w)
-            temp(0) = ders [ 0 ](1, k) * ders [ 1 ](0, k) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, k) * w * wders(1, 0);
+            temp[0] = ders [ 0 ](1, k) * ders [ 1 ](0, k) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, k) * w * wders(1, 0);
             // Nu*dNv/dv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(Nu*dNv/dv*w)
-            temp(1) = ders [ 0 ](0, k) * ders [ 1 ](1, k) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, k) * w * wders(0, 1);
+            temp[1] = ders [ 0 ](0, k) * ders [ 1 ](1, k) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, k) * w * wders(0, 1);
 
-            answer(k, 0) = ( jacobian(1, 1) * temp(0) - jacobian(0, 1) * temp(1) ) / product;
-            answer(k, 1) = ( -jacobian(1, 0) * temp(0) + jacobian(0, 0) * temp(1) ) / product;
+            answer(k, 0) = ( jacobian(1, 1) * temp[0] - jacobian(0, 1) * temp[1] ) / product;
+            answer(k, 1) = ( -jacobian(1, 0) * temp[0] + jacobian(0, 0) * temp[1] ) / product;
         }
     }
 
@@ -320,23 +298,22 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
 void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     /* Based on SurfacePoint A4.3 implementation*/
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
-    const FloatArray *vertexCoordsPtr;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatArray N(nsd);
     IntArray span(nsd);
     IntArray mask;
-    double w, xw, yw, product, weight = 0.0;
+    double weight = 0.0;
     int count;
 
     if ( nsd != 2 ) {
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
-            span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
+            span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
         }
     }
 
@@ -350,17 +327,17 @@ void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     if ( nsd == 2 ) {
         for ( int k = 0; k < count; k++ ) {
             for ( int i = 0; i < nsd; i++ ) {
-                N(i) = this->basisFunction(lcoords(i), degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask(k) - 1 ] [ i ]);
+                N[i] = this->basisFunction(lcoords[i], degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask[k] - 1 ] [ i ]);
             }
 
-            vertexCoordsPtr = cellgeo.giveVertexCoordinates( mask(k) );
-            w = vertexCoordsPtr->at(3);
-            xw = vertexCoordsPtr->at(1) * w;
-            yw = vertexCoordsPtr->at(2) * w;
+            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates( mask[k] );
+            double w = vertexCoords[2];
+            double xw = vertexCoords[0] * w;
+            double yw = vertexCoords[1] * w;
 
-            product = N(0) * N(1);                // Nu*Nv
-            answer(0) += product * xw; // x=sum Nu*Nv*x*w
-            answer(1) += product * yw; // y=sum Nu*Nv*y*w
+            double product = N[0] * N[1];                // Nu*Nv
+            answer[0] += product * xw; // x=sum Nu*Nv*x*w
+            answer[1] += product * yw; // y=sum Nu*Nv*y*w
             weight    += product * w; // w=sum Nu*Nv*w
         }
     }
@@ -374,12 +351,10 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
     //
     // Based on Algorithm A4.4 (p. 137) for d=1
     //
-    FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
-    const FloatArray *vertexCoordsPtr;
+    const FEIIGAElementGeometryWrapper &gw = static_cast< const FEIIGAElementGeometryWrapper& >(cellgeo);
     FloatArray temp(nsd);
     IntArray span(nsd);
     IntArray mask;
-    double w, xw, yw, product, weight;
     int count;
     std :: vector< FloatArray > ders(nsd);
     jacobian.resize(nsd, nsd);
@@ -394,11 +369,11 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    if ( gw->knotSpan ) {
-        span = * gw->knotSpan;
+    if ( gw.knotSpan ) {
+        span = * gw.knotSpan;
     } else {
         for ( int i = 0; i < nsd; i++ ) {
-            span(i) = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords(i), knotVector [ i ]);
+            span[i] = this->findSpan(numberOfControlPoints [ i ], degree [ i ], lcoords[i], knotVector [ i ]);
         }
     }
 
@@ -424,33 +399,34 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
 
         for ( int k = 0; k < count; k++ ) {
             for ( int i = 0; i < nsd; i++ ) {
-                this->dersBasisFunction(1, lcoords(i), degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask(k) - 1 ] [ i ], ders [ i ]);
+                this->dersBasisFunction(1, lcoords[i], degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask[k] - 1 ] [ i ], ders [ i ]);
             }
 
             // calculation of jacobian matrix in similar fashion as A4.4
             // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-            vertexCoordsPtr = cellgeo.giveVertexCoordinates( mask(k) );
-            w = vertexCoordsPtr->at(3);
-            xw = vertexCoordsPtr->at(1) * w;
-            yw = vertexCoordsPtr->at(2) * w;
+            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates( mask[k] );
+            double w = vertexCoords[2];
+            double xw = vertexCoords[0] * w;
+            double yw = vertexCoords[1] * w;
+            double product;
 
-            product = ders [ 0 ](0) * ders [ 1 ](0);       // Nu*Nv
+            product = ders [ 0 ][0] * ders [ 1 ][0];       // Nu*Nv
             Aders [ 0 ](0, 0) += product * xw;             // x=sum Nu*Nv*x*w
             Aders [ 1 ](0, 0) += product * yw;             // x=sum Nu*Nv*y*w
             wders(0, 0)    += product * w;                 // w=sum Nu*Nv*w
 
-            product = ders [ 0 ](1) * ders [ 1 ](0);       // dNu/du*Nv
+            product = ders [ 0 ][1] * ders [ 1 ][0];       // dNu/du*Nv
             Aders [ 0 ](1, 0) += product * xw; // dx/du=sum dNu/du*Nv*x*w
             Aders [ 1 ](1, 0) += product * yw; // dy/du=sum dNu/du*Nv*y*w
             wders(1, 0)    += product * w;                 // dw/du=sum dNu/du*Nv*w
 
-            product = ders [ 0 ](0) * ders [ 1 ](1);       // Nu*dNv/dv
+            product = ders [ 0 ][0] * ders [ 1 ][1];       // Nu*dNv/dv
             Aders [ 0 ](0, 1) += product * xw; // dx/dv=sum Nu*dNv/dv*x*w
             Aders [ 1 ](0, 1) += product * yw; // dy/dv=sum Nu*dNv/dv*y*w
             wders(0, 1)    += product * w; // dw/dv=sum Nu*dNv/dv*w
         }
 
-        weight = wders(0, 0);
+        double weight = wders(0, 0);
 
         // optimized version of A4.4 for d=1, binomial coefficients ignored
 #if 0
@@ -467,12 +443,12 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
         jacobian(1,1) = Sders[1](0,1);   // dy/dv
 #endif
 
-        temp(0) = Aders [ 0 ](0, 0) / weight;
-        temp(1) = Aders [ 1 ](0, 0) / weight;
-        jacobian(1, 0) = ( Aders [ 0 ](0, 1) - wders(0, 1) * temp(0) ) / weight; // dx/dv
-        jacobian(1, 1) = ( Aders [ 1 ](0, 1) - wders(0, 1) * temp(1) ) / weight; // dy/dv
-        jacobian(0, 0) = ( Aders [ 0 ](1, 0) - wders(1, 0) * temp(0) ) / weight; // dx/du
-        jacobian(0, 1) = ( Aders [ 1 ](1, 0) - wders(1, 0) * temp(1) ) / weight; // dy/du
+        temp[0] = Aders [ 0 ](0, 0) / weight;
+        temp[1] = Aders [ 1 ](0, 0) / weight;
+        jacobian(1, 0) = ( Aders [ 0 ](0, 1) - wders(0, 1) * temp[0] ) / weight; // dx/dv
+        jacobian(1, 1) = ( Aders [ 1 ](0, 1) - wders(0, 1) * temp[1] ) / weight; // dy/dv
+        jacobian(0, 0) = ( Aders [ 0 ](1, 0) - wders(1, 0) * temp[0] ) / weight; // dx/du
+        jacobian(0, 1) = ( Aders [ 1 ](1, 0) - wders(1, 0) * temp[1] ) / weight; // dy/du
     }
 }
 
@@ -496,8 +472,8 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
 
     // get starting and ending knots
     for ( int j = 0; j < nsd; j++ ) {
-        knotStart(j) = knotVector [ j ] [ knotSpan(j) ];
-        knotEnd(j) = knotVector [ j ] [ knotSpan(j) + 1 ];
+        knotStart[j] = knotVector [ j ] [ knotSpan[j] ];
+        knotEnd[j] = knotVector [ j ] [ knotSpan[j] + 1 ];
     }
 
     // for each control point check
@@ -505,8 +481,8 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
         // whether local knot vector overlaps the given knot span
         int nonzero = 1;
         for ( int j = 0; j < nsd; j++ ) {
-            if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+            if ( ( knotEnd[j] <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
+                ( knotStart[j] >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -534,8 +510,8 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
 
     // get starting and ending knots
     for ( int j = 0; j < nsd; j++ ) {
-        knotStart(j) = knotVector [ j ] [ knotSpan(j) ];
-        knotEnd(j) = knotVector [ j ] [ knotSpan(j) + 1 ];
+        knotStart[j] = knotVector [ j ] [ knotSpan[j] ];
+        knotEnd[j] = knotVector [ j ] [ knotSpan[j] + 1 ];
     }
 
     // for each control point check
@@ -543,8 +519,8 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
         answer++;
         // whether local knot vector overlaps the given knot span
         for ( int j = 0; j < nsd; j++ ) {
-            if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+            if ( ( knotEnd[j] <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
+                ( knotStart[j] >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }
@@ -576,8 +552,8 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotS
 
     // get starting and ending knots
     for ( int j = 0; j < nsd; j++ ) {
-        knotStart(j) = knotVector [ j ] [ startKnotSpan(j) ];
-        knotEnd(j) = knotVector [ j ] [ endKnotSpan(j) + 1 ];
+        knotStart[j] = knotVector [ j ] [ startKnotSpan[j] ];
+        knotEnd[j] = knotVector [ j ] [ endKnotSpan[j] + 1 ];
     }
 
     // for each control point check
@@ -585,8 +561,8 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotS
         // whether local knot vector overlaps at least partially the knot span interval
         nonzero = 1;
         for ( int j = 0; j < nsd; j++ ) {
-            if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+            if ( ( knotEnd[j] <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
+                ( knotStart[j] >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -613,8 +589,8 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &s
 
     // get starting and ending knots
     for ( int j = 0; j < nsd; j++ ) {
-        knotStart(j) = knotVector [ j ] [ startKnotSpan(j) ];
-        knotEnd(j) = knotVector [ j ] [ endKnotSpan(j) + 1 ];
+        knotStart[j] = knotVector [ j ] [ startKnotSpan[j] ];
+        knotEnd[j] = knotVector [ j ] [ endKnotSpan[j] + 1 ];
     }
 
     // for each control point check
@@ -622,8 +598,8 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &s
         answer++;
         // whether local knot vector overlaps at least partially the knot span interval
         for ( int j = 0; j < nsd; j++ ) {
-            if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+            if ( ( knotEnd[j] <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
+                ( knotStart[j] >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }
@@ -637,12 +613,12 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &s
 
 // call corresponding BSpline methods for open local knot vector
 
-double TSplineInterpolation :: basisFunction(double u, int p, const FloatArray &U, const int *I)
+double TSplineInterpolation :: basisFunction(double u, int p, const FloatArray &U, const IntArray &I)
 {
     int span, prepend, append;
     FloatArray N;
 
-    createLocalKnotVector(p, U, I, & prepend, & append);
+    createLocalKnotVector(p, U, I, prepend, append);
     span = BSplineInterpolation :: findSpan(prepend + append, p, u, openLocalKnotVector);
     BSplineInterpolation :: basisFuns(N, span, u, p, openLocalKnotVector);
 
@@ -654,12 +630,12 @@ double TSplineInterpolation :: basisFunction(double u, int p, const FloatArray &
 
 // call corresponding BSpline methods for open local knot vector
 
-void TSplineInterpolation :: dersBasisFunction(int n, double u, int p, const FloatArray &U, const int *I, FloatArray &ders)
+void TSplineInterpolation :: dersBasisFunction(int n, double u, int p, const FloatArray &U, const IntArray &I, FloatArray &ders)
 {
     int span, prepend, append;
     FloatMatrix Ders;
 
-    createLocalKnotVector(p, U, I, & prepend, & append);
+    createLocalKnotVector(p, U, I, prepend, append);
     span = BSplineInterpolation :: findSpan(prepend + append, p, u, openLocalKnotVector);
     BSplineInterpolation :: dersBasisFuns(n, u, span, p, openLocalKnotVector, Ders);
 
@@ -667,12 +643,12 @@ void TSplineInterpolation :: dersBasisFunction(int n, double u, int p, const Flo
     // this corresponds to index p-span, however prepended knotspans must be considered
     ders.resize(n + 1);
     for ( int i = 0; i <= n; i++ ) {
-        ders(i) = Ders(i, p - span + prepend);
+        ders[i] = Ders(i, p - span + prepend);
     }
 }
 
 
-void TSplineInterpolation :: createLocalKnotVector(int p, const FloatArray &U, const int *I, int *prepend, int *append)
+void TSplineInterpolation :: createLocalKnotVector(int p, const FloatArray &U, const IntArray &I, int &prepend, int &append)
 {
     int j = 0, index_first = I [ 0 ], index_last = I [ p + 1 ], mult_first = 1, mult_last = 1;
     double first = U.at(index_first), last = U.at(index_last);
@@ -693,11 +669,11 @@ void TSplineInterpolation :: createLocalKnotVector(int p, const FloatArray &U, c
         mult_last++;
     }
 
-    * prepend = p + 1 - mult_first;
-    * append = p + 1 - mult_last;
+    prepend = p + 1 - mult_first;
+    append = p + 1 - mult_last;
 
     // prepend first knot (once more)
-    for ( int i = 0; i <= * prepend; i++ ) {
+    for ( int i = 0; i <= prepend; i++ ) {
         openLocalKnotVector [ j++ ] = first;
     }
 
@@ -707,7 +683,7 @@ void TSplineInterpolation :: createLocalKnotVector(int p, const FloatArray &U, c
     }
 
     // append last knot (once more)
-    for ( int i = 0; i <= * append; i++ ) {
+    for ( int i = 0; i <= append; i++ ) {
         openLocalKnotVector [ j++ ] = last;
     }
 }

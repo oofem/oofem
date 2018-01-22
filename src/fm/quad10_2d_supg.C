@@ -39,7 +39,7 @@
 #include "material.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -142,17 +142,33 @@ Quad10_2D_SUPG :: computeGaussPoints()
         integrationRulesArray.resize(3);
 
 
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 4, this);
 
         //seven point Gauss integration
-        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3) );
+        integrationRulesArray [ 1 ] = std::make_unique<GaussIntegrationRule>(2, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], 4, this);
 
-        integrationRulesArray [ 2 ].reset( new GaussIntegrationRule(3, this, 1, 3) );
+        integrationRulesArray [ 2 ] = std::make_unique<GaussIntegrationRule>(3, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 3 ], 4, this);
     }
 }
+
+
+void
+Quad10_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStress2D(answer, gp, eps, tStep);
+}
+
+
+void
+Quad10_2D_SUPG :: computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeTangent2D(answer, mode, gp, tStep);
+}
+
+
 
 
 void

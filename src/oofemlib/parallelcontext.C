@@ -188,7 +188,7 @@ ParallelContext :: accumulate(const FloatArray &local, FloatArray &global)
         int size = local.giveSize();
         global.resize(size);
         ///@todo Why aren't we using the C++ MPI functions?
-        MPI_Allreduce( const_cast<double*>(local.givePointer()), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm() );
+        MPI_Allreduce( local.givePointer(), global.givePointer(), size, MPI_DOUBLE, MPI_SUM, this->emodel->giveParallelComm() );
     } else {
 #endif
     global = local;

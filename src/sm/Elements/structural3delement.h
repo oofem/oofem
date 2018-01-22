@@ -35,7 +35,7 @@
 #ifndef structural3delement_h
 #define structural3delement_h
 
-#include "Elements/nlstructuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 
 
 #define _IFT_Structural3DElement_materialCoordinateSystem "matcs" ///< [optional] Support for material directions based on element orientation.

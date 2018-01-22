@@ -35,7 +35,7 @@
 #ifndef mitc4_h
 #define mitc4_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -127,7 +127,7 @@ private:
     void giveLocalDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4);
     void giveThickness(double &a1, double &a2, double &a3, double &a4);
     void giveJacobian(FloatArray lcoords, FloatMatrix &jacobianMatrix);
-    void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
+    void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
     const FloatMatrix *computeGtoLRotationMatrix();
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);

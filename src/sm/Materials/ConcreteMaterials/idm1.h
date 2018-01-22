@@ -50,9 +50,9 @@
 #define IDM_USE_MAPPEDSTRAIN
 
 #include "material.h"
-#include "Materials/linearelasticmaterial.h"
-#include "Materials/isodamagemodel.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/linearelasticmaterial.h"
+#include "sm/Materials/isodamagemodel.h"
+#include "sm/Materials/structuralms.h"
 #include "randommaterialext.h"
 #include "materialmapperinterface.h"
 

@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Shells/cct3d.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Elements/Shells/cct3d.h"
+#include "sm/Materials/structuralms.h"
 #include "fei2dtrlin.h"
 #include "node.h"
 #include "load.h"
@@ -53,23 +53,17 @@ CCTPlate3d :: CCTPlate3d(int n, Domain *aDomain) : CCTPlate(n, aDomain)
 
 
 void
-CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
-// Returns global coordinates given in global vector
-// transformed into local coordinate system of the
-// receiver
+CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 {
-    FloatArray offset;
-    // test the parametr
     if ( global.giveSize() != 3 ) {
         OOFEM_ERROR("cannot transform coordinates - size mismatch");
-        exit(1);
     }
 
     // first ensure that receiver's GtoLRotationMatrix[3,3] is defined
     this->computeGtoLRotationMatrix();
 
-    offset = global;
-    offset.subtract( * this->giveNode(1)->giveCoordinates() );
+    FloatArray offset;
+    offset.beDifferenceOf(global, * this->giveNode(1)->giveCoordinates() );
     answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
@@ -117,7 +111,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     FloatArray inputCoords_ElCS;
     std::vector< FloatArray > lc(3);
     FloatArray llc;
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
+    this->giveLocalCoordinates( inputCoords_ElCS, coords );
     for ( int _i = 0; _i < 3; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }

@@ -34,16 +34,16 @@
 
 #include "freewarping.h"
 #include "crosssection.h"
-#include "Elements/trwarp.h"
+#include "sm/Elements/trwarp.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
 #include "dof.h"
 #include "sparsemtrx.h"
 #include "verbose.h"
-#include "Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "unknownnumberingscheme.h"
-#include "Elements/structuralelementevaluator.h"
+#include "sm/Elements/structuralelementevaluator.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
@@ -238,7 +238,7 @@ TimeStep *FreeWarping :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, ( double ) istep, 0., counter);
     return currentStep.get();
 }
 

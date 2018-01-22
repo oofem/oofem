@@ -36,7 +36,7 @@
 #define steel1_h
 
 #include "perfectlyplasticmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for Steel1
 //@{

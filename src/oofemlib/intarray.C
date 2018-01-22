@@ -61,57 +61,6 @@ void IntArray :: add(int value)
 }
 
 
-#ifdef DEBUG
-int &IntArray :: at(int i)
-{
-    this->checkBounds(i);
-    return values [ i - 1 ];
-}
-
-int IntArray :: at(int i) const
-{
-    this->checkBounds(i);
-    return values [ i - 1 ];
-}
-
-int &IntArray :: operator()(int i)
-{
-    this->checkBounds(i);
-    return values [ i ];
-}
-
-const int &IntArray :: operator()(int i) const
-{
-    this->checkBounds(i);
-    return values [ i ];
-}
-
-int &IntArray :: operator[](int i)
-{
-    this->checkBounds(i);
-    return values [ i ];
-}
-
-const int &IntArray :: operator[](int i) const
-{
-    this->checkBounds(i);
-    return values [ i ];
-}
-
-void IntArray :: checkBounds(int i) const
-// Checks that the receiver includes an index i.
-{
-    if ( i < 0 ) {
-        OOFEM_ERROR("array error on index : %d < 0", i);
-    }
-
-    if ( i > this->giveSize() ) {
-        OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
-    }
-}
-#endif
-
-
 void IntArray :: resizeWithValues(int n, int allocChunk)
 {
     if ( allocChunk > 0 && (int)this->values.capacity() < n ) {
@@ -162,7 +111,7 @@ void IntArray :: followedBy(int b, int allocChunk)
 
 void IntArray :: erase(int _pos)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     this->checkBounds(_pos);
 #endif
     values.erase(values.begin() + _pos - 1);
@@ -183,7 +132,7 @@ bool IntArray :: containsOnlyZeroes() const
 
 int IntArray :: minimum() const
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( this->isEmpty() ) {
         OOFEM_ERROR("Empty array.");
     }
@@ -194,7 +143,7 @@ int IntArray :: minimum() const
 
 int IntArray :: maximum() const
 {
-#ifdef DEBUG
+#ifndef NDEBUG
     if ( this->isEmpty() ) {
         OOFEM_ERROR("Empty array.");
     }

@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "contextioerr.h"
-#include "../sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "gausspoint.h"
 
 namespace oofem {
@@ -179,8 +179,7 @@ StructuralMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode,
 
 void StructuralMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
-    const StructuralMaterialStatus &structStatus = dynamic_cast< StructuralMaterialStatus & >(tmpStat);
+    const StructuralMaterialStatus &structStatus = static_cast< const StructuralMaterialStatus & >(iStatus);
 
     strainVector = structStatus.giveStrainVector();
     stressVector = structStatus.giveStressVector();

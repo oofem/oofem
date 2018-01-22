@@ -51,9 +51,10 @@ REGISTER_GeneralizedEigenValueSolver(SLEPcSolver, GES_SLEPc);
 
 
 SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(d, m)
+    A(nullptr),
+    B(nullptr),
+    epsInit(false)
 {
-    A = B = NULL;
-    epsInit = false;
 }
 
 

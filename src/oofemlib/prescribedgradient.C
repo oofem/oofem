@@ -127,8 +127,8 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 
     for ( auto &n : domain->giveDofManagers() ) {
         FloatArray *coords = n->giveCoordinates();
-        Dof *d1 = n->giveDofWithID( this->dofs(0) );
-        Dof *d2 = n->giveDofWithID( this->dofs(1) );
+        Dof *d1 = n->giveDofWithID( this->dofs[0] );
+        Dof *d2 = n->giveDofWithID( this->dofs[1] );
         int k1 = d1->__givePrescribedEquationNumber();
         int k2 = d2->__givePrescribedEquationNumber();
         if ( nsd == 2 ) {
@@ -142,7 +142,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
                 C.at(k2, 3) = coords->at(1) - xbar;
             }
         } else { // nsd == 3
-            Dof *d3 = n->giveDofWithID( this->dofs(2) );
+            Dof *d3 = n->giveDofWithID( this->dofs[2] );
             int k3 = d3->__givePrescribedEquationNumber();
 
             if ( k1 ) {

@@ -1,21 +1,11 @@
 brazil_2d_nl.oofem.out
 2D brazilian splitting test
-#linearstatic nsteps 1 renumber 1
-#
-#nonlinearstatic nsteps 100 renumber 1 stiffMode 1 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 nonlocalext lstype 3 smtype 7
-#
 nonlinearstatic nsteps 1 nmsteps 5 renumber 0 profileopt 1 nonlocalext lstype 4 smtype 7 nmodules 1
 errocheck "brazil_2d_nl.oofem.in"
-#
-#metastep 1
 nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
-#metastep 2
 nsteps 3 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
-#metastep 3
 nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.00001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
-#metastep 4
 nsteps 9 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
-#metastep 5 
 nsteps 10 stiffMode 2 controlmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
 #
 domain PlaneStrain

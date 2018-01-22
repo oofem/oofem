@@ -35,26 +35,18 @@
 #include "metastep.h"
 
 namespace oofem {
-MetaStep :: MetaStep(int n, EngngModel *e)
-{
-    this->number = n;
-    this->eModel = e;
-    this->numberOfSteps = 0;
-    this->attributes = NULL;
-}
+MetaStep :: MetaStep(int n, EngngModel *e) :
+    eModel(e),
+    numberOfSteps(0),
+    number(n)
+{}
 
-MetaStep :: MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib)
-{
-    this->number = n;
-    this->eModel = e;
-    this->numberOfSteps = nsteps;
-    this->attributes = attrib.GiveCopy();
-}
-
-MetaStep :: ~MetaStep()
-{
-    delete attributes;
-}
+MetaStep :: MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib) :
+    eModel(e),
+    numberOfSteps(nsteps),
+    attributes(attrib.clone()),
+    number(n)
+{}
 
 
 IRResultType
@@ -64,8 +56,7 @@ MetaStep :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_MetaStep_nsteps);
 
-    delete attributes;
-    this->attributes = ir->GiveCopy();
+    this->attributes = ir->clone();
 
     return IRRT_OK;
 }
@@ -87,11 +78,6 @@ MetaStep :: setNumberOfSteps(int newNumberOfSteps)
 int
 MetaStep :: isStepValid(int solStepNumber)
 {
-    if ( ( solStepNumber >= sindex ) &&
-        ( solStepNumber < ( sindex + numberOfSteps ) ) ) {
-        return 1;
-    }
-
-    return 0;
+    return solStepNumber >= sindex && solStepNumber < ( sindex + numberOfSteps );
 }
 } // end namespace oofem

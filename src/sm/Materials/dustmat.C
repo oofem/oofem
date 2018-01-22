@@ -36,11 +36,11 @@
 
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "gausspoint.h"
 #include "intarray.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
@@ -155,15 +155,11 @@ DustMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void 
 //   *************************************************************
 
 
-DustMaterial :: DustMaterial(int n, Domain *d) : StructuralMaterial(n, d)
+DustMaterial :: DustMaterial(int n, Domain *d) : StructuralMaterial(n, d),
+    LEMaterial(n, d)
 {
-    LEMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
-DustMaterial :: ~DustMaterial()
-{
-    delete LEMaterial;
-}
 
 IRResultType
 DustMaterial :: initializeFrom(InputRecord *ir)
@@ -175,7 +171,7 @@ DustMaterial :: initializeFrom(InputRecord *ir)
     if ( result != IRRT_OK ) return result;
 
     // call the corresponding service for the linear elastic material
-    result = this->LEMaterial->initializeFrom(ir);
+    result = this->LEMaterial.initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
     // instanciate the variables defined in DustMaterial
@@ -505,13 +501,13 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                               TimeStep *tStep)
 {
     DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
-    double ym0 = LEMaterial->giveYoungsModulus();
+    double ym0 = LEMaterial.giveYoungsModulus();
     double ym = status->giveYoungsModulus();
     double coeff = status->giveVolumetricPlasticStrain() < 0 ? ym / ym0 : 1.0;
     if ( mode == ElasticStiffness ) {
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
     } else {
         OOFEM_ERROR("Unsupported MatResponseMode");
@@ -645,8 +641,8 @@ void
 DustMaterial :: computeAndSetBulkAndShearModuli(double &bulkModulus, double &shearModulus, GaussPoint *gp)
 {
     DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
-    double ym = LEMaterial->giveYoungsModulus();
-    double nu = LEMaterial->givePoissonsRatio();
+    double ym = LEMaterial.giveYoungsModulus();
+    double nu = LEMaterial.givePoissonsRatio();
     double volumetricPlasticStrain = status->giveVolumetricPlasticStrain();
     if ( volumetricPlasticStrain < 0. ) {
         ym -= mStiff * volumetricPlasticStrain;

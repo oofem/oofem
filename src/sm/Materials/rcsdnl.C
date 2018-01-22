@@ -440,9 +440,9 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
     RCSDEMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), nonlocalStrainVector(),
     tempNonlocalStrainVector(), localStrainVectorForAverage()
 {
-    nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+    nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( g->giveMaterialMode() ) );
 
-    localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+    localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( g->giveMaterialMode() ) );
 }
 
 
@@ -476,14 +476,6 @@ RCSDNLMaterialStatus :: initTempStatus()
 //
 {
     RCSDEMaterialStatus :: initTempStatus();
-
-    if ( nonlocalStrainVector.giveSize() == 0 ) {
-        nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-    }
-
-    if ( localStrainVectorForAverage.giveSize() == 0 ) {
-        localStrainVectorForAverage.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-    }
 
     tempNonlocalStrainVector = nonlocalStrainVector;
 }

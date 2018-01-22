@@ -35,8 +35,8 @@
 #ifndef qtrplanestrain_h
 #define qtrplanestrain_h
 
-#include "Elements/structural2delement.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
+#include "sm/Elements/structural2delement.h"
+#include "sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"

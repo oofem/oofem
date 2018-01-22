@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/staticstructural.h"
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "sm/EngineeringModels/staticstructural.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelementevaluator.h"
 #include "dofmanager.h"
 #include "set.h"
 #include "timestep.h"
@@ -124,7 +124,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
     this->solverType = "nrsolver";
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
-    nMethod.reset(NULL);
+    nMethod = nullptr;
 
     int tmp = TangentStiffness; // Default TangentStiffness
     IR_GIVE_OPTIONAL_FIELD(ir, tmp, _IFT_StaticStructural_stiffmode);
@@ -154,7 +154,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    this->field.reset( new DofDistributedPrimaryField(this, 1, FT_Displacements, 0) );
+    this->field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_Displacements, 0);
 
     return IRRT_OK;
 }
@@ -186,7 +186,7 @@ StaticStructural :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, s, _IFT_StaticStructural_solvertype);
     if ( s.compare(this->solverType) ) {
         this->solverType = s;
-        nMethod.reset(NULL);
+        nMethod = nullptr;
     }
 
     int tmp = TangentStiffness; // Default TangentStiffness
@@ -207,8 +207,8 @@ TimeStep *StaticStructural :: giveNextStep()
 {
     if ( !currentStep ) {
         // first step -> generate initial step
-        //currentStep.reset( new TimeStep(*giveSolutionStepWhenIcApply()) );
-        currentStep.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0) );
+        //currentStep = std::make_unique<TimeStep>(*giveSolutionStepWhenIcApply());
+        currentStep = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 1, 0., this->deltaT, 0);
     }
     previousStep = std :: move(currentStep);
     double dt;
@@ -217,7 +217,7 @@ TimeStep *StaticStructural :: giveNextStep()
     } else {
         dt = this->deltaT;
     }
-    currentStep.reset( new TimeStep(*previousStep, dt) );
+    currentStep = std::make_unique<TimeStep>(*previousStep, dt);
 
     return currentStep.get();
 }
@@ -454,9 +454,7 @@ contextIOResultType StaticStructural :: saveContext(DataStream &stream, ContextM
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->field->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    this->field->saveContext(stream);
 
     return CIO_OK;
 }
@@ -470,9 +468,7 @@ contextIOResultType StaticStructural :: restoreContext(DataStream &stream, Conte
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->field->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    this->field->restoreContext(stream);
 
     return CIO_OK;
 }
@@ -488,7 +484,7 @@ StaticStructural :: updateDomainLinks()
 int
 StaticStructural :: forceEquationNumbering()
 {
-    stiffnessMatrix.reset( NULL );
+    stiffnessMatrix = nullptr;
     return StructuralEngngModel::forceEquationNumbering();
 }
 

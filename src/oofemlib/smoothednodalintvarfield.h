@@ -68,13 +68,13 @@ public:
     SmoothedNodalInternalVariableField(InternalStateType ist, FieldType b, NodalRecoveryModel :: NodalRecoveryModelType st, Domain * d);
     virtual ~SmoothedNodalInternalVariableField();
 
-    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep);
-    virtual int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep);
+    int evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep) override;
+    int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep) override;
 
     InternalStateType giveInternalType() { return istType; }
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-    virtual const char *giveClassName() const { return "SmoothedNodalInternalVariableField"; }
+    void saveContext(DataStream &stream) override;
+    void restoreContext(DataStream &stream) override;
+    const char *giveClassName() const override { return "SmoothedNodalInternalVariableField"; }
 };
 } // end namespace oofem
 #endif // smoothednodalintvarfieldintvarfield_h

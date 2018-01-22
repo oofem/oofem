@@ -35,7 +35,7 @@
 #ifndef cct3d_h
 #define cct3d_h
 
-#include "../sm/Elements/Plates/cct.h"
+#include "sm/Elements/Plates/cct.h"
 #include "floatmatrix.h"
 
 #define _IFT_CCTPlate3d_Name "cctplate3d"
@@ -83,7 +83,7 @@ public:
     virtual ~CCTPlate3d() {}
 
 protected:
-    void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
+    void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
                                      double &y1, double &y2, double &y3,
                                      double &z1, double &z2, double &z3);

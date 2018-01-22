@@ -96,20 +96,19 @@ public:
 class OOFEM_EXPORT IGAElement : public Element
 {
 protected:
-    // FEInterpolation interpolation;
 #ifdef __PARALLEL_MODE
     IntArray knotSpanParallelMode;
 #endif
 public:
     IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { }
-    IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 #ifdef __PARALLEL_MODE
     elementParallelMode giveKnotSpanParallelMode(int) const;
 #endif
 
 #ifdef __OOFEG
-    virtual void  drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
 protected:
@@ -124,7 +123,7 @@ class OOFEM_EXPORT IGATSplineElement : public IGAElement
 {
 public:
     IGATSplineElement(int n, Domain * aDomain) : IGAElement(n, aDomain) { }
-    IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 protected:
     virtual int giveNsd() = 0;

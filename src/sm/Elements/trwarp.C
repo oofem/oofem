@@ -33,20 +33,20 @@
 
 #include "trwarp.h"
 #include "node.h"
-#include "CrossSections/warpingcrosssection.h"
+#include "sm/CrossSections/warpingcrosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 #include "load.h"
-#include "EngineeringModels/freewarping.h"
+#include "sm/EngineeringModels/freewarping.h"
 #include "engngm.h"
 #include "dof.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 
 
 
@@ -88,7 +88,7 @@ Tr_Warp :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 4) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 4);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }

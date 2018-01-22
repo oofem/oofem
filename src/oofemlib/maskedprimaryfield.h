@@ -57,20 +57,20 @@ class OOFEM_EXPORT MaskedPrimaryField : public Field
 protected:
     PrimaryField *master;
     IntArray mask;
+
 public:
-    MaskedPrimaryField(FieldType b, PrimaryField * m, IntArray dofIdMask) : Field(b), mask(std::move(dofIdMask)) {
-        master = m;
-    }
+    MaskedPrimaryField(FieldType b, PrimaryField * m, IntArray dofIdMask) : Field(b),
+        master(m),
+        mask(std::move(dofIdMask))
+    { }
 
-    virtual int evaluateAt(FloatArray &answer, const FloatArray &coords,
-                           ValueModeType mode, TimeStep *tStep);
-    virtual int evaluateAt(FloatArray &answer, DofManager *dman,
-                           ValueModeType mode, TimeStep *tStep);
+    int evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep) override;
+    int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep) override;
 
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode) { return CIO_OK; }
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode) { return CIO_OK; }
+    void restoreContext(DataStream &stream) override { }
+    void saveContext(DataStream &stream) override { }
 
-    virtual const char *giveClassName() const { return "MaskedPrimaryField"; }
+    const char *giveClassName() const override { return "MaskedPrimaryField"; }
 };
 } // end namespace oofem
 #endif // maskedprimaryfield_h

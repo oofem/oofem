@@ -35,9 +35,9 @@
 #ifndef combinedzzsiee_h
 #define combinedzzsiee_h
 
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
-#include "../sm/ErrorEstimators/scalarerrorindicator.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
+#include "sm/ErrorEstimators/scalarerrorindicator.h"
+#include "sm/ErrorEstimators/directerrorindicatorrc.h"
 
 #define _IFT_CombinedZZSIErrorEstimator_Name "zzscalar"
 

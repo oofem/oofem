@@ -39,12 +39,12 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
-#include "Elements/latticestructuralelement.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Elements/latticestructuralelement.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __TM_MODULE
- #include "../tm/latticetransportelement.h"
+ #include "tm/Elements/latticetransportelement.h"
 #endif
 
 #include <cstdlib>

@@ -87,52 +87,28 @@ public:
      * @param n Size of matrix
      * @see buildInternalStructure
      */
-    SymCompCol(int n);
-    /**
-     * Constructor.
-     * Before any operation an internal profile must be built.
-     * @see buildInternalStructure
-     */
-    SymCompCol();
+    SymCompCol(int n=0);
     /// Copy constructor
     SymCompCol(const SymCompCol & S);
     /// Destructor
     virtual ~SymCompCol() { }
 
-    // Overloaded methods
-    virtual SparseMtrx *GiveCopy() const;
-    virtual void times(const FloatArray &x, FloatArray &answer) const;
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
-    virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
-    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
-    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    virtual bool canBeFactorized() const { return false; }
-    virtual void zero();
-    virtual double &at(int i, int j);
-    virtual double at(int i, int j) const;
-    virtual const char* giveClassName() const { return "SymCompCol"; }
-    virtual SparseMtrxType giveType() const { return SMT_SymCompCol; }
-    virtual bool isAntisymmetric() const { return false; }
-
-
-    const double &val(int i) const { return val_(i); }
-    const int &row_ind(int i) const { return rowind_(i); }
-    const int &col_ptr(int i) const { return colptr_(i); }
-    int dim(int i) const { return dim_ [ i ]; }
+    std::unique_ptr<SparseMtrx> clone() const override;
+    void times(const FloatArray &x, FloatArray &answer) const override;
+    void timesT(const FloatArray &x, FloatArray &answer) const override { this->times(x, answer); }
+    void times(double x) override;
+    int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &) override;
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override;
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
+    bool canBeFactorized() const override { return false; }
+    void zero() override;
+    double &at(int i, int j) override;
+    double at(int i, int j) const override;
+    const char* giveClassName() const override { return "SymCompCol"; }
+    SparseMtrxType giveType() const  override { return SMT_SymCompCol; }
+    bool isAsymmetric() const override { return false; }
 
 protected:
-    /*******************************/
-    /*  Access and info functions  */
-    /*******************************/
-
-    double &val(int i) { return val_(i); }
-    int &row_ind(int i) { return rowind_(i); }
-    int &col_ptr(int i) { return colptr_(i); }
-
-    int size(int i) const { return dim_ [ i ]; }
-    int NumNonzeros() const { return nz_; }
-    int base() const { return base_; }
 
     /***********************************/
     /*  General access function (slow) */

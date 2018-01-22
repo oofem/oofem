@@ -54,8 +54,8 @@
 #include "function.h"
 
 #include "timestep.h"
-// #include "../sm/Elements/tet21ghostsolid.h"
-#include "../sm/Elements/nlstructuralelement.h"
+// #include "sm/Elements/tet21ghostsolid.h"
+#include "sm/Elements/nlstructuralelement.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(WeakPeriodicBoundaryCondition);
@@ -250,7 +250,7 @@ void WeakPeriodicBoundaryCondition :: giveEdgeNormal(FloatArray &answer, int ele
     }
 
     Element *thisElement = this->domain->giveElement(element);
-    FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids(0) );
+    FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
 
     interpolation->boundaryEvalNormal( answer, side, xi, FEIElementGeometryWrapper(thisElement) );
 }
@@ -394,7 +394,7 @@ WeakPeriodicBoundaryCondition :: computeDeformationGradient(FloatMatrix &answer,
 
     FloatArray F, u;
     FloatMatrix dNdx, BH, Fmatrix, Finv;
-    FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofids(0) );
+    FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofids[0] );
 
     // Fetch displacements
     e->computeVectorOf({1, 2, 3}, VM_Total, tStep, u);
@@ -441,7 +441,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     FEInterpolation *geoInterpolation = e->giveInterpolation();
 
     // Use correct interpolation for the dofid on which the condition is applied
-    FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofids(0) );
+    FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofids[0] );
 
     interpolation->boundaryGiveNodes(bnodes, boundary);
 
@@ -517,7 +517,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
             // Find dofs for this element which should be periodic
             IntArray bNodes;
 
-            FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids(0) );
+            FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
             interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
@@ -698,7 +698,7 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
             // Find dofs for this element which should be periodic
             IntArray bNodes;
 
-            FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids(0) );
+            FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
             interpolation->boundaryGiveNodes( bNodes, boundary );

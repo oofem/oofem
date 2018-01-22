@@ -33,7 +33,7 @@
 
 namespace oofem {
 DiagPreconditioner :: DiagPreconditioner(const SparseMtrx &C, InputRecord &attributes) : Preconditioner(C, attributes),
-    diag_( C.giveNumberOfRows() )
+    diag( C.giveNumberOfRows() )
 { }
 
 
@@ -42,17 +42,17 @@ DiagPreconditioner :: init(const SparseMtrx &C)
 {
     int n = C.giveNumberOfRows();
 
-    diag_.resize( n );
-    diag_.zero();
+    diag.resize( n );
+    diag.zero();
 
     /* Find the diagonal elements */
     for ( int i = 1; i <= n; i++ ) {
-        double diag = C.at(i, i);
-        if ( diag  == 0 ) {
+        double d = C.at(i, i);
+        if ( d  == 0 ) {
             OOFEM_ERROR("failed, zero diagonal detected in equation %d", i);
         }
 
-        diag_(i - 1) = 1. / diag;
+        diag.at(i) = 1. / d;
     }
 }
 
@@ -62,7 +62,7 @@ DiagPreconditioner :: solve(const FloatArray &x, FloatArray &y) const
 {
     y.resize( x.giveSize() );
     for ( int i = 0; i < x.giveSize(); i++ ) {
-        y(i) = x(i) * diag(i);
+        y[i] = x[i] * diag[i];
     }
 }
 
@@ -73,7 +73,7 @@ DiagPreconditioner :: trans_solve(const FloatArray &x, FloatArray &y) const
     y.resize( x.giveSize() );
 
     for ( int i = 0; i < x.giveSize(); i++ ) {
-        y(i) = x(i) * diag(i);
+        y[i] = x[i] * diag[i];
     }
 }
 } // end namespace oofem

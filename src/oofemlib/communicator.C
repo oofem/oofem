@@ -44,68 +44,31 @@
 namespace oofem {
 CommunicatorBuff :: CommunicatorBuff(int s, CommBuffType t)
 {
-    this->size = s;
-
-    if ( size ) {
-        processCommBuffs = new ProcessCommunicatorBuff * [ size ];
-        for ( int i = 0; i < size; i++ ) {
-            processCommBuffs [ i ] = new ProcessCommunicatorBuff(t);
-        }
-    } else {
-        processCommBuffs = NULL;
+    this->processCommBuffs.reserve(s);
+    for ( int i = 0; i < s; ++i ) {
+        this->processCommBuffs.emplace_back(t);
     }
 }
 
-CommunicatorBuff :: ~CommunicatorBuff()
+
+Communicator :: Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, CommunicatorMode m) :
+    rank(rank),
+    engngModel(emodel),
+    mode(m)
 {
+    processComms.reserve(size);
     for ( int i = 0; i < size; i++ ) {
-        if ( processCommBuffs [ i ] ) {
-            delete(processCommBuffs [ i ]);
-        }
-    }
-
-    if ( processCommBuffs ) {
-        delete[] processCommBuffs;
+        processComms.emplace_back(b->giveProcessCommunicatorBuff ( i ), i, mode);
     }
 }
 
-Communicator :: Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, CommunicatorMode m)
-{
-    this->engngModel = emodel;
-    this->rank = rank;
-    this->size = size;
-    this->mode = m;
-
-    if ( size ) {
-        processComms = new ProcessCommunicator * [ size ];
-        for ( int i = 0; i < size; i++ ) {
-            processComms [ i ] =
-                new ProcessCommunicator(b->giveProcessCommunicatorBuff ( i ), i, mode);
-        }
-    } else {
-        processComms = NULL;
-    }
-}
-
-Communicator :: ~Communicator()
-{
-    int i = size;
-
-    if ( size ) {
-        while ( i-- ) {
-            delete(processComms [ i ]);
-        }
-
-        delete[]  processComms;
-    }
-}
 
 int
 Communicator :: initExchange(int tag)
 {
     int result = 1;
-    for  ( int i = 0; i < size; i++ ) {
-        result &= this->giveProcessCommunicator(i)->initExchange(tag);
+    for  ( auto &pc : processComms ) {
+        result &= pc.initExchange(tag);
     }
 
     return result;
@@ -115,8 +78,8 @@ int
 Communicator :: finishExchange()
 {
     int result = 1;
-    for  ( int i = 0; i < size; i++ ) {
-        result &= this->giveProcessCommunicator(i)->finishExchange();
+    for  ( auto &pc : processComms ) {
+        result &= pc.finishExchange();
     }
 
     return result;
@@ -128,8 +91,8 @@ int
 Communicator :: initSend(int tag)
 {
     int result = 1;
-    for  ( int i = 0; i < size; i++ ) {
-        result &= this->giveProcessCommunicator(i)->initSend(tag);
+    for  ( auto &pc : processComms ) {
+        result &= pc.initSend(tag);
     }
 
     return result;
@@ -139,8 +102,8 @@ int
 Communicator :: initReceive(int tag)
 {
     int result = 1;
-    for  ( int i = 0; i < size; i++ ) {
-        result &= this->giveProcessCommunicator(i)->initReceive(tag);
+    for  ( auto &pc : processComms) {
+        result &= pc.initReceive(tag);
     }
 
     return result;
@@ -149,8 +112,8 @@ Communicator :: initReceive(int tag)
 void
 Communicator :: clearBuffers()
 {
-    for  ( int i = 0; i < size; i++ ) {
-        this->giveProcessCommunicator(i)->clearBuffers();
+    for  ( auto &pc : processComms ) {
+        pc.clearBuffers();
     }
 }
 

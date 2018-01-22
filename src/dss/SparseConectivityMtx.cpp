@@ -822,7 +822,7 @@ long MD_Qqraph :: ApproximateMinumumDegree(long i, IntArrayList &Lp)
             }
         }
 
-        long d = min(n - this->no_elements, degrees [ i ] + Lpc);
+        long d = std::min(n - this->no_elements, degrees [ i ] + Lpc);
 
         long Les = 0;
         //foreach(long e in E[i]) if (amd_w[e]<0) Les += L[e].Length;   else Les += amd_w[e];
@@ -835,7 +835,7 @@ long MD_Qqraph :: ApproximateMinumumDegree(long i, IntArrayList &Lp)
             }
         }
 
-        d = min(d, Aic + Lpc + Les);
+        d = std::min(d, Aic + Lpc + Les);
 
         if ( MinDegB > d && IsFree(i) ) {
             MinDegB = d;
@@ -1233,7 +1233,7 @@ IntArrayList *MD_Qqraph :: GenerateMD(bool approximate_degree, IntArrayList *fix
             }
         } else {
             while ( no_elements < n ) {
-                long MinimDeg = min(MinDegB, MinDegA);
+                long MinimDeg = std::min(MinDegB, MinDegA);
                 MinDegB = n;
                 MinDegC = n;
 

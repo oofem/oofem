@@ -50,10 +50,17 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 
 
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
-
-PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), blocksize(1), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL){ }
+    mtrx(NULL),
+    symmFlag(false),
+    leqs(0),
+    geqs(0),
+    blocksize(1),
+    di(0),
+    kspInit(false),
+    newValues(true),
+    localIS(NULL),
+    globalIS(NULL)
+{ }
 
 
 PetscSparseMtrx :: ~PetscSparseMtrx()
@@ -69,10 +76,10 @@ PetscSparseMtrx :: ~PetscSparseMtrx()
 }
 
 
-SparseMtrx *
-PetscSparseMtrx :: GiveCopy() const
+std::unique_ptr<SparseMtrx>
+PetscSparseMtrx :: clone() const
 {
-    PetscSparseMtrx *answer = new PetscSparseMtrx(nRows, nColumns);
+    std::unique_ptr<PetscSparseMtrx> answer = std::make_unique<PetscSparseMtrx>(nRows, nColumns);
     MatDuplicate( this->mtrx, MAT_COPY_VALUES, & ( answer->mtrx ) );
     answer->symmFlag = this->symmFlag;
     answer->mType    = this->mType;
@@ -83,7 +90,7 @@ PetscSparseMtrx :: GiveCopy() const
     answer->kspInit  = false;
     answer->newValues = this->newValues;
 
-    return answer;
+    return std::move(answer);
 }
 
 void
@@ -125,7 +132,7 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
         VecGetArray(globY, & ptr);
         answer.resize(this->nRows);
         for ( int i = 0; i < this->nRows; i++ ) {
-            answer(i) = ptr [ i ];
+            answer[i] = ptr [ i ];
         }
 
         VecRestoreArray(globY, & ptr);
@@ -156,7 +163,7 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     VecGetArray(globY, & ptr);
     answer.resize(this->nColumns);
     for ( int i = 0; i < this->nColumns; i++ ) {
-        answer(i) = ptr [ i ];
+        answer[i] = ptr [ i ];
     }
 
     VecRestoreArray(globY, & ptr);
@@ -247,13 +254,13 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
     BT.beTranspositionOf(B);
     MatCreateSeqDense(PETSC_COMM_SELF, BT.giveNumberOfRows(), BT.giveNumberOfColumns(), BT.givePointer(), & globB);
     MatMatMult(globB, this->mtrx, MAT_INITIAL_MATRIX, PETSC_DEFAULT, & globC);
-    const double *vals;
     for ( int r = 0; r < nc; r++ ) {
-        MatGetRow(globC, r, NULL, NULL, & vals);
+        const double *vals;
+        MatGetRow(globC, r, nullptr, nullptr, & vals);
         for ( int i = 0; i < nr; i++ ) {
             * aptr++ = vals [ i ];
         }
-        MatRestoreRow(globC, r, NULL, NULL, & vals);
+        MatRestoreRow(globC, r, nullptr, nullptr, & vals);
     }
 
     MatDestroy(& globB);
@@ -335,7 +342,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int n, int m, cons
 
         total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
-            d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+            d_nnz[i] = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
         }
     }
 
@@ -443,8 +450,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
 
         total_nnz = 0;
         for ( int i = 0; i < leqs; i++ ) {
-            d_nnz(i) = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
-            total_nnz += d_nnz(i);
+            d_nnz[i] = rows_upper [ i ].giveSize() + rows_lower [ i ].giveSize();
+            total_nnz += d_nnz[i];
         }
     }
 
@@ -490,8 +497,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
     if ( localIS ) {
         ISDestroy(& localIS);
         ISDestroy(& globalIS);
-        localIS = NULL;
-        globalIS = NULL;
+        localIS = nullptr;
+        globalIS = nullptr;
     }
 
     this->emodel = eModel;
@@ -577,16 +584,16 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
             }
 
             for ( int i = 0; i < leqs; i++ ) {
-                d_nnz(i) = d_rows_upper [ i ].giveSize() + d_rows_lower [ i ].giveSize();
-                o_nnz(i) = o_rows_upper [ i ].giveSize() + o_rows_lower [ i ].giveSize();
+                d_nnz[i] = d_rows_upper [ i ].giveSize() + d_rows_lower [ i ].giveSize();
+                o_nnz[i] = o_rows_upper [ i ].giveSize() + o_rows_lower [ i ].giveSize();
 
-                d_nnz_sym(i) = d_rows_upper [ i ].giveSize();
-                o_nnz_sym(i) = o_rows_upper [ i ].giveSize();
+                d_nnz_sym[i] = d_rows_upper [ i ].giveSize();
+                o_nnz_sym[i] = o_rows_upper [ i ].giveSize();
             }
         }
 
         //fprintf (stderr,"\n[%d]PetscSparseMtrx: Profile ...",rank);
-        //for (i=0; i<leqs; i++) fprintf(stderr, "%d ", d_nnz(i));
+        //for (i=0; i<leqs; i++) fprintf(stderr, "%d ", d_nnz[i]);
         //fprintf (stderr,"\n[%d]PetscSparseMtrx: Creating MPIAIJ Matrix ...\n",rank);
 
         // create PETSc mat
@@ -875,7 +882,7 @@ PetscSparseMtrx :: at(int i, int j) const
     //return value;
 }
 
-SparseMtrx *
+std::unique_ptr<SparseMtrx>
 PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
 {
 #ifdef __PARALLEL_MODE
@@ -887,7 +894,7 @@ PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
     prows.add(-1);
     pcols.add(-1);
 
-    PetscSparseMtrx *answer = new PetscSparseMtrx(prows.giveSize(), pcols.giveSize());
+    std::unique_ptr<PetscSparseMtrx> answer = std::make_unique<PetscSparseMtrx>(prows.giveSize(), pcols.giveSize());
     answer->emodel = this->emodel;
     IS is_rows;
     IS is_cols;
@@ -898,7 +905,7 @@ PetscSparseMtrx :: giveSubMatrix(const IntArray &rows, const IntArray &cols)
     ISDestroy(& is_rows);
     ISDestroy(& is_cols);
 
-    return answer;
+    return std::move(answer);
 }
 
 void
@@ -918,22 +925,25 @@ PetscSparseMtrx :: toFloatMatrix(FloatMatrix &answer) const
 void
 PetscSparseMtrx :: printStatistics() const
 {
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_INFO);
+    PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_INFO);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
+    PetscViewerPopFormat(PETSC_VIEWER_STDOUT_SELF);
 }
 
 void
 PetscSparseMtrx :: printYourself() const
 {
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DENSE);
+    PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_DENSE);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
+    PetscViewerPopFormat(PETSC_VIEWER_STDOUT_SELF);
 }
 
 void
 PetscSparseMtrx :: printMatlab() const
 {
-    PetscViewerSetFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_MATLAB);
+    PetscViewerPushFormat(PETSC_VIEWER_STDOUT_SELF, PETSC_VIEWER_ASCII_MATLAB);
     MatView(this->mtrx, PETSC_VIEWER_STDOUT_SELF);
+    PetscViewerPopFormat(PETSC_VIEWER_STDOUT_SELF);
 }
 
 void

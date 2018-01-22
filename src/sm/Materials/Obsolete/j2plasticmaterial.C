@@ -33,7 +33,7 @@
  */
 
 #include "j2plasticmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

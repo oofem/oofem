@@ -35,8 +35,8 @@
 #ifndef QTRPLANSTRSSXFEM_H_
 #define QTRPLANSTRSSXFEM_H_
 
-#include "../sm/Elements/PlaneStress/qtrplstr.h"
-#include "../sm/xfem/xfemstructuralelementinterface.h"
+#include "sm/Elements/PlaneStress/qtrplstr.h"
+#include "sm/xfem/xfemstructuralelementinterface.h"
 #include "vtkxmlexportmodule.h"
 
 #include "domain.h"

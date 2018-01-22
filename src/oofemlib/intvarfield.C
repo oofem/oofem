@@ -39,24 +39,16 @@
 
 namespace oofem {
 InternalVariableField :: InternalVariableField(InternalStateType ist, FieldType ft, MaterialMappingAlgorithmType mma_type, Domain *d) :
-    Field(ft)
-{
-    this->type = ist;
-    this->mma = classFactory.createMaterialMappingAlgorithm(mma_type);
-    this->domain = d;
-}
-
-InternalVariableField :: ~InternalVariableField()
-{
-    if ( mma ) {
-        delete mma;
-    }
-}
+    Field(ft),
+    mma(classFactory.createMaterialMappingAlgorithm(mma_type)),
+    type(ist),
+    domain(d)
+{}
 
 int
 InternalVariableField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
-    IntArray types(1);
+    IntArray types;
     types.at(1) = this->type;
     /// Use MaterialMappingAlgorithm classes to do the job
     Set eset(0, domain);
@@ -77,15 +69,11 @@ InternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueM
     }
 }
 
-contextIOResultType
-InternalVariableField :: saveContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
-}
+void
+InternalVariableField :: saveContext(DataStream &stream)
+{}
 
-contextIOResultType
-InternalVariableField :: restoreContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
-}
+void
+InternalVariableField :: restoreContext(DataStream &stream)
+{}
 } // end namespace oofem

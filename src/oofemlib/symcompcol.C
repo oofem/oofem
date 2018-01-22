@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-// Class SymCompCol
-
 // inspired by
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 /*             ********   ***                                 SparseLib++    */
@@ -65,10 +63,6 @@
 /*                                                                           */
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-/*          Compressed column symmetric sparse matrix (0-based)          */
-/*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-
 #include "symcompcol.h"
 #include "floatarray.h"
 #include "engngm.h"
@@ -83,30 +77,20 @@
 namespace oofem {
 REGISTER_SparseMtrx(SymCompCol, SMT_SymCompCol);
 
-SymCompCol :: SymCompCol(void) : CompCol()
-{ }
-
 
 SymCompCol :: SymCompCol(int n) : CompCol(n)
 { }
 
 
-/*****************************/
-/*  Copy constructor         */
-/*****************************/
-
 SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
 { }
 
 
-SparseMtrx *SymCompCol :: GiveCopy() const
+std::unique_ptr<SparseMtrx> SymCompCol :: clone() const
 {
-    SymCompCol *result = new SymCompCol(*this);
-    return result;
+    return std::make_unique<SymCompCol>(*this);
 }
 
-
-#define MAP(i, j) map [ ( j ) * neq - ( j ) * ( ( j ) + 1 ) / 2 + ( i ) ]
 
 int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
@@ -117,7 +101,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     // allocation map
     std :: vector< std :: set< int > > columns(neq);
 
-    this->nz_ = 0;
+    this->nz = 0;
 
     for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
@@ -139,7 +123,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
     for ( auto &gbc : domain->giveBcs() ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
-        if ( bc != NULL ) {
+        if ( bc ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
@@ -157,34 +141,31 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
         }
     }
 
-
-
     for ( auto &val : columns ) {
-        this->nz_ += val.size();
+        this->nz += val.size();
     }
 
-    rowind_.resize(nz_);
-    colptr_.resize(neq + 1);
+    rowind.resize(nz);
+    colptr.resize(neq + 1);
     indx = 0;
 
-    for ( int j = 0; j < neq; j++ ) { // column loop
-        colptr_(j) = indx;
-        for ( int row: columns [ j ] ) { // row loop
-            rowind_(indx++) = row;
+    for ( int j = 0; j < neq; j++ ) {
+        colptr[j] = indx;
+        for ( int row: columns [ j ] ) {
+            rowind[indx++] = row;
         }
     }
 
-    colptr_(neq) = indx;
+    colptr[neq] = indx;
 
     // allocate value array
-    val_.resize(nz_);
-    val_.zero();
+    val.resize(nz);
+    val.zero();
 
-    OOFEM_LOG_INFO("SymCompCol info: neq is %d, nwk is %d\n", neq, nz_);
+    OOFEM_LOG_INFO("SymCompCol info: neq is %d, nwk is %d\n", neq, nz);
 
-    dim_ [ 0 ] = dim_ [ 1 ] = nColumns = nRows = neq;
+    nColumns = nRows = neq;
 
-    // increment version
     this->version++;
 
     return true;
@@ -194,39 +175,33 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
 void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
 {
-    int M = dim_ [ 0 ];
-    int N = dim_ [ 1 ];
-
 #if DEBUG
-    if ( x.giveSize() != N ) {
+    if ( x.giveSize() != this->giveNumberOfColumns() ) {
         OOFEM_ERROR("incompatible dimensions");
     }
 #endif
 
-    answer.resize(M);
+    answer.resize(this->giveNumberOfRows());
     answer.zero();
 
-    for ( int j = 0; j < N; j++ ) {
-        double rhs = x(j);
+    for ( int j = 0; j < this->giveNumberOfColumns(); j++ ) {
+        double rhs = x[j];
         double sum = 0.0;
-        for ( int t = colptr_(j) + 1; t < colptr_(j + 1); t++ ) {
-            answer( rowind_(t) ) += val_(t) * rhs; // column loop
-            sum += val_(t) * x( rowind_(t) ); // row loop
+        for ( int t = colptr[j] + 1; t < colptr[j + 1]; t++ ) {
+            answer[ rowind[t] ] += val[t] * rhs; // column loop
+            sum += val[t] * x[ rowind[t] ]; // row loop
         }
 
-        answer(j) += sum;
-        answer(j) += val_( colptr_(j) ) * rhs; // diagonal
+        answer[j] += sum + val[ colptr[j] ] * rhs;  // include diagonal
     }
 }
 
 void SymCompCol :: times(double x)
 {
-    val_.times(x);
+    val.times(x);
 
-    // increment version
     this->version++;
 }
-
 
 
 int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
@@ -242,7 +217,7 @@ int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
     for ( int j = 0; j < dim; j++ ) {
         int jj = loc[j];
         if ( jj ) {
-            int cstart = colptr_[jj - 1];
+            int cstart = colptr[jj - 1];
             int t = cstart;
             int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
             for ( int i = 0; i < dim; i++ ) {
@@ -253,36 +228,34 @@ int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
                         t = cstart;
                     else if ( ii > last_ii )
                         t++;
-                    for ( ; rowind_[t] < ii - 1; t++ ) {
+                    for ( ; rowind[t] < ii - 1; t++ ) {
 #  ifdef DEBUG
-                        if ( t >= colptr_[jj] )
+                        if ( t >= colptr[jj] )
                             OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
 #  endif
                     }
-                    val_[t] += mat(i, j);
+                    val[t] += mat(i, j);
                     last_ii = ii;
                 }
             }
         }
     }
 
-    // increment version
     this->version++;
 
     return 1;
 }
 
+
 int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    int dim1, dim2;
-
-    dim1 = mat.giveNumberOfRows();
-    dim2 = mat.giveNumberOfColumns();
+    int dim1 = mat.giveNumberOfRows();
+    int dim2 = mat.giveNumberOfColumns();
 
     for ( int j = 0; j < dim2; j++ ) {
         int jj = cloc[j];
         if ( jj ) {
-            int cstart = colptr_[jj - 1];
+            int cstart = colptr[jj - 1];
             int t = cstart;
             int last_ii = this->nRows + 1; // Ensures that t is set correctly the first time.
             for ( int i = 0; i < dim1; i++ ) {
@@ -293,74 +266,65 @@ int SymCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
                         t = cstart;
                     else if ( ii > last_ii )
                         t++;
-                    for ( ; rowind_[t] < ii - 1; t++ ) {
+                    for ( ; rowind[t] < ii - 1; t++ ) {
 #  ifdef DEBUG
-                        if ( t >= colptr_[jj] )
+                        if ( t >= colptr[jj] )
                             OOFEM_ERROR("Couldn't find row %d in the sparse structure", ii);
 #  endif
                     }
-                    val_[t] += mat(i, j);
+                    val[t] += mat(i, j);
                     last_ii = ii;
                 }
             }
         }
     }
 
-    // increment version
     this->version++;
 
     return 1;
 }
 
+
 void SymCompCol :: zero()
 {
-    val_.zero();
+    val.zero();
 
-    // increment version
     this->version++;
 }
 
-/*********************/
-/*   Array access    */
-/*********************/
 
 double &SymCompCol :: at(int i, int j)
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
+    if ( i < j ) {
+        std::swap(i, j);
     }
 
-    // increment version
     this->version++;
 
-    for ( int t = colptr_(jj - 1); t < colptr_(jj); t++ ) {
-        if ( rowind_(t) == ( ii - 1 ) ) {
-            return val_(t);
+    for ( int t = colptr[j - 1]; t < colptr[j]; t++ ) {
+        if ( rowind[t] == ( i - 1 ) ) {
+            return val[t];
         }
     }
 
     OOFEM_ERROR("Array accessing exception -- out of bounds");
-    return val_(0); // return to suppress compiler warning message
+    return val[0]; // return to suppress compiler warning message
 }
 
 
 double SymCompCol :: at(int i, int j) const
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
+    if ( i < j ) {
+        std::swap(i, j);
     }
 
-    for ( int t = colptr_(jj - 1); t < colptr_(jj); t++ ) {
-        if ( rowind_(t) == ( ii - 1 ) ) {
-            return val_(t);
+    for ( int t = colptr[j - 1]; t < colptr[j]; t++ ) {
+        if ( rowind[t] == ( i - 1 ) ) {
+            return val[t];
         }
     }
 
-    if ( i <= dim_ [ 0 ] && j <= dim_ [ 1 ] ) {
+    if ( i <= this->giveNumberOfColumns() && j <= this->giveNumberOfRows() ) {
         return 0.0;
     } else {
         OOFEM_ERROR("Array accessing exception -- index out of bounds (%d,%d)", i, j);
@@ -370,19 +334,17 @@ double SymCompCol :: at(int i, int j) const
 
 double SymCompCol :: operator() (int i, int j)  const
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
+    if ( i < j ) {
+        std::swap(i, j);
     }
 
-    for ( int t = colptr_(jj); t < colptr_(jj + 1); t++ ) {
-        if ( rowind_(t) == ii ) {
-            return val_(t);
+    for ( int t = colptr[j]; t < colptr[j + 1]; t++ ) {
+        if ( rowind[t] == i ) {
+            return val[t];
         }
     }
 
-    if ( i < dim_ [ 0 ] && j < dim_ [ 1 ] ) {
+    if ( i < this->giveNumberOfColumns() && j < this->giveNumberOfRows() ) {
         return 0.0;
     } else {
         OOFEM_ERROR("Array accessing exception, index out of bounds (%d,%d)", i, j);
@@ -392,22 +354,19 @@ double SymCompCol :: operator() (int i, int j)  const
 
 double &SymCompCol :: operator() (int i, int j)
 {
-    int ii = i, jj = j;
-    if ( ii < jj ) {
-        ii = j;
-        jj = i;
+    if ( i < j ) {
+        std::swap(i, j);
     }
 
-    // increment version
     this->version++;
 
-    for ( int t = colptr_(jj); t < colptr_(jj + 1); t++ ) {
-        if ( rowind_(t) == ii ) {
-            return val_(t);
+    for ( int t = colptr[j]; t < colptr[j + 1]; t++ ) {
+        if ( rowind[t] == i ) {
+            return val[t];
         }
     }
 
     OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
-    return val_(0); // return to suppress compiler warning message
+    return val[0]; // return to suppress compiler warning message
 }
 } // end namespace oofem

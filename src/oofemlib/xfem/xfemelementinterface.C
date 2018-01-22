@@ -577,13 +577,13 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 else if( bNodes.giveSize() == 3 ) {
 
                 	// Start
-					const FloatArray &coordS = * ( element->giveDofManager(bNodes(0))->giveCoordinates() );
+					const FloatArray &coordS = * ( element->giveDofManager(bNodes[0])->giveCoordinates() );
 
 					// Center
-					const FloatArray &coordC = * ( element->giveDofManager(bNodes(2))->giveCoordinates() );
+					const FloatArray &coordC = * ( element->giveDofManager(bNodes[2])->giveCoordinates() );
 
 					// End
-					const FloatArray &coordE = * ( element->giveDofManager(bNodes(1))->giveCoordinates() );
+					const FloatArray &coordE = * ( element->giveDofManager(bNodes[1])->giveCoordinates() );
 
 
 					if ( i == intersecEdgeInd [ 0 ] ) {

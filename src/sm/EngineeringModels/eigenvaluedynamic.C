@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/eigenvaluedynamic.h"
+#include "sm/EngineeringModels/eigenvaluedynamic.h"
 #include "timestep.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -153,7 +153,7 @@ TimeStep *EigenValueDynamic :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, ( double ) istep, 0., counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, ( double ) istep, 0., counter);
 
     return currentStep.get();
 }
@@ -208,8 +208,8 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
 
     nMethod->solve(*stiffnessMatrix, *massMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
 
-    stiffnessMatrix.reset(NULL);
-    massMatrix.reset(NULL);
+    stiffnessMatrix = nullptr;
+    massMatrix = nullptr;
 }
 
 

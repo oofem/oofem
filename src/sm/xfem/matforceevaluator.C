@@ -36,12 +36,12 @@
 #include "xfem/tipinfo.h"
 #include "domain.h"
 #include "spatiallocalizer.h"
-#include "Elements/nlstructuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "dofmanager.h"
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "gausspoint.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 
 #include <fstream>
 #include <set>

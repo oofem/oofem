@@ -129,7 +129,7 @@ bool ParticleTopologyDescription :: instanciateYourself(DataReader &dr)
 
     this->tubeWidth = ( bb1(0) - bb0(0) ) / res * tubewidth;
 
-    this->grid.reset( new ParticleGrid< ParticlePoint >(resolution, bb0, bb1) );
+    this->grid = std::make_unique< ParticleGrid< ParticlePoint > >(resolution, bb0, bb1);
 
     for ( int i = 1; i <= nsegments; i++ ) {
         ir = dr.giveInputRecord(DataReader :: IR_geometryRec, i);
@@ -481,8 +481,8 @@ void ParticleTopologyDescription :: calculateShortestDistance(const ParticlePoin
     FloatArray grid_point;
     IntArray pos(2);
     /// @todo Adaptivity
-    for ( pos(0) = ind0(0); pos(0) < ind1(0); pos(0)++ ) {
-        for ( pos(1) = ind0(1); pos(1) < ind1(1); pos(1)++ ) {
+    for ( pos[0] = ind0[0]; pos[0] < ind1[0]; pos[0]++ ) {
+        for ( pos[1] = ind0[1]; pos[1] < ind1[1]; pos[1]++ ) {
             g.getGridCoord(grid_point, pos);
             if ( grid_point.distance_square(p0->foot) > radius * radius ) {  // Quick optimization (might give false negatives, but that is acceptable.)
                 continue;
@@ -515,22 +515,22 @@ double ParticleTopologyDescription :: shortestDistanceFromCurve(const FloatArray
     FloatArray p_y0(2), t0(2);
 
     // Tangent
-    t0(0) = n0(1);
-    t0(1) = -n0(0);
+    t0[0] = n0[1];
+    t0[1] = -n0[0];
 
-    p_y0(0) = y0(0) - p(0);
-    p_y0(1) = y0(1) - p(1);
+    p_y0[0] = y0[0] - p[0];
+    p_y0[1] = y0[1] - p[1];
 
     p_y0.beDifferenceOf(y0, p);
-    temp1 = n0(0) * p_y0(0) + n0(1) * p_y0(1);           //n0.dotProduct(p_y0);
-    temp2 = t0(0) * p_y0(0) + t0(1) * p_y0(1);           //t0.dotProduct(p_y0);
+    temp1 = n0[0] * p_y0[0] + n0[1] * p_y0[1];           //n0.dotProduct(p_y0);
+    temp2 = t0[0] * p_y0[0] + t0[1] * p_y0[1];           //t0.dotProduct(p_y0);
 
     // Same as [1]
-    b3 = 2 * a(2) * a(2);
-    b2 = 3 * a(1) * a(2);
+    b3 = 2 * a[2] * a[2];
+    b2 = 3 * a[1] * a[2];
     // Last terms with "tempX" missing in article [1]
-    b1 = a(1) * a(1) + 2 * a(0) * a(2) + 1 + 2 * a(2) * temp1;
-    b0 = a(0) * a(1) + a(1) * temp1 + temp2;
+    b1 = a[1] * a[1] + 2 * a[0] * a[2] + 1 + 2 * a[2] * temp1;
+    b0 = a[0] * a[1] + a[1] * temp1 + temp2;
 
     // Find the roots
     int roots;
@@ -556,10 +556,10 @@ double ParticleTopologyDescription :: shortestDistanceFromCurve(const FloatArray
     double dx, dy, distance2, f, fp, txi;
     for ( int i = 0; i < points; i++ ) {
         txi = txi_list [ i ];
-        f = a(0) + a(1) * txi + a(2) * txi * txi;
+        f = a[0] + a[1] * txi + a[2] * txi * txi;
 
-        dx = n0(0) * f + t0(0) * txi + p_y0(0);
-        dy = n0(1) * f + t0(1) * txi + p_y0(1);
+        dx = n0[0] * f + t0[0] * txi + p_y0[0];
+        dy = n0[1] * f + t0[1] * txi + p_y0[1];
 
         distance2 = dx * dx + dy * dy;
 
@@ -573,16 +573,16 @@ double ParticleTopologyDescription :: shortestDistanceFromCurve(const FloatArray
         return 2 * this->tubeWidth * this->tubeWidth;
     }
 
-    f = a(0) + a(1) * min_txi + a(2) * min_txi * min_txi;
-    fp = a(1) + 2 * a(2) * min_txi;
+    f = a[0] + a[1] * min_txi + a[2] * min_txi * min_txi;
+    fp = a[1] + 2 * a[2] * min_txi;
 
     foot.resize(2);
-    foot(0) = n0(0) * f + t0(0) * min_txi + y0(0);
-    foot(1) = n0(1) * f + t0(1) * min_txi + y0(1);
+    foot[0] = n0[0] * f + t0[0] * min_txi + y0[0];
+    foot[1] = n0[1] * f + t0[1] * min_txi + y0[1];
 
     normal.resize(2);
-    normal(0) = n0(0) + t0(0) * ( -fp );
-    normal(1) = n0(1) + t0(1) * ( -fp );
+    normal[0] = n0[0] + t0[0] * ( -fp );
+    normal[1] = n0[1] + t0[1] * ( -fp );
     normal.normalize();
 
     return foot.distance_square(p);
@@ -661,7 +661,7 @@ void ParticleTopologyDescription :: collectNeighbors(std :: list< ParticlePoint 
         }
         temp.beDifferenceOf(p->foot, origin->foot);
         lcoord.beProductOf(toLocalCoord, temp);
-        valid_points.push_front( dist_pair( p, lcoord(0) ) );
+        valid_points.push_front( dist_pair( p, lcoord[0] ) );
     }
 
     // Apply rejection criteria based on normals (and other things?)
@@ -678,7 +678,7 @@ void ParticleTopologyDescription :: collectNeighbors(std :: list< ParticlePoint 
         }
         temp.beDifferenceOf(p->foot, origin->foot);
         lcoord.beProductOf(toLocalCoord, temp);
-        valid_points.push_front( dist_pair( p, lcoord(0) ) );
+        valid_points.push_front( dist_pair( p, lcoord[0] ) );
     }
 
     valid_points.sort(compare_second);
@@ -718,8 +718,7 @@ void ParticleTopologyDescription :: collectNeighbors(std :: list< ParticlePoint 
 bool ParticleTopologyDescription :: findDisplacement(FloatArray &displacement, int id, const FloatArray &footpoint, TimeStep *tStep) const
 {
     FloatArray lcoords, closest, offset;
-    IntArray region(1);
-    region(0) = id;
+    IntArray region = {id};
     // Finds a single element close to this point.
     Element *e = this->d->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, footpoint, id);
     if ( !e ) { // No element at all for this domain. Then there is no displacement;
@@ -731,7 +730,7 @@ bool ParticleTopologyDescription :: findDisplacement(FloatArray &displacement, i
     offset.beDifferenceOf(closest, footpoint);
     double dist = offset.computeSquaredNorm();
     if ( dist > 0.25 * this->grid->getGridStep(0) * this->grid->getGridStep(0) ) {    // TODO: Maybe also check normals?
-        OOFEM_WARNING( "Foot point far from element (%e) (%e, %e)->(%e, %e).\n", sqrt(dist), footpoint.at(1), footpoint.at(2), closest.at(1), closest.at(2) );
+        OOFEM_WARNING( "Foot point far from element (%e) (%e, %e)->(%e, %e).\n", sqrt(dist), footpoint[0], footpoint[1], closest[0], closest[1] );
         return false;
     }
 
@@ -747,12 +746,12 @@ bool ParticleTopologyDescription :: findDisplacement(FloatArray &displacement, i
         e->computeField(VM_Total, tStep, lcoords, fields);    // Velocities + pressures most likely.
         e->giveElementDofIDMask(dofIds);
         for ( int i = 0; i < dofIds.giveSize(); i++ ) {
-            if ( dofIds(i) == V_u ) {
-                displacement(0) = fields(i) * dt;
-            } else if ( dofIds(i) == V_v ) {
-                displacement(1) = fields(i) * dt;
-            } else if ( dofIds(i) == V_w ) {
-                displacement(2) = fields(i) * dt;
+            if ( dofIds[i] == V_u ) {
+                displacement[0] = fields[i] * dt;
+            } else if ( dofIds[i] == V_v ) {
+                displacement[1] = fields[i] * dt;
+            } else if ( dofIds[i] == V_w ) {
+                displacement[2] = fields[i] * dt;
             }
         }
     }
@@ -786,15 +785,15 @@ void ParticleTopologyDescription :: writeDataToFile(const char *name) const
             dims = grid_coord.giveSize();
             // First write the grid coordinate
             for ( int i = 0; i < dims; i++ ) {
-                fprintf( fid, "%e ", grid_coord(i) );
+                fprintf( fid, "%e ", grid_coord[i] );
             }
             // Then the foot point
             for ( int i = 0; i < dims; i++ ) {
-                fprintf( fid, "%e ", p->foot(i) );
+                fprintf( fid, "%e ", p->foot[i] );
             }
             // Auxiliary information, like normal
             for ( int i = 0; i < dims; i++ ) {
-                fprintf( fid, "%e ", p->normal(i) );
+                fprintf( fid, "%e ", p->normal[i] );
             }
             fprintf(fid, "%d ", p->id);
             fprintf(fid, "\n");
@@ -833,14 +832,14 @@ void ParticleTopologyDescription :: writeVTKFile(const char *name) const
     int i = 0;
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
         if ( ( p = it.getPoint() ) != NULL ) {
-            points->InsertNextPoint(p->foot(0), p->foot(1), dims == 3 ? p->foot(2) : 0.0);
+            points->InsertNextPoint(p->foot[0], p->foot[1], dims == 3 ? p->foot[2] : 0.0);
             vertex = vtkSmartPointer< vtkVertex > :: New();
             vertex->GetPointIds()->SetId(0, i);
             vertices->InsertNextCell(vertex);
             pointIDArray->SetTuple1(i,  p->id);
-            pointNormalsArray->SetTuple3(i, p->normal(0), p->normal(1), dims == 3 ? p->normal(2) : 0.0);
+            pointNormalsArray->SetTuple3(i, p->normal[0], p->normal[1], dims == 3 ? p->normal[2] : 0.0);
             if ( p->corner.giveSize() > 0 ) {
-                pointEndPointsArray->InsertNextTuple3(p->corner(0) - p->foot(0), p->corner(1) - p->foot(1), dims == 3 ? p->corner(2) - p->foot(2) : 0.0);
+                pointEndPointsArray->InsertNextTuple3(p->corner[0] - p->foot[0], p->corner[1] - p->foot[1], dims == 3 ? p->corner[2] - p->foot[2] : 0.0);
             } else {
                 pointEndPointsArray->InsertNextTuple3(0.0, 0.0, 0.0);
             }
@@ -1036,28 +1035,28 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
                 double projection = p->normal.giveSize() > 0 ? p->normal.dotProduct(origin->normal) : 1.0;
                 if ( projection < 0.0 ) { // Then take the furthest point
 #if 1
-                    if ( lcoord(0) > b_front_dist && !found_front ) {
-                        b_front_dist = lcoord(0);
+                    if ( lcoord[0] > b_front_dist && !found_front ) {
+                        b_front_dist = lcoord[0];
                         e1.second = p->node;
                     }
-                    if ( lcoord(0) < b_back_dist && !found_back ) {
-                        b_back_dist = lcoord(0);
+                    if ( lcoord[0] < b_back_dist && !found_back ) {
+                        b_back_dist = lcoord[0];
                         e0.first = p->node;
                     }
 #endif
                     continue;
                 }
 
-                if ( lcoord(0) > 0 ) {
-                    if ( lcoord(0) < front_dist ) {
+                if ( lcoord[0] > 0 ) {
+                    if ( lcoord[0] < front_dist ) {
                         found_front = true;
-                        front_dist = lcoord(0);
+                        front_dist = lcoord[0];
                         e1.second = p->node;
                     }
                 } else {
-                    if ( lcoord(0) > back_dist ) {
+                    if ( lcoord[0] > back_dist ) {
                         found_back = true;
-                        back_dist = lcoord(0);
+                        back_dist = lcoord[0];
                         e0.first = p->node;
                     }
                 }
@@ -1079,8 +1078,8 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
     std :: list< node > :: iterator it_node;
     int n = 0;
     for ( it_node = nodes.begin(); it_node != nodes.end(); it_node++ ) {
-        fine.nx(n) = it_node->c(0);
-        fine.ny(n) = it_node->c(1);
+        fine.nx[n] = it_node->c[0];
+        fine.ny[n] = it_node->c[1];
         n++;
     }
 
@@ -1090,9 +1089,9 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
     std :: list< edge > :: iterator it_edge;
     n = 0;
     for ( it_edge = edges.begin(); it_edge != edges.end(); it_edge++ ) {
-        fine.segment_a(n) = it_edge->first;
-        fine.segment_b(n) = it_edge->second;
-        fine.segment_marker(n) = it_edge->id;
+        fine.segment_a[n] = it_edge->first;
+        fine.segment_b[n] = it_edge->second;
+        fine.segment_marker[n] = it_edge->id;
         n++;
     }
 
@@ -1114,13 +1113,13 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
 
     fprintf(file, "edges = [");
     for ( int i = 0; i < pslg.segment_a.giveSize(); i++ ) {
-        fprintf( file, "%d, %d, %d;\n", pslg.segment_a(i), pslg.segment_b(i), pslg.segment_marker(i) );
+        fprintf( file, "%d, %d, %d;\n", pslg.segment_a[i], pslg.segment_b[i], pslg.segment_marker[i] );
     }
     fprintf(file, "];\n");
 
     fprintf(file, "nodes = [");
     for ( int i = 0; i < pslg.nx.giveSize(); i++ ) {
-        fprintf( file, "%e, %e;\n", pslg.nx(i), pslg.ny(i) );
+        fprintf( file, "%e, %e;\n", pslg.nx[i], pslg.ny[i] );
     }
     fprintf(file, "];\n");
 
@@ -1186,34 +1185,31 @@ void ParticleTopologyDescription :: generateMesh(std :: vector< FloatArray > &no
     printf("Printing mesh.m\n");
     FILE *file = fopen("mesh.m", "w");
     fprintf(file, "nodes = [");
-    for ( int i = 1; i <= ( int ) nodes.size(); i++ ) {
-        FloatArray &x = nodes [ i - 1 ];
-        for ( int j = 1; j <= 2; j++ ) {
-            fprintf( file, "%e, ", x.at(j) );
+    for ( int i = 0; i < ( int ) nodes.size(); i++ ) {
+        for ( auto x : nodes [ i ] ) {
+            fprintf( file, "%e, ", x );
         }
-        fprintf( file, " %d", n_markers [ i - 1 ].at(1) );
+        fprintf( file, " %d", n_markers [ i ][0] );
         fprintf(file, ";\n");
     }
     fprintf(file, "];\n");
 
     fprintf(file, "triangles = [");
-    for ( int i = 1; i <= ( int ) elements.size(); i++ ) {
-        IntArray &x = elements [ i - 1 ];
-        for ( int j = 1; j <= x.giveSize(); j++ ) {
-            fprintf( file, "%d, ", x.at(j) );
+    for ( int i = 0; i < ( int ) elements.size(); i++ ) {
+        for ( auto x : elements [ i ] ) {
+            fprintf( file, "%d, ", x );
         }
-        fprintf( file, "%d", e_markers.at(i) );
+        fprintf( file, "%d", e_markers[i] );
         fprintf(file, ";\n");
     }
     fprintf(file, "];\n");
 
     fprintf(file, "segments = [");
-    for ( int i = 1; i <= ( int ) segments.size(); i++ ) {
-        IntArray &x = segments [ i - 1 ];
-        for ( int j = 1; j <= x.giveSize(); j++ ) {
-            fprintf( file, "%d, ", x.at(j) );
+    for ( int i = 0; i < ( int ) segments.size(); i++ ) {
+        for ( auto x : segments [ i ] ) {
+            fprintf( file, "%d, ", x );
         }
-        fprintf( file, "%d", s_markers.at(i) );
+        fprintf( file, "%d", s_markers[i] );
         fprintf(file, ";\n");
     }
     fprintf(file, "];\n");

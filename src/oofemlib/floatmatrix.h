@@ -32,12 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
-
 #ifndef flotmtrx_h
 #define flotmtrx_h
 
@@ -170,22 +164,26 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-#ifdef DEBUG
-    double at(int i, int j) const;
-#else
-    inline double at(int i, int j) const { return values [ ( j - 1 ) * nRows + i - 1 ]; }
+    inline double at(int i, int j) const
+    {
+#ifndef NDEBUG
+        this->checkBounds(i, j);
 #endif
+        return values [ ( j - 1 ) * nRows + i - 1 ];
+    }
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Implements 1-based indexing.
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-#ifdef DEBUG
-    double &at(int i, int j);
-#else
-    inline double &at(int i, int j) { return values [ ( j - 1 ) * nRows + i - 1 ]; }
+    inline double &at(int i, int j)
+    {
+#ifndef NDEBUG
+        this->checkBounds(i, j);
 #endif
+        return values [ ( j - 1 ) * nRows + i - 1 ];
+    }
 
     /**
      * Coefficient access function. Returns l-value of coefficient at given
@@ -193,21 +191,25 @@ public:
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-#ifdef DEBUG
-    double &operator()(int i, int j);
-#else
-    inline double &operator()(int i, int j) { return values [ j * nRows + i ]; }
+    inline double &operator()(int i, int j)
+    {
+#ifndef NDEBUG
+        this->checkBounds(i + 1, j + 1);
 #endif
+        return values [ j * nRows + i ];
+    }
     /**
      * Coefficient access function. Implements 0-based indexing.
      * @param i Row position of coefficient.
      * @param j Column position of coefficient.
      */
-#ifdef DEBUG
-    double operator()(int i, int j) const;
-#else
-    inline double operator()(int i, int j) const { return values [ j * nRows + i ]; }
-#endif
+    inline double operator()(int i, int j) const
+    {
+#ifndef NDEBUG
+        this->checkBounds(i + 1, j + 1);
+#endif 
+        return values [ j * nRows + i ];
+    }
     /**
      * Assembles the contribution using localization array into receiver. The receiver must
      * have dimensions large enough to localize contribution.

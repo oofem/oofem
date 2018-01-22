@@ -35,7 +35,7 @@
 #ifndef concretefcm_h
 #define concretefcm_h
 
-#include "../fcm.h"
+#include "sm/Materials/fcm.h"
 #include "randommaterialext.h"
 
 ///@name Input fields for ConcreteFCM

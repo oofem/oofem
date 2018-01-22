@@ -44,11 +44,11 @@ namespace oofem {
 class OOFEM_EXPORT CompCol_ICPreconditioner : public Preconditioner
 {
 private:
-    FloatArray val_;
-    IntArray pntr_;
-    IntArray indx_;
-    int nz_;
-    int dim_ [ 2 ];
+    FloatArray val;
+    IntArray pntr;
+    IntArray indx;
+    int nz;
+    int dim [ 2 ];
 
 public:
     /// Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
@@ -58,15 +58,15 @@ public:
     /// Destructor.
     virtual ~CompCol_ICPreconditioner(void) { }
 
-    virtual void init(const SparseMtrx &a);
+    void init(const SparseMtrx &a) override;
 
     void initialize(const CompCol &A);
 
-    void solve(const FloatArray &rhs, FloatArray &solution) const;
-    void trans_solve(const FloatArray &rhs, FloatArray &solution) const;
+    void solve(const FloatArray &rhs, FloatArray &solution) const override;
+    void trans_solve(const FloatArray &rhs, FloatArray &solution) const override;
 
-    virtual const char *giveClassName() const { return "ICP"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "ICP"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 protected:
     void qsortRow(IntArray &, FloatArray &, int l, int r);

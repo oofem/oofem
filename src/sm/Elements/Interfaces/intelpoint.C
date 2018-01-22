@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Interfaces/intelpoint.h"
-#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "sm/Elements/Interfaces/intelpoint.h"
+#include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "domain.h"
 #include "node.h"
 #include "gaussintegrationrule.h"
@@ -200,7 +200,7 @@ IntElPoint :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
         integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
     }
 }

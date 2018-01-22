@@ -35,7 +35,7 @@
 #ifndef microplanematerial_bazant_h
 #define microplanematerial_bazant_h
 
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "microplanematerial.h"
 
 

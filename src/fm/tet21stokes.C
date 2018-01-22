@@ -44,7 +44,7 @@
 #include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
 #include "fluidcrosssection.h"
@@ -81,7 +81,7 @@ void Tet21Stokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
@@ -150,7 +150,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
 
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
-        mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
+        mat->computeDeviatoricStress3D(devStress, r_vol, gp, epsp, pressure, tStep);
 
         momentum.plusProduct(B, devStress, dV);
         momentum.add(-pressure * dV, dN_V);
@@ -305,7 +305,7 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, mode, gp, tStep);
+        mat->computeTangents3D(Ed, Ep, Cd, Cp, mode, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);

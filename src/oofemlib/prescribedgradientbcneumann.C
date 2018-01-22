@@ -277,9 +277,9 @@ void PrescribedGradientBCNeumann :: computeTangent(FloatMatrix &tangent, TimeSte
         }
     }
 
-    std :: unique_ptr< SparseMtrx > Kuu(Kff->giveSubMatrix(loc_u, loc_u));
+    std :: unique_ptr< SparseMtrx > Kuu = Kff->giveSubMatrix(loc_u, loc_u);
     // NOTE: Kus is actually a dense matrix, but we have to make it a dense matrix first
-    std :: unique_ptr< SparseMtrx > Kus(Kff->giveSubMatrix(loc_u, loc_s));
+    std :: unique_ptr< SparseMtrx > Kus = Kff->giveSubMatrix(loc_u, loc_s);
     FloatMatrix eye(Kus->giveNumberOfColumns(), Kus->giveNumberOfColumns());
     eye.beUnitMatrix();
     FloatMatrix KusD;
@@ -342,7 +342,7 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         std :: vector< FloatArray >intersecPoints;
         xfemElInt->partitionEdgeSegment(iBndIndex, segments, intersecPoints);
         MaterialMode matMode = e->giveMaterialMode();
-        ir.reset( new DiscontinuousSegmentIntegrationRule(1, e, segments) );
+        ir = std::make_unique<DiscontinuousSegmentIntegrationRule>(1, e, segments);
         int numPointsPerSeg = 1;
         ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
     } else {

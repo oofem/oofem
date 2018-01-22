@@ -42,10 +42,9 @@
 #include <cstring>
 
 namespace oofem {
-EngngModel *InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
+std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
     IRResultType result;                       // Required by IR_GIVE_FIELD macro
-    EngngModel *problem;
     std :: string problemName, dataOutputFileName, desc;
 
     dataOutputFileName = dr.giveOutputFileName();
@@ -55,13 +54,13 @@ EngngModel *InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag
      * be updated as reading e-model components (nodes, etc). But we need this record being available
      * through the whole e-model instanciation
      */
-    InputRecord *emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
+    auto emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1)->clone();
     result = emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
     if ( result != IRRT_OK ) {
         emodelir->report_error("", __func__, "", result, __FILE__, __LINE__);
     }
 
-    problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
+    auto problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
     if ( !problem ) {
         OOFEM_WARNING( "Failed to construct engineering model of type \"%s\".\n", problemName.c_str() );
         return NULL;
@@ -74,10 +73,8 @@ EngngModel *InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag
         problem->setContextOutputMode(COM_Always);
     }
 
-    problem->instanciateYourself( dr, emodelir, dataOutputFileName.c_str(), desc.c_str() );
+    problem->instanciateYourself( dr, emodelir.get(), dataOutputFileName.c_str(), desc.c_str() );
 
-    delete emodelir;
-
-    return problem;
+    return std::move(problem);
 }
 } // end namespace oofem

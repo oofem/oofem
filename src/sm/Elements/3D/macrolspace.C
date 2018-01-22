@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/3D/macrolspace.h"
-#include "../sm/Materials/micromaterial.h"
-#include "../sm/EngineeringModels/structengngmodel.h"
-#include "../sm/Elements/3D/lspace.h"
+#include "sm/Elements/3D/macrolspace.h"
+#include "sm/Materials/micromaterial.h"
+#include "sm/EngineeringModels/structengngmodel.h"
+#include "sm/Elements/3D/lspace.h"
 #include "fei3dhexalin.h"
 #include "constantfunction.h"
 #include "domain.h"
@@ -49,8 +49,6 @@ REGISTER_Element(MacroLSpace);
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
-    this->microMasterNodes.clear();
-    this->microBoundaryNodes.clear();
     this->firstCall = true;
     microMaterial = NULL;
     microDomain = NULL;
@@ -134,7 +132,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     this->microEngngModel->giveCurrentStep()->setTimeIncrement(0.); //no time increment
     this->microEngngModel->initMetaStepAttributes( microEngngModel->giveCurrentMetaStep() ); //updates numerical method
 
-    OOFEM_LOG_INFO( "\n** Assembling %s stiffness matrix of microproblem %p on macroElement %d, micTimeStep %d, micTime %f\n", __MatResponseModeToString(rMode), this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTargetTime() );
+    OOFEM_LOG_INFO( "\n** Assembling %s stiffness matrix of microproblem on macroElement %d, micTimeStep %d, micTime %f\n", __MatResponseModeToString(rMode), this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->microEngngModel->giveCurrentStep()->giveTargetTime() );
 
     //this->microEngngModel->solveYourselfAt( microEngngModel->giveCurrentStep() );
     //this->microEngngModel->terminate( microEngngModel->giveCurrentStep() );
@@ -238,7 +236,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     if ( useUpdatedGpRecord ) { //printing of data
         answer = this->internalMacroForcesVector;
     } else {
-        OOFEM_LOG_INFO( "\n*** Solving reactions %p of macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->microMaterial->problemMicro, this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTargetTime() );
+        OOFEM_LOG_INFO( "\n*** Solving reactions of macroElement %d, micTimeStep %d, macIteration %d, micTime %f\n", this->giveNumber(), this->microEngngModel->giveCurrentStep()->giveNumber(), this->iteration, this->microEngngModel->giveCurrentStep()->giveTargetTime() );
 
         this->iteration++;
         this->changeMicroBoundaryConditions(tStep);
@@ -269,7 +267,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
         }
 
         this->internalMacroForcesVector = answer;
-        OOFEM_LOG_INFO("*** Reactions done\n", this->microMaterial->problemMicro);
+        OOFEM_LOG_INFO("*** Reactions done\n");
     }
 
     //answer.printYourself();

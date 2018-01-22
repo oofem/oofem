@@ -314,16 +314,15 @@ ZZNodalRecoveryModel :: exchangeDofManValues(FloatArray &lhs, FloatMatrix &rhs, 
 int
 ZZNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
-    int result = 1, indx, nc, size;
+    int result = 1;
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    nc = s->rhs->giveNumberOfColumns();
+    const IntArray &toSendMap = processComm.giveToSendMap();
+    int nc = s->rhs->giveNumberOfColumns();
 
-    size = toSendMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
+    for ( int inode : toSendMap ) {
         // toSendMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node value is available for given region
-        indx = s->regionNodalNumbers->at( toSendMap->at(i) );
+        int indx = s->regionNodalNumbers->at( inode );
         if ( indx ) {
             // pack "1" to indicate that for given shared node this is a valid contribution
             result &= pcbuff->write(1);
@@ -333,7 +332,7 @@ ZZNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunica
             }
 
             //printf("[%d] ZZ: Sending data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
-            //       toSendMap->at(i), domain->giveDofManager(toSendMap->at(i))->giveGlobalNumber());
+            //       inode, domain->giveDofManager(inode)->giveGlobalNumber());
         } else {
             // ok shared node is not in active region (determined by s->regionNodalNumbers)
             result &= pcbuff->write(0);
@@ -347,15 +346,14 @@ int
 ZZNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm)
 {
     int result = 1;
-    int nc, indx, size, flag;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
+    int flag;
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
     ProcessCommunicatorBuff *pcbuff = processComm.giveProcessCommunicatorBuff();
     double value;
-    nc = s->rhs->giveNumberOfColumns();
+    int nc = s->rhs->giveNumberOfColumns();
 
-    size = toRecvMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
+    for ( int inode : toRecvMap ) {
+        int indx = s->regionNodalNumbers->at( inode );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
         result &= pcbuff->read(flag);
@@ -375,7 +373,7 @@ ZZNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommuni
             }
 
             //if (indx) printf("[%d] ZZ: Receiving data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
-            //                 toRecvMap->at(i), domain->giveDofManager(toRecvMap->at(i))->giveGlobalNumber());
+            //                 inode, domain->giveDofManager(inode)->giveGlobalNumber());
         }
     }
 

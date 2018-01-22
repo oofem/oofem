@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/3D/qspace.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/Elements/3D/qspace.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "fei3dhexaquad.h"
 #include "node.h"
 #include "gausspoint.h"

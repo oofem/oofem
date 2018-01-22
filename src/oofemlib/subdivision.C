@@ -110,14 +110,12 @@ REGISTER_Mesher(Subdivision, MPT_SUBDIVISION);
 int Subdivision :: RS_Node :: buildTopLevelNodeConnectivity(ConnectivityTable *ct)
 {
     IntArray me(1), connElems;
-    int i, el;
     me.at(1) = this->giveNumber();
 
     ct->giveNodeNeighbourList(connElems, me);
     this->connectedElements.preallocate( connElems.giveSize() );    // estimate size of the list
 
-    for ( i = 1; i <= connElems.giveSize(); i++ ) {
-        el = connElems.at(i);
+    for ( int el : connElems ) {
 
 #ifdef __PARALLEL_MODE
         if ( this->mesh->giveElement(el)->giveParallelMode() != Element_local ) {
@@ -129,23 +127,20 @@ int Subdivision :: RS_Node :: buildTopLevelNodeConnectivity(ConnectivityTable *c
         this->mesh->giveElement(el)->buildTopLevelNodeConnectivity(this);
     }
 
-    return ( connectedElements.giveSize() );
+    return connectedElements.giveSize();
 }
 
 
 void Subdivision :: RS_Element :: buildTopLevelNodeConnectivity(Subdivision :: RS_Node *node)
 {
-    int el, i;
-    Subdivision :: RS_Element *elem;
-
     if ( this->isTerminal() ) {
         node->insertConnectedElement( this->giveNumber() );
         return;
     }
 
-    for ( el = 1; el <= this->giveChildren()->giveSize(); el++ ) {
-        elem = mesh->giveElement( this->giveChildren()->at(el) );
-        for ( i = 1; i <= elem->giveNodes()->giveSize(); i++ ) {
+    for ( int el = 1; el <= this->giveChildren()->giveSize(); el++ ) {
+        Subdivision::RS_Element *elem = mesh->giveElement( this->giveChildren()->at(el) );
+        for ( int i = 1; i <= elem->giveNodes()->giveSize(); i++ ) {
             if ( elem->giveNode(i) == node->giveNumber() ) {
                 elem->buildTopLevelNodeConnectivity(node);
                 break;
@@ -161,14 +156,13 @@ int
 Subdivision :: RS_Node :: importConnectivity(ConnectivityTable *ct)
 {
     IntArray me(1), connElems;
-    int i, el, cnt = 0;
+    int cnt = 0;
     me.at(1) = this->giveNumber();
 
     ct->giveNodeNeighbourList(connElems, me);
     this->connectedElements.preallocate( connElems.giveSize() );    // estimate size of the list
 
-    for ( i = 1; i <= connElems.giveSize(); i++ ) {
-        el = connElems.at(i);
+    for ( int el : connElems ) {
         if ( this->mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
@@ -178,7 +172,7 @@ Subdivision :: RS_Node :: importConnectivity(ConnectivityTable *ct)
         cnt++;
     }
 
-    return ( cnt );
+    return cnt;
 }
 
 
@@ -186,12 +180,12 @@ Subdivision :: RS_Node :: importConnectivity(ConnectivityTable *ct)
 void
 Subdivision :: RS_Node :: numberSharedEdges()
 {
-    int ie, num = this->giveNumber();
+    int num = this->giveNumber();
     IntArray connNodes;
-    const IntArray *connElems = this->giveConnectedElements();
+    const IntArray &connElems = *this->giveConnectedElements();
 
-    for ( ie = 1; ie <= connElems->giveSize(); ie++ ) {
-        this->mesh->giveElement( connElems->at(ie) )->numberSharedEdges(num, connNodes);
+    for ( int el : connElems ) {
+        this->mesh->giveElement( el )->numberSharedEdges(num, connNodes);
     }
 }
 
@@ -199,11 +193,9 @@ Subdivision :: RS_Node :: numberSharedEdges()
 void
 Subdivision :: RS_Triangle :: numberSharedEdges(int iNode, IntArray &connNodes)
 {
-    int eIndex, jnode, jNode, eNum = this->mesh->giveNumberOfEdges();
-    Subdivision :: RS_SharedEdge *_edge;
+    int eNum = this->mesh->giveNumberOfEdges();
 
-    for ( jnode = 1; jnode <= 3; jnode++ ) {
-        jNode = nodes.at(jnode);
+    for ( int jNode : nodes ) {
         if ( jNode == iNode ) {
             continue;
         }
@@ -220,7 +212,7 @@ Subdivision :: RS_Triangle :: numberSharedEdges(int iNode, IntArray &connNodes)
 
         connNodes.followedBy(jNode, 10);
 
-        eIndex = giveEdgeIndex(iNode, jNode);
+        int eIndex = giveEdgeIndex(iNode, jNode);
 
         if ( shared_edges.giveSize() ) {
             if ( shared_edges.at(eIndex) ) {
@@ -229,7 +221,7 @@ Subdivision :: RS_Triangle :: numberSharedEdges(int iNode, IntArray &connNodes)
         }
 
         // create edge (even if it might not be shared)
-        _edge = new Subdivision :: RS_SharedEdge(this->mesh);
+        Subdivision :: RS_SharedEdge *_edge = new Subdivision :: RS_SharedEdge(this->mesh);
         _edge->setEdgeNodes(iNode, jNode);
 
         this->mesh->addEdge(_edge);
@@ -255,12 +247,9 @@ Subdivision :: RS_Triangle :: numberSharedEdges(int iNode, IntArray &connNodes)
 void
 Subdivision :: RS_Tetra :: numberSharedEdges(int iNode, IntArray &connNodes)
 {
-    int ie, elems, eIndex, jnode, jNode, eNum = this->mesh->giveNumberOfEdges();
-    Subdivision :: RS_SharedEdge *_edge;
-    Subdivision :: RS_Element *elem;
+    int eNum = this->mesh->giveNumberOfEdges();
 
-    for ( jnode = 1; jnode <= 4; jnode++ ) {
-        jNode = nodes.at(jnode);
+    for ( int jNode : nodes ) {
         if ( jNode == iNode ) {
             continue;
         }
@@ -277,7 +266,7 @@ Subdivision :: RS_Tetra :: numberSharedEdges(int iNode, IntArray &connNodes)
 
         connNodes.followedBy(jNode, 20);
 
-        eIndex = giveEdgeIndex(iNode, jNode);
+        int eIndex = giveEdgeIndex(iNode, jNode);
 
         if ( shared_edges.giveSize() ) {
             if ( shared_edges.at(eIndex) ) {
@@ -286,7 +275,7 @@ Subdivision :: RS_Tetra :: numberSharedEdges(int iNode, IntArray &connNodes)
         }
 
         // create edge (even if it might not be shared)
-        _edge = new Subdivision :: RS_SharedEdge(this->mesh);
+        Subdivision :: RS_SharedEdge *_edge = new Subdivision :: RS_SharedEdge(this->mesh);
         _edge->setEdgeNodes(iNode, jNode);
 
         this->mesh->addEdge(_edge);
@@ -318,15 +307,15 @@ Subdivision :: RS_Tetra :: numberSharedEdges(int iNode, IntArray &connNodes)
 
             // I do rely on the fact that the arrays are ordered !!!
             // I am using zero chunk because common is large enough
-            elems = iElems->findCommonValuesSorted(* jElems, common, 0);
+            int elems = iElems->findCommonValuesSorted(* jElems, common, 0);
  #ifdef DEBUG_CHECK
             if ( !elems ) {
                 OOFEM_ERROR("potentionally shared edge %d is not shared by common elements", eNum);
             }
 
  #endif
-            for ( ie = 1; ie <= elems; ie++ ) {
-                elem = mesh->giveElement( common.at(ie) );
+            for ( int ie = 1; ie <= elems; ie++ ) {
+                Subdivision :: RS_Element *elem = mesh->giveElement( common.at(ie) );
                 if ( elem == this ) {
                     continue;
                 }
@@ -393,7 +382,7 @@ Subdivision :: RS_Element :: giveTopParent()
         elem = mesh->giveElement( elem->giveParent() );
     }
 
-    return ( elem->giveNumber() );
+    return elem->giveNumber();
 }
 
 
@@ -4768,15 +4757,14 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
 
 #else // local case
 
-    int i, nelems, numberOfLocalElementsToNumber = 0;
+    int numberOfLocalElementsToNumber = 0;
     int localMaxGlobnum = 0;
 
     // idea: first determine the number of local elements waiting for new global id
     // and also determine max global number assigned up to now
-    nelems = d->giveNumberOfElements();
-    for ( i = 1; i <= nelems; i++ ) {
-        localMaxGlobnum = max( localMaxGlobnum, d->giveElement(i)->giveGlobalNumber() );
-        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
+    for ( auto &elem : d->giveElements() ) {
+        localMaxGlobnum = max( localMaxGlobnum, elem->giveGlobalNumber() );
+        if ( elem->giveGlobalNumber() <= 0 ) {
             numberOfLocalElementsToNumber++;
         }
     }
@@ -4786,9 +4774,9 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
 
     // lets assign global numbers on each partition to local elements
     availGlobNum = startOffset;
-    for ( i = 1; i <= nelems; i++ ) {
-        if ( d->giveElement(i)->giveGlobalNumber() <= 0 ) {
-            d->giveElement(i)->setGlobalNumber(++availGlobNum);
+    for ( auto &elem : d->giveElements() ) {
+        if ( elem->giveGlobalNumber() <= 0 ) {
+            elem->setGlobalNumber(++availGlobNum);
         }
     }
 
@@ -4838,10 +4826,8 @@ Subdivision :: exchangeSharedIrregulars()
 int
 Subdivision :: packSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
 {
-    int pi, iNode, jNode, rproc = pc.giveRank();
+    int rproc = pc.giveRank();
     int myrank = this->giveRank();
-    const IntArray *sharedPartitions;
-    std :: list< int > :: const_iterator sharedIrregQueueIter;
     IntArray edgeInfo(2);
 
     if ( rproc == myrank ) {
@@ -4850,16 +4836,14 @@ Subdivision :: packSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
 
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-    for ( sharedIrregQueueIter = sharedIrregularsQueue.begin();
-          sharedIrregQueueIter != sharedIrregularsQueue.end();
-          sharedIrregQueueIter++ ) {
-        pi = ( * sharedIrregQueueIter );
-        sharedPartitions = this->mesh->giveNode(pi)->givePartitions();
+    for ( int pi : sharedIrregularsQueue ) {
+        const IntArray *sharedPartitions = this->mesh->giveNode(pi)->givePartitions();
         if ( sharedPartitions->contains(rproc) ) {
             // the info about new local shared irregular node needs to be sent to remote partition
             // the new irregular on remote partition is identified using two nodes (glonums) defining
             // an edge on which irregular node is introduced
-            ( ( RS_IrregularNode * ) this->mesh->giveNode(pi) )->giveEdgeNodes(iNode, jNode);
+            int iNode, jNode;
+            static_cast< RS_IrregularNode * >( this->mesh->giveNode(pi) )->giveEdgeNodes(iNode, jNode);
             edgeInfo.at(1) = this->mesh->giveNode(iNode)->giveGlobalNumber();
             edgeInfo.at(2) = this->mesh->giveNode(jNode)->giveGlobalNumber();
             pcbuff->write(SUBDIVISION_SHARED_IRREGULAR_REC_TAG);
@@ -4930,7 +4914,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
                // get type of the next record
                pcbuff->read(_type);
                continue;
-            }            
+            }
 #else
             if ( !elems ) {
                 OOFEM_ERROR("[%d] no element found sharing nodes %d[%d] and %d[%d]",
@@ -5323,16 +5307,16 @@ Subdivision :: exchangeRemoteElements(Domain *d, IntArray &parentMap)
     com.initExchange(SUBDIVISION_MIGRATE_REMOTE_ELEMENTS_TAG);
 
     // remove existing remote elements and null nodes
-    int i, nelem = d->giveNumberOfElements();
+    int nelem = d->giveNumberOfElements();
     int nnodes = d->giveNumberOfDofManagers();
     DomainTransactionManager *dtm = d->giveTransactionManager();
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         if ( d->giveDofManager(i)->giveParallelMode() == DofManager_null ) {
             dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
         }
     }
 
-    for ( i = 1; i <= nelem; i++ ) {
+    for ( int i = 1; i <= nelem; i++ ) {
         if ( d->giveElement(i)->giveParallelMode() == Element_remote ) {
             dtm->addElementTransaction(DomainTransactionManager :: DTT_Remove, d->giveElement(i)->giveGlobalNumber(), NULL);
         }
@@ -5348,11 +5332,7 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
 {
     Domain *d = s->d;
     int rproc = pc.giveRank();
-    int i, inode;
-    int nn, in;
     int myrank = this->giveRank();
-    DofManager *inodePtr;
-    Element *elemPtr, *relemPtr;
     std :: queue< int >elemCandidates;
     std :: set< int >remoteElements, processedElements, nodesToSend;
 
@@ -5362,7 +5342,7 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
 
     EngngModel *emodel = d->giveEngngModel();
     // comMap refers to original (parent) elements
-    const IntArray *comMap = emodel->giveProblemCommunicator(EngngModel :: PC_nonlocal)->giveProcessCommunicator(rproc)->giveToSendMap();
+    const IntArray &comMap = emodel->giveProblemCommunicator(EngngModel :: PC_nonlocal)->giveProcessCommunicator(rproc)->giveToSendMap();
  #ifdef __OOFEG
   #ifdef DRAW_REMOTE_ELEMENTS
     oofegGraphicContext gc;
@@ -5370,9 +5350,9 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     gc.setElementColor( gc.getActiveCrackColor() );
   #endif
  #endif
-    for ( i = 1; i <= d->giveNumberOfElements(); i++ ) {
+    for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
         // remote parent skipped - parentElemMap has zero value for them
-        if ( comMap->contains( s->parentElemMap->at(i) ) ) {
+        if ( comMap.contains( s->parentElemMap->at(i) ) ) {
             remoteElements.insert(i);
  #ifdef __OOFEG
   #ifdef DRAW_REMOTE_ELEMENTS
@@ -5398,10 +5378,10 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
      * loop over elements in remoteElements set and add all their nodes (except those that are shared)
      */
     for ( int elNum: remoteElements ) {
-        relemPtr = d->giveElement(elNum);
-        nn = relemPtr->giveNumberOfNodes();
-        for ( in = 1; in <= nn; in++ ) {
-            inode = relemPtr->giveDofManagerNumber(in);
+        Element *relemPtr = d->giveElement(elNum);
+        int nn = relemPtr->giveNumberOfNodes();
+        for ( int in = 1; in <= nn; in++ ) {
+            int inode = relemPtr->giveDofManagerNumber(in);
             if ( ( d->giveDofManager(inode)->giveParallelMode() == DofManager_local ) ||
                 ( ( d->giveDofManager(inode)->giveParallelMode() == DofManager_shared ) && ( !d->giveDofManager(inode)->givePartitionList()->contains(rproc) ) ) ) {
                 // nodesToSend is set, therefore duplicity is avoided
@@ -5416,7 +5396,7 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
     // send nodes that define remote_elements gometry
     for ( int nodeNum: nodesToSend ) {
-        inodePtr = d->giveDofManager(nodeNum);
+        DofManager *inodePtr = d->giveDofManager(nodeNum);
 
         pcbuff->write( inodePtr->giveInputRecordName() );
         pcbuff->write( inodePtr->giveGlobalNumber() );
@@ -5428,7 +5408,7 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
 
     // send elements
     for ( int elNum: remoteElements ) {
-        elemPtr = d->giveElement(elNum);
+        Element *elemPtr = d->giveElement(elNum);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
         pcbuff->write( elemPtr->giveInputRecordName() );
@@ -5520,8 +5500,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
 void
 Subdivision :: exchangeSharedEdges()
 {
-    int i, pi, iNode, jNode, elems;
-    std :: list< int > :: const_iterator sharedEdgeQueueIter;
+    int iNode, jNode, elems;
     Subdivision :: RS_SharedEdge *edge;
     Subdivision :: RS_Element *elem;
     const IntArray *iElems, *jElems;
@@ -5550,11 +5529,7 @@ Subdivision :: exchangeSharedEdges()
         com.packAllData(this, this, & Subdivision :: packSharedEdges);
 
         // remove all tentative partitions on queued shared edges after packing relevant data
-        for ( sharedEdgeQueueIter = sharedEdgesQueue.begin();
-              sharedEdgeQueueIter != sharedEdgesQueue.end();
-              sharedEdgeQueueIter++ ) {
-            pi = ( * sharedEdgeQueueIter );
-
+        for ( int pi : sharedEdgesQueue ) {
             edge = mesh->giveEdge(pi);
             edge->removePartitions();
         }
@@ -5564,10 +5539,7 @@ Subdivision :: exchangeSharedEdges()
         com.finishExchange();
 
         // unmark unshared edges from elements after unpacking data and before clearing the queue
-        for ( sharedEdgeQueueIter = sharedEdgesQueue.begin();
-              sharedEdgeQueueIter != sharedEdgesQueue.end();
-              sharedEdgeQueueIter++ ) {
-            pi = ( * sharedEdgeQueueIter );
+        for ( int pi : sharedEdgesQueue ) {
 
             edge = mesh->giveEdge(pi);
             if ( edge->givePartitions()->giveSize() ) {
@@ -5599,7 +5571,7 @@ Subdivision :: exchangeSharedEdges()
             }
 
  #endif
-            for ( i = 1; i <= elems; i++ ) {
+            for ( int i = 1; i <= elems; i++ ) {
                 elem = mesh->giveElement( common.at(i) );
  #ifdef DEBUG_CHECK
                 if ( !elem->giveSharedEdges()->giveSize() ) {
@@ -5621,10 +5593,8 @@ Subdivision :: exchangeSharedEdges()
 int
 Subdivision :: packSharedEdges(Subdivision *s, ProcessCommunicator &pc)
 {
-    int pi, iNode, jNode, rproc = pc.giveRank();
+    int rproc = pc.giveRank();
     int myrank = this->giveRank();
-    const IntArray *sharedPartitions;
-    std :: list< int > :: const_iterator sharedEdgeQueueIter;
     IntArray edgeInfo(2);
 
     if ( rproc == myrank ) {
@@ -5633,13 +5603,11 @@ Subdivision :: packSharedEdges(Subdivision *s, ProcessCommunicator &pc)
 
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
-    for ( sharedEdgeQueueIter = sharedEdgesQueue.begin();
-          sharedEdgeQueueIter != sharedEdgesQueue.end();
-          sharedEdgeQueueIter++ ) {
-        pi = ( * sharedEdgeQueueIter );
+    for ( int pi : sharedEdgesQueue ) {
 
-        sharedPartitions = this->mesh->giveEdge(pi)->givePartitions();
+        const IntArray *sharedPartitions = this->mesh->giveEdge(pi)->givePartitions();
         if ( sharedPartitions->contains(rproc) ) {
+            int iNode, jNode;
             this->mesh->giveEdge(pi)->giveEdgeNodes(iNode, jNode);
             edgeInfo.at(1) = this->mesh->giveNode(iNode)->giveGlobalNumber();
             edgeInfo.at(2) = this->mesh->giveNode(jNode)->giveGlobalNumber();
@@ -5665,7 +5633,6 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
     int iNode, jNode, elems;
     IntArray edgeInfo(2);
     const IntArray *iElems, *jElems;
-    std :: list< int > :: const_iterator sharedEdgeQueueIter;
     Subdivision :: RS_SharedEdge *edge;
     Subdivision :: RS_Element *elem;
     int eIndex;
@@ -5746,13 +5713,10 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
 }
 
 
-
 void
 Subdivision :: RS_Mesh :: insertGlobalSharedNodeMap(Subdivision :: RS_Node *node)
 {
-    int key;
-    key = node->giveGlobalNumber();
-    sharedNodeMap [ key ] = node;
+    sharedNodeMap [ node->giveGlobalNumber() ] = node;
 }
 
 
@@ -5774,10 +5738,8 @@ Subdivision :: RS_Mesh :: sharedNodeGlobal2Local(int _globnum)
 int
 Subdivision :: RS_CompareNodePositions :: operator() (int i, int j)
 {
-    double icoord, jcoord;
-
-    icoord = m->giveNode(i)->giveCoordinates()->at(1);
-    jcoord = m->giveNode(j)->giveCoordinates()->at(1);
+    double icoord = m->giveNode(i)->giveCoordinates()->at(1);
+    double jcoord = m->giveNode(j)->giveCoordinates()->at(1);
 
     if ( icoord < jcoord ) {
         return -1;

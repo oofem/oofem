@@ -88,14 +88,14 @@ namespace bp = boost::python;
 #include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
-#include "Materials/structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "matstatus.h"
-#include "Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
 
-#include "Materials/structmatsettable.h"
+#include "sm/Materials/structmatsettable.h"
 
 #include<iostream>
 
@@ -350,12 +350,8 @@ void pyclass_IntArray()
 *****************************************************/
 struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
 {
-    PySparseMtrx() : SparseMtrx() {}
-    PySparseMtrx(int n, int m): SparseMtrx(n,m) {}
+    PySparseMtrx(int n=0, int m=0): SparseMtrx(n,m) {}
 
-    SparseMtrx *GiveCopy() const {
-        return this->get_override("GiveCopy")();
-    }
 
     void times(const FloatArray &x, FloatArray &answer) const {
         this->get_override("times")();
@@ -574,7 +570,7 @@ void pyclass_EngngModel()
 
 EngngModel *InstanciateProblem_1 (DataReader &dr, problemMode mode, int contextFlag)
 {
-    return InstanciateProblem(dr, mode, contextFlag);
+    return InstanciateProblem(dr, mode, contextFlag).release();
 }
 
 
@@ -1485,8 +1481,8 @@ object engngModel(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number = len(args)>1? extract<int>(args[1])() : 0;
     EngngModel* master = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
-    EngngModel *engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
-    if (engngm==NULL) { OOFEM_LOG_ERROR("engngModel: wrong input data"); }
+    std::unique_ptr<EngngModel> engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
+    if ( !engngm ) { OOFEM_LOG_ERROR("engngModel: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     // instanciateYourself
     ///@todo Output filename isn't stored like this (and has never been!)!?
@@ -1508,7 +1504,7 @@ object engngModel(bp::tuple args, bp::dict kw)
 
     engngm->Instanciate_init();
     //
-    object ret = object(ptr(engngm));
+    object ret = object(ptr(engngm.release()));
     /* ????????????????????
     // sets the last created engngModel as default one for further script
     temp_global["defaultEngngModel"] = ret;

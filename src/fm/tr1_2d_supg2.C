@@ -44,7 +44,7 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
@@ -160,11 +160,11 @@ TR1_2D_SUPG2 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3, true) );
-        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3, true);
+        integrationRulesArray [ 1 ] = std::make_unique<GaussIntegrationRule>(2, this, 1, 3, true);
     }
     if ( !defaultIRule ) {
-        defaultIRule.reset( new GaussIntegrationRule(1, this, 1, 3, true) );
+        defaultIRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 3, true);
         this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
     }
 }
@@ -472,7 +472,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
         for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
-            mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+            mat->computeDeviatoricStress2D(stress, gp, eps, tStep);
             stress.times(1. / Re);
 
             // \int dNu/dxj \Tau_ij
@@ -558,7 +558,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
 
-            mat->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
+            mat->computeTangent2D(_d, mode, gp, tStep);
             _db.beProductOf(_d, _b);
             answer.plusProductSymmUpper(_b, _db, dV);
             //answer.plusProductSymmUpper (_bs,_db,dV*t_supg);
@@ -1200,20 +1200,31 @@ TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 
 
 void
-TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep)
 {
     /* one computes here average deviatoric stress, based on rule of mixture (this is used only for postprocessing) */
-    FloatArray eps, s0, s1;
+    FloatArray s0, s1;
+
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeDeviatoricStress2D(s0, gp, eps, tStep);
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeDeviatoricStress2D(s1, gp, eps, tStep);
+
     answer.resize(3);
-
-    this->computeDeviatoricStrain(eps, gp, tStep);
-
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeDeviatoricStressVector(s0, gp, eps, tStep);
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeDeviatoricStressVector(s1, gp, eps, tStep);
-
     for ( int i = 1; i <= 3; i++ ) {
         answer.at(i) = ( temp_vof ) * s0.at(i) + ( 1. - temp_vof ) * s1.at(i);
     }
+}
+
+void
+TR1_2D_SUPG2 :: computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatMatrix t0, t1;
+
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeTangent2D(t0, mode, gp, tStep);
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeTangent2D(t1, mode, gp, tStep);
+
+    answer = t0;
+    answer.times(temp_vof);
+    answer.add(1. - temp_vof, t1);
 }
 
 

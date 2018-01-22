@@ -35,12 +35,12 @@
 #ifndef mplasticmaterial_h
 #define mplasticmaterial_h
 
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/linearelasticmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/linearelasticmaterial.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 
 #include <vector>
 

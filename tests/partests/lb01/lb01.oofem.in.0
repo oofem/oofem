@@ -1,25 +1,33 @@
 lb01.out.0
 Patch test of PlaneStress2d elements -> pure compression in x direction
-NonLinearStatic nsteps 3 controllmode 1 rtolv 1.e-3 refloadmode 0 lstype 3 smtype 7 lbflag 1 forcelb1 1 lbperturbedsteps {1}  lbperturbfactor 0.5 nmodules 1
+NonLinearStatic nsteps 3 controlmode 1 rtolv 1.e-3 refloadmode 1 lstype 3 smtype 7 lbflag 1 forcelb1 1 lbperturbedsteps {1}  lbperturbfactor 0.5 nmodules 1
+#StaticStructural nsteps 3 lstype 3 smtype 7 lbflag 1 forcelb1 1 lbperturbedsteps {1}  lbperturbfactor 0.5 nmodules 1
 errorcheck filename "lb01.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
-ndofman 9 nelem 4 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
-node 1 coords 3  0.0   0.0   0.0  bc 2 1 1 
-node 2 coords 3  0.0   1.0   0.0  bc 2 1 0 
-node 3 coords 3  0.0   2.0   0.0  bc 2 1 0 
-node 4 coords 3  1.0   0.0   0.0  bc 2 0 0 
-node 5 coords 3  1.0   1.0   0.0  bc 2 0 0 
-node 6 coords 3  1.0   2.0   0.0  bc 2 0 0 
-node 7 coords 3  2.0   0.0   0.0  bc 2 0 0  Shared partitions 1 1
-node 8 coords 3  2.0   1.0   0.0  bc 2 0 0  Shared partitions 1 1
-node 9 coords 3  2.0   2.0   0.0  bc 2 0 0  Shared partitions 1 1
-PlaneStress2d 1 nodes 4 1 4 5 2  crossSect 1 mat 1  
-PlaneStress2d 2 nodes 4 2 5 6 3  crossSect 1 mat 1  
-PlaneStress2d 3 nodes 4 4 7 8 5  crossSect 1 mat 1  
-PlaneStress2d 4 nodes 4 5 8 9 6  crossSect 1 mat 1  
-SimpleCS 1 thick 0.15 width 1.0
+ndofman 9 nelem 4 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 2 nset 4
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   1.0   0.0
+node 3 coords 3  0.0   2.0   0.0
+node 4 coords 3  1.0   0.0   0.0
+node 5 coords 3  1.0   1.0   0.0
+node 6 coords 3  1.0   2.0   0.0
+node 7 coords 3  2.0   0.0   0.0  Shared partitions 1 1
+node 8 coords 3  2.0   1.0   0.0  Shared partitions 1 1
+node 9 coords 3  2.0   2.0   0.0  Shared partitions 1 1
+PlaneStress2d 1 nodes 4 1 4 5 2
+PlaneStress2d 2 nodes 4 2 5 6 3
+PlaneStress2d 3 nodes 4 4 7 8 5
+PlaneStress2d 4 nodes 4 5 8 9 6
+Set 1 elementranges {(1 4)}
+Set 2 nodes 3 1 2 3
+Set 3 nodes 1 1
+Set 4 nodes 0
+SimpleCS 1 thick 0.15 width 1.0 material 1 set 1
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
-BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
-NodalLoad 2 loadTimeFunction 1 Components 2 -2.5 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 2 dofs 2 1 2 components 2 -2.5 0.0
+# set 4
 ConstantFunction 1 f(t) 1.0
+PieceWiseLinFunction 2 t 2 0.0 3.0  f(t) 2 0.0 3.0

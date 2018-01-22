@@ -36,7 +36,7 @@
 #include "structuralinterfacematerial.h"
 #include "contextioerr.h"
 
-#include "../sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "structuralinterfacematerialstatus.h"
 #include "gausspoint.h"
 namespace oofem {
@@ -157,8 +157,7 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextM
 
 void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
-    const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >(tmpStat);
+    const StructuralInterfaceMaterialStatus &structStatus = static_cast< const StructuralInterfaceMaterialStatus & >(iStatus);
 
     jump                    = structStatus.giveJump();
     traction                = structStatus.giveTraction();

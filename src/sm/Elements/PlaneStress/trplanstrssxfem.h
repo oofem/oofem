@@ -35,8 +35,8 @@
 #ifndef TRPLANSTRSSXFEM_H_
 #define TRPLANSTRSSXFEM_H_
 
-#include "../sm/Elements/PlaneStress/trplanstrss.h"
-#include "../sm/xfem/xfemstructuralelementinterface.h"
+#include "sm/Elements/PlaneStress/trplanstrss.h"
+#include "sm/xfem/xfemstructuralelementinterface.h"
 #include "vtkxmlexportmodule.h"
 
 

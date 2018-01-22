@@ -36,11 +36,11 @@
 
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "gausspoint.h"
 #include "intarray.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
@@ -199,18 +199,14 @@ DruckerPragerPlasticitySMStatus :: restoreContext(DataStream &stream, ContextMod
 
 
 DruckerPragerPlasticitySM :: DruckerPragerPlasticitySM(int n, Domain *d) :
-    StructuralMaterial(n, d)
+    StructuralMaterial(n, d),
+    LEMaterial(n, d)
 {
-    LEMaterial = new IsotropicLinearElasticMaterial(n, d);
     kFactor = 0.;
     yieldTol = 0.;
     newtonIter = 0;
 }
 
-DruckerPragerPlasticitySM :: ~DruckerPragerPlasticitySM()
-{
-    delete LEMaterial;
-}
 
 IRResultType
 DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
@@ -222,12 +218,12 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
     if ( result != IRRT_OK ) return result;
 
     // call the corresponding service for the linear elastic material
-    result = LEMaterial->initializeFrom(ir);
+    result = LEMaterial.initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
     // initialize elastic constants
-    //eM = LEMaterial->give(Ex,gp);
-    //nu = LEMaterial->give(NYxz,gp);
+    //eM = LEMaterial.give(Ex,gp);
+    //nu = LEMaterial.give(NYxz,gp);
     //gM = eM / ( 2. * ( 1. + nu ) );
     //kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
@@ -302,8 +298,8 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     FloatArray strainDeviator;
     double volumetricStrain;
     // elastic constants
-    double eM = LEMaterial->give(Ex, gp);
-    double nu = LEMaterial->give(NYxz, gp);
+    double eM = LEMaterial.give(Ex, gp);
+    double nu = LEMaterial.give(NYxz, gp);
     double gM = eM / ( 2. * ( 1. + nu ) );
     double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
@@ -583,11 +579,11 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     switch ( mode ) {
     case ElasticStiffness:
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
 
     case SecantStiffness:
-        LEMaterial->give3dMaterialStiffnessMatrix(answer,  mode, gp, tStep);
+        LEMaterial.give3dMaterialStiffnessMatrix(answer,  mode, gp, tStep);
         break;
 
 
@@ -596,7 +592,7 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                 ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
-            LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+            LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Yielding:
             // elasto-plastic stiffness for regular case
@@ -636,8 +632,8 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     computeDeviatoricVolumetricSplit(deviatoricStress, stressVector);
     double normOfStress = sqrt( 2. * computeSecondStressInvariant(deviatoricStress) );
     // elastic constants
-    double eM = LEMaterial->give(Ex, gp);
-    double nu = LEMaterial->give(NYxz, gp);
+    double eM = LEMaterial.give(Ex, gp);
+    double nu = LEMaterial.give(NYxz, gp);
     double gM = eM / ( 2. * ( 1. + nu ) );
     double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
@@ -703,7 +699,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     }
 
     FloatMatrix De;
-    LEMaterial->give3dMaterialStiffnessMatrix(De, mode, gp, tStep);
+    LEMaterial.give3dMaterialStiffnessMatrix(De, mode, gp, tStep);
 
     // answer is A_Matrix^-1 * De
     A_Matrix.solveForRhs(De, answer);
@@ -721,15 +717,15 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     double tempKappa = status->giveTempKappa();
     double deltaKappa = tempKappa - status->giveKappa();
     // elastic constants
-    double eM = LEMaterial->give(Ex, gp);
-    double nu = LEMaterial->give(NYxz, gp);
+    double eM = LEMaterial.give(Ex, gp);
+    double nu = LEMaterial.give(NYxz, gp);
     //double gM = eM / ( 2. * ( 1. + nu ) );
     double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
     if ( deltaKappa <= 0. ) {
         // This case occurs in the first iteration of a step.
         // printf("deltaKappa<=0. for vertex case algorithmic stiffness, i.e. continuum tangent stiffness. Since the continuum tangent stiffness does not exist at the vertex, elastic stiffness is used instead. This will cause the loss of quadratic convergence.\n") ;
-        LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     }
 
     double deltaVolumetricPlasticStrain =

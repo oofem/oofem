@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/nlinearstatic.h"
-#include "../sm/Elements/structuralelement.h"
+#include "sm/EngineeringModels/nlinearstatic.h"
+#include "sm/Elements/structuralelement.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "metastep.h"
@@ -280,7 +280,7 @@ TimeStep *NonLinearStatic :: giveSolutionStepWhenIcApply(bool force)
     if ( !stepWhenIcApply ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
 	//        int nFirst = giveNumberOfFirstStep();
-        stepWhenIcApply.reset(new TimeStep(inin, this, 0, -deltaT, deltaT, 0));
+        stepWhenIcApply = std::make_unique<TimeStep>(inin, this, 0, -deltaT, deltaT, 0);
     }
 
     return stepWhenIcApply.get();
@@ -316,11 +316,11 @@ TimeStep *NonLinearStatic :: giveNextStep()
     } else {
         // first step -> generate initial step
         TimeStep *newStep = giveSolutionStepWhenIcApply();
-        currentStep.reset(new TimeStep(*newStep));
+        currentStep = std::make_unique<TimeStep>(*newStep);
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, mStepNum, totalTime, deltaTtmp, counter);
     // dt variable are set eq to 0 for statics - has no meaning
     // *Wrong* It has meaning for viscoelastic materials.
 

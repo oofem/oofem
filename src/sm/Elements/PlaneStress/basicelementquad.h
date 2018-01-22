@@ -35,7 +35,7 @@
 #ifndef basicelementquad_h
 #define basicelementquad_h
 
-#include "Elements/structural2delement.h"
+#include "sm/Elements/structural2delement.h"
 #define _IFT_BasicElementQuad_Name "basicelementquad"
 
 namespace oofem {

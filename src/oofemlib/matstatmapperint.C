@@ -32,13 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * matstatmapperint.C
- *
- *  Created on: Nov 6, 2013
- *      Author: Erik Svenning
- */
-
 #include "matstatmapperint.h"
 
 #include "error.h"
@@ -47,18 +40,9 @@
 #include "matstatus.h"
 
 namespace oofem {
-MaterialStatusMapperInterface :: MaterialStatusMapperInterface()
-{
-    mpMaterialMapper = new MMAClosestIPTransfer();
-}
-
-MaterialStatusMapperInterface :: ~MaterialStatusMapperInterface()
-{
-    if ( mpMaterialMapper != NULL ) {
-        delete mpMaterialMapper;
-        mpMaterialMapper = NULL;
-    }
-}
+MaterialStatusMapperInterface :: MaterialStatusMapperInterface() :
+    mpMaterialMapper(std::make_unique<MMAClosestIPTransfer>())
+{}
 
 int MaterialStatusMapperInterface :: MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, MaterialStatus &oStatus)
 {

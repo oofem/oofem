@@ -35,8 +35,8 @@
 #ifndef structuralfe2material_h
 #define structuralfe2material_h
 
-#include "Materials/structuralmaterial.h"
-#include "Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 
 #include <memory>
 
@@ -80,7 +80,7 @@ public:
     void computeTangent(TimeStep *tStep);
 
     /// Creates/Initiates the RVE problem.
-    bool createRVE(int n, GaussPoint *gp, const std :: string &inputfile);
+    bool createRVE(int n, const std :: string &inputfile);
 
     /// Copies time step data to RVE.
     void setTimeStep(TimeStep *tStep);

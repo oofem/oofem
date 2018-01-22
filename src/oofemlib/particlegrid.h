@@ -142,7 +142,7 @@ public:
      * @return Resolution in dimension i.
      */
     int getResolution ( int i ) {
-        return this->res ( i );
+        return this->res [ i ];
     }
     /**
      * Returns the grid increment.
@@ -150,7 +150,7 @@ public:
      * @return Grid step in dimension i.
      */
     double getGridStep ( int i ) const {
-        return this->dx ( i );
+        return this->dx [ i ];
     }
 
     /**
@@ -255,16 +255,16 @@ void ParticleGrid<Point> :: init ( const IntArray &res, const FloatArray &bb0, c
     this->dx.resize ( this->n );
     this->total = 1;
     this->res_prod.resize ( this->n );
-    this->res_prod ( 0 ) = 1;
+    this->res_prod [ 0 ] = 1;
 
     for ( int i = 0; i < this->n; ++i ) {
-        this->dx ( i ) = ( this->bb1 ( i ) - this->bb0 ( i ) ) / ( this->res ( i )-1 );
+        this->dx [ i ] = ( this->bb1 [ i ] - this->bb0 [ i ] ) / ( this->res [ i ]-1 );
 
-        this->total *= this->res ( i );
+        this->total *= this->res [ i ];
 
-        this->res_prod ( i ) = 1;
+        this->res_prod [ i ] = 1;
         for ( int j = 0; j < i; ++j ) {
-            this->res_prod ( i ) *= this->res ( j );
+            this->res_prod [ i ] *= this->res [ j ];
         }
     }
 
@@ -326,7 +326,7 @@ int ParticleGrid<Point> :: giveIndex ( const IntArray &pos ) const
 {
     int index = 0;
     for ( int i = 0; i < this->n; ++i ) {
-        index += this->res_prod ( i ) *pos ( i );
+        index += this->res_prod [ i ] * pos [ i ];
     }
     return index;
 }
@@ -336,7 +336,7 @@ void ParticleGrid<Point> :: givePosition ( IntArray &pos, int index ) const
 {
     pos.resize ( this->n );
     for ( int i = 0; i < this->n; ++i ) {
-        pos ( i ) = ( index/res_prod ( i ) ) % res ( i );
+        pos [ i ] = ( index/res_prod [ i ] ) % res [ i ];
     }
 }
 
@@ -345,7 +345,7 @@ void ParticleGrid<Point> :: getGridCoord ( FloatArray &answer, const IntArray &p
 {
     answer.resize ( this->n );
     for ( int i = 0; i < this->n; ++i ) {
-        answer ( i ) = pos ( i ) *this->dx ( i ) + this->bb0 ( i );
+        answer [ i ] = pos [ i ] *this->dx [ i ] + this->bb0 [ i ];
     }
 }
 
@@ -363,8 +363,8 @@ void ParticleGrid<Point> :: getBoundingBox ( const FloatArray &x0, const FloatAr
     ind0.resize ( this->n );
     ind1.resize ( this->n );
     for ( int i = 0; i < this->n; ++i ) {
-        ind0 ( i ) = max ( ( int ) floor ( ( x0 ( i ) - this->bb0 ( i ) ) /this->dx ( i ) ), 0 );
-        ind1 ( i ) = min ( ( int ) ceil ( ( x1 ( i ) - this->bb0 ( i ) ) /this->dx ( i ) ), this->res ( i ) );
+        ind0 [ i ] = max ( ( int ) floor ( ( x0 [ i ] - this->bb0 [ i ] ) /this->dx [ i ] ), 0 );
+        ind1 [ i ] = min ( ( int ) ceil ( ( x1 [ i ] - this->bb0 [ i ] ) /this->dx [ i ] ), this->res [ i ] );
     }
 }
 
@@ -373,9 +373,9 @@ void ParticleGrid<Point> :: getPosition ( const FloatArray &x, IntArray &pos ) c
 {
     pos.resize ( this->n );
     for ( int i = 0; i < this->n; ++i ) {
-        //pos(i) = (int)nearest((x(i) - this->bb0(i))/this->dx(i));
-        pos ( i ) = ( int ) floor ( ( x ( i ) - this->bb0 ( i ) ) /this->dx ( i ) + 0.5 );
-        pos ( i ) = min ( max ( pos ( i ),0 ),this->res ( i )-1 );
+        //pos[i] = [int]nearest((x[i] - this->bb0[i])/this->dx[i]);
+        pos [ i ] = ( int ) floor ( ( x [ i ] - this->bb0 [ i ] ) /this->dx [ i ] + 0.5 );
+        pos [ i ] = min ( max ( pos [ i ],0 ),this->res [ i ]-1 );
     }
 }
 
@@ -407,10 +407,10 @@ void ParticleGrid<Point> :: getPointsWithin ( std::list<Point*> &answer, const F
     // Get all grid points in that region
     IntArray p ( this->n );
     if ( this->n == 2 ) {
-        for ( int x = p0 ( 0 ); x < p1 ( 0 ); x++ ) {
-            p ( 0 ) = x;
-            for ( int y = p0 ( 1 ); y < p1 ( 1 ); y++ ) {
-                p ( 1 ) = y;
+        for ( int x = p0 [ 0 ]; x < p1 [ 0 ]; x++ ) {
+            p [ 0 ] = x;
+            for ( int y = p0 [ 1 ]; y < p1 [ 1 ]; y++ ) {
+                p [ 1 ] = y;
                 RefinedParticlePoint *rp = this->data[this->giveIndex ( p )];
                 if ( rp ) {
                     if ( rp->subgrid ) {
@@ -652,11 +652,11 @@ public:
         }
         this->index++;
         if ( this->limited ) {
-            this->pos ( 0 ) ++;
+            this->pos [ 0 ] ++;
             for ( int i = 0; i < this->pos.giveSize() - 1; ++i ) {
-                if ( this->pos ( i ) >= this->ind1 ( i ) ) {
-                    this->pos ( i ) = this->ind0 ( i );
-                    this->pos ( i+1 ) ++;
+                if ( this->pos [ i ] >= this->ind1 [ i ] ) {
+                    this->pos [ i ] = this->ind0 [ i ];
+                    this->pos [ i+1 ] ++;
                 } else {
                     break;
                 }

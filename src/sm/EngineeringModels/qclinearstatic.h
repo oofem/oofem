@@ -35,13 +35,13 @@
 #ifndef qclinearstatic_h
 #define qclinearstatic_h
 
-#include "../sm/EngineeringModels/linearstatic.h"
+#include "sm/EngineeringModels/linearstatic.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 #include "node.h"
 
-#include "../sm/Quasicontinuum/fullsolveddomain.h"
-#include "../sm/Quasicontinuum/quasicontinuumnumberingscheme.h"
+#include "sm/Quasicontinuum/fullsolveddomain.h"
+#include "sm/Quasicontinuum/quasicontinuumnumberingscheme.h"
 
 #define _IFT_QClinearStatic_Name "qclinearstatic"
 #define _IFT_QuasiContinuum_approach "qcapproach"

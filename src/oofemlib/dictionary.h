@@ -100,16 +100,14 @@ public:
 
     /**
      * Saves the receiver contends (state) to given stream.
-     * @return contextIOResultType value.
      * @exception throws an ContextIOERR exception if error encountered
      */
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void saveContext(DataStream &stream);
     /**
      * Restores the receiver contents (state) from given stream.
-     * @return contextIOResultType value.
      * @exception throws an ContextIOERR exception if error encountered
      */
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void restoreContext(DataStream &stream);
 
     friend std :: ostream &operator << ( std :: ostream & out, const Dictionary & r );
 };

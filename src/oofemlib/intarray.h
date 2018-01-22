@@ -38,6 +38,7 @@
 #include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "error.h"
 
 #include <cstdio>
 #include <vector>
@@ -97,66 +98,70 @@ public:
      * @param i Position of coefficient in array.
      * @return Value at position.
      */
-#ifdef DEBUG
-    int &at(int i);
-#else
-    inline int &at(int i) { return values [ i - 1 ]; }
+    inline int &at(int i)
+    {
+#ifndef NDEBUG
+        this->checkBounds(i);
 #endif
+        return values[ i - 1 ];
+    }
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver.
      * @param i position of coefficient in array.
      * @return Value at position.
      */
-#ifdef DEBUG
-    int at(int i) const;
-#else
-    inline int at(int i) const { return values [ i - 1 ]; }
+    inline int at(int i) const
+    {
+#ifndef NDEBUG
+        this->checkBounds(i);
 #endif
+        return values[ i - 1 ];
+    }
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      * @return Value at position.
      */
-#ifdef DEBUG
-    int &operator() (int i);
-#else
-    inline int &operator() (int i) { return values [ i ]; }
+    inline int &operator() (int i) { return this->operator[](i); }
+    inline int &operator[] (int i)
+    {
+#ifndef NDEBUG
+        this->checkBounds(i + 1);
 #endif
+        return values[ i ];
+    }
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
      * @param i position of coefficient in array.
      * @return Value at position.
      */
-#ifdef DEBUG
-    const int &operator() (int i) const;
-#else
-    inline const int &operator() (int i) const { return values [ i ]; }
+    inline const int &operator() (int i) const { return this->operator[](i); }
+    inline const int &operator[] (int i) const
+    {
+#ifndef NDEBUG
+        this->checkBounds(i + 1);
 #endif
+        return values[ i ];
+    }
 
-#ifdef DEBUG
-    int &operator[] ( int i );
-#else
-    inline int &operator[] ( int i ) { return values [ i ]; }
-#endif
-
-#ifdef DEBUG
-    const int &operator[] ( int i ) const;
-#else
-    inline const int &operator[] ( int i ) const { return values [ i ]; }
-#endif
-
-#ifdef DEBUG
     /**
      * Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1) if dimension
      * mismatch found.
      * @param i Required size of receiver
      */
-    void checkBounds(int i) const;
-#endif
+    void checkBounds(int i) const
+    {
+        if ( i <= 0 ) {
+            OOFEM_ERROR("array error on index : %d <= 0", i);
+        } else if ( i > this->giveSize() ) {
+            OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
+        }
+    }
+
     /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly and memory is copied over.
@@ -362,7 +367,8 @@ public:
 
 
 template< class operation > int
-quickSortPartition(IntArray &arry, int l, int r, operation op) {
+quickSortPartition(IntArray &arry, int l, int r, operation op)
+{
     int i = l - 1, j = r;
     int v = arry.at(r);
     int swap;
@@ -395,7 +401,8 @@ quickSortPartition(IntArray &arry, int l, int r, operation op) {
 
 
 
-template< class operation > void quickSort(IntArray &arry, int l, int r, operation op) {
+template< class operation > void quickSort(IntArray &arry, int l, int r, operation op)
+{
     if ( r <= l ) {
         return;
     }

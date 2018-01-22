@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Contact/celnode2node.h"
+#include "sm/Contact/celnode2node.h"
 #include "floatmatrix.h"
 #include "masterdof.h"
 #include "unknownnumberingscheme.h"

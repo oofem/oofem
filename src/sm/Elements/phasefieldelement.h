@@ -36,7 +36,7 @@
 #ifndef phasefieldelement_h
 #define phasefieldelement_h
 
-#include "../sm/Elements/PlaneStress/qplanstrss.h"
+#include "sm/Elements/PlaneStress/qplanstrss.h"
 
 namespace oofem {
 /**

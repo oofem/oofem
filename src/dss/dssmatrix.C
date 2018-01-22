@@ -42,7 +42,6 @@
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 #include "activebc.h"
-#include "DSSolver.h"
 
 #include <set>
 
@@ -52,10 +51,13 @@ REGISTER_SparseMtrx( DSSMatrixLDL, SMT_DSS_sym_LDL);
 REGISTER_SparseMtrx( DSSMatrixLL, SMT_DSS_sym_LL);
 REGISTER_SparseMtrx( DSSMatrixLU, SMT_DSS_unsym_LU);
 
-DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx(), _dss(new DSSolver())
+
+DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n),
+    _dss(std::make_unique<DSSolver>()),
+    isFactorized(false),
+    _type(_t)
 {
     eDSSolverType _st = eDSSFactorizationLDLT;
-    _type = _t;
     if ( _t == sym_LDL ) {
         _st = eDSSFactorizationLDLT;
     } else if ( _t == sym_LL ) {
@@ -67,31 +69,8 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx(), _dss(new DSSolver())
     }
 
     _dss->Initialize(0, _st);
-    isFactorized = false;
 }
 
-
-DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n), _dss(new DSSolver())
-{
-    eDSSolverType _st = eDSSFactorizationLDLT;
-    _type = _t;
-    if ( _t == sym_LDL ) {
-        _st = eDSSFactorizationLDLT;
-    } else if ( _t == sym_LL ) {
-        _st = eDSSFactorizationLLT;
-    } else if ( _t == unsym_LU ) {
-        _st = eDSSFactorizationLU;
-    } else {
-        OOFEM_ERROR("unknown dssType");
-    }
-
-    _dss->Initialize(0, _st);
-    isFactorized = false;
-}
-
-DSSMatrix :: ~DSSMatrix()
-{
-}
 
 /*****************************/
 /*  Copy constructor         */
@@ -102,33 +81,25 @@ DSSMatrix :: DSSMatrix(const DSSMatrix &S) : SparseMtrx(S.nRows, S.nColumns)
     OOFEM_ERROR("not implemented");
 }
 
-SparseMtrx *DSSMatrix :: GiveCopy() const
-{
-    OOFEM_ERROR("not implemented");
-    return NULL;
-}
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 {
-  // Note: not really eficient. The sparse matrix is assembled directly into its block structure,
-  // which is efficient for factorization, but unfortunately not efficient for implementing the multiplication,
-  // as the blocks have to be identified (see implementation of ElementAt method) when traversing rows
-  // Also note, that this method will yield correct results only before factorization, after that the blocks
-  // contain factorized matrix.
+    // Note: not really eficient. The sparse matrix is assembled directly into its block structure,
+    // which is efficient for factorization, but unfortunately not efficient for implementing the multiplication,
+    // as the blocks have to be identified (see implementation of ElementAt method) when traversing rows
+    // Also note, that this method will yield correct results only before factorization, after that the blocks
+    // contain factorized matrix.
 
-  int i, j, dim;
+    int dim = this->_sm->neq;
 
-  dim = this->_sm->neq;
+    answer.resize(dim);
+    answer.zero();
 
-  answer.resize(dim);
-  answer.zero();
-	
-  for (i = 1; i <= dim; i++) {
-    for (j = 1; j <= dim; j++) 
-      {
-	answer.at(i) += _dss->ElementAt(i - 1, j - 1) * x.at(j);  
-      }
-  }
+    for ( int i = 1; i <= dim; i++) {
+        for ( int j = 1; j <= dim; j++) {
+            answer.at(i) += _dss->ElementAt(i - 1, j - 1) * x.at(j);  
+        }
+    }
 }
 
 void DSSMatrix :: times(double x)
@@ -143,9 +114,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     int neq = eModel->giveNumberOfDomainEquations(di, s);
     unsigned long indx;
     // allocation map
-    std :: vector< std :: set< int > >columns(neq);
-
-    unsigned long nz_ = 0;
+    std :: vector< IntArray > columns(neq);
 
     for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
@@ -154,20 +123,18 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
             if ( ii > 0 ) {
                 for ( int jj : loc ) {
                     if ( jj > 0 ) {
-                        columns [ jj - 1 ].insert(ii - 1);
+                        columns [ jj - 1 ].insertSortedOnce(ii - 1);
                     }
                 }
             }
         }
     }
 
-    // loop over active boundary conditions
-    std::vector<IntArray> r_locs;
-    std::vector<IntArray> c_locs;
-    
     for ( auto &gbc : domain->giveBcs() ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
-        if ( bc != NULL ) {
+        if ( bc ) {
+            std::vector<IntArray> r_locs;
+            std::vector<IntArray> c_locs;
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for (std::size_t k = 0; k < r_locs.size(); k++) {
                 IntArray &krloc = r_locs[k];
@@ -176,7 +143,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
                     if ( ii > 0 ) {
                         for ( int jj : kcloc ) {
                             if ( jj > 0 ) {
-                                columns [ jj - 1 ].insert(ii - 1);
+                                columns [ jj - 1 ].insertSortedOnce(ii - 1);
                             }
                         }
                     }
@@ -184,9 +151,10 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
             }
         }
     }
-    
+
+    unsigned long nz_ = 0;
     for ( int i = 0; i < neq; i++ ) {
-        nz_ += columns [ i ].size();
+        nz_ += columns [ i ].giveSize();
     }
 
     rowind_.reset( new unsigned long [ nz_ ]);
@@ -309,9 +277,9 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
                 if ( dof->isPrimaryDof() ) {
                     _neq = dof->giveEquationNumber(s);
                     if ( _neq > 0 ) {
-                    mcn [ _c++ ] = _neq - 1;
+                        mcn [ _c++ ] = _neq - 1;
                     } else {
-                    mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
+                        mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
                     }
                 }
             }
@@ -321,7 +289,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
             }
         }
     }
-    
+
     if ( _succ ) {
         _dss->SetMatrixPattern(_sm.get(), bsize);
         _dss->LoadMCN(ndofmans+ndofmansbc+nInternalElementDofMans, bsize, mcn);
@@ -346,24 +314,20 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
 int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim;
+    int dim = mat.giveNumberOfRows();
 
- #  ifdef DEBUG
-    dim = mat.giveNumberOfRows();
+#  ifdef DEBUG
     if ( dim != loc.giveSize() ) {
         OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
-
  #  endif
 
-    dim = mat.giveNumberOfRows();
-
     if ( _type == unsym_LU ) {
-        for ( j = 1; j <= dim; j++ ) {
-            jj = loc.at(j);
+        for ( int j = 1; j <= dim; j++ ) {
+            int jj = loc.at(j);
             if ( jj ) {
-                for ( i = 1; i <= dim; i++ ) {
-                    ii = loc.at(i);
+                for ( int i = 1; i <= dim; i++ ) {
+                    int ii = loc.at(i);
                     if ( ii ) {
                         _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
                     }
@@ -371,11 +335,11 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
             }
         }
     } else { // symmetric pattern
-        for ( j = 1; j <= dim; j++ ) {
-            jj = loc.at(j);
+        for ( int j = 1; j <= dim; j++ ) {
+            int jj = loc.at(j);
             if ( jj ) {
-                for ( i = 1; i <= dim; i++ ) {
-                    ii = loc.at(i);
+                for ( int i = 1; i <= dim; i++ ) {
+                    int ii = loc.at(i);
                     if ( ii ) {
                         if ( jj > ii ) {
                             continue;
@@ -388,7 +352,6 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
         }
     }
 
-    // increment version
     this->version++;
 
     return 1;
@@ -396,12 +359,8 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    int dim1, dim2;
-
-    // this->checkSizeTowards(rloc, cloc);
-
-    dim1 = mat.giveNumberOfRows();
-    dim2 = mat.giveNumberOfColumns();
+    int dim1 = mat.giveNumberOfRows();
+    int dim2 = mat.giveNumberOfColumns();
     if ( _type == unsym_LU ) {
         for ( int i = 1; i <= dim1; i++ ) {
             int ii = rloc.at(i);
@@ -428,7 +387,6 @@ int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const Floa
         }
     }
 
-    // increment version
     this->version++;
 
     return 1;
@@ -438,7 +396,6 @@ void DSSMatrix :: zero()
 {
     _dss->LoadZeros();
 
-    // increment version
     this->version++;
     isFactorized = false;
 }
@@ -466,7 +423,6 @@ void DSSMatrix :: solve(FloatArray &b, FloatArray &x)
 
 double &DSSMatrix :: at(int i, int j)
 {
-    // increment version
     this->version++;
     return _dss->ElementAt(i - 1, j - 1);
 }
@@ -484,7 +440,6 @@ double DSSMatrix :: operator() (int i, int j)  const
 
 double &DSSMatrix :: operator() (int i, int j)
 {
-    // increment version
     this->version++;
     return _dss->ElementAt(i, j);
 }

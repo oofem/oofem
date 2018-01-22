@@ -35,7 +35,7 @@
 #ifndef solidshell_h
 #define solidshell_h
 
-#include "Elements/3D/lspace.h"
+#include "sm/Elements/3D/lspace.h"
 
 
 #define _IFT_SolidShell_Name "solidshell"

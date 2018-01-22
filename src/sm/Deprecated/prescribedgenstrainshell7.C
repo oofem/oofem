@@ -49,7 +49,7 @@
 #include "feinterpol.h"
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
-#include "Elements/Shells/shell7base.h"
+#include "sm/Elements/Shells/shell7base.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGenStrainShell7);
@@ -228,8 +228,8 @@ void PrescribedGenStrainShell7 :: updateCoefficientMatrix(FloatMatrix &C)
     for ( int i = 1; i <= nNodes; i++ ) {
         Node *n = domain->giveNode(i);
         FloatArray *coords = n->giveCoordinates();
-        Dof *d1 = n->giveDofWithID( this->dofs(0) );
-        Dof *d2 = n->giveDofWithID( this->dofs(1) );
+        Dof *d1 = n->giveDofWithID( this->dofs[0] );
+        Dof *d2 = n->giveDofWithID( this->dofs[1] );
         int k1 = d1->__givePrescribedEquationNumber();
         int k2 = d2->__givePrescribedEquationNumber();
         if ( nsd == 2 ) {

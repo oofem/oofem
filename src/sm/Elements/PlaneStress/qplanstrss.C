@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/PlaneStress/qplanstrss.h"
+#include "sm/Elements/PlaneStress/qplanstrss.h"
 #include "fei2dquadquad.h"
 #include "crosssection.h"
 #include "gausspoint.h"

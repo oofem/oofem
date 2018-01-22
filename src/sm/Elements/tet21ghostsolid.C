@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/tet21ghostsolid.h"
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/Elements/tet21ghostsolid.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "fei3dtetquad.h"
 #include "fei3dtetlin.h"
 #include "classfactory.h"
@@ -53,7 +53,7 @@
 #include <iostream>
 
 #ifdef __FM_MODULE
- #include "fluiddynamicmaterial.h"
+ #include "fm/Materials/fluiddynamicmaterial.h"
  #include "fluidcrosssection.h"
 #endif
 
@@ -105,20 +105,20 @@ tet21ghostsolid :: tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement
     };
 
     for ( int i = 0, j = 1; i < 10; ++i ) {
-        momentum_ordering(i * 3 + 0) = j++;
-        momentum_ordering(i * 3 + 1) = j++;
-        momentum_ordering(i * 3 + 2) = j++;
+        momentum_ordering[i * 3 + 0] = j++;
+        momentum_ordering[i * 3 + 1] = j++;
+        momentum_ordering[i * 3 + 2] = j++;
         if ( i <= 3 ) {
             j++;
         }
-        j = j + 3;
+        j += 3;
     }
 
     for ( int i = 0, j = 1; i < 10; ++i ) {
-        j = j + 3;
-        ghostdisplacement_ordering(i * 3 + 0) = j++;
-        ghostdisplacement_ordering(i * 3 + 1) = j++;
-        ghostdisplacement_ordering(i * 3 + 2) = j++;
+        j += 3;
+        ghostdisplacement_ordering[i * 3 + 0] = j++;
+        ghostdisplacement_ordering[i * 3 + 1] = j++;
+        ghostdisplacement_ordering[i * 3 + 2] = j++;
         if ( i <= 3 ) {
             j++;
         }
@@ -147,7 +147,7 @@ tet21ghostsolid :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 6) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -282,7 +282,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
 #ifdef __FM_MODULE
         gp->setMaterialMode(_3dFlow);
-        fluidMaterial->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep);
+        fluidMaterial->computeTangent3D(Ed, TangentStiffness, gp, tStep);
         gp->setMaterialMode(_3dMat);
 #else
         OOFEM_ERROR("Fluid module missing\n");
@@ -344,7 +344,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 #endif
 
             gp->setMaterialMode(_3dFlow);
-            fluidMaterial->computeDeviatoricStressVector(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
             gp->setMaterialMode(_3dMat);
             fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchyArray);
 
@@ -759,7 +759,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             // Momentum equation
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidStress, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -806,7 +806,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
 
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -916,7 +916,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
             // Momentum equation
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidStress, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -974,7 +974,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
 
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStressVector(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
+            fluidMaterial->computeDeviatoricStress3D(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
 #else
             OOFEM_ERROR("Missing FM module");
 #endif

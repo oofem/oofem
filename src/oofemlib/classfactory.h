@@ -51,6 +51,7 @@
 #include <map>
 #include <string>
 #include <cstring>
+#include <memory>
 
 namespace oofem {
 class Domain;
@@ -110,7 +111,8 @@ template< typename T > DofManager *dofmanCreator(int n, Domain *d) { return new 
 template< typename T > GeneralBoundaryCondition *bcCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > CrossSection *csCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
+//template< typename T > std::unique_ptr<EngngModel> engngCreator(int n, EngngModel *m) { return std::make_unique<T>(n, m); }
+template< typename T > std::unique_ptr<EngngModel> engngCreator(int n, EngngModel *m) { return std::unique_ptr<EngngModel>(new T(n, m)); }
 template< typename T > Function *funcCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
@@ -215,7 +217,7 @@ private:
     /// Associative container containing material creators with material name as key.
     std :: map < std :: string, Material * ( * )(int, Domain *) > matList;
     /// Associative container containing engng model creators with engng model name as key.
-    std :: map < std :: string, EngngModel * ( * )(int, EngngModel *) > engngList;
+    std :: map < std :: string, std::unique_ptr<EngngModel> ( * )(int, EngngModel *) > engngList;
     /// Associative container containing load time function creators with function name as key.
     std :: map < std :: string, Function * ( * )(int, Domain *) > funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
@@ -353,12 +355,12 @@ public:
      * @param master Master engineering model (used for multiscale modeling).
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    EngngModel *createEngngModel(const char *name, int num, EngngModel *master);
+    std::unique_ptr<EngngModel> createEngngModel(const char *name, int num, EngngModel *master);
     /**
      * Registers a new engineering model in the class factory.
      * @param name Keyword string.
      */
-    bool registerEngngModel( const char *name, EngngModel * ( *creator )( int, EngngModel * ) );
+    bool registerEngngModel( const char *name, std::unique_ptr<EngngModel> ( *creator )( int, EngngModel * ) );
     /**
      * Creates new instance of load time function corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.

@@ -35,8 +35,8 @@
 #ifndef mooneyrivlinmaterial_h
 #define mooneyrivlinmaterial_h
 
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 
 ///@name Input fields for MooneyRivlinMaterial
 //@{

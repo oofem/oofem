@@ -37,10 +37,9 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Materials/structuralmaterial.h"
-
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for StructuralMaterialSettable
 //@{
@@ -57,31 +56,24 @@ namespace oofem {
 class StructuralMaterialSettable : public StructuralMaterial
 {
 private:
-    IsotropicLinearElasticMaterial *isoLE;
+    IsotropicLinearElasticMaterial isoLE;
 
 public:
     /// Constructor
     StructuralMaterialSettable(int n, Domain *d);
     /// Destructor
-    virtual ~StructuralMaterialSettable();
+    virtual ~StructuralMaterialSettable() {}
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "StructuralMaterialSettable"; }
-    virtual const char *giveInputRecordName() const { return _IFT_StructuralMaterialSettable_Name; }
+    const char *giveClassName() const override { return "StructuralMaterialSettable"; }
+    const char *giveInputRecordName() const override { return _IFT_StructuralMaterialSettable_Name; }
 
-    virtual void giveRealStressVector_3d(FloatArray &answer,
-                              GaussPoint *gp,
-                              const FloatArray &strainVector,
-                              TimeStep *atTime);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
-    virtual void  give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                MatResponseMode mode,
-                                                GaussPoint *gp,
-                                                TimeStep *atTime);
+    void  give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // structmatsettable_h

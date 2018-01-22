@@ -35,7 +35,7 @@
 // please activate or de-activate next line
 //#define LIN_STAB_COMPATIBILITY_MODE
 
-#include "../sm/EngineeringModels/linearstability.h"
+#include "sm/EngineeringModels/linearstability.h"
 #include "timestep.h"
 #include "element.h"
 #include "contextioerr.h"
@@ -166,7 +166,7 @@ TimeStep *LinearStability :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, 0., 0., counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, 0., 0., counter);
 
     return currentStep.get();
 }
@@ -251,7 +251,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
 
     stiffnessMatrix->zero();
     if ( !initialStressMatrix ) {
-        initialStressMatrix.reset( stiffnessMatrix->GiveCopy() );
+        initialStressMatrix = stiffnessMatrix->clone();
     } else {
         initialStressMatrix->zero();
     }

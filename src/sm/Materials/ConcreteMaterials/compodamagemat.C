@@ -33,10 +33,10 @@
  */
 
 #include "compodamagemat.h"
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "gausspoint.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
 #include "contextioerr.h"
@@ -624,8 +624,6 @@ void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
             fprintf( file, "%.2e ", this->kappa.at(6 * j + i) );
         }
     }
-    ///todo should we simply not allow a gp to ask for the material? Output cross section number for now. /JB
-    fprintf( file, " Cross section num %d", gp->giveElement()->giveCrossSection()->giveNumber() );
 
     fprintf(file, "}\n");
 }

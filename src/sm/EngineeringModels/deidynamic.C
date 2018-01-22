@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/deidynamic.h"
+#include "sm/EngineeringModels/deidynamic.h"
 #include "timestep.h"
 #include "dofmanager.h"
 #include "element.h"
@@ -117,7 +117,7 @@ TimeStep *DEIDynamic :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, deltaT, counter);
 
     return currentStep.get();
 }

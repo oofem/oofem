@@ -165,8 +165,8 @@ protected:
       int nsd = bb1.giveSize();
       IntArray mask(3);
       size = bb1.at(1);
-      for (int i =1; i< nsd; i++) size=max(size, bb1(i));
-      for (int i=0; i<nsd; i++) mask(i)=1;
+      for (int i = 1; i < nsd; i++) size = max(size, bb1[i]);
+      for (int i = 0; i < nsd; i++) mask[i] = 1;
       bb.init (bb0, size, mask);
     }
     
@@ -197,7 +197,7 @@ protected:
       }
       
     }
-    const Vertex* getVertex (int i) const {return mesh->getVertex(vertices(i));}
+    const Vertex* getVertex (int i) const { return mesh->getVertex(vertices[i]); }
     int interpolate (FloatArray& answer, const FloatArray& pos, FloatArray** vertexVals) {
       int i,j, size = vertexVals[0]->giveSize();
       FloatArray N, lcoords;
@@ -217,7 +217,7 @@ protected:
       return 1;
     }
     int getVertexNum (int i) {
-      return this->vertices(i);
+      return this->vertices[i];
     }
   };
 
@@ -390,25 +390,9 @@ protected:
     FloatArray* coords = dman->giveCoordinates();
     return this->evaluateAt (answer, *coords, mode, tStep);
   }
-  
-  /**
-   * Stores receiver state to output stream.
-   * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
-   * @param stream Output stream.
-   * @param mode Determines amount of info in stream (state, definition,...).
-   * @return contextIOResultType.
-   * @exception Throws an ContextIOERR exception if error encountered.
-   */
-  contextIOResultType saveContext(DataStream &stream, ContextMode mode) override { return CIO_OK; }
-  /**
-   * Restores the receiver state previously written in stream.
-   * Reads the FEMComponent class-id in order to allow test consistency.
-   * @param stream Input stream.
-   * @param mode Determines amount of info in stream (state, definition,...).
-   * @return contextIOResultType.
-   * @exception Throws an ContextIOERR exception if error encountered.
-   */
-  contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override { return CIO_OK; }
+
+  void saveContext(DataStream &stream) override { }
+  void restoreContext(DataStream &stream) override { }
   
   /// @return Class name of the receiver.
   const char *giveClassName() const override { return "UnstructuredGridField"; }
@@ -439,7 +423,7 @@ protected:
       IntArray mask (3);
       for (int j=0; j<nsd; j++) {
         size = max(size, cmax(j)-cmin(j));
-        mask(j)=1;
+        mask[j] = 1;
       }
       BoundingBox bb;
       bb.init(cmin, size, mask);

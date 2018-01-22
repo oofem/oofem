@@ -44,7 +44,7 @@
 #include "domain.h"
 #include "mathfem.h"
 #include "engngm.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fluidcrosssection.h"
 #include "load.h"
 #include "timestep.h"
@@ -130,8 +130,8 @@ TR1_2D_SUPG2_AXI :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 2 );
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3, true) );
-        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3, true);
+        integrationRulesArray [ 1 ] = std::make_unique<GaussIntegrationRule>(2, this, 1, 3, true);
     }
 }
 
@@ -300,7 +300,6 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     this->computeVectorOfVelocities(VM_Total, tStep, u);
     FloatArray n;
-    double _u, _v, _r;
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
     FloatMatrix _b(4, 6);
 
@@ -311,15 +310,15 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
             this->computeBMtrx(_b, gp);
             eps.beProductOf(_b, u);
-            mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+            mat->computeDeviatoricStressAxi(stress, gp, eps, tStep);
             answer.plusProduct(_b, stress, dV / Re);
 
 #if 1
             // stabilization term k_delta
-            _r = this->computeRadiusAt(gp);
             computeNVector(n, gp);
-            _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
-            _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
+            double _r = this->computeRadiusAt(gp);
+            double _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
+            double _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
 
             for ( int i = 1; i <= 3; i++ ) {
                 answer.at(2 * i - 1) -= t_supg * ( _u * b [ i - 1 ] + _v * c [ i - 1 ] ) * ( stress.at(1) / _r ) * dV / Re;
@@ -342,7 +341,6 @@ TR1_2D_SUPG2_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRe
     //FloatArray un;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     FloatArray un, u, n, eps, stress;
-    double _u, _v, _r;
 
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
     this->computeVectorOfVelocities(VM_Total, tStep, u);
@@ -353,21 +351,21 @@ TR1_2D_SUPG2_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRe
             double dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
             this->computeBMtrx(_b, gp);
-            mat->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
+            mat->computeTangentAxi(_d, mode, gp, tStep);
             _db.beProductOf(_d, _b);
             answer.plusProductUnsym(_b, _db, dV);
             //answer.plusProductSymmUpper (_bs,_db,dV*t_supg);
             // }
 
 #if 1
-            _r = this->computeRadiusAt(gp);
             computeNVector(n, gp);
             eps.beProductOf(_b, u);
-            mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+            mat->computeDeviatoricStressAxi(stress, gp, eps, tStep);
             //_mu = mat->giveCharacteristicValue(MRM_Viscosity, gp, tStep);
 
-            _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
-            _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
+            double _r = this->computeRadiusAt(gp);
+            double _u = n.at(1) * un.at(1) + n.at(2) * un.at(3) + n.at(3) * un.at(5);
+            double _v = n.at(1) * un.at(2) + n.at(2) * un.at(4) + n.at(3) * un.at(6);
 
             for ( int i = 1; i <= 3; i++ ) {
                 for ( int j = 1; j <= 6; j++ ) {
@@ -567,7 +565,7 @@ void TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *t
             double _r = this->computeRadiusAt(gp);
             this->computeBMtrx(_b, gp);
             eps.beProductOf(_b, u);
-            mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
+            mat->computeDeviatoricStressAxi(stress, gp, eps, tStep);
             stress.times(1. / Re);
             for ( int i = 1; i <= 3; i++ ) {
                 answer.at(i) -= t_pspg * ( b [ i - 1 ] * stress.at(1) + c [ i - 1 ] * stress.at(4) ) * dV / rho / _r;
@@ -597,7 +595,7 @@ void TR1_2D_SUPG2_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, 
             double rho = mat->give('d', gp);
             double _r = this->computeRadiusAt(gp);
             this->computeBMtrx(_b, gp);
-            mat->giveDeviatoricStiffnessMatrix(_d, TangentStiffness, gp, tStep);
+            mat->computeTangentAxi(_d, TangentStiffness, gp, tStep);
             _db.beProductOf(_d, _b);
             //eps.beProductOf (_b, u);
             //mat->computeDeviatoricStressVector (stress,gp,eps,tStep);
@@ -1072,24 +1070,30 @@ TR1_2D_SUPG2_AXI :: computeCriticalTimeStep(TimeStep *tStep)
 
 
 void
-TR1_2D_SUPG2_AXI :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+TR1_2D_SUPG2_AXI :: computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep)
 {
     /* one computes here average deviatoric stress, based on rule of mixture (this is used only for postprocessing) */
-    FloatArray u, eps, s0, s1;
-    FloatMatrix _b;
-    answer.resize(3);
+    FloatArray s0, s1;
+
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeDeviatoricStressAxi(s0, gp, eps, tStep);
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeDeviatoricStressAxi(s1, gp, eps, tStep);
+
+    answer.beScaled(temp_vof, s0);
+    answer.add(1. - temp_vof, s1);
+}
 
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
-    this->computeBMtrx(_b, gp);
-    eps.beProductOf(_b, u);
+void
+TR1_2D_SUPG2_AXI :: computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatMatrix t0, t1;
 
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeDeviatoricStressVector(s0, gp, eps, tStep);
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeDeviatoricStressVector(s1, gp, eps, tStep);
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeTangentAxi(t0, mode, gp, tStep);
+    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeTangentAxi(t1, mode, gp, tStep);
 
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(i) = ( temp_vof ) * s0.at(i) + ( 1. - temp_vof ) * s1.at(i);
-    }
+    answer = t0;
+    answer.times(temp_vof);
+    answer.add(1. - temp_vof, t1);
 }
 
 

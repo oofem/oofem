@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Elements/3D/qwedge.h"
-#include "Materials/structuralms.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "sm/Elements/3D/qwedge.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "fei3dwedgequad.h"
 #include "node.h"
 #include "material.h"

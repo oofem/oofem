@@ -36,7 +36,7 @@
 #define micromaterial_h
 
 #include "structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "dictionary.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -45,7 +45,7 @@
 #include "contextioerr.h"
 #include "unknownnumberingscheme.h"
 #include "boundarycondition.h"
-#include "Elements/3D/macrolspace.h"
+#include "sm/Elements/3D/macrolspace.h"
 #include "error.h"
 
 ///@name Input fields for MicroMaterial
@@ -92,7 +92,7 @@ public:
     /// Constructor
     MicroMaterial(int n, Domain * d);
     /// Destructor
-    virtual ~MicroMaterial();
+    virtual ~MicroMaterial() {}
 
     std :: string inputFileNameMicro;
 
@@ -110,7 +110,7 @@ public:
     void setMacroProperties(Domain *macroDomain, MacroLSpace *macroLSpaceElement, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
     /// Pointer to the underlying micro problem.
-    EngngModel *problemMicro;
+    std::unique_ptr<EngngModel> problemMicro;
 
     /// Pointer to the macroscale domain.
     Domain *macroDomain;
@@ -127,15 +127,15 @@ public:
     /// Array containing coordinates of 8 master nodes of microproblem.
     std::vector< FloatArray >microMasterCoords;
     /// Array containing equation numbers for boundary nodes [DofManagerNumber][DOF].
-    int **microBoundaryDofs;
+    std::vector<IntArray> microBoundaryDofs;
     /// Array of equation numbers associated to boundary nodes.
     IntArray microBoundaryDofsArr;
     /// Array containing equation numbers for internal nodes to be condensed out [DofManagerNumber][DOF].
-    int **microInternalDofs;
+    std::vector<IntArray> microInternalDofs;
     /// Array of equation numbers associated to internal nodes.
     IntArray microInternalDofsArr;
     /// Array containing default equation numbers for all nodes [DofManagerNumber][DOF].
-    int **microDefaultDofs;
+    std::vector<IntArray> microDefaultDofs;
     /// Flag signalizing whether micromaterial is used by other element.
     bool microMatIsUsed;
 

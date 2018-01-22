@@ -46,8 +46,8 @@
 
 #include "pfem.h"
 #include "interactionpfemparticle.h"
-#include "../../sm/EngineeringModels/diidynamic.h"
-#include "../../sm/EngineeringModels/nlineardynamic.h"
+#include "sm/EngineeringModels/diidynamic.h"
+#include "sm/EngineeringModels/nlineardynamic.h"
 
 #include <stdlib.h>
 

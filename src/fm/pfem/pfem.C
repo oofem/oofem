@@ -294,7 +294,7 @@ TimeStep *
 PFEM :: giveSolutionStepWhenIcApply()
 {
     if ( !stepWhenIcApply ) {
-        stepWhenIcApply.reset( new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, deltaT, 0) );
+        stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, deltaT, 0);
     }
 
     return stepWhenIcApply.get();
@@ -349,7 +349,7 @@ PFEM :: giveNextStep()
 
     if ( !currentStep ) {
         // first step -> generate initial step
-        currentStep.reset( new TimeStep( * giveSolutionStepWhenIcApply() ) );
+        currentStep = std::make_unique<TimeStep>( * giveSolutionStepWhenIcApply() );
     } else {
         istep = currentStep->giveNumber() + 1;
         counter = currentStep->giveSolutionStateCounter() + 1;
@@ -377,7 +377,7 @@ PFEM :: giveNextStep()
 
     totalTime = previousStep->giveTargetTime() + ndt;
 
-    currentStep.reset( new TimeStep(istep, this, 1, totalTime, ndt, counter) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, ndt, counter);
     // time and dt variables are set eq to 0 for staics - has no meaning
 
     OOFEM_LOG_INFO( "SolutionStep %d : t = %e, dt = %e\n", istep, totalTime * this->giveVariableScale(VST_Time), ndt * this->giveVariableScale(VST_Time) );

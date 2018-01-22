@@ -1430,7 +1430,7 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
     for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
         std :: vector< FloatArray > oneLineIntersects;
         ///@todo Move semantics or something would be useful here to avoid multiple copies.
-        FloatArray xStart = * element->giveDofManager ( i )->giveCoordinates();
+        const FloatArray &xStart = * element->giveDofManager ( i )->giveCoordinates();
         FloatArray xEnd;
         if ( i != element->giveNumberOfBoundarySides() ) {
         	xEnd = * element->giveDofManager ( i + 1 )->giveCoordinates();
@@ -1441,7 +1441,7 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
 
         computeIntersectionPoints(xStart, xEnd, oneLineIntersects);
 
-        for ( FloatArray &interSect: oneLineIntersects ) {
+        for ( auto &interSect: oneLineIntersects ) {
             // Check that the intersection point has not already been identified.
             // This may happen if the crack intersects the element exactly at a node,
             // so that intersection is detected for both element edges in that node.
@@ -1451,12 +1451,9 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
 
             bool alreadyFound = false;
 
-            FloatArray pNew = interSect;
+            for ( auto &pInterSect: oIntersectionPoints ) {
 
-            for ( FloatArray &pInterSect: oIntersectionPoints ) {
-            	FloatArray pOld = pInterSect;
-
-                if ( pOld.distance(pNew) < distTol ) {
+                if ( pInterSect.distance(interSect) < distTol ) {
                     alreadyFound = true;
                     break;
                 }
@@ -1617,8 +1614,8 @@ void PolygonLine :: computeIntersectionPoints(const FloatArray &iXStart, const F
             FloatArray dxi;
             dxi.beProductOf(KInv, res);
 
-            xi1 -= dxi(0);
-            xi2 -= dxi(1);
+            xi1 -= dxi[0];
+            xi2 -= dxi[1];
         }
 
 //        printf("xi1: %e xi2: %e\n", xi1, xi2);

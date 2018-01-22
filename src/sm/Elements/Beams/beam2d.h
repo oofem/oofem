@@ -35,8 +35,8 @@
 #ifndef beam2d_h
 #define beam2d_h
 
-#include "../sm/Elements/Beams/beambaseelement.h"
-#include "../sm/CrossSections/layeredcrosssection.h"
+#include "sm/Elements/Beams/beambaseelement.h"
+#include "sm/CrossSections/layeredcrosssection.h"
 #include "dofmanager.h"
 
 ///@name Input fields for Beam2d

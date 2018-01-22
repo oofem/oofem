@@ -1,6 +1,7 @@
 lb01.out
 Patch test of PlaneStress2d elements -> pure compression in x direction
-NonLinearStatic nsteps 3 controlmode 1 rtolv 1.e-3 refloadmode 0 nmodules 1
+NonLinearStatic nsteps 3 controlmode 1 rtolv 1.e-3 refloadmode 1 nmodules 1
+#StaticStructural nsteps 3 nmodules 1
 errorcheck filename "lb01.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -41,8 +42,9 @@ SimpleCS 1 thick 0.15 width 1.0 material 1 set 1
 IsoLE 1 d 0. E 15.0 n 0.25 tAlpha 0.000012
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
-NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 Components 2 -2.5 0.0 set 4
+NodalLoad 3 loadTimeFunction 2 dofs 2 1 2 components 2 -2.5 0.0 set 4
 ConstantFunction 1 f(t) 1.0
+PieceWiseLinFunction 2 t 2 0.0 3.0  f(t) 2 0.0 3.0
 #
 #
 #

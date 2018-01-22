@@ -43,7 +43,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "../sm/Elements/structuralelementevaluator.h"
+ #include "sm/Elements/structuralelementevaluator.h"
 #endif
 
 
@@ -99,7 +99,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                 du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
-                integrationRulesArray [ indx ].reset( new IGAIntegrationElement(indx, this, knotSpan) );
+                integrationRulesArray [ indx ] = std::make_unique<IGAIntegrationElement>(indx, this, knotSpan);
                 integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
@@ -150,7 +150,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                     du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                     knotSpan.at(1) += knotMultiplicityU->at(ui);
 
-                    integrationRulesArray [ indx ].reset( new IGAIntegrationElement(indx, this, knotSpan) );
+                    integrationRulesArray [ indx ] = std::make_unique<IGAIntegrationElement>(indx, this, knotSpan);
                     integrationRulesArray [ indx ]->SetUpPointsOnCube(numberOfGaussPoints, _3dMat);
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
@@ -258,7 +258,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
                 du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
-                integrationRulesArray [ indx ].reset( new IGAIntegrationElement(indx, this, knotSpan) );
+                integrationRulesArray [ indx ] = std::make_unique<IGAIntegrationElement>(indx, this, knotSpan);
                 integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
@@ -325,7 +325,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     nseq = 4;
  #endif
 
-    const double *const *knotVector = interp->giveKnotVector();
+    const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
     int nsd = this->giveNsd();
 
@@ -1035,7 +1035,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     nseg = 4;
  #endif
 
-    const double *const *knotVector = interp->giveKnotVector();
+    const FloatArray *knotVector = interp->giveKnotVector();
     const IntArray *span;
     int nsd = interp->giveNsd();
 

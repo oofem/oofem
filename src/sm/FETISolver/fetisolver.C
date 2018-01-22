@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/FETISolver/feticommunicator.h"
+#include "sm/FETISolver/feticommunicator.h"
 #include "mathfem.h"
 #include "fetisolver.h"
 #include "skyline.h"
@@ -46,11 +46,13 @@
 namespace oofem {
 REGISTER_SparseLinSolver(FETISolver, ST_Feti);
 
-FETISolver :: FETISolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m), pcbuff(CBT_static), processCommunicator(& pcbuff, 0)
+FETISolver :: FETISolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m),
+    ni(20),
+    err(1.e-6),
+    pcbuff(CBT_static),
+    processCommunicator(& pcbuff, 0),
+    energyNorm_comput_flag(0)
 {
-    err    = 1.e-6;
-    ni     = 20;
-    energyNorm_comput_flag = 0;
 }
 
 
@@ -249,25 +251,23 @@ int
 FETISolver :: packRBM(ProcessCommunicator &processComm)
 {
     int result = 1;
-    int i, ir, size;
-    int j, ndofs, eqNum;
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    const IntArray &toSendMap = processComm.giveToSendMap();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
     EModelDefaultEquationNumbering dn;
 
-    size = toSendMap->giveSize();
-    for ( i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
-        ndofs = locationArray.giveSize();
-        for ( j = 1; j <= ndofs; j++ ) {
+    for ( int inode : toSendMap ) {
+        domain->giveDofManager( inode )->giveCompleteLocationArray(locationArray, dn);
+        int ndofs = locationArray.giveSize();
+        for ( int j = 1; j <= ndofs; j++ ) {
+            int eqNum;
             if ( ( eqNum = locationArray.at(j) ) ) {
-                for ( ir = 1; ir <= nse; ir++ ) {
-                    result &= send_buff->write( rbm.at(eqNum, ir) );
+                for ( int ir = 1; ir <= nse; ir++ ) {
+                    result &= send_buff.write( rbm.at(eqNum, ir) );
                 }
 
                 if ( nse == 0 ) {
-                    result &= send_buff->write(0.0);
+                    result &= send_buff.write(0.0);
                 }
             }
         }
@@ -280,42 +280,38 @@ FETISolver :: packRBM(ProcessCommunicator &processComm)
 int
 FETISolver :: masterUnpackRBM(ProcessCommunicator &processComm)
 {
-    int to, result = 1;
-    int size, receivedRank;
-    int nshared, part, eqNum;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    int result = 1;
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
-    double value;
 
-    receivedRank = processComm.giveRank();
-    size = toRecvMap->giveSize();
+    int receivedRank = processComm.giveRank();
     if ( receivedRank != 0 ) {
         //  for (irbm = 1; irbm <= nsem.at(receivedRank+1); irbm++) {
-        for ( int i = 1; i <= size; i++ ) {
-            to = toRecvMap->at(i);
+        for ( int to : toRecvMap ) {
             //
             // loop over all dofs
             for ( int idof = 1; idof <= masterCommunicator->giveDofManager(to)->giveNumberOfDofs(); idof++ ) {
                 for ( int irbm = 1; irbm <= nsem.at(receivedRank + 1); irbm++ ) {
                     // unpack contribution
-                    result &= recv_buff->read(value);
+                    double value;
+                    result &= recv_buff.read(value);
                     if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                               // corresponding DOFs in boundary node
 
                         // localize to corresponding places
-                        nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
+                        int nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
                         for ( int j = 1; j <= nshared; j++ ) {
-                            part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
+                            int part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
                             if ( part == processComm.giveRank() ) {
                                 continue;
                             }
 
-                            eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
+                            int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
                             l.at(eqNum, rbmAddr.at(receivedRank + 1) + irbm - 1) = value;
                         }
                     } else { // no reference partition
-                        eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
+                        int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
                         l.at(eqNum, rbmAddr.at(receivedRank + 1) + irbm - 1) = ( -1.0 ) * value;
                     }
                 }
@@ -329,9 +325,8 @@ FETISolver :: masterUnpackRBM(ProcessCommunicator &processComm)
 int
 FETISolver :: masterMapRBM()
 {
-    int to, from, receivedRank = 0, nshared, part, eqNum, result;
+    int receivedRank = 0, result;
     IntArray locationArray;
-    double value;
     int size = masterCommMap.giveSize();
     // master will map its own values directly
     int locpos;
@@ -339,10 +334,10 @@ FETISolver :: masterMapRBM()
 
     for ( int irbm = 1; irbm <= nsem.at(1); irbm++ ) {
         for ( int i = 1; i <= size; i++ ) {
-            to = masterCommunicator->giveMasterCommMapPtr()->at(i);
+            int to = masterCommunicator->giveMasterCommMapPtr()->at(i);
             // use receive map, send map is empty to prevent master to send
             // itself any data. Note, however, that send and receive maps are same.
-            from = masterCommMap.at(i);
+            int from = masterCommMap.at(i);
 
             domain->giveDofManager(from)->giveCompleteLocationArray(locationArray, dn);
             locpos = 1;
@@ -363,23 +358,23 @@ FETISolver :: masterMapRBM()
                     }
                 }
 
-                value = rbm.at(locationArray.at(locpos), irbm);
+                double value = rbm.at(locationArray.at(locpos), irbm);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                           // corresponding DOFs in boundary node
 
                     // localize to corresponding places
-                    nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
+                    int nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
                     for ( int j = 1; j <= nshared; j++ ) {
-                        part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
+                        int part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
                         if ( part == 0 ) {
                             continue;
                         }
 
-                        eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
+                        int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
                         l.at(eqNum, rbmAddr.at(receivedRank + 1) + irbm - 1) = value;
                     }
                 } else { // no reference partition
-                    eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
+                    int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
                     l.at(eqNum, rbmAddr.at(receivedRank + 1) + irbm - 1) = ( -1.0 ) * value;
                 }
             }
@@ -395,11 +390,11 @@ int
 FETISolver :: packQQProducts(ProcessCommunicator &processComm)
 {
     int result = 1;
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
 
     for ( int i = 1; i <= nse; i++ ) {
-        result &= send_buff->write( qq.at(i) );
+        result &= send_buff.write( qq.at(i) );
     }
 
     return result;
@@ -410,17 +405,16 @@ int
 FETISolver :: masterUnpackQQProduct(ProcessCommunicator &processComm)
 {
     int result = 1;
-    int receivedRank;
-    //IntArray const* toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    //const IntArray const &toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
     //double value;
 
-    receivedRank = processComm.giveRank();
+    int receivedRank = processComm.giveRank();
 
     if ( receivedRank != 0 ) {
         for ( int i = 1; i <= nsem.at(receivedRank + 1); i++ ) {
-            result &= recv_buff->read( q.at(rbmAddr.at(receivedRank + 1) + i - 1) );
+            result &= recv_buff.read( q.at(rbmAddr.at(receivedRank + 1) + i - 1) );
         }
     }
 
@@ -446,42 +440,37 @@ int
 FETISolver :: packSolution(ProcessCommunicator &processComm)
 {
     // master
-
     int result = 1;
-    int size;
-    int ndofs, eqNum, nshared, part, from;
-    double val;
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    const IntArray &toSendMap = processComm.giveToSendMap();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
 
     int rank = processComm.giveRank();
-    size = toSendMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        from = toSendMap->at(i);
-        ndofs = masterCommunicator->giveDofManager(from)->giveNumberOfDofs();
+    for ( int from : toSendMap ) {
+        int ndofs = masterCommunicator->giveDofManager(from)->giveNumberOfDofs();
         if ( rank == masterCommunicator->giveDofManager(from)->giveReferencePratition() ) {
             // summ corresponding values (multipliers)
-            nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
+            int nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
             for ( int k = 1; k <= ndofs; k++ ) {
-                val = 0.0;
+                double val = 0.0;
                 for ( int j = 1; j <= nshared; j++ ) {
-                    part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
+                    int part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
                     if ( part == processComm.giveRank() ) {
                         continue;
                     }
 
-                    eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, k);
+                    int eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, k);
                     val += w.at(eqNum);
                 }
 
-                result &= send_buff->write(val);
+                result &= send_buff.write(val);
             }
         } else {
             masterCommunicator->giveDofManager(from)->giveCompleteLocationArray(rank, locationArray);
             for ( int j = 1; j <= ndofs; j++ ) {
+                int eqNum;
                 if ( ( eqNum = locationArray.at(j) ) ) {
-                    result &= send_buff->write( ( -1.0 ) * w.at(eqNum) );
+                    result &= send_buff.write( ( -1.0 ) * w.at(eqNum) );
                 }
             }
         }
@@ -495,23 +484,20 @@ int
 FETISolver :: unpackSolution(ProcessCommunicator &processComm)
 {
     // slaves unpack their slotion contributions
-    int result = 1, to;
-    int size;
-    int ndofs, eqNum;
-    double value;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    int result = 1;
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
     EModelDefaultEquationNumbering dn;
 
-    size = toRecvMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        to = toRecvMap->at(i);
+    for ( int to : toRecvMap ) {
         domain->giveDofManager(to)->giveCompleteLocationArray(locationArray, dn);
-        ndofs = locationArray.giveSize();
+        int ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
+            int eqNum;
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= recv_buff->read(value);
+                double value;
+                result &= recv_buff.read(value);
                 dd.at(eqNum) = value;
 
 #ifdef __VERBOSE_PARALLEL
@@ -528,20 +514,19 @@ FETISolver :: unpackSolution(ProcessCommunicator &processComm)
 int
 FETISolver :: masterMapSolution()
 {
-    int to, from, receivedRank = 0, nshared, part, eqNum, result, locpos;
+    int receivedRank = 0, result;
     IntArray locationArray;
-    double value;
     int size = masterCommMap.giveSize();
     EModelDefaultEquationNumbering dn;
 
     for ( int i = 1; i <= size; i++ ) {
-        from = masterCommunicator->giveMasterCommMapPtr()->at(i);
+        int from = masterCommunicator->giveMasterCommMapPtr()->at(i);
         // use receive map, send map is empty to prevent master to send
         // itself any data. Note, however, that send and receive maps are same.
-        to = masterCommMap.at(i);
+        int to = masterCommMap.at(i);
 
         domain->giveDofManager(to)->giveCompleteLocationArray(locationArray, dn);
-        locpos = 1;
+        int locpos = 1;
         //
         // loop over all dofs
         for ( int idof = 1; idof <= masterCommunicator->giveDofManager(from)->giveNumberOfDofs(); idof++, locpos++ ) {
@@ -554,23 +539,23 @@ FETISolver :: masterMapSolution()
                 }
             }
 
-            value = 0.0;
+            double value = 0.0;
             if ( masterCommunicator->giveDofManager(from)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                         // corresponding DOFs in boundary node
 
                 // localize to corresponding places
-                nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
+                int nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
                 for ( int j = 1; j <= nshared; j++ ) {
-                    part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
+                    int part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
                     if ( part == 0 ) {
                         continue;
                     }
 
-                    eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, idof);
+                    int eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, idof);
                     value += w.at(eqNum);
                 }
             } else { // no reference partition
-                eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(receivedRank, idof);
+                int eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(receivedRank, idof);
                 value = ( -1.0 ) * w.at(eqNum);
             }
 
@@ -591,20 +576,18 @@ FETISolver :: packResiduals(ProcessCommunicator &processComm)
     // slaves
 
     int result = 1;
-    int size;
-    int ndofs, eqNum;
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    const IntArray &toSendMap = processComm.giveToSendMap();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
     EModelDefaultEquationNumbering dn;
 
-    size = toSendMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
-        ndofs = locationArray.giveSize();
+    for ( int inode : toSendMap ) {
+        domain->giveDofManager( inode )->giveCompleteLocationArray(locationArray, dn);
+        int ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
+            int eqNum;
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= send_buff->write( pp.at(eqNum) );
+                result &= send_buff.write( pp.at(eqNum) );
             }
         }
     }
@@ -619,40 +602,36 @@ FETISolver :: unpackResiduals(ProcessCommunicator &processComm)
     // master
 
     int result = 1;
-    int size, receivedRank, to;
-    int nshared, part, eqNum;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
-    double value;
 
-    receivedRank = processComm.giveRank();
+    int receivedRank = processComm.giveRank();
 
-    size = toRecvMap->giveSize();
     if ( receivedRank != 0 ) {
-        for ( int i = 1; i <= size; i++ ) {
-            to = toRecvMap->at(i);
+        for ( int to : toRecvMap ) {
             //
             // loop over all dofs
             for ( int idof = 1; idof <= masterCommunicator->giveDofManager(to)->giveNumberOfDofs(); idof++ ) {
                 // unpack contribution
-                result &= recv_buff->read(value);
+                double value;
+                result &= recv_buff.read(value);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                           // corresponding DOFs in boundary node
 
                     // localize to corresponding places
-                    nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
+                    int nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
                     for ( int j = 1; j <= nshared; j++ ) {
-                        part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
+                        int part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
                         if ( part == processComm.giveRank() ) {
                             continue;
                         }
 
-                        eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
+                        int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
                         g.at(eqNum) += value;
                     }
                 } else { // no reference partition
-                    eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
+                    int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
                     g.at(eqNum) += ( -1.0 ) * value;
                 }
             }
@@ -665,20 +644,19 @@ FETISolver :: unpackResiduals(ProcessCommunicator &processComm)
 int
 FETISolver :: masterMapResiduals()
 { // master will map its own values directly
-    int to, from, receivedRank = 0, nshared, part, eqNum, result, locpos;
+    int receivedRank = 0, result;
     IntArray locationArray;
-    double value;
     int size = masterCommMap.giveSize();
     EModelDefaultEquationNumbering dn;
 
     for ( int i = 1; i <= size; i++ ) {
-        to = masterCommunicator->giveMasterCommMapPtr()->at(i);
+        int to = masterCommunicator->giveMasterCommMapPtr()->at(i);
         // use receive map, send map is empty to prevent master to send
         // itself any data. Note, however, that send and receive maps are same.
-        from = masterCommMap.at(i);
+        int from = masterCommMap.at(i);
 
         domain->giveDofManager(from)->giveCompleteLocationArray(locationArray, dn);
-        locpos = 1;
+        int locpos = 1;
         //
         //   ndofs = locationArray.giveSize(); // including supported
         //   for (j=1; j<=ndofs; j++) {
@@ -696,23 +674,23 @@ FETISolver :: masterMapResiduals()
                 }
             }
 
-            value = pp.at( locationArray.at(locpos) );
+            double value = pp.at( locationArray.at(locpos) );
             if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                       // corresponding DOFs in boundary node
 
                 // localize to corresponding places
-                nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
+                int nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
                 for ( int j = 1; j <= nshared; j++ ) {
-                    part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
+                    int part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
                     if ( part == 0 ) {
                         continue;
                     }
 
-                    eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
+                    int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
                     g.at(eqNum) += value;
                 }
             } else { // no reference partition
-                eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
+                int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
                 g.at(eqNum) += ( -1.0 ) * value;
             }
         }
@@ -729,43 +707,37 @@ int
 FETISolver :: packDirectionVector(ProcessCommunicator &processComm)
 {
     // master
-
     int result = 1;
-    int size;
-    int ndofs, eqNum, nshared, part, from;
-    double val;
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    const IntArray &toSendMap = processComm.giveToSendMap();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
 
     int rank = processComm.giveRank();
-    size = toSendMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        from = toSendMap->at(i);
-
-        ndofs = masterCommunicator->giveDofManager(from)->giveNumberOfDofs();
+    for ( int from : toSendMap ) {
+        int ndofs = masterCommunicator->giveDofManager(from)->giveNumberOfDofs();
         if ( rank == masterCommunicator->giveDofManager(from)->giveReferencePratition() ) {
             // summ corresponding values (multipliers)
-            nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
+            int nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
             for ( int k = 1; k <= ndofs; k++ ) {
-                val = 0.0;
+                double val = 0.0;
                 for ( int j = 1; j <= nshared; j++ ) {
-                    part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
+                    int part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
                     if ( part == processComm.giveRank() ) {
                         continue;
                     }
 
-                    eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, k);
+                    int eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, k);
                     val += d.at(eqNum);
                 }
 
-                result &= send_buff->write(val);
+                result &= send_buff.write(val);
             }
         } else {
             masterCommunicator->giveDofManager(from)->giveCompleteLocationArray(rank, locationArray);
             for ( int j = 1; j <= ndofs; j++ ) {
+                int eqNum;
                 if ( ( eqNum = locationArray.at(j) ) ) {
-                    result &= send_buff->write( ( -1.0 ) * d.at(eqNum) );
+                    result &= send_buff.write( ( -1.0 ) * d.at(eqNum) );
                 }
             }
         }
@@ -780,22 +752,20 @@ FETISolver :: unpackDirectionVector(ProcessCommunicator &processComm)
 {
     // slaves unpack their slotion contributions
     int result = 1;
-    int size;
-    int ndofs, eqNum;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
     // int receivedRank = domainComm.giveRank();
     EModelDefaultEquationNumbering dn;
 
-    size = toRecvMap->giveSize();
     // if (receivedRank != 0) {
-    for ( int i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toRecvMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
-        ndofs = locationArray.giveSize();
+    for ( int inode : toRecvMap ) {
+        domain->giveDofManager( inode )->giveCompleteLocationArray(locationArray, dn);
+        int ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
+            int eqNum;
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= recv_buff->read( dd.at(eqNum) );
+                result &= recv_buff.read( dd.at(eqNum) );
             }
         }
     }
@@ -807,20 +777,19 @@ FETISolver :: unpackDirectionVector(ProcessCommunicator &processComm)
 int
 FETISolver :: masterMapDirectionVector()
 {
-    int to, from, receivedRank = 0, nshared, part, eqNum, result, locpos;
+    int receivedRank = 0, result;
     IntArray locationArray;
-    double value;
     int size = masterCommMap.giveSize();
     EModelDefaultEquationNumbering dn;
 
     for ( int i = 1; i <= size; i++ ) {
-        from = masterCommunicator->giveMasterCommMapPtr()->at(i);
+        int from = masterCommunicator->giveMasterCommMapPtr()->at(i);
         // use receive map, send map is empty to prevent master to send
         // itself any data. Note, however, that send and receive maps are same.
-        to = masterCommMap.at(i);
+        int to = masterCommMap.at(i);
 
         domain->giveDofManager(to)->giveCompleteLocationArray(locationArray, dn);
-        locpos = 1;
+        int locpos = 1;
         //
         // loop over all dofs
         for ( int idof = 1; idof <= masterCommunicator->giveDofManager(from)->giveNumberOfDofs(); idof++, locpos++ ) {
@@ -833,23 +802,23 @@ FETISolver :: masterMapDirectionVector()
                 }
             }
 
-            value = 0.0;
+            double value = 0.0;
             if ( masterCommunicator->giveDofManager(from)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                         // corresponding DOFs in boundary node
 
                 // localize to corresponding places
-                nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
+                int nshared = masterCommunicator->giveDofManager(from)->giveNumberOfSharedPartitions();
                 for ( int j = 1; j <= nshared; j++ ) {
-                    part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
+                    int part = masterCommunicator->giveDofManager(from)->giveSharedPartition(j);
                     if ( part == 0 ) {
                         continue;
                     }
 
-                    eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, idof);
+                    int eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(part, idof);
                     value += d.at(eqNum);
                 }
             } else { // no reference partition
-                eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(receivedRank, idof);
+                int eqNum = masterCommunicator->giveDofManager(from)->giveCodeNumber(receivedRank, idof);
                 value = ( -1.0 ) * d.at(eqNum);
             }
 
@@ -869,20 +838,18 @@ FETISolver :: packPPVector(ProcessCommunicator &processComm)
     // slaves
 
     int result = 1;
-    int size;
-    int ndofs, eqNum;
-    IntArray const *toSendMap = processComm.giveToSendMap();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    const IntArray &toSendMap = processComm.giveToSendMap();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
     IntArray locationArray;
     EModelDefaultEquationNumbering dn;
 
-    size = toSendMap->giveSize();
-    for ( int i = 1; i <= size; i++ ) {
-        domain->giveDofManager( toSendMap->at(i) )->giveCompleteLocationArray(locationArray, dn);
-        ndofs = locationArray.giveSize();
+    for ( int inode : toSendMap ) {
+        domain->giveDofManager( inode )->giveCompleteLocationArray(locationArray, dn);
+        int ndofs = locationArray.giveSize();
         for ( int j = 1; j <= ndofs; j++ ) {
+            int eqNum;
             if ( ( eqNum = locationArray.at(j) ) ) {
-                result &= send_buff->write( pp.at(eqNum) );
+                result &= send_buff.write( pp.at(eqNum) );
             }
         }
     }
@@ -897,40 +864,36 @@ FETISolver :: unpackPPVector(ProcessCommunicator &processComm)
     // master
 
     int result = 1;
-    int size, receivedRank, to;
-    int nshared, part, eqNum;
-    IntArray const *toRecvMap = processComm.giveToRecvMap();
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    const IntArray &toRecvMap = processComm.giveToRecvMap();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
     IntArray locationArray;
-    double value;
 
-    receivedRank = processComm.giveRank();
+    int receivedRank = processComm.giveRank();
 
-    size = toRecvMap->giveSize();
     if ( receivedRank != 0 ) {
-        for ( int i = 1; i <= size; i++ ) {
-            to = toRecvMap->at(i);
+        for ( int to : toRecvMap ) {
             //
             // loop over all dofs
             for ( int idof = 1; idof <= masterCommunicator->giveDofManager(to)->giveNumberOfDofs(); idof++ ) {
                 // unpack contribution
-                result &= recv_buff->read(value);
+                double value;
+                result &= recv_buff.read(value);
                 if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                           // corresponding DOFs in boundary node
 
                     // localize to corresponding places
-                    nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
+                    int nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
                     for ( int j = 1; j <= nshared; j++ ) {
-                        part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
+                        int part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
                         if ( part == processComm.giveRank() ) {
                             continue;
                         }
 
-                        eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
+                        int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
                         p.at(eqNum) += value;
                     }
                 } else { // no reference partition
-                    eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
+                    int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
                     p.at(eqNum) += ( -1.0 ) * value;
                 }
             }
@@ -943,20 +906,19 @@ FETISolver :: unpackPPVector(ProcessCommunicator &processComm)
 int
 FETISolver :: masterMapPPVector()
 { // master will map its own values directly
-    int to, from, receivedRank = 0, nshared, part, eqNum, result, locpos;
+    int receivedRank = 0, result;
     IntArray locationArray;
-    double value;
     int size = masterCommMap.giveSize();
     EModelDefaultEquationNumbering dn;
 
     for ( int i = 1; i <= size; i++ ) {
-        to = masterCommunicator->giveMasterCommMapPtr()->at(i);
+        int to = masterCommunicator->giveMasterCommMapPtr()->at(i);
         // use receive map, send map is empty to prevent master to send
         // itself any data. Note, however, that send and receive maps are same.
-        from = masterCommMap.at(i);
+        int from = masterCommMap.at(i);
 
         domain->giveDofManager(from)->giveCompleteLocationArray(locationArray, dn);
-        locpos = 1;
+        int locpos = 1;
         //
         //   ndofs = locationArray.giveSize(); // including supported
         //   for (j=1; j<=ndofs; j++) {
@@ -974,23 +936,23 @@ FETISolver :: masterMapPPVector()
                 }
             }
 
-            value = pp.at( locationArray.at(locpos) );
+            double value = pp.at( locationArray.at(locpos) );
             if ( masterCommunicator->giveDofManager(to)->giveReferencePratition() == receivedRank ) { // contribution from reference partition localizes to all
                                                                                                       // corresponding DOFs in boundary node
 
                 // localize to corresponding places
-                nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
+                int nshared = masterCommunicator->giveDofManager(to)->giveNumberOfSharedPartitions();
                 for ( int j = 1; j <= nshared; j++ ) {
-                    part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
+                    int part = masterCommunicator->giveDofManager(to)->giveSharedPartition(j);
                     if ( part == 0 ) {
                         continue;
                     }
 
-                    eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
+                    int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(part, idof);
                     p.at(eqNum) += value;
                 }
             } else { // no reference partition
-                eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
+                int eqNum = masterCommunicator->giveDofManager(to)->giveCodeNumber(receivedRank, idof);
                 p.at(eqNum) += ( -1.0 ) * value;
             }
         }
@@ -1008,10 +970,10 @@ FETISolver :: packGammas(ProcessCommunicator &processComm)
 
     int result = 1;
     int rank = processComm.giveRank();
-    CommunicationBuffer *send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
+    CommunicationBuffer &send_buff = processComm.giveProcessCommunicatorBuff()->giveSendBuff();
 
     for ( int irbm = 1; irbm <= nsem.at(rank + 1); irbm++ ) {
-        result &= send_buff->write( gamma.at(rbmAddr.at(rank + 1) + irbm - 1) );
+        result &= send_buff.write( gamma.at(rbmAddr.at(rank + 1) + irbm - 1) );
     }
 
     return result;
@@ -1023,11 +985,11 @@ FETISolver :: unpackGammas(ProcessCommunicator &processComm)
 {
     // slaves
     int result = 1;
-    CommunicationBuffer *recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
+    CommunicationBuffer &recv_buff = processComm.giveProcessCommunicatorBuff()->giveRecvBuff();
 
     localGammas.resize(nse);
     for ( int irbm = 1; irbm <= nse; irbm++ ) {
-        result &= recv_buff->read( localGammas.at(irbm) );
+        result &= recv_buff.read( localGammas.at(irbm) );
     }
 
     return result;

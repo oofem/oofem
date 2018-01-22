@@ -213,7 +213,7 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
             OOFEM_LOG_INFO("\nSolving for dof group %d \n", dG+1);
             
             engngModel->updateComponent(tStep, NonLinearLhs, domain);
-            dg.stiffnessMatrixList[dG].reset(k.giveSubMatrix( dg.locArrayList[dG], dg.locArrayList[dG]));
+            dg.stiffnessMatrixList[dG] = k.giveSubMatrix( dg.locArrayList[dG], dg.locArrayList[dG]);
 
             if ( this->prescribedDofsFlag ) {
                 if ( !prescribedEqsInitFlag ) {
@@ -258,7 +258,7 @@ StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
                 if ( nite > 0 || !mCalcStiffBeforeRes ) {
                     if ( NR_Mode == nrsolverFullNRM || ( NR_Mode == nrsolverAccelNRM && (nite % MANRMSteps) == 0 ) ) {
                         engngModel->updateComponent(tStep, NonLinearLhs, domain);
-                        dg.stiffnessMatrixList[dG].reset(k.giveSubMatrix( dg.locArrayList[dG], dg.locArrayList[dG]));
+                        dg.stiffnessMatrixList[dG] = k.giveSubMatrix( dg.locArrayList[dG], dg.locArrayList[dG]);
                         applyConstraintsToStiffness(*dg.stiffnessMatrixList[dG]);
                     }
                 }

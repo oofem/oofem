@@ -35,8 +35,8 @@
 #ifndef quad2platesubsoil_H
 #define quad2platesubsoil_H
 
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/Elements/quad1platesubsoil.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Elements/quad1platesubsoil.h"
 
 #define _IFT_Quad2PlateSubSoil_Name "quad2platesubsoil"
 

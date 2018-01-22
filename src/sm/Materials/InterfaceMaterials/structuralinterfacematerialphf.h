@@ -34,7 +34,7 @@
 #ifndef structuralinterfacematerialphf_h
 #define structuralinterfacematerialphf_h
 
-#include "Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
 
 namespace oofem {
 class GaussPoint;

@@ -35,9 +35,9 @@
 #ifndef qdkt_h
 #define qdkt_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/CrossSections/layeredcrosssection.h"
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/CrossSections/layeredcrosssection.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"

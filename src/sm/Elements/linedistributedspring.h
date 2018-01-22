@@ -35,7 +35,7 @@
 #ifndef linedistributedspring_H
 #define linedistributedspring_H
 
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 

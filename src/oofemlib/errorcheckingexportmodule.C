@@ -48,9 +48,9 @@
 #include "irresulttype.h"
 #include "mathfem.h"
 #ifdef __SM_MODULE
- #include "../sm/EngineeringModels/structengngmodel.h"
- #include "../sm/Elements/Beams/beam2d.h"
- #include "../sm/Elements/Beams/beam3d.h"
+ #include "sm/EngineeringModels/structengngmodel.h"
+ #include "sm/Elements/Beams/beam2d.h"
+ #include "sm/Elements/Beams/beam3d.h"
 #endif
 
 namespace oofem {
@@ -567,9 +567,12 @@ ErrorCheckingExportModule :: giveErrorCheck(std :: ifstream &stream, double erro
         if ( line.compare(0, 12, "#%END_CHECK%") == 0 ) {
             return NULL;
         }
-        if ( line.size() > 2 && line[0] == '#' && line[1] != '#' ) {
-            break;
+        if ( line.size() > 2 && line[0] == '#' && line[1] != '#') {
+            if (line.compare(0, 5, "#TIME") != 0 ) {
+                break;
+            }
         }
+        
     }
 
     if ( line.compare(0, 5, "#NODE") == 0 ) {

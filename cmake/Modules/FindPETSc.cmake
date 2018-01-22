@@ -82,8 +82,6 @@ find_path (PETSC_DIR include/petsc.h
   /opt/local/lib/petsc
   $ENV{HOME}/petsc
   DOC "PETSc Directory")
-  
-  message("found dir ${PETSC_DIR}")
 
 find_program (MAKE_EXECUTABLE NAMES make gmake)
 

@@ -74,36 +74,14 @@ public:
     /** Accessor for setting nodal values; checks size of the array for correctness. */
     void setValues(const FloatArray& vv);
 
-    /**
-        Implementation of Field::evaluateAt for coordinates.
-     */
     int evaluateAt(FloatArray &answer, const FloatArray &coords,
                            ValueModeType mode, TimeStep *tStep) override;
 
-    /**
-        Implementaton of Field::evaluateAt for DofManager.
-     */
     int evaluateAt(FloatArray &answer, DofManager *dman,
                            ValueModeType mode, TimeStep *tStep) override;
 
-    /**
-     * Stores receiver state to output stream.
-     * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
-     * @param stream Output stream.
-     * @param mode Determines amount of info in stream (state, definition,...).
-     * @return contextIOResultType.
-     * @exception Throws an ContextIOERR exception if error encountered.
-     */
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override { return CIO_OK; }
-    /**
-     * Restores the receiver state previously written in stream.
-     * Reads the FEMComponent class-id in order to allow test consistency.
-     * @param stream Input stream.
-     * @param mode Determines amount of info in stream (state, definition,...).
-     * @return contextIOResultType.
-     * @exception Throws an ContextIOERR exception if error encountered.
-     */
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override { return CIO_OK; }
+    void saveContext(DataStream &stream) override { }
+    void restoreContext(DataStream &stream) override { }
 
     /// @return Class name of the receiver.
     const char *giveClassName() const override { return "UniformGridField"; }

@@ -35,14 +35,14 @@
 #ifndef ltrspace_h
 #define ltrspace_h
 
-#include "Elements/structural3delement.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
+#include "sm/Elements/structural3delement.h"
+#include "sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "ErrorEstimators/zzerrorestimator.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 
 #define _IFT_LTRSpace_Name "ltrspace"

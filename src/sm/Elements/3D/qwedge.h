@@ -35,8 +35,8 @@
 #ifndef qwedge_h
 #define qwedge_h
 
-#include "Elements/structural3delement.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
+#include "sm/Elements/structural3delement.h"
+#include "sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"

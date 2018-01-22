@@ -78,30 +78,25 @@
 #define _IFT_CompCol_Name "csc"
 
 namespace oofem {
-/*
+/**
  * Implementation of sparse matrix stored in compressed column storage.
  */
 class OOFEM_EXPORT CompCol : public SparseMtrx
 {
 protected:
 
-    FloatArray val_; // data values (nz_ elements)
-    IntArray rowind_;    // row_ind (nz_ elements)
-    IntArray colptr_;    // col_ptr (dim_[1]+1 elements)
+    FloatArray val; // data values (nz_ elements)
+    IntArray rowind;    // row_ind (nz_ elements)
+    IntArray colptr;    // col_ptr (dim_[1]+1 elements)
 
-    int base_;              // index base: offset of first element
-    int nz_;                // number of nonzeros
-    int dim_ [ 2 ];         // number of rows, cols
+    int base;              // index base: offset of first element
+    int nz;                // number of nonzeros
 
 public:
     /** Constructor. Before any operation an internal profile must be built.
      * @see buildInternalStructure
      */
-    CompCol(int n);
-    /** Constructor. Before any operation an internal profile must be built.
-     * @see buildInternalStructure
-     */
-    CompCol();
+    CompCol(int n=0);
     /// Copy constructor
     CompCol(const CompCol & S);
     /// Assignment operator
@@ -110,49 +105,36 @@ public:
     virtual ~CompCol() { }
 
     // Overloaded methods:
-    SparseMtrx *GiveCopy() const;
-    virtual void times(const FloatArray &x, FloatArray &answer) const;
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
-    virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &s);
-    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
-    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    virtual bool canBeFactorized() const { return false; }
-    virtual void zero();
-    virtual double &at(int i, int j);
-    virtual double at(int i, int j) const;
-    virtual void toFloatMatrix(FloatMatrix &answer) const;
-    virtual void printYourself() const;
-    virtual const char* giveClassName() const { return "CompCol"; }
-    virtual SparseMtrxType giveType() const { return SMT_CompCol; }
-    virtual bool isAsymmetric() const { return true; }
+    std::unique_ptr<SparseMtrx> clone() const override;
+    void times(const FloatArray &x, FloatArray &answer) const override;
+    void timesT(const FloatArray &x, FloatArray &answer) const override;
+    void times(double x) override;
+    int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &s) override;
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override;
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
+    bool canBeFactorized() const override { return false; }
+    void zero() override;
+    double &at(int i, int j) override;
+    double at(int i, int j) const override;
+    void toFloatMatrix(FloatMatrix &answer) const override;
+    void printYourself() const override;
+    const char* giveClassName() const override { return "CompCol"; }
+    SparseMtrxType giveType() const override { return SMT_CompCol; }
+    bool isAsymmetric() const override { return true; }
 
     // Breaks encapsulation, but access is needed for PARDISO and SuperLU solvers;
-    FloatArray &giveValues() { return val_; }
-    IntArray &giveRowIndex() { return rowind_; }
-    IntArray &giveColPtr() { return colptr_; }
+    FloatArray &giveValues() { return val; }
+    IntArray &giveRowIndex() { return rowind; }
+    IntArray &giveColPtr() { return colptr; }
 
     // Methods needed by SuperLU interface
-    const int giveNumberOfNonzeros() {return nz_;}
-    
-    const double &val(int i) const { return val_(i); }
-    const int &row_ind(int i) const { return rowind_(i); }
-    const int &col_ptr(int i) const { return colptr_(i); }
-    int dim(int i) const { return dim_ [ i ]; }
+    const int giveNumberOfNonzeros() {return nz;}
+
+    const double &values(int i) const { return val[i]; }
+    const int &row_ind(int i) const { return rowind[i]; }
+    const int &col_ptr(int i) const { return colptr[i]; }
 
 protected:
-    /*******************************/
-    /*  Access and info functions  */
-    /*******************************/
-
-    double &val(int i) { return val_(i); }
-    int &row_ind(int i) { return rowind_(i); }
-    int &col_ptr(int i) { return colptr_(i); }
-
-    int size(int i) const { return dim_ [ i ]; }
-    int NumNonzeros() const { return nz_; }
-    int base() const { return base_; }
-
     /***********************************/
     /*  General access function (slow) */
     /***********************************/

@@ -67,43 +67,41 @@ protected:
     IS localIS, globalIS;
 
 public:
-    PetscSparseMtrx(int n, int m);
-    PetscSparseMtrx();
+    PetscSparseMtrx(int n=0, int m=0);
 
     virtual ~PetscSparseMtrx();
 
-    // Overloaded methods:
-    virtual SparseMtrx *GiveCopy() const;
-    virtual void times(const FloatArray &x, FloatArray &answer) const;
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
-    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const;
-    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const;
-    virtual void times(double x);
-    virtual void add(double x, SparseMtrx &m);
-    virtual void addDiagonal(double x, FloatArray &m);
-    virtual int buildInternalStructure(EngngModel *eModel, int n, int m, const IntArray &I, const IntArray &J);
-    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s);
-    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
-    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
-    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    virtual int assembleBegin();
-    virtual int assembleEnd();
-    virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols);
-    virtual bool canBeFactorized() const { return false; }
-    virtual SparseMtrx *factorized() { return NULL; }
-    virtual FloatArray *backSubstitutionWith(FloatArray &y) const { return NULL; }
-    virtual void zero();
-    virtual double computeNorm() const;
-    virtual double &at(int i, int j);
-    virtual double at(int i, int j) const;
-    virtual void toFloatMatrix(FloatMatrix &answer) const;
-    virtual void printStatistics() const;
-    virtual void printYourself() const;
+    std::unique_ptr<SparseMtrx> clone() const override;
+    void times(const FloatArray &x, FloatArray &answer) const override;
+    void timesT(const FloatArray &x, FloatArray &answer) const override;
+    void times(const FloatMatrix &B, FloatMatrix &answer) const override;
+    void timesT(const FloatMatrix &B, FloatMatrix &answer) const override;
+    void times(double x) override;
+    void add(double x, SparseMtrx &m) override;
+    void addDiagonal(double x, FloatArray &m) override;
+    int buildInternalStructure(EngngModel *eModel, int n, int m, const IntArray &I, const IntArray &J) override;
+    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s) override;
+    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override;
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
+    int assembleBegin() override;
+    int assembleEnd() override;
+    std::unique_ptr<SparseMtrx> giveSubMatrix(const IntArray &rows, const IntArray &cols) override;
+    bool canBeFactorized() const override { return false; }
+    SparseMtrx *factorized() override { return NULL; }
+    FloatArray *backSubstitutionWith(FloatArray &y) const override { return NULL; }
+    void zero() override;
+    double computeNorm() const override;
+    double &at(int i, int j) override;
+    double at(int i, int j) const override;
+    void toFloatMatrix(FloatMatrix &answer) const override;
+    void printStatistics() const override;
+    void printYourself() const override;
     void printMatlab() const;
-    virtual SparseMtrxType  giveType() const;
-    virtual bool isAsymmetric() const;
-    virtual void writeToFile(const char *fname) const;
-    virtual const char *giveClassName() const { return "PetscSparseMtrx"; }
+    SparseMtrxType giveType() const override;
+    bool isAsymmetric() const override;
+    void writeToFile(const char *fname) const override;
+    const char *giveClassName() const override { return "PetscSparseMtrx"; }
 
     /// Creates a global vector that fits the instance of this matrix.
     void createVecGlobal(Vec *answer) const;

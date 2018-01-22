@@ -36,7 +36,7 @@ protected:
 #ifndef qplanstrss_h
 #define qplanstrss_h
 
-#include "Elements/structural2delement.h"
+#include "sm/Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 

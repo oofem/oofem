@@ -210,11 +210,11 @@ POIExportModule :: giveMapper()
 {
     if ( !this->mapper ) {
         if ( this->mtype == POI_CPT ) {
-            this->mapper.reset( new MMAClosestIPTransfer() );
+            this->mapper = std::make_unique<MMAClosestIPTransfer>();
         } else if ( this->mtype == POI_SFT ) {
-            this->mapper.reset( new MMAShapeFunctProjection() );
+            this->mapper = std::make_unique<MMAShapeFunctProjection>();
         } else if ( this->mtype == POI_LST ) {
-            this->mapper.reset( new MMALeastSquareProjection() );
+            this->mapper = std::make_unique<MMALeastSquareProjection>();
         } else {
             OOFEM_ERROR("unsupported smoother type ID");
         }

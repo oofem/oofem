@@ -38,6 +38,8 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 #include "floatarray.h"
+#include "DSSolver.h"
+#include "SparseMatrixF.h"
 
 #include <memory>
 
@@ -87,35 +89,27 @@ public:
      * @param n Size of row and columns of square matrix
      * @see buildInternalStructure
      */
-    DSSMatrix(dssType t, int n);
-    /**
-     * Constructor. Before any operation an internal profile must be built.
-     * @param t Storage type
-     * @see buildInternalStructure
-     */
-    DSSMatrix(dssType t);
+    DSSMatrix(dssType t, int n=0);
     /// Copy constructor
     DSSMatrix(const DSSMatrix &S);
     /// Destructor
-    virtual ~DSSMatrix();
+    virtual ~DSSMatrix() {}
 
-    // Overloaded methods
-    virtual SparseMtrx *GiveCopy() const;
-    virtual void times(const FloatArray &x, FloatArray &answer) const;
-    virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme & s);
-    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
-    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    virtual bool canBeFactorized() const { return true; }
-    virtual SparseMtrx *factorized();
-    virtual void solve(FloatArray &b, FloatArray &x);
-    virtual void zero();
-    virtual double &at(int i, int j);
-    virtual double at(int i, int j) const;
-    virtual SparseMtrxType giveType() const { return SMT_SymCompCol; }
-    virtual bool isAsymmetric() const { return false; }
+    void times(const FloatArray &x, FloatArray &answer) const override;
+    void times(double x) override;
+    int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme & s) override;
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override;
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
+    bool canBeFactorized() const override { return true; }
+    SparseMtrx *factorized() override;
+    void solve(FloatArray &b, FloatArray &x);
+    void zero() override;
+    double &at(int i, int j) override;
+    double at(int i, int j) const override;
+    SparseMtrxType giveType() const override { return SMT_SymCompCol; }
+    bool isAsymmetric() const override { return false; }
 
-    virtual const char *giveClassName() const { return "DSSMatrix"; }
+    const char *giveClassName() const override { return "DSSMatrix"; }
 };
 
 class DSSMatrixLDL : public DSSMatrix

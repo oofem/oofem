@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/EngineeringModels/diidynamic.h"
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "sm/EngineeringModels/diidynamic.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelementevaluator.h"
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -191,7 +191,7 @@ TimeStep *DIIDynamic :: giveNextStep()
 
     previousStep = std :: move(currentStep);
 
-    currentStep.reset( new TimeStep(istep, this, 1, totalTime, deltaT, counter, td) );
+    currentStep = std::make_unique<TimeStep>(istep, this, 1, totalTime, deltaT, counter, td);
 
     return currentStep.get();
 }

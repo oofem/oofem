@@ -35,9 +35,9 @@
 #ifndef linquad3d_planestress_h
 #define linquad3d_planestress_h
 
-#include "Elements/PlaneStress/planstrss.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
+#include "sm/Elements/PlaneStress/planstrss.h"
+#include "sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"

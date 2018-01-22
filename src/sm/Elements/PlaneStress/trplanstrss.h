@@ -35,10 +35,10 @@
 #ifndef trplanstrss_h
 #define trplanstrss_h
 
-#include "Elements/structural2delement.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
-#include "ErrorEstimators/zzerrorestimator.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
+#include "sm/Elements/structural2delement.h"
+#include "sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "sm/ErrorEstimators/zzerrorestimator.h"
+#include "sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"

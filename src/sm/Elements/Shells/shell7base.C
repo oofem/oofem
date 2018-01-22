@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Shells/shell7base.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Loads/constantpressureload.h"
+#include "sm/Elements/Shells/shell7base.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/Loads/constantpressureload.h"
 #include "node.h"
 #include "load.h"
 #include "mathfem.h"
@@ -2122,9 +2122,9 @@ Shell7Base :: nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues
         if ( valueType == ISVT_TENSOR_S3 ) {
             FloatArray nodalStresses; 
             nodalStresses.beColumnOf(temprecovedValuesT,i+1);
-            recoveredValues[strangeNodeNumbering(i)-1] = convV6ToV9Stress(nodalStresses);
+            recoveredValues[strangeNodeNumbering[i]-1] = convV6ToV9Stress(nodalStresses);
         } else {
-            recoveredValues[strangeNodeNumbering(i)-1].beColumnOf(temprecovedValuesT,i+1);
+            recoveredValues[strangeNodeNumbering[i]-1].beColumnOf(temprecovedValuesT,i+1);
         }
     }
 }
@@ -2139,7 +2139,6 @@ Shell7Base :: giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int l
     int numNodes = localNodeCoords.giveNumberOfColumns();
     
     std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ layer - 1 ];
-    IntegrationPoint *ip;
     int numIP = iRule->giveNumberOfIntegrationPoints();
     FloatArray nodeCoords, ipCoords;
     InternalStateValueType valueType =  giveInternalStateValueType(type);
@@ -2152,7 +2151,7 @@ Shell7Base :: giveL2contribution(FloatMatrix &ipValues, FloatMatrix &Nbar, int l
     ipValues.resize(numIP,numSC);
     
     for ( int i = 0; i < numIP; i++ ) {
-        ip = iRule->getIntegrationPoint(i);
+        auto *ip = iRule->getIntegrationPoint(i);
         FloatArray tempIPvalues;
         this->giveIPValue(tempIPvalues, ip, type, tStep);
         ipValues.addSubVectorRow(tempIPvalues,i+1,1);

@@ -33,8 +33,8 @@
  */
 
 #include "micromaterial.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
+#include "sm/Materials/structuralmaterial.h"
+#include "sm/Materials/structuralms.h"
 #include "domain.h"
 #include "dofmanager.h"
 #include "classfactory.h"
@@ -92,56 +92,16 @@ contextIOResultType MicroMaterialStatus :: restoreContext(DataStream &stream, Co
 }
 
 
-MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme()
-{
-    this->problemMicro = NULL;
-    this->isDefaultNumbering = true;
-    this->DofEquationNumbering = AllNodes;
-    this->microBoundaryDofs = NULL;
-    this->microInternalDofs = NULL;
-    this->microDefaultDofs = NULL;
-    this->microBoundaryDofsArr.clear();
-    this->microInternalDofsArr.clear();
-    this->microMatIsUsed = false;
-}
+MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme(),
+    microMatIsUsed(false),
+    isDefaultNumbering(true),
+    DofEquationNumbering(AllNodes)
+{}
 
-MicroMaterial :: ~MicroMaterial()
-{
-    if ( this->problemMicro ) {
-        delete this->problemMicro;
-    }
-
-    for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
-        if ( this->microBoundaryDofs ) {
-            delete [] microBoundaryDofs [ i ];
-        }
-
-        if ( this->microInternalDofs ) {
-            delete [] microInternalDofs [ i ];
-        }
-
-        if ( this->microDefaultDofs ) {
-            delete [] microDefaultDofs [ i ];
-        }
-    }
-
-    if ( this->microBoundaryDofs ) {
-        delete [] microBoundaryDofs;
-    }
-
-    if ( this->microInternalDofs ) {
-        delete [] microInternalDofs;
-    }
-
-    if ( this->microDefaultDofs ) {
-        delete [] microDefaultDofs;
-    }
-}
 
 IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;              // Required by IR_GIVE_FIELD macro
-
 
     IR_GIVE_FIELD(ir, this->inputFileNameMicro, _IFT_MicroMaterial_fileName);
 
@@ -149,12 +109,10 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
     OOFEMTXTDataReader drMicro( inputFileNameMicro.c_str() );
     this->problemMicro = InstanciateProblem(drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
-    OOFEM_LOG_INFO("** Microproblem %p instanciated\n\n", problemMicro);
+    OOFEM_LOG_INFO("Microproblem instanciated\n");
 
     return IRRT_OK;
 }
-
-
 
 
 //original pure virtual function has to be declared here
@@ -226,8 +184,7 @@ void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
 MaterialStatus *
 MicroMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    MicroMaterialStatus *status = new MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
-    return status;
+    return new MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
 }
 
 
@@ -242,15 +199,15 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     Dof *dof;
 
     FloatMatrix Kbb; //contains reduced problem with boundary nodes and without interior nodes
-    FloatMatrix *Kbi = NULL; //can be zero size if no internal DOFs
-    FloatMatrix *Kii1KbiT = NULL; //can be zero size if no internal DOFs
-    FloatMatrix *Kbb_1 = NULL; //help matrix
+    FloatMatrix Kbi; //can be zero size if no internal DOFs
+    FloatMatrix Kii1KbiT; //can be zero size if no internal DOFs
+    FloatMatrix Kbb_1; //help matrix
 
     FloatMatrix slaveMasterOnBoundary; //transformation matrix representing displacements on boundary tied to master nodes
 
     SparseMtrxType sparseMtrxType = ( SparseMtrxType ) 0; //SMT_Skyline symmetric skyline
-    SparseMtrx *stiffnessMatrixMicro = NULL; //full stiffness matrix without any constraint
-    SparseMtrx *Kii = NULL; //submatrix of internal DOFs
+    std::unique_ptr<SparseMtrx> stiffnessMatrixMicro; //full stiffness matrix without any constraint
+    std::unique_ptr<SparseMtrx> Kii; //submatrix of internal DOFs
 
     Kbb.resize(totalBoundaryDofs, totalBoundaryDofs);
     Kbb.zero();
@@ -264,13 +221,12 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     printf( "Internal DOFs %d\n", this->giveRequiredNumberOfDomainEquation() );
     this->DofEquationNumbering = InteriorNodes;
     if ( totalInternalDofs ) {
-        Kbi = new FloatMatrix(totalBoundaryDofs, totalInternalDofs);
-        Kbi->zero();
-        Kii1KbiT = new FloatMatrix(totalInternalDofs, totalBoundaryDofs);
-        Kii1KbiT->zero();
-        Kii = classFactory.createSparseMtrx(sparseMtrxType);
+        Kbi.resize(totalBoundaryDofs, totalInternalDofs);
+        Kbi.zero();
+        Kii1KbiT.resize(totalInternalDofs, totalBoundaryDofs);
+        Kii1KbiT.zero();
+        Kii.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         Kii->buildInternalStructure(microEngngModel, 1, * this);
-        Kii->zero();
         microEngngModel->assemble(*Kii, tStep, TangentAssembler(rMode), * this, microDomain);
     }
 
@@ -280,10 +236,8 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     this->reqNumberOfDomainEquation = this->maxNumberOfDomainEquation;
     this->DofEquationNumbering = AllNodes;
 
-    stiffnessMatrixMicro = classFactory.createSparseMtrx(sparseMtrxType);
-    stiffnessMatrixMicro->zero();
+    stiffnessMatrixMicro.reset( classFactory.createSparseMtrx(sparseMtrxType) );
     stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, * this);
-    stiffnessMatrixMicro->zero();
     microEngngModel->assemble(*stiffnessMatrixMicro, tStep, TangentAssembler(rMode), * this, microDomain);
 
 
@@ -301,7 +255,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             row = microBoundaryDofsArr.at(i);
             col = microInternalDofsArr.at(j);
             if ( stiffnessMatrixMicro->isAllocatedAt(row, col) ) {
-                Kbi->at(i, j) = stiffnessMatrixMicro->at(row, col);
+                Kbi.at(i, j) = stiffnessMatrixMicro->at(row, col);
             }
         }
     }
@@ -321,10 +275,10 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             for ( int b = 1; b <= totalBoundaryDofs; b++ ) { //do not store Kii^-1, it is a dense matrix, compute multiplication directly
                 tmpDouble = 0.;
                 for ( int j = 1; j <= totalInternalDofs; j++ ) {
-                    tmpDouble += xVector.at(j) * Kbi->at(b, j);
+                    tmpDouble += xVector.at(j) * Kbi.at(b, j);
                 }
 
-                Kii1KbiT->at(i, b) = tmpDouble;
+                Kii1KbiT.at(i, b) = tmpDouble;
             }
 
             //OOFEM_LOG_INFO("%d ", i);
@@ -332,39 +286,18 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
         OOFEM_LOG_INFO("\n");
 
-        Kbb_1 = new FloatMatrix();
-        Kbb_1->beProductOf( ( FloatMatrix const & ) * Kbi, ( FloatMatrix const & ) * Kii1KbiT );
+        Kbb_1.beProductOf( Kbi, Kii1KbiT );
         for ( int i = 1; i <= totalBoundaryDofs; i++ ) {
             for ( int j = 1; j <= totalBoundaryDofs; j++ ) {
-                Kbb.at(i, j) -= Kbb_1->at(i, j);
+                Kbb.at(i, j) -= Kbb_1.at(i, j);
             }
         }
     }
 
-    if ( Kbi ) {
-        delete Kbi;
-    }
-
-    if ( Kii1KbiT ) {
-        delete Kii1KbiT;
-    }
-
-    if ( Kbb_1 ) {
-        delete Kbb_1;
-    }
-
-    //Kbb_1->printYourself();
+    //Kbb_1-printYourself();
     //OOFEM_ERROR("Stop");
     this->isDefaultNumbering = true; //switch back to default numbering
     this->DofEquationNumbering = AllNodes;
-
-    if ( Kii ) {
-        delete Kii;
-    }
-
-    if ( stiffnessMatrixMicro ) {
-        delete stiffnessMatrixMicro;
-    }
 
     //     IntArray interiorDofNode; //equation numbers to be condensed out, sorted
     //     IntArray boundaryDofNode;//equation numbers in rows (or columns) of stiffness matrix without interior nodes, sorted
@@ -531,19 +464,18 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     mstep = microEngngModel->giveCurrentMetaStep();
     mstep->setNumberOfSteps(this->macroDomain->giveEngngModel()->giveMetaStep(1)->giveNumberOfSteps() + 1);
 
-
     //separate DOFs into boundary and internal
     this->NumberOfDofManagers = microDomain->giveNumberOfDofManagers();
-    microBoundaryDofs = new int * [ this->NumberOfDofManagers ];
-    microInternalDofs = new int * [ this->NumberOfDofManagers ];
-    microDefaultDofs  = new int * [ this->NumberOfDofManagers ];
+    microBoundaryDofs.resize( this->NumberOfDofManagers );
+    microInternalDofs.resize( this->NumberOfDofManagers );
+    microDefaultDofs.resize( this->NumberOfDofManagers );
     for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
-        microBoundaryDofs [ i ] = new int [ 3 ];
-        microInternalDofs [ i ] = new int [ 3 ];
-        microDefaultDofs [ i ] =  new int [ 3 ];
-        microBoundaryDofs [ i ] [ 0 ] = microBoundaryDofs [ i ] [ 1 ] = microBoundaryDofs [ i ] [ 2 ] = 0;
-        microInternalDofs [ i ] [ 0 ] = microInternalDofs [ i ] [ 1 ] = microInternalDofs [ i ] [ 2 ] = 0;
-        microDefaultDofs [ i ] [ 0 ]  = microDefaultDofs [ i ] [ 1 ]  = microDefaultDofs [ i ] [ 2 ]  = 0;
+        microBoundaryDofs [ i ].resize(3);
+        microInternalDofs [ i ].resize(3);
+        microDefaultDofs [ i ].resize(3);
+        microBoundaryDofs [ i ].zero();
+        microInternalDofs [ i ].zero();
+        microDefaultDofs [ i ].zero();
     }
 
     for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
@@ -607,30 +539,24 @@ void MicroMaterial :: init(void)
 //Each node has three dofs (x,y,z direction)
 int MicroMaterial :: giveDofEquationNumber(Dof *dof) const
 {
-    int answer;
-    int numDofMan, numDof;
-
-    numDofMan = dof->giveDofManNumber();
-    numDof = dof->giveDofID(); // Note: Relieas on D_u, D_v, D_w being 1, 2, 3
+    int numDofMan = dof->giveDofManNumber();
+    int numDof = dof->giveDofID(); // Note: Relieas on D_u, D_v, D_w being 1, 2, 3
 
     //depending on the assembly of submatrix, swith to equation numbering
     switch ( DofEquationNumbering ) {
     case AllNodes: //the default
-        answer =  microDefaultDofs [ numDofMan - 1 ] [ numDof - 1 ];
+        return  microDefaultDofs [ numDofMan - 1 ] [ numDof - 1 ];
         break;
     case BoundaryNodes:
-        answer =  microBoundaryDofs [ numDofMan - 1 ] [ numDof - 1 ];
+        return  microBoundaryDofs [ numDofMan - 1 ] [ numDof - 1 ];
         break;
     case InteriorNodes:
-        answer =  microInternalDofs [ numDofMan - 1 ] [ numDof - 1 ];
+        return  microInternalDofs [ numDofMan - 1 ] [ numDof - 1 ];
         break;
     default:
-        answer = 0;
         OOFEM_ERROR("Node numbering undefined");
+        return 0;
     }
-
-    //    answer = 3 * ( dof->giveDofManNumber() - 1 ) + dof->giveNumber();
-    return answer;
 }
 
 //from class UnknownNumberingScheme

@@ -36,7 +36,7 @@
 #define trabbonenl_h
 
 #include "trabbonematerial.h"
-#include "Materials/structuralnonlocalmaterialext.h"
+#include "sm/Materials/structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 

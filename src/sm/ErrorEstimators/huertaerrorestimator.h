@@ -35,8 +35,8 @@
 #ifndef huertaerrorestimator_h
 #define huertaerrorestimator_h
 
-#include "../sm/refinedelement.h"
-#include "../sm/refinedmesh.h"
+#include "sm/refinedelement.h"
+#include "sm/refinedmesh.h"
 #include "errorestimator.h"
 #include "interface.h"
 #include "floatarray.h"

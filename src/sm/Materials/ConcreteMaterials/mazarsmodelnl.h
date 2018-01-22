@@ -36,7 +36,7 @@
 #define mazarsmodelnl_h
 
 #include "mazarsmodel.h"
-#include "Materials/structuralnonlocalmaterialext.h"
+#include "sm/Materials/structuralnonlocalmaterialext.h"
 
 ///@name Input fields for MazarsNLMaterial
 //@{

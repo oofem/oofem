@@ -35,7 +35,7 @@
 #ifndef feticommunicator_h
 #define feticommunicator_h
 
-#include "../sm/FETISolver/fetiboundarydofman.h"
+#include "sm/FETISolver/fetiboundarydofman.h"
 #include "communicator.h"
 #include "error.h"
 

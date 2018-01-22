@@ -42,7 +42,7 @@
 #include "bodyload.h"
 #include "boundaryload.h"
 #include "mathfem.h"
-#include "fluiddynamicmaterial.h"
+#include "fm/Materials/fluiddynamicmaterial.h"
 #include "fei3dtetlin.h"
 #include "masterdof.h"
 #include "fluidcrosssection.h"
@@ -68,7 +68,7 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->numberOfDofMans = 4;
     this->numberOfGaussPoints = 24;
 
-    this->bubble.reset( new ElementDofManager(1, aDomain, this) );
+    this->bubble = std::make_unique<ElementDofManager>(1, aDomain, this);
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_u) );
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_v) );
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_w) );
@@ -82,7 +82,7 @@ void Tet1BubbleStokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
@@ -166,7 +166,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
         pressure = N.dotProduct(a_pressure);
         epsp.beProductOf(B, a_velocity);
 
-        mat->computeDeviatoricStressVector(devStress, r_vol, gp, epsp, pressure, tStep);
+        mat->computeDeviatoricStress3D(devStress, r_vol, gp, epsp, pressure, tStep);
 
         momentum.plusProduct(B, devStress, dV);
         momentum.add(-pressure * dV, dNv);
@@ -337,7 +337,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponse
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, mode, gp, tStep);
+        mat->computeTangents3D(Ed, Ep, Cd, Cp, mode, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);

@@ -1,65 +1,62 @@
 if (USE_CEMHYD)
     set (tm_cemhyd
-        cemhyd/cemhydmat.C
+        Materials/cemhyd/cemhydmat.C
         )
 endif ()
 
 set (tm_emodel
-    stationarytransportproblem.C
-    nonstationarytransportproblem.C
-    nltransienttransportproblem.C
-    darcyflow.C
-    transienttransportproblem.C
+    EngineeringModels/darcyflow.C
+    EngineeringModels/nltransienttransportproblem.C
+    EngineeringModels/nonstationarytransportproblem.C
+    EngineeringModels/stationarytransportproblem.C
+    EngineeringModels/transienttransportproblem.C
     )
 
 set (tm_element
-    transportelement.C
-    quad1_ht.C
-    tr1_ht.C
-    quadaxisym1_ht.C
-    traxisym1_ht.C
-    brick1_ht.C
-    qbrick1_ht.C
-    wedge_ht.C
-    qwedge_ht.C
-    tetrah1_ht.C
-    tr1darcy.C
-    latticetransportelement.C
-    lattice2d_mt.C
+    Elements/transportelement.C
+    Elements/quad1_ht.C
+    Elements/tr1_ht.C
+    Elements/quadaxisym1_ht.C
+    Elements/traxisym1_ht.C
+    Elements/brick1_ht.C
+    Elements/qbrick1_ht.C
+    Elements/wedge_ht.C
+    Elements/qwedge_ht.C
+    Elements/tetrah1_ht.C
+    Elements/tr1darcy.C
+    Elements/latticetransportelement.C
+    Elements/lattice2d_mt.C
     )
 
 set (tm_boundary
-    gravitypressure.C
-    transportgradientneumann.C
-    transportgradientdirichlet.C
-    transportgradientperiodic.C
+    BoundaryCondition/gravitypressure.C
+    BoundaryCondition/transportgradientneumann.C
+    BoundaryCondition/transportgradientdirichlet.C
+    BoundaryCondition/transportgradientperiodic.C
     )
 
 set (tm_cs
     simpletransportcrosssection.C
     )
 
-set (tm_status
-    transportmaterial.C
-    latticetransmat.C
-    )
-
 set (tm_material
-    hydram.C
-    hydratingisoheatmat.C
-    hydratinghemomat.C
-    hydratingconcretemat.C
-    hemotkmat.C
-    hemokunzelmat.C
-    hemobaznajmat.C
-    isoheatmat.C
-    isomoisturemat.C
-    isolinmoisturemat.C
-    bazantnajjarmat.C
-    nlisomoisturemat.C
-    nonlinearmassmat.C
-    anisomassmat.C
-    rvestokesflow.C
+    Materials/anisomassmat.C
+    Materials/bazantnajjarmat.C
+    Materials/hemobaznajmat.C
+    Materials/hemokunzelmat.C
+    Materials/hemotkmat.C
+    Materials/hydram.C
+    Materials/hydratingconcretemat.C
+    Materials/hydratinghemomat.C
+    Materials/hydratingisoheatmat.C
+    Materials/isoheatmat.C
+    Materials/isolinmoisturemat.C
+    Materials/isomoisturemat.C
+    Materials/latticetransmat.C
+    Materials/nlisomoisturemat.C
+    Materials/nonlinearmassmat.C
+    Materials/rvestokesflow.C
+    Materials/transportmaterial.C
     )
 
 set (tm
@@ -67,7 +64,6 @@ set (tm
     ${tm_element}
     ${tm_material}
     ${tm_cs}
-    ${tm_status}
     ${tm_new}
     ${tm_cemhyd}
     ${tm_hydram}

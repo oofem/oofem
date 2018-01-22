@@ -45,8 +45,6 @@ namespace oofem {
  */
 class OOFEM_EXPORT VoidPreconditioner : public Preconditioner
 {
-private:
-
 public:
     /// Constructor. Creates the empty preconditioner.
     VoidPreconditioner(const SparseMtrx & a, InputRecord & attributes);
@@ -55,11 +53,11 @@ public:
     /// Destructor
     virtual ~VoidPreconditioner(void) { }
 
-    void init(const SparseMtrx &a) { }
-    void solve(const FloatArray &rhs, FloatArray &solution) const { solution = rhs; }
-    void trans_solve(const FloatArray &rhs, FloatArray &solution) const { solution = rhs; }
+    void init(const SparseMtrx &a) override { }
+    void solve(const FloatArray &rhs, FloatArray &solution) const override { solution = rhs; }
+    void trans_solve(const FloatArray &rhs, FloatArray &solution) const override { solution = rhs; }
 
-    virtual const char *giveClassName() const { return "VoidPreconditioner"; }
+    const char *giveClassName() const override { return "VoidPreconditioner"; }
 };
 } // end namespace oofem
 #endif // voidprecond_h

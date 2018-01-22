@@ -47,8 +47,8 @@
 #include "exportmodulemanager.h"
 #include "vtkxmlexportmodule.h"
 #include "nummet.h"
-#include "EngineeringModels/xfemsolverinterface.h"
-#include "EngineeringModels/staticstructural.h"
+#include "sm/EngineeringModels/xfemsolverinterface.h"
+#include "sm/EngineeringModels/staticstructural.h"
 #include "unknownnumberingscheme.h"
 #include "xfem/xfemstructuremanager.h"
 #include "mathfem.h"
@@ -250,14 +250,14 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
 
 
 StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile) :
-StructuralMaterialStatus(n, d, g),
-mNewlyInitialized(true)
+    StructuralMaterialStatus(n, d, g),
+    mNewlyInitialized(true)
 {
     mInputFile = inputfile;
 
     this->oldTangent = true;
 
-    if ( !this->createRVE(n, gp, inputfile) ) {
+    if ( !this->createRVE(n, inputfile) ) {
         OOFEM_ERROR("Couldn't create RVE");
     }
 
@@ -271,18 +271,16 @@ PrescribedGradientHomogenization* StructuralFE2MaterialStatus::giveBC()
 
 
 bool
-StructuralFE2MaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: string &inputfile)
+StructuralFE2MaterialStatus :: createRVE(int n, const std :: string &inputfile)
 {
     OOFEMTXTDataReader dr( inputfile.c_str() );
-    EngngModel *em = InstanciateProblem(dr, _processor, 0); // Everything but nrsolver is updated.
+    this->rve = InstanciateProblem(dr, _processor, 0); // Everything but nrsolver is updated.
     dr.finish();
-    em->setProblemScale(microScale);
-    em->checkProblemConsistency();
-    em->initMetaStepAttributes( em->giveMetaStep(1) );
-    em->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
-    em->init();
-
-    this->rve.reset( em );
+    this->rve->setProblemScale(microScale);
+    this->rve->checkProblemConsistency();
+    this->rve->initMetaStepAttributes( this->rve->giveMetaStep(1) );
+    this->rve->giveNextStep(); // Makes sure there is a timestep (which we will modify before solving a step)
+    this->rve->init();
 
     std :: ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;

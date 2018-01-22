@@ -35,8 +35,8 @@
 #ifndef Shell7BaseXFEM_h
 #define Shell7BaseXFEM_h
 
-#include "../sm/Elements/Shells/shell7base.h"
-#include "../sm/xfem/enrichmentitems/delamination.h"
+#include "sm/Elements/Shells/shell7base.h"
+#include "sm/xfem/enrichmentitems/delamination.h"
 #include "xfem/xfemelementinterface.h"
 #include "fei3dtrquad.h"
 

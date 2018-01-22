@@ -35,8 +35,8 @@
 #ifndef qplanstrssphf_h
 #define qplanstrssphf_h
 
-#include "../sm/Elements/phasefieldelement.h"
-#include "../sm/Elements/PlaneStress/qplanstrss.h"
+#include "sm/Elements/phasefieldelement.h"
+#include "sm/Elements/PlaneStress/qplanstrss.h"
 
 #define _IFT_QPlaneStressPhF2d_Name "QPlaneStressPhF2d"
 

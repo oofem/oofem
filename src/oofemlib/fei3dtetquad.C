@@ -124,23 +124,23 @@ FEI3dTetQuad :: giveVolume(const FEICellGeometry &cellgeo) const
 void
 FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double x1 = lcoords(0);
-    double x2 = lcoords(1);
-    double x3 = lcoords(2);
+    double x1 = lcoords[0];
+    double x2 = lcoords[1];
+    double x3 = lcoords[2];
     double x4 = 1.0 - x1 - x2 - x3;
 
     answer.resize(10);
-    answer(0) = x1 * ( 2 * x1 - 1 );
-    answer(1) = x2 * ( 2 * x2 - 1 );
-    answer(2) = x3 * ( 2 * x3 - 1 );
-    answer(3) = x4 * ( 2 * x4 - 1 );
+    answer[0] = x1 * ( 2 * x1 - 1 );
+    answer[1] = x2 * ( 2 * x2 - 1 );
+    answer[2] = x3 * ( 2 * x3 - 1 );
+    answer[3] = x4 * ( 2 * x4 - 1 );
 
-    answer(4) = 4 * x1 * x2;
-    answer(5) = 4 * x2 * x3;
-    answer(6) = 4 * x3 * x1;
-    answer(7) = 4 * x1 * x4;
-    answer(8) = 4 * x2 * x4;
-    answer(9) = 4 * x3 * x4;
+    answer[4] = 4 * x1 * x2;
+    answer[5] = 4 * x2 * x3;
+    answer[6] = 4 * x3 * x1;
+    answer[7] = 4 * x1 * x4;
+    answer[8] = 4 * x2 * x4;
+    answer[9] = 4 * x3 * x4;
 }
 
 double
@@ -162,9 +162,9 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 void
 FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords , const FEICellGeometry &cellgeo)
 {
-    double x1 = lcoords(0);
-    double x2 = lcoords(1);
-    double x3 = lcoords(2);
+    double x1 = lcoords[0];
+    double x2 = lcoords[1];
+    double x3 = lcoords[2];
     double x4 = 1.0 - x1 - x2 - x3;
 
     answer.resize(10, 3);
@@ -260,23 +260,23 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
     }
 
     answer.resize(4);
-    answer(0) = lcoords_guess(0);
-    answer(1) = lcoords_guess(1);
-    answer(2) = lcoords_guess(2);
+    answer[0] = lcoords_guess[0];
+    answer[1] = lcoords_guess[1];
+    answer[2] = lcoords_guess[2];
 
     bool inside = true;
     for ( int i = 0; i < 3; i++ ) {
-        if ( answer(i) < ( 0. - POINT_TOL ) ) {
-            answer(i) = 0.;
+        if ( answer[i] < ( 0. - POINT_TOL ) ) {
+            answer[i] = 0.;
             inside = false;
-        } else if ( answer(i) > ( 1. + POINT_TOL ) ) {
-            answer(i) = 1.;
+        } else if ( answer[i] > ( 1. + POINT_TOL ) ) {
+            answer[i] = 1.;
             inside = false;
         }
     }
 
-    answer(3) = 1.0 - answer(0) - answer(1) - answer(2); // Do this afterwards, since it might get clamped.
-    if ( answer(3) < 0. - POINT_TOL ) {
+    answer[3] = 1.0 - answer[0] - answer[1] - answer[2]; // Do this afterwards, since it might get clamped.
+    if ( answer[3] < 0. - POINT_TOL ) {
         return false;
     }
     return inside;
@@ -306,11 +306,11 @@ FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 void
 FEI3dTetQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double xi = lcoords.at(1);
+    double xi = lcoords[0];
     answer.resize(3);
-    answer(0) = 0.5 * ( xi - 1.0 ) * xi;
-    answer(1) = 0.5 * ( xi + 1.0 ) * xi;
-    answer(2) = 1.0 - xi * xi;
+    answer[0] = 0.5 * ( xi - 1.0 ) * xi;
+    answer[1] = 0.5 * ( xi + 1.0 ) * xi;
+    answer[2] = 1.0 - xi * xi;
 }
 
 void
@@ -334,7 +334,7 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
+        answer.add( N[i], * cellgeo.giveVertexCoordinates( edgeNodes[i] ) );
     }
 }
 
@@ -356,29 +356,29 @@ FEI3dTetQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     edgeNodes.resize(3);
 
     if ( iedge == 1 ) { // edge between nodes 1 2
-        edgeNodes(0) = 1;
-        edgeNodes(1) = 2;
-        edgeNodes(2) = 5;
+        edgeNodes[0] = 1;
+        edgeNodes[1] = 2;
+        edgeNodes[2] = 5;
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        edgeNodes(0) = 2;
-        edgeNodes(1) = 3;
-        edgeNodes(2) = 6;
+        edgeNodes[0] = 2;
+        edgeNodes[1] = 3;
+        edgeNodes[2] = 6;
     } else if ( iedge == 3 ) { // edge between nodes 3 1
-        edgeNodes(0) = 3;
-        edgeNodes(1) = 1;
-        edgeNodes(2) = 7;
+        edgeNodes[0] = 3;
+        edgeNodes[1] = 1;
+        edgeNodes[2] = 7;
     } else if ( iedge == 4 ) { // edge between nodes 1 4
-        edgeNodes(0) = 1;
-        edgeNodes(1) = 4;
-        edgeNodes(2) = 8;
+        edgeNodes[0] = 1;
+        edgeNodes[1] = 4;
+        edgeNodes[2] = 8;
     } else if ( iedge == 5 ) { // edge between nodes 2 4
-        edgeNodes(0) = 2;
-        edgeNodes(1) = 4;
-        edgeNodes(2) = 9;
+        edgeNodes[0] = 2;
+        edgeNodes[1] = 4;
+        edgeNodes[2] = 9;
     } else if ( iedge == 6 ) { // edge between nodes 3 4
-        edgeNodes(0) = 3;
-        edgeNodes(1) = 4;
-        edgeNodes(2) = 10;
+        edgeNodes[0] = 3;
+        edgeNodes[1] = 4;
+        edgeNodes[2] = 10;
     } else {
         OOFEM_ERROR("wrong edge number (%d)", iedge);
     }
@@ -395,8 +395,8 @@ FEI3dTetQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &ce
 void
 FEI3dTetQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l1 = lcoords.at(1);
-    double l2 = lcoords.at(2);
+    double l1 = lcoords[0];
+    double l2 = lcoords[1];
     double l3 = 1. - l1 - l2;
 
     answer.resize(6);
@@ -420,7 +420,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N(i), * cellgeo.giveVertexCoordinates( nodes(i) ) );
+        answer.add( N[i], * cellgeo.giveVertexCoordinates( nodes[i] ) );
     }
 }
 
@@ -459,23 +459,23 @@ FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArra
 
     FloatArray dNdxi(6), dNdeta(6);
 
-    dNdxi(0) = 4.0 * l1 - 1.0;
-    dNdxi(1) = 0.0;
-    dNdxi(2) = -1.0 * ( 4.0 * l3 - 1.0 );
-    dNdxi(3) = 4.0 * l2;
-    dNdxi(4) = -4.0 * l2;
-    dNdxi(5) = 4.0 * l3 - 4.0 * l1;
+    dNdxi[0] = 4.0 * l1 - 1.0;
+    dNdxi[1] = 0.0;
+    dNdxi[2] = -1.0 * ( 4.0 * l3 - 1.0 );
+    dNdxi[3] = 4.0 * l2;
+    dNdxi[4] = -4.0 * l2;
+    dNdxi[5] = 4.0 * l3 - 4.0 * l1;
 
-    dNdeta(0) = 0.0;
-    dNdeta(1) = 4.0 * l2 - 1.0;
-    dNdeta(2) = -1.0 * ( 4.0 * l3 - 1.0 );
-    dNdeta(3) = 4.0 * l1;
-    dNdeta(4) = 4.0 * l3 - 4.0 * l2;
-    dNdeta(5) = -4.0 * l1;
+    dNdeta[0] = 0.0;
+    dNdeta[1] = 4.0 * l2 - 1.0;
+    dNdeta[2] = -1.0 * ( 4.0 * l3 - 1.0 );
+    dNdeta[3] = 4.0 * l1;
+    dNdeta[4] = 4.0 * l3 - 4.0 * l2;
+    dNdeta[5] = -4.0 * l1;
 
     for ( int i = 0; i < 6; ++i ) {
-        a.add( dNdxi(i),  * cellgeo.giveVertexCoordinates( snodes(i) ) );
-        b.add( dNdeta(i), * cellgeo.giveVertexCoordinates( snodes(i) ) );
+        a.add( dNdxi[i],  * cellgeo.giveVertexCoordinates( snodes[i] ) );
+        b.add( dNdeta[i], * cellgeo.giveVertexCoordinates( snodes[i] ) );
     }
     answer.beVectorProductOf(a, b);
     return answer.normalize();
@@ -549,36 +549,36 @@ double FEI3dTetQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 
     // Expression derived in Mathematica:
     return (
-               c1(2) * ( c2(1) * ( -2 * c3(0) -  3 * c4(0) +  5 * c5(0) +  5 * c6(0) ) +
-                        c3(1) * ( 2 * c2(0)            -  5 * c4(0) -  5 * c5(0) +  3 * c6(0) ) +
-                        c4(1) * ( 3 * c2(0) +  5 * c3(0)            -  4 * c5(0) - 24 * c6(0) ) +
-                        c5(1) * ( -5 * c2(0) +  5 * c3(0) +  4 * c4(0)            -  4 * c6(0) ) +
-                        c6(1) * ( -5 * c2(0) -  3 * c3(0) + 24 * c4(0) +  4 * c5(0) ) ) +
-               c2(2) * ( c1(1) * ( 2 * c3(0) +  3 * c4(0) -  5 * c5(0) -  5 * c6(0) ) +
-                        c3(1) * ( -2 * c1(0)                       +  5 * c4(0) -  3 * c5(0) +  5 * c6(0) ) +
-                        c4(1) * ( -3 * c1(0)            -  5 * c3(0)            + 24 * c5(0) +  4 * c6(0) ) +
-                        c5(1) * ( 5 * c1(0)            +  3 * c3(0) - 24 * c4(0)            -  4 * c6(0) ) +
-                        c6(1) * ( 5 * c1(0)            -  5 * c3(0) -  4 * c4(0) +  4 * c5(0) ) ) +
-               c3(2) * ( c1(1) * ( -2 * c2(0)            +  5 * c4(0) +  5 * c5(0) -  3 * c6(0) ) +
-                        c2(1) * ( 2 * c1(0)                       -  5 * c4(0) +  3 * c5(0) -  5 * c6(0) ) +
-                        c4(1) * ( -5 * c1(0) +  5 * c2(0)                       -  4 * c5(0) +  4 * c6(0) ) +
-                        c5(1) * ( -5 * c1(0) -  3 * c2(0)            +  4 * c4(0)            + 24 * c6(0) ) +
-                        c6(1) * ( 3 * c1(0) +  5 * c2(0)            -  4 * c4(0) - 24 * c5(0) ) ) +
-               c4(2) * ( c1(1) * ( -3 * c2(0) -  5 * c3(0)            +  4 * c5(0) + 24 * c6(0) ) +
-                        c2(1) * ( 3 * c1(0)            +  5 * c3(0)            - 24 * c5(0) -  4 * c6(0) ) +
-                        c3(1) * ( 5 * c1(0) -  5 * c2(0)                       +  4 * c5(0) -  4 * c6(0) ) +
-                        c5(1) * ( -4 * c1(0) + 24 * c2(0) -  4 * c3(0)                       - 16 * c6(0) ) +
-                        c6(1) * ( -24 * c1(0) +  4 * c2(0) +  4 * c3(0)            + 16 * c5(0) ) ) +
-               c5(2) * ( c1(1) * ( 5 * c2(0) -  5 * c3(0) -  4 * c4(0)            +  4 * c6(0) ) +
-                        c2(1) * ( -5 * c1(0)            -  3 * c3(0) + 24 * c4(0)            +  4 * c6(0) ) +
-                        c3(1) * ( 5 * c1(0) +  3 * c2(0)            -  4 * c4(0)            - 24 * c6(0) ) +
-                        c4(1) * ( 4 * c1(0) - 24 * c2(0) +  4 * c3(0)                       + 16 * c6(0) ) +
-                        c6(1) * ( -4 * c1(0) -  4 * c2(0) + 24 * c3(0) - 16 * c4(0) ) ) +
-               c6(2) * ( c1(1) * ( 5 * c2(0) +  3 * c3(0) - 24 * c4(0) -  4 * c5(0) ) +
-                        c2(1) * ( -5 * c1(0)            +  5 * c3(0) +  4 * c4(0) -  4 * c5(0) ) +
-                        c3(1) * ( -3 * c1(0) -  5 * c2(0)            +  4 * c4(0) + 24 * c5(0) ) +
-                        c4(1) * ( 24 * c1(0) -  4 * c2(0) -  4 * c3(0)            - 16 * c5(0) ) +
-                        c5(1) * ( 4 * c1(0) +  4 * c2(0) - 24 * c3(0) + 16 * c4(0) ) )
+               c1[2] * ( c2[1] * ( -2 * c3[0] -  3 * c4[0] +  5 * c5[0] +  5 * c6[0] ) +
+                        c3[1] * ( 2 * c2[0]            -  5 * c4[0] -  5 * c5[0] +  3 * c6[0] ) +
+                        c4[1] * ( 3 * c2[0] +  5 * c3[0]            -  4 * c5[0] - 24 * c6[0] ) +
+                        c5[1] * ( -5 * c2[0] +  5 * c3[0] +  4 * c4[0]            -  4 * c6[0] ) +
+                        c6[1] * ( -5 * c2[0] -  3 * c3[0] + 24 * c4[0] +  4 * c5[0] ) ) +
+               c2[2] * ( c1[1] * ( 2 * c3[0] +  3 * c4[0] -  5 * c5[0] -  5 * c6[0] ) +
+                        c3[1] * ( -2 * c1[0]                       +  5 * c4[0] -  3 * c5[0] +  5 * c6[0] ) +
+                        c4[1] * ( -3 * c1[0]            -  5 * c3[0]            + 24 * c5[0] +  4 * c6[0] ) +
+                        c5[1] * ( 5 * c1[0]            +  3 * c3[0] - 24 * c4[0]            -  4 * c6[0] ) +
+                        c6[1] * ( 5 * c1[0]            -  5 * c3[0] -  4 * c4[0] +  4 * c5[0] ) ) +
+               c3[2] * ( c1[1] * ( -2 * c2[0]            +  5 * c4[0] +  5 * c5[0] -  3 * c6[0] ) +
+                        c2[1] * ( 2 * c1[0]                       -  5 * c4[0] +  3 * c5[0] -  5 * c6[0] ) +
+                        c4[1] * ( -5 * c1[0] +  5 * c2[0]                       -  4 * c5[0] +  4 * c6[0] ) +
+                        c5[1] * ( -5 * c1[0] -  3 * c2[0]            +  4 * c4[0]            + 24 * c6[0] ) +
+                        c6[1] * ( 3 * c1[0] +  5 * c2[0]            -  4 * c4[0] - 24 * c5[0] ) ) +
+               c4[2] * ( c1[1] * ( -3 * c2[0] -  5 * c3[0]            +  4 * c5[0] + 24 * c6[0] ) +
+                        c2[1] * ( 3 * c1[0]            +  5 * c3[0]            - 24 * c5[0] -  4 * c6[0] ) +
+                        c3[1] * ( 5 * c1[0] -  5 * c2[0]                       +  4 * c5[0] -  4 * c6[0] ) +
+                        c5[1] * ( -4 * c1[0] + 24 * c2[0] -  4 * c3[0]                       - 16 * c6[0] ) +
+                        c6[1] * ( -24 * c1[0] +  4 * c2[0] +  4 * c3[0]            + 16 * c5[0] ) ) +
+               c5[2] * ( c1[1] * ( 5 * c2[0] -  5 * c3[0] -  4 * c4[0]            +  4 * c6[0] ) +
+                        c2[1] * ( -5 * c1[0]            -  3 * c3[0] + 24 * c4[0]            +  4 * c6[0] ) +
+                        c3[1] * ( 5 * c1[0] +  3 * c2[0]            -  4 * c4[0]            - 24 * c6[0] ) +
+                        c4[1] * ( 4 * c1[0] - 24 * c2[0] +  4 * c3[0]                       + 16 * c6[0] ) +
+                        c6[1] * ( -4 * c1[0] -  4 * c2[0] + 24 * c3[0] - 16 * c4[0] ) ) +
+               c6[2] * ( c1[1] * ( 5 * c2[0] +  3 * c3[0] - 24 * c4[0] -  4 * c5[0] ) +
+                        c2[1] * ( -5 * c1[0]            +  5 * c3[0] +  4 * c4[0] -  4 * c5[0] ) +
+                        c3[1] * ( -3 * c1[0] -  5 * c2[0]            +  4 * c4[0] + 24 * c5[0] ) +
+                        c4[1] * ( 24 * c1[0] -  4 * c2[0] -  4 * c3[0]            - 16 * c5[0] ) +
+                        c5[1] * ( 4 * c1[0] +  4 * c2[0] - 24 * c3[0] + 16 * c4[0] ) )
                ) / 30.;
 }
 

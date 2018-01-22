@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/ErrorEstimators/scalarerrorindicator.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "sm/ErrorEstimators/scalarerrorindicator.h"
+#include "sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "element.h"
 #include "integrationrule.h"
 #include "gausspoint.h"
@@ -108,7 +108,7 @@ RemeshingCriteria *
 ScalarErrorIndicator :: giveRemeshingCrit()
 {
     if ( !this->rc ) {
-        this->rc.reset( new DirectErrorIndicatorRC(1, this) );
+        this->rc = std::make_unique<DirectErrorIndicatorRC>(1, this);
     }
 
     return this->rc.get();

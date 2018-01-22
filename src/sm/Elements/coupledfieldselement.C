@@ -34,10 +34,10 @@
  */
 
 #if 1
-#include "../sm/Elements/coupledfieldselement.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
-#include "../sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/coupledfieldselement.h"
+#include "sm/Materials/structuralms.h"
+#include "sm/CrossSections/structuralcrosssection.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"

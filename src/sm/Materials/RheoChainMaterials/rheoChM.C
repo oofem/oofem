@@ -35,13 +35,13 @@
 #include "mathfem.h"
 #include "rheoChM.h"
 #include "material.h"
-#include "Materials/isolinearelasticmaterial.h"
-//#include "Materials/latticelinearelastic.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
+//#include "sm/Materials/latticelinearelastic.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "engngm.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/structuralcrosssection.h"
 #include "contextioerr.h"
 
 namespace oofem {

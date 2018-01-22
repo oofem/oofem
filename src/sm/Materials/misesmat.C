@@ -33,7 +33,7 @@
  */
 
 #include "misesmat.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -44,29 +44,19 @@
 #include "datastream.h"
 #include "classfactory.h"
 #include "fieldmanager.h"
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "engngm.h"
 
 namespace oofem {
 REGISTER_Material(MisesMat);
 
-// constructor
-MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d)
+
+MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d),
+    linearElasticMaterial(n, d)
 {
-    linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
-    H = 0.;
-    //sig0 = 0.;
-    G = 0.;
-    K = 0.;
 }
 
-// destructor
-MisesMat :: ~MisesMat()
-{
-    delete linearElasticMaterial;
-}
 
-// reads the model parameters from the input file
 IRResultType
 MisesMat :: initializeFrom(InputRecord *ir)
 {
@@ -75,11 +65,11 @@ MisesMat :: initializeFrom(InputRecord *ir)
     result = StructuralMaterial :: initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
-    result = linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
+    result = linearElasticMaterial.initializeFrom(ir); // takes care of elastic constants
     if ( result != IRRT_OK ) return result;
 
-    G = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveShearModulus();
-    K = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveBulkModulus();
+    G = linearElasticMaterial.giveShearModulus();
+    K = linearElasticMaterial.giveBulkModulus();
 
     IR_GIVE_FIELD(ir, sig0, _IFT_MisesMat_sig0); // uniaxial yield stress
 
@@ -123,8 +113,7 @@ MisesMat :: giveRealStressVector_1d(FloatArray &answer,
     answer.times(1 - omega);
 
     // Compute the other components of the strain:
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    double E = lmat->give('E', gp), nu = lmat->give('n', gp);
+    double E = linearElasticMaterial.give('E', gp), nu = linearElasticMaterial.give('n', gp);
 
     FloatArray strain = status->getTempPlasticStrain();
     strain[0] = totalStrain[0];
@@ -303,8 +292,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
 
     // === radial return algorithm ===
     if ( totalStrain.giveSize() == 1 ) {
-        LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        double E = lmat->give('E', gp);
+        double E = linearElasticMaterial.give('E', gp);
         /*trial stress*/
         fullStress.resize(6);
         fullStress.at(1) = E * ( totalStrain.at(1) - plStrain.at(1) );
@@ -386,7 +374,6 @@ MisesMat :: computeDamageParamPrime(double tempKappa)
 }
 
 
-
 double
 MisesMat :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
@@ -427,7 +414,7 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                             TimeStep *tStep)
 {
     // start from the elastic stiffness
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    this->linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     if ( mode != TangentStiffness ) {
         return;
     }
@@ -482,7 +469,7 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer,
                                   GaussPoint *gp,
                                   TimeStep *tStep)
 {
-    this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, mode, gp, tStep);
+    this->linearElasticMaterial.give1dStressStiffMtrx(answer, mode, gp, tStep);
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
     // increment of cumulative plastic strain as an indicator of plastic loading
@@ -493,12 +480,10 @@ MisesMat :: give1dStressStiffMtrx(FloatMatrix &answer,
         return;
     }
 
-
     if ( tempKappa <= kappa ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
         answer.times(1 - omega);
         return;
     }
-
 
     // === plastic loading ===
     const FloatArray &stressVector = status->giveTempEffectiveStress();
@@ -719,7 +704,7 @@ MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :
 {
     stressVector.resize(6);
     strainVector.resize(6);
-    
+
     damage = tempDamage = 0.;
     kappa = tempKappa = 0.;
     effStress.resize(6);

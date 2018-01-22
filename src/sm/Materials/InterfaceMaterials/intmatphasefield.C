@@ -32,7 +32,7 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialphf.h"
 #include "intmatphasefield.h"
 
 #include "gausspoint.h"

@@ -33,7 +33,7 @@
  */
 
 #include "misesmatnl.h"
-#include "../sm/Elements/structuralelement.h"
+#include "sm/Elements/structuralelement.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
@@ -88,8 +88,7 @@ void
 MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(1, 1);
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    double E = lmat->give('E', gp);
+    double E = linearElasticMaterial.give('E', gp);
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
@@ -437,8 +436,7 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
 
     rcontrib.clear();
     if ( ( tempKappa - kappa ) > 0 ) {
-        LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-        double E = lmat->give('E', gp);
+        double E = linearElasticMaterial.give('E', gp);
         const FloatArray &stress = status->giveTempEffectiveStress();
         if ( gp->giveMaterialMode() == _1dMat ) {
             double coeff = sgn( stress.at(1) ) * E / ( E + H );

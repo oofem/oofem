@@ -35,8 +35,8 @@
 #ifndef concrete3_h
 #define concrete3_h
 
-#include "Materials/rcm2.h"
-#include "Materials/isolinearelasticmaterial.h"
+#include "sm/Materials/rcm2.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 
 ///@name Input fields for Concrete3
 //@{

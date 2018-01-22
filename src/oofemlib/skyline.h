@@ -52,7 +52,7 @@ namespace oofem {
  * Attribute 'isFactorized' is True if the skyline is already in U(T).D.U
  *         factorized form, else it is False.
  * Attribute adr  is array of diagonal members, it's size is size+1 (adr[0]=neni, adr[1]=1)
- * Attribute mtrx is double pointer to skyline stored in a array form
+ * Attribute mtrx is matrix values to skyline stored in a array form
  *         (but we start from index 1)
  *
  * Tasks:
@@ -68,12 +68,10 @@ namespace oofem {
 class OOFEM_EXPORT Skyline : public SparseMtrx
 {
 protected:
-    /// Total number of nonzero coefficients stored.
-    int nwk;
+    /// Vector of stored coefficients.
+    FloatArray mtrx;
     /// Integer array holding addresses of diagonal members.
     IntArray adr;
-    /// Vector of stored coefficients.
-    double *mtrx;
     /// Flag indicating whether factorized.
     int isFactorized;
 
@@ -82,40 +80,34 @@ public:
      * Constructor. Before any operation an internal profile must be built.
      * @see builInternalStructure
      */
-    Skyline(int n);
-    /**
-     * Constructor. Before any operation an internal profile must be built.
-     * @see builInternalStructure
-     */
-    Skyline();
+    Skyline(int n=0);
+    Skyline(const Skyline &s);
+    Skyline(int n, FloatArray mtrx, IntArray adr);
     /// Destructor
-    virtual ~Skyline();
+    virtual ~Skyline() {}
 
-    virtual SparseMtrx *GiveCopy() const;
+    std::unique_ptr<SparseMtrx> clone() const override;
 
-    virtual void times(const FloatArray &x, FloatArray &answer) const;
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
-    virtual void times(double x);
-    virtual void add(double x, SparseMtrx &m);
-    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
+    void times(const FloatArray &x, FloatArray &answer) const override;
+    void timesT(const FloatArray &x, FloatArray &answer) const override { this->times(x, answer); }
+    void times(double x) override;
+    void add(double x, SparseMtrx &m) override;
+    int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &) override;
 
-    //virtual Skyline *giveSubMatrix(Skyline &mat, IntArray &rows, IntArray &cols);
-    //virtual Skyline *beSubMatrixOf(const Skyline &mat, IntArray &rows, IntArray &cols);
-    //virtual SparseMtrx *beSubMatrixOf(const SparseMtrx &mat, IntArray &rows, IntArray &cols);
-    virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols); 
+    std::unique_ptr<SparseMtrx> giveSubMatrix(const IntArray &rows, const IntArray &cols) override; 
     /**
      * Allocates and builds internal structure according to given
      * array holding addresses of diagonal members values (adr).
      */
-    int setInternalStructure(IntArray &a);
+    int setInternalStructure(IntArray a);
 
-    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
-    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override;
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
 
-    virtual bool canBeFactorized() const { return true; }
-    virtual SparseMtrx *factorized();
-    virtual FloatArray *backSubstitutionWith(FloatArray &) const;
-    virtual void zero();
+    bool canBeFactorized() const override { return true; }
+    SparseMtrx *factorized() override;
+    FloatArray *backSubstitutionWith(FloatArray &) const override;
+    void zero() override;
     /**
      * Splits the receiver to LDLT form,
      * and computes the rigid body motions.
@@ -139,26 +131,20 @@ public:
      * @param se indexes of singular equations
      */
     void ldl_feti_sky(FloatArray &x, FloatArray &y, int nse, double limit, IntArray &se);
-    /// Returns coefficient at position (i,j).
-    virtual double &at(int, int);
-    /// Returns coefficient at position (i,j).
-    virtual double at(int i, int j) const;
-    /// Returns 0 if the memory is not allocated at position (i,j).
-    virtual bool isAllocatedAt(int i, int j) const;
-    int giveNumberOfNonZeros() const { return this->nwk; }
-    virtual void toFloatMatrix(FloatMatrix &answer) const;
-    /// Prints receiver to stdout.
-    virtual void printYourself() const;
-    virtual void writeToFile(const char *fname) const;
-    int giveAllocatedSize() { return nwk; }
 
-    virtual SparseMtrxType giveType() const { return SMT_Skyline; }
-    virtual bool isAsymmetric() const { return false; }
+    double &at(int, int) override;
+    double at(int i, int j) const override;
+    bool isAllocatedAt(int i, int j) const override;
+    int giveNumberOfNonZeros() const { return this->mtrx.giveSize(); }
+    void toFloatMatrix(FloatMatrix &answer) const override;
+    void printYourself() const override;
+    void writeToFile(const char *fname) const override;
+    int giveAllocatedSize() { return this->mtrx.giveSize(); }
 
-    virtual const char *giveClassName() const { return "Skyline"; }
+    SparseMtrxType giveType() const override { return SMT_Skyline; }
+    bool isAsymmetric() const override { return false; }
 
-protected:
-    Skyline(int, int, double *, const IntArray &);
+    const char *giveClassName() const override { return "Skyline"; }
 };
 } // end namespace oofem
 #endif // skyline_h

@@ -129,13 +129,6 @@ public:
      * by another simulation (e.g. of the manufacturing process).
      */
     virtual void setStatusVariable(int varID, double value) { }
-    /**
-     * Restores consistency of the status, i.e., computes or corrects
-     * the values of certain status variables such that the state is admissible.
-     * For instance, if the initial values of some internal variables
-     * are read from a file, other internal variables are adjusted accordingly.
-     */
-    virtual void restoreConsistency() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };

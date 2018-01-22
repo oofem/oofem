@@ -35,9 +35,9 @@
 #include <iostream>
 using namespace std;
 
-#include "../sm/EngineeringModels/nlineardynamic.h"
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/Elements/structuralelementevaluator.h"
+#include "sm/EngineeringModels/nlineardynamic.h"
+#include "sm/Elements/nlstructuralelement.h"
+#include "sm/Elements/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "metastep.h"
@@ -91,7 +91,7 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
     if ( this->nMethod ) {
         this->nMethod->reinitialize();
     } else {
-        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
+        this->nMethod = std::make_unique<NRSolver>(this->giveDomain(1), this);
     }
 
     return this->nMethod.get();
@@ -253,7 +253,7 @@ TimeStep *NonLinearDynamic :: giveNextStep()
     }
 
     previousStep = std :: move(currentStep);
-    currentStep.reset( new TimeStep(istep, this, mStepNum, totalTime, deltaTtmp, counter, td) );
+    currentStep = std::make_unique<TimeStep>(istep, this, mStepNum, totalTime, deltaTtmp, counter, td);
 
     return currentStep.get();
 }

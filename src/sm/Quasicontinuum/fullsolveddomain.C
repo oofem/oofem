@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Quasicontinuum/fullsolveddomain.h"
+#include "sm/Quasicontinuum/fullsolveddomain.h"
 
 #include "nummet.h"
 #include "timestep.h"

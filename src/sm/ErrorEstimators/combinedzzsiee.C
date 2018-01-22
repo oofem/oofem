@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/ErrorEstimators/combinedzzsiee.h"
+#include "sm/ErrorEstimators/combinedzzsiee.h"
 #include "domain.h"
 #include "element.h"
 #include "connectivitytable.h"
@@ -84,7 +84,7 @@ RemeshingCriteria *
 CombinedZZSIErrorEstimator :: giveRemeshingCrit()
 {
     if ( !this->rc ) {
-        this->rc.reset( new CombinedZZSIRemeshingCriteria(1, this) );
+        this->rc = std::make_unique<CombinedZZSIRemeshingCriteria>(1, this);
     }
 
     return this->rc.get();

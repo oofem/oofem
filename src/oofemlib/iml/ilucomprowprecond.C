@@ -60,12 +60,13 @@ void
 CompRow_ILUPreconditioner :: init(const SparseMtrx &A)
 {
     if ( dynamic_cast< const DynCompRow *>(& A) ) {
-        this->A =  ( * ( ( DynCompRow * ) & A ) );
-        ( this->A ).ILUPYourself(part_fill, drop_tol);
+        this->A = static_cast< const DynCompRow &>(A);
+        this->A.ILUPYourself(part_fill, drop_tol);
     } else {
         OOFEM_ERROR("unsupported sparse matrix type");
     }
 }
+
 
 void
 CompRow_ILUPreconditioner :: solve(const FloatArray &x, FloatArray &y) const

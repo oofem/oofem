@@ -35,7 +35,7 @@
 #ifndef intelline1phf_h
 #define intelline1phf_h
 
-#include "Elements/Interfaces/structuralinterfaceelementphf.h"
+#include "sm/Elements/Interfaces/structuralinterfaceelementphf.h"
 
 #define _IFT_IntElLine1PhF_Name "intelline1phf"
 #define _IFT_IntElLine1PhF_axisymmode "axisymmode"

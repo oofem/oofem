@@ -57,45 +57,43 @@ namespace oofem {
 class OOFEM_EXPORT DynCompRow : public SparseMtrx
 {
 protected:
+    /// data values per column
+    std::vector<FloatArray> rows;
+    /// row_ind per column
+    std::vector<IntArray> colind;
+    /// pointers to the diagonal elements; needed only for ILU
+    IntArray diag;
 
-    FloatArray **rows_;   // data values per column
-    IntArray **colind_;   // row_ind per column
-    IntArray diag_rowptr_; // pointers to the diagonal elements; needed only for ILU
-
-    int base_;              // index base: offset of first element
+    /// index base: offset of first element
+    int base;
 
 public:
     /** Constructor. Before any operation an internal profile must be built.
      * @see builInternalStructure
      */
-    DynCompRow(int n);
-    /** Constructor. Before any operation an internal profile must be built.
-     * @see builInternalStructure
-     */
-    DynCompRow();
+    DynCompRow(int n=0);
     /// Copy constructor
     DynCompRow(const DynCompRow & S);
     /// Assignment operator
     DynCompRow &operator = ( const DynCompRow & C );
     /// Destructor
-    virtual ~DynCompRow();
+    virtual ~DynCompRow() {}
 
-    // Overloaded methods:
-    SparseMtrx *GiveCopy() const;
-    virtual void times(const FloatArray &x, FloatArray &answer) const;
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
-    virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
-    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
-    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    virtual bool canBeFactorized() const { return false; }
-    virtual void zero();
-    virtual const char* giveClassName() const { return "DynCompRow"; }
-    virtual SparseMtrxType  giveType() const { return SMT_DynCompRow; }
-    virtual bool isAsymmetric() const { return true; }
-    virtual void printStatistics() const;
-    virtual double &at(int i, int j);
-    virtual double at(int i, int j) const;
+    std::unique_ptr<SparseMtrx> clone() const override;
+    void times(const FloatArray &x, FloatArray &answer) const override;
+    void timesT(const FloatArray &x, FloatArray &answer) const override;
+    void times(double x) override;
+    int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &) override;
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override;
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
+    bool canBeFactorized() const override { return false; }
+    void zero() override;
+    const char* giveClassName() const override { return "DynCompRow"; }
+    SparseMtrxType  giveType() const override { return SMT_DynCompRow; }
+    bool isAsymmetric() const override { return true; }
+    void printStatistics() const override;
+    double &at(int i, int j) override;
+    double at(int i, int j) const override;
 
     /**
      * Performs LU factorization on yourself; modifies receiver
@@ -109,9 +107,9 @@ public:
     /*  Access and info functions  */
     /*******************************/
     /// Returns col index for i-th  row
-    const IntArray *col_ind(int i) const { return colind_ [ i ]; }
+    const IntArray &col_ind(int i) const { return colind[ i ]; }
     /// Returns row values
-    const FloatArray *row(int i) const { return rows_ [ i ]; }
+    const FloatArray &row(int i) const { return rows[ i ]; }
 
 protected:
 

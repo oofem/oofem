@@ -53,48 +53,33 @@
 namespace oofem {
 REGISTER_SparseMtrx(SkylineUnsym, SMT_SkylineU);
 
-SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n)
-    // Constructor. Creates an empty skyline unsymmetric.
-
+SkylineUnsym :: SkylineUnsym(int n) : SparseMtrx(n, n),
+    isFactorized(false)
 {
-    size         = n;
-    rowColumns   = NULL;
-    isFactorized = false;
 }
 
-SkylineUnsym :: SkylineUnsym() : SparseMtrx()
+
+SkylineUnsym :: SkylineUnsym(const SkylineUnsym &s) : SparseMtrx(s.nRows, s.nColumns),
+    rowColumns(s.rowColumns),
+    isFactorized(s.isFactorized)
 {
-    // Constructor. Creates a skyline of size 0.
-    // nRows = nColumns = 0;  // set by SparseMtrx constructor
-    size         = 0;
-    rowColumns   = NULL;
-    isFactorized = false;
 }
 
-SkylineUnsym :: ~SkylineUnsym()
-// Destructor.
 
+std::unique_ptr<SparseMtrx>
+SkylineUnsym :: clone() const
 {
-    if ( size ) {
-        int i = size;
-        RowColumn **p = rowColumns;
-        while ( i-- ) {
-            delete *p++;
-        }
-
-        delete [] rowColumns;
-    }
+    return std::make_unique<SkylineUnsym>(*this);
 }
+
 
 void
 SkylineUnsym :: toFloatMatrix(FloatMatrix &answer) const
 {
-    int start;
-
-    answer.resize(size, size);
+    answer.resize(this->giveNumberOfRows(), this->giveNumberOfColumns());
     answer.zero();
-    for ( int j = 1; j <= size; j++ ) {
-        start = this->giveRowColumn(j)->giveStart();
+    for ( int j = 1; j <= this->giveNumberOfColumns(); j++ ) {
+        int start = this->rowColumns[j-1].giveStart();
         for ( int i = start; i <= j; i++ ) {
             answer.at(i, j) = this->at(i, j);
             answer.at(j, i) = this->at(j, i);
@@ -105,49 +90,38 @@ SkylineUnsym :: toFloatMatrix(FloatMatrix &answer) const
 
 double &
 SkylineUnsym :: at(int i, int j)
-// Returns the (i,j) coefficient of the receiver. Not very efficient.
-
 {
-    // increment version
     this->version++;
 
     if ( i < j ) {
-        return this->giveRowColumn(j)->atU(i);
+        return this->rowColumns[j-1].atU(i);
     } else if ( i > j ) {
-        return this->giveRowColumn(i)->atL(j);
+        return this->rowColumns[i-1].atL(j);
     } else {
-        return this->giveRowColumn(i)->atDiag();
+        return this->rowColumns[i-1].atDiag();
     }
 }
 
+
 double
 SkylineUnsym :: at(int i, int j) const
-// Returns the (i,j) coefficient of the receiver. Not very efficient.
-
 {
     if ( i < j ) {
-        return this->giveRowColumn(j)->atU(i);
+        return this->rowColumns[j-1].atU(i);
     } else if ( i > j ) {
-        return this->giveRowColumn(i)->atL(j);
+        return this->rowColumns[i-1].atL(j);
     } else {
-        return this->giveRowColumn(i)->atDiag();
+        return this->rowColumns[i-1].atDiag();
     }
 }
 
 
 int
 SkylineUnsym :: assemble(const IntArray &loc, const FloatMatrix &mat)
-// Assembles the elemental matrix 'k' to the receiver, using 'loc' as a
-// location array. The values in k corresponding to a zero coefficient
-// in loc are not assembled.
-// Warning : k is not supposed to be an instance of DiagonalMatrix.
-
 {
-    int dim;
-    //   RowColumn* rowColumnJJ ; // 13 November 1996 - not needed anymore
+    int dim = mat.giveNumberOfRows();
 
 #  ifdef DEBUG
-    dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
         OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
@@ -157,9 +131,6 @@ SkylineUnsym :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
     // added to make it work for nonlocal model !!!!!!!!!!!!!!!!!!!!!!!!!!
     // checkSizeTowards(loc) ;
-
-
-    dim = mat.giveNumberOfRows();
 
     for ( int j = 1; j <= dim; j++ ) {
         int jj = loc.at(j);
@@ -173,7 +144,6 @@ SkylineUnsym :: assemble(const IntArray &loc, const FloatMatrix &mat)
         }
     }
 
-    // increment version
     this->version++;
 
     return 1;
@@ -182,19 +152,11 @@ SkylineUnsym :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int
 SkylineUnsym :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
-// Assembles the elemental matrix 'k' to the receiver, using 'loc1' as a
-// location array for rows and 'loc2' as a location array for columns.
-// The values in 'k' corresponding to a zero coefficient
-// in loc are not assembled.
-// Warning : k is not supposed to be an instance of DiagonalMatrix.
-
 {
-    int dim1, dim2;
-
     this->checkSizeTowards(rloc, cloc);
 
-    dim1 = mat.giveNumberOfRows();
-    dim2 = mat.giveNumberOfColumns();
+    int dim1 = rloc.giveSize();
+    int dim2 = cloc.giveSize();
     for ( int i = 1; i <= dim1; i++ ) {
         int ii = rloc.at(i);
         if ( ii ) {
@@ -207,50 +169,41 @@ SkylineUnsym :: assemble(const IntArray &rloc, const IntArray &cloc, const Float
         }
     }
 
-    // increment version
     this->version++;
 
     return 1;
 }
 
+
 void
 SkylineUnsym :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
-// Increases the number of columns of the receiver if 'rloc, cloc' points to
-// out-of-range columns.
 {
-    int maxCol, dim1, dim2;
+    int maxCol = 0;
 
-    maxCol = 0;                         // the largest coefficient in 'loc'
-    dim1    = rloc.giveSize();
-    dim2    = cloc.giveSize();
-
-    for ( int i = 1; i <= dim1; i++ ) {
-        maxCol = max( maxCol, rloc.at(i) );
+    for ( auto r : rloc ) {
+        maxCol = max( maxCol, r );
     }
 
-    for ( int j = 1; j <= dim2; j++ ) {
-        maxCol = max( maxCol, cloc.at(j) );
+    for ( auto c : cloc ) {
+        maxCol = max( maxCol, c );
     }
 
-    if ( maxCol > size ) {              // enlarge the matrix
+    if ( maxCol > this->giveNumberOfColumns() ) {
         growTo(maxCol);
     }
 
-    for ( int i = 1; i <= dim1; i++ ) {
-        int ii = rloc.at(i);
+    for ( auto ii : rloc ) {
         if ( ii ) {
-            giveRowColumn(ii)->checkSizeTowards(cloc);
+            rowColumns[ii-1].checkSizeTowards(cloc);
         }
     }
 
-    for ( int j = 1; j <= dim2; j++ ) {
-        int jj = cloc.at(j);
+    for ( auto jj : cloc ) {
         if ( jj ) {
-            giveRowColumn(jj)->checkSizeTowards(rloc);
+            rowColumns[jj-1].checkSizeTowards(rloc);
         }
     }
 }
-
 
 
 int
@@ -258,32 +211,15 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const Unknown
 {
     // Instanciates the profile of the receiver and initializes all coefficients to zero.
     // Warning : case diagonal (lumped) matrix to expected.
-
     IntArray loc;
     int first, nonlocal;
     Domain *domain = eModel->giveDomain(di);
     int neq = eModel->giveNumberOfDomainEquations(di, s);
     int nelem = domain->giveNumberOfElements();
-    Element *elem;
-    //nonlocal = aDomain -> giveAlgorithm() -> useNonlocalStiffness();
     nonlocal = eModel->useNonlocalStiffnessOption();
 
     // clear receiver if exist
-
-    if ( size ) {
-        RowColumn **_p;
-        int _i;
-        _i = size;
-        _p = rowColumns;
-        while ( _i-- ) {
-            delete *_p++;
-        }
-
-        delete [] rowColumns;
-        rowColumns = NULL;
-        size = 0;
-    }
-
+    this->rowColumns.clear();
     this->growTo(neq); // from now on, size = MaxIndex
 
     // Set up the array with indices of first nonzero elements in each row
@@ -293,7 +229,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const Unknown
     }
 
     for ( int n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+        auto elem = domain->giveElement(n);
         //elem -> giveLocationArray (loc) ;
 
         if ( !nonlocal ) {
@@ -329,7 +265,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const Unknown
 
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
-        if ( bc != NULL ) {
+        if ( bc ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t j = 0; j < r_locs.size(); j++ ) {
                 IntArray &krloc = r_locs [ j ];
@@ -352,16 +288,13 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const Unknown
     }
 
 
-    // Enlarge the rowcolumns
     for ( int i = 1; i <= neq; i++ ) {
-        this->giveRowColumn(i)->growTo( firstIndex.at(i) );
+        this->rowColumns[i-1].growTo( firstIndex.at(i) );
     }
 
-    // Print out basic information.
     this->printStatistics();
 
     nRows = nColumns = neq;
-    // increment version
     this->version++;
 
     return true;
@@ -376,7 +309,6 @@ int SkylineUnsym :: setInternalStructure(IntArray &adr1)
     IntArray mht, firstIndex;
     int n = adr1.giveSize();
     this->growTo(n - 1);
-    size = n - 1; // check
 
     // build first index array
     mht.resize(n - 1);
@@ -390,14 +322,13 @@ int SkylineUnsym :: setInternalStructure(IntArray &adr1)
 
     // Enlarge the rowcolumns
     for ( int i = 1; i <= n - 1; i++ ) {
-        this->giveRowColumn(i)->growTo( firstIndex.at(i) );
+        this->rowColumns[i-1].growTo( firstIndex.at(i) );
     }
 
-    // Print out basic information.
     this->printStatistics();
 
     nRows = nColumns = n - 1;
-    // increment version
+
     this->version++;
 
     return true;
@@ -407,59 +338,30 @@ int SkylineUnsym :: setInternalStructure(IntArray &adr1)
 
 void
 SkylineUnsym :: checkSizeTowards(const IntArray &loc)
-// Increases the number of columns of the receiver if 'loc' points to
-// out-of-range columns.
 {
-    int dim, maxCol;
-
-    maxCol = 0;                         // the largest coefficient in 'loc'
-    dim    = loc.giveSize();
-    for ( int i = 1; i <= dim; i++ ) {
-        maxCol = max( maxCol, loc.at(i) );
+    int maxCol = 0; // the largest coefficient in 'loc'
+    for ( auto c: loc ) {
+        maxCol = max( maxCol, c );
     }
 
-    if ( maxCol > size ) {              // enlarge the matrix
+    if ( maxCol > (int)this->rowColumns.size() ) { // enlarge the matrix
         growTo(maxCol);
     }
 
-    for ( int i = 1; i <= dim; i++ ) {
-        int ii = loc.at(i);
+    for ( auto ii: loc ) {
         if ( ii ) {
-            giveRowColumn(ii)->checkSizeTowards(loc);
+            this->rowColumns[ii-1].checkSizeTowards(loc);
         }
     }
 }
 
-/*
- * int
- * SkylineUnsym :: computeNumberNegativeEigenvalue()
- * // Compute the number of negative eigenvalue, equivalent to the number of
- * // negative diagonal terms.
- *
- * {
- * int j, count;
- *
- * if (! isFactorized) factorized();
- *
- * count = 0;
- * for (j=1 ; j<=size ; j++) {
- * if (at(j,j) <= 0.)
- * count = count + 1;
- * }
- * return count;
- * }
- */
 
 SparseMtrx *
 SkylineUnsym :: factorized()
 // Returns the receiver in L.D.U factorized form. From Golub & van Loan,
 // 1rst edition, pp 83-84.
-
 {
-    RowColumn *rowColumnK, *rowColumnI;
     FloatArray r, w;
-    double diag;
-    int start, startK, startI;
 #ifdef TIME_REPORT
     Timer timer;
     timer.startTimer();
@@ -469,15 +371,15 @@ SkylineUnsym :: factorized()
         return this;
     }
 
-    if ( !size ) {
+    if ( this->rowColumns.empty() ) {
         OOFEM_WARNING("null-sized matrix factorized");
         isFactorized = 1;
         return this;
     }
 
-    for ( int k = 1; k <= size; k++ ) {
-        rowColumnK = this->giveRowColumn(k);
-        startK   = rowColumnK->giveStart();
+    for ( int k = 1; k <= this->giveNumberOfColumns(); k++ ) {
+        auto &rowColumnK = this->rowColumns[k-1];
+        int startK = rowColumnK.giveStart();
 
         // compute vectors r and w
         r.resize(k - 1);
@@ -485,31 +387,31 @@ SkylineUnsym :: factorized()
         w.resize(k - 1);
         w.zero();
         for ( int p = startK; p < k; p++ ) {
-            diag     = this->giveRowColumn(p)->atDiag();
-            r.at(p) = diag * rowColumnK->atU(p);
-            w.at(p) = diag * rowColumnK->atL(p);
+            double diag = this->rowColumns[p-1].atDiag();
+            r.at(p) = diag * rowColumnK.atU(p);
+            w.at(p) = diag * rowColumnK.atL(p);
         }
 
         // compute diagonal coefficient of rowColumn k
-        rowColumnK->atDiag() -= rowColumnK->dot(r, 'R', startK, k - 1);
-        diag = rowColumnK->atDiag();
+        rowColumnK.atDiag() -= rowColumnK.dot(r, 'R', startK, k - 1);
+        double diag = rowColumnK.atDiag();
 
         // test pivot not too small
         if ( fabs(diag) < SkylineUnsym_TINY_PIVOT ) {
-            rowColumnK->atDiag() = diag = SkylineUnsym_TINY_PIVOT;
+            rowColumnK.atDiag() = diag = SkylineUnsym_TINY_PIVOT;
             OOFEM_LOG_DEBUG("SkylineUnsym :: factorized: zero pivot %d artificially set to a small value", k);
         }
 
         // compute off-diagonal coefficients of rowColumns i>k
-        for ( int i = k + 1; i <= size; i++ ) {
-            rowColumnI = giveRowColumn(i);
-            startI   = rowColumnI->giveStart();
+        for ( int i = k + 1; i <= this->giveNumberOfColumns(); i++ ) {
+            auto &rowColumnI = this->rowColumns[i-1];
+            int startI = rowColumnI.giveStart();
             if ( startI <= k ) {
-                start = max(startI, startK);
-                rowColumnI->atL(k) -= rowColumnI->dot(r, 'R', start, k - 1);
-                rowColumnI->atL(k) /= diag;
-                rowColumnI->atU(k) -= rowColumnI->dot(w, 'C', start, k - 1);
-                rowColumnI->atU(k) /= diag;
+                int start = max(startI, startK);
+                rowColumnI.atL(k) -= rowColumnI.dot(r, 'R', start, k - 1);
+                rowColumnI.atL(k) /= diag;
+                rowColumnI.atU(k) -= rowColumnI.dot(w, 'C', start, k - 1);
+                rowColumnI.atU(k) /= diag;
             }
         }
     }
@@ -520,7 +422,7 @@ SkylineUnsym :: factorized()
     timer.stopTimer();
     OOFEM_LOG_DEBUG( "SkylineU info: user time consumed by factorization: %.2fs\n", timer.getUtime() );
 #endif
-    // increment version
+
     //this->version++;
 
     return this;
@@ -530,36 +432,20 @@ SkylineUnsym :: factorized()
 
 FloatArray *
 SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
-// Returns the solution x of the system U.x = y , where U is the upper
-// half of the receiver. Note : x overwrites y.
-
 {
-    int start;
-    double yK, diag;
-    RowColumn *rowColumnK;
-
-
-    // forwardReductionWith
-    // if (! isFactorized) this -> factorized();
-
-    if ( !size ) {
-        return & y;                               // null size system
-    }
-
-    if ( y.giveSize() != size ) {
+    if ( y.giveSize() != this->giveNumberOfColumns() ) {
         OOFEM_ERROR("size mismatch");
     }
 
-    for ( int k = 1; k <= size; k++ ) {
-        rowColumnK  = this->giveRowColumn(k);
-        start     = rowColumnK->giveStart();
-        y.at(k) -= rowColumnK->dot(y, 'R', start, k - 1);
+    for ( int k = 1; k <= this->giveNumberOfColumns(); k++ ) {
+        auto &rowColumnK = this->rowColumns[k-1];
+        int start = rowColumnK.giveStart();
+        y.at(k) -= rowColumnK.dot(y, 'R', start, k - 1);
     }
 
     // diagonalScaling
-    /*  uprava diagonalniho prvku  */
-    for ( int k = 1; k <= size; k++ ) {
-        diag = this->giveRowColumn(k)->atDiag();
+    for ( int k = 1; k <= this->giveNumberOfColumns(); k++ ) {
+        double diag = this->rowColumns[k-1].atDiag();
 #     ifdef DEBUG
         if ( fabs(diag) < SkylineUnsym_TINY_PIVOT ) {
             OOFEM_ERROR("pivot %d is small", k);
@@ -570,152 +456,79 @@ SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
     }
 
 
-    for ( int k = size; k > 0; k-- ) {
-        rowColumnK = this->giveRowColumn(k);
-        yK       = y.at(k);
-        start    = rowColumnK->giveStart();
+    for ( int k = this->giveNumberOfColumns(); k > 0; k-- ) {
+        auto &rowColumnK = this->rowColumns[k-1];
+        double yK = y.at(k);
+        int start = rowColumnK.giveStart();
         for ( int i = start; i < k; i++ ) {
-            y.at(i) -= rowColumnK->atU(i) * yK;
+            y.at(i) -= rowColumnK.atU(i) * yK;
         }
     }
 
     return & y;
 }
 
-SparseMtrx *
-SkylineUnsym :: GiveCopy() const
-{
-    RowColumn **newRowColumns, *rowColumni;
-    newRowColumns = new RowColumn * [ size ];
-    SkylineUnsym *answer;
-
-    for ( int i = 1; i <= size; i++ ) {
-        rowColumni  = this->giveRowColumn(i);
-        if ( rowColumni ) {
-            newRowColumns [ i - 1 ] = rowColumni->GiveCopy();
-        } else {
-            newRowColumns [ i - 1 ] = NULL;
-        }
-    }
-
-    answer = new SkylineUnsym(newRowColumns, this->size, this->isFactorized);
-    return answer;
-}
 
 void
 SkylineUnsym :: times(const FloatArray &x, FloatArray &answer) const
 {
-    int starti;
-    RowColumn *rowColumni;
-    //
-    // first check sizes
-    //
-    if ( this->size != x.giveSize() ) {
+    if ( this->giveNumberOfColumns() != x.giveSize() ) {
         OOFEM_ERROR("size mismatch");
     }
 
-    answer.resize(this->size);
+    answer.resize(this->giveNumberOfRows());
     answer.zero();
 
-    for ( int i = 1; i <= size; i++ ) {
-        rowColumni  = this->giveRowColumn(i);
-        starti     = rowColumni->giveStart();
-        answer.at(i) += rowColumni->dot(x, 'R', starti, i - 1);
-        answer.at(i) += rowColumni->atDiag() * x.at(i);
+    for ( int i = 1; i <= this->giveNumberOfColumns(); i++ ) {
+        auto &rowColumni = this->rowColumns[i-1];
+        int starti = rowColumni.giveStart();
+        answer.at(i) += rowColumni.dot(x, 'R', starti, i - 1);
+        answer.at(i) += rowColumni.atDiag() * x.at(i);
 
         for ( int j = starti; j <= i - 1; j++ ) {
-            answer.at(j) += rowColumni->atU(j) * x.at(i);
+            answer.at(j) += rowColumni.atU(j) * x.at(i);
         }
     }
 }
+
 
 void SkylineUnsym :: times(double x)
 {
-    int starti;
-    RowColumn *rowColumni;
-
-    for ( int i = 1; i <= size; i++ ) {
-        rowColumni  = this->giveRowColumn(i);
-        starti     = rowColumni->giveStart();
+    for ( int i = 1; i <= this->giveNumberOfColumns(); i++ ) {
+        auto &rowColumni = this->rowColumns[i-1];
+        int starti = rowColumni.giveStart();
         for ( int j = starti; j <= i - 1; j++ ) {
-            rowColumni->atU(j) *= x;
-            rowColumni->atL(j) *= x;
+            rowColumni.atU(j) *= x;
+            rowColumni.atL(j) *= x;
         }
 
-        rowColumni->atDiag() *= x;
+        rowColumni.atDiag() *= x;
     }
 
-    // increment version
     this->version++;
-}
-
-
-RowColumn *
-SkylineUnsym :: giveRowColumn(int j) const
-// Returns the j-th rowColumn of the receiver. Creates it if necessary.
-
-{
-    if ( size < j ) {
-        // this -> growTo(j) ;
-        OOFEM_ERROR("size mismatch");
-    }
-
-    if ( !rowColumns [ j - 1 ] ) {
-        rowColumns [ j - 1 ] = new RowColumn(j, j);
-    }
-
-    return rowColumns [ j - 1 ];
 }
 
 
 void
 SkylineUnsym :: growTo(int n)
-// Enlarges the receiver to n columns.
 {
-    RowColumn **newRowColumns, **p1, **p2;
-    int i;
-
-    if ( n == size ) {
-        return;
+    this->rowColumns.reserve(n);
+    for (int i = 1; i <= n; ++i ) {
+        this->rowColumns.emplace_back(i);
     }
-
-#  ifdef DEBUG
-    else if ( n <= size ) {
-        OOFEM_ERROR("cannot grow from %d to %d", size, n);
-    }
-#  endif
-
-    newRowColumns = new RowColumn * [ n ];
-    p1          = rowColumns;
-    p2          = newRowColumns;
-
-    i = size;
-    while ( i-- ) {
-        * p2++ = * p1++;
-    }
-
-    i = n - size;
-    while ( i-- ) {
-        * p2++ = NULL;
-    }
-
-    if ( rowColumns ) {
-        delete [] rowColumns;
-    }
-
-    rowColumns = newRowColumns;
-    size     = n;
+    this->nRows = n;
+    this->nColumns = n;
 }
 
 void
 SkylineUnsym :: printStatistics() const
 {
     int nelem = 0;
-    for ( int i = 1; i <= size; i++ ) {
-        nelem += this->giveRowColumn(i)->giveSize();
+    for ( auto &rc : this->rowColumns ) {
+        nelem += rc.giveSize();
     }
 
-    OOFEM_LOG_INFO("Skylineu info: neq is %d, nwk is %d\n", size, nelem);
+    OOFEM_LOG_INFO("Skylineu info: neq is %d, nwk is %d\n", this->giveNumberOfRows(), nelem);
 }
 
 
@@ -737,87 +550,45 @@ SkylineUnsym :: writeToFile(const char *fname) const
 
 void
 SkylineUnsym :: printYourself() const
-// Prints the receiver.
 {
     FloatMatrix copy;
-
     this->toFloatMatrix(copy);
     copy.printYourself();
+    for ( auto &rc : this->rowColumns ) {
+        rc.printYourself();
+    }
 }
 
 void
 SkylineUnsym :: zero()
 {
-    // Returns the receiver with all coefficients set to zero.
-    for ( int j = 1; j <= size; j++ ) {
-        this->giveRowColumn(j)->zero();
+    for ( auto &rc : this->rowColumns ) {
+        rc.zero();
     }
 
     isFactorized = false;
 
-    // increment version
     this->version++;
 }
 
-/*
- * SkylineSym* SkylineUnsym :: giveSymmetricPart()
- * {
- * int i, j, rowcolsize, colsize;
- * SkylineSym* answer = new SkylineSym();
- * answer -> growTo(size);
- * for (i=1; i<=size; i++){
- * rowcolsize = rowColumns[i-1] -> giveSize();
- * colsize = (rowcolsize+1)/2;
- * answer -> giveColumn(i) -> growTo(colsize);
- * answer->at(i,i) = at(i,i);
- * j=i+1-colsize;
- * while(j<i){
- * answer->at(j,i) = (at(i,j)+at(j,i))/2.;
- * j++;
- * }
- * }
- * return answer;
- * }
- *
- *
- * int  SkylineUnsym :: computeNumberNegativePivotsOfSymPart()
- * {
- * SkylineSym* SymPart = giveSymmetricPart();
- * int answer = SymPart -> computeNumberNegativeEigenvalue();
- * delete SymPart;
- * return answer;
- * }
- *
- */
-
-SkylineUnsym :: SkylineUnsym(RowColumn **newRowCol, int newSize, int isFact) : SparseMtrx(newSize, newSize)
-{
-    size         = newSize;
-    rowColumns   = newRowCol;
-    isFactorized = isFact;
-}
 
 void SkylineUnsym :: timesT(const FloatArray &x, FloatArray &answer) const
 {
-    int starti;
-    RowColumn *rowColumni;
-
-    // first check sizes
-    if ( this->size != x.giveSize() ) {
+    if ( this->giveNumberOfRows() != x.giveSize() ) {
         OOFEM_ERROR("size mismatch");
     }
 
-    answer.resize(this->size);
+    answer.resize(this->giveNumberOfColumns());
     answer.zero();
 
-    for ( int i = 1; i <= size; i++ ) {
-        rowColumni  = this->giveRowColumn(i);
-        starti     = rowColumni->giveStart();
-        answer.at(i) += rowColumni->dot(x, 'C', starti, i - 1);
-        answer.at(i) += rowColumni->atDiag() * x.at(i);
+    for ( int i = 1; i <= this->giveNumberOfRows(); i++ ) {
+        auto &rowColumni = this->rowColumns[i-1];
+        int starti = rowColumni.giveStart();
+        answer.at(i) += rowColumni.dot(x, 'C', starti, i - 1);
+        answer.at(i) += rowColumni.atDiag() * x.at(i);
 
         for ( int j = starti; j <= i - 1; j++ ) {
-            answer.at(j) += rowColumni->atL(j) * x.at(i);
+            answer.at(j) += rowColumni.atL(j) * x.at(i);
         }
     }
 }

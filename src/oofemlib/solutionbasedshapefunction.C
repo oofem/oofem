@@ -61,20 +61,13 @@ void logDataMsg(const char *c, T myArray, const char *c2) {
 
 REGISTER_BoundaryCondition(SolutionbasedShapeFunction)
 
-SolutionbasedShapeFunction :: SolutionbasedShapeFunction(int n, Domain *d) : ActiveBoundaryCondition(n, d)
-{
-    isLoaded = false;
-    order = 8;
-    TOL = 1e-5;
-    bigNorm = 0.0;
+SolutionbasedShapeFunction :: SolutionbasedShapeFunction(int n, Domain *d) : ActiveBoundaryCondition(n, d),
+    order(8),
+    TOL(1e-5),
+    isLoaded(false),
+    bigNorm(0.0)
+{}
 
-    // TODO Auto-generated constructor stub
-}
-
-SolutionbasedShapeFunction :: ~SolutionbasedShapeFunction()
-{
-    // TODO Auto-generated destructor stub
-}
 
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
@@ -146,7 +139,7 @@ SolutionbasedShapeFunction :: init()
 }
 
 void
-SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntArray *Dofs, double *am, double *ap)
+SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntArray &Dofs, double &am, double &ap)
 {
     /*
      * *Compute c0, cp, cm, Bp, Bm, Ap and Am
@@ -154,16 +147,16 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 
     double A0p = 0.0, App = 0.0, A0m = 0.0, Amm = 0.0, Bp = 0.0, Bm = 0.0, c0 = 0.0, cp = 0.0, cm = 0.0;
 
-    EngngModel *model = myMode.myEngngModel;
-    Set *mySet = model->giveDomain(1)->giveSet(externalSet);
+    EngngModel &model = *myMode.myEngngModel;
+    Set *mySet = model.giveDomain(1)->giveSet(externalSet);
 
     IntArray BoundaryList = mySet->giveBoundaryList();
 
     for ( int i = 0; i < BoundaryList.giveSize() / 2; i++ ) {
-        int ElementID = BoundaryList(2 * i);
-        int Boundary = BoundaryList(2 * i + 1);
+        int ElementID = BoundaryList[2 * i];
+        int Boundary = BoundaryList[2 * i + 1];
 
-        Element *thisElement = model->giveDomain(1)->giveElement(ElementID);
+        Element *thisElement = model.giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
         IntArray bnodes, zNodes, pNodes, mNodes;
         FloatMatrix nodeValues;
@@ -178,7 +171,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 
         std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
-        for ( GaussPoint *gp: *iRule ) {
+        for ( auto &gp: *iRule ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;
@@ -189,22 +182,16 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
             geoInterpolation->boundaryEvalN( N, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
             geoInterpolation->boundaryLocal2Global( gcoords, Boundary, lcoords, FEIElementGeometryWrapper(thisElement) );
 
-            FloatArray pPhi, mPhi, zPhi;
-            pPhi.resize( Dofs->giveSize() );
-            pPhi.zero();
-            mPhi.resize( Dofs->giveSize() );
-            mPhi.zero();
-            zPhi.resize( Dofs->giveSize() );
-            zPhi.zero();
+            FloatArray pPhi(Dofs.giveSize()), mPhi(Dofs.giveSize()), zPhi(Dofs.giveSize());
 
             // Build phi (analytical averaging, not projected onto the mesh)
-            computeBaseFunctionValueAt(Phi, gcoords, * Dofs, * myMode.myEngngModel);
+            computeBaseFunctionValueAt(Phi, gcoords, Dofs, *myMode.myEngngModel);
 
             // Build zPhi for this DofID
             for ( int l = 1; l <= zNodes.giveSize(); l++ ) {
                 int nodeID = zNodes.at(l);
                 for ( int m = 1; m <= this->dofs.giveSize(); m++ ) {
-                    zPhi.at(m) = zPhi.at(m) + N.at(nodeID) * nodeValues.at(m, nodeID);
+                    zPhi.at(m) += N.at(nodeID) * nodeValues.at(m, nodeID);
                 }
             }
 
@@ -213,7 +200,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
             for ( int l = 1; l <= pNodes.giveSize(); l++ ) {
                 int nodeID = pNodes.at(l);
                 for ( int m = 1; m <= this->dofs.giveSize(); m++ ) {
-                    pPhi.at(m) = pPhi.at(m) + N.at(nodeID) * nodeValues.at(m, nodeID);
+                    pPhi.at(m) += N.at(nodeID) * nodeValues.at(m, nodeID);
                 }
             }
 
@@ -221,26 +208,26 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
             for ( int l = 1; l <= mNodes.giveSize(); l++ ) {
                 int nodeID = mNodes.at(l);
                 for ( int m = 1; m <= this->dofs.giveSize(); m++ ) {
-                    mPhi.at(m) = mPhi.at(m) + N.at(nodeID) * nodeValues.at(m, nodeID);
+                    mPhi.at(m) += N.at(nodeID) * nodeValues.at(m, nodeID);
                 }
             }
 
-            c0 = c0 + zPhi.dotProduct(normal, 3) * detJ;
-            cp = cp + pPhi.dotProduct(normal, 3) * detJ;
-            cm = cm + mPhi.dotProduct(normal, 3) * detJ;
+            c0 += zPhi.dotProduct(normal, 3) * detJ;
+            cp += pPhi.dotProduct(normal, 3) * detJ;
+            cm += mPhi.dotProduct(normal, 3) * detJ;
 
-            App = App + pPhi.dotProduct(pPhi, 3) * detJ;
-            Amm = Amm + mPhi.dotProduct(mPhi, 3) * detJ;
-            A0p = A0p + zPhi.dotProduct(pPhi, 3) * detJ;
-            A0m = A0m + zPhi.dotProduct(mPhi, 3) * detJ;
+            App += pPhi.dotProduct(pPhi, 3) * detJ;
+            Amm += mPhi.dotProduct(mPhi, 3) * detJ;
+            A0p += zPhi.dotProduct(pPhi, 3) * detJ;
+            A0m += zPhi.dotProduct(mPhi, 3) * detJ;
 
-            Bp = Bp + Phi.dotProduct(pPhi, 3) * detJ;
-            Bm = Bm + Phi.dotProduct(mPhi, 3) * detJ;
+            Bp += Phi.dotProduct(pPhi, 3) * detJ;
+            Bm += Phi.dotProduct(mPhi, 3) * detJ;
         }
     }
 
-    * am = -( A0m * cp * cp - Bm * cp * cp - A0p * cm * cp + App * c0 * cm + Bp * cm * cp ) / ( App * cm * cm + Amm * cp * cp );
-    * ap = -( A0p * cm * cm - Bp * cm * cm - A0m * cm * cp + Amm * c0 * cp + Bm * cm * cp ) / ( App * cm * cm + Amm * cp * cp );
+    am = -( A0m * cp * cp - Bm * cp * cp - A0p * cm * cp + App * c0 * cm + Bp * cm * cp ) / ( App * cm * cm + Amm * cp * cp );
+    ap = -( A0p * cm * cm - Bp * cm * cm - A0m * cm * cp + Amm * c0 * cp + Bm * cm * cp ) / ( App * cm * cm + Amm * cp * cp );
 }
 
 void
@@ -269,15 +256,15 @@ SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e,
 
         // Find global DofManager and fetch nodal values
         for ( size_t k = 0; k < mode.SurfaceData.size(); k++ ) {
-            if ( mode.SurfaceData.at(k)->DofMan == dman ) {
+            if ( mode.SurfaceData[k].DofMan == dman ) {
                 int IndexOfDofIDItem = 0;
                 for ( int l = 1; l <= dofs.giveSize(); l++ ) {
-                    if ( dofs.at(l) == mode.SurfaceData.at(k)->DofID ) {
+                    if ( dofs.at(l) == mode.SurfaceData[k].DofID ) {
                         IndexOfDofIDItem = l;
                         break;
                     }
                 }
-                nodeValues.at(IndexOfDofIDItem, j) = mode.SurfaceData.at(k)->value;
+                nodeValues.at(IndexOfDofIDItem, j) = mode.SurfaceData[k].value;
             }
         }
     }
@@ -322,17 +309,17 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
     bool isPlus, isMinus, isZero, found;
     whichBoundary(* dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
 
-    for ( int i = 1; i <= this->giveDomain()->giveNumberOfSpatialDimensions(); i++ ) {
+    for ( int i = 0; i < this->giveDomain()->giveNumberOfSpatialDimensions(); i++ ) {
         double factor = 1.0;
         found = false;
 
-        modeStruct *ms = modes.at(i - 1);
-        for ( size_t j = 0; j < ms->SurfaceData.size(); j++ ) {
-            SurfaceDataStruct *sd = ms->SurfaceData.at(j);
-            if ( sd->DofMan->giveNumber() == dof->giveDofManager()->giveNumber() ) {
-                if ( sd->DofID == dof->giveDofID() ) {
+        modeStruct &ms = modes[i];
+        for ( size_t j = 0; j < ms.SurfaceData.size(); j++ ) {
+            SurfaceDataStruct &sd = ms.SurfaceData[j];
+            if ( sd.DofMan->giveNumber() == dof->giveDofManager()->giveNumber() ) {
+                if ( sd.DofID == dof->giveDofID() ) {
                     values.resize(1);
-                    values.at(1) = sd->value;
+                    values.at(1) = sd.value;
                     found = true;
                     break;
                 }
@@ -347,11 +334,11 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
         //giveValueAtPoint(values2, *dof->giveDofManager()->giveCoordinates(), dofIDs, *modes.at(i-1)->myEngngModel);
         //printf ("Mode %u, DofManager: %u, DofIDItem %u, value %10.10f\n", i, dof->giveDofManager()->giveNumber(), dof->giveDofID(), values.at(1));
 
-        factor = isPlus  ? modes.at(i - 1)->ap : factor;
-        factor = isMinus ? modes.at(i - 1)->am : factor;
+        factor = isPlus  ? modes[i].ap : factor;
+        factor = isMinus ? modes[i].am : factor;
         factor = isZero  ? 1.0 : factor;
 
-        masterContribs.at(i) = factor * values.at(1);
+        masterContribs[i] = factor * values.at(1);
     }
 }
 
@@ -375,13 +362,13 @@ SolutionbasedShapeFunction :: loadProblem()
 
         // Set up and solve problem
         OOFEMTXTDataReader drMicro( filename.c_str() );
-        EngngModel *myEngngModel = InstanciateProblem(drMicro, _processor, 0, NULL, false);
+        auto myEngngModel = InstanciateProblem(drMicro, _processor, 0, NULL, false);
         drMicro.finish();
         myEngngModel->checkProblemConsistency();
         myEngngModel->initMetaStepAttributes( myEngngModel->giveMetaStep(1) );
         thisTimestep = myEngngModel->giveNextStep();
         myEngngModel->init();
-        this->setLoads(myEngngModel, i + 1);
+        this->setLoads(*myEngngModel, i + 1);
 
         // Check
         for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
@@ -419,8 +406,8 @@ SolutionbasedShapeFunction :: loadProblem()
             myEngngModel->doStepOutput(thisTimestep);
         }
 
-        modeStruct *mode = new(modeStruct);
-        mode->myEngngModel = myEngngModel;
+        modeStruct mode;
+        mode.myEngngModel = std::move(myEngngModel);
 
         // Check elements
 
@@ -432,13 +419,13 @@ SolutionbasedShapeFunction :: loadProblem()
         double am=1.0, ap=1.0;
 
         if (useCorrectionFactors) {
-            computeCorrectionFactors(*mode, &dofs, &am, &ap );
+            computeCorrectionFactors(mode, dofs, am, ap);
         }
 
         OOFEM_LOG_INFO("Correction factors: am=%f, ap=%f\n", am, ap);
 
-        mode->ap = ap;
-        mode->am = am;
+        mode.ap = ap;
+        mode.am = am;
 
         updateModelWithFactors(mode);
 
@@ -447,35 +434,35 @@ SolutionbasedShapeFunction :: loadProblem()
             myEngngModel->doStepOutput(thisTimestep);
         }
 
-        modes.push_back(mode);
+        modes.push_back(std::move(mode));
 
-        OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", myEngngModel);
+        OOFEM_LOG_INFO("Microproblem at instanciated\n");
     }
 }
 
 void
-SolutionbasedShapeFunction :: updateModelWithFactors(modeStruct *m)
+SolutionbasedShapeFunction :: updateModelWithFactors(modeStruct &m)
 {
     //Update values with correction factors
-    for ( size_t j = 0; j < m->SurfaceData.size(); j++ ) {
-        SurfaceDataStruct *sd = m->SurfaceData.at(j);
-        DofManager *dman = sd->DofMan;
-        Dof *d = dman->giveDofWithID(sd->DofID);
+    for ( size_t j = 0; j < m.SurfaceData.size(); j++ ) {
+        SurfaceDataStruct &sd = m.SurfaceData.at(j);
+        DofManager &dman = *sd.DofMan;
+        Dof *d = dman.giveDofWithID(sd.DofID);
 
         double factor = 1.0;
-        factor = m->SurfaceData.at(j)->isPlus ? m->ap : factor;
-        factor = m->SurfaceData.at(j)->isMinus ? m->am : factor;
-        factor = m->SurfaceData.at(j)->isZeroBoundary ? 1.0 : factor;
+        factor = sd.isPlus ? m.ap : factor;
+        factor = sd.isMinus ? m.am : factor;
+        factor = sd.isZeroBoundary ? 1.0 : factor;
 
-        if ( dynamic_cast< MasterDof * >(d) && m->SurfaceData.at(j)->isFree ) {
-            double u = m->SurfaceData.at(j)->value;
-            this->setBoundaryConditionOnDof(dman->giveDofWithID(m->SurfaceData.at(j)->DofID), u * factor);
+        if ( dynamic_cast< MasterDof * >(d) && sd.isFree ) {
+            double u = sd.value;
+            this->setBoundaryConditionOnDof(dman.giveDofWithID(sd.DofID), u * factor);
         }
     }
 }
 
 void
-SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
+SolutionbasedShapeFunction :: setLoads(EngngModel &myEngngModel, int d)
 {
     DynamicInputRecord ir;
     FloatArray gradP;
@@ -488,13 +475,13 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
     ir.setField(gradP, _IFT_Load_components);
     ir.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
 
-    int bcID = myEngngModel->giveDomain(1)->giveNumberOfBoundaryConditions() + 1;
+    int bcID = myEngngModel.giveDomain(1)->giveNumberOfBoundaryConditions() + 1;
     GeneralBoundaryCondition *myBodyLoad;
-    myBodyLoad = classFactory.createBoundaryCondition( "deadweight", bcID, myEngngModel->giveDomain(1) );
+    myBodyLoad = classFactory.createBoundaryCondition( "deadweight", bcID, myEngngModel.giveDomain(1) );
     myBodyLoad->initializeFrom(& ir);
-    myEngngModel->giveDomain(1)->setBoundaryCondition(bcID, myBodyLoad);
+    myEngngModel.giveDomain(1)->setBoundaryCondition(bcID, myBodyLoad);
 
-    for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
+    for ( auto &elem : myEngngModel.giveDomain(1)->giveElements() ) {
         IntArray *blArray;
         blArray = elem->giveBodyLoadArray();
         blArray->resizeWithValues(blArray->giveSize() + 1);
@@ -640,11 +627,11 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
 }
 
 void
-SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
+SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct &mode)
 {
 
-    EngngModel *m=mode->myEngngModel;
-    double TOL2=1e-3;
+    EngngModel &m = *mode.myEngngModel;
+    double TOL2 = 1e-3;
 
     IntArray pNodes, mNodes, zNodes;
 
@@ -653,10 +640,10 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
 
     // First add all nodes to pNodes or nNodes respectively depending on coordinate and normal.
     for ( int i = 0; i < BoundaryList.giveSize() / 2; i++ ) {
-        int ElementID = BoundaryList(2 * i);
-        int Boundary = BoundaryList(2 * i + 1);
+        int ElementID = BoundaryList[2 * i];
+        int Boundary = BoundaryList[2 * i + 1];
 
-        Element *e = m->giveDomain(1)->giveElement(ElementID);
+        Element *e = m.giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = e->giveInterpolation();
 
         // Check all sides of element
@@ -809,23 +796,16 @@ SolutionbasedShapeFunction :: whichBoundary(FloatArray &coord, bool &isPlus, boo
 }
 
 void
-SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct *mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZeroBoundary)
+SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct &mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZeroBoundary)
 {
     for ( int i = 1; i <= nodeList.giveSize(); i++ ) {
         FloatArray values;
 
         IntArray DofIDs;
-        DofManager *dman = mode->myEngngModel->giveDomain(1)->giveDofManager(nodeList.at(i));
+        DofManager *dman = mode.myEngngModel->giveDomain(1)->giveDofManager(nodeList.at(i));
 
-        computeBaseFunctionValueAt(values, *dman->giveCoordinates(), this->dofs, *mode->myEngngModel );
+        computeBaseFunctionValueAt(values, *dman->giveCoordinates(), this->dofs, *mode.myEngngModel );
 
-/* <<<<<<< HEAD
-=======
-        for ( int j = 1; j <= this->dofs.giveSize(); j++ ) {
-            SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
-            Dof *d = dman->giveDofWithID( dofs.at(j) );
->>>>>>> 147f565295394adef603dae296a820af5f28d9cd
-*/
         // Check that current node contains current DofID
         for (int j=1; j<=this->dofs.giveSize(); j++) {
             for (Dof *d: *dman ){ //int k=1; k<= dman->giveNumberOfDofs(); k++ ) {
@@ -833,16 +813,16 @@ SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct *mode, Int
                 //Dof *d = dman->dofArray.at(k);// giveDof(k);
 
                 if (d->giveDofID() == this->dofs.at(j)) {
-                    SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
-                    surfaceData->DofID = (DofIDItem) this->dofs.at(j);
-                    surfaceData->DofMan = dman;
-                    surfaceData->isPlus = isPlus;
-                    surfaceData->isMinus = isMinus;
-                    surfaceData->isZeroBoundary = isZeroBoundary;
-                    surfaceData->isFree = d->giveBcId() == 0;
-                    surfaceData->value = values.at(j);
-
-                    mode->SurfaceData.push_back(surfaceData);
+                    SurfaceDataStruct surfaceData {
+                        isPlus,
+                        isMinus,
+                        isZeroBoundary,
+                        d->giveBcId() == 0,
+                        (DofIDItem) this->dofs.at(j),
+                        dman,
+                        values.at(j),
+                    };
+                    mode.SurfaceData.emplace_back(std::move(surfaceData));
                 }
             }
         }
