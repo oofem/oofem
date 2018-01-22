@@ -174,6 +174,10 @@ public:
     virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
     virtual int estimatePackSize(DataStream &buff, GaussPoint *gp);
 
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    
 protected:
     int materialNumber;   // material number
     int czMaterialNumber; // cohesive zone material number
