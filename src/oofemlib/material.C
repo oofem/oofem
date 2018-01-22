@@ -39,6 +39,7 @@
 #include "mathfem.h"
 #include "dynamicinputrecord.h"
 #include "contextioerr.h"
+#include "datastream.h"
 
 namespace oofem {
 Material :: Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(), castingTime(-1.) { }
@@ -282,4 +283,52 @@ Material :: initMaterial(Element *element)
 {
     return 0;
 }
+
+
+contextIOResultType Material :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+// saves full element context (saves state variables, that completely describe current state)
+{
+    contextIOResultType iores;
+
+    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( mode & CM_Definition ) ) {
+      if ( ( iores = propertyDictionary.saveContext (stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(CIO_IOERR);
+      }
+
+      if ( !stream.write(castingTime) ) {
+            THROW_CIOERR(CIO_IOERR);
+      }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType Material :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+// restores full element context (saves state variables, that completely describe current state)
+{
+    contextIOResultType iores;
+
+    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+      if ( ( iores = propertyDictionary.restoreContext(stream, mode) ) != CIO_OK ) {
+        THROW_CIOERR(CIO_IOERR);
+      }
+
+      if ( !stream.read(castingTime) ) {
+        THROW_CIOERR(CIO_IOERR);
+      }
+
+    }
+    return CIO_OK;
+}
+
+  
 } // end namespace oofem
