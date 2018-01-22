@@ -130,9 +130,26 @@ GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
 contextIOResultType
 GeneralBoundaryCondition :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
+    contextIOResultType iores;
+    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
     if ( mode & CM_Definition ) {
         if ( !stream.write(timeFunction) ) {
             THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(valType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( ( iores = dofs.storeYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream.write(isImposedTimeFunction) ) {
+          THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(set) ) {
+          THROW_CIOERR(CIO_IOERR);
         }
     }
 
@@ -143,9 +160,28 @@ GeneralBoundaryCondition :: saveContext(DataStream &stream, ContextMode mode, vo
 contextIOResultType
 GeneralBoundaryCondition :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
+    int _val;
+    contextIOResultType iores;
+    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
     if ( mode & CM_Definition ) {
         if ( !stream.read(timeFunction) ) {
             THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(_val) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        valType  = (bcValType) _val;
+        if ( ( iores = dofs.restoreYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream.read(isImposedTimeFunction) ) {
+          THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(set) ) {
+          THROW_CIOERR(CIO_IOERR);
         }
     }
 
