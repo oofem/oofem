@@ -187,6 +187,9 @@ protected:
      * @param mode Determines response mode.
      */
     virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 
