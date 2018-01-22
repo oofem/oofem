@@ -295,9 +295,7 @@ contextIOResultType Material :: saveContext(DataStream &stream, ContextMode mode
     }
 
     if ( ( mode & CM_Definition ) ) {
-      if ( ( iores = propertyDictionary.saveContext (stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
+      propertyDictionary.saveContext (stream) ;
 
       if ( !stream.write(castingTime) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -318,9 +316,7 @@ contextIOResultType Material :: restoreContext(DataStream &stream, ContextMode m
     }
 
     if ( mode & CM_Definition ) {
-      if ( ( iores = propertyDictionary.restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
+      propertyDictionary.restoreContext(stream);
 
       if ( !stream.read(castingTime) ) {
         THROW_CIOERR(CIO_IOERR);

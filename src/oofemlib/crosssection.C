@@ -192,9 +192,7 @@ contextIOResultType CrossSection :: saveContext(DataStream &stream, ContextMode 
     }
 
     if ( ( mode & CM_Definition ) ) {
-      if ( ( iores = propertyDictionary.saveContext (stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
+      propertyDictionary.saveContext (stream) ;
 
       if ( !stream.write(setNumber) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -215,9 +213,7 @@ contextIOResultType CrossSection :: restoreContext(DataStream &stream, ContextMo
     }
 
     if ( mode & CM_Definition ) {
-      if ( ( iores = propertyDictionary.restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
+      propertyDictionary.restoreContext(stream);
 
       if ( !stream.read(setNumber) ) {
         THROW_CIOERR(CIO_IOERR);

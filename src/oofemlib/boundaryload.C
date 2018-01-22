@@ -184,12 +184,9 @@ BoundaryLoad :: saveContext(DataStream &stream, ContextMode mode, void *obj)
           THROW_CIOERR(CIO_IOERR);
         }
       
-        if ( ( iores = propertyDictionary.saveContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-        if ( ( iores = propertyTimeFunctDictionary.saveContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        propertyDictionary.saveContext(stream);
+        propertyTimeFunctDictionary.saveContext(stream);
+
         if ( !stream.write(temperOffset) ) {
           THROW_CIOERR(CIO_IOERR);
         }
@@ -219,12 +216,9 @@ BoundaryLoad :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
         }
         coordSystemType = (CoordSystType) _val;
       
-        if ( ( iores = propertyDictionary.restoreContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-        if ( ( iores = propertyTimeFunctDictionary.restoreContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        propertyDictionary.restoreContext(stream);
+        propertyTimeFunctDictionary.restoreContext(stream);
+
         if ( !stream.read(temperOffset) ) {
           THROW_CIOERR(CIO_IOERR);
         }
