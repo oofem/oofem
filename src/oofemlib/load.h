@@ -176,6 +176,9 @@ public:
      */
     const FloatArray &giveComponentArray() const;
     void setComponentArray(FloatArray &arry) { componentArray = arry; }
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 } // end namespace oofem
 #endif // load_h

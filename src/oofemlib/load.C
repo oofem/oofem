@@ -37,6 +37,8 @@
 #include "timestep.h"
 #include "function.h"
 #include "dynamicinputrecord.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 namespace oofem {
 Load :: Load(int i, Domain *aDomain) :
@@ -157,4 +159,53 @@ Load :: scale(double s)
     this->reference = false;
 }
 
+
+contextIOResultType
+Load :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( ( iores = GeneralBoundaryCondition :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+        if ( ( iores = componentArray.storeYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = dofExcludeMask.storeYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream.write(reference) ) {
+          THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+Load :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( ( iores = GeneralBoundaryCondition :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+        if ( ( iores = componentArray.restoreYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( ( iores = dofExcludeMask.restoreYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+        if ( !stream.read(reference) ) {
+          THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
+  
 } // end namespace oofem
