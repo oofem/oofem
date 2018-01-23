@@ -122,7 +122,7 @@ oofegGraphicContext :: init(EngngModel *d)
 
         nmat = 0;
         for ( int id = 1; id <= d->giveNumberOfDomains(); id++ ) {
-            nmat = max( nmat, d->giveDomain(id)->giveNumberOfMaterialModels() );
+            nmat = max( nmat, d->giveDomain(id)->giveNumberOfRegions() );
         }
 
         // ft = ColorCreateFringeTable();
