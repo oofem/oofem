@@ -1261,7 +1261,7 @@ Beam3d :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &
     }
   }
 
-  primaryVarsToExport.giveSize();
+  n = primaryVarsToExport.giveSize();
   vtkPieces[0].setNumberOfPrimaryVarsToExport(n, nNodes);
   for ( int i = 1; i <= n; i++ ) {
     UnknownType utype = (UnknownType) primaryVarsToExport.at(i);
