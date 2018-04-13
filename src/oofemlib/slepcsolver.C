@@ -50,10 +50,10 @@ namespace oofem {
 REGISTER_GeneralizedEigenValueSolver(SLEPcSolver, GES_SLEPc);
 
 
-SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(d, m)
-    A(nullptr),
-    B(nullptr),
-    epsInit(false)
+SLEPcSolver :: SLEPcSolver(Domain *d, EngngModel *m) : SparseGeneralEigenValueSystemNM(d, m),
+                                                       //A(nullptr),
+                                                       //B(nullptr),
+                                                       epsInit(false)
 {
 }
 
@@ -80,8 +80,8 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
         OOFEM_ERROR("matrices size mismatch");
     }
 
-    A = dynamic_cast< PetscSparseMtrx * >(&a);
-    B = dynamic_cast< PetscSparseMtrx * >(&b);
+    PetscSparseMtrx* A = dynamic_cast< PetscSparseMtrx * >(&a);
+    PetscSparseMtrx* B = dynamic_cast< PetscSparseMtrx * >(&b);
 
     if ( !A || !B ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
