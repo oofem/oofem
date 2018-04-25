@@ -173,7 +173,7 @@ SLEPcSolver :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatri
         FloatArray Vr_loc;
 
         for ( int i = 0; i < nconv && i < nroot; i++ ) {
-            ierr = EPSGetEigenpair(eps, nconv - i - 1, & kr, PETSC_NULL, Vr, PETSC_NULL);
+            ierr = EPSGetEigenpair(eps, i, & kr, PETSC_NULL, Vr, PETSC_NULL);
             CHKERRQ(ierr);
 
             //Store the eigenvalue
