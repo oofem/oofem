@@ -982,7 +982,7 @@ ConcreteDPM :: performRegularReturn(FloatArray &effectiveStress,
 
     // printf("\nnumber of iterations = %i\n", iterationCount);
     status->letDeltaLambdaBe(deltaLambda);
-    FloatArray stressPrincipal;
+    FloatArray stressPrincipal(6);
     stressPrincipal.zero();
 
     stressPrincipal(0) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial);
@@ -1592,7 +1592,7 @@ void
 ConcreteDPM :: computeTrialCoordinates(const FloatArray &stress, GaussPoint *gp)
 {
     FloatArray deviatoricStress;
-    this->computeDeviatoricVolumetricSplit(deviatoricStress, effectiveStress);
+    sig = this->computeDeviatoricVolumetricSplit(deviatoricStress, effectiveStress);
     rho = computeSecondCoordinate(deviatoricStress);
     thetaTrial = computeThirdCoordinate(deviatoricStress);
 }
