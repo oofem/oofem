@@ -365,6 +365,7 @@ main(int argc, char *argv[])
     problem = InstanciateProblem(dr, _postProcessor, 0, NULL, parallelFlag);
     dr.finish();
     problem->checkProblemConsistency();
+    problem->init();
 
 #ifdef OOFEG_DEVEL
     mask = ESI_GRAPHIC_EDITOR_MASK;
@@ -888,7 +889,7 @@ void ESICustomize(Widget parent_pane)
     oofeg_add_palette("< Filters >", parent_pane, & filters_palette);
     oofeg_add_palette("< Material Region Filter >", filters_palette, & matregfilter_palette);
     for ( int id = 1; id <= problem->giveNumberOfDomains(); id++ ) {
-        nmat = problem->giveDomain(id)->giveNumberOfMaterialModels();
+        nmat = problem->giveDomain(id)->giveNumberOfRegions();
 
         for ( i = 1; i <= nmat; i++ ) {
             sprintf(ltname, "region %2d.%2d", id, i);

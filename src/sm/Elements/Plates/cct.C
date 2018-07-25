@@ -691,7 +691,7 @@ CCTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
         return;
     }
 
-    if ( this->giveMaterial()->isActivated(tStep) ) {
+    if ( this->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
         EASValsSetColor( gc.getElementColor() );
         EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -727,7 +727,7 @@ CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkno
         return;
     }
 
-    if ( this->giveMaterial()->isActivated(tStep) ) {
+    if ( this->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
         EASValsSetColor( gc.getDeformedElementColor() );
         EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -764,7 +764,7 @@ CCTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         return;
     }
 
-    if ( !this->giveMaterial()->isActivated(tStep) ) {
+    if ( !this->isActivated(tStep) ) {
         return;
     }
 

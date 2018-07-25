@@ -38,6 +38,7 @@
 #include "gausspoint.h"
 #include "material.h"
 #include "contextioerr.h"
+#include "datastream.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -180,4 +181,47 @@ CrossSection :: predictRelativeComputationalCost(GaussPoint *gp)
     return this->giveRelativeSelfComputationalCost() * this->giveMaterial(gp)->predictRelativeComputationalCost(gp);
 }
 
+
+contextIOResultType CrossSection :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+// saves full element context (saves state variables, that completely describe current state)
+{
+    contextIOResultType iores;
+
+    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( mode & CM_Definition ) ) {
+      propertyDictionary.saveContext (stream) ;
+
+      if ( !stream.write(setNumber) ) {
+            THROW_CIOERR(CIO_IOERR);
+      }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType CrossSection :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+// restores full element context (saves state variables, that completely describe current state)
+{
+    contextIOResultType iores;
+
+    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+      propertyDictionary.restoreContext(stream);
+
+      if ( !stream.read(setNumber) ) {
+        THROW_CIOERR(CIO_IOERR);
+      }
+
+    }
+    return CIO_OK;
+}
+
+  
 } // end namespace oofem

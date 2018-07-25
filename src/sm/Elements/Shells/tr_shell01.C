@@ -468,7 +468,7 @@ TR_SHELL01 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
         return;
     }
 
-    if ( this->giveMaterial()->isActivated(tStep) ) {
+    if ( this->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
         EASValsSetColor( gc.getElementColor() );
         EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -503,7 +503,7 @@ TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unk
         return;
     }
 
-    if ( this->giveMaterial()->isActivated(tStep) ) {
+    if ( this->isActivated(tStep) ) {
         EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
         EASValsSetColor( gc.getDeformedElementColor() );
         EASValsSetEdgeColor( gc.getElementEdgeColor() );
@@ -538,7 +538,7 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         return;
     }
 
-    if ( !this->giveMaterial()->isActivated(tStep) ) {
+    if ( !this->isActivated(tStep) ) {
         return;
     }
 

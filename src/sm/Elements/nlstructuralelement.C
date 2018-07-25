@@ -60,8 +60,8 @@ NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
 double
 NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
 {
-    double vol=0.0;
-    for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
+    double vol = 0.0;
+    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
         FloatArray F;
         FloatMatrix Fm;
 
@@ -89,7 +89,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
 
     // Obtain the current displacement vector of the element and subtract initial displacements (if present)
     FloatArray u;
-    this->computeVectorOf({D_u, D_v, D_w}, VM_Total, tStep, u); // solution vector
+    this->computeVectorOf({ D_u, D_v, D_w }, VM_Total, tStep, u); // solution vector
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
     }
@@ -111,7 +111,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_ERROR( "MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
@@ -158,7 +158,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
         // Engineering (small strain) stress
@@ -208,10 +208,10 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                 FloatArray stressTemp;
                 StructuralMaterial :: giveReducedVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
                 answer.plusProduct(B, stressTemp, dV);
-            } else   {
+            } else {
                 answer.plusProduct(B, vStress, dV);
             }
-        } else   {
+        } else {
             if ( vStress.giveSize() == 6 ) {
                 // It may happen that e.g. plane strain is computed
                 // using the default 3D implementation. If so,
@@ -221,7 +221,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
                 FloatArray stressTemp;
                 StructuralMaterial :: giveReducedSymVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
                 answer.plusProduct(B, stressTemp, dV);
-            } else   {
+            } else {
                 answer.plusProduct(B, vStress, dV);
             }
         }
@@ -263,8 +263,8 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
 
     // loop over individual integration rules
-    for ( auto &iRule: integrationRulesArray ) {
-        for ( GaussPoint *gp: *iRule ) {
+    for ( auto &iRule : integrationRulesArray ) {
+        for ( GaussPoint *gp : *iRule ) {
             StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
             if ( nlGeometry == 0 ) {
@@ -304,7 +304,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
             m->plusProduct(B, vStress, dV);
 
             // localize irule contribution into element matrix
-            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, *iRule) ) {
+            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, * iRule) ) {
                 answer.assemble(* m, irlocnum);
                 m->clear();
             }
@@ -340,7 +340,6 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     if ( integrationRulesArray.size() == 1 ) {
         FloatMatrix B, D, DB;
         for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
-
             // Engineering (small strain) stiffness
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
@@ -378,10 +377,10 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
 
         int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
         FloatMatrix Bi, Bj, D, Dij, DBj;
-        for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
+        for ( int i = 0; i < ( int ) integrationRulesArray.size(); i++ ) {
             iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
             iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
-            for ( int j = 0; j < (int)integrationRulesArray.size(); j++ ) {
+            for ( int j = 0; j < ( int ) integrationRulesArray.size(); j++ ) {
                 IntegrationRule *iRule;
                 jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
@@ -393,8 +392,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     iRule = integrationRulesArray [ j ].get();
                 }
 
-                for ( GaussPoint *gp: *iRule ) {
-
+                for ( GaussPoint *gp : *iRule ) {
                     // Engineering (small strain) stiffness dSig/dEps
                     if ( nlGeometry == 0 ) {
                         this->computeBmatrixAt(gp, Bi, iStartIndx, iEndIndx);
@@ -464,9 +462,8 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     // Compute matrix from material stiffness
     FloatMatrix B, D, DB;
     IntArray irlocnum;
-    for ( auto &iRule: integrationRulesArray ) {
+    for ( auto &iRule : integrationRulesArray ) {
         for ( auto &gp : *iRule ) {
-
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
                 this->computeConstitutiveMatrixAt(D, rMode, gp, tStep);
@@ -490,7 +487,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
         }
 
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, *iRule) ) {
+        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, * iRule) ) {
             answer.assemble(* m, irlocnum);
             m->clear();
         }
@@ -501,55 +498,6 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     }
 }
 
-
-void
-NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
-{
-    FloatArray stress;
-    FloatMatrix B, stress_ident, stress_identFull;
-    IntArray indx;
-
-    answer.clear();
-
-    // assemble initial stress matrix
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
-        // This function fetches the full form of the tensor
-        this->giveIPValue(stress, gp, IST_StressTensor, tStep);
-        if ( stress.giveSize() ) {
-            // Construct the stress_ident matrix
-            // The complicated part, the not-so-pretty product here: s_il delta_jk
-            {
-                stress_identFull.at(1, 1) = stress.at(1);
-                stress_identFull.at(2, 2) = stress.at(2);
-                stress_identFull.at(3, 3) = stress.at(3);
-                stress_identFull.at(4, 4) = stress.at(2) + stress.at(3);
-                stress_identFull.at(5, 5) = stress.at(1) + stress.at(3);
-                stress_identFull.at(6, 6) = stress.at(1) + stress.at(2);
-
-                stress_identFull.at(1, 5) = stress.at(5);
-                stress_identFull.at(1, 6) = stress.at(6);
-
-                stress_identFull.at(2, 4) = stress.at(4);
-                stress_identFull.at(2, 5) = stress.at(6);
-
-                stress_identFull.at(3, 4) = stress.at(4);
-                stress_identFull.at(3, 5) = stress.at(5);
-
-                stress_identFull.at(4, 5) = stress.at(6);
-                stress_identFull.at(4, 6) = stress.at(5);
-                stress_identFull.at(5, 6) = stress.at(4);
-            }
-            stress_ident.beSubMatrixOf(stress_identFull, indx, indx);
-            stress_ident.symmetrized();
-            OOFEM_WARNING("Implementation not tested yet!");
-
-            this->computeBmatrixAt(gp, B);
-            answer.plusProductSymmUpper( B, stress_ident, this->computeVolumeAround(gp) );
-        }
-    }
-
-    answer.symmetrized();
-}
 
 
 

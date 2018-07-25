@@ -91,6 +91,9 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
     virtual const char *giveClassName() const { return "NodalLoad"; }
     virtual bcGeomType giveBCGeoType() const { return NodalLoadBGT; }
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 } // end namespace oofem
 #endif // nodalload_h

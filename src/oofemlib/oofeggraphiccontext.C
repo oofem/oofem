@@ -122,7 +122,7 @@ oofegGraphicContext :: init(EngngModel *d)
 
         nmat = 0;
         for ( int id = 1; id <= d->giveNumberOfDomains(); id++ ) {
-            nmat = max( nmat, d->giveDomain(id)->giveNumberOfMaterialModels() );
+            nmat = max( nmat, d->giveDomain(id)->giveNumberOfRegions() );
         }
 
         // ft = ColorCreateFringeTable();
@@ -160,7 +160,7 @@ oofegGraphicContext :: GR_giveColorFromUserColorTable(EPixel *table, int tableSi
 int
 oofegGraphicContext :: testElementGraphicActivity(Element *e)
 {
-    int matFilterState = ( this->getMaterialModelFilterState( e->giveMaterial()->giveNumber() ) );
+  int matFilterState = ( this->getMaterialModelFilterState( e->giveRegionNumber() ) );
     int elemFiltState = 0;
     if ( element_filter.empty() ) {
         return matFilterState;

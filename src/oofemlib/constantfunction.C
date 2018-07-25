@@ -35,6 +35,8 @@
 #include "constantfunction.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
+#include "datastream.h"
+#include "contextioerr.h"
 
 namespace oofem {
 REGISTER_Function(ConstantFunction);
@@ -56,4 +58,40 @@ ConstantFunction :: giveInputRecord(DynamicInputRecord &input)
     Function :: giveInputRecord(input);
     input.setField(this->value, _IFT_ConstantFunction_f);
 }
+
+contextIOResultType
+ConstantFunction :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( ( iores = Function :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+        if ( !stream.write(value) ) {
+          THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+ConstantFunction :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( ( iores = Function :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+        if ( !stream.read(value) ) {
+          THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
 } // end namespace oofem

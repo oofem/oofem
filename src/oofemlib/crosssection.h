@@ -290,6 +290,11 @@ public:
      * @exception throws an ContextIOERR exception if error encountered.
      */
     virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+
+    
 };
 } // end namespace oofem
 #endif // crosssection_h
