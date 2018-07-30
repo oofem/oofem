@@ -63,24 +63,24 @@ public:
     /// Destructor.
     virtual ~FluidCrossSection();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep) override;
 
     virtual double giveDensity(GaussPoint *gp);
     FluidDynamicMaterial *giveFluidMaterial();
-    Material *giveMaterial(IntegrationPoint *ip);
+    Material *giveMaterial(IntegrationPoint *ip) override;
 
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *gp);
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *gp) override;
 
-    virtual const char *giveClassName() const { return "FluidCrossSection"; }
-    virtual const char *giveInputRecordName() const { return _IFT_FluidCrossSection_Name; }
+    const char *giveClassName() const override { return "FluidCrossSection"; }
+    const char *giveInputRecordName() const override { return _IFT_FluidCrossSection_Name; }
 };
 } // end namespace oofem
 #endif // fluidcrosssection_h

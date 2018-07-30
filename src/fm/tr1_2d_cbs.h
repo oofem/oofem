@@ -84,79 +84,79 @@ public:
     TR1_2D_CBS(int n, Domain * aDomain);
     virtual ~TR1_2D_CBS();
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
-    virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
-    virtual void computeConvectionTermsI(FloatArray &answer, TimeStep *);
-    virtual void computeDiffusionTermsI(FloatArray &answer, TimeStep *);
-    virtual void computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep);
-    virtual void computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep);
-    virtual void computePrescribedTractionPressure(FloatArray &answer, TimeStep *tStep);
-    virtual void computeNumberOfNodalPrescribedTractionPressureContributions(FloatArray &answer, TimeStep *tStep);
-    virtual void computePressureLhs(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeCorrectionRhs(FloatArray &answer, TimeStep *tStep);
-    virtual double computeCriticalTimeStep(TimeStep *tStep);
+    void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep) override;
+    void computeConvectionTermsI(FloatArray &answer, TimeStep *tStep) override;
+    void computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep) override;
+    void computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep) override;
+    void computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep) override;
+    void computePrescribedTractionPressure(FloatArray &answer, TimeStep *tStep) override;
+    void computeNumberOfNodalPrescribedTractionPressureContributions(FloatArray &answer, TimeStep *tStep) override;
+    void computePressureLhs(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeCorrectionRhs(FloatArray &answer, TimeStep *tStep) override;
+    double computeCriticalTimeStep(TimeStep *tStep) override;
 
     // definition
-    virtual const char *giveClassName() const { return "TR1_2D_CBS"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_CBS_Name; }
-    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
+    const char *giveClassName() const override { return "TR1_2D_CBS"; }
+    const char *giveInputRecordName() const override { return _IFT_TR1_2D_CBS_Name; }
+    MaterialMode giveMaterialMode() override { return _2dFlow; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual int computeNumberOfDofs();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void updateYourself(TimeStep *tStep);
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    int computeNumberOfDofs() override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void updateYourself(TimeStep *tStep) override;
     /// Used to check consistency and initialize some element geometry data (area,b,c)
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
-    virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
-                                                      const FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                      TimeStep *tStep);
+    int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
+                                              const FloatArray &coords, IntArray &dofId, ValueModeType mode,
+                                              TimeStep *tStep) override;
 
     //<RESTRICTED_SECTION>
-    virtual double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag);
-    virtual void formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
-                                        const FloatArray &normal, const double p, bool updFlag);
-    virtual void formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
-                                         const FloatArray &normal, const double p, bool updFlag);
-    virtual double truncateMatVolume(const Polygon &matvolpoly, double &volume);
-    virtual void giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool upd);
-    virtual void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag);
-    virtual Element *giveElement() { return this; }
-    virtual double computeMyVolume(LEPlic *matInterface, bool updFlag);
-    virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep) { return 1.e6; }
+    double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag) override;
+    void formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
+                                const FloatArray &normal, const double p, bool updFlag) override;
+    void formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
+                                 const FloatArray &normal, const double p, bool updFlag) override;
+    double truncateMatVolume(const Polygon &matvolpoly, double &volume) override;
+    void giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool upd) override;
+    void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag) override;
+    Element *giveElement() override { return this; }
+    double computeMyVolume(LEPlic *matInterface, bool updFlag) override;
+    double computeCriticalLEPlicTimeStep(TimeStep *tStep) override { return 1.e6; }
     //</RESTRICTED_SECTION>
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
     // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override {}
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeGaussPoints() override;
+    void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // tr1_2d_cbs_h

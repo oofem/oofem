@@ -152,26 +152,26 @@ public:
         levelSetVersion = 0;
     }
 
-    virtual void initialize();
-    virtual void updatePosition(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep) { previousLevelSetValues = levelSetValues; }
-    virtual double computeCriticalTimeStep(TimeStep *tStep);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void reinitialization(TimeStep *tStep);
+    void initialize() override;
+    void updatePosition(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override { previousLevelSetValues = levelSetValues; }
+    double computeCriticalTimeStep(TimeStep *tStep) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void reinitialization(TimeStep *tStep);
 
-    virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);
-    virtual void giveElementMaterialMixture(FloatArray &answer, int ielem);
-    virtual double giveNodalScalarRepresentation(int i) { return levelSetValues.at(i); }
+    void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position) override;
+    void giveElementMaterialMixture(FloatArray &answer, int ielem) override;
+    double giveNodalScalarRepresentation(int i) override { return levelSetValues.at(i); }
 
     /// Returns level set value in specific node
     double giveLevelSetDofManValue(int i) { return levelSetValues.at(i); }
 
     // identification
-    virtual const char *giveClassName() const { return "LevelSetPCS"; }
+    const char *giveClassName() const override { return "LevelSetPCS"; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
 protected:
     void pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *tStep, PCSEqType t);

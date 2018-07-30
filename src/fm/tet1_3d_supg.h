@@ -57,42 +57,42 @@ public:
     virtual ~Tet1_3D_SUPG();
 
     // definition
-    virtual const char *giveClassName() const { return "Tet1_3D_SUPG"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Tet1_3D_SUPG_Name; }
-    virtual MaterialMode giveMaterialMode() { return _3dFlow; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual int computeNumberOfDofs();
+    const char *giveClassName() const override { return "Tet1_3D_SUPG"; }
+    const char *giveInputRecordName() const override { return _IFT_Tet1_3D_SUPG_Name; }
+    MaterialMode giveMaterialMode() override { return _3dFlow; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    int computeNumberOfDofs() override;
 
-    virtual Interface *giveInterface(InterfaceType t);
+    Interface *giveInterface(InterfaceType t) override;
 
-    virtual double computeCriticalTimeStep(TimeStep *tStep);
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeCriticalTimeStep(TimeStep *tStep) override;
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual void updateStabilizationCoeffs(TimeStep *tStep);
+    void updateStabilizationCoeffs(TimeStep *tStep) override;
 
-    virtual double LS_PCS_computeF(LevelSetPCS *, TimeStep *);
-    virtual void LS_PCS_computedN(FloatMatrix &answer);
-    virtual double LS_PCS_computeVolume();
-    virtual double LS_PCS_computeS(LevelSetPCS *, TimeStep *);
-    virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
+    double LS_PCS_computeF(LevelSetPCS *, TimeStep *tStep) override;
+    void LS_PCS_computedN(FloatMatrix &answer) override;
+    double LS_PCS_computeVolume() override;
+    double LS_PCS_computeS(LevelSetPCS *, TimeStep *tStep) override;
+    void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
-    virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual int  giveNumberOfSpatialDimensions();
+    void computeGaussPoints() override;
+    void computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep) override;
+    void computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp) override;
+    void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    int  giveNumberOfSpatialDimensions() override;
 };
 } // end namespace oofem
 #endif // tet1_3d_supg_h

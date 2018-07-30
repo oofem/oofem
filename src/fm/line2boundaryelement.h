@@ -66,21 +66,21 @@ public:
     /// Destructor.
     virtual ~Line2BoundaryElement();
 
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.clear(); }
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.clear(); }
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override { answer.clear(); }
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override { answer.clear(); }
 
-    virtual void giveDofManDofIDMask(int i, IntArray &nodeDofIDMask) const;
+    void giveDofManDofIDMask(int i, IntArray &nodeDofIDMask) const override;
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual int computeNumberOfDofs() { return 6; }
+    FEInterpolation *giveInterpolation() const override;
+    int computeNumberOfDofs() override { return 6; }
 
-    virtual const char *giveClassName() const { return "Line2BoundaryElement"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Line2BoundaryElement_Name; }
+    const char *giveClassName() const override { return "Line2BoundaryElement"; }
+    const char *giveInputRecordName() const override { return _IFT_Line2BoundaryElement_Name; }
 
     // Interfaces
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+    void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer) override;
 };
 }
 

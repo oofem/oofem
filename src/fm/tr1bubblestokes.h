@@ -75,40 +75,40 @@ public:
     Tr1BubbleStokes(int n, Domain * d);
     virtual ~Tr1BubbleStokes();
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual void computeGaussPoints();
+    void computeGaussPoints() override;
 
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override;
 
-    virtual const char *giveClassName() const { return "Tr1BubbleStokes"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Tr1BubbleStokes_Name; }
-    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
+    const char *giveClassName() const override { return "Tr1BubbleStokes"; }
+    const char *giveInputRecordName() const override { return _IFT_Tr1BubbleStokes_Name; }
+    MaterialMode giveMaterialMode() override { return _2dFlow; }
 
-    virtual int computeNumberOfDofs();
+    int computeNumberOfDofs() override;
 
-    virtual int giveNumberOfInternalDofManagers() const;
-    virtual DofManager *giveInternalDofManager(int i) const;
-    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const;
+    int giveNumberOfInternalDofManagers() const override;
+    DofManager *giveInternalDofManager(int i) const override;
+    void giveInternalDofManDofIDMask(int i, IntArray &answer) const override;
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer) override;
 };
 } // end namespace oofem
 #endif // tr1bubblestokes_h

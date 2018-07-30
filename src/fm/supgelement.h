@@ -73,12 +73,12 @@ public:
     SUPGElement(int n, Domain * aDomain);
     virtual ~SUPGElement();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void updateStabilizationCoeffs(TimeStep *tStep) override { }
     virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
 
     /**
@@ -197,8 +197,8 @@ public:
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
     // time step termination
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual int checkConsistency();
+    void updateInternalState(TimeStep *tStep) override;
+    int checkConsistency() override;
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,

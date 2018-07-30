@@ -73,28 +73,28 @@ public:
     Tr21Stokes(int n, Domain * d);
     virtual ~Tr21Stokes();
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual void computeGaussPoints();
+    void computeGaussPoints() override;
 
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override;
 
-    virtual const char *giveClassName() const { return "Tr21Stokes"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Tr21Stokes_Name; }
-    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
+    const char *giveClassName() const override { return "Tr21Stokes"; }
+    const char *giveInputRecordName() const override { return _IFT_Tr21Stokes_Name; }
+    MaterialMode giveMaterialMode() override { return _2dFlow; }
 
-    virtual int computeNumberOfDofs();
+    int computeNumberOfDofs() override;
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
     /**
      * Gives the dof ID mask for the element.
@@ -102,16 +102,15 @@ public:
      * @param inode Node to check.
      * @param answer List of dof IDs.
      */
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    void computeField(ValueModeType u, TimeStep *tStep, const FloatArray &coords, FloatArray &answer) override;
 
-    // Nodal averaging interface:
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // tr21stokes_h

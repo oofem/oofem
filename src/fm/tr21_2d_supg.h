@@ -50,7 +50,7 @@ class FEI2dTrQuad;
 class FEI2dTrLin;
 
 /**
- * Class representing 2d triangular element  with quadratic velocity
+ * Class representing 2d triangular element with quadratic velocity
  * and linear pressure approximation for solving incompressible fluid problems
  * with SUPG solver.
  */
@@ -64,33 +64,33 @@ public:
     TR21_2D_SUPG(int n, Domain * aDomain);
     virtual ~TR21_2D_SUPG();
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
     // definition
-    virtual const char *giveClassName() const { return "TR21_2D_SUPG"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TR21_2D_SUPG_Name; }
-    virtual MaterialMode giveMaterialMode() { return _2dFlow; }
+    const char *giveClassName() const override { return "TR21_2D_SUPG"; }
+    const char *giveInputRecordName() const override { return _IFT_TR21_2D_SUPG_Name; }
+    MaterialMode giveMaterialMode() override { return _2dFlow; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual int computeNumberOfDofs();
-    virtual void updateYourself(TimeStep *tStep);
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    int computeNumberOfDofs() override;
+    void updateYourself(TimeStep *tStep) override;
     /// Used to check consistency and initialize some element geometry data (area,b,c).
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
-    virtual void LS_PCS_computedN(FloatMatrix &answer);
-    virtual double LS_PCS_computeVolume();
-    virtual void LS_PCS_computeVolume(double &answer,  const FloatArray **coordinates);
-    virtual double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep);
-    virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
+    double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep) override;
+    void LS_PCS_computedN(FloatMatrix &answer) override;
+    double LS_PCS_computeVolume() override;
+    void LS_PCS_computeVolume(double &answer,  const FloatArray **coordinates);
+    double LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep) override;
+    void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi) override;
 
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                            InternalStateType type, TimeStep *tStep) override;
 
     /// @name Helping functions for computing VOFFractions.
     //@{
@@ -103,47 +103,47 @@ public:
     void computeQuadraticFunct(FloatArray &answer, FloatArray line);
     //@{
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
     // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override {}
 #endif
 
-    virtual double computeCriticalTimeStep(TimeStep *tStep);
+    double computeCriticalTimeStep(TimeStep *tStep) override;
 
     // three terms for computing their norms due to computing t_supg
-    virtual void computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeLSICTerm(FloatMatrix &answer, TimeStep *tStep);
+    void computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep);
+    void computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep);
+    void computeLSICTerm(FloatMatrix &answer, TimeStep *tStep);
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
 protected:
-    virtual void giveLocalVelocityDofMap(IntArray &map);
-    virtual void giveLocalPressureDofMap(IntArray &map);
+    void giveLocalVelocityDofMap(IntArray &map) override;
+    void giveLocalPressureDofMap(IntArray &map) override;
 
-    virtual void computeGaussPoints();
-    virtual void computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp);
-    virtual void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual int  giveNumberOfSpatialDimensions();
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual void initGeometry();
+    void computeGaussPoints() override;
+    void computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep) override;
+    void computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp) override;
+    void computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeNpMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    int  giveNumberOfSpatialDimensions() override;
+    double computeVolumeAround(GaussPoint *gp) override;
+    void initGeometry();
 
-    virtual void updateStabilizationCoeffs(TimeStep *tStep);
+    void updateStabilizationCoeffs(TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // tr21_2d_supg_h

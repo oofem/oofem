@@ -56,11 +56,11 @@ public:
     /// Destructor.
     virtual ~TractionPressureBC() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, double time);
+    double give(Dof *dof, ValueModeType mode, double time) override;
 
-    virtual void scale(double s) { }
-    virtual const char *giveClassName() const { return "TractionPressureBC"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TractionPressureBC_Name; }
+    void scale(double s) override { }
+    const char *giveClassName() const override { return "TractionPressureBC"; }
+    const char *giveInputRecordName() const override { return _IFT_TractionPressureBC_Name; }
 };
 } // end namespace oofem
 #endif // tractionpressurebc_h
