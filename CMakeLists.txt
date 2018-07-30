@@ -469,26 +469,23 @@ if (USE_SPOOLES)
     list (APPEND MODULE_LIST "SPOOLES")
 endif ()
 
-# We need the interpreter for the test suite.
-find_package(PythonInterp "2.7")
-
 if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
-    set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
-    find_package(PythonInterp "2.7" REQUIRED)
+    #set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
+    find_package(PythonInterp "3" REQUIRED)
     find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
     list (APPEND EXT_LIBS ${PYTHON_LIBRARIES})
     list (APPEND MODULE_LIST "Python")
     add_definitions(-D__PYTHON_MODULE)
 
-    #if (USE_PYTHON_BINDINGS)
-    # require boost_python also for python stuff by itself
+    if (USE_PYTHON_BINDINGS)
+        # require boost_python also for python stuff by itself
         find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
         include_directories (${Boost_INCLUDE_DIRS})
         list (APPEND EXT_LIBS ${Boost_LIBRARIES})
         add_definitions(-DBOOST_PYTHON)
-    #endif ()
+    endif ()
 endif ()
 
 
