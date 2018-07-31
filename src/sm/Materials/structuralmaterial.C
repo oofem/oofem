@@ -378,13 +378,14 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
         this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
         vP_control.beSubArrayOf(vP, P_control);
         if ( vP_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
-            StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
+            StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStress);
             return;
         }
 
         this->give3dMaterialStiffnessMatrix_dPdF(tangent, TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
+	increment_vF.negated();
         vF.assemble(increment_vF, P_control);
     }
 
