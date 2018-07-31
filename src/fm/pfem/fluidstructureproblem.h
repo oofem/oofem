@@ -81,25 +81,24 @@ public:
     void setUDContextOutputMode(int cStep);
     void setProblemMode(problemMode pmode);
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void initializeYourself(TimeStep *tStep);
-    virtual int initializeAdaptive(int stepNumber) { return 0; }
+    void solveYourselfAt(TimeStep *tStep) override;
+    void initializeYourself(TimeStep *tStep) override;
+    int initializeAdaptive(int stepNumber) override { return 0; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     void printYourself();
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) { }
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) override { }
 
-    virtual void preInitializeNextStep();
+    void preInitializeNextStep() override;
 
     // identification
-    virtual const char *giveClassName() const { return "FluidStructureProblem"; }
-    virtual const char *giveInputRecordName() const { return _IFT_FluidStructureProblem_Name; }
-    virtual int isIncremental() { return 0; }
-    virtual int useNonlocalStiffnessOption() { return 0; }
+    const char *giveClassName() const override { return "FluidStructureProblem"; }
+    const char *giveInputRecordName() const override { return _IFT_FluidStructureProblem_Name; }
+    int isIncremental() { return 0; }
+    int useNonlocalStiffnessOption() override { return 0; }
 
-    virtual fMode giveFormulation() { return UNKNOWN; }
-
+    fMode giveFormulation() override { return UNKNOWN; }
 
     /// Returns list of model number that this model is coupled with. Used for staggered approach.
     void giveCoupledModels(IntArray &answer) { answer = coupledModels; }
@@ -108,13 +107,13 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) { }
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) override { }
 #endif
 
-    virtual int giveNumberOfSlaveProblems() { return ( int ) inputStreamNames.size(); }
+    int giveNumberOfSlaveProblems() override { return ( int ) inputStreamNames.size(); }
 
-    virtual int giveNumberOfFirstStep() { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
-    virtual int giveNumberOfTimeStepWhenIcApply() {
+    int giveNumberOfFirstStep() override { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
+    int giveNumberOfTimeStepWhenIcApply() {
         if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; }
     }
 

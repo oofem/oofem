@@ -55,28 +55,28 @@ public:
     DarcyFlow(int i, EngngModel * _master);
     virtual ~DarcyFlow();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode) { return CIO_IOERR; }
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode) { return CIO_IOERR; }
-    virtual int checkConsistency() { return 1; }
-    virtual fMode giveFormulation() { return TL; }
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override { return CIO_IOERR; }
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override { return CIO_IOERR; }
+    int checkConsistency() override { return 1; }
+    fMode giveFormulation() override { return TL; }
 
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
 
-    virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *);
+    double giveUnknownComponent(ValueModeType, TimeStep *tSteo, Domain *d, Dof *dof) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
     void DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector);
 
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual TimeStep *giveNextStep();
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
+    TimeStep *giveNextStep() override;
 
-    virtual int forceEquationNumbering(int id);
+    int forceEquationNumbering(int id) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_DarcyFlow_Name; }
-    virtual const char *giveClassName() const { return "DarcyFlow"; }
+    const char *giveInputRecordName() const { return _IFT_DarcyFlow_Name; }
+    const char *giveClassName() const override { return "DarcyFlow"; }
 };
 }
 

@@ -98,21 +98,21 @@ public:
     DIIDynamic(int i, EngngModel * _master = NULL);
     virtual ~DIIDynamic();
 
-    virtual void solveYourself();
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-	virtual void initializeYourself(TimeStep *tStep);
+    void solveYourself() override;
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    TimeStep *giveNextStep() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
+    void initializeYourself(TimeStep *tStep) override;
 
     // identification
-    virtual const char *giveClassName() const { return "DIIDynamic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DIIDynamic_Name; }
-    virtual fMode giveFormulation() { return TL; }
+    const char *giveClassName() const override { return "DIIDynamic"; }
+    const char *giveInputRecordName() const { return _IFT_DIIDynamic_Name; }
+    fMode giveFormulation() override { return TL; }
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) override;
 
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
     void assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueModeType mode, TimeStep *tStep);
@@ -120,8 +120,8 @@ public:
 
     void assembleDirichletBcRhsVector (FloatArray& answer, Domain* d, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
 	TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
 };

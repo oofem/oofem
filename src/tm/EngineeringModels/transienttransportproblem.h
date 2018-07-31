@@ -92,39 +92,39 @@ public:
     /// Destructor.
     virtual ~TransientTransportProblem();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-    
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+
     virtual void applyIC();
 
-    virtual int requiresUnknownsDictionaryUpdate();
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
-    virtual void updateDomainLinks();
+    int requiresUnknownsDictionaryUpdate() override;
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
+    void updateDomainLinks() override;
 
     Function *giveDtFunction();
     double giveDeltaT(int n);
     double giveDiscreteTime(int iStep);
 
-    virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    TimeStep *giveNextStep() override;
+    TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual bool requiresEquationRenumbering(TimeStep *tStep);
-    virtual int forceEquationNumbering();
+    bool requiresEquationRenumbering(TimeStep *tStep) override;
+    int forceEquationNumbering() override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
     
-    virtual int checkConsistency();
-    virtual FieldPtr giveField (FieldType key, TimeStep *);
+    int checkConsistency() override;
+    FieldPtr giveField (FieldType key, TimeStep *tStep) override;
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_TransientTransportProblem_Name; }
-    virtual const char *giveClassName() const { return "TransientTransportProblem"; }
-    virtual fMode giveFormulation() { return TL; }
+    const char *giveInputRecordName() const { return _IFT_TransientTransportProblem_Name; }
+    const char *giveClassName() const override { return "TransientTransportProblem"; }
+    fMode giveFormulation() override { return TL; }
 };
 } // end namespace oofem
 #endif // transienttransportproblem_h

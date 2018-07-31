@@ -73,27 +73,27 @@ public:
     /// Destructor.
     virtual ~NLTransientTransportProblem();
 
-    virtual TimeStep* giveNextStep();
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
-    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    TimeStep* giveNextStep() override;
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
+    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_NLTransientTransportProblem_Name; }
-    virtual const char *giveClassName() const { return "NLTransientTransportProblem"; }
-    virtual fMode giveFormulation() { return nonLinFormulation; }
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
-    virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
+    const char *giveInputRecordName() const { return _IFT_NLTransientTransportProblem_Name; }
+    const char *giveClassName() const override { return "NLTransientTransportProblem"; }
+    fMode giveFormulation() override { return nonLinFormulation; }
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
+    void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep) override;
 
-    virtual int giveCurrentNumberOfIterations() {return currentIterations;}
+    int giveCurrentNumberOfIterations() override { return currentIterations; }
 
 protected:
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual void applyIC(TimeStep *tStep);
+    void updateInternalState(TimeStep *tStep) override;
+    void applyIC(TimeStep *tStep) override;
     void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, const UnknownNumberingScheme &s, TimeStep *tStep);
+    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, const UnknownNumberingScheme &s, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // nltransienttransportproblem_h

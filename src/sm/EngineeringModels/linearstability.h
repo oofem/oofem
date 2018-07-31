@@ -91,37 +91,37 @@ public:
     }
     virtual ~LinearStability() { }
 
-    virtual void solveYourself();
-    virtual void solveYourselfAt(TimeStep *tStep);
+    void solveYourself() override;
+    void solveYourselfAt(TimeStep *tStep) override;
 
-    virtual void doStepOutput(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void doStepOutput(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
     //virtual void printOutputAt(FILE *file, TimeStep *tStep, const IntArray &nodeSets, const IntArray &elementSets);
     void terminateLinStatic(TimeStep *tStep);
     int requiresNewLsh() { return 0; }
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
     // the intrinsic time of time step defines active eigen value and corresponding vector,
     // for which values can be requested using
     // giveUnknownComponent method.
     // When DisplacementVector is requested, then if time==0 linear elastic solution displacement are returned,
     // otherwise corresponding eigen vector is considered as displacement vector
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-    virtual TimeStep *giveNextStep();
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    TimeStep *giveNextStep() override;
 
-    virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
-    virtual void setActiveVector(int i);
+    double giveEigenValue(int eigNum) override { return eigVal.at(eigNum); }
+    void setActiveVector(int i) override;
 
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
     SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *tStep);
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_LinearStability_Name; }
-    virtual const char *giveClassName() const { return "LinearStability"; }
-    virtual fMode giveFormulation() { return TL; }
+    const char *giveInputRecordName() const { return _IFT_LinearStability_Name; }
+    const char *giveClassName() const override { return "LinearStability"; }
+    fMode giveFormulation() override { return TL; }
 };
 } // end namespace oofem
 #endif // linearstability_h

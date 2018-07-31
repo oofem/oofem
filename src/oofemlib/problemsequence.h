@@ -76,31 +76,31 @@ public:
 
     EngngModel & giveActiveModel() { return *emodelList[activeModel]; }
 
-    virtual void solveYourself();
+    void solveYourself() override;
 
     //virtual void initializeYourself(TimeStep *tStep);
-    virtual int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkProblemConsistency();
+    int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    int checkProblemConsistency() override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
     // identification
-    virtual const char *giveClassName() const { return "ProblemSequence"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ProblemSequence_Name; }
+    const char *giveClassName() const override { return "ProblemSequence"; }
+    const char *giveInputRecordName() const { return _IFT_ProblemSequence_Name; }
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &gc);
-    virtual void drawElements(oofegGraphicContext &gc);
-    virtual void drawNodes(oofegGraphicContext &gc);
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) { }
+    void drawYourself(oofegGraphicContext &gc) override;
+    void drawElements(oofegGraphicContext &gc) override;
+    void drawNodes(oofegGraphicContext &gc) override;
+    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) override { }
 #endif
 
-    virtual EngngModel *giveSlaveProblem(int i) { return NULL; }
-    virtual int giveNumberOfSlaveProblems() { return 0; }
+    EngngModel *giveSlaveProblem(int i) override { return NULL; }
+    int giveNumberOfSlaveProblems() override { return 0; }
 
-    virtual int instanciateDefaultMetaStep(InputRecord *ir) { return 1; }
+    int instanciateDefaultMetaStep(InputRecord *ir) override { return 1; }
 };
 } // end namespace oofem
 #endif // problemsequence_h

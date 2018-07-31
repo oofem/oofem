@@ -99,11 +99,11 @@ public:
     AdaptiveNonLinearStatic(int i, EngngModel * _master = NULL);
     virtual ~AdaptiveNonLinearStatic();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
 
     /**
      * Returns the load level corresponding to given solution step number.
@@ -114,7 +114,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int tStepNumber);
+    int initializeAdaptive(int tStepNumber) override;
     /**
      * Initializes the receiver state according to state of given source problem.
      * This process should typically include mapping of source solution, internal variable mapping procedures and
@@ -128,17 +128,17 @@ public:
      */
     virtual int adaptiveRemap(Domain *dNew);
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
-    virtual const char *giveClassName() const { return "AdaptiveNonLinearStatic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_AdaptiveNonLinearStatic_Name; }
+    const char *giveClassName() const override { return "AdaptiveNonLinearStatic"; }
+    const char *giveInputRecordName() const { return _IFT_AdaptiveNonLinearStatic_Name; }
 
 #ifdef __PARALLEL_MODE
-    virtual LoadBalancer *giveLoadBalancer();
-    virtual LoadBalancerMonitor *giveLoadBalancerMonitor();
+    LoadBalancer *giveLoadBalancer() override;
+    LoadBalancerMonitor *giveLoadBalancerMonitor() override;
 #endif
 
 protected:

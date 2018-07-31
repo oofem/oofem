@@ -86,44 +86,44 @@ protected:
 public:
     StaticStructural(int i, EngngModel * _master = NULL);
     virtual ~StaticStructural();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void updateAttributes(MetaStep *mStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void updateAttributes(MetaStep *mStep) override;
 
-    virtual void solveYourself();
-    virtual void solveYourselfAt(TimeStep *tStep);
+    void solveYourself() override;
+    void solveYourselfAt(TimeStep *tStep) override;
 
-    virtual void terminate(TimeStep *tStep);
+    void terminate(TimeStep *tStep) override;
 
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
     
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
-    virtual int forceEquationNumbering();
+    int forceEquationNumbering() override;
 
-    virtual double giveLoadLevel() { return loadLevel; }
-    virtual TimeStep *giveNextStep();
-    virtual double giveEndOfTimeOfInterest();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    double giveLoadLevel() override { return loadLevel; }
+    TimeStep *giveNextStep() override;
+    double giveEndOfTimeOfInterest() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
     
-    virtual fMode giveFormulation() { return TL; }
+    fMode giveFormulation() override { return TL; }
 
     void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
 
-    virtual bool requiresEquationRenumbering(TimeStep *tStep);
+    bool requiresEquationRenumbering(TimeStep *tStep) override;
 
-    virtual int requiresUnknownsDictionaryUpdate() { return true; }
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
+    int requiresUnknownsDictionaryUpdate() override { return true; }
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
-    virtual const char *giveClassName() const { return "StaticStructural"; }
+    const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
+    const char *giveClassName() const override { return "StaticStructural"; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-    
-    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+
+    int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
 };
 } // end namespace oofem
 #endif // staticstructural_h

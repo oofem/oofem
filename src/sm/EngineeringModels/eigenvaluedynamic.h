@@ -87,23 +87,23 @@ public:
     }
     virtual ~EigenValueDynamic() { }
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void doStepOutput(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
+    void solveYourselfAt(TimeStep *tStep) override;
+    void doStepOutput(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-    virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual void setActiveVector(int i);
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    TimeStep *giveNextStep() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
+    void setActiveVector(int i) override;
 
-    virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
+    double giveEigenValue(int eigNum) override { return eigVal.at(eigNum); }
 
     // identification
-    virtual const char *giveClassName() const { return "EigenValueDynamic"; }
+    const char *giveClassName() const override { return "EigenValueDynamic"; }
 };
 } // end namespace oofem
 #endif // eigenvaluedynamic_h

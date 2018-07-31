@@ -128,19 +128,17 @@ public:
     QClinearStatic(int i, EngngModel * _master = NULL);
     virtual ~QClinearStatic();
 
-    virtual void postInitialize();
+    void postInitialize() override;
 
+    void solveYourself() override;
+    void solveYourselfAt(TimeStep *tStep) override;
 
-    virtual void solveYourself();
-    virtual void solveYourselfAt(TimeStep *tStep);
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_QClinearStatic_Name; }
-    virtual const char *giveClassName() const { return "QClinearStatic"; }
-    virtual fMode giveFormulation() { return TL; }
-
+    const char *giveInputRecordName() const { return _IFT_QClinearStatic_Name; }
+    const char *giveClassName() const override { return "QClinearStatic"; }
+    fMode giveFormulation() override { return TL; }
 
     virtual void updateNodeTypes(Domain *d);
     virtual void setQCNodeType(Domain *d);
@@ -162,19 +160,15 @@ public:
     virtual QCFullsolveddomain *giveFullSolvedDomain();
     virtual int giveQcApproachNumber() {return qcApproach;}
 
-    bool isElementActivated( int elemNum ) { return activatedElementList[elemNum-1]; }
-    bool isElementActivated( Element  *e ) { return activatedElementList[e->giveNumber()-1]; }
+    bool isElementActivated( int elemNum ) override { return activatedElementList[elemNum-1]; }
+    bool isElementActivated( Element  *e ) override { return activatedElementList[e->giveNumber()-1]; }
 
     void setActivatedNodeList( IntArray nodeList, Domain *d);
     void setActivatedElementList( IntArray elemList);
 
-
-    virtual UnknownNumberingScheme *giveEquationNumbering() {return this->qcEquationNumbering; }
-
-    
-
+    virtual UnknownNumberingScheme *giveEquationNumbering() { return this->qcEquationNumbering; }
 };
 
 
 } // end namespace oofem
-#endif // linearstatic_h
+#endif // qclinearstatic_h

@@ -148,41 +148,41 @@ public:
     void setContextOutputMode(ContextOutputMode contextMode);
     void setUDContextOutputMode(int cStep);
     void setProblemMode(problemMode pmode);
-    virtual void setRenumberFlag();
+    void setRenumberFlag() override;
 
-    virtual void solveYourself();
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual int forceEquationNumbering();
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void initializeYourself(TimeStep *tStep) { }
-    virtual int initializeAdaptive(int tStepNumber) { return 0; }
-    virtual void terminate(TimeStep *tStep);
-    virtual void doStepOutput(TimeStep *tStep);
+    void solveYourself() override;
+    void solveYourselfAt(TimeStep *tStep) override;
+    int forceEquationNumbering() override;
+    void updateYourself(TimeStep *tStep) override;
+    void initializeYourself(TimeStep *tStep) override { }
+    int initializeAdaptive(int tStepNumber) override { return 0; }
+    void terminate(TimeStep *tStep) override;
+    void doStepOutput(TimeStep *tStep) override;
 
-    virtual int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void updateAttributes(MetaStep *mStep);
+    int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void updateAttributes(MetaStep *mStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mod);
-    virtual void updateDomainLinks();
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mod) override;
+    void updateDomainLinks() override;
 
     void printYourself();
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual TimeStep *giveCurrentStep(bool force = false);
-    virtual TimeStep *givePreviousStep(bool force = false);
-    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
-    virtual int giveNumberOfFirstStep(bool force = false);
+    TimeStep *giveCurrentStep(bool force = false) override;
+    TimeStep *givePreviousStep(bool force = false) override;
+    TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+    int giveNumberOfFirstStep(bool force = false) override;
 
-    virtual TimeStep *giveNextStep();
+    TimeStep *giveNextStep() override;
 
     // identification
-    virtual const char *giveClassName() const { return "StaggeredProblem"; }
+    const char *giveClassName() const override { return "StaggeredProblem"; }
     virtual const char *giveInputRecordName() const { return _IFT_StaggeredProblem_Name; }
-    virtual int useNonlocalStiffnessOption() { return 0; }
+    int useNonlocalStiffnessOption() override { return 0; }
 
-    virtual fMode giveFormulation() { return UNKNOWN; }
+    fMode giveFormulation() override { return UNKNOWN; }
     /**
      * Returns time function for time step increment.
      * Used time function should provide step lengths as function of step number.
@@ -204,17 +204,17 @@ public:
     void giveCoupledModels(IntArray &answer) { answer = coupledModels; }
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &gc);
-    virtual void drawElements(oofegGraphicContext &gc);
-    virtual void drawNodes(oofegGraphicContext &gc);
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) { }
+    void drawYourself(oofegGraphicContext &gc) override;
+    void drawElements(oofegGraphicContext &gc) override;
+    void drawNodes(oofegGraphicContext &gc) override;
+    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) override { }
 #endif
 
-    virtual int checkProblemConsistency();
+    int checkProblemConsistency() override;
 
-    virtual EngngModel *giveSlaveProblem(int i);
-    virtual int giveNumberOfSlaveProblems() { return (int)inputStreamNames.size(); }
-    virtual int instanciateDefaultMetaStep(InputRecord *ir);
+    EngngModel *giveSlaveProblem(int i) override;
+    int giveNumberOfSlaveProblems() override { return (int)inputStreamNames.size(); }
+    int instanciateDefaultMetaStep(InputRecord *ir) override;
 
 protected:
     int instanciateSlaveProblems();
