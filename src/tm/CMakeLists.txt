@@ -5,7 +5,6 @@ if (USE_CEMHYD)
 endif ()
 
 set (tm_emodel
-    EngineeringModels/darcyflow.C
     EngineeringModels/nltransienttransportproblem.C
     EngineeringModels/nonstationarytransportproblem.C
     EngineeringModels/stationarytransportproblem.C
