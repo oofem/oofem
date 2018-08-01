@@ -381,6 +381,37 @@ SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
     }
 }
 
+void SUPG :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    this->VelocityPressureField->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+    // update element stabilization
+    for ( auto &elem : d->giveElements() ) {
+        static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
+    }
+}
+
+
+void SUPG :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+    answer.zero();
+    this->assembleVector(answer, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
+                         EModelDefaultEquationNumbering(), d, eNorm);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+}
+
+
+void SUPG :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    mat.zero();
+    //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
+    this->assemble( mat, tStep, SUPGTangentAssembler(TangentStiffness, lscale, dscale, uscale, alpha),
+                    EModelDefaultEquationNumbering(), d );
+    // } else {
+    //     this->assemble( lhs, tStep, SUPGTangentAssembler(SecantStiffness),
+    //                     EModelDefaultEquationNumbering(), d );
+    // }
+}
+
 
 double
 SUPG :: giveReynoldsNumber()
@@ -558,7 +589,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
     double loadLevel;
     int currentIterations;
-    this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
+    this->updateInternalRHS( this->internalForces, tStep, this->giveDomain(1), &this->eNorm );
     NM_Status status = this->nMethod->solve(*this->lhs,
                                             externalForces,
                                             NULL,

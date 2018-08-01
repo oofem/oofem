@@ -506,7 +506,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 	FloatArray extrapolatedForces;
         this->assemblePrescribedExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
-        this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
+        this->updateMatrix(*stiffnessMatrix, tStep, this->giveDomain(di));
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
         OOFEM_LOG_RELEVANT("solving for increment\n");
         linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfDisplacement);
@@ -528,12 +528,51 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
                                       totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
-    ///@todo Martin: ta bort!!!
-    //this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di));
-    ///@todo Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
     prevStepLength =  currentStepLength;
 }
+
+
+void
+NonLinearStatic :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    // No-op: This can't really be supported in any nice way in nlinearstatic. 
+}
+
+
+void
+NonLinearStatic :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    if ( stiffMode == nls_tangentStiffness ) {
+        mat.zero(); // zero stiffness matrix
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Assembling tangent stiffness matrix\n");
+#endif
+        this->assemble(mat, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), d);
+    } else if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness && initFlag ) ) {
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Assembling secant stiffness matrix\n");
+#endif
+        mat.zero(); // zero stiffness matrix
+        this->assemble(mat, tStep, TangentAssembler(SecantStiffness), EModelDefaultEquationNumbering(), d);
+        initFlag = 0;
+    } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
+        ( this->giveMetaStep( tStep->giveMetaStepNumber() )->giveFirstStepNumber() == tStep->giveNumber() ) || (updateElasticStiffnessFlag) ) ) {
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
+#endif
+        mat.zero(); // zero stiffness matrix
+        this->assemble(mat, tStep, TangentAssembler(ElasticStiffness),
+                       EModelDefaultEquationNumbering(), d);
+        initFlag = 0;
+    } else {
+        // currently no action , this method is mainly intended to
+        // assemble new tangent stiffness after each iteration
+        // when secantStiffMode is on, we use the same stiffness
+        // during iteration process
+    }
+}
+
 
 void
 NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
@@ -583,7 +622,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         OOFEM_LOG_DEBUG("Updating internal forces\n");
 #endif
         // update internalForces and internalForcesEBENorm concurrently
-        this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
+        this->updateInternalRHS(internalForces, tStep, d, &this->internalForcesEBENorm);
         break;
 
     default:

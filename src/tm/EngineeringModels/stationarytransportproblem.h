@@ -79,6 +79,9 @@ public:
     void solveYourselfAt(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
     void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+    void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
+    void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
+    void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
     FieldPtr giveField (FieldType key, TimeStep *) override;
     contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;

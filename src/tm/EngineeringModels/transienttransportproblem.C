@@ -264,7 +264,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray incrementOfSolution;
     double loadLevel;
     int currentIterations;
-    this->updateComponent(tStep, InternalRhs, d); // @todo Hack to ensure that internal RHS is evaluated before the tangent. This is not ideal, causing this to be evaluated twice for a linearproblem. We have to find a better way to handle this.
+    this->updateInternalRHS(this->internalForces, tStep, this->giveDomain(1), &this->eNorm); /// @todo Hack to ensure that internal RHS is evaluated before the tangent. This is not ideal, causing this to be evaluated twice for a linearproblem. We have to find a better way to handle this.
     this->nMethod->solve(*this->effectiveMatrix,
                          externalForces,
                          NULL, // ignore
@@ -276,6 +276,58 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
                          SparseNonLinearSystemNM :: rlm_total, // ignore
                          currentIterations, // ignore
                          tStep);
+}
+
+
+void
+TransientTransportProblem :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    ///@todo NRSolver should report when the solution changes instead of doing it this way.
+    this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+    ///@todo Need to reset the boundary conditions properly since some "update" is doing strange
+    /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
+    this->field->applyBoundaryCondition(tStep);
+}
+
+
+void
+TransientTransportProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+    // F_eff = F(T^(k)) + C * dT/dt^(k)
+    answer.zero();
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
+                         EModelDefaultEquationNumbering(), d, & this->eNorm);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+    if ( lumped ) {
+        // Note, inertia contribution cannot be computed on element level when lumped mass matrices are used.
+        FloatArray oldSolution, vel;
+        this->field->initialize(VM_Total, tStep->givePreviousStep(), oldSolution, EModelDefaultEquationNumbering());
+        vel.beDifferenceOf(solution, oldSolution);
+        vel.times( 1./tStep->giveTimeIncrement() );
+        FloatArray capacityDiag(vel.giveSize());
+        this->assembleVector( capacityDiag, tStep, LumpedMassVectorAssembler(), VM_Total, EModelDefaultEquationNumbering(), d );
+        for ( int i = 0; i < vel.giveSize(); ++i ) {
+            answer[i] += capacityDiag[i] * vel[i];
+        }
+    } else {
+        FloatArray tmp;
+        this->assembleVector(answer, tStep, InertiaForceAssembler(), VM_Total,
+                             EModelDefaultEquationNumbering(), d, & tmp);
+        this->eNorm.add(tmp); ///@todo Fix this, assembleVector shouldn't zero eNorm inside the functions. / Mikael
+    }
+}
+
+
+void
+TransientTransportProblem :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    // K_eff = (a*K + C/dt)
+    if ( !this->keepTangent || !this->hasTangent ) {
+        mat.zero();
+        this->assemble(mat, tStep, EffectiveTangentAssembler(TangentStiffness, lumped, this->alpha, 1./tStep->giveTimeIncrement()),
+                       EModelDefaultEquationNumbering(), d );
+        this->hasTangent = true;
+    }
 }
 
 

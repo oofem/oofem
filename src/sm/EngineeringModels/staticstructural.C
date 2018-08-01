@@ -318,7 +318,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
                 OOFEM_LOG_RELEVANT("Computing old tangent\n");
             }
 
-            this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
+            this->updateMatrix(*stiffnessMatrix, tStep, this->giveDomain(di));
             SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
 
             if( this->giveProblemScale() == macroScale ) {
@@ -420,6 +420,28 @@ double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
         return 0;
     }
     return this->field->giveUnknownValue(dof, mode, tStep);
+}
+
+
+void StaticStructural :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    this->field->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+    this->field->applyBoundaryCondition(tStep); ///@todo Temporary hack to override the incorrect values that is set by "update" 
+}
+
+
+void StaticStructural :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+    answer.zero();
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d, eNorm);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+}
+
+
+void StaticStructural :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    mat.zero();
+    this->assemble(mat, tStep, TangentAssembler(this->stiffMode), EModelDefaultEquationNumbering(), d);
 }
 
 

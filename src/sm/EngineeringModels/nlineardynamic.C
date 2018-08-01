@@ -350,7 +350,7 @@ NonLinearDynamic :: initializeYourself(TimeStep *tStep)
                 }
             }
         }
-        this->giveInternalForces(internalForces, true, 1, tStep);
+        this->updateInternalRHS(internalForces, tStep, domain, &this->internalForcesEBENorm);
     }
 }
 
@@ -557,6 +557,79 @@ void NonLinearDynamic :: updateYourself(TimeStep *tStep)
     StructuralEngngModel :: updateYourself(tStep);
 }
 
+
+void NonLinearDynamic :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    // No-op; this still assumes that the solution vector is passed by reference to the NRSolver. 
+    //this->field->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+}
+
+
+void NonLinearDynamic :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+#ifdef VERBOSE
+    OOFEM_LOG_DEBUG("Updating internal RHS\n");
+#endif
+#ifdef TIME_REPORT
+    Timer timer;
+    timer.startTimer();
+#endif
+    if ( ( currentIterations != 0 ) || ( totIterations == 0 ) ) {
+        StructuralEngngModel::updateInternalRHS(internalForces, tStep, d, eNorm);
+
+        // Updating the residual vector @ NR-solver
+        help.beScaled(a0 + eta * a1, incrementOfDisplacement);
+
+        massMatrix->times(help, rhs2);
+
+        forcesVector = internalForces;
+        forcesVector.add(rhs2);
+        forcesVector.subtract(previousInternalForces);
+
+        if ( delta != 0 ) {
+            help.beScaled(delta * a1, incrementOfDisplacement);
+            this->timesMtrx(help, rhs2, TangentStiffnessMatrix, this->giveDomain(1), tStep);
+            //this->assembleVector(rhs2, tStep, MatrixProductAssembler(TangentAssembler(), help), VM_Total, 
+            //                    EModelDefaultEquationNumbering(), this->giveDomain(1));
+            forcesVector.add(rhs2);
+        }
+    }
+#ifdef TIME_REPORT
+    timer.stopTimer();
+    OOFEM_LOG_DEBUG( "User time consumed by updating internal RHS: %.2fs\n", timer.getUtime() );
+#endif
+}
+
+
+void NonLinearDynamic :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    // Prevent assembly if already assembled ( totIterations > 0 )
+    // Allow if MANRMSteps != 0
+    if ( ( totIterations == 0 ) || MANRMSteps ) {
+#ifdef VERBOSE
+        OOFEM_LOG_DEBUG("Updating effective stiffness matrix\n");
+#endif
+#ifdef TIME_REPORT
+        Timer timer;
+        timer.startTimer();
+#endif
+#if 1
+        mat.zero();
+        this->assemble(mat, tStep, EffectiveTangentAssembler(TangentStiffness, false, 1 + this->delta * a1,  this->a0 + this->eta * this->a1),
+                       EModelDefaultEquationNumbering(), d);
+#else
+        this->assemble(mat, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
+        mat.times(1. + this->delta * a1);
+        mat.add(this->a0 + this->eta * this->a1, this->massMatrix);
+#endif
+#ifdef TIME_REPORT
+        timer.stopTimer();
+        OOFEM_LOG_DEBUG( "User time consumed by updating nonlinear LHS: %.2fs\n", timer.getUtime() );
+#endif
+    }
+}
+
+
 void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 //
 // Updates some component, which is used by numerical method
@@ -605,7 +678,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
             timer.startTimer();
 #endif
             if ( ( currentIterations != 0 ) || ( totIterations == 0 ) ) {
-                this->giveInternalForces(internalForces, true, d->giveNumber(), tStep);
+                StructuralEngngModel::updateInternalRHS(internalForces, tStep, d, &this->internalForcesEBENorm);
 
                 // Updating the residual vector @ NR-solver
                 help.beScaled(a0 + eta * a1, incrementOfDisplacement);

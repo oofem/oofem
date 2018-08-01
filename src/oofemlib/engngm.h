@@ -787,16 +787,34 @@ public:
      * @param domainSerNum Domain serial number.
      */
     std :: string giveDomainFileName(int domainNum, int domainSerNum) const;
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     /**
-     * Updates components mapped to numerical method if necessary during solution process.
-     * Some numerical methods may require updating
-     * mapped components during solution process (e.g., updating of tangent stiffness
-     * when using updated Newton-Raphson method).
+     * Updates the solution (guess) according to the new values.
+     * Callback for nonlinear solvers (e.g. Newton-Raphson), and are called before new internal forces are computed.
+     * @param solutionVector New solution.
      * @param tStep Time when component is updated.
-     * @param cmpn Numerical component to update.
      * @param d Domain.
      */
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    virtual void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d);
+    /**
+     * Updates the solution (guess) according to the new values.
+     * Callback for nonlinear solvers (e.g. Newton-Raphson).
+     * @param solutionVector New solution.
+     * @param tStep Time when component is updated.
+     * @param d Domain.
+     * @param eNorm Optional per-element norm (for normalization).
+     */
+    virtual void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm);
+    /**
+     * Updates the solution (guess) according to the new values.
+     * Callback for nonlinear solvers (e.g. Newton-Raphson).
+     * @note For performance, the matrix should keep it's non-zero structure between calls, 
+     * so the caller should make sure *not* to clear the matrix object before called. 
+     * @param solutionVector New solution.
+     * @param tStep Time when component is updated.
+     * @param d Domain.
+     */
+    virtual void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d);
     /**
      * Initializes solution of new time step. Default implementation
      * resets all internal history variables (in integration points of elements)
@@ -1118,7 +1136,6 @@ public:
     virtual bool isElementActivated( int elemNum ) { return true; }
     virtual bool isElementActivated( Element *e ) { return true; }
 
-    
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc);

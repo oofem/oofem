@@ -150,26 +150,26 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #if 1
     double loadLevel;
     int currentIterations;
-    this->updateComponent( tStep, InternalRhs, d );
+    this->updateInternalRHS( this->internalForces, tStep, d, &this->eNorm );
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             externalForces,
                                             NULL,
                                             solutionVector,
                                             incrementOfSolution,
                                             this->internalForces,
-
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,
                                             currentIterations,
                                             tStep);
 #else
-    this->updateComponent( tStep, InternalRhs, d );
-    this->updateComponent( tStep, NonLinearLhs, d );
+    this->updateInternalRHS( this->internalForces, tStep, d, nullptr );
+    this->updateMatrix( this->stiffnessMatrix, tStep, d );
     this->internalForces.negated();
     this->internalForces.add(externalForces);
     NM_Status status = this->nMethod->giveLinearSolver()->solve(this->stiffnessMatrix.get(), & ( this->internalForces ), & solutionVector);
-    this->updateComponent( tStep, NonLinearLhs, d );
+    this->updateSolution(solutionVector);
+    this->updateInternalRHS( this->internalForces, tStep, d, nullptr );
 #endif
 
     if ( !( status & NM_Success ) ) {
@@ -202,11 +202,39 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
     }
 }
 
+void StokesFlow :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    this->velocityPressureField->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+    // update element stabilization
+    for ( auto &elem : d->giveElements() ) {
+        static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
+    }
+}
+
+
+void StokesFlow :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+    answer.zero();
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
+                         EModelDefaultEquationNumbering(), d, eNorm);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+}
+
+
+void StokesFlow :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    mat.zero();
+    this->assemble(mat, tStep, TangentAssembler(TangentStiffness),
+                   EModelDefaultEquationNumbering(), d);
+}
+
+
 void StokesFlow :: updateYourself(TimeStep *tStep)
 {
     this->updateInternalState(tStep);
     FluidModel :: updateYourself(tStep);
 }
+
 
 int StokesFlow :: forceEquationNumbering(int id)
 {

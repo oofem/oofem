@@ -238,6 +238,33 @@ StationaryTransportProblem :: updateYourself(TimeStep *tStep)
     EngngModel :: updateYourself(tStep);
 }
 
+
+void
+StationaryTransportProblem :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    // No-op: currently uses "PrimaryField" and passes along the reference
+    ///@todo this->field->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+}
+
+
+void
+StationaryTransportProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+    answer.zero();
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
+                         EModelDefaultEquationNumbering(), this->giveDomain(1), eNorm);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+}
+
+
+void
+StationaryTransportProblem :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    mat.zero();
+    this->assemble(mat, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), this->giveDomain(1) );
+}
+
+
 void
 StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
