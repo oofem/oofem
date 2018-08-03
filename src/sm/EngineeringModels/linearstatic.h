@@ -73,7 +73,7 @@ protected:
     std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     int initFlag;
-    EModelDefaultEquationNumbering *equationNumbering;
+    EModelDefaultEquationNumbering equationNumbering;
 
 public:
     LinearStatic(int i, EngngModel * _master = NULL);
@@ -93,7 +93,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    UnknownNumberingScheme *giveEquationNumbering() { return equationNumbering; }
+    virtual UnknownNumberingScheme &giveEquationNumbering() { return equationNumbering; }
 
     // identification
     const char *giveInputRecordName() const { return _IFT_LinearStatic_Name; }

@@ -91,9 +91,8 @@ protected:
     SparseMtrxType sparseMtrxType;
     /// Numerical method used to solve the problem.
     SparseLinearSystemNM *nMethod;
-    
-    QuasicontinuumNumberingscheme *qcEquationNumbering;
 
+    QuasicontinuumNumberingscheme qcEquationNumbering;
 
     int initFlag;
 	
@@ -113,10 +112,9 @@ protected:
     //std :: vector< std :: unique_ptr< Element > > interpolationElementList;
     //std :: vector< std :: unique_ptr< Element > > links;
 
-
     std::vector<IntArray> interpolationMeshNodes;
     int  numberOfIntepolationElements;
-    
+
     QCFullsolveddomain Fullsolveddomain;
 
     FloatArray FullSolvedDomainNodes;
@@ -166,7 +164,7 @@ public:
     void setActivatedNodeList( IntArray nodeList, Domain *d);
     void setActivatedElementList( IntArray elemList);
 
-    virtual UnknownNumberingScheme *giveEquationNumbering() { return this->qcEquationNumbering; }
+    UnknownNumberingScheme &giveEquationNumbering() override { return this->qcEquationNumbering; }
 };
 
 
