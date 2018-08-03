@@ -38,7 +38,7 @@
 #include "fluidmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include "primaryfield.h"
+#include "dofdistributedprimaryfield.h"
 //<RESTRICTED_SECTION>
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
@@ -179,9 +179,9 @@ protected:
 
     std :: unique_ptr< SparseMtrx > lhs;
     /// Pressure field.
-    PrimaryField PressureField;
+    DofDistributedPrimaryField pressureField;
     /// Velocity field.
-    PrimaryField VelocityField;
+    DofDistributedPrimaryField velocityField;
     FloatArray deltaAuxVelocity;
     FloatArray prescribedTractionPressure;
     FloatArray nodalPrescribedTractionPressureConnectivity;
@@ -227,6 +227,7 @@ public:
 
     void updateYourself(TimeStep *tStep) override;
 
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
     double giveReynoldsNumber() override;
     double giveTheta1();
