@@ -48,8 +48,9 @@
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,
-                                                         FieldType ft, int nHist) :
-    PrimaryField(a, idomain, ft, nHist)
+                                                         FieldType ft, int nHist, double alpha) :
+    PrimaryField(a, idomain, ft, nHist),
+    alpha(alpha)
 { }
 
 DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
@@ -65,6 +66,8 @@ DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, Tim
         double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
         if ( mode == VM_Velocity ) {
             return (val1 - val0) / tStep->giveTimeIncrement();
+        } else if ( mode == VM_Intermediate ) {
+            return this->alpha * val1 - (1-this->alpha) * val0;
         } else if ( mode == VM_Incremental ) {
             return val1 - val0;
         } else {
