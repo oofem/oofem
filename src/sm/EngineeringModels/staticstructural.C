@@ -503,17 +503,12 @@ StaticStructural :: updateDomainLinks()
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
+
 int
 StaticStructural :: forceEquationNumbering()
 {
     stiffnessMatrix = nullptr;
     return StructuralEngngModel::forceEquationNumbering();
-}
-
-
-void StaticStructural :: setSolution(TimeStep *tStep, const FloatArray &vectorToStore)
-{
-    this->field->update(VM_Total, tStep, vectorToStore, EModelDefaultEquationNumbering());
 }
 
 

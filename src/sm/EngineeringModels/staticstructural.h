@@ -109,10 +109,8 @@ public:
     TimeStep *giveNextStep() override;
     double giveEndOfTimeOfInterest() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
-    
-    fMode giveFormulation() override { return TL; }
 
-    void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
+    fMode giveFormulation() override { return TL; }
 
     bool requiresEquationRenumbering(TimeStep *tStep) override;
 
