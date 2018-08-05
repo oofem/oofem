@@ -41,6 +41,8 @@
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 
+#include <memory>
+
 #define LOCAL_ZERO_MASS_REPLACEMENT 1
 
 ///@name Input fields for NlDEIDynamic
@@ -121,10 +123,9 @@ protected:
     /// Product of p^tM^(-1)p; where p is reference load vector.
     double pMp;
 
-    SparseMtrx *massMatrixConsistent;
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
-    SparseLinearSystemNM *nMethod;
+    std::unique_ptr<SparseLinearSystemNM> nMethod;
 
 public:
     NlDEIDynamic(int i, EngngModel * _master = NULL);

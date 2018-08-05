@@ -59,26 +59,24 @@ REGISTER_EngngModel(NlDEIDynamic);
 NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
     previousIncrementOfDisplacementVector(), displacementVector(),
     velocityVector(), accelerationVector(), internalForces(),
-    nMethod(NULL)
+    initFlag(1)
 {
     ndomains = 1;
-    initFlag = 1;
 }
 
 
 NlDEIDynamic :: ~NlDEIDynamic()
 { }
 
+
 NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset(classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this));
     }
-
-    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-
-    return nMethod;
+    return nMethod.get();
 }
+
 
 IRResultType
 NlDEIDynamic :: initializeFrom(InputRecord *ir)
@@ -153,6 +151,7 @@ double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
     return 0.;
 }
 
+
 TimeStep *NlDEIDynamic :: giveNextStep()
 {
     int istep = 0;
@@ -170,7 +169,6 @@ TimeStep *NlDEIDynamic :: giveNextStep()
 
     return currentStep.get();
 }
-
 
 
 void NlDEIDynamic :: solveYourself()
@@ -492,11 +490,8 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    int j, jj, n;
-    double maxOmi, maxOmEl;
     FloatMatrix charMtrx, charMtrx2, R;
     IntArray loc;
-    Element *element;
     EModelDefaultEquationNumbering en;
 
 #ifndef LOCAL_ZERO_MASS_REPLACEMENT
@@ -507,7 +502,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     massMatrix.resize(neq);
     massMatrix.zero();
     for ( int i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
+        Element *element = domain->giveElement(i);
 
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
@@ -541,10 +536,9 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         }
 #endif
 
-        n = loc.giveSize();
+        int n = loc.giveSize();
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
-        maxOmEl = 0.;
 
         double maxElmass = -1.0;
         for ( int j = 1; j <= n; j++ ) {
@@ -558,9 +552,10 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
             if (charMtrx2.isNotEmpty() ) {
                 // in case stifness matrix defined, we can generate artificial mass
                 // in those DOFs without mass
+                double maxOmEl = 0.;
                 for ( int j = 1; j <= n; j++ ) {
                     if ( charMtrx.at(j, j) > maxElmass * ZERO_REL_MASS ) {
-                        maxOmi =  charMtrx2.at(j, j) / charMtrx.at(j, j);
+                        double maxOmi =  charMtrx2.at(j, j) / charMtrx.at(j, j);
                         maxOmEl = ( maxOmEl > maxOmi ) ? ( maxOmEl ) : ( maxOmi );
                     }
                 }
@@ -589,15 +584,14 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     // If init step - find minimun period of vibration in order to
     // determine maximal admisible time step
     // global variant
-    for ( int i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
+    for ( auto &element : domain->giveElements() ) {
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, TangentStiffnessMatrix, tStep);
         if ( charMtrx.isNotEmpty() ) {
-          ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
-          if ( element->giveRotationMatrix(R) ) {
-            charMtrx.rotatedWith(R);
-          }
+            ///@todo This rotation matrix is not flexible enough.. it can only work with full size matrices and doesn't allow for flexibility in the matrixassembler.
+            if ( element->giveRotationMatrix(R) ) {
+                charMtrx.rotatedWith(R);
+            }
         }
 
         int n = loc.giveSize();
@@ -621,7 +615,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
 
     for ( int j = 1; j <= neq; j++ ) {
         if ( massMatrix.at(j) > maxElmass * ZERO_REL_MASS ) {
-            maxOmi = diagonalStiffMtrx.at(j) / massMatrix.at(j);
+            double maxOmi = diagonalStiffMtrx.at(j) / massMatrix.at(j);
             maxOm = ( maxOm > maxOmi ) ? ( maxOm ) : ( maxOmi );
         }
     }
