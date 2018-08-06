@@ -128,7 +128,7 @@ Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
     FloatArray u, un;
     interpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
-    this->computeVectorOfVelocities(VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, un);
 
     u.beProductOf(n, un);
 
@@ -155,7 +155,7 @@ Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
     FloatArray u;
     FloatMatrix dn, um(3, 4);
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     interpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
@@ -344,7 +344,7 @@ Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
     FloatArray u;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) + u.at(3) * u.at(3) );
     double vn2 = sqrt( u.at(4) * u.at(4) + u.at(5) * u.at(5) + u.at(6) * u.at(6) );
@@ -420,7 +420,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
     FloatMatrix n, dn;
     FloatArray fi(4), u, un, gfi;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, un);
 
     for ( int i = 1; i <= 4; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );

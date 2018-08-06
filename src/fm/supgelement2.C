@@ -164,7 +164,7 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         // add lsic stabilization term
         this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
-        this->computeVectorOfVelocities(VM_Total, tStep, v);
+        this->computeVectorOfVelocities(VM_Intermediate, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, vloc);
         this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
@@ -232,11 +232,11 @@ SUPGElement2 :: giveInternalStateAtNode(FloatArray &answer, InternalStateType ty
         answer.resize( this->giveSpatialDimension() );
         std::vector< Dof* >::const_iterator dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) != n->end() ) {
-            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Intermediate, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_v) ) != n->end() ) {
-            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Intermediate, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_w) ) != n->end() ) {
-            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Intermediate, tStep);
         }
 
         return 1;
@@ -285,7 +285,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     answer.clear();
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     int rule = 2;
     /* consistent part + supg stabilization term */
@@ -342,7 +342,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     answer.clear();
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     int rule = 1;
     for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
@@ -464,7 +464,7 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     answer.clear();
 
     int rule = 1;
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     /* pspg stabilization term */
     for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
@@ -527,7 +527,7 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep)
      * int i,k;
      * FloatArray u, dDB_u;
      *
-     * this->computeVectorOfVelocities(VM_Total, tStep, u);
+     * this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
      *
      * for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
      *  dV  = this->computeVolumeAround(gp);
@@ -714,10 +714,7 @@ SUPGElement2 :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharType t
     }
 
     int rule = 1;
-    FloatArray un, nV;
     FloatArray mb, mc;
-
-    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     if ( load->giveBCValType() == ForceLoadBVT ) {
         FloatMatrix b, g, nu;
@@ -781,7 +778,7 @@ SUPGElement2 :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, Time
 {
     FloatArray u;
     FloatMatrix b;
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     this->computeBMatrix(b, gp);
     answer.beProductOf(b, u);

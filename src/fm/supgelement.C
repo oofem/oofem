@@ -196,7 +196,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
-        this->computeVectorOfVelocities(VM_Total, tStep, v);
+        this->computeVectorOfVelocities(VM_Intermediate, tStep, v);
         //h.beProductOf(m1, v);
         //answer.assemble(h, vloc);
         this->computeLinearAdvectionTerm_MC(m1, tStep);
@@ -358,11 +358,11 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
         answer.resize( this->giveSpatialDimension() );
         std::vector< Dof* >::const_iterator dofindx;
         if ( ( dofindx = n->findDofWithDofId(V_u) ) != n->end() ) {
-            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Intermediate, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_v) ) != n->end() ) {
-            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Intermediate, tStep);
         } else if ( ( dofindx = n->findDofWithDofId(V_w) ) != n->end() ) {
-            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Intermediate, tStep);
         }
 
         return 1;

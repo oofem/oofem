@@ -211,7 +211,7 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double dudx, dudy, dvdx, dvdy, usum, vsum, coeff;
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -253,8 +253,8 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
 
     FloatArray u, un;
     double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
     double coeff, ar12 = area / 12.;
@@ -325,7 +325,7 @@ TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray u, eps(3), stress;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -476,7 +476,7 @@ TR1_2D_SUPG :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     FloatArray u, un;
 
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -502,7 +502,7 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *
     int w_dof_addr, u_dof_addr, d1j, d2j, km1, mm1;
     FloatArray u, un;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
@@ -1109,7 +1109,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 
     //this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(),un) ;
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
-    this->computeVectorOfVelocities(VM_Acceleration, tStep->givePreviousStep(), a);
+    this->computeVectorOfVelocities(VM_Velocity, tStep->givePreviousStep(), a);
 
     un = u;
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
@@ -1409,7 +1409,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
  * bool zeroFlag = false;
  * int i,im1;
  * FloatArray u;
- * this -> computeVectorOfVelocities(VM_Total,tStep, u) ;
+ * this -> computeVectorOfVelocities(VM_Intermediate,tStep, u) ;
  * double nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, integrationRulesArray[0]->getIntegrationPoint(0), tStep);
  *
  * // UGN-Based Stabilization
@@ -1491,7 +1491,7 @@ TR1_2D_SUPG :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeS
     answer.resize(3);
 
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     answer.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     answer.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -1557,7 +1557,7 @@ TR1_2D_SUPG :: computeNMtrx(FloatArray &answer, GaussPoint *gp)
  * double dt1, dt2, dt;
  * double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
  *
- * this -> computeVectorOfVelocities(VM_Total,tStep, u) ;
+ * this -> computeVectorOfVelocities(VM_Intermediate,tStep, u) ;
  *
  * double vn1 = sqrt(u.at(1)*u.at(1)+u.at(2)*u.at(2));
  * double vn2 = sqrt(u.at(3)*u.at(3)+u.at(4)*u.at(4));
@@ -2033,7 +2033,7 @@ TR1_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
     double answer;
     FloatArray fi(3), un;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, un);
 
     for ( int i = 1; i <= 3; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );

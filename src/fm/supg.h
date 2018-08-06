@@ -38,7 +38,7 @@
 #include "fluidmodel.h"
 #include "sparsemtrxtype.h"
 #include "sparselinsystemnm.h"
-#include "primaryfield.h"
+#include "dofdistributedprimaryfield.h"
 #include "materialinterface.h"
 #include "assemblercallback.h"
 
@@ -111,13 +111,8 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     std :: unique_ptr< SparseMtrx > lhs;
-    std :: unique_ptr< PrimaryField > VelocityPressureField;
-    //PrimaryField VelocityField;
-    FloatArray accelerationVector; //, previousAccelerationVector;
-    FloatArray incrementalSolutionVector;
-
-    FloatArray internalForces;
-    FloatArray eNorm;
+    std :: unique_ptr< PrimaryField > velocityPressureField;
+    FloatArray solutionVector;
 
     ///@todo Use ScalarFunction here!
     double deltaT;
@@ -157,12 +152,14 @@ public:
     void solveYourselfAt(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
 
+    void computeInitialGuess(FloatArray &solution, TimeStep *tStep, Domain *d);
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
-    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
     void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
     void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
     void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
     double giveReynoldsNumber() override;
+    int forceEquationNumbering() override;
+    bool requiresEquationRenumbering(TimeStep *tStep) override;
 
     contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
     contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
@@ -184,12 +181,11 @@ public:
 
     void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) override;
 
-    int requiresUnknownsDictionaryUpdate() override { return renumberFlag; }
+    int requiresUnknownsDictionaryUpdate() override { return true; }
 
     bool giveEquationScalingFlag() override { return equationScalingFlag; }
     double giveVariableScale(VarScaleType varId) override;
 
-    void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep) override;
     int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
 
     MaterialInterface *giveMaterialInterface(int n) override { return materialInterface.get(); }
@@ -199,12 +195,6 @@ protected:
     void applyIC(TimeStep *tStep);
     void evaluateElementStabilizationCoeffs(TimeStep *tStep);
     void updateElementsForNewInterfacePosition(TimeStep *tStep);
-
-    void updateDofUnknownsDictionary_predictor(TimeStep *tStep);
-    void updateDofUnknownsDictionary_corrector(TimeStep *tStep);
-
-    void updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerationVector, FloatArray &incrementalSolutionVector, TimeStep *tStep);
-    void updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &accelerationVector, TimeStep *tStep);
 
     //void initDofManActivityMap ();
     //void updateDofManActivityMap (TimeStep* tStep);

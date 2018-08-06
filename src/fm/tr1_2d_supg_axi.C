@@ -121,7 +121,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray u, un, n;
 
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -157,7 +157,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeSt
     answer.zero();
 
     FloatArray u, un, n;
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
     double dudx [ 2 ] [ 2 ];
     int w_dof_addr, u_dof_addr, d1j, d2j, dij;
@@ -220,7 +220,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.zero();
     FloatArray u, eps, stress;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatMatrix _b;
 
@@ -267,7 +267,7 @@ TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRes
     FloatArray un, u, n, eps, stress;
     double _u, _v, _r;
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
@@ -400,7 +400,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     answer.zero();
 
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
     dvdx = b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6);
@@ -429,7 +429,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeSt
     FloatArray u, un, n;
     double _u, _v;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
@@ -467,7 +467,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tS
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 
     // stabilization term K_eps
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         double dV = this->computeVolumeAround(gp);
@@ -497,7 +497,7 @@ void TR1_2D_SUPG_AXI :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, T
     //FloatArray eps, stress,u;
 
     // stabilization term K_eps
-    //this -> computeVectorOfVelocities(VM_Total,tStep, u) ;
+    //this->computeVectorOfVelocities(VM_Intermediate,tStep, u);
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         double dV = this->computeVolumeAround(gp);
         double rho = mat->give('d', gp);
@@ -568,7 +568,7 @@ TR1_2D_SUPG_AXI :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, T
     FloatArray u;
     FloatMatrix _b;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     this->computeBMtrx(_b, gp);
     answer.beProductOf(_b, u);
 }

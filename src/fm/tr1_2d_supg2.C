@@ -292,7 +292,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     double rho;
     double dV, dudx, dudy, dvdx, dvdy, u1, u2;
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
@@ -371,7 +371,7 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
 
     FloatArray u, un, n;
     double rho;
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     double u1, u2, dV;
@@ -453,7 +453,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -700,7 +700,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     FloatArray u, un;
 
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -726,7 +726,7 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     int w_dof_addr, u_dof_addr, d1j, d2j, km1, mm1;
     FloatArray u, un;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
     this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
@@ -935,8 +935,8 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *tStep)
     nu = vof * nu0 + ( 1. - vof ) * nu1;
 
     //this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(),un) ;
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
-    this->computeVectorOfVelocities(VM_Acceleration, tStep, a);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
+    this->computeVectorOfVelocities(VM_Velocity, tStep, a);
 
     un = u;
     usum = un.at(1) + un.at(3) + un.at(5);

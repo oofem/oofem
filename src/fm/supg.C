@@ -53,6 +53,7 @@
 #include "contextioerr.h"
 #include "timer.h"
 #include "unknownnumberingscheme.h"
+#include "boundarycondition.h"
 
 namespace oofem {
 /* define if implicit interface update required */
@@ -78,8 +79,11 @@ void SUPGInternalForceAssembler :: vectorFromElement(FloatArray &vec, Element &e
     vec.resize(size);
     vec.zero();
 
-    eptr->computeVectorOfVelocities(VM_Acceleration, tStep, vacc);
-    eptr->computeVectorOfVelocities(VM_Total, tStep, vtot);
+    ///@todo Computing v, p, a, is repeated in almost all the methods. We should pass these instead.
+    /// I would do so right now, but I'm not sure which code to trust, as they all do different things.
+    /// Some elements also use the prev solution for upwind stabilitzation, but, for example, quad10_supg does not.
+    eptr->computeVectorOfVelocities(VM_Velocity, tStep, vacc);
+    eptr->computeVectorOfVelocities(VM_Intermediate, tStep, vtot);
     eptr->computeVectorOfPressures(VM_Total, tStep, ptot);
 
     // MB contributions:
@@ -119,7 +123,7 @@ void SUPGInternalForceAssembler :: vectorFromElement(FloatArray &vec, Element &e
     eptr->computeLinearAdvectionTerm_MC(m1, tStep);
     //m1.times(uscale/lscale);
     m1.times( 1. / ( dscale * uscale ) );
-    eptr->computeVectorOfVelocities(VM_Total, tStep, vtot);
+    eptr->computeVectorOfVelocities(VM_Intermediate, tStep, vtot);
     h.beProductOf(m1, vtot); // term due to prescribed velocity
     vec.assemble(h, ploc);
     // Diffusion term
@@ -207,7 +211,7 @@ void SUPGTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element &el,
 }
 
 
-SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master), accelerationVector()
+SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master)
 {
     initFlag = 1;
     ndomains = 1;
@@ -232,6 +236,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
     }
     return this->nMethod.get();
 }
+
 
 IRResultType
 SUPG :: initializeFrom(InputRecord *ir)
@@ -284,11 +289,7 @@ SUPG :: initializeFrom(InputRecord *ir)
         Re = 1.0;
     }
 
-    if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_VelocityPressure, 1);
-    } else {
-        VelocityPressureField = std::make_unique<PrimaryField>(this, 1, FT_VelocityPressure, 1);
-    }
+    velocityPressureField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_VelocityPressure, 3, this->alpha);
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_miflag);
@@ -299,7 +300,7 @@ SUPG :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask = {V_u, V_v, V_w};
 
-        std :: shared_ptr< Field > _velocityField = std::make_shared<MaskedPrimaryField>( FT_Velocity, this->VelocityPressureField.get(), mask );
+        std :: shared_ptr< Field > _velocityField = std::make_shared<MaskedPrimaryField>( FT_Velocity, this->velocityPressureField.get(), mask );
         fm->registerField(_velocityField, FT_Velocity);
 
         //fsflag = 0;
@@ -316,74 +317,116 @@ SUPG :: initializeFrom(InputRecord *ir)
 
 double
 SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displaacement, velocity of equation eq
-// This function translates this request to numerical method language
 {
-    if ( this->requiresUnknownsDictionaryUpdate() ) {
-        int hash = this->giveUnknownDictHashIndx(mode, tStep);
-        if ( dof->giveUnknowns()->includes(hash) ) {
-            return dof->giveUnknowns()->at(hash);
-        } else {
-            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
-        }
-    } else {
-        int eq = dof->__giveEquationNumber();
-        if ( eq == 0 ) {
-            OOFEM_ERROR("invalid equation number");
-        }
-
-        if ( mode == VM_Acceleration ) {
-            return accelerationVector.at(eq);
-            /*
-             * if (tStep->isTheCurrentTimeStep()) {
-             * return accelerationVector.at(eq);
-             * } else if (tStep == givePreviousStep()) {
-             * return previousAccelerationVector.at(eq);
-             * } else OOFEM_ERROR("VM_Acceleration history past previous step not supported");
-             */
-        } else if ( mode == VM_Velocity ) {
-            return VelocityPressureField->giveUnknownValue(dof, VM_Total, tStep);
-        } else {
-            return VelocityPressureField->giveUnknownValue(dof, mode, tStep);
-        }
-    }
-
-    return 0;
+    return this->velocityPressureField->giveUnknownValue(dof, mode, tStep);
 }
 
 
 void
-SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
+SUPG :: computeInitialGuess(FloatArray &solution, TimeStep *tStep, Domain *d)
 {
-    // update element stabilization
-    for ( auto &elem : d->giveElements() ) {
-        static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
+    // This is a bit narly, and I would welcome a nicer approach. The root problem is that the solution vector here is not stored
+    // As part of the discretized solution. A good initial guess here is that the acceleration is constant:
+    // a_{n} = a_{n-1} = (v_{n-1} - v_{n-2})/dt_{n-1}.
+    // In addition, the solution vector includes other DOFs than velocities, which may have any other possible initial guess.
+    // dp_{n} = dp_{n-1} = p_{n-1} - p_{n-2}
+    // It might be worth simply assembling an old tangent and computing an initial guess. Such approach could handle changing BCs
+    // which the current initial guess (constant acceleration) doesn't give good results fo. It would also let us ignore this whole mess.
+
+    ///@todo This approach is broken because unkownsdicts can't handle more than 2 time-steps, because givePreviousStep only works 1 level.
+
+    EModelDefaultEquationNumbering s;
+    TimeStep *oldStep = tStep->givePreviousStep();
+
+    auto a_to_v = [&solution, &s, &oldStep, this](DofManager &dman) {
+        for ( Dof *dof: dman ) {
+            DofIDItem id = dof->giveDofID();
+            if ( !dof->isPrimaryDof() ) continue;
+            int eqNum = dof->giveEquationNumber(s);
+            if ( eqNum ) {
+                ///@todo Couldn't/shouldn't SUPG elements just scale the elements with dt to obtain dv directly?
+                // Then this whole thing could just be sol = old_sol + dsol
+                if ( id == V_u || id == V_v || id == V_w ) {
+                    solution.at(eqNum) = this->velocityPressureField->giveUnknownValue(dof, VM_Velocity, oldStep);
+                } else {
+                    solution.at(eqNum) = this->velocityPressureField->giveUnknownValue(dof, VM_Incremental, oldStep);
+                }
+            }
+        }
+    };
+
+    for ( auto &node : d->giveDofManagers() ) {
+        a_to_v(*node);
     }
 
-    if ( cmpn == InternalRhs ) {
-        this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
-                             EModelDefaultEquationNumbering(), d, & this->eNorm);
-        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-        return;
-    } else if ( cmpn == NonLinearLhs ) {
-        this->lhs->zero();
-        //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-        this->assemble( *lhs, tStep, SUPGTangentAssembler(TangentStiffness, lscale, dscale, uscale, alpha),
-                        EModelDefaultEquationNumbering(), d );
-       // } else {
-       //     this->assemble( lhs, tStep, SUPGTangentAssembler(SecantStiffness),
-       //                     EModelDefaultEquationNumbering(), d );
-       // }
-        return;
-    } else {
-        OOFEM_ERROR("Unknown component");
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            a_to_v(*elem->giveInternalDofManager(i));
+        }
     }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            a_to_v(*bc->giveInternalDofManager(i));
+        }
+    }
+
+    this->updateSolution(solution, tStep, d);
 }
+
 
 void SUPG :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
 {
-    this->VelocityPressureField->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+    // Two options here: Overload DofDistributedPrimaryField and implement the "mixed" time integration (w.r.t to pressure vs velocities).
+    // It might also be nicer to just keep pressure and velocity separately.
+    // Third alternative, compute the VM_Total value here, and use that to update the field.
+    // This requires us to convert solutionVector (which contains [a, p] into [v, p]. Reminder:
+    // Reminder, alpha doesn't come into play here: a = (v1 - v0)/dt --->   v1 = v0 + a*dt
+    // alpha only affects VM_Intermediate, and is computed by velocityPressureField dynamically based on VM_Total.
+    FloatArray totalSolution(solutionVector.giveSize());
+    EModelDefaultEquationNumbering s;
+    double dt = tStep->giveTimeIncrement();
+    FloatArray prevSolutionVector;
+    this->velocityPressureField->initialize(VM_Total, tStep->givePreviousStep(), prevSolutionVector, s);
+
+    auto a_to_v = [&totalSolution, &prevSolutionVector, &solutionVector, &s, dt](DofManager &dman) {
+        for ( Dof *dof: dman ) {
+            DofIDItem id = dof->giveDofID();
+            if ( !dof->isPrimaryDof() ) continue;
+            int eqNum = dof->giveEquationNumber(s);
+            if ( eqNum ) {
+                ///@todo Couldn't/shouldn't SUPG elements just scale the elements with dt to obtain dv directly?
+                // Then this whole thing could just be sol = old_sol + dsol
+                if ( id == V_u || id == V_v || id == V_w ) {
+                    totalSolution.at(eqNum) = prevSolutionVector.at(eqNum) + solutionVector.at(eqNum) * dt;
+                } else {
+                    totalSolution.at(eqNum) = prevSolutionVector.at(eqNum) + solutionVector.at(eqNum);
+                }
+            }
+        }
+    };
+
+    for ( auto &node : d->giveDofManagers() ) {
+        a_to_v(*node);
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            a_to_v(*elem->giveInternalDofManager(i));
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            a_to_v(*bc->giveInternalDofManager(i));
+        }
+    }
+
+    this->velocityPressureField->update(VM_Total, tStep, totalSolution, s);
     // update element stabilization
     for ( auto &elem : d->giveElements() ) {
         static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
@@ -427,18 +470,19 @@ SUPG :: giveReynoldsNumber()
 TimeStep *
 SUPG :: giveSolutionStepWhenIcApply(bool force)
 {
-  if ( master && (!force)) {
-    return master->giveSolutionStepWhenIcApply();
-  } else {
-    if ( !stepWhenIcApply ) {
-        double dt = deltaT / this->giveVariableScale(VST_Time);
+    if ( master && (!force)) {
+        return master->giveSolutionStepWhenIcApply();
+    } else {
+        if ( !stepWhenIcApply ) {
+            double dt = deltaT / this->giveVariableScale(VST_Time);
 
-        stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, dt, 0);
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0.0, dt, 0);
+        }
+
+        return stepWhenIcApply.get();
     }
-
-    return stepWhenIcApply.get();
-  }
 }
+
 
 TimeStep *
 SUPG :: giveNextStep()
@@ -481,10 +525,11 @@ SUPG :: giveNextStep()
 void
 SUPG :: solveYourselfAt(TimeStep *tStep)
 {
+    Domain *domain = this->giveDomain(1);
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
     FloatArray externalForces(neq);
-    this->internalForces.resize(neq);
+    FloatArray internalForces(neq);
+    FloatArray eNorm;
 
     if ( tStep->isTheFirstStep() ) {
         TimeStep *stepWhenIcApply = tStep->givePreviousStep();
@@ -496,59 +541,28 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         //if (this->fsflag) this->updateDofManActivityMap(tStep);
     }
 
-    if ( !requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField->advanceSolution(tStep);
-        solutionVector = VelocityPressureField->giveSolutionVector(tStep);
-        prevSolutionVector = VelocityPressureField->giveSolutionVector( tStep->givePreviousStep() );
-    }
+    velocityPressureField->advanceSolution(tStep);
 
-    if ( initFlag ) {
-        if ( !requiresUnknownsDictionaryUpdate() ) {
-            //previousAccelerationVector.resize(neq);
-            accelerationVector.resize(neq);
-            solutionVector->resize(neq);
-            prevSolutionVector->resize(neq);
-        }
-
-        incrementalSolutionVector.resize(neq);
-
+    if ( !lhs ) {
         lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
         lhs->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
+    }
+
+    if ( initFlag ) {
 
         if ( materialInterface ) {
             this->updateElementsForNewInterfacePosition(tStep);
         }
 
         initFlag = 0;
-    } else if ( requiresUnknownsDictionaryUpdate() ) {
-        // rebuild lhs structure and resize solution vector
-        incrementalSolutionVector.resize(neq);
-        lhs->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
-
-
-    if ( !requiresUnknownsDictionaryUpdate() ) {
-        *solutionVector = *prevSolutionVector;
-    }
-
-    //previousAccelerationVector=accelerationVector;
 
     // evaluate element supg and sppg stabilization coeffs
     this->evaluateElementStabilizationCoeffs(tStep);
-
-    //
-    // predictor
-    //
-
-    if ( requiresUnknownsDictionaryUpdate() ) {
-        this->updateDofUnknownsDictionary_predictor(tStep);
-    } else {
-        this->updateSolutionVectors_predictor(* solutionVector, accelerationVector, tStep);
-    }
 
     if ( tStep->giveNumber() != 1 ) {
         if ( materialInterface ) {
@@ -572,31 +586,38 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         }
     }
 
-    // evaluate element supg and sppg stabilization coeffs
-    // this -> evaluateElementStabilizationCoeffs (tStep);
+    // Initial guess. Note, we should get this from the field, relying only on old values.
+    // But there are shortcomings of fields that needs to be sorted out first. Until then, we keep the old solution vector cached.
+    // Unfortunately, with a cached vector, we have no option to start from 0 if we renumber eqs.
+    FloatArray incrementalSolutionVector(neq);
+#if 0
+    FloatArray solutionVector(neq);
+    this->computeInitialGuess(solutionVector, tStep, domain);
+#else
+    if ( solutionVector.giveSize() != neq ) {
+        solutionVector.resize(neq);
+        solutionVector.zero();
+    }
+    this->updateSolution(solutionVector, tStep, domain);
+#endif
 
-    //
-    // assemble rhs (residual)
-    //
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, ExternalForceAssembler(), VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector(externalForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), domain);
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(),  LoadExchangeTag);
 
 #if 0
-    this->updateSolutionVectors(* solutionVector, accelerationVector, incrementalSolutionVector, tStep);
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
     double loadLevel;
     int currentIterations;
-    this->updateInternalRHS( this->internalForces, tStep, this->giveDomain(1), &this->eNorm );
+    this->updateInternalRHS( internalForces, tStep, domain, &eNorm );
     NM_Status status = this->nMethod->solve(*this->lhs,
                                             externalForces,
                                             NULL,
                                             solutionVector,
-                                            this->incrementalSolutionVector,
-                                            this->internalForces,
-                                            this->eNorm,
+                                            incrementalSolutionVector,
+                                            internalForces,
+                                            eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,
                                             currentIterations,
@@ -605,25 +626,16 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     if ( !( status & NM_Success ) ) {
         OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
     }
-    
 #else
     int nite = 0;
     double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
-    int jj, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
-    FloatArray rhs, internalForces(neq);
-
+    FloatArray rhs;
 
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-    internalForces.zero();
-    this->assembleVector( internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+    this->updateInternalRHS(internalForces, tStep, domain, &eNorm);
 
     rhs.beDifferenceOf(externalForces, internalForces);
 
-    //
-    // corrector
-    //
     //OOFEM_LOG_INFO("Iteration  IncrSolErr      RelResidErr     AbsResidErr\n_______________________________________________________\n");
     OOFEM_LOG_INFO("Iteration  IncrSolErr      RelResidErr     (Rel_MB      ,Rel_MC      ) AbsResidErr\n__________________________________________________________________________________\n");
     do {
@@ -645,42 +657,9 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
-#if 1
         nMethod->solve(*lhs, rhs, incrementalSolutionVector);
-#else
-        {
-            auto lhs_copy = lhs->clone();
-
-            nMethod->solve(*lhs, rhs, incrementalSolutionVector);
-
-            // check solver
-            FloatArray __rhs(neq);
-            double __absErr = 0., __relErr = 0.;
-            lhs_copy->times(incrementalSolutionVector, __rhs);
-            for ( int i = 1; i <= neq; i++ ) {
-                if ( fabs( __rhs.at(i) - rhs.at(i) ) > __absErr ) {
-                    __absErr = fabs( __rhs.at(i) - rhs.at(i) );
-                }
-
-                if ( fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) ) > __relErr ) {
-                    __relErr = fabs( ( __rhs.at(i) - rhs.at(i) ) / rhs.at(i) );
-                }
-            }
-
-            OOFEM_LOG_INFO("SUPG: solver check: absoluteError %e, relativeError %e\n", __absErr, __relErr);
-        }
-#endif
-
-
-
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            this->updateDofUnknownsDictionary_corrector(tStep);
-        } else {
-            //update
-            this->updateSolutionVectors(* solutionVector, accelerationVector, incrementalSolutionVector, tStep);
-            avn = accelerationVector.computeSquaredNorm();
-            aivn = incrementalSolutionVector.computeSquaredNorm();
-        }   // end update
+        solutionVector.add(incrementalSolutionVector);
+        this->updateSolution(solutionVector, tStep, domain);
 
 #if 0
  #ifdef SUPG_IMPLICIT_INTERFACE
@@ -719,16 +698,16 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         internalForces.zero();
-        this->assembleVector( internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
-                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assembleVector(internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
+                             EModelDefaultEquationNumbering(), domain );
         this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
         rhs.beDifferenceOf(externalForces, internalForces);
 
         // check convergence and repeat iteration if desired
         double rnorm_mb = 0.0, rnorm_mc = 0.0;
-        for ( int i = 1; i <= nnodes; i++ ) {
-            DofManager *inode = this->giveDomain(1)->giveDofManager(i);
+        for ( auto &inode : domain->giveDofManagers() ) {
             for ( Dof *dof: *inode ) {
+                int jj;
                 if ( ( jj = dof->__giveEquationNumber() ) ) {
                     DofIDItem type = dof->giveDofID();
                     double val = rhs.at(jj);
@@ -765,7 +744,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             //
             internalForces.zero();
             this->assembleVector( internalForces, tStep, SUPGInternalForceAssembler(lscale, dscale, uscale), VM_Total,
-                                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                 EModelDefaultEquationNumbering(), domain );
             this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
             rhs.beDifferenceOf(externalForces, internalForces);
         }
@@ -800,6 +779,38 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
     // update solution state counter
     tStep->incrementStateCounter();
+}
+
+
+int
+SUPG :: forceEquationNumbering()
+{
+    lhs = nullptr;
+    solutionVector.clear();
+    return FluidModel::forceEquationNumbering();
+}
+
+
+bool
+SUPG :: requiresEquationRenumbering(TimeStep *tStep)
+{
+    if ( tStep->isTheFirstStep() ) {
+        return true;
+    }
+    // Check if Dirichlet b.c.s has changed.
+    Domain *d = this->giveDomain(1);
+    for ( auto &gbc : d->giveBcs() ) {
+        BoundaryCondition *bc = dynamic_cast< BoundaryCondition * >(gbc.get());
+        //ActiveBoundaryCondition *active_bc = dynamic_cast< ActiveBoundaryCondition * >(gbc.get());
+        // We only need to consider Dirichlet b.c.s
+        if ( bc ) {
+            // Check of the dirichlet b.c. has changed in the last step (if so we need to renumber)
+            if ( gbc->isImposed(tStep) != gbc->isImposed(tStep->givePreviousStep()) ) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 
@@ -842,11 +853,7 @@ SUPG :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    VelocityPressureField->saveContext(stream);
-
-    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    velocityPressureField->saveContext(stream);
 
     if ( materialInterface ) {
         if ( ( iores = materialInterface->saveContext(stream, mode) ) != CIO_OK ) {
@@ -867,11 +874,7 @@ SUPG :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    VelocityPressureField->restoreContext(stream);
-
-    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    velocityPressureField->restoreContext(stream);
 
     if ( materialInterface ) {
         if ( ( iores = materialInterface->restoreContext(stream, mode) ) != CIO_OK ) {
@@ -892,7 +895,7 @@ SUPG :: checkConsistency()
 
     // check for proper element type
     for ( auto &elem : domain->giveElements() ) {
-        if ( dynamic_cast< SUPGElement * >( elem.get() ) == NULL ) {
+        if ( !dynamic_cast< SUPGElement * >( elem.get() ) ) {
             OOFEM_WARNING("Element %d has no SUPG base", elem->giveLabel());
             return 0;
         }
@@ -902,7 +905,6 @@ SUPG :: checkConsistency()
     if ( ret == 0 ) {
         return 0;
     }
-
 
     // scale boundary and initial conditions
     if ( equationScalingFlag ) {
@@ -959,49 +961,10 @@ SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 void
 SUPG :: applyIC(TimeStep *stepWhenIcApply)
 {
-    Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    FloatArray *vp_vector = NULL;
-
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nman  = domain->giveNumberOfDofManagers();
-
-    accelerationVector.resize(neq);
-    accelerationVector.zero();
-
-    if ( !requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField->advanceSolution(stepWhenIcApply);
-        vp_vector = VelocityPressureField->giveSolutionVector(stepWhenIcApply);
-        vp_vector->resize(neq);
-        vp_vector->zero();
-
-        for ( int j = 1; j <= nman; j++ ) {
-            DofManager *node = domain->giveDofManager(j);
-
-            for ( Dof *dof: *node ) {
-                // ask for initial values obtained from
-                // bc (boundary conditions) and ic (initial conditions)
-                if ( !dof->isPrimaryDof() ) {
-                    continue;
-                }
-
-                int jj = dof->__giveEquationNumber();
-                DofIDItem type = dof->giveDofID();
-                if ( jj ) {
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, stepWhenIcApply);
-                    } else {
-                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, stepWhenIcApply);
-                    }
-                }
-            }
-        }
-    }
-
-    //ICs and BCs are scaled already in CheckConsistency
-    //vp_vector->times(1./this->giveVariableScale(VST_Velocity));
+    this->velocityPressureField->applyDefaultInitialCondition();
 
     // update element state according to given ic
 
@@ -1009,13 +972,21 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
     if ( materialInterface ) {
         this->updateElementsForNewInterfacePosition(stepWhenIcApply);
     }
-
+#if 0
+    // Is this meaningful, or even needed?
+    // We have to be *very* careful what the time integration and initial conditions actaully mean.
+    // Internal states are computed in intermediate steps, which, doesn't exist until we proceed to the first step.
+    // So, "stepWhenIcApply" makes no sense here.
+    // And even then, just computing the internal forces will take care of this.
+    Domain *domain = this->giveDomain(1);
     for ( auto &elem : domain->giveElements() ) {
         SUPGElement *element = static_cast< SUPGElement * >( elem.get() );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
+#endif
 }
+
 
 double
 SUPG :: giveVariableScale(VarScaleType varID)
@@ -1041,6 +1012,7 @@ SUPG :: giveVariableScale(VarScaleType varID)
     return 0.0;
 }
 
+
 void
 SUPG :: evaluateElementStabilizationCoeffs(TimeStep *tStep)
 {
@@ -1052,13 +1024,13 @@ SUPG :: evaluateElementStabilizationCoeffs(TimeStep *tStep)
     }
 }
 
+
 void
 SUPG :: updateElementsForNewInterfacePosition(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
 
     OOFEM_LOG_DEBUG("SUPG :: updateElements - updating elements for interface position");
-
 
     for ( auto &elem : domain->giveElements() ) {
         SUPGElement *ePtr = static_cast< SUPGElement * >( elem.get() );
@@ -1067,198 +1039,11 @@ SUPG :: updateElementsForNewInterfacePosition(TimeStep *tStep)
 }
 
 
-void
-SUPG :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
-{
-    // update DOF unknowns dictionary, where
-    // unknowns are hold instead of keeping them in global unknowns
-    // vectors in engng instancies
-    // this is necessary, because during solution equation numbers for
-    // particular DOFs may changed, and it is necesary to keep them
-    // in DOF level.
-
-    // empty -> all done in updateDofUnknownsDictionary_corrector (TimeStep* tStep);
-}
-
-
-void
-SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
-{
-    double deltaT = tStep->giveTimeIncrement();
-    Domain *domain = this->giveDomain(1);
-
-    int nnodes = domain->giveNumberOfDofManagers();
-
-    if ( requiresUnknownsDictionaryUpdate() ) {
-        for ( int j = 1; j <= nnodes; j++ ) {
-            DofManager *inode = domain->giveDofManager(j);
-            for ( Dof *dof: *inode ) {
-                double val, prev_val, accel;
-                DofIDItem type = dof->giveDofID();
-                if ( !dof->hasBc(tStep) ) {
-                    prev_val = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
-                    accel    = dof->giveUnknown( VM_Acceleration, tStep->givePreviousStep() );
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        val = prev_val +  deltaT * accel;
-                    } else {
-                        val = prev_val;
-                    }
-
-                    dof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
-                    dof->updateUnknownsDictionary(tStep, VM_Acceleration, accel); // acceleration
-                } else {
-                    val = dof->giveBcValue(VM_Total, tStep);
-                    dof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
-                    dof->updateUnknownsDictionary(tStep, VM_Acceleration, 0.0); // acceleration
-                }
-            }
-        }
-    }
-}
-
-
-void
-SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
-{
-    double deltaT = tStep->giveTimeIncrement();
-    Domain *domain = this->giveDomain(1);
-    int nnodes = domain->giveNumberOfDofManagers();
-
-    if ( requiresUnknownsDictionaryUpdate() ) {
-        for ( int j = 1; j <= nnodes; j++ ) {
-            DofManager *inode = domain->giveDofManager(j);
-            for ( Dof *iDof: *inode ) {
-                DofIDItem type = iDof->giveDofID();
-                if ( !iDof->hasBc(tStep) ) {
-                    double val, prev_val;
-                    prev_val = iDof->giveUnknown(VM_Total, tStep);
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        val = prev_val +  deltaT *alpha *incrementalSolutionVector.at( iDof->__giveEquationNumber() );
-                    } else {
-                        val = prev_val +  incrementalSolutionVector.at( iDof->__giveEquationNumber() );
-                    }
-
-                    iDof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
-
-                    prev_val = iDof->giveUnknown(VM_Acceleration, tStep);
-                    val = prev_val +  incrementalSolutionVector.at( iDof->__giveEquationNumber() );
-                    iDof->updateUnknownsDictionary(tStep, VM_Acceleration, val); // acceleration
-                }
-            }
-        }
-    }
-}
-
 int
 SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
-    if ( ( tStep == this->giveCurrentStep() ) || ( tStep == this->givePreviousStep() ) ) {
-        return ( tStep->giveNumber() % 2 ) * 100 + mode;
-    } else {
-        OOFEM_ERROR("unsupported solution step");
-    }
-
-    return 0;
+    return tStep->giveNumber() % 2;
 }
-
-void
-SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &accelerationVector, TimeStep *tStep)
-{
-    double deltaT = tStep->giveTimeIncrement();
-    Domain *domain = this->giveDomain(1);
-
-    for ( auto &node : domain->giveDofManagers() ) {
-        for ( Dof *iDof: *node ) {
-            if ( !iDof->isPrimaryDof() ) {
-                continue;
-            }
-
-            int jj = iDof->__giveEquationNumber();
-            DofIDItem type = iDof->giveDofID();
-
-            if ( jj ) {
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT)*a
-                    solutionVector.at(jj) += deltaT * accelerationVector.at(jj);
-                }
-            }
-        }
-    }
-
-    for ( auto &elem : domain->giveElements() ) {
-        int ndofman = elem->giveNumberOfInternalDofManagers();
-        for ( int ji = 1; ji <= ndofman; ji++ ) {
-            DofManager *dofman = elem->giveInternalDofManager(ji);
-            for ( Dof *iDof: *dofman ) {
-                if ( !iDof->isPrimaryDof() ) {
-                    continue;
-                }
-
-                int jj = iDof->__giveEquationNumber();
-                DofIDItem type = iDof->giveDofID();
-
-                if ( jj ) {
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-                        solutionVector.at(jj) += deltaT * accelerationVector.at(jj);
-                    }
-                }
-            }
-        } // end loop over elem internal dofmans
-    } // end loop over elems
-}
-
-
-void
-SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerationVector, FloatArray &incrementalSolutionVector, TimeStep *tStep)
-{
-    double deltaT = tStep->giveTimeIncrement();
-    Domain *domain = this->giveDomain(1);
-
-    accelerationVector.add(incrementalSolutionVector);
-
-    for ( auto &node : domain->giveDofManagers() ) {
-
-        for ( Dof *iDof: *node ) {
-            if ( !iDof->isPrimaryDof() ) {
-                continue;
-            }
-
-            int jj = iDof->__giveEquationNumber();
-            DofIDItem type = iDof->giveDofID();
-
-            if ( jj ) {
-                if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-                    solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
-                } else {
-                    solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
-                }
-            }
-        }
-    } // end loop over dnam
-
-    for ( auto &elem : domain->giveElements() ) {
-        int ndofman = elem->giveNumberOfInternalDofManagers();
-        for ( int ji = 1; ji <= ndofman; ji++ ) {
-            DofManager *dofman = elem->giveInternalDofManager(ji);
-            for ( Dof *iDof: *dofman ) {
-                if ( !iDof->isPrimaryDof() ) {
-                    continue;
-                }
-
-                int jj = iDof->__giveEquationNumber();
-                DofIDItem type = iDof->giveDofID();
-
-                if ( jj ) {
-                    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) { // v = v + (deltaT*alpha)*da
-                        solutionVector.at(jj) += deltaT * alpha * incrementalSolutionVector.at(jj);
-                    } else {
-                        solutionVector.at(jj) += incrementalSolutionVector.at(jj); // p = p + dp
-                    }
-                }
-            }
-        } // end loop over elem internal dofmans
-    } // end loop over elems
-}
-
 
 #define __VOF_TRESHOLD 1.e-5
 
@@ -1426,8 +1211,8 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
  * vincr.at(2) = 1.e-7;
  * vincr.at(3) = 2.e-2;
  * element -> giveLocationArray (loc);
- * VelocityPressureField->advanceSolution(tStep);
- * solutionVector = VelocityPressureField->giveSolutionVector(tStep);
+ * velocityPressureField->advanceSolution(tStep);
+ * solutionVector = velocityPressureField->giveSolutionVector(tStep);
  * solutionVector->resize(neq);
  * // restrict vincr
  * for (i=1; i<=6; i++)

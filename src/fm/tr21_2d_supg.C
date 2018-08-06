@@ -161,7 +161,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
     FloatArray u, un;
     this->velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
-    this->computeVectorOfVelocities(VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, un);
 
     u.beProductOf(n, un);
 
@@ -225,7 +225,7 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 {
     FloatArray u;
     FloatMatrix dn, um(2, 6);
-    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, u);
 
     velocityInterpolation.evaldNdx( dn, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 6; i++ ) {
@@ -412,7 +412,7 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
     FloatMatrix n, dn;
     FloatArray fi(6), u, un, gfi;
 
-    this->computeVectorOfVelocities(VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Intermediate, tStep, un);
 
     for ( int i = 1; i <= 6; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
