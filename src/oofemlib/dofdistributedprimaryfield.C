@@ -66,7 +66,7 @@ DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, Tim
         double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
         if ( mode == VM_Velocity ) {
             return (val1 - val0) / tStep->giveTimeIncrement();
-        } else if ( mode == VM_Intermediate ) {
+        } else if ( mode == VM_Intermediate || mode == VM_TotalIntrinsic ) {
             return this->alpha * val1 - (1-this->alpha) * val0;
         } else if ( mode == VM_Incremental ) {
             return val1 - val0;
