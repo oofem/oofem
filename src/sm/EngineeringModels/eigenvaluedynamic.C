@@ -55,6 +55,14 @@
 namespace oofem {
 REGISTER_EngngModel(EigenValueDynamic);
 
+
+EigenValueDynamic :: EigenValueDynamic(int i, EngngModel *master) : EngngModel(i, master)
+{
+    numberOfSteps = 1;
+    ndomains = 1;
+}
+
+
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
@@ -67,6 +75,7 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
     return nMethod.get();
 }
 
+
 IRResultType
 EigenValueDynamic :: initializeFrom(InputRecord *ir)
 {
@@ -74,6 +83,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     //EngngModel::instanciateFrom (ir);
 
     IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, _IFT_EigenValueDynamic_nroot);
+    this->field = std::make_unique<EigenVectorPrimaryField>(this, 1, FT_Displacements, numberOfRequiredEigenValues);
 
     // numberOfSteps set artificially to numberOfRequiredEigenValues
     // in order to allow
@@ -84,9 +94,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, rtolv, _IFT_EigenValueDynamic_rtolv);
     if ( rtolv < 1.e-12 ) {
         rtolv =  1.e-12;
-    }
-
-    if ( rtolv > 0.01 ) {
+    } else if ( rtolv > 0.01 ) {
         rtolv =  0.01;
     }
 
@@ -100,45 +108,31 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
 
     suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
 
-    if(suppressOutput) {
-    	printf("Suppressing output.\n");
+    if ( suppressOutput ) {
+        printf("Suppressing output.\n");
+    } else {
+        if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+        }
+
+        fprintf(outputStream, "%s", PRG_HEADER);
+        fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
+        fprintf(outputStream, "%s\n", simulationDescription.c_str());
     }
-    else {
-
-		if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-			OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-		}
-
-		fprintf(outputStream, "%s", PRG_HEADER);
-		fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
-		fprintf(outputStream, "%s\n", simulationDescription.c_str());
-	}
 
     return IRRT_OK;
 }
 
 
-double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
-// returns unknown quantity like displacement, eigenvalue.
-// This function translates this request to numerical method language
+int EigenValueDynamic :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 {
-    int eq = dof->__giveEquationNumber();
-#ifdef DEBUG
-    if ( eq == 0 ) {
-        OOFEM_ERROR("invalid equation number");
-    }
-#endif
+    return tStep->giveNumber() % this->numberOfRequiredEigenValues; 
+}
 
-    switch ( mode ) {
-    case VM_Total:  // EigenVector
-    case VM_Incremental:
-        return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
 
-    default:
-        OOFEM_ERROR("Unknown is of undefined type for this problem");
-    }
-
-    return 0.;
+double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
+{
+    return field->giveUnknownValue(dof, mode, tStep);
 }
 
 
@@ -159,21 +153,19 @@ TimeStep *EigenValueDynamic :: giveNextStep()
 }
 
 
-void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
+void EigenValueDynamic :: solveYourself()
 {
-    //
-    // creates system of governing eq's and solves them at given time step
-    //
-    // first assemble problem at current time step
+    this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
-#ifdef VERBOSE
+    TimeStep *tStep = this->giveNextStep();
+    this->updateAttributes( this->giveCurrentMetaStep() );
+
     OOFEM_LOG_INFO("Assembling stiffness and mass matrices\n");
-#endif
 
-    if ( tStep->giveNumber() == 1 ) {
-        //
-        // first step  assemble stiffness Matrix
-        //
+    FloatMatrix eigVec;
+    {
+        std :: unique_ptr< SparseMtrx > stiffnessMatrix;
+        std :: unique_ptr< SparseMtrx > massMatrix;
 
         stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
@@ -181,35 +173,19 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         massMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness),
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( *massMatrix, tStep, MassMatrixAssembler(),
-                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        //
-        // create resulting objects eigVec and eigVal
-        //
-        eigVec.resize(this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ), numberOfRequiredEigenValues);
-        eigVec.zero();
-        eigVal.resize(numberOfRequiredEigenValues);
-        eigVal.zero();
+        this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( *massMatrix, tStep, MassMatrixAssembler(), EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
+        this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+        OOFEM_LOG_INFO("Solving ...\n");
+        nMethod->solve(*stiffnessMatrix, *massMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
     }
+    this->field->updateAll(eigVec, EModelDefaultEquationNumbering());
 
-    //
-    // set-up numerical model
-    //
-    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
+    this->terminate( tStep );
 
-    //
-    // call numerical model to solve arised problem
-    //
-#ifdef VERBOSE
-    OOFEM_LOG_INFO("Solving ...\n");
-#endif
-
-    nMethod->solve(*stiffnessMatrix, *massMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
-
-    stiffnessMatrix = nullptr;
-    massMatrix = nullptr;
+    double steptime = this->giveSolutionStepTime();
+    OOFEM_LOG_INFO("EngngModel info: user time consumed by solution: %.2fs\n", steptime);
 }
 
 
@@ -253,9 +229,9 @@ void EigenValueDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
 
     for ( int i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         fprintf(file, "\nOutput for eigen value no.  %.3e \n", ( double ) i);
-        fprintf(file, "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                i, eigVal.at(i) );
+        fprintf(file, "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n", i, eigVal.at(i) );
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
+        tStep->setNumber(i);
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
             for ( auto &dman : domain->giveDofManagers() ) {
@@ -269,6 +245,9 @@ void EigenValueDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
             dman->printOutputAt(file, tStep);
         }
     }
+
+    double utsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
+    fprintf(file, "\nUser time consumed by solution step: %.3f [s]\n\n", utsec);
 }
 
 
@@ -284,7 +263,7 @@ contextIOResultType EigenValueDynamic :: saveContext(DataStream &stream, Context
         THROW_CIOERR(iores);
     }
 
-    if ( ( eigVec.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = this->field->saveContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -304,7 +283,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream &stream, Cont
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eigVec.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = this->field->restoreContext(stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -319,6 +298,7 @@ void EigenValueDynamic :: setActiveVector(int i)
         activeVector = numberOfRequiredEigenValues;
     }
 
+    this->giveCurrentStep()->setNumber( activeVector );
     this->giveCurrentStep()->setTime( ( double ) activeVector );
 }
 

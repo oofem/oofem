@@ -60,7 +60,6 @@ namespace oofem {
 REGISTER_EngngModel(LinearStability);
 
 LinearStability :: LinearStability(int i, EngngModel *master) : StructuralEngngModel(i, master),
-    field(),
     numberOfRequiredEigenValues(1),
     rtolv(1e-6),
     solverType(GES_SubspaceIt)
