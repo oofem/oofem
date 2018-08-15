@@ -115,10 +115,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
-    // Move solution space to current time step
     velocityPressureField->advanceSolution(tStep);
-
-    // Point pointer SolutionVector to current solution in velocityPressureField
     velocityPressureField->initialize(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering() );
 
     // Create "stiffness matrix"
@@ -151,6 +148,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateInternalRHS( this->internalForces, tStep, d, &this->eNorm );
+    internalForces.printYourself("int0");
     NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
                                             externalForces,
                                             NULL,
@@ -180,6 +178,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
     velocityPressureField->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
+    solutionVector.printYourself("sol*");
 
     // update element stabilization
     for ( auto &elem : d->giveElements() ) {

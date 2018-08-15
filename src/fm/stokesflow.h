@@ -102,6 +102,7 @@ public:
     void updateYourself(TimeStep *tStep) override;
 
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof) override;
+    bool newDofHandling() override { return true; }
 
     double giveReynoldsNumber() override;
 

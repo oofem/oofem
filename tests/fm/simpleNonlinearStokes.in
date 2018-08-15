@@ -1,6 +1,6 @@
 simpleNonlinearStokes.out
 Test for stokes flow on triangular Taylor-Hood element
-stokesflow nsteps 1 rtolf 1e-5 lstype 0 smtype 0 linesearch 0 maxiter 1000 nmodules 1
+stokesflow nsteps 1 rtolf 1e-5 lstype 0 smtype 0 linesearch 0 maxiter 50 nmodules 1
 errorcheck
 # vtkxml tstep_all domain_all primvars 2 4 5
 domain 2dIncompFlow
@@ -17,14 +17,14 @@ node 8 coords 3 1.0 0.5 0.0
 node 9 coords 3 0.5 1.0 0.0
 tr21stokes 1 nodes 6  1 2 4 5 6 7
 tr21stokes 2 nodes 6  2 3 4 8 9 6
+Set 1 nodes 2 2 3
+Set 2 nodes 2 1 4
+Set 3 elementranges {(1 2)}
 fluidcs 1 mat 1 set 3
 nonlinearfluid 1 mu 1.000000  d 1.000000 C 1 alpha 0.5
 BoundaryCondition 1 loadTimeFunction 1 values 3 1. 1. 1. dofs 3 7 8 11 set 1
 BoundaryCondition 2 loadTimeFunction 1 values 1 0. dofs 1 7 set 2
 ConstantFunction 1 f(t) 1.0
-Set 1 nodes 2 2 3
-Set 2 nodes 2 1 4
-Set 3 elementranges {(1 2)}
 
 #%BEGIN_CHECK%
 #NODE tStep 1 number 4 dof 8 unknown d value 6.939245e-01

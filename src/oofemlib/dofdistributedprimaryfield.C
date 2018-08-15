@@ -334,8 +334,6 @@ DofDistributedPrimaryField :: setInitialGuess(DofManager &dman, TimeStep *tStep,
 void
 DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
 {
-    PrimaryField :: advanceSolution(tStep);
-#if 0
     // Copy over the old dictionary values to the new step as the initial guess:
     Domain *d = emodel->giveDomain(1);
     TimeStep *prev = tStep->givePreviousStep();
@@ -355,14 +353,13 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
     for ( auto &bc : d->giveBcs() ) {
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
-            if ( abc->giveInternalDofManager(i)->isNull() ) continue;
+            if ( bc->giveInternalDofManager(i)->isNull() ) continue;
             this->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
         }
     }
 
     // Apply dirichlet b.c.s
-    //this->applyBoundaryCondition(tStep);
-#endif
+    this->applyBoundaryCondition(tStep);
 }
 
 
