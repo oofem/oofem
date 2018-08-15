@@ -189,13 +189,6 @@ CBS :: initializeFrom(InputRecord *ir)
 double
 CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-#ifdef DEBUG
-    if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number");
-    }
-
-#endif
-
     if ( dof->giveDofID() == P_f ) { // pressures
         return pressureField.giveUnknownValue(dof, mode, tStep);
     } else { // velocities

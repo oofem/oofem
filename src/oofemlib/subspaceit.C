@@ -67,14 +67,13 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
 
     FloatArray temp, w, d, tt, f, rtolv, eigv;
     FloatMatrix r;
-    int nn, nc1, ij = 0, is;
-    double rt, art, brt, eigvt;
+    int nc1, ij = 0;
     FloatMatrix ar, br, vec;
     std :: unique_ptr< SparseLinearSystemNM > solver( GiveClassFactory().createSparseLinSolver(ST_Direct, domain, engngModel) );
 
     GJacobi mtd(domain, engngModel);
     int nc = min(2 * nroot, nroot + 8);
-    nn = a.giveNumberOfColumns();
+    int nn = a.giveNumberOfColumns();
     if ( nc > nn ) {
         nc = nn;
     }
@@ -118,7 +117,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
     r.setColumn(tt, 1);
 
     for ( int j = 2; j <= nc; j++ ) {
-        rt = 0.0;
+        double rt = 0.0;
         for ( int i = 1; i <= nn; i++ ) {
             if ( fabs( w.at(i) ) >= rt ) {
                 rt = fabs( w.at(i) );
@@ -165,7 +164,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
             solver->solve(a, f, tt);
 
             for ( int i = j; i <= nc; i++ ) {
-                art = 0.;
+                double art = 0.;
                 for ( int k = 1; k <= nn; k++ ) {
                     art += r.at(k, i) * tt.at(k);
                 }
@@ -187,7 +186,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
 
             b.times(tt, temp);
             for ( int i = j; i <= nc; i++ ) {
-                brt = 0.;
+                double brt = 0.;
                 for ( int k = 1; k <= nn; k++ ) {
                     brt += r.at(k, i) * temp.at(k);
                 }
@@ -292,18 +291,15 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
         //
         // sorting eigenvalues according to their values
         //
+        int is;
         do {
             is = 0; // label 350
             for ( int i = 1; i <= nc1; i++ ) {
                 if ( fabs( eigv.at(i + 1) ) < fabs( eigv.at(i) ) ) {
                     is++;
-                    eigvt = eigv.at(i + 1);
-                    eigv.at(i + 1) = eigv.at(i);
-                    eigv.at(i)   = eigvt;
+                    std::swap(eigv.at(i), eigv.at(i + 1)); 
                     for ( int k = 1; k <= nc; k++ ) {
-                        rt = vec.at(k, i + 1);
-                        vec.at(k, i + 1) = vec.at(k, i);
-                        vec.at(k, i)   = rt;
+                        std::swap(vec.at(k, i), vec.at(k, i + 1));
                     }
                 }
             }                   // label 360
@@ -324,7 +320,7 @@ SubspaceIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, Floa
             }
 
             for ( int k = 1; k <= nc; k++ ) {
-                rt = 0.;
+                double rt = 0.;
                 for ( int j = 1; j <= nc; j++ ) {
                     rt += tt.at(j) * vec.at(j, k);
                 }

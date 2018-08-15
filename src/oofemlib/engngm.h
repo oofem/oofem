@@ -883,7 +883,13 @@ public:
      * actual one to avoid storage of complete history.
      */
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
-
+    /**
+     * Temporary method for allowing code to seamlessly convert from the old to new way of handling DOF values.
+     * (the new way expects the field to store all values, regardless of if they are computed, from BC, or IC.)
+     * This is used by MasterDof
+     * @todo When all models have converted to using a field, this should be removed.
+     */
+    virtual bool newDofHandling() { return false; }
     /**
      * Returns the parallel context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from parallelContextList.

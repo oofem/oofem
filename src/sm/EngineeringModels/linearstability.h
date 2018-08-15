@@ -53,6 +53,10 @@
 //@}
 
 namespace oofem {
+
+class EigenVectorPrimaryField;
+//class DofDistributedPrimaryField;
+
 /**
  * This class implements way for examining critical load of structure.
  *
@@ -70,10 +74,10 @@ class LinearStability : public StructuralEngngModel
 private:
     std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     std :: unique_ptr< SparseMtrx > initialStressMatrix;
-    FloatArray loadVector;
-    FloatArray displacementVector;
-    FloatMatrix eigVec;
+    std :: unique_ptr< EigenVectorPrimaryField > field;
+    //std :: unique_ptr< DofDistributedPrimaryField > initialDisplacements;
     FloatArray eigVal;
+
     int numberOfRequiredEigenValues;
     double rtolv;
     /// Numerical method used to solve the problem.
@@ -83,12 +87,7 @@ private:
     std :: unique_ptr< SparseLinearSystemNM > nMethodLS;
 
 public:
-    LinearStability(int i, EngngModel * _master = NULL) : StructuralEngngModel(i, _master),
-        loadVector(), displacementVector(), eigVec(), eigVal()
-    {
-        numberOfSteps = 1;
-        ndomains = 1;
-    }
+    LinearStability(int i, EngngModel *master=nullptr);
     virtual ~LinearStability() { }
 
     void solveYourself() override;
@@ -107,6 +106,8 @@ public:
     // When DisplacementVector is requested, then if time==0 linear elastic solution displacement are returned,
     // otherwise corresponding eigen vector is considered as displacement vector
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
+    bool newDofHandling() override { return true; }
     IRResultType initializeFrom(InputRecord *ir) override;
     contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
     contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;

@@ -41,13 +41,13 @@ Beam2d 14 nodes 2 14 15
 Beam2d 15 nodes 2 15 16
 Beam2d 16 nodes 2 16 17
 #
+Set 1 elementranges {(1 16)}
+Set 2 nodes 2 1 17
+#
 SimpleCS 1 area 0.06  Iy 0.00045  beamShearCoeff 1.e60 material 1 set 1
 IsoLE 1 d 25.0 E 25.e6 n 0.2 tAlpha 1.2e-5
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 3 values 2 0. 0. set 2
 ConstantFunction 1 f(t) 1.
-Set 1 elementranges {(1 16)}
-Set 2 nodes 2 1 17
-#
 #
 #%BEGIN_CHECK% tolerance 1.e-3
 ## check eigen values

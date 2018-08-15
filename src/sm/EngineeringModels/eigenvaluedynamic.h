@@ -41,6 +41,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "geneigvalsolvertype.h"
+#include "eigenvectorprimaryfield.h"
 
 ///@name Input fields for EigenValueDynamic
 //@{
@@ -65,34 +66,29 @@ namespace oofem {
 class EigenValueDynamic : public EngngModel
 {
 private:
-    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
-    std :: unique_ptr< SparseMtrx > massMatrix;
-    SparseMtrxType sparseMtrxType;
-    FloatMatrix eigVec;
+    std :: unique_ptr< EigenVectorPrimaryField > field;
     FloatArray eigVal;
-    int numberOfRequiredEigenValues;
     int activeVector;
     int restoreFlag;
+    SparseMtrxType sparseMtrxType;
+    int numberOfRequiredEigenValues;
     /// Relative tolerance.
     double rtolv;
-    /// Numerical method used to solve the problem.
     std :: unique_ptr< SparseGeneralEigenValueSystemNM > nMethod;
     GenEigvalSolverType solverType;
 
 public:
-    EigenValueDynamic(int i, EngngModel * _master = NULL) : EngngModel(i, _master)
-    {
-        numberOfSteps = 1;
-        ndomains = 1;
-    }
+    EigenValueDynamic(int i, EngngModel *master=nullptr);
     virtual ~EigenValueDynamic() { }
 
-    void solveYourselfAt(TimeStep *tStep) override;
+    void solveYourself() override;
     void doStepOutput(TimeStep *tStep) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
 
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    bool newDofHandling() override { return true; }
     IRResultType initializeFrom(InputRecord *ir) override;
     contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
     contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
@@ -102,7 +98,6 @@ public:
 
     double giveEigenValue(int eigNum) override { return eigVal.at(eigNum); }
 
-    // identification
     const char *giveClassName() const override { return "EigenValueDynamic"; }
 };
 } // end namespace oofem

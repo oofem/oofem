@@ -229,6 +229,7 @@ public:
 
     int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    bool newDofHandling() override { return true; }
     double giveReynoldsNumber() override;
     double giveTheta1();
     double giveTheta2();

@@ -66,7 +66,7 @@ DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, Tim
         double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
         if ( mode == VM_Velocity ) {
             return (val1 - val0) / tStep->giveTimeIncrement();
-        } else if ( mode == VM_Intermediate ) {
+        } else if ( mode == VM_Intermediate || mode == VM_TotalIntrinsic ) {
             return this->alpha * val1 - (1-this->alpha) * val0;
         } else if ( mode == VM_Incremental ) {
             return val1 - val0;
@@ -132,51 +132,43 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
     }
 }
 
-// project solutionVector to DoF unknowns dictionary
+ 
 void
 DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s)
 {
     Domain *d = emodel->giveDomain(domainIndx);
 
-    for ( auto &node : d->giveDofManagers() ) {
-        for ( Dof *dof: *node ) {
+    auto set_values = [&mode, &tStep, &vectorToStore, &s](DofManager &dman) {
+        for ( Dof *dof: dman ) {
             if ( !dof->isPrimaryDof() ) continue;
             int eqNum = dof->giveEquationNumber(s);
             if ( eqNum > 0 ) {
-                dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
+                dof->updateUnknownsDictionary(tStep, VM_Total, vectorToStore.at(eqNum));
             }
             ///@todo This should not be here / Mikael
             if ( mode == VM_Total ) {
                 if ( dof->hasBc(tStep) ) {
-                    dof->updateUnknownsDictionary(tStep, mode, dof->giveBcValue(VM_Total, tStep));
+                    dof->updateUnknownsDictionary(tStep, VM_Total, dof->giveBcValue(VM_Total, tStep));
                 }
             }
         }
+    };
+
+    for ( auto &node : d->giveDofManagers() ) {
+        set_values(*node);
     }
 
     for ( auto &elem : d->giveElements() ) {
         int ndman = elem->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
-            for ( auto &dof : *elem->giveInternalDofManager(i) ) {
-                if ( !dof->isPrimaryDof() ) continue;
-                int eqNum = dof->giveEquationNumber(s);
-                if ( eqNum > 0 ) {
-                    dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
-                }
-            }
+            set_values(*elem->giveInternalDofManager(i));
         }
     }
 
     for ( auto &bc : d->giveBcs() ) {
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
-            for ( auto &dof : *bc->giveInternalDofManager(i) ) {
-                if ( !dof->isPrimaryDof() ) continue;
-                int eqNum = dof->giveEquationNumber(s);
-                if ( eqNum > 0 ) {
-                    dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
-                }
-            }
+            set_values(*bc->giveInternalDofManager(i));
         }
     }
 }
