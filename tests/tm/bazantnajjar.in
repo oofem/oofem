@@ -42,23 +42,24 @@ quadaxisym1mt   8   nodes 4    8   9  20  19
 quadaxisym1mt   9   nodes 4    9  10  21  20
 quadaxisym1mt  10   nodes 4   10  11  22  21
 #
+Set 1 elementranges {(1 10)}
+Set 2 nodes 2 11 22
+#
 SimpleTransportCS 1 mat 1 set 1
 bazantnajjarmoisturemat 1 d 2400. C1 3.1e-05 alpha0 0.02 hC 0.775 n 5
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 14 values 1 1.0 set 2
 InitialCondition 1 Conditions 1 u 1.00 dofs 1 14 set 1
 ConstantFunction 1 f(t) 0.5
 #PieceWiseLinFunction 1 t 4 -1 0 0.01 10 f(t) 4 0 0 0.5 0.5
-Set 1 elementranges {(1 10)}
-Set 2 nodes 2 11 22
 ##
 ##
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 4 number 1 dof 14 unknown d value 7.99174594e-01
-#NODE tStep 4 number 3 dof 14 unknown d value 7.93215521e-01
-#NODE tStep 4 number 5 dof 14 unknown d value 7.80840997e-01
-#NODE tStep 8 number 1 dof 14 unknown d value 6.21069014e-01
-#NODE tStep 8 number 3 dof 14 unknown d value 6.16643713e-01
-#NODE tStep 8 number 5 dof 14 unknown d value 6.05649077e-01
+#NODE tStep 4 number 1 dof 14 unknown d value 8.21898066e-01
+#NODE tStep 4 number 3 dof 14 unknown d value 8.16589267e-01
+#NODE tStep 4 number 5 dof 14 unknown d value 8.05355193e-01
+#NODE tStep 8 number 1 dof 14 unknown d value 6.38601781e-01
+#NODE tStep 8 number 3 dof 14 unknown d value 6.34189820e-01
+#NODE tStep 8 number 5 dof 14 unknown d value 6.21702020e-01
 #%END_CHECK%
 
