@@ -189,13 +189,14 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     }
 
     Domain *domain = this->giveDomain(1);
-    // update element state according to given ic
-    for ( auto &elem : domain->giveElements() ) {
-        TransportElement *element = static_cast< TransportElement * >( elem.get() );
-        element->updateInternalState(tStep);
-        element->updateYourself(tStep);
+    if ( tStep->isTheFirstStep() ) {
+        // update element state according to given ic
+        for ( auto &elem : domain->giveElements() ) {
+            TransportElement *element = static_cast< TransportElement * >( elem.get() );
+            element->updateInternalState(tStep);
+            element->updateYourself(tStep);
+        }
     }
-
 
     internalForces.resize(neq);
 
@@ -229,13 +230,6 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
                          tStep);
 
     //nMethod->solve( *conductivityMatrix, rhsVector, *UnknownsField->giveSolutionVector(tStep) );
-}
-
-void
-StationaryTransportProblem :: updateYourself(TimeStep *tStep)
-{
-    this->updateInternalState(tStep);
-    EngngModel :: updateYourself(tStep);
 }
 
 
@@ -340,18 +334,6 @@ StationaryTransportProblem :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-}
-
-
-void
-StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
-{
-    ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
-    for ( auto &domain: domainList ) {
-        for ( auto &elem : domain->giveElements() ) {
-            elem->updateInternalState(tStep);
-        }
-    }
 }
 
 } // end namespace oofem

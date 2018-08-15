@@ -77,7 +77,6 @@ public:
     virtual ~StationaryTransportProblem() {}
 
     void solveYourselfAt(TimeStep *tStep) override;
-    void updateYourself(TimeStep *tStep) override;
     void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
     void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
     void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
@@ -100,13 +99,6 @@ public:
     const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }
     const char *giveClassName() const override { return "StationaryTransportProblem"; }
     fMode giveFormulation() override { return TL; }
-
-protected:
-    /**
-     * Updates IP values on elements
-     * @param tStep Solution step.
-     */
-    virtual void updateInternalState(TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // stationarytransportproblem_h

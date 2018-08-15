@@ -222,7 +222,7 @@ protected:
      * Updates IP values on elements.
      * @param tStep Solution step.
      */
-    virtual void updateInternalState(TimeStep *tStep) override;
+    virtual void updateInternalState(TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // nonstationarytransportproblem_h

@@ -1316,8 +1316,8 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
 
 void
 TransportElement :: updateInternalState(TimeStep *tStep)
-// Updates the receiver at the end of a solution step
 {
+    ///@todo This method should only used when applying IC (but nltransienttransport and nonstationarytransport uses it wrong, and they should be removed)
     FloatArray stateVector, r;
 #if 0
     FloatArray gradient, flux;
@@ -1332,13 +1332,17 @@ TransportElement :: updateInternalState(TimeStep *tStep)
         CemhydMat *cem = dynamic_cast< CemhydMat * >( mat );
         cem->initMaterial(this); //create microstructures and statuses on specific GPs
     }
-#endif //__CEMHYD_MODULE    
-    
+#endif //__CEMHYD_MODULE
+
     this->giveElementDofIDMask(dofid);
-    this->computeVectorOf(dofid, VM_TotalIntrinsic, tStep, r);
+    if ( tStep->isIcApply() ) {
+        this->computeVectorOf(dofid, VM_Total, tStep, r);
+    } else {
+        this->computeVectorOf(dofid, VM_TotalIntrinsic, tStep, r);
+    }
     // force updating ip values
     for ( auto &iRule: integrationRulesArray ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( auto &gp: *iRule ) {
 
             ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael
             this->computeNmatrixAt( n, gp->giveNaturalCoordinates() );
@@ -1353,7 +1357,6 @@ TransportElement :: updateInternalState(TimeStep *tStep)
 #endif
         }
     }
-    
 }
 
 int
