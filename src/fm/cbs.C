@@ -420,6 +420,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         }
     }
     this->velocityField.update(VM_Total, tStep, velocityVector, this->vnum );
+    this->updateInternalState(tStep);
 
     // update solution state counter
     tStep->incrementStateCounter();
@@ -451,7 +452,6 @@ CBS :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 void
 CBS :: updateYourself(TimeStep *tStep)
 {
-    this->updateInternalState(tStep);
     EngngModel :: updateYourself(tStep);
     //<RESTRICTED_SECTION>
     if ( materialInterface ) {
@@ -467,12 +467,6 @@ void
 CBS :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
-        if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( auto &dman : domain->giveDofManagers() ) {
-                this->updateDofUnknownsDictionary(dman.get(), tStep);
-            }
-        }
-
         for ( auto &elem : domain->giveElements() ) {
             elem->updateInternalState(tStep);
         }

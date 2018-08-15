@@ -264,10 +264,7 @@ public:
 
 protected:
     /**
-     * Updates nodal values
-     * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system). The element internal state update is also forced using
-     * updateInternalState service.
+     * Updates the IP values for the new solution velocities
      */
     void updateInternalState(TimeStep *tStep);
     void applyIC(TimeStep *tStep);
