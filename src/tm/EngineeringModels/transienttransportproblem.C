@@ -53,7 +53,7 @@
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
 
-TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *master) : EngngModel(i, master),
     alpha(0.5),
     dtFunction(0),
     prescribedTimes(),
@@ -101,7 +101,7 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
 
     this->lumped = ir->hasField(_IFT_TransientTransportProblem_lumped);
 
-    field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
+    field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 2, this->alpha);
 
     // read field export flag
     exportFields.clear();
@@ -125,23 +125,7 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
 
 double TransientTransportProblem :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
-    //return this->field->giveUnknownValue(dof, mode, tStep);
-    double val1 = field->giveUnknownValue(dof, VM_Total, tStep);
-    double val0 = field->giveUnknownValue(dof, VM_Total, tStep->givePreviousStep());
-    if ( mode == VM_Total ) {
-        //return this->alpha * val1 + (1.-this->alpha) * val0;
-        return val1;//The output should be given always at the end of the time step, regardless of alpha
-    } else if ( mode == VM_TotalIntrinsic) {
-        return this->alpha * val1 + (1.-this->alpha) * val0;
-        //return val1;
-    } else if ( mode == VM_Velocity ) {
-        return (val1 - val0) / tStep->giveTimeIncrement();
-    } else if ( mode == VM_Incremental ) {
-        return val1 - val0;
-    } else {
-        OOFEM_ERROR("Unknown value mode requested");
-        return 0;
-    }
+    return this->field->giveUnknownValue(dof, mode, tStep);
 }
 
 
@@ -215,39 +199,12 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     }
 
     field->advanceSolution(tStep);
-
-#if 1
-    // This is what advanceSolution should be doing, but it can't be there yet 
-    // (backwards compatibility issues due to inconsistencies in other solvers).
-    TimeStep *prev = tStep->givePreviousStep();
-    for ( auto &dman : d->giveDofManagers() ) {
-        static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*dman, tStep, prev);//copy total values into new tStep
-    }
-
-    for ( auto &elem : d->giveElements() ) {
-        int ndman = elem->giveNumberOfInternalDofManagers();
-        for ( int i = 1; i <= ndman; i++ ) {
-            static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*elem->giveInternalDofManager(i), tStep, prev);
-        }
-    }
-
-    for ( auto &bc : d->giveBcs() ) {
-        int ndman = bc->giveNumberOfInternalDofManagers();
-        for ( int i = 1; i <= ndman; i++ ) {
-            static_cast< DofDistributedPrimaryField* >(field.get())->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
-        }
-    }
-#endif
-
-    field->applyBoundaryCondition(tStep);
     field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
-
 
     if ( !effectiveMatrix ) {
         effectiveMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
-
 
     OOFEM_LOG_INFO("Assembling external forces\n");
     FloatArray externalForces(neq);
@@ -267,7 +224,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     this->updateInternalRHS(this->internalForces, tStep, this->giveDomain(1), &this->eNorm); /// @todo Hack to ensure that internal RHS is evaluated before the tangent. This is not ideal, causing this to be evaluated twice for a linearproblem. We have to find a better way to handle this.
     this->nMethod->solve(*this->effectiveMatrix,
                          externalForces,
-                         NULL, // ignore
+                         nullptr, // ignore
                          this->solution,
                          incrementOfSolution,
                          this->internalForces,
@@ -283,7 +240,7 @@ void
 TransientTransportProblem :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
 {
     ///@todo NRSolver should report when the solution changes instead of doing it this way.
-    this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
+    this->field->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
     ///@todo Need to reset the boundary conditions properly since some "update" is doing strange
     /// things such as applying the (wrong) boundary conditions. This call will be removed when that code can be removed.
     this->field->applyBoundaryCondition(tStep);
@@ -295,8 +252,7 @@ TransientTransportProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tSt
 {
     // F_eff = F(T^(k)) + C * dT/dt^(k)
     answer.zero();
-    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
-                         EModelDefaultEquationNumbering(), d, & this->eNorm);
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d, eNorm);
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
     if ( lumped ) {
         // Note, inertia contribution cannot be computed on element level when lumped mass matrices are used.
@@ -311,9 +267,8 @@ TransientTransportProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tSt
         }
     } else {
         FloatArray tmp;
-        this->assembleVector(answer, tStep, InertiaForceAssembler(), VM_Total,
-                             EModelDefaultEquationNumbering(), d, & tmp);
-        this->eNorm.add(tmp); ///@todo Fix this, assembleVector shouldn't zero eNorm inside the functions. / Mikael
+        this->assembleVector(answer, tStep, InertiaForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d, & tmp);
+        eNorm->add(tmp); ///@todo Fix this, assembleVector shouldn't zero eNorm inside the functions. / Mikael
     }
 }
 
@@ -395,8 +350,7 @@ TransientTransportProblem :: applyIC()
 
     this->field->applyDefaultInitialCondition();
 
-    ///@todo It's rather strange that the models need the initial values.
-    // update element state according to given ic
+    // set initial field IP values (needed by some nonlinear materials)
     TimeStep *s = this->giveSolutionStepWhenIcApply();
     for ( auto &elem : domain->giveElements() ) {
         TransportElement *element = static_cast< TransportElement * >( elem.get() );
@@ -451,7 +405,7 @@ TransientTransportProblem :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    field->saveContext(stream);
+    field->saveContext(stream, mode);
 
     return CIO_OK;
 }
@@ -466,7 +420,7 @@ TransientTransportProblem :: restoreContext(DataStream &stream, ContextMode mode
         THROW_CIOERR(iores);
     }
 
-    field->restoreContext(stream);
+    field->restoreContext(stream, mode);
 
     return CIO_OK;
 }

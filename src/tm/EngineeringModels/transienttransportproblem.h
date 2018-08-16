@@ -55,7 +55,7 @@
 //@}
 
 namespace oofem {
-class PrimaryField;
+class DofDistributedPrimaryField;
 class Function;
 
 /**
@@ -66,7 +66,7 @@ class TransientTransportProblem : public EngngModel
 {
 protected:
     SparseMtrxType sparseMtrxType;
-    std :: unique_ptr< PrimaryField > field;
+    std :: unique_ptr< DofDistributedPrimaryField > field;
 
     std :: unique_ptr< SparseMtrx > effectiveMatrix;
 
@@ -88,12 +88,13 @@ protected:
 
 public:
     /// Constructor.
-    TransientTransportProblem(int i, EngngModel * _master);
+    TransientTransportProblem(int i, EngngModel *master=nullptr);
     /// Destructor.
     virtual ~TransientTransportProblem();
 
     void solveYourselfAt(TimeStep *tStep) override;
     void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+    bool newDofHandling() override { return true; }
     void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
     void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
     void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
