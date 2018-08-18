@@ -100,9 +100,9 @@ private:
     /// Natural Element Coordinates of receiver.
     FloatArray naturalCoordinates;
     /// Optional local sub-patch (sub-patches form element volume) coordinates of the receiver.
-    FloatArray *subPatchCoordinates;
+    std::unique_ptr<FloatArray> subPatchCoordinates;
     /// Optional global (Cartesian) coordinates
-    FloatArray *globalCoordinates;
+    std::unique_ptr<FloatArray> globalCoordinates;
     /// Integration weight.
     double weight;
     /// Material mode of receiver.
@@ -111,9 +111,9 @@ private:
 protected:
     // layer and fibered material support
     /// List of slave integration points.
-    std::vector< GaussPoint * >gaussPoints;
+    std::vector< GaussPoint * > gaussPoints;
     /// Status of e.g. material in point
-    IntegrationPointStatus *materialStatus;
+    std::unique_ptr<IntegrationPointStatus> materialStatus;
 
 public:
     /**
@@ -125,9 +125,9 @@ public:
      * @param w Integration weight.
      * @param mode Material mode.
      */
-    GaussPoint(IntegrationRule * ir, int n, FloatArray iNaturalCoord, double w, MaterialMode mode);
+    GaussPoint(IntegrationRule *ir, int n, FloatArray iNaturalCoord, double w, MaterialMode mode);
 
-    GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode);
+    GaussPoint(IntegrationRule *ir, int n, double w, MaterialMode mode);
 
     /// Destructor
     virtual ~GaussPoint();
@@ -136,12 +136,11 @@ public:
     double giveNaturalCoordinate(int i) const { return naturalCoordinates.at(i); }
     /// Returns coordinate array of receiver.
     const FloatArray &giveNaturalCoordinates() { return naturalCoordinates; }
-    void setNaturalCoordinates(const FloatArray &c) {
-        naturalCoordinates = c;
-    }
+    void setNaturalCoordinates(const FloatArray &c) { naturalCoordinates = c; }
 
     /// Returns local sub-patch coordinates of the receiver
-    const FloatArray &giveSubPatchCoordinates() {
+    const FloatArray &giveSubPatchCoordinates()
+    {
         if ( subPatchCoordinates ) {
             return *subPatchCoordinates;
         } else {
@@ -153,27 +152,27 @@ public:
         if ( subPatchCoordinates ) {
             * subPatchCoordinates = c;
         } else {
-            subPatchCoordinates = new FloatArray(c);
+            subPatchCoordinates = std::make_unique<FloatArray>(c);
         }
     }
 
-    inline const FloatArray &giveGlobalCoordinates() {
-        if( globalCoordinates ) {
+    inline const FloatArray &giveGlobalCoordinates()
+    {
+        if ( globalCoordinates ) {
             return *globalCoordinates;
-        }
-        else {
-            globalCoordinates = new FloatArray();
+        } else {
+            globalCoordinates = std::make_unique<FloatArray>();
             this->giveElement()->computeGlobalCoordinates(*globalCoordinates, naturalCoordinates);
             return *globalCoordinates;
         }
     }
 
-    void setGlobalCoordinates(const FloatArray &iCoord) {
-        if( globalCoordinates ) {
+    void setGlobalCoordinates(const FloatArray &iCoord)
+    {
+        if ( globalCoordinates ) {
             *globalCoordinates = iCoord;
-        }
-        else {
-            globalCoordinates = new FloatArray(iCoord);
+        } else {
+            globalCoordinates = std::make_unique<FloatArray>(iCoord);
         }
     }
 
@@ -202,7 +201,7 @@ public:
     /**
      * Returns reference to associated material status (NULL if not defined).
      */
-    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus; }
+    IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus.get(); }
 
     /**
      * Sets Material status managed by receiver.
@@ -222,10 +221,10 @@ public:
      */
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
     {
-        if ( this->materialStatus != NULL ) {
+        if ( this->materialStatus ) {
             OOFEM_ERROR("status already exist");
         }
-        this->materialStatus = ptr;
+        this->materialStatus.reset(ptr);
         return ptr;
     }
     /**
@@ -234,7 +233,7 @@ public:
      * @return Slave gp.
      */
     GaussPoint *giveSlaveGaussPoint(int index);
-   
+
     /**
      * True if gauss point has slave points. Otherwise false.
      */
