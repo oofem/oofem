@@ -145,12 +145,6 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const 
             if ( eqNum > 0 ) {
                 dof->updateUnknownsDictionary(tStep, VM_Total, vectorToStore.at(eqNum));
             }
-            ///@todo This should not be here / Mikael
-            if ( mode == VM_Total ) {
-                if ( dof->hasBc(tStep) ) {
-                    dof->updateUnknownsDictionary(tStep, VM_Total, dof->giveBcValue(VM_Total, tStep));
-                }
-            }
         }
     };
 

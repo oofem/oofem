@@ -51,6 +51,7 @@
 #define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
 namespace oofem {
 class SparseMtrx;
+class DofDistributedPrimaryField;
 
 /**
  * Solves a static structural problem.
@@ -67,7 +68,7 @@ public:
     std :: unique_ptr< SparseMtrx >stiffnessMatrix;
 protected:
 
-    std :: unique_ptr< PrimaryField >field;
+    std :: unique_ptr< DofDistributedPrimaryField >field;
 
     SparseMtrxType sparseMtrxType;
 
@@ -84,7 +85,7 @@ protected:
     bool mRecomputeStepAfterPropagation;
 
 public:
-    StaticStructural(int i, EngngModel * _master = NULL);
+    StaticStructural(int i, EngngModel *master=nullptr);
     virtual ~StaticStructural();
     IRResultType initializeFrom(InputRecord *ir) override;
     void updateAttributes(MetaStep *mStep) override;
@@ -100,6 +101,7 @@ public:
     void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
 
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    bool newDofHandling() override { return true; }
 
     void updateDomainLinks() override;
 
