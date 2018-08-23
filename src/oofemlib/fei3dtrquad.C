@@ -402,7 +402,7 @@ FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 IntegrationRule *
 FEI3dTrQuad :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order);
     iRule->SetUpPointsOnTriangle(points, _Unknown);
     return iRule;
@@ -413,7 +413,7 @@ FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary)
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
     OOFEM_ERROR("FEI3dTrQuad :: giveBoundaryIntegrationRule - Not supported");
-    return NULL;
+    return nullptr;
 }
 
 

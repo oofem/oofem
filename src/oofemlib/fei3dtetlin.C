@@ -433,7 +433,7 @@ FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 IntegrationRule *
 FEI3dTetLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, order + 0);
     iRule->SetUpPointsOnTetrahedra(points, _Unknown);
     return iRule;
@@ -442,7 +442,7 @@ FEI3dTetLin :: giveIntegrationRule(int order)
 IntegrationRule *
 FEI3dTetLin :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
     iRule->SetUpPointsOnTriangle(points, _Unknown);
     return iRule;

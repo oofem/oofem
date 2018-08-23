@@ -59,14 +59,10 @@ class OOFEM_EXPORT FEI2dQuadBiQuad : public FEI2dQuadQuad
 public:
     FEI2dQuadBiQuad(int ind1, int ind2) : FEI2dQuadQuad(ind1, ind2) { }
 
-    // Bulk
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual int giveNumberOfNodes() const { return 9; }
-    
-    virtual IntegrationRule *giveIntegrationRule(int order);
-
-protected:
-    virtual void giveDerivatives(FloatMatrix &answer, const FloatArray &lcoords);
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    int giveNumberOfNodes() const override { return 9; }
+    IntegrationRule *giveIntegrationRule(int order) override;
 };
 } // end namespace oofem
 #endif // fei2dquadbiquad_h

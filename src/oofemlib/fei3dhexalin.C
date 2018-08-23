@@ -555,7 +555,7 @@ FEI3dHexaLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 IntegrationRule *
 FEI3dHexaLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Cube, order + 6);
     iRule->SetUpPointsOnCube(points, _Unknown);
     return iRule;
@@ -564,7 +564,7 @@ FEI3dHexaLin :: giveIntegrationRule(int order)
 IntegrationRule *
 FEI3dHexaLin :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
     iRule->SetUpPointsOnSquare(points, _Unknown);
     return iRule;

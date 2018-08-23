@@ -206,7 +206,7 @@ FEI3dHexaTriQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
 
 
 void
-FEI3dHexaTriQuad :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords)
+FEI3dHexaTriQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double u, v, w;
     u = lcoords.at(1);
@@ -463,7 +463,7 @@ FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo)
 IntegrationRule *
 FEI3dHexaTriQuad :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     ///@todo Verify: Is +15 correct for dealing with "detJ"? If it is, perhaps we shouldn't go for exact integration since it is likely overkill.
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Cube, order + 15);
     iRule->SetUpPointsOnCube(points, _Unknown);
@@ -473,7 +473,7 @@ FEI3dHexaTriQuad :: giveIntegrationRule(int order)
 IntegrationRule *
 FEI3dHexaTriQuad :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     ///@todo Verify: Is +6 correct for dealing with "detJ" on this surface?
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 6);
     iRule->SetUpPointsOnSquare(points, _Unknown);

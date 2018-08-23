@@ -140,21 +140,18 @@ FEI2dQuadConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 double
 FEI2dQuadConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
-    double dx, dy;
-    int nodeA, nodeB;
+    int nodeA = edgeNodes.at(1);
+    int nodeB = edgeNodes.at(2);
 
-    nodeA = edgeNodes.at(1);
-    nodeB = edgeNodes.at(2);
-
-    dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
-    dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
+    double dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
+    double dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
     return sqrt(dx * dx + dy * dy);
 }
 
 IntegrationRule *
 FEI2dQuadConst :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 0);
     iRule->SetUpPointsOnSquare(points, _Unknown);
     return iRule;

@@ -47,35 +47,28 @@ protected:
     int cindx;
 
 public:
-    FEI1dLin(int coordIndx) : FEInterpolation1d(1) {
-        cindx = coordIndx;
-    }
+    FEI1dLin(int coordIndx) : FEInterpolation1d(1), cindx(coordIndx) { }
 
-    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Point; }
-    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _UnknownIntegrationDomain; }
-    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _UnknownIntegrationDomain; }
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Point; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _UnknownIntegrationDomain; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _UnknownIntegrationDomain; }
 
+    double giveLength(const FEICellGeometry &cellgeo) const override;
 
-    
-    virtual double giveLength(const FEICellGeometry &cellgeo) const;
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    int giveNumberOfNodes() const override { return 2; }
 
-    virtual int giveNumberOfNodes() const { return 2; }
-
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary);
-    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-
-
-    
+    void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override;
+    void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 };
 } // end namespace oofem
 #endif // fei1dlin_h

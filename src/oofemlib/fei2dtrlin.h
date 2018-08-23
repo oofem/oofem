@@ -46,37 +46,34 @@ class OOFEM_EXPORT FEI2dTrLin : public FEInterpolation2d
 public:
     FEI2dTrLin(int ind1, int ind2) : FEInterpolation2d(1, ind1, ind2) { }
 
-    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
-    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Line; }
-    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Triangle; }
-    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
+    integrationDomain giveIntegrationDomain() const override { return _Triangle; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Line; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _Triangle; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
 
-    
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
 
     // Bulk
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void local2global(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo);
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double giveArea(const FEICellGeometry &cellgeo) const;
-    virtual int giveNumberOfNodes() const { return 3; }
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void local2global(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) override;
+    int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double giveArea(const FEICellGeometry &cellgeo) const override;
+    int giveNumberOfNodes() const override { return 3; }
  
-    virtual bool inside(const FloatArray &lcoords) const;
+    bool inside(const FloatArray &lcoords) const override;
 
     // Edge
-    virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
-    virtual int giveNumberOfEdges() const { return 3; }
-    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void edgeEvaldNds(FloatArray &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
+    void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) override;
+    int giveNumberOfEdges() const override { return 3; }
+    void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) override;
 
-    virtual IntegrationRule *giveIntegrationRule(int order);
+    IntegrationRule *giveIntegrationRule(int order) override;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
@@ -89,17 +86,14 @@ protected:
 class OOFEM_EXPORT FEI2dTrLinAxi : public FEI2dTrLin
 {
 public:
-  FEI2dTrLinAxi(int ind1, int ind2) : FEI2dTrLin(ind1, ind2) { }
-  
-  virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-  virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-  virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-  virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
-                                                const FEICellGeometry &cellgeo);
-  
+    FEI2dTrLinAxi(int ind1, int ind2) : FEI2dTrLin(ind1, ind2) { }
+
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+
 };
-
-
 
 } // end namespace oofem
 #endif // fei2dtrlin_h

@@ -349,7 +349,7 @@ FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 IntegrationRule *
 FEI3dWedgeLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     ///@todo This function below isn't supported for wedges. We must decide how we should do this.
     //int points = iRule->getRequiredNumberOfIntegrationPoints(_Wedge, order);
     OOFEM_WARNING("Warning.. ignoring 'order' argument: FIXME");
@@ -363,7 +363,7 @@ FEI3dWedgeLin :: giveIntegrationRule(int order)
 IntegrationRule *
 FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     if ( boundary <= 2 ) {
         int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
         iRule->SetUpPointsOnTriangle(points, _Unknown);

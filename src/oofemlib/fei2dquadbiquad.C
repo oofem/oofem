@@ -67,9 +67,8 @@ FEI2dQuadBiQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FE
     answer.at(3) = a [ 2 ] * b [ 2 ];
 }
 
-
 void
-FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dN, const FloatArray &lc)
+FEI2dQuadBiQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lc, const FEICellGeometry &cellgeo)
 {
     double u = lc.at(1);
     double v = lc.at(2);
@@ -114,7 +113,7 @@ FEI2dQuadBiQuad :: giveDerivatives(FloatMatrix &dN, const FloatArray &lc)
 
 IntegrationRule *FEI2dQuadBiQuad :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 6);
     iRule->SetUpPointsOnSquare(points, _Unknown);
     return iRule;
