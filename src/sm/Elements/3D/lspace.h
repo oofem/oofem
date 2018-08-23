@@ -110,7 +110,7 @@ protected:
      * @name Surface load support
      */
     //@{
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
+    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int iSurf);
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     //@}
 };

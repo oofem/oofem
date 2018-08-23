@@ -358,12 +358,12 @@ FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     return -( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI2dTrQuad :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 2);
     iRule->SetUpPointsOnTriangle(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 } // end namespace oofem

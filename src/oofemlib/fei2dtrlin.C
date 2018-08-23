@@ -302,13 +302,13 @@ FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     return -( x2 * y1 - x1 * y2 );
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI2dTrLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
     iRule->SetUpPointsOnTriangle(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
 // FEI2dTrLinAxi element

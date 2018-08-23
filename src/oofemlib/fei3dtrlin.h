@@ -87,8 +87,8 @@ public:
     void surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     void surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
-    IntegrationRule *giveIntegrationRule(int order) override;
-    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
     double giveArea(const FEICellGeometry &cellgeo) const;
 
     int giveNumberOfNodes() const override { return 3; }

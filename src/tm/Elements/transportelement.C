@@ -1052,7 +1052,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         answer.resize( this->giveNumberOfDofManagers() );
         answer.zero();
 
-        double coeff=0.;
+        double coeff = 0.;
         int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
 
         std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );

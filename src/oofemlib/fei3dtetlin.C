@@ -430,21 +430,21 @@ FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
             ( c1.at(1) * c2.at(2) - c2.at(1) * c1.at(2) ) * c3.at(3) ) * 0.5;
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dTetLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, order + 0);
     iRule->SetUpPointsOnTetrahedra(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dTetLin :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
     iRule->SetUpPointsOnTriangle(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 } // end namespace oofem

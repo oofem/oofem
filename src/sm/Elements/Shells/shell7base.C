@@ -1165,7 +1165,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
     } 
     
     int nPointsTri = 6; //todo generalize
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, this);
 //     iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
     iRule->SetUpPointsOnTriangle(nPointsTri, _3dMat);
     

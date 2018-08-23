@@ -238,7 +238,7 @@ public:
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
      */
-    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual std::unique_ptr<IntegrationRule> giveIntegrationRule(int order);
     //@}
 
     /** @name Edge boundary functions.
@@ -282,7 +282,7 @@ public:
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
+    virtual std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary);
     /**
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
@@ -347,7 +347,7 @@ public:
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual IntegrationRule *giveBoundarySurfaceIntegrationRule(int order, int boundary);
+    virtual std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary);
     /**
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
@@ -425,7 +425,7 @@ public:
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+    virtual std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary);
     //@}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */

@@ -65,8 +65,8 @@ public:
     void computeLocalSurfaceMapping(IntArray &nodes, int iSurf) override;
     double evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo) override;
 
-    IntegrationRule *giveIntegrationRule(int order) override;
-    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
 };
 } // end namespace oofem
 #endif

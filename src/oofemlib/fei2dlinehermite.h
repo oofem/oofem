@@ -79,7 +79,7 @@ public:
 
     int giveNumberOfNodes() const override { return 2; }
 
-    IntegrationRule *giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 };
 } // end namespace oofem
 #endif // fei2dlinehermite_h

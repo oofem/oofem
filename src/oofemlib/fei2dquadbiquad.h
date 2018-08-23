@@ -60,9 +60,9 @@ public:
     FEI2dQuadBiQuad(int ind1, int ind2) : FEI2dQuadQuad(ind1, ind2) { }
 
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     int giveNumberOfNodes() const override { return 9; }
-    IntegrationRule *giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 };
 } // end namespace oofem
 #endif // fei2dquadbiquad_h

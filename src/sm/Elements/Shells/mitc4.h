@@ -155,7 +155,7 @@ private:
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
+    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int approxOrder);
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
 

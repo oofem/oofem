@@ -78,7 +78,7 @@ public:
 
     int giveNumberOfNodes() const override { return 2; }
 
-    IntegrationRule *giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

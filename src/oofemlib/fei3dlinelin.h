@@ -78,8 +78,8 @@ public:
 
     int giveNumberOfNodes() const override { return 2; }
 
-    IntegrationRule *giveIntegrationRule(int order) override;
-    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
 };
 } // end namespace oofem
 #endif // fei3dlinelin_h

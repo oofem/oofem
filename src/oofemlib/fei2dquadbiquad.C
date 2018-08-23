@@ -111,11 +111,11 @@ FEI2dQuadBiQuad :: evaldNdxi(FloatMatrix &dN, const FloatArray &lc, const FEICel
 }
 
 
-IntegrationRule *FEI2dQuadBiQuad :: giveIntegrationRule(int order)
+std::unique_ptr<IntegrationRule> FEI2dQuadBiQuad :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 6);
     iRule->SetUpPointsOnSquare(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 } // end namespace oofem

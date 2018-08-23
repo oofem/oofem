@@ -640,21 +640,21 @@ FEI3dHexaQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dHexaQuad :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Cube, order + 9);
     iRule->SetUpPointsOnCube(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dHexaQuad :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 4);
     iRule->SetUpPointsOnSquare(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 } // end namespace oofem

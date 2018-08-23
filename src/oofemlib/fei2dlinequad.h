@@ -65,6 +65,7 @@ public:
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
@@ -77,11 +78,10 @@ public:
 
     int giveNumberOfNodes() const override { return 3; }
 
-    IntegrationRule *giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 };
 } // end namespace oofem
 #endif // fei2dlinequad_h

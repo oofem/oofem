@@ -106,16 +106,15 @@ QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
     return gcoords.at(1);
 }
 
-IntegrationRule*
-QuadAxisym1_ht :: giveBoundaryEdgeIntegrationRule (int order, int boundary)
+std::unique_ptr<IntegrationRule>
+QuadAxisym1_ht :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
-  return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order+1, boundary);
-
+    return this->giveInterpolation()->giveBoundaryEdgeIntegrationRule(order+1, boundary);
 }
 
-IntegrationRule*
-QuadAxisym1_ht :: giveBoundarySurfaceIntegrationRule (int order, int boundary)
+std::unique_ptr<IntegrationRule>
+QuadAxisym1_ht :: giveBoundarySurfaceIntegrationRule(int order, int boundary)
 {
-  return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order+1, boundary);
+    return this->giveInterpolation()->giveBoundarySurfaceIntegrationRule(order+1, boundary);
 }
 } // end namespace oofem

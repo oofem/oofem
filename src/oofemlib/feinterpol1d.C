@@ -66,22 +66,22 @@ void FEInterpolation1d :: boundaryLocal2Global(FloatArray &answer, int boundary,
     answer = * cellgeo.giveVertexCoordinates(boundary);
 }
 
-IntegrationRule *FEInterpolation1d :: giveIntegrationRule(int order)
+std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
     iRule->SetUpPointsOnLine(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
-IntegrationRule *FEInterpolation1d :: giveBoundaryIntegrationRule(int order, int boundary)
+std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     iRule->SetUpPoint(_Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
-IntegrationRule *FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
+std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
     return this->giveIntegrationRule(order);
 }

@@ -1138,21 +1138,19 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
         cLocal.at(2) = -rotX.dotProduct(hky);
         cLocal.at(6) = rotY.dotProduct(hky) - rotX.dotProduct(hkx);
 
-        mat->transformStrainVectorTo(answer,  GtoLRotationMatrix, cLocal, false);
+        mat->transformStrainVectorTo(answer, GtoLRotationMatrix, cLocal, false);
     } else if ( type == IST_ShellStrainTensor ) {
         FloatArray coords;
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
         coords = gp->giveNaturalCoordinates();
         coords.at(3) = 0;     //set to midplane
-        IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 10);
-        GaussPoint *midGP = new GaussPoint( iRule, 1, coords, 1, this->giveMaterialMode() );
+        GaussIntegrationRule iRule(1, this, 1, 10);
+        GaussPoint midGP( &iRule, 1, coords, 1, this->giveMaterialMode() );
 
-        this->giveIPValue(answer, midGP, IST_StrainTensor, tStep);
+        this->giveIPValue(answer, &midGP, IST_StrainTensor, tStep);
     } else {
         OOFEM_ERROR("MITC4Shell :: giveMidplaneIPValue - unknown type");
     }
-
-    return;
 }
 
 void
@@ -1508,16 +1506,14 @@ MITC4Shell :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 MITC4Shell :: GetSurfaceIntegrationRule(int approxOrder)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
     iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
-
-
 
 double
 MITC4Shell :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)

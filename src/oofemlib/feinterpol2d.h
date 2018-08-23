@@ -100,7 +100,7 @@ public:
     double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void boundarySurfaceGiveNodes(IntArray &answer, int boundary);
+    void boundarySurfaceGiveNodes(IntArray &answer, int boundary) override;
     //@}
 
     /**@name Edge interpolation services. */

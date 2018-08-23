@@ -331,13 +331,13 @@ DKTPlate3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 DKTPlate3d :: GetSurfaceIntegrationRule(int approxOrder)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 1);
     int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
     iRule->SetUpPointsOnTriangle(npoints, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
 double

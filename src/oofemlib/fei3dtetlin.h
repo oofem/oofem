@@ -76,8 +76,8 @@ public:
     void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge) override;
     double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) override;
 
-    IntegrationRule *giveIntegrationRule(int order) override;
-    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

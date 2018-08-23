@@ -177,8 +177,8 @@ public:
     void computeSurfaceMapping(IntArray &surfNodes, IntArray &elemNodes, int isurf);
     //@}
 
-    IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) override;
-    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override
     {
         OOFEM_ERROR("Not overloaded"); 
         return nullptr;

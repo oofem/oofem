@@ -85,9 +85,9 @@ public:
     double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void computeLocalSurfaceMapping(IntArray &nodes, int iSurf) override;
 
-    IntegrationRule *giveIntegrationRule(int order) override;
-    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override;
-    IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf)
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveSurfaceIntegrationRule(int order, int isurf)
     { return giveBoundaryIntegrationRule(order, isurf); }
 
     int giveNumberOfNodes() const override { return 6; }

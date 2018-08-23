@@ -113,7 +113,7 @@ protected:
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
     //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
     //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
-    //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
+    //virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);

@@ -246,7 +246,7 @@ protected:
      */
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) = 0;
 
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder) { return NULL; }
+    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int approxOrder) { return NULL; }
     virtual void computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void giveSurfaceDofMapping(IntArray &mask, int iSurf);

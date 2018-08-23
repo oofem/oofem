@@ -1390,9 +1390,9 @@ tet21ghostsolid :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundary
     int nsd = fei->giveNsd();
 
     f.zero();
-    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
+    auto iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
-    for ( GaussPoint *gp : *iRule ) {
+    for ( auto &gp : *iRule ) {
         FloatArray lcoords = gp->giveNaturalCoordinates();
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
@@ -1452,7 +1452,5 @@ tet21ghostsolid :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundary
     answer.resize(39);
     answer.zero();
     answer.assemble(f, this->velocitydofsonside);
-
-    delete iRule;
 }
 }

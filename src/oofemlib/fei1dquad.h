@@ -51,7 +51,6 @@ public:
 
     integrationDomain giveIntegrationDomain() const override { return _Line; }
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_2; }
-
     integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Point; }
     integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _UnknownIntegrationDomain; }
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _UnknownIntegrationDomain; }

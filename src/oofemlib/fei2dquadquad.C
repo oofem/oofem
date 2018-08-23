@@ -304,13 +304,13 @@ FEI2dQuadQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 }
 
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule> 
 FEI2dQuadQuad :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 4);
     iRule->SetUpPointsOnSquare(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
 

@@ -81,7 +81,7 @@ public:
     double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) override;
 
-    IntegrationRule *giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 };
 
 

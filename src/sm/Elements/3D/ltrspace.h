@@ -109,7 +109,7 @@ protected:
      * @name Surface load support
      */
     //@{
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int);
+    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int);
     //@}
 };
 } // end namespace oofem

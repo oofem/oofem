@@ -386,20 +386,19 @@ double FEI2dQuadLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     return -( x2 * y1 - x1 * y2 );
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule> 
 FEI2dQuadLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, nullptr);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
     iRule->SetUpPointsOnSquare(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
 
 /*
  * FEI2dQuadlinAxi element
  */
-  
 double
 FEI2dQuadLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -427,7 +426,7 @@ FEI2dQuadLinAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lco
     double r = n.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(1) + n.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(1);
     return r * FEI2dQuadLin::edgeGiveTransformationJacobian(iedge, lcoords, cellgeo);
 }
-  
+
 double
 FEI2dQuadLinAxi::boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

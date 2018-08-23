@@ -82,9 +82,9 @@ public:
         return 0;
     }
 
-    IntegrationRule *giveIntegrationRule(int order) override;
-    IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) override;
-    IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) override;
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

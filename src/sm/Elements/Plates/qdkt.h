@@ -102,7 +102,7 @@ protected:
     virtual void computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
+    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int iSurf);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     //@}
