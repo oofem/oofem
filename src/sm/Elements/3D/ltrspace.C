@@ -505,14 +505,4 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 
 #endif
 
-
-std::unique_ptr<IntegrationRule>
-LTRSpace :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    auto iRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
-    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
-    return std::move(iRule);
-}
-
 } // end namespace oofem

@@ -94,8 +94,6 @@ protected:
     virtual int testElementExtension(ElementExtension ext)
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-
-    //virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int); // old
     virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);

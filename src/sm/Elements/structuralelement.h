@@ -395,8 +395,6 @@ protected:
      */
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
 
-    ///@todo Old, only kept until all el have changed to the above
-    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int order) { return NULL; }
     /**
      * Computes volume related to integration point on local edge.
      * @param gp edge integration point

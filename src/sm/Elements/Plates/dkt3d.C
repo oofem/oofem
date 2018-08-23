@@ -331,14 +331,6 @@ DKTPlate3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-std::unique_ptr<IntegrationRule>
-DKTPlate3d :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    auto iRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
-    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
-    return std::move(iRule);
-}
 
 double
 DKTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)

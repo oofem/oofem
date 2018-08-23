@@ -102,15 +102,6 @@ public:
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-protected:
-
-    /**
-     * @name Surface load support
-     */
-    //@{
-    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int);
-    //@}
 };
 } // end namespace oofem
 #endif // ltrspace_h

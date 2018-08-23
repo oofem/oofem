@@ -414,14 +414,6 @@ TrPlaneStrRot3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-std::unique_ptr<IntegrationRule>
-TrPlaneStrRot3d :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    auto iRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
-    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
-    return std::move(iRule);
-}
 
 double
 TrPlaneStrRot3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)

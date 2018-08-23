@@ -263,14 +263,6 @@ Quad1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-std::unique_ptr<IntegrationRule>
-Quad1PlateSubSoil :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    auto iRule = std::make_unique<GaussIntegrationRule>(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return std::move(iRule);
-}
 
 double
 Quad1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)

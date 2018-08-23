@@ -92,7 +92,6 @@ public:
 protected:
     virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual std::unique_ptr<IntegrationRule> GetSurfaceIntegrationRule(int approxOrder);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
 };
 
