@@ -71,28 +71,28 @@ private:
     void computeNormal(FloatArray &answer, Element *e, int side);
 public:
     NeumannMomentLoad(int i, Domain * d) : SurfaceLoad(i, d) { }
+    virtual ~NeumannMomentLoad() {}
 
-    // Overloaded methods:
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
-    virtual int giveApproxOrder() { return 0; }
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
+    int giveApproxOrder() override { return 0; }
 
-    FormulationType giveFormulationType() { return FT_Global; }
+    FormulationType giveFormulationType() override { return FT_Global; }
 
-    virtual void computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int boundary);
+    void computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int boundary);
     /**
      * Sets a new load vector.
      * @param newValue New load.
      */
     void updateLoad(const FloatArray &newValue) { componentArray = newValue; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual bcGeomType giveBCGeoType() const { return SurfaceLoadBGT; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    bcGeomType giveBCGeoType() const override { return SurfaceLoadBGT; }
 
-    virtual const char *giveClassName() const { return "NeumannMomentLoad"; }
-    virtual const char *giveInputRecordName() const { return _IFT_NeumannMomentLoad_Name; }
+    const char *giveClassName() const override { return "NeumannMomentLoad"; }
+    const char *giveInputRecordName() const override { return _IFT_NeumannMomentLoad_Name; }
 
 private:
-    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const { answer.clear(); }
+    void computeNArray(FloatArray &answer, const FloatArray &coords) const override { answer.clear(); }
 };
 } // end namespace oofem
 

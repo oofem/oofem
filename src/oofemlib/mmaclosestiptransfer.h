@@ -57,16 +57,17 @@ protected:
 public:
     /// Constructor
     MMAClosestIPTransfer();
+    virtual ~MMAClosestIPTransfer() {}
 
-    virtual void __init(Domain *dold, IntArray &type, const FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    void __init(Domain *dold, IntArray &type, const FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false) override;
 
-    virtual void finish(TimeStep *tStep) { }
+    void finish(TimeStep *tStep) override { }
 
-    virtual int __mapVariable(FloatArray &answer, const FloatArray &coords, InternalStateType type, TimeStep *tStep);
+    int __mapVariable(FloatArray &answer, const FloatArray &coords, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int mapStatus(MaterialStatus &oStatus) const;
+    int mapStatus(MaterialStatus &oStatus) const override;
 
-    virtual const char *giveClassName() const { return "MMAClosestIPTransfer"; }
+    const char *giveClassName() const override { return "MMAClosestIPTransfer"; }
 };
 } // end namespace oofem
 #endif // mmaclosestiptransfer_h

@@ -112,10 +112,11 @@ private:
 public:
     MatlabExportModule(int n, EngngModel * e);
     virtual ~MatlabExportModule();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
-    virtual void initialize();
-    virtual void terminate();
+
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    void initialize() override;
+    void terminate() override;
 
     void doOutputMesh(TimeStep *tStep, FILE *FID);
     void doOutputData(TimeStep *tStep, FILE *FID);
@@ -124,8 +125,8 @@ public:
     void doOutputIntegrationPointFields(TimeStep *tStep, FILE *FID);
     void doOutputHomogenizeDofIDs(TimeStep *tStep, FILE *FID);
 
-    virtual const char *giveClassName() const { return "MatlabExportModule"; }
-    virtual const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
+    const char *giveClassName() const override { return "MatlabExportModule"; }
+    const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
 };
 } // end namespace oofem
 #endif // matlabexportmodule_h_

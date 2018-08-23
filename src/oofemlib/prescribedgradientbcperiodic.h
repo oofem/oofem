@@ -65,7 +65,7 @@ protected:
 
     std :: map< int, int > slavemap;
     FloatArray jump;
-    
+
     int masterSet;
 
     /**
@@ -77,32 +77,31 @@ public:
     PrescribedGradientBCPeriodic(int n, Domain *d);
     virtual ~PrescribedGradientBCPeriodic();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void postInitialize();
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void postInitialize() override;
 
-    virtual int giveNumberOfInternalDofManagers();
-    virtual DofManager *giveInternalDofManager(int i);
+    int giveNumberOfInternalDofManagers() override;
+    DofManager *giveInternalDofManager(int i) override;
 
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof);
-    virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
+    int giveNumberOfMasterDofs(ActiveDof *dof) override;
+    Dof *giveMasterDof(ActiveDof *dof, int mdof) override;
 
-    virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
-    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
-    virtual void computeTangent(FloatMatrix &E, TimeStep *tStep);
+    void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs) override;
+    void computeField(FloatArray &sigma, TimeStep *tStep) override;
+    void computeTangent(FloatMatrix &E, TimeStep *tStep) override;
+    double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof) override;
+    double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof) override;
     double giveUnknown(double val, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
-    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
-    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
-    virtual bool isPrimaryDof(ActiveDof *dof);
-    virtual double giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
-    virtual bool hasBc(Dof *dof, TimeStep *tStep);
+    bool isPrimaryDof(ActiveDof *dof) override;
+    double giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep) override;
+    bool hasBc(Dof *dof, TimeStep *tStep) override;
     bool isStrainDof(Dof *dof);
 
-    virtual bool requiresActiveDofs() { return true; }
+    bool requiresActiveDofs() override { return true; }
 
-    virtual const char *giveClassName() const { return "PrescribedGradientBCPeriodic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCPeriodic_Name; }
-
+    const char *giveClassName() const override { return "PrescribedGradientBCPeriodic"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedGradientBCPeriodic_Name; }
 };
 } // end namespace oofem
 

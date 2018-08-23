@@ -69,20 +69,20 @@ public:
     /// Destructor.
     virtual ~SurfaceTensionBoundaryCondition() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0);
+    void assemble(SparseMtrx &answer, TimeStep *tStep,
+                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr) override;
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
+                            const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
 
-    virtual const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }
-    virtual const char *giveInputRecordName() const { return _IFT_SurfaceTensionBoundaryCondition_Name; }
+    const char *giveClassName() const override { return "SurfaceTensionBoundaryCondition"; }
+    const char *giveInputRecordName() const override { return _IFT_SurfaceTensionBoundaryCondition_Name; }
 
 protected:
     /**

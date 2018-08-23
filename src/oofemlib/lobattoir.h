@@ -61,19 +61,19 @@ public:
     /// Destructor
     virtual ~LobattoIntegrationRule();
 
-    virtual const char *giveClassName() const { return "LobattoIntegrationRule"; }
-    virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_Lobatto; }
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    const char *giveClassName() const override { return "LobattoIntegrationRule"; }
+    IntegrationRuleType giveIntegrationRuleType() const override { return IRT_Lobatto; }
+    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
 
-    virtual int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder);
+    int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder) override;
 
     //@todo These 3 integration rules have not been verified but the code is identical
     // to that in GaussIntegrationRule, only the point coords and weights differ /JB
-    virtual int SetUpPointsOnLine(int nPoints, MaterialMode mode);
-    virtual int SetUpPointsOnSquare(int nPoints, MaterialMode mode);
-    virtual int SetUpPointsOnCube(int nPoints, MaterialMode mode);
+    int SetUpPointsOnLine(int nPoints, MaterialMode mode) override;
+    int SetUpPointsOnSquare(int nPoints, MaterialMode mode) override;
+    int SetUpPointsOnCube(int nPoints, MaterialMode mode) override;
     static void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
-    virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
+    int SetUpPointsOnTriangle(int nPoints, MaterialMode mode) override;
 };
 } // end namespace oofem
 #endif // lobattoir_h

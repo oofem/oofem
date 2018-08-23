@@ -75,14 +75,14 @@ public:
     }
     virtual ~PeriodicPiecewiseLinFunction() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "PeriodicPiecewiseClass"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PeriodicPiecewiseLinFunction_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "PeriodicPiecewiseClass"; }
+    const char *giveInputRecordName() const override { return _IFT_PeriodicPiecewiseLinFunction_Name; }
 
-    virtual double evaluateAtTime(double);
-    virtual double evaluateVelocityAtTime(double);
-    virtual double evaluateAccelerationAtTime(double) { return 0.; }
+    double evaluateAtTime(double) override;
+    double evaluateVelocityAtTime(double) override;
+    double evaluateAccelerationAtTime(double) override { return 0.; }
 };
 } // end namespace oofem
 #endif // periodicpiecewiselinfunction_h

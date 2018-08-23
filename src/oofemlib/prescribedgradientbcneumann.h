@@ -58,31 +58,31 @@ public:
     PrescribedGradientBCNeumann(int n, Domain *d);
     virtual ~PrescribedGradientBCNeumann();
 
-    virtual int giveNumberOfInternalDofManagers() { return 1; }
-    virtual DofManager *giveInternalDofManager(int i);
+    int giveNumberOfInternalDofManagers() override { return 1; }
+    DofManager *giveInternalDofManager(int i) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bcType giveType() const { return UnknownBT; }
+    bcType giveType() const override { return UnknownBT; }
 
-    virtual void scale(double s);
+    void scale(double s) override;
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorm=nullptr) override;
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0);
+    void assemble(SparseMtrx &answer, TimeStep *tStep,
+                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
+                            const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
 
-    virtual const char *giveClassName() const { return "PrescribedGradientBCNeumann"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCNeumann_Name; }
+    const char *giveClassName() const override { return "PrescribedGradientBCNeumann"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedGradientBCNeumann_Name; }
 
-    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
-    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
+    void computeField(FloatArray &sigma, TimeStep *tStep) override;
+    void computeTangent(FloatMatrix &tangent, TimeStep *tStep) override;
 
     void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
 

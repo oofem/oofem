@@ -121,9 +121,9 @@ public:
     NodeCommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size);
     virtual ~NodeCommunicator() {}
 
-    virtual void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false);
-    virtual int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map);
-    virtual int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map);
+    void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false) override;
+    int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map) override;
+    int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map) override;
 };
 
 class OOFEM_EXPORT ElementCommunicator : public ProblemCommunicator
@@ -132,9 +132,9 @@ public:
     ElementCommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size);
     virtual ~ElementCommunicator() {}
 
-    virtual void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false);
-    virtual int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map);
-    virtual int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map);
+    void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false) override;
+    int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map) override;
+    int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map) override;
 };
 
 } // end namespace oofem

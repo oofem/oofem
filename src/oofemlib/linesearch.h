@@ -88,11 +88,11 @@ public:
      * @param status Linesearch status
      * @param tStep Time step.
      */
-    virtual NM_Status solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
-                            IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
+    NM_Status solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
+                    IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "LineSearchNM"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const { return "LineSearchNM"; }
 
 protected:
     void search(int istep, FloatArray &prod, FloatArray &eta, double amp, double maxeta, double mineta, int &status);

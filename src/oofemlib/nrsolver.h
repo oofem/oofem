@@ -162,17 +162,17 @@ public:
     virtual ~NRSolver();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
-                            FloatArray &X, FloatArray &dX, FloatArray &F,
-                            const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
-                            int &nite, TimeStep *);
-    virtual void printState(FILE *outputStream);
+    NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                    FloatArray &X, FloatArray &dX, FloatArray &F,
+                    const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                    int &nite, TimeStep *) override;
+    void printState(FILE *outputStream) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "NRSolver"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "NRSolver"; }
     virtual const char *giveInputRecordName() const { return _IFT_NRSolver_Name; }
 
-    virtual void setDomain(Domain *d) {
+    void setDomain(Domain *d) override {
         this->domain = d;
         if ( linSolver ) {
             linSolver->setDomain(d);
@@ -181,13 +181,13 @@ public:
             linesearchSolver->setDomain(d);
         }
     }
-    virtual void reinitialize() {
+    void reinitialize() override {
         if ( linSolver ) {
             linSolver->reinitialize();
         }
     }
 
-    virtual SparseLinearSystemNM *giveLinearSolver();
+    SparseLinearSystemNM *giveLinearSolver() override;
 
 protected:
     /// Constructs and returns a line search solver.

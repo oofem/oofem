@@ -82,9 +82,9 @@ public:
     /// Destructor.
     virtual ~SPRNodalRecoveryModel();
 
-    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "SPRNodalRecoveryModel"; }
+    const char *giveClassName() const override { return "SPRNodalRecoveryModel"; }
 
 private:
     /**

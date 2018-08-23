@@ -73,7 +73,7 @@ public:
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
     virtual RemeshingCriteria *giveRemeshingCrit();
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveInputRecordName() const { return NULL; }
+    virtual const char *giveInputRecordName() const { return _IFT_CombinedZZSIErrorEstimator_Name; }
     virtual const char *giveClassName() const { return "CombinedZZSIErrorEstimator"; }
     virtual void setDomain(Domain *d);
 };

@@ -57,14 +57,13 @@ public:
      * @param m Engineering model which solver belongs to.
      */
     MKLPardisoSolver(Domain * d, EngngModel * m);
-
     virtual ~MKLPardisoSolver();
 
-    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
+    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
-    virtual const char *giveClassName() const { return "MKLPardisoSolver"; }
-    virtual LinSystSolverType giveLinSystSolverType() const { return ST_MKLPardiso; }
-    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return SMT_CompCol; }
+    const char *giveClassName() const override { return "MKLPardisoSolver"; }
+    LinSystSolverType giveLinSystSolverType() const override { return ST_MKLPardiso; }
+    SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return SMT_CompCol; }
 };
 } // end namespace oofem
 #endif // mklpardisosolver_h

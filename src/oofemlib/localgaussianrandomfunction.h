@@ -64,14 +64,14 @@ public:
     /// Destructor
     virtual ~LocalGaussianRandomFunction();
 
-    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=NULL, double param=0.);
-    virtual double evaluateAtTime(double t);
-    virtual double evaluateVelocityAtTime(double t);
-    virtual double evaluateAccelerationAtTime(double t);
+    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override;
+    double evaluateAtTime(double t) override;
+    double evaluateVelocityAtTime(double t) override;
+    double evaluateAccelerationAtTime(double t) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "LocalGaussianRandomFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_LocalGaussianRandomFunction_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "LocalGaussianRandomFunction"; }
+    const char *giveInputRecordName() const override { return _IFT_LocalGaussianRandomFunction_Name; }
 
 protected:
     /**

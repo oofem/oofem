@@ -69,7 +69,7 @@ public:
     virtual ~MixedGradientPressureBC() { }
 
     /// Not relevant for this boundary condition.
-    virtual bcType giveType() const { return UnknownBT; }
+    bcType giveType() const override { return UnknownBT; }
 
     /**
      * Initializes receiver according to object description stored in input record.
@@ -80,7 +80,7 @@ public:
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     /**
      * Computes the size (including pores) by surface integral over the domain

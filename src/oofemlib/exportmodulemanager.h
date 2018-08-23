@@ -51,8 +51,8 @@ public:
     ExportModuleManager(EngngModel * emodel);
     virtual ~ExportModuleManager();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    ExportModule *CreateModule(const char *name, int num, EngngModel *emodel);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    ExportModule *CreateModule(const char *name, int num, EngngModel *emodel) override;
 
     /**
      * Writes the output. Loops over all modules and calls corresponding doOutput module service.
@@ -68,7 +68,7 @@ public:
      * Terminates the receiver, the corresponding terminate module services are called.
      */
     void terminate();
-    virtual const char *giveClassName() const { return "ExportModuleManager"; }
+    const char *giveClassName() const override { return "ExportModuleManager"; }
 };
 } // end namespace oofem
 #endif // exportmodulemanager_h

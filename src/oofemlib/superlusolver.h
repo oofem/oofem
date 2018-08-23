@@ -69,16 +69,13 @@ public:
      * @param x Solution array.
      * @return Status value.
      */
-
-    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
-    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const {
-        return SMT_CompCol;
-    }
+    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+    SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return SMT_CompCol; }
 
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "SuperLUSolver"; }
-    virtual LinSystSolverType giveLinSystSolverType() const { return ST_SuperLU_MT; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "SuperLUSolver"; }
+    LinSystSolverType giveLinSystSolverType() const override { return ST_SuperLU_MT; }
 
 private:
 

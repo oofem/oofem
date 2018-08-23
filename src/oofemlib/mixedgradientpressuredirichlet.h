@@ -107,11 +107,11 @@ public:
      * This boundary condition stores its own DOF managers, one for @f$ d_{\mathrm{dev},ij} @f$ in which the DOFs are prescribed
      * and one for @f$ d_{\mathrm{vol}} @f$ for single free volumetric strain rate.
      */
-    virtual int giveNumberOfInternalDofManagers();
+    int giveNumberOfInternalDofManagers() override;
     /**
      * Returns the volumetric DOF manager for i == 1, and the deviatoric manager for i == 2.
      */
-    virtual DofManager *giveInternalDofManager(int i);
+    DofManager *giveInternalDofManager(int i) override;
 
     /**
      * Initializes receiver according to object description stored in input record.
@@ -123,19 +123,19 @@ public:
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void scale(double s) {
+    void scale(double s) override {
         devGradient.times(s);
         pressure *= s;
     }
 
-    virtual void computeFields(FloatArray &stressDev, double &vol, TimeStep *tStep);
-    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep);
+    void computeFields(FloatArray &stressDev, double &vol, TimeStep *tStep) override;
+    void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep) override;
 
-    virtual void setPrescribedPressure(double p) { pressure = p; }
-    virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
+    void setPrescribedPressure(double p) override { pressure = p; }
+    void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev) override;
 
     /**
      * Set the center coordinate.
@@ -143,31 +143,31 @@ public:
      */
     virtual void setCenterCoordinate(const FloatArray &x) { centerCoord = x; }
     /// Returns the center coordinate
-    virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
+    FloatArray &giveCenterCoordinate() { return centerCoord; }
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr) override;
 
-    virtual bool requiresActiveDofs() { return true; }
-    virtual bool isPrimaryDof(ActiveDof *dof);
+    bool requiresActiveDofs() override { return true; }
+    bool isPrimaryDof(ActiveDof *dof) override;
 
-    virtual double giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
-    virtual bool hasBc(Dof *dof, TimeStep *tStep);
+    double giveBcValue(Dof *dof, ValueModeType mode, TimeStep *tStep) override;
+    bool hasBc(Dof *dof, TimeStep *tStep) override;
 
     /// Returns true is DOF represents one of the deviatoric parts.
     bool isDevDof(Dof *dof);
 
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof);
-    virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
-    virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
+    int giveNumberOfMasterDofs(ActiveDof *dof) override;
+    Dof *giveMasterDof(ActiveDof *dof, int mdof) override;
+    void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs) override;
 
     double giveUnknown(double vol, const FloatArray &dev, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
-    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
-    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
+    double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof) override;
+    double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof) override;
 
-    virtual const char *giveClassName() const { return "MixedGradientPressureDirichlet"; }
-    virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureDirichlet_Name; }
+    const char *giveClassName() const override { return "MixedGradientPressureDirichlet"; }
+    const char *giveInputRecordName() const override { return _IFT_MixedGradientPressureDirichlet_Name; }
 };
 } // end namespace oofem
 

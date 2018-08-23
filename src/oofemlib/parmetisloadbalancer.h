@@ -74,12 +74,12 @@ public:
     ParmetisLoadBalancer(Domain * d);
     virtual ~ParmetisLoadBalancer();
 
-    virtual void calculateLoadTransfer();
+    void calculateLoadTransfer() override;
 
  #if 1
-    virtual DofManMode giveDofManState(int idofman);
-    virtual IntArray *giveDofManPartitions(int idofman);
-    virtual int giveElementPartition(int ielem);
+    DofManMode giveDofManState(int idofman) override;
+    IntArray *giveDofManPartitions(int idofman) override;
+    int giveElementPartition(int ielem) override;
  #endif
 protected:
     void handleMasterSlaveDofManLinks();
@@ -102,7 +102,7 @@ protected:
     int unpackSharedDmanPartitions(ProcessCommunicator &pc);
     void addSharedDofmanPartitions(int _locnum, IntArray _partitions);
 
-    virtual const char *giveClassName() const { return "ParmetisLoadBalancer"; }
+    const char *giveClassName() const override { return "ParmetisLoadBalancer"; }
 };
 } // end namespace oofem
 

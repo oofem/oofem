@@ -62,17 +62,17 @@ public:
     PiecewiseLinFunction(int i, Domain * d);
     virtual ~PiecewiseLinFunction() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "PiecewiseLinFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PiecewiseLinFunction_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "PiecewiseLinFunction"; }
+    const char *giveInputRecordName() const override { return _IFT_PiecewiseLinFunction_Name; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual double evaluateAtTime(double t);
-    virtual double evaluateVelocityAtTime(double t);
-    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+    double evaluateAtTime(double t) override;
+    double evaluateVelocityAtTime(double t) override;
+    double evaluateAccelerationAtTime(double t) override { return 0.; }
 };
 } // end namespace oofem
 #endif // piecewiselinfunction_h

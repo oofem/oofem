@@ -140,7 +140,7 @@ public:
     /**
      * Constructor. Creates an engineering model with number i belonging to domain d.
      */
-    StaggeredProblem(int i, EngngModel * _master = NULL);
+    StaggeredProblem(int i, EngngModel * _master=nullptr);
     /// Destructor.
     virtual ~StaggeredProblem();
     StaggeredProblem(const StaggeredProblem &) = delete;

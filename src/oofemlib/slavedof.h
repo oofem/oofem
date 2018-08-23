@@ -68,16 +68,16 @@ public:
     /// Destructor.
     virtual ~SlaveDof(void) { }
 
-    virtual dofType giveDofType() { return DT_slave; }
+    dofType giveDofType() override { return DT_slave; }
 
     void initialize(const IntArray &masterNodes, const IntArray &mstrDofID, const FloatArray &mstrContribution);
-    virtual int giveNumberOfPrimaryMasterDofs();
-    virtual void giveMasterDofManArray(IntArray &answer);
-    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep);
-    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep);
-    virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
-    virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
-    virtual void giveDofIDs(IntArray &masterDofIDs);
+    int giveNumberOfPrimaryMasterDofs() override;
+    void giveMasterDofManArray(IntArray &answer) override;
+    void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep) override;
+    void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep) override;
+    void computeDofTransformation(FloatArray &primaryMasterContribs) override;
+    void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s) override;
+    void giveDofIDs(IntArray &masterDofIDs) override;
 
     /**
      * Returns the value of the unknown associated with the receiver at given time step.
@@ -90,8 +90,8 @@ public:
      * standard method for unknown query returns the corresponding master DOF value.
      * @see MasterDof::giveUnknown
      */
-    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
-    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep);
+    double giveUnknown(ValueModeType mode, TimeStep *tStep) override;
+    double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep) override;
 
     /**
      * Returns equation number corresponding to receiver.
@@ -100,7 +100,7 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    virtual int __giveEquationNumber() const;
+    int __giveEquationNumber() const override;
     /**
      * Returns equation number corresponding to receiver.
      * Rigid Arm Slave have equation number undefined.
@@ -108,41 +108,41 @@ public:
      * contributing to several master dofs (displacement to displacement and rotations in master).
      * @return Prints error message and exits.
      */
-    virtual int __givePrescribedEquationNumber();
+    int __givePrescribedEquationNumber() override;
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */
-    virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
+    int askNewEquationNumber(TimeStep *tStep) override { return 1; }
 
     /**
      * Returns boundary condition of dof if it is prescribed.
      * HangingDof can not be subjected to BC, it is only mapping to master
      * @return NULL if no BC applied, otherwise pointer to corresponding BC.
      */
-    virtual bool hasBc(TimeStep *tStep) { return false; }
+    bool hasBc(TimeStep *tStep) override { return false; }
 
     /**
      * Returns initial condition of dof if it is prescribed.
      * HangingDof can not be subjected to IC, it is only mapping to master
      * @see MasterDof::hasIc
      */
-    virtual bool hasIc() { return false; }
+    bool hasIc() override { return false; }
 
     /**
      * RigidArmSlaveDof can not be subjected to IC - it is only mapping to master.
      * @see MasterDof::hasIc
      */
-    virtual bool hasIcOn(ValueModeType) { return false; }
+    bool hasIcOn(ValueModeType) override { return false; }
 
-    virtual int giveBcId() { return 0; }
-    virtual int giveIcId() { return 0; }
+    int giveBcId() override { return 0; }
+    int giveIcId() override { return 0; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual const char *giveClassName() const { return "SlaveDof"; }
+    const char *giveClassName() const override { return "SlaveDof"; }
 
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
 
 protected:
     inline Dof *giveMasterDof(int i);

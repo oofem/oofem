@@ -19,17 +19,17 @@ public:
     PrescribedGradientBCWeakDirichlet(int n, Domain *d);
     virtual ~PrescribedGradientBCWeakDirichlet();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void postInitialize();
+    void postInitialize() override;
 
-    virtual const char *giveClassName() const { return "PrescribedGradientBCWeakDirichlet"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCWeakDirichlet_Name; }
+    const char *giveClassName() const override { return "PrescribedGradientBCWeakDirichlet"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedGradientBCWeakDirichlet_Name; }
 
 protected:
-    virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const;
-    virtual void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const;
-    virtual bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const { return true; }
+    void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const override;
+    void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const override;
+    bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const override { return true; }
 };
 } /* namespace oofem */
 

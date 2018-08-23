@@ -212,21 +212,24 @@ public:
      * Initialize receiver data structure if not done previously.
      * Current implementation calls and returns the buildOctreeDataStructure service response.
      */
-    virtual int init(bool force = false);
+    int init(bool force = false) override;
 
-    virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = nullptr);
-    virtual Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset);
-    virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, Set &elemSet, bool iCohesiveZoneGP = false);
-    virtual void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords, const double radius) { giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, coords, radius, false); }
-    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius) { giveAllElementsWithIpWithinBox(elemSet, coords, radius, false); }
-    virtual void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
-    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
-    virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
-    virtual Node * giveNodeClosestToPoint(const FloatArray &coords, double maxDist);
+    Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = nullptr) override;
+    Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset) override;
+    Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region) override;
 
-    virtual const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
+    GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false) override;
+    GaussPoint *giveClosestIP(const FloatArray &coords, Set &elemSet, bool iCohesiveZoneGP = false) override;
+
+    void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords, const double radius) override { giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, coords, radius, false); }
+    void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius) override { giveAllElementsWithIpWithinBox(elemSet, coords, radius, false); }
+    void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
+    void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
+
+    void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius) override;
+    Node * giveNodeClosestToPoint(const FloatArray &coords, double maxDist) override;
+
+    const char *giveClassName() const override { return "OctreeSpatialLocalizer"; }
 
 protected:
     /**

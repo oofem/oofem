@@ -58,7 +58,7 @@ protected:
 
 public:
     SpoolesSparseMtrx(int n=0, int m=0, int _sflag=SPOOLES_SYMMETRIC, int _type=SPOOLES_REAL) : SparseMtrx(n, m),
-        mtrx(NULL),
+        mtrx(nullptr),
         type(_type),
         sflag(_sflag)
     { }
@@ -75,8 +75,8 @@ public:
     int assemble(const IntArray &loc, const FloatMatrix &mat) override;
     int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override;
     bool canBeFactorized() const override { return false; }
-    SparseMtrx *factorized() override { return NULL; }
-    FloatArray *backSubstitutionWith(FloatArray &y) const override { return NULL; }
+    SparseMtrx *factorized() override { return nullptr; }
+    FloatArray *backSubstitutionWith(FloatArray &y) const override { return nullptr; }
     void zero() override;
     double &at(int i, int j) override;
     double at(int i, int j) const override;

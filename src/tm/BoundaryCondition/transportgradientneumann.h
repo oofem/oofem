@@ -77,12 +77,12 @@ public:
 
     double domainSize();
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorm=nullptr) override;
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorm=nullptr) override;
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s,
-                          const UnknownNumberingScheme &c_s, double scale=1.0) override;
+    void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s,
+                  const UnknownNumberingScheme &c_s, double scale=1.0) override;
 
     void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                             const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;

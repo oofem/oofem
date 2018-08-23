@@ -90,19 +90,19 @@ public:
     MMAShapeFunctProjection(const MMAShapeFunctProjection &) = delete;
     MMAShapeFunctProjection &operator=(const MMAShapeFunctProjection &) = delete;
 
-    virtual void __init(Domain *dold, IntArray &type, const FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    void __init(Domain *dold, IntArray &type, const FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false) override;
 
-    virtual void finish(TimeStep *tStep);
+    void finish(TimeStep *tStep) override;
 
-    virtual int mapVariable(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int mapVariable(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int __mapVariable(FloatArray &answer, const FloatArray &coords, InternalStateType type, TimeStep *tStep);
+    int __mapVariable(FloatArray &answer, const FloatArray &coords, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int mapStatus(MaterialStatus &oStatus) const;
+    int mapStatus(MaterialStatus &oStatus) const override;
 
     void interpolateIntVarAt(FloatArray &answer, Element *elem, const FloatArray &lcoords, std :: vector< FloatArray > &list, InternalStateType type, TimeStep *tStep) const;
 
-    virtual const char *giveClassName() const { return "MMAShapeFunctProjectionInterface"; }
+    const char *giveClassName() const override { return "MMAShapeFunctProjectionInterface"; }
 };
 } // end namespace oofem
 #endif // mmashapefunctprojection_h

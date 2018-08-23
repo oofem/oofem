@@ -68,9 +68,9 @@ public:
      * @param w Eigenvalue(s).
      * @return Status.
      */
-    virtual NM_Status solve(FloatMatrix &K, FloatMatrix &M, FloatArray &w, FloatMatrix &x);
+    NM_Status solve(FloatMatrix &K, FloatMatrix &M, FloatArray &w, FloatMatrix &x);
 
-    virtual const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
+    const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
     std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }
 };
 } // end namespace oofem

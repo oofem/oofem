@@ -69,18 +69,18 @@ public:
     /// Constructor.
     NodalAveragingRecoveryModel(Domain * d);
     /// Destructor.
-    ~NodalAveragingRecoveryModel();
+    virtual ~NodalAveragingRecoveryModel();
 
-    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "NodalAveragingRecoveryModel"; }
+    const char *giveClassName() const override { return "NodalAveragingRecoveryModel"; }
 
 private:
 #ifdef __PARALLEL_MODE
     void initCommMaps();
     void exchangeDofManValues(FloatArray &lhs, IntArray &, IntArray &, int);
-    int  packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
-    int  unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
+    int packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
+    int unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
 };
 

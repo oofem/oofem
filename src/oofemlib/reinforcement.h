@@ -62,7 +62,6 @@ protected:
     double shapefactor;
     FloatArray permeability;
 
-
 public:
     /// Constructor
     Reinforcement(int i, Domain * d) : BodyLoad(i, d) { }
@@ -74,15 +73,15 @@ public:
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode-
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override
     { computeComponentArrayAt(answer, tStep, mode); }
 
-    virtual bcValType giveBCValType() const { return ReinforceBVT; }
-    virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+    bcValType giveBCValType() const override { return ReinforceBVT; }
+    bcGeomType giveBCGeoType() const override { return BodyLoadBGT; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "Reinforcement"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Reinforcement_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "Reinforcement"; }
+    const char *giveInputRecordName() const override { return _IFT_Reinforcement_Name; }
 
     /// Accessor
     double givePorosity() { return porosity; }

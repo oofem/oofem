@@ -82,18 +82,18 @@ public:
      */
     NodalLoad(int n, Domain * d) : Load(n, d) { }
 
-    virtual const char *giveInputRecordName() const { return _IFT_NodalLoad_Name; }
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
+    const char *giveInputRecordName() const override { return _IFT_NodalLoad_Name; }
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override
     { computeComponentArrayAt(answer, tStep, mode); }
-    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
+    CoordSystType giveCoordSystMode() override { return coordSystemType; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "NodalLoad"; }
-    virtual bcGeomType giveBCGeoType() const { return NodalLoadBGT; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "NodalLoad"; }
+    bcGeomType giveBCGeoType() const override { return NodalLoadBGT; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // nodalload_h

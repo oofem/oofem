@@ -1137,12 +1137,12 @@ public:
     IntArray *giveBoundaryLoadArray();
 
     // Overloaded methods:
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual const char *giveClassName() const { return "Element"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "Element"; }
 
 protected:
     /**

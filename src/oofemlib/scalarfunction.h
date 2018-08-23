@@ -133,7 +133,7 @@ public:
      * @param d domain managing external functions
      */
     //double eval(double time, const FloatArray &coords, Domain *d) const;
-    
+
     /**
      * True if receiver is defined.
      */

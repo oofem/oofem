@@ -67,7 +67,7 @@ protected:
 
 public:
     /// Constructor
-    ProblemSequence(int i, EngngModel * _master = NULL);
+    ProblemSequence(int i, EngngModel *master=nullptr);
     /// Destructor.
     virtual ~ProblemSequence();
 

@@ -125,6 +125,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ZZErrorEstimator_Name; }
 };
 
 

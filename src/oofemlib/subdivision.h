@@ -418,7 +418,7 @@ public:
     }
 
     /// Runs the mesh generation, mesh will be written to corresponding domain din file
-    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
+    returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew) override;
     const char *giveClassName() { return "Subdivision"; }
     Domain *giveDomain() { return domain; }
 

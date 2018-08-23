@@ -319,7 +319,7 @@ public:
      * @return Reference to new status.
      */
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const
-    { return NULL; }
+    { return nullptr; }
 
     /**
      * Initializes temporary variables stored in integration point status

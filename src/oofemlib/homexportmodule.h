@@ -71,13 +71,13 @@ public:
     /// Constructor. Creates empty Output Manager.
     HOMExportModule(int n, EngngModel * e);
     /// Destructor.
-    virtual ~HOMExportModule();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
-    virtual void initialize();
-    virtual void terminate();
-    virtual const char *giveClassName() const { return "HOMExportModule"; }
-    virtual const char *giveInputRecordName() const { return _IFT_HOMExportModule_Name; }
+    virtual ~HOMExportModule() override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    void initialize() override;
+    void terminate() override;
+    const char *giveClassName() const override { return "HOMExportModule"; }
+    const char *giveInputRecordName() const { return _IFT_HOMExportModule_Name; }
 };
 } // end namespace oofem
 

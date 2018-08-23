@@ -69,11 +69,10 @@ public:
     /// Destructor.
     virtual ~ElementSide();
 
-    // miscellaneous
-    virtual const char *giveClassName() const { return "ElementSide"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ElementSide_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void printYourself();
+    const char *giveClassName() const override { return "ElementSide"; }
+    const char *giveInputRecordName() const override { return _IFT_ElementSide_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void printYourself() override;
 
     /**
      * Computes receiver transformation matrix from global cs. to dofManager specific
@@ -89,8 +88,8 @@ public:
      * assembled. If dofIDArry is NULL, then all receiver dofs are assumed.
      */
     virtual void computeTransformation(FloatMatrix &answer, const IntArray *dofIDArry);
-    virtual bool requiresTransformation() { return false; }
-    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
+    bool requiresTransformation() override { return false; }
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_simpleSlave ); }
 };
 } // end namespace oofem
 #endif // elementside_h

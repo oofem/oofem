@@ -94,7 +94,7 @@ public:
     enum referenceLoadInputModeType {
         rlm_total=0, ///< The reference incremental load vector is defined as totalLoadVector assembled at given time.
         rlm_incremental=1, ///< The reference load vector is obtained as incremental load vector at given time.
-    };    
+    };
 
     /// Constructor
     SparseNonLinearSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m), igp_PertDmanDofSrcArray(), igp_PertWeightArray(), igp_Map(), igp_Weight() { pert_init_needed = false; }
@@ -150,7 +150,7 @@ public:
      * Constructs (if necessary) and returns a linear solver.
      * Public method because some problems require it for sensitivity analysis, etc. even for nonlinear problems (e.g. tangent relations in multiscale simulations).
      */
-    virtual SparseLinearSystemNM *giveLinearSolver() { return NULL; }
+    virtual SparseLinearSystemNM *giveLinearSolver() { return nullptr; }
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual void convertPertMap();

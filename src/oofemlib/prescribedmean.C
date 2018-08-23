@@ -67,7 +67,7 @@ PrescribedMean :: initializeFrom(InputRecord *ir)
     int newdofid = this->domain->giveNextFreeDofID();
     lambdaIDs.clear();
     lambdaIDs.followedBy(newdofid);
-    lambdaDman->appendDof( new MasterDof( lambdaDman, ( DofIDItem )newdofid ));
+    lambdaDman->appendDof( new MasterDof( lambdaDman.get(), ( DofIDItem )newdofid ));
 
     domainSize=-1.;
 

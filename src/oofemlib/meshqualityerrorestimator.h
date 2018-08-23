@@ -81,18 +81,19 @@ public:
     /// Destructor
     virtual ~MeshQualityErrorEstimator() { }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+    double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep) override;
 
     /// Gives the max error from any element in the domain.
-    virtual double giveValue(EE_ValueType type, TimeStep *tStep);
+    double giveValue(EE_ValueType type, TimeStep *tStep) override;
 
     /// Empty implementation.
-    virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
+    int estimateError(EE_ErrorMode mode, TimeStep *tStep) override;
 
-    virtual RemeshingCriteria *giveRemeshingCrit() { return NULL; }
+    RemeshingCriteria *giveRemeshingCrit() override { return nullptr; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "MeshQualityErrorEstimator"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "MeshQualityErrorEstimator"; }
+    const char *giveInputRecordName() const override { return _IFT_MeshQualityErrorEstimator_Name; }
 };
 } // end namespace oofem
 #endif // meshqualityerrorestimator_h

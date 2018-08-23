@@ -114,7 +114,7 @@ public:
      * @param valDict Map with inputs.
      * @param answer Function value.
      */
-    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=NULL, double param=0.);
+    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.);
     /**
      * Returns the (scalar) value of the function for given input.
      * @param valDict Map with inputs.
@@ -142,8 +142,8 @@ public:
     virtual double evaluateAccelerationAtTime(double t) = 0;
 
     double giveFunctionParameter(int paramID);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // function_h
