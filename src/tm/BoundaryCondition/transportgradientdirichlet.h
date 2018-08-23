@@ -92,13 +92,13 @@ public:
     /// Destructor
     virtual ~TransportGradientDirichlet() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void postInitialize();
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void postInitialize() override;
 
-    virtual double give(Dof *dof, ValueModeType mode, double time);
+    double give(Dof *dof, ValueModeType mode, double time) override;
 
-    virtual bcType giveType() const { return DirichletBT; }
+    bcType giveType() const override { return DirichletBT; }
 
     double domainSize();
     /**
@@ -122,13 +122,13 @@ public:
      * @param tStep Active time step.
      */
     virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
-    
+
     /// Computes the offset values for "improved" Dirichlet. See class description.
     void computeXi();
 
-    virtual void scale(double s) { mGradient.times(s); }
+    void scale(double s) override { mGradient.times(s); }
 
-    virtual const char *giveClassName() const { return "TransportGradientDirichlet"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TransportGradientDirichlet_Name; }
+    const char *giveClassName() const override { return "TransportGradientDirichlet"; }
+    const char *giveInputRecordName() const override { return _IFT_TransportGradientDirichlet_Name; }
 };
 } // end namespace oofem
