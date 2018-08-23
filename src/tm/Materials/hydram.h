@@ -132,15 +132,14 @@ public:
     void setHydrationDegree(double v) { hydrationDegree = v; }
     void setTempHydrationDegree(double v) { tempHydrationDegree = v; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    // --- identification and auxiliary functions ---
-    virtual const char *giveClassName() const { return "HydrationModelStatus"; }
+    const char *giveClassName() const override { return "HydrationModelStatus"; }
 };
 
 
@@ -225,7 +224,7 @@ public:
      * Not a standard material - initializes from master material record, doesn't call parent initializeFrom
      * Use hm_ prefix in parameter names to avoid confusion with master material parameters
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     /**
      * Returns the hydration degree at end of TimeStep tStep in given integraion point.
@@ -259,7 +258,7 @@ public:
      * point gp.
      * @return hydration model status associated with given integration point.
      */
-    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
+    MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
     /// Returns generated heat for given gp [kJ/m3], eventually water consumption
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
@@ -267,12 +266,11 @@ public:
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
     virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep);
     // --- identification and auxiliary functions ---
-    virtual const char *giveInputRecordName() const { return _IFT_HydrationModel_Name; }
-    virtual const char *giveClassName() const { return "HydrationModel"; }
+    const char *giveInputRecordName() const override { return _IFT_HydrationModel_Name; }
+    const char *giveClassName() const override { return "HydrationModel"; }
 
-protected:
     /// Creates and returns new HydrationModelStatus instance
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 
 // =========== Interfaces for materials using the hydration model ============

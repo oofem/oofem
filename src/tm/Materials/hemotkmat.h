@@ -84,7 +84,6 @@ protected:
     double rho_gws;   ///< Saturation volume density.
 
 public:
-
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.
@@ -94,28 +93,29 @@ public:
     /// Destructor.
     virtual ~HeMoTKMaterial() { }
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_HeMoTKMaterial_Name; }
-    virtual const char *giveClassName() const { return "HeMoTKMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_HeMoTKMaterial_Name; }
+    const char *giveClassName() const override { return "HeMoTKMaterial"; }
 
     double sorption_isotherm(double phi);
     double inverse_sorption_isotherm(double w);
@@ -131,7 +131,7 @@ protected:
     /**
      * Returns positive value of humidity, use VM_Velocity for previous (equilibrated) value
      */
-    double giveHumidity(GaussPoint *gp, ValueModeType mode);
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
 
     double get_latent(double w, double t);
     double get_ceff(double w, double t);
@@ -145,9 +145,6 @@ protected:
     double get_b(double w, double t);
     double get_sat(double w, double t);
     double give_p_gws(double t);
-
-    // post-processing, poi export
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // hemotkmat_h

@@ -50,26 +50,26 @@ public:
     IsotropicMoistureTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
     virtual ~IsotropicMoistureTransferMaterial() { }
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
     virtual double givePermeability(GaussPoint *gp, TimeStep *tStep) = 0;
     virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) = 0;
     //sorption isotherm, return total water mass [kg/m3]
-    virtual double giveMoistureContent(double humidity) {return 0.;};
+    virtual double giveMoistureContent(double humidity) { return 0.; }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual const char *giveClassName() const { return "IsotropicMoistureTransferMaterial"; }
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "IsotropicMoistureTransferMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem
 #endif // isomoisturemat_h

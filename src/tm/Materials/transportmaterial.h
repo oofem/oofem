@@ -70,19 +70,19 @@ public:
     /// Destructor
     virtual ~TransportMaterialStatus() { }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     ///@todo REMOVE THESE:
     /// Assigns temporary state vector from a given vector v.
     void letTempStateVectorBe(FloatArray v) { temp_field = std :: move(v); }
 
-    virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
+    const char *giveClassName() const override { return "TransportMaterialStatus"; }
 
     /// Set gradient.
     void setTempGradient(FloatArray grad);
@@ -192,10 +192,9 @@ public:
      */
     virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) { return -1.0; }
 
-    // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TransportMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TransportMaterialStatus(1, domain, gp); }
 };
 } // end namespace oofem
 #endif // transportmaterial_h

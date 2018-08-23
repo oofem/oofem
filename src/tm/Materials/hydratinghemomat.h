@@ -62,29 +62,28 @@ public:
 
     void setMixture(MixtureType mix);
 
-    virtual int hasInternalSource(); // return true if hydration heat source is present
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-    virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
+    int hasInternalSource() override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
     // saves current context(state) into stream
-    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
     // identification and auxiliary functions
-    virtual const char *giveInputRecordName() const { return _IFT_HydratingHeMoMaterial_Name; }
-    virtual const char *giveClassName() const { return "HydratingHeMoMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_HydratingHeMoMaterial_Name; }
+    const char *giveClassName() const override { return "HydratingHeMoMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-protected:
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // hydratinghemomat_h

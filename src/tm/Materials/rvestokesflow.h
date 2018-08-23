@@ -67,12 +67,12 @@ public:
 
     void setTimeStep(TimeStep *tStep);
 
-    virtual void initTempStatus();
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     const FloatMatrix &giveTangentMatrix() { return tangentMatrix; }
     const FloatMatrix &giveTempTangentMatrix() { return temp_TangentMatrix; }
@@ -82,7 +82,7 @@ public:
 
     bool oldTangent;
 
-    virtual const char *giveClassName() const { return "RVEStokesFlowMaterialStatus"; }
+    const char *giveClassName() const override { return "RVEStokesFlowMaterialStatus"; }
 };
 
 
@@ -113,18 +113,18 @@ public:
 
     virtual ~RVEStokesFlow() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { return 0.0; }
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override { return 0.0; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "RVEStokesFlow"; }
-    virtual const char *giveInputRecordName() const { return _IFT_RVEStokesFlow_Name; }
+    const char *giveClassName() const override { return "RVEStokesFlow"; }
+    const char *giveInputRecordName() const override { return _IFT_RVEStokesFlow_Name; }
 };
 }
 

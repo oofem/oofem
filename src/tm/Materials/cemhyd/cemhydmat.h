@@ -97,11 +97,11 @@ public:
     /// Destructor
     virtual ~CemhydMat();
     /// Returns input record name of the receiver.
-    virtual const char *giveInputRecordName() const { return _IFT_CemhydMat_Name; }
-    virtual const char *giveClassName() const { return "CemhydMat"; }
+    const char *giveInputRecordName() const override { return _IFT_CemhydMat_Name; }
+    const char *giveClassName() const override { return "CemhydMat"; }
 
-    virtual int hasInternalSource() { return 1; }
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    int hasInternalSource() override { return 1; }
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
     /// Returns cycle number at the closest cycle after the target time
     virtual int giveCycleNumber(GaussPoint *gp);
     /// Returns time of the CEMHYD3D at the first cycle after the target time
@@ -109,17 +109,17 @@ public:
     /// Returns DoH of the closest CEMHYD3D cycle after the target time
     virtual double giveDoHActual(GaussPoint *gp);
     /// Returns concrete heat conductivity depending on chosen type
-    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
+    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) override;
     /// Returns concrete thermal capacity depending on chosen type
     virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep);
     /// Returns concrete density depending on chosen type
     virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep);
 
     /// Compute heat thermal capacity per volume.
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int initMaterial(Element *element);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    int initMaterial(Element *element) override;
     /// Clear temperatures multiplied with volume around GPs - need before temperature averaging.
     virtual void clearWeightTemperatureProductVolume(Element *element);
     /// Store temperatures multiplied with volume around GPs - need before temperature averaging.
@@ -127,7 +127,7 @@ public:
     /// Perform averaging on a master CemhydMatStatus.
     virtual void averageTemperature();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
     /// Use different methods to evaluate material parameters
     int conductivityType, capacityType, densityType;
     /// Array containing warnings supression for density, conductivity, capacity, high temperature.
@@ -140,7 +140,7 @@ public:
     int eachGP;
     /// XML input file name for CEMHYD3D.
     std :: string XMLfileName;
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
     /**
      * Pointer to master CemhydMatStatus, which is shared among related integration points (on element, for example).
      * When Cemhyd3D runs seperately in each GP, MasterCemhydMatStatus belongs to the first instance, from which the microstructure is copied to the rest of integration points.
@@ -165,10 +165,10 @@ public:
      */
     CemhydMatStatus(int n, Domain * d, GaussPoint * gp, CemhydMatStatus * CemStat, CemhydMat * cemhydmat, bool withMicrostructure);
     virtual ~CemhydMatStatus();
-    //virtual Interface *giveInterface(InterfaceType);
-    virtual const char *giveClassName() const { return "CemhydMatStatus"; }
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    //Interface *giveInterface(InterfaceType) override;
+    const char *giveClassName() const override { return "CemhydMatStatus"; }
+    void updateYourself(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 #elif CEMPY
  #define OUTFILES
  #define IMAGEFILES

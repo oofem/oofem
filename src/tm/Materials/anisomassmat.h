@@ -66,16 +66,16 @@ public:
     AnisotropicMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
     virtual ~AnisotropicMassTransferMaterial() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_AnisotropicMassTransferMaterial_Name; }
-    virtual const char *giveClassName() const { return "AnisotropicMassTransferMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_AnisotropicMassTransferMaterial_Name; }
+    const char *giveClassName() const override { return "AnisotropicMassTransferMaterial"; }
 };
 } // end namespace oofem
 #endif // anisomassmat_h

@@ -56,32 +56,32 @@ protected:
 public:
     Tr1Darcy(int, Domain *);
     virtual ~Tr1Darcy();
-    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() const;
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual MaterialMode giveMaterialMode() { return _2dHeat; } ///@todo This isn't actually correct.
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
+    MaterialMode giveMaterialMode() override { return _2dHeat; } ///@todo This isn't actually correct.
 
-    virtual void computeGaussPoints();
-    virtual int computeNumberOfDofs();
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
-    virtual void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    void computeGaussPoints() override;
+    int computeNumberOfDofs() override;
+
+    void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) override;
     void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode, int indx);
-    virtual void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
+    void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep) override;
 
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual double giveThicknessAt(const FloatArray &gcoords);
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    double giveThicknessAt(const FloatArray &gcoords) override;
 
-    // From NodalAveragingRecoveryModelInterface
-    virtual const char *giveInputRecordName() const { return _IFT_Tr1Darcy_Name; }
-    virtual const char *giveClassName() const { return "Tr1Darcy"; }
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual Interface *giveInterface(InterfaceType interface);
+    const char *giveInputRecordName() const override { return _IFT_Tr1Darcy_Name; }
+    const char *giveClassName() const override { return "Tr1Darcy"; }
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
+    Interface *giveInterface(InterfaceType interface) override;
 };
 }
 

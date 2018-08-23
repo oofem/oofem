@@ -95,12 +95,7 @@ protected:
     double cw;           ///< specific heat capacity of liquid water [J kg^-1 K^-1]
     double hv;           ///< latent heat of phase change/evaporation enthalpy of pure water [J/kg]
 
-
-
-
-
 public:
-
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.
@@ -110,28 +105,30 @@ public:
     /// Destructor.
     virtual ~HeMoKunzelMaterial() { }
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *atTime);
+    void giveCharacteristicMatrix(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *atTime) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *atTime) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    // identification
-    virtual const char *giveInputRecordName() const { return _IFT_HeMoKunzelMaterial_Name; }
-    virtual const char *giveClassName() const { return "HeMoKunzelMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_HeMoKunzelMaterial_Name; }
+    const char *giveClassName() const override { return "HeMoKunzelMaterial"; }
+
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
 
     /// returns water content (in kg/m^3)
     double giveMoistureContent(double h);
@@ -143,7 +140,6 @@ public:
     double computeSatVaporPressure(double T);
     double computeSatVaporPressureDerivative(double T);
     double computeDw(double h);
-
 
 protected:
     void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
@@ -158,10 +154,6 @@ protected:
     double perm_hm(double h, double T);
     double perm_hh(double h, double T);
 
-
-    // post-processing, poi export
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
-    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
 };
 } // end namespace oofem
 #endif // hemokunzelmat_h

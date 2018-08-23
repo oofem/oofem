@@ -58,31 +58,31 @@ public:
     Quad1_ht(int n, Domain * d);
     virtual ~Quad1_ht();
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual double computeVolumeAround(GaussPoint *gp);
+    FEInterpolation *giveInterpolation() const override;
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1_ht_Name; }
-    virtual const char *giveClassName() const { return "Quad1_ht"; }
+    const char *giveInputRecordName() const override { return _IFT_Quad1_ht_Name; }
+    const char *giveClassName() const override { return "Quad1_ht"; }
 
-    //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
-    virtual int computeNumberOfDofs() { return 4; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _2dHeat; }
-    virtual double giveThicknessAt(const FloatArray &gcoords);
+    //int computeNumberOfDofs() override { return ( emode == HeatTransferEM ) ? 4 : 8; }
+    int computeNumberOfDofs() override { return 4; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    MaterialMode giveMaterialMode() override { return _2dHeat; }
+    double giveThicknessAt(const FloatArray &gcoords) override;
 
-    virtual Interface *giveInterface(InterfaceType t);
+    Interface *giveInterface(InterfaceType t) override;
 
 #ifdef __OOFEG
     // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override {}
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override {}
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    void computeGaussPoints() override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
 };
 
 /**
@@ -93,10 +93,10 @@ class Quad1_hmt : public Quad1_ht
 public:
     Quad1_hmt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1_hmt_Name; }
-    virtual const char *giveClassName() const { return "Quad1_hmt"; }
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
+    const char *giveInputRecordName() const override { return _IFT_Quad1_hmt_Name; }
+    const char *giveClassName() const override { return "Quad1_hmt"; }
+    int computeNumberOfDofs() override { return 8; }
+    MaterialMode giveMaterialMode() override { return _2dHeMo; }
 };
 
 /**
@@ -107,10 +107,10 @@ class Quad1_mt : public Quad1_ht
 public:
     Quad1_mt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1_mt_Name; }
-    virtual const char *giveClassName() const { return "Quad1_mt"; }
-    virtual int computeNumberOfDofs() { return 4; }
-    virtual MaterialMode giveMaterialMode() { return _2dHeat; }
+    const char *giveInputRecordName() const override { return _IFT_Quad1_mt_Name; }
+    const char *giveClassName() const override { return "Quad1_mt"; }
+    int computeNumberOfDofs() override { return 4; }
+    MaterialMode giveMaterialMode() override { return _2dHeat; }
 };
 } // end namespace oofem
 #endif // quad1_ht_h

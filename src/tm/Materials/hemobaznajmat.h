@@ -55,7 +55,6 @@ namespace oofem {
 class HeMoBazNajMaterial : public TransportMaterial
 {
 protected:
-
     /// sorption isotherm derivative [kg/m^3]
     double moistureCapacity;
 
@@ -71,9 +70,7 @@ protected:
     double heatConductivity; ///< Conductivity (k in input file).
     double heatCapacity;     ///< Capacity (c in input file).
 
-
 public:
-
     /**
      * Constructor. Creates material with given number, belonging to given domain.
      * @param n Material number.
@@ -83,28 +80,28 @@ public:
     /// Destructor.
     virtual ~HeMoBazNajMaterial() { }
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *atTime);
+    void giveCharacteristicMatrix(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *atTime) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *atTime) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode);
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
-    // identification
-    virtual const char *giveInputRecordName() const { return _IFT_HeMoBazNajMaterial_Name; }
-    virtual const char *giveClassName() const { return "HeMoBazNajMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_HeMoBazNajMaterial_Name; }
+    const char *giveClassName() const override { return "HeMoBazNajMaterial"; }
 
 protected:
     void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
@@ -118,10 +115,6 @@ protected:
     double perm_mh(double h, double T);
     double perm_hm(double h, double T);
     double perm_hh(double h, double T);
-
-
-    // post-processing, poi export
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
 };
 } // end namespace oofem
 #endif // hemobaznajmat_h

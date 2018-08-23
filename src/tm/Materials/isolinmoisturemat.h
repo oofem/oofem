@@ -61,13 +61,13 @@ public:
     IsotropicLinMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
     virtual ~IsotropicLinMoistureTransferMaterial() { }
 
-    virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
-    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_IsotropicLinMoistureTransferMaterial_Name; }
-    virtual const char *giveClassName() const { return "IsotropicLinMoistureTransferMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_IsotropicLinMoistureTransferMaterial_Name; }
+    const char *giveClassName() const override { return "IsotropicLinMoistureTransferMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem
 #endif // isolinmoisturemat_h

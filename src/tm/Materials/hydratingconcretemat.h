@@ -75,21 +75,20 @@ public:
     HydratingConcreteMat(int n, Domain * d);
     virtual ~HydratingConcreteMat();
 
-    virtual int hasInternalSource() { return 1; }
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    int hasInternalSource() override { return 1; }
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "HydratingConcreteMat"; }
+    const char *giveClassName() const override { return "HydratingConcreteMat"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) override;
     virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep);
     virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep);
     /// Type of hydration model, e.g. exponential curve, Cervera's model.
@@ -142,8 +141,8 @@ public:
     virtual ~HydratingConcreteMatStatus();
     /// Returns actual degree of hydration at last known equilibrium.
     double giveDoHActual();
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
     double power;
     double lastEvalTime;
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;

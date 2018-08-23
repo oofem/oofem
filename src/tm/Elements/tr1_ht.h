@@ -57,32 +57,32 @@ protected:
 
 public:
     Tr1_ht(int n, Domain * d);
-    //virtual ~Tr1_ht();
+    virtual ~Tr1_ht() {}
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
     // definition
-    virtual const char *giveInputRecordName() const { return _IFT_Tr1_ht_Name; }
-    virtual const char *giveClassName() const { return "Tr1_htElement"; }
+    const char *giveInputRecordName() const override { return _IFT_Tr1_ht_Name; }
+    const char *giveClassName() const override { return "Tr1_htElement"; }
 
-    virtual int computeNumberOfDofs() { return ( emode == HeatMass1TransferEM ) ? 6 : 3; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _2dHeat; }
-    virtual double giveThicknessAt(const FloatArray &gcoords);
+    int computeNumberOfDofs() override { return ( emode == HeatMass1TransferEM ) ? 6 : 3; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    MaterialMode giveMaterialMode() override { return _2dHeat; }
+    double giveThicknessAt(const FloatArray &gcoords) override;
 
-    virtual Interface *giveInterface(InterfaceType t);
+    Interface *giveInterface(InterfaceType t) override;
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
 #ifdef __OOFEG
     // Graphics output
-    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override {}
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override {}
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    void computeGaussPoints() override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
 };
 
 /**
@@ -93,9 +93,9 @@ class Tr1_mt : public Tr1_ht
 public:
     Tr1_mt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Tr1_mt_Name; }
-    virtual const char *giveClassName() const { return "Tr1_mt"; }
-    virtual MaterialMode giveMaterialMode() { return _2dHeat; }
+    const char *giveInputRecordName() const override { return _IFT_Tr1_mt_Name; }
+    const char *giveClassName() const override { return "Tr1_mt"; }
+    MaterialMode giveMaterialMode() override { return _2dHeat; }
 };
 
 
@@ -107,9 +107,9 @@ class Tr1_hmt : public Tr1_ht
 public:
     Tr1_hmt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Tr1_hmt_Name; }
-    virtual const char *giveClassName() const { return "Tr1_hmt"; }
-    virtual MaterialMode giveMaterialMode() { return _2dHeMo; }
+    const char *giveInputRecordName() const override { return _IFT_Tr1_hmt_Name; }
+    const char *giveClassName() const override { return "Tr1_hmt"; }
+    MaterialMode giveMaterialMode() override { return _2dHeMo; }
 };
 } // end namespace oofem
 #endif // tr1_ht_h

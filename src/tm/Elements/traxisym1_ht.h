@@ -49,16 +49,16 @@ public:
     TrAxisym1_ht(int n, Domain * d);
     virtual ~TrAxisym1_ht();
 
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual const char *giveInputRecordName() const { return _IFT_TrAxisym1_ht_Name; }
-    virtual const char *giveClassName() const { return "TrAxisym1_htElement"; }
+    double computeVolumeAround(GaussPoint *gp) override;
+    const char *giveInputRecordName() const override { return _IFT_TrAxisym1_ht_Name; }
+    const char *giveClassName() const override { return "TrAxisym1_htElement"; }
 
-    virtual double giveThicknessAt(const FloatArray &gcoords);
+    double giveThicknessAt(const FloatArray &gcoords) override;
 
 protected:
     double computeRadiusAt(GaussPoint *gp);
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual int giveApproxOrder(int unknownIndx) { return 2; }
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    int giveApproxOrder(int unknownIndx) override { return 2; }
 };
 } // end namespace oofem
 #endif // traxisym1_ht_h
