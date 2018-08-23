@@ -60,16 +60,16 @@ public:
     /// Destructor
     virtual ~DummySpatialLocalizer() { }
 
-    virtual int init(bool force = false);
+    int init(bool force = false) override;
 
-    virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region = 0);
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
-    virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
-    virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
-    virtual Node *giveNodeClosestToPoint(const FloatArray &coords, double maxDist);
+    Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = nullptr) override;
+    Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region = 0) override;
+    GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false) override;
+    void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius) override;
+    void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius) override;
+    Node *giveNodeClosestToPoint(const FloatArray &coords, double maxDist) override;
 
-    virtual const char *giveClassName() const { return "DummySpatialLocalizer"; }
+    const char *giveClassName() const override { return "DummySpatialLocalizer"; }
 };
 } // end namespace oofem
 #endif // dummylocalizer_h

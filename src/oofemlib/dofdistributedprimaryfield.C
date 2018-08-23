@@ -79,13 +79,6 @@ DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, Tim
     return 0.;
 }
 
-FloatArray *
-DofDistributedPrimaryField :: giveSolutionVector(TimeStep *tStep)
-{
-    //OOFEM_ERROR("This function should not be called. initialize and update should be used instead");
-    return PrimaryField :: giveSolutionVector(tStep);
-}
-
 void
 DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s)
 {
@@ -356,17 +349,4 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
     this->applyBoundaryCondition(tStep);
 }
 
-
-contextIOResultType
-DofDistributedPrimaryField :: saveContext(DataStream &stream, ContextMode mode)
-{
-    // all the job is done by dofs alone
-    return CIO_OK;
-}
-
-contextIOResultType
-DofDistributedPrimaryField :: restoreContext(DataStream &stream, ContextMode mode)
-{
-    return CIO_OK;
-}
 } // end namespace oofem

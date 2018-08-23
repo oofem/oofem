@@ -263,9 +263,7 @@ contextIOResultType EigenValueDynamic :: saveContext(DataStream &stream, Context
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->field->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    this->field->saveContext(stream);
 
     return CIO_OK;
 }
@@ -283,9 +281,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream &stream, Cont
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->field->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    this->field->restoreContext(stream);
 
     return CIO_OK;
 }

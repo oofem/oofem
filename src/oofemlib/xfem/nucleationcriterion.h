@@ -50,12 +50,13 @@ class DynamicDataReader;
 class InputRecord;
 class EnrichmentFunction;
 
-class NucleationCriterion {
+class NucleationCriterion
+{
 public:
-	NucleationCriterion(Domain *ipDomain);
-	virtual ~NucleationCriterion();
+    NucleationCriterion(Domain *ipDomain);
+    virtual ~NucleationCriterion();
 
-	virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
+    virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int instanciateYourself(DataReader &dr);

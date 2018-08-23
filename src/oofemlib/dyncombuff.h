@@ -189,26 +189,26 @@ public:
     /// Initialize for Unpacking (data already received).
     virtual void initForUnpacking();
 
-    virtual int write(const int *src, int n)
+    int write(const int *src, int n) override
     { return __write(src, n, MPI_INT); }
-    virtual int write(const long *src, int n)
+    int write(const long *src, int n) override
     { return __write(src, n, MPI_LONG); }
-    virtual int write(const unsigned long *src, int n)
+    int write(const unsigned long *src, int n) override
     { return __write(src, n, MPI_UNSIGNED_LONG); }
-    virtual int write(const double *src, int n)
+    int write(const double *src, int n) override
     { return __write(src, n, MPI_DOUBLE); }
-    virtual int write(const char *src, int n)
+    int write(const char *src, int n) override
     { return __write(src, n, MPI_CHAR); }
 
-    virtual int read(int *dest, int n)
+    int read(int *dest, int n) override
     { return __read(dest, n, MPI_INT); }
-    virtual int read(long *dest, int n)
+    int read(long *dest, int n) override
     { return __read(dest, n, MPI_LONG); }
-    virtual int read(unsigned long *dest, int n)
+    int read(unsigned long *dest, int n) override
     { return __read(dest, n, MPI_UNSIGNED_LONG); }
-    virtual int read(double *dest, int n)
+    int read(double *dest, int n) override
     { return __read(dest, n, MPI_DOUBLE); }
-    virtual int read(char *dest, int n)
+    int read(char *dest, int n) override
     { return __read(dest, n, MPI_CHAR); }
 
 

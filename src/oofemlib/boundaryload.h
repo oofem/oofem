@@ -142,20 +142,20 @@ public:
      */
     BoundaryLoad(int i, Domain * d);
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
     /**
      * @return Approximation order of load geometry.
      */
-    virtual int giveApproxOrder() = 0;
+    virtual int giveApproxOrder() override = 0;
 
-    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
+    CoordSystType giveCoordSystMode() override { return coordSystemType; }
     /**
      * Initializes receiver according to object description stored in input record.
      * Reads number of dofs into nDofs attribute (i.e. the number of dofs, which are on loaded entity),
      * its loadType into loadType attribute and coordinate system type into csType attribute.
      */
-    IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    virtual void giveInputRecord(DynamicInputRecord &input) override;
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).
@@ -163,9 +163,9 @@ public:
      * specified on input by user.
      * See cltypes.h file for details.
      */
-    virtual bcType giveType() const { return lType; }
+    bcType giveType() const override { return lType; }
     virtual double giveProperty(int aProperty, TimeStep *tStep, const std :: map< std :: string, FunctionArgument > &valDict);
-    virtual double giveProperty(int aProperty, TimeStep *tStep);
+    double giveProperty(int aProperty, TimeStep *tStep) override;
     /// Return temperature offset
     virtual double giveTemperOffset(void);
     /// Expression to multiply all properties
@@ -186,10 +186,10 @@ protected:
      * @param tStep Time step.
      * @param mode Determines response mode.
      */
-    virtual void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    void computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -228,10 +228,6 @@ public:
      */
      SurfaceLoad(int i, Domain * d) : BoundaryLoad (i, d) {}
 };
-
-
-
-
 
 } // end namespace oofem
 #endif // boundaryload_h

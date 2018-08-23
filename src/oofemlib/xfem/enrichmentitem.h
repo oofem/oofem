@@ -110,7 +110,8 @@ public:
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
     virtual ~EnrichmentItem();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    virtual int instanciateYourself(DataReader &dr) = 0;
 
     /**
      * Note the special treatment here, the "normal" syntax
@@ -123,8 +124,6 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("This function must be called with DynamicDataReader as input."); }
     virtual void appendInputRecords(DynamicDataReader &oDR) = 0;
 
-    virtual int instanciateYourself(DataReader &dr) = 0;
-    virtual const char *giveClassName() const = 0;
     const IntArray *giveEnrichesDofsWithIdArray() const { return & mpEnrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs() const;
 
@@ -151,7 +150,6 @@ public:
 
     virtual bool hasPropagatingFronts() const;
     virtual bool hasInitiationCriteria() { return false; }
-
 
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; }

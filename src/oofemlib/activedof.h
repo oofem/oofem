@@ -66,41 +66,40 @@ public:
     /// Destructor.
     virtual ~ActiveDof() { }
 
-    virtual void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
-    virtual int giveNumberOfPrimaryMasterDofs();
-    virtual bool isPrimaryDof();
+    void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
+    int giveNumberOfPrimaryMasterDofs() override;
+    bool isPrimaryDof() override;
     int giveNumberOfMasterDofs();
-    virtual void giveMasterDofManArray(IntArray &answer);
-    virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep);
-    virtual void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep);
-    virtual void computeDofTransformation(FloatArray &primaryMasterContribs);
-    virtual void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s);
-    virtual void giveDofIDs(IntArray &masterDofIDs);
+    void giveMasterDofManArray(IntArray &answer) override;
+    void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep) override;
+    void giveUnknowns(FloatArray &masterUnknowns, PrimaryField &field, ValueModeType mode, TimeStep *tStep) override;
+    void computeDofTransformation(FloatArray &primaryMasterContribs) override;
+    void giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberingScheme &s) override;
+    void giveDofIDs(IntArray &masterDofIDs) override;
 
-    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
-    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep);
+    double giveUnknown(ValueModeType mode, TimeStep *tStep) override;
+    double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual dofType giveDofType() { return DT_active; }
-    virtual const char *giveClassName() const { return "ActiveDof"; }
+    dofType giveDofType() override { return DT_active; }
+    const char *giveClassName() const override { return "ActiveDof"; }
 
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
 
-    virtual int __giveEquationNumber() const;
-    virtual int __givePrescribedEquationNumber();
-    virtual int askNewEquationNumber(TimeStep *tStep);
-    virtual bool hasBc(TimeStep *tStep);
-    virtual int giveBcId();
-    virtual void setBcId(int bcId);
-    virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
+    int __giveEquationNumber() const override;
+    int __givePrescribedEquationNumber() override;
+    int askNewEquationNumber(TimeStep *tStep) override;
+    bool hasBc(TimeStep *tStep) override;
+    int giveBcId() override;
+    void setBcId(int bcId) override;
+    double giveBcValue(ValueModeType mode, TimeStep *tStep) override;
 
-    virtual bool hasIc(TimeStep *tStep);
-    virtual bool hasIcOn(ValueModeType type);
-    virtual InitialCondition *giveIc();
-    virtual bool hasIc();
-    virtual int giveIcId();
+    bool hasIcOn(ValueModeType type) override;
+    InitialCondition *giveIc() override;
+    bool hasIc() override;
+    int giveIcId() override;
 
     ActiveBoundaryCondition *giveActiveBoundaryCondition();
 

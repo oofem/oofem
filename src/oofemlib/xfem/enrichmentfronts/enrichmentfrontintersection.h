@@ -63,24 +63,24 @@ public:
     EnrFrontIntersection();
     virtual ~EnrFrontIntersection();
 
-    virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo);
+    void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo) override;
 
-    virtual int  giveNumEnrichments(const DofManager &iDMan) const;
-    virtual int  giveMaxNumEnrichments() const { return 1; }
+    int giveNumEnrichments(const DofManager &iDMan) const override;
+    int giveMaxNumEnrichments() const override { return 1; }
 
     // Evaluate the enrichment function and its derivative in front nodes.
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const;
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const;
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const;
+    void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const override;
+    void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const override;
+    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const override;
 
-    virtual const char *giveClassName() const { return "EnrFrontIntersection"; }
-    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontIntersection_Name; }
+    const char *giveClassName() const override { return "EnrFrontIntersection"; }
+    const char *giveInputRecordName() const override { return _IFT_EnrFrontIntersection_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual double giveSupportRadius() const { return 0.0; }
-    virtual bool propagationIsAllowed() const { return false; }
+    double giveSupportRadius() const override { return 0.0; }
+    bool propagationIsAllowed() const override { return false; }
 
     void setTangent(FloatArray iTangent) { mTangent = std :: move(iTangent); }
 

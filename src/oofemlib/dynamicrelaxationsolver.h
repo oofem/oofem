@@ -65,15 +65,15 @@ public:
     DynamicRelaxationSolver(Domain * d, EngngModel * m);
     virtual ~DynamicRelaxationSolver() {}
 
-    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
-                            FloatArray &X, FloatArray &dX, FloatArray &F,
-                            const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
-                            int &nite, TimeStep *);
+    NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                    FloatArray &X, FloatArray &dX, FloatArray &F,
+                    const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                    int &nite, TimeStep *) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
-    virtual const char *giveClassName() const { return "DynamicRelaxationSolver"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DynamicRelaxationSolver_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+
+    const char *giveClassName() const override { return "DynamicRelaxationSolver"; }
+    const char *giveInputRecordName() const override { return _IFT_DynamicRelaxationSolver_Name; }
 };
 } // end namespace oofem
 #endif // dynamicrelaxationsolver_h

@@ -52,11 +52,13 @@ class OOFEM_EXPORT DummyMaterial : public Material
 {
 public:
     DummyMaterial(int n, Domain * d) : Material(n, d) { }
-    virtual int hasMaterialModeCapability(MaterialMode mode) { return 0; }
+    virtual ~DummyMaterial() { }
 
-    virtual const char *giveClassName() const { return "DummyMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DummyMaterial_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    int hasMaterialModeCapability(MaterialMode mode) override { return 0; }
+
+    const char *giveClassName() const override { return "DummyMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_DummyMaterial_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // material_h

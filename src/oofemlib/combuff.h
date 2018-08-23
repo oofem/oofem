@@ -210,13 +210,9 @@ class OOFEM_EXPORT CommunicationBuffer: public DataStream
 protected:
     MPI_Comm communicator;
 public:
-    CommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) {
-        communicator = comm;
-    }
+    CommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) : communicator(comm) { }
     /// Constructor. Creates empty buffer, using given communicator for packing
-    CommunicationBuffer(MPI_Comm comm, bool dynamic = 0) {
-        communicator = comm;
-    }
+    CommunicationBuffer(MPI_Comm comm, bool dynamic = 0) : communicator(comm) { }
     /// Destructor.
     virtual ~CommunicationBuffer() { }
 
@@ -240,16 +236,16 @@ public:
     virtual void initForUnpacking() = 0;
 
     using DataStream::read;
-    virtual int read(bool &data);
+    virtual int read(bool &data) override;
 
     using DataStream::write;
-    virtual int write(bool data);
-   
-    virtual int givePackSizeOfInt(int count);
-    virtual int givePackSizeOfDouble(int count);
-    virtual int givePackSizeOfChar(int count);
-    virtual int givePackSizeOfBool(int count);
-    virtual int givePackSizeOfLong(int count);
+    virtual int write(bool data) override;
+
+    virtual int givePackSizeOfInt(int count) override;
+    virtual int givePackSizeOfDouble(int count) override;
+    virtual int givePackSizeOfChar(int count) override;
+    virtual int givePackSizeOfBool(int count) override;
+    virtual int givePackSizeOfLong(int count) override;
 
     /**@name Services for buffer sending/receiving */
     //@{
@@ -311,7 +307,7 @@ public:
     /// Destructor.
     virtual ~StaticCommunicationBuffer() { }
 
-    virtual int resize(int newSize) { return MPIBuffer :: resize(newSize); }
+    virtual int resize(int newSize) override { return MPIBuffer :: resize(newSize); }
 
     virtual void init() { return MPIBuffer :: init(); }
     virtual void initForPacking() { this->init(); }

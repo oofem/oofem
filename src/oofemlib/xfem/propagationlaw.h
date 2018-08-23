@@ -87,14 +87,14 @@ public:
     PLDoNothing() { }
     virtual ~PLDoNothing() { }
 
-    virtual const char *giveClassName() const { return "PLDoNothing"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLDoNothing_Name; }
+    const char *giveClassName() const override { return "PLDoNothing"; }
+    const char *giveInputRecordName() const override { return _IFT_PLDoNothing_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bool hasPropagation() const { return false; }
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) { return false; }
+    bool hasPropagation() const override { return false; }
+    bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) override { return false; }
 };
 
 /**
@@ -107,14 +107,14 @@ public:
     PLCrackPrescribedDir() : mAngle(0.0), mIncrementLength(0.0) { }
     virtual ~PLCrackPrescribedDir() { }
 
-    virtual const char *giveClassName() const { return "PLCrackPrescribedDir"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLCrackPrescribedDir_Name; }
+    const char *giveClassName() const override { return "PLCrackPrescribedDir"; }
+    const char *giveInputRecordName() const override { return _IFT_PLCrackPrescribedDir_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bool hasPropagation() const { return mIncrementLength > 0.; }
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+    bool hasPropagation() const override { return mIncrementLength > 0.; }
+    bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) override;
 
 protected:
     double mAngle, mIncrementLength;
@@ -130,14 +130,14 @@ public:
     PLnodeRadius() : mRadius(0.0) { }
     virtual ~PLnodeRadius() { }
 
-    virtual const char *giveClassName() const { return "PLnodeRadius"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLnodeRadius_Name; }
+    const char *giveClassName() const override { return "PLnodeRadius"; }
+    const char *giveInputRecordName() const override { return _IFT_PLnodeRadius_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bool hasPropagation() const { return mRadius > 0.; }
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+    bool hasPropagation() const override { return mRadius > 0.; }
+    bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) override;
 
 protected:
     double mRadius;
