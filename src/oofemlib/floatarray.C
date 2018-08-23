@@ -479,7 +479,7 @@ double FloatArray :: distance_square(const FloatArray &from) const
     double dist = 0.;
     int s = min(this->giveSize(), from.giveSize());
     for ( int i = 1; i <= s; ++i ) {
-        double dx = this->at(i) - from.at(i); ///@todo This isn't a distance to "from"?!
+        double dx = this->at(i) - from.at(i);
         dist += dx * dx;
     }
 
