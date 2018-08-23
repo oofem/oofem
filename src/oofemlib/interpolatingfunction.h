@@ -60,7 +60,7 @@ public:
     /// Destructor
     virtual ~InterpolatingFuction();
 
-    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=NULL, double param=0.) override;
+    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override;
     double evaluateAtTime(double t) override;
     double evaluateVelocityAtTime(double t) override { return 0.; }
     double evaluateAccelerationAtTime(double t) override { return 0.; }

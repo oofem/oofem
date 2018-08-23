@@ -69,7 +69,7 @@ CalculatorFunction :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-CalculatorFunction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict)
+CalculatorFunction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp, double param)
 {
     Parser myParser;
     int err;

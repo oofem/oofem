@@ -785,8 +785,8 @@ if (USE_FM AND USE_SM AND USE_PFEM)
     foreach (case ${fmpfem_benchmark})
         add_test (NAME "benchmark_fm_${case}" WORKING_DIRECTORY ${oofem_BENCHMARK_DIR}/fmpfem COMMAND ${oofem_cmd} "-f" ${case})
     endforeach (case)
-endif()   
-  
+endif()
+
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
 ProcessorCount(N)
