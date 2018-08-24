@@ -5238,8 +5238,7 @@ The governing differential equation solves water mass balance in a unit volume [
 k(h) \frac{\partial h}{\partial t} = \nabla \cdot \left[ c(h) \nabla h \right] + w_n \frac{\ud \alpha}{\ud t}
 \end{equation} 
 where 
-$k(h)$ [kg/m$^3$] is the humidity-dependent moisture capacity (derivative of
-the moisture content with respect to the relative humidity), $c(h)$
+$k(h)$ [kg/m$^3$] is the humidity-dependent moisture capacity ($k(h)=\frac{\partial w}{\partial h}$ which is derivative of the moisture content $w(h)$ [kg/m$^3$] with respect to the relative humidity), $c(h)$
 [kg/m/s] is the moisture permeability and the sink term 
 $w_n \frac{\ud \alpha}{\ud t}$ corresponds to non-evaporable water loss due to hydration. $w_n$ is
 non-evaporable water content for complete hydration per m$^3$ [kg/m$^3$] and $\alpha$ is degree of hydration [-]. 

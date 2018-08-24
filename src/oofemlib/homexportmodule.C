@@ -39,6 +39,7 @@
 #include "engngm.h"
 #include "material.h"
 #include "classfactory.h"
+#include "tm/EngineeringModels/transienttransportproblem.h"
 
 namespace oofem {
 REGISTER_ExportModule(HOMExportModule)
@@ -51,11 +52,11 @@ IRResultType
 HOMExportModule :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    IR_GIVE_FIELD(ir, this->ists, _IFT_HOMExportModule_ISTs);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->ists, _IFT_HOMExportModule_ISTs);
+    this->reactions = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->reactions, _IFT_HOMExportModule_reactions);
     this->scale = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->scale, _IFT_HOMExportModule_scale);
-    //this->matnum.clear();
-    //IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, _IFT_HOMExportModule_matnum);
     return ExportModule :: initializeFrom(ir);
 }
 
@@ -76,33 +77,42 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
     //elements.printYourself();
 
-    for ( int ist: ists ) {
-        FloatArray ipState, avgState;
-        double VolTot = 0.;
-        Domain *d = emodel->giveDomain(1);
-        for ( auto &elem : d->giveElements() ) {
-            //printf("%d ", elem -> giveNumber());
-            if ( elements.contains(elem -> giveNumber()) ){
-                for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
-                    double dV = elem->computeVolumeAround(gp);
-                    VolTot += dV;
-                    elem->giveGlobalIPValue(ipState, gp, (InternalStateType)ist, tStep);
-                    avgState.add(dV, ipState);
+    if (!ists.isEmpty()) {
+        for ( int ist: ists ) {
+            FloatArray ipState, avgState;
+            double VolTot = 0.;
+            Domain *d = emodel->giveDomain(1);
+            for ( auto &elem : d->giveElements() ) {
+                //printf("%d ", elem -> giveNumber());
+                if ( elements.contains(elem -> giveNumber()) ){
+                    for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
+                        double dV = elem->computeVolumeAround(gp);
+                        VolTot += dV;
+                        elem->giveGlobalIPValue(ipState, gp, (InternalStateType)ist, tStep);
+                        avgState.add(dV, ipState);
+                    }
                 }
             }
-        }
 
-        if ( !volExported ) {
-            fprintf(this->stream, "%.3e    ", VolTot);
-            volExported = true;
+            if ( !volExported ) {
+                fprintf(this->stream, "%.3e    ", VolTot);
+                volExported = true;
+            }
+            avgState.times( 1. / VolTot * this->scale );
+            fprintf(this->stream, "%d ", avgState.giveSize());
+            for ( auto s: avgState ) {
+                fprintf(this->stream, "%e ", s);
+            }
+            fprintf(this->stream, "    ");
         }
-        avgState.times( 1. / VolTot * this->scale );
-        fprintf(this->stream, "%d ", avgState.giveSize());
-        for ( auto s: avgState ) {
-            fprintf(this->stream, "%e ", s);
-        }
-        fprintf(this->stream, "    ");
     }
+    if (reactions) {
+       ///@todo need reaction forces from engngm model, not separately from sm/tm modules as it is implemented now
+       TransientTransportProblem *TTP = dynamic_cast< TransientTransportProblem * >(emodel);
+       FieldPtr fld = TTP->giveField(FT_HumidityConcentration, tStep);
+    
+    }
+        
     fprintf(this->stream, "\n" );
     fflush(this->stream);
 }
@@ -110,7 +120,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 void
 HOMExportModule :: initialize()
 {
-    std :: string fileName = emodel->giveOutputBaseFileName() + ".hom";
+    char numStr[32];
+    sprintf(numStr, "%02d", this->number);
+    std :: string fileName = emodel->giveOutputBaseFileName() + "." + numStr + ".hom";
     if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
         OOFEM_ERROR( "failed to open file %s", fileName.c_str() );
     }

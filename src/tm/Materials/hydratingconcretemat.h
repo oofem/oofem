@@ -76,6 +76,7 @@ public:
     virtual ~HydratingConcreteMat();
 
     virtual int hasInternalSource() { return 1; }
+    virtual int hasCastingTimeSupport() { return 1; }
     virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double giveCharacteristicValue(MatResponseMode mode,

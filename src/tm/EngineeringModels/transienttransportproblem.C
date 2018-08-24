@@ -36,6 +36,7 @@
 #include "timestep.h"
 #include "dofdistributedprimaryfield.h"
 #include "maskedprimaryfield.h"
+#include "intvarfield.h"
 #include "tm/Elements/transportelement.h"
 #include "classfactory.h"
 #include "datastream.h"
@@ -118,6 +119,9 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
             }
         }
     }
+    
+//     InternalVariableField(IST_HydrationDegree, FT_Unknown, MMA_ClosestPoint, this->giveDomain(1));
+    
 
     return EngngModel :: initializeFrom(ir);
 }
