@@ -76,34 +76,29 @@ public:
     /// Destructor.
     virtual ~StationaryTransportProblem() {}
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual FieldPtr giveField (FieldType key, TimeStep *);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+    void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
+    void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
+    void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
+    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
+    FieldPtr giveField (FieldType key, TimeStep *) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
-    virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    TimeStep *giveNextStep() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }
-    virtual const char *giveClassName() const { return "StationaryTransportProblem"; }
-    virtual fMode giveFormulation() { return TL; }
-
-protected:
-    /**
-     * Updates IP values on elements
-     * @param tStep Solution step.
-     */
-    virtual void updateInternalState(TimeStep *tStep);
+    const char *giveInputRecordName() const { return _IFT_StationaryTransportProblem_Name; }
+    const char *giveClassName() const override { return "StationaryTransportProblem"; }
+    fMode giveFormulation() override { return TL; }
 };
 } // end namespace oofem
 #endif // stationarytransportproblem_h

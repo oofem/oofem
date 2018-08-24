@@ -51,6 +51,7 @@
 #define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
 namespace oofem {
 class SparseMtrx;
+class DofDistributedPrimaryField;
 
 /**
  * Solves a static structural problem.
@@ -67,7 +68,7 @@ public:
     std :: unique_ptr< SparseMtrx >stiffnessMatrix;
 protected:
 
-    std :: unique_ptr< PrimaryField >field;
+    std :: unique_ptr< DofDistributedPrimaryField >field;
 
     SparseMtrxType sparseMtrxType;
 
@@ -84,46 +85,48 @@ protected:
     bool mRecomputeStepAfterPropagation;
 
 public:
-    StaticStructural(int i, EngngModel * _master = NULL);
+    StaticStructural(int i, EngngModel *master=nullptr);
     virtual ~StaticStructural();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void updateAttributes(MetaStep *mStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void updateAttributes(MetaStep *mStep) override;
 
-    virtual void solveYourself();
-    virtual void solveYourselfAt(TimeStep *tStep);
+    void solveYourself() override;
+    void solveYourselfAt(TimeStep *tStep) override;
 
-    virtual void terminate(TimeStep *tStep);
+    void terminate(TimeStep *tStep) override;
 
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-    
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+    void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
+    void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
+    void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
 
-    virtual void updateDomainLinks();
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    bool newDofHandling() override { return true; }
 
-    virtual int forceEquationNumbering();
+    void updateDomainLinks() override;
 
-    virtual double giveLoadLevel() { return loadLevel; }
-    virtual TimeStep *giveNextStep();
-    virtual double giveEndOfTimeOfInterest();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    
-    virtual fMode giveFormulation() { return TL; }
+    int forceEquationNumbering() override;
 
-    void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
+    double giveLoadLevel() override { return loadLevel; }
+    TimeStep *giveNextStep() override;
+    double giveEndOfTimeOfInterest() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual bool requiresEquationRenumbering(TimeStep *tStep);
+    fMode giveFormulation() override { return TL; }
 
-    virtual int requiresUnknownsDictionaryUpdate() { return true; }
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
+    bool requiresEquationRenumbering(TimeStep *tStep) override;
+
+    int requiresUnknownsDictionaryUpdate() override { return true; }
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
-    virtual const char *giveClassName() const { return "StaticStructural"; }
+    const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
+    const char *giveClassName() const override { return "StaticStructural"; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-    
-    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+
+    int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
 };
 } // end namespace oofem
 #endif // staticstructural_h

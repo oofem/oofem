@@ -637,9 +637,10 @@ HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
         answer.at(1) = giveHumidity(gp, VM_Velocity); // VM_Previous = equilibrated value of humidity
         return 1;
     } else if ( type == IST_MoistureContent ) {
-        double humidity = giveHumidity(gp, VM_Velocity);;
+        double humidity = giveHumidity(gp, VM_Velocity);
         answer.resize(1);
         answer.at(1) = giveMoistureContent(humidity);
+        return 1;
     } else {
         return TransportMaterial :: giveIPValue(answer, gp, type, atTime);
     }

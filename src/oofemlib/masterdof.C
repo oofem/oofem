@@ -149,40 +149,41 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
-#if 1
-    // first try if IC apply
-    if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
-        if ( this->hasIcOn(mode) ) {
-            return this->giveIc()->give(mode);
-        } else if ( this->hasBc(tStep) ) {
+
+    if ( ! dofManager->giveDomain()->giveEngngModel()->newDofHandling() ) {
+        // first try if IC apply
+        if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
+            if ( this->hasIcOn(mode) ) {
+                return this->giveIc()->give(mode);
+            } else if ( this->hasBc(tStep) ) {
+                return this->giveBcValue(mode, tStep);
+            } else {
+                return 0.;
+            }
+        }
+
+        //  if ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
+        // if this feature is active, engng model must ensure
+        // valid data in unknowns dictionary
+        // the e-model must ensure that bc and ic values are correctly set in unknowns dictionaries
+        // they could not be obtained from bc (which are typically incremental)
+        // directly since dictionaries keep the history.
+
+        //    return ( dofManager->giveDomain()->giveEngngModel()->
+        //         giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
+
+        //         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
+        //         if ( unknowns->includes(hash) ) {
+        //             return unknowns->at(hash);
+        //         } else {
+        //             OOFEM_ERROR(Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
+        //         }
+        //  }
+
+        if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(tStep) ) {
             return this->giveBcValue(mode, tStep);
-        } else {
-            return 0.;
         }
     }
-
-    //  if ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) {
-    // if this feature is active, engng model must ensure
-    // valid data in unknowns dictionary
-    // the e-model must ensure that bc and ic values are correctly set in unknowns dictionaries
-    // they could not be obtained from bc (which are typically incremental)
-    // directly since dictionaries keep the history.
-
-    //    return ( dofManager->giveDomain()->giveEngngModel()->
-    //         giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
-
-    //         int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    //         if ( unknowns->includes(hash) ) {
-    //             return unknowns->at(hash);
-    //         } else {
-    //             OOFEM_ERROR(Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
-    //         }
-    //  }
-
-    if ( !dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() && this->hasBc(tStep) ) {
-        return this->giveBcValue(mode, tStep);
-    }
-#endif
     return ( dofManager->giveDomain()->giveEngngModel()->
             giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
 }

@@ -78,7 +78,7 @@ protected:
 
 public:
     SUPGInternalForceAssembler(double l, double d, double u);
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /**
@@ -94,7 +94,7 @@ protected:
 
 public:
     SUPGTangentAssembler(MatResponseMode m, double l, double d, double u, double a);
-    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
 /**
@@ -154,43 +154,45 @@ public:
     SUPG(int i, EngngModel * _master = NULL);
     virtual ~SUPG();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-    virtual double giveReynoldsNumber();
+    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
+    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+    void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
+    void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
+    void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
+    double giveReynoldsNumber() override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
-    virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    TimeStep *giveNextStep() override;
+    TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
     // identification
-    virtual const char *giveClassName() const { return "SUPG"; }
-    virtual const char *giveInputRecordName() const { return _IFT_SUPG_Name; }
+    const char *giveClassName() const override { return "SUPG"; }
+    const char *giveInputRecordName() const { return _IFT_SUPG_Name; }
 
-    virtual fMode giveFormulation() { return TL; }
+    fMode giveFormulation() override { return TL; }
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) override;
 
-    virtual int requiresUnknownsDictionaryUpdate() { return renumberFlag; }
+    int requiresUnknownsDictionaryUpdate() override { return renumberFlag; }
 
-    virtual bool giveEquationScalingFlag() { return equationScalingFlag; }
-    virtual double giveVariableScale(VarScaleType varId);
+    bool giveEquationScalingFlag() override { return equationScalingFlag; }
+    double giveVariableScale(VarScaleType varId) override;
 
-    virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
+    void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep) override;
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
 
-    virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface.get(); }
-
+    MaterialInterface *giveMaterialInterface(int n) override { return materialInterface.get(); }
 
 protected:
     void updateInternalState(TimeStep *tStep);

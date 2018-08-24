@@ -95,7 +95,7 @@ public:
      * @param n Element number.
      * @param d Domain to which new material will belong.
      */
-    NLStructuralElement(int n, Domain * d);
+    NLStructuralElement(int n, Domain *d);
     /// Destructor.
     virtual ~NLStructuralElement() { }
 
@@ -152,7 +152,8 @@ public:
      * @param answer Computed initial stiffness matrix.
      * @param tStep Time step.
      */
-    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+    { OOFEM_ERROR("Method computeInitialStressMatrix is not implemented"); }
 
     /**
      * Computes the stiffness matrix of receiver.
@@ -206,8 +207,8 @@ public:
     virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     /**
-      * Computes the current volume of element
-      */
+     * Computes the current volume of element
+     */
     double computeCurrentVolume(TimeStep *tStep);
 
     // data management

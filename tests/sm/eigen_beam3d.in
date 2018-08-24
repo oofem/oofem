@@ -5,34 +5,34 @@ errorcheck
 domain 3dShell
 OutputManager tstep_all dofman_all element_all
 ndofman 18 nelem 16 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 2
-node 1 coords 3 0.   0.    0.00
-node 2 coords 3 0.   0.0   0.25
-node 3 coords 3 0.   0.0   0.50
-node 4 coords 3 0.0  0.0   0.75
-node 5 coords 3 0.   0.0   1.00
-node 6 coords 3 0.   0.0   1.25
-node 7 coords 3 0.   0.0   1.50
-node 8 coords 3 0.0  0.0   1.75
-node 9 coords 3 0.   0.0   2.00
-node 10 coords 3 0.   0.0   2.25
-node 11 coords 3 0.   0.0   2.50
-node 12 coords 3 0.0  0.0   2.75
-node 13 coords 3 0.   0.0   3.00
-node 14 coords 3 0.   0.0   3.25
-node 15 coords 3 0.   0.0   3.50
-node 16 coords 3 0.0  0.0   3.75
-node 17 coords 3 0.   0.0   4.00
-node 18 coords 3 1.0  0.0   0.00
+node  1 coords 3 0.   0.    0.00
+node  2 coords 3 0.   0.    0.25
+node  3 coords 3 0.   0.    0.50
+node  4 coords 3 0.   0.    0.75
+node  5 coords 3 0.   0.    1.00
+node  6 coords 3 0.   0.    1.25
+node  7 coords 3 0.   0.    1.50
+node  8 coords 3 0.   0.    1.75
+node  9 coords 3 0.   0.    2.00
+node 10 coords 3 0.   0.    2.25
+node 11 coords 3 0.   0.    2.50
+node 12 coords 3 0.   0.    2.75
+node 13 coords 3 0.   0.    3.00
+node 14 coords 3 0.   0.    3.25
+node 15 coords 3 0.   0.    3.50
+node 16 coords 3 0.   0.    3.75
+node 17 coords 3 0.   0.    4.00
+node 18 coords 3 1.   0.    0.00
 #
-Beam3d 1 nodes 2 1 2 refNode 18
-Beam3d 2 nodes 2 2 3 refNode 18
-Beam3d 3 nodes 2 3 4 refNode 18
-Beam3d 4 nodes 2 4 5 refNode 18
-Beam3d 5 nodes 2 5 6 refNode 18
-Beam3d 6 nodes 2 6 7 refNode 18
-Beam3d 7 nodes 2 7 8 refNode 18
-Beam3d 8 nodes 2 8 9 refNode 18
-Beam3d 9 nodes 2 9 10 refNode 18
+Beam3d  1 nodes 2  1  2 refNode 18
+Beam3d  2 nodes 2  2  3 refNode 18
+Beam3d  3 nodes 2  3  4 refNode 18
+Beam3d  4 nodes 2  4  5 refNode 18
+Beam3d  5 nodes 2  5  6 refNode 18
+Beam3d  6 nodes 2  6  7 refNode 18
+Beam3d  7 nodes 2  7  8 refNode 18
+Beam3d  8 nodes 2  8  9 refNode 18
+Beam3d  9 nodes 2  9 10 refNode 18
 Beam3d 10 nodes 2 10 11 refNode 18
 Beam3d 11 nodes 2 11 12 refNode 18
 Beam3d 12 nodes 2 12 13 refNode 18
@@ -41,14 +41,13 @@ Beam3d 14 nodes 2 14 15 refNode 18
 Beam3d 15 nodes 2 15 16 refNode 18
 Beam3d 16 nodes 2 16 17 refNode 18
 #
+Set 1 elementranges {(1 16)}
+Set 2 nodes 2 1 17
 #
 SimpleCS 1 area 0.06 Iy 0.00045 Iz 0.0002 Ik 0.000498461  beamShearCoeff 1.e60 material 1 set 1
 IsoLE 1 d 25.0 E 25.e6 n 0.15 tAlpha 1.2e-5
 BoundaryCondition 1 loadTimeFunction 1 dofs 4 1 2 3 6 values 4 0. 0. 0. 0. set 2
 ConstantFunction 1 f(t) 1.
-Set 1 elementranges {(1 16)}
-Set 2 nodes 2 1 17
-#
 #
 #%BEGIN_CHECK% tolerance 1.e-2
 ## check eigen values

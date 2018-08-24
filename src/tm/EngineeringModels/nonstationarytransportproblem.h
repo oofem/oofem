@@ -67,10 +67,10 @@ namespace oofem {
 class TransportExternalForceAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
-    
+
 /**
  * Callback class for assembling mid point effective tangents
  * @author Mikael Öhman
@@ -83,7 +83,7 @@ protected:
 
 public:
     MidpointLhsAssembler(bool lumped, double alpha);
-    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
 
@@ -94,7 +94,7 @@ public:
 class IntSourceLHSAssembler : public MatrixAssembler
 {
 public:
-    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
 };
 
 
@@ -141,33 +141,33 @@ public:
     /// Destructor.
     virtual ~NonStationaryTransportProblem();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
-    virtual double giveUnknownComponent(ValueModeType, TimeStep *, Domain *, Dof *);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    void solveYourselfAt(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
+    double giveUnknownComponent(ValueModeType, TimeStep *tStep, Domain *d, Dof *dof) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
-    virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    TimeStep *giveNextStep() override;
+    TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkConsistency();
+    IRResultType initializeFrom(InputRecord *ir) override;
+    int checkConsistency() override;
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_NonStationaryTransportProblem_Name; }
-    virtual const char *giveClassName() const { return "NonStationaryTransportProblem"; }
-    virtual fMode giveFormulation() { return TL; }
+    const char *giveInputRecordName() const { return _IFT_NonStationaryTransportProblem_Name; }
+    const char *giveClassName() const override { return "NonStationaryTransportProblem"; }
+    fMode giveFormulation() override { return TL; }
 
     /// Allows to change number of equations during solution.
-    virtual int requiresUnknownsDictionaryUpdate() { return changingProblemSize; }
-    virtual bool requiresEquationRenumbering(TimeStep *) { return changingProblemSize; }
+    int requiresUnknownsDictionaryUpdate() override { return changingProblemSize; }
+    bool requiresEquationRenumbering(TimeStep *tStep) override { return changingProblemSize; }
     //Store solution vector to involved DoFs
-    //virtual void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep);
+    //void updateDofUnknownsDictionary(DofManager *dman, TimeStep *tStep) override;
 
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep);
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
 
     /**
      * Returns time function for time step increment.

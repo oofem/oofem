@@ -60,37 +60,37 @@ public:
     SUPGElement2(int n, Domain * aDomain);
     virtual ~SUPGElement2();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    virtual IRResultType initializeFrom(InputRecord *ir) override;
+    virtual void giveInputRecord(DynamicInputRecord &input) override;
 
     // characteristic  matrix
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType, ValueModeType, TimeStep *tStep);
-    virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { }
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep) override;
+    virtual void giveCharacteristicVector(FloatArray &answer, CharType, ValueModeType, TimeStep *tStep) override;
+    virtual void updateElementForNewInterfacePosition(TimeStep *tStep) override { }
 
-    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep);
-    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep);
-    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
-    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep);
-    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep);
-    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
-    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
-    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep) override;
+    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep) override;
+    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep) override;
+    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep) override;
+    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep) override;
+    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep) override;
+    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep) override;
+    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
 
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
     // time step termination
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual int checkConsistency();
+    virtual void updateInternalState(TimeStep *tStep) override;
+    virtual int checkConsistency() override;
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
@@ -98,7 +98,7 @@ public:
 #endif
 
 protected:
-    virtual void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
     virtual void computeNuMatrix(FloatMatrix &answer, GaussPoint *gp) = 0;
     virtual void computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) = 0;
     virtual void computeBMatrix(FloatMatrix &anwer, GaussPoint *gp) = 0;

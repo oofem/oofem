@@ -1483,12 +1483,29 @@ EngngModel :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, Ch
 
 void
 EngngModel :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
-//
-// updates some component, which is used by numerical method
-// to newly reached state
-//
 {
     OOFEM_ERROR("Unknown Type of component.");
+}
+
+
+void
+EngngModel :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
+{
+    OOFEM_ERROR("updateSolution is not implemented.");
+}
+
+
+void
+EngngModel :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorms)
+{
+    OOFEM_ERROR("updateInternalRHS is not implemented.");
+}
+
+
+void
+EngngModel :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    OOFEM_ERROR("updateMatrix is not implemented.");
 }
 
 

@@ -208,17 +208,17 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
 
 
 void
-StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, int di, TimeStep *tStep)
+StructuralEngngModel :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
 {
-    // Simply assembles contributions from each element in domain
-    Domain *domain = this->giveDomain(di);
+#ifdef VERBOSE
+    OOFEM_LOG_DEBUG("Updating internal forces\n");
+#endif
     // Update solution state counter
     tStep->incrementStateCounter();
 
-    answer.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
+    answer.resize( this->giveNumberOfDomainEquations( d->giveNumber(), EModelDefaultEquationNumbering() ) );
     answer.zero();
-    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
-                         EModelDefaultEquationNumbering(), domain, normFlag ? & this->internalForcesEBENorm : NULL);
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d, eNorm);
 
     // Redistributes answer so that every process have the full values on all shared equations
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);

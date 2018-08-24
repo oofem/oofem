@@ -48,8 +48,8 @@ class FluidModel : public EngngModel
 public:
     FluidModel(int i, EngngModel * master) : EngngModel(i, master) { }
 
-    virtual int forceEquationNumbering(int id);
-    virtual int forceEquationNumbering() { return EngngModel :: forceEquationNumbering(); }
+    int forceEquationNumbering(int id) override;
+    int forceEquationNumbering() override { return EngngModel :: forceEquationNumbering(); }
 
     virtual double giveReynoldsNumber() = 0;
 };

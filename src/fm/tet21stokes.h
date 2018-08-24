@@ -73,25 +73,25 @@ public:
     Tet21Stokes(int n, Domain * d);
     virtual ~Tet21Stokes();
 
-    virtual void computeGaussPoints();
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
+    void computeGaussPoints() override;
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
 
     void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
 
     void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep);
-    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override;
 
-    virtual const char *giveClassName() const { return "Tet21Stokes"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Tet21Stokes_Name; }
-    virtual MaterialMode giveMaterialMode() { return _3dFlow; }
+    const char *giveClassName() const override { return "Tet21Stokes"; }
+    const char *giveInputRecordName() const override { return _IFT_Tet21Stokes_Name; }
+    MaterialMode giveMaterialMode() override { return _3dFlow; }
 
-    virtual int computeNumberOfDofs();
+    int computeNumberOfDofs() override;
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
     /**
      * Gives the dof ID mask for the element.
@@ -99,18 +99,18 @@ public:
      * @param inode Node to check.
      * @param answer List of dof IDs.
      */
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
     // Element interpolation interface:
-    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
-                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+    void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
+                                                               TimeStep *tStep, const FloatArray &coords, FloatArray &answer) override;
 
     // Nodal averaging interface:
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // tet21stokes_h

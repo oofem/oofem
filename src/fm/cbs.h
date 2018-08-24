@@ -38,7 +38,7 @@
 #include "fluidmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include "primaryfield.h"
+#include "dofdistributedprimaryfield.h"
 //<RESTRICTED_SECTION>
 #include "materialinterface.h"
 //</RESTRICTED_SECTION>
@@ -66,50 +66,50 @@ namespace oofem {
 class NumberOfNodalPrescribedTractionPressureAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /// Implementation for assembling external forces vectors in standard monolithic FE-problems
 class IntermediateConvectionDiffusionAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /// Implementation for assembling external forces vectors in standard monolithic FE-problems
 class PrescribedVelocityRhsAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /// Implementation for assembling external forces vectors in standard monolithic FE-problems
 class DensityPrescribedTractionPressureAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /// Implementation for assembling external forces vectors in standard monolithic FE-problems
 class DensityRhsAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /// Implementation for assembling external forces vectors in standard monolithic FE-problems
 class CorrectionRhsAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /// Callback class for assembling CBS pressure matrices
 class PressureLhsAssembler : public MatrixAssembler
 {
 public:
-    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
-    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
+    void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const override;
 };
 
 
@@ -125,8 +125,8 @@ protected:
 public:
     VelocityEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) { }
 
-    virtual bool isDefault() const { return !prescribed; }
-    virtual int giveDofEquationNumber(Dof *dof) const {
+    bool isDefault() const override { return !prescribed; }
+    int giveDofEquationNumber(Dof *dof) const override {
         DofIDItem id = dof->giveDofID();
         if ( id == V_u || id == V_v || id == V_w ) {
             return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
@@ -134,7 +134,7 @@ public:
 
         return 0;
     }
-    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+    int giveRequiredNumberOfDomainEquation() const override { return numEqs; }
 
     int askNewEquationNumber() { return ++numEqs; }
 };
@@ -151,8 +151,8 @@ protected:
 public:
     PressureEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) { }
 
-    virtual bool isDefault() const { return !prescribed; }
-    virtual int giveDofEquationNumber(Dof *dof) const {
+    bool isDefault() const override { return !prescribed; }
+    int giveDofEquationNumber(Dof *dof) const override {
         DofIDItem id = dof->giveDofID();
         if ( id == P_f ) {
             return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();
@@ -160,7 +160,7 @@ public:
 
         return 0;
     }
-    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+    int giveRequiredNumberOfDomainEquation() const override { return numEqs; }
 
     int askNewEquationNumber() { return ++numEqs; }
 };
@@ -179,9 +179,9 @@ protected:
 
     std :: unique_ptr< SparseMtrx > lhs;
     /// Pressure field.
-    PrimaryField PressureField;
+    DofDistributedPrimaryField pressureField;
     /// Velocity field.
-    PrimaryField VelocityField;
+    DofDistributedPrimaryField velocityField;
     FloatArray deltaAuxVelocity;
     FloatArray prescribedTractionPressure;
     FloatArray nodalPrescribedTractionPressureConnectivity;
@@ -223,49 +223,48 @@ public:
     CBS(int i, EngngModel * _master = NULL);
     virtual ~CBS();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
+    void solveYourselfAt(TimeStep *tStep) override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual double giveReynoldsNumber();
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    bool newDofHandling() override { return true; }
+    double giveReynoldsNumber() override;
     double giveTheta1();
     double giveTheta2();
     double giveTractionPressure(Dof *dof);
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
-    virtual TimeStep *giveNextStep();
-    virtual TimeStep *giveSolutionStepWhenIcApply(bool force = false);
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    TimeStep *giveNextStep() override;
+    TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
     // identification
-    virtual const char *giveClassName() const { return "CBS"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CBS_Name; }
-    virtual fMode giveFormulation() { return TL; }
+    const char *giveClassName() const override { return "CBS"; }
+    const char *giveInputRecordName() const { return _IFT_CBS_Name; }
+    fMode giveFormulation() override { return TL; }
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) override;
 
-    virtual int giveNumberOfDomainEquations(int, const UnknownNumberingScheme &num);
+    int giveNumberOfDomainEquations(int, const UnknownNumberingScheme &num) override;
 
-    virtual int giveNewEquationNumber(int domain, DofIDItem);
-    virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
+    int giveNewEquationNumber(int domain, DofIDItem) override;
+    int giveNewPrescribedEquationNumber(int domain, DofIDItem) override;
 
-    virtual bool giveEquationScalingFlag() { return equationScalingFlag; }
-    virtual double giveVariableScale(VarScaleType varId);
+    bool giveEquationScalingFlag() override { return equationScalingFlag; }
+    double giveVariableScale(VarScaleType varId) override;
 
 protected:
     /**
-     * Updates nodal values
-     * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
-     * if model supports changes of static system). The element internal state update is also forced using
-     * updateInternalState service.
+     * Updates the IP values for the new solution velocities
      */
     void updateInternalState(TimeStep *tStep);
     void applyIC(TimeStep *tStep);

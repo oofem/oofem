@@ -48,8 +48,9 @@
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,
-                                                         FieldType ft, int nHist) :
-    PrimaryField(a, idomain, ft, nHist)
+                                                         FieldType ft, int nHist, double alpha) :
+    PrimaryField(a, idomain, ft, nHist),
+    alpha(alpha)
 { }
 
 DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
@@ -65,6 +66,8 @@ DofDistributedPrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, Tim
         double val0 = dof->giveUnknownsDictionaryValue(tStep->givePreviousStep(), VM_Total);
         if ( mode == VM_Velocity ) {
             return (val1 - val0) / tStep->giveTimeIncrement();
+        } else if ( mode == VM_Intermediate || mode == VM_TotalIntrinsic ) {
+            return this->alpha * val1 + (1-this->alpha) * val0;
         } else if ( mode == VM_Incremental ) {
             return val1 - val0;
         } else {
@@ -129,51 +132,37 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
     }
 }
 
-// project solutionVector to DoF unknowns dictionary
+ 
 void
 DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s)
 {
     Domain *d = emodel->giveDomain(domainIndx);
 
-    for ( auto &node : d->giveDofManagers() ) {
-        for ( Dof *dof: *node ) {
+    auto set_values = [&mode, &tStep, &vectorToStore, &s](DofManager &dman) {
+        for ( Dof *dof: dman ) {
             if ( !dof->isPrimaryDof() ) continue;
             int eqNum = dof->giveEquationNumber(s);
             if ( eqNum > 0 ) {
-                dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
-            }
-            ///@todo This should not be here / Mikael
-            if ( mode == VM_Total ) {
-                if ( dof->hasBc(tStep) ) {
-                    dof->updateUnknownsDictionary(tStep, mode, dof->giveBcValue(VM_Total, tStep));
-                }
+                dof->updateUnknownsDictionary(tStep, VM_Total, vectorToStore.at(eqNum));
             }
         }
+    };
+
+    for ( auto &node : d->giveDofManagers() ) {
+        set_values(*node);
     }
 
     for ( auto &elem : d->giveElements() ) {
         int ndman = elem->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
-            for ( auto &dof : *elem->giveInternalDofManager(i) ) {
-                if ( !dof->isPrimaryDof() ) continue;
-                int eqNum = dof->giveEquationNumber(s);
-                if ( eqNum > 0 ) {
-                    dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
-                }
-            }
+            set_values(*elem->giveInternalDofManager(i));
         }
     }
 
     for ( auto &bc : d->giveBcs() ) {
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
-            for ( auto &dof : *bc->giveInternalDofManager(i) ) {
-                if ( !dof->isPrimaryDof() ) continue;
-                int eqNum = dof->giveEquationNumber(s);
-                if ( eqNum > 0 ) {
-                    dof->updateUnknownsDictionary(tStep, mode, vectorToStore.at(eqNum));
-                }
-            }
+            set_values(*bc->giveInternalDofManager(i));
         }
     }
 }
@@ -339,8 +328,6 @@ DofDistributedPrimaryField :: setInitialGuess(DofManager &dman, TimeStep *tStep,
 void
 DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
 {
-    PrimaryField :: advanceSolution(tStep);
-#if 0
     // Copy over the old dictionary values to the new step as the initial guess:
     Domain *d = emodel->giveDomain(1);
     TimeStep *prev = tStep->givePreviousStep();
@@ -360,14 +347,13 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
     for ( auto &bc : d->giveBcs() ) {
         int ndman = bc->giveNumberOfInternalDofManagers();
         for ( int i = 1; i <= ndman; i++ ) {
-            if ( abc->giveInternalDofManager(i)->isNull() ) continue;
+            if ( bc->giveInternalDofManager(i)->isNull() ) continue;
             this->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
         }
     }
 
     // Apply dirichlet b.c.s
-    //this->applyBoundaryCondition(tStep);
-#endif
+    this->applyBoundaryCondition(tStep);
 }
 
 

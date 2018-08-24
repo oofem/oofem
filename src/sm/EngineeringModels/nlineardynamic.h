@@ -115,57 +115,60 @@ public:
     NonLinearDynamic(int i, EngngModel * _master = NULL);
     virtual ~NonLinearDynamic();
 
-    virtual void solveYourself();
-    virtual void solveYourselfAt(TimeStep *tStep);
+    void solveYourself() override;
+    void solveYourselfAt(TimeStep *tStep) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) override;
 
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
-    virtual void updateAttributes(MetaStep *mStep);
-    virtual void initializeYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
+    void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d) override;
+    void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
+    void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
+    void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
+    void updateAttributes(MetaStep *mStep) override;
+    void initializeYourself(TimeStep *tStep) override;
 
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    TimeStep *giveNextStep() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
     // Identification
-    virtual const char *giveInputRecordName() const { return _IFT_NonLinearDynamic_Name; }
-    virtual const char *giveClassName() const { return "NonLinearDynamic"; }
-    virtual fMode giveFormulation() { return nonLinFormulation; }
-    virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
+    const char *giveInputRecordName() const { return _IFT_NonLinearDynamic_Name; }
+    const char *giveClassName() const override { return "NonLinearDynamic"; }
+    fMode giveFormulation() override { return nonLinFormulation; }
+    int useNonlocalStiffnessOption() override { return this->nonlocalStiffnessFlag; }
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override { return ( int ) mode; }
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
     TimeDiscretizationType giveInitialTimeDiscretization() { return initialTimeDiscretization; }
 
 #ifdef __OOFEG
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
+    int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
 #ifdef __PARALLEL_MODE
-    virtual LoadBalancer *giveLoadBalancer();
-    virtual LoadBalancerMonitor *giveLoadBalancerMonitor();
+    LoadBalancer *giveLoadBalancer() override;
+    LoadBalancerMonitor *giveLoadBalancerMonitor() override;
 #endif
 
 protected:
     void assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAssembler &ma,
-                  const UnknownNumberingScheme &, Domain *domain);
+                  const UnknownNumberingScheme &, Domain *domain) override;
 
     void proceedStep(int di, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
 
-    virtual void packMigratingData(TimeStep *tStep);
-    virtual void unpackMigratingData(TimeStep *tStep);
+    void packMigratingData(TimeStep *tStep) override;
+    void unpackMigratingData(TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // nlineardynamic_h

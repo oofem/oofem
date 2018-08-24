@@ -189,13 +189,14 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     }
 
     Domain *domain = this->giveDomain(1);
-    // update element state according to given ic
-    for ( auto &elem : domain->giveElements() ) {
-        TransportElement *element = static_cast< TransportElement * >( elem.get() );
-        element->updateInternalState(tStep);
-        element->updateYourself(tStep);
+    if ( tStep->isTheFirstStep() ) {
+        // update element state according to given ic
+        for ( auto &elem : domain->giveElements() ) {
+            TransportElement *element = static_cast< TransportElement * >( elem.get() );
+            element->updateInternalState(tStep);
+            element->updateYourself(tStep);
+        }
     }
-
 
     internalForces.resize(neq);
 
@@ -231,12 +232,32 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //nMethod->solve( *conductivityMatrix, rhsVector, *UnknownsField->giveSolutionVector(tStep) );
 }
 
+
 void
-StationaryTransportProblem :: updateYourself(TimeStep *tStep)
+StationaryTransportProblem :: updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d)
 {
-    this->updateInternalState(tStep);
-    EngngModel :: updateYourself(tStep);
+    // No-op: currently uses "PrimaryField" and passes along the reference
+    ///@todo this->field->update(VM_Total, tStep, solutionVector, EModelDefaultEquationNumbering());
 }
+
+
+void
+StationaryTransportProblem :: updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm)
+{
+    answer.zero();
+    this->assembleVector(answer, tStep, InternalForceAssembler(), VM_Total,
+                         EModelDefaultEquationNumbering(), this->giveDomain(1), eNorm);
+    this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+}
+
+
+void
+StationaryTransportProblem :: updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d)
+{
+    mat.zero();
+    this->assemble(mat, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), this->giveDomain(1) );
+}
+
 
 void
 StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
@@ -313,18 +334,6 @@ StationaryTransportProblem :: updateDomainLinks()
 {
     EngngModel :: updateDomainLinks();
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
-}
-
-
-void
-StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
-{
-    ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
-    for ( auto &domain: domainList ) {
-        for ( auto &elem : domain->giveElements() ) {
-            elem->updateInternalState(tStep);
-        }
-    }
 }
 
 } // end namespace oofem

@@ -111,7 +111,7 @@ bool
 NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-    if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
+    if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
 
@@ -170,7 +170,7 @@ bool
 ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-     if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
+     if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
 
@@ -231,7 +231,7 @@ bool
 BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-    if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
+    if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
 
@@ -246,18 +246,18 @@ BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
         }
     }
     if ( element->giveParallelMode() != Element_local ) {
-      return true;
+        return true;
     }
 
     if (ist == BET_localEndDisplacement) {
-      element->computeVectorOf(VM_Total, tStep, val);
+        element->computeVectorOf(VM_Total, tStep, val);
     } else if (ist ==  BET_localEndForces) {
-      if(Beam2d* b = dynamic_cast<Beam2d*>(element)) b->giveEndForcesVector(val, tStep);
-      else if(Beam3d* b = dynamic_cast<Beam3d*>(element)) b->giveEndForcesVector(val, tStep);
-      else {
-        OOFEM_WARNING("Element %d has no beam interface.", number);
-        return false;
-      }
+        if(Beam2d* b = dynamic_cast<Beam2d*>(element)) b->giveEndForcesVector(val, tStep);
+        else if(Beam3d* b = dynamic_cast<Beam3d*>(element)) b->giveEndForcesVector(val, tStep);
+        else {
+            OOFEM_WARNING("Element %d has no beam interface.", number);
+            return false;
+        }
     }
 
     if ( component > val.giveSize() || component < 1 ) {
@@ -299,7 +299,7 @@ bool
 ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 {
     // Rule doesn't apply yet.
-    if ( (tStep->giveNumber() != tstep ) || (tStep->giveVersion() != tsubstep) )  {
+    if ( tStep->giveNumber() != tstep || tStep->giveVersion() != tsubstep )  {
         return true;
     }
 
@@ -412,10 +412,10 @@ EigenValueErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-ErrorCheckingExportModule :: ErrorCheckingExportModule(int n, EngngModel *e) : ExportModule(n, e)
+ErrorCheckingExportModule :: ErrorCheckingExportModule(int n, EngngModel *e) : ExportModule(n, e),
+    allPassed(true),
+    writeChecks(false)
 {
-    allPassed = true;
-    writeChecks = false;
 }
 
 IRResultType
@@ -444,7 +444,7 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     double tol = 0.;
     if ( this->scanToErrorChecks(inputStream,  tol) ) {
         for (;;) {
-            std :: unique_ptr< ErrorCheckingRule > rule(this->giveErrorCheck(inputStream, tol));
+            std :: unique_ptr< ErrorCheckingRule > rule = this->giveErrorCheck(inputStream, tol);
             if ( !rule ) {
                 break;
             }
@@ -558,7 +558,7 @@ ErrorCheckingExportModule :: scanToErrorChecks(std :: ifstream &stream, double &
     return false;
 }
 
-ErrorCheckingRule *
+std::unique_ptr<ErrorCheckingRule>
 ErrorCheckingExportModule :: giveErrorCheck(std :: ifstream &stream, double errorTolerance)
 {
     std :: string line;
@@ -572,24 +572,23 @@ ErrorCheckingExportModule :: giveErrorCheck(std :: ifstream &stream, double erro
                 break;
             }
         }
-        
     }
 
     if ( line.compare(0, 5, "#NODE") == 0 ) {
-        return new NodeErrorCheckingRule(line, errorTolerance);
+        return std::make_unique<NodeErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 8, "#ELEMENT") == 0 ) {
-        return new ElementErrorCheckingRule(line, errorTolerance);
+        return std::make_unique<ElementErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 13, "#BEAM_ELEMENT") == 0 ) {
-        return new BeamElementErrorCheckingRule(line, errorTolerance);
+        return std::make_unique<BeamElementErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 9, "#REACTION") == 0 ) {
-        return new ReactionErrorCheckingRule(line, errorTolerance);
+        return std::make_unique<ReactionErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 10, "#LOADLEVEL") == 0 ) {
-        return new LoadLevelErrorCheckingRule(line, errorTolerance);
+        return std::make_unique<LoadLevelErrorCheckingRule>(line, errorTolerance);
     } else if ( line.compare(0, 7, "#EIGVAL") == 0 ) {
-        return new EigenValueErrorCheckingRule(line, errorTolerance);
+        return std::make_unique<EigenValueErrorCheckingRule>(line, errorTolerance);
     } else {
         OOFEM_ERROR("Unsupported rule '%s'", line.c_str());
-        return NULL;
+        return nullptr;
     }
 }
 

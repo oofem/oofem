@@ -43,8 +43,7 @@ namespace oofem {
 Structural3DElement :: Structural3DElement(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
     matRotation(false)
-{
-}
+{}
 
 
 IRResultType
@@ -62,9 +61,9 @@ Structural3DElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
     FEInterpolation *interp = this->giveInterpolation();
-    FloatMatrix dNdx; 
+    FloatMatrix dNdx;
     interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    
+
     answer.resize(6, dNdx.giveNumberOfRows() * 3);
     answer.zero();
 
@@ -88,9 +87,9 @@ Structural3DElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
 {
     FEInterpolation *interp = this->giveInterpolation();
-    FloatMatrix dNdx; 
+    FloatMatrix dNdx;
     interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    
+
     answer.resize(9, dNdx.giveNumberOfRows() * 3);
     answer.zero();
 
@@ -105,8 +104,82 @@ Structural3DElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
         answer.at(6, 3 * i - 2) = dNdx.at(i, 2);     // du/dy
         answer.at(9, 3 * i - 1) = dNdx.at(i, 1);     // dv/dx
     }
-
 }
+
+
+void
+Structural3DElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+{
+    FloatArray stress;
+    FloatMatrix B, DB, stress_ident;
+
+    answer.clear();
+    stress_ident.resize(9, 9);
+    // assemble initial stress matrix
+    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+        // This function fetches the full form of the tensor
+        this->giveIPValue(stress, gp, IST_StressTensor, tStep);
+        stress_ident.zero();
+        if ( stress.giveSize() ) {
+            // Construct the stress_ident matrix
+            // product answer_ijkl = delta_ik * sigma_jl
+            /*ij      11       22     33     23   13     12       32     31     21
+             * kl
+             * 11  [ sig11,     0,     0,     0, sig13, sig12,     0,     0,     0]
+             * 22  [     0, sig22,     0, sig23,     0,     0,     0,     0, sig12]
+             * 33  [     0,     0, sig33,     0,     0,     0, sig23, sig13,     0]
+             * 23  [     0, sig23,     0, sig33,     0,     0,     0,     0, sig13]
+             * 13  [ sig13,     0,     0,     0, sig33, sig23,     0,     0,     0]
+             * 12  [ sig12,     0,     0,     0, sig23, sig22,     0,     0,     0]
+             * 32  [     0,     0, sig23,     0,     0,     0, sig22, sig12,     0]
+             * 31  [     0,     0, sig13,     0,     0,     0, sig12, sig11,     0]
+             * 21  [     0, sig12,     0, sig13,     0,     0,     0,     0, sig11]
+             */
+
+            stress_ident.at(1, 1) = stress.at(1);
+            stress_ident.at(1, 5) = stress.at(5);
+            stress_ident.at(1, 6) = stress.at(6);
+
+            stress_ident.at(2, 2) = stress.at(2);
+            stress_ident.at(2, 4) = stress.at(4);
+            stress_ident.at(2, 9) = stress.at(6);
+
+            stress_ident.at(3, 3) = stress.at(3);
+            stress_ident.at(3, 7) = stress.at(4);
+            stress_ident.at(3, 8) = stress.at(5);
+
+            stress_ident.at(4, 2) = stress.at(4);
+            stress_ident.at(4, 4) = stress.at(3);
+            stress_ident.at(4, 9) = stress.at(5);
+
+            stress_ident.at(5, 1) = stress.at(5);
+            stress_ident.at(5, 5) = stress.at(3);
+            stress_ident.at(5, 6) = stress.at(4);
+
+            stress_ident.at(6, 1) = stress.at(6);
+            stress_ident.at(6, 5) = stress.at(4);
+            stress_ident.at(6, 6) = stress.at(2);
+
+            stress_ident.at(7, 3) = stress.at(4);
+            stress_ident.at(7, 7) = stress.at(2);
+            stress_ident.at(7, 8) = stress.at(6);
+
+            stress_ident.at(8, 3) = stress.at(5);
+            stress_ident.at(8, 7) = stress.at(6);
+            stress_ident.at(8, 8) = stress.at(1);
+
+            stress_ident.at(9, 2) = stress.at(6);
+            stress_ident.at(9, 4) = stress.at(5);
+            stress_ident.at(9, 9) = stress.at(1);
+        }
+
+        OOFEM_WARNING("Implementation not tested yet!");
+        this->computeBHmatrixAt(gp, B);
+        DB.beProductOf(stress_ident, B);
+        answer.plusProductUnsym( B, DB,  this->computeVolumeAround(gp) );
+    }
+}
+
 
 
 MaterialMode
@@ -196,17 +269,19 @@ Structural3DElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 void
 Structural3DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w};
+    answer = {
+        D_u, D_v, D_w
+    };
 }
 
 
-int 
-Structural3DElement :: computeNumberOfDofs() 
+int
+Structural3DElement :: computeNumberOfDofs()
 {
     ///@todo move one hiearchy up and generalize
-    IntArray dofIdMask; 
+    IntArray dofIdMask;
     this->giveDofManDofIDMask(-1, dofIdMask); // ok for standard elements
-    return this->giveInterpolation()->giveNumberOfNodes() * dofIdMask.giveSize(); 
+    return this->giveInterpolation()->giveNumberOfNodes() * dofIdMask.giveSize();
 }
 
 
@@ -214,21 +289,21 @@ void Structural3DElement :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 6);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = std :: make_unique< GaussIntegrationRule >(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 
 
-double 
+double
 Structural3DElement :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
     determinant = fabs( this->giveInterpolation()->giveTransformationJacobian( gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
+                                                                               FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -252,15 +327,15 @@ Structural3DElement :: giveCharacteristicLength(const FloatArray &normalToCrackP
 void
 Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    /* Returns the [ 3 x (nno*3) ] shape function matrix {N} of the receiver, 
+    /* Returns the [ 3 x (nno*3) ] shape function matrix {N} of the receiver,
      * evaluated at the given gp.
      * {u} = {N}*{a} gives the displacements at the integration point.
-     */ 
-          
-    // Evaluate the shape functions at the position of the gp. 
+     */
+
+    // Evaluate the shape functions at the position of the gp.
     FloatArray N;
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        surfaceEvalN( N, iSurf, sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
+    static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
+    surfaceEvalN( N, iSurf, sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(N, 3);
 }
 
@@ -270,10 +345,10 @@ Structural3DElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     IntArray nodes;
     const int ndofsn = 3;
 
-     static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        computeLocalSurfaceMapping(nodes, iSurf);
+    static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
+    computeLocalSurfaceMapping(nodes, iSurf);
 
-    answer.resize(nodes.giveSize() *3 );
+    answer.resize(nodes.giveSize() * 3);
 
     for ( int i = 1; i <= nodes.giveSize(); i++ ) {
         answer.at(i * ndofsn - 2) = nodes.at(i) * ndofsn - 2;
@@ -286,8 +361,8 @@ double
 Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( static_cast< FEInterpolation3d* > ( this->giveInterpolation() )-> 
-        surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
+                        surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -319,9 +394,9 @@ Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
     IntArray eNodes;
-    static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->computeLocalEdgeMapping(eNodes,  iEdge);
+    static_cast< FEInterpolation3d * >( this->giveInterpolation() )->computeLocalEdgeMapping(eNodes,  iEdge);
 
-    answer.resize( eNodes.giveSize() * 3 );
+    answer.resize(eNodes.giveSize() * 3);
     for ( int i = 1; i <= eNodes.giveSize(); i++ ) {
         answer.at(i * 3 - 2) = eNodes.at(i) * 3 - 2;
         answer.at(i * 3 - 1) = eNodes.at(i) * 3 - 1;
@@ -335,11 +410,11 @@ double
 Structural3DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     /* Returns the line element ds associated with the given gp on the specific edge.
-     * Note: The name is misleading since there is no volume to speak of in this case. 
+     * Note: The name is misleading since there is no volume to speak of in this case.
      * The returned value is used for integration of a line integral (external forces).
      */
-    double detJ = static_cast< FEInterpolation3d* > ( this->giveInterpolation() )->
-        edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
+                  edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ * gp->giveWeight();
 }
 
@@ -354,11 +429,8 @@ Structural3DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    ///@todo how should this be supported 
+    ///@todo how should this be supported
     OOFEM_ERROR("egde local coordinate system not supported");
     return 1;
 }
-
-
-
 } // end namespace oofem

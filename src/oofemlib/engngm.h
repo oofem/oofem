@@ -787,16 +787,34 @@ public:
      * @param domainSerNum Domain serial number.
      */
     std :: string giveDomainFileName(int domainNum, int domainSerNum) const;
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     /**
-     * Updates components mapped to numerical method if necessary during solution process.
-     * Some numerical methods may require updating
-     * mapped components during solution process (e.g., updating of tangent stiffness
-     * when using updated Newton-Raphson method).
+     * Updates the solution (guess) according to the new values.
+     * Callback for nonlinear solvers (e.g. Newton-Raphson), and are called before new internal forces are computed.
+     * @param solutionVector New solution.
      * @param tStep Time when component is updated.
-     * @param cmpn Numerical component to update.
      * @param d Domain.
      */
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    virtual void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d);
+    /**
+     * Updates the solution (guess) according to the new values.
+     * Callback for nonlinear solvers (e.g. Newton-Raphson).
+     * @param solutionVector New solution.
+     * @param tStep Time when component is updated.
+     * @param d Domain.
+     * @param eNorm Optional per-element norm (for normalization).
+     */
+    virtual void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm);
+    /**
+     * Updates the solution (guess) according to the new values.
+     * Callback for nonlinear solvers (e.g. Newton-Raphson).
+     * @note For performance, the matrix should keep it's non-zero structure between calls, 
+     * so the caller should make sure *not* to clear the matrix object before called. 
+     * @param solutionVector New solution.
+     * @param tStep Time when component is updated.
+     * @param d Domain.
+     */
+    virtual void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d);
     /**
      * Initializes solution of new time step. Default implementation
      * resets all internal history variables (in integration points of elements)
@@ -865,7 +883,13 @@ public:
      * actual one to avoid storage of complete history.
      */
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
-
+    /**
+     * Temporary method for allowing code to seamlessly convert from the old to new way of handling DOF values.
+     * (the new way expects the field to store all values, regardless of if they are computed, from BC, or IC.)
+     * This is used by MasterDof
+     * @todo When all models have converted to using a field, this should be removed.
+     */
+    virtual bool newDofHandling() { return false; }
     /**
      * Returns the parallel context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from parallelContextList.
@@ -1118,7 +1142,6 @@ public:
     virtual bool isElementActivated( int elemNum ) { return true; }
     virtual bool isElementActivated( Element *e ) { return true; }
 
-    
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc);

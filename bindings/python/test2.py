@@ -73,9 +73,9 @@ for ltf in ltfs:
    domain.setFunction(ltf.number, ltf)
 
 
-problem.checkProblemConsistency();
-problem.init();
-problem.postInitialize();
-problem.setRenumberFlag();
-problem.solveYourself();
-problem.terminateAnalysis();
+problem.checkProblemConsistency()
+problem.init()
+problem.postInitialize()
+problem.setRenumberFlag()
+problem.solveYourself()
+problem.terminateAnalysis()

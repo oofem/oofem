@@ -92,32 +92,36 @@ public:
     StokesFlow(int i, EngngModel * _master = NULL);
     virtual ~StokesFlow();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
+    void solveYourselfAt(TimeStep *tStep) override;
 
     /**
      * Updates everything for the problem.
      * Updates the internal state for the elements.
      * Also calls updateNodalPositions.
      */
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof);
+    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *domain, Dof *dof) override;
+    bool newDofHandling() override { return true; }
 
-    virtual double giveReynoldsNumber();
+    double giveReynoldsNumber() override;
 
-    virtual int forceEquationNumbering(int id);
+    int forceEquationNumbering(int id) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int checkConsistency();
-    virtual void doStepOutput(TimeStep *tStep);
+    int checkConsistency() override;
+    void doStepOutput(TimeStep *tStep) override;
     void updateInternalState(TimeStep *tStep);
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual TimeStep *giveNextStep();
+    void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
+    void updateSolution(FloatArray &solutionVector, TimeStep *tStep, Domain *d) override;
+    void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
+    void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
+    TimeStep *giveNextStep() override;
 
-    virtual const char *giveClassName() const { return "StokesFlow"; }
-    virtual const char *giveInputRecordName() const { return _IFT_StokesFlow_Name; }
+    const char *giveClassName() const override { return "StokesFlow"; }
+    const char *giveInputRecordName() const { return _IFT_StokesFlow_Name; }
 };
 } // end namespace oofem
 

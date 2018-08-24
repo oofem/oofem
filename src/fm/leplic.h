@@ -170,12 +170,12 @@ public:
         orig_reference_fluid_volume = 0.0;
     }
 
-    virtual void updatePosition(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep) { }
-    virtual void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position);
-    virtual void giveElementMaterialMixture(FloatArray &answer, int ielem);
-    virtual double giveNodalScalarRepresentation(int);
-    virtual double computeCriticalTimeStep(TimeStep *tStep);
+    void updatePosition(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override { }
+    void giveMaterialMixtureAt(FloatArray &answer, FloatArray &position) override;
+    void giveElementMaterialMixture(FloatArray &answer, int ielem) override;
+    double giveNodalScalarRepresentation(int) override;
+    double computeCriticalTimeStep(TimeStep *tStep) override;
 
     /**
      * Returns updated nodal positions.
@@ -189,11 +189,11 @@ public:
     double giveUpdatedXCoordinate(int num) { return updated_XCoords.at(num); }
     double giveUpdatedYCoordinate(int num) { return updated_YCoords.at(num); }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     // identification
-    virtual const char *giveClassName() const { return "LEPlic"; }
+    const char *giveClassName() const override { return "LEPlic"; }
 
 protected:
     void doLagrangianPhase(TimeStep *tStep);

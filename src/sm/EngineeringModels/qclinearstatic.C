@@ -75,15 +75,12 @@ REGISTER_EngngModel(QClinearStatic);
 
 QClinearStatic :: QClinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master), loadVector(), displacementVector()
 {
-    qcEquationNumbering = new QuasicontinuumNumberingscheme();
 }
 
 
 QClinearStatic :: ~QClinearStatic()
 {
-    delete qcEquationNumbering;
 }
-
 
 
 IRResultType
@@ -159,8 +156,6 @@ QClinearStatic :: initializeFrom(InputRecord *ir)
             OOFEM_ERROR("Invalid input field \"GenInterpElem\". Value: %d is not supported", generateInterpolationElements);
         }
 
-
-
         // test of combination of input geometry generating
 #if DEBUG
         if  ( generateParticles == 1 && generateLinks != 1 ) {
@@ -176,8 +171,6 @@ QClinearStatic :: initializeFrom(InputRecord *ir)
         generateInterpolationElements = 0;
     }
 
-
-
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
@@ -186,7 +179,6 @@ QClinearStatic :: initializeFrom(InputRecord *ir)
     }
 
 #endif
-
 
     return IRRT_OK;
 }
@@ -212,7 +204,7 @@ QClinearStatic :: postInitialize()
     if ( qcApproach > 0 ) {
         createInterpolationMeshNodes( this->giveDomain(1) );
         setRepNodesInVerticesOfInterpolationMesh( this->giveDomain(1) );
-        qc.setupInterpolationMesh(this->giveDomain(1), generateInterpolationElements, interpolationElementsMaterialNumber, & interpolationMeshNodes);
+        qc.setupInterpolationMesh(this->giveDomain(1), generateInterpolationElements, interpolationElementsMaterialNumber, interpolationMeshNodes);
         qc.createInterpolationElements( this->giveDomain(1) );
         qc.addCrosssectionToInterpolationElements( this->giveDomain(1) );
     }
@@ -228,7 +220,6 @@ QClinearStatic :: postInitialize()
      */
 
     EngngModel :: postInitialize();
-
 
     //  apply QC
 
@@ -283,17 +274,17 @@ QClinearStatic :: postInitialize()
 }
 
 
-
 void QClinearStatic :: solveYourself()
 {
     LinearStatic :: solveYourself();
 }
 
+
 void QClinearStatic :: solveYourselfAt(TimeStep *tStep)
 {
     // initialize node eq numbering (for actived nodes only)
-    if ( !qcEquationNumbering->giveIsInitializedFlag() ) {
-        qcEquationNumbering->init(this->giveDomain(1), activatedNodeList, tStep);
+    if ( !qcEquationNumbering.giveIsInitializedFlag() ) {
+        qcEquationNumbering.init(this->giveDomain(1), activatedNodeList, tStep);
     }
     LinearStatic :: solveYourselfAt(tStep);
 }
@@ -321,10 +312,11 @@ QClinearStatic :: initializeFullSolvedDomain(InputRecord *ir)
     return IRRT_OK;
 }
 
+
 bool
 QClinearStatic :: nodeInFullSolvedDomainTest(Node *n)
 {
-    FloatArray *coordinates = n->giveCoordinates();
+    FloatArray &coordinates = *n->giveCoordinates();
     // is tested node in FullSolvedDomainNodes
     if ( FullSolvedDomainNodes.giveSize() != 0 ) {
         for ( int i = 1; i <= FullSolvedDomainNodes.giveSize(); i++ ) {
@@ -350,9 +342,9 @@ QClinearStatic :: nodeInFullSolvedDomainTest(Node *n)
         for ( int i = 0; i <= FullSolvedDomainRadius.giveSize() / 4 - 1; i++ ) {
             FloatArray vector;
             vector.resize(3);
-            vector.at(1) = coordinates->at(1) - FullSolvedDomainRadius.at(4 * i + 1);
-            vector.at(2) = coordinates->at(2) - FullSolvedDomainRadius.at(4 * i + 2);
-            vector.at(3) = coordinates->at(3) - FullSolvedDomainRadius.at(4 * i + 3);
+            vector.at(1) = coordinates.at(1) - FullSolvedDomainRadius.at(4 * i + 1);
+            vector.at(2) = coordinates.at(2) - FullSolvedDomainRadius.at(4 * i + 2);
+            vector.at(3) = coordinates.at(3) - FullSolvedDomainRadius.at(4 * i + 3);
             if ( vector.computeNorm() <= FullSolvedDomainRadius.at(4 * i + 4) ) {
                 return true;
             }
@@ -372,14 +364,13 @@ QClinearStatic :: nodeInFullSolvedDomainTest(Node *n)
             B.at(2) = FullSolvedDomainBox.at(6 * i + 5);
             B.at(3) = FullSolvedDomainBox.at(6 * i + 4);
 
-            if ( ( A.at(1) <= coordinates->at(1) ) && ( coordinates->at(1) <= B.at(1) ) && \
-                 ( A.at(2) <= coordinates->at(2) ) && ( coordinates->at(2) <= B.at(2) ) && \
-                 ( A.at(3) <= coordinates->at(3) ) && ( coordinates->at(3) <= B.at(3) ) ) {
+            if ( ( A.at(1) <= coordinates.at(1) ) && ( coordinates.at(1) <= B.at(1) ) && \
+                 ( A.at(2) <= coordinates.at(2) ) && ( coordinates.at(2) <= B.at(2) ) && \
+                 ( A.at(3) <= coordinates.at(3) ) && ( coordinates.at(3) <= B.at(3) ) ) {
                 return true;
             }
         }
     }
-
 
     return false;
 }
@@ -426,6 +417,7 @@ QClinearStatic :: setQCNodeType(Domain *d)
     }
 }
 
+
 void
 QClinearStatic :: updateNodeTypes(Domain *d)
 {
@@ -460,12 +452,13 @@ QClinearStatic :: createInterpolationMeshNodes(Domain *d)
     }
 }
 
+
 std :: vector< IntArray >
 QClinearStatic :: generateInterpolationMesh(Domain *d)
 {
     std :: vector< IntArray >newMeshNodes;
 #ifdef __T3D
-    T3DInterface *t3dInterface = new T3DInterface( this->giveDomain(1) );
+    T3DInterface *t3dInterface( this->giveDomain(1) );
 #endif
     std :: vector< FloatArray >nodeCoords;
     std :: vector< IntArray >meshNodes;
@@ -498,24 +491,25 @@ QClinearStatic :: generateInterpolationMesh(Domain *d)
     if ( generateInterpolationElements == 1 || generateInterpolationElements == 2 ) {
         // create interpolation mesh from t3d output file
 #ifdef __T3D
-        t3dInterface->createQCInterpolationMesh(t3dOutFile, nodeCoords, meshNodes, cellTypes);
+        t3dInterface.createQCInterpolationMesh(t3dOutFile, nodeCoords, meshNodes, cellTypes);
 #endif
 
         // map mesh to position of particles
         newMeshNodes = this->transformMeshToParticles(this->giveDomain(1), nodeCoords, meshNodes);
 
         // degenerated elements have been removed
-        // check if mesch is consistent after removal. ??km?? TO DO ?? How to check it?
+        // check if mesh is consistent after removal. ??km?? TO DO ?? How to check it?
     }
     return newMeshNodes;
 }
+
 
 std :: vector< IntArray >
 QClinearStatic :: loadInterpolationMesh(Domain *d)
 {
     std :: vector< IntArray >newMeshNodes;
     //#ifdef __T3D
-    T3DInterface *t3dInterface = new T3DInterface( this->giveDomain(1) );
+    T3DInterface t3dInterface( this->giveDomain(1) );
     //#endif
     std :: vector< FloatArray >nodeCoords;
     std :: vector< IntArray >meshNodes;
@@ -527,14 +521,14 @@ QClinearStatic :: loadInterpolationMesh(Domain *d)
 
     // create interpolation mesh from given t3d output file
     //#ifdef __T3D
-    t3dInterface->createQCInterpolationMesh(t3dOutFile, nodeCoords, meshNodes, cellTypes);
+    t3dInterface.createQCInterpolationMesh(t3dOutFile, nodeCoords, meshNodes, cellTypes);
     //#endif
 
     // map mesh to position of particles
     newMeshNodes = this->transformMeshToParticles(this->giveDomain(1), nodeCoords, meshNodes);
 
     // degenerated elements have been removed
-    // check if mesch is consistent after removal. ??km?? TO DO ?? How to check it?
+    // check if mesh is consistent after removal. ??km?? TO DO ?? How to check it?
     return newMeshNodes;
 }
 
@@ -664,6 +658,7 @@ QClinearStatic :: transformMeshToParticles(Domain *d, std :: vector< FloatArray 
     return newMeshNodes;
 }
 
+
 double
 QClinearStatic :: computeTotalVolumeOfInterpolationMesh(Domain *d)
 // TO DO: computeVolumeAreaOrLength() is not working
@@ -707,11 +702,10 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
 {
     // TO DO: use octree here
     double minDistance = 1.0e100;
-    double distance;
     DofManager *p;
     // loop over all particles (nodes in existing domain)
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        distance = coords.distance( d->giveDofManager(i)->giveCoordinates() );
+        double distance = coords.distance( d->giveDofManager(i)->giveCoordinates() );
         if ( distance < minDistance ) {
             minDistance = distance;
             p = d->giveDofManager(i);
@@ -725,12 +719,11 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
     }
 }
 
+
 QCFullsolveddomain *
 QClinearStatic :: giveFullSolvedDomain()
 {
-    QCFullsolveddomain *p;
-    p = & Fullsolveddomain;
-    return p;
+    return &Fullsolveddomain;
 }
 
 
@@ -747,6 +740,7 @@ QClinearStatic :: setActivatedNodeList(IntArray nodeList, Domain *d)
     }
 }
 
+
 void
 QClinearStatic :: setActivatedElementList(IntArray elemList)
 {
@@ -759,4 +753,5 @@ QClinearStatic :: setActivatedElementList(IntArray elemList)
         }
     }
 }
+
 } // end namespace oofem

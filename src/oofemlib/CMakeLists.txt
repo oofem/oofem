@@ -124,6 +124,7 @@ set (core_fields
     intvarfield.C
     maskedprimaryfield.C
     dofdistributedprimaryfield.C
+    eigenvectorprimaryfield.C
     uniformgridfield.C
     )
 

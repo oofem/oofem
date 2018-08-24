@@ -41,6 +41,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "geneigvalsolvertype.h"
+#include "eigenvectorprimaryfield.h"
 
 ///@name Input fields for EigenValueDynamic
 //@{
@@ -65,45 +66,39 @@ namespace oofem {
 class EigenValueDynamic : public EngngModel
 {
 private:
-    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
-    std :: unique_ptr< SparseMtrx > massMatrix;
-    SparseMtrxType sparseMtrxType;
-    FloatMatrix eigVec;
+    std :: unique_ptr< EigenVectorPrimaryField > field;
     FloatArray eigVal;
-    int numberOfRequiredEigenValues;
     int activeVector;
     int restoreFlag;
+    SparseMtrxType sparseMtrxType;
+    int numberOfRequiredEigenValues;
     /// Relative tolerance.
     double rtolv;
-    /// Numerical method used to solve the problem.
     std :: unique_ptr< SparseGeneralEigenValueSystemNM > nMethod;
     GenEigvalSolverType solverType;
 
 public:
-    EigenValueDynamic(int i, EngngModel * _master = NULL) : EngngModel(i, _master)
-    {
-        numberOfSteps = 1;
-        ndomains = 1;
-    }
+    EigenValueDynamic(int i, EngngModel *master=nullptr);
     virtual ~EigenValueDynamic() { }
 
-    virtual void solveYourselfAt(TimeStep *tStep);
-    virtual void doStepOutput(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
+    void solveYourself() override;
+    void doStepOutput(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
-    virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
-    virtual void setActiveVector(int i);
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    bool newDofHandling() override { return true; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    TimeStep *giveNextStep() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
+    void setActiveVector(int i) override;
 
-    virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
+    double giveEigenValue(int eigNum) override { return eigVal.at(eigNum); }
 
-    // identification
-    virtual const char *giveClassName() const { return "EigenValueDynamic"; }
+    const char *giveClassName() const override { return "EigenValueDynamic"; }
 };
 } // end namespace oofem
 #endif // eigenvaluedynamic_h

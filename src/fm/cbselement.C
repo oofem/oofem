@@ -156,7 +156,7 @@ CBSElement :: updateInternalState(TimeStep *tStep)
 
     // force updating strains & stresses
     for ( auto &iRule: integrationRulesArray ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( auto &gp: *iRule ) {
             computeDeviatoricStress(stress, gp, tStep);
         }
     }

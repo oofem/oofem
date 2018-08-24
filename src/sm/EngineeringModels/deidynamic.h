@@ -86,20 +86,20 @@ public:
     }
     virtual ~DEIDynamic();
 
-    virtual void solveYourselfAt(TimeStep *tStep);
+    void solveYourselfAt(TimeStep *tStep) override;
 
-    virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual TimeStep *giveNextStep();
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+    double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    TimeStep *giveNextStep() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) override;
 
     // identification
-    virtual const char *giveClassName() const { return "DEIDynamic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DEIDynamic_Name; }
-    virtual fMode giveFormulation() { return TL; }
-    virtual int giveNumberOfFirstStep(bool force = false) { return 0; }
+    const char *giveClassName() const override { return "DEIDynamic"; }
+    const char *giveInputRecordName() const { return _IFT_DEIDynamic_Name; }
+    fMode giveFormulation() override { return TL; }
+    int giveNumberOfFirstStep(bool force = false) override { return 0; }
 };
 } // end namespace oofem
 #endif // deidynamic_h

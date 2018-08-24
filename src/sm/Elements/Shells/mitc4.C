@@ -994,12 +994,12 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(1, 1) = stress.at(1);
         answer.at(2, 2) = stress.at(2);
         answer.at(3, 3) = stress.at(3);
-        answer.at(1, 2) = stress.at(4);
-        answer.at(2, 1) = stress.at(4);
-        answer.at(2, 3) = stress.at(5);
-        answer.at(3, 2) = stress.at(5);
-        answer.at(1, 3) = stress.at(6);
-        answer.at(3, 1) = stress.at(6);
+        answer.at(2, 3) = stress.at(4);
+        answer.at(3, 2) = stress.at(4);
+        answer.at(1, 3) = stress.at(5);
+        answer.at(3, 1) = stress.at(5);
+        answer.at(1, 2) = stress.at(6);
+        answer.at(2, 1) = stress.at(6);
     } else if ( type == GlobalStrainTensor ) {
         FloatArray strain, localStrain;
         this->computeStrainVector(localStrain, gp, tStep);

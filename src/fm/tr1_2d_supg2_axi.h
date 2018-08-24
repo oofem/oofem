@@ -71,49 +71,49 @@ public:
     TR1_2D_SUPG2_AXI(int n, Domain * d);
     virtual ~TR1_2D_SUPG2_AXI();
 
-    virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep);
-    virtual void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep);
-    virtual void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep);
-    virtual void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep);
-    virtual void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep);
-    virtual void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep);
-    virtual void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep);
+    void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep) override;
+    void computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep) override;
+    void computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep) override;
+    void computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep) override;
+    void computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep) override;
+    void computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    void computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep) override;
+    void computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep) override;
 
-    virtual void updateStabilizationCoeffs(TimeStep *tStep);
-    virtual void updateElementForNewInterfacePosition(TimeStep *tStep) { this->updateIntegrationRules(); }
-    virtual double computeCriticalTimeStep(TimeStep *tStep);
+    void updateStabilizationCoeffs(TimeStep *tStep) override;
+    void updateElementForNewInterfacePosition(TimeStep *tStep) override { this->updateIntegrationRules(); }
+    double computeCriticalTimeStep(TimeStep *tStep) override;
 
     // definition
-    virtual const char *giveClassName() const { return "TR1_2D_SUPG2_AXI"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG2_AXI_Name; }
-    virtual MaterialMode giveMaterialMode() { return _2dAxiFlow; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    const char *giveClassName() const override { return "TR1_2D_SUPG2_AXI"; }
+    const char *giveInputRecordName() const override { return _IFT_TR1_2D_SUPG2_AXI_Name; }
+    MaterialMode giveMaterialMode() override { return _2dAxiFlow; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
     // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
     //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void computeGaussPoints() override;
+    void computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep) override;
+    void computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
     void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,
                               const FloatArray &normal, const double p, bool updFlag);
     double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const std::vector< FloatArray > &idpoly);
@@ -123,24 +123,24 @@ protected:
     void updateIntegrationRules();
     Material *_giveMaterial(int indx) { return domain->giveMaterial(mat [ indx ]); }
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
-    virtual double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag);
-    virtual void formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
-                                        const FloatArray &normal, const double p, bool updFlag);
-    virtual void formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
-                                         const FloatArray &normal, const double p, bool updFlag);
-    virtual double truncateMatVolume(const Polygon &matvolpoly, double &volume);
-    virtual void giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool updFlag);
-    virtual void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag);
-    virtual Element *giveElement() { return this; }
-    virtual double computeMyVolume(LEPlic *matInterface, bool updFlag);
+    double computeLEPLICVolumeFraction(const FloatArray &n, const double p, LEPlic *matInterface, bool updFlag) override;
+    void formMaterialVolumePoly(Polygon &matvolpoly, LEPlic *matInterface,
+                                const FloatArray &normal, const double p, bool updFlag) override;
+    void formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface,
+                                 const FloatArray &normal, const double p, bool updFlag) override;
+    double truncateMatVolume(const Polygon &matvolpoly, double &volume) override;
+    void giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool updFlag) override;
+    void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag) override;
+    Element *giveElement() override { return this; }
+    double computeMyVolume(LEPlic *matInterface, bool updFlag) override;
 };
 } // end namespace oofem
 #endif // tr1_2d_supg2_axi_h

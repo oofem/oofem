@@ -274,6 +274,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     // loop over POIs
     for ( auto &poi: POIList ) {
         coords.at(1) = poi.x;
+        coords.at(2) = poi.y;
         coords.at(3) = poi.z;
         //region = poi.region;
 

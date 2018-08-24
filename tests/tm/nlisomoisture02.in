@@ -42,23 +42,24 @@ quadaxisym1mt   8   nodes 4    8   9  20  19
 quadaxisym1mt   9   nodes 4    9  10  21  20
 quadaxisym1mt  10   nodes 4   10  11  22  21
 #
+Set 1 elementranges {(1 10)}
+Set 2 nodes 2 11 22
+#
 SimpleTransportCS 1 mat 1 set 1
 #moisture capacity 180 kg/m3, hydration takes maximum 70 kg/m3
 nlisomoisturemat 1 d 2400. isothermtype 0 Capa 180. permeabilitytype 1 C1 1.5e-2 alpha0 0.05 hC 0.70 n 12. wn 70. alpha $1-exp(-t/1.2)$
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 14 values 1 1. set 2
 InitialCondition 1 Conditions 1 u 1.00 dofs 1 14 set 1
 ConstantFunction 1 f(t) 0.5
-Set 1 elementranges {(1 10)}
-Set 2 nodes 2 11 22
 ##
 ##
 #
 #%BEGIN_CHECK% tolerance 1.e-5
 #TIME
-#NODE tStep 2 number 1 dof 14 unknown d value 7.094815e-01
-#NODE tStep 2 number 3 dof 14 unknown d value 7.020422e-01
-#NODE tStep 2 number 5 dof 14 unknown d value 6.852221e-01
-#NODE tStep 6 number 1 dof 14 unknown d value 4.305701e-01
-#NODE tStep 6 number 3 dof 14 unknown d value 4.370362e-01
-#NODE tStep 6 number 5 dof 14 unknown d value 4.516013e-01
+#NODE tStep 2 number 1 dof 14 unknown d value 7.17107011e-01
+#NODE tStep 2 number 3 dof 14 unknown d value 7.10410246e-01
+#NODE tStep 2 number 5 dof 14 unknown d value 6.95300909e-01
+#NODE tStep 6 number 1 dof 14 unknown d value 4.37636005e-01
+#NODE tStep 6 number 3 dof 14 unknown d value 4.43648407e-01
+#NODE tStep 6 number 5 dof 14 unknown d value 4.57902853e-01
 #%END_CHECK%

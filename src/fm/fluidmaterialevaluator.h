@@ -87,16 +87,16 @@ public:
     FluidMaterialEvaluator(int i, EngngModel * _master = NULL);
     virtual ~FluidMaterialEvaluator();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void solveYourself();
+    void solveYourself() override;
 
-    virtual int checkConsistency();
-    virtual void doStepOutput(TimeStep *tStep);
-    virtual TimeStep *giveNextStep();
+    int checkConsistency() override;
+    void doStepOutput(TimeStep *tStep) override;
+    TimeStep *giveNextStep() override;
 
-    virtual const char *giveClassName() const { return "FluidMaterialEvaluator"; }
-    virtual const char *giveInputRecordName() const { return _IFT_FluidMaterialEvaluator_Name; }
+    const char *giveClassName() const override { return "FluidMaterialEvaluator"; }
+    const char *giveInputRecordName() const { return _IFT_FluidMaterialEvaluator_Name; }
 };
 } // end namespace oofem
 
