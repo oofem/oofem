@@ -170,7 +170,7 @@ public:
      * @return True if stiffness matrix of receiver is symmetric.
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
-    virtual void printYourself();
+    void printYourself() override;
 
     /**
      * Sets up integration rule for the given element.
@@ -263,8 +263,8 @@ public:
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     /**
      * Returns the material associated with the GP.
@@ -291,10 +291,8 @@ public:
      */
     virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
-    
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // crosssection_h

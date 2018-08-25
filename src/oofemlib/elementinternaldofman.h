@@ -67,12 +67,12 @@ public:
     /// Destructor.
     virtual ~ElementDofManager();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void printYourself();
-    virtual const char *giveClassName() const { return "ElementDofManager"; }
-    virtual const char *giveInputRecordName() const { return ""; } // Note: Can't be created in input files.
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void printYourself() override;
+    const char *giveClassName() const override { return "ElementDofManager"; }
+    const char *giveInputRecordName() const override { return ""; } // Note: Can't be created in input files.
 
-    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave ); }
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_simpleSlave ); }
 };
 } // end namespace oofem
 #endif // elementdofman_h

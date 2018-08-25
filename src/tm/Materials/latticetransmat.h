@@ -89,11 +89,11 @@ public:
     /// Returns mass
     double giveMass() { return this->mass; }
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void initTempStatus();
+    void initTempStatus() override;
 
-    virtual const char *giveClassName() const { return "LatticeTransportMaterialStatus"; }
+    const char *giveClassName() const override { return "LatticeTransportMaterialStatus"; }
 };
 
 /**
@@ -150,19 +150,20 @@ protected:
 
 public:
     LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-
     virtual ~LatticeTransportMaterial() { }
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep) {; }
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual double  giveCharacteristicValue(MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *tStep);
+    void  giveCharacteristicMatrix(FloatMatrix &answer,
+                                   MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override { }
+
+    double  giveCharacteristicValue(MatResponseMode mode,
+                                    GaussPoint *gp,
+                                    TimeStep *tStep) override;
 
     /**
      * Computes the conductivity.
@@ -187,14 +188,12 @@ public:
 
     double computeMass(FloatArray &stateVector, GaussPoint *gp);
 
-    virtual const char *giveInputRecordName() const { return _IFT_LatticeTransportMaterial_Name; }
-    virtual const char *giveClassName() const { return "LatticeTransportMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_LatticeTransportMaterial_Name; }
+    const char *giveClassName() const override { return "LatticeTransportMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    double give(int, GaussPoint *gp) override;
 
-    virtual double give(int, GaussPoint *gp);
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif

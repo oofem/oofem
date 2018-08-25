@@ -171,11 +171,6 @@ void AbaqusUserElement :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->filename, _IFT_AbaqusUserElement_userElement);
 }
 
-Interface *AbaqusUserElement :: giveInterface(InterfaceType it)
-{
-    return NULL;
-}
-
 void AbaqusUserElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = this->dofs;

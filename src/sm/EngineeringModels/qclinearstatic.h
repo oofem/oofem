@@ -123,7 +123,7 @@ protected:
     FloatArray FullSolvedDomainBox;
 
 public:
-    QClinearStatic(int i, EngngModel * _master = NULL);
+    QClinearStatic(int i, EngngModel *master = nullptr);
     virtual ~QClinearStatic();
 
     void postInitialize() override;

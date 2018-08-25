@@ -48,50 +48,48 @@ FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const F
 }
 
 
-IntegrationRule*
+std::unique_ptr<IntegrationRule>
 FEInterpolation:: giveIntegrationRule(int order)
 {
-  integrationDomain id = this->giveIntegrationDomain();
-  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    integrationDomain id = this->giveIntegrationDomain();
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
 
-  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
-  iRule->SetUpPointsOnLine(points, _Unknown);
-  return iRule;
+    int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+    iRule->SetUpPointsOnLine(points, _Unknown);
+    return std::move(iRule);
 }
 
-IntegrationRule*
+std::unique_ptr<IntegrationRule>
 FEInterpolation::giveBoundaryIntegrationRule(int order, int boundary)
 {
-  integrationDomain id = this->giveBoundaryIntegrationDomain(boundary);
-  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    integrationDomain id = this->giveBoundaryIntegrationDomain(boundary);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
 
-  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
-  iRule->setUpIntegrationPoints(id, points, _Unknown);
-  return iRule;
+    int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+    iRule->setUpIntegrationPoints(id, points, _Unknown);
+    return std::move(iRule);
 }
 
-IntegrationRule*
+std::unique_ptr<IntegrationRule>
 FEInterpolation::giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
-  integrationDomain id = this->giveBoundaryEdgeIntegrationDomain(boundary);
-  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    integrationDomain id = this->giveBoundaryEdgeIntegrationDomain(boundary);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
 
-  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
-  iRule->setUpIntegrationPoints(id, points, _Unknown);
-  return iRule;
+    int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+    iRule->setUpIntegrationPoints(id, points, _Unknown);
+    return std::move(iRule);
 }
 
-IntegrationRule*
+std::unique_ptr<IntegrationRule>
 FEInterpolation::giveBoundarySurfaceIntegrationRule(int order, int boundary)
 {
-  integrationDomain id = this->giveBoundarySurfaceIntegrationDomain(boundary);
-  IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    integrationDomain id = this->giveBoundarySurfaceIntegrationDomain(boundary);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
 
-  int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
-  iRule->setUpIntegrationPoints(id, points, _Unknown);
-  return iRule;
-}
-
-  
+    int points = iRule->getRequiredNumberOfIntegrationPoints(id, order + this->order);
+    iRule->setUpIntegrationPoints(id, points, _Unknown);
+    return std::move(iRule);
+}  
   
 } // end namespace oofem

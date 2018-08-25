@@ -92,7 +92,7 @@ public:
     RheoChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~RheoChainMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     virtual const FloatArray &giveViscoelasticStressVector() const { return stressVector; }
 
@@ -104,11 +104,11 @@ public:
     FloatArray *giveShrinkageStrainVector() { return & shrinkageStrain; }
     void setShrinkageStrainVector(FloatArray src) { shrinkageStrain = std :: move(src); }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
 
 #ifdef keep_track_of_strains
@@ -118,7 +118,7 @@ public:
 #endif
 
     // definition
-    virtual const char *giveClassName() const { return "RheoChainMaterialStatus"; }
+    const char *giveClassName() const override { return "RheoChainMaterialStatus"; }
 };
 
 
@@ -211,15 +211,14 @@ public:
     virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) = 0;
 
     // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 0; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
     virtual int hasCastingTimeSupport() { return 1; }
 
-    virtual const char *giveClassName() const { return "RheoChainMaterial"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "RheoChainMaterial"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     // store & restore context functions
     virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
@@ -281,7 +280,7 @@ public:
      */
     virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) { }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     double giveAlphaOne() const { return this->alphaOne; }
     double giveAlphaTwo() const { return this->alphaTwo; }

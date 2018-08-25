@@ -71,20 +71,20 @@ protected:
     IntArray primaryVarsToExport;
     /// List of cell data to export.
     IntArray cellVarsToExport;
-    
+
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
     QuasicontinuumVTKXMLExportModule(int n, EngngModel * e);
     /// Destructor
     virtual ~QuasicontinuumVTKXMLExportModule();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
- protected:    
+protected:
     //
     //  Exports single internal variable by smoothing.
     //
-    virtual void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region);
+    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region) override;
     /**
      * Assembles the region node map. Also computes the total number of nodes in region.
      * The region are numbered starting from offset+1.
@@ -93,10 +93,10 @@ public:
      * If mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
      * The i-th value contains the corresponding global node number.
      */
-    virtual int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans, 
-				int &totalcells,
-                                Domain *domain, TimeStep *tStep, int reg);
+    int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
+                        int &regionDofMans, 
+                        int &totalcells,
+                        Domain *domain, TimeStep *tStep, int reg) override;
 };
 } // end namespace oofem
 #endif // quasicontinuumvtkxmlexportmodule_h

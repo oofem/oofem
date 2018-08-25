@@ -58,29 +58,28 @@ protected:
 public:
     IntElLine2(int n, Domain * d);
     virtual ~IntElLine2() { }
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
+    FEInterpolation *giveInterpolation() const override;
+    int computeNumberOfDofs() override { return 12; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
-    virtual const char *giveClassName() const { return "IntElLine2"; }
+    const char *giveInputRecordName() const override { return _IFT_IntElLine2_Name; }
+    const char *giveClassName() const override { return "IntElLine2"; }
 
-    #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    #endif    
-    
+#ifdef __OOFEG
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+#endif
+
 protected:
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_quad_21_interface; }
 
     /// If linear interpolation should be used.
 	bool linear;
-
 };
 } // end namespace oofem
 #endif

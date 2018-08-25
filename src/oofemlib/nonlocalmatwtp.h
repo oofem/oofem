@@ -76,7 +76,7 @@ public:
      * Current implementation assembles for each local element the list
      * of contributing global element numbers. This is extracted from IP nonlocal tables;
      */
-    void init(Domain *d);
+    void init(Domain *d) override;
     /**
      * Migrates necessary local elements to remote processors, where they
      * become remote elements needed to efficiently handle nonlocal dependencies.
@@ -87,12 +87,12 @@ public:
      * - build domain nonlocal element dependency list. Then exclude local elements - what remains are unsatisfied remote dependencies that have to be broadcasted and received from partitions owning relevant elements
      * - transfer of local elements and nodes to remote partitions (remote elements and null dofmans)
      */
-    void migrate();
+    void migrate() override;
     /**
      * Called after all wtps migrated their data. Intended to update local data structure.
      * Current implementations rebuilds the nonlocal integration point tables.
      */
-    void update();
+    void update() override;
 
 protected:
     void giveElementNonlocalDepArry(IntArray &answer, Domain *d, int num);

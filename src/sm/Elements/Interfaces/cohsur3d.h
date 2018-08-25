@@ -70,35 +70,35 @@ public:
     CohesiveSurface3d(int n, Domain * d);
     virtual ~CohesiveSurface3d() { }
 
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual int computeNumberOfDofs() { return 6 * giveNumberOfNodes(); }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui) override;
+    double computeVolumeAround(GaussPoint *gp) override;
+    int computeNumberOfDofs() override { return 6 * giveNumberOfNodes(); }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     double giveLength();
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override { }
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
     // definition & identification
-    virtual const char *giveClassName() const { return "CohesiveSurface3d"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CohesiveSurface3d_Name; }
+    const char *giveClassName() const override { return "CohesiveSurface3d"; }
+    const char *giveInputRecordName() const override { return _IFT_CohesiveSurface3d_Name; }
 
     // input and output
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
 protected:
-    virtual void computeGaussPoints();
+    void computeGaussPoints() override;
     void evaluateCenter();
     void evaluateLocalCoordinateSystem();
 
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual MaterialMode giveMaterialMode() { return _3dInterface; }
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    MaterialMode giveMaterialMode() override { return _3dInterface; }
 };
 } // namespace oofem
 #endif

@@ -168,11 +168,6 @@ public:
 
     // identification and auxiliary functions
     /**
-     * Returns nonzero if receiver is non linear
-     */
-    virtual int hasNonLinearBehaviour() { return 0; }
-
-    /**
      * Tests if material supports material mode.
      * @param mode Required material mode.
      * @return Nonzero if supported, zero otherwise.
@@ -319,7 +314,7 @@ public:
      * @return Reference to new status.
      */
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const
-    { return NULL; }
+    { return nullptr; }
 
     /**
      * Initializes temporary variables stored in integration point status

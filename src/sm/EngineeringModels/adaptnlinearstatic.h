@@ -96,7 +96,7 @@ protected:
     FloatArray timeStepLoadLevels;
 
 public:
-    AdaptiveNonLinearStatic(int i, EngngModel * _master = NULL);
+    AdaptiveNonLinearStatic(int i, EngngModel *master = nullptr);
     virtual ~AdaptiveNonLinearStatic();
 
     void solveYourselfAt(TimeStep *tStep) override;
@@ -134,7 +134,7 @@ public:
     void updateDomainLinks() override;
 
     const char *giveClassName() const override { return "AdaptiveNonLinearStatic"; }
-    const char *giveInputRecordName() const { return _IFT_AdaptiveNonLinearStatic_Name; }
+    const char *giveInputRecordName() const override { return _IFT_AdaptiveNonLinearStatic_Name; }
 
 #ifdef __PARALLEL_MODE
     LoadBalancer *giveLoadBalancer() override;

@@ -45,38 +45,32 @@ class OOFEM_EXPORT FEInterpolation1d : public FEInterpolation
 {
 public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
-    virtual int giveNsd() { return 1; }
+    int giveNsd() override { return 1; }
 
     //virtual FloatArray giveParametricCenter() const { return {0.}; }
 
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary);
-    virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void boundaryGiveNodes(IntArray &answer, int boundary) override;
+    void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
     /**@name Surface interpolation services */
     //@{
-    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
-					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
-					     const FEICellGeometry &cellgeo)
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
-					      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-							     const FEICellGeometry &cellgeo)
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-
     //@}
 
-
-    
     /**
      * Computes the exact length.
      * @param cellgeo Cell geometry for the element.
@@ -88,9 +82,9 @@ public:
         return 0;
     }
 
-    virtual IntegrationRule *giveIntegrationRule(int order);
-    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
-    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) override;
 };
 } // end namespace oofem
 #endif // feinterpol1d_h

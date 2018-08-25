@@ -89,39 +89,39 @@ public:
     /// Destructor.
     virtual ~SimpleSlaveDof() { }
 
-    virtual dofType giveDofType() { return DT_simpleSlave; }
-    virtual const char *giveClassName() const { return "SimpleSlaveDof"; }
+    dofType giveDofType() override { return DT_simpleSlave; }
+    const char *giveClassName() const override { return "SimpleSlaveDof"; }
     /**
      * Returns equation number corresponding to receiver.
      * Slave simply forwards this message to master.
      * @return Equation number, if active BC exists, returns zero
      */
-    virtual int __giveEquationNumber() const;
+    int __giveEquationNumber() const override;
     /**
      * Returns prescribed equation number corresponding to receiver.
      * Slave simply forwards this message to master.
      * @return Prescribed equation number, if active BC exists, returns zero
      */
-    virtual int  __givePrescribedEquationNumber();
+    int __givePrescribedEquationNumber() override;
     /**
      * Asks new equation number. Empty function (master is assumed to receive same message).
      */
-    virtual int askNewEquationNumber(TimeStep *tStep) { return 1; }
-    virtual double giveUnknown(ValueModeType, TimeStep *);
-    virtual double giveUnknown(PrimaryField &field, ValueModeType, TimeStep *tStep);
-    virtual bool hasBc(TimeStep *tStep);
-    virtual bool hasIc();
-    virtual bool hasIcOn(ValueModeType);
-    virtual int giveBcId();
-    virtual int giveIcId();
-    virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
+    int askNewEquationNumber(TimeStep *tStep) override { return 1; }
+    double giveUnknown(ValueModeType, TimeStep *) override;
+    double giveUnknown(PrimaryField &field, ValueModeType, TimeStep *tStep) override;
+    bool hasBc(TimeStep *tStep) override;
+    bool hasIc() override;
+    bool hasIcOn(ValueModeType) override;
+    int giveBcId() override;
+    int giveIcId() override;
+    double giveBcValue(ValueModeType mode, TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /// Returns Master Dof Manager Number.
     int giveMasterDofManagerNum() const { return masterDofMngr; }
-    virtual void giveMasterDofManArray(IntArray &answer) {
+    void giveMasterDofManArray(IntArray &answer) override {
         answer.resize(1);
         answer.at(1) = masterDofMngr;
     }
@@ -130,15 +130,15 @@ public:
     /// Returns number of master dof in master dofManager.
     int giveMasterDofIndx() const { return masterDofIndx; }
 
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
 
 private:
     /// Returns reference to master dof.
     Dof *giveMasterDof() const;
 
 protected:
-    BoundaryCondition *giveBc();
-    InitialCondition *giveIc();
+    BoundaryCondition *giveBc() override;
+    InitialCondition *giveIc() override;
 };
 } // end namespace oofem
 #endif // simpleslavedof_h

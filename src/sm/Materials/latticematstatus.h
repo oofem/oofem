@@ -55,23 +55,22 @@ public:
     /// Destructor.
     virtual ~LatticeMaterialStatus() { }
 
-    virtual void printOutputAt(FILE *, TimeStep *) { }
+    void printOutputAt(FILE *, TimeStep *) override { }
 
-    virtual void initTempStatus() { }
+    void initTempStatus() override { }
 
-    virtual void updateYourself(TimeStep *) { }
+    void updateYourself(TimeStep *) override { }
 
     /// Gives the last equilibrated normal stress
     virtual double giveNormalStress() { return 0; }
 
     /// Gives the last equilibrated normal stress
-    virtual double giveOldNormalStress(){return 0;}
+    virtual double giveOldNormalStress() { return 0; }
 
     /// Gives the last equilibrated normal stress
-    virtual int hasBeenUpdated(){return 0;}
+    virtual int hasBeenUpdated() { return 0; }
 
-
-    virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
+    const char *giveClassName() const override { return "LatticeMaterialStatus"; }
 
     ///Sets the temp_crack_flag
     virtual void setTempCrackFlag(int val) = 0;
@@ -87,12 +86,10 @@ public:
      */
     virtual double giveCrackWidth() { return 0; }
 
-
     /**
      * @return old crack width
      */
     virtual double giveOldCrackWidth() { return 0; }
-
 
     /**
      * Returns the energy dissipation computed at the GaussPoint of the element.
@@ -108,7 +105,7 @@ public:
      */
     virtual double giveDeltaDissipation() { return 0; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // matstatus_h

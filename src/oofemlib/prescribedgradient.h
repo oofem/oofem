@@ -71,9 +71,9 @@ public:
     /// Destructor
     virtual ~PrescribedGradient() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, double time);
+    double give(Dof *dof, ValueModeType mode, double time) override;
 
-    virtual bcType giveType() const { return DirichletBT; }
+    bcType giveType() const override { return DirichletBT; }
 
     /**
      * Initializes receiver according to object description stored in input record.
@@ -83,8 +83,8 @@ public:
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     /**
      * Constructs a coefficient matrix for all prescribed unknowns.
@@ -99,19 +99,19 @@ public:
      * @param sigma Output quantity (typically stress).
      * @param tStep Active time step.
      */
-    virtual void computeField(FloatArray &sigma, TimeStep *tStep);
+    void computeField(FloatArray &sigma, TimeStep *tStep) override;
 
     /**
      * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
      * @param tangent Output tangent.
      * @param tStep Active time step.
      */
-    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
+    void computeTangent(FloatMatrix &tangent, TimeStep *tStep) override;
 
-    virtual void scale(double s) { mGradient.times(s); }
+    void scale(double s) override { mGradient.times(s); }
 
-    virtual const char *giveClassName() const { return "PrescribedGradient"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
+    const char *giveClassName() const override { return "PrescribedGradient"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedGradient_Name; }
 };
 } // end namespace oofem
 

@@ -69,27 +69,24 @@ protected:
     FloatArray alpha;
 
 public:
-
     AnisotropicLinearElasticMaterial(int n, Domain *d) : LinearElasticMaterial(n, d), stiffmat(6,6), alpha(3)
     {}
     virtual ~AnisotropicLinearElasticMaterial()
     {}
 
     // identification and auxiliary functions
-    virtual const char *giveInputRecordName() const { return _IFT_AnisotropicLinearElasticMaterial_Name; }
-    virtual const char *giveClassName() const { return "AnisotropicLinearElasticMaterial"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    void giveInputRecord(DynamicInputRecord &input);
+    const char *giveInputRecordName() const override { return _IFT_AnisotropicLinearElasticMaterial_Name; }
+    const char *giveClassName() const override { return "AnisotropicLinearElasticMaterial"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     // important functions
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp,
-                                               TimeStep *tStep);
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp,
+                                       TimeStep *tStep) override;
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-protected:
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     friend class CrossSection;
 };

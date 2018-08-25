@@ -64,45 +64,45 @@ public:
     LumpedMassElement(int n, Domain * d);
     virtual ~LumpedMassElement() { }
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { computeLumpedMassMatrix(answer, tStep); }
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override
     { answer.clear(); }
-    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { answer.clear(); }
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0)
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override
     { answer.clear(); }
 
-    virtual int computeNumberOfDofs();
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    int computeNumberOfDofs() override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual void updateInternalState(TimeStep *tStep) { }
-    virtual void updateYourself(TimeStep *tStep) { }
-    virtual int checkConsistency();
+    void updateInternalState(TimeStep *tStep) override { }
+    void updateYourself(TimeStep *tStep) override { }
+    int checkConsistency() override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LumpedMassElement_Name; }
-    virtual const char *giveClassName() const { return "LumpedMassElement"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
+    const char *giveInputRecordName() const override { return _IFT_LumpedMassElement_Name; }
+    const char *giveClassName() const override { return "LumpedMassElement"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
 
 protected:
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override
     { answer.clear(); }
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
     { answer.clear(); }
 
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                                  int lowerIndx = 1, int upperIndx = ALL_STRAINS)
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
+                          int lowerIndx = 1, int upperIndx = ALL_STRAINS) override
     { answer.clear(); }
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { answer.clear(); }
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override { answer.clear(); }
 };
 } // end namespace oofem
 #endif // lumpedmasselement_h

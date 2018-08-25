@@ -97,9 +97,7 @@ protected:
      */
     FloatMatrix *localCoordinateSystem;
 
-
 public:
-
     /**
      * Constructor. Creates a node belonging to domain.
      * @param n Node number in domain aDomain.
@@ -109,15 +107,15 @@ public:
     /// Destructor.
     virtual ~Node();
 
-    virtual bool hasCoordinates() { return true; }
-    virtual double giveCoordinate(int i);
-    virtual FloatArray *giveCoordinates() { return & coordinates; }
+    bool hasCoordinates() override { return true; }
+    double giveCoordinate(int i) override;
+    FloatArray *giveCoordinates() override { return & coordinates; }
 
     /**
      * As giveCoordinates, but non-virtual and therefore faster
      * (because it can be inlined). /ES
      */
-    inline const FloatArray &giveNodeCoordinates() const {return coordinates;}
+    inline const FloatArray &giveNodeCoordinates() const { return coordinates; }
 
     /**
      * Sets node coordinates to given array.
@@ -147,7 +145,7 @@ public:
 
     // local coordinate system
     /// Returns nonzero if node has prescribed local coordinate system.
-    bool hasLocalCS() { return ( localCoordinateSystem != NULL ); }
+    bool hasLocalCS() { return ( localCoordinateSystem != nullptr ); }
     /** Returns pointer to local coordinate triplet in node.
      * If not defined, returns NULL.
      * @return Triplet defining the local coordinate system in node.
@@ -159,9 +157,9 @@ public:
     /** Returns true, if the local coordinate systems of receiver and given node are the same */
     bool hasSameLCS(Node *remote);
 
-    virtual bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry);
-    virtual bool requiresTransformation() { return ( this->hasLocalCS() || hasSlaveDofs ); }
-    virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode);
+    bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) override;
+    bool requiresTransformation() override { return ( this->hasLocalCS() || hasSlaveDofs ); }
+    void computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode) override;
 
     /**
      * Updates receiver at end of time step (i.e. after equilibrium has been reached).
@@ -170,24 +168,23 @@ public:
      * @param tStep Time step for which to update.
      * @see EngngModel::giveFormulation
      */
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
     // miscellaneous
-    virtual const char *giveClassName() const { return "Node"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Node_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void printYourself();
-    virtual int checkConsistency();
-    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_simpleSlave || type == DT_active ); }
-    virtual int giveQcNodeType() {return 0;};
+    const char *giveClassName() const override { return "Node"; }
+    const char *giveInputRecordName() const override { return _IFT_Node_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void printYourself() override;
+    int checkConsistency() override;
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_simpleSlave || type == DT_active ); }
+    virtual int giveQcNodeType() { return 0; }
 
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 };
 } // end namespace oofem

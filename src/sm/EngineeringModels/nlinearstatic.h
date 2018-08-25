@@ -134,7 +134,7 @@ protected:
     InitialGuess initialGuessType;
 
 public:
-    NonLinearStatic(int i, EngngModel * _master = NULL);
+    NonLinearStatic(int i, EngngModel *master = nullptr);
     virtual ~NonLinearStatic();
 
     void solveYourself() override;

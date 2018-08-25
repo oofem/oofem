@@ -168,11 +168,11 @@ double FEI2dLineLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     return x2 * y1 - x1 * y2;
 }
 
-IntegrationRule *FEI2dLineLin :: giveIntegrationRule(int order)
+std::unique_ptr<IntegrationRule> FEI2dLineLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 0);
     iRule->SetUpPointsOnLine(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 } // end namespace oofem

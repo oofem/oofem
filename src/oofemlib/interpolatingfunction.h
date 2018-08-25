@@ -60,14 +60,14 @@ public:
     /// Destructor
     virtual ~InterpolatingFuction();
 
-    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=NULL, double param=0.);
-    virtual double evaluateAtTime(double t);
-    virtual double evaluateVelocityAtTime(double t) { return 0.; }
-    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override;
+    double evaluateAtTime(double t) override;
+    double evaluateVelocityAtTime(double t) override { return 0.; }
+    double evaluateAccelerationAtTime(double t) override { return 0.; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "InterpolatingFuction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_InterpolatingFuction_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "InterpolatingFuction"; }
+    const char *giveInputRecordName() const override { return _IFT_InterpolatingFuction_Name; }
 };
 } // end namespace oofem
 

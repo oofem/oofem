@@ -644,17 +644,6 @@ LSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 #endif
 
 
-
-IntegrationRule *
-LSpace :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return iRule;
-}
-
-
 int
 LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
 {

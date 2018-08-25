@@ -49,10 +49,9 @@ class FloatArray;
 class XfemSolverInterface {
 public:
     XfemSolverInterface();
-    virtual ~XfemSolverInterface();
+    virtual ~XfemSolverInterface() { }
 
     void propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel, bool iRecomputeStepAfterCrackProp);
-
 
 protected:
     bool mNeedsVariableMapping;

@@ -76,11 +76,10 @@ public:
     /// Sets characteristic length to given value.
     void setLec(double ls) { lec = ls; }
 
-    // definition
-    virtual const char *giveClassName() const { return "MazarsMaterialStatus"; }
+    const char *giveClassName() const override { return "MazarsMaterialStatus"; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -113,16 +112,15 @@ public:
     /// Destructor
     virtual ~MazarsMaterial();
 
-    // identification and auxiliary functions
-    virtual const char *giveInputRecordName() const { return _IFT_MazarsMaterial_Name; }
-    virtual const char *giveClassName() const { return "MazarsMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_MazarsMaterial_Name; }
+    const char *giveClassName() const override { return "MazarsMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
+    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
 
 protected:
     /**
@@ -133,7 +131,7 @@ protected:
      *  @param totalStrainVector Current total strain vector,
      *  @param gp Integration point,
      */
-    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;
     /*
      * Computes elastic stiffness for normal stress components.
      * @param answer Result of size (3,3).

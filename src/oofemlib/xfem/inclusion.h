@@ -57,15 +57,14 @@ public:
 
     // Returns true if the enrichment item can assign
     // a different material to any Gauss point.
-    inline virtual bool canModifyMaterial() const { return true; }
+    bool canModifyMaterial() const override { return true; }
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
-    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
+    bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const override;
 
-
-    virtual const char *giveClassName() const { return "Inclusion"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Inclusion_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "Inclusion"; }
+    const char *giveInputRecordName() const override { return _IFT_Inclusion_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
     CrossSection *giveCrossSection() { return mpCrossSection; }
 };
 } /* namespace oofem */

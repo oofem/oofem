@@ -74,82 +74,78 @@ public:
     QDKTPlate(int n, Domain * d);
     virtual ~QDKTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
-    virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
+    MaterialMode giveMaterialMode() override { return _2dPlate; }
+    int testElementExtension(ElementExtension ext) override { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
+    void computeGaussPoints() override;
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
 
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
 
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
                                      double &y1, double &y2, double &y3, double &y4,
                                      double &z1, double &z2, double &z3, double &z4);
 
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode) override;
 
     /**
      * @name Surface load support
      */
     //@{
-    virtual void computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords);
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray& lcoords) override;
+    void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
+    double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) override;
+    int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) override;
     //@}
     /**
      * @name Edge load support
      */
     //@{
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
      //@}
-
-
-
 
 public:
     // definition & identification
-    virtual const char *giveClassName() const { return "QDKTPlate"; }
-    virtual const char *giveInputRecordName() const { return _IFT_QDKTPlate_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "QDKTPlate"; }
+    const char *giveInputRecordName() const override { return _IFT_QDKTPlate_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    int computeNumberOfDofs() override { return 12; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
-    virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
+    void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp) override;
 
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double giveCharacteristicLength(const FloatArray &normalToCrackPlane) override;
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override { return this->numberOfGaussPoints; }
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
     // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+    void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 };
 } // end namespace oofem

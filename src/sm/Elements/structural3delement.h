@@ -67,39 +67,37 @@ public:
     /// Destructor.
     virtual ~Structural3DElement() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual MaterialMode giveMaterialMode();
-    virtual int computeNumberOfDofs();
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
+    MaterialMode giveMaterialMode() override;
+    int computeNumberOfDofs() override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
+    double giveCharacteristicLength(const FloatArray &normalToCrackPlane) override;
 
     void giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z, const FloatArray &lcoords);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override;
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) override;
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
 
     // Edge support
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
 
-    virtual int testElementExtension(ElementExtension ext)
+    int testElementExtension(ElementExtension ext) override
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-
-    //virtual IntegrationRule *GetSurfaceIntegrationRule(int); // old
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
+    void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    void giveSurfaceDofMapping(IntArray &answer, int) const override;
+    double computeSurfaceVolumeAround(GaussPoint *gp, int) override;
+    int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp) override;
 
 private:
     double dnx(int i, int arg2);

@@ -79,16 +79,16 @@ public:
      * - dfdt(t) (optional)
      * - d2fdt2(t) (optional)
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &ir) override;
 
-    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict);
-    virtual double evaluateAtTime(double t);
-    virtual double evaluateVelocityAtTime(double t);
-    virtual double evaluateAccelerationAtTime(double t);
+    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override;
+    double evaluateAtTime(double t) override;
+    double evaluateVelocityAtTime(double t) override;
+    double evaluateAccelerationAtTime(double t) override;
 
-    virtual const char *giveClassName() const { return "CalculatorFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CalculatorFunction_Name; }
+    const char *giveClassName() const override { return "CalculatorFunction"; }
+    const char *giveInputRecordName() const override { return _IFT_CalculatorFunction_Name; }
 };
 } // end namespace oofem
 #endif // calculatorfunction_h

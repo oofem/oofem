@@ -229,7 +229,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
                 }
 
                 // For shared nodes we add locally an average = 1/givePartitionsConnectivitySize()*contribution,
-                for ( Dof *dof: *dman ) {
+                for ( auto &dof: *dman ) {
                     int eqNum;
                     if ( dof->isPrimaryDof() && ( eqNum = dof->__giveEquationNumber() ) ) {
                         my_pMp += coeff * loadRefVector.at(eqNum) * loadRefVector.at(eqNum) / massMatrix.at(eqNum);
@@ -351,7 +351,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
 
             // For shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution.
-            for ( Dof *dof: *dman ) {
+            for ( auto &dof: *dman ) {
                 int eqNum;
                 if ( dof->isPrimaryDof() && ( eqNum = dof->__giveEquationNumber() ) ) {
                     my_pt += coeff * internalForces.at(eqNum) * loadRefVector.at(eqNum) / massMatrix.at(eqNum);
@@ -386,7 +386,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         double my_err = 0.0;
 
         for ( auto &dman : domain->giveDofManagers() ) {
-            dofmanmode = dman->giveParallelMode();
+            auto dofmanmode = dman->giveParallelMode();
             // Skip all remote and null dofmanagers.
             double coeff = 1.0;
             if ( ( dofmanmode == DofManager_remote ) || ( dofmanmode == DofManager_null ) ) {
@@ -396,7 +396,8 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
 
             // For shared nodes we add locally an average= 1/givePartitionsConnectivitySize()*contribution.
-            for ( Dof *dof: *dman ) {
+            for ( auto &dof: *dman ) {
+                int eqNum;
                 if ( dof->isPrimaryDof() && ( eqNum = dof->__giveEquationNumber() ) ) {
                     my_err += coeff * loadVector.at(eqNum) * loadVector.at(eqNum) / massMatrix.at(eqNum);
                 }

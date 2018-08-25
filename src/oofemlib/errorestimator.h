@@ -100,7 +100,7 @@ public:
     /// Destructor
     virtual ~ErrorEstimator();
     /// Sets Domain; should also re-initialize attributes if necessary.
-    void setDomain(Domain *d);
+    void setDomain(Domain *d) override;
     /**
      * Returns the element error. The estimateError service should be called before.
      * @param type Error type.
@@ -151,9 +151,7 @@ public:
     bool skipRegion(int reg);
     virtual void reinitialize();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual const char *giveInputRecordName() const { return NULL; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 };
 } // end namespace oofem
 #endif // errorestimator_h

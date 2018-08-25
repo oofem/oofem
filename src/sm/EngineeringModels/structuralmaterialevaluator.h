@@ -78,10 +78,10 @@ protected:
     double tolerance;
 
 public:
-    StructuralMaterialEvaluator(int i, EngngModel * _master = NULL);
+    StructuralMaterialEvaluator(int i, EngngModel *master = nullptr);
     virtual ~StructuralMaterialEvaluator();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     void solveYourself() override;
 

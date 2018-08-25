@@ -71,10 +71,10 @@ public:
     Eurocode2CreepMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~Eurocode2CreepMaterialStatus() { }
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     double giveConcreteMaturity() const { return maturity; }
     void setTempConcreteMaturity(double src) { tempMaturity = src; }
@@ -84,7 +84,7 @@ public:
 
 
     // definition
-    virtual const char *giveClassName() const { return "Eurocode2CreepMaterialStatus"; }
+    const char *giveClassName() const override { return "Eurocode2CreepMaterialStatus"; }
 };
 
 
@@ -181,11 +181,11 @@ public:
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual const char *giveClassName() const { return "Eurocode2CreepMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Eurocode2CreepMaterial_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "Eurocode2CreepMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_Eurocode2CreepMaterial_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// evaluates concrete strength at given age 
     virtual double computeConcreteStrengthAtAge(double age);

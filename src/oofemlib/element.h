@@ -556,31 +556,29 @@ public:
      * @param bNodes list of boundary edge nodes 
      * @param boundary edge id
      */
-    virtual void giveBoundaryEdgeNodes (IntArray& bNodes, int boundary);
+    virtual void giveBoundaryEdgeNodes(IntArray& bNodes, int boundary);
     /**
      * Returns list of receiver boundary nodes for given surface
      * @param bNodes list of boundary surface nodes 
      * @param boundary surface id
      */
-    virtual void giveBoundarySurfaceNodes (IntArray& bNodes, int boundary);
+    virtual void giveBoundarySurfaceNodes(IntArray& bNodes, int boundary);
     /**
      * Returns boundary edge integration rule
      * @param order approximation order to integrate 
      * @param boundary boundary edge id
-     * @note some elements may increase the order (like axusymmetric elements)
+     * @note some elements may increase the order (like axisymmetric elements)
      */
-    virtual IntegrationRule* giveBoundaryEdgeIntegrationRule (int order, int boundary);
+    virtual std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary);
     /**
      * Returns boundary surface integration rule
      * @param order approximation order to integrate 
      * @param boundary boundary surface id
-     * @note some elements may increase the order (like axusymmetric elements)
+     * @note some elements may increase the order (like axisymmetric elements)
       */
-    virtual IntegrationRule* giveBoundarySurfaceIntegrationRule (int order, int boundary);
+    virtual std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary);
 
 
-
-    
     // data management
     /**
      * Translates local to global indices for dof managers.
@@ -1139,12 +1137,12 @@ public:
     IntArray *giveBoundaryLoadArray();
 
     // Overloaded methods:
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual const char *giveClassName() const { return "Element"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    const char *giveClassName() const override { return "Element"; }
 
 protected:
     /**

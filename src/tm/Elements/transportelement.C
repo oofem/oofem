@@ -1040,6 +1040,7 @@ void
 TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                                                 int iSurf, TimeStep *tStep, ValueModeType mode, int indx)
 {
+    OOFEM_ERROR("STOP");
     if ( !this->testElementExtension(Element_SurfaceLoadSupport) ) {
         OOFEM_ERROR("no surface load support");
     }
@@ -1052,11 +1053,11 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         answer.resize( this->giveNumberOfDofManagers() );
         answer.zero();
 
-        double coeff=0.;
-        int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
+        double coeff = 0.;
+        int approxOrder = surfLoad->giveApproxOrder();
 
-        std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
-        for ( GaussPoint *gp: *iRule ) {
+        auto iRule = this->giveBoundarySurfaceIntegrationRule(approxOrder, iSurf);
+        for ( auto &gp: *iRule ) {
             if ( load->giveType() == TransmissionBC ) {
                 coeff = -1.0;
             } else if ( load->giveType() == ConvectionBC ) {
@@ -1087,15 +1088,15 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
             FieldPtr tf;
-            if (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)){
-	      //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
-	      this->giveInterpolation()->boundarySurfaceLocal2global(gcoords, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+            if ( (tf = domain->giveEngngModel()->giveContext()->giveFieldManager()->giveField(FT_TemperatureAmbient)) ) {
+                //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+                this->giveInterpolation()->boundarySurfaceLocal2global(gcoords, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
                 tf->evaluateAt(val, gcoords, VM_TotalIntrinsic, tStep);
             } else if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
                 surfLoad->computeValueAt(val, tStep, gp->giveNaturalCoordinates(), mode);
             } else {
-	      //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
-	      this->giveInterpolation()->boundarySurfaceLocal2global(gcoords, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+                //this->computeSurfIpGlobalCoords(gcoords, gp->giveNaturalCoordinates(), iSurf);
+                this->giveInterpolation()->boundarySurfaceLocal2global(gcoords, iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
                 surfLoad->computeValueAt(val, tStep, gcoords, mode);
             }
@@ -1180,9 +1181,8 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 }
 
                 defined = 1;
-                int approxOrder = 2 * this->giveApproxOrder(indx);
-                std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
-
+                int approxOrder = 2;
+                auto iRule = this->giveBoundarySurfaceIntegrationRule(approxOrder, id);
                 for ( auto &gp: *iRule ) {
                     this->computeSurfaceNAt( n, id, gp->giveNaturalCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);

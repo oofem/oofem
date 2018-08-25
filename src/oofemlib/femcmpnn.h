@@ -176,7 +176,7 @@ public:
      * @see InterfaceType
      * @return Requested interface if implemented, otherwise NULL.
      */
-    virtual Interface *giveInterface(InterfaceType t) { return NULL; }
+    virtual Interface *giveInterface(InterfaceType t) { return nullptr; }
 
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;

@@ -78,9 +78,9 @@ public:
     /// Destructor
     virtual ~PrescribedGenStrainShell7() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, double time);
+    double give(Dof *dof, ValueModeType mode, double time) override;
 
-    virtual bcType giveType() const { return DirichletBT; }
+    bcType giveType() const override { return DirichletBT; }
 
     /**
      * Initializes receiver according to object description stored in input record.
@@ -90,8 +90,8 @@ public:
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     /**
      * Constructs a coefficient matrix for all prescribed unknowns.
@@ -117,7 +117,7 @@ public:
      */
     void computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep);
 
-    virtual void scale(double s) { gradient.times(s); }
+    void scale(double s) override { gradient.times(s); }
 
     /**
      * Set prescribed tensor.
@@ -140,8 +140,8 @@ public:
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 
-    virtual const char *giveClassName() const { return "PrescribedGenStrainShell7"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGenStrainShell7_Name; }
+    const char *giveClassName() const override { return "PrescribedGenStrainShell7"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedGenStrainShell7_Name; }
 
 protected:
     double domainSize();

@@ -73,39 +73,41 @@ protected:
     double initiationFactor;   // knock-down factor on initiation values, (0,1] //JF
     double initiationRadius;   // radius around around newlye initiated element nodes to be included //JF
     bool recoverStresses;      // recover tranverse stresses using momentum balance (default). //JF
+
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
+    virtual ~Delamination() { }
 
-    virtual int instanciateYourself(DataReader &dr);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    int instanciateYourself(DataReader &dr) override;
+    void appendInputRecords(DynamicDataReader &oDR) override;
 
-    virtual const char *giveClassName() const { return "Delamination"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void appendInputRecords(DynamicDataReader &oDR);
+    const char *giveClassName() const override { return "Delamination"; }
+    const char *giveInputRecordName() const override { return _IFT_Delamination_Name; }
 
     double giveDelamXiCoord() const { return xiBottom; }     // coord where the delamination is defined
     double giveBoundingDelamXiCoord() const { return xiTop; } // coord where the delamination enrichment should stop, default is the shell surface
     int giveDelamInterfaceNum() const { return interfaceNum.at(1); }
     IntArray giveDelamCrossSectionNum() const { return crossSectionNum; }
     double giveInitiationFactor() const { return initiationFactor; }
-    //virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
-    virtual bool hasPropagatingFronts() const { return true; }
-    virtual bool hasInitiationCriteria();
-    
-    virtual void propagateFronts(bool &oFrontsHavePropagated);
-    virtual void findInitiationFronts(bool &failureChecked, const IntArray &CSnumbers, std :: vector< IntArray > &CSinterfaceNumbers, std :: vector< IntArray > &CSDofManNumbers, std :: vector< FloatArray > &initiationFactors, TimeStep *tStep);
+    //void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) override;
+    bool hasPropagatingFronts() const override { return true; }
+    bool hasInitiationCriteria() override;
 
-    virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const { OOFEM_ERROR("Not implemented.") }
+    void propagateFronts(bool &oFrontsHavePropagated) override;
+    void findInitiationFronts(bool &failureChecked, const IntArray &CSnumbers, std :: vector< IntArray > &CSinterfaceNumbers, std :: vector< IntArray > &CSDofManNumbers, std :: vector< FloatArray > &initiationFactors, TimeStep *tStep);
 
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const;
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const;
+    void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const override { OOFEM_ERROR("Not implemented.") }
 
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const { OOFEM_ERROR("Not implemented."); }
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const FloatMatrix &idNdX, const IntArray &iElNodes) const { OOFEM_ERROR("Not implemented."); }
+    void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const override;
+    void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const override;
 
-    virtual void evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const;
-    virtual void evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const { OOFEM_ERROR("Not implemented."); }
-    virtual void evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const { OOFEM_ERROR("Not implemented."); }
+    void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const override { OOFEM_ERROR("Not implemented."); }
+    void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const FloatMatrix &idNdX, const IntArray &iElNodes) const override { OOFEM_ERROR("Not implemented."); }
+
+    void evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const override;
+    void evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const override { OOFEM_ERROR("Not implemented."); }
+    void evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const override { OOFEM_ERROR("Not implemented."); }
 
     void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const;
 };

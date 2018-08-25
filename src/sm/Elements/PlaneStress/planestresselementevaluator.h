@@ -51,15 +51,15 @@ protected:
      * Assemble interpolation matrix at given IP.
      * In case of IGAElements, N is assumed to contain only nonzero interpolation functions.
      */
-    virtual void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp) override;
     /**
      * Assembles the strain-displacement matrix of the receiver at given integration point.
      * In case of IGAElements, B is assumed to contain only contribution from nonzero interpolation functions.
      */
-    virtual void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void computeBMatrixAt(FloatMatrix &answer, GaussPoint *gp) override;
+    double computeVolumeAround(GaussPoint *gp) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const {
         answer = {D_u, D_v};
     }

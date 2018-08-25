@@ -78,11 +78,13 @@ class OOFEM_EXPORT FEIVoidCellGeometry : public FEICellGeometry
 public:
     FEIVoidCellGeometry() : FEICellGeometry() { }
     virtual ~FEIVoidCellGeometry() { }
-    int giveNumberOfVertices() const {
+    int giveNumberOfVertices() const override
+    {
         OOFEM_ERROR("no reference geometry");
         return 0;
     }
-    const FloatArray *giveVertexCoordinates(int i) const {
+    const FloatArray *giveVertexCoordinates(int i) const override
+    {
         OOFEM_ERROR("no reference geometry");
         return NULL;
     }
@@ -97,12 +99,11 @@ class OOFEM_EXPORT FEIElementGeometryWrapper : public FEICellGeometry
 protected:
     const Element *elem;
 public:
-    FEIElementGeometryWrapper(const Element * elem) : FEICellGeometry() {
-        this->elem = elem;
-    }
+    FEIElementGeometryWrapper(const Element * elem) :
+        FEICellGeometry(), elem(elem) { }
     virtual ~FEIElementGeometryWrapper() { }
-    int giveNumberOfVertices() const;
-    inline const FloatArray *giveVertexCoordinates(int i) const
+    int giveNumberOfVertices() const override;
+    const FloatArray *giveVertexCoordinates(int i) const override
     {
         return &(elem->giveNode(i)->giveNodeCoordinates());
     }
@@ -121,8 +122,8 @@ public:
     FEIVertexListGeometryWrapper(const std::vector< FloatArray > &coords) : 
         FEICellGeometry(), coords(coords) { }
     virtual ~FEIVertexListGeometryWrapper() { }
-    int giveNumberOfVertices() const { return (int)this->coords.size(); }
-    const FloatArray *giveVertexCoordinates(int i) const { return &this->coords [ i - 1 ]; }
+    int giveNumberOfVertices() const override { return (int)this->coords.size(); }
+    const FloatArray *giveVertexCoordinates(int i) const override { return &this->coords [ i - 1 ]; }
 };
 
 /**
@@ -135,13 +136,10 @@ protected:
     int order;
 
 public:
-    FEInterpolation(int o) {
-        order = o;
-    }
+    FEInterpolation(int o) : order(o) { }
     virtual ~FEInterpolation() { }
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-
 
     /* @name basic interpolation services */
     //@{
@@ -180,7 +178,8 @@ public:
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
+    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    {
         OOFEM_ERROR("not implemented");
     }
     /**
@@ -190,13 +189,15 @@ public:
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    {
         OOFEM_ERROR("not implemented");
     }
     /**
      * Returns a matrix containing the local coordinates for each node corresponding to the interpolation
      */
-    virtual void giveLocalNodeCoords(FloatMatrix &answer) {
+    virtual void giveLocalNodeCoords(FloatMatrix &answer)
+    {
         OOFEM_ERROR("FEInterpolation::giveLocalNodeCoords: not implemented");
     }
     /**
@@ -237,10 +238,9 @@ public:
      * The required polynomial order for the determinant of the jacobian is added automatically.
      * @param order Polynomial order of integrand (should NOT including determinant of jacobian).
      */
-    virtual IntegrationRule *giveIntegrationRule(int order);
+    virtual std::unique_ptr<IntegrationRule> giveIntegrationRule(int order);
     //@}
 
-    
     /** @name Edge boundary functions.
      * Provide interpolation services for boundary edges (entity of dimension 1)
      */
@@ -255,7 +255,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @todo
      */
-    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the determinant of the transformation Jacobian on the requested boundary.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
@@ -264,7 +264,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @return The determinant of the boundary transformation Jacobian.
      */
-    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Maps the local boundary coordinates to global.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
@@ -273,7 +273,7 @@ public:
      * @param lcoords The local coordinates (on the boundary local coordinate system).
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /// Returns boundary integration domain
     virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int boundary) const = 0;
     /**
@@ -282,13 +282,13 @@ public:
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
+    virtual std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary);
     /**
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)=0;
+    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary) = 0;
     //@}
 
     /**@name Surface interpolation services 
@@ -311,8 +311,7 @@ public:
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
-					 const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /**
      * Evaluates the normal out of the surface at given point.
      * @param answer Contains resulting normal vector.
@@ -321,8 +320,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @return Surface mapping jacobian.
      */
-    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
-					     const FEICellGeometry &cellgeo)=0;
+    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
 
     /**
      * Evaluates edge global coordinates from given local ones.
@@ -332,8 +330,7 @@ public:
      * @param lcoords Array containing (local) coordinates.
      * @param cellgeo Underlying cell geometry.
      */
-    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf,
-					     const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
+    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)=0;
     /**
      * Evaluates the edge jacobian of transformation between local and global coordinates.
      * @param isurf Determines the surface number.
@@ -341,8 +338,7 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @return Determinant of the transformation.
      */
-    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-							     const FEICellGeometry &cellgeo)=0;
+    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
     /// Returns boundary integration domain
     virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int boundary) const = 0;
     /**
@@ -351,14 +347,13 @@ public:
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual IntegrationRule *giveBoundarySurfaceIntegrationRule(int order, int boundary);
+    virtual std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary);
     /**
      * Gives the boundary nodes for requested boundary number.
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary)=0;
-
+    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary) = 0;
     //@}
 
     /** @name General boundary interpolation functions.
@@ -417,7 +412,8 @@ public:
      * @param cellgeo Underlying cell geometry.
      * @return Evaluated integral.
      */
-    virtual double evalNXIntegral(int boundary, const FEICellGeometry &cellgeo) {
+    virtual double evalNXIntegral(int boundary, const FEICellGeometry &cellgeo)
+    {
         OOFEM_ERROR("Not implemented");
         return 0.;
     }
@@ -429,8 +425,7 @@ public:
      * @param order Polynomial order of the integrand (should NOT including determinant of jacobian).
      * @param boundary Boundary number.
      */
-    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary) ;
-
+    virtual std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary);
     //@}
 
     /**@name Methods to support interpolation defined on patch by patch basis. */
@@ -454,9 +449,7 @@ public:
     /**
      * Returns the subdivision of patch parametric space
      */
-    virtual const FloatArray *giveKnotVector() {
-        return NULL;
-    }
+    virtual const FloatArray *giveKnotVector() { return nullptr; }
     /**
      * Returns the number of knot spans of the receiver.
      */
@@ -464,11 +457,11 @@ public:
     /**
      * Returns the knot values of the receiver.
      */
-    virtual const FloatArray *giveKnotValues(int dim) { return NULL; }
+    virtual const FloatArray *giveKnotValues(int dim) { return nullptr; }
     /**
      * Returns the knot multiplicity of the receiver.
      */
-    virtual const IntArray *giveKnotMultiplicity(int dim) { return NULL; }
+    virtual const IntArray *giveKnotMultiplicity(int dim) { return nullptr; }
     /**
      * Returns number of spatial dimensions.
      */
@@ -477,16 +470,16 @@ public:
      * Returns number of edges.
      */
     virtual int giveNumberOfEdges() const 
-    { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); return -1;}
+    { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); return -1; }
     //@}
 
     /**
      * Returns the number of geometric nodes of the receiver.
      */
     virtual int giveNumberOfNodes() const
-    { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); return -1;}
+    { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); return -1; }
     //@}
-    
+
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
 } // end namespace oofem

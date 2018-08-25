@@ -53,29 +53,27 @@ namespace oofem {
  */
 class IntMatElastic : public StructuralInterfaceMaterial
 {
-public:
-	IntMatElastic(int n, Domain * d);
-	virtual ~IntMatElastic();
-
-    virtual int hasNonLinearBehaviour()   { return 0; }
-
-    virtual const char *giveClassName() const { return "IntMatElastic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IntMatElastic_Name; }
-
-    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
-                                        const FloatMatrix &F, TimeStep *tStep);
-
-    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralInterfaceMaterialStatus(1, domain, gp); }
-
-    virtual bool hasAnalyticalTangentStiffness() const { return true; }
-
 protected:
-	double k;
+    double k;
+
+public:
+    IntMatElastic(int n, Domain * d);
+    virtual ~IntMatElastic();
+
+    const char *giveClassName() const override { return "IntMatElastic"; }
+    const char *giveInputRecordName() const override { return _IFT_IntMatElastic_Name; }
+
+    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
+                                const FloatMatrix &F, TimeStep *tStep) override;
+
+    void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new StructuralInterfaceMaterialStatus(1, domain, gp); }
+
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 };
 
 } /* namespace oofem */

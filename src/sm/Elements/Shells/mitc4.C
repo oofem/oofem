@@ -1080,18 +1080,16 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp = NULL;
-
     if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
-        double J, thickness, z, w;
         FloatArray mLocal;
         mLocal.resize(6);
         mLocal.zero();
 
         for ( int i = 0; i < nPointsZ; i++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
-            thickness = this->giveCrossSection()->give(CS_Thickness, gp->giveGlobalCoordinates(), this, false);
-            J = thickness / 2.0;
+            auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
+            double thickness = this->giveCrossSection()->give(CS_Thickness, gp->giveGlobalCoordinates(), this, false);
+            double J = thickness / 2.0;
+            double z, w;
             if (  type == IST_ShellMomentTensor ) {
                 z = gp->giveNaturalCoordinates().at(3) * ( thickness / 2 );
             } else if (  type == IST_ShellForceTensor ) {
@@ -1106,25 +1104,20 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
         }
 
         // local to global
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
         this->computeGtoLRotationMatrix();
-        mat->transformStressVectorTo(answer,  GtoLRotationMatrix, mLocal, false);
+        StructuralMaterial::transformStressVectorTo(answer,  GtoLRotationMatrix, mLocal, false);
     } else if ( type == IST_CurvatureTensor ) {
         FloatArray h;
         FloatMatrix dn;
         FloatArray coords;
 
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
+        auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
         coords = gp->giveNaturalCoordinates();
-
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
 
         FloatArray hkx, hky;
         this->givedNdx(hkx, hky, coords);
 
         FloatArray dofs(24);
-
-
         FloatArray rotX(4), rotY(4);
 
         this->computeVectorOf(VM_Total, tStep, dofs);
@@ -1138,21 +1131,19 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
         cLocal.at(2) = -rotX.dotProduct(hky);
         cLocal.at(6) = rotY.dotProduct(hky) - rotX.dotProduct(hkx);
 
-        mat->transformStrainVectorTo(answer,  GtoLRotationMatrix, cLocal, false);
+        StructuralMaterial::transformStrainVectorTo(answer, GtoLRotationMatrix, cLocal, false);
     } else if ( type == IST_ShellStrainTensor ) {
         FloatArray coords;
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
+        auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
         coords = gp->giveNaturalCoordinates();
         coords.at(3) = 0;     //set to midplane
-        IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 10);
-        GaussPoint *midGP = new GaussPoint( iRule, 1, coords, 1, this->giveMaterialMode() );
+        GaussIntegrationRule iRule(1, this, 1, 10);
+        GaussPoint midGP( &iRule, 1, coords, 1, this->giveMaterialMode() );
 
-        this->giveIPValue(answer, midGP, IST_StrainTensor, tStep);
+        this->giveIPValue(answer, &midGP, IST_StrainTensor, tStep);
     } else {
         OOFEM_ERROR("MITC4Shell :: giveMidplaneIPValue - unknown type");
     }
-
-    return;
 }
 
 void
@@ -1195,8 +1186,6 @@ MITC4Shell :: givedNdx(FloatArray &hkx, FloatArray &hky, FloatArray coords)
     hky.at(2)  = dndx.at(2, 2);
     hky.at(3)  = dndx.at(3, 2);
     hky.at(4)  = dndx.at(4, 2);
-
-    return;
 }
 
 void
@@ -1268,7 +1257,7 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
-    GaussPoint _gp(NULL, 1, answer, 2.0, _2dPlate);
+    GaussPoint _gp(nullptr, 1, answer, 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
     bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 
@@ -1323,8 +1312,6 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
     FloatMatrix A(3, 3);
     FloatMatrix b, r;
     FloatArray val;
-    double u, v;
-
 
     int size = 0;
 
@@ -1339,8 +1326,8 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
         }
 
         const FloatArray &coord = gp->giveNaturalCoordinates();
-        u = coord.at(1);
-        v = coord.at(2);
+        double u = coord.at(1);
+        double v = coord.at(2);
 
         A.at(1, 1) += 1;
         A.at(1, 2) += u;
@@ -1508,17 +1495,6 @@ MITC4Shell :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-IntegrationRule *
-MITC4Shell :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return iRule;
-}
-
-
-
 double
 MITC4Shell :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
@@ -1530,7 +1506,6 @@ MITC4Shell :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     lcoords.at(2) = gp->giveNaturalCoordinate(2);
     FloatArray x(4), y(4), z(4);
     this->giveNodeCoordinates( x.at(1), x.at(2), x.at(3), x.at(4), y.at(1), y.at(2), y.at(3), y.at(4), z.at(1), z.at(2), z.at(3), z.at(4) );
-
 
     weight = gp->giveWeight();
 

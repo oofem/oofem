@@ -57,14 +57,14 @@ public:
     HydratingTransportMaterialStatus(int n, Domain * d, GaussPoint * g) : TransportMaterialStatus(n, d, g), HydrationModelStatusInterface() { }
     virtual ~HydratingTransportMaterialStatus() { }
 
-    virtual Interface *giveInterface(InterfaceType t);
-    virtual const char *giveClassName() const { return "HydratingTransportMaterialStatus"; }
+    Interface *giveInterface(InterfaceType t) override;
+    const char *giveClassName() const override { return "HydratingTransportMaterialStatus"; }
 
-    virtual void updateYourself(TimeStep *tStep) {
+    void updateYourself(TimeStep *tStep) override {
         HydrationModelStatusInterface :: updateYourself(tStep);
         TransportMaterialStatus :: updateYourself(tStep);
     }
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 };
 
 /**
@@ -84,28 +84,25 @@ public:
     void setMixture(MixtureType mix);
 
     /// Return true if hydration heat source is present.
-    virtual int hasInternalSource();
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-    virtual void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep);
+    int hasInternalSource() override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
-    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
     // identification and auxiliary functions
-    virtual const char *giveInputRecordName() const { return _IFT_HydratingIsoHeatMaterial_Name; }
-    virtual const char *giveClassName() const { return "HydratingIsoHeatMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_HydratingIsoHeatMaterial_Name; }
+    const char *giveClassName() const override { return "HydratingIsoHeatMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    // post-processing
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-
-protected:
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // hydratingisoheatmat_h

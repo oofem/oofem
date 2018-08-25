@@ -105,7 +105,7 @@ protected:
 public:
     Concrete2MaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~Concrete2MaterialStatus();
-    virtual void printOutputAt(FILE *file, TimeStep *tStep)
+    void printOutputAt(FILE *file, TimeStep *tStep) override
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
 
     const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }
@@ -132,15 +132,13 @@ public:
     double &giveMaxVolPlasticStrain()     { return E0PM; }
 
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    // definition
-    virtual const char *giveClassName() const { return "Concrete2MaterialStatus"; }
+    const char *giveClassName() const override { return "Concrete2MaterialStatus"; }
 };
 
 
@@ -180,15 +178,21 @@ public:
     Concrete2(int n, Domain * d);
     virtual ~Concrete2();
 
-    virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &, TimeStep *tStep);
+    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp,
+                                         const FloatArray &, TimeStep *tStep) override;
 
-    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
+    void givePlateLayerStiffMtrx(FloatMatrix &answer,
+                                 MatResponseMode mode,
+                                 GaussPoint *gp,
+                                 TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+
+    double give(int, GaussPoint *gp) override;
+
+    const char *giveClassName() const override { return "Concrete2"; }
+    const char *giveInputRecordName() const override { return _IFT_Concrete2_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 protected:
     void dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
@@ -203,15 +207,6 @@ protected:
     // gp's status. These variables are used to control process, when
     // we try to find equilibrium state.
     void updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep);
-
-public:
-    virtual double give(int, GaussPoint *gp);
-
-    // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual const char *giveClassName() const { return "Concrete2"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Concrete2_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
 };
 } // end namespace oofem
 #endif // concrete2_h

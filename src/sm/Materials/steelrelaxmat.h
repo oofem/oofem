@@ -124,26 +124,22 @@ protected:
      */
     enum approachType { Bazant_EC2, EquivTime_EC2 } Approach;
 
-
-
 public:
     SteelRelaxMat(int n, Domain *d);
     virtual ~SteelRelaxMat();
 
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-
+    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
     /**
      * evaluates stress-related strain - subtracts not only temperature strains but also strains caused by steel relaxation
      */
-    virtual void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain,
-                                                       TimeStep *tStep, ValueModeType mode);
+    void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain,
+                                               TimeStep *tStep, ValueModeType mode);
     /**
      * evaluates eigenstrain due to steel relaxation
      */
@@ -160,20 +156,18 @@ public:
      */
     void computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoint *gp, TimeStep *tStep, double stress);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int hasNonLinearBehaviour() { return 1; }
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
+    const char *giveInputRecordName() const override { return _IFT_SteelRelaxMat_Name; }
+    const char *giveClassName() const override { return "SteelRelaxMat"; }
 
-    virtual const char *giveInputRecordName() const { return _IFT_SteelRelaxMat_Name; }
-    virtual const char *giveClassName() const { return "SteelRelaxMat"; }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
 
 //=============================================================================
@@ -196,8 +190,6 @@ public:
     SteelRelaxMatStatus(int n, Domain *d, GaussPoint *g);
     virtual ~SteelRelaxMatStatus();
 
-
-
     void setTempRelaxIntVariable(double src) { tempRelaxIntVariable = src; }
     double giveTempRelaxIntVariable(void) { return tempRelaxIntVariable; }
     double giveRelaxIntVariable(void) { return relaxIntVariable; }
@@ -205,17 +197,16 @@ public:
     void setPrestress(double src) { prestress = src; }
     double givePrestress(void) { return prestress; }
 
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void initTempStatus() override;
 
-    virtual void initTempStatus();
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
-    virtual const char *giveClassName() const { return "SteelRelaxMatStatus"; }
+    const char *giveClassName() const override { return "SteelRelaxMatStatus"; }
 };
 } // end namespace oofem
 #endif // steelrelaxmat_h

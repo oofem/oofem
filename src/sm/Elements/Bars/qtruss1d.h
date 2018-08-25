@@ -55,32 +55,32 @@ public:
     QTruss1d(int n, Domain * d);
     virtual ~QTruss1d() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int computeNumberOfDofs() { return 3; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    int computeNumberOfDofs() override { return 3; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+    double giveCharacteristicLength(const FloatArray &normalToCrackPlane) override
     { return this->computeLength(); }
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
+    int testElementExtension(ElementExtension ext) override { return 0; }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QTruss1d_Name; }
-    virtual const char *giveClassName() const { return "QTruss1d"; }
+    const char *giveInputRecordName() const override { return _IFT_QTruss1d_Name; }
+    const char *giveClassName() const override { return "QTruss1d"; }
 
-    virtual MaterialMode giveMaterialMode() { return _1dMat; }
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    MaterialMode giveMaterialMode() override { return _1dMat; }
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
     
 };
 } // end namespace oofem

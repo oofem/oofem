@@ -126,11 +126,11 @@ public:
     MPSMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~MPSMaterialStatus() { }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /// Returns relative humidity
     double giveHum() { return hum; }
@@ -187,7 +187,7 @@ public:
 #endif
 
     // definition
-    virtual const char *giveClassName() const { return "MPSMaterialStatus"; }
+    const char *giveClassName() const override { return "MPSMaterialStatus"; }
 };
 
 
@@ -258,12 +258,12 @@ public:
     MPSMaterial(int n, Domain *d) : KelvinChainSolidMaterial(n, d) { }
     virtual ~MPSMaterial() { }
 
-    virtual const char *giveInputRecordName() const { return _IFT_MPSMaterial_Name; }
-    virtual const char *giveClassName() const { return "MPSMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_MPSMaterial_Name; }
+    const char *giveClassName() const override { return "MPSMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     //virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
@@ -275,7 +275,7 @@ public:
     /// Evaluation of the basic creep compliance function - can be used to compute elastic modulus in derived damage material
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
     void predictParametersFrom(double, double, double, double);

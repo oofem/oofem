@@ -63,9 +63,9 @@ public:
     DoublePowerLawMaterial(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
     virtual ~DoublePowerLawMaterial() { }
 
-    virtual const char *giveClassName() const { return "DoublePowerLawMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DoublePowerLawMaterial_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "DoublePowerLawMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_DoublePowerLawMaterial_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 

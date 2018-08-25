@@ -67,23 +67,21 @@ public:
         delete linearElasticMaterial;
     }
 
-    // identification and auxiliary functions
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual const char *giveClassName() const { return "Concrete3"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Concrete3_Name; }
+     IRResultType initializeFrom(InputRecord *ir) override;
+     const char *giveClassName() const override { return "Concrete3"; }
+     const char *giveInputRecordName() const override { return _IFT_Concrete3_Name; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
-                                       double crackStrain, int i);
-    //virtual double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i);
-    virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i);
-    virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
-    //virtual void updateStatusForNewCrack( GaussPoint*, int, double);
-    virtual double computeStrength(GaussPoint *, double);
-    virtual int checkSizeLimit(GaussPoint *gp, double);
+    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
+                               double crackStrain, int i) override;
+    //double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i) override;
+    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) override;
+    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) override;
+    //void updateStatusForNewCrack( GaussPoint*, int, double) override;
+    double computeStrength(GaussPoint *, double) override;
+    int checkSizeLimit(GaussPoint *gp, double) override;
 };
 } // end namespace oofem
 #endif // concrete3_h

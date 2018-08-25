@@ -126,18 +126,17 @@ public:
         }
     }
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    // identification and auxiliary functions
-    virtual const char *giveInputRecordName() const { return _IFT_OrthotropicLinearElasticMaterial_Name; }
-    virtual const char *giveClassName() const { return "OrthotropicLinearElasticMaterial"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    void giveInputRecord(DynamicInputRecord &input);
-    virtual double give(int aProperty, GaussPoint *gp);
+    const char *giveInputRecordName() const override { return _IFT_OrthotropicLinearElasticMaterial_Name; }
+    const char *giveClassName() const override { return "OrthotropicLinearElasticMaterial"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    double give(int aProperty, GaussPoint *gp) override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
     /// Computes local 3d stiffness matrix of the receiver.
     virtual void give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,

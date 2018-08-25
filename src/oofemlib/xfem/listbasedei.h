@@ -57,17 +57,17 @@ public:
     ListBasedEI(int n, XfemManager *xm, Domain *aDomain);
     virtual ~ListBasedEI();
 
-    virtual const char *giveClassName() const { return "ListBasedEI"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ListBasedEI_Name; }
+    const char *giveClassName() const override { return "ListBasedEI"; }
+    const char *giveInputRecordName() const override { return _IFT_ListBasedEI_Name; }
 
-    virtual void updateGeometry();
-    virtual void propagateFronts(bool &oFrontsHavePropagated);
+    void updateGeometry() override;
+    void propagateFronts(bool &oFrontsHavePropagated) override;
     virtual void initiateFronts(bool &oFrontsHavePropagated, IntArray &initiateDofMans);
-    virtual void updateNodeEnrMarker(XfemManager &ixFemMan);
+    void updateNodeEnrMarker(XfemManager &ixFemMan) override;
 
-    virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const;
+    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const override;
 
-    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) { OOFEM_ERROR("Not implemented.") }
+    void giveBoundingSphere(FloatArray &oCenter, double &oRadius) override { OOFEM_ERROR("Not implemented.") }
 
 protected:
     std :: vector< int >dofManList;

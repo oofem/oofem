@@ -449,7 +449,7 @@ contextIOResultType StaticStructural :: saveContext(DataStream &stream, ContextM
         THROW_CIOERR(iores);
     }
 
-    this->field->saveContext(stream, mode);
+    this->field->saveContext(stream);
 
     return CIO_OK;
 }
@@ -463,7 +463,7 @@ contextIOResultType StaticStructural :: restoreContext(DataStream &stream, Conte
         THROW_CIOERR(iores);
     }
 
-    this->field->restoreContext(stream, mode);
+    this->field->restoreContext(stream);
 
     return CIO_OK;
 }

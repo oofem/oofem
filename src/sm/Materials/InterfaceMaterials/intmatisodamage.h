@@ -73,7 +73,7 @@ public:
     /// Destructor
     virtual ~IntMatIsoDamageStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the last equilibrated scalar measure of the largest jump level.
     double giveKappa() { return kappa; }
@@ -82,20 +82,19 @@ public:
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated damage level.
-    double giveDamage() { return damage; }
+    double giveDamage() override { return damage; }
     /// Returns the temp. damage level.
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() override { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
-    // definition
-    virtual const char *giveClassName() const { return "IntMatIsoDamageStatus"; }
+    const char *giveClassName() const override { return "IntMatIsoDamageStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -129,22 +128,21 @@ protected:
     bool semiExplicit; // If semi-explicit time integration should be used
 
 public:
-    /// Constructor
     IntMatIsoDamage(int n, Domain *d);
-    /// Destructor
     virtual ~IntMatIsoDamage();
 
-    virtual const char *giveInputRecordName() const { return _IFT_IntMatIsoDamage_Name; }
-    virtual bool hasAnalyticalTangentStiffness() const { return true; } 
+    const char *giveInputRecordName() const override { return _IFT_IntMatIsoDamage_Name; }
+    const char *giveClassName() const override { return "IntMatIsoDamage"; }
 
-    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &jump, TimeStep *tStep);
+    bool hasAnalyticalTangentStiffness() const override { return true; } 
 
-    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatMatrix &F, TimeStep *tStep);
+    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
+                            const FloatArray &jump, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    
+    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                const FloatMatrix &F, TimeStep *tStep) override;
+
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     /**
      * Computes the equivalent jump measure from given jump vector (full form).
@@ -164,16 +162,15 @@ public:
      */
     virtual void computeDamageParam(double &omega, double kappa);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatIsoDamageStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatIsoDamageStatus(1, domain, gp); }
 
-protected:
-    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                                GaussPoint *gp, TimeStep *tStep);
+    void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                   GaussPoint *gp, TimeStep *tStep) override;
+    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                   GaussPoint *gp, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

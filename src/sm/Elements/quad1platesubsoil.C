@@ -88,7 +88,7 @@ Quad1PlateSubSoil :: computeGaussPoints()
 void
 Quad1PlateSubSoil :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 {
-  OOFEM_ERROR("Body load not supported, use surface load instead");
+    OOFEM_ERROR("Body load not supported, use surface load instead");
 }
 
 
@@ -170,10 +170,8 @@ Quad1PlateSubSoil :: giveCharacteristicLength(const FloatArray &normalToCrackPla
 double
 Quad1PlateSubSoil :: computeVolumeAround(GaussPoint *gp)
 {
-    double detJ, weight;
-
-    weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double weight = gp->giveWeight();
+    double detJ = fabs( this->interp_lin.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight;
 }
 
@@ -182,7 +180,7 @@ void
 Quad1PlateSubSoil :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-  OOFEM_ERROR("Mass matrix not provided");
+    OOFEM_ERROR("Mass matrix not provided");
 }
 
 
@@ -257,7 +255,7 @@ Quad1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     answer.resize(4);
     answer.zero();
     if ( iSurf == 1 ) {
-        for (int i = 1; i<=4; i++) {
+        for (int i = 1; i <= 4; i++) {
             answer.at(i) = i;
         }
     } else {
@@ -265,14 +263,6 @@ Quad1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-IntegrationRule *
-Quad1PlateSubSoil :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return iRule;
-}
 
 double
 Quad1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)

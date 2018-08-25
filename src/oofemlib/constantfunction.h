@@ -65,19 +65,18 @@ public:
     /// @return Value of receiver.
     double giveValue() { return value; }
 
-    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=NULL, double param=0.) { answer = FloatArray{this->giveValue()}; }
-    virtual double evaluateAtTime(double t) { return this->giveValue(); }
-    virtual double evaluateVelocityAtTime(double t) { return 0.; }
-    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override { answer = FloatArray{this->giveValue()}; }
+    double evaluateAtTime(double t) override { return this->giveValue(); }
+    double evaluateVelocityAtTime(double t) override { return 0.; }
+    double evaluateAccelerationAtTime(double t) override { return 0.; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual const char *giveClassName() const { return "ConstantFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ConstantFunction_Name; }
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
+    const char *giveClassName() const override { return "ConstantFunction"; }
+    const char *giveInputRecordName() const override { return _IFT_ConstantFunction_Name; }
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // constantfunction_h

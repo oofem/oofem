@@ -60,40 +60,38 @@ public:
     Brick1_ht(int n, Domain * d);
     virtual ~Brick1_ht();
 
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual FEInterpolation *giveInterpolation() const;
+    double computeVolumeAround(GaussPoint *gp) override;
+    FEInterpolation *giveInterpolation() const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_Brick1_ht_Name; }
-    virtual const char *giveClassName() const { return "Brick1_ht"; }
+    const char *giveInputRecordName() const override { return _IFT_Brick1_ht_Name; }
+    const char *giveClassName() const override { return "Brick1_ht"; }
 
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
+    int computeNumberOfDofs() override { return 8; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    MaterialMode giveMaterialMode() override { return _3dHeat; }
 
-    virtual Interface *giveInterface(InterfaceType t);
-    virtual int testElementExtension(ElementExtension ext)
+    Interface *giveInterface(InterfaceType t) override;
+    int testElementExtension(ElementExtension ext) override
     { return ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ); }
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
 #ifdef __OOFEG
     // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override {}
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override {}
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
+    void computeGaussPoints() override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge) override;
 };
 
 /**
@@ -104,10 +102,10 @@ class Brick1_hmt : public Brick1_ht
 public:
     Brick1_hmt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Brick1_hmt_Name; }
-    virtual const char *giveClassName() const { return "Brick1_hmt"; }
-    virtual int computeNumberOfDofs() { return 16; }
-    virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
+    const char *giveInputRecordName() const override { return _IFT_Brick1_hmt_Name; }
+    const char *giveClassName() const override { return "Brick1_hmt"; }
+    int computeNumberOfDofs() override { return 16; }
+    MaterialMode giveMaterialMode() override { return _3dHeMo; }
 };
 
 /**
@@ -118,10 +116,10 @@ class Brick1_mt : public Brick1_ht
 public:
     Brick1_mt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Brick1_mt_Name; }
-    virtual const char *giveClassName() const { return "Brick1_mt"; }
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
+    const char *giveInputRecordName() const override { return _IFT_Brick1_mt_Name; }
+    const char *giveClassName() const override { return "Brick1_mt"; }
+    int computeNumberOfDofs() override { return 8; }
+    MaterialMode giveMaterialMode() override { return _3dHeat; }
 };
 } // end namespace oofem
 #endif // brick1_ht_h

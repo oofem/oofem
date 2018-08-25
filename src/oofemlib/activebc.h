@@ -121,7 +121,7 @@ public:
      */
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) { }
+                                const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr) { }
 
     /**
      * Gives a list of location arrays that will be assembled.
@@ -183,7 +183,7 @@ public:
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof)
     {
         OOFEM_ERROR("Not supported by bc.");
-        return NULL;
+        return nullptr;
     }
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
     {

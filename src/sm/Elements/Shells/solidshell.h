@@ -61,27 +61,27 @@ protected:
 public:
     SolidShell(int n, Domain * d);
     virtual ~SolidShell() { }
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeBHmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
-    
+    FEInterpolation *giveInterpolation() const override;
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) override;
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeBHmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
+
     virtual void computeBEmatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeGaussPoints();
+    void computeGaussPoints() override;
     virtual void computeEASBmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     void computeGeometricStiffness(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     void computeFVector(FloatArray &answer, FloatArray &lCoords, FloatArray &ae);
     void computeEVector(FloatArray &answer, FloatArray &lCoords, FloatArray &ae);
     void computeEASfield(FloatArray &answer, TimeStep *tStep);
-    
+
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LSpace_Name; }
-    virtual const char *giveClassName() const { return "SolidShell"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
+    const char *giveInputRecordName() const override { return _IFT_LSpace_Name; }
+    const char *giveClassName() const override { return "SolidShell"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+
     // variables associated with EAS
     int EAS_type; 
     FloatArray tempAlpha;
@@ -91,13 +91,12 @@ public:
     FloatMatrix KEC;
     FloatArray fE;
     void computeAlpha(FloatArray &answer, FloatArray &u);
-    
+
     void computeBondTransformationMatrix(FloatMatrix &answer, FloatMatrix &base);
-    virtual void postInitialize();
-    virtual int checkConsistency(){ return 1; };
-    
-    
-    private:
+    void postInitialize() override;
+    int checkConsistency() override{ return 1; };
+
+private:
     void x(int arg1);
 };
 } // end namespace oofem

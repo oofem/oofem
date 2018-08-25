@@ -73,24 +73,27 @@ public:
     DofDistributedPrimaryField(EngngModel * a, int idomain, FieldType ft, int nHist=2, double alpha=1.0);
     virtual ~DofDistributedPrimaryField();
 
-    virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);
+    void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s) override;
 
-    virtual double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep);
+    double giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep) override;
 
-    virtual void update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s);
+    void update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s) override;
 
-    virtual void applyDefaultInitialCondition();
+    void applyDefaultInitialCondition() override;
     void applyInitialCondition(InitialCondition &ic);
-    virtual void applyBoundaryCondition(TimeStep *tStep);
-    virtual void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
 
-    virtual FloatArray *giveSolutionVector(TimeStep *tStep);
+    void applyBoundaryCondition(TimeStep *tStep) override;
+    void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
+
+    FloatArray *giveSolutionVector(TimeStep *tStep) override { OOFEM_ERROR("DEPRECATED"); return nullptr; }
 
     void setInitialGuess(DofManager &dman, TimeStep *tStep, TimeStep *prev);
-    virtual void advanceSolution(TimeStep *tStep);
+    void advanceSolution(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+
+
+    void saveContext(DataStream &stream) override { }
+    void restoreContext(DataStream &stream) override { }
 };
 } // end namespace oofem
 #endif // dofdistributedprimaryfield_h

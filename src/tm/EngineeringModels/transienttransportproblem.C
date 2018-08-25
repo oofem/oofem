@@ -409,7 +409,7 @@ TransientTransportProblem :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    field->saveContext(stream, mode);
+    field->saveContext(stream);
 
     return CIO_OK;
 }
@@ -424,7 +424,7 @@ TransientTransportProblem :: restoreContext(DataStream &stream, ContextMode mode
         THROW_CIOERR(iores);
     }
 
-    field->restoreContext(stream, mode);
+    field->restoreContext(stream);
 
     return CIO_OK;
 }

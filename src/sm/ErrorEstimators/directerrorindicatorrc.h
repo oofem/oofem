@@ -95,25 +95,25 @@ public:
     DirectErrorIndicatorRC(int n, ErrorEstimator * e);
     virtual ~DirectErrorIndicatorRC();
 
-    virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);
-    virtual double giveDofManDensity(int num);
+    double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0) override;
+    double giveDofManDensity(int num) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int estimateMeshDensities(TimeStep *tStep);
-    virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep);
+    int estimateMeshDensities(TimeStep *tStep) override;
+    RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep) override;
     /// Returns the minimum indicator limit.
     double giveMinIndicatorLimit() { return minIndicatorLimit; }
     double giveMinIndicatorDensity() { return minIndicatorDensity; }
 
     void giveNodeChar(int inode, TimeStep *tStep, double &indicatorVal, double &currDensity);
     double giveZeroIndicatorDensity() { return zeroIndicatorDensity; }
-    virtual void reinitialize();
+    void reinitialize() override;
 
-    virtual void setDomain(Domain *d);
+    void setDomain(Domain *d) override;
 
-    virtual const char *giveInputRecordName() const { return NULL; }
-    virtual const char *giveClassName() const { return "DirectErrorIndicatorRC"; }
+    const char *giveInputRecordName() const override { return nullptr; }
+    const char *giveClassName() const override { return "DirectErrorIndicatorRC"; }
 
 protected:
     double giveLocalDofManDensity(int num);

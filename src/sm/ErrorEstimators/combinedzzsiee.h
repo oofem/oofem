@@ -67,15 +67,15 @@ public:
     /// Destructor
     virtual ~CombinedZZSIErrorEstimator() { }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
-    virtual double giveValue(EE_ValueType type, TimeStep *tStep);
+    double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep) override;
+    double giveValue(EE_ValueType type, TimeStep *tStep) override;
 
-    virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
-    virtual RemeshingCriteria *giveRemeshingCrit();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveInputRecordName() const { return NULL; }
-    virtual const char *giveClassName() const { return "CombinedZZSIErrorEstimator"; }
-    virtual void setDomain(Domain *d);
+    int estimateError(EE_ErrorMode mode, TimeStep *tStep) override;
+    RemeshingCriteria *giveRemeshingCrit() override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveInputRecordName() const override { return _IFT_CombinedZZSIErrorEstimator_Name; }
+    const char *giveClassName() const override { return "CombinedZZSIErrorEstimator"; }
+    void setDomain(Domain *d) override;
 };
 
 /**
@@ -103,14 +103,14 @@ public:
     /// Destructor
     virtual ~CombinedZZSIRemeshingCriteria() { }
 
-    virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);
-    virtual double giveDofManDensity(int num);
-    virtual RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep);
-    virtual int estimateMeshDensities(TimeStep *tStep);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveInputRecordName() const { return NULL; }
-    virtual const char *giveClassName() const { return "CombinedZZSIRemeshingCriteria"; }
-    virtual void setDomain(Domain *d);
+    double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0) override;
+    double giveDofManDensity(int num) override;
+    RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep) override;
+    int estimateMeshDensities(TimeStep *tStep) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveInputRecordName() const override { return nullptr; }
+    const char *giveClassName() const override { return "CombinedZZSIRemeshingCriteria"; }
+    void setDomain(Domain *d) override;
 };
 } // end namespace oofem
 #endif // combinedzzsiee_h

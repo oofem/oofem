@@ -66,19 +66,19 @@ public:
     virtual ~XfemStructureManager();
 
     /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual int instanciateYourself(DataReader &dr);
-    virtual const char *giveClassName() const { return "XfemStructureManager"; }
-    virtual const char *giveInputRecordName() const { return _IFT_XfemStructureManager_Name; }
+    int instanciateYourself(DataReader &dr) override;
+    const char *giveClassName() const override { return "XfemStructureManager"; }
+    const char *giveInputRecordName() const override { return _IFT_XfemStructureManager_Name; }
 
-    virtual void propagateFronts(bool &oAnyFronHasPropagated);
+    void propagateFronts(bool &oAnyFronHasPropagated) override;
 
     /**
      * Update enrichment items (level sets).
      */
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
     void splitCracks();
 
@@ -87,7 +87,7 @@ public:
     bool tipsHaveOppositeDirection(EnrichmentFront *iEf1, EnrichmentFront *iEf2);
     void mergeCloseCracks();
 
-    bool giveUseNonStdCz() const {return mNonstandardCz;}
+    bool giveUseNonStdCz() const { return mNonstandardCz; }
 
     /// Compute the total length of all cracks in the domain.
     double computeTotalCrackLength();

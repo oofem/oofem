@@ -63,10 +63,10 @@ protected:
     FloatArray nonlocalStrainVector, tempNonlocalStrainVector, localStrainVectorForAverage;
 
 public:
-    RCSDNLMaterialStatus(int n, Domain * d, GaussPoint * g);
+    RCSDNLMaterialStatus(int n, Domain * d, GaussPoint *gp);
     virtual ~RCSDNLMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     const FloatArray &giveNonlocalStrainVector() { return nonlocalStrainVector; }
     const FloatArray &giveTempNonlocalStrainVector() { return tempNonlocalStrainVector; }
@@ -75,18 +75,16 @@ public:
     const FloatArray &giveLocalStrainVectorForAverage() { return localStrainVectorForAverage; }
     void setLocalStrainVectorForAverage(FloatArray ls) { localStrainVectorForAverage = std :: move(ls); }
 
-    // definition
-    virtual const char *giveInputRecordName() const { return _IFT_RCSDNLMaterial_Name; }
-    virtual const char *giveClassName() const { return "RCSDNLMaterialStatus"; }
+    const char *giveInputRecordName() const override { return _IFT_RCSDNLMaterial_Name; }
+    const char *giveClassName() const override { return "RCSDNLMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 };
 
 
@@ -118,15 +116,14 @@ public:
     RCSDNLMaterial(int n, Domain * d);
     virtual ~RCSDNLMaterial();
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "RCSDNLMaterial"; }
+    const char *giveClassName() const override { return "RCSDNLMaterial"; }
 
-    virtual Interface *giveInterface(InterfaceType t);
+    Interface *giveInterface(InterfaceType t) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &, TimeStep *tStep) override;
 
     /**
      * Implements the service updating local variables in given integration points,
@@ -138,25 +135,25 @@ public:
      * @param gp integration point to update.
      * @param tStep solution step indicating time of update.
      */
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
-    virtual int hasBoundedSupport() { return 1; }
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
+    int hasBoundedSupport() override { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
      */
-    virtual void giveSupportRadius(double &radius) { radius = this->R; }
+    void giveSupportRadius(double &radius) { radius = this->R; }
 
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDNLMaterialStatus(1, RCSDEMaterial :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCSDNLMaterialStatus(1, RCSDEMaterial :: domain, gp); }
 
 protected:
-    virtual double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &) { return 1.0; }
-    virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
-    virtual double computeStrength(GaussPoint *, double)  { return this->Ft; }
+    double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &) override { return 1.0; }
+    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) override;
+    double computeStrength(GaussPoint *, double) override { return this->Ft; }
 };
 } // end namespace oofem
 #endif // rcsdnl_h

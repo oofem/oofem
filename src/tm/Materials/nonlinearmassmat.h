@@ -65,27 +65,26 @@ protected:
     double alpha;
 
 public:
-
     NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
     virtual ~NonlinearMassTransferMaterial() { }
 
-    virtual void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    void  giveCharacteristicMatrix(FloatMatrix &answer,
+                                   MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_NonlinearMassTransferMaterial_Name; }
-    virtual const char *giveClassName() const { return "NonlinearMassTransferMaterial"; }
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_NonlinearMassTransferMaterial_Name; }
+    const char *giveClassName() const override { return "NonlinearMassTransferMaterial"; }
 };
 } // end namespace oofem
 #endif // nonlinearheatmat_h

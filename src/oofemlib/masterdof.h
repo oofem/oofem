@@ -117,46 +117,46 @@ public:
     /// Destructor.
     virtual ~MasterDof();
 
-    virtual dofType giveDofType() { return DT_master; }
-    virtual const char *giveClassName() const { return "MasterDof"; }
+    dofType giveDofType() override { return DT_master; }
+    const char *giveClassName() const override { return "MasterDof"; }
 
-    virtual int __giveEquationNumber() const;
+    int __giveEquationNumber() const override;
 
-    virtual int __givePrescribedEquationNumber();
+    int __givePrescribedEquationNumber() override;
 
-    virtual int askNewEquationNumber(TimeStep *tStep);
+    int askNewEquationNumber(TimeStep *tStep) override;
 
-    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
-    virtual double giveUnknown(PrimaryField &field, ValueModeType, TimeStep *tStep);
+    double giveUnknown(ValueModeType mode, TimeStep *tStep) override;
+    double giveUnknown(PrimaryField &field, ValueModeType, TimeStep *tStep) override;
 
-    virtual bool hasBc(TimeStep *tStep);
-    virtual bool hasIc();
-    virtual bool hasIcOn(ValueModeType);
+    bool hasBc(TimeStep *tStep) override;
+    bool hasIc() override;
+    bool hasIcOn(ValueModeType) override;
 
-    virtual bool isPrimaryDof() { return true; }
+    bool isPrimaryDof() override { return true; }
 
-    virtual int giveBcId();
-    virtual int giveIcId();
+    int giveBcId() override;
+    int giveIcId() override;
 
-    virtual void printYourself();
-    virtual void updateYourself(TimeStep *tStep);
+    void printYourself() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue);
+    void updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue) override;
 
-    virtual double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode);
+    double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual void setBcId(int bcId) { this->bc = bcId; }
-    virtual void setIcId(int icId) { this->ic = icId; }
-    virtual void setEquationNumber(int newEquationNumber) { this->equationNumber = newEquationNumber; }
-    virtual Dictionary *giveUnknowns() { return &this->unknowns; }
-    virtual int giveEqn() { return equationNumber; }
+    void setBcId(int bcId) override { this->bc = bcId; }
+    void setIcId(int icId) override { this->ic = icId; }
+    void setEquationNumber(int newEquationNumber) override { this->equationNumber = newEquationNumber; }
+    Dictionary *giveUnknowns() override { return &this->unknowns; }
+    int giveEqn() override { return equationNumber; }
 
 protected:
-    BoundaryCondition *giveBc();
-    InitialCondition *giveIc();
+    BoundaryCondition *giveBc() override;
+    InitialCondition *giveIc() override;
 };
 } // end namespace oofem
 #endif // masterdof_h

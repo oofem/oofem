@@ -118,16 +118,15 @@ public:
     void setPrescribedValue(double s);
 
     // Overloaded methods:
-    virtual bcType giveType() const { return DirichletBT; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void scale(double s);
-    virtual const char *giveClassName() const { return "BoundaryCondition"; }
-    virtual const char *giveInputRecordName() const { return _IFT_BoundaryCondition_Name; }
+    bcType giveType() const override { return DirichletBT; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void scale(double s) override;
+    const char *giveClassName() const override { return "BoundaryCondition"; }
+    const char *giveInputRecordName() const override { return _IFT_BoundaryCondition_Name; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // boudary_h

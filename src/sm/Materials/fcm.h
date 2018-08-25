@@ -94,8 +94,8 @@ protected:
 public:
     FCMMaterialStatus(int n, Domain *d, GaussPoint *g);
     virtual ~FCMMaterialStatus();
-    /// prints the output into the output file
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
     /// returns number of cracks from the previous time step (equilibrated value)
     virtual int giveNumberOfCracks() const;
     /// returns temporary number of cracks
@@ -173,18 +173,13 @@ public:
     /// returns maximum number of cracks associated with current mode
     virtual int giveMaxNumberOfCracks(GaussPoint *gp);
 
-    // definition
-    virtual const char *giveClassName() const { return "FCMMaterialStatus"; }
+    const char *giveClassName() const override { return "FCMMaterialStatus"; }
 
-    /// initializes temporary status
-    virtual void initTempStatus();
-    /// replaces equilibrated values with temporary values
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    /// saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    /// restores context(state) from stream
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 /**
@@ -203,54 +198,50 @@ public:
     FCMMaterial(int n, Domain *d);
     virtual ~FCMMaterial();
 
-    // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual const char *giveClassName() const { return "FCMMaterial"; }
+    const char *giveClassName() const override { return "FCMMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
     IsotropicLinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
+    void givePlaneStressStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
     virtual void initializeCrack(GaussPoint *gp, FloatMatrix &base, int nCrack);
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     /// uses temporary cracking strain and characteristic length to obtain the crack opening
     virtual double computeNormalCrackOpening(GaussPoint *gp, int i);
@@ -260,7 +251,7 @@ public:
     /// computes total shear slip on a given crack plane (i = 1, 2, 3); the slip is computed from the temporary cracking strain
     virtual double computeShearSlipOnCrack(GaussPoint *gp, int i);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new FCMMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FCMMaterialStatus(1, domain, gp); }
 
 protected:
 

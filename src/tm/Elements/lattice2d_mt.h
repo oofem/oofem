@@ -78,74 +78,72 @@ public:
     virtual ~Lattice2d_mt();
 
     /** Computes the contribution to balance equation(s) due to internal sources */
-    virtual void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode);
-    virtual double computeVolumeAround(GaussPoint *);
+    void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) override;
+    double computeVolumeAround(GaussPoint *) override;
 
-    virtual int giveCouplingFlag(){ return this->couplingFlag;}
+    int giveCouplingFlag() override { return this->couplingFlag; }
 
-    virtual void giveCouplingNumbers(IntArray &numbers){ numbers = this->couplingNumbers;}
-    
-    virtual void giveCrackLengths(FloatArray &lengths){ lengths = this->crackLengths;}
+    void giveCouplingNumbers(IntArray &numbers) override { numbers = this->couplingNumbers; }
 
-    virtual void giveCrackWidths(FloatArray &widths){ widths = crackWidths;}
+    void giveCrackLengths(FloatArray &lengths) override { lengths = this->crackLengths; }
+
+    void giveCrackWidths(FloatArray &widths) override { widths = crackWidths; }
 
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;
 
-    virtual void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
-    virtual void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep);
+    void computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_Lattice2d_mt_Name; }
-    virtual const char *giveClassName() const { return "Lattice2d_mtElement"; }
+    const char *giveInputRecordName() const override { return _IFT_Lattice2d_mt_Name; }
+    const char *giveClassName() const override { return "Lattice2d_mtElement"; }
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
-    virtual double giveWidth() { return width; }
-    virtual int computeNumberOfDofs() { return 2; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    double giveWidth() { return width; }
+    int computeNumberOfDofs() override { return 2; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void updateInternalState(TimeStep *tStep);
+    void updateInternalState(TimeStep *tStep) override;
 
 #ifdef __OOFEG
     // Graphics output
-    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void giveCrossSectionCoordinates(FloatArray &coords);
+    void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void giveCrossSectionCoordinates(FloatArray &coords) override;
 #endif
 
 protected:
-    virtual void computeGaussPoints();
+    void computeGaussPoints() override;
 
-    virtual void computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords) { this->computeGradientMatrixAt(answer, lcoords); }
-    virtual void  computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords);
-    virtual void  computeNmatrixAt(FloatMatrix &n, const FloatArray &);
+    void computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords) override { this->computeGradientMatrixAt(answer, lcoords); }
+    void computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords) override;
+    void computeNmatrixAt(FloatMatrix &n, const FloatArray &) override;
 
-    virtual double givePressure();
+    double givePressure() override;
 
-    virtual double giveOldPressure();
+    double giveOldPressure() override;
 
-    virtual double giveMass();
-
+    double giveMass() override;
 
     /* computes the submatrix of interpolation matrix cooresponding to single unknown.
      */
-    virtual void  computeNSubMatrixAt(FloatMatrix &n, const FloatArray &);
+    void computeNSubMatrixAt(FloatMatrix &n, const FloatArray &);
 
-    virtual double giveLength();
+    double giveLength() override;
 
-    virtual double giveArea() { return width * thickness; }
+    double giveArea() override { return width * thickness; }
 
+    void  giveGpCoordinates(FloatArray &coords) override;
 
-    virtual void  giveGpCoordinates(FloatArray &coords);
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override { return 0; }
 
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) { return 0; }
-
-    virtual int giveApproxOrder(int unknownIndx) { return 1; }
+    int giveApproxOrder(int unknownIndx) override { return 1; }
 };
 } // end namespace oofem
 #endif

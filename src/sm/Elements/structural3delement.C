@@ -312,15 +312,11 @@ Structural3DElement :: computeVolumeAround(GaussPoint *gp)
 }
 
 
-
 double
 Structural3DElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
     return this->giveLengthInDir(normalToCrackPlane);
 }
-
-
-
 
 
 // Surface support
@@ -371,17 +367,12 @@ Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 }
 
 
-
 int
 Structural3DElement :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *)
 {
     OOFEM_ERROR("surface local coordinate system not supported");
     return 1;
 }
-
-
-
-
 
 
 // Edge support
@@ -403,7 +394,6 @@ Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(i * 3)     = eNodes.at(i) * 3;
     }
 }
-
 
 
 double

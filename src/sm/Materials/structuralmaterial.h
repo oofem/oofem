@@ -124,7 +124,7 @@ public:
     static std::vector< std::vector<int> > svIndex;
 
     static int giveSymVI(int ind1, int ind2) { return svIndex[ind1-1][ind2-1]; }
-    static int giveVI(int ind1, int ind2) { return vIindex[ind1-1][ind2-1]; }    
+    static int giveVI(int ind1, int ind2) { return vIindex[ind1-1][ind2-1]; }
 
     /**
      * Constructor. Creates material with given number, belonging to given domain.
@@ -135,11 +135,11 @@ public:
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "StructuralMaterial"; }
+    int hasMaterialModeCapability(MaterialMode mode) override;
+    const char *giveClassName() const override { return "StructuralMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     /**
      * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
@@ -441,8 +441,8 @@ public:
     void giveStressDependentPartOfStrainVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
                                                TimeStep *tStep, ValueModeType mode);
 
-    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     /**
      * Method for computing plane stress stiffness matrix of receiver.

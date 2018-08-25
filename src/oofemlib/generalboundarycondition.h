@@ -113,7 +113,7 @@ public:
     /// Gives the number of internal dof managers.
     virtual int giveNumberOfInternalDofManagers() { return 0; }
     /// Gives an internal dof manager from receiver.
-    virtual DofManager *giveInternalDofManager(int i) { return NULL; }
+    virtual DofManager *giveInternalDofManager(int i) { return nullptr; }
 
 
     /**
@@ -162,11 +162,11 @@ public:
     virtual void postInitialize() { }
 
     // Overloaded methods:
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // generalbc_h

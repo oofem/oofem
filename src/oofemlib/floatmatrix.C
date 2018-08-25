@@ -1890,8 +1890,6 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 
 
     /* Local variables */
-    double ssum, aa, co, si, tt, tol, sum, aij, aji;
-    int ite, i, j, k, ih;
     int neq = this->giveNumberOfRows();
 
     double c_b2 = .10;
@@ -1903,8 +1901,8 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
         OOFEM_ERROR("Not square matrix");
     }
     // check for symmetry
-    for ( i = 1; i <= neq; i++ ) {
-        for ( j = i + 1; j <= neq; j++ ) {
+    for ( int i = 1; i <= neq; i++ ) {
+        for ( int j = i + 1; j <= neq; j++ ) {
             //if ( this->at(i, j) != this->at(j, i) ) {
             if ( fabs( this->at(i, j) - this->at(j, i) ) > 1.0e-6 ) {
                 OOFEM_ERROR("Not Symmetric matrix");
@@ -1917,14 +1915,14 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     eval.resize(neq);
     v.resize(neq, neq);
 
-    for ( i = 1; i <= neq; i++ ) {
+    for ( int i = 1; i <= neq; i++ ) {
         eval.at(i) = this->at(i, i);
     }
 
-    tol = pow(c_b2, nf);
-    sum = 0.0;
-    for ( i = 1; i <= neq; ++i ) {
-        for ( j = 1; j <= neq; ++j ) {
+    double tol = pow(c_b2, nf);
+    double sum = 0.0;
+    for ( int i = 1; i <= neq; ++i ) {
+        for ( int j = 1; j <= neq; ++j ) {
             sum += fabs( this->at(i, j) );
             v.at(i, j) = 0.0;
         }
@@ -1938,18 +1936,19 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 
 
     /* ---- REDUCE MATRIX TO DIAGONAL ---------------- */
-    ite = 0;
+    int ite = 0;
+    double ssum;
     do {
         ssum = 0.0;
-        for ( j = 2; j <= neq; ++j ) {
-            ih = j - 1;
-            for ( i = 1; i <= ih; ++i ) {
+        for ( int j = 2; j <= neq; ++j ) {
+            int ih = j - 1;
+            for ( int i = 1; i <= ih; ++i ) {
                 if ( ( fabs( this->at(i, j) ) / sum ) > tol ) {
                     ssum += fabs( this->at(i, j) );
                     /* ---- CALCULATE ROTATION ANGLE ----------------- */
-                    aa = atan2( this->at(i, j) * 2.0, eval.at(i) - eval.at(j) ) /  2.0;
-                    si = sin(aa);
-                    co = cos(aa);
+                    double aa = atan2( this->at(i, j) * 2.0, eval.at(i) - eval.at(j) ) /  2.0;
+                    double si = sin(aa);
+                    double co = cos(aa);
                     /*
                      *   // ---- MODIFY "I" AND "J" COLUMNS OF "A" AND "V"
                      *   for (k = 1; k <= neq; ++k) {
@@ -1973,27 +1972,27 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
                      *   }
                      */
                     // ---- MODIFY "I" AND "J" COLUMNS OF "A" AND "V"
-                    for ( k = 1; k < i; ++k ) {
-                        tt = this->at(k, i);
-                        this->at(k, i) = co * tt + si *this->at(k, j);
-                        this->at(k, j) = -si * tt + co *this->at(k, j);
+                    for ( int k = 1; k < i; ++k ) {
+                        double tt = this->at(k, i);
+                        this->at(k, i) = co * tt + si * this->at(k, j);
+                        this->at(k, j) = -si * tt + co * this->at(k, j);
                         tt = v.at(k, i);
                         v.at(k, i) = co * tt + si *v.at(k, j);
                         v.at(k, j) = -si * tt + co *v.at(k, j);
                     }
 
                     // diagonal term (i,i)
-                    tt = eval.at(i);
-                    eval.at(i) = co * tt + si *this->at(i, j);
-                    aij = -si * tt + co *this->at(i, j);
+                    double tt = eval.at(i);
+                    eval.at(i) = co * tt + si * this->at(i, j);
+                    double aij = -si * tt + co *this->at(i, j);
                     tt = v.at(i, i);
                     v.at(i, i) = co * tt + si *v.at(i, j);
                     v.at(i, j) = -si * tt + co *v.at(i, j);
 
-                    for ( k = i + 1; k < j; ++k ) {
-                        tt = this->at(i, k);
-                        this->at(i, k) = co * tt + si *this->at(k, j);
-                        this->at(k, j) = -si * tt + co *this->at(k, j);
+                    for ( int k = i + 1; k < j; ++k ) {
+                        double tt = this->at(i, k);
+                        this->at(i, k) = co * tt + si * this->at(k, j);
+                        this->at(k, j) = -si * tt + co * this->at(k, j);
                         tt = v.at(k, i);
                         v.at(k, i) = co * tt + si *v.at(k, j);
                         v.at(k, j) = -si * tt + co *v.at(k, j);
@@ -2001,15 +2000,15 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 
                     // diagonal term (j,j)
                     tt = this->at(i, j);
-                    aji = co * tt + si *eval.at(j);
+                    double aji = co * tt + si *eval.at(j);
                     eval.at(j) = -si * tt + co *eval.at(j);
 
                     tt = v.at(j, i);
                     v.at(j, i) = co * tt + si *v.at(j, j);
                     v.at(j, j) = -si * tt + co *v.at(j, j);
                     //
-                    for ( k = j + 1; k <= neq; ++k ) {
-                        tt = this->at(i, k);
+                    for ( int k = j + 1; k <= neq; ++k ) {
+                        double tt = this->at(i, k);
                         this->at(i, k) = co * tt + si *this->at(j, k);
                         this->at(j, k) = -si * tt + co *this->at(j, k);
                         tt = v.at(k, i);
@@ -2035,8 +2034,8 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     } while ( fabs(ssum) / sum > tol );
 
     // restore original matrix
-    for ( i = 1; i <= neq; i++ ) {
-        for ( j = i; j <= neq; j++ ) {
+    for ( int i = 1; i <= neq; i++ ) {
+        for ( int j = i; j <= neq; j++ ) {
             this->at(i, j) = this->at(j, i);
         }
     }

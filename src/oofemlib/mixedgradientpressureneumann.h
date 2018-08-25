@@ -123,14 +123,14 @@ public:
      * This boundary condition stores its own DOF managers, one for @f$ d_{\mathrm{dev},ij} @f$ in which the DOFs are prescribed
      * and one for @f$ d_{\mathrm{vol}} @f$ for single free volumetric strain rate.
      */
-    virtual int giveNumberOfInternalDofManagers();
+    int giveNumberOfInternalDofManagers() override;
     /**
      * Returns the volumetric DOF manager for i == 1, and the deviatoric manager for i == 2.
      */
-    virtual DofManager *giveInternalDofManager(int i);
+    DofManager *giveInternalDofManager(int i) override;
 
     /// Not relevant for this boundary condition.
-    virtual bcType giveType() const { return UnknownBT; }
+    bcType giveType() const override { return UnknownBT; }
 
     /**
      * Initializes receiver according to object description stored in input record.
@@ -139,29 +139,29 @@ public:
      * - pressure p (required)
      * The gradient should be in Voigt notation (only the deviatoric part will be used)
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void scale(double s);
+    void scale(double s) override;
 
-    virtual void computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep);
-    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep);
+    void computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep) override;
+    void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep) override;
 
-    virtual void setPrescribedPressure(double p) { pressure = p; }
-    virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
+    void setPrescribedPressure(double p) override { pressure = p; }
+    void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev) override;
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorm=nullptr) override;
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0);
+    void assemble(SparseMtrx &answer, TimeStep *tStep,
+                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
+                            const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
 
-    virtual const char *giveClassName() const { return "MixedGradientPressureNeumann"; }
-    virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureNeumann_Name; }
+    const char *giveClassName() const override { return "MixedGradientPressureNeumann"; }
+    const char *giveInputRecordName() const override { return _IFT_MixedGradientPressureNeumann_Name; }
 
 protected:
     /// Helper function that integrates the deviatoric tangent contribution from a single element boundary.

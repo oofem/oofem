@@ -175,22 +175,22 @@ public:
      */
     virtual MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode masterMode);
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
-    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     virtual IntegrationPointStatus *giveMicroplaneStatus(GaussPoint *gp);
 
 protected:
     virtual MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) = 0;
-    virtual void initTempStatus(GaussPoint *gp);
+    void initTempStatus(GaussPoint *gp) override;
 };
 } // end namespace oofem
 #endif // microplanematerial_h

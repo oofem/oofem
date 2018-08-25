@@ -200,20 +200,20 @@ FEI3dLineLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
     jacobianMatrix.at(1, 1) = 1.0;
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dLineLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + 0);
     iRule->SetUpPointsOnLine(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dLineLin :: giveBoundaryIntegrationRule(int order, int boundary)
 {
     ///@todo Not sure about this.
     OOFEM_ERROR("Not supported");
-    return NULL;
+    return nullptr;
 }
 } // end namespace oofem

@@ -57,35 +57,34 @@ public:
     Tetrah1_ht(int n, Domain * d);
     virtual ~Tetrah1_ht();
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
     // definition
-    virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_ht_Name; }
-    virtual const char *giveClassName() const { return "Tetrah1_ht"; }
+    const char *giveInputRecordName() const override { return _IFT_Tetrah1_ht_Name; }
+    const char *giveClassName() const override { return "Tetrah1_ht"; }
 
-    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
+    int computeNumberOfDofs() override { return ( emode == HeatTransferEM ) ? 4 : 8; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    MaterialMode giveMaterialMode() override { return _3dHeat; }
 
-    virtual Interface *giveInterface(InterfaceType t);
-    virtual int testElementExtension(ElementExtension ext)
+    Interface *giveInterface(InterfaceType t) override;
+    int testElementExtension(ElementExtension ext) override
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
 #ifdef __OOFEG
     // Graphics output
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override {}
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override {}
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
+    void computeGaussPoints() override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge) override;
 };
 
 class Tetrah1_hmt : public Tetrah1_ht
@@ -93,9 +92,9 @@ class Tetrah1_hmt : public Tetrah1_ht
 public:
     Tetrah1_hmt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_hmt_Name; }
-    virtual const char *giveClassName() const { return "Tetrah1_hmt"; }
-    virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
+    const char *giveInputRecordName() const override { return _IFT_Tetrah1_hmt_Name; }
+    const char *giveClassName() const override { return "Tetrah1_hmt"; }
+    MaterialMode giveMaterialMode() override { return _3dHeMo; }
 };
 } // end namespace oofem
 #endif // tetrah1_ht_h

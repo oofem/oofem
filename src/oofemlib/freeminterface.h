@@ -58,7 +58,7 @@ public:
     /// Destructor
     virtual ~FreemInterface() { }
 
-    virtual returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew);
+    returnCode createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, Domain **dNew) override;
 
 protected:
     /// Creates the mesher input, containing the required mesh density information.

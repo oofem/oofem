@@ -63,18 +63,18 @@ public:
     PLCZdamageRadius() : mIncrementRadius(0.0), mDamageThreshold(0.0), mPropCS(0) { }
     virtual ~PLCZdamageRadius() { }
 
-    virtual const char *giveClassName() const { return "PLCZdamageRadius"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLCZdamageRadius_Name; }
+    const char *giveClassName() const override { return "PLCZdamageRadius"; }
+    const char *giveInputRecordName() const override { return _IFT_PLCZdamageRadius_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bool hasPropagation() const { return mIncrementRadius > 0.; } ///@todo Could this be done smarter? / Mikael
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+    bool hasPropagation() const override { return mIncrementRadius > 0.; } ///@todo Could this be done smarter? / Mikael
+    bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) override;
 
-    void setIncrementRadius(double iIncrementRadius) {mIncrementRadius = std::move(iIncrementRadius);}
-    void setdamageThreshold(double idamageThreshold) {mDamageThreshold = std::move(idamageThreshold);}
-    
+    void setIncrementRadius(double iIncrementRadius) { mIncrementRadius = iIncrementRadius; }
+    void setdamageThreshold(double idamageThreshold) { mDamageThreshold = idamageThreshold; }
+
     IntArray givePropagationCrossSections() {return this->mPropCS;}
 
 protected:

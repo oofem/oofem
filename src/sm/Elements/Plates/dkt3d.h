@@ -82,58 +82,57 @@ public:
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
-    virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
-                                     double &y1, double &y2, double &y3,
-                                     double &z1, double &z2, double &z3);
+    void giveNodeCoordinates(double &x1, double &x2, double &x3,
+                             double &y1, double &y2, double &y3,
+                             double &z1, double &z2, double &z3) override;
 
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode) override;
 
     /**
      * @name Edge load support
      */
     //@{
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
     //@}
     /**
      * @name Surface load support
      */
     //@{
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
+    double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) override;
+    int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) override;
     //@}
 
 public:
     // definition & identification
-    virtual const char *giveClassName() const { return "DktPlate3d"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DKTPlate3d_Name; }
+    const char *giveClassName() const override { return "DktPlate3d"; }
+    const char *giveInputRecordName() const override { return _IFT_DKTPlate3d_Name; }
 
-    virtual int computeNumberOfDofs() { return 9; }
-    virtual int computeNumberOfGlobalDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int computeNumberOfDofs() override { return 9; }
+    int computeNumberOfGlobalDofs() override { return 18; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual const FloatMatrix *computeGtoLRotationMatrix();
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    const FloatMatrix *computeGtoLRotationMatrix();
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
 
-    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer)
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override
     {
         OOFEM_ERROR("calling of this function id not allowed");
         return 0;
     }
-    virtual int testElementExtension(ElementExtension ext)
+    int testElementExtension(ElementExtension ext) override
     { return ( ( ext == Element_SurfaceLoadSupport )  ? 1 : 0 ); }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // dkt3d_h

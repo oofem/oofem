@@ -54,37 +54,35 @@ protected:
     /// Parameters specifying how the length scale parameter l is adjusted
     double beta, t;
 
-
 public:
     /// Constructor
     IDGMaterial(int n, Domain * d);
     /// Destructor
     virtual ~IDGMaterial();
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "IDGMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IDGMaterial_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    const char *giveClassName() const override { return "IDGMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_IDGMaterial_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual Interface *giveInterface(InterfaceType t) {
+    Interface *giveInterface(InterfaceType t) override {
         if ( t == GradDpMaterialExtensionInterfaceType ) {
             return static_cast< GradDpMaterialExtensionInterface * >(this);
         } else {
-            return NULL;
+            return nullptr;
         }
     }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
+    void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
 
-    void giveStiffnessMatrix(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,  TimeStep *tStep);
+    void giveStiffnessMatrix(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,  TimeStep *tStep) override;
     void give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void give1dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -107,16 +105,16 @@ public:
     IDGMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~IDGMaterialStatus();
 
-    virtual const char *giveClassName() const { return "IDGMaterialStatus"; }
+    const char *giveClassName() const override { return "IDGMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
-    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
+    double giveNonlocalCumulatedStrain() override { return nonlocalCumulatedStrain; }
+    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) override { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
 };
 } // end namespace oofem
 #endif // idmgrad1_h

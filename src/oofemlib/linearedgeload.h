@@ -74,18 +74,19 @@ protected:
 
 public:
     LinearEdgeLoad(int i, Domain * d) : EdgeLoad(i, d) { }
+    virtual ~LinearEdgeLoad() { }
 
-    virtual int giveApproxOrder() { return 1; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
-    virtual FormulationType giveFormulationType() { return formulation; }
+    int giveApproxOrder() override { return 1; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    bcGeomType giveBCGeoType() const override { return EdgeLoadBGT; }
+    FormulationType giveFormulationType() override { return formulation; }
 
-    virtual const char *giveClassName() const { return "LinearEdgeLoad"; }
-    virtual const char *giveInputRecordName() const { return _IFT_LinearEdgeLoad_Name; }
+    const char *giveClassName() const override { return "LinearEdgeLoad"; }
+    const char *giveInputRecordName() const override { return _IFT_LinearEdgeLoad_Name; }
 
 protected:
-    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const;
+    void computeNArray(FloatArray &answer, const FloatArray &coords) const override;
 };
 } // end namespace oofem
 #endif // linearedgeload_h

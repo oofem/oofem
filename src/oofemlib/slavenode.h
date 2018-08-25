@@ -72,13 +72,13 @@ public:
     /// Destructor.
     virtual ~SlaveNode(void) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void postInitialize();
-    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void postInitialize() override;
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
 
-    virtual const char *giveClassName() const { return "SlaveNode"; }
-    virtual const char *giveInputRecordName() const { return _IFT_SlaveNode_Name; }
+    const char *giveClassName() const override { return "SlaveNode"; }
+    const char *giveInputRecordName() const override { return _IFT_SlaveNode_Name; }
 };
 } // end namespace oofem
 #endif // slavenode_h

@@ -47,16 +47,16 @@ public:
     MaxwellChainMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
     virtual ~MaxwellChainMaterialStatus() { }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     // definition
-    virtual const char *giveClassName() const { return "MaxwellChainMaterialStatus"; }
+    const char *giveClassName() const override { return "MaxwellChainMaterialStatus"; }
 };
 
 
@@ -76,9 +76,8 @@ public:
     void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 0; }
-    virtual const char *giveClassName() const { return "MaxwellChainMaterial"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "MaxwellChainMaterial"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     virtual void giveShrinkageStrainVector(FloatArray &answer,
                                            GaussPoint *gp,
@@ -89,7 +88,7 @@ public:
     virtual void giveEigenStrainVector(FloatArray &answer,
                                        GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
     virtual int hasIncrementalShrinkageFormulation() { return 0; }

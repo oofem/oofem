@@ -214,32 +214,32 @@ public:
     virtual ~CylindricalALM();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
-                            FloatArray &X, FloatArray &dX, FloatArray &F,
-                            const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
-                            int &nite, TimeStep *);
-    virtual double giveCurrentStepLength() { return deltaL; }
-    virtual void setStepLength(double s) { deltaL = s; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual bool referenceLoad() const { return true; }
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual void setDomain(Domain *d) {
+    NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+                    FloatArray &X, FloatArray &dX, FloatArray &F,
+                    const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
+                    int &nite, TimeStep *) override;
+    double giveCurrentStepLength() override { return deltaL; }
+    void setStepLength(double s) override { deltaL = s; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    bool referenceLoad() const override { return true; }
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void setDomain(Domain *d) override {
         this->domain = d;
         if ( linSolver ) {
             linSolver->setDomain(d);
         }
     }
-    virtual void reinitialize() {
+    void reinitialize() override {
         calm_hpc_init = 1;
         if ( linSolver ) {
             linSolver->reinitialize();
         }
     }
-    virtual const char *giveClassName() const { return "CylindricalALM"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CylindricalALM_Name; }
+    const char *giveClassName() const override { return "CylindricalALM"; }
+    const char *giveInputRecordName() const { return _IFT_CylindricalALM_Name; }
 
-    virtual SparseLinearSystemNM *giveLinearSolver();
+    SparseLinearSystemNM *giveLinearSolver() override;
 
 protected:
     void convertHPCMap();

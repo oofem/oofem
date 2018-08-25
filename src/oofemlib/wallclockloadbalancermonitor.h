@@ -84,18 +84,19 @@ protected:
     FloatArray processingWeights;
  #endif
 public:
-    WallClockLoadBalancerMonitor(EngngModel * em) : LoadBalancerMonitor(em) {
-        relWallClockImbalanceTreshold = 0.1;
-        absWallClockImbalanceTreshold = 10.0;
-        minAbsWallClockImbalanceTreshold = 0.0;
-        lbstep = 5;
-    }
+    WallClockLoadBalancerMonitor(EngngModel * em) :
+        LoadBalancerMonitor(em),
+        relWallClockImbalanceTreshold(0.1),
+        absWallClockImbalanceTreshold(10.0),
+        minAbsWallClockImbalanceTreshold(0.0),
+        lbstep(5)
+    { }
 
     LoadBalancerDecisionType decide(TimeStep *);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "WallClockLoadBalancerMonitor"; }
+    const char *giveClassName() const override { return "WallClockLoadBalancerMonitor"; }
 };
 
 } // end namespace oofem

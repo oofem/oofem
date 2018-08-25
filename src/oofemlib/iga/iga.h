@@ -60,14 +60,7 @@ public:
     const IntArray *knotSpan;
     Element *elem;
 public:
-    FEIIGAElementGeometryWrapper(Element * _elem, const IntArray * _knotSpan) : FEICellGeometry() {
-        this->elem = _elem;
-        this->knotSpan = _knotSpan;
-    }
-    FEIIGAElementGeometryWrapper(Element * _elem) : FEICellGeometry() {
-        this->elem = _elem;
-        this->knotSpan = NULL;
-    }
+    FEIIGAElementGeometryWrapper(Element *elem, const IntArray *knotSpan=nullptr) : FEICellGeometry(), knotSpan(knotSpan), elem(elem) { }
 
     int giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
     const FloatArray *giveVertexCoordinates(int i) const { return elem->giveNode(i)->giveCoordinates(); }
@@ -82,9 +75,9 @@ class OOFEM_EXPORT IGAIntegrationElement : public GaussIntegrationRule
 protected:
     IntArray knotSpan;     // knot_span(nsd)
 public:
-    IGAIntegrationElement(int _n, Element * _e, IntArray & _knotSpan) :
-        GaussIntegrationRule(_n, _e, 0, 0, false),
-        knotSpan(_knotSpan) { }
+    IGAIntegrationElement(int _n, Element *e, IntArray knotSpan) :
+        GaussIntegrationRule(_n, e, 0, 0, false),
+        knotSpan(std::move(knotSpan)) { }
     const IntArray *giveKnotSpan() { return & this->knotSpan; }
     void setKnotSpan1(IntArray &src) { this->knotSpan = src; }
 };
@@ -124,9 +117,6 @@ class OOFEM_EXPORT IGATSplineElement : public IGAElement
 public:
     IGATSplineElement(int n, Domain * aDomain) : IGAElement(n, aDomain) { }
     IRResultType initializeFrom(InputRecord *ir) override;
-
-protected:
-    virtual int giveNsd() = 0;
 };
 } // end namespace oofem
 #endif //iga_h

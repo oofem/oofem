@@ -58,21 +58,21 @@ protected:
 
 public:
     HyperElasticMaterial(int n, Domain * d);
+    virtual ~HyperElasticMaterial() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &reducedStrain, TimeStep *tStep);
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-    virtual const char *giveInputRecordName() const { return _IFT_HyperElasticMaterial_Name; }
-    virtual const char *giveClassName() const { return "HyperElasticMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_HyperElasticMaterial_Name; }
+    const char *giveClassName() const override { return "HyperElasticMaterial"; }
 };
 } // end namespace oofem
 #endif

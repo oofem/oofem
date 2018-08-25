@@ -59,31 +59,30 @@ public:
     Q27Space(int n, Domain * d);
     virtual ~Q27Space() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Interface *giveInterface(InterfaceType);
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Interface *giveInterface(InterfaceType) override;
+    int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_Q27Space_Name; }
-    virtual const char *giveClassName() const { return "Q27Space"; }
+    const char *giveInputRecordName() const override { return _IFT_Q27Space_Name; }
+    const char *giveClassName() const override { return "Q27Space"; }
 protected:
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 27; }
+    int giveNumberOfIPForMassMtrxIntegration() override { return 27; }
 
     /**
      * @name Surface load support
      */
     //@{
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
+    int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp) override;
     //@}
 };
 } // end namespace oofem

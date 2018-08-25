@@ -93,19 +93,19 @@ public:
     /// Destructor.
     virtual ~RigidArmNode(void) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void postInitialize();
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
-    virtual int checkConsistency();
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void postInitialize() override;
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
+    int checkConsistency() override;
     /**
      * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
     void computeMasterContribution(std::map< DofIDItem, IntArray > &masterDofID, 
                                    std::map< DofIDItem, FloatArray > &masterContribution);
 
-    virtual const char *giveClassName() const { return "RigidArmNode"; }
-    virtual const char *giveInputRecordName() const { return _IFT_RigidArmNode_Name; }
-    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
+    const char *giveClassName() const override { return "RigidArmNode"; }
+    const char *giveInputRecordName() const override { return _IFT_RigidArmNode_Name; }
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }
 };
 } // end namespace oofem
 #endif // rigidarmnode_h

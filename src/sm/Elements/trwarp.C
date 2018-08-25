@@ -73,15 +73,14 @@ Tr_Warp :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueMode
 //
 {
     if ( mtrx == ExternalForcesVector ) {
-      // include implicit edge contribution 
-      this->computeEdgeLoadVectorAt(answer, NULL, tStep, mode);
+        // include implicit edge contribution 
+        this->computeEdgeLoadVectorAt(answer, NULL, tStep, mode);
     } else {
-      StructuralElement::giveCharacteristicVector(answer, mtrx, mode, tStep);
+        StructuralElement::giveCharacteristicVector(answer, mtrx, mode, tStep);
     }
 }
 
 
-  
 void
 Tr_Warp :: computeGaussPoints()
 // Sets up the array containing the Gauss point of the receiver.
@@ -142,7 +141,7 @@ Tr_Warp :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
     this->interp.evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     // gausspoint coordinates
     FloatArray gcoords;
-    Element *elem = gp->giveElement();
+    Element *elem = gp->giveElement(); ///@todo Why?! Is this really called *not* by this elements own GP?!?!?! If so, ouch! / Mikael
     elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
 
     this->transformCoordinates( tc, gcoords, this->giveCrossSection()->giveNumber() );
@@ -359,28 +358,25 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateTy
     double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
-    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
-    FEInterpolation *interpol = elem->giveInterpolation();
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    FEInterpolation *interpol = this->giveInterpolation();
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
 
     if ( !interpol ) {
-        OOFEM_ERROR( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", elem->giveNumber() );
+        OOFEM_ERROR( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", this->giveNumber() );
     }
 
-    int size = 3; //elem->giveNumberOfDofManagers();
+    int size = 3; //this->giveNumberOfDofManagers();
     fullAnswer.resize(size, size);
     fullAnswer.zero();
     double pok = 0.0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        double dV = elem->computeVolumeAround(gp);
-        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
+    for ( auto &gp : *iRule ) {
+        double dV = this->computeVolumeAround(gp);
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         fullAnswer.plusDyadSymmUpper(n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;
     }
-
 
     fullAnswer.symmetrized();
     answer.resize(4);
@@ -402,20 +398,18 @@ Tr_Warp :: ZZNodalRecoveryMI_computeNValProduct(FloatMatrix &answer, InternalSta
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray stressVector, n;
-    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
-    FEInterpolation *interpol = elem->giveInterpolation();
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    FEInterpolation *interpol = this->giveInterpolation();
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
 
     answer.clear();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        double dV = elem->computeVolumeAround(gp);
+    for ( auto &gp : *iRule ) {
+        double dV = this->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, tStep);
-        if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
+        if ( !this->giveIPValue(stressVector, gp, type, tStep) ) {
             continue;
         }
 
-        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
+        interpol->evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         answer.plusDyadUnsym(n, stressVector, dV);
 
         //  help.beTProductOf(n,stressVector);

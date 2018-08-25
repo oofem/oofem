@@ -85,24 +85,22 @@ public:
     /// Destructor.
     virtual ~qcNode(void) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void postInitialize();
-    virtual void postInitializeAsHangingNode();
-    virtual int checkConsistency();
-    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void postInitialize() override;
+    void postInitializeAsHangingNode();
+    int checkConsistency() override;
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }
 
-    
     virtual bool initializeAsRepnode();
     virtual void setAsRepnode();
     virtual void setAsHanging();
-    virtual int giveQcNodeType() {return this->qcNodeTypeLabel; }
-    virtual int giveMasterElementNumber() {return this->masterElement; }
+    int giveQcNodeType() override { return this->qcNodeTypeLabel; }
+    virtual int giveMasterElementNumber() { return this->masterElement; }
 
-    void  printOutputAt(FILE *stream, TimeStep *tStep);
-    
-    
-    virtual const char *giveClassName() const { return "qcNode"; }
-    virtual const char *giveInputRecordName() const { return _IFT_qcNode_Name; }
+    void printOutputAt(FILE *stream, TimeStep *tStep) override;
+
+    const char *giveClassName() const override { return "qcNode"; }
+    const char *giveInputRecordName() const override { return _IFT_qcNode_Name; }
 };
 } // end namespace oofem
 #endif // qcnode_h

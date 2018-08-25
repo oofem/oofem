@@ -69,15 +69,15 @@ public:
     /// Destructor.
     virtual ~PatchIntegrationRule();
 
-    virtual const char *giveClassName() const { return "PatchIntegrationRule"; }
+    const char *giveClassName() const override { return "PatchIntegrationRule"; }
 
     // TODO: Give this function a better name.
     // Note: the fact that this function is inherited complicates name change.
-    virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
-    virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
+    int SetUpPointsOnTriangle(int nPoints, MaterialMode mode) override;
+    int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
 };
 } // end namespace oofem
 #endif // patchintegrationrule_h

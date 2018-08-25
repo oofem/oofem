@@ -70,12 +70,12 @@ public:
     CustomEquationNumbering();
 
     IntArray dofIdArray; // should be private
-    virtual bool isDefault() const { return true; }
+    bool isDefault() const override { return true; }
     void setDofIdArray(IntArray array) { this->dofIdArray = std::move(array); }
 
-    virtual int giveDofEquationNumber(Dof *dof) const;
+    int giveDofEquationNumber(Dof *dof) const override;
 
-    virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
+    int giveRequiredNumberOfDomainEquation() const override { return numEqs; }
 
     int giveNewEquationNumber() { return ++numEqs; }
     int giveNewPrescribedEquationNumber() { return ++numPresEqs; }
@@ -121,15 +121,15 @@ public:
     virtual ~StaggeredSolver() {}
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
-                            FloatArray &X, FloatArray &dX, FloatArray &F,
-                            const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
-                            int &nite, TimeStep *);
+    NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                    FloatArray &X, FloatArray &dX, FloatArray &F,
+                    const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
+                    int &nite, TimeStep *) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
-    virtual const char *giveClassName() const { return "StaggeredSolver"; }
-    virtual const char *giveInputRecordName() const { return _IFT_StaggeredSolver_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+
+    const char *giveClassName() const override { return "StaggeredSolver"; }
+    const char *giveInputRecordName() const override { return _IFT_StaggeredSolver_Name; }
 };
 } // end namespace oofem
 #endif // staggeredsolver_h

@@ -72,9 +72,9 @@ private:
     PyObject *main_dict;
 
     /// Helper function to convert the std::map to a Python dictionary.
-    PyObject *getDict(std :: map< std :: string, FunctionArgument > &valDict);
+    PyObject *getDict(const std :: map< std :: string, FunctionArgument > &valDict);
     /// Helper function to run given function for given value dictionary.
-    void getArray(FloatArray &answer, PyObject *func, std :: map< std :: string, FunctionArgument > &valDict);
+    void getArray(FloatArray &answer, PyObject *func, const std :: map< std :: string, FunctionArgument > &valDict);
     /// Helper function to run given function for given time
     double getScalar(PyObject *func, double time);
 
@@ -94,18 +94,19 @@ public:
      * - dfdt(t) (optional)
      * - d2fdt2(t) (optional)
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &ir) override;
 
-    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
-    virtual void evaluateVelocity(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
-    virtual void evaluateAcceleration(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
-    virtual double evaluateAtTime(double t);
-    virtual double evaluateVelocityAtTime(double t);
-    virtual double evaluateAccelerationAtTime(double t);
+    void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict, GaussPoint *gp=nullptr, double param=0.) override;
+    void evaluateVelocity(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict);
+    void evaluateAcceleration(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict);
 
-    virtual const char *giveClassName() const { return "PythonExpression"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PythonExpression_Name; }
+    double evaluateAtTime(double t) override;
+    double evaluateVelocityAtTime(double t) override;
+    double evaluateAccelerationAtTime(double t) override;
+
+    const char *giveClassName() const override { return "PythonExpression"; }
+    const char *giveInputRecordName() const override { return _IFT_PythonExpression_Name; }
 };
 } // end namespace oofem
 #endif // pythonexpression_h

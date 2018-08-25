@@ -52,17 +52,17 @@ public:
     QuadAxisym1_ht(int n, Domain * d);
     virtual ~QuadAxisym1_ht();
 
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual double giveThicknessAt(const FloatArray &gcoords);
+    double computeVolumeAround(GaussPoint *gp) override;
+    double giveThicknessAt(const FloatArray &gcoords) override;
 
-    virtual const char *giveClassName() const { return "QuadAxisym1_ht"; }
-    virtual IntegrationRule* giveBoundaryEdgeIntegrationRule (int order, int boundary);
-    virtual IntegrationRule* giveBoundarySurfaceIntegrationRule (int order, int boundary);
-    
+    const char *giveClassName() const override { return "QuadAxisym1_ht"; }
+    std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) override;
+    std::unique_ptr<IntegrationRule> giveBoundarySurfaceIntegrationRule(int order, int boundary) override;
+
 protected:
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual double computeRadiusAt(GaussPoint *gp);
-    virtual int giveApproxOrder(int unknownIndx) { return 2; }
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    double computeRadiusAt(GaussPoint *gp);
+    int giveApproxOrder(int unknownIndx) override { return 2; }
 };
 
 /**
@@ -73,7 +73,7 @@ class QuadAxisym1_hmt : public QuadAxisym1_ht
 public:
     QuadAxisym1_hmt(int n, Domain * d);
 
-    virtual const char *giveClassName() const { return "QuadAxisym1_hmt"; }
+    const char *giveClassName() const override { return "QuadAxisym1_hmt"; }
 };
 
 
@@ -84,7 +84,7 @@ class QuadAxisym1_mt : public QuadAxisym1_ht
 {
 public:
     QuadAxisym1_mt(int n, Domain * d);
-    virtual const char *giveClassName() const { return "QuadAxisym1_mt"; }
+    const char *giveClassName() const override { return "QuadAxisym1_mt"; }
 };
 } // end namespace oofem
 #endif // quadaxisym1_ht_h

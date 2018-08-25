@@ -54,7 +54,7 @@ public:
     virtual ~XfemStructuralElementInterface();
 
     /// Updates integration rule based on the triangulation.
-    virtual bool XfemElementInterface_updateIntegrationRule();
+    bool XfemElementInterface_updateIntegrationRule() override;
 
     MaterialStatus *giveClosestGP_MatStat(double &oClosestDist, std :: vector< std :: unique_ptr< IntegrationRule > > &iRules, const FloatArray &iCoord);
 
@@ -63,7 +63,7 @@ public:
     virtual void XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
     virtual void XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    virtual bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRules.size() > 0 ); }
+    virtual bool hasCohesiveZone() const { return ( mpCZMat != nullptr && mpCZIntegrationRules.size() > 0 ); }
 
     virtual void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
     virtual void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);

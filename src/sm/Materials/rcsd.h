@@ -73,7 +73,7 @@ public:
     RCSDMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RCSDMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     double giveTempMaxEquivStrain() { return tempMaxEquivStrain; }
     void setTempMaxEquivStrain(double val) { tempMaxEquivStrain = val; }
@@ -97,15 +97,13 @@ public:
 
     rcsdMode giveMode() { return mode; }
 
-    // definition
-    virtual const char *giveClassName() const { return "RCSDMaterialStatus"; }
+    const char *giveClassName() const override { return "RCSDMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -125,21 +123,17 @@ public:
     RCSDMaterial(int n, Domain * d);
     virtual ~RCSDMaterial();
 
-    // identification and auxiliary functions
-    virtual const char *giveInputRecordName() const { return _IFT_RCSDMaterial_Name; }
-    virtual const char *giveClassName() const { return "RCSDMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_RCSDMaterial_Name; }
+    const char *giveClassName() const override { return "RCSDMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &, TimeStep *tStep) override;
 
-#ifdef __OOFEG
-#endif
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCSDMaterialStatus(1, domain, gp); }
 
 protected:
     double computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *);
@@ -147,20 +141,19 @@ protected:
     // gp's status. These variables are used to control process, when
     // we try to find equilibrium state.
 
-    virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                      MatResponseMode rMode,
-                                                      GaussPoint *gp, TimeStep *tStep);
+    void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
+                                              MatResponseMode rMode,
+                                              GaussPoint *gp, TimeStep *tStep) override;
 
     double computeDamageCoeff(double, double, double, double);
-    virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
-                                       double crackStrain, int i);
-    //virtual double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i);
-    virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i);
-    virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
-    //virtual void updateStatusForNewCrack( GaussPoint*, int, double);
-    virtual double computeStrength(GaussPoint *, double);
-    virtual int checkSizeLimit(GaussPoint *gp, double);
-    ////
+    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
+                               double crackStrain, int i) override;
+    //double giveShearRetentionFactor(GaussPoint* gp, double eps_cr, int i) override;
+    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) override;
+    double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) override;
+    //void updateStatusForNewCrack( GaussPoint*, int, double) override;
+    double computeStrength(GaussPoint *gp, double) override;
+    int checkSizeLimit(GaussPoint *gp, double) override;
 };
 } // end namespace oofem
 #endif // rcsd_h

@@ -57,7 +57,7 @@ TutorialMaterial :: initializeFrom(InputRecord *ir)
 
     result = D.initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
-    
+
     IR_GIVE_FIELD(ir, this->sig0, _IFT_TutorialMaterial_yieldstress);
 
     IR_GIVE_FIELD(ir, this->H, _IFT_TutorialMaterial_hardeningmoduli);
@@ -71,7 +71,6 @@ TutorialMaterial :: giveInputRecord(DynamicInputRecord &ir)
 {
     StructuralMaterial :: giveInputRecord(ir);
     D.giveInputRecord(ir);
-    
     ir.setField(this->sig0, _IFT_TutorialMaterial_yieldstress);
     ir.setField(this->H, _IFT_TutorialMaterial_hardeningmoduli);
 }
@@ -93,7 +92,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
 
     // subtract stress thermal expansion
     this->giveStressDependentPartOfStrainVector_3d(strain, gp, totalStrain, tStep, VM_Total);
-    
+
     FloatArray trialElastStrain;
     trialElastStrain.beDifferenceOf(strain, status->givePlasticStrain());
 
@@ -105,7 +104,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
 
     FloatArray sphTrialStress, devTrialStress;
     computeSphDevPartOf(trialStress, sphTrialStress, devTrialStress);
-    
+
     double J2 = this->computeSecondStressInvariant(devTrialStress);
     double effectiveTrialStress = sqrt(3 * J2);
 
@@ -123,7 +122,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     // evaluate the yield surface
     double k = status->giveK();
     double phiTrial = effectiveTrialStress - ( temperatureScaling * this->sig0 +  temperatureScaling * H * k );
-    
+
     if ( phiTrial < 0.0 ) { // elastic
         answer = trialStress;
 
@@ -141,7 +140,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
         plasticStrain.add(mu * 3. / (2. * effectiveTrialStress), dPlStrain);
         status->letTempPlasticStrainBe(plasticStrain);
     }
-    
+
     // Store the temporary values for the given iteration
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);

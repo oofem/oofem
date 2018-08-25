@@ -56,25 +56,25 @@ public:
     QTruss1dGrad(int n, Domain * d);
     virtual ~QTruss1dGrad() { }
 
-    virtual const char *giveInputRecordName() const { return _IFT_QTruss1dGrad_Name; }
-    virtual const char *giveClassName() const { return "QTruss1dGrad"; }
+    const char *giveInputRecordName() const override { return _IFT_QTruss1dGrad_Name; }
+    const char *giveClassName() const override { return "QTruss1dGrad"; }
 
-    virtual MaterialMode giveMaterialMode() { return _1dMat; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int computeNumberOfDofs() { return 5; }
+    MaterialMode giveMaterialMode() override { return _1dMat; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    int computeNumberOfDofs() override { return 5; }
 
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
 protected:
-    virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
-    virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual StructuralElement *giveStructuralElement() { return this; }
-    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
+     void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
+    void computeGaussPoints() override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    StructuralElement *giveStructuralElement() override { return this; }
+    NLStructuralElement *giveNLStructuralElement() override { return this; }
 };
 } // end namespace oofem
 #endif // truss1d_h

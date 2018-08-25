@@ -89,13 +89,13 @@ public:
     /// Destructor
     virtual ~POIExportModule();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
-    virtual void initialize();
-    virtual void terminate();
-    virtual const char *giveInputRecordName() const { return _IFT_POIExportModule_Name; }
-    virtual const char *giveClassName() const { return "POIExportModule"; }
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    void initialize() override;
+    void terminate() override;
+    const char *giveClassName() const override { return "POIExportModule"; }
+    const char *giveInputRecordName() const { return _IFT_POIExportModule_Name; }
 
 protected:
     void readPOIFile(const std :: string &poiFileName);

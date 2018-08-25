@@ -49,11 +49,10 @@ namespace oofem {
 class LatticeTransportElement : public TransportElement
 {
 public:
-    LatticeTransportElement(int, Domain *, ElementMode);        // constructor
+    LatticeTransportElement(int, Domain *, ElementMode);
+    virtual ~LatticeTransportElement();
 
-    ~LatticeTransportElement();                                 // destructor
-
-    IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     /**
      * Returns the cross-sectional area of the lattice element.
@@ -65,7 +64,7 @@ public:
      * Returns the radius of the lattice element.
      * @return radius.
      */
-    virtual double giveRadius(){return 0;}
+    virtual double giveRadius() { return 0; }
 
     /**
      * Returns the element length
@@ -90,43 +89,40 @@ public:
      * @return mass.
      */
     virtual double giveMass() { return 0; }
-    
+
     /**
      * Returns the coupling flag
      * @return couplingFlag.
      */
-    virtual int giveCouplingFlag(){return 0;}
+    virtual int giveCouplingFlag() { return 0; }
 
     /**
      * Returns the coupling numbers
      * @return couplingNumbers.
      */
-    virtual void giveCouplingNumbers(IntArray &numbers){return;}
+    virtual void giveCouplingNumbers(IntArray &numbers) { }
 
     /**
      * Returns the crack lengths
      * @return crackLengths.
      */
-    virtual void giveCrackLengths(FloatArray &lengths){return;}
+    virtual void giveCrackLengths(FloatArray &lengths) { }
 
     /**
      * Returns the crack widths
      * @return crackWidths.
      */
-    virtual void giveCrackWidths(FloatArray &widths) {return;}
-
+    virtual void giveCrackWidths(FloatArray &widths) { }
 
     /**
      * Gives the GP coordinates
      */
-    virtual void  giveGpCoordinates(FloatArray &coords) { return; }
+    virtual void  giveGpCoordinates(FloatArray &coords) { }
 
     /**
      * Returns the real volume
      */
-    virtual double  computeLatticeVolumeAroundIt() {return 0;}
-
-
+    virtual double  computeLatticeVolumeAroundIt() { return 0; }
 };
 } // end namespace oofem
 #endif

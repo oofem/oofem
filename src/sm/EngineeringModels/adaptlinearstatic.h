@@ -59,28 +59,28 @@ protected:
     MeshPackageType meshPackage;
 
 public:
-    AdaptiveLinearStatic(int i, EngngModel * _master = NULL) : LinearStatic(i, _master) { }
+    AdaptiveLinearStatic(int i, EngngModel *master = nullptr) : LinearStatic(i, master) { }
     virtual ~AdaptiveLinearStatic() { }
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
     /**
      * Initializes the newly generated discretization state according to previous solution.
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int tStepNumber);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    int initializeAdaptive(int tStepNumber) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void updateDomainLinks();
+    void updateDomainLinks() override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // identification
-    virtual const char *giveClassName() const { return "AdaptiveLinearStatic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_AdaptiveLinearStatic_Name; }
+    const char *giveClassName() const override { return "AdaptiveLinearStatic"; }
+    const char *giveInputRecordName() const override { return _IFT_AdaptiveLinearStatic_Name; }
 };
 } // end namespace oofem
 #endif // adaptlinearstatic_h

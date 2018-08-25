@@ -256,7 +256,6 @@ double ActiveDof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
 
 
 // Not sure of initial conditions yet.
-bool ActiveDof :: hasIc(TimeStep *tStep) { return false; }
 bool ActiveDof :: hasIcOn(ValueModeType type) { return false; }
 bool ActiveDof :: hasIc() { return false; }
 int ActiveDof :: giveIcId() { return 0; }

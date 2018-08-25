@@ -62,7 +62,6 @@ namespace oofem {
 class GravityPressure : public BodyLoad
 {
 protected:
-
     double zeroLevel;
     FloatArray normalVector;
 
@@ -70,13 +69,13 @@ public:
     /// Constructor
     GravityPressure(int i, Domain * d) : BodyLoad(i, d) { }
 
-    virtual bcGeomType giveBCGeoType() const { return GravityPressureBGT; }
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    bcGeomType giveBCGeoType() const override { return GravityPressureBGT; }
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "GravityPressure"; }
-    virtual const char *giveInputRecordName() const { return _IFT_GravityPressure_Name; }
+    const char *giveClassName() const override { return "GravityPressure"; }
+    const char *giveInputRecordName() const override { return _IFT_GravityPressure_Name; }
 };
 } // end namespace oofem
 

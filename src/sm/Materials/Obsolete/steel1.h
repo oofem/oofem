@@ -56,23 +56,23 @@ public:
     Steel1(int n, Domain * d);
     virtual ~Steel1() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveInputRecordName() const { return _IFT_Steel1_Name; }
-    virtual const char *giveClassName() const { return "Steel1MaterialClass"; }
-    virtual void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) { }
-    virtual int hasCastingTimeSupport() { return 1.; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveInputRecordName() const override { return _IFT_Steel1_Name; }
+    const char *giveClassName() const override { return "Steel1MaterialClass"; }
+    void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) override { }
+    int hasCastingTimeSupport() override { return 1.; }
 
 protected:
     //
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
-    virtual double      computeYCValueAt(GaussPoint *, FloatArray *, FloatArray *);
-    virtual FloatArray *GiveYCStressGradient(GaussPoint *, FloatArray *, FloatArray *);
-    virtual FloatArray *GiveLCStressGradient(GaussPoint *, FloatArray *, FloatArray *);
-    virtual FloatArray *GiveYCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *);
-    virtual FloatArray *GiveLCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *);
-    virtual void        updateTempYC(GaussPoint *, FloatArray *, FloatArray *) { }
-    virtual void        updateTempLC(GaussPoint *, FloatArray *, FloatArray *) { }
+    double      computeYCValueAt(GaussPoint *, FloatArray *, FloatArray *) override;
+    FloatArray *GiveYCStressGradient(GaussPoint *, FloatArray *, FloatArray *) override;
+    FloatArray *GiveLCStressGradient(GaussPoint *, FloatArray *, FloatArray *) override;
+    FloatArray *GiveYCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *) override;
+    FloatArray *GiveLCPlasticStrainGradient(GaussPoint *, FloatArray *, FloatArray *) override;
+    void        updateTempYC(GaussPoint *, FloatArray *, FloatArray *) override { }
+    void        updateTempLC(GaussPoint *, FloatArray *, FloatArray *) override { }
     // update during computation
 
     // auxiliary function

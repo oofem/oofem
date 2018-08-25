@@ -80,9 +80,9 @@ public:
     /// Destructor.
     virtual ~StructuralInterfaceElementPhF();
 
-    //virtual FEInterpolation *giveInterpolation() const { return interpolation; };
+    //FEInterpolation *giveInterpolation() const override { return interpolation; };
 
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
     
     //Phf
@@ -137,10 +137,10 @@ public:
     virtual void computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N);
     
     
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
     virtual void computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep);
     //virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-    //virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    //int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     virtual void computeCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &G) = 0;
     
@@ -148,12 +148,12 @@ public:
     //@}
 
     // Overloaded methods.
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
-    //virtual int checkConsistency();
-    //virtual IRResultType initializeFrom(InputRecord *ir);
-    //virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "StructuralInterfaceElementPhF"; };
+    void updateInternalState(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
+    //int checkConsistency() override;
+    //IRResultType initializeFrom(InputRecord *ir) override;
+    //void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "StructuralInterfaceElementPhF"; };
 
     //StructuralInterfaceCrossSection *giveInterfaceCrossSection();
 

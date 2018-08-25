@@ -48,23 +48,21 @@ protected:
     int cindx;
 
 public:
-    FEI1dHermite(int coordIndx) : FEInterpolation1d(2) {
-        cindx = coordIndx;
-    }
+    FEI1dHermite(int coordIndx) : FEInterpolation1d(2), cindx(coordIndx) { }
 
-    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
-    virtual double giveLength(const FEICellGeometry &cellgeo) const;
+    double giveLength(const FEICellGeometry &cellgeo) const override;
 
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
-    virtual int giveNumberOfNodes() const { return 2; }
+    int giveNumberOfNodes() const override { return 2; }
 };
 } // end namespace oofem
 #endif

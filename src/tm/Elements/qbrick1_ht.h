@@ -60,30 +60,29 @@ public:
     QBrick1_ht(int n, Domain * d);
     virtual ~QBrick1_ht();
 
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual FEInterpolation *giveInterpolation() const;
+    double computeVolumeAround(GaussPoint *gp) override;
+    FEInterpolation *giveInterpolation() const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QBrick1_ht_Name; }
-    virtual const char *giveClassName() const { return "QBrick1_ht"; }
+    const char *giveInputRecordName() const override { return _IFT_QBrick1_ht_Name; }
+    const char *giveClassName() const override { return "QBrick1_ht"; }
 
-    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 20 : 40; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
+    int computeNumberOfDofs() override { return ( emode == HeatTransferEM ) ? 20 : 40; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    MaterialMode giveMaterialMode() override { return _3dHeat; }
 
-    virtual Interface *giveInterface(InterfaceType t);
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
+    Interface *giveInterface(InterfaceType t) override;
+    int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
 protected:
-    virtual void computeGaussPoints();
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge);
+    void computeGaussPoints() override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    double computeSurfaceVolumeAround(GaussPoint *gp, int iEdge) override;
 };
 
 class QBrick1_hmt : public QBrick1_ht
@@ -91,9 +90,9 @@ class QBrick1_hmt : public QBrick1_ht
 public:
     QBrick1_hmt(int n, Domain * d);
 
-    virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
-    virtual const char *giveInputRecordName() const { return _IFT_QBrick1_hmt_Name; }
-    virtual const char *giveClassName() const { return "QBrick1_hmt"; }
+    MaterialMode giveMaterialMode() override { return _3dHeMo; }
+    const char *giveInputRecordName() const override { return _IFT_QBrick1_hmt_Name; }
+    const char *giveClassName() const override { return "QBrick1_hmt"; }
 };
 } // end namespace oofem
 #endif // qbrick1_ht_h

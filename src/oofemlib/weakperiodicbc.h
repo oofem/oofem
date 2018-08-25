@@ -161,33 +161,33 @@ public:
     WeakPeriodicBoundaryCondition(int n, Domain * d);
     virtual ~WeakPeriodicBoundaryCondition();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     basisType giveBasisType() { return useBasisType; }
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
-                          const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0);
+    void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
+                  const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorm = nullptr) override;
 
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+                                  const UnknownNumberingScheme &s, FloatArray *eNorm = nullptr);
 
     void giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                   CharType type, ValueModeType mode,
                                   const UnknownNumberingScheme &s);
 
-    virtual int giveNumberOfInternalDofManagers();
+    int giveNumberOfInternalDofManagers() override;
 
-    virtual DofManager *giveInternalDofManager(int i);
+    DofManager *giveInternalDofManager(int i) override;
 
-    virtual void addElementSide(int elem, int side);
+    void addElementSide(int elem, int side) override;
 
-    virtual const char *giveClassName() const { return "WeakPeriodicBoundaryCondition"; }
-    virtual const char *giveInputRecordName() const { return _IFT_WeakPeriodicBoundaryCondition_Name; }
+    const char *giveClassName() const override { return "WeakPeriodicBoundaryCondition"; }
+    const char *giveInputRecordName() const override { return _IFT_WeakPeriodicBoundaryCondition_Name; }
 
 protected:
     void computeElementTangent(FloatMatrix &answer, Element *e, int boundary, TimeStep *tStep);

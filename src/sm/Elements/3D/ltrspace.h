@@ -67,50 +67,41 @@ public:
     LTRSpace(int n, Domain * d);
     virtual ~LTRSpace() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
-    virtual Interface *giveInterface(InterfaceType it);
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    int giveNumberOfIPForMassMtrxIntegration() override { return 4; }
+    Interface *giveInterface(InterfaceType it) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LTRSpace_Name; }
-    virtual const char *giveClassName() const { return "LTRSpace"; }
-    
+    const char *giveInputRecordName() const override { return _IFT_LTRSpace_Name; }
+    const char *giveClassName() const override { return "LTRSpace"; }
+
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    virtual double giveRelativeSelfComputationalCost() { return 2.15; }
+    double giveRelativeSelfComputationalCost() override { return 2.15; }
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
     // HuertaErrorEstimatorInterface
-    virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
-                                                                  IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
-                                                                  HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
-                                                                  int &localNodeId, int &localElemId, int &localBcId,
-                                                                  IntArray &controlNode, IntArray &controlDof,
-                                                                  HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-protected:
-
-    /**
-     * @name Surface load support
-     */
-    //@{
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int);
-    //@}
+    void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
+                                                          IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
+                                                          HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
+                                                          int &localNodeId, int &localElemId, int &localBcId,
+                                                          IntArray &controlNode, IntArray &controlDof,
+                                                          HuertaErrorEstimator :: AnalysisMode aMode) override;
+    void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 };
 } // end namespace oofem
 #endif // ltrspace_h

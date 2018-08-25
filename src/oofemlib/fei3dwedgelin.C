@@ -346,24 +346,24 @@ FEI3dWedgeLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 }
 
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dWedgeLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     ///@todo This function below isn't supported for wedges. We must decide how we should do this.
     //int points = iRule->getRequiredNumberOfIntegrationPoints(_Wedge, order);
     OOFEM_WARNING("Warning.. ignoring 'order' argument: FIXME");
     int pointsZeta = 1;
     int pointsTriangle = 1;
     iRule->SetUpPointsOnWedge(pointsTriangle, pointsZeta, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     if ( boundary <= 2 ) {
         int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
         iRule->SetUpPointsOnTriangle(points, _Unknown);
@@ -371,6 +371,6 @@ FEI3dWedgeLin :: giveBoundaryIntegrationRule(int order, int boundary)
         int points = iRule->getRequiredNumberOfIntegrationPoints(_Square, order + 2);
         iRule->SetUpPointsOnSquare(points, _Unknown);
     }
-    return iRule;
+    return std::move(iRule);
 }
 } // end namespace oofem

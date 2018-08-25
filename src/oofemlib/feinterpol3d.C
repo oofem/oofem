@@ -112,9 +112,9 @@ void FEInterpolation3d :: computeSurfaceMapping(IntArray &surfNodes, IntArray &e
     }
 }
 
-IntegrationRule *FEInterpolation3d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
+std::unique_ptr<IntegrationRule> FEInterpolation3d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Line, order + this->order);
     iRule->SetUpPointsOnLine(points, _Unknown);
     return iRule;

@@ -71,14 +71,15 @@ protected:
 public:
     OutputExportModule(int n, EngngModel * e);
     virtual ~OutputExportModule() {}
-    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    IRResultType initializeFrom(InputRecord *ir) override;
     FILE *giveOutputStream();
 
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
-    virtual void terminate();
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    void terminate() override;
 
-    virtual const char *giveClassName() const { return "OutputExportModule"; }
-    virtual const char *giveInputRecordName() const { return _IFT_OutputExportModule_Name; }
+    const char *giveClassName() const override { return "OutputExportModule"; }
+    const char *giveInputRecordName() const { return _IFT_OutputExportModule_Name; }
 };
 } // end namespace oofem
 #endif // outputexportmodule_h_

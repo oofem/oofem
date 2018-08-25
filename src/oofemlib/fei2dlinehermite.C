@@ -150,9 +150,9 @@ double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords,
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) * 0.5;
 }
 
-IntegrationRule *FEI2dLineHermite :: giveIntegrationRule(int order)
+std::unique_ptr<IntegrationRule> FEI2dLineHermite :: giveIntegrationRule(int order)
 {
     OOFEM_ERROR("Not supported.");
-    return NULL;
+    return nullptr;
 }
 } // end namespace oofem

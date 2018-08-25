@@ -173,7 +173,7 @@ Node2NodeContact :: giveLocationArray(IntArray &answer, const UnknownNumberingSc
     // master node
     for ( int i = 1; i <= dofIdArray.giveSize(); i++ ) {
         if ( this->masterNode->hasDofID( (DofIDItem)dofIdArray.at(i) ) ) { // add corresponding number
-            Dof *dof= this->masterNode->giveDofWithID( (DofIDItem)dofIdArray.at(i) );
+            Dof *dof = this->masterNode->giveDofWithID( (DofIDItem)dofIdArray.at(i) );
             answer.at(i) = s.giveDofEquationNumber( dof );
         } 
     }
@@ -181,7 +181,7 @@ Node2NodeContact :: giveLocationArray(IntArray &answer, const UnknownNumberingSc
     // slave node
     for ( int i = 1; i <= dofIdArray.giveSize(); i++ ) {
         if ( this->slaveNode->hasDofID( (DofIDItem)dofIdArray.at(i) ) ) { // add corresponding number
-            Dof *dof= this->slaveNode->giveDofWithID( (DofIDItem)dofIdArray.at(i) );
+            Dof *dof = this->slaveNode->giveDofWithID( (DofIDItem)dofIdArray.at(i) );
             answer.at(3 + i) = s.giveDofEquationNumber( dof );
         }
     }
@@ -192,9 +192,9 @@ void
 Node2NodeContact :: setupIntegrationPoints()
 {
     // Sets up the integration rule array which contains all the necessary integration points
-    if ( this->integrationRule == NULL ) {
+    if ( !this->integrationRule ) {
         //TODO sets a null pointer for the element in the iRule 
-        this->integrationRule = new GaussIntegrationRule(1, NULL) ;
+        this->integrationRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
         this->integrationRule->SetUpPoint(_Unknown);
     }
 }

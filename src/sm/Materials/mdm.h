@@ -129,17 +129,15 @@ public:
     const FloatMatrix &giveLocalDamageTensorForAverage() { return localDamageTensor; }
     const FloatMatrix *giveLocalDamageTensorForAveragePtr() { return & localDamageTensor; }
 
+    const char *giveClassName() const override { return "MDMStatus"; }
 
-    // definition
-    virtual const char *giveClassName() const { return "MDMStatus"; }
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /**
      * Interface requesting service.  In the case of nonlocal constitutive models,
@@ -151,7 +149,7 @@ public:
      * returning adress of component or using pointer conversion from receiver to base class
      * NonlocalMaterialStatusExtension. If no nonlocal extension exists, NULL pointer is returned.
      */
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 };
 
 
@@ -248,70 +246,67 @@ public:
         }
     }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    const char *giveInputRecordName() const override { return _IFT_MDM_Name; }
+    const char *giveClassName() const override { return "MDM"; }
 
-    // identification and auxiliary functions
-    virtual const char *giveInputRecordName() const { return _IFT_MDM_Name; }
-    virtual const char *giveClassName() const { return "MDM"; }
+    void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
+                                        const FloatArray &strain, TimeStep *tStep) override { }
 
-    virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
-                                                const FloatArray &strain, TimeStep *tStep) { }
+    void initializeData(int numberOfMicroplanes) override;
 
-    virtual void initializeData(int numberOfMicroplanes);
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
 
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
-
-    virtual int hasBoundedSupport() { return 1; }
+    int hasBoundedSupport() override { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function.
      */
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual int MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep);
-    virtual int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *estrain = NULL);
-    virtual int MMI_finish(TimeStep *tStep);
+    int MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep) override;
+    int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *estrain = nullptr) override;
+    int MMI_finish(TimeStep *tStep) override;
 
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
-    virtual double predictRelativeComputationalCost(GaussPoint *gp);
-    virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
+    double predictRelativeComputationalCost(GaussPoint *gp) override;
+    double predictRelativeRedistributionCost(GaussPoint *gp) override { return 1.0; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
     /// Returns reference to undamaged (bulk) material.
     StructuralMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp)
-    { return NULL; }
+    MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) override { return nullptr; }
     void computeDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,
                              GaussPoint *gp, TimeStep *tStep);
     void computeLocalDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,
@@ -331,13 +326,13 @@ protected:
     void applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp);
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mmode, GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
     void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);
     void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n);

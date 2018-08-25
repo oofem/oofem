@@ -656,11 +656,11 @@ QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint 
 }
 
 void
-QDKTPlate::computeSurfaceNMatrix (FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
+QDKTPlate::computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray& lcoords)
 {
-  FloatArray n_vec;
-  this->giveInterpolation()->boundarySurfaceEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
-  answer.beNMatrixOf(n_vec, 3);
+    FloatArray n_vec;
+    this->giveInterpolation()->boundarySurfaceEvalN(n_vec, boundaryID, lcoords, FEIElementGeometryWrapper(this) );
+    answer.beNMatrixOf(n_vec, 3);
 }
 
 void
@@ -677,14 +677,6 @@ QDKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     }
 }
 
-IntegrationRule *
-QDKTPlate :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return iRule;
-}
 
 double
 QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)

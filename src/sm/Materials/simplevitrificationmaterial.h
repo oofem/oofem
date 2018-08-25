@@ -77,23 +77,22 @@ public:
     /// Destructor.
     virtual ~SimpleVitrificationMaterial();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual int checkConsistency();
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    int checkConsistency() override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual int hasNonLinearBehaviour() { return true; }
-    virtual const char *giveClassName() const { return "SimpleVitrificationMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_SimpleVitrificationMaterial_Name; }
+    const char *giveClassName() const override { return "SimpleVitrificationMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_SimpleVitrificationMaterial_Name; }
 };
 } // end namespace oofem
 #endif // simplevitrificationmaterial_h

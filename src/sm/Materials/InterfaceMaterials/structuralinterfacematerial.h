@@ -137,15 +137,13 @@ public:
     virtual bool hasAnalyticalTangentStiffness() const = 0;
 
     // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "StructuralInterfaceMaterial"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    
-    virtual FloatArray giveInterfaceStrength() { return {0};}
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
+    virtual FloatArray giveInterfaceStrength() { return {0}; }
 
     //virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     bool useNumericalTangent; ///@todo make private
 };

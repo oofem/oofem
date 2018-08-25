@@ -56,9 +56,9 @@ public:
     /// Destructor
     virtual ~GPInitModule();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doInit();
-    virtual const char *giveClassName() const { return "GPInitModule"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void doInit() override;
+    const char *giveClassName() const override { return "GPInitModule"; }
 };
 } // namespace oofem
 #endif

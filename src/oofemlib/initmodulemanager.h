@@ -52,7 +52,7 @@ public:
     InitModuleManager(EngngModel * emodel);
     virtual ~InitModuleManager();
 
-    InitModule *CreateModule(const char *name, int n, EngngModel *emodel);
+    InitModule *CreateModule(const char *name, int n, EngngModel *emodel) override;
 
     /**
      * Performs the initialization of individual modules.
@@ -60,9 +60,9 @@ public:
      */
     void doInit();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "InitModuleManager"; }
+    const char *giveClassName() const override { return "InitModuleManager"; }
 };
 } // end namespace oofem
 #endif // initmodulemanager_h

@@ -143,7 +143,7 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->mFileName, _IFT_UserDefDirichletBC_filename);
 
     // Import Python file
-    PyObject *mpName = PyString_FromString( this->mFileName.c_str() );
+    PyObject *mpName = PyBytes_FromString( this->mFileName.c_str() );
     mpModule = PyImport_Import(mpName);
     Py_DECREF(mpName);
 

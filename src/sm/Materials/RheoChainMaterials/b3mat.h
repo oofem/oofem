@@ -102,9 +102,9 @@ public:
 
     virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual const char *giveClassName() const { return "B3Material"; }
-    virtual const char *giveInputRecordName() const { return _IFT_B3Material_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "B3Material"; }
+    const char *giveInputRecordName() const override { return _IFT_B3Material_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 

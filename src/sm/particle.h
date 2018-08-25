@@ -67,9 +67,9 @@ public:
      */
     virtual ~Particle(void) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveInputRecordName() const { return _IFT_Particle_Name; }
-    virtual const char *giveClassName() const { return "Particle"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveInputRecordName() const override { return _IFT_Particle_Name; }
+    const char *giveClassName() const override { return "Particle"; }
 
     /// Returns the radius of the particle.
     double giveRadius() const { return radius; }

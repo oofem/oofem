@@ -54,21 +54,21 @@ public:
     PlaneStressPhF2d(int n, Domain *d);
     virtual ~PlaneStressPhF2d() { }
 
-    NLStructuralElement *giveElement() { return this; } 
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual void giveDofManDofIDMask_u(IntArray &answer);
-    virtual void giveDofManDofIDMask_d(IntArray &answer);
+    NLStructuralElement *giveElement() override { return this; } 
+    int computeNumberOfDofs() override { return 12; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    void giveDofManDofIDMask_u(IntArray &answer) override;
+    void giveDofManDofIDMask_d(IntArray &answer) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_PlaneStressPhF2d_Name; }
-    virtual const char *giveClassName() const { return "PlaneStressPhF2d"; }
+    const char *giveInputRecordName() const override { return _IFT_PlaneStressPhF2d_Name; }
+    const char *giveClassName() const override { return "PlaneStressPhF2d"; }
 
-    virtual void computeStiffnessMatrix( FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep ) 
+    void computeStiffnessMatrix( FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep ) override
     {
         PhaseFieldElement :: computeStiffnessMatrix( answer, rMode, tStep );
     }
-    virtual void giveInternalForcesVector( FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0 ) 
+    void giveInternalForcesVector( FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0 ) override 
     {
         PhaseFieldElement :: giveInternalForcesVector( answer, tStep, useUpdatedGpRecord );
     }

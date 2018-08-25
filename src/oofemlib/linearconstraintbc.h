@@ -93,27 +93,25 @@ public:
     /// Destructor.
     virtual ~LinearConstraintBC();
 
-    IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveInputRecordName() const { return _IFT_LinearConstraintBC_Name; }
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0);
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveInputRecordName() const override { return _IFT_LinearConstraintBC_Name; }
+    void assemble(SparseMtrx &answer, TimeStep *tStep,
+                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr) override;
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols,
-                                    CharType type, const UnknownNumberingScheme &r_s,
-                                    const UnknownNumberingScheme &c_s);
+    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols,
+                            CharType type, const UnknownNumberingScheme &r_s,
+                            const UnknownNumberingScheme &c_s) override;
 
-    /// Gives the number of internal dof managers.
-    virtual int giveNumberOfInternalDofManagers() { return 1; }
-    /// Gives an internal dof manager from receiver.
-    virtual DofManager *giveInternalDofManager(int i) { return this->md.get(); }
+    int giveNumberOfInternalDofManagers() override { return 1; }
+    DofManager *giveInternalDofManager(int i) override { return this->md.get(); }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual const char *giveClassName() const { return "LinearConstraintBC"; }
+    const char *giveClassName() const override { return "LinearConstraintBC"; }
 
 protected:
     void giveLocArray(const UnknownNumberingScheme &r_s,  IntArray &locr, int &lambdaeq);

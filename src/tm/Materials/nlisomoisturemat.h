@@ -93,7 +93,7 @@ namespace oofem {
 class NlIsoMoistureMaterial : public IsotropicMoistureTransferMaterial
 {
 protected:
-  enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB, bilinear } Isotherm;
+    enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB, bilinear } Isotherm;
 
     /// density of the dry solid phase
     double rhodry;
@@ -121,13 +121,12 @@ protected:
     double hx, dx;
     double iso_offset;
     double c1, c2, capa2;
-    
+
     /// Nonevaporable water content per m3 of concrete at complete hydration
     double wn;
-    
+
     /// Function of degree of hydration
     ScalarFunction alpha;
-    
 
     enum permeabilityType { multilin, Bazant, Xi, KunzelPerm } Permeability;
 
@@ -157,21 +156,21 @@ public:
     NlIsoMoistureMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
     virtual ~NlIsoMoistureMaterial() { }
 
+    IRResultType initializeFrom(InputRecord *ir) override;
+
     /// evaluates slope of the sorption isotherm
-    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
-    virtual double giveMoistureContent(double humidity);
-    virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
-    virtual double computeCapTranspCoeff(double humidity);
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveMoistureContent(double humidity) override;
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
+    double computeCapTranspCoeff(double humidity);
 
-    virtual const char *giveInputRecordName() const { return _IFT_NlIsoMoistureMaterial_Name; }
-    virtual const char *giveClassName() const { return "NlIsoMoistureMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_NlIsoMoistureMaterial_Name; }
+    const char *giveClassName() const override { return "NlIsoMoistureMaterial"; }
 
-    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasInternalSource();
-    virtual  void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-    
+    int hasInternalSource() override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 };
 } // end namespace oofem
 #endif // nlisomoisturemat_h

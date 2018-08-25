@@ -75,24 +75,23 @@ protected:
     FloatMatrix GtoLRotationMatrix;
 
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
-    virtual void giveNodeCoordinates(FloatArray &x, FloatArray &y);
+    void giveNodeCoordinates(FloatArray &x, FloatArray &y) override;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode) override;
 
     friend class TR_SHELL01;
     /**
      * @name Surface load support
      */
     //@{
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
+    double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) override;
+    int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) override;
     //@}
 
 public:
@@ -100,19 +99,19 @@ public:
     virtual ~TrPlaneStrRot3d() { }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrRot3d_Name; }
-    virtual const char *giveClassName() const { return "TrPlaneStrRot3d"; }
+    const char *giveInputRecordName() const override { return _IFT_TrPlaneStrRot3d_Name; }
+    const char *giveClassName() const override { return "TrPlaneStrRot3d"; }
 
-    virtual int computeNumberOfDofs() { return 9; }
-    virtual int computeNumberOfGlobalDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    int computeNumberOfDofs() override { return 9; }
+    int computeNumberOfGlobalDofs() override { return 18; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
     const FloatMatrix *computeGtoLRotationMatrix();
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    virtual int testElementExtension(ElementExtension ext)
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
+    int testElementExtension(ElementExtension ext) override
     { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif //  trplanrot3d_h

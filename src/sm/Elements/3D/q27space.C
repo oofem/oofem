@@ -73,17 +73,6 @@ Q27Space :: initializeFrom(InputRecord *ir)
 // ***  Surface load support  ***
 // ******************************
 
-IntegrationRule *
-Q27Space :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return iRule;
-}
-
-
-
 int
 Q27Space :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp)
 {

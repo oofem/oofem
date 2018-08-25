@@ -101,33 +101,32 @@ public:
     /// Destructor.
     virtual ~StructuralPythonMaterial();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     void callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
     void callTangentFunction(FloatMatrix &answer, bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp,
-                                                    TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                            MatResponseMode mode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                            const FloatArray &reducedF, TimeStep *tStep);
+    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                    const FloatArray &reducedF, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int hasNonLinearBehaviour() { return true; }
-    virtual const char *giveClassName() const { return "StructuralPythonMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_StructuralPythonMaterial_Name; }
+    const char *giveClassName() const override { return "StructuralPythonMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_StructuralPythonMaterial_Name; }
 };
 
 class StructuralPythonMaterialStatus : public StructuralMaterialStatus
@@ -146,14 +145,14 @@ public:
     /// Destructor.
     virtual ~StructuralPythonMaterialStatus();
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
     void reinitTempStateDictionary();
 
     bp::object giveStateDictionary() { return stateDict; }
     bp::object giveTempStateDictionary() { return tempStateDict; }
 
-    virtual const char *giveClassName() const { return "StructuralPythonMaterialStatus"; }
+    const char *giveClassName() const override { return "StructuralPythonMaterialStatus"; }
 };
 } // end namespace oofem
 #endif // structuralpythonmaterial_h

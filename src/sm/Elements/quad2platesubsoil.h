@@ -62,22 +62,22 @@ public:
     Quad2PlateSubSoil(int n, Domain * d);
     virtual ~Quad2PlateSubSoil() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_Quad2PlateSubSoil_Name; }
-    virtual const char *giveClassName() const { return "Quad2PlateSubSoil"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_Quad2PlateSubSoil_Name; }
+    const char *giveClassName() const override { return "Quad2PlateSubSoil"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int computeNumberOfDofs() { return 8; }
+    int computeNumberOfDofs() override { return 8; }
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeGaussPoints() override;
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
 };
 } // end namespace oofem
 #endif // quad2platesubsoil_H

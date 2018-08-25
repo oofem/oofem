@@ -136,9 +136,9 @@ public:
     double givee0() { return var_e0; }
     double givegf() { return var_gf; }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
 #ifdef supplementary_info
     void setCrackWidth(double src) { crackWidth = src; }
@@ -148,11 +148,11 @@ public:
 #endif
 
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     // definition
-    virtual const char *giveClassName() const { return "MPSDamMaterialStatus"; }
+    const char *giveClassName() const override { return "MPSDamMaterialStatus"; }
 
 protected:
     /**
@@ -231,16 +231,14 @@ public:
     MPSDamMaterial(int n, Domain *d);
     virtual ~MPSDamMaterial() { }
 
-    virtual int hasNonLinearBehaviour() { return 1; }
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    const char *giveInputRecordName() const override { return _IFT_MPSDamMaterial_Name; }
+    const char *giveClassName() const override { return "MPSDamMaterial"; }
 
-    virtual const char *giveInputRecordName() const { return _IFT_MPSDamMaterial_Name; }
-    virtual const char *giveClassName() const { return "MPSDamMaterial"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
@@ -279,7 +277,7 @@ public:
      */
     void computeDamageForCohesiveCrack(double &omega, double kappa, GaussPoint *gp);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 
     virtual double computeTensileStrength(double equivalentTime);

@@ -128,7 +128,7 @@ protected:
     std::unique_ptr<SparseLinearSystemNM> nMethod;
 
 public:
-    NlDEIDynamic(int i, EngngModel * _master = NULL);
+    NlDEIDynamic(int i, EngngModel *master = nullptr);
 
     virtual ~NlDEIDynamic();
 

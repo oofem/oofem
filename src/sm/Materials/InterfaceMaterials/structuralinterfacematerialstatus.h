@@ -97,13 +97,13 @@ public:
     /// Destructor
     virtual ~StructuralInterfaceMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /// Returns the const pointer to receiver's jump.
     const FloatArray &giveJump() const { return jump; }
@@ -146,15 +146,15 @@ public:
     /// Assigns projeted traction
     void letProjectedTractionBe(FloatArray iProjectedTraction) { projectedTraction = std :: move(iProjectedTraction); }
 
-    virtual const char *giveClassName() const { return "StructuralInterfaceMaterialStatus"; }
+    const char *giveClassName() const override { return "StructuralInterfaceMaterialStatus"; }
 
     /// Functions for MaterialStatusMapperInterface
-    virtual void copyStateVariables(const MaterialStatus &iStatus);
-    virtual void addStateVariables(const MaterialStatus &iStatus);
+    void copyStateVariables(const MaterialStatus &iStatus) override;
+    void addStateVariables(const MaterialStatus &iStatus) override;
 
     bool giveNewlyInserted() const {return mNewlyInserted;}
     void setNewlyInserted(bool iNewlyInserted) {mNewlyInserted = iNewlyInserted;}
-    
+
     virtual double giveDamage() { return 0.0; }     // no default damage
     virtual double giveTempDamage() { return 0.0; } // no default damage
 };

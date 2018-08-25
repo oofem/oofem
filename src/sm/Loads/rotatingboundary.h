@@ -73,15 +73,15 @@ public:
     /// Destructor.
     virtual ~RotatingBoundary() { }
 
-    virtual double give(Dof *dof, ValueModeType mode, double time);
+    double give(Dof *dof, ValueModeType mode, double time) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void scale(double s) { }
+    void scale(double s) override { }
 
-    virtual const char *giveInputRecordName() const { return _IFT_RotatingBoundary_Name; }
-    virtual const char *giveClassName() const { return "RotatingBoundary"; }
+    const char *giveInputRecordName() const override { return _IFT_RotatingBoundary_Name; }
+    const char *giveClassName() const override { return "RotatingBoundary"; }
 };
 } // end namespace oofem
 #endif // rotatingboundary_h

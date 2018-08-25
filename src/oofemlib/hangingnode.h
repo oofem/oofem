@@ -83,13 +83,13 @@ public:
     /// Destructor.
     virtual ~HangingNode(void) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void postInitialize();
-    virtual int checkConsistency();
-    virtual bool isDofTypeCompatible(dofType type) const { return ( type == DT_master || type == DT_slave ); }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void postInitialize() override;
+    int checkConsistency() override;
+    bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }
 
-    virtual const char *giveClassName() const { return "HangingNode"; }
-    virtual const char *giveInputRecordName() const { return _IFT_HangingNode_Name; }
+    const char *giveClassName() const override { return "HangingNode"; }
+    const char *giveInputRecordName() const override { return _IFT_HangingNode_Name; }
 };
 } // end namespace oofem
 #endif // hangingnode_h

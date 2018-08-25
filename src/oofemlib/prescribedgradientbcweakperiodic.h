@@ -19,18 +19,18 @@ public:
     PrescribedGradientBCWeakPeriodic(int n, Domain *d);
     virtual ~PrescribedGradientBCWeakPeriodic();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void postInitialize();
+    void postInitialize() override;
 
-    virtual const char *giveClassName() const { return "PrescribedGradientBCWeakPeriodic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCWeakPeriodic_Name; }
+    const char *giveClassName() const override { return "PrescribedGradientBCWeakPeriodic"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedGradientBCWeakPeriodic_Name; }
 
 protected:
-    virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const;
-    virtual void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const;
+    void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const override;
+    void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const override;
 
-    virtual bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const { return pointIsOnGammaPlus(iPos); }
+    bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const override { return pointIsOnGammaPlus(iPos); }
 };
 } /* namespace oofem */
 

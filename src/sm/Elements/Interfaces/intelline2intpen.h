@@ -53,12 +53,12 @@ public:
 	virtual ~IntElLine2IntPen();
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_IntElLine2IntPen_Name; }
-    virtual const char *giveClassName() const { return "IntElLine2IntPen"; }
+    const char *giveInputRecordName() const override { return _IFT_IntElLine2IntPen_Name; }
+    const char *giveClassName() const override { return "IntElLine2IntPen"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
+    void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G) override;
 
 
     /**
@@ -78,7 +78,7 @@ public:
      * @param rMode Response mode.
      * @param tStep Time step.
      */
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
 
     /**
@@ -95,7 +95,7 @@ public:
      * nonzero the stresses are taken directly from integration point status (should be derived from StructuralMaterialStatus)
      * (fast, but engineering model must ensure valid status data in each integration point).
      */
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
 };
 

@@ -54,8 +54,8 @@ namespace oofem {
 class CrackExportModule : public ExportModule
 {
 protected:
-  IntArray crossSections;
-  double threshold;
+    IntArray crossSections;
+    double threshold;
 
 public:
     /// Constructor.
@@ -63,12 +63,12 @@ public:
     /// Destructor
     virtual ~CrackExportModule();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput);
-    virtual void initialize();
-    virtual void terminate();
-    virtual const char *giveClassName() const { return "CrackExportModule"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CrackExportModule_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void doOutput(TimeStep *tStep, bool forcedOutput) override;
+    void initialize() override;
+    void terminate() override;
+    const char *giveClassName() const override { return "CrackExportModule"; }
+    const char *giveInputRecordName() const { return _IFT_CrackExportModule_Name; }
 
     static void writeToOutputFile(const std :: string &iName, const std :: vector< FloatArray > &iPoints);
 };

@@ -59,7 +59,7 @@ public:
     DiscontinuousSegmentIntegrationRule(int n, Element *e, const std :: vector< Line > &iSegments);
     virtual ~DiscontinuousSegmentIntegrationRule();
 
-    virtual int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode);
+    int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode) override;
 };
 } /* namespace oofem */
 

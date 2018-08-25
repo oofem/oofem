@@ -89,7 +89,7 @@ public:
      */
     void setDofManValue(int dofMan, FloatArray value);
 
-    virtual const char *giveClassName() const override { return "DofManValueField"; }
+    const char *giveClassName() const override { return "DofManValueField"; }
 };
 } // end namespace oofem
 #endif // dofmanvalfield_h

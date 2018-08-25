@@ -58,21 +58,21 @@ public:
     QPlaneStress2d(int n, Domain * d);
     virtual ~QPlaneStress2d() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
-    virtual const char *giveClassName() const { return "QPlaneStress2d"; }
-    
-    virtual Interface *giveInterface(InterfaceType it);
+    const char *giveInputRecordName() const override { return _IFT_QPlaneStress2d_Name; }
+    const char *giveClassName() const override { return "QPlaneStress2d"; }
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    Interface *giveInterface(InterfaceType it) override;
+
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
 };

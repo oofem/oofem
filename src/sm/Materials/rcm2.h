@@ -104,7 +104,7 @@ public:
     RCM2MaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RCM2MaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     const FloatArray &getPrincipalStrainVector() const { return principalStrain; }
     const FloatArray &getPrincipalStressVector() const { return principalStress; }
@@ -152,15 +152,13 @@ public:
     const IntArray &giveCrackStatus() { return crackStatuses; }
     int giveAlreadyCrack() const { return this->giveNumberOfActiveCracks(); }
 
-    // definition
-    virtual const char *giveClassName() const { return "RCM2MaterialStatus"; }
+    const char *giveClassName() const override { return "RCM2MaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 /**
@@ -186,45 +184,43 @@ public:
     RCM2Material(int n, Domain * d);
     virtual ~RCM2Material();
 
-    // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual const char *giveClassName() const { return "RCM2Material"; }
+    const char *giveClassName() const override { return "RCM2Material"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCM2MaterialStatus(1, domain, gp); }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCM2MaterialStatus(1, domain, gp); }
-
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) { linearElasticMaterial->giveThermalDilatationVector(answer, gp, tStep); }
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
+    { linearElasticMaterial->giveThermalDilatationVector(answer, gp, tStep); }
 
 protected:
 
@@ -233,7 +229,7 @@ protected:
     virtual void updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain);
 
     virtual void checkIfClosedCracks(GaussPoint *gp, FloatArray &crackStrainVector, IntArray &);
-    virtual int  checkSizeLimit(GaussPoint *gp, double) { return 0; }
+    virtual int checkSizeLimit(GaussPoint *gp, double) { return 0; }
     virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) = 0;
     virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) = 0;
     virtual double computeStrength(GaussPoint *gp, double) = 0;
@@ -254,7 +250,6 @@ protected:
      * void  computeTrialStressIncrement (FloatArray& answer, GaussPoint *gp,
      * const FloatArray& strainIncrement, TimeStep* tStep);
      */
-    FloatMatrix *GiveCrackTransformationMtrx(GaussPoint *gp, int i);
     virtual void giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
                                                       MatResponseMode rMode,
                                                       GaussPoint *gp, TimeStep *tStep);
@@ -271,21 +266,21 @@ protected:
     double giveResidualStrength() { return 0.01 * this->Ft; }
 
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
-    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
+    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
+    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                               GaussPoint *gp,
+                               TimeStep *tStep) override;
+    void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
+    void givePlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                                 GaussPoint *gp,
+                                 TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // rcm2_h

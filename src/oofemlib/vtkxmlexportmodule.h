@@ -180,11 +180,11 @@ public:
     /// Destructor
     virtual ~VTKXMLExportModule();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
-    virtual void initialize();
-    virtual void terminate();
-    virtual const char *giveClassName() const { return "VTKXMLExportModule"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    void initialize() override;
+    void terminate() override;
+    const char *giveClassName() const override { return "VTKXMLExportModule"; }
     /**
      * Prints point data header.
      */
@@ -314,8 +314,7 @@ protected:
      * The i-th value contains the corresponding global node number.
      */
     virtual int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans, 
-				int &totalcells,
+                                int &regionDofMans, int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg);
     /**
      * Writes a VTK collection file where time step data is stored.
@@ -357,7 +356,6 @@ class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 {
 public:
     VTKXMLExportModuleElementInterface() : Interface() { }
-    virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
     virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
 };

@@ -1165,7 +1165,7 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
     } 
     
     int nPointsTri = 6; //todo generalize
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, this);
 //     iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
     iRule->SetUpPointsOnTriangle(nPointsTri, _3dMat);
     
@@ -1358,13 +1358,6 @@ Shell7Base :: edgeComputeLengthAround(GaussPoint *gp, const int iedge)
 
 #if 1
 
-void Shell7Base :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    // what is this?
-    answer.resize(0);
-}
-
-
 void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_DirectorField ) {
@@ -1388,23 +1381,20 @@ Shell7Base :: NodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer,
     // N(nsigma, nsigma*nnodes)
     // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray stressVector, n;
-    Element *elem = this->ZZNodalRecoveryMI_giveElement();
 
-    //int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
     int size = 6; ///@todo this is hard coded for stress recovery
 
     answer.zero();
     for ( auto *gp: *integrationRulesArray [ layer - 1 ] ) {
         double dV = this->computeVolumeAroundLayer(gp, layer);
 
-        if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
+        if ( !this->giveIPValue(stressVector, gp, type, tStep) ) {
             stressVector.resize(size);
             stressVector.zero();
         }
 
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         answer.plusDyadUnsym(n, stressVector, dV);
-
     }
 }
 

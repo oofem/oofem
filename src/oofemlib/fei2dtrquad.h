@@ -46,38 +46,34 @@ class OOFEM_EXPORT FEI2dTrQuad : public FEInterpolation2d
 public:
     FEI2dTrQuad(int ind1, int ind2) : FEInterpolation2d(2, ind1, ind2) { }
 
-    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
-    virtual integrationDomain giveBoundaryIntegrationDomain(int ib) const { return _Line; }
-    virtual integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const { return _Triangle; }
-    virtual integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const { return _Line; }
-
-    
+    integrationDomain giveIntegrationDomain() const override { return _Triangle; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_2; }
+    integrationDomain giveBoundaryIntegrationDomain(int ib) const override { return _Line; }
+    integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return _Triangle; }
+    integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
 
     // Bulk
-    virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double giveArea(const FEICellGeometry &cellgeo) const;
-    virtual int giveNumberOfNodes() const { return 6; }    
+    void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double giveArea(const FEICellGeometry &cellgeo) const override;
+    int giveNumberOfNodes() const override { return 6; }
 
-    virtual bool inside(const FloatArray &lcoords) const;
+    bool inside(const FloatArray &lcoords) const override;
 
     // Edge
-    virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
-    virtual int giveNumberOfEdges() const { return 3; }
-    virtual void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void edgeEvaldNds(FloatArray &answer, int iedge,
-                              const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual void edgeLocal2global(FloatArray &answer, int iedge,
-                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-    virtual double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo);
+    void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) override;
+    int giveNumberOfEdges() const override { return 3; }
+    void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) override;
 
-    virtual IntegrationRule *giveIntegrationRule(int order);
+    std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 
-    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

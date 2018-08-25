@@ -62,10 +62,10 @@ public:
     TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
     virtual ~TransportElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     virtual void computeInternalForcesVector(FloatArray &answer, TimeStep *tStep);
     virtual void computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
@@ -73,19 +73,19 @@ public:
     virtual void computeLumpedCapacityVector(FloatArray &answer, TimeStep *tStep);
 
     //Compute volumetric load from element
-    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
     //Boundary load by prescribed flux, convection, or radiation over surface
-    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override;
     //Contribution to conductivity matrix from convection
-    virtual void computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
-    virtual void computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep);
+    void computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep) override;
+    void computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *load, int boundary, MatResponseMode rmode, TimeStep *tStep) override;
     //Boundary load by prescribed flux, convection, or radiation over length
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override;
 
-    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+    void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer) override;
 
     TransportCrossSection * giveTransportCrossSection();
-    virtual Material * giveMaterial();
+    Material * giveMaterial() override;
 
     /**
      * Gives the thickness at some global coordinate.
@@ -119,19 +119,19 @@ public:
     virtual void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // time step termination
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual int checkConsistency();
+    void updateInternalState(TimeStep *tStep) override;
+    int checkConsistency() override;
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                       const FloatArray &coords, IntArray &dofId, ValueModeType mode,
-                                                      TimeStep *tStep);
+                                                      TimeStep *tStep) override;
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *tStep);
+                                int node, TimeStep *tStep) override;
     // Graphics output
-    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
+    //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override {}
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override {}
 #endif
 
     /**
@@ -246,7 +246,6 @@ protected:
      */
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) = 0;
 
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int approxOrder) { return NULL; }
     virtual void computeSurfaceNAt(FloatArray &answer, int iSurf, const FloatArray &lcoord);
     virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void giveSurfaceDofMapping(IntArray &mask, int iSurf);

@@ -68,50 +68,49 @@ protected:
 public:
     LSpace(int n, Domain * d);
     virtual ~LSpace() { }
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual Interface *giveInterface(InterfaceType it);
-    virtual int testElementExtension(ElementExtension ext)
+    Interface *giveInterface(InterfaceType it) override;
+    int testElementExtension(ElementExtension ext) override
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
-    virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
-                                                                  IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
-                                                                  HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
-                                                                  int &localNodeId, int &localElemId, int &localBcId,
-                                                                  IntArray &controlNode, IntArray &controlDof,
-                                                                  HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
+                                                          IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
+                                                          HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
+                                                          int &localNodeId, int &localElemId, int &localBcId,
+                                                          IntArray &controlNode, IntArray &controlDof,
+                                                          HuertaErrorEstimator :: AnalysisMode aMode) override;
+    void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LSpace_Name; }
-    virtual const char *giveClassName() const { return "LSpace"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_LSpace_Name; }
+    const char *giveClassName() const override { return "LSpace"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawTriad(FloatArray &, int isurf);
 #endif
 
 protected:
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 8; }
+    int giveNumberOfIPForMassMtrxIntegration() override { return 8; }
 
     /**
      * @name Surface load support
      */
     //@{
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) override;
     //@}
 };
 } // end namespace oofem

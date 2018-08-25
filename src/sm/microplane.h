@@ -85,17 +85,17 @@ public:
     /// Destructor
     virtual ~Microplane();
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
 
-    double giveWeight()
+    double giveWeight() override
     { return static_cast< MicroplaneMaterial * >( this->giveMaterial() )->giveMicroplaneIntegrationWeight(this); }
     /// Returns normal of microplane.
     void giveMicroplaneNormal(FloatArray &answer)
     { static_cast< MicroplaneMaterial * >( this->giveMaterial() )->giveMicroplaneNormal(answer, this); }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "Microplane"; }
+    const char *giveClassName() const override { return "Microplane"; }
 };
 } // end namespace oofem
 #endif // microplane_h

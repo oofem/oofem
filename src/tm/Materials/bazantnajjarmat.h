@@ -74,16 +74,16 @@ public:
     virtual ~BazantNajjarMoistureTransferMaterial() { }
 
     /// evaluates permeability according to Bazant - Najjar function for diffusivity
-    virtual double givePermeability(GaussPoint *gp, TimeStep *tStep);
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
     /// evaluates slope of the sorption isotherm
-    virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep);
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_BazantNajjarMoistureTransferMaterial_Name; }
-    virtual const char *giveClassName() const { return "BazantNajjarMoistureTransferMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_BazantNajjarMoistureTransferMaterial_Name; }
+    const char *giveClassName() const override { return "BazantNajjarMoistureTransferMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode);
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
 };
 } // end namespace oofem
 #endif // bazantnajjarmat_h

@@ -89,18 +89,16 @@ public:
     double giveTempDamage() { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
-    /// Writes information into the output file.
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    // definition
-    virtual const char *giveClassName() const { return "FRCFCMStatus"; }
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    const char *giveClassName() const override { return "FRCFCMStatus"; }
 
-    // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
+
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -116,15 +114,13 @@ public:
     FRCFCM(int n, Domain *d);
     virtual ~FRCFCM() {}
 
-    // identification and auxiliary functions
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new FRCFCMStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FRCFCMStatus(1, domain, gp); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
 protected:
-
     /// fiber shear strength at zero slip
     double tau_0;
 
@@ -212,38 +208,28 @@ protected:
     enum FiberType { FT_CAF, FT_SAF, FT_SRF, FT_Unknown };
     FiberType fiberType;
 
-    /// returns stiffness in the normal direction of the i-th crack
-    virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i);
+    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i) override;
     /// evaluates the fiber bond if w > w*
     virtual double computeFiberBond(double w);
-    /// computes normal stress associated with i-th crack direction
-    virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i);
+    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) override;
     /// compute the nominal stress in fibers in the i-th crack
     virtual double computeStressInFibersInCracked(GaussPoint *gp, double eps_cr, int i);
-    /// returns Geff which is necessary in the global stiffness matrix
-    virtual double computeEffectiveShearModulus(GaussPoint *gp, int i);
-    /// shear modulus for a given crack plane (1, 2, 3)
-    virtual double computeD2ModulusForCrack(GaussPoint *gp, int icrack);
+    double computeEffectiveShearModulus(GaussPoint *gp, int i) override;
+    double computeD2ModulusForCrack(GaussPoint *gp, int icrack) override;
     /// estimate shear modulus for a given crack plane (1, 2, 3). Uses equilibrated value of damage.
     virtual double estimateD2ModulusForCrack(GaussPoint *gp, int icrack);
-    /// computes the maximum value of the shear stress; if the shear stress exceeds this value, it is cropped
-    virtual double maxShearStress(GaussPoint *gp, int i);
+    double maxShearStress(GaussPoint *gp, int i) override;
     /// evaluates temporary value of damage caused by fibre shearing
     virtual double computeTempDamage(GaussPoint *gp);
     /// computes crack spacing based on composition of the fibre composite
-    virtual double computeCrackSpacing(void);
+    virtual double computeCrackSpacing();
     /// compute the angle between the fibre and i-th crack normal
     virtual double computeCrackFibreAngle(GaussPoint *gp, int i);
-    /// overrides real checking from concretefcm.C, here we assume that the fibers provide sufficient strength to prevent snapback
-    virtual void checkSnapBack(GaussPoint *gp, int crack) { return; }
-    /// the method from fcm is overridden to consider stress split between the matrix and fibers
-    virtual bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress);
-    /// function calculating ratio used to split shear slips on two crack planes
-    virtual double computeShearStiffnessRedistributionFactor(GaussPoint *gp, int ithCrackPlane, int jthCrackDirection);
-    /// according to the volume fraction of fibers and the Young's moduli estimates the overall stiffness of the composite
-    virtual double computeOverallElasticStiffness(void);
-    /// from the Poisson's ratio of matrix and the overall stiffness estimates G
-    virtual double computeOverallElasticShearModulus(void) { return this->computeOverallElasticStiffness() / ( 2. * ( 1. + this->giveLinearElasticMaterial()->givePoissonsRatio() ) ); }
+    void checkSnapBack(GaussPoint *gp, int crack) override { }
+    bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) override;
+    double computeShearStiffnessRedistributionFactor(GaussPoint *gp, int ithCrackPlane, int jthCrackDirection) override;
+    double computeOverallElasticStiffness() override;
+    double computeOverallElasticShearModulus(void) override { return this->computeOverallElasticStiffness() / ( 2. * ( 1. + this->giveLinearElasticMaterial()->givePoissonsRatio() ) ); }
 };
 } // end namespace oofem
 #endif // frcfcm_h

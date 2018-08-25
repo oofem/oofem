@@ -143,7 +143,7 @@ public:
      */
     int isDofExcluded(int index);
 
-    virtual void scale(double s);
+    void scale(double s) override;
 
     /**
      * Returns receiver's coordinate system.
@@ -168,17 +168,17 @@ public:
         return 0;
     }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     /**
      * @return Pointer to receiver component array, where component values of boundary condition are stored.
      */
     const FloatArray &giveComponentArray() const;
-    void setComponentArray(FloatArray &arry) { componentArray = arry; }
+    void setComponentArray(FloatArray &arry) { componentArray = std::move(arry); }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // load_h

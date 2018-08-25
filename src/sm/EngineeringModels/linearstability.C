@@ -380,9 +380,7 @@ contextIOResultType LinearStability :: saveContext(DataStream &stream, ContextMo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = field->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    field->saveContext(stream);
 
     if ( ( iores = eigVal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -400,9 +398,7 @@ contextIOResultType LinearStability :: restoreContext(DataStream &stream, Contex
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = field->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    field->restoreContext(stream);
 
     if ( ( iores = eigVal.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);

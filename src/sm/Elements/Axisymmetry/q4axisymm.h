@@ -63,21 +63,19 @@ public:
     Q4Axisymm(int n, Domain * d);
     virtual ~Q4Axisymm();
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
     // definition & identification
-    virtual Interface *giveInterface(InterfaceType);
-    virtual const char *giveInputRecordName() const { return _IFT_Q4Axisymm_Name; }
-    virtual const char *giveClassName() const { return "Q4axisymm"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
-protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
-    
-    
+    Interface *giveInterface(InterfaceType) override;
+    const char *giveInputRecordName() const override { return _IFT_Q4Axisymm_Name; }
+    const char *giveClassName() const override { return "Q4axisymm"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) override;
+
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type) override;
 #endif
 };
 } // end namespace oofem

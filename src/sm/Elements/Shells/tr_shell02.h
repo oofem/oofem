@@ -76,88 +76,87 @@ public:
     /// Destructor
     virtual ~TR_SHELL02() {}
 
-    virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
+    FEInterpolation *giveInterpolation() const override { return plate->giveInterpolation(); }
 
-    virtual int computeNumberOfDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const
+    int computeNumberOfDofs() override { return 18; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override
     { plate->giveDofManDofIDMask(inode, answer); }
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL02_Name; }
-    virtual const char *giveClassName() const { return "TR_SHELL02"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_TR_SHELL02_Name; }
+    const char *giveClassName() const override { return "TR_SHELL02"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual bool giveRotationMatrix(FloatMatrix &answer);
+    void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override;
+    double computeVolumeAround(GaussPoint *gp) override;
+    bool giveRotationMatrix(FloatMatrix &answer) override;
 
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual void postInitialize();
-    void updateLocalNumbering(EntityRenumberingFunctor &f);
-    void setCrossSection(int csIndx);
+    void updateYourself(TimeStep *tStep) override;
+    void updateInternalState(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void postInitialize() override;
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
+    void setCrossSection(int csIndx) override;
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
     // the membrane and plate irules are same (chacked in initializeFrom)
-    virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule(); }
-    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return plate->giveDefaultIntegrationRulePtr(); }
-    virtual IntegrationRule *giveIntegrationRule(int i) { return plate->giveIntegrationRule(i); }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
-    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
-    virtual MaterialMode giveMaterialMode() { return _Unknown; }
+    int giveDefaultIntegrationRule() const override { return plate->giveDefaultIntegrationRule(); }
+    IntegrationRule *giveDefaultIntegrationRulePtr() override { return plate->giveDefaultIntegrationRulePtr(); }
+    IntegrationRule *giveIntegrationRule(int i) override { return plate->giveIntegrationRule(i); }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
+    integrationDomain giveIntegrationDomain() const override { return _Triangle; }
+    MaterialMode giveMaterialMode() override { return _Unknown; }
 
-    virtual Interface *giveInterface(InterfaceType it);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    Interface *giveInterface(InterfaceType it) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
-    virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
-    virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
+    IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule() override;
+    void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig) override;
 
     // SpatialLocalizerI
-    virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
+    void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1) override;
 
-
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override {
         return this->plate->computeGlobalCoordinates(answer, lcoords);
     }
 
-    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) {
+    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override {
         return this->plate->computeLocalCoordinates(answer, gcoords);
     }
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &)
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
 
     /// @todo In time delete
 protected:
-    virtual void computeGaussPoints()
+    void computeGaussPoints() override
     {
         this->membrane->computeGaussPoints();
         this->plate->computeGaussPoints();
     }
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this funciton is not allowed"); }
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode) override;
 
 public:
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
 };
 } // end namespace oofem

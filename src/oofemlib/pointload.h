@@ -76,26 +76,24 @@ public:
      * @param n Load number.
      * @param d Domain to which new object will belongs.
      */
-    PointLoad(int n, Domain * d) : BodyLoad(n, d) {
-        coordSystemType = CST_Global;
-    }
+    PointLoad(int n, Domain * d) : BodyLoad(n, d), coordSystemType(CST_Global) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
     /**
      * Gives coordinates of the receiver
      */
     const FloatArray & giveCoordinates() const { return coords; }
 
-    virtual CoordSystType giveCoordSystMode() { return coordSystemType; }
-    //virtual FormulationType giveFormulationType () { return FT_Entity; }
+    CoordSystType giveCoordSystMode() override { return coordSystemType; }
+    //FormulationType giveFormulationType () override { return FT_Entity; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bcType giveType() const { return lType; }
-    virtual bcGeomType giveBCGeoType() const { return PointLoadBGT; }
-    virtual const char *giveClassName() const { return "PointLoad"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PointLoad_Name; }
+    bcType giveType() const override { return lType; }
+    bcGeomType giveBCGeoType() const override { return PointLoadBGT; }
+    const char *giveClassName() const override { return "PointLoad"; }
+    const char *giveInputRecordName() const override { return _IFT_PointLoad_Name; }
 };
 } // end namespace oofem
 #endif // pointload_h

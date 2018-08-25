@@ -56,69 +56,60 @@ namespace oofem {
 /**
  * Development cz-model using phase field
  */
-
-
 class IntMatPhaseFieldStatus : public StructuralInterfaceMaterialStatus
 {
 public:
     IntMatPhaseFieldStatus(int n, Domain * d, GaussPoint * g);
-    virtual ~IntMatPhaseFieldStatus(){};
-    
+    virtual ~IntMatPhaseFieldStatus() { }
+
     /// damage variable
     double tempDamage;
-    double giveDamage() { return tempDamage; }
-    
-    
+    double giveDamage() override { return tempDamage; }
+
     double tempDrivingEnergy;
     double drivingEnergy;
     double giveTempDrivingEnergy() { return tempDrivingEnergy; }
     double giveDrivingEnergy() { return drivingEnergy; }
     void letTempDrivingEnergyBe(double val) { this->tempDrivingEnergy = val; }
-     
-    virtual const char *giveClassName() const { return "IntMatPhaseFieldStatus"; }
-    
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
 
+    const char *giveClassName() const override { return "IntMatPhaseFieldStatus"; }
+
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 };
 
 
-class IntMatPhaseField : public StructuralInterfaceMaterialPhF{
+class IntMatPhaseField : public StructuralInterfaceMaterialPhF
+{
+protected:
+    double k;
+    double Gc;
+
 public:
     IntMatPhaseField(int n, Domain * d);
     virtual ~IntMatPhaseField();
 
-    virtual int hasNonLinearBehaviour()   { return 1; }
+    int hasMaterialModeCapability(MaterialMode mode) override;
+    const char *giveClassName() const override { return "IntMatPhaseField"; }
+    const char *giveInputRecordName() const override { return _IFT_IntMatPhaseField_Name; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "IntMatPhaseField"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IntMatPhaseField_Name; }
+    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep) override;
+    void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveTangents(FloatMatrix &jj, FloatMatrix &jd, FloatMatrix &dj, FloatMatrix &dd, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveTangents(FloatMatrix &jj, FloatMatrix &jd, FloatMatrix &dj, FloatMatrix &dd, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-     
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatPhaseFieldStatus(1, domain, gp); }; 
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    bool hasAnalyticalTangentStiffness() const override { return true; };
 
-    //virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralInterfaceMaterialStatus(1, domain, gp); }
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatPhaseFieldStatus(1, domain, gp); }; 
-    
-    virtual bool hasAnalyticalTangentStiffness() const { return true; };
-
-    
-    virtual double giveDrivingForce(GaussPoint *gp);
-    virtual double giveDrivingForcePrime(GaussPoint *gp);
+    double giveDrivingForce(GaussPoint *gp) override;
+    double giveDrivingForcePrime(GaussPoint *gp) override;
     //double compute_fPrime(const double d);
     double compute_g(const double d);
     double compute_gPrime(const double d);
     double compute_gBis(const double d);
-    
-protected:
-	double k;
-    double Gc;
 };
 
 } /* namespace oofem */

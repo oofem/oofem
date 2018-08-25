@@ -60,37 +60,36 @@ public:
     HTSelement(int n, Domain * d);
     virtual ~HTSelement() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_HTSelement_Name; }
-    virtual const char *giveClassName() const { return "HTSelement"; }
+    const char *giveInputRecordName() const override { return _IFT_HTSelement_Name; }
+    const char *giveClassName() const override { return "HTSelement"; }
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int) {; }
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) {; }
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int) override { }
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override { }
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     double computeVolumeAroundSide(GaussPoint *gp, int elemSideNumber);
     Node *giveSideNode(int elementSideNumber, int nodeNumber);
     double giveSideLength(int sideNumber);
-    virtual int computeNumberOfDofs() { return 4 * numberOfEdges; }
-    virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    int computeNumberOfDofs() override { return 4 * numberOfEdges; }
+    void computeGaussPoints() override;
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
     virtual StructuralElement *giveStructuralElement() { return this; }
     //jak se pocita deformace???
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) { answer.resize(numberOfStressDofs); }
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override { answer.resize(numberOfStressDofs); }
     //dodelat vypocet napeti!!!
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) { answer.resize(numberOfStressDofs); }
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) {
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override { answer.resize(numberOfStressDofs); }
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override {
         OOFEM_ERROR("Function not defined for this element and should never be called. This is a bug.");
     }
     //dodelat internal forces, budou potreba pro nelinearni vypocet
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) { answer.resize(numberOfDofs); }
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) override { answer.resize(numberOfDofs); }
 
     void computePuVectorAt(FloatArray &answer, FloatMatrix N, FloatArray u, GaussPoint *gp, int sideNumber);
     void computePsVectorAt(FloatArray &answer, FloatArray t, GaussPoint *gp);
     void computePrescribedDisplacementLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
-    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
-
+    int testElementExtension(ElementExtension ext) override { return ( ext == Element_EdgeLoadSupport ); }
 
     void computeFMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *gp, int sideNumber);
     void computeAMatrixAt(FloatMatrix &answer, FloatMatrix N, GaussPoint *gp, int sideNumber);
@@ -99,9 +98,8 @@ protected:
     void computeUgammaMatrixAt(FloatMatrix &answer, GaussPoint *gp);
     void computeOutwardNormalMatrix(FloatMatrix &answer, int sideNumber);
 
-
     void computeCenterOfGravity();
-    virtual int giveNumberOfNodes() const { return numberOfEdges; }
+    int giveNumberOfNodes() const override { return numberOfEdges; }
     //uv functions
     void uv1(FloatArray &answer, double x, double y);
     void uv2(FloatArray &answer, double x, double y);

@@ -96,6 +96,14 @@ protected:
     std :: vector< double >values;
 
 public:
+    /// @name Iterator for for-each loops (columns-wise order):
+    //@{
+    std::vector< double > :: iterator begin() { return this->values.begin(); }
+    std::vector< double > :: iterator end() { return this->values.end(); }
+    std::vector< double > :: const_iterator begin() const { return this->values.begin(); }
+    std::vector< double > :: const_iterator end() const { return this->values.end(); }
+    //@}
+
     /**
      * Creates matrix of given size.
      * @param n Number of rows.

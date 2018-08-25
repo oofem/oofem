@@ -114,16 +114,6 @@ QBrick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-IntegrationRule *
-QBrick1_ht :: GetSurfaceIntegrationRule(int approxOrder)
-{
-    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
-    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Square, approxOrder);
-    iRule->SetUpPointsOnSquare(npoints, _Unknown);
-    return iRule;
-}
-
-
 double
 QBrick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {

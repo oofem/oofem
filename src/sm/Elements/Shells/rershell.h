@@ -67,66 +67,62 @@ protected:
 
 public:
     RerShell(int n, Domain * d);
-    virtual ~RerShell() {
-    }
+    virtual ~RerShell() { }
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { computeLumpedMassMatrix(answer, tStep); }
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
     void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
 
-    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;
     //
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual const FloatMatrix *computeGtoLRotationMatrix() {return CCTPlate3d::computeGtoLRotationMatrix();}
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    
-
+    const FloatMatrix *computeGtoLRotationMatrix() override { return CCTPlate3d::computeGtoLRotationMatrix(); }
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
 
     // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+    void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual int computeNumberOfDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    int computeNumberOfDofs() override { return 18; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
-
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
     // io routines
 #ifdef __OOFEG
     //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
     //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    //virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    //void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_RerShell_Name; }
-    virtual const char *giveClassName() const { return "RerShell"; }
+    const char *giveInputRecordName() const override { return _IFT_RerShell_Name; }
+    const char *giveClassName() const override { return "RerShell"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
-    virtual MaterialMode giveMaterialMode() { return _3dShell; }
+    integrationDomain giveIntegrationDomain() const override { return _Triangle; }
+    MaterialMode giveMaterialMode() override { return _3dShell; }
 
 protected:
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeGaussPoints();
-    virtual double giveArea();
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode) override;
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeGaussPoints() override;
+    double giveArea();
 };
 } // end namespace oofem
 #endif // rershell_h

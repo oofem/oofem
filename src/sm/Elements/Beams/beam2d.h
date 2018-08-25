@@ -80,25 +80,25 @@ public:
     Beam2d(int n, Domain *aDomain);
     virtual ~Beam2d();
 
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
-    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
-    virtual void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
+    void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) override;
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
+    void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
+    int testElementExtension(ElementExtension ext) override { return ( ext == Element_EdgeLoadSupport ); }
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override { return nullptr; }
 
-    virtual int computeNumberOfDofs() { return 6; }
-    virtual int computeNumberOfGlobalDofs() { return 6 + this->numberOfCondensedDofs; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual int giveNumberOfInternalDofManagers() const { return ( ghostNodes [ 0 ] != NULL ) + ( ghostNodes [ 1 ] != NULL ); }
-    virtual DofManager *giveInternalDofManager(int i) const {
+    int computeNumberOfDofs() override { return 6; }
+    int computeNumberOfGlobalDofs() override { return 6 + this->numberOfCondensedDofs; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    int giveNumberOfInternalDofManagers() const override { return ( ghostNodes [ 0 ] != nullptr ) + ( ghostNodes [ 1 ] != nullptr ); }
+    DofManager *giveInternalDofManager(int i) const override {
         if ( i == 1 ) {
             if ( ghostNodes [ 0 ] ) { return ghostNodes [ 0 ]; } else { return ghostNodes [ 1 ]; }
         } else if ( i == 2 ) { // i==2
@@ -108,7 +108,7 @@ public:
             return NULL;
         }
     }
-    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const {
+    void giveInternalDofManDofIDMask(int i, IntArray &answer) const override {
         if ( i == 1 ) {
             if ( ghostNodes [ 0 ] ) {
                 ghostNodes [ 0 ]->giveCompleteMasterDofIDArray(answer);
@@ -122,49 +122,48 @@ public:
         }
     }
 
-    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) {
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) override {
       giveLocationArray (locationArray, s, dofIds);
     }
-     
-    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) {
+
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) override {
       giveLocationArray (locationArray, dofIDMask, s, dofIds);
     }
-    
 
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual void  printOutputAt(FILE *file, TimeStep *tStep);
+    double computeVolumeAround(GaussPoint *gp) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "Beam2d"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Beam2d_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "Beam2d"; }
+    const char *giveInputRecordName() const override { return _IFT_Beam2d_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType) override;
 #endif
 
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+    void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
 protected:
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override;
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
 
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode) override;
 
     double giveKappaCoeff(TimeStep *tStep);
-    virtual double computeLength();
+    double computeLength() override;
     double givePitch();
-    virtual void computeGaussPoints();
-    virtual MaterialMode giveMaterialMode() { return _2dBeam; }
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    void computeGaussPoints() override;
+    MaterialMode giveMaterialMode() override { return _2dBeam; }
+    int giveNumberOfIPForMassMtrxIntegration() override { return 4; }
 
     bool hasDofs2Condense() { return ( ghostNodes [ 0 ] || ghostNodes [ 1 ] ); }
 };

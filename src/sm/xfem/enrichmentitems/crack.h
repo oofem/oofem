@@ -56,14 +56,14 @@ class OOFEM_EXPORT Crack : public HybridEI
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);
 
-    virtual const char *giveClassName() const { return "Crack"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "Crack"; }
+    const char *giveInputRecordName() const override { return _IFT_Crack_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     void AppendCohesiveZoneGaussPoint(GaussPoint *ipGP);
     void ClearCohesiveZoneGaussPoints() {mCohesiveZoneGaussPoints.clear(); mCohesiveZoneArcPositions.clear();}
 
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
+    void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep) override;
 
     const std :: vector< GaussPoint * > &giveCohesiveZoneGaussPoints() const { return mCohesiveZoneGaussPoints; }
     const std :: vector< double > &giveCohesiveZoneArcPositions() const { return mCohesiveZoneArcPositions; }
@@ -71,7 +71,7 @@ public:
     void computeCrackIntersectionPoints(Crack &iCrack, std :: vector< FloatArray > &oIntersectionPoints, std :: vector< double > &oArcPositions);
     void computeArcPoints(const std :: vector< FloatArray > &iIntersectionPoints, std :: vector< double > &oArcPositions);
     double computeLength();
-    virtual int giveDofPoolSize() const;
+    int giveDofPoolSize() const override;
 
 protected:
     /**

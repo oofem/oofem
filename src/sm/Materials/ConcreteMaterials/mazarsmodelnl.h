@@ -62,22 +62,21 @@ public:
     /// Destructor
     virtual ~MazarsNLMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the local equivalent strain to be averaged.
     double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }
     /// Sets the local equivalent strain for average to given value.
     void setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
 
-    // definition
-    virtual const char *giveInputRecordName() const { return _IFT_MazarsNLMaterial_Name; }
-    virtual const char *giveClassName() const { return "MazarsNLMaterialStatus"; }
+    const char *giveInputRecordName() const override { return _IFT_MazarsNLMaterial_Name; }
+    const char *giveClassName() const override { return "MazarsNLMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /**
      * Interface requesting service.
@@ -110,13 +109,12 @@ public:
     /// Destructor
     virtual ~MazarsNLMaterial();
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "MazarsNLMaterial"; }
+    const char *giveClassName() const override { return "MazarsNLMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Interface *giveInterface(InterfaceType it);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     /**
      * Computes the equivalent local strain measure from given strain vector (full form).
      * @param[out] kappa Return parameter, containing the corresponding equivalent strain
@@ -127,19 +125,19 @@ public:
     void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { MazarsMaterial :: computeEquivalentStrain(kappa, strain, gp, tStep); }
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
-    virtual int hasBoundedSupport() { return 1; }
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
+    int hasBoundedSupport() override { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
      */
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
 
 protected:
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);

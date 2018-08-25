@@ -55,12 +55,12 @@ class StructuralTemperatureLoad : public Load
 public:
     StructuralTemperatureLoad(int n, Domain * d) : Load(n, d) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    virtual bcValType giveBCValType() const { return TemperatureBVT; }
-    virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
-    virtual const char *giveInputRecordName() const { return _IFT_StructuralTemperatureLoad_Name; }
-    virtual const char *giveClassName() const { return "StructuralTemperatureLoad"; }
+    bcValType giveBCValType() const override { return TemperatureBVT; }
+    bcGeomType giveBCGeoType() const override { return BodyLoadBGT; }
+    const char *giveInputRecordName() const override { return _IFT_StructuralTemperatureLoad_Name; }
+    const char *giveClassName() const override { return "StructuralTemperatureLoad"; }
 };
 } // end namespace oofem
 #endif // structtemperatureload_h

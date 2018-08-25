@@ -68,14 +68,15 @@ public:
     /// Destructor
     virtual ~ScalarErrorIndicator() { }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
-    virtual double giveValue(EE_ValueType type, TimeStep *tStep) { return 0.0; }
-    virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
-    virtual RemeshingCriteria *giveRemeshingCrit();
+    double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep) override;
+    double giveValue(EE_ValueType type, TimeStep *tStep) override { return 0.0; }
+    int estimateError(EE_ErrorMode mode, TimeStep *tStep) override;
+    RemeshingCriteria *giveRemeshingCrit() override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "ScalarErrorIndicator"; }
+    const char *giveClassName() const override { return "ScalarErrorIndicator"; }
+    const char *giveInputRecordName() const override { return _IFT_ScalarErrorIndicator_Name; }
 };
 } // end namespace oofem
 #endif // scalarerrorindicator_h

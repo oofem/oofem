@@ -302,63 +302,56 @@ FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     return -( x2 * y1 - x1 * y2 );
 }
 
-IntegrationRule *
+std::unique_ptr<IntegrationRule>
 FEI2dTrLin :: giveIntegrationRule(int order)
 {
-    IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
+    auto iRule = std::make_unique<GaussIntegrationRule>(1, nullptr);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
     iRule->SetUpPointsOnTriangle(points, _Unknown);
-    return iRule;
+    return std::move(iRule);
 }
 
-
-
-
-  
 // FEI2dTrLinAxi element
 
-  
 double
 FEI2dTrLinAxi :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  FloatArray N;
-  this->evalN( N, lcoords, cellgeo);
+    FloatArray N;
+    this->evalN( N, lcoords, cellgeo);
 
-  double r = 0.0;
-  for ( int i = 1; i <= 3; i++ ) {
-    double x  = cellgeo.giveVertexCoordinates(i)->at(1);
-    r += x * N.at(i);
-  }
+    double r = 0.0;
+    for ( int i = 1; i <= 3; i++ ) {
+        double x  = cellgeo.giveVertexCoordinates(i)->at(1);
+        r += x * N.at(i);
+    }
 
-  return r * FEI2dTrLin::giveTransformationJacobian(lcoords, cellgeo);
+    return r * FEI2dTrLin::giveTransformationJacobian(lcoords, cellgeo);
 }
 
 double
 FEI2dTrLinAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
                                                 const FEICellGeometry &cellgeo)
 {
-  IntArray edgeNodes;
-  FloatArray n;
-  this->computeLocalEdgeMapping(edgeNodes, iedge);
-  this->edgeEvalN(n, iedge, lcoords, cellgeo);
+    IntArray edgeNodes;
+    FloatArray n;
+    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
-  double r = n.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(1) + n.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(1);
-  return r * FEI2dTrLin::edgeGiveTransformationJacobian(iedge, lcoords, cellgeo);
+    double r = n.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1))->at(1) + n.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2))->at(1);
+    return r * FEI2dTrLin::edgeGiveTransformationJacobian(iedge, lcoords, cellgeo);
 
 }
-  
+
 double
 FEI2dTrLinAxi::boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
+    return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }
 
 double
 FEI2dTrLinAxi::boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
+    return this->edgeGiveTransformationJacobian(boundary, lcoords, cellgeo);
 }
-
-
 
 } // end namespace oofem

@@ -50,7 +50,6 @@ class TimeStep;
  */
 class QCMaterialExtensionInterface : public Interface
 {
-protected:
 public:
     /**
      * Constructor. Creates material with given number, belonging to given domain.

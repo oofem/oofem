@@ -71,37 +71,35 @@ protected:
     /// Specifies the strain tensor.
     double m;
 
-
 public:
     LargeStrainMasterMaterial(int n, Domain *d);
     virtual ~LargeStrainMasterMaterial();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual const char *giveInputRecordName() const { return _IFT_LargeStrainMasterMaterial_Name; }
-    virtual const char *giveClassName() const { return "LargeStrainMasterMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_LargeStrainMasterMaterial_Name; }
+    const char *giveClassName() const override { return "LargeStrainMasterMaterial"; }
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix & answer,
-                                                    MatResponseMode,
-                                                    GaussPoint * gp,
-                                                    TimeStep * tStep);
+    void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix & answer,
+                                            MatResponseMode,
+                                            GaussPoint * gp,
+                                            TimeStep * tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *) override
     { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
-    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
+    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep) override;
 
     /// transformation matrices
     void constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eigenVectors);
     void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stress, double E1, double E2, double E3);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
 
 //=============================================================================
@@ -117,7 +115,6 @@ public:
     LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s);
     virtual ~LargeStrainMasterMaterialStatus();
 
-
     const FloatMatrix &givePmatrix() { return Pmatrix; }
     const FloatMatrix &giveTLmatrix() { return TLmatrix; }
     const FloatMatrix &giveTransformationMatrix() { return transformationMatrix; }
@@ -126,17 +123,14 @@ public:
     void setTLmatrix(const FloatMatrix &values) { TLmatrix = values; }
     void setTransformationMatrix(const FloatMatrix &values) { transformationMatrix = values; }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void initTempStatus() override;
+    void updateYourself(TimeStep *) override;
 
-    virtual void initTempStatus();
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual void updateYourself(TimeStep *);
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
-    virtual const char *giveClassName() const { return "LargeStrainMasterMaterialStatus"; }
+    const char *giveClassName() const override { return "LargeStrainMasterMaterialStatus"; }
 };
 } // end namespace oofem
 #endif // misesmat_h

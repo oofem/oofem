@@ -64,18 +64,17 @@ class MicroMaterialStatus : public StructuralMaterialStatus
 public:
     /// Constructor
     MicroMaterialStatus(int, Domain * d, GaussPoint * gp);
-
     /// Destructor
     virtual ~MicroMaterialStatus();
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "MicroMaterialStatus"; }
+    const char *giveClassName() const override { return "MicroMaterialStatus"; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -96,14 +95,14 @@ public:
 
     std :: string inputFileNameMicro;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_MicroMaterial_Name; }
-    virtual const char *giveClassName() const { return "MicroMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_MicroMaterial_Name; }
+    const char *giveClassName() const override { return "MicroMaterial"; }
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &, TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     void giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep, MatResponseMode rMode, const IntArray &microMasterNodes, const IntArray &microBoundaryNodes);
 
@@ -119,10 +118,10 @@ public:
     MacroLSpace *macroLSpaceElement;
 
     /// Related to numbering scheme.
-    void init(void);
-    int giveDofEquationNumber(Dof *dof) const;
-    virtual bool isDefault() const { return isDefaultNumbering; }
-    virtual int giveRequiredNumberOfDomainEquation() const;
+    void init(void) override;
+    int giveDofEquationNumber(Dof *dof) const override;
+    bool isDefault() const override { return isDefaultNumbering; }
+    int giveRequiredNumberOfDomainEquation() const override;
     //friend class EngngModel;-not here but define in EngngModel class
     /// Array containing coordinates of 8 master nodes of microproblem.
     std::vector< FloatArray >microMasterCoords;

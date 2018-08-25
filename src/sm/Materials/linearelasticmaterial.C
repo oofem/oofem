@@ -210,6 +210,9 @@ LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussP
     //        tau_zx = G * theta * (-y + dPsi/dx )
     // where x and y are the global coordinates of the Gauss point (the origin must be at the centroid of the cross section)
     //       G is the shear modulus of elasticity and theta is the relative twist (dPhi_z/dz)
+    
+    ///@todo Why is this warping method implemented here? It seems to assume isotropic linear elastic material, so it should be implemented in the subclass instead of relying on "giveShearModulus" which is only implemented there anyway.
+    
     FloatArray gcoords;
     Element *elem = gp->giveElement();
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );

@@ -61,26 +61,25 @@ public:
     EnrFrontReduceFront() {};
     virtual ~EnrFrontReduceFront() {};
 
-    virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo);
+    void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo) override;
 
     // No special tip enrichments are applied with this model,
     // it only modifies the set of nodes subject to bulk enrichment.
-    virtual int  giveNumEnrichments(const DofManager &iDMan) const { return 0; }
-    virtual int  giveMaxNumEnrichments() const { return 0; }
+    int giveNumEnrichments(const DofManager &iDMan) const override { return 0; }
+    int giveMaxNumEnrichments() const override { return 0; }
 
     // Evaluate the enrichment function and its derivative in front nodes.
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const {};
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const {};
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const {};
+    void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const override {}
+    void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const override {}
+    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const override {}
 
+    const char *giveClassName() const override { return "EnrFrontReduceFront"; }
+    const char *giveInputRecordName() const override { return _IFT_EnrFrontReduceFront_Name; }
 
-    virtual const char *giveClassName() const { return "EnrFrontReduceFront"; }
-    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontReduceFront_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual double giveSupportRadius() const { return 0.0; }
+    double giveSupportRadius() const override { return 0.0; }
 };
 } // end namespace oofem
 

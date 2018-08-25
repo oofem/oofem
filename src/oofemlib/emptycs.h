@@ -55,13 +55,13 @@ public:
     /// Destructor.
     virtual ~EmptyCS();
 
-    virtual Material *giveMaterial(IntegrationPoint *ip);
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip) { return 0; }
+    Material *giveMaterial(IntegrationPoint *ip) override;
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override { return 1; }
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override { return 1; }
+    int estimatePackSize(DataStream &buff, GaussPoint *ip) override { return 0; }
 
-    virtual const char *giveClassName() const { return "EmptyCS"; }
-    virtual const char *giveInputRecordName() const { return _IFT_EmptyCS_Name; }
+    const char *giveClassName() const override { return "EmptyCS"; }
+    const char *giveInputRecordName() const override { return _IFT_EmptyCS_Name; }
 };
 } // end namespace oofem
 #endif // emptycs_h

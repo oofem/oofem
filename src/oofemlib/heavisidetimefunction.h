@@ -68,14 +68,14 @@ public:
     }
     virtual ~HeavisideTimeFunction() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "HeavisideTimeFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_HeavisideTimeFunction_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "HeavisideTimeFunction"; }
+    const char *giveInputRecordName() const override { return _IFT_HeavisideTimeFunction_Name; }
 
-    virtual double evaluateAtTime(double);
-    virtual double evaluateVelocityAtTime(double t) { return 0.; }
-    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+    double evaluateAtTime(double) override;
+    double evaluateVelocityAtTime(double t) override { return 0.; }
+    double evaluateAccelerationAtTime(double t) override { return 0.; }
 };
 } // end namespace oofem
 #endif // heavisidetimefunction_h

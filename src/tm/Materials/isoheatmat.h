@@ -67,30 +67,30 @@ public:
     IsotropicHeatTransferMaterial(int n, Domain * d);
     virtual ~IsotropicHeatTransferMaterial();
 
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
     virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
 
-    virtual double giveCharacteristicValue(MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep);
+    double giveCharacteristicValue(MatResponseMode mode,
+                                   GaussPoint *gp,
+                                   TimeStep *tStep) override;
 
     virtual double  giveMaturityT0() { return maturityT0; }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_IsotropicHeatTransferMaterial_Name; }
-    virtual const char *giveClassName() const { return "IsotropicHeatTransferMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_IsotropicHeatTransferMaterial_Name; }
+    const char *giveClassName() const override { return "IsotropicHeatTransferMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
     double giveTemperature(GaussPoint *gp);
 };
 
@@ -99,7 +99,7 @@ class IsotropicHeatTransferMaterialStatus : public TransportMaterialStatus
 public:
     IsotropicHeatTransferMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~IsotropicHeatTransferMaterialStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 };
 
 } // end namespace oofem

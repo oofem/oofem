@@ -61,17 +61,16 @@ public:
     TrabBoneGrad3DStatus(int n, Domain *d, GaussPoint *g);
     virtual ~TrabBoneGrad3DStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "TrabBoneGrad3DStatus"; }
+    const char *giveClassName() const override { return "TrabBoneGrad3DStatus"; }
 
+    double giveNonlocalCumulatedStrain() override { return nonlocalCumulatedStrain; }
+    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) override { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
 
-    virtual double giveNonlocalCumulatedStrain() { return nonlocalCumulatedStrain; }
-    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
+    void initTempStatus() override;
 
-    virtual void initTempStatus();
-
-    virtual void updateYourself(TimeStep *);
+    void updateYourself(TimeStep *tStep) override;
 };
 
 
@@ -88,38 +87,35 @@ public:
     TrabBoneGrad3D(int n, Domain *d);
     virtual ~TrabBoneGrad3D();
 
-    virtual const char *giveClassName() const { return "TrabBoneGrad3D"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneGrad3D_Name; }
+    const char *giveClassName() const override { return "TrabBoneGrad3D"; }
+    const char *giveInputRecordName() const override { return _IFT_TrabBoneGrad3D_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual Interface *giveInterface(InterfaceType t) {
+    IRResultType initializeFrom(InputRecord *ir) override;
+    int hasMaterialModeCapability(MaterialMode mode) override;
+    Interface *giveInterface(InterfaceType t) override {
         if ( t == GradDpMaterialExtensionInterfaceType ) {
             return static_cast< GradDpMaterialExtensionInterface * >( this );
         } else {
-            return NULL;
+            return nullptr;
         }
     }
 
-    virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
     void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
+    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
-    //LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-protected:
-    // Creates the corresponding material status
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneGrad3DStatus(1, TrabBone3D :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneGrad3DStatus(1, TrabBone3D :: domain, gp); }
 };
 } // end namespace oofem
 

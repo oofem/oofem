@@ -158,7 +158,7 @@ protected:
 
     // IDs of all potential enriched dofs
     IntArray mXFEMPotentialDofIDs;
-    
+
 public:
 
     /**

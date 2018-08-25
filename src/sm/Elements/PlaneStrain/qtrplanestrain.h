@@ -60,32 +60,32 @@ public:
     QTrPlaneStrain(int n, Domain * d);
     virtual ~QTrPlaneStrain() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual Interface *giveInterface(InterfaceType it);
-    virtual double giveParentElSize() const { return 0.5; }
+    Interface *giveInterface(InterfaceType it) override;
+    double giveParentElSize() const override { return 0.5; }
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
+    int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStrain_Name; }
-    virtual const char *giveClassName() const { return "QTrPlaneStrain"; }
+    const char *giveInputRecordName() const override { return _IFT_QTrPlaneStrain_Name; }
+    const char *giveClassName() const override { return "QTrPlaneStrain"; }
     
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
 
 protected:
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    int giveNumberOfIPForMassMtrxIntegration() override { return 4; }
 };
 } // end namespace oofem
 #endif // qtrplanestrain_h

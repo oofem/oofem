@@ -72,9 +72,9 @@ public:
     /// Destructor.
     virtual ~ZZNodalRecoveryModel();
 
-    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "ZZNodalRecoveryModel"; }
+    const char *giveClassName() const override { return "ZZNodalRecoveryModel"; }
 
 private:
     /**

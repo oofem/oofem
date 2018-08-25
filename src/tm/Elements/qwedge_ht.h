@@ -64,33 +64,30 @@ public:
     QWedge_ht(int, Domain *);
     virtual ~QWedge_ht() { }
 
-
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual FEInterpolation *giveInterpolation() const;
+    double computeVolumeAround(GaussPoint *gp) override;
+    FEInterpolation *giveInterpolation() const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QWedge_ht_Name; }
-    virtual const char *giveClassName() const { return "QWedge_ht"; }
+    const char *giveInputRecordName() const override { return _IFT_QWedge_ht_Name; }
+    const char *giveClassName() const override { return "QWedge_ht"; }
 
-    virtual int computeNumberOfDofs() { return 15; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
+    int computeNumberOfDofs() override { return 15; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    MaterialMode giveMaterialMode() override { return _3dHeat; }
 
-    virtual Interface *giveInterface(InterfaceType t);
-    virtual int testElementExtension(ElementExtension ext)
+    Interface *giveInterface(InterfaceType t) override;
+    int testElementExtension(ElementExtension ext) override
     { return ( ext == Element_EdgeLoadSupport );}
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
 
  protected:
-    virtual void computeGaussPoints();
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-
-    
+    void computeGaussPoints() override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
 };
 
 
@@ -103,10 +100,10 @@ class QWedge_hmt : public QWedge_ht
 public:
     QWedge_hmt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_QWedge_hmt_Name; }
-    virtual const char *giveClassName() const { return "QWedge_hmt"; }
-    virtual int computeNumberOfDofs() { return 24; }
-    virtual MaterialMode giveMaterialMode() { return _3dHeMo; }
+    const char *giveInputRecordName() const override { return _IFT_QWedge_hmt_Name; }
+    const char *giveClassName() const override { return "QWedge_hmt"; }
+    int computeNumberOfDofs() override { return 24; }
+    MaterialMode giveMaterialMode() override { return _3dHeMo; }
 };
 
 /**
@@ -117,10 +114,10 @@ class QWedge_mt : public QWedge_ht
 public:
     QWedge_mt(int n, Domain * d);
 
-    virtual const char *giveInputRecordName() const { return _IFT_QWedge_mt_Name; }
-    virtual const char *giveClassName() const { return "QWedge_mt"; }
-    virtual int computeNumberOfDofs() { return 15; }
-    virtual MaterialMode giveMaterialMode() { return _3dHeat; }
+    const char *giveInputRecordName() const override { return _IFT_QWedge_mt_Name; }
+    const char *giveClassName() const override { return "QWedge_mt"; }
+    int computeNumberOfDofs() override { return 15; }
+    MaterialMode giveMaterialMode() override { return _3dHeat; }
 };
 
  

@@ -64,10 +64,10 @@ public:
     OOFEMTXTDataReader(const OOFEMTXTDataReader & x);
     virtual ~OOFEMTXTDataReader();
 
-    virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
-    virtual bool peakNext(const std :: string &keyword);
-    virtual void finish();
-    virtual std :: string giveReferenceName() const { return dataSourceName; }
+    InputRecord *giveInputRecord(InputRecordType, int recordId) override;
+    bool peakNext(const std :: string &keyword) override;
+    void finish() override;
+    std :: string giveReferenceName() const override { return dataSourceName; }
 
 protected:
     /**

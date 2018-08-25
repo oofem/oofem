@@ -107,15 +107,10 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) override { }
+    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *atTime) override { }
 #endif
 
     int giveNumberOfSlaveProblems() override { return ( int ) inputStreamNames.size(); }
-
-    int giveNumberOfFirstStep() override { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
-    int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; }
-    }
 
     int giveIterationNumber() { return iterationNumber; }
 };

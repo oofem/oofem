@@ -1,5 +1,10 @@
 from __future__ import print_function
+import sys, os
+#Add current dir for liboofem module
+#sys.path.insert(0, os.getcwd())
+sys.path.append('/home/smilauer/data/work/trunk/oofem/default')
 import liboofem
+
 dr=liboofem.OOFEMTXTDataReader("inputs/tmpatch42.in")
 pb=liboofem.InstanciateProblem(dr,liboofem.problemMode._processor,0)
 pb.checkProblemConsistency()
