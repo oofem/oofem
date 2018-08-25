@@ -1,0 +1,3 @@
+/home/smilauer/data/work/trunk/oofem/src/sm/CMakeFiles/edit_cache.dir
+/home/smilauer/data/work/trunk/oofem/src/sm/CMakeFiles/rebuild_cache.dir
+/home/smilauer/data/work/trunk/oofem/src/sm/CMakeFiles/sm.dir
