@@ -472,6 +472,10 @@ endif ()
 if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
     #set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
+    #Print if set up manually
+    message(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}")
+    message(STATUS "PYTHON_EXECUTABLE = ${PYTHON_EXECUTABLE}")
+    message(STATUS "PYTHON_INCLUDE_DIR = ${PYTHON_INCLUDE_DIR}")     
     find_package(PythonInterp "3" REQUIRED)
     find_package(PythonLibs "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" REQUIRED)
     include_directories (${PYTHON_INCLUDE_DIRS})
