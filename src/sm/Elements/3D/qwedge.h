@@ -62,25 +62,24 @@ public:
     QWedge(int, Domain *);
     virtual ~QWedge() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 9; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    int giveNumberOfIPForMassMtrxIntegration() override { return 9; }
 
-    virtual Interface *giveInterface(InterfaceType);
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
+    Interface *giveInterface(InterfaceType) override;
+    int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }
-    virtual const char *giveClassName() const { return "QWedge"; }
-
+    const char *giveInputRecordName() const override { return _IFT_QWedge_Name; }
+    const char *giveClassName() const override { return "QWedge"; }
 };
 } // end namespace oofem
 #endif

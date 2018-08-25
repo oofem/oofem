@@ -79,26 +79,25 @@ public:
     LinQuad3DPlaneStress(int n, Domain * d);
     virtual ~LinQuad3DPlaneStress();
 
-    virtual Interface *giveInterface(InterfaceType it);
-    virtual FEICellGeometry* giveCellGeometryWrapper();
+    Interface *giveInterface(InterfaceType it) override;
+    FEICellGeometry* giveCellGeometryWrapper() override;
     void computeLocalNodalCoordinates(std::vector< FloatArray > &lxy);
 
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual int computeNumberOfGlobalDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-
+    int computeNumberOfDofs() override { return 8; }
+    int computeNumberOfGlobalDofs() override { return 12; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
     const FloatMatrix *computeGtoLRotationMatrix();
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LinQuad3DPlaneStress_Name; }
-    virtual const char *giveClassName() const { return "LinQuad3DPlaneStress"; }
+    const char *giveInputRecordName() const override { return _IFT_LinQuad3DPlaneStress_Name; }
+    const char *giveClassName() const override { return "LinQuad3DPlaneStress"; }
 };
 } // end namespace oofem
 #endif // linquad3d_planestress_h

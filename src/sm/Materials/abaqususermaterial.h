@@ -133,34 +133,33 @@ public:
      *  - umat (required, string): Filename of umat file dynamically library.
      *  - name (optional, string, default "umat"): Name of material model (used for input to umat routine).
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp,
-                                                    TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
+                                            MatResponseMode mode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep) override;
 
-    virtual void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                               MatResponseMode mmode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
+                                       MatResponseMode mmode, GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                            const FloatArray &reducedF, TimeStep *tStep);
+    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                    const FloatArray &reducedF, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int hasNonLinearBehaviour() { return true; }
-    virtual const char *giveClassName() const { return "AbaqusUserMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_AbaqusUserMaterial_Name; }
+    const char *giveClassName() const override { return "AbaqusUserMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_AbaqusUserMaterial_Name; }
 };
 
 class AbaqusUserMaterialStatus : public StructuralMaterialStatus
@@ -184,8 +183,8 @@ public:
     /// Destructor.
     virtual ~AbaqusUserMaterialStatus() { }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
     bool hasTangent() const { return hasTangentFlag; }
 
@@ -199,11 +198,9 @@ public:
         hasTangentFlag = true;
     }
 
- 
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-
-    virtual const char *giveClassName() const { return "AbaqusUserMaterialStatus"; }
+    const char *giveClassName() const override { return "AbaqusUserMaterialStatus"; }
 };
 } // end namespace oofem
 #endif // abaqususermaterial_h

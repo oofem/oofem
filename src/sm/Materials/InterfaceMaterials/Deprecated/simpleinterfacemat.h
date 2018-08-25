@@ -58,28 +58,26 @@ protected:
     bool shearYieldingFlag;
     FloatArray shearStressShift, tempShearStressShift;
 
-
 public:
     /// Constructor
     SimpleInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~SimpleInterfaceMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    // definition
-    virtual const char *giveClassName() const { return "SimpleInterfaceMaterialStatus"; }
+    const char *giveClassName() const override { return "SimpleInterfaceMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
     const FloatArray &giveShearStressShift();
     void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; }
     bool giveShearYieldingFlag(){return shearYieldingFlag;}
     void setShearYieldingFlag(bool sY){ shearYieldingFlag = sY;}
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -104,21 +102,20 @@ public:
     /// Destructor
     virtual ~SimpleInterfaceMaterial();
 
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 
-    virtual const char *giveInputRecordName() const { return _IFT_SimpleInterfaceMaterial_Name; }
-    virtual const char *giveClassName() const { return "SimpleInterfaceMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_SimpleInterfaceMaterial_Name; }
+    const char *giveClassName() const override { return "SimpleInterfaceMaterial"; }
 
-    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
+    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new SimpleInterfaceMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new SimpleInterfaceMaterialStatus(1, domain, gp); }
 };
 } // end namespace oofem
 #endif // simpleinterfacemat_h

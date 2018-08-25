@@ -53,19 +53,15 @@ public:
     CoupledFieldsElement(int i, Domain *aDomain);
     virtual ~CoupledFieldsElement() {}
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const = 0;
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 protected:
-    
     virtual void computeNStressAt(GaussPoint *, FloatArray &) = 0;
     virtual void computeBStressAt(GaussPoint *, FloatArray &) = 0;
 
-    virtual double computeVolumeAround(GaussPoint *) = 0;
-    void computeStiffnessMatrix(FloatMatrix &, MatResponseMode, TimeStep *) = 0;
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) = 0;
-
-
+    double computeVolumeAround(GaussPoint *) override = 0;
+    void computeStiffnessMatrix(FloatMatrix &, MatResponseMode, TimeStep *) override = 0;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) override = 0;
 
     void computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType valueMode, TimeStep *stepN, FloatArray &answer);
     void computeLocationArrayOfDofIDs(const IntArray &dofIdArray, IntArray &answer);
@@ -77,13 +73,10 @@ protected:
         void (*BStiffness)(FloatMatrix, MatResponseMode, GaussPoint*, TimeStep*),
         double (*volumeAround)(GaussPoint*) );
 
-    
     void giveInternalForcesVectorGen(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, 
         void (*Nfunc)(GaussPoint*, FloatMatrix), void (*Bfunc)(GaussPoint*, FloatMatrix, int, int), //(GaussPoint*, FloatMatrix)
         void (*NStress)(GaussPoint*, FloatArray), void (*BStress)(GaussPoint*, FloatArray),
-        double (*volumeAround)(GaussPoint*)
-        );
-
+        double (*volumeAround)(GaussPoint*) );
 };
 } // end namespace oofem
 

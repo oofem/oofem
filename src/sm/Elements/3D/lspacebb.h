@@ -51,11 +51,11 @@ public:
     LSpaceBB(int n, Domain * d);
     virtual ~LSpaceBB() { }
 
-    virtual const char *giveInputRecordName() const { return _IFT_LSpaceBB_Name; }
-    virtual const char *giveClassName() const { return "LSpaceBB"; }
+    const char *giveInputRecordName() const override { return _IFT_LSpaceBB_Name; }
+    const char *giveClassName() const override { return "LSpaceBB"; }
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
 };
 } // end namespace oofem
 #endif // lspacebb_h

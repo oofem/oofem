@@ -71,13 +71,13 @@ public:
     PlasticMaterialStatus(int n, Domain * d, GaussPoint * g, int statusSize);
     virtual ~PlasticMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     const FloatArray &givePlasticStrainVector() const { return plasticStrainVector; }
     const FloatArray &giveTempPlasticStrainVector() const { return tempPlasticStrainVector; }
@@ -97,14 +97,13 @@ public:
 
     void letTempStateFlagBe(int v) { temp_state_flag = v; }
 
-    // definition
-    virtual const char *giveClassName() const { return "PlasticMaterialStatus"; }
+    const char *giveClassName() const override { return "PlasticMaterialStatus"; }
 
-    virtual void printYourself();
+    void printYourself() override;
 
     /// Functions for MaterialStatusMapperInterface
-    virtual void copyStateVariables(const MaterialStatus &iStatus);
-    virtual void addStateVariables(const MaterialStatus &iStatus);
+    void copyStateVariables(const MaterialStatus &iStatus) override;
+    void addStateVariables(const MaterialStatus &iStatus) override;
 };
 
 /**
@@ -128,41 +127,39 @@ public:
     virtual ~PlasticMaterial();
 
     // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "PlasticMaterial"; }
+    int hasMaterialModeCapability(MaterialMode mode) override;
+    const char *giveClassName() const override { return "PlasticMaterial"; }
 
     /// Returns reference to undamaged (bulk) material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep) override;
+
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
+
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
+    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-
-
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
     // add here some auxiliary functions if needed
@@ -220,38 +217,36 @@ protected:
 
     friend class PlasticMaterialStatus;
 
-
-
     // next functions overloaded rom structural material level
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void givePlaneStressStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
+    void give1dStressStiffMtrx(FloatMatrix &answer,
+                               MatResponseMode mode,
+                               GaussPoint *gp,
+                               TimeStep *tStep) override;
 
-    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep);
+    void givePlateLayerStiffMtrx(FloatMatrix &answer,
+                                 MatResponseMode mode,
+                                 GaussPoint *gp,
+                                 TimeStep *tStep) override;
 
-    virtual void giveFiberStiffMtrx(FloatMatrix &answer,
-                                    MatResponseMode mode,
-                                    GaussPoint *gp,
-                                    TimeStep *tStep);
+    void giveFiberStiffMtrx(FloatMatrix &answer,
+                            MatResponseMode mode,
+                            GaussPoint *gp,
+                            TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // plasticmaterial_h

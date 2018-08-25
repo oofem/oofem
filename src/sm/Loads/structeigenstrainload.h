@@ -62,12 +62,12 @@ public:
      * @param coords Integration point global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode.
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_StructuralEigenstrainLoad_Name; }
-    virtual const char *giveClassName() const { return "StructuralEigenstrainLoad"; }
-    virtual bcValType giveBCValType() const { return EigenstrainBVT; }
-    virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+    const char *giveInputRecordName() const override { return _IFT_StructuralEigenstrainLoad_Name; }
+    const char *giveClassName() const override { return "StructuralEigenstrainLoad"; }
+    bcValType giveBCValType() const override { return EigenstrainBVT; }
+    bcGeomType giveBCGeoType() const override { return BodyLoadBGT; }
 };
 } // end namespace oofem
 #endif // structeigenstrainload_h

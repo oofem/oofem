@@ -133,7 +133,7 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
     answer.resize(6);
     answer.zero();
 
-    for ( int i = 1; i <= numberOfFibers; i++ ) {
+    for ( int i = 1; i <= this->fiberMaterials.giveSize(); i++ ) {
         GaussPoint *fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
         StructuralMaterial *fiberMat = static_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
         // the question is whether this function should exist ?
@@ -248,7 +248,7 @@ FiberedCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode 
     answer.zero();
     // perform integration over layers
 
-    for ( int i = 1; i <= numberOfFibers; i++ ) {
+    for ( int i = 1; i <= this->fiberMaterials.giveSize(); i++ ) {
         fiberGp = giveSlaveGaussPoint(gp, i - 1);
         this->giveFiberMaterialStiffnessMatrix(fiberMatrix, rMode, fiberGp, tStep);
         //
@@ -403,9 +403,6 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
 
 IRResultType
 FiberedCrossSection :: initializeFrom(InputRecord *ir)
-//
-// instanciates receiver from input record
-//
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
@@ -413,7 +410,6 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
 #  endif
 
-    IR_GIVE_FIELD(ir, numberOfFibers, _IFT_FiberedCrossSection_nfibers);
     IR_GIVE_FIELD(ir, fiberMaterials, _IFT_FiberedCrossSection_fibermaterials);
     IR_GIVE_FIELD(ir, fiberThicks, _IFT_FiberedCrossSection_thicks);
     IR_GIVE_FIELD(ir, fiberWidths, _IFT_FiberedCrossSection_widths);
@@ -425,28 +421,30 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, thick, _IFT_FiberedCrossSection_thick);
     IR_GIVE_FIELD(ir, width, _IFT_FiberedCrossSection_width);
 
-    if ( numberOfFibers != fiberMaterials.giveSize() ||
-         numberOfFibers != fiberThicks.giveSize()    ||
-         numberOfFibers != fiberWidths.giveSize()    ||
-         numberOfFibers != fiberYcoords.giveSize()   ||
-         numberOfFibers != fiberZcoords.giveSize() ) {
+    int num = fiberMaterials.giveSize();
+    if ( num != fiberThicks.giveSize()    ||
+         num != fiberWidths.giveSize()    ||
+         num != fiberYcoords.giveSize()   ||
+         num != fiberZcoords.giveSize() ) {
         OOFEM_WARNING("Array size mismatch ");
         return IRRT_BAD_FORMAT;
     }
 
-    if ( numberOfFibers <= 0 ) {
-        OOFEM_WARNING("numberOfFibers <= 0 is not allowed");
+    if ( num <= 0 ) {
+        OOFEM_WARNING("number of fibers == 0 is not allowed");
         return IRRT_BAD_FORMAT;
     }
+
+    area = fiberThicks.dotProduct(fiberWidths);
 
     return IRRT_OK;
 }
 
 void FiberedCrossSection :: createMaterialStatus(GaussPoint &iGP)
 {
-    for ( int i = 1; i <= numberOfFibers; i++ ) {
+    for ( int i = 1; i <= fiberMaterials.giveSize(); i++ ) {
         GaussPoint *fiberGp = this->giveSlaveGaussPoint(& iGP, i - 1);
-        StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
+        Material *mat = domain->giveMaterial( fiberMaterials.at(i) );
         MaterialStatus *matStat = mat->CreateStatus(fiberGp);
         iGP.setMaterialStatus(matStat);
     }
@@ -460,10 +458,10 @@ FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 //
 {
     GaussPoint *slave = masterGp->giveSlaveGaussPoint(i);
-    if ( slave == NULL ) {
+    if ( !slave ) {
         // check for proper dimensions - slave can be NULL if index too high or if not
         // slaves previously defined
-        if ( i > this->numberOfFibers ) {
+        if ( i > this->fiberMaterials.giveSize() ) {
             OOFEM_ERROR("no such fiber defined");
         }
 
@@ -473,9 +471,9 @@ FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
 
-        masterGp->gaussPoints.resize( this->numberOfFibers );
+        masterGp->gaussPoints.resize( fiberMaterials.giveSize() );
 
-        for ( int j = 0; j < numberOfFibers; j++ ) {
+        for ( int j = 0; j < fiberMaterials.giveSize(); j++ ) {
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
             masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1,
                                                 {fiberYcoords.at(j + 1), fiberZcoords.at(j + 1)}, 0., slaveMode);
@@ -509,11 +507,6 @@ FiberedCrossSection :: printYourself()
 
 contextIOResultType
 FiberedCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
-//
-// saves full material context (saves state variables, that completely describe
-// current state)
-// stores also slaves records of master gp
-//
 {
     contextIOResultType iores;
 
@@ -523,7 +516,7 @@ FiberedCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, Gauss
 
     // saved master gp record;
     // and now save slave gp of master:
-    for ( int i = 1; i <= numberOfFibers; i++ ) {
+    for ( int i = 1; i <= fiberMaterials.giveSize(); i++ ) {
         GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
         if ( ( iores = mat->saveIPContext(stream, mode, slaveGP) ) != CIO_OK ) {
@@ -537,12 +530,6 @@ FiberedCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, Gauss
 
 contextIOResultType
 FiberedCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
-//
-// restores full material context (saves state variables, that completely describe
-// current state)
-//
-// restores also slaves of master gp
-//
 {
     contextIOResultType iores;
 
@@ -550,7 +537,7 @@ FiberedCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, Ga
         THROW_CIOERR(iores);                                                                   // saved masterGp
     }
 
-    for ( int i = 1; i <= numberOfFibers; i++ ) {
+    for ( int i = 1; i <= fiberMaterials.giveSize(); i++ ) {
         // creates also slaves if they don't exists
         GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
@@ -565,9 +552,6 @@ FiberedCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, Ga
 
 MaterialMode
 FiberedCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMode)
-//
-// returns corresponding slave material mode to master mode
-//
 {
     if ( masterMode == _3dBeam ) {
         return _Fiber;
@@ -587,23 +571,10 @@ FiberedCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
     } else if ( aProperty == CS_Width ) {
         return this->width;
     } else if ( aProperty == CS_Area ) { // not given in input
-        return this->giveArea();
+        return this->area;
     }
 
     return CrossSection :: give(aProperty, gp);
-}
-
-
-double FiberedCrossSection :: giveArea()
-{
-    if ( this->area <= 0.0 ) {
-        this->area = 0.0;
-        for ( int i = 1; i <= numberOfFibers; i++ ) {
-            this->area += this->fiberThicks.at(i) * this->fiberWidths.at(i);
-        }
-    }
-
-    return area;
 }
 
 
@@ -621,8 +592,8 @@ bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 {
     ///@todo As far as I can see, it only uses diagonal components for the 3dbeam, but there is no way to check here.
 
-    for ( int i = 1; i <= this->numberOfFibers; i++ ) {
-        if ( !this->domain->giveMaterial( this->fiberMaterials.at(i) )->isCharacteristicMtrxSymmetric(rMode) ) {
+    for ( int imat : this->fiberMaterials ) {
+        if ( !this->domain->giveMaterial( imat )->isCharacteristicMtrxSymmetric(rMode) ) {
             return false;
         }
     }
@@ -632,11 +603,6 @@ bool FiberedCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
 
 int
 FiberedCrossSection :: checkConsistency()
-//
-// check internal consistency
-// mainly tests, whether material and crossSection data
-// are safe for conversion to "Structural" versions
-//
 {
     int result = 1;
     for ( int i = 1; this->fiberMaterials.giveSize(); i++ ) {

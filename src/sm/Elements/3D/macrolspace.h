@@ -62,20 +62,20 @@ public:
     MacroLSpace(int n, Domain * d);
     virtual ~MacroLSpace();
 
-    virtual const char *giveInputRecordName() const { return _IFT_MacroLSpace_Name; }
-    virtual const char *giveClassName() const { return "MacroLSpace"; }
+    const char *giveInputRecordName() const override { return _IFT_MacroLSpace_Name; }
+    const char *giveClassName() const override { return "MacroLSpace"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
-    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+    void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer) override
     { OOFEM_ERROR("Macro space element doesn't support computing local unknown vector (yet)\n"); }
 
     /// Related to setting the boundary conditions of micro problem.
     virtual void changeMicroBoundaryConditions(TimeStep *tStep);
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
     /**
      * Evaluates shape function at a given pointnodal representation of real internal forces obtained from microProblem.
@@ -85,7 +85,7 @@ public:
      */
     virtual void evalInterpolation(FloatArray &answer, const std::vector< FloatArray > &coords, const FloatArray &gcoords);
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
 protected:
     /// Array containing the node mapping from microscale (which microMasterNodes corresponds to which macroNode)

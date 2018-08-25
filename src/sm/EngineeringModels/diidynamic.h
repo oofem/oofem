@@ -95,7 +95,7 @@ protected:
     std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
 public:
-    DIIDynamic(int i, EngngModel * _master = NULL);
+    DIIDynamic(int i, EngngModel *master = nullptr);
     virtual ~DIIDynamic();
 
     void solveYourself() override;

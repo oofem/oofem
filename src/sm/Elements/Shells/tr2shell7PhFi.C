@@ -63,53 +63,48 @@ IntArray Tr2Shell7PhFi :: ordering_gr_edge(21);
 bool Tr2Shell7PhFi :: __initialized = Tr2Shell7PhFi :: initOrdering();
 
 
-
 Tr2Shell7PhFi:: Tr2Shell7PhFi(int n, Domain *aDomain) : Shell7BasePhFi(n, aDomain)
 {
     this->numberOfDofMans = 6;
-	
-	this->ordering_damage.resize(0);
-	this->ordering_gr.resize(0);
+
+    this->ordering_damage.resize(0);
+    this->ordering_gr.resize(0);
     this->ordering_disp_inv.resize(0);
 
-	IntArray localDam, localDisp(7);	// hard coded for 7 parameter shell!!
+    IntArray localDam, localDisp(7);	// hard coded for 7 parameter shell!!
 
-	localDam.resize(0);
-	localDisp.setValues(7, 1, 2, 3, 19, 20, 21, 37);
+    localDam.resize(0);
+    localDisp.setValues(7, 1, 2, 3, 19, 20, 21, 37);
 
-	for (int i = 1; i <= numberOfLayers; i++)
-	{
-		//localDam.followedBy(i + this->giveNumberOfuDofs());
+    for (int i = 1; i <= numberOfLayers; i++) {
+        //localDam.followedBy(i + this->giveNumberOfuDofs());
         localDam.followedBy(7 + i);
-	}
+    }
 
     int numDofsPerNode = 7 + numberOfLayers;
 
-	for (int i = 1; i <= this->numberOfDofMans; i++)
-	{
-		this->ordering_damage.followedBy(localDam);
-		this->ordering_gr.followedBy(localDisp);
-		this->ordering_gr.followedBy(localDam);
+    for (int i = 1; i <= this->numberOfDofMans; i++) {
+        this->ordering_damage.followedBy(localDam);
+        this->ordering_gr.followedBy(localDisp);
+        this->ordering_gr.followedBy(localDam);
         this->ordering_disp_inv.followedBy(localDisp);
 
-		localDisp.at(1) += 3;
-		localDisp.at(2) += 3;
-		localDisp.at(3) += 3;
-		localDisp.at(4) += 3;
-		localDisp.at(5) += 3;
-		localDisp.at(6) += 3;
-		localDisp.at(7) += 1;
-		
-		localDam.add(numberOfLayers);
-       
-	}
+        localDisp.at(1) += 3;
+        localDisp.at(2) += 3;
+        localDisp.at(3) += 3;
+        localDisp.at(4) += 3;
+        localDisp.at(5) += 3;
+        localDisp.at(6) += 3;
+        localDisp.at(7) += 1;
+
+        localDam.add(numberOfLayers);
+    }
 
 
-	this->ordering_all.resize(0);
-	this->ordering_all = this->ordering_disp;
-	this->ordering_all.followedBy(ordering_damage);
+    this->ordering_all.resize(0);
+    this->ordering_all = this->ordering_disp;
+    this->ordering_all.followedBy(ordering_damage);
 
-    
     // JB - New
 
     IntArray temp_x(0), temp_m(0), temp_dam(0), local_temp_x(0), local_temp_m(0), local_temp_gam(0), local_temp_dam(0);
@@ -117,12 +112,11 @@ Tr2Shell7PhFi:: Tr2Shell7PhFi(int n, Domain *aDomain) : Shell7BasePhFi(n, aDomai
     temp_m.setValues(3, 4, 5, 6);
     int temp_gam = 7;
 
-	for (int i = 1; i <= numberOfLayers; i++) {
+    for (int i = 1; i <= numberOfLayers; i++) {
         temp_dam.followedBy(7 + i);
-	}
+    }
 
-    for (int i = 1; i <= this->numberOfDofMans; i++)
-	{
+    for (int i = 1; i <= this->numberOfDofMans; i++) {
         local_temp_x.followedBy(temp_x);
         local_temp_m.followedBy(temp_m);
         local_temp_gam.followedBy(temp_gam);
@@ -136,7 +130,7 @@ Tr2Shell7PhFi:: Tr2Shell7PhFi(int n, Domain *aDomain) : Shell7BasePhFi(n, aDomai
     //local_temp_m.printYourself();
     //local_temp_gam.printYourself();
     //local_temp_dam.printYourself();
-    
+
     // Construct the two orddering arrays
     ordering_disp.resize(0);
     ordering_damage.resize(0);
@@ -152,13 +146,13 @@ Tr2Shell7PhFi:: Tr2Shell7PhFi(int n, Domain *aDomain) : Shell7BasePhFi(n, aDomai
 void
 Tr2Shell7PhFi :: giveDofManDofIDMask_u(IntArray &answer)
 {
-	Shell7BasePhFi :: giveDofManDofIDMask_u(answer);
+    Shell7BasePhFi :: giveDofManDofIDMask_u(answer);
 }
 
 void
 Tr2Shell7PhFi :: giveDofManDofIDMask_d(IntArray &answer)
 {
-	Shell7BasePhFi :: giveDofManDofIDMask_d(answer);
+    Shell7BasePhFi :: giveDofManDofIDMask_d(answer);
 }
 
 const IntArray &
@@ -166,7 +160,6 @@ Tr2Shell7PhFi:: giveOrdering(SolutionField fieldType) const
 {
     OOFEM_ERROR("Tr2Shell7PhFi :: giveOrdering not implemented: Use Tr2Shell7PhFi :: giveOrderingPhFi instead");
     return 0;
-
 }
 
 
@@ -182,7 +175,7 @@ Tr2Shell7PhFi:: giveOrderingPhFi(SolutionFieldPhFi fieldType) const
     } else if ( fieldType == AllInv ) {
         return this->ordering_gr;
     } else { /*if ( fieldType == EdgeInv )*/
-		OOFEM_ERROR("Tr2Shell7PhFi :: giveOrdering: the requested ordering is not implemented")
+        OOFEM_ERROR("Tr2Shell7PhFi :: giveOrdering: the requested ordering is not implemented")
         //return this->ordering_gr_edge;
     }
 }
@@ -224,7 +217,6 @@ Tr2Shell7PhFi:: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &n
 FEInterpolation *Tr2Shell7PhFi:: giveInterpolation() const { return & interpolation; }
 
 
-
 void
 Tr2Shell7PhFi:: computeGaussPoints()
 {
@@ -263,8 +255,6 @@ Tr2Shell7PhFi:: computeGaussPoints()
 }
 
 
-
-
 void
 Tr2Shell7PhFi:: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
@@ -289,7 +279,7 @@ Tr2Shell7PhFi:: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 void
-Tr2Shell7PhFi:: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+Tr2Shell7PhFi::giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     answer.resize(42);
     for ( int i = 1; i <= 42; i++ ) {
@@ -299,7 +289,7 @@ Tr2Shell7PhFi:: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 
 
 double
-Tr2Shell7PhFi:: computeAreaAround(GaussPoint *gp, double xi)
+Tr2Shell7PhFi::computeAreaAround(GaussPoint *gp, double xi)
 {
     FloatArray G1, G2, temp;
     FloatMatrix Gcov;
@@ -316,9 +306,8 @@ Tr2Shell7PhFi:: computeAreaAround(GaussPoint *gp, double xi)
 }
 
 
-
 double
-Tr2Shell7PhFi:: computeVolumeAroundLayer(GaussPoint *gp, int layer)
+Tr2Shell7PhFi::computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
     double detJ;
     FloatMatrix Gcov;
@@ -353,4 +342,5 @@ Tr2Shell7PhFi:: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &m
         }
     }
 }
+
 } // end namespace oofem

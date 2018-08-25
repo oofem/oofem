@@ -52,24 +52,24 @@ public:
     QTrPlaneStressGrad(int n, Domain * d);
     virtual ~QTrPlaneStressGrad() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStressGrad_Name; }
-    virtual const char *giveClassName() const { return "QTrPlaneStressGrad"; }
+    const char *giveInputRecordName() const override { return _IFT_QTrPlaneStressGrad_Name; }
+    const char *giveClassName() const override { return "QTrPlaneStressGrad"; }
 
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-    virtual int computeNumberOfDofs() { return 15; }
+    MaterialMode giveMaterialMode() override { return _PlaneStress; }
+    int computeNumberOfDofs() override { return 15; }
 
 protected:
-    virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+     void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
 
-    virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual StructuralElement *giveStructuralElement() { return this; }
-    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
+    void computeGaussPoints() override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    StructuralElement *giveStructuralElement() override { return this; }
+    NLStructuralElement *giveNLStructuralElement() override { return this; }
 };
 } // end namespace oofem
 #endif // qtrplstrgrad_h

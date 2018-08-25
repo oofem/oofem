@@ -93,13 +93,13 @@ public:
     /// Destructor
     virtual ~StructuralMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /// Returns the const pointer to receiver's strain vector.
     const FloatArray &giveStrainVector() const { return strainVector; }
@@ -142,11 +142,11 @@ public:
     /// Assigns tempFVector to given vector v
     void letTempFVectorBe(const FloatArray &v) { tempFVector = v; }
 
-    virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
+    const char *giveClassName() const override { return "StructuralMaterialStatus"; }
 
     /// Functions for MaterialStatusMapperInterface
-    virtual void copyStateVariables(const MaterialStatus &iStatus);
-    virtual void addStateVariables(const MaterialStatus &iStatus);
+    void copyStateVariables(const MaterialStatus &iStatus) override;
+    void addStateVariables(const MaterialStatus &iStatus) override;
 };
 } // end namespace oofem
 #endif // structuralms_h

@@ -63,43 +63,43 @@ class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
     XfemManager *xMan;
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void postInitialize();
+    void updateYourself(TimeStep *tStep) override;
+    void postInitialize() override;
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
 
-    virtual void evalCovarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec, TimeStep *tStep);
+    void evalCovarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec, TimeStep *tStep) override;
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
     void computeDiscSolutionVector(IntArray &dofIdArray , TimeStep *tStep, FloatArray &solVecD);
     void computeInterfaceJumpAt(int interf, FloatArray &lCoords, TimeStep *tStep, FloatArray &answer);
 
     // Internal forces
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) override;
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
     void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
-    
+
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
 //    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei, const int edge);
     double evaluateHeavisideXi(double xi, ShellCrack *ei);
     double evaluateHeavisideXi(double xi, Delamination *ei);
     double evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop) const;
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei, EnrichmentItem *coupledToEi);
-    
+
     // Tangent matrices
     void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
     void computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta);  
     virtual void OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
     virtual void discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoint *ip, EnrichmentItem *eiI, EnrichmentItem *eiJ, int layer, FloatMatrix A [ 3 ] [ 3 ], TimeStep *tStep);
     virtual void discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, FloatMatrix &LDC, IntegrationPoint *ip, int layer, FloatMatrix A [ 3 ] [ 3 ], TimeStep *tStep);
-    
+
     double EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei);
     void computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
     void computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
     void computeCohesiveNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
-    
-    virtual void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
+
+    void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep) override;
 
     void edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei);
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
@@ -112,28 +112,27 @@ protected:
 
     // External loads
     // Overloaded, as the element is using enhanced approximation 
-    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global);
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global) override;
     // overloaded, the computeBoundaryEdgeLoadVector returns full element DOFs
-    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIdArray)
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIdArray) override
     { this->giveLocationArray (locationArray, s, dofIdArray);}
 
-    
     void computeEnrTractionForce(FloatArray &answer, const int iedge, BoundaryLoad *edgeLoad, TimeStep *tStep, 
         ValueModeType mode, EnrichmentItem *ei);
 
     // Mass matrices
-    void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep);
+    void computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep) override;
 
     // VTK
-    virtual void giveCompositeExportData(std::vector < VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
-    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
-    virtual void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
-    virtual void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    void giveCompositeExportData(std::vector < VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
+    void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
-    virtual void vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep);
+    void vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep) override;
     void giveDisUnknownsAt(const FloatArray &lCoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep);
     IntArray DelaminatedInterfaceList;
-    void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
+    void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) override;
 
 
     // Subdivision
@@ -141,7 +140,7 @@ protected:
 
     std :: vector < std :: vector< Triangle > > crackSubdivisions;
     IntArray numSubDivisionsArray;
-    
+
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
@@ -156,31 +155,30 @@ protected:
 
     std::vector< IntArray > orderingArrays;
     std::vector< IntArray > activeDofsArrays;
-    
+
     void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
-    
+
     // Recovery of through thickness stresses by momentum balance
-    void recoverShearStress(TimeStep *tStep);
-    
+    void recoverShearStress(TimeStep *tStep) override;
 
 public:
     Shell7BaseXFEM(int n, Domain * d);
     virtual ~Shell7BaseXFEM();
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);
-    virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
+    const char *giveClassName() const override { return "Shell7BaseXFEM"; }
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual int giveNumberOfDofs();
-    
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    int giveNumberOfDofs() override;
+
     // Recovery of through thickness stresses by momentum balance
-    virtual void giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArray &initiationFactor, TimeStep *tStep, bool recoverStresses = true);
-    virtual void giveAverageTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
-    virtual void giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
+    void giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArray &initiationFactor, TimeStep *tStep, bool recoverStresses = true);
+    void giveAverageTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep);
+    void giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix> &transverseStress, TimeStep *tStep) override;
 
     bool hasCohesiveZone(int interfaceNum);
     std :: vector< std :: unique_ptr< IntegrationRule > > czIntegrationRulesArray;

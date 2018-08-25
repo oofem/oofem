@@ -105,65 +105,63 @@ public:
     Masonry02(int n, Domain * d);
     virtual ~Masonry02();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_Masonry02_Name; }
-    virtual const char *giveClassName() const { return "Masonry02"; }
+    const char *giveInputRecordName() const override { return _IFT_Masonry02_Name; }
+    const char *giveClassName() const override { return "Masonry02"; }
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseMode mode,
-                                     GaussPoint *gp,
-                                     TimeStep *tStep);
+    void giveStiffnessMatrix(FloatMatrix &answer,
+                             MatResponseMode mode,
+                             GaussPoint *gp,
+                             TimeStep *tStep) override;
 
-    virtual int giveSizeOfFullHardeningVarsVector() { return 3; }
-    virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const { return 3; }
+    int giveSizeOfFullHardeningVarsVector() override { return 3; }
+    int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const override { return 3; }
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 
 protected:
-    virtual int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) { return 2; }
+    int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) override { return 2; }
     //
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
 
-    virtual double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                                       const FloatArray &stressSpaceHardeningVars);
+    double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
+                               const FloatArray &stressSpaceHardeningVars) override;
 
-    virtual void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                             const FloatArray &stressSpaceHardeningVars);
-    virtual void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
-                                                     const FloatArray &stress, const FloatArray &dlambda,
-                                                     const FloatArray &dplasticStrain, const IntArray &activeConditionMap);
-    virtual void computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector,
-                                        const FloatArray &strainSpaceHardeningVariables);
+    void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
+                                     const FloatArray &stressSpaceHardeningVars) override;
+    void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
+                                             const FloatArray &stress, const FloatArray &dlambda,
+                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) override;
+    void computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector,
+                                const FloatArray &strainSpaceHardeningVariables) override;
 
-    virtual void computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap,
-                                                          const FloatArray &fullStressVector,
-                                                          const FloatArray &strainSpaceHardeningVars,
-                                                          const FloatArray &gamma);
-    virtual void computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf,
-                                                        const IntArray &activeConditionMap,
-                                                        const FloatArray &fullStressVector,
-                                                        const FloatArray &strainSpaceHardeningVars,
-                                                        const FloatArray &gamma);
-    virtual int hasHardening() { return 1; }
+    void computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap,
+                                                  const FloatArray &fullStressVector,
+                                                  const FloatArray &strainSpaceHardeningVars,
+                                                  const FloatArray &gamma) override;
+    void computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf,
+                                                const IntArray &activeConditionMap,
+                                                const FloatArray &fullStressVector,
+                                                const FloatArray &strainSpaceHardeningVars,
+                                                const FloatArray &gamma) override;
+    int hasHardening() override { return 1; }
 
-    virtual void computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                                const FloatArray &strainSpaceHardeningVariables);
-    virtual void computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                                const FloatArray &strainSpaceHardeningVariables);
+    void computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
+                                        const FloatArray &strainSpaceHardeningVariables) override;
+    void computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
+                                        const FloatArray &strainSpaceHardeningVariables) override;
 
 
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp,
-                                             TimeStep *tStep);
-
+    void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
 
     /// Cap mode related functions.
     double computeF3HardeningLaw(double k);

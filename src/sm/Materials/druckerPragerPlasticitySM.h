@@ -88,18 +88,17 @@ protected:
 public:
     /// Constructor
     DruckerPragerPlasticitySMStatus(int n, Domain * d, GaussPoint * gp);
-
     /// Destructor
     virtual ~DruckerPragerPlasticitySMStatus();
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual const char *giveClassName() const { return "DruckerPragerPlasticitySMStatus"; }
+    const char *giveClassName() const override { return "DruckerPragerPlasticitySMStatus"; }
 
     /**
      * Get the full plastic strain vector from the material status.
@@ -233,18 +232,18 @@ public:
     /// Destructor
     virtual ~DruckerPragerPlasticitySM() {}
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "DruckerPragerPlasticitySM"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DruckerPragerPlasticitySM_Name; }
+    const char *giveClassName() const override { return "DruckerPragerPlasticitySM"; }
+    const char *giveInputRecordName() const override { return _IFT_DruckerPragerPlasticitySM_Name; }
 
-    virtual void giveRealStressVector_3d(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &strainVector,
-                                      TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer,
+                              GaussPoint *gp,
+                              const FloatArray &strainVector,
+                              TimeStep *tStep) override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
 
     /**
      * Perform a standard local stress return using the function computeYieldValue at the specified Gauss point.
@@ -326,22 +325,22 @@ public:
                                           GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *tStep);
+    int giveIPValue(FloatArray &answer,
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *tStep) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
     {
         LEMaterial.giveThermalDilatationVector(answer, gp, tStep);
     }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual double predictRelativeComputationalCost(GaussPoint *gp);
-    virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
+    double predictRelativeComputationalCost(GaussPoint *gp) override;
+    double predictRelativeRedistributionCost(GaussPoint *gp) override { return 1.0; }
 };
 } // end namespace oofem
 #endif // druckerpragerplasticitysm_h

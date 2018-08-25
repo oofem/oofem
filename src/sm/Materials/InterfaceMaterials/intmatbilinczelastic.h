@@ -63,17 +63,16 @@ public:
     /// Destructor
     virtual ~IntMatBilinearCZElasticStatus();
 
-    double giveDamage() { return 0.0; } // no damage in this model
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    double giveDamage() override { return 0.0; } // no damage in this model
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    // definition
-    virtual const char *giveClassName() const { return "IntMatBilinearCZElasticStatus"; }
+    const char *giveClassName() const override { return "IntMatBilinearCZElasticStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    //virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    //virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    //contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    //contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -106,7 +105,7 @@ protected:
 
     double kn1;   // slope during softening part
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 public:
@@ -115,22 +114,20 @@ public:
     /// Destructor
     virtual ~IntMatBilinearCZElastic();
 
-    virtual int hasNonLinearBehaviour() { return 1; }
+    const char *giveClassName() const override { return "IntMatBilinearCZElastic"; }
+    const char *giveInputRecordName() const override { return _IFT_IntMatBilinearCZElastic_Name; }
 
-    virtual const char *giveClassName() const { return "IntMatBilinearCZElastic"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZElastic_Name; }
+    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
+                                const FloatMatrix &F, TimeStep *tStep) override;
 
-    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
-                                        const FloatMatrix &F, TimeStep *tStep);
+    void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralInterfaceMaterialStatus(1, domain, gp); }
-    void printYourself();
-    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new StructuralInterfaceMaterialStatus(1, domain, gp); }
+    void printYourself() override;
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

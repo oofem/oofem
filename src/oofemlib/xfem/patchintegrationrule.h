@@ -69,7 +69,7 @@ public:
     /// Destructor.
     virtual ~PatchIntegrationRule();
 
-    virtual const char *giveClassName() const override { return "PatchIntegrationRule"; }
+    const char *giveClassName() const override { return "PatchIntegrationRule"; }
 
     // TODO: Give this function a better name.
     // Note: the fact that this function is inherited complicates name change.

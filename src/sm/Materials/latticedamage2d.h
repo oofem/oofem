@@ -149,7 +149,6 @@ public:
     /// Destructor
     virtual ~LatticeDamage2dStatus() { }
 
-
     /// Returns the last equilibrated scalar measure of the largest strain level
     double giveKappa() { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level
@@ -165,14 +164,14 @@ public:
     void setTempEquivalentStrain(double newEquivStrain) { tempEquivStrain = newEquivStrain; }
 
     /// Returns the last equilibrated dissipation
-    double giveDissipation() { return dissipation; }
+    double giveDissipation() override { return dissipation; }
     /// Returns the temp. dissipation
     double giveTempDissipation() { return tempDissipation; }
     /// Sets the temp dissipation
     void setTempDissipation(double newDiss) { tempDissipation = newDiss; }
 
     /// Returns the last equilibrated increment of dissipation
-    double giveDeltaDissipation() { return deltaDissipation; }
+    double giveDeltaDissipation() override { return deltaDissipation; }
     /// Returns the temp. increment dissipation
     double giveTempDeltaDissipation() { return tempDeltaDissipation; }
     /// Sets the temp. increment dissipation
@@ -195,10 +194,10 @@ public:
      * Assign the temp value of plastic strain.
      * @param v New temp value of plastic strain.
      */
-    void letTempReducedStrainBe(FloatArray v)  { tempReducedStrain = std :: move(v); }
+    void letTempReducedStrainBe(FloatArray v) { tempReducedStrain = std :: move(v); }
 
     /// Prints the receiver state to given stream
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns characteristic length stored in receiver
     double giveLe() { return le; }
@@ -207,10 +206,10 @@ public:
     void setLe(double ls) { le = ls; }
 
     ///Sets the temp_crack_flag
-    void setTempCrackFlag(int val);
+    void setTempCrackFlag(int val) override;
 
     /// Returns the crack_flag
-    int giveCrackFlag();
+    int giveCrackFlag() override;
 
     /// Set random e0
     void setE0(double val) { e0 = val; }
@@ -219,15 +218,13 @@ public:
     void setTempCrackWidth(double val);
 
     /// Gives the last equilibrated crack width
-    double giveCrackWidth() { return this->crackWidth; }
+    double giveCrackWidth() override { return this->crackWidth; }
 
+    double giveNormalStress() override { return this->normalStress; }
 
-    virtual double giveNormalStress() { return this->normalStress; }
+    double giveOldNormalStress() override { return this->oldNormalStress; }
 
-    virtual double giveOldNormalStress() { return this->oldNormalStress; }
-
-    virtual int hasBeenUpdated() { return this->updateFlag; }
-
+    int hasBeenUpdated() override { return this->updateFlag; }
 
     /// Sets the temp normalStress
     void setTempNormalStress(double val);
@@ -235,22 +232,19 @@ public:
     /// Sets the old normalStress
     void setOldNormalStress(double val);
 
-    // definition
-    virtual const char *giveClassName() const { return "LatticeDamage2dStatus"; }
+    const char *giveClassName() const override { return "LatticeDamage2dStatus"; }
 
-    virtual void initTempStatus();
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
-    virtual void setVariableInStatus(double variable);
-
+    void setVariableInStatus(double variable);
     void setBiotCoefficientInStatus(double variable);
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -317,22 +311,22 @@ public:
     /// Destructor
     virtual ~LatticeDamage2d();
 
-    virtual const char *giveInputRecordName() const { return _IFT_LatticeDamage2d_Name; }
-    virtual const char *giveClassName() const { return "LatticeDamage2d"; }
+    const char *giveInputRecordName() const override { return _IFT_LatticeDamage2d_Name; }
+    const char *giveClassName() const override { return "LatticeDamage2d"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
-    virtual void  giveStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep);
+    void  giveStiffnessMatrix(FloatMatrix &answer,
+                              MatResponseMode mode,
+                              GaussPoint *gp,
+                              TimeStep *tStep) override;
 
-    virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp,
-                                                      TimeStep *tStep,
-                                                      ValueModeType mode);
+    void computeStressIndependentStrainVector(FloatArray &answer,
+                                              GaussPoint *gp,
+                                              TimeStep *tStep,
+                                              ValueModeType mode) override;
 
     virtual void giveSecantStiffnessMatrix(FloatMatrix &answer,
                                    GaussPoint *gp,
@@ -343,7 +337,7 @@ public:
                                     GaussPoint *gp,
                                     TimeStep *tStep);
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
@@ -351,33 +345,29 @@ public:
 
     virtual double computeBiot(double omega, double kappa, double le);
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &, TimeStep *tStep) override;
 
     virtual void giveRandomParameters(FloatArray &param);
 
 
-    ///Compute increment of dissipation for post-processing reasons
+    /// Compute increment of dissipation for post-processing reasons
     double computeDeltaDissipation(double omega, FloatArray &reducedStrain, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp,  TimeStep *tStep);
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp,  TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
+    MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
-
-protected:
-
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *tStep);
+    int giveIPValue(FloatArray &answer,
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif

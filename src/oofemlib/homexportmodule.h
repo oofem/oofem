@@ -71,7 +71,7 @@ public:
     /// Constructor. Creates empty Output Manager.
     HOMExportModule(int n, EngngModel * e);
     /// Destructor.
-    virtual ~HOMExportModule() override;
+    virtual ~HOMExportModule();
     IRResultType initializeFrom(InputRecord *ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
     void initialize() override;

@@ -122,10 +122,9 @@ public:
     /// Destructor
     virtual ~IsotropicDamageMaterial1Status() { }
 
-    // definition
-    virtual const char *giveClassName() const { return "IsotropicDamageMaterial1Status"; }
+    const char *giveClassName() const override { return "IsotropicDamageMaterial1Status"; }
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 };
 
 /**
@@ -245,17 +244,15 @@ protected:
 #endif
 
 public:
-
     /// Constructor
     IsotropicDamageMaterial1(int n, Domain *d);
     /// Destructor
     virtual ~IsotropicDamageMaterial1();
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "IsotropicDamageMaterial1"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IsotropicDamageMaterial1_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    const char *giveClassName() const override { return "IsotropicDamageMaterial1"; }
+    const char *giveInputRecordName() const override { return _IFT_IsotropicDamageMaterial1_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
     /**
      * Computes invariants I1 and J2 of the strain tensor
      * from the strain components stored in a vector.
@@ -266,10 +263,10 @@ public:
     static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
 
     bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->gf != 0. ); }
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
+    void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
     /**
      * computes the value of damage parameter omega,
      * based on a given value of equivalent strain,
@@ -325,20 +322,20 @@ public:
      */
     double complianceFunction(double kappa, GaussPoint *gp);
 
-    double evaluatePermanentStrain(double kappa, double omega);
+    double evaluatePermanentStrain(double kappa, double omega) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual int MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep);
-    virtual int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *estrain = NULL);
-    virtual int MMI_finish(TimeStep *tStep);
+    int MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep) override;
+    int MMI_update(GaussPoint *gp, TimeStep *tStep, FloatArray *estrain = nullptr) override;
+    int MMI_finish(TimeStep *tStep) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
 protected:
     /**
@@ -349,7 +346,7 @@ protected:
      * @param totalStrainVector Current total strain vector.
      * @param gp Integration point.
      */
-    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;
 };
 } // end namespace oofem
 #endif // idm1_h

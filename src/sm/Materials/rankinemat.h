@@ -150,31 +150,30 @@ public:
     double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual const char *giveInputRecordName() const { return _IFT_RankineMat_Name; }
-    virtual const char *giveClassName() const { return "RankineMat"; }
+    const char *giveInputRecordName() const override { return _IFT_RankineMat_Name; }
+    const char *giveClassName() const override { return "RankineMat"; }
 
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return ( a == 0. ); }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return ( a == 0. ); }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
-                                                  const FloatArray &reducesStrain, TimeStep *tStep);
-    virtual void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
+    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
+                                          const FloatArray &reducesStrain, TimeStep *tStep) override;
+    void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
 protected:
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void givePlaneStressStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
     /**
      * Executive method used by local and gradient version.
      * (with different parameters gprime)
@@ -187,7 +186,7 @@ protected:
     /// Computes derivatives of final kappa with respect to final strain.
     void computeEta(FloatArray &answer, RankineMatStatus *status);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
 
 //=============================================================================
@@ -287,13 +286,13 @@ public:
 
     const FloatArray &givePlasDef() { return plasticStrain; }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments.
@@ -319,7 +318,7 @@ public:
     void computeWork_1d(GaussPoint *gp, double gf);
 #endif
 
-    virtual const char *giveClassName() const { return "RankineMatStatus"; }
+    const char *giveClassName() const override { return "RankineMatStatus"; }
 };
 } // end namespace oofem
 #endif // rankinemat_h

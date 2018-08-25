@@ -72,59 +72,59 @@ public:
     LIBeam3dNL2(int n, Domain * d);
     virtual ~LIBeam3dNL2() { }
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) override
     { computeLumpedMassMatrix(answer, tStep); }
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
+    int computeNumberOfDofs() override { return 12; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LIBeam3dNL2_Name; }
-    virtual const char *giveClassName() const { return "LIBeam3dNL2"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    const char *giveInputRecordName() const override { return _IFT_LIBeam3dNL2_Name; }
+    const char *giveClassName() const override { return "LIBeam3dNL2"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
 #endif
 
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
-    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
-    virtual MaterialMode giveMaterialMode() { return _3dBeam; }
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
+    MaterialMode giveMaterialMode() override { return _3dBeam; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
 
 protected:
     // edge load support
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode) override;
 
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void initForNewStep();
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int)
+    void updateYourself(TimeStep *tStep) override;
+    void initForNewStep() override;
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int) override
     { OOFEM_ERROR("not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-    virtual void computeGaussPoints();
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double computeLength();
+    double computeLength() override;
     //double givePitch ();
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
     /**
      * Updates the temporary triad at the centre to the state identified by given solution step.

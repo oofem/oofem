@@ -65,14 +65,14 @@ public:
     /// Destructor.
     virtual ~BasicElementQuad() { }         
 
-    virtual FEInterpolation *giveInterpolation() const;    
-    virtual const char *giveInputRecordName() const { return _IFT_BasicElementQuad_Name; }
-    virtual const char *giveClassName() const { return "BasicElementQuad"; }
+    FEInterpolation *giveInterpolation() const override;    
+    const char *giveInputRecordName() const override { return _IFT_BasicElementQuad_Name; }
+    const char *giveClassName() const override { return "BasicElementQuad"; }
 
 protected:
     
     // - Support for computing the mass matrix needed for dynamic simulations
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }    
+    int giveNumberOfIPForMassMtrxIntegration() override { return 4; }    
 
 
 };

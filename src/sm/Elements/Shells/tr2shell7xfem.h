@@ -53,7 +53,6 @@ class BoundaryLoad;
  * @author Jim Brouzoulis
  * @date 2012-11-01
  */
-
 class Tr2Shell7XFEM : public Shell7BaseXFEM
 {
 protected:
@@ -62,27 +61,26 @@ protected:
     static IntArray orderingNodes;
     static IntArray orderingEdgeNodes;
 
-    virtual const IntArray &giveOrderingDofTypes() const;
-    virtual const IntArray &giveOrderingNodes() const;
-    virtual const IntArray &giveOrderingEdgeNodes() const;
-    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    const IntArray &giveOrderingDofTypes() const override;
+    const IntArray &giveOrderingNodes() const override;
+    const IntArray &giveOrderingEdgeNodes() const override;
+    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
 
+    double computeVolumeAroundLayer(GaussPoint *mastergp, int layer) override;
+    double computeAreaAround(GaussPoint *gp, double xi) override;
 
-    virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
-    virtual double computeAreaAround(GaussPoint *gp, double xi);
-
-    virtual void computeGaussPoints();
+    void computeGaussPoints() override;
     bool updateIntegrationRuleMultiCrack();
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this funciton is not allowed"); }
 
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual double computeArea();
+    FEInterpolation *giveInterpolation() const override;
+    double computeArea() override;
     // VTK
     void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords [ 15 ], int layer, TimeStep *tStep);
 
@@ -90,13 +88,13 @@ public:
     Tr2Shell7XFEM(int n, Domain * d);
     virtual ~Tr2Shell7XFEM() { }     // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
-    virtual int giveNumberOfEdgeDofs() { return 21; }
-    virtual int giveNumberOfEdgeDofManagers() { return 3;  }
-    virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
-    virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
+    int giveNumberOfEdgeDofs() override { return 21; }
+    int giveNumberOfEdgeDofManagers() override { return 3;  }
+    const char *giveInputRecordName() const override { return _IFT_Tr2Shell7XFEM_Name; }
+    const char *giveClassName() const override { return "Tr2Shell7XFEM"; }
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
-    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
+    Element_Geometry_Type giveGeometryType() const override { return EGT_Composite; }
+    integrationDomain giveIntegrationDomain() const override { return _Triangle; } // write new wedge-like type 'layeredWedge'
 };
 } // end namespace oofem
 #endif

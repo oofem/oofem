@@ -66,26 +66,23 @@ public:
     IntElPoint(int n, Domain *d);
     virtual ~IntElPoint() { }
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual int computeNumberOfDofs();
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    int computeNumberOfDofs() override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual double computeAreaAround(GaussPoint *gp);
-
-
+    double computeAreaAround(GaussPoint *gp) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_IntElPoint_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    const char *giveInputRecordName() const override { return _IFT_IntElPoint_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
-    virtual MaterialMode giveMaterialMode();
+    MaterialMode giveMaterialMode() override;
 
+    void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 
-    virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-    virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+    void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
         if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
             this->giveInterfaceCrossSection()->giveEngTraction_3d(answer, gp, jump, tStep);
@@ -96,7 +93,7 @@ public:
         }
     }
 
-    virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
+    void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
         if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
             this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
@@ -105,18 +102,17 @@ public:
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 1 ) {
             this->giveInterfaceCrossSection()->give1dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
         }
-        
     }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-#endif    
-    
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+#endif
+
 protected:
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
 
     void computeLocalSlipDir(FloatArray &normal);
     cmode giveCoordMode() const { return this->mode; }

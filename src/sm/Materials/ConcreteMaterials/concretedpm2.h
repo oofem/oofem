@@ -180,12 +180,12 @@ public:
     /// Destructor
     virtual ~ConcreteDPM2Status();
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream &, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &, ContextMode mode, void *obj = NULL);
-    virtual const char *giveClassName() const { return "ConcreteDPM2Status"; }
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    contextIOResultType saveContext(DataStream &, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &, ContextMode mode, void *obj = NULL) override;
+    const char *giveClassName() const override { return "ConcreteDPM2Status"; }
 
     // Inline functions for access to state variables
 
@@ -194,7 +194,6 @@ public:
      * @return Plastic strain deviator.
      */
     const FloatArray &givePlasticStrain() const { return plasticStrain; }
-
 
     /**
      * Get the deviatoric plastic strain norm from the material status.
@@ -292,7 +291,6 @@ public:
     double giveDamageTension() const
     { return damageTension; }
 
-
     /**
      * Get the compressive damage variable of the damage model from the
      * material status.
@@ -300,8 +298,6 @@ public:
      */
     double giveDamageCompression() const
     { return damageCompression; }
-
-
 
     /**
      * Get the rate factor of the damage model from the
@@ -336,7 +332,6 @@ public:
     int giveStateFlag() const
     { return state_flag; }
 
-
     // giveTemp:
 
     // Functions used to access the temp variables.
@@ -352,7 +347,6 @@ public:
     double giveTempVolumetricPlasticStrain() const
     { return 1. / 3. * ( tempPlasticStrain(0) + tempPlasticStrain(1) + tempPlasticStrain(2) ); }
 
-
     /**
      * Get the temp value of the hardening variable of the plasticity model
      * from the material status.
@@ -360,7 +354,6 @@ public:
      */
     double giveTempKappaP() const
     { return tempKappaP; }
-
 
     /**
      * Get the temp value of the hardening variable of the damage model
@@ -373,7 +366,6 @@ public:
     double giveAlpha() const
     { return alpha; }
 
-
     /**
      * Get the temp value of the hardening variable of the damage model
      * from the material status.
@@ -382,7 +374,6 @@ public:
     double giveKappaDCompression() const
     { return kappaDCompression; }
 
-
     /**
      * Get the temp value of the hardening variable of the damage model
      * from the material status.
@@ -390,7 +381,6 @@ public:
      */
     double giveTempDamageTension() const
     { return tempDamageTension; }
-
 
     /**
      * Get the temp value of the hardening variable of the damage model
@@ -408,7 +398,6 @@ public:
     double giveDeltaEquivStrain() const
     { return deltaEquivStrain; }
 
-
     /**
      * Get the temp value of the state flag from the material status.
      * @return Temp value of the state flag (i.e. elastic, unloading,
@@ -416,7 +405,6 @@ public:
      */
     int giveTempStateFlag() const
     { return temp_state_flag; }
-
 
     // letTemp...be :
     // Functions used by the material to assign a new value to a temp variable.
@@ -525,7 +513,6 @@ public:
     void letTempEquivStrainCompressionBe(double v)
     { tempEquivStrainCompression = v; }
 
-
     /**
      *  Gives the characteristic length.
      */
@@ -534,7 +521,6 @@ public:
     /**
      *  Sets the characteristic length.
      */
-
     void setLe(double ls)
     { le = ls; }
     /**
@@ -544,7 +530,6 @@ public:
      */
     void letTempStateFlagBe(const int v)
     { temp_state_flag = v; }
-
 
     void letKappaPPeakBe(double kappa)
     { kappaPPeak = kappa; }
@@ -693,23 +678,22 @@ protected:
     /// Flag which signals if strainRate effects should be considered.
     int strainRateFlag;
 
-
 public:
     /// Constructor
     ConcreteDPM2(int n, Domain *d);
     /// Destructor
     virtual ~ConcreteDPM2();
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "ConcreteDPM2"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM2_Name; }
+    const char *giveClassName() const override { return "ConcreteDPM2"; }
+    const char *giveInputRecordName() const override { return _IFT_ConcreteDPM2_Name; }
 
     LinearElasticMaterial *giveLinearElasticMaterial()
     { return linearElasticMaterial; }
 
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
     /**
      * Perform stress return of the plasticity model and compute history variables.
@@ -837,7 +821,6 @@ public:
                            double tempKappa,
                            bool mode1d);
 
-
     /**
      * Compute the derivative of kappa with respect of delta lambda based on the stress state and the hardening variable.
      * @param sig Volumetric stress.
@@ -847,7 +830,6 @@ public:
      */
     double computeDKappaDDeltaLambda(double sig, double rho, double tempKappa);
     double computeDKappaDDeltaLambda1d(double sig, double tempKappa);
-
 
     /**
      * Compute the ductility measure based on the stress state.
@@ -859,8 +841,6 @@ public:
     virtual double computeDuctilityMeasure(double sig,
                                            double rho,
                                            double theta);
-
-
 
     /**
      * Compute derivative the ductility measure with respect to  the stress state.
@@ -956,7 +936,6 @@ public:
     double computeDDKappaDDeltaLambdaDKappa(double sig, double rho, double tempKappa);
     double computeDDKappaDDeltaLambdaDKappa1d(double sig, double tempKappa);
 
-
     /**
      * Computes the derivative of the yield surface with respect to the
      * invariants sig and rho.
@@ -973,7 +952,6 @@ public:
                             double sigTrial,
                             double rhoTrial,
                             double sig);
-
 
     /**
      * Compute damage parameters
@@ -1003,7 +981,6 @@ public:
 
     virtual double computeEquivalentStrain(double sig, double rho, double theta);
 
-
     /// Compute the ductility measure for the damage model.
     double computeDuctilityMeasureDamage(const FloatArray &strain, GaussPoint *gp);
 
@@ -1014,7 +991,6 @@ public:
     void initDamaged(double kappa,
                      const FloatArray &strain,
                      GaussPoint *gp);
-
 
     /// Compute the trial coordinates.
     void computeTrialCoordinates(const FloatArray &stress, double &sig, double &rho, double &theta);
@@ -1041,24 +1017,18 @@ public:
     /// Compute the derivative of R with respect to costheta.
     double computeDRDCosTheta(double theta, double ecc) const;
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
     void compute3dSecantStiffness(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
-
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
-
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } //end namespace oofem
 #endif

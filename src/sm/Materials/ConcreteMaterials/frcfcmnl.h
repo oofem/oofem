@@ -57,7 +57,6 @@ class GaussPoint;
 class FRCFCMNLStatus : public FRCFCMStatus, public StructuralNonlocalMaterialStatusExtensionInterface
 {
 protected:
-
     /// bulk stress in fibers - evaluated from crack opening
     FloatArray fiberStressLoc;
     /// Non-equilibrated stress (bulk) in fibers.
@@ -83,22 +82,18 @@ public:
     double giveTempFiberStressNL(int icrack) { return tempFiberStressNL.at(icrack); }
     void setTempFiberStressNL(int icrack, double newFiberStressNL) { tempFiberStressNL.at(icrack) = newFiberStressNL; }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    // definition
-    virtual const char *giveClassName() const { return "FRCFCMNLStatus"; }
+    const char *giveClassName() const override { return "FRCFCMNLStatus"; }
 
-    virtual void initTempStatus();
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-
-    // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 };
 
 
@@ -108,32 +103,28 @@ public:
     FRCFCMNL(int n, Domain *d);
     virtual ~FRCFCMNL() {}
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "FRCFCMNL"; }
-    virtual const char *giveInputRecordName() const { return _IFT_FRCFCMNL_Name; }
+    const char *giveClassName() const override { return "FRCFCMNL"; }
+    const char *giveInputRecordName() const override { return _IFT_FRCFCMNL_Name; }
 
-    // identification and auxiliary functions
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
+    void giveMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode,
+                                     GaussPoint * gp,
+                                     TimeStep * tStep) override;
 
-    virtual void giveMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode,
-                                             GaussPoint * gp,
-                                             TimeStep * tStep);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FRCFCMNLStatus(1, FRCFCM :: domain, gp); }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new FRCFCMNLStatus(1, FRCFCM :: domain, gp); }
-
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     //nothing to update here, is it?
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) {}
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override { }
 
-    virtual bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress);
-
+    bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) override;
 
     double computeDebondedLength(double delta);
 
@@ -154,7 +145,6 @@ public:
 
     /// computes an angle between two vectors
     double computeAngleBetweenVectors(const FloatArray &vec1, const FloatArray &vec2);
-
 
 protected:
     /// participation angle. The target gauss point must fall into this angle to contribute to the nonlocal stress

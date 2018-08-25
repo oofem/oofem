@@ -94,43 +94,43 @@ protected:
 
     /// Subsoil material
     int subsoilMat;
-    
+
 public:
     Beam3d(int n, Domain *d);
     virtual ~Beam3d();
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
-    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0);
+    void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) override;
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0) override;
     void giveEndForcesVector(FloatArray &answer, TimeStep *tStep);
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
 
-    virtual int testElementExtension(ElementExtension ext) {
+    int testElementExtension(ElementExtension ext) override {
         return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 );
     }
     //int hasLayeredSupport () {return 1;}
 
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual int computeNumberOfGlobalDofs() { return 12 + this->numberOfCondensedDofs; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual int giveNumberOfInternalDofManagers() const { return ( ghostNodes [ 0 ] != NULL ) + ( ghostNodes [ 1 ] != NULL ); }
-    virtual DofManager *giveInternalDofManager(int i) const {
+    int computeNumberOfDofs() override { return 12; }
+    int computeNumberOfGlobalDofs() override { return 12 + this->numberOfCondensedDofs; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    int giveNumberOfInternalDofManagers() const override { return ( ghostNodes [ 0 ] != nullptr ) + ( ghostNodes [ 1 ] != nullptr ); }
+    DofManager *giveInternalDofManager(int i) const override {
         if ( i == 1 ) {
             if ( ghostNodes [ 0 ] ) { return ghostNodes [ 0 ]; } else { return ghostNodes [ 1 ]; }
         } else if ( i == 2 ) { // i==2
             return ghostNodes [ 1 ];
         } else {
             OOFEM_ERROR("No such DOF available on Element %d", number);
-            return NULL;
+            return nullptr;
         }
     }
-    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const {
+    void giveInternalDofManDofIDMask(int i, IntArray &answer) const override {
         if ( i == 1 ) {
             if ( ghostNodes [ 0 ] ) {
                 ghostNodes [ 0 ]->giveCompleteMasterDofIDArray(answer);
@@ -143,37 +143,37 @@ public:
             OOFEM_ERROR("No such DOF available on Element %d", number);
         }
     }
-    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) {
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) override {
       giveLocationArray (locationArray, s, dofIds);
     }
-     
-    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) {
+
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) override {
       giveLocationArray (locationArray, dofIDMask, s, dofIds);
     }
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     //
     // fibered cross section support functions
     //
-    virtual void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                                         GaussPoint *slaveGp, TimeStep *tStep);
+    void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
+                                                                 GaussPoint *slaveGp, TimeStep *tStep) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
     // definition & identification
-    virtual const char *giveClassName() const { return "Beam3d"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Beam3d_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "Beam3d"; }
+    const char *giveInputRecordName() const override { return _IFT_Beam3d_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
     ///@todo Introduce interpolator and remove these two:
-    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
-    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
+    //Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_Composite; }
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
 
     /*
     /// Subsoil support implemented directly enabling the postprocessing of end-forces
@@ -188,41 +188,39 @@ public:
       return this->computeVolumeAround(gp);
     }
     */
-    virtual void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix& answer);
+    void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix& answer) override;
 
-    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
+    void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
 
-    
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType) override;
 #endif
 
 protected:
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep, bool global=true) override;
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode) override;
 
     double giveKappayCoeff(TimeStep *tStep);
     double giveKappazCoeff(TimeStep *tStep);
     void computeKappaCoeffs(TimeStep *tStep);
-    virtual double computeLength();
-    virtual void computeGaussPoints();
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    double computeLength() override;
+    void computeGaussPoints() override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual MaterialMode giveMaterialMode() { return _3dBeam; }
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    MaterialMode giveMaterialMode() override { return _3dBeam; }
+    int giveNumberOfIPForMassMtrxIntegration() override { return 4; }
 
     bool hasDofs2Condense() { return ( ghostNodes [ 0 ] || ghostNodes [ 1 ] ); }
 
 
     void computeSubSoilNMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeSubSoilStiffnessMatrix(FloatMatrix &answer,
-				       MatResponseMode rMode, TimeStep *tStep);
+    void computeSubSoilStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
     void giveInternalForcesVectorAtPoint(FloatArray &answer, TimeStep *tStep, FloatArray &coords);
     void computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode,

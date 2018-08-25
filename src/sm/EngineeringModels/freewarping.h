@@ -81,7 +81,7 @@ protected:
     int initFlag; // needed?
 
 public:
-    FreeWarping(int i, EngngModel *_master = NULL);
+    FreeWarping(int i, EngngModel *master = nullptr);
     virtual ~FreeWarping();
 
     void solveYourself() override;

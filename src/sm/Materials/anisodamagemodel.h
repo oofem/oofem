@@ -102,7 +102,7 @@ public:
     /// Destructor
     virtual ~AnisotropicDamageMaterialStatus() {}
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -157,13 +157,13 @@ public:
 #endif
 
     // definition
-    virtual const char *giveClassName() const { return "AnisotropicDamageMaterialModelStatus"; }
+    const char *giveClassName() const override { return "AnisotropicDamageMaterialModelStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -179,7 +179,6 @@ public:
 class AnisotropicDamageMaterial : public StructuralMaterial
 {
 protected:
-
     /// Reference to bulk (undamaged) material
     IsotropicLinearElasticMaterial linearElasticMaterial;
     /// Young's modulus
@@ -207,15 +206,13 @@ public:
     /// Destructor
     virtual ~AnisotropicDamageMaterial() {}
 
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    int hasMaterialModeCapability(MaterialMode mode) override;
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "AnisotropicDamageMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_AnisotropicDamageMaterial_Name; }
+    const char *giveClassName() const override { return "AnisotropicDamageMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_AnisotropicDamageMaterial_Name; }
 
     /// Plane-stress version of the stress evaluation algorithm
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
     void computePrincValDir2D(double &D1, double &D2, double &c, double &s, double Dx, double Dy, double Dxy);
     bool checkPrincVal2D(double Dx, double Dy, double Dxy);
     void computeDamage(FloatMatrix &tempDamage, const FloatMatrix &damage, double kappa, double eps1, double eps2, double ceps, double seps, double epsZ);
@@ -223,7 +220,6 @@ public:
     double computeOutOfPlaneStrain(const FloatArray &inplaneStrain, const FloatMatrix &dam, bool tens_flag);
     double computeDimensionlessOutOfPlaneStress(const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
     void computeInplaneStress(FloatArray &inplaneStress, const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
-
 
     /// Obtains the proportion of the damage tensor that is needed to get the first eigenvalue equal to the damage threshold
     double obtainAlpha1(FloatMatrix tempDamageTensor, double deltaLambda, FloatMatrix positiveStrainTensor, double damageThreshold);
@@ -240,27 +236,27 @@ public:
 
     double computeCorrectionFactor(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
-    virtual void giveRealStressVector(FloatArray &answer,  GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer,  GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep)
+    void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
-    //    virtual InternalStateValueType giveIPValueType(InternalStateType type);
-    //virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *);
+    //InternalStateValueType giveIPValueType(InternalStateType type) override;
+    //void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *) override;
 
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
@@ -269,39 +265,37 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, double equivStrain,
-                                     TimeStep *atTime);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp, const FloatArray &totalStrain, double equivStrain, TimeStep *atTime);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new AnisotropicDamageMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new AnisotropicDamageMaterialStatus(1, domain, gp); }
 
 protected:
 
+    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
+                               GaussPoint *gp,
+                               TimeStep *tStep) override;
+    void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain, GaussPoint *gp,
+                                  TimeStep *atTime);
+    void computePlaneStressSigmaZ(double &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector,
+                                  double epsZ, GaussPoint *gp, TimeStep *atTime);
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
-    virtual void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain, GaussPoint *gp,
-                                          TimeStep *atTime);
-    virtual void computePlaneStressSigmaZ(double &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector,
-                                          double epsZ, GaussPoint *gp, TimeStep *atTime);
-
-    /*    virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
-     *                                   const FloatArray &totalStrain, double equivStrain,
-     *                                   TimeStep *atTime);
-     */
+#if 0
+    void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
+                             const FloatArray &totalStrain, double equivStrain,
+                             TimeStep *atTime) override;
+#endif
 
     virtual void computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor,
                                        FloatMatrix damageTensor, GaussPoint *gp);

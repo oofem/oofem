@@ -114,7 +114,7 @@ public:
 
     virtual ~TrabBone3DStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     double giveKappa();
     double giveTempKappa();
@@ -149,13 +149,13 @@ public:
 
     void setDensG(double g) { densG = g; }
 
-    virtual const char *giveClassName() const { return "TrabBone3DStatus"; }
+    const char *giveClassName() const override { return "TrabBone3DStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -181,7 +181,7 @@ protected:
 public:
     TrabBone3D(int n, Domain *d);
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
     double evaluateCurrentYieldStress(const double kappa);
     double evaluateCurrentPlasticModulus(const double kappa);
     double evaluateCurrentViscousStress(const double deltaKappa, TimeStep *tStep);
@@ -220,25 +220,24 @@ public:
     /// Construct Tensor to adjust Norm.
     void constructNormAdjustTensor(FloatMatrix &answer);
 
+    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+                                       MatResponseMode, GaussPoint * gp,
+                                       TimeStep * tStep) override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseMode, GaussPoint * gp,
-                                               TimeStep * tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                 const FloatArray &, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *,
-                                         const FloatArray &, TimeStep *);
+    const char *giveInputRecordName() const override { return _IFT_TrabBone3D_Name; }
+    const char *giveClassName() const override { return "TrabBone3D"; }
 
-    virtual const char *giveInputRecordName() const { return _IFT_TrabBone3D_Name; }
-    virtual const char *giveClassName() const { return "TrabBone3D"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-
-    virtual double predictRelativeComputationalCost(GaussPoint *gp);
-    virtual double predictRelativeRedistributionCost(GaussPoint *gp);
+    double predictRelativeComputationalCost(GaussPoint *gp) override;
+    double predictRelativeRedistributionCost(GaussPoint *gp) override;
 };
 } //end namespace oofem
 #endif

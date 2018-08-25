@@ -236,16 +236,16 @@ public:
     virtual void initForUnpacking() = 0;
 
     using DataStream::read;
-    virtual int read(bool &data) override;
+    int read(bool &data) override;
 
     using DataStream::write;
-    virtual int write(bool data) override;
+    int write(bool data) override;
 
-    virtual int givePackSizeOfInt(int count) override;
-    virtual int givePackSizeOfDouble(int count) override;
-    virtual int givePackSizeOfChar(int count) override;
-    virtual int givePackSizeOfBool(int count) override;
-    virtual int givePackSizeOfLong(int count) override;
+    int givePackSizeOfInt(int count) override;
+    int givePackSizeOfDouble(int count) override;
+    int givePackSizeOfChar(int count) override;
+    int givePackSizeOfBool(int count) override;
+    int givePackSizeOfLong(int count) override;
 
     /**@name Services for buffer sending/receiving */
     //@{
@@ -294,9 +294,6 @@ public:
 };
 
 
-
-
-
 class OOFEM_EXPORT StaticCommunicationBuffer : public CommunicationBuffer, public MPIBuffer
 {
 public:
@@ -307,47 +304,47 @@ public:
     /// Destructor.
     virtual ~StaticCommunicationBuffer() { }
 
-    virtual int resize(int newSize) override { return MPIBuffer :: resize(newSize); }
+    int resize(int newSize) override { return MPIBuffer :: resize(newSize); }
 
-    virtual void init() { return MPIBuffer :: init(); }
-    virtual void initForPacking() { this->init(); }
-    virtual void initForUnpacking() { this->init(); }
+    void init() override { return MPIBuffer :: init(); }
+    void initForPacking() override { this->init(); }
+    void initForUnpacking() override { this->init(); }
 
     using CommunicationBuffer::write;
-    virtual int write(const int *src, int n)
+    int write(const int *src, int n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_INT); }
-    virtual int write(const long *src, int n)
+    int write(const long *src, int n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_LONG); }
-    virtual int write(const unsigned long *src, int n)
+    int write(const unsigned long *src, int n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_UNSIGNED_LONG); }
-    virtual int write(const double *src, int n)
+    int write(const double *src, int n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_DOUBLE); }
-    virtual int write(const char *src, int n)
+    int write(const char *src, int n) override
     { return MPIBuffer :: packArray(this->communicator, src, n, MPI_CHAR); }
 
     using CommunicationBuffer::read;
-    virtual int read(int *dest, int n)
+    int read(int *dest, int n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_INT); }
-    virtual int read(long *dest, int n)
+    int read(long *dest, int n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_LONG); }
-    virtual int read(unsigned long *dest, int n)
+    int read(unsigned long *dest, int n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_UNSIGNED_LONG); }
-    virtual int read(double *dest, int n)
+    int read(double *dest, int n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_DOUBLE); }
-    virtual int read(char *dest, int n)
+    int read(char *dest, int n) override
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_CHAR); }
 
-    virtual int iSend(int dest, int tag) { return MPIBuffer :: iSend(this->communicator, dest, tag); }
+    int iSend(int dest, int tag) override { return MPIBuffer :: iSend(this->communicator, dest, tag); }
 
-    virtual int iRecv(int source, int tag, int count = 0)  { return MPIBuffer :: iRecv(this->communicator, source, tag, count); }
+    int iRecv(int source, int tag, int count = 0) override { return MPIBuffer :: iRecv(this->communicator, source, tag, count); }
 
-    virtual int testCompletion() { return MPIBuffer :: testCompletion(); }
+    int testCompletion() override { return MPIBuffer :: testCompletion(); }
 
     int testCompletion(int &source, int &tag) { return MPIBuffer :: testCompletion(source, tag); }
 
-    virtual int waitCompletion() { return MPIBuffer :: waitCompletion(); }
+    int waitCompletion() override { return MPIBuffer :: waitCompletion(); }
 
-    virtual int bcast(int root) { return MPIBuffer :: bcast(this->communicator, root); }
+    int bcast(int root) override { return MPIBuffer :: bcast(this->communicator, root); }
 };
 } // end namespace oofem
 

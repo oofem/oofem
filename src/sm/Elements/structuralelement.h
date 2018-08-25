@@ -108,8 +108,8 @@ public:
     /// Destructor.
     virtual ~StructuralElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
+    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep) override;
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
 
     /**
      * Computes mass matrix of receiver. Default implementation returns consistent mass matrix and uses
@@ -199,7 +199,7 @@ public:
         OOFEM_ERROR("not implemented");
     }
 
-    virtual void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
+    void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer) override;
 
     // stress equivalent vector in nodes (vector of internal forces)
     // - mainly for nonLinear Analysis.
@@ -235,7 +235,7 @@ public:
      */
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     /**
      * Computes at given time (tStep) the the resulting temperature component array.
      * This is summation of all temperature load  components of  receiver.
@@ -286,13 +286,13 @@ public:
     //@}
 
     // Overloaded methods.
-    virtual int adaptiveUpdate(TimeStep *tStep);
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual void updateYourself(TimeStep *tStep);
-    virtual int checkConsistency();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "StructuralElement"; }
+    int adaptiveUpdate(TimeStep *tStep) override;
+    void updateInternalState(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
+    int checkConsistency() override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "StructuralElement"; }
 
 #ifdef __OOFEG
     /**

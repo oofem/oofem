@@ -62,41 +62,39 @@ public:
     InterfaceElem1d(int n, Domain * d);
     virtual ~InterfaceElem1d() { }
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)  { computeLumpedMassMatrix(answer, tStep); }
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override  { computeLumpedMassMatrix(answer, tStep); }
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
+    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;
 
-    virtual int computeNumberOfDofs();
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    int computeNumberOfDofs() override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
-
-    virtual Interface *giveInterface(InterfaceType it) { return NULL; }
+    int testElementExtension(ElementExtension ext) override { return 0; }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem1d_Name; }
-    virtual const char *giveClassName() const { return "InterfaceElem1d"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
-    virtual integrationDomain giveIntegrationDomain() const { return _Point; }
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual MaterialMode giveMaterialMode();
+    const char *giveInputRecordName() const override { return _IFT_InterfaceElem1d_Name; }
+    const char *giveClassName() const override { return "InterfaceElem1d"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
+    integrationDomain giveIntegrationDomain() const override { return _Point; }
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    MaterialMode giveMaterialMode() override;
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
-    virtual void computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override { }
+    void computeGaussPoints() override;
     void evaluateLocalCoordinateSystem(FloatMatrix &);
 
     void computeLocalSlipDir(FloatArray &normal);

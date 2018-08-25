@@ -84,12 +84,12 @@ public:
 
     virtual bool isActivated(const FloatArray &c1, const FloatArray &c2);
 
-    virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
-                                 bool &shieldFlag, NonlocalMaterialExtensionInterface *nei);
+    void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
+                         bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords);
+    double calculateMinimumDistanceFromBoundary(const FloatArray &coords) override;
 
     /**
      * This function computes the length of the normal to the line defined by 2 vertices that passes through
@@ -101,8 +101,8 @@ public:
      */
     double giveDistancePointLine(const FloatArray &coordsA, const FloatArray &coordsB, const FloatArray &coordsGP);
 
-    virtual const char *giveInputRecordName() const { return _IFT_PolylineNonlocalBarrier_Name; }
-    virtual const char *giveClassName() const { return "PolylineNonlocalBarrier"; }
+    const char *giveInputRecordName() const override { return _IFT_PolylineNonlocalBarrier_Name; }
+    const char *giveClassName() const override { return "PolylineNonlocalBarrier"; }
 };
 } // end namespace oofem
 #endif // polylinenonlocalbarrier_h

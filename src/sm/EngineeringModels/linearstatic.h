@@ -76,7 +76,7 @@ protected:
     EModelDefaultEquationNumbering equationNumbering;
 
 public:
-    LinearStatic(int i, EngngModel * _master = NULL);
+    LinearStatic(int i, EngngModel *master = nullptr);
     virtual ~LinearStatic();
 
     void solveYourself() override;
@@ -96,7 +96,7 @@ public:
     virtual UnknownNumberingScheme &giveEquationNumbering() { return equationNumbering; }
 
     // identification
-    const char *giveInputRecordName() const { return _IFT_LinearStatic_Name; }
+    virtual const char *giveInputRecordName() const { return _IFT_LinearStatic_Name; }
     const char *giveClassName() const override { return "LinearStatic"; }
     fMode giveFormulation() override { return TL; }
 

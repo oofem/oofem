@@ -61,18 +61,18 @@ public:
     TrabBoneNLStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneNLStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    double giveLocalCumPlastStrainForAverage()     { return localCumPlastStrainForAverage; }
+    double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
-    virtual const char *giveClassName() const { return "TrabBoneNLStatus"; }
+    const char *giveClassName() const override { return "TrabBoneNLStatus"; }
 
-    virtual void initTempStatus();
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 };
 
 
@@ -89,33 +89,33 @@ public:
     TrabBoneNL(int n, Domain * d);
     virtual ~TrabBoneNL();
 
-    virtual const char *giveClassName() const { return "TrabBoneNL"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL_Name; }
+    const char *giveClassName() const override { return "TrabBoneNL"; }
+    const char *giveInputRecordName() const override { return _IFT_TrabBoneNL_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
+    void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
     void computeLocalCumPlastStrain(double &alpha, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     {
         TrabBoneMaterial :: computeCumPlastStrain(alpha, gp, tStep);
     }
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
 
-    virtual int hasBoundedSupport() { return 1; }
+    int hasBoundedSupport() override { return 1; }
 
-    virtual void giveSupportRadius(double &radius) { radius = this->R; }
+    void giveSupportRadius(double &radius) { radius = this->R; }
 
 protected:
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneNLStatus(1, TrabBoneMaterial :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNLStatus(1, TrabBoneMaterial :: domain, gp); }
 };
 } // end namespace oofem
 #endif

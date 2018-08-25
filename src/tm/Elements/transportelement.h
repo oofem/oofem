@@ -119,8 +119,8 @@ public:
     virtual void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // time step termination
-    virtual void updateInternalState(TimeStep *tStep) override;
-    virtual int checkConsistency() override;
+    void updateInternalState(TimeStep *tStep) override;
+    int checkConsistency() override;
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                       const FloatArray &coords, IntArray &dofId, ValueModeType mode,

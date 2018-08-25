@@ -80,7 +80,7 @@ protected:
     double dumpingCoef, deltaT;
 
 public:
-    DEIDynamic(int i, EngngModel * _master = NULL) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
+    DEIDynamic(int i, EngngModel *master = nullptr) : StructuralEngngModel(i, master), massMatrix(), loadVector(),
         nextDisplacementVector(), displacementVector(), velocityVector(), accelerationVector() {
         ndomains = 1;
     }

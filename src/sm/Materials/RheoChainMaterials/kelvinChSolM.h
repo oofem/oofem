@@ -47,16 +47,16 @@ class KelvinChainSolidMaterialStatus : public RheoChainMaterialStatus
 public:
     KelvinChainSolidMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
     virtual ~KelvinChainSolidMaterialStatus() { }
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     // definition
-    virtual const char *giveClassName() const { return "KelvinChainSolidMaterialStatus"; }
+    const char *giveClassName() const override { return "KelvinChainSolidMaterialStatus"; }
 };
 
 
@@ -74,9 +74,8 @@ public:
     void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
-    virtual int hasNonLinearBehaviour() { return 0; }
-    virtual const char *giveClassName() const { return "KelvinChainSolidMaterial"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "KelvinChainSolidMaterial"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     virtual void  giveShrinkageStrainVector(FloatArray &answer,
                                             GaussPoint *gp,
@@ -86,7 +85,7 @@ public:
 
     virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the creep compliance function - function useless here
     virtual double computeCreepFunction(double ofAge, double tPrime, GaussPoint *gp, TimeStep *tStep);

@@ -51,13 +51,13 @@ public:
 	IntElLine1IntPen(int n, Domain * d);
 	virtual ~IntElLine1IntPen();
 
-    virtual const char *giveInputRecordName() const { return _IFT_IntElLine1IntPen_Name; }
-    virtual const char *giveClassName() const { return "IntElLine1IntPen"; }
+    const char *giveInputRecordName() const override { return _IFT_IntElLine1IntPen_Name; }
+    const char *giveClassName() const override { return "IntElLine1IntPen"; }
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
 
-    virtual void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
+    void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G) override;
 
     /**
      * Computes the stiffness/tangent matrix of receiver. Default implementation computes element stiffness using
@@ -76,7 +76,7 @@ public:
      * @param rMode Response mode.
      * @param tStep Time step.
      */
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
 
     /**
@@ -93,14 +93,13 @@ public:
      * nonzero the stresses are taken directly from integration point status (should be derived from StructuralMaterialStatus)
      * (fast, but engineering model must ensure valid status data in each integration point).
      */
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
 protected:
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
 
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_21_interface; }
-
+    Element_Geometry_Type giveGeometryType() const override { return EGT_quad_21_interface; }
 };
 
 } /* namespace oofem */

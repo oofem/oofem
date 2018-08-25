@@ -52,20 +52,19 @@ namespace oofem {
  * 
  */
 class GeometryGenerator 
-
 {
 protected:
-// global
-  int nop; // number of particles
-  int nol; // number of links
-  std::vector<FloatArray> Particles;
-  std::vector<IntArray> Links;
+    // global
+    int nop; // number of particles
+    int nol; // number of links
+    std::vector<FloatArray> Particles;
+    std::vector<IntArray> Links;
 
-// particleGenerator
-  double ParticleRadius;  // minimal distance of two particles
-  int maxNumOfParticles;  // maximal number of generated particles
-  int maxNumOfIterations; // maximal number of iterations during generation
-  int maxNumOfItOnePar;   // maximal number of generation of one particle
+    // particleGenerator
+    double ParticleRadius;  // minimal distance of two particles
+    int maxNumOfParticles;  // maximal number of generated particles
+    int maxNumOfIterations; // maximal number of iterations during generation
+    int maxNumOfItOnePar;   // maximal number of generation of one particle
 
 public:
     GeometryGenerator();
@@ -82,9 +81,7 @@ public:
     void generateLinks();
     void loadLinks();
 
-
     virtual const char *giveClassName() const { return "QCFullsolveddomain"; }
-
 };
 } // end namespace oofem
 #endif // geometrygenerator_h

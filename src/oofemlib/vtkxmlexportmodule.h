@@ -356,7 +356,6 @@ class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 {
 public:
     VTKXMLExportModuleElementInterface() : Interface() { }
-    virtual const char *giveClassName() const override { return "VTKXMLExportModuleElementInterface"; }
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
     virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
 };

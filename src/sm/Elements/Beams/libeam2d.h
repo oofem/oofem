@@ -59,49 +59,48 @@ public:
     LIBeam2d(int n, Domain * aDomain);
     virtual ~LIBeam2d() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) { computeLumpedMassMatrix(answer, tStep); }
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override { computeLumpedMassMatrix(answer, tStep); }
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
 
     // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+    void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
-
+    int computeNumberOfDofs() override { return 6; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    double computeVolumeAround(GaussPoint *gp) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LIBeam2d_Name; }
-    virtual const char *giveClassName() const { return "LIBeam2d"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_LIBeam2d_Name; }
+    const char *giveClassName() const override { return "LIBeam2d"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual MaterialMode giveMaterialMode() { return _2dBeam; }
+    MaterialMode giveMaterialMode() override { return _2dBeam; }
 
 protected:
     // edge load support
-    virtual void giveEdgeDofMapping(IntArray &answer, int) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *, int);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
-    virtual void computeGaussPoints();
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void giveEdgeDofMapping(IntArray &answer, int) const override;
+    double computeEdgeVolumeAround(GaussPoint *, int) override;
+    int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *) override;
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode) override;
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &) override;
+    void computeGaussPoints() override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double computeLength();
+    double computeLength() override;
     double givePitch();
 };
 } // end namespace oofem

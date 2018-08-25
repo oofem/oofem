@@ -60,38 +60,38 @@ public:
     InterfaceElem2dQuad(int n, Domain * d);
     virtual ~InterfaceElem2dQuad() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    int computeNumberOfDofs() override { return 12; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
+    int testElementExtension(ElementExtension ext) override { return 0; }
 
-    virtual Interface *giveInterface(InterfaceType) { return NULL; }
+    Interface *giveInterface(InterfaceType) override { return NULL; }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_InterfaceElem2dQuad_Name; }
-    virtual const char *giveClassName() const { return "InterfaceElem2dQuad"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual MaterialMode giveMaterialMode() { return _2dInterface; }
+    const char *giveInputRecordName() const override { return _IFT_InterfaceElem2dQuad_Name; }
+    const char *giveClassName() const override { return "InterfaceElem2dQuad"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    MaterialMode giveMaterialMode() override { return _2dInterface; }
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
-    virtual void computeGaussPoints();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override { }
+    void computeGaussPoints() override;
 
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
 };
 } // end namespace oofem
 #endif // interfaceelem2dquad_h

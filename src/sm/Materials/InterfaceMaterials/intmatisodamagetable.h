@@ -79,7 +79,6 @@ namespace oofem {
 class IntMatIsoDamageTable : public IntMatIsoDamage
 {
 protected:
-    ///Additional parameters
     /// Name of table file
     std :: string tablename;
     /// Damages read from the second column in the table file
@@ -93,19 +92,13 @@ public:
     /// Destructor
     virtual ~IntMatIsoDamageTable();
 
-    virtual const char *giveInputRecordName() const { return _IFT_IntMatIsoDamageTable_Name; }
+    const char *giveClassName() const override { return "IntMatIsoDamageTable"; }
+    const char *giveInputRecordName() const override { return _IFT_IntMatIsoDamageTable_Name; }
 
-    /**
-     * Computes the value of damage parameter omega, based on given value of equivalent strain.
-     * It uses a table (jump vs. damage) and interpolates linearly in between.
-     * @param[out] omega Contains result.
-     * @param kappa Equivalent strain measure.
-     */
-    virtual void computeDamageParam(double &omega, double kappa);
-    
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    void computeDamageParam(double &omega, double kappa) override;
 
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

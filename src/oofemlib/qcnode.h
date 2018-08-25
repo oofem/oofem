@@ -94,7 +94,7 @@ public:
     virtual bool initializeAsRepnode();
     virtual void setAsRepnode();
     virtual void setAsHanging();
-    virtual int giveQcNodeType() override { return this->qcNodeTypeLabel; }
+    int giveQcNodeType() override { return this->qcNodeTypeLabel; }
     virtual int giveMasterElementNumber() { return this->masterElement; }
 
     void printOutputAt(FILE *stream, TimeStep *tStep) override;

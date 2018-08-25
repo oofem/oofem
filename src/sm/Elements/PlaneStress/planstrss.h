@@ -64,41 +64,41 @@ public:
     PlaneStress2d(int n, Domain * d);
     virtual ~PlaneStress2d();
 
-    virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
-    virtual double giveParentElSize() const { return 4.0; }
+    double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method) override;
+    double giveParentElSize() const override { return 4.0; }
 
-    virtual Interface *giveInterface(InterfaceType it);
-    virtual FEInterpolation *giveInterpolation() const;
+    Interface *giveInterface(InterfaceType it) override;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
-    virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
-                                                                  IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
-                                                                  HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
-                                                                  int &localNodeId, int &localElemId, int &localBcId,
-                                                                  IntArray &controlNode, IntArray &controlDof,
-                                                                  HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
+                                                          IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
+                                                          HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
+                                                          int &localNodeId, int &localElemId, int &localBcId,
+                                                          IntArray &controlNode, IntArray &controlDof,
+                                                          HuertaErrorEstimator :: AnalysisMode aMode) override;
+    void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2d_Name; }
-    virtual const char *giveClassName() const { return "PlaneStress2d"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_PlaneStress2d_Name; }
+    const char *giveClassName() const override { return "PlaneStress2d"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
 protected:
 
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 
     int giveNumberOfIPForMassMtrxIntegration() { return 4; } 
 };

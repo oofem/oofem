@@ -56,7 +56,7 @@ public:
     LatticeStructuralElement(int n, Domain * d);
     virtual ~LatticeStructuralElement();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     /**
      * Returns the cross-sectional area of the lattice element.
@@ -105,7 +105,7 @@ public:
      * Usually computes interpolation function, which is not needed for the lattice elements.
      * However, structural element requires implementation.
      */
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { return; }
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override { return; }
 
 
     /**

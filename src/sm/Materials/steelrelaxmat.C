@@ -261,8 +261,6 @@ SteelRelaxMat :: give1dStressStiffMtrx(FloatMatrix &answer,
 }
 
 
-
-
 void
 SteelRelaxMat :: giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep, ValueModeType mode)
 {
@@ -277,8 +275,6 @@ SteelRelaxMat :: giveStressDependentPartOfStrainVector(FloatArray &answer, Gauss
 
     answer = temperatureFreeStrain;
     answer.subtract(relaxationStrain);
-
-    return;
 }
 
 

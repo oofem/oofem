@@ -65,13 +65,11 @@ public:
     TrPlanestressRotAllman(int, Domain *);
     virtual ~TrPlanestressRotAllman() { }
 
-
-    
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
 
-    virtual double giveArea();
+    double giveArea() override;
     virtual void computeLocalNodalCoordinates(std::vector< FloatArray > &lxy);
     /**
      * Computes the stiffness matrix stabilization of zero energy mode (equal rotations)
@@ -83,26 +81,26 @@ protected:
     void computeStiffnessMatrixZeroEnergyStabilization(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 public:
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_TrPlanestressRotAllman_Name; }
-    virtual const char *giveClassName() const { return "TrPlanestressRotAllman"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }
+    const char *giveInputRecordName() const override { return _IFT_TrPlanestressRotAllman_Name; }
+    const char *giveClassName() const override { return "TrPlanestressRotAllman"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    MaterialMode giveMaterialMode() override { return _PlaneStress; }
+    integrationDomain giveIntegrationDomain() const override { return _Triangle; }
     /** Computes the stiffness matrix of receiver. Overloaded to add stabilization of zero-energy mode (equal rotations) */
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeGaussPoints();
-    virtual int computeNumberOfDofs() { return 9; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    void computeGaussPoints() override;
+    int computeNumberOfDofs() override { return 9; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
-    Interface *giveInterface(InterfaceType interface);
+    Interface *giveInterface(InterfaceType interface) override;
     // layered cross section support functions
-    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-                                            GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+    void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
+                                    GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep) override;
 
-    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global);
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global) override;
     void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    int SPRNodalRecoveryMI_giveNumberOfIP();
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
 };
 } // end namespace oofem
 #endif //  trplanestressrotallman_h

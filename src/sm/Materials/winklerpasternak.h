@@ -75,18 +75,16 @@ public:
     /// Destructor.
     virtual ~WinklerPasternakMaterial();
 
-    // identification and auxiliary functions
+    int hasMaterialModeCapability(MaterialMode mode) override;
+    const char *giveClassName() const override { return "WinklerPasternakMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_WinklerPasternakMaterial_Name; }
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual const char *giveClassName() const { return "WinklerPasternakMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_WinklerPasternakMaterial_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep);
-    virtual MaterialStatus * CreateStatus(GaussPoint *gp) const;
+    void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
+    void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    MaterialStatus * CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // winklerpasternak_h

@@ -59,7 +59,6 @@ class Field;
  */
 class ForeignTemperatureFieldLoad : public StructuralTemperatureLoad
 {
-private:
 public:
     // make public so that it can be simply set from python
     std::shared_ptr<Field> foreignField;
@@ -80,12 +79,12 @@ public:
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode.
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_ForeignTemperatureFieldLoad_Name; }
-    virtual const char *giveClassName() const { return "ForeignTemperatureFieldLoad"; }
+    const char *giveInputRecordName() const override { return _IFT_ForeignTemperatureFieldLoad_Name; }
+    const char *giveClassName() const override { return "ForeignTemperatureFieldLoad"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 };
 } // end namespace oofem
 #endif // foreigntempfield_h

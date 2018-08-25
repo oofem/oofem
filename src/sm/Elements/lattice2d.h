@@ -65,73 +65,71 @@ public:
     Lattice2d(int n, Domain *d);
     virtual ~Lattice2d();
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
     /**
      * This function is different from the standard computeGlobalCorrdinates
      * function as it returns the global coordinates of the gausspoint
      * independent to the value of the lcoords.
      */
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual double giveLength();
+    double giveLength() override;
 
-    virtual double giveNormalStress();
-    virtual double giveOldNormalStress();
+    double giveNormalStress() override;
+    double giveOldNormalStress() override;
 
-    virtual int hasBeenUpdated();
+    int hasBeenUpdated() override;
 
-    virtual double giveArea() { return this->width * this->thickness; }
+    double giveArea() override { return this->width * this->thickness; }
 
-    virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
+    int computeNumberOfDofs() override { return 6; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual int giveCrackFlag();
+    int giveCrackFlag() override;
 
-    virtual double giveCrackWidth();
-    virtual double giveOldCrackWidth();
+    double giveCrackWidth() override;
+    double giveOldCrackWidth() override;
 
-    virtual double giveDissipation();
-    virtual double giveDeltaDissipation();
+    double giveDissipation() override;
+    double giveDeltaDissipation() override;
 
-    virtual int giveCouplingFlag() { return couplingFlag; }
+    int giveCouplingFlag() override { return couplingFlag; }
 
-    virtual void giveCouplingNumbers(IntArray &numbers) { numbers = this->couplingNumbers; }
+    void giveCouplingNumbers(IntArray &numbers) override { numbers = this->couplingNumbers; }
     //
     // definition & identification
     //
-    virtual const char *giveInputRecordName() const { return _IFT_Lattice2d_Name; }
-    virtual const char *giveClassName() const { return "Lattice2d"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    const char *giveInputRecordName() const override { return _IFT_Lattice2d_Name; }
+    const char *giveClassName() const override { return "Lattice2d"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void giveCrossSectionCoordinates(FloatArray &coords);
-
+    void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void giveCrossSectionCoordinates(FloatArray &coords) override;
 #endif
 
 protected:
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-
-    virtual int giveNumberOfCrossSectionNodes() { return 2; }
+    int giveNumberOfCrossSectionNodes() override { return 2; }
     double givePitch();
-    virtual void computeGaussPoints();
-    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
-    virtual void  giveGpCoordinates(FloatArray &coords);
+    void computeGaussPoints() override;
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
+    void giveGpCoordinates(FloatArray &coords) override;
 };
 } // end namespace oofem
 #endif

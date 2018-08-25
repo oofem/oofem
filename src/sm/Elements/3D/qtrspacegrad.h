@@ -51,29 +51,29 @@ class QTRSpaceGrad : public QTRSpace, public GradDpElement
 {
 protected:
     static FEI3dTetLin interpolation_lin;
-    
+
 public:
     QTRSpaceGrad(int, Domain *);
     virtual ~QTRSpaceGrad() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QTRSpaceGrad_Name; }
-    virtual const char *giveClassName() const { return "QTRSpaceGrad"; }
-    virtual int computeNumberOfDofs() { return 34; }
+    const char *giveInputRecordName() const override { return _IFT_QTRSpaceGrad_Name; }
+    const char *giveClassName() const override { return "QTRSpaceGrad"; }
+    int computeNumberOfDofs() override { return 34; }
 
 protected:
     ///////////////////////////////////////////////////////////////////////////////
-    void computeGaussPoints();
-    void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer);
-    void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    StructuralElement *giveStructuralElement() { return this; }
-    NLStructuralElement *giveNLStructuralElement() { return this; }
+    void computeGaussPoints() override;
+    void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer) override;
+    void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    StructuralElement *giveStructuralElement() override { return this; }
+    NLStructuralElement *giveNLStructuralElement() override { return this; }
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
 };
 }
 #endif // end namespace oofem

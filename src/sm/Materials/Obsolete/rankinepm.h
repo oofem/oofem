@@ -60,12 +60,12 @@ public:
     RankinePlasticMaterial(int n, Domain * d);
     virtual ~RankinePlasticMaterial();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_RankinePlasticMaterial_Name; }
-    virtual const char *giveClassName() const { return "RankinePlasticMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_RankinePlasticMaterial_Name; }
+    const char *giveClassName() const override { return "RankinePlasticMaterial"; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
 
@@ -74,25 +74,25 @@ protected:
     //
 
     double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                               const FloatArray &stressSpaceHardeningVars);
+                               const FloatArray &stressSpaceHardeningVars) override;
 
     void computeHardeningReducedModuli(FloatMatrix &answer,
                                        GaussPoint *gp,
                                        const FloatArray &strainSpaceHardeningVariables,
-                                       TimeStep *tStep);
+                                       TimeStep *tStep) override;
     void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                     const FloatArray &stressSpaceHardeningVars);
+                                     const FloatArray &stressSpaceHardeningVars) override;
     void computeStressSpaceHardeningVarsReducedGradient(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp,
                                                         const FloatArray &stressVector,
-                                                        const FloatArray &stressSpaceHardeningVars);
-    int hasHardening() { return 0; }
+                                                        const FloatArray &stressSpaceHardeningVars) override;
+    int hasHardening() override { return 0; }
     void computeReducedGradientMatrix(FloatMatrix &answer, int isurf,
                                       GaussPoint *gp,
                                       const FloatArray &stressVector,
-                                      const FloatArray &stressSpaceHardeningVars);
+                                      const FloatArray &stressSpaceHardeningVars) override;
 
     void computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &strainSpaceHardeningVariables);
+                                         const FloatArray &strainSpaceHardeningVariables) override;
 };
 } // end namespace oofem
 #endif // rankinepm_h

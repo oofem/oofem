@@ -66,44 +66,44 @@ public:
     LineDistributedSpring(int n, Domain * d);
     virtual ~LineDistributedSpring() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+    FEInterpolation *giveInterpolation() const override;
+    FEInterpolation *giveInterpolation(DofIDItem id) const override;
 
-    virtual MaterialMode giveMaterialMode()  { return _Unknown; }
+    MaterialMode giveMaterialMode() override { return _Unknown; }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LineDistributedSpring_Name; }
-    virtual const char *giveClassName() const { return "LineDistributedSpring"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_LineDistributedSpring_Name; }
+    const char *giveClassName() const override { return "LineDistributedSpring"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int computeNumberOfDofs() { return this->dofs.giveSize(); }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    int computeNumberOfDofs() override { return this->dofs.giveSize(); }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { computeLumpedMassMatrix(answer, tStep); }
     void giveInternalForcesVector(FloatArray &answer,
-                                  TimeStep *tStep, int useUpdatedGpRecord);
+                                  TimeStep *tStep, int useUpdatedGpRecord) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual Interface *giveInterface(InterfaceType it);
-    int checkConsistency();
-    void printOutputAt(FILE *File, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    Interface *giveInterface(InterfaceType it) override;
+    int checkConsistency() override;
+    void printOutputAt(FILE *File, TimeStep *tStep) override;
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    void computeGaussPoints() override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode) override;
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
 
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override { return this->numberOfGaussPoints; }
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override { return SPRPatchType_2dxy; }
 };
 } // end namespace oofem
 #endif // linedistributedspring_H

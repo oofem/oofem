@@ -62,18 +62,17 @@ public:
     TrabBoneNL3DStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneNL3DStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
     const FloatArray *giveLTangentContrib();
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
-    // definition
-    virtual const char *giveClassName() const { return "TrabBoneNL3DStatus"; }
+    const char *giveClassName() const override { return "TrabBoneNL3DStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-    virtual Interface *giveInterface(InterfaceType it);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
+    Interface *giveInterface(InterfaceType it) override;
 };
 
 
@@ -92,15 +91,15 @@ public:
     TrabBoneNL3D(int n, Domain * d);
     virtual ~TrabBoneNL3D();
 
-    virtual const char *giveClassName() const { return "TrabBoneNL3D"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNL3D_Name; }
+    const char *giveClassName() const override { return "TrabBoneNL3D"; }
+    const char *giveInputRecordName() const override { return _IFT_TrabBoneNL3D_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
 
     /**
      * Computes the local cumulated plastic strain from given strain vector (full form).
@@ -114,17 +113,17 @@ public:
         TrabBone3D :: computeCumPlastStrain(kappa, gp, tStep);
     }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep) override;
 
 #ifdef __OOFEG
     // Plots the sparse structure of stiffness contribution.
-    //virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep);
+    //void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                      GaussPoint *gp, TimeStep *tStep);
+    void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
+                                                              GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual std :: vector< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    std :: vector< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp) override;
 
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.
@@ -149,23 +148,23 @@ public:
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
 
-    virtual int hasBoundedSupport() { return 1; }
+    int hasBoundedSupport() override { return 1; }
 
     /// Determines the width (radius) of limited support of weighting function.
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneNL3DStatus(1, TrabBone3D :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNL3DStatus(1, TrabBone3D :: domain, gp); }
 };
 } // end namespace oofem
 #endif

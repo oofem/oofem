@@ -69,17 +69,17 @@ public:
     /// Destructor.
     virtual ~BasicElement() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
     // Necessary for reading input files:
-    virtual const char *giveInputRecordName() const { return _IFT_BasicElement_Name; }
+    const char *giveInputRecordName() const override { return _IFT_BasicElement_Name; }
     // Necessary for debug messages:
-    virtual const char *giveClassName() const { return "BasicElement"; }
+    const char *giveClassName() const override { return "BasicElement"; }
 
 protected:
 
     // Support for computing the mass matrix needed for dynamic simulations
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    int giveNumberOfIPForMassMtrxIntegration() override { return 4; }
 };
 } // end namespace oofem
 #endif // basicelement_h

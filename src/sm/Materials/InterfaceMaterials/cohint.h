@@ -58,40 +58,39 @@ class CohesiveInterfaceMaterial : public StructuralInterfaceMaterial
 protected:
     /// Elastic properties (normal and shear moduli).
     double kn, ks;
-    
+
     /// Reduction of normal stiffness when in tension
     double stiffCoeffKn;
-    
+
     /// Opening when material stiffness changes from kn to kn*stiffCoeffKn
     double transitionOpening;
-    
+
     /// Smoothing region between tension and compression stiffness.
     /// Uses atan(smoothMag*x) function, where (smoothMag*x) needs to be 6
     /// to be 10% off the asymptotic value. SmoothMag is by default 1.e+4.
     /// Higher values mean sharper transition.
     double smoothMag;
-    
+
 public:
     /// Constructor
     CohesiveInterfaceMaterial(int n, Domain * d);
     /// Destructor
     virtual ~CohesiveInterfaceMaterial() { }
 
-    virtual int hasNonLinearBehaviour() { return 0; }
-    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 
-    virtual const char *giveClassName() const { return "CohesiveInterfaceMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CohesiveInterfaceMaterial_Name; }
+    const char *giveClassName() const override { return "CohesiveInterfaceMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_CohesiveInterfaceMaterial_Name; }
 
-    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
+    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new StructuralInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new StructuralInterfaceMaterialStatus(1, FEMComponent :: domain, gp); }
 };
 } // namespace oofem
 #endif

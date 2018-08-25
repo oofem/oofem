@@ -168,11 +168,6 @@ public:
 
     // identification and auxiliary functions
     /**
-     * Returns nonzero if receiver is non linear
-     */
-    virtual int hasNonLinearBehaviour() { return 0; }
-
-    /**
      * Tests if material supports material mode.
      * @param mode Required material mode.
      * @return Nonzero if supported, zero otherwise.

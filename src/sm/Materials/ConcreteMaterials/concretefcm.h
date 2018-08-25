@@ -70,22 +70,19 @@ class ConcreteFCMStatus : public FCMMaterialStatus, public RandomMaterialStatusE
 public:
     ConcreteFCMStatus(int n, Domain *d, GaussPoint *g);
     virtual ~ConcreteFCMStatus();
-    /// Writes information into the output file.
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    // definition
-    virtual const char *giveClassName() const { return "ConcreteFCMStatus"; }
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    const char *giveClassName() const override { return "ConcreteFCMStatus"; }
 
-    virtual Interface *giveInterface(InterfaceType it);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    // saves current context(state) into stream
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    Interface *giveInterface(InterfaceType it) override;
+
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
-
 
 
 /**
@@ -103,23 +100,19 @@ public:
         delete linearElasticMaterial;
     }
 
-    // identification and auxiliary functions
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual const char *giveClassName() const { return "ConcreteFCM"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ConcreteFCM_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "ConcreteFCM"; }
+    const char *giveInputRecordName() const override { return _IFT_ConcreteFCM_Name; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new ConcreteFCMStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ConcreteFCMStatus(1, domain, gp); }
 
-    virtual double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
-
+    MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
 protected:
-
     /// Fracture energy
     double Gf;
     /// Tensile strenght
@@ -149,29 +142,14 @@ protected:
     /// strain at failure
     double eps_f;
 
-    /// returns tensile strength (can be random)
-    virtual double giveTensileStrength(GaussPoint *gp) { return this->give(ft_strength, gp); }
-
-    /// returns fracture energy (can be random)
-    virtual double giveFractureEnergy(GaussPoint *gp) { return this->give(gf_ID, gp); }
-
-    /// returns stiffness in the normal direction of the i-th crack
-    virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i);
-
-    /// returns Geff which is necessary in the global stiffness matrix
-    virtual double computeEffectiveShearModulus(GaussPoint *gp, int i);
-
-    /// shear modulus for a given crack plane (1, 2, 3)
-    virtual double computeD2ModulusForCrack(GaussPoint *gp, int icrack);
-
-    /// computes normal stress associated with i-th crack direction
-    virtual double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i);
-
-    /// computes the maximum value of the shear stress; if the shear stress exceeds this value, it is cropped
-    virtual double maxShearStress(GaussPoint *gp, int i);
-
-    /// checks possible snap-back
-    virtual void checkSnapBack(GaussPoint *gp, int crack);
+    double giveTensileStrength(GaussPoint *gp) override { return this->give(ft_strength, gp); }
+    double giveFractureEnergy(GaussPoint *gp) { return this->give(gf_ID, gp); }
+    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i) override;
+    double computeEffectiveShearModulus(GaussPoint *gp, int i) override;
+    double computeD2ModulusForCrack(GaussPoint *gp, int icrack) override;
+    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) override;
+    double maxShearStress(GaussPoint *gp, int i) override;
+    void checkSnapBack(GaussPoint *gp, int crack) override;
 
     /// type of post-peak behavior in the normal direction to the crack plane
     enum SofteningType { ST_NONE, ST_Exponential, ST_Linear, ST_Hordijk, ST_UserDefinedCrack, ST_LinearHardeningStrain, ST_UserDefinedStrain, ST_Unknown };

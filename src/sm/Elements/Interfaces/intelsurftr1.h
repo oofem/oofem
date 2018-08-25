@@ -53,41 +53,41 @@ public:
     IntElSurfTr1(int n, Domain *d);
     virtual ~IntElSurfTr1() { }
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
-    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
+    bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;
     virtual void computeCovarBaseVectorsAt(IntegrationPoint *ip, FloatArray &G1, FloatArray &G2);
-    //virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    //bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
+    void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
 
-    virtual int computeNumberOfDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    int computeNumberOfDofs() override { return 18; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual double computeAreaAround(IntegrationPoint *ip);
-    
-    virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+    double computeAreaAround(IntegrationPoint *ip) override;
+
+    void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
         this->giveInterfaceCrossSection()->giveEngTraction_3d(answer, gp, jump, tStep);
     }
 
-    virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
+    void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
         this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
     }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_IntElSurfTr1_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_wedge_1; }
+    const char *giveInputRecordName() const override { return _IFT_IntElSurfTr1_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_wedge_1; }
 
-    #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    #endif
+#ifdef __OOFEG
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+#endif
 
 protected:
-    virtual void computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer);
-    virtual void computeGaussPoints();
+    void computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
 
 };
 } // end namespace oofem

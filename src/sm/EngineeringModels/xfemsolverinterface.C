@@ -53,23 +53,16 @@
 
 namespace oofem {
 
-XfemSolverInterface::XfemSolverInterface():
-mNeedsVariableMapping(false)
-{
-
-}
-
-XfemSolverInterface::~XfemSolverInterface()
-{
-
-}
+XfemSolverInterface::XfemSolverInterface() :
+    mNeedsVariableMapping(false)
+{ }
 
 void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel, bool iRecomputeStepAfterCrackProp)
 {
     int domainInd = 1;
     Domain *domain = ioEngngModel.giveDomain(domainInd);
 
-    if(domain->hasXfemManager()) {
+    if ( domain->hasXfemManager() ) {
         XfemManager *xMan = domain->giveXfemManager();
         bool frontsHavePropagated = false;
         if ( xMan->hasInitiationCriteria() ) {
@@ -78,47 +71,41 @@ void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEng
             xMan->initiateFronts(frontsHavePropagated,tStep);
         }
 
-        if( xMan->hasPropagatingFronts() ) {
+        if ( xMan->hasPropagatingFronts() ) {
             // Propagate crack tips
             xMan->propagateFronts(frontsHavePropagated);
-
         }
 
         bool eiWereNucleated = false;
-        if( xMan->hasNucleationCriteria() ) {
+        if ( xMan->hasNucleationCriteria() ) {
         	xMan->nucleateEnrichmentItems(eiWereNucleated);
-       }
-
-        int numEl = domain->giveNumberOfElements();
-        for ( int i = 1; i <= numEl; i++ ) {
-            ////////////////////////////////////////////////////////
-            // Map state variables for enriched elements
-            XfemElementInterface *xfemElInt = dynamic_cast< XfemElementInterface * >( domain->giveElement(i) );
-
-            if(xfemElInt) {
-            	xfemElInt->XfemElementInterface_updateIntegrationRule();
-            }
-
         }
 
+        for ( auto &elem : domain->giveElements() ) {
+            ////////////////////////////////////////////////////////
+            // Map state variables for enriched elements
+            XfemElementInterface *xfemElInt = dynamic_cast< XfemElementInterface * >( elem.get() );
 
-        if(frontsHavePropagated || eiWereNucleated) {
+            if ( xfemElInt ) {
+                xfemElInt->XfemElementInterface_updateIntegrationRule();
+            }
+        }
+
+        if ( frontsHavePropagated || eiWereNucleated ) {
             mNeedsVariableMapping = false;
-            
+
             ioEngngModel.giveDomain(1)->postInitialize();
             ioEngngModel.forceEquationNumbering();
 
-            if(iRecomputeStepAfterCrackProp) {
-                printf("Recomputing time step.\n");
+            if ( iRecomputeStepAfterCrackProp ) {
+                OOFEM_LOG_RELEVANT("Recomputing time step.\n");
                 ioEngngModel.forceEquationNumbering();
                 ioEngngModel.solveYourselfAt(tStep);
                 ioEngngModel.updateYourself( tStep );
                 ioEngngModel.terminate( tStep );
-
             }
         }
     }
-
 }
 
 

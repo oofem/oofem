@@ -144,23 +144,22 @@ public:
     /// Destructor.
     virtual ~ConcreteDPMStatus();
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     int setIPValue(const FloatArray &value, InternalStateType type);
 
-    virtual const char *giveClassName() const { return "ConcreteDPMStatus"; }
+    const char *giveClassName() const override { return "ConcreteDPMStatus"; }
 
     /**
      * Get the plastic strain deviator from the material status.
      * @return Plastic strain deviator.
      */
     const FloatArray &givePlasticStrain() const { return plasticStrain; }
-
 
     /**
      * Get the deviatoric plastic strain norm from the material status.
@@ -174,12 +173,10 @@ public:
             dev [ 3 ] * dev [ 3 ] + dev [ 4 ] * dev [ 4 ] + dev [ 5 ] * dev [ 5 ] ) );
     }
 
-
     double giveVolumetricPlasticStrain() const
     {
         return 1. / 3. * ( plasticStrain(0) + plasticStrain(1) + plasticStrain(2) );
     }
-
 
     /**
      * Get the hardening variable of the plasticity model.
@@ -469,20 +466,20 @@ public:
     /// Destructor
     virtual ~ConcreteDPM();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "ConcreteDPM"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ConcreteDPM_Name; }
+    const char *giveClassName() const override { return "ConcreteDPM"; }
+    const char *giveInputRecordName() const override { return _IFT_ConcreteDPM_Name; }
 
-    virtual ConcreteDPMStatus *giveStatus(GaussPoint *gp) const
+    ConcreteDPMStatus *giveConcreteDPMStatus(GaussPoint *gp) const
     { return static_cast< ConcreteDPMStatus * >( this->Material :: giveStatus(gp) ); }
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    virtual void giveRealStressVector_3d(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &reducedStrain,
-                                      TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer,
+                              GaussPoint *gp,
+                              const FloatArray &reducedStrain,
+                              TimeStep *tStep) override;
 
     /**
      * @param gp Gauss point.
@@ -676,7 +673,6 @@ public:
                             double rhoTrial,
                             double sig);
 
-
     /**
      * Perform stress return for the damage model, i.e. if the trial stress state does not violate the plasticity surface.
      * @param strain Strain.
@@ -686,8 +682,6 @@ public:
      */
     double computeDamage(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-
-
     /// Compute damage parameter.
     virtual double computeDamageParam(double kappa, GaussPoint *gp);
 
@@ -696,7 +690,6 @@ public:
 
     /// Compute equivalent strain value.
     virtual void computeEquivalentStrain(double &kappaD, const FloatArray &elasticStrain, GaussPoint *gp, TimeStep *tStep);
-
 
     /// Compute the ductility measure for the damage model.
     double computeDuctilityMeasureDamage(const FloatArray &strain, GaussPoint *gp);
@@ -730,23 +723,22 @@ public:
     /// Compute the derivative of R with respect to costheta.
     double computeDRDCosTheta(double theta, double ecc) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type) override;
 
-    virtual int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type);
+    int giveIPValue(FloatArray &answer,
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *tStep);
-
-    virtual void restoreConsistency(GaussPoint *gp);
+    void restoreConsistency(GaussPoint *gp) override;
 
 protected:
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif

@@ -70,21 +70,20 @@ public:
     /// Destructor.
     virtual ~IDNLMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the local  equivalent strain to be averaged.
     double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }
     /// Sets the localEquivalentStrainForAverage to given value.
     void setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
 
-    // definition
-    virtual const char *giveClassName() const { return "IDNLMaterialStatus"; }
+    const char *giveClassName() const override { return "IDNLMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
     /**
      * Interface requesting service.
@@ -97,7 +96,7 @@ public:
      * returning address of component or using pointer conversion from receiver to base class
      * NonlocalMaterialStatusExtensionInterface.
      */
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 };
 
 
@@ -114,16 +113,15 @@ public:
     /// Destructor
     virtual ~IDNLMaterial();
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "IDNLMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IDNLMaterial_Name; }
+    const char *giveClassName() const override { return "IDNLMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_IDNLMaterial_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     /**
      * Function used in the Stress based nonlocal variation.In this function the ratio of the first two
      * eigenvalues is and the angle of the first eigenvector with respect to the horizontal axis is calculated
@@ -150,30 +148,30 @@ public:
     void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     { IsotropicDamageMaterial1 :: computeEquivalentStrain(kappa, strain, gp, tStep); }
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
     /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
-    virtual double giveNonlocalMetricModifierAt(GaussPoint *gp);
+    double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
 #ifdef __OOFEG
     /// Plots the sparse structure of stiffness contribution.
-    virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep);
+    void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
+    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
 
     /**@name Services required by NonlocalMaterialStiffnessInterface and related ones to support Nonlocal Stiffness*/
     //@{
-    virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
-                                                                      GaussPoint *gp, TimeStep *tStep);
+    void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
+                                                              GaussPoint *gp, TimeStep *tStep) override;
     /**
      * Returns integration list of receiver. Contains localIntegrationRecord structures, containing
      * references to integration points and their weights that influence to nonlocal average in
      * receiver's associated integration point.
      */
-    virtual std :: vector< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp);
+    std :: vector< localIntegrationRecord > *NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(GaussPoint *gp) override;
     /**
      * Computes the "local" part of nonlocal stiffness contribution assembled for given integration point.
      * @param gp Source integration point.
@@ -207,16 +205,16 @@ public:
                                           GaussPoint *gp, TimeStep *tStep);
     //@}
 
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip);
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip);
-    virtual double predictRelativeComputationalCost(GaussPoint *gp);
-    virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
+    double predictRelativeComputationalCost(GaussPoint *gp) override;
+    double predictRelativeRedistributionCost(GaussPoint *gp) override { return 1.0; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IDNLMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IDNLMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
 
 protected:
-    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override { }
 };
 } // end namespace oofem
 #endif // idmnl1_h

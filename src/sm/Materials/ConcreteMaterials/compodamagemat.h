@@ -72,11 +72,11 @@ public:
     /// Destructor
     virtual ~CompoDamageMatStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
     //tempVal are values used during iteration, Val are equilibrated values, updated after last iteration in previous time step
 
@@ -111,10 +111,10 @@ public:
     /// Characteristic element length at IP in three perpendicular planes aligned with material orientation
     FloatArray elemCharLength;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
 
-    virtual const char *giveClassName() const { return "CompoDamageMatStatus"; }
+    const char *giveClassName() const override { return "CompoDamageMatStatus"; }
 };
 
 
@@ -144,28 +144,28 @@ public:
     /// Destructor
     virtual ~CompoDamageMat();
 
-    virtual const char *giveClassName() const { return "CompositeDamageMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_CompoDamageMat_Name; }
+    const char *giveClassName() const override { return "CompositeDamageMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_CompoDamageMat_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CompoDamageMatStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CompoDamageMatStatus(1, domain, gp); }
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mmode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mmode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     /**
      * Optional parameter determining after how many iterations within the time step the damage is calculated.

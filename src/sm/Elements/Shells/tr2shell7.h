@@ -70,42 +70,41 @@ protected:
     static IntArray orderingNodes;
     static IntArray orderingEdgeNodes;
 
-    virtual const IntArray &giveOrderingDofTypes() const;
-    virtual const IntArray &giveOrderingNodes() const;
-    virtual const IntArray &giveOrderingEdgeNodes() const;
+    const IntArray &giveOrderingDofTypes() const override;
+    const IntArray &giveOrderingNodes() const override;
+    const IntArray &giveOrderingEdgeNodes() const override;
 
     //specific
-    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
 
-    virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
-    virtual double computeAreaAround(GaussPoint *gp, double xi);
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    double computeVolumeAroundLayer(GaussPoint *mastergp, int layer) override;
+    double computeAreaAround(GaussPoint *gp, double xi) override;
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this function is not allowed"); }
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("calling of this funciton is not allowed"); }
 
-    virtual void computeGaussPoints();
+    void computeGaussPoints() override;
     //only used for debuging
     void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
 
-    virtual FEInterpolation *giveInterpolation() const;
-
+    FEInterpolation *giveInterpolation() const override;
 
 public:
     Tr2Shell7(int n, Domain * d);        // constructor
     virtual ~Tr2Shell7() { }            // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
-    virtual int giveNumberOfDofs() { return 42; }
-    virtual int giveNumberOfEdgeDofs() { return 21; }
-    virtual int giveNumberOfEdgeDofManagers() { return 3;  }
-    virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7_Name; }
-    virtual const char *giveClassName() const { return "Tr2Shell7"; }
-    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
-    virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'
+    int giveNumberOfDofs() override { return 42; }
+    int giveNumberOfEdgeDofs() override { return 21; }
+    int giveNumberOfEdgeDofManagers() override { return 3;  }
+    const char *giveInputRecordName() const override { return _IFT_Tr2Shell7_Name; }
+    const char *giveClassName() const override { return "Tr2Shell7"; }
+    //Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_2; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_Composite; }
+    integrationDomain giveIntegrationDomain() const override { return _Triangle; }     // write new wedge-like type 'layeredWedge'
 
-    virtual void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIdArray);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIdArray) override;
 };
 } // end namespace oofem
 #endif

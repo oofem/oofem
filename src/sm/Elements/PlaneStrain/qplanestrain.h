@@ -56,20 +56,20 @@ public:
     QPlaneStrain(int N, Domain * d);
     virtual ~QPlaneStrain() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrain_Name; }
-    virtual const char *giveClassName() const { return "QPlaneStrain"; }
+    const char *giveInputRecordName() const override { return _IFT_QPlaneStrain_Name; }
+    const char *giveClassName() const override { return "QPlaneStrain"; }
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; } ///@todo //check this probably ok now when derived from PE-element
+    int testElementExtension(ElementExtension ext) override { return 0; } ///@todo //check this probably ok now when derived from PE-element
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
 };

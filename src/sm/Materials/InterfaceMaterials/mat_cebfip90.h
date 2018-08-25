@@ -68,7 +68,7 @@ public:
     /// Destructor.
     virtual ~CebFipSlip90MaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -77,14 +77,13 @@ public:
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
 
-    // definition
-    virtual const char *giveClassName() const { return "CebFipSlip90MaterialStatus"; }
+    const char *giveClassName() const override { return "CebFipSlip90MaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -116,17 +115,15 @@ public:
     /// Destructor
     virtual ~CebFipSlip90Material();
 
-    virtual int hasNonLinearBehaviour() { return 1; }
+    const char *giveInputRecordName() const override { return _IFT_CebFipSlip90Material_Name; }
+    const char *giveClassName() const override { return "CebFipSlip90Material"; }
 
-    virtual const char *giveInputRecordName() const { return _IFT_CebFipSlip90Material_Name; }
-    virtual const char *giveClassName() const { return "CebFipSlip90Material"; }
+    void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
+    void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
-    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-
-    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 
     /**
      * Computes the value of bond force/stress, based on given value of slip value.
@@ -139,11 +136,10 @@ public:
      */
     double computeBondForceStiffness(double kappa);
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new CebFipSlip90MaterialStatus(1, domain, gp); }
-
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CebFipSlip90MaterialStatus(1, domain, gp); }
 };
 } // end namespace oofem
 #endif // mat_cebfip90_h

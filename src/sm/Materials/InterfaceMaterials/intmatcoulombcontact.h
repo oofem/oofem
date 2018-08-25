@@ -61,21 +61,19 @@ protected:
     FloatArray shearStressShift, tempShearStressShift;
 
 public:
-    /// Constructor
     IntMatCoulombContactStatus(int n, Domain *d, GaussPoint *g);
-    /// Destructor
     virtual ~IntMatCoulombContactStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
     FloatArray giveShearStressShift();
     void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -102,35 +100,33 @@ protected:
     double normalClearance;
 
 public:
-    /// Constructor
     IntMatCoulombContact( int n, Domain *d );
-    /// Destructor
     virtual ~IntMatCoulombContact();
 
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual const char *giveInputRecordName() const { return _IFT_IntMatCoulombContact_Name; }
+    const char *giveInputRecordName() const override { return _IFT_IntMatCoulombContact_Name; }
+    const char *giveClassName() const override { return "IntMatCoulombContact"; }
 
-    virtual void giveEngTraction_3d( FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &jump, TimeStep *tStep);
+    void giveEngTraction_3d( FloatArray &answer, GaussPoint *gp,
+                             const FloatArray &jump, TimeStep *tStep) override;
 
-    virtual void giveEngTraction_2d( FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &jump, TimeStep *tStep);
+    void giveEngTraction_2d( FloatArray &answer, GaussPoint *gp,
+                             const FloatArray &jump, TimeStep *tStep) override;
 
-    virtual void giveEngTraction_1d( FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &jump, TimeStep *tStep);
+    void giveEngTraction_1d( FloatArray &answer, GaussPoint *gp,
+                             const FloatArray &jump, TimeStep *tStep) override;
 
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                           GaussPoint *gp, TimeStep *tStep)
+    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                   GaussPoint *gp, TimeStep *tStep) override
     { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 3); }
 
-    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                           GaussPoint *gp, TimeStep *tStep)
+    void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                   GaussPoint *gp, TimeStep *tStep) override
     { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 2); }
 
-    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                           GaussPoint *gp, TimeStep *tStep)
+    void give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                   GaussPoint *gp, TimeStep *tStep) override
     { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 1); }
-    
+
     // This method returns the stiffness matrix according to the size of 
     // the spatial jump.
     void giveGeneralStiffnessMatrix(FloatMatrix &answer,
@@ -142,11 +138,11 @@ public:
                              FloatArray &tempShearStressShift,
                              double normalJump, const FloatArray &shearJump );
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual bool hasAnalyticalTangentStiffness( ) const { return true; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatCoulombContactStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatCoulombContactStatus(1, domain, gp); }
 };
 } // end namespace oofem
 #endif // simpleinterfacemat_h

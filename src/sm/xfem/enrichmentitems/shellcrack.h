@@ -58,9 +58,9 @@ class OOFEM_EXPORT ShellCrack : public Crack
 public:
     ShellCrack(int n, XfemManager *xm, Domain *aDomain);
 
-    virtual const char *giveClassName() const { return "ShellCrack"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ShellCrack_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "ShellCrack"; }
+    const char *giveInputRecordName() const override { return _IFT_ShellCrack_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     double xiBottom;
     double xiTop;

@@ -77,7 +77,7 @@ public:
     TrabBoneMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     double giveAlpha();
     double giveTempAlpha();
@@ -100,17 +100,14 @@ public:
     void setTempEpsp(double epsip) { tempEpsp.at(1) = epsip; }
     void setTempDepsp(double depsip) { tempDepsp.at(1) = depsip; }
 
+    const char *giveClassName() const override { return "TrabBoneMaterialStatus"; }
 
-    // definition
-    virtual const char *giveClassName() const { return "TrabBoneMaterialStatus"; }
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
-
 
 
 /**
@@ -134,21 +131,21 @@ public:
 
     virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp,
-                                       TimeStep *tStep);
+    void give1dStressStiffMtrx(FloatMatrix &answer,
+                               MatResponseMode mode, GaussPoint *gp,
+                               TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
+                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual int hasMaterialModeCapability(MaterialMode);
+    int hasMaterialModeCapability(MaterialMode) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneMaterial_Name; }
-    virtual const char *giveClassName() const { return "TrabBoneMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_TrabBoneMaterial_Name; }
+    const char *giveClassName() const override { return "TrabBoneMaterial"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif

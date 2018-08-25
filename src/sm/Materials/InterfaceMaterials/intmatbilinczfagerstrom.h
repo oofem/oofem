@@ -58,7 +58,6 @@ namespace oofem {
 class IntMatBilinearCZFagerstromStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
-
     // material jump
     FloatArray oldMaterialJump;
     // temporary material jump
@@ -92,24 +91,19 @@ protected:
     FloatMatrix temp_dTdJ;
     FloatMatrix old_dTdJ;
 
-
-
-
-
-
 public:
     /// Constructor
     IntMatBilinearCZFagerstromStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~IntMatBilinearCZFagerstromStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     // definition
-    virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstromStatus"; }
+    const char *giveClassName() const override { return "IntMatBilinearCZFagerstromStatus"; }
 
-    double giveDamage() { return damage; }
-    double giveTempDamage() { return tempDamage; }
+    double giveDamage() override { return damage; }
+    double giveTempDamage() override { return tempDamage; }
     bool giveOldDamageDev() { return oldDamageDev; }
 
     const FloatArray &giveOldMaterialJump() { return oldMaterialJump; }
@@ -138,13 +132,11 @@ public:
     void letTempIepBe(FloatMatrix v) { Iep = std :: move(v); }
     void letTempAlphavBe(FloatArray v) { alphav = std :: move(v); }
 
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
-
-    //virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    //virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    //contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    //contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -175,7 +167,7 @@ protected:
     double gamma; // loading function parameter
 
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
     void give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 
@@ -185,32 +177,27 @@ public:
     /// Destructor
     virtual ~IntMatBilinearCZFagerstrom();
 
-    virtual int hasNonLinearBehaviour()   { return 1; }
+    const char *giveClassName() const override { return "IntMatBilinearCZFagerstrom"; }
+    const char *giveInputRecordName() const override { return _IFT_IntMatBilinearCZFagerstrom_Name; }
 
-    virtual const char *giveClassName() const { return "IntMatBilinearCZFagerstrom"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IntMatBilinearCZFagerstrom_Name; }
-
-
-    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatMatrix &F, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
+                                const FloatMatrix &F, TimeStep *tStep) override;
+    void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.
      * If not, the tangent must be computed numerically.
      */
-    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    
-    virtual FloatArray giveInterfaceStrength() { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }
+    FloatArray giveInterfaceStrength() override { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); } //@Martin: Why new?
-    void printYourself();
-protected:
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); } //@Martin: Why new?
+    void printYourself() override;
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

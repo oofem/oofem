@@ -141,7 +141,7 @@ public:
      * @param rMode Response mode.
      * @param tStep Time step.
      */
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
 
     /**
@@ -152,7 +152,7 @@ public:
      * @param answer Computed initial stiffness matrix.
      * @param tStep Time step.
      */
-    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { OOFEM_ERROR("Method computeInitialStressMatrix is not implemented"); }
 
     /**
@@ -180,7 +180,7 @@ public:
      * @param useUpdatedGpRecord If equal to zero, the stresses in integration points are computed (slow but safe).
      */
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
     /**
      * Evaluates nodal representation of real internal forces.
@@ -194,7 +194,7 @@ public:
      * @param tStep Time step.
      * @param useUpdatedGpRecord If equal to zero, the stresses in the integration points are computed (slow but safe).
      */
-    void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector_withIRulesAsSubcells(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
     /**
      * Computes the deformation gradient in Voigt form at integration point ip and at time
@@ -212,14 +212,14 @@ public:
     double computeCurrentVolume(TimeStep *tStep);
 
     // data management
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
     // definition
-    virtual const char *giveClassName() const { return "NLStructuralElement"; }
+    const char *giveClassName() const override { return "NLStructuralElement"; }
 
 protected:
-    virtual int checkConsistency();
+    int checkConsistency() override;
     /**
      * Computes a matrix which, multiplied by the column matrix of nodal displacements,
      * gives the displacement gradient stored by columns.
@@ -228,7 +228,6 @@ protected:
      * @param gp Integration point.
      * @param answer BF matrix at this point.
      */
-
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
         OOFEM_ERROR("method not implemented for this element");
         return;

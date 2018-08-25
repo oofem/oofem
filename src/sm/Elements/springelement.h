@@ -83,26 +83,26 @@ public:
     SpringElement(int n, Domain * d);
     virtual ~SpringElement() { }
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { computeLumpedMassMatrix(answer, tStep); }
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { answer.clear(); }
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
-    virtual int computeNumberOfDofs() { return 2; }
-    virtual int computeNumberOfGlobalDofs();
+    int computeNumberOfDofs() override { return 2; }
+    int computeNumberOfGlobalDofs() override;
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual void updateInternalState(TimeStep *tStep) { }
-    virtual void updateYourself(TimeStep *tStep) { }
-    virtual int checkConsistency() { return 1; }
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual bool isCast(TimeStep *tStep) {return true;}
-    
+    void updateInternalState(TimeStep *tStep) override { }
+    void updateYourself(TimeStep *tStep) override { }
+    int checkConsistency() override { return 1; }
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    bool isCast(TimeStep *tStep) override { return true; }
+
 #ifdef __OOFEG
     //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
     //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
@@ -110,22 +110,22 @@ public:
 #endif
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_SpringElement_Name; }
-    virtual const char *giveClassName() const { return "SpringElement"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_point; }
+    const char *giveInputRecordName() const override { return _IFT_SpringElement_Name; }
+    const char *giveClassName() const override { return "SpringElement"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
 
 protected:
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override
     { answer.clear(); }
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
     { answer.clear(); }
 
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                                  int lowerIndx = 1, int upperIndx = ALL_STRAINS)
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
+                          int lowerIndx = 1, int upperIndx = ALL_STRAINS) override
     { answer.clear(); }
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { answer.clear(); }
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override { answer.clear(); }
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
     double computeSpringInternalForce(TimeStep *tStep);
 };
 } // end namespace oofem

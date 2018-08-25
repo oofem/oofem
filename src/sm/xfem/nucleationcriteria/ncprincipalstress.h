@@ -48,21 +48,20 @@
 
 namespace oofem {
 
-class NCPrincipalStress : public NucleationCriterion {
+class NCPrincipalStress : public NucleationCriterion
+{
 public:
-	NCPrincipalStress(Domain *ipDomain);
-	virtual ~NCPrincipalStress();
+    NCPrincipalStress(Domain *ipDomain);
+    virtual ~NCPrincipalStress();
 
-	virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
+    std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems() override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void appendInputRecords(DynamicDataReader &oDR);
+    void appendInputRecords(DynamicDataReader &oDR) override;
 
-    /// @return Class name of the receiver.
-    virtual const char *giveClassName() const {return "NCPrincipalStress";}
-    /// @return Input record name of the receiver.
-    virtual const char *giveInputRecordName() const {return _IFT_NCPrincipalStress_Name;};
+    const char *giveClassName() const override { return "NCPrincipalStress"; }
+    const char *giveInputRecordName() const override {return _IFT_NCPrincipalStress_Name;};
 
 protected:
     double mStressThreshold;

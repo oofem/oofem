@@ -63,23 +63,22 @@ public:
     TrabBoneNLEmbedStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneNLEmbedStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Gives the local cumulative plastic strain.
     double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
     /// Sets the local cumulative plastic strain.
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
-    // definition
-    virtual const char *giveClassName() const { return "TrabBoneNLEmbedStatus"; }
+    const char *giveClassName() const override { return "TrabBoneNLEmbedStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 };
 
 /**
@@ -95,33 +94,33 @@ public:
     TrabBoneNLEmbed(int n, Domain * d);
     virtual ~TrabBoneNLEmbed();
 
-    virtual const char *giveClassName() const { return "TrabBoneNLEmbed"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneNLEmbed_Name; }
+    const char *giveClassName() const override { return "TrabBoneNLEmbed"; }
+    const char *giveInputRecordName() const override { return _IFT_TrabBoneNLEmbed_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
+    void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
     void computeLocalCumPlastStrain(double &alpha, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     {
         TrabBoneEmbed :: computeCumPlastStrain(alpha, gp, tStep);
     }
 
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
 
-    virtual int hasBoundedSupport() { return 1; }
+    int hasBoundedSupport() override { return 1; }
 
     /// Determines the width (radius) of limited support of weighting function.
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
 protected:
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneNLEmbedStatus(1, TrabBoneEmbed :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNLEmbedStatus(1, TrabBoneEmbed :: domain, gp); }
 };
 } // end namespace oofem
 #endif

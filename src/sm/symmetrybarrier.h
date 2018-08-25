@@ -73,13 +73,13 @@ public:
     /// Destructor.
     virtual ~SymmetryBarrier();
 
-    virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
-                                 bool &shieldFlag, NonlocalMaterialExtensionInterface *nei);
-    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords) { return 1.e10; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
+                         bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) override;
+    double calculateMinimumDistanceFromBoundary(const FloatArray &coords) override { return 1.e10; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_SymmetryBarrier_Name; }
-    virtual const char *giveClassName() const { return "SymmetryBarrier"; }
+    const char *giveInputRecordName() const override { return _IFT_SymmetryBarrier_Name; }
+    const char *giveClassName() const override { return "SymmetryBarrier"; }
 };
 } // end namespace oofem
 #endif // symmetrybarrier_h

@@ -146,7 +146,7 @@ public:
     /**
      * @return Approximation order of load geometry.
      */
-    virtual int giveApproxOrder() override = 0;
+    int giveApproxOrder() override = 0;
 
     CoordSystType giveCoordSystMode() override { return coordSystemType; }
     /**
@@ -155,7 +155,7 @@ public:
      * its loadType into loadType attribute and coordinate system type into csType attribute.
      */
     IRResultType initializeFrom(InputRecord *ir) override;
-    virtual void giveInputRecord(DynamicInputRecord &input) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to
      * their "physical" meaning (like StructuralTemperatureLoadLT, StructuralLoadLT).

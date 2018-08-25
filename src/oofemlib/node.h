@@ -168,7 +168,7 @@ public:
      * @param tStep Time step for which to update.
      * @see EngngModel::giveFormulation
      */
-    virtual void updateYourself(TimeStep *tStep) override;
+    void updateYourself(TimeStep *tStep) override;
 
     // miscellaneous
     const char *giveClassName() const override { return "Node"; }

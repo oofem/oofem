@@ -78,29 +78,29 @@ public:
     }
 
 protected:
-    void computeLocalNodalCoordinates(std::vector< FloatArray > &lxy);
+    void computeLocalNodalCoordinates(std::vector< FloatArray > &lxy) override;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
 
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode);
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode) override;
 
 public:
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_TrPlanestressRotAllman3d_Name; }
-    virtual const char *giveClassName() const { return "TrPlaneStressRotAllman3d"; }
+    const char *giveInputRecordName() const override { return _IFT_TrPlanestressRotAllman3d_Name; }
+    const char *giveClassName() const override { return "TrPlaneStressRotAllman3d"; }
 
-    virtual int computeNumberOfDofs() { return 9; }
-    virtual int computeNumberOfGlobalDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int computeNumberOfDofs() override { return 9; }
+    int computeNumberOfGlobalDofs() override { return 18; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     const FloatMatrix *computeGtoLRotationMatrix();
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
-    virtual int testElementExtension(ElementExtension ext)
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
+    int testElementExtension(ElementExtension ext) override
     { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif //  trplanestressrotallman3d_h

@@ -108,7 +108,7 @@ public:
     void giveDofManDofIDMask(int inode, IntArray &) const override;
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void updateInternalState(TimeStep *tStep) override;
+    void updateInternalState(TimeStep *tStep) override;
 
 #ifdef __OOFEG
     // Graphics output

@@ -63,16 +63,16 @@ public:
     /// Destructor
     virtual ~ExpCZMaterialStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     // definition
-    virtual const char *giveClassName() const { return "ExpCZMaterialStatus"; }
+    const char *giveClassName() const override { return "ExpCZMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    //virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    //virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    //contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    //contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 
 
@@ -112,22 +112,19 @@ public:
     /// Destructor
     virtual ~ExpCZMaterial();
 
-    virtual int hasNonLinearBehaviour() { return 1; }
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
-    virtual const char *giveClassName() const { return "ExpCZMaterial"; }
+    const char *giveClassName() const override { return "ExpCZMaterial"; }
 
-    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
+    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
-    virtual int giveIntVarCompFullIndx(IntArray &answer, InternalStateType type, MaterialMode mmode);
-    virtual int giveIPValueSize(InternalStateType type, GaussPoint *gp);
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new ExpCZMaterialStatus(1, domain, gp); }
-    virtual void printYourself();
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ExpCZMaterialStatus(1, domain, gp); }
+    void printYourself() override;
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

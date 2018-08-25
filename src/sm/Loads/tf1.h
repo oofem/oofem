@@ -60,12 +60,12 @@ public:
     /// Destructor
     virtual ~TF1()  { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_TF1_Name; }
-    virtual const char *giveClassName() const { return "TF1"; }
+    const char *giveInputRecordName() const override { return _IFT_TF1_Name; }
+    const char *giveClassName() const override { return "TF1"; }
 };
 } // end namespace oofem
 #endif // tf1_h

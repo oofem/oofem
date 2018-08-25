@@ -51,8 +51,6 @@ class FloatMatrix;
 class GaussPoint;
 class TimeStep;
 
-
-
 /**
  * Material interface for gradient material models.
  */

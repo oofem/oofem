@@ -60,25 +60,24 @@ public:
     LWedge(int, Domain *);
     virtual ~LWedge() { }
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    
-    virtual Interface *giveInterface(InterfaceType);
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 9; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    Interface *giveInterface(InterfaceType) override;
+    int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
+    int giveNumberOfIPForMassMtrxIntegration() override { return 9; }
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
+
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LWedge_Name; }
-    virtual const char *giveClassName() const { return "LWedge"; }
-    
+    const char *giveInputRecordName() const override { return _IFT_LWedge_Name; }
+    const char *giveClassName() const override { return "LWedge"; }
 };
 } // end namespace oofem
 #endif

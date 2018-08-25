@@ -71,27 +71,26 @@ public:
     virtual ~Axisymm3d();
 
     virtual double giveArea();
-    virtual Interface *giveInterface(InterfaceType it);
-    virtual FEInterpolation *giveInterpolation() const;
+    Interface *giveInterface(InterfaceType it) override;
+    FEInterpolation *giveInterpolation() const override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
-    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
-    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
-    virtual int SPRNodalRecoveryMI_giveNumberOfIP();
-    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
+    void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
+    void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
+    int SPRNodalRecoveryMI_giveNumberOfIP() override;
+    SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
 
-    virtual const char *giveClassName() const { return "Axisymm3d"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Axisymm3d_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
+    const char *giveClassName() const override { return "Axisymm3d"; }
+    const char *giveInputRecordName() const override { return _IFT_Axisymm3d_Name; }
+    IRResultType initializeFrom(InputRecord *ir) override;
 };
 } // end namespace oofem
 #endif // axisymm3d_h

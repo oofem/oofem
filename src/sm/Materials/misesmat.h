@@ -102,7 +102,6 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    int hasNonLinearBehaviour() override { return 1; }
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
     const char *giveInputRecordName() const override { return _IFT_MisesMat_Name; }

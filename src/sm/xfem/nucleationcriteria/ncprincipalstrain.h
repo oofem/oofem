@@ -47,21 +47,20 @@
 
 namespace oofem {
 
-class NCPrincipalStrain : public NucleationCriterion {
+class NCPrincipalStrain : public NucleationCriterion
+{
 public:
-	NCPrincipalStrain(Domain *ipDomain);
-	virtual ~NCPrincipalStrain();
+    NCPrincipalStrain(Domain *ipDomain);
+    virtual ~NCPrincipalStrain();
 
-	virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
+    std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems() override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void appendInputRecords(DynamicDataReader &oDR);
+    void appendInputRecords(DynamicDataReader &oDR) override;
 
-    /// @return Class name of the receiver.
-    virtual const char *giveClassName() const {return "NCPrincipalStrain";}
-    /// @return Input record name of the receiver.
-    virtual const char *giveInputRecordName() const {return _IFT_NCPrincipalStrain_Name;};
+    const char *giveClassName() const override { return "NCPrincipalStrain"; }
+    const char *giveInputRecordName() const override { return _IFT_NCPrincipalStrain_Name; }
 
 protected:
     double mStrainThreshold;

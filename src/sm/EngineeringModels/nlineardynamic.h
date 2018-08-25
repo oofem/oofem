@@ -112,7 +112,7 @@ protected:
     double deltaT;
 
 public:
-    NonLinearDynamic(int i, EngngModel * _master = NULL);
+    NonLinearDynamic(int i, EngngModel *master = nullptr);
     virtual ~NonLinearDynamic();
 
     void solveYourself() override;

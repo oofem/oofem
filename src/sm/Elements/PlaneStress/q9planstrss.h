@@ -60,14 +60,14 @@ public:
     virtual ~Q9PlaneStress2d() { }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_Q9PlaneStress2d_Name; }
-    virtual const char *giveClassName() const { return "Q9PlaneStress2d"; }
-    virtual FEInterpolation *giveInterpolation() const;
+    const char *giveInputRecordName() const override { return _IFT_Q9PlaneStress2d_Name; }
+    const char *giveClassName() const override { return "Q9PlaneStress2d"; }
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
-    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                            InternalStateType type, TimeStep *tStep);
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
 
 };
 } // end namespace oofem

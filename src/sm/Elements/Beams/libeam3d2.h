@@ -74,71 +74,71 @@ public:
     LIBeam3d2(int n, Domain * d);
     virtual ~LIBeam3d2() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
+    void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+    void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override
     { computeLumpedMassMatrix(answer, tStep); }
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
 
-    virtual int testElementExtension(ElementExtension ext);
+    int testElementExtension(ElementExtension ext) override;
 
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    int computeNumberOfDofs() override { return 12; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    double computeVolumeAround(GaussPoint *gp) override;
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
     // Fibered cross section support functions
     void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
                                                                  GaussPoint *slaveGp, TimeStep *tStep);
 
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_LIBeam3d2_Name; }
-    virtual const char *giveClassName() const { return "LIBeam3d2"; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    const char *giveInputRecordName() const override { return _IFT_LIBeam3d2_Name; }
+    const char *giveClassName() const override { return "LIBeam3d2"; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    virtual integrationDomain giveIntegrationDomain() const { return _Line; }
-    virtual MaterialMode giveMaterialMode() { return _3dBeam; }
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
+    MaterialMode giveMaterialMode() override { return _3dBeam; }
 
 protected:
     // edge load support
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const override;
+    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
+    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
+    int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
+    void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode) override;
 
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-    virtual void computeGaussPoints();
-    virtual double computeLength();
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
+    double computeLength() override;
 
     // nonlinearity
     void updateTempTriad(TimeStep *tStep);
     void computeSMtrx(FloatMatrix &answer, FloatArray &vec);
     void computeRotMtrx(FloatMatrix &answer, FloatArray &psi);
     double giveCurrentLength(TimeStep *tStep);
-    void initForNewStep();
+    void initForNewStep() override;
 };
 } // end namespace oofem
 #endif // libeam3d2_h
