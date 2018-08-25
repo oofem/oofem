@@ -126,7 +126,7 @@ public:
     double givePoissonsRatio() { return nu; }
 
     /// Returns the shear elastic modulus @f$ G = \frac{E}{2(1+\nu)} @f$.
-    double giveShearModulus() { return G; }
+    double giveShearModulus() override { return G; }
 
     /// Returns the bulk elastic modulus @f$ K = \frac{E}{3(1-2\nu)} @f$.
     double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }

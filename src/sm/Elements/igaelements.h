@@ -63,16 +63,16 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     int checkConsistency() override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) override {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
     FEInterpolation *giveInterpolation() const override { return const_cast< BSplineInterpolation * >(& this->interpolation); }
-    virtual Element *giveElement() { return this; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+    Element *giveElement() override { return this; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     int computeNumberOfDofs() override { return numberOfDofMans * 2; }
@@ -84,13 +84,13 @@ public:
 #ifdef __OOFEG
     // Graphics output
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) {
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) override {
         drawIGAPatchDeformedGeometry(this, this, gc, tStep, ut);
     }
 #endif
 
 protected:
-    virtual int giveNsd() { return 2; }
+    int giveNsd() override { return 2; }
 };
 
 
@@ -105,16 +105,16 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     int checkConsistency() override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) override {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
     FEInterpolation *giveInterpolation() const override { return const_cast< NURBSInterpolation * >(& this->interpolation); }
-    virtual Element *giveElement() { return this; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+    Element *giveElement() override { return this; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     int computeNumberOfDofs() override { return numberOfDofMans * 2; }
@@ -126,15 +126,15 @@ public:
     //
     // Graphics output
     //
-    virtual void  drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) {
+    void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) override {
         drawIGAPatchDeformedGeometry(this, this, gc, tStep, ut);
     }
 
 #endif
 
 protected:
-    virtual int giveNsd() { return 2; }
+    int giveNsd() override { return 2; }
 };
 
 
@@ -153,16 +153,16 @@ public:
         return IRRT_OK;
     }
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) override {
         PlaneStressStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
     FEInterpolation *giveInterpolation() const override { return const_cast< TSplineInterpolation * >(& this->interpolation); }
-    virtual Element *giveElement() { return this; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+    Element *giveElement() override { return this; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override {
         PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     int computeNumberOfDofs() override { return numberOfDofMans * 2; }
@@ -176,7 +176,7 @@ public:
 #endif
 
 protected:
-    virtual int giveNsd() { return 2; }
+    int giveNsd() override { return 2; }
 };
 
 
@@ -191,17 +191,17 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     int checkConsistency() override;
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {
         Space3dStructuralElementEvaluator :: giveCharacteristicMatrix(answer, mtrx, tStep);
     }
-    virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) {
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *t) override {
         Space3dStructuralElementEvaluator :: giveCharacteristicVector(answer, type, mode, t);
     }
 
     FEInterpolation *giveInterpolation() const override { return const_cast< NURBSInterpolation * >(& this->interpolation); }
-    virtual Element *giveElement() { return this; }
+    Element *giveElement() override { return this; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override {
         Space3dStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     int computeNumberOfDofs() override { return numberOfDofMans * 3; }
@@ -212,13 +212,13 @@ public:
 #ifdef __OOFEG
     // Graphics output
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
-    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) {
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) override {
         drawIGAPatchDeformedGeometry(this, this, gc, tStep, ut);
     }
 #endif
 
 protected:
-    virtual int giveNsd() { return 3; }
+    int giveNsd() override { return 3; }
 };
 } // end namespace oofem
 #endif //igaelements_h

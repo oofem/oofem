@@ -74,9 +74,9 @@ public:
     /// Destructor.
     virtual ~StructuralInterfaceCrossSection() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual int testCrossSectionExtension(CrossSectExtension ext) { return this->crossSectionType; }
+    int testCrossSectionExtension(CrossSectExtension ext) override { return this->crossSectionType; }
 
     /**
      * Computes the real stress vector for given strain and integration point.
@@ -128,21 +128,21 @@ public:
     StructuralInterfaceMaterial *giveInterfaceMaterial();
     const FloatArray &giveTraction(IntegrationPoint *ip);
 
-    virtual int checkConsistency();
+    int checkConsistency() override;
 
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
+    int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep) override;
 
-    virtual Material *giveMaterial(IntegrationPoint *ip);
+    Material *giveMaterial(IntegrationPoint *ip) override;
     int giveMaterialNumber() const { return this->materialNum; }
     void setMaterialNumber(int matNum) { this->materialNum = matNum; }
-    
-    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int estimatePackSize(DataStream &buff, GaussPoint *gp);
+
+    int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp) override;
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp) override;
+    int estimatePackSize(DataStream &buff, GaussPoint *gp) override;
 
     // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "StructuralInterfaceCrossSection"; }
-    virtual const char *giveInputRecordName() const { return _IFT_StructuralInterfaceCrossSection_Name; }
+    const char *giveClassName() const override { return "StructuralInterfaceCrossSection"; }
+    const char *giveInputRecordName() const override { return _IFT_StructuralInterfaceCrossSection_Name; }
 
     CrossSectExtension crossSectionType;
 private:

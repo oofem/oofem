@@ -121,7 +121,8 @@ public:
      * EnrichmentDomain, EnrichmentFront and PropagationLaw
      * without have to keep track of them globally.
      */
-    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("This function must be called with DynamicDataReader as input."); }
+    void giveInputRecord(DynamicInputRecord &input) override
+    { OOFEM_ERROR("This function must be called with DynamicDataReader as input."); }
     virtual void appendInputRecords(DynamicDataReader &oDR) = 0;
 
     const IntArray *giveEnrichesDofsWithIdArray() const { return & mpEnrichesDofsWithIdArray; }

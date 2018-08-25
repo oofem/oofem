@@ -51,17 +51,17 @@ class DynamicInputRecord;
 
 class OOFEM_EXPORT PLPrincipalStrain : public PropagationLaw {
 public:
-	PLPrincipalStrain();
-	virtual ~PLPrincipalStrain();
+    PLPrincipalStrain();
+    virtual ~PLPrincipalStrain();
 
-    virtual const char *giveClassName() const { return "PLPrincipalStrain"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLPrincipalStrain_Name; }
+    const char *giveClassName() const override { return "PLPrincipalStrain"; }
+    const char *giveInputRecordName() const override { return _IFT_PLPrincipalStrain_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bool hasPropagation() const { return mIncrementLength > 0.; }
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+    bool hasPropagation() const override { return mIncrementLength > 0.; }
+    bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) override;
 
     void setRadius(double iRadius) {mRadius = std::move(iRadius);}
     void setIncrementLength(double iIncrementLength) {mIncrementLength = std::move(iIncrementLength);}

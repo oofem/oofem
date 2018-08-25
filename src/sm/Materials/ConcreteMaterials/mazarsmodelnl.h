@@ -89,7 +89,7 @@ public:
      * returning adress of component or using pointer conversion from receiver to base class
      * NonlocalMaterialStatusExtension. If no nonlocal extension exists, NULL pointer is returned.
      */
-    virtual Interface *giveInterface(InterfaceType it);
+    Interface *giveInterface(InterfaceType it) override;
 };
 
 
@@ -140,7 +140,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
 
 protected:
-    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp);
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;
 };
 } // end namespace oofem
 #endif // mazarsmodelnl_h

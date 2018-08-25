@@ -62,8 +62,8 @@ public:
 public:
     FEIIGAElementGeometryWrapper(Element *elem, const IntArray *knotSpan=nullptr) : FEICellGeometry(), knotSpan(knotSpan), elem(elem) { }
 
-    int giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
-    const FloatArray *giveVertexCoordinates(int i) const { return elem->giveNode(i)->giveCoordinates(); }
+    int giveNumberOfVertices() const override { return elem->giveNumberOfNodes(); }
+    const FloatArray *giveVertexCoordinates(int i) const override { return elem->giveNode(i)->giveCoordinates(); }
 };
 
 
@@ -78,7 +78,7 @@ public:
     IGAIntegrationElement(int _n, Element *e, IntArray knotSpan) :
         GaussIntegrationRule(_n, e, 0, 0, false),
         knotSpan(std::move(knotSpan)) { }
-    const IntArray *giveKnotSpan() { return & this->knotSpan; }
+    const IntArray *giveKnotSpan() override { return & this->knotSpan; }
     void setKnotSpan1(IntArray &src) { this->knotSpan = src; }
 };
 

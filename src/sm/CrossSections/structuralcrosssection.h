@@ -312,15 +312,16 @@ public:
      */
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
 
-    virtual int testCrossSectionExtension(CrossSectExtension ext) { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
+    int testCrossSectionExtension(CrossSectExtension ext) override { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
-    virtual Material *giveMaterial(IntegrationPoint *ip) { OOFEM_ERROR("Missing implementation"); return NULL; }
+    ///@todo This shouldn't  be optional
+    Material *giveMaterial(IntegrationPoint *ip) override { OOFEM_ERROR("Missing implementation"); return nullptr; }
+    virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return nullptr; }
 
     virtual void createMaterialStatus(GaussPoint &iGP) = 0;
 
-    virtual int checkConsistency() = 0;
-    virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return NULL; }
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode) = 0;
+    int checkConsistency() override = 0;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode mode) override = 0;
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h

@@ -67,7 +67,7 @@ public:
     /// Destructor.
     virtual ~IntegrationPointStatus() { }
     /// Print receiver's output to given stream.
-    virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
+    void printOutputAt(FILE *file, TimeStep *tStep) override { }
     /**
      * Update equilibrium history variables according to temp-variables.
      * Invoked, after new equilibrium state has been reached.
@@ -83,9 +83,9 @@ public:
      */
     virtual void setStatusVariable(int varID, double value) { }
 
-    virtual const char *giveInputRecordName() const { return NULL; }
-    virtual const char *giveClassName() const { return "IntegrationPointStatus"; }
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    const char *giveInputRecordName() const override { return nullptr; }
+    const char *giveClassName() const override { return "IntegrationPointStatus"; }
+    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // integrationpointstatus_h

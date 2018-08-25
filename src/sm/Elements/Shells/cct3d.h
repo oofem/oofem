@@ -119,7 +119,7 @@ public:
     bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer)
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override
     {
         OOFEM_ERROR("calling of this function id not allowed");
         return 0;

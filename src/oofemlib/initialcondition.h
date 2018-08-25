@@ -142,11 +142,11 @@ public:
      */
     const IntArray &giveDofIDs() { return dofIDs; }
 
-    // Overloaded methods:
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void printYourself();
-    virtual const char *giveClassName() const { return "InitialCondition"; }
-    virtual const char *giveInputRecordName() const { return _IFT_InitialCondition_Name; }
+    void printYourself() override;
+
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "InitialCondition"; }
+    const char *giveInputRecordName() const override { return _IFT_InitialCondition_Name; }
 };
 } // end namespace oofem
 #endif // initial_h

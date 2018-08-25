@@ -78,14 +78,14 @@ public:
     PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) { }
     virtual ~PLHoopStressCirc() { }
 
-    virtual const char *giveClassName() const { return "PLHoopStressCirc"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLHoopStressCirc_Name; }
+    const char *giveClassName() const override { return "PLHoopStressCirc"; }
+    const char *giveInputRecordName() const override { return _IFT_PLHoopStressCirc_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bool hasPropagation() const { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+    bool hasPropagation() const override { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
+    bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) override;
 
     void setRadius(double iRadius) {mRadius = std::move(iRadius);}
     void setAngleInc(double iAngleInc) {mAngleInc = std::move(iAngleInc);}

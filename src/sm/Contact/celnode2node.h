@@ -76,8 +76,8 @@ public:
     Node2NodeContact(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContact(){};
-    virtual int instanciateYourself(DataReader &dr);
-    virtual void setupIntegrationPoints();
+    int instanciateYourself(DataReader &dr) override;
+    void setupIntegrationPoints() override;
 
     virtual void computeGap(FloatArray &answer, TimeStep *tStep);
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
@@ -86,12 +86,12 @@ public:
 
 
     // Necessary methods - pure virtual in base class
-    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);    
+    void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
+                              const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms) override;
 
-    virtual void computeContactTangent(FloatMatrix &answer, TimeStep *tStep);
+    void computeContactTangent(FloatMatrix &answer, TimeStep *tStep) override;
 
-    virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s);
+    void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s) override;
 };
 
 
@@ -113,16 +113,16 @@ public:
     Node2NodeContactL(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContactL(){};
-    virtual void giveDofManagersToAppendTo(IntArray &answer); 
-    virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
+    void giveDofManagersToAppendTo(IntArray &answer) override; 
+    void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep) override;
 
     // Necessary methods - pure virtual in base class
-    virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
-                                const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);    
+    void computeContactForces(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
+                              const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms) override;
 
-    virtual void computeContactTangent(FloatMatrix &answer, TimeStep *tStep);
+    void computeContactTangent(FloatMatrix &answer, TimeStep *tStep) override;
 
-    virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s);
+    void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s) override;
 };
 
 } // end namespace oofem

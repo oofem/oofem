@@ -100,16 +100,16 @@ public:
     }
     virtual ~B3Material() { }
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     const char *giveClassName() const override { return "B3Material"; }
     const char *giveInputRecordName() const override { return _IFT_B3Material_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
 
 protected:
-    virtual int hasIncrementalShrinkageFormulation() { return 1; }
+    int hasIncrementalShrinkageFormulation() override { return 1; }
 
     virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     /// Free shrinkage at material point, requires staggered analysis.

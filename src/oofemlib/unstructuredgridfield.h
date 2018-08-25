@@ -112,10 +112,10 @@ protected:
         this->cell = c;
       }
       virtual ~FEICellGeometryWrapper() { }
-      int giveNumberOfVertices() const {
+      int giveNumberOfVertices() const override {
         return this->cell->giveNumberOfVertices();
       }
-      inline const FloatArray *giveVertexCoordinates(int i) const
+      const FloatArray *giveVertexCoordinates(int i) const override
       {
         return ((cell->getVertex(i-1))->getCoordinates());
       }
@@ -226,7 +226,7 @@ protected:
   private:
   public:
     CellInsertionFunctor () {}
-    virtual bool evaluate (Cell& member, OctantRecT<Cell>* cell) {
+    virtual bool evaluate (Cell& member, OctantRecT<Cell>* cell) override {
       BoundingBox b;
       member.giveBoundingBox(b);
       OctantRec::BoundingBoxStatus s = cell->testBoundingBox(b);
@@ -237,8 +237,8 @@ protected:
       }
     }
     
-    void registerInsertion (Cell& member, LocalInsertionData<Cell> lidata) {}
-    std::list<LocalInsertionData<Cell>> *giveInsertionList(Cell& m) {return NULL;}
+    void registerInsertion (Cell& member, LocalInsertionData<Cell> lidata) override {}
+    std::list<LocalInsertionData<Cell>> *giveInsertionList(Cell& m) override {return nullptr;}
     
   };
   
@@ -261,7 +261,7 @@ protected:
      * @param DTptr Delaunay triangle. nodeNr Number of the node in the domain list
      * @returns true if the circumscribed circle of the Delaunay triangle contains the point, false otherwise
      */
-    bool evaluate(Cell& c)
+    bool evaluate(Cell& c) override
     {
       if (c.containsPoint(position)) {
         cells.push_back(c);
@@ -275,7 +275,7 @@ protected:
      * Gives the starting position of the search
      * @param position startingPosition
      */
-    void giveStartingPosition(FloatArray &answer)
+    void giveStartingPosition(FloatArray &answer) override
     {
         answer = position;
     }
@@ -284,11 +284,11 @@ protected:
      * Gives the triangles containing the node
      * @param answer List containing Delaunay triangles
      */
-    void giveResult(std :: list <Cell > &answer)
+    void giveResult(std :: list <Cell > &answer) override
     { answer=cells;}
 
-    bool isBBXStage1Defined(BoundingBox &BBXStage1) { return true; }
-    bool isBBXStage2Defined(BoundingBox &BBXStage2) { return false; }
+    bool isBBXStage1Defined(BoundingBox &BBXStage1) override { return true; }
+    bool isBBXStage2Defined(BoundingBox &BBXStage2) override { return false; }
 
   };
  

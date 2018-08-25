@@ -56,14 +56,14 @@ public:
      * Computes the principal values of the receiver.
      * @param answer Principal values.
      */
-    void computePrincipalValues(FloatArray &answer) const;
+    void computePrincipalValues(FloatArray &answer) const override;
     /**
      * Computes the principal values and principal directions of the receiver.
      * The principal values are ordered from the largest to the smallest.
      * @param answer Principal values.
      * @param dir Principal directions (first index refers to component, second index to eigenvalue number).
      */
-    void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const;
+    void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const override;
     /**
      * Computes the principal direction of the receiver
      * associated with the maximum principal value.
@@ -85,7 +85,7 @@ public:
     /**
      * Prints receiver on stdout, useful for debugging
      */
-    void printYourself() const;
+    void printYourself() const override;
     /**
      * Computes the change of volume.
      * @return @f$ \epsilon_v = \epsilon_1 + \epsilon_2 + \epsilon_3 @f$.
@@ -119,7 +119,7 @@ public:
 protected:
 
     void giveTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                               int transpose = 0) const;
+                               int transpose = 0) const override;
 };
 } // end namespace oofem
 #endif // strainvector_h

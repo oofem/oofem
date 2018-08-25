@@ -126,26 +126,26 @@ public:
     SolutionbasedShapeFunction(int n, Domain * d);
     virtual ~SolutionbasedShapeFunction() {}
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual bool requiresActiveDofs() { return true; }
-    virtual int giveNumberOfInternalDofManagers() { return 1; }
-    virtual DofManager *giveInternalDofManager(int i);
+    bool requiresActiveDofs() override { return true; }
+    int giveNumberOfInternalDofManagers() override { return 1; }
+    DofManager *giveInternalDofManager(int i) override;
 
-    virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
-    virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
+    double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof) override;
+    double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof) override;
 
-    virtual bool hasBc(Dof *dof, TimeStep *tStep) { return false; }
+    bool hasBc(Dof *dof, TimeStep *tStep) override { return false; }
 
-    virtual bool isPrimaryDof(ActiveDof *dof) { return false; }
+    bool isPrimaryDof(ActiveDof *dof) override { return false; }
 
-    virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
+    void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs) override;
 
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof);
-    virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
+    int giveNumberOfMasterDofs(ActiveDof *dof) override;
+    Dof *giveMasterDof(ActiveDof *dof, int mdof) override;
 
-    virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }
-    virtual const char *giveInputRecordName() const { return _IFT_SolutionbasedShapeFunction_Name; }
+    const char *giveClassName() const override { return "SolutionbasedShapeFunction"; }
+    const char *giveInputRecordName() const override { return _IFT_SolutionbasedShapeFunction_Name; }
 
     double checkIncompressibility(EngngModel &myEngngModel);
 };

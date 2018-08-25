@@ -265,32 +265,30 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
-    //virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
+    //void updateYourself(GaussPoint *gp, TimeStep *tStep) override;
 
-
-
-    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     /// Evaluation of the basic creep compliance function - can be used to compute elastic modulus in derived damage material
-    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
     void predictParametersFrom(double, double, double, double);
 
-    virtual void computeCharTimes();
+    void computeCharTimes() override;
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain
-    virtual void computeCharCoefficients(FloatArray &answer, double, GaussPoint *gp, TimeStep *tStep);
+    void computeCharCoefficients(FloatArray &answer, double, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep);
+    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
-    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
+    double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu) override;
+    double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) override;
 
     /// Evaluation of the flow term viscosity
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
@@ -298,10 +296,9 @@ protected:
     /// Returns initial value of the flow term viscosity
     double giveInitViscosity(TimeStep *tStep);
 
-    virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
-    virtual int hasIncrementalShrinkageFormulation() { return 1; }
-
+    int hasIncrementalShrinkageFormulation() override { return 1; }
 
     /// Evaluation of the shrinkageStrainVector - shrinkage is fully dependent on humidity rate in given GP
     void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);

@@ -111,17 +111,17 @@ public:
      * @param x Solution array
      * @return NM_Status value
      */
-    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
+    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     int estimateMaxPackSize(IntArray &, DataStream &, int &);
     /// Sets up the communication maps
     void setUpCommunicationMaps();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // identification
-    virtual const char *giveClassName() const { return "FETISolver"; }
-    virtual LinSystSolverType giveLinSystSolverType() const { return ST_Feti; }
+    const char *giveClassName() const override { return "FETISolver"; }
+    LinSystSolverType giveLinSystSolverType() const override { return ST_Feti; }
 
     void projection(FloatArray &v, FloatMatrix &l, FloatMatrix &l1);
 

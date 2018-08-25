@@ -176,10 +176,10 @@ public:
     }
     virtual ~Eurocode2CreepMaterial() { }
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     const char *giveClassName() const override { return "Eurocode2CreepMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_Eurocode2CreepMaterial_Name; }
@@ -195,16 +195,16 @@ public:
 
 
     /// Evaluation of the compliance function
-    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
 
     /// Evaluation of the compliance function (according to appendix B from the EC)
     virtual double computeCreepCoefficient(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
 
 
 protected:
-    virtual int hasIncrementalShrinkageFormulation() { return 1; }
+    int hasIncrementalShrinkageFormulation() override { return 1; }
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
     /// implements B.9
     virtual double computeEquivalentAge(GaussPoint *gp, TimeStep *tStep);
@@ -223,7 +223,7 @@ protected:
     void computeCreepParams(int, double);
 
     /// computes retardation times of the aging Kelvin chain
-    virtual void computeCharTimes();
+    void computeCharTimes() override;
 
     /// computes correction factor which multiplies the retardation times
     double computeRetardationTimeCorrection(int mu);
@@ -232,7 +232,7 @@ protected:
     double evaluateSpectrumAt(double tau);
 
     /// Evaluation of characteristic moduli of the Kelvin chain.
-    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep);
+    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
 
     /// computes increment of drying shrinkage - the shrinkage strain is isotropic
     void computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);

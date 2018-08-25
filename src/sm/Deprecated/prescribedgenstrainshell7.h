@@ -90,7 +90,7 @@ public:
     /// Destructor
     virtual ~PrescribedGenStrainShell7() { }
 
-    double give(Dof *dof, ValueModeType mode, double time);
+    double give(Dof *dof, ValueModeType mode, double time) override;
 
     bcType giveType() const override { return DirichletBT; }
 

@@ -174,13 +174,11 @@ public:
      */
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
-
     /**
      * Tests if material supports casting time
      * @return Nonzero if supported, zero otherwise.
      */
     virtual int hasCastingTimeSupport();
-
 
     ///@name Access functions for internal states. Usually overloaded by new material models.
     //@{
@@ -205,9 +203,9 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     //@}
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual void printYourself();
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    void printYourself() override;
 
     /**
      * Stores integration point state to output stream.
@@ -235,7 +233,7 @@ public:
      * mesh components are instanciated.
      * @return Nonzero if receiver is consistent.
      */
-    virtual int checkConsistency();
+    int checkConsistency() override;
     /**
      * Restores consistency of the status, i.e., computes or corrects
      * the values of certain status variables such that the state is admissible.
@@ -307,7 +305,6 @@ public:
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 
-
     /**
      * Creates new copy of associated status and inserts it into given integration point.
      * @param gp Integration point where newly created status will be stored.
@@ -335,7 +332,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
     /**
      * Restores the receiver state previously written in stream.
      * @see saveContext
@@ -345,9 +342,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-
-
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 };
 } // end namespace oofem
 #endif // material_h

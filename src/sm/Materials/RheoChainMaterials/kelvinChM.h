@@ -75,26 +75,26 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual void  giveShrinkageStrainVector(FloatArray &answer,
-                                            GaussPoint *gp,
-                                            TimeStep *tStep,
-                                            ValueModeType mode)
+    void  giveShrinkageStrainVector(FloatArray &answer,
+                                    GaussPoint *gp,
+                                    TimeStep *tStep,
+                                    ValueModeType mode) override
     { answer.clear(); }
 
-    virtual void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 
     void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
 protected:
-    virtual int hasIncrementalShrinkageFormulation() { return 0; }
+    int hasIncrementalShrinkageFormulation() override { return 0; }
 
-    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep);
+    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
     LinearElasticMaterial *giveLinearElasticMaterial();
 };

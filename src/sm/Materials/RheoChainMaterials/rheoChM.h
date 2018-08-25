@@ -175,23 +175,23 @@ public:
     RheoChainMaterial(int n, Domain *d);
     virtual ~RheoChainMaterial();
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
     /*    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
      *    { answer.clear(); }*/
@@ -213,7 +213,7 @@ public:
     // identification and auxiliary functions
     int hasMaterialModeCapability(MaterialMode mode) override;
 
-    virtual int hasCastingTimeSupport() { return 1; }
+    int hasCastingTimeSupport() override { return 1; }
 
     const char *giveClassName() const override { return "RheoChainMaterial"; }
     IRResultType initializeFrom(InputRecord *ir) override;
@@ -221,39 +221,39 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     // store & restore context functions
-    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mmode,
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode,
                                        GaussPoint *gp,
-                                       TimeStep *tStep);
+                                       TimeStep *tStep) override;
 
-    virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode,
-                                        GaussPoint *gp,
-                                        TimeStep *tStep);
+    void givePlaneStressStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mmode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
+    void give1dStressStiffMtrx(FloatMatrix &answer,
+                               MatResponseMode mmode,
+                               GaussPoint *gp,
+                               TimeStep *tStep) override;
 
-    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode,
-                                        GaussPoint *gp,
-                                        TimeStep *tStep);
+    void give2dLatticeStiffMtrx(FloatMatrix &answer,
+                                MatResponseMode mmode,
+                                GaussPoint *gp,
+                                TimeStep *tStep) override;
 
-    virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void give3dLatticeStiffMtrx(FloatMatrix &answer,
+                                MatResponseMode mmode,
+                                GaussPoint *gp,
+                                TimeStep *tStep) override;
+
+    void computeStressIndependentStrainVector(FloatArray &answer,
+                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     /**
      * Computes, for the given integration point,
@@ -288,7 +288,7 @@ public:
     /// Evaluation of the creep compliance function at time t when loading is acting from time t_prime
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) = 0;
 
-    virtual bool isActivated(TimeStep *tStep) {
+    bool isActivated(TimeStep *tStep) override {
         if ( this->preCastingTimeMat > 0 ) {
             return true;
         } else {

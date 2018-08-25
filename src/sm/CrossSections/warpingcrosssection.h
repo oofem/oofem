@@ -36,9 +36,6 @@
 #define warpingcrosssection_h
 
 #include "simplecrosssection.h"
-// #include "structuralmaterial.h"
-// #include "floatarray.h"
-//  #include "floatmatrix.h"
 
 ///@name Input fields for SimpleCrossSection
 //@{
@@ -50,34 +47,29 @@ namespace oofem {
 /**
  * description of warping cross section...
  */
-//class OOFEM_EXPORT WarpingCrossSection : public StructuralCrossSection {
 class OOFEM_EXPORT WarpingCrossSection : public SimpleCrossSection
 {
+protected:
+    int WarpingNodeNumber;     // number of the 4rd node
+
 public:
+    WarpingCrossSection(int n, Domain *d) : SimpleCrossSection(n, d), WarpingNodeNumber(0) { }
 
-    WarpingCrossSection(int n, Domain *d) : SimpleCrossSection(n, d) {
-        WarpingNodeNumber = 0;
-    }
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // identification and auxiliary functions
 
-    virtual const char *giveClassName() const {
+    const char *giveClassName() const override {
         return "WarpingCrossSection";
     }
 
-    virtual const char *giveInputRecordName() const {
+    const char *giveInputRecordName() const override {
         return _IFT_WarpingCrossSection_Name;
     }
 
     int giveWarpingNodeNumber() const {
         return this->WarpingNodeNumber;
-    };
-
-protected:
-    int WarpingNodeNumber;     // number of the 4rd node
+    }
 };
 } // end namespace oofem
 #endif // warpingcrosssection_h
