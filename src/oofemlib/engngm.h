@@ -291,8 +291,8 @@ protected:
     /**@name Load balancing attributes */
     //@{
     /// Load Balancer.
-    LoadBalancer *lb;
-    LoadBalancerMonitor *lbm;
+    std::unique_ptr<LoadBalancer> lb;
+    std::unique_ptr<LoadBalancerMonitor> lbm;
     /// If set to true, load balancing is active.
     bool loadBalancingFlag;
     /// Debug flag forcing load balancing after first step.

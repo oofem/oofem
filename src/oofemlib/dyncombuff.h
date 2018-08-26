@@ -89,7 +89,7 @@ public:
      * @param communicator Communicator request handle.
      * @return Sends MIP_Succes if ok.
      */
-    int iSend(MPI_Comm communicator, int dest, int tag);
+    int iSend(MPI_Comm communicator, int dest, int tag) override;
     /**
      * Starts standard mode, nonblocking receive. The buffer must be large enough to receive all data.
      * @param source Rank of source.
@@ -99,7 +99,7 @@ public:
      * @param communicator Communicator request handle.
      * @return MIP_Succes if ok.
      */
-    int iRecv(MPI_Comm communicator, int source, int tag, int count = 0);
+    int iRecv(MPI_Comm communicator, int source, int tag, int count = 0) override;
     /**
      * Tests if the operation identified by this->request is complete.
      * In such case, true is returned and
@@ -116,7 +116,7 @@ public:
      * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      * @return True if request is successful.
      */
-    virtual int waitCompletion();
+    virtual int waitCompletion() override;
  #endif
     //@}
 
@@ -181,13 +181,13 @@ public:
     /// Destructor.
     virtual ~DynamicCommunicationBuffer();
 
-    virtual int resize(int newSize) { return 1; }
-    virtual void init();
+    int resize(int newSize) override { return 1; }
+    void init() override;
 
     /// Initialize for packing.
-    virtual void initForPacking();
+    void initForPacking() override;
     /// Initialize for Unpacking (data already received).
-    virtual void initForUnpacking();
+    void initForUnpacking() override;
 
     int write(const int *src, int n) override
     { return __write(src, n, MPI_INT); }
@@ -212,9 +212,9 @@ public:
     { return __read(dest, n, MPI_CHAR); }
 
 
-    virtual int iSend(int dest, int tag);
-    virtual int iRecv(int source, int tag, int count = 0);
-    virtual int bcast(int root);
+    virtual int iSend(int dest, int tag) override;
+    virtual int iRecv(int source, int tag, int count = 0) override;
+    virtual int bcast(int root) override;
 
     /**
      * Tests if the operation identified by this->request is complete.
@@ -223,7 +223,7 @@ public:
      * is set to MPI_REQUEST_NULL. Otherwise call returns flag=false.
      * @return True if operation complete, false otherwise.
      */
-    int testCompletion();
+    int testCompletion() override;
     /**
      * Waits until a completion of a nonblocking communication. The completion of a send operation indicates that the sender is
      * now free to update the locations in the send buffer, the completion of a receive operation indicates that the
@@ -232,7 +232,7 @@ public:
      * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      * @return True if request is successful.
      */
-    virtual int waitCompletion();
+    virtual int waitCompletion() override;
 
 
     static void printInfo() { packetPool.printInfo(); }

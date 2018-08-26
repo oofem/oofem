@@ -92,7 +92,7 @@ public:
         lbstep(5)
     { }
 
-    LoadBalancerDecisionType decide(TimeStep *);
+    LoadBalancerDecisionType decide(TimeStep *) override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

@@ -420,7 +420,6 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
     int myrank = d->giveEngngModel()->giveRank();
     int iproc = pc.giveRank();
     std :: string _type;
-    DofManager *dofman;
     IntArray _partitions;
 
     if ( iproc == myrank ) {
@@ -436,22 +435,20 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         if ( _type.size() == 0 ) {
             break;
         }
-        dofman = classFactory.createDofManager(_type.c_str(), 0, d);
+        auto dofman = classFactory.createDofManager(_type.c_str(), 0, d);
         dofman->restoreContext(*pcbuff, CM_Definition | CM_State | CM_UnknownDictState);
         dofman->setParallelMode(DofManager_null);
         if ( d->dofmanGlobal2Local( dofman->giveGlobalNumber() ) ) {
             // record already exist
-            delete dofman;
         } else {
             d->giveTransactionManager()->addDofManTransaction(DomainTransactionManager :: DTT_ADD,
                                                               dofman->giveGlobalNumber(),
-                                                              dofman);
+                                                              dofman.release()); ///@todo Can be do safer than just releasing?
         }
     } while ( 1 );
 
 
     // unpack element data
-    Element *elem;
     _partitions.resize(1);
     _partitions.at(1) = iproc;
     do {
@@ -460,7 +457,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
             break;
         }
 
-        elem = classFactory.createElement(_type.c_str(), 0, d);
+        auto elem = classFactory.createElement(_type.c_str(), 0, d).release(); ///@todo Can be do safer than just releasing?
         elem->restoreContext(*pcbuff, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);

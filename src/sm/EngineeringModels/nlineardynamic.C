@@ -948,14 +948,14 @@ LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {
     if ( lb ) {
-        return lb;
+        return lb.get();
     }
 
     if ( loadBalancingFlag ) {
         lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
-        return lb;
+        return lb.get();
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -964,14 +964,14 @@ LoadBalancerMonitor *
 NonLinearDynamic :: giveLoadBalancerMonitor()
 {
     if ( lbm ) {
-        return lbm;
+        return lbm.get();
     }
 
     if ( loadBalancingFlag ) {
         lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
-        return lbm;
+        return lbm.get();
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 #endif

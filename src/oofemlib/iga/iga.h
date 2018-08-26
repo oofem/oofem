@@ -97,7 +97,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
 
 #ifdef __PARALLEL_MODE
-    elementParallelMode giveKnotSpanParallelMode(int) const;
+    elementParallelMode giveKnotSpanParallelMode(int) const override;
 #endif
 
 #ifdef __OOFEG

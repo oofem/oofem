@@ -152,11 +152,6 @@ EngngModel :: ~EngngModel()
     }
 
 #ifdef __PARALLEL_MODE
-    if ( loadBalancingFlag ) {
-        delete lb;
-        delete lbm;
-    }
-
     delete communicator;
     delete nonlocCommunicator;
     delete commBuff;

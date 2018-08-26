@@ -343,7 +343,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
              * }
              */
             _newentry = true;
-            dofman = classFactory.createDofManager(_type.c_str(), 0, d);
+            dofman = classFactory.createDofManager(_type.c_str(), 0, d).release(); ///@todo Unsafe! Find a better way to preserve ownership.
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
@@ -373,8 +373,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
              * }
              */
             _newentry = true;
-            dofman = classFactory.createDofManager(_type.c_str(), 0, d);
-
+            dofman = classFactory.createDofManager(_type.c_str(), 0, d).release(); ///@todo Unsafe! Find a better way to preserve ownership.
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
@@ -408,7 +407,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             break;
         }
 
-        elem = classFactory.createElement(_type.c_str(), 0, d);
+        elem = classFactory.createElement(_type.c_str(), 0, d).release(); ///@todo Unsafe! Find a better way to preserve ownership.
         elem->restoreContext(*pcbuff, CM_Definition | CM_State);
         elem->initForNewStep();
         dtm->addElementTransaction(DomainTransactionManager :: DTT_ADD, elem->giveGlobalNumber(), elem);

@@ -5448,7 +5448,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
         if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
             // data not available -> create a new one
             _newentry = true;
-            dofman = classFactory.createDofManager(_type.c_str(), 0, d);
+            dofman = classFactory.createDofManager(_type.c_str(), 0, d).release(); ///@todo Can we do better than this unsafe code?
         }
 
         dofman->setGlobalNumber(_globnum);
@@ -5471,7 +5471,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
             break;
         }
 
-        Element *elem = classFactory.createElement(_type.c_str(), 0, d);
+        Element *elem = classFactory.createElement(_type.c_str(), 0, d).release(); ///@todo Can we do etter than this unsafe code?
         elem->restoreContext(*pcbuff, CM_Definition | CM_DefinitionGlobal);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(elemPartitions);

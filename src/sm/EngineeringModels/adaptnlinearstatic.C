@@ -964,28 +964,28 @@ LoadBalancer *
 AdaptiveNonLinearStatic :: giveLoadBalancer()
 {
     if ( lb ) {
-        return lb;
+        return lb.get();
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
         lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
-        return lb;
+        return lb.get();
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 LoadBalancerMonitor *
 AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
 {
     if ( lbm ) {
-        return lbm;
+        return lbm.get();
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
         lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
-        return lbm;
+        return lbm.get();
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 #endif
