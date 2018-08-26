@@ -38,6 +38,7 @@
 #include "field.h"
 #include "materialmappingalgorithmtype.h"
 #include "internalstatetype.h"
+#include "materialmappingalgorithm.h"
 
 namespace oofem {
 class Domain;
@@ -57,7 +58,7 @@ class OOFEM_EXPORT InternalVariableField : public Field
 {
 protected:
     /// Material mapping algorithm used.
-    MaterialMappingAlgorithm *mma;
+    std::unique_ptr<MaterialMappingAlgorithm> mma;
     /// InternalStateType.
     InternalStateType type;
     /// Source domain.

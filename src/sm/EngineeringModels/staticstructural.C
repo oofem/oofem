@@ -84,7 +84,7 @@ StaticStructural :: ~StaticStructural()
 NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
-        nMethod.reset( classFactory.createNonLinearSolver(this->solverType.c_str(), this->giveDomain(1), this) );
+        nMethod = classFactory.createNonLinearSolver(this->solverType.c_str(), this->giveDomain(1), this);
         if ( !nMethod ) {
             OOFEM_ERROR("Failed to create solver (%s).", this->solverType.c_str());
         }
@@ -264,7 +264,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() );
 
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
             OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }

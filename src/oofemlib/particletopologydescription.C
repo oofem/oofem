@@ -1263,9 +1263,9 @@ void ParticleTopologyDescription :: replaceFEMesh()
         //DynamicInputRecord *dir = new DynamicInputRecord(_IFT_Node_Name, i);
         //dir->setField(nodes[i-1], _IFT_Node_coords);
         //dr->insertInputRecord(IR_dofmanRec, dir);
-        Node *node = new Node(i, new_d);
+        auto node = std::make_unique<Node>(i, new_d);
         node->setCoordinates(nodes [ i - 1 ]);
-        new_d->setDofManager(i, node);
+        new_d->setDofManager(i, std::move(node));
     }
 
     for ( int i = 1; i <= ( int ) elements.size(); ++i ) {
@@ -1274,12 +1274,12 @@ void ParticleTopologyDescription :: replaceFEMesh()
         //dir->setField(r, _IFT_Element_crosssect);
         //dir->setField(elements[i-1], _IFT_Element_nodes);
         //dr->insertInputRecord(IR_elemRec, dir);
-        Element *element = classFactory.createElement(this->regionElementType [ r - 1 ].c_str(), i, new_d);
+        auto element = classFactory.createElement(this->regionElementType [ r - 1 ].c_str(), i, new_d);
         element->setGlobalNumber(i);
         element->setCrossSection(r);
         element->setDofManagers(elements [ i - 1 ]);
         element->setParallelMode(Element_local);
-        new_d->setElement(element->giveNumber(), element);
+        new_d->setElement(element->giveNumber(), std::move(element)); ///@todo setElement should take unique_ptr, FIXME
     }
 
     for ( int i = 1; i <= ( int ) segments.size(); ++i ) {
@@ -1288,7 +1288,7 @@ void ParticleTopologyDescription :: replaceFEMesh()
         //dir->setField(r, _IFT_Element_crosssect);
         //dir->setField(segments[i-1], _IFT_Element_nodes);
         //dr->insertInputRecord(IR_elemRec, dir);
-        Element *element = classFactory.createElement(regionElementType [ r - 1 ].c_str(), elements.size() + i, new_d);
+        auto element = classFactory.createElement(regionElementType [ r - 1 ].c_str(), elements.size() + i, new_d);
         if ( !element ) {
             printf( "Couldn't create: %s\n", regionElementType [ r - 1 ].c_str() );
         }
@@ -1296,16 +1296,16 @@ void ParticleTopologyDescription :: replaceFEMesh()
         element->setCrossSection(r);
         element->setDofManagers(segments [ i - 1 ]);
         element->setParallelMode(Element_local);
-        new_d->setElement(element->giveNumber(), element);
+        new_d->setElement(element->giveNumber(), std::move(element)); ///@todo setElement should take unique_ptr, FIXME
     }
 
     for ( int i = 1; i <= ( int ) boundarySets.size(); ++i ) {
         //DynamicInputRecord *dir = new DynamicInputRecord(_IFT_Set_Name, i);
         //dir->setField(boundarySets[i-1], _IFT_Set_elementBoundaries);
         //dr->insertInputRecord(IR_setRec, dir);
-        Set *set = new Set(1, new_d);
+        auto set = std::make_unique<Set>(1, new_d);
         set->setBoundaryList(boundarySets [ i - 1 ]);
-        new_d->setSet(i, set);
+        new_d->setSet(i, std::move(set));  ///@todo setSet should take unique_ptr, FIXME
     }
 
     new_d->postInitialize();

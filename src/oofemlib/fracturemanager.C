@@ -98,7 +98,7 @@ int FractureManager :: instanciateYourself(DataReader &dr)
             IR_IOERR("", mir, result);
         }
 
-        FailureCriteria *failCriteria = classFactory.createFailureCriteria(name.c_str(), i, this);
+        auto failCriteria = classFactory.createFailureCriteria(name.c_str(), i, this);
         if ( !failCriteria ) {
             OOFEM_ERROR( "unknown failure criteria (%s)", name.c_str() );
             return 0;
@@ -111,7 +111,7 @@ int FractureManager :: instanciateYourself(DataReader &dr)
             failCriteria->list.resize(numEl);
             for ( int j = 1; j <= numEl; j++ ) {
                 Element *el = domain->giveElement(j);
-                FailureCriteriaStatus *fcs = failCriteria->CreateStatus(el, failCriteria);
+                FailureCriteriaStatus *fcs = failCriteria->CreateStatus(el);
                 failCriteria->list.at(j - 1) = fcs;
             }
         } else if ( failCriteria->giveType() == IPLocal ) {
@@ -122,7 +122,7 @@ int FractureManager :: instanciateYourself(DataReader &dr)
             OOFEM_ERROR("Unknown failure criteria");
         }
 
-        this->criteriaList.at(i - 1) = failCriteria;
+        this->criteriaList.at(i - 1) = std::move(failCriteria);
     }
 
     return 1;
@@ -148,7 +148,7 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
 #ifdef VERBOSE
         printf("\n  Evaluating failure criteria %i \n", i);
 #endif
-        FailureCriteria *failCrit = this->criteriaList.at(i - 1);
+        auto &failCrit = this->criteriaList.at(i - 1);
         if ( failCrit->giveType() == ELLocal ) {
             for ( int j = 1; j <= ( int ) failCrit->list.size(); j++ ) {
 #ifdef VERBOSE
@@ -185,7 +185,7 @@ FractureManager :: updateXFEM(TimeStep *tStep)
 #ifdef VERBOSE
                 printf("based on failure criteria %i \n", i);
 #endif
-                FailureCriteria *failCrit = this->criteriaList.at(i - 1);
+                auto &failCrit = this->criteriaList.at(i - 1);
 
                 for ( int j = 1; j <= ( int ) failCrit->list.size(); j++ ) { // each criteria (often each element)
 #ifdef VERBOSE

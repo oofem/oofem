@@ -84,7 +84,7 @@ public:
 
 private:
     double mEnrichmentRadius;
-    LinElBranchFunction *mpBranchFunc;
+    LinElBranchFunction mpBranchFunc;
 };
 } // end namespace oofem
 

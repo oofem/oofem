@@ -73,10 +73,10 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
     if ( !nMethod ) {
         if ( isParallel() ) {
             if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-                nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+                nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
             }
         } else {
-            nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
         }
         if ( !nMethod ) {
             OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
@@ -198,7 +198,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         // first step  assemble stiffness Matrix
         //
-        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }

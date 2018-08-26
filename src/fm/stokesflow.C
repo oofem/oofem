@@ -120,7 +120,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
             OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }

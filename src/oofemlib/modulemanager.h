@@ -79,7 +79,7 @@ public:
      * @param n Number associated with module.
      * @param emodel Engineering model which receiver belongs to.
      */
-    virtual M *CreateModule(const char *name, int n, EngngModel *emodel) = 0;
+    virtual std::unique_ptr<M> CreateModule(const char *name, int n, EngngModel *emodel) = 0;
     /**
      *
      * Reads receiver description from input stream and creates corresponding modules components accordingly.
@@ -107,7 +107,7 @@ public:
             }
 
             // read type of module
-            std :: unique_ptr< M > module( this->CreateModule(name.c_str(), i, emodel) );
+            std :: unique_ptr< M > module = this->CreateModule(name.c_str(), i, emodel);
             if ( !module ) {
                 OOFEM_ERROR("unknown module (%s)", name.c_str());
             }

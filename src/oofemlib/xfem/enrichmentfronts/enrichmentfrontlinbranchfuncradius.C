@@ -45,18 +45,11 @@ namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncRadius)
 
 EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius() :
-    mEnrichmentRadius(0.0)
-{
-    mpBranchFunc = new LinElBranchFunction();
-}
+    mEnrichmentRadius(0.0),
+    mpBranchFunc()
+{ }
 
-EnrFrontLinearBranchFuncRadius :: ~EnrFrontLinearBranchFuncRadius()
-{
-    if ( mpBranchFunc != NULL ) {
-        delete mpBranchFunc;
-        mpBranchFunc = NULL;
-    }
-}
+EnrFrontLinearBranchFuncRadius :: ~EnrFrontLinearBranchFuncRadius() { }
 
 void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
@@ -120,7 +113,7 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std :: vector< double >
     double r = 0.0, theta = 0.0;
     EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t, iEfInput, flipTangent);
 
-    mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
+    mpBranchFunc.evaluateEnrFuncAt(oEnrFunc, r, theta);
 }
 
 void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const
@@ -137,7 +130,7 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< Flo
 
 
     size_t sizeStart = oEnrFuncDeriv.size();
-    mpBranchFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
+    mpBranchFunc.evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
 
     /**
      * Transform to global coordinates.
@@ -162,7 +155,7 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< doubl
     double radius = gpCoord.distance(xTip);
 
     std :: vector< double >jumps;
-    mpBranchFunc->giveJump(jumps, radius);
+    mpBranchFunc.giveJump(jumps, radius);
 
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }

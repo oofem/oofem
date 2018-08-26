@@ -83,7 +83,7 @@ protected:
     /// Smoother type.
     NodalRecoveryModel :: NodalRecoveryModelType stype;
     /// Smoother.
-    NodalRecoveryModel *smoother;
+    std::unique_ptr<NodalRecoveryModel> smoother;
     /// List of regions to skip.
     IntArray regionsToSkip;
 

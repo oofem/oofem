@@ -149,7 +149,7 @@ public:
     int instanciateYourself(DataReader &dr);
     virtual const char *giveClassName() const { return "FailureCriteria"; }
 
-    virtual FailureCriteriaStatus *CreateStatus(Element *el, FailureCriteria *failCrit) const = 0;
+    virtual FailureCriteriaStatus *CreateStatus(Element *el) = 0;
     virtual bool computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStatus, TimeStep *tStep);
     virtual bool evaluateFCQuantities(Element *el, TimeStep *tStep) { return false; } // defaults to no implementation
     virtual bool evaluateFailureCriteria(FailureCriteriaStatus *fcStatus) = 0;
@@ -180,8 +180,8 @@ public:
     const char *giveInputRecordName() const { return _IFT_DamagedNeighborLayered_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    FailureCriteriaStatus *CreateStatus(Element *el, FailureCriteria *failCrit) const override
-    { return new DamagedNeighborLayeredStatus(el, failCrit); }
+    FailureCriteriaStatus * CreateStatus(Element *el) override
+    { return new DamagedNeighborLayeredStatus(el, this); }
 };
 
 
@@ -228,7 +228,7 @@ public:
     void clear();
     Domain *giveDomain() { return this->domain; }
 
-    std :: vector< FailureCriteria * >criteriaList;
+    std::vector<std::unique_ptr<FailureCriteria>> criteriaList;
     //std :: vector< CrackManager*           > crackManagers;   // Keep track of all cracks - each crack may have several fronts/tips
     //std :: vector< PropagationLawManager*  > propagationLawManagers;
 };

@@ -136,8 +136,6 @@ routine at the end. If converters are missing for some type (such as std::vector
 added at the end by simply instantiating these templates with the respective argument.
 */
 
-
-
 // copied from https://github.com/eudoxos/minieigen/blob/master/src/converters.hpp (written by myself)
 template<typename T>
 bool pySeqItemCheck(PyObject* o, int i){ return bp::extract<T>(bp::object(bp::handle<>(PySequence_GetItem(o,i)))).check(); }
@@ -206,7 +204,6 @@ void converters_cxxVector_pyList_2way()
 
 
 
-
 /*****************************************************
 * FloatArray
 *****************************************************/
@@ -260,7 +257,7 @@ void pyclass_FloatArray()
         .def("computeSquaredNorm", &FloatArray::computeSquaredNorm, "Computes the square of the norm")
         .def("sum", &FloatArray::sum, "Computes the sum of receiver values")
 
-          .def("__str__", &FloatArray_str,"Return printable representation.")
+        .def("__str__", &FloatArray_str,"Return printable representation.")
 
         .def("__len__", &FloatArray::giveSize, "Returns the size of receiver")
         .def("__getitem__", &FloatArray::__getitem__, "Coefficient access function. Provides 0-based indexing access")
@@ -462,7 +459,8 @@ void pyclass_SpatialLocalizer()
 }
 
 
-void pyclass_UnknownNumberingScheme(){
+void pyclass_UnknownNumberingScheme()
+{
     class_<UnknownNumberingScheme,boost::noncopyable>("UnknownNumberingScheme",no_init)
         .def("giveDofEquationNumber",pure_virtual(&UnknownNumberingScheme::giveDofEquationNumber))
         .def("giveRequiredNumberOfDomainEquation",&UnknownNumberingScheme::giveRequiredNumberOfDomainEquation)
@@ -698,13 +696,13 @@ void pyclass_Domain()
         .def("resizeInitialConditions", &Domain::resizeInitialConditions)
         .def("resizeFunctions", &Domain::resizeFunctions)
 
-        .def("setDofManager", &Domain::setDofManager)
-        .def("setElement", &Domain::setElement)
-        .def("setCrossSection", &Domain::setCrossSection)
-        .def("setMaterial", &Domain::setMaterial)
-        .def("setBoundaryCondition", &Domain::setBoundaryCondition)
-        .def("setInitialCondition", &Domain::setInitialCondition)
-        .def("setFunction", &Domain::setFunction)
+        .def("setDofManager", &Domain::py_setDofManager)
+        .def("setElement", &Domain::py_setElement)
+        .def("setCrossSection", &Domain::py_setCrossSection)
+        .def("setMaterial", &Domain::py_setMaterial)
+        .def("setBoundaryCondition", &Domain::py_setBoundaryCondition)
+        .def("setInitialCondition", &Domain::py_setInitialCondition)
+        .def("setFunction", &Domain::py_setFunction)
 
         .def("checkConsistency", &Domain::checkConsistency)
         .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
@@ -721,6 +719,7 @@ void pyclass_Domain()
         ;
 }
 
+#if 1
 
 /*****************************************************
 * FEMComponent
@@ -1529,17 +1528,17 @@ object domain(bp::tuple args, bp::dict kw)
     int serialNumber =       len(args)>1? extract<int>(args[1])() : 0;
     EngngModel *engngModel = len(args)>2? extract<EngngModel*>(args[2])() : nullptr;
     domainType dType =       len(args)>3? extract<domainType>(args[3])() : _unknownMode;
-    Domain *d = new Domain(number,serialNumber,engngModel);
+    auto d = std::make_unique<Domain>(number,serialNumber,engngModel);
     d->setDomainType(dType);
     // output manager record
     OOFEMTXTInputRecord omir = makeOutputManagerOOFEMTXTInputRecordFrom(kw);
     d->giveOutputManager()->initializeFrom(&omir);
-    object ret = object(ptr(d));
+    object ret = object(ptr(d.release()));
     /* ????????????????????
     // sets the last created domain as default one for furtherscript
     temp_global["defaultDomain"] = ret;
     ???????????????????? */
-    return object(ptr(d));
+    return ret;
 }
 
 
@@ -1564,9 +1563,9 @@ object element(bp::tuple args, bp::dict kw)
     if (domain==nullptr) { LOG_ERROR(oofem_errLogger,"wrong Domain"); }
     ???????????????????? */
     // create Element (convert aClass to char* - expected by classFactory.createElement)
-    Element *elem = classFactory.createElement(aClass.c_str(),number,domain);
+    auto elem = classFactory.createElement(aClass.c_str(),number,domain);
     // if elem==nullptr, something was wrong
-    if (elem==nullptr) { OOFEM_LOG_ERROR("element: wrong input data"); }
+    if (!elem) { OOFEM_LOG_ERROR("element: wrong input data"); }
     // sets globalNumber == number befor initializeFrom
     elem->setGlobalNumber(number);
     // construct OOFEMTXTInputRecord from bp::dict **kw
@@ -1574,7 +1573,7 @@ object element(bp::tuple args, bp::dict kw)
     // pass input record to elem
     elem->initializeFrom(&ir);
     // convert element to PyObject (expected by raw_function, which enables fun(*args,**kw) syntax in python)
-    return object(ptr(elem));
+    return object(ptr(elem.release()));
 }
 
 // auxiliary constructor for specific element type (name is passed as first argument)
@@ -1597,12 +1596,12 @@ object dofManager(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
-    DofManager *dofMan = classFactory.createDofManager(aClass.c_str(),number,domain);
-    if (dofMan==nullptr) { OOFEM_LOG_ERROR("dofManager: wrong input data"); }
+    auto dofMan = classFactory.createDofManager(aClass.c_str(),number,domain);
+    if (!dofMan) { OOFEM_LOG_ERROR("dofManager: wrong input data"); }
     dofMan->setGlobalNumber(number);
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     dofMan->initializeFrom(&ir);
-    return object(ptr(dofMan));
+    return object(ptr(dofMan.release()));
 }
 
 object createDofManagerOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1622,11 +1621,11 @@ object generalBoundaryCondition(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
-    GeneralBoundaryCondition *bc = classFactory.createBoundaryCondition(aClass.c_str(),number,domain);
-    if (bc==nullptr) { OOFEM_LOG_ERROR("generalBoundaryCondition: wrong input data"); }
+    auto bc = classFactory.createBoundaryCondition(aClass.c_str(),number,domain);
+    if (!bc) { OOFEM_LOG_ERROR("generalBoundaryCondition: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     bc->initializeFrom(&ir);
-    return object(ptr(bc));
+    return object(ptr(bc.release()));
 }
 
 object CreateBCOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1648,11 +1647,11 @@ object material(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
-    Material *mat = classFactory.createMaterial(aClass.c_str(),number,domain);
-    if (mat==nullptr) { OOFEM_LOG_ERROR("material: wrong input data"); }
+    auto mat = classFactory.createMaterial(aClass.c_str(),number,domain);
+    if (!mat) { OOFEM_LOG_ERROR("material: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     mat->initializeFrom(&ir);
-    return object(ptr(mat));
+    return object(mat);
 }
 
 object CreateMaterialOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1671,11 +1670,11 @@ object crossSection(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
-    CrossSection *cs = classFactory.createCrossSection(aClass.c_str(),number,domain);
-    if (cs==nullptr) { OOFEM_LOG_ERROR("crossSection: wrong input data"); }
+    auto cs = classFactory.createCrossSection(aClass.c_str(),number,domain);
+    if (!cs) { OOFEM_LOG_ERROR("crossSection: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     cs->initializeFrom(&ir);
-    return object(ptr(cs));
+    return object(cs);
 }
 
 object CreateCrossSectionOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1695,11 +1694,11 @@ object loadTimeFunction(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
-    Function *ltf = classFactory.createFunction(aClass.c_str(),number,domain);
-    if (ltf==nullptr) { OOFEM_LOG_ERROR("function: wrong input data"); }
+    auto ltf = classFactory.createFunction(aClass.c_str(),number,domain);
+    if (!ltf) { OOFEM_LOG_ERROR("function: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     ltf->initializeFrom(&ir);
-    return object(ptr(ltf));
+    return object(ltf);
 }
 
 object CreateLoadTimeFunctionOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1719,11 +1718,11 @@ object exportModule(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
     EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : nullptr;
-    ExportModule *module = classFactory.createExportModule(aClass.c_str(),number,engngm);
-    if (module==nullptr) { OOFEM_LOG_ERROR("exportModule: wrong input data"); }
+    auto module = classFactory.createExportModule(aClass.c_str(),number,engngm);
+    if (!module) { OOFEM_LOG_ERROR("exportModule: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     module->initializeFrom(&ir);
-    return object(ptr(module));
+    return object(module);
 }
 
 object CreateExportModuleOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1862,4 +1861,6 @@ BOOST_PYTHON_MODULE (liboofem)
     def("exportModule", raw_function(exportModule,1));
     def("vtkxml", raw_function(vtkxml,0));
 }
+
+#endif
 } // end namespace oofem

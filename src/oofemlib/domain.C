@@ -449,16 +449,26 @@ void Domain :: resizeInitialConditions(int _newSize) { icList.resize(_newSize); 
 void Domain :: resizeFunctions(int _newSize) { functionList.resize(_newSize); }
 void Domain :: resizeSets(int _newSize) { setList.resize(_newSize); }
 
-void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList[i-1].reset(obj); mDofManPlaceInArray[obj->giveGlobalNumber()] = i;}
-void Domain :: setElement(int i, Element *obj) { elementList[i-1].reset(obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
-void Domain :: setCrossSection(int i, CrossSection *obj) { crossSectionList[i-1].reset(obj); }
-void Domain :: setMaterial(int i, Material *obj) { materialList[i-1].reset(obj); }
-void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarrierList[i-1].reset(obj); }
-void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList[i-1].reset(obj); }
-void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList[i-1].reset(obj); }
-void Domain :: setFunction(int i, Function *obj) { functionList[i-1].reset(obj); }
-void Domain :: setSet(int i, Set *obj) { setList[i-1].reset(obj); }
-void Domain :: setXfemManager(XfemManager *ipXfemManager) { xfemManager.reset(ipXfemManager); }
+void Domain :: py_setDofManager(int i, DofManager *obj) { dofManagerList[i-1].reset(obj); mDofManPlaceInArray[obj->giveGlobalNumber()] = i;}
+void Domain :: py_setElement(int i, Element *obj) { elementList[i-1].reset(obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
+void Domain :: py_setCrossSection(int i, CrossSection *obj) { crossSectionList[i-1].reset(obj); }
+void Domain :: py_setMaterial(int i, Material *obj) { materialList[i-1].reset(obj); }
+void Domain :: py_setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarrierList[i-1].reset(obj); }
+void Domain :: py_setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList[i-1].reset(obj); }
+void Domain :: py_setInitialCondition(int i, InitialCondition *obj) { icList[i-1].reset(obj); }
+void Domain :: py_setFunction(int i, Function *obj) { functionList[i-1].reset(obj); }
+void Domain :: py_setSet(int i, Set *obj) { setList[i-1].reset(obj); }
+
+void Domain :: setDofManager(int i, std::unique_ptr<DofManager> obj) { mDofManPlaceInArray[obj->giveGlobalNumber()] = i; dofManagerList[i-1] = std::move(obj); }
+void Domain :: setElement(int i, std::unique_ptr<Element> obj) { mElementPlaceInArray[obj->giveGlobalNumber()] = i; elementList[i-1] = std::move(obj); }
+void Domain :: setCrossSection(int i, std::unique_ptr<CrossSection> obj) { crossSectionList[i-1] = std::move(obj); }
+void Domain :: setMaterial(int i, std::unique_ptr<Material> obj) { materialList[i-1] = std::move(obj); }
+void Domain :: setNonlocalBarrier(int i, std::unique_ptr<NonlocalBarrier> obj) { nonlocalBarrierList[i-1] = std::move(obj); }
+void Domain :: setBoundaryCondition(int i, std::unique_ptr<GeneralBoundaryCondition> obj) { bcList[i-1] = std::move(obj); }
+void Domain :: setInitialCondition(int i, std::unique_ptr<InitialCondition> obj) { icList[i-1] = std::move(obj); }
+void Domain :: setFunction(int i, std::unique_ptr<Function> obj) { functionList[i-1] = std::move(obj); }
+void Domain :: setSet(int i, std::unique_ptr<Set> obj) { setList[i-1] = std::move(obj); }
+void Domain :: setXfemManager(std::unique_ptr<XfemManager> obj) { xfemManager = std::move(obj); }
 
 void Domain :: clearBoundaryConditions() { bcList.clear(); }
 void Domain :: clearElements() { elementList.clear(); }
@@ -876,7 +886,7 @@ Domain :: instanciateYourself(DataReader &dr)
         ir = dr.giveInputRecord(DataReader :: IR_xfemManRec, 1);
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        xfemManager.reset( classFactory.createXfemManager(name.c_str(), this) );
+        xfemManager = classFactory.createXfemManager(name.c_str(), this);
         if ( !xfemManager ) {
             OOFEM_ERROR("Couldn't create xfemmanager: %s", name.c_str());
         }
@@ -894,7 +904,7 @@ Domain :: instanciateYourself(DataReader &dr)
         ir = dr.giveInputRecord(DataReader :: IR_contactManRec, 1);
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        contactManager.reset( classFactory.createContactManager(name.c_str(), this) );
+        contactManager = classFactory.createContactManager(name.c_str(), this);
         if ( !contactManager ) {
             OOFEM_ERROR("Couldn't create contact manager: %s", name.c_str());
         }
@@ -911,7 +921,7 @@ Domain :: instanciateYourself(DataReader &dr)
 
     this->topology = NULL;
     if ( topologytype.length() > 0 ) {
-        this->topology.reset( classFactory.createTopology(topologytype.c_str(), this) );
+        this->topology = classFactory.createTopology(topologytype.c_str(), this);
         if ( !this->topology ) {
             OOFEM_ERROR("Couldn't create topology of type '%s'", topologytype.c_str());
         }
@@ -1481,8 +1491,7 @@ void restore_components(T &list, DataStream &stream, ContextMode mode, const C &
             if ( !stream.read(name) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
-            auto object = creator(name, i);
-            list[i-1].reset(object);
+            list[i-1] = creator(name, i);
         }
         auto iores = list[i-1]->restoreContext(stream, mode);
         if ( iores != CIO_OK ) {
@@ -1543,7 +1552,7 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode)
         xfemManager = nullptr;
 
         restore_components(this->setList, stream, mode,
-                           [this] (std::string &x, int i) { return new Set(i, this); });
+                           [this] (std::string &x, int i) { return std::make_unique<Set>(i, this); });
         restore_components(this->materialList, stream, mode,
                            [this] (std::string &x, int i) { return classFactory.createMaterial(x.c_str(), i, this); });
         restore_components(this->crossSectionList, stream, mode,

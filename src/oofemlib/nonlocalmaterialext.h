@@ -42,6 +42,7 @@
 #include "mathfem.h"
 
 #include <list>
+#include <memory>
 
 ///@name Input fields for NonlocalMaterialExtensionInterface
 //@{
@@ -180,9 +181,9 @@ protected:
     WeightFunctionType weightFun;
     /// Grid on which the eikonal equation will be solved (used by eikonal nonlocal models)
     int gridSize;
-    Grid *grid;
+    std::unique_ptr<Grid> grid;
     /// Auxiliary matrix to store minimum distances of grid points from Gauss points
-    FloatMatrix *minDist2;
+    std::unique_ptr<FloatMatrix> minDist2;
     /// Optional parameters setting details of the fast marching method
     double initDiag;
     int order;
@@ -261,7 +262,7 @@ public:
      */
     NonlocalMaterialExtensionInterface(Domain *d);
     /// Destructor.
-    virtual ~NonlocalMaterialExtensionInterface() { delete grid; delete minDist2; }
+    virtual ~NonlocalMaterialExtensionInterface() { }
 
 
     /**

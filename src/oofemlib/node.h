@@ -44,6 +44,8 @@
 #include "dofmanager.h"
 #include "floatarray.h"
 
+#include <memory>
+
 ///@name Input fields for Node
 //@{
 #define _IFT_Node_Name "node"
@@ -95,7 +97,7 @@ protected:
      * where e' is base vector of local coordinate system and e is
      * base vector of global c.s.
      */
-    FloatMatrix *localCoordinateSystem;
+    std::unique_ptr<FloatMatrix> localCoordinateSystem;
 
 public:
     /**
@@ -153,7 +155,7 @@ public:
      * where e' is base vector of local coordinate system and e is
      * base vector of global c.s.
      */
-    FloatMatrix *giveLocalCoordinateTriplet() { return localCoordinateSystem; }
+    FloatMatrix *giveLocalCoordinateTriplet() { return localCoordinateSystem.get(); }
     /** Returns true, if the local coordinate systems of receiver and given node are the same */
     bool hasSameLCS(Node *remote);
 

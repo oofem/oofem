@@ -3542,15 +3542,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #endif
 
     Dof *dof;
-    DofManager *parentNodePtr, *node;
-    Element *elem;
-    CrossSection *crossSection;
-    Material *mat;
-    NonlocalBarrier *barrier;
-    GeneralBoundaryCondition *bc;
-    InitialCondition *ic;
-    Function *func;
-    Set *set;
+    DofManager *parentNodePtr;
     std :: string name;
 
     // create new mesh (missing param for new mesh!)
@@ -3562,11 +3554,13 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     ( * dNew )->resizeDofManagers(nnodes);
     const IntArray dofIDArrayPtr = domain->giveDefaultNodeDofIDArry();
     for ( int inode = 1; inode <= nnodes; inode++ ) {
+        std::unique_ptr<DofManager> newNode;
         parent = mesh->giveNode(inode)->giveParent();
         if ( parent ) {
             parentNodePtr = domain->giveNode(parent);
             // inherit all data from parent (bc, ic, load, etc.)
-            node = classFactory.createDofManager(parentNodePtr->giveInputRecordName(), inode, * dNew);
+            newNode = classFactory.createDofManager(parentNodePtr->giveInputRecordName(), inode, * dNew);
+            auto node = newNode.get();
             node->setNumberOfDofs(0);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
             // create individual DOFs
@@ -3579,7 +3573,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         dof = new SimpleSlaveDof( node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
                         OOFEM_ERROR("unsupported DOF type");
-                        dof = NULL;
+                        dof = nullptr;
                     }
                 }
                 node->appendDof(dof);
@@ -3592,7 +3586,8 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #endif
         } else {
             // newly created node (irregular)
-            node = new Node(inode, *dNew);
+            newNode = std::make_unique<Node>(inode, *dNew);
+            auto node = newNode.get();
             //create new node with default DOFs
             int ndofs = dofIDArrayPtr.giveSize();
             node->setNumberOfDofs(0);
@@ -3600,7 +3595,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             // create individual DOFs
             for ( int idof = 1; idof <= ndofs; idof++ ) {
 #ifdef NM
-                dof = NULL;
+                dof = nullptr;
                 FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
                 if ( !dof ) {
                     if ( fabs(coords->at(1) - 200.0) < 0.000001 ) {
@@ -3638,7 +3633,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
 #else
  #ifdef BRAZIL_2D
-                dof = NULL;
+                dof = nullptr;
                 FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
                 if ( !dof ) {
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
@@ -3666,7 +3661,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
  #else
   #ifdef THREEPBT_3D
-                dof = NULL;
+                dof = nullptr;
                 FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
                 if ( !dof ) {
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
@@ -3701,7 +3696,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 double dist, rad;
                 FloatArray *coords = mesh->giveNode(inode)->giveCoordinates();
 
-                dof = NULL;
+                dof = nullptr;
                 if ( !dof ) {
                     dist = coords->at(1) * coords->at(1) + coords->at(3) * coords->at(3);
                     if ( coords->at(2) < 88.000001 ) {
@@ -3762,9 +3757,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         }
 
         // set node coordinates
-        static_cast< Node * >(node)->setCoordinates( * mesh->giveNode(inode)->giveCoordinates() );
-        node->setBoundaryFlag( mesh->giveNode(inode)->isBoundary() );
-        ( * dNew )->setDofManager(inode, node);
+        static_cast< Node * >(newNode.get())->setCoordinates( * mesh->giveNode(inode)->giveCoordinates() );
+        newNode->setBoundaryFlag( mesh->giveNode(inode)->isBoundary() );
+        ( * dNew )->setDofManager(inode, std::move(newNode));
     } // end creating dof managers
 
     // create elements
@@ -3809,7 +3804,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             DynamicInputRecord ir( *domain->giveElement ( parent ) );
             ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
             ir.giveRecordKeywordField(name);
-            elem = classFactory.createElement(name.c_str(), eNum, * dNew);
+            auto elem = classFactory.createElement(name.c_str(), eNum, * dNew);
             elem->initializeFrom(& ir);
             elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
 #ifdef __PARALLEL_MODE
@@ -3817,7 +3812,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             // not subdivided elements inherit globNum, subdivided give -1
             // local elements have array partitions empty !
 #endif
-            ( * dNew )->setElement(eNum, elem);
+            ( * dNew )->setElement(eNum, std::move(elem));
         } else {
             OOFEM_ERROR("parent element missing");
         }
@@ -3831,9 +3826,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         DynamicInputRecord ir( *domain->giveCrossSection ( i ) );
         ir.giveRecordKeywordField(name);
 
-        crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
+        auto crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
         crossSection->initializeFrom(& ir);
-        ( * dNew )->setCrossSection(i, crossSection);
+        ( * dNew )->setCrossSection(i, std::move(crossSection));
     }
 
     // materials
@@ -3843,9 +3838,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         DynamicInputRecord ir( *domain->giveMaterial ( i ) );
         ir.giveRecordKeywordField(name);
 
-        mat = classFactory.createMaterial(name.c_str(), i, * dNew);
+        auto mat = classFactory.createMaterial(name.c_str(), i, * dNew);
         mat->initializeFrom(& ir);
-        ( * dNew )->setMaterial(i, mat);
+        ( * dNew )->setMaterial(i, std::move(mat));
     }
 
     // barriers
@@ -3854,10 +3849,10 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     for ( int i = 1; i <= nbarriers; i++ ) {
         DynamicInputRecord ir( *domain->giveNonlocalBarrier ( i ) );
         ir.giveRecordKeywordField(name);
-        
-        barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
+
+        auto barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
         barrier->initializeFrom(& ir);
-        ( * dNew )->setNonlocalBarrier(i, barrier);
+        ( * dNew )->setNonlocalBarrier(i, std::move(barrier));
     }
 
     // boundary conditions
@@ -3867,10 +3862,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         DynamicInputRecord ir( *domain->giveBc ( i ) );
         ir.giveRecordKeywordField(name);
 
-
-        bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
+        auto bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
         bc->initializeFrom(& ir);
-        ( * dNew )->setBoundaryCondition(i, bc);
+        ( * dNew )->setBoundaryCondition(i, std::move(bc));
     }
 
     // initial conditions
@@ -3879,9 +3873,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     for ( int i = 1; i <= nic; i++ ) {
         DynamicInputRecord ir( *domain->giveIc ( i ) );
 
-        ic = new InitialCondition(i, *dNew);
+        auto ic = std::make_unique<InitialCondition>(i, *dNew);
         ic->initializeFrom(& ir);
-        ( * dNew )->setInitialCondition(i, ic);
+        ( * dNew )->setInitialCondition(i, std::move(ic));
     }
 
     // load time functions
@@ -3891,9 +3885,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         DynamicInputRecord ir( *domain->giveFunction ( i ) );
         ir.giveRecordKeywordField(name);
 
-        func = classFactory.createFunction(name.c_str(), i, * dNew);
+        auto func = classFactory.createFunction(name.c_str(), i, * dNew);
         func->initializeFrom(& ir);
-        ( * dNew )->setFunction(i, func);
+        ( * dNew )->setFunction(i, std::move(func));
     }
 
     // sets
@@ -3903,11 +3897,10 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         DynamicInputRecord ir( *domain->giveSet ( i ) );
         ir.giveRecordKeywordField(name);
 
-        set = new Set(i, * dNew);
+        auto set = std::make_unique<Set>(i, * dNew);
         set->initializeFrom(& ir);
-        ( * dNew )->setSet(i, set);
+        ( * dNew )->setSet(i, std::move(set));
     }
-    
 
     // post initialize components
     ( * dNew )->postInitialize();

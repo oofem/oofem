@@ -19,15 +19,11 @@
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontCohesiveBranchFuncOneEl)
 
-EnrFrontCohesiveBranchFuncOneEl::EnrFrontCohesiveBranchFuncOneEl()
-{
-    mpBranchFunc = new CohesiveBranchFunction();
-}
+EnrFrontCohesiveBranchFuncOneEl::EnrFrontCohesiveBranchFuncOneEl() :
+    mpBranchFunc()
+{ }
 
-EnrFrontCohesiveBranchFuncOneEl::~EnrFrontCohesiveBranchFuncOneEl()
-{
-    delete mpBranchFunc;
-}
+EnrFrontCohesiveBranchFuncOneEl::~EnrFrontCohesiveBranchFuncOneEl() { }
 
 
 void EnrFrontCohesiveBranchFuncOneEl :: MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
@@ -58,7 +54,7 @@ void EnrFrontCohesiveBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double 
     double r = 0.0, theta = 0.0;
     EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t, iEfInput, flipTangent);
 
-    mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
+    mpBranchFunc.evaluateEnrFuncAt(oEnrFunc, r, theta);
 
 #ifdef DEBUG
     for ( double val:oEnrFunc ) {
@@ -84,7 +80,7 @@ void EnrFrontCohesiveBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< Fl
 
 
     size_t sizeStart = oEnrFuncDeriv.size();
-    mpBranchFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
+    mpBranchFunc.evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
 
     /**
      * Transform to global coordinates.
@@ -110,7 +106,7 @@ void EnrFrontCohesiveBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< doub
     double radius = gpCoord.distance(xTip);
 
     std :: vector< double >jumps;
-    mpBranchFunc->giveJump(jumps, radius);
+    mpBranchFunc.giveJump(jumps, radius);
 
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }

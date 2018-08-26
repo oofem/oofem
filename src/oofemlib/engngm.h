@@ -270,7 +270,7 @@ protected:
     /// Type of non linear formulation (total or updated formulation).
     enum fMode nonLinFormulation;
     /// Error estimator. Useful for adaptivity, or simply printing errors output.
-    ErrorEstimator *defaultErrEstimator;
+    std::unique_ptr<ErrorEstimator> defaultErrEstimator;
 
     /// Domain rank in a group of collaborating processes (0..groupSize-1).
     int rank;
@@ -346,9 +346,9 @@ public:
     bool giveSuppressOutput() const { return suppressOutput; }
 
     /** Service for accessing ErrorEstimator corresponding to particular domain */
-    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
+    virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator.get(); }
     /** Returns material interface representation for given domain */
-    virtual MaterialInterface *giveMaterialInterface(int n) { return NULL; }
+    virtual MaterialInterface *giveMaterialInterface(int n) { return nullptr; }
     void setNumberOfEquations(int id, int neq) {
         numberOfEquations = neq;
         domainNeqs.at(id) = neq;

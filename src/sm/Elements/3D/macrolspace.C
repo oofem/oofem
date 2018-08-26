@@ -152,8 +152,6 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 //assign values to DOF on the boundary according to definition on macrolspace and actual displacement stage
 void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 {
-    GeneralBoundaryCondition *GeneralBoundaryCond;
-    Function *timeFunct;
     DynamicInputRecord ir_func, ir_bc;
     FloatArray n(8), answer, localCoords;
     double displ;
@@ -175,11 +173,12 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 
     ir_func.setRecordKeywordField("constantfunction", 1);
     ir_func.setField(1.0, _IFT_ConstantFunction_f);
-    if ( ( timeFunct = classFactory.createFunction("constantfunction", 1, microDomain) ) == NULL ) {
+    auto timeFunct = classFactory.createFunction("constantfunction", 1, microDomain);
+    if ( !timeFunct ) {
         OOFEM_ERROR("Couldn't create constant time function");
     }
     timeFunct->initializeFrom(& ir_func);
-    microDomain->setFunction(1, timeFunct);
+    microDomain->setFunction(1, std::move(timeFunct));
 
 
     /*assign to each boundary node the form "bc 3 # # #", set 0s on free nodes
@@ -202,15 +201,16 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
                 ir_bc.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
-                if ( ( GeneralBoundaryCond = classFactory.createBoundaryCondition("boundarycondition", counter, microDomain) ) == NULL ) {
+                auto bc = classFactory.createBoundaryCondition("boundarycondition", counter, microDomain);
+                if ( !bc ) {
                     OOFEM_ERROR("Couldn't create boundary condition.");
                 }
-                GeneralBoundaryCond->initializeFrom(& ir_bc);
-                microDomain->setBoundaryCondition(counter, GeneralBoundaryCond);
+                bc->initializeFrom(& ir_bc);
+                microDomain->setBoundaryCondition(counter, std::move(bc));
                 counter++;
             }
         } else {
-            for ( Dof *dof: *DofMan ) {
+            for ( auto &dof: *DofMan ) {
                 dof->setBcId(0);
             }
         }

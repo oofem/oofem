@@ -206,31 +206,23 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 									crack->setGeometry(std::move(geom));
 
 									// Enrichment function
-									EnrichmentFunction *ef = new HeavisideFunction(1, mpDomain);
-									crack->setEnrichmentFunction(ef);
+                                    crack->setEnrichmentFunction(std::make_unique<HeavisideFunction>(1, mpDomain));
 
 									// Enrichment fronts
-//									EnrichmentFront *efStart = new EnrFrontLinearBranchFuncOneEl();
-									EnrichmentFront *efStart = new EnrFrontCohesiveBranchFuncOneEl();
-									crack->setEnrichmentFrontStart(efStart);
+                                    crack->setEnrichmentFrontStart(std::make_unique<EnrFrontCohesiveBranchFuncOneEl>());
 
-//									EnrichmentFront *efEnd = new EnrFrontLinearBranchFuncOneEl();
-									EnrichmentFront *efEnd = new EnrFrontCohesiveBranchFuncOneEl();
-									crack->setEnrichmentFrontEnd(efEnd);
-
-
-
+                                    crack->setEnrichmentFrontEnd(std::make_unique<EnrFrontCohesiveBranchFuncOneEl>());
 
 									///////////////////////////////////////
 									// Propagation law
 
 									// Options
-									PLPrincipalStrain *pl = new PLPrincipalStrain();
+									auto pl = std::make_unique<PLPrincipalStrain>();
 									pl->setRadius(0.1*mIncrementLength);
 									pl->setIncrementLength(mIncrementLength);
 									pl->setStrainThreshold(mPropStrainThreshold);
 
-									crack->setPropagationLaw(pl);
+									crack->setPropagationLaw(std::move(pl));
 
 									crack->updateDofIdPool();
 

@@ -52,7 +52,7 @@ public:
     InitModuleManager(EngngModel * emodel);
     virtual ~InitModuleManager();
 
-    InitModule *CreateModule(const char *name, int n, EngngModel *emodel) override;
+    std::unique_ptr<InitModule> CreateModule(const char *name, int n, EngngModel *emodel) override;
 
     /**
      * Performs the initialization of individual modules.

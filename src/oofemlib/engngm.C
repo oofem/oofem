@@ -91,7 +91,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     suppressOutput = false;
 
     number = i;
-    defaultErrEstimator = NULL;
     numberOfSteps = 0;
     numberOfEquations = 0;
     numberOfPrescribedEquations = 0;
@@ -155,8 +154,6 @@ EngngModel :: ~EngngModel()
     if ( outputStream ) {
         fclose(outputStream);
     }
-
-    delete defaultErrEstimator;
 
 #ifdef __PARALLEL_MODE
     if ( loadBalancingFlag ) {

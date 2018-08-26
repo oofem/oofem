@@ -1005,12 +1005,12 @@ contextIOResultType Element :: restoreContext(DataStream &stream, ContextMode mo
             // AND ALLOCATE NEW ONE
             integrationRulesArray.resize( _nrules );
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this ) );
+                integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this );
             }
         } else {
             for ( int i = 0; i < _nrules; i++ ) {
                 if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes[i] ) {
-                    integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this ) );
+                    integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this );
                 }
             }
         }

@@ -476,10 +476,9 @@ SolutionbasedShapeFunction :: setLoads(EngngModel &myEngngModel, int d)
     ir.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
 
     int bcID = myEngngModel.giveDomain(1)->giveNumberOfBoundaryConditions() + 1;
-    GeneralBoundaryCondition *myBodyLoad;
-    myBodyLoad = classFactory.createBoundaryCondition( "deadweight", bcID, myEngngModel.giveDomain(1) );
+    auto myBodyLoad = classFactory.createBoundaryCondition( "deadweight", bcID, myEngngModel.giveDomain(1) );
     myBodyLoad->initializeFrom(& ir);
-    myEngngModel.giveDomain(1)->setBoundaryCondition(bcID, myBodyLoad);
+    myEngngModel.giveDomain(1)->setBoundaryCondition(bcID, std::move(myBodyLoad));
 
     for ( auto &elem : myEngngModel.giveDomain(1)->giveElements() ) {
         IntArray *blArray;
@@ -614,10 +613,9 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
 
         bcID = d->giveDofManager()->giveDomain()->giveNumberOfBoundaryConditions() + 1;
 
-        GeneralBoundaryCondition *myBC;
-        myBC = classFactory.createBoundaryCondition( "boundarycondition", bcID, d->giveDofManager()->giveDomain() );
+        auto myBC = classFactory.createBoundaryCondition( "boundarycondition", bcID, d->giveDofManager()->giveDomain() );
         myBC->initializeFrom(& ir);
-        d->giveDofManager()->giveDomain()->setBoundaryCondition(bcID, myBC);
+        d->giveDofManager()->giveDomain()->setBoundaryCondition(bcID, std::move(myBC));
 
         d->setBcId(bcID);
     } else {

@@ -225,7 +225,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         Kbi.zero();
         Kii1KbiT.resize(totalInternalDofs, totalBoundaryDofs);
         Kii1KbiT.zero();
-        Kii.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        Kii = classFactory.createSparseMtrx(sparseMtrxType);
         Kii->buildInternalStructure(microEngngModel, 1, * this);
         microEngngModel->assemble(*Kii, tStep, TangentAssembler(rMode), * this, microDomain);
     }
@@ -236,7 +236,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     this->reqNumberOfDomainEquation = this->maxNumberOfDomainEquation;
     this->DofEquationNumbering = AllNodes;
 
-    stiffnessMatrixMicro.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+    stiffnessMatrixMicro = classFactory.createSparseMtrx(sparseMtrxType);
     stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, * this);
     microEngngModel->assemble(*stiffnessMatrixMicro, tStep, TangentAssembler(rMode), * this, microDomain);
 

@@ -49,12 +49,7 @@ SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(Interna
     this->domain = d;
 }
 
-SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField()
-{
-    if ( smoother ) {
-        delete smoother;
-    }
-}
+SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField() { }
 
 int
 SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, const FloatArray &coords, ValueModeType mode, TimeStep *tStep)

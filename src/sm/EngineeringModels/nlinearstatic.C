@@ -433,7 +433,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         // first step  create space for stiffness Matrix
         //
         if ( !stiffnessMatrix ) {
-            stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         }
 
         if ( !stiffnessMatrix ) {

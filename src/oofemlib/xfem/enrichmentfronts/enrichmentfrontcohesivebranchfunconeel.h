@@ -83,7 +83,7 @@ public:
     double giveSupportRadius() const override { return 0.0; }
 
 private:
-    CohesiveBranchFunction *mpBranchFunc;
+    CohesiveBranchFunction mpBranchFunc;
 };
 
 } /* namespace oofem */

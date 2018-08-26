@@ -70,7 +70,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
         return nMethod.get();
     }
 
-    nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+    nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( !nMethod ) {
         OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
     }
@@ -258,7 +258,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
-        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }

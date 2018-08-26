@@ -78,23 +78,10 @@ IntArray VTKXMLExportModule :: redToFull = {
     1, 5, 9, 8, 7, 4, 6, 3, 2
 };                                                                      //position of xx, yy, zz, yz, xz, xy in tensor
 
-VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
-{
-    primVarSmoother = NULL;
-    smoother = NULL;
-}
+VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport() { }
 
 
-VTKXMLExportModule :: ~VTKXMLExportModule()
-{
-    if ( this->smoother ) {
-        delete this->smoother;
-    }
-
-    if ( this->primVarSmoother ) {
-        delete this->primVarSmoother;
-    }
-}
+VTKXMLExportModule :: ~VTKXMLExportModule() { }
 
 
 IRResultType
@@ -123,11 +110,8 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 void
 VTKXMLExportModule :: initialize()
 {
-    if ( this->smoother ) {
-        delete this->smoother;
-        this->smoother = NULL;
-    }
-
+    this->smoother = nullptr;
+    this->primVarSmoother = nullptr;
     ExportModule :: initialize();
 }
 
@@ -2021,11 +2005,11 @@ VTKXMLExportModule :: giveSmoother()
 {
     Domain *d = emodel->giveDomain(1);
 
-    if ( this->smoother == NULL ) {
+    if ( !this->smoother ) {
         this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
     }
 
-    return this->smoother;
+    return this->smoother.get();
 }
 
 
@@ -2034,11 +2018,11 @@ VTKXMLExportModule :: givePrimVarSmoother()
 {
     Domain *d = emodel->giveDomain(1);
 
-    if ( this->primVarSmoother == NULL ) {
+    if ( !this->primVarSmoother ) {
         this->primVarSmoother = classFactory.createNodalRecoveryModel(NodalRecoveryModel :: NRM_NodalAveraging, d);
     }
 
-    return this->primVarSmoother;
+    return this->primVarSmoother.get();
 }
 
 

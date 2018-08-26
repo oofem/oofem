@@ -120,7 +120,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         }   // end shared dman
 #endif
         if ( isLocal(dman) ) {
-            for ( Dof *dof: *dman ) {
+            for ( auto &dof: *dman ) {
                 if ( dof->isPrimaryDof() ) {
                     if ( dof->giveEquationNumber(n) ) {
                         l_neqs++;
@@ -219,7 +219,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
 
             //} else if (dman->giveParallelMode() == DofManager_local) {
         } else {
-            for ( Dof *dof: *dman ) {
+            for ( auto &dof: *dman ) {
                 if ( dof->isPrimaryDof() ) {
                     int eq = dof->giveEquationNumber(n);
 

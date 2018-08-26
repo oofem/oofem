@@ -44,7 +44,7 @@ EmptyCS :: ~EmptyCS() { }
 
 Material* EmptyCS::giveMaterial(IntegrationPoint* ip)
 {
-    return NULL;
+    return nullptr;
 }
 
 } // end namespace oofem

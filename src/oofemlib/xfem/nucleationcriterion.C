@@ -45,16 +45,10 @@
 namespace oofem {
 
 NucleationCriterion::NucleationCriterion(Domain *ipDomain):
-    mpDomain(ipDomain),
-    mpEnrichmentFunc(NULL)
-{
+    mpDomain(ipDomain)
+{ }
 
-}
-
-NucleationCriterion::~NucleationCriterion()
-{
-    delete mpEnrichmentFunc;
-}
+NucleationCriterion::~NucleationCriterion() { }
 
 std::vector<std::unique_ptr<EnrichmentItem>> NucleationCriterion::nucleateEnrichmentItems()
 {
@@ -64,8 +58,8 @@ std::vector<std::unique_ptr<EnrichmentItem>> NucleationCriterion::nucleateEnrich
     return std::move( eiList );
 }
 
-IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) {
-
+IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) 
+{
     return IRRT_OK;
 }
 
@@ -83,7 +77,7 @@ int NucleationCriterion::instanciateYourself(DataReader &dr)
     }
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, mpDomain );
-    if ( mpEnrichmentFunc != NULL ) {
+    if ( mpEnrichmentFunc ) {
         mpEnrichmentFunc->initializeFrom(mir);
     } else {
         OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
