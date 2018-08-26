@@ -719,7 +719,6 @@ void pyclass_Domain()
         ;
 }
 
-#if 1
 
 /*****************************************************
 * FEMComponent
@@ -1862,5 +1861,4 @@ BOOST_PYTHON_MODULE (liboofem)
     def("vtkxml", raw_function(vtkxml,0));
 }
 
-#endif
 } // end namespace oofem

@@ -55,6 +55,8 @@
 #include "contextioresulttype.h"
 #include "metastep.h"
 #include "parallelcontext.h"
+#include "exportmodulemanager.h"
+#include "initmodulemanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -247,9 +249,9 @@ protected:
     int contextOutputStep;
 
     /// Export module manager.
-    ExportModuleManager *exportModuleManager;
+    ExportModuleManager exportModuleManager;
     /// Initialization module manager.
-    InitModuleManager *initModuleManager;
+    InitModuleManager initModuleManager;
 
     /// Domain mode.
     problemMode pMode;
@@ -753,9 +755,9 @@ public:
     /// Returns the time step number, when initial conditions should apply.
     int giveNumberOfTimeStepWhenIcApply() { return 0; }
     /// Returns reference to receiver's numerical method.
-    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep) { return NULL; }
+    virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep) { return nullptr; }
     /// Returns receiver's export module manager.
-    ExportModuleManager *giveExportModuleManager() { return exportModuleManager; }
+    ExportModuleManager *giveExportModuleManager() { return &exportModuleManager; }
     /// Returns reference to receiver timer (EngngModelTimer).
     EngngModelTimer *giveTimer() { return & timer; }
 

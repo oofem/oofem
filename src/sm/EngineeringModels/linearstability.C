@@ -315,7 +315,7 @@ void LinearStability :: doStepOutput(TimeStep *tStep)
             dman->updateYourself(&step);
         }
 
-        exportModuleManager->doOutput(&step);
+        exportModuleManager.doOutput(&step);
     }
 }
 

@@ -204,7 +204,7 @@ void EigenValueDynamic :: doStepOutput(TimeStep *tStep)
         // export using export manager
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
         tStep->setNumber(i);
-        exportModuleManager->doOutput(tStep);
+        exportModuleManager.doOutput(tStep);
     }
 }
 
