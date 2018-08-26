@@ -192,7 +192,7 @@ public:
 class FCMMaterial : public StructuralMaterial
 {
 protected:
-    IsotropicLinearElasticMaterial *linearElasticMaterial;
+    IsotropicLinearElasticMaterial linearElasticMaterial;
 
 public:
     FCMMaterial(int n, Domain *d);
@@ -205,8 +205,6 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
 
     double give(int aProperty, GaussPoint *gp) override;
-
-    IsotropicLinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,
@@ -332,10 +330,10 @@ protected:
                                                  GaussPoint *gp, TimeStep *tStep);
 
     /// returns overall Young's modulus
-    virtual double computeOverallElasticStiffness(void) { return linearElasticMaterial->giveYoungsModulus(); }
+    virtual double computeOverallElasticStiffness(void) { return linearElasticMaterial.giveYoungsModulus(); }
 
     /// returns overall shear modulus
-    virtual double computeOverallElasticShearModulus(void) { return linearElasticMaterial->giveShearModulus(); }
+    virtual double computeOverallElasticShearModulus(void) { return linearElasticMaterial.giveShearModulus(); }
 };
 } // end namespace oofem
 #endif // fcm_h

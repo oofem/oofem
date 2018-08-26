@@ -45,16 +45,12 @@
 namespace oofem {
 REGISTER_Material(Concrete2);
 
-Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d)
-{
-    linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
-}
+Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d),
+    linearElasticMaterial(n, d)
+{ }
 
 
-Concrete2 :: ~Concrete2()
-{
-    delete linearElasticMaterial;
-}
+Concrete2 :: ~Concrete2() { }
 
 IRResultType
 Concrete2 :: initializeFrom(InputRecord *ir)
@@ -81,7 +77,7 @@ Concrete2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, stirrEREF, _IFT_Concrete2_stirr_eref);
     IR_GIVE_FIELD(ir, stirrLAMBDA, _IFT_Concrete2_stirr_lambda);
 
-    result = this->linearElasticMaterial->initializeFrom(ir);
+    result = this->linearElasticMaterial.initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -153,7 +149,7 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
             value = propertyDictionary.at(aProperty);
             return value;
         } else {
-            return this->linearElasticMaterial->give(aProperty, gp);
+            return this->linearElasticMaterial.give(aProperty, gp);
             // error ("give: property not defined");
         }
     }
@@ -1240,7 +1236,7 @@ Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 //
 {
     // error ("givePlateLayerStiffMtrx: unable to compute");
-    linearElasticMaterial->givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
+    linearElasticMaterial.givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
 }
 
 

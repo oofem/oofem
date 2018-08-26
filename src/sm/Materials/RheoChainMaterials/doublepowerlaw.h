@@ -67,9 +67,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_DoublePowerLawMaterial_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
-
-protected:
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // doublepowerlaw_h

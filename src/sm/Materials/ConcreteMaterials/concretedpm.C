@@ -295,6 +295,7 @@ ConcreteDPMStatus :: setIPValue(const FloatArray &value, InternalStateType type)
 
 ConcreteDPM :: ConcreteDPM(int n, Domain *d) :
     StructuralMaterial(n, d),
+    linearElasticMaterial(n,d),
     effectiveStress(_Unknown)
 {
     tempKappaP = kappaP = 0.;
@@ -303,7 +304,6 @@ ConcreteDPM :: ConcreteDPM(int n, Domain *d) :
     yieldTol = 0.;
     newtonIter = 0;
     helem = 0.;
-    linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     href = 0.;
 #endif
@@ -311,7 +311,6 @@ ConcreteDPM :: ConcreteDPM(int n, Domain *d) :
 
 ConcreteDPM :: ~ConcreteDPM()
 {
-    delete linearElasticMaterial;
 }
 
 IRResultType
@@ -326,7 +325,7 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    result = linearElasticMaterial->initializeFrom(ir);
+    result = linearElasticMaterial.initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
@@ -1574,7 +1573,7 @@ ConcreteDPM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                              TimeStep *tStep)
 {
     ConcreteDPMStatus *status = giveConcreteDPMStatus(gp);
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    this->linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     if ( mode == SecantStiffness || mode == TangentStiffness ) {
         double omega = status->giveTempDamage();
         if ( omega > 0.9999 ) {
