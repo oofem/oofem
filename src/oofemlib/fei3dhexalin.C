@@ -64,7 +64,7 @@ FEI3dHexaLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
 
-    this->giveLocalDerivative(dNduvw, lcoords);
+    this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 8);
     for ( int i = 1; i <= 8; i++ ) {
         coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
@@ -488,7 +488,7 @@ FEI3dHexaLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     FloatMatrix dNduvw, coords;
-    this->giveLocalDerivative(dNduvw, lcoords);
+    this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 8);
     for ( int i = 1; i <= 8; i++ ) {
         coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
@@ -497,7 +497,7 @@ FEI3dHexaLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 }
 
 void
-FEI3dHexaLin :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords)
+FEI3dHexaLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &)
 {
     double u, v, w;
     u = lcoords.at(1);
