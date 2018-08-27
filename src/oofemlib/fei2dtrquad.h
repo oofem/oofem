@@ -53,6 +53,10 @@ public:
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
 
     // Bulk
+    static FloatArrayF<6> evalN(const FloatArrayF<2> &lcoords);
+    static FloatMatrixF<2,6> evaldNdxi(const FloatArrayF<2> &lcoords);
+    std::pair<double,FloatMatrixF<2,6>> evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const;
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

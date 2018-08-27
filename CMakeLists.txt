@@ -597,6 +597,10 @@ if (USE_OOFEG)
     install(TARGETS oofeg DESTINATION bin)
 endif ()
 
+add_executable(liboofem_benchmark ${oofem_SOURCE_DIR}/src/main/benchmark.C)
+set_target_properties(liboofem_benchmark PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_link_libraries (liboofem_benchmark liboofem benchmark)
+
 # Example of using liboofem with dynamic input record:
 add_executable(beam01 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam01.C)
 set_target_properties(beam01 PROPERTIES EXCLUDE_FROM_ALL TRUE)

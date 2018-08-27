@@ -77,18 +77,6 @@ public:
     /// Copy constructor.
     FloatMatrixF(const FloatMatrixF<N,M> &mat) : values(mat.values) {}
 
-    /// Assignment operator.
-    FloatMatrixF &operator=(std::initializer_list< std::initializer_list< double > > mat)
-    {
-        auto p = this->values.begin();
-        for ( auto col : mat ) {
-            for ( auto x : col ) {
-                * p = x;
-                p++;
-            }
-        }
-        return * this;
-    }
     /// Assignment operator
     FloatMatrixF &operator=(const FloatMatrixF<N,M> &mat)
     {
@@ -339,15 +327,6 @@ public:
     }
 };
 
-/// Convert to dynamic size matrix
-template<int N, int M>
-FloatMatrix to_dynamic( const FloatMatrixF<N,M> & x )
-{
-    FloatMatrix out(N,M);
-    std::copy(out.begin(), out.end(), x.begin());
-    return x;
-}
-
 template<int N, int M>
 std::ostream & operator << ( std::ostream & out, const FloatMatrixF<N,M> & x )
 {
@@ -457,7 +436,7 @@ FloatMatrixF<N*3,NSD> Nmatrix(const FloatArrayF<N> &n)
  * Constructs a local coordinary system for the given normal.
  * @param normal Normal (normalized).
  */
-FloatMatrixF<2,2> local_cs(const FloatArrayF<2> &normal)
+inline FloatMatrixF<2,2> local_cs(const FloatArrayF<2> &normal)
 {
     return {
         normal[0], normal[1],
@@ -465,7 +444,7 @@ FloatMatrixF<2,2> local_cs(const FloatArrayF<2> &normal)
     };
 }
 
-FloatMatrixF<3,3> local_cs(const FloatArrayF<3> &normal)
+inline FloatMatrixF<3,3> local_cs(const FloatArrayF<3> &normal)
 {
     // Create a permutated vector of n, *always* length 1 and significantly different from n.
     FloatArrayF<3> tangent = {normal[1], -normal[2], normal[0]};
@@ -629,6 +608,7 @@ FloatArrayF<N> column(const FloatMatrixF<N,M> &mat, int col)
     return ans;
 }
 
+#if 0
 /**
  * Symmetrizes and stores a matrix in Voigt form:
  * x_11, x_22, x_33, x_23, x_13, x_12, x_32, x_31, x_21
@@ -718,6 +698,7 @@ FloatArrayF<6> to_voigt_strain(const FloatMatrixF<3,3> &t)
         ( t(0, 1) + t(1, 0) )
     };
 }
+#endif
 
 /**
  * Constructs diagonal matrix from vector.
@@ -749,6 +730,7 @@ FloatArrayF<N*M> flatten(const FloatMatrixF<N,M> &m)
  * Swaps the fourth and sixth index in the array. This is to reorder the indices
  * from OOFEM's order to Abaqus' and vice versa.
  */
+#if 0
 void swap_46(FloatMatrixF<6,6> &t)
 {
     std::swap( t(3, 0), t(5, 0) );
@@ -779,6 +761,7 @@ void swap_46(FloatMatrixF<9,9> &t)
 
     t = tmp;
 }
+#endif
 
 /// Constructs an identity matrix
 template<int N>
@@ -928,13 +911,15 @@ double det(const FloatMatrixF<N,N> &mat)
 }
 
 /// Computes the determinant
-double det(const FloatMatrixF<2,2> &mat)
+template<>
+inline double det(const FloatMatrixF<2,2> &mat)
 {
     return mat(0, 0) * mat(1, 1) - mat(0, 1) * mat(1, 0);
 }
 
 /// Computes the determinant
-double det(const FloatMatrixF<3,3> &mat)
+template<>
+inline double det(const FloatMatrixF<3,3> &mat)
 {
     return mat(0, 0) * mat(1, 1) * mat(2, 2) + mat(0, 1) * mat(1, 2) * mat(2, 0) +
            mat(0, 2) * mat(1, 0) * mat(2, 1) - mat(0, 2) * mat(1, 1) * mat(2, 0) -
@@ -988,7 +973,8 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat)
 }
 
 /// Computes the inverse
-FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat)
+template<>
+inline FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat)
 {
     FloatMatrixF<2,2> out;
     double d = det(mat);
@@ -1000,7 +986,8 @@ FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat)
 }
 
 /// Computes the inverse
-FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat)
+template<>
+inline FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat)
 {
     FloatMatrixF<3,3> out;
     double d = det(mat);
@@ -1028,8 +1015,8 @@ std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(FloatMatrixF<N,N> &mat, int nf)
     OOFEM_ERROR("TODO");
 }
 
-/*
-std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(FloatMatrixF<2,2> &mat, int nf)
+template<>
+inline std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(FloatMatrixF<2,2> &mat, int nf)
 {
     double b = - (mat(0,0) + mat(1,1))/2.;
     double c = mat(0,0) * mat(1,1) - mat(0,1) * mat(1,0);
@@ -1038,10 +1025,9 @@ std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(FloatMatrixF<2,2> &mat, int nf)
         -b - std::sqrt(b*b - c)
     };
     FloatMatrixF<2,2> vecs;
-    OOFEM_ERRO("TODO"); // is this even worth specializing? I don't think we ever use it for 2x2. Typically just 3x3, 6x6, 9x9
-    return std::make_pair{vals, vecs};
+    OOFEM_ERROR("TODO"); // is this even worth specializing? I don't think we ever use it for 2x2. Typically just 3x3, 6x6, 9x9
+    return {vals, vecs};
 }
-*/
 
 /**
  * Solves the  system of linear equations @f$ K\cdot a = b @f$ .

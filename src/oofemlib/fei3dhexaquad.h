@@ -81,6 +81,10 @@ public:
     double giveCharacteristicLength(const FEICellGeometry &cellgeo) const;
 
     // Bulk
+    static FloatArrayF<20> evalN(const FloatArrayF<3> &lcoords);
+    static std::pair<double, FloatMatrixF<3,20>> evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo);
+    static FloatMatrixF<3,20> evaldNdxi(const FloatArrayF<3> &lcoords);
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
