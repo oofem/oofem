@@ -2,46 +2,48 @@ cemhyd02.out
 Test of CEMHYD3D hydration model, Q_pot = 534 J/g_cem, 300 kg cem/m3_con, i.e. max 160.2 kJ/m3_com; deltaT=160200/2.4/870=76.724 C
 #side YZ is kept at 20C and later released. Heat transport coefficient is assigned to opposite YZ side. The setup corresponds to 1D case.
 #8 independent CEMHYD3D models are used, for each integration point one instance.
-TransientTransport nsteps 10 deltat 3600.0 alpha 0.5 nmodules 1 rtolf 1e-6
+TransientTransport nsteps 10 deltat 3600.0 alpha 0.5 rtolf 1e-8 nmodules 2
 errorcheck
-#vtkxml tstep_all domain_all vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1
+vtkxml tstep_all domain_all primvars 1 6 vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
-ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 1 nltf 2 nset 3
-node 1 coords 3  0.0   0.0   4.0
-node 2 coords 3  0.0   4.0   4.0
-node 3 coords 3  4.0   4.0   4.0
-node 4 coords 3  4.0   0.0   4.0
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 1 nltf 2 nset 4
+node 1 coords 3  0.0   0.0   0.4
+node 2 coords 3  0.0   0.4   0.4
+node 3 coords 3  0.4   0.4   0.4
+node 4 coords 3  0.4   0.0   0.4
 node 5 coords 3  0.0   0.0   0.0
-node 6 coords 3  0.0   4.0   0.0
-node 7 coords 3  4.0   4.0   0.0
-node 8 coords 3  4.0   0.0   0.0
+node 6 coords 3  0.0   0.4   0.0
+node 7 coords 3  0.4   0.4   0.0
+node 8 coords 3  0.4   0.0   0.0
 Brick1ht 1 nodes 8 1 2 3 4 5 6 7 8
 #boundaryloads 2 2 5
 SimpleTransportCS 1 mat 1 set 1
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 CemhydMat 1 d 2400. k 1.7 c 870. file "cemhyd01_XML.src" eachGP 1 densityType 0 conductivityType 0 capacityType 0 castingtime 0.
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 20.0 isImposedTimeFunction 2 set 2
-constantsurfaceload 2 loadTimeFunction 1 dofs 1 10 components 1 10.0 properties 1 a 50.0 loadtype 3 set 3
-InitialCondition 1 dofs 1 10 Conditions 1 u 20.0 set 1
+constantsurfaceload 2 loadTimeFunction 1 dofs 1 10 components 1 20.0 properties 1 a 5.0 loadtype 3 set 3
+InitialCondition 1 dofs 1 10 Conditions 1 u 20.0 set 4
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 t 4 -1.e+5 15000 15001 1.e+7 f(t) 4 1.0 1.0 0.0 0.0
 Set 1 elementranges {1}
-Set 2 elementboundaries 2 1 3
+Set 2 nodes 4 1 2 5 6
 Set 3 elementboundaries 2 1 5
+Set 4 noderanges {(1 8)}
+
 
 #%BEGIN_CHECK% tolerance 1.e-3
 ## TIME
 ## Check temperature
 #NODE tStep 2 number 1 dof 10 unknown d value 2.00000000e+01
-#NODE tStep 2 number 3 dof 10 unknown d value 2.02000723e+01
-#NODE tStep 10 number 1 dof 10 unknown d value 5.40281630e+01
-#NODE tStep 10 number 3 dof 10 unknown d value 4.12759083e+01
+#NODE tStep 2 number 3 dof 10 unknown d value 2.55030970e+01
+#NODE tStep 10 number 1 dof 10 unknown d value 5.87740182e+01
+#NODE tStep 10 number 3 dof 10 unknown d value 5.25887194e+01
 ## Check degree of hydration
-#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 2.28292097e-02
-#ELEMENT tStep 2 number 1 gp 5 keyword 39 component 1 value 2.85766881e-02
-#ELEMENT tStep 10 number 1 gp 1 keyword 39 component 1 value 4.66584656e-01
-#ELEMENT tStep 10 number 1 gp 5 keyword 39 component 1 value 3.91491384e-01
+#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 6.53565654e-02
+#ELEMENT tStep 2 number 1 gp 5 keyword 39 component 1 value 6.53620289e-02
+#ELEMENT tStep 10 number 1 gp 1 keyword 39 component 1 value 5.41535843e-01
+#ELEMENT tStep 10 number 1 gp 5 keyword 39 component 1 value 5.80581479e-01
 #%END_CHECK%
 
 
