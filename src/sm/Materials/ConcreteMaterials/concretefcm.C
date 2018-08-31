@@ -46,7 +46,6 @@ ConcreteFCM :: ConcreteFCM(int n, Domain *d) : FCMMaterial(n, d), RandomMaterial
     Gf = Ft = 0.;
     softType = ST_Unknown;
     shearType = SHR_Unknown;
-    linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
 IRResultType
@@ -55,11 +54,6 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     result = FCMMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial->initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }

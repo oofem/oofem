@@ -52,7 +52,7 @@ public:
     virtual ~ExportModuleManager();
 
     IRResultType initializeFrom(InputRecord *ir) override;
-    ExportModule *CreateModule(const char *name, int num, EngngModel *emodel) override;
+    std::unique_ptr<ExportModule> CreateModule(const char *name, int num, EngngModel *emodel) override;
 
     /**
      * Writes the output. Loops over all modules and calls corresponding doOutput module service.

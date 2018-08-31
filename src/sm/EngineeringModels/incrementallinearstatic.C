@@ -76,7 +76,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
 {
     if ( !nMethod ) {
-        nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
         if ( !nMethod ) {
             OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
@@ -295,7 +295,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
 #endif
-    stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+    stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
     if ( !stiffnessMatrix ) {
         OOFEM_ERROR("sparse matrix creation failed");
     }

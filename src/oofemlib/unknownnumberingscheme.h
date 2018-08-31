@@ -82,8 +82,8 @@ class OOFEM_EXPORT EModelDefaultEquationNumbering : public UnknownNumberingSchem
 public:
     EModelDefaultEquationNumbering(void) : UnknownNumberingScheme() { }
 
-    virtual bool isDefault() const { return true; }
-    virtual int giveDofEquationNumber(Dof *dof) const {
+    bool isDefault() const override { return true; }
+    int giveDofEquationNumber(Dof *dof) const override {
         return dof->__giveEquationNumber();
     }
 };
@@ -99,7 +99,7 @@ class OOFEM_EXPORT EModelDefaultPrescribedEquationNumbering : public UnknownNumb
 public:
     EModelDefaultPrescribedEquationNumbering(void) : UnknownNumberingScheme() { }
 
-    virtual int giveDofEquationNumber(Dof *dof) const {
+    int giveDofEquationNumber(Dof *dof) const override {
         return dof->__givePrescribedEquationNumber();
     }
 };
@@ -119,8 +119,8 @@ public:
     DofIDEquationNumbering(bool prescribed, IntArray dofids) : 
         UnknownNumberingScheme(), dofids(std :: move(dofids)), prescribed(prescribed) { }
 
-    virtual bool isDefault() const { return !prescribed; }
-    virtual int giveDofEquationNumber(Dof *dof) const {
+    bool isDefault() const override { return !prescribed; }
+    int giveDofEquationNumber(Dof *dof) const override {
         DofIDItem id = dof->giveDofID();
         if ( dofids.contains(id) ) {
             return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();

@@ -206,7 +206,7 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     field->initialize(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
 
     if ( !effectiveMatrix ) {
-        effectiveMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        effectiveMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         effectiveMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 

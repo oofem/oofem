@@ -136,8 +136,6 @@ routine at the end. If converters are missing for some type (such as std::vector
 added at the end by simply instantiating these templates with the respective argument.
 */
 
-
-
 // copied from https://github.com/eudoxos/minieigen/blob/master/src/converters.hpp (written by myself)
 template<typename T>
 bool pySeqItemCheck(PyObject* o, int i){ return bp::extract<T>(bp::object(bp::handle<>(PySequence_GetItem(o,i)))).check(); }
@@ -146,7 +144,8 @@ T pySeqItemExtract(PyObject* o, int i){ return bp::extract<T>(bp::object(bp::han
 
 // AnyArray will be FloatArray or IntArray, Scalar is double or int
 template<typename AnyArray, typename Scalar>
-struct custom_AnyArray_from_sequence{
+struct custom_AnyArray_from_sequence
+{
     custom_AnyArray_from_sequence(){ bp::converter::registry::push_back(&convertible,&construct,bp::type_id<AnyArray>()); }
     static void* convertible(PyObject* obj_ptr){
         // dont check size, since FloatArray/IntArray are always dynamic-sized
@@ -170,7 +169,8 @@ struct custom_AnyArray_from_sequence{
 // copied from https://github.com/woodem/woo/blob/master/lib/pyutil/converters.hpp (written by myself)
 /*** python sequence to std::vector<T> ***/
 template<typename containedType>
-struct custom_vector_from_seq{
+struct custom_vector_from_seq
+{
     custom_vector_from_seq(){ bp::converter::registry::push_back(&convertible,&construct,bp::type_id<vector<containedType> >()); }
     static void* convertible(PyObject* obj_ptr){
         // the second condition is important, for some reason otherwise there were attempted conversions of Body to list which failed afterwards.
@@ -187,8 +187,9 @@ struct custom_vector_from_seq{
 };
 /*** std::vector<T> to python list ***/
 template<typename containedType>
-struct custom_vector_to_list{
-    static PyObject* convert(const vector<containedType>& v){
+struct custom_vector_to_list
+{
+    static PyObject* convert(const vector<containedType>& v) {
         bp::list ret; for(const containedType& e: v) ret.append(e);
         return bp::incref(ret.ptr());
     }
@@ -196,10 +197,10 @@ struct custom_vector_to_list{
 
 /** shorthand for registering both converter above **/
 template<typename T>
-void converters_cxxVector_pyList_2way(){
+void converters_cxxVector_pyList_2way()
+{
     custom_vector_from_seq<T>(); bp::to_python_converter<vector<T>,custom_vector_to_list<T>>();
 };
-
 
 
 
@@ -352,62 +353,60 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
 {
     PySparseMtrx(int n=0, int m=0): SparseMtrx(n,m) {}
 
-
-    void times(const FloatArray &x, FloatArray &answer) const {
+    void times(const FloatArray &x, FloatArray &answer) const override {
         this->get_override("times")();
     }
 
-    void times(double x) {
+    void times(double x) override {
         this->get_override("times")();
     }
 
-
-    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme& s) {
+    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme& s) override {
         return this->get_override("buildInternalStructure")(eModel, di, s);
     }
 
-    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme& r, const UnknownNumberingScheme &s) {
+    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme& r, const UnknownNumberingScheme &s) override {
         if (override f = this->get_override("buildInternalStructure")) {return f(eModel, di, r, s);}
         return this->get_override("buildInternalStructure")(eModel, di, r, s);
     }
 
-    int assemble(const IntArray &loc, const FloatMatrix &mat) {
+    int assemble(const IntArray &loc, const FloatMatrix &mat) override {
         return this->get_override("assemble")();
     }
 
-    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) {
+    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat) override {
         return this->get_override("assemble")();
     }
 
-    bool canBeFactorized() const {
+    bool canBeFactorized() const override {
         return this->get_override("canBeFactorized")();
     }
 
-    void zero() {
+    void zero() override {
         this->get_override("zero")();
     }
 
-    double &at(int i, int j) {
+    double &at(int i, int j) override {
         return this->get_override("at")();
     }
 
-    double at(int i, int j) const {
+    double at(int i, int j) const override {
         return this->get_override("at")();
     }
 
-    void toFloatMatrix(FloatMatrix &answer) const {
+    void toFloatMatrix(FloatMatrix &answer) const override {
         this->get_override("toFloatMatrix")();
     }
 
-    void printYourself() const {
+    void printYourself() const override {
         this->get_override("printYourself")();
     }
 
-    SparseMtrxType  giveType() const {
+    SparseMtrxType giveType() const override {
         return this->get_override("giveType")();
     }
 
-    bool isAsymmetric() const {
+    bool isAsymmetric() const override {
         return this->get_override("isAsymmetric")();
     }
 
@@ -415,7 +414,7 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
         return this->get_override("trans_mult")();
     }
 
-    const char *giveClassName() const {
+    const char *giveClassName() const override {
         return this->get_override("giveClassName")();
     }
 };
@@ -460,7 +459,8 @@ void pyclass_SpatialLocalizer()
 }
 
 
-void pyclass_UnknownNumberingScheme(){
+void pyclass_UnknownNumberingScheme()
+{
     class_<UnknownNumberingScheme,boost::noncopyable>("UnknownNumberingScheme",no_init)
         .def("giveDofEquationNumber",pure_virtual(&UnknownNumberingScheme::giveDofEquationNumber))
         .def("giveRequiredNumberOfDomainEquation",&UnknownNumberingScheme::giveRequiredNumberOfDomainEquation)
@@ -486,42 +486,42 @@ void pyclass_EngngModelContext()
 class PyEngngModel : public EngngModel, public wrapper<EngngModel>
 {
 public:
-    //PyEngngModel(int i) : EngngModel(i, NULL) {}
-    PyEngngModel(int i, EngngModel *_master = NULL) : EngngModel(i, _master) {}
+    //PyEngngModel(int i) : EngngModel(i, nullptr) {}
+    PyEngngModel(int i, EngngModel *_master = nullptr) : EngngModel(i, _master) {}
 
-    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) {
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) override {
         this->get_override("printDofOutputAt")();
     }
 
-    void solveYourself() {
+    void solveYourself() override {
         if (override f = this->get_override("solveYourself")) {f();return;}
         EngngModel::solveYourself();
     }
-    void solveYourselfAt(TimeStep *t) {
+    void solveYourselfAt(TimeStep *t) override {
         if (override f = this->get_override("solveYourselfAt")) {f(t); return;}
         EngngModel::solveYourselfAt(t);
     }
-    void terminate(TimeStep *t) {
+    void terminate(TimeStep *t) override {
         if (override f = this->get_override("terminate")) {f(t); return;}
         EngngModel::terminate(t);
     }
 
-    void updateYourself(TimeStep *t) {
+    void updateYourself(TimeStep *t) override {
         if (override f = this->get_override("updateYourself")) {f(t); return;}
         EngngModel::updateYourself(t);
     }
 
-    TimeStep* giveNextStep() {
+    TimeStep* giveNextStep() override {
         if (override f = this->get_override("giveNextStep")) {return f();}
         return this->get_override("giveNextStep")();
     }
 
-    void default_solveYourself() {return this->EngngModel::solveYourself();}
-    void default_solveYourselfAt(TimeStep* t) {return this->EngngModel::solveYourselfAt(t);}
-    void default_terminate(TimeStep* t) {return this->EngngModel::terminate(t);}
-    void default_updateYourself(TimeStep* t) {return this->EngngModel::updateYourself(t);}
-    TimeStep* default_giveNextStep() {return this->EngngModel::giveNextStep();}
-    MetaStep* default_giveMetaStep(int i) {return this->EngngModel::giveMetaStep(i);}
+    void default_solveYourself() { return this->EngngModel::solveYourself(); }
+    void default_solveYourselfAt(TimeStep* t) { return this->EngngModel::solveYourselfAt(t); }
+    void default_terminate(TimeStep* t) { return this->EngngModel::terminate(t); }
+    void default_updateYourself(TimeStep* t) { return this->EngngModel::updateYourself(t); }
+    TimeStep* default_giveNextStep() { return this->EngngModel::giveNextStep(); }
+    MetaStep* default_giveMetaStep(int i) { return this->EngngModel::giveMetaStep(i); }
 };
 
 void pyclass_EngngModel()
@@ -595,7 +595,7 @@ class PyExportModule : public ExportModule, public wrapper<ExportModule>
 public:
     PyExportModule(int i, EngngModel * e) : ExportModule(i, e) {}
 
-    void doOutput(TimeStep *tStep, bool forcedOutput=false) {
+    void doOutput(TimeStep *tStep, bool forcedOutput=false) override {
         this->get_override("doOutput")();
     }
 
@@ -617,16 +617,16 @@ void pyclass_ExportModule()
 *****************************************************/
 struct PyDataReader : DataReader, wrapper<DataReader>
 {
-    InputRecord *giveInputRecord(InputRecordType irType, int recordId)
+    InputRecord *giveInputRecord(InputRecordType irType, int recordId) override
     {
         return this->get_override("giveInputRecord")();
     }
 
-    void finish() {
+    void finish() override {
         this->get_override("finish")();
     }
 
-    std :: string giveReferenceName() const {
+    std :: string giveReferenceName() const override {
         return this->get_override("giveReferenceName")();
     }
 };
@@ -696,13 +696,13 @@ void pyclass_Domain()
         .def("resizeInitialConditions", &Domain::resizeInitialConditions)
         .def("resizeFunctions", &Domain::resizeFunctions)
 
-        .def("setDofManager", &Domain::setDofManager)
-        .def("setElement", &Domain::setElement)
-        .def("setCrossSection", &Domain::setCrossSection)
-        .def("setMaterial", &Domain::setMaterial)
-        .def("setBoundaryCondition", &Domain::setBoundaryCondition)
-        .def("setInitialCondition", &Domain::setInitialCondition)
-        .def("setFunction", &Domain::setFunction)
+        .def("setDofManager", &Domain::py_setDofManager)
+        .def("setElement", &Domain::py_setElement)
+        .def("setCrossSection", &Domain::py_setCrossSection)
+        .def("setMaterial", &Domain::py_setMaterial)
+        .def("setBoundaryCondition", &Domain::py_setBoundaryCondition)
+        .def("setInitialCondition", &Domain::py_setInitialCondition)
+        .def("setFunction", &Domain::py_setFunction)
 
         .def("checkConsistency", &Domain::checkConsistency)
         .def("giveConnectivityTable", &Domain::giveConnectivityTable, return_internal_reference<>())
@@ -753,7 +753,7 @@ public:
         }
         DofManager::giveUnknownVector(answer, dofMask, mode, stepN);
     }
-    bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) {
+    bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) override {
         if (override f = this->get_override("computeL2GTransformation")) { return f(answer, dofIDArry); }
         return DofManager::computeL2GTransformation(answer, dofIDArry);
     }
@@ -762,7 +762,7 @@ public:
     { return this->DofManager::giveUnknownVector(answer, dofMask, mode, stepN, padding); }
 };
 
-  void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding) = &DofManager::giveUnknownVector;
+void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding) = &DofManager::giveUnknownVector;
 
 void pyclass_DofManager()
 {
@@ -792,22 +792,19 @@ class PyElement : public Element, public wrapper<Element>
 public:
     PyElement (int n, Domain *d) : Element (n,d) {}
 
-    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) {
+    void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override {
         this->get_override("giveCharacteristicMatrix")();
     }
 
-    virtual void  giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) {
+    void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override {
         this->get_override("giveCharacteristicVector")();
     }
 
-    virtual double giveCharacteristicValue(CharType, TimeStep *) {
+    double giveCharacteristicValue(CharType, TimeStep *) override {
         return this->get_override("giveCharacteristicValue")();
     }
 
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const {
-        this->get_override("giveDefaultDofManDofIDMask")();
-    }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override {
         this->get_override("giveDofManDofIDMask")();
     }
 
@@ -815,9 +812,6 @@ public:
             ValueModeType mode, TimeStep *atTime) {
         return this->get_override("evaluateAt")(answer, coords,mode,atTime);
     }
-
-
-
 };
 
 
@@ -892,8 +886,8 @@ void pyclass_Material()
 struct PyStructuralMaterial : StructuralMaterial , wrapper<StructuralMaterial>
 {
     PyStructuralMaterial(int i, Domain *d) : StructuralMaterial(i,d) {}
-    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) {
-        if (override f = this->get_override("giveRealStressVector")) { f(answer,gp,reducedStrain,tStep);}
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override {
+        if (override f = this->get_override("giveRealStressVector")) { f(answer,gp,reducedStrain,tStep); }
         this->get_override("giveRealStressVector")(answer,gp,reducedStrain,tStep);
     }
 };
@@ -962,7 +956,7 @@ void pyclass_BoundaryCondition()
 struct PyLoad : Load , wrapper<Load>
 {
     PyLoad(int i, Domain *d) : Load(i,d) {}
-    void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) {
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override {
         if (override f = this->get_override("computeValueAt")) { f(answer,tStep,coords,mode);}
         this->get_override("computeValueAt")(answer,tStep,coords,mode);
     }
@@ -1066,17 +1060,17 @@ class PyField : public Field, public wrapper<Field>
 public:
     PyField (FieldType b): Field(b) {}
     int evaluateAt(FloatArray &answer, FloatArray &coords,
-            ValueModeType mode, TimeStep *atTime) {
+            ValueModeType mode, TimeStep *atTime) override {
         return this->get_override("evaluateAt")(answer, coords,mode,atTime);
     }
     int evaluateAt(FloatArray &answer, DofManager* dman,
-            ValueModeType mode, TimeStep *atTime) {
+            ValueModeType mode, TimeStep *atTime) override {
         return this->get_override("evaluateAt")(answer,dman,mode,atTime);
     }
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode) {
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override {
         return this->get_override("saveContext")(stream, mode);
     }
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) {
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override {
         return this->get_override("restoreContext")(stream, mode);
     }
 };
@@ -1101,13 +1095,15 @@ FloatArray Field_evaluateAtPos(Field* field, FloatArray& coords, ValueModeType m
 #endif
 
 // raise exception if there is a problem
-FloatArray Field_evaluateAtDman(Field* field, DofManager* dman, ValueModeType mode, TimeStep* atTime){
+FloatArray Field_evaluateAtDman(Field* field, DofManager* dman, ValueModeType mode, TimeStep* atTime)
+{
     FloatArray answer;
     int err=field->evaluateAt(answer,dman,mode,atTime);
     if(err) throw std::runtime_error("Error evaluating field at given DofManager.");
     return answer;
 }
-FloatArray Field_evaluateAtPos(Field* field, FloatArray coords, ValueModeType mode, TimeStep* atTime){
+FloatArray Field_evaluateAtPos(Field* field, FloatArray coords, ValueModeType mode, TimeStep* atTime)
+{
     FloatArray answer;
     int err=field->evaluateAt(answer,coords,mode,atTime);
     if(err) throw std::runtime_error("Error evaluating field at given position.");
@@ -1129,7 +1125,7 @@ void pyclass_Field()
     class_<Field, FieldPtr, boost::noncopyable>("Field", no_init)
         .def("evaluateAtPos",Field_evaluateAtPos,(bp::arg("coords"),bp::arg("mode")=VM_Unknown,bp::arg("atTime")=bp::object()))
         /*
-        making atTime=py::object() (i.e. NULL) by default leads to crash, look at that better;
+        making atTime=py::object() (i.e. nullptr) by default leads to crash, look at that better;
         the default should use the current timestep or anything that is meaningful; mandatory for now
         */
         .def("evaluateAtDman",Field_evaluateAtDman,(bp::arg("dman"),bp::arg("mode"),bp::arg("atTime")))
@@ -1480,7 +1476,7 @@ object engngModel(bp::tuple args, bp::dict kw)
     //args
     string aClass = extract<string>(args[0])();
     int number = len(args)>1? extract<int>(args[1])() : 0;
-    EngngModel* master = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
+    EngngModel* master = len(args)>2? extract<EngngModel*>(args[2])() : nullptr;
     std::unique_ptr<EngngModel> engngm = classFactory.createEngngModel(aClass.c_str(),number,master);
     if ( !engngm ) { OOFEM_LOG_ERROR("engngModel: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
@@ -1529,19 +1525,19 @@ object domain(bp::tuple args, bp::dict kw)
     // args
     int number =             len(args)>0? extract<int>(args[0])() : 0;
     int serialNumber =       len(args)>1? extract<int>(args[1])() : 0;
-    EngngModel *engngModel = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
+    EngngModel *engngModel = len(args)>2? extract<EngngModel*>(args[2])() : nullptr;
     domainType dType =       len(args)>3? extract<domainType>(args[3])() : _unknownMode;
-    Domain *d = new Domain(number,serialNumber,engngModel);
+    auto d = std::make_unique<Domain>(number,serialNumber,engngModel);
     d->setDomainType(dType);
     // output manager record
     OOFEMTXTInputRecord omir = makeOutputManagerOOFEMTXTInputRecordFrom(kw);
     d->giveOutputManager()->initializeFrom(&omir);
-    object ret = object(ptr(d));
+    object ret = object(ptr(d.release()));
     /* ????????????????????
     // sets the last created domain as default one for furtherscript
     temp_global["defaultDomain"] = ret;
     ???????????????????? */
-    return object(ptr(d));
+    return ret;
 }
 
 
@@ -1555,20 +1551,20 @@ object element(bp::tuple args, bp::dict kw)
     string aClass = extract<string>(args[0])();
     // extracts values from args if they are specified
     int number =     len(args)>1? extract<int>(args[1])() : 0;
-    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
     /* ????????????????
     // if no material is specified, set it to 1
     if (!kw.has_key("mat")) { kw["mat"] = 1; }
     // if no cross section is specified, set it to 1
     if (!kw.has_key("crosssect")) { kw["crosssect"] = 1; }
     // if no domain is specified and one already exists in the script, use that one
-    if (domain == NULL && temp_global.has_key("defaultDomain")) { domain = extract<Domain*>(temp_global["defaultDomain"])(); }
-    if (domain==NULL) { LOG_ERROR(oofem_errLogger,"wrong Domain"); }
+    if (domain == nullptr && temp_global.has_key("defaultDomain")) { domain = extract<Domain*>(temp_global["defaultDomain"])(); }
+    if (domain==nullptr) { LOG_ERROR(oofem_errLogger,"wrong Domain"); }
     ???????????????????? */
     // create Element (convert aClass to char* - expected by classFactory.createElement)
-    Element *elem = classFactory.createElement(aClass.c_str(),number,domain);
-    // if elem==NULL, something was wrong
-    if (elem==NULL) { OOFEM_LOG_ERROR("element: wrong input data"); }
+    auto elem = classFactory.createElement(aClass.c_str(),number,domain);
+    // if elem==nullptr, something was wrong
+    if (!elem) { OOFEM_LOG_ERROR("element: wrong input data"); }
     // sets globalNumber == number befor initializeFrom
     elem->setGlobalNumber(number);
     // construct OOFEMTXTInputRecord from bp::dict **kw
@@ -1576,7 +1572,7 @@ object element(bp::tuple args, bp::dict kw)
     // pass input record to elem
     elem->initializeFrom(&ir);
     // convert element to PyObject (expected by raw_function, which enables fun(*args,**kw) syntax in python)
-    return object(ptr(elem));
+    return object(ptr(elem.release()));
 }
 
 // auxiliary constructor for specific element type (name is passed as first argument)
@@ -1598,13 +1594,13 @@ object dofManager(bp::tuple args, bp::dict kw)
 {
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
-    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
-    DofManager *dofMan = classFactory.createDofManager(aClass.c_str(),number,domain);
-    if (dofMan==NULL) { OOFEM_LOG_ERROR("dofManager: wrong input data"); }
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
+    auto dofMan = classFactory.createDofManager(aClass.c_str(),number,domain);
+    if (!dofMan) { OOFEM_LOG_ERROR("dofManager: wrong input data"); }
     dofMan->setGlobalNumber(number);
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     dofMan->initializeFrom(&ir);
-    return object(ptr(dofMan));
+    return object(ptr(dofMan.release()));
 }
 
 object createDofManagerOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1623,12 +1619,12 @@ object generalBoundaryCondition(bp::tuple args, bp::dict kw)
 {
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
-    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
-    GeneralBoundaryCondition *bc = classFactory.createBoundaryCondition(aClass.c_str(),number,domain);
-    if (bc==NULL) { OOFEM_LOG_ERROR("generalBoundaryCondition: wrong input data"); }
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
+    auto bc = classFactory.createBoundaryCondition(aClass.c_str(),number,domain);
+    if (!bc) { OOFEM_LOG_ERROR("generalBoundaryCondition: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     bc->initializeFrom(&ir);
-    return object(ptr(bc));
+    return object(ptr(bc.release()));
 }
 
 object CreateBCOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1649,12 +1645,12 @@ object material(bp::tuple args, bp::dict kw)
 {
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
-    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
-    Material *mat = classFactory.createMaterial(aClass.c_str(),number,domain);
-    if (mat==NULL) { OOFEM_LOG_ERROR("material: wrong input data"); }
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
+    auto mat = classFactory.createMaterial(aClass.c_str(),number,domain);
+    if (!mat) { OOFEM_LOG_ERROR("material: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     mat->initializeFrom(&ir);
-    return object(ptr(mat));
+    return object(mat);
 }
 
 object CreateMaterialOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1672,12 +1668,12 @@ object crossSection(bp::tuple args, bp::dict kw)
 {
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
-    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
-    CrossSection *cs = classFactory.createCrossSection(aClass.c_str(),number,domain);
-    if (cs==NULL) { OOFEM_LOG_ERROR("crossSection: wrong input data"); }
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
+    auto cs = classFactory.createCrossSection(aClass.c_str(),number,domain);
+    if (!cs) { OOFEM_LOG_ERROR("crossSection: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     cs->initializeFrom(&ir);
-    return object(ptr(cs));
+    return object(cs);
 }
 
 object CreateCrossSectionOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1696,12 +1692,12 @@ object loadTimeFunction(bp::tuple args, bp::dict kw)
 {
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
-    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : NULL;
-    Function *ltf = classFactory.createFunction(aClass.c_str(),number,domain);
-    if (ltf==NULL) { OOFEM_LOG_ERROR("function: wrong input data"); }
+    Domain *domain = len(args)>2? extract<Domain*>(args[2])() : nullptr;
+    auto ltf = classFactory.createFunction(aClass.c_str(),number,domain);
+    if (!ltf) { OOFEM_LOG_ERROR("function: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     ltf->initializeFrom(&ir);
-    return object(ptr(ltf));
+    return object(ltf);
 }
 
 object CreateLoadTimeFunctionOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1720,12 +1716,12 @@ object exportModule(bp::tuple args, bp::dict kw)
 {
     string aClass = extract<string>(args[0])();
     int number =     len(args)>1? extract<int>(args[1])() : 0;
-    EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : NULL;
-    ExportModule *module = classFactory.createExportModule(aClass.c_str(),number,engngm);
-    if (module==NULL) { OOFEM_LOG_ERROR("exportModule: wrong input data"); }
+    EngngModel *engngm = len(args)>2? extract<EngngModel*>(args[2])() : nullptr;
+    auto module = classFactory.createExportModule(aClass.c_str(),number,engngm);
+    if (!module) { OOFEM_LOG_ERROR("exportModule: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     module->initializeFrom(&ir);
-    return object(ptr(module));
+    return object(module);
 }
 
 object CreateExportModuleOfType(const char* type, bp::tuple args, bp::dict kw)
@@ -1864,4 +1860,5 @@ BOOST_PYTHON_MODULE (liboofem)
     def("exportModule", raw_function(exportModule,1));
     def("vtkxml", raw_function(vtkxml,0));
 }
+
 } // end namespace oofem

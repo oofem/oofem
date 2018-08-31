@@ -50,6 +50,7 @@
 #include "microplanematerial.h"
 #include "structuralnonlocalmaterialext.h"
 #include "matconst.h"
+#include "sm/Materials/isolinearelasticmaterial.h"
 #include "sm/Materials/structuralms.h"
 #include "materialmapperinterface.h"
 #include "mmaclosestiptransfer.h"
@@ -184,7 +185,7 @@ protected:
     MDMModeType mdmMode;
 
     /// Reference to bulk (undamaged) material.
-    StructuralMaterial *linearElasticMaterial;
+    IsotropicLinearElasticMaterial linearElasticMaterial;
 
     /// Flag indicating local or nonlocal mode.
     int nonlocal;
@@ -192,7 +193,7 @@ protected:
     double R;
 
     ///cached source element set used to map internal variables (adaptivity), created on demand
-    Set *sourceElemSet;
+    std::unique_ptr<Set> sourceElemSet;
 
 #ifdef MDM_MAPPING_DEBUG
     /// Mapper used to map internal variables in adaptivity.
@@ -227,24 +228,18 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MDM(int n, Domain * d) : MicroplaneMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d), MaterialModelMapperInterface()
+    MDM(int n, Domain * d) : MicroplaneMaterial(n, d), 
+        StructuralNonlocalMaterialExtensionInterface(d),
+        MaterialModelMapperInterface(),
+        linearElasticMaterial(n, d)
     {
-        linearElasticMaterial = NULL;
         nonlocal = 0;
         type_dam = 0;
         type_soft = 0;
         mdm_Ep = mdm_Efp = -1.0;
-        sourceElemSet = NULL;
     }
     /// Destructor.
-    virtual ~MDM() {
-        if ( linearElasticMaterial ) {
-            delete linearElasticMaterial;
-        }
-        if ( sourceElemSet ) {
-            delete sourceElemSet;
-        }
-    }
+    virtual ~MDM() { }
 
     int hasMaterialModeCapability(MaterialMode mode) override;
 
@@ -303,9 +298,6 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    /// Returns reference to undamaged (bulk) material.
-    StructuralMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
-
     MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) override { return nullptr; }
     void computeDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,
                              GaussPoint *gp, TimeStep *tStep);

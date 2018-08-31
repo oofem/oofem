@@ -161,9 +161,9 @@ protected:
     /// Smoother type.
     NodalRecoveryModel :: NodalRecoveryModelType stype;
     /// Smoother.
-    NodalRecoveryModel *smoother;
+    std::unique_ptr<NodalRecoveryModel> smoother;
     /// Smoother for primary variables.
-    NodalRecoveryModel *primVarSmoother;
+    std::unique_ptr<NodalRecoveryModel> primVarSmoother;
 
     /// particle export flag
     bool particleExportFlag;

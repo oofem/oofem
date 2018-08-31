@@ -83,7 +83,7 @@ int Delamination :: instanciateYourself(DataReader &dr)
     }
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
-    if ( mpEnrichmentFunc != NULL ) {
+    if ( mpEnrichmentFunc ) {
         mpEnrichmentFunc->initializeFrom(mir);
     } else {
         OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
@@ -108,8 +108,8 @@ int Delamination :: instanciateYourself(DataReader &dr)
 
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
-        mpEnrichmentFrontStart = new EnrFrontDoNothing(this->giveNumber());
-        mpEnrichmentFrontEnd = new EnrFrontDoNothing(this->giveNumber());
+        mpEnrichmentFrontStart = std::make_unique<EnrFrontDoNothing>(this->giveNumber());
+        mpEnrichmentFrontEnd = std::make_unique<EnrFrontDoNothing>(this->giveNumber());
     } else {
         std :: string enrFrontNameStart, enrFrontNameEnd;
 
@@ -117,7 +117,7 @@ int Delamination :: instanciateYourself(DataReader &dr)
         result = enrFrontStartIr->giveRecordKeywordField(enrFrontNameStart);
 
         mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
-        if ( mpEnrichmentFrontStart != NULL ) {
+        if ( mpEnrichmentFrontStart ) {
             mpEnrichmentFrontStart->initializeFrom(enrFrontStartIr);
             //printf("EnrichmentFrontStart : %s \n", mpEnrichmentFrontStart->giveClassName()); 
         } else {
@@ -128,7 +128,7 @@ int Delamination :: instanciateYourself(DataReader &dr)
         result = enrFrontEndIr->giveRecordKeywordField(enrFrontNameEnd);
 
         mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
-        if ( mpEnrichmentFrontEnd != NULL ) {
+        if ( mpEnrichmentFrontEnd ) {
             mpEnrichmentFrontEnd->initializeFrom(enrFrontEndIr);
             //printf("EnrichmentFrontEnd   : %s \n", mpEnrichmentFrontEnd->giveClassName()); 
         } else {
@@ -139,7 +139,7 @@ int Delamination :: instanciateYourself(DataReader &dr)
 
     // Instantiate PropagationLaw
     if ( mPropLawIndex == 0 ) {
-        mpPropagationLaw = new PLDoNothing();
+        mpPropagationLaw = std::make_unique<PLDoNothing>();
     } else {
         std :: string propLawName;
 
@@ -147,7 +147,7 @@ int Delamination :: instanciateYourself(DataReader &dr)
         result = propLawir->giveRecordKeywordField(propLawName);
 
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
-        if ( mpPropagationLaw != NULL ) {
+        if ( mpPropagationLaw ) {
             mpPropagationLaw->initializeFrom(propLawir);
         } else {
             OOFEM_ERROR( "Failed to create propagation law (%s)", propLawName.c_str() );
@@ -219,10 +219,10 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 bool 
 Delamination :: hasInitiationCriteria()
 {
-    if (this->initiationFactor < 1e6 ) { // less than default
+    if ( this->initiationFactor < 1e6 ) { // less than default
         return true;
     }
-    
+
     return false;
 }
 
@@ -373,7 +373,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     int numberOfLayers(0);
     for (int iCS : this->crossSectionNum) {
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(iCS) );
-        if ( layeredCS == NULL ) {
+        if ( !layeredCS ) {
             OOFEM_WARNING("Delamination EI requires a valid layered cross section number input: see record '%s'.", _IFT_Delamination_csnum);
             return IRRT_BAD_FORMAT;
         } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
@@ -392,7 +392,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
         
         
         if (checkCS) {
-            if ( layeredCS->give(CS_Thickness, FloatArray(), NULL, false) != totalThickness ) {
+            if ( layeredCS->give(CS_Thickness, FloatArray(), nullptr, false) != totalThickness ) {
                 OOFEM_WARNING("Delamination cross section have different totalThickness: see record '%s'.", _IFT_Delamination_csnum);
                 return IRRT_BAD_FORMAT;
             }
@@ -403,7 +403,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
             
         } else 
         numberOfLayers = layeredCS->giveNumberOfLayers();
-        totalThickness = layeredCS->give(CS_Thickness, FloatArray(), NULL, false); // no position available
+        totalThickness = layeredCS->give(CS_Thickness, FloatArray(), nullptr, false); // no position available
         for ( int i = 1 ; i <= numberOfLayers ; i++) {
             double layerThickness = layeredCS->giveLayerThickness(i);
             if (checkCS) {
@@ -442,7 +442,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 #else
     // old csnum (int version). NB: this was a bug since element nodes that where not part of the cross section could be enriched. 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
-    if ( layeredCS == NULL ) {
+    if ( !layeredCS ) {
         OOFEM_WARNING("Delamination EI requires a valid layered cross section number input: see record '%s'.", _IFT_Delamination_csnum);
         return IRRT_BAD_FORMAT;
     } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
@@ -461,7 +461,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     // compute xi-coord of the delamination
     this->delamXiCoord = -1.0;
-    double totalThickness = layeredCS->give(CS_Thickness, FloatArray(), NULL, false); // no position available
+    double totalThickness = layeredCS->give(CS_Thickness, FloatArray(), nullptr, false); // no position available
     for ( int i = 1; i <= this->interfaceNum.at(1); i++ ) {
         this->delamXiCoord += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
         this->xiBottom += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;

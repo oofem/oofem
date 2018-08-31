@@ -72,7 +72,7 @@ NlDEIDynamic :: ~NlDEIDynamic()
 NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
-        nMethod.reset(classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this));
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     }
     return nMethod.get();
 }

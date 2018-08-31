@@ -375,6 +375,9 @@ protected:
     enum Concrete_VertexType { VT_Regular, VT_Tension, VT_Compression };
     Concrete_VertexType vertexType;
 
+    /// Linear elastic material
+    IsotropicLinearElasticMaterial linearElasticMaterial;
+
     /**
      * Parameters of the yield surface of the plasticity model. fc is the uniaxial compressive strength, ft the uniaxial tensile strength and ecc controls the out of roundness of the deviatoric section.
      */
@@ -417,9 +420,6 @@ protected:
 
     /// Element size (to be used in fracture energy approach (crack band).
     double helem;
-
-    /// Pointer for linear elastic material
-    LinearElasticMaterial *linearElasticMaterial;
 
     /// Elastic Young's modulus.
     double eM;
@@ -473,8 +473,6 @@ public:
 
     ConcreteDPMStatus *giveConcreteDPMStatus(GaussPoint *gp) const
     { return static_cast< ConcreteDPMStatus * >( this->Material :: giveStatus(gp) ); }
-
-    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     void giveRealStressVector_3d(FloatArray &answer,
                               GaussPoint *gp,

@@ -58,13 +58,13 @@ public:
      * Member function that computes principal values of receiver (stress vector).
      * @param answer computed principal values (sorted)
      */
-    void computePrincipalValues(FloatArray &answer) const;
+    void computePrincipalValues(FloatArray &answer) const override;
     /**
      * Computes principal values and directions of receiver vector.
      * @param answer Computed principal values (sorted).
      * @param dir Principal directions (stored column wise).
      */
-    void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const;
+    void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) const override;
     /**
      * Computes split of receiver into deviatoric and volumetric part.
      * @param dev Computed deviatoric part.
@@ -79,7 +79,7 @@ public:
      */
     void computeDeviatoricVolumetricSum(StressVector &answer, double vol) const;
     /// Prints receiver on stdout, useful for debugging.
-    void printYourself() const;
+    void printYourself() const override;
     /**
      * Computes the first invariant I1 of the stress.
      * @return First invariant.
@@ -153,7 +153,7 @@ public:
 
 protected:
     void giveTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                               int transpose = 0) const;
+                               int transpose = 0) const override;
 };
 } // end namespace oofem
 #endif // stressvector_h

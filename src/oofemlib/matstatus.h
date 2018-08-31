@@ -94,7 +94,7 @@ public:
     /// Destructor.
     virtual ~MaterialStatus() { }
     /// Print receiver's output to given stream.
-    virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
+    void printOutputAt(FILE *file, TimeStep *tStep) override { }
 
     /**
      * Initializes the temporary internal variables, describing the current state according to
@@ -105,7 +105,7 @@ public:
      * Update equilibrium history variables according to temp-variables.
      * Invoked, after new equilibrium state has been reached.
      */
-    virtual void updateYourself(TimeStep *) { }
+    void updateYourself(TimeStep *) override { }
     /**
      * Returns the value of material model property stored in receiving status.
      * This is typically used when random variation of some material property is considered,
@@ -119,18 +119,6 @@ public:
      * in this case the individual values are to be stored in status (they are no longer material constants)
      */
     virtual void setMaterialProperty(int propID, double value) { }
-
-    /**
-     * Allows to set the value of a specific variable, identified by varID.
-     * The meaning of varID is defined in each specific implementation
-     * of the method depending on the material model.
-     * This method can be used to set the initial values of internal
-     * variables, stresses, etc., which have been previously determined
-     * by another simulation (e.g. of the manufacturing process).
-     */
-    virtual void setStatusVariable(int varID, double value) { }
-
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // matstatus_h

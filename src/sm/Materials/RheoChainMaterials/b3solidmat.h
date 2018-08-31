@@ -124,11 +124,10 @@ public:
     }
     virtual ~B3SolidMaterial() { }
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &reducedStrain, TimeStep *tStep);
-    //virtual void updateYourself(GaussPoint *gp, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
+                              const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    virtual void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     const char *giveClassName() const override { return "B3SolidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_B3SolidMaterial_Name; }
@@ -137,10 +136,10 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
-    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
 
 protected:
-    virtual int hasIncrementalShrinkageFormulation() { return 1; }
+    int hasIncrementalShrinkageFormulation() override { return 1; }
 
     void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -158,16 +157,16 @@ protected:
     double inverse_sorption_isotherm(double w);
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
-    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep);
+    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
 
     /// Update of partial moduli of individual chain units
-    virtual void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep);
+    void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void computeCharTimes();
+    void computeCharTimes() override;
 
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     /**
      * Computes microprestress at given time step and GP.

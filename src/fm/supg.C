@@ -225,7 +225,7 @@ SUPG :: ~SUPG()
 NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !this->nMethod ) {
-        this->nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) ); 
+        this->nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
         if ( !this->nMethod ) { 
             OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
@@ -512,7 +512,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         incrementalSolutionVector.resize(neq);
 
-        lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        lhs = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }

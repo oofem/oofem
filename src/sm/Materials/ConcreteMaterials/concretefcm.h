@@ -96,9 +96,7 @@ class ConcreteFCM : public FCMMaterial, public RandomMaterialExtensionInterface
 {
 public:
     ConcreteFCM(int n, Domain *d);
-    virtual ~ConcreteFCM() {
-        delete linearElasticMaterial;
-    }
+    virtual ~ConcreteFCM() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
     const char *giveClassName() const override { return "ConcreteFCM"; }

@@ -104,7 +104,7 @@ public:
     MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
     virtual ~MPSDamMaterialStatus() { }
 
-    virtual const FloatArray &giveViscoelasticStressVector() const { return effectiveStressVector; }
+    const FloatArray &giveViscoelasticStressVector() const override { return effectiveStressVector; }
     /// Assigns tempStressVector to given vector v.
     void letTempViscoelasticStressVectorBe(FloatArray v) { tempEffectiveStressVector = std :: move(v); }
     virtual const FloatArray &giveTempViscoelasticStressVector() const { return tempEffectiveStressVector; }
@@ -240,7 +240,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 
     double givee0(GaussPoint *gp);
     double givegf(GaussPoint *gp);
@@ -283,30 +283,25 @@ public:
     virtual double computeTensileStrength(double equivalentTime);
     virtual double computeFractureEnergy(double equivalentTime);
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep);
-
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
-
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
-                                       TimeStep *tStep);
+                                       TimeStep *tStep) override;
 
+    void givePlaneStressStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-protected:
+    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
+                                  MatResponseMode mode,
+                                  GaussPoint *gp,
+                                  TimeStep *tStep) override;
 
-    //virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep);
+    void give1dStressStiffMtrx(FloatMatrix &answer,
+                               MatResponseMode mode,
+                               GaussPoint *gp,
+                               TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // mpsdammat_h

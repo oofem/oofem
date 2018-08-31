@@ -86,12 +86,13 @@
 
 
 namespace oofem {
-EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
+EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs(),
+    exportModuleManager(this),
+    initModuleManager(this)
 {
     suppressOutput = false;
 
     number = i;
-    defaultErrEstimator = NULL;
     numberOfSteps = 0;
     numberOfEquations = 0;
     numberOfPrescribedEquations = 0;
@@ -111,8 +112,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     pMode                 = _processor;  // for giveContextFile()
     pScale                = macroScale;
 
-    exportModuleManager   = new ExportModuleManager(this);
-    initModuleManager     = new InitModuleManager(this);
     master                = _master; // master mode by default
     // create context if in master mode; otherwise request context from master
     if ( master ) {
@@ -142,10 +141,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 
 EngngModel :: ~EngngModel()
 {
-    delete exportModuleManager;
-
-    delete initModuleManager;
-
     // master deletes the context
     if ( master == NULL ) {
         delete context;
@@ -156,14 +151,7 @@ EngngModel :: ~EngngModel()
         fclose(outputStream);
     }
 
-    delete defaultErrEstimator;
-
 #ifdef __PARALLEL_MODE
-    if ( loadBalancingFlag ) {
-        delete lb;
-        delete lbm;
-    }
-
     delete communicator;
     delete nonlocCommunicator;
     delete commBuff;
@@ -226,8 +214,8 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const cha
 
     // instanciate receiver
     this->initializeFrom(ir);
-    exportModuleManager->initializeFrom(ir);
-    initModuleManager->initializeFrom(ir);
+    exportModuleManager.initializeFrom(ir);
+    initModuleManager.initializeFrom(ir);
 
     if ( this->nMetaSteps == 0 ) {
         inputReaderFinish = false;
@@ -237,12 +225,12 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const cha
     }
 
     // instanciate initialization module manager
-    initModuleManager->instanciateYourself(dr, ir);
+    initModuleManager.instanciateYourself(dr, ir);
     // instanciate export module manager
-    exportModuleManager->instanciateYourself(dr, ir);
+    exportModuleManager.instanciateYourself(dr, ir);
     this->instanciateDomains(dr);
 
-    exportModuleManager->initialize();
+    exportModuleManager.initialize();
 
     // Milan ??????????????????
     //GPImportModule* gim = new GPImportModule(this);
@@ -659,7 +647,7 @@ EngngModel :: terminate(TimeStep *tStep)
         this->doStepOutput(tStep);
         fflush( this->giveOutputStream() );
     } else {
-        exportModuleManager->doOutput(tStep);
+        exportModuleManager.doOutput(tStep);
     }
 
     this->saveStepContext(tStep, CM_State | CM_Definition);
@@ -675,7 +663,7 @@ EngngModel :: doStepOutput(TimeStep *tStep)
     }
 
     // export using export manager
-    exportModuleManager->doOutput(tStep);
+    exportModuleManager.doOutput(tStep);
 }
 
 void
@@ -1850,7 +1838,7 @@ EngngModel :: terminateAnalysis()
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
     OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
     OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", uhrs, umin, usec);
-    exportModuleManager->terminate();
+    exportModuleManager.terminate();
 }
 
 int
@@ -1895,7 +1883,7 @@ EngngModel :: postInitialize()
 void
 EngngModel :: init()
 {
-    initModuleManager->doInit();
+    initModuleManager.doInit();
 }
 
 

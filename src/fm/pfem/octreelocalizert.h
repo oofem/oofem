@@ -129,19 +129,19 @@ public:
     }
     bool contains(const FloatArray& coords) const
     {
-      for ( int i = 1; i <= coords.giveSize(); i++ ) {
-	if ( spatialMask.at(i) ) {
-	  if ( coords.at(i) < this->origin.at(i) ) {
-	    return 0;
-	  }
-	  
-	  if ( coords.at(i) > ( this->origin.at(i) + this->size ) ) {
-	    return 0;
-	  }
-	}
-      }
+        for ( int i = 1; i <= coords.giveSize(); i++ ) {
+            if ( spatialMask.at(i) ) {
+                if ( coords.at(i) < this->origin.at(i) ) {
+                    return 0;
+                }
 
-      return 1;
+                if ( coords.at(i) > ( this->origin.at(i) + this->size ) ) {
+                    return 0;
+                }
+            }
+        }
+
+        return 1;
     }
 };
 
@@ -546,7 +546,7 @@ public:
      * @param cell Octant cell to be tested
      * @returns true if the node is contained in the cell, false otherwise
      */
-    bool evaluate(int &nodeNr, OctantRecT< int > *cell)
+    bool evaluate(int &nodeNr, OctantRecT< int > *cell) override
     {
         FloatArray coords(3);
         for ( int i = 1; i <= 3; i++ ) {
@@ -560,11 +560,11 @@ public:
         }
     };
 
-    void registerInsertion(int &nodeNr, LocalInsertionData< int >LIdata) { }
+    void registerInsertion(int &nodeNr, LocalInsertionData< int >LIdata) override { }
 
-    std :: list< LocalInsertionData< int > > *giveInsertionList(int &nodeNr)
+    std :: list< LocalInsertionData< int > > *giveInsertionList(int &nodeNr) override
     {
-        return NULL;
+        return nullptr;
     }
 };
 
@@ -592,7 +592,7 @@ public:
      * @param cell Octant cell to be tested
      * @returns true if the cirumscribed circle of the circle lies inside or contains a part of the cell, false otherwise
      */
-    bool evaluate(DelaunayTriangle * &DTptr, OctantRecT< DelaunayTriangle * > *cell)
+    bool evaluate(DelaunayTriangle * &DTptr, OctantRecT< DelaunayTriangle * > *cell) override
     {
         double radius = DTptr->giveCircumRadius();
         FloatArray centerCoords(3);
@@ -606,11 +606,11 @@ public:
             return true;
         }
     }
-    void registerInsertion(DelaunayTriangle * &TEptr, LocalInsertionData< DelaunayTriangle * >LIdata)
+    void registerInsertion(DelaunayTriangle * &TEptr, LocalInsertionData< DelaunayTriangle * >LIdata) override
     {
         ( TEptr->giveListOfCellsAndPosition() )->push_back(LIdata);
     }
-    std :: list< LocalInsertionData< DelaunayTriangle * > > *giveInsertionList(DelaunayTriangle * &DTptr)
+    std :: list< LocalInsertionData< DelaunayTriangle * > > *giveInsertionList(DelaunayTriangle * &DTptr) override
     {
         return DTptr->giveListOfCellsAndPosition();
     }
@@ -676,7 +676,7 @@ public:
      * Gives the starting position of the search
      * @param position startingPosition
      */
-    void giveStartingPosition(FloatArray &position)
+    void giveStartingPosition(FloatArray &position) override
     {
         position = * startingPosition;
     }
@@ -687,7 +687,7 @@ public:
      * @param nodeNr Number of the node in the domain list
      * @returns true after evaluation is processed.
      */
-    bool evaluate(int &nodeNr)
+    bool evaluate(int &nodeNr) override
     {
         if ( initFlag ) {
             double distance = startingPosition->distance( this->domain->giveNode(nodeNr)->giveCoordinates() );
@@ -714,16 +714,16 @@ public:
      * Gives the closest nodes
      * @param answer List containing numbers of the closest nodes
      */
-    void giveResult(std :: list< int > &answer) {
+    void giveResult(std :: list< int > &answer) override {
         answer = closestNodeIndices;
     }
 
-    bool isBBXStage1Defined(BoundingBox &BBXStage1)
+    bool isBBXStage1Defined(BoundingBox &BBXStage1) override
     {
         return false;
     }
 
-    bool isBBXStage2Defined(BoundingBox &BBXStage2)
+    bool isBBXStage2Defined(BoundingBox &BBXStage2) override
     {
         if ( initFlag ) {
             BBXStage2.setOrigin(* startingPosition);
@@ -766,7 +766,7 @@ public:
      * @param DTptr Delaunay triangle. nodeNr Number of the node in the domain list
      * @returns true if the circumscribed circle of the Delaunay triangle contains the point, false otherwise
      */
-    bool evaluate(DelaunayTriangle * &DTptr)
+    bool evaluate(DelaunayTriangle * &DTptr) override
     {
         double radius = DTptr->giveCircumRadius();
         FloatArray centerCoords(3);
@@ -786,7 +786,7 @@ public:
      * Gives the starting position of the search
      * @param position startingPosition
      */
-    void giveStartingPosition(FloatArray &answer)
+    void giveStartingPosition(FloatArray &answer) override
     {
         answer = * startingPosition;
     }
@@ -795,14 +795,14 @@ public:
      * Gives the triangles containing the node
      * @param answer List containing Delaunay triangles
      */
-    void giveResult(std :: list< DelaunayTriangle * > &answer)
+    void giveResult(std :: list< DelaunayTriangle * > &answer) override
     {
         answer = result;
     }
 
     // neither stage1, nor stage 2 are defined
-    bool isBBXStage1Defined(BoundingBox &BBXStage1) { return false; }
-    bool isBBXStage2Defined(BoundingBox &BBXStage2) { return false; }
+    bool isBBXStage1Defined(BoundingBox &BBXStage1) override { return false; }
+    bool isBBXStage2Defined(BoundingBox &BBXStage2) override { return false; }
 };
 
 /**

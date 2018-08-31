@@ -134,7 +134,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         cs_type = localCS;
         double n1 = 0.0, n2 = 0.0;
 
-        localCoordinateSystem = new FloatMatrix(3, 3);
+        localCoordinateSystem = std::make_unique<FloatMatrix>(3, 3);
         for ( int j = 1; j <= 3; j++ ) {
             localCoordinateSystem->at(j, 1) = triplets.at(j);
             n1 += triplets.at(j) * triplets.at(j);
@@ -183,7 +183,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         if ( size == 3 ) {
             cs_type = shellCS;
             triplets.normalize();
-            helpPlaneNormal = new FloatArray(triplets);
+            helpPlaneNormal = std::make_unique<FloatArray>(triplets);
 
             //
             // store normal defining help plane into row matrix
@@ -197,7 +197,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         // if no cs defined assume global one
         //
         cs_type = localCS;
-        localCoordinateSystem = new FloatMatrix(3, 3);
+        localCoordinateSystem = std::make_unique<FloatMatrix>(3, 3);
         localCoordinateSystem->beUnitMatrix();
     }
 
@@ -344,7 +344,7 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
         }
     } else if ( this->cs_type == shellCS ) {
         FloatArray elementNormal, helpx, helpy;
-        localCoordinateSystem = new FloatMatrix(3, 3);
+        FloatMatrix cs(3, 3);
 
         element->computeMidPlaneNormal(elementNormal, gp);
         helpx.beVectorProductOf(* ( this->helpPlaneNormal ), elementNormal);
@@ -356,9 +356,9 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
 
         helpy.beVectorProductOf(elementNormal, helpx);
         for ( int i = 1; i < 4; i++ ) {
-            localCoordinateSystem->at(i, 1) = helpx.at(i);
-            localCoordinateSystem->at(i, 2) = helpy.at(i);
-            localCoordinateSystem->at(i, 3) = elementNormal.at(i);
+            cs.at(i, 1) = helpx.at(i);
+            cs.at(i, 2) = helpy.at(i);
+            cs.at(i, 3) = elementNormal.at(i);
         }
 
         //
@@ -375,13 +375,10 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
          * localCoordinateSystem = rotatedLocalCoordinateSystem;
          */
         if ( elementCsFlag ) {
-            answer.beProductOf(elementCs, * this->localCoordinateSystem);
+            answer.beProductOf(elementCs, cs);
         } else {
-            answer = * this->localCoordinateSystem;
+            answer = cs;
         }
-
-        delete localCoordinateSystem;
-        localCoordinateSystem = NULL;
     } else {
         OOFEM_ERROR("internal error no cs defined");
     }

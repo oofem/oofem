@@ -52,6 +52,9 @@ class FloatMatrix;
 class IntArray;
 class IntegrationRule;
 
+template <int N> class FloatArrayF;
+template <int N, int M> class FloatMatrixF;
+
 /**
  * Class representing a general abstraction for cell geometry.
  * The motivation for this class is that the interpolation classes require to pass underlying cell geometry.

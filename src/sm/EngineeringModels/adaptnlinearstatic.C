@@ -146,13 +146,11 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
         this->terminate( this->giveCurrentStep() ); // make output 
 
         // do remeshing
-        MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
+        auto mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
 
         Domain *newDomain;
         MesherInterface :: returnCode result = mesher->createMesh(this->giveCurrentStep(), 1,
                                                                   this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
-
-        delete mesher;
 
         if ( result == MesherInterface :: MI_OK ) {
             this->initFlag = 1;
@@ -346,7 +344,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
         if ( initFlag ) {
-            stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
             if ( !stiffnessMatrix ) {
                 OOFEM_ERROR("sparse matrix creation failed");
             }
@@ -659,7 +657,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
         if ( initFlag ) {
             if ( !stiffnessMatrix ) {
-                stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+                stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
                 if ( !stiffnessMatrix ) {
                     OOFEM_ERROR("sparse matrix creation failed");
                 }
@@ -966,28 +964,28 @@ LoadBalancer *
 AdaptiveNonLinearStatic :: giveLoadBalancer()
 {
     if ( lb ) {
-        return lb;
+        return lb.get();
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
         lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
-        return lb;
+        return lb.get();
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 LoadBalancerMonitor *
 AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
 {
     if ( lbm ) {
-        return lbm;
+        return lbm.get();
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
         lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
-        return lbm;
+        return lbm.get();
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 #endif

@@ -196,12 +196,11 @@ void XfemStructureManager :: splitCracks()
 
                                 int n1 = this->giveNumberOfEnrichmentItems() + 1;
                                 //                        EnrichmentItem *newEI_1 = new Crack(n1, this, this->giveDomain() );
-                                Crack *newCrack = new Crack( n1, this, this->giveDomain() );
-                                std :: unique_ptr< EnrichmentItem >newEI_1(newCrack);
+                                auto newCrack = std::make_unique<Crack>( n1, this, this->giveDomain() );
 
                                 InputRecord *ir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
-                                newEI_1->initializeFrom(ir);
-                                newEI_1->instanciateYourself(dataReader);
+                                newCrack->initializeFrom(ir);
+                                newCrack->instanciateYourself(dataReader);
 
                                 PolygonLine *new_pl = dynamic_cast< PolygonLine * >( newCrack->giveGeometry() );
                                 //                                EDCrack *ed = dynamic_cast<EDCrack*>( newEI_1->giveEnrichmentDomain() );
@@ -215,13 +214,13 @@ void XfemStructureManager :: splitCracks()
 
                                     PolygonLine *polygonLine_j = dynamic_cast< PolygonLine * >( crack_j->giveGeometry() );
 
-                                    if ( polygonLine_j == NULL ) {
+                                    if ( !polygonLine_j ) {
                                         OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_j.")
                                     }
 
                                     PolygonLine *polygonLine_i = dynamic_cast< PolygonLine * >( crack_i->giveGeometry() );
 
-                                    if ( polygonLine_i == NULL ) {
+                                    if ( !polygonLine_i ) {
                                         OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_i.")
                                     }
 
@@ -257,14 +256,13 @@ void XfemStructureManager :: splitCracks()
                                         polygonLine_i->giveTangent(crackTangent1, arcPositions_i [ k - 1 ]);
                                         crackTangent1.times(-1.0);
 
-                                        EnrFrontIntersection *ef = new EnrFrontIntersection();
-
                                         if ( frontTangent1.dotProduct(crackTangent1) < 0.0 ) {
                                             frontTangent1.times(-1.0);
                                         }
+                                        auto ef = std::make_unique<EnrFrontIntersection>();
                                         ef->setTangent(frontTangent1);
 
-                                        newEI_1->setEnrichmentFrontStart(ef);
+                                        newCrack->setEnrichmentFrontStart(std::move(ef));
                                     }
 
                                     if ( k < int( arcPositions_i.size() ) - 1 ) {
@@ -274,21 +272,21 @@ void XfemStructureManager :: splitCracks()
                                         FloatArray crackTangent1;
                                         polygonLine_i->giveTangent(crackTangent1, arcPositions_i [ k ]);
 
-                                        EnrFrontIntersection *ef = new EnrFrontIntersection();
 
                                         if ( frontTangent1.dotProduct(crackTangent1) < 0.0 ) {
                                             frontTangent1.times(-1.0);
                                         }
+                                        auto ef = std::make_unique<EnrFrontIntersection>();
                                         ef->setTangent(frontTangent1);
 
-                                        newEI_1->setEnrichmentFrontEnd(ef);
+                                        newCrack->setEnrichmentFrontEnd(std::move(ef));
                                     }
                                 }
                                 //this->enrichmentItemList[i-1] = std :: move(ei);
 
-                                this->enrichmentItemList.push_back(NULL);
-                                newEI_1->updateGeometry();
-                                this->enrichmentItemList [ enrichmentItemList.size() - 1 ] = std :: move(newEI_1);
+                                this->enrichmentItemList.push_back(nullptr);
+                                newCrack->updateGeometry();
+                                this->enrichmentItemList [ enrichmentItemList.size() - 1 ] = std :: move(newCrack);
 
 
                                 splittedCrack = true;
@@ -441,8 +439,8 @@ void XfemStructureManager :: mergeCloseCracks()
 
                             // Fix tips
                             EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
-                            crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontEnd(), false );
-                            crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+                            crack_i->setEnrichmentFrontStart(std::unique_ptr<EnrichmentFront>(crack_j->giveEnrichmentFrontEnd()), false );
+                            crack_j->setEnrichmentFrontEnd(std::unique_ptr<EnrichmentFront>(ef_tmp), false);
 
 
                             //mergedCrack = true;
@@ -475,9 +473,10 @@ void XfemStructureManager :: mergeCloseCracks()
                             polygonLine_j->insertVertexBack(tmp);
 
                             // Fix tips
+                            ///@todo Quite ugly; come up with bettermethods for swapping without releasing from the ptrs.
                             EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontStart();
-                            crack_i->setEnrichmentFrontStart( crack_j->giveEnrichmentFrontStart(), false );
-                            crack_j->setEnrichmentFrontStart(ef_tmp, false);
+                            crack_i->setEnrichmentFrontStart(std::unique_ptr<EnrichmentFront>(crack_j->giveEnrichmentFrontStart()), false );
+                            crack_j->setEnrichmentFrontStart(std::unique_ptr<EnrichmentFront>(ef_tmp), false);
 
                             //mergedCrack = true;
                             break;
@@ -511,8 +510,8 @@ void XfemStructureManager :: mergeCloseCracks()
 
                             // Fix tips
                             EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
-                            crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontEnd(), false );
-                            crack_j->setEnrichmentFrontEnd(ef_tmp, false);
+                            crack_i->setEnrichmentFrontEnd(std::unique_ptr<EnrichmentFront>(crack_j->giveEnrichmentFrontEnd()), false );
+                            crack_j->setEnrichmentFrontEnd(std::unique_ptr<EnrichmentFront>(ef_tmp), false);
 
                             //mergedCrack = true;
                             break;
@@ -543,8 +542,8 @@ void XfemStructureManager :: mergeCloseCracks()
 
                             // Fix tips
                             EnrichmentFront *ef_tmp = crack_i->giveEnrichmentFrontEnd();
-                            crack_i->setEnrichmentFrontEnd( crack_j->giveEnrichmentFrontStart(), false );
-                            crack_j->setEnrichmentFrontStart(ef_tmp, false);
+                            crack_i->setEnrichmentFrontEnd(std::unique_ptr<EnrichmentFront>(crack_j->giveEnrichmentFrontStart()), false );
+                            crack_j->setEnrichmentFrontStart(std::unique_ptr<EnrichmentFront>(ef_tmp), false);
 
                             //mergedCrack = true;
                             break;

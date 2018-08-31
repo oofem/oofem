@@ -72,7 +72,7 @@ public:
     /// Destructor.
     virtual ~ActiveBoundaryCondition() { }
 
-    IRResultType initializeFrom(InputRecord *ir)
+    IRResultType initializeFrom(InputRecord *ir) override
     {
         GeneralBoundaryCondition :: initializeFrom(ir);
 

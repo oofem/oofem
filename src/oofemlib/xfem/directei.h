@@ -56,12 +56,12 @@ public:
     DirectEI(int n, XfemManager *xm, Domain *aDomain);
     virtual ~DirectEI();
 
-    virtual const char *giveClassName() const { return "DirectEI"; }
-    virtual const char *giveInputRecordName() const { return _IFT_DirectEI_Name; }
+    const char *giveClassName() const override { return "DirectEI"; }
+    const char *giveInputRecordName() const override { return _IFT_DirectEI_Name; }
 
-    virtual void evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const;
-    virtual void evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const;
-    virtual void evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const;
+    void evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const override;
+    void evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const override;
+    void evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const override;
 };
 } /* namespace oofem */
 

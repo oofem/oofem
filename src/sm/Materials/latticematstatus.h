@@ -104,8 +104,6 @@ public:
      * @return increment of dissipation
      */
     virtual double giveDeltaDissipation() { return 0; }
-
-    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
 };
 } // end namespace oofem
 #endif // matstatus_h

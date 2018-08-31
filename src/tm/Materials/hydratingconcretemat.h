@@ -129,7 +129,7 @@ protected:
     int conductivityType, capacityType, densityType;
     /// Degree of reinforcement, if defined, reinforcement effect for conductivity and capacity is accounted for. Isotropic case.
     double reinforcementDegree;
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };
 
 /**

@@ -82,7 +82,7 @@ public:
     double giveSupportRadius() const override { return 0.0; }
 
 private:
-    LinElBranchFunction *mpBranchFunc;
+    LinElBranchFunction mpBranchFunc;
 };
 } // end namespace oofem
 

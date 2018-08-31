@@ -193,29 +193,29 @@ public:
     virtual ~Line() { }
     Line(const FloatArray &iPointA, const FloatArray &iPointB);
 
-    virtual BasicGeometry *Clone() { return new Line(*this); }
+    BasicGeometry *Clone() override { return new Line(*this); }
 
-    virtual double computeDistanceTo(const FloatArray *point);
+    double computeDistanceTo(const FloatArray *point) override;
     /// Computes tangential distance to a point
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); }
+    void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const override { OOFEM_ERROR("not implemented"); }
 
     double computeTangentialDistanceToEnd(FloatArray *point);
 
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const;
+    void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const override;
 
     void computeProjection(FloatArray &answer);
-    virtual int computeNumberOfIntersectionPoints(Element *element);
-    virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
+    int computeNumberOfIntersectionPoints(Element *element) override;
+    void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) override;
     double computeInclinationAngle();
     void computeTransformationMatrix(FloatMatrix &answer);
     void transformIntoPolar(FloatArray *point, FloatArray &answer);
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
     bool isPointInside(FloatArray *point);
-    virtual bool intersects(Element *element);
-    virtual bool isOutside(BasicGeometry *bg);
+    bool intersects(Element *element) override;
+    bool isOutside(BasicGeometry *bg) override;
 
-    double giveLength() const {return mVertices[0].distance( mVertices[1] );}
+    double giveLength() const { return mVertices[0].distance( mVertices[1] ); }
 };
 
 class OOFEM_EXPORT Triangle : public BasicGeometry
@@ -224,17 +224,19 @@ public:
     Triangle(const FloatArray & iP1, const FloatArray & iP2, const FloatArray & iP3);
     virtual ~Triangle() { }
 
-    virtual BasicGeometry *Clone() { return new Triangle(*this); }
+    BasicGeometry *Clone() override { return new Triangle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); }
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); }
+    void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const override
+    { OOFEM_ERROR("not implemented"); }
+    void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const override
+    { OOFEM_ERROR("not implemented"); }
 
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;
     double getRadiusOfCircumCircle();
     void computeCenterOfCircumCircle(FloatArray &answer) const;
-    virtual void printYourself();
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
+    void printYourself() override;
+    int computeNumberOfIntersectionPoints(Element *element) override { return 0; }
     bool isOrientedAnticlockwise();
     void changeToAnticlockwise();
 
@@ -261,33 +263,33 @@ public:
     virtual ~Circle() { }
     Circle(FloatArray &center, double radius);
 
-    virtual BasicGeometry *Clone() { return new Circle(*this); }
+    BasicGeometry *Clone() override { return new Circle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const;
+    void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const override;
 
     // Irrelevant for a closed interface: we can always consider ourselves to be "inside" a closed interface in
     // tangential direction. Therefore, we may return any positive number.
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { oDist = mTangSignDist; }
+    void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const override
+    { oDist = mTangSignDist; }
 
-    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
+    void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const override;
 
-    virtual void giveTangent(FloatArray &oTangent, const double &iArcPosition) const { }
+    void giveTangent(FloatArray &oTangent, const double &iArcPosition) const override { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "Circle"; }
-    virtual bool intersects(Element *element);
-    virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
-    virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
-    virtual int computeNumberOfIntersectionPoints(Element *element);
-    virtual bool isOutside(BasicGeometry *bg);
-    virtual bool isInside(Element *element);
-    virtual bool isInside(FloatArray &point);
-    virtual void printYourself();
+    IRResultType initializeFrom(InputRecord *ir) override;
+    const char *giveClassName() const override { return "Circle"; }
+    bool intersects(Element *element) override;
+    void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) override;
+    void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
+    int computeNumberOfIntersectionPoints(Element *element) override;
+    bool isOutside(BasicGeometry *bg) override;
+    bool isInside(Element *element) override;
+    bool isInside(FloatArray &point) override;
+    void printYourself() override;
 
     double giveRadius() const {return radius;}
 
-    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
-
+    void giveBoundingSphere(FloatArray &oCenter, double &oRadius) override;
 };
 
 class OOFEM_EXPORT PolygonLine : public BasicGeometry
@@ -297,56 +299,56 @@ public:
     PolygonLine();
     virtual ~PolygonLine() { }
 
-    virtual BasicGeometry *Clone() { return new PolygonLine(*this); }
+    BasicGeometry *Clone() override { return new PolygonLine(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const;
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const;
+    void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const override;
+    void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const override;
 
     /// Computes arc length coordinate in the range [0,1]
-    virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const;
+    void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const override;
     double computeLength() const;
 
-    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
-    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
+    void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const override;
+    void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const override;
     void giveNormal(FloatArray &oNormal, const double &iArcPosition) const;
-    virtual void giveTangent(FloatArray &oTangent, const double &iArcPosition) const;
+    void giveTangent(FloatArray &oTangent, const double &iArcPosition) const override;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual const char *giveClassName() const { return "PolygonLine"; }
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    const char *giveClassName() const override { return "PolygonLine"; }
 
 #ifdef __BOOST_MODULE
-    virtual bool boundingBoxIntersects(Element *element);
+    bool boundingBoxIntersects(Element *element);
 #endif
 
-    virtual bool intersects(Element *element);
-    virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
-    virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
+    bool intersects(Element *element) override;
+    void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) override;
+    void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
     void computeIntersectionPoints(const PolygonLine &iPolygonLine, std :: vector< FloatArray > &oIntersectionPoints) const;
     void computeIntersectionPoints(const FloatArray &iXStart, const FloatArray &iXEnd, std :: vector< FloatArray > &oIntersectionPoints) const;
 
-    virtual int computeNumberOfIntersectionPoints(Element *element);
-    virtual bool isOutside(BasicGeometry *bg);
-    virtual bool isInside(Element *element);
-    virtual bool isInside(FloatArray &point);
+    int computeNumberOfIntersectionPoints(Element *element) override;
+    bool isOutside(BasicGeometry *bg) override;
+    bool isInside(Element *element) override;
+    bool isInside(FloatArray &point) override;
 
 #ifdef __BOOST_MODULE
     virtual void calcBoundingBox(bPoint2 &oLC, bPoint2 &oUC);
 #endif
 
-    virtual void printYourself();
+    void printYourself() override;
 
     // For debugging
-    virtual void printVTK(int iTStepIndex, int iLineIndex);
+    void printVTK(int iTStepIndex, int iLineIndex) override;
 
 #ifdef __BOOST_MODULE
     // Upper and lower corner
     bPoint2 LC, UC;
 #endif
 
-    virtual bool giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const;
+    bool giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const override;
 
-    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+    void giveBoundingSphere(FloatArray &oCenter, double &oRadius) override;
 
     /**
      * Keep only a part of the underlying geometry,
@@ -366,21 +368,25 @@ public:
     virtual ~PointSwarm() { }
     PointSwarm(std :: list< int >pointsID);
 
-    virtual BasicGeometry *Clone() { return new PointSwarm(*this); }
+    BasicGeometry *Clone() override { return new PointSwarm(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); }
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); }
+    void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const override
+    { OOFEM_ERROR("not implemented"); }
+    void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const override
+    { OOFEM_ERROR("not implemented"); }
 
     /// Computes the normal distance to the surface not to the center.
-    // virtual double computeDistanceTo(FloatArray *point);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    // virtual const char *giveClassName() const { return "Circle"; }
-    // virtual bool intersects(Element *element);
-    // virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > *intersecPoints);
-    // virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > *intersecPoints);
-    // virtual bool isOutside(BasicGeometry *bg);
-    // virtual bool isInside(Element *element);
-    // virtual bool isInside(FloatArray &point);
+    IRResultType initializeFrom(InputRecord *ir) override;
+#if 0
+    double computeDistanceTo(FloatArray *point) override;
+    const char *giveClassName() const override { return "Circle"; }
+    bool intersects(Element *element) override;
+    void computeIntersectionPoints(Element *element, std :: vector< FloatArray > *intersecPoints) override;
+    void computeIntersectionPoints(Line *l, std :: vector< FloatArray > *intersecPoints) override;
+    bool isOutside(BasicGeometry *bg) override;
+    bool isInside(Element *element) override;
+    bool isInside(FloatArray &point) override;
+#endif
 };
 } // end namespace oofem
 #endif  // geometry_h

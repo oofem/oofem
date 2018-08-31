@@ -105,7 +105,7 @@ public:
         dofmanMap(_dofmanMap), elemMap(_elemMap)
     { }
 
-    virtual int operator() (int n, EntityRenumberingScheme ers)
+    int operator() (int n, EntityRenumberingScheme ers) override
     {
         std :: map< int, int > :: const_iterator it;
         if ( ers == ERS_DofManager ) {
@@ -124,7 +124,7 @@ public:
         return 0;
     }
 
-    virtual int call(int n, EntityRenumberingScheme ers)
+    int call(int n, EntityRenumberingScheme ers) override
     { return this->operator() (n, ers); };
 };
 } // end namespace oofem

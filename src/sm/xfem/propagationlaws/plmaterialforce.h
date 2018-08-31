@@ -65,14 +65,14 @@ public:
     PLMaterialForce();
     virtual ~PLMaterialForce();
 
-    virtual const char *giveClassName() const { return "PLMaterialForce"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLMaterialForce_Name; }
+    const char *giveClassName() const override { return "PLMaterialForce"; }
+    const char *giveInputRecordName() const override { return _IFT_PLMaterialForce_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual bool hasPropagation() const { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
+    bool hasPropagation() const override { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
+    bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) override;
 
     void setRadius(const double &iRadius) {mRadius = iRadius;}
     void setIncrementLength(const double &iIncrementLength) {mIncrementLength = iIncrementLength;}

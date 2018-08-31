@@ -107,10 +107,9 @@ NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
 NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *mStep)
 // only one has reason for LinearStatic
 //     - SolutionOfLinearEquations
-
 {
-    if (!linSolver) { 
-        linSolver.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+    if ( !linSolver ) { 
+        linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
         if ( !linSolver ) {
             OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
@@ -328,7 +327,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     //Create a new lhs matrix if necessary
     if ( tStep->isTheFirstStep() || this->changingProblemSize ) {
 
-        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }

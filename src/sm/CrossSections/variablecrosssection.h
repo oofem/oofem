@@ -116,15 +116,14 @@ public:
      * - 'beamshearcoeff' Beam shear coefficient
      * @param ir Record to read off.
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
 
-    // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "VariableCrossSection"; }
-    virtual const char *giveInputRecordName() const { return _IFT_VariableCrossSection_Name; }
+    const char *giveClassName() const override { return "VariableCrossSection"; }
+    const char *giveInputRecordName() const override { return _IFT_VariableCrossSection_Name; }
 
-    virtual double give(CrossSectionProperty a, GaussPoint *gp);
-    virtual double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local);
+    double give(CrossSectionProperty a, GaussPoint *gp) override;
+    double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local) override;
 
 protected:
     void giveExpression(const ScalarFunction **expr, CrossSectionProperty aProperty) const;

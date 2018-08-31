@@ -54,7 +54,7 @@ ExportModuleManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-ExportModule *ExportModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
+std::unique_ptr<ExportModule> ExportModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
 {
     return classFactory.createExportModule(name, n, emodel);
 }

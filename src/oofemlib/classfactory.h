@@ -106,93 +106,63 @@ class ContactDefinition;
 #endif
 
 // Templates to wrap constructors into functions
-template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > GeneralBoundaryCondition *bcCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > CrossSection *csCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, d); }
-//template< typename T > std::unique_ptr<EngngModel> engngCreator(int n, EngngModel *m) { return std::make_unique<T>(n, m); }
-template< typename T > std::unique_ptr<EngngModel> engngCreator(int n, EngngModel *m) { return std::unique_ptr<EngngModel>(new T(n, m)); }
-template< typename T > Function *funcCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
-template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
+
+// Wraps any ctor into 
+
+/**
+ * Wrapper for ctors, creates a function that returns a unique_ptr to the object. 
+ * The base class (B) template argument must be specified explicitly, becuase we can't "downcast" the function pointer.
+ * E.g.
+ * CTOR<SparseLinearSystemNM, LDLTFactorization, Domain*, EngngModel*>
+ * CTOR<SparseMtrx, PetscSparseMtrx>
+ */
+template< typename B, typename T, typename... V > std::unique_ptr<B> CTOR(V... x) { return std::make_unique<T>(x...); }
 
 template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { return new T(dman, dofid); }
-template< typename T > SparseMtrx *sparseMtrxCreator() { return new T(); }
-template< typename T > SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
-template< typename T > ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
-
-template< typename T > NodalRecoveryModel *nrmCreator(Domain *d) { return new T(d); }
-template< typename T > SparseGeneralEigenValueSystemNM *gesCreator(Domain *d, EngngModel *m) { return new T(d, m); }
-template< typename T > MesherInterface *mesherCreator(Domain *d) { return new T(d); }
-template< typename T > MaterialMappingAlgorithm *mmaCreator() { return new T(); }
-
-
-template< typename T > LoadBalancer *loadBalancerCreator(Domain *d) { return new T(d); }
-template< typename T > LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { return new T(e); }
-
-// XFEM stuff
-template< typename T > XfemManager *xManCreator(Domain *d) { return new T(d); }
-template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
-template< typename T > NucleationCriterion *nucleationCritCreator(Domain *d) { return new T(d); }
-template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
-template< typename T > BasicGeometry *geometryCreator() { return new T(); }
-template< typename T > EnrichmentFront *enrichFrontCreator() { return new T(); }
-template< typename T > PropagationLaw *propagationLawCreator() { return new T(); }
-
-
-template< typename T > FailureCriteria *failureCriteriaCreator(int n, FractureManager *x) { return new T(n, x); }
-template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, FailureCriteria *x) { return new T(n, x); }
-
-template< typename T > ContactManager *contactManCreator(Domain *d) { return new T(d); }
-template< typename T > ContactDefinition *contactDefCreator(ContactManager *cMan) { return new T(cMan); }
 
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
-#define REGISTER_Element(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
-#define REGISTER_DofManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, dofmanCreator< class > );
-#define REGISTER_BoundaryCondition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, bcCreator< class > );
-#define REGISTER_CrossSection(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
-#define REGISTER_Material(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
-#define REGISTER_Material_Alt(class, altname) static bool __dummy_ ## class ## altname OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterial(#altname, matCreator< class > );
-#define REGISTER_EngngModel(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
-#define REGISTER_Function(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
-#define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
-#define REGISTER_ExportModule(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
-#define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
-#define REGISTER_InitModule(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
-#define REGISTER_TopologyDescription(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
-#define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
-#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
+#define REGISTER_Element(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, CTOR< Element, class, int, Domain* > );
+#define REGISTER_DofManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, CTOR< DofManager, class, int, Domain* > );
+#define REGISTER_BoundaryCondition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, CTOR< GeneralBoundaryCondition, class, int, Domain* > );
+#define REGISTER_CrossSection(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, CTOR< CrossSection, class, int, Domain* > );
+#define REGISTER_Material(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, CTOR< Material, class, int, Domain* > );
+#define REGISTER_Material_Alt(class, altname) static bool __dummy_ ## class ## altname OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterial(#altname, CTOR< Material, class, int, Domain* > );
+#define REGISTER_EngngModel(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, CTOR< EngngModel, class, int, EngngModel* > );
+#define REGISTER_Function(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, CTOR< Function, class, int, Domain* > );
+#define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, CTOR< NonlocalBarrier, class, int, Domain* > );
+#define REGISTER_ExportModule(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, CTOR< ExportModule, class, int, EngngModel* > );
+#define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, CTOR< SparseNonLinearSystemNM, class, Domain*, EngngModel* > );
+#define REGISTER_InitModule(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, CTOR< InitModule, class, int, EngngModel* > );
+#define REGISTER_TopologyDescription(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, CTOR< TopologyDescription, class, Domain* > );
+#define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, CTOR< LoadBalancerMonitor, class, EngngModel* > );
+#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, CTOR< LoadBalancer, class, EngngModel* > );
 
 // These should be converted to use strings.
-#define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class > );
-#define REGISTER_SparseLinSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class > );
-#define REGISTER_ErrorEstimator(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class > );
-#define REGISTER_NodalRecoveryModel(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNodalRecoveryModel(type, nrmCreator< class > );
-#define REGISTER_GeneralizedEigenValueSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerGeneralizedEigenValueSolver(type, gesCreator< class > );
-#define REGISTER_Mesher(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMesherInterface(type, mesherCreator< class > );
-#define REGISTER_MaterialMappingAlgorithm(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterialMappingAlgorithm(type, mmaCreator< class > );
+#define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseMtrx(type, CTOR< SparseMtrx, class > );
+#define REGISTER_SparseLinSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseLinSolver(type, CTOR< SparseLinearSystemNM, class, Domain*, EngngModel* > );
+#define REGISTER_ErrorEstimator(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerErrorEstimator(type, CTOR< ErrorEstimator, class, int, Domain* > );
+#define REGISTER_NodalRecoveryModel(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNodalRecoveryModel(type, CTOR< NodalRecoveryModel, class, Domain* > );
+#define REGISTER_GeneralizedEigenValueSolver(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerGeneralizedEigenValueSolver(type, CTOR< SparseGeneralEigenValueSystemNM, class, Domain*, EngngModel* > );
+#define REGISTER_Mesher(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMesherInterface(type, CTOR< MesherInterface, class, Domain* > );
+#define REGISTER_MaterialMappingAlgorithm(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMaterialMappingAlgorithm(type, CTOR< MaterialMappingAlgorithm, class > );
 
-#define REGISTER_XfemManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, xManCreator< class > );
-#define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, enrichItemCreator< class > );
-#define REGISTER_NucleationCriterion(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNucleationCriterion(_IFT_ ## class ## _Name, nucleationCritCreator< class > );
-#define REGISTER_EnrichmentFunction(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentFunction(_IFT_ ## class ## _Name, enrichFuncCreator< class > );
-#define REGISTER_EnrichmentDomain(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentDomain(_IFT_ ## class ## _Name, enrichmentDomainCreator< class > );
-#define REGISTER_Geometry(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerGeometry(_IFT_ ## class ## _Name, geometryCreator< class > );
-#define REGISTER_EnrichmentFront(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentFront(_IFT_ ## class ## _Name, enrichFrontCreator< class > );
-#define REGISTER_PropagationLaw(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerPropagationLaw(_IFT_ ## class ## _Name, propagationLawCreator< class > );
+#define REGISTER_XfemManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, CTOR< XfemManager, class, Domain* > );
+#define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, CTOR< EnrichmentItem, class, int, XfemManager*, Domain* > );
+#define REGISTER_NucleationCriterion(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerNucleationCriterion(_IFT_ ## class ## _Name, CTOR< NucleationCriterion, class, Domain* > );
+#define REGISTER_EnrichmentFunction(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentFunction(_IFT_ ## class ## _Name, CTOR< EnrichmentFunction, class, int, Domain* > );
+//#define REGISTER_EnrichmentDomain(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentDomain(_IFT_ ## class ## _Name, CTOR< EnrichmentDomain, class > );
+#define REGISTER_EnrichmentFront(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerEnrichmentFront(_IFT_ ## class ## _Name, CTOR< EnrichmentFront, class > );
+#define REGISTER_PropagationLaw(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerPropagationLaw(_IFT_ ## class ## _Name, CTOR< PropagationLaw, class > );
+#define REGISTER_Geometry(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerGeometry(_IFT_ ## class ## _Name, CTOR< BasicGeometry, class > );
 
-#define REGISTER_FailureCriteria(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFailureCriteria(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
-#define REGISTER_FailureCriteriaStatus(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFailureCriteriaStatus(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
+#define REGISTER_FailureCriteria(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFailureCriteria(_IFT_ ## class ## _Name, CTOR< FailureCriteria, class, int, FractureManager* > );
+#define REGISTER_FailureCriteriaStatus(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerFailureCriteriaStatus(_IFT_ ## class ## _Name, CTOR< FailureCriteriaStatus, class, FailureCriteria* > );
 
-#define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, contactManCreator< class > );
-#define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, contactDefCreator< class > );
-#define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, QuasicontinuumCreator< class > );
+#define REGISTER_ContactManager(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, CTOR< ContactManager, class, Domain* > );
+#define REGISTER_ContactDefinition(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerContactDefinition(_IFT_ ## class ## _Name, CTOR< ContactDefinition, class, ContactManager* > );
+///@todo What is this? Doesn't seem needed / Mikael
+#define REGISTER_Quasicontinuum(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerQuasicontinuum(_IFT_ ## class ## _Name, < QuasiContinuum, class, ????? > );
 //@}
 
 /**
@@ -207,78 +177,78 @@ class OOFEM_EXPORT ClassFactory
 {
 private:
     /// Associative container containing element creators with element name as key.
-    std :: map < std :: string, Element * ( * )(int, Domain *) > elemList;
+    std :: map < std :: string, std::unique_ptr<Element> ( * )(int, Domain *) > elemList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.
-    std :: map < std :: string, DofManager * ( * )(int, Domain *) > dofmanList;
+    std :: map < std :: string, std::unique_ptr<DofManager> ( * )(int, Domain *) > dofmanList;
     /// Associative container containing boundary condition creators with bc  name as key.
-    std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *) > bcList;
+    std :: map < std :: string, std::unique_ptr<GeneralBoundaryCondition> ( * )(int, Domain *) > bcList;
     /// Associative container containing cross section creators with cross section name as key.
-    std :: map < std :: string, CrossSection * ( * )(int, Domain *) > csList;
+    std :: map < std :: string, std::unique_ptr<CrossSection> ( * )(int, Domain *) > csList;
     /// Associative container containing material creators with material name as key.
-    std :: map < std :: string, Material * ( * )(int, Domain *) > matList;
+    std :: map < std :: string, std::unique_ptr<Material> ( * )(int, Domain *) > matList;
     /// Associative container containing engng model creators with engng model name as key.
     std :: map < std :: string, std::unique_ptr<EngngModel> ( * )(int, EngngModel *) > engngList;
     /// Associative container containing load time function creators with function name as key.
-    std :: map < std :: string, Function * ( * )(int, Domain *) > funcList;
+    std :: map < std :: string, std::unique_ptr<Function> ( * )(int, Domain *) > funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
-    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *) > nlbList;
+    std :: map < std :: string, std::unique_ptr<NonlocalBarrier> ( * )(int, Domain *) > nlbList;
     /// Associative container containing export module creators.
-    std :: map < std :: string, ExportModule * ( * )(int, EngngModel *) > exportList;
+    std :: map < std :: string, std::unique_ptr<ExportModule> ( * )(int, EngngModel *) > exportList;
     /// Associative container containing nonlinear solver creators.
-    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *) > nonlinList;
+    std :: map < std :: string, std::unique_ptr<SparseNonLinearSystemNM> ( * )(Domain *, EngngModel *) > nonlinList;
     /// Associative container containing init module creators.
-    std :: map < std :: string, InitModule * ( * )(int, EngngModel *) > initList;
+    std :: map < std :: string, std::unique_ptr<InitModule> ( * )(int, EngngModel *) > initList;
     /// Associative container containing topology description creators.
-    std :: map < std :: string, TopologyDescription * ( * )(Domain *) > topologyList;
+    std :: map < std :: string, std::unique_ptr<TopologyDescription> ( * )(Domain *) > topologyList;
     // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing load balancer creators.
-    std :: map < std :: string, LoadBalancer * ( * )(Domain *) > loadBalancerList;
+    std :: map < std :: string, std::unique_ptr<LoadBalancer> ( * )(Domain *) > loadBalancerList;
     /// Associative container containing load balancer monitor creators.
-    std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *) > loadMonitorList;
+    std :: map < std :: string, std::unique_ptr<LoadBalancerMonitor> ( * )(EngngModel *) > loadMonitorList;
     /// Associative container containing sparse matrix creators.
-    std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
+    std :: map < SparseMtrxType, std::unique_ptr<SparseMtrx> ( * )() > sparseMtrxList;
     /// Associative container containing dof creators.
     std :: map < dofType, Dof * ( * )(DofIDItem, DofManager *) > dofList;
     /// Associative container containing error estimator creators.
-    std :: map < ErrorEstimatorType, ErrorEstimator * ( * )(int, Domain *) > errEstList;
+    std :: map < ErrorEstimatorType, std::unique_ptr<ErrorEstimator> ( * )(int, Domain *) > errEstList;
     /// Associative container containing sparse linear solver creators
-    std :: map < LinSystSolverType, SparseLinearSystemNM * ( * )(Domain *, EngngModel *) > sparseLinSolList;
+    std :: map < LinSystSolverType, std::unique_ptr<SparseLinearSystemNM> ( * )(Domain *, EngngModel *) > sparseLinSolList;
     /// Associative container containing nodal recovery model creators
-    std :: map < NodalRecoveryModel :: NodalRecoveryModelType, NodalRecoveryModel * ( * )(Domain *) > nodalRecoveryModelList;
+    std :: map < NodalRecoveryModel :: NodalRecoveryModelType, std::unique_ptr<NodalRecoveryModel> ( * )(Domain *) > nodalRecoveryModelList;
     /// Associative container containing sparse generalized eigenvalue creators
-    std :: map < GenEigvalSolverType, SparseGeneralEigenValueSystemNM * ( * )(Domain *, EngngModel *) > generalizedEigenValueSolverList;
+    std :: map < GenEigvalSolverType, std::unique_ptr<SparseGeneralEigenValueSystemNM> ( * )(Domain *, EngngModel *) > generalizedEigenValueSolverList;
     /// Associative container containing material mapping algorithm creators
-    std :: map < MaterialMappingAlgorithmType, MaterialMappingAlgorithm * ( * )() > materialMappingList;
+    std :: map < MaterialMappingAlgorithmType, std::unique_ptr<MaterialMappingAlgorithm> ( * )() > materialMappingList;
     /// Associative container containing mesher interface creators
-    std :: map < MeshPackageType, MesherInterface * ( * )(Domain *) > mesherInterfaceList;
+    std :: map < MeshPackageType, std::unique_ptr<MesherInterface> ( * )(Domain *) > mesherInterfaceList;
 
     // XFEM:
     /// Associative container containing enrichment item creators
-    std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *) > enrichItemList;
+    std :: map < std :: string, std::unique_ptr<EnrichmentItem> ( * )(int, XfemManager *, Domain *) > enrichItemList;
     /// Associative container containing nucleation criterion creators
-    std :: map < std :: string, NucleationCriterion * ( * )(Domain *) > nucleationCritList;
+    std :: map < std :: string, std::unique_ptr<NucleationCriterion> ( * )(Domain *) > nucleationCritList;
     /// Associative container containing enrichment function creators
-    std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *) > enrichFuncList;
+    std :: map < std :: string, std::unique_ptr<EnrichmentFunction> ( * )(int, Domain *) > enrichFuncList;
     /// Associative container containing geometry creators
-    std :: map < std :: string, BasicGeometry * ( * )() > geometryList;
+    std :: map < std :: string, std::unique_ptr<BasicGeometry> ( * )() > geometryList;
     /// Associative container containing enrichment-domain creators
-    std :: map < std :: string, EnrichmentDomain * ( * )() > enrichmentDomainList;
+    std :: map < std :: string, std::unique_ptr<EnrichmentDomain> ( * )() > enrichmentDomainList;
     /// Associative container containing enrichment front creators
-    std :: map < std :: string, EnrichmentFront * ( * )() > enrichmentFrontList;
+    std :: map < std :: string, std::unique_ptr<EnrichmentFront> ( * )() > enrichmentFrontList;
     /// Associative container containing propagation law creators
-    std :: map < std :: string, PropagationLaw * ( * )() > propagationLawList;
+    std :: map < std :: string, std::unique_ptr<PropagationLaw> ( * )() > propagationLawList;
     /// Associative container containing XfemManager creators
-    std :: map < std :: string, XfemManager * ( * )(Domain *) > xManList;
+    std :: map < std :: string, std::unique_ptr<XfemManager> ( * )(Domain *) > xManList;
 
 
     /// Associative container containing failure criteria creators
-    std :: map < std :: string, FailureCriteria * ( * )(int, FractureManager *) > failureCriteriaList;
-    std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
+    std :: map < std :: string, std::unique_ptr<FailureCriteria> ( * )(int, FractureManager *) > failureCriteriaList;
+    std :: map < std :: string, std::unique_ptr<FailureCriteriaStatus> ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
 
     /// Associative container containing ContactManager creators
-    std :: map < std :: string, ContactManager * ( * )(Domain *) > contactManList;
-    std :: map < std :: string, ContactDefinition * ( * )(ContactManager *) > contactDefList;
-    
+    std :: map < std :: string, std::unique_ptr<ContactManager> ( * )(Domain *) > contactManList;
+    std :: map < std :: string, std::unique_ptr<ContactDefinition> ( * )(ContactManager *) > contactDefList;
+
 public:
     /// Creates empty factory
     ClassFactory();
@@ -290,12 +260,12 @@ public:
      * @param domain Domain assigned to new element.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Element *createElement(const char *name, int num, Domain *domain);
+    std::unique_ptr<Element> createElement(const char *name, int num, Domain *domain);
     /**
      * Registers a new element in the class factory.
      * @param name Keyword string.
      */
-    bool registerElement( const char *name, Element * ( *creator )( int, Domain * ) );
+    bool registerElement( const char *name, std::unique_ptr<Element> ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of Dof manager corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -303,12 +273,12 @@ public:
      * @param domain Domain assigned to new instance.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    DofManager *createDofManager(const char *name, int num, Domain *domain);
+    std::unique_ptr<DofManager> createDofManager(const char *name, int num, Domain *domain);
     /**
      * Registers a new dof manager in the class factory.
      * @param name Keyword string.
      */
-    bool registerDofManager( const char *name, DofManager * ( *creator )( int, Domain * ) );
+    bool registerDofManager( const char *name, std::unique_ptr<DofManager> ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of boundary condition corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -316,12 +286,12 @@ public:
      * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    GeneralBoundaryCondition *createBoundaryCondition(const char *name, int num, Domain *domain);
+    std::unique_ptr<GeneralBoundaryCondition> createBoundaryCondition(const char *name, int num, Domain *domain);
     /**
      * Registers a new boundary condition in the class factory.
      * @param name Keyword string.
      */
-    bool registerBoundaryCondition( const char *name, GeneralBoundaryCondition * ( *creator )( int, Domain * ) );
+    bool registerBoundaryCondition( const char *name, std::unique_ptr<GeneralBoundaryCondition> ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of cross section corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -329,12 +299,12 @@ public:
      * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    CrossSection *createCrossSection(const char *name, int num, Domain *domain);
+    std::unique_ptr<CrossSection> createCrossSection(const char *name, int num, Domain *domain);
     /**
      * Registers a new cross section in the class factory.
      * @param name Keyword string.
      */
-    bool registerCrossSection( const char *name, CrossSection * ( *creator )( int, Domain * ) );
+    bool registerCrossSection( const char *name, std::unique_ptr<CrossSection> ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of material corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -342,12 +312,12 @@ public:
      * @param domain Domain assigned to new material.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Material *createMaterial(const char *name, int num, Domain *domain);
+    std::unique_ptr<Material> createMaterial(const char *name, int num, Domain *domain);
     /**
      * Registers a new material in the class factory.
      * @param name Keyword string.
      */
-    bool registerMaterial( const char *name, Material * ( *creator )( int, Domain * ) );
+    bool registerMaterial( const char *name, std::unique_ptr<Material> ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of engng model corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -368,12 +338,12 @@ public:
      * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Function *createFunction(const char *name, int num, Domain *domain);
+    std::unique_ptr<Function> createFunction(const char *name, int num, Domain *domain);
     /**
      * Registers a new load time function in the class factory.
      * @param name Keyword string.
      */
-    bool registerFunction( const char *name, Function * ( *creator )( int, Domain * ) );
+    bool registerFunction( const char *name, std::unique_ptr<Function> ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of nonlocal barrier corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -381,12 +351,12 @@ public:
      * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    NonlocalBarrier *createNonlocalBarrier(const char *name, int num, Domain *domain);
+    std::unique_ptr<NonlocalBarrier> createNonlocalBarrier(const char *name, int num, Domain *domain);
     /**
      * Registers a new nonlocal barrier in the class factory.
      * @param name Keyword string.
      */
-    bool registerNonlocalBarrier( const char *name, NonlocalBarrier * ( *creator )( int, Domain * ) );
+    bool registerNonlocalBarrier( const char *name, std::unique_ptr<NonlocalBarrier> ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of export module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -394,12 +364,12 @@ public:
      * @param emodel Engineering model that object belongs to.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    ExportModule *createExportModule(const char *name, int num, EngngModel *emodel);
+    std::unique_ptr<ExportModule> createExportModule(const char *name, int num, EngngModel *emodel);
     /**
      * Registers a new export module in the class factory.
      * @param name Keyword string.
      */
-    bool registerExportModule( const char *name, ExportModule * ( *creator )( int, EngngModel * ) );
+    bool registerExportModule( const char *name, std::unique_ptr<ExportModule> ( *creator )( int, EngngModel * ) );
     /**
      * Creates new instance of nonlinear solver corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -407,12 +377,12 @@ public:
      * @param emodel Engineering model that object belongs to.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    SparseNonLinearSystemNM *createNonLinearSolver(const char *name, Domain *domain, EngngModel *emodel);
+    std::unique_ptr<SparseNonLinearSystemNM> createNonLinearSolver(const char *name, Domain *domain, EngngModel *emodel);
     /**
      * Registers a new nonlinear solver in the class factory.
      * @param name Keyword string.
      */
-    bool registerSparseNonLinearSystemNM( const char *name, SparseNonLinearSystemNM * ( *creator )( Domain *, EngngModel * ) );
+    bool registerSparseNonLinearSystemNM( const char *name, std::unique_ptr<SparseNonLinearSystemNM> ( *creator )( Domain *, EngngModel * ) );
     /**
      * Creates new instance of init module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -420,12 +390,12 @@ public:
      * @param emodel Engineering model that object belongs to.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    InitModule *createInitModule(const char *name, int num, EngngModel *emodel);
+    std::unique_ptr<InitModule> createInitModule(const char *name, int num, EngngModel *emodel);
     /**
      * Registers a new init module in the class factory.
      * @param name Keyword string.
      */
-    bool registerInitModule( const char *name, InitModule * ( *creator )( int, EngngModel * ) );
+    bool registerInitModule( const char *name, std::unique_ptr<InitModule> ( *creator )( int, EngngModel * ) );
     /**
      * Creates new instance of Initial Condition corresponding to given type.
      * @param name Keyword string determining the type of new instance.
@@ -433,31 +403,31 @@ public:
      * @param d Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    InitialCondition *createInitialCondition(const char *name, int num, Domain *d);
+    std::unique_ptr<InitialCondition> createInitialCondition(const char *name, int num, Domain *d);
     /**
      * Creates new instance of topology description corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param domain Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    TopologyDescription *createTopology(const char *name, Domain *domain);
+    std::unique_ptr<TopologyDescription> createTopology(const char *name, Domain *domain);
     /**
      * Registers a new topology description in the class factory.
      * @param name Keyword string.
      */
-    bool registerTopologyDescription( const char *name, TopologyDescription * ( *creator )( Domain * ) );
+    bool registerTopologyDescription( const char *name, std::unique_ptr<TopologyDescription> ( *creator )( Domain * ) );
 
     /**
      * Creates new instance of sparse matrix corresponding to given keyword.
      * @param type SparseMtrxType id determining the type of new instance.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    SparseMtrx *createSparseMtrx(SparseMtrxType type);
+    std::unique_ptr<SparseMtrx> createSparseMtrx(SparseMtrxType type);
     /**
      * Registers a sparse matrix type.
      * @param type SparseMtrxType id determining the type of new instance.
      */
-    bool registerSparseMtrx( SparseMtrxType type, SparseMtrx * ( *creator )() );
+    bool registerSparseMtrx( SparseMtrxType type, std::unique_ptr<SparseMtrx> ( *creator )(void) );
     /**
      * Creates new instance of DOF corresponding to given keyword.
      * @param type ID determining the type of new instance.
@@ -474,12 +444,12 @@ public:
      * @param m EngngModel  assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    SparseLinearSystemNM *createSparseLinSolver(LinSystSolverType st, Domain *d, EngngModel *m);
+    std::unique_ptr<SparseLinearSystemNM> createSparseLinSolver(LinSystSolverType st, Domain *d, EngngModel *m);
     /**
      * Registers a sparse linear system solver.
      * @param type LinSystSolverType id determining the type of new instance.
      */
-    bool registerSparseLinSolver( LinSystSolverType type, SparseLinearSystemNM * ( *creator )(Domain *, EngngModel *) );
+    bool registerSparseLinSolver( LinSystSolverType type, std::unique_ptr<SparseLinearSystemNM> ( *creator )(Domain *, EngngModel *) );
     /**
      * Creates new instance of ErrorEstimator corresponding
      * to given type.
@@ -488,79 +458,82 @@ public:
      * @param d Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    ErrorEstimator *createErrorEstimator(ErrorEstimatorType type, int num, Domain *d);
+    std::unique_ptr<ErrorEstimator> createErrorEstimator(ErrorEstimatorType type, int num, Domain *d);
     /**
      * Registers a new  error estimator.
      * @param type ErrorEstimatorType id determining the type of new instance.
      */
-    bool registerErrorEstimator( ErrorEstimatorType type, ErrorEstimator * ( *creator )(int, Domain *) );
+    bool registerErrorEstimator( ErrorEstimatorType type, std::unique_ptr<ErrorEstimator> ( *creator )(int, Domain *) );
     /**
      * Registers a new nodal recovery model.
      * @param name Indentifier.
      */
-    bool registerNodalRecoveryModel( NodalRecoveryModel :: NodalRecoveryModelType name, NodalRecoveryModel * ( *creator )(Domain *) );
+    bool registerNodalRecoveryModel( NodalRecoveryModel :: NodalRecoveryModelType name, std::unique_ptr<NodalRecoveryModel> ( *creator )(Domain *) );
     /**
      * Creates new instance of nodal recovery model corresponding to given type.
      * @param type ID determining the type of new instance.
      * @param d Domain assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    NodalRecoveryModel *createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d);
+    std::unique_ptr<NodalRecoveryModel> createNodalRecoveryModel(NodalRecoveryModel :: NodalRecoveryModelType type, Domain *d);
 
     // XFEM:
-    EnrichmentItem *createEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *domain);
-    bool registerEnrichmentItem( const char *name, EnrichmentItem * ( *creator )( int, XfemManager *, Domain * ) );
+    std::unique_ptr<EnrichmentItem> createEnrichmentItem(const char *name, int num, XfemManager *xm, Domain *domain);
+    bool registerEnrichmentItem( const char *name, std::unique_ptr<EnrichmentItem> ( *creator )( int, XfemManager *, Domain * ) );
 
-    NucleationCriterion *createNucleationCriterion(const char *name, Domain *domain);
-    bool registerNucleationCriterion( const char *name, NucleationCriterion * ( *creator )( Domain * ) );
+    std::unique_ptr<NucleationCriterion> createNucleationCriterion(const char *name, Domain *domain);
+    bool registerNucleationCriterion( const char *name, std::unique_ptr<NucleationCriterion> ( *creator )( Domain * ) );
 
-    EnrichmentFunction *createEnrichmentFunction(const char *name, int num, Domain *domain);
-    bool registerEnrichmentFunction( const char *name, EnrichmentFunction * ( *creator )( int, Domain * ) );
+    std::unique_ptr<EnrichmentFunction> createEnrichmentFunction(const char *name, int num, Domain *domain);
+    bool registerEnrichmentFunction( const char *name, std::unique_ptr<EnrichmentFunction> ( *creator )( int, Domain * ) );
 
-    EnrichmentDomain *createEnrichmentDomain(const char *name);
-    bool registerEnrichmentDomain( const char *name, EnrichmentDomain * ( *creator )( ) );
+#if 0
+    std::unique_ptr<EnrichmentDomain> createEnrichmentDomain(const char *name);
+    bool registerEnrichmentDomain( const char *name, std::unique_ptr<EnrichmentDomain> ( *creator )( ) );
+#endif
 
-    EnrichmentFront *createEnrichmentFront(const char *name);
-    bool registerEnrichmentFront( const char *name, EnrichmentFront * ( *creator )( ) );
+    std::unique_ptr<EnrichmentFront> createEnrichmentFront(const char *name);
+    bool registerEnrichmentFront( const char *name, std::unique_ptr<EnrichmentFront> ( *creator )( ) );
 
-    PropagationLaw *createPropagationLaw(const char *name);
-    bool registerPropagationLaw( const char *name, PropagationLaw * ( *creator )( ) );
+    std::unique_ptr<PropagationLaw> createPropagationLaw(const char *name);
+    bool registerPropagationLaw( const char *name, std::unique_ptr<PropagationLaw> ( *creator )( ) );
 
-    BasicGeometry *createGeometry(const char *name);
-    bool registerGeometry( const char *name, BasicGeometry * ( *creator )( ) );
+    std::unique_ptr<BasicGeometry> createGeometry(const char *name);
+    bool registerGeometry( const char *name, std::unique_ptr<BasicGeometry> ( *creator )( ) );
 
-    XfemManager *createXfemManager(const char *name, Domain *domain);
-    bool registerXfemManager( const char *name, XfemManager * ( *creator )( Domain * ) );
+    std::unique_ptr<XfemManager> createXfemManager(const char *name, Domain *domain);
+    bool registerXfemManager( const char *name, std::unique_ptr<XfemManager> ( *creator )( Domain * ) );
 
 
-    ContactManager *createContactManager(const char *name, Domain *domain);
-    bool registerContactManager( const char *name, ContactManager * ( *creator )( Domain * ) );
+    std::unique_ptr<ContactManager> createContactManager(const char *name, Domain *domain);
+    bool registerContactManager( const char *name, std::unique_ptr<ContactManager> ( *creator )( Domain * ) );
 
-    ContactDefinition *createContactDefinition(const char *name, ContactManager *cMan);
-    bool registerContactDefinition( const char *name, ContactDefinition * ( *creator )( ContactManager * ) );
+    std::unique_ptr<ContactDefinition> createContactDefinition(const char *name, ContactManager *cMan);
+    bool registerContactDefinition( const char *name, std::unique_ptr<ContactDefinition> ( *creator )( ContactManager * ) );
 
     // Failure module (in development!)
-    FailureCriteria *createFailureCriteria(const char *name, int num, FractureManager *fracManager);
-    bool registerFailureCriteria( const char *name, FailureCriteria * ( *creator )( int, FractureManager * ) );
+    std::unique_ptr<FailureCriteria> createFailureCriteria(const char *name, int num, FractureManager *fracManager);
+    bool registerFailureCriteria( const char *name, std::unique_ptr<FailureCriteria> ( *creator )( int, FractureManager * ) );
 
-    FailureCriteriaStatus *createFailureCriteriaStatus(const char *name, int num, FailureCriteria *critManager);
-    bool registerFailureCriteriaStatus( const char *name, FailureCriteriaStatus * ( *creator )( int, FailureCriteria * ) );
+    std::unique_ptr<FailureCriteriaStatus> createFailureCriteriaStatus(const char *name, int num, FailureCriteria *critManager);
+    bool registerFailureCriteriaStatus( const char *name, std::unique_ptr<FailureCriteriaStatus> ( *creator )( int, FailureCriteria * ) );
 
-    bool registerGeneralizedEigenValueSolver( GenEigvalSolverType name, SparseGeneralEigenValueSystemNM * ( *creator )(Domain *, EngngModel *) );
-    SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType name, Domain *d, EngngModel *m);
+    std::unique_ptr<SparseGeneralEigenValueSystemNM> createGeneralizedEigenValueSolver(GenEigvalSolverType name, Domain *d, EngngModel *m);
+    bool registerGeneralizedEigenValueSolver( GenEigvalSolverType name, std::unique_ptr<SparseGeneralEigenValueSystemNM> ( *creator )(Domain *, EngngModel *) );
 
-    IntegrationRule *createIRule(IntegrationRuleType name, int number, Element *e);
+    std::unique_ptr<IntegrationRule> createIRule(IntegrationRuleType name, int number, Element *e);
 
-    bool registerMaterialMappingAlgorithm( MaterialMappingAlgorithmType name, MaterialMappingAlgorithm * ( *creator )( ) );
-    MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType name);
+    std::unique_ptr<MaterialMappingAlgorithm> createMaterialMappingAlgorithm(MaterialMappingAlgorithmType name);
+    bool registerMaterialMappingAlgorithm( MaterialMappingAlgorithmType name, std::unique_ptr<MaterialMappingAlgorithm> ( *creator )( ) );
 
-    bool registerMesherInterface( MeshPackageType name, MesherInterface * ( *creator )( Domain * ) );
-    MesherInterface *createMesherInterface(MeshPackageType name, Domain *d);
+    std::unique_ptr<MesherInterface> createMesherInterface(MeshPackageType name, Domain *d);
+    bool registerMesherInterface( MeshPackageType name, std::unique_ptr<MesherInterface> ( *creator )( Domain * ) );
 
-    LoadBalancerMonitor *createLoadBalancerMonitor(const char *name, EngngModel *e);
-    bool registerLoadBalancerMonitor( const char *name, LoadBalancerMonitor * ( *creator )( EngngModel * ) );
-    LoadBalancer *createLoadBalancer(const char *name, Domain *d);
-    bool registerLoadBalancer( const char *name, LoadBalancer * ( *creator )( Domain * ) );
+    std::unique_ptr<LoadBalancerMonitor> createLoadBalancerMonitor(const char *name, EngngModel *e);
+    bool registerLoadBalancerMonitor( const char *name, std::unique_ptr<LoadBalancerMonitor> ( *creator )( EngngModel * ) );
+
+    std::unique_ptr<LoadBalancer> createLoadBalancer(const char *name, Domain *d);
+    bool registerLoadBalancer( const char *name, std::unique_ptr<LoadBalancer> ( *creator )( Domain * ) );
 };
 
 extern ClassFactory &classFactory;

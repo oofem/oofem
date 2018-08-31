@@ -170,6 +170,7 @@ public:
      * @return True if stiffness matrix of receiver is symmetric.
      */
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+
     void printYourself() override;
 
     /**

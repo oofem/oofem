@@ -38,6 +38,7 @@
 #include "oofemcfg.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "datastream.h"
 #include "error.h"
 
 #include <array>
@@ -68,20 +69,20 @@ public:
     auto end() const { return this->values.end(); }
     //@}
 
-    /// Ctor
-    template<typename... V> FloatArrayF(V... x) : values{x...} { }
     /// Copy ctor
-    FloatArrayF(FloatArrayF<N> &x) : values{x.values} { }
+    FloatArrayF(const FloatArrayF<N> &x) : values{x.values} { }
     /// Ctor from dynamic array (size must match)
-    FloatArrayF(FloatArray &x)
+    FloatArrayF(const FloatArray &x)
     {
 #ifndef NDEBUG
         if ( x.giveSize() != N ) {
             OOFEM_ERROR("Can't convert dynamic float array of size %d to fixed size %d\n", x.giveSize(), N);
         }
 #endif
-        std::copy(x.begin(), x.end(), values.begin());
+        std::copy_n(x.begin(), N, values.begin());
     }
+    /// Ctor
+    template<typename... V> FloatArrayF(V... x) : values{x...} { }
 
     /// Assignment operator
     void operator = (const FloatArrayF<N> &src) { values = src.values; }
@@ -197,15 +198,6 @@ public:
 
     //friend class FloatMatrixF;
 };
-
-/// Convert to dynamic size matrix
-template<int N>
-FloatArray to_dynamic( const FloatArrayF<N> & x )
-{
-    FloatArray out(N);
-    std::copy(x.begin(), x.end(), out.begin());
-    return x;
-}
 
 /// Print to stream
 template<int N>
@@ -370,7 +362,7 @@ double product( const FloatArrayF<N> & x )
 }
 
 /// Computes @$ x \cross y @$
-FloatArrayF<3> cross( const FloatArrayF<3> & x, const FloatArrayF<3> & y )
+inline FloatArrayF<3> cross( const FloatArrayF<3> & x, const FloatArrayF<3> & y )
 {
     return {
         x[1] * y[2] - x[2] * y[1],
@@ -394,12 +386,12 @@ double dot( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
  * Swaps the fourth and sixth index in the array. This is to reorder the indices
  * from OOFEM's order to Abaqus' and vice versa.
  */
-void swap_46(FloatArrayF<6> &t)
+inline void swap_46(FloatArrayF<6> &t)
 {
     std::swap( t[3], t[5] );
 }
 
-void swap_46(FloatArrayF<9> &t)
+inline void swap_46(FloatArrayF<9> &t)
 {
     // OOFEM: 11, 22, 33, 23, 13, 12, 32, 31, 21
     // UMAT:  11, 22, 33, 12, 13, 23, 32, 21, 31

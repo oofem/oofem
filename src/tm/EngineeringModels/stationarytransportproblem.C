@@ -38,7 +38,6 @@
 #include "element.h"
 #include "dof.h"
 #include "maskedprimaryfield.h"
-#include "intvarfield.h"
 #include "verbose.h"
 #include "tm/Elements/transportelement.h"
 #include "classfactory.h"
@@ -175,8 +174,8 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         solutionVector->resize(neq);
         solutionVector->zero();
 
-        conductivityMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
-        if ( conductivityMatrix == NULL ) {
+        conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        if ( !conductivityMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 

@@ -60,7 +60,7 @@ public:
 
     virtual ~PetscSolver();
 
-    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
+    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     /**
      * Solves the given linear system.
@@ -71,9 +71,9 @@ public:
      */
     NM_Status petsc_solve(PetscSparseMtrx &A, Vec b, Vec x);
 
-    virtual const char *giveClassName() const { return "PetscSolver"; }
-    virtual LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
-    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return SMT_PetscMtrx; }
+    virtual const char *giveClassName() const override { return "PetscSolver"; }
+    LinSystSolverType giveLinSystSolverType() const override { return ST_Petsc; }
+    SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return SMT_PetscMtrx; }
 };
 } // end namespace oofem
 #endif // petscsolver_h

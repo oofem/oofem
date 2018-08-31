@@ -68,7 +68,7 @@ class OOFEM_EXPORT ContactDefinitionNode2Node : public ContactDefinition
 private:
     double epsN;
     double epsT; // these should be 'contactmaterial' par
-    
+
 public:
 
     /// Constructor.
@@ -76,15 +76,11 @@ public:
     /// Destructor.
     virtual ~ContactDefinitionNode2Node(){};
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "ContactDefinitionNode2Node"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2Node_Name; }
- 
+    const char *giveClassName() const override { return "ContactDefinitionNode2Node"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2Node_Name; } 
 };
-
-
-
 
 
 /**
@@ -102,11 +98,10 @@ public:
     /// Destructor.
     virtual ~ContactDefinitionNode2NodeL(){};
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual const char *giveClassName() const { return "ContactDefinitionNode2NodeL"; }
-    virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2NodeL_Name; }
-
+    const char *giveClassName() const override { return "ContactDefinitionNode2NodeL"; }
+    const char *giveInputRecordName() const override { return _IFT_ContactDefinitionNode2NodeL_Name; }
 };
 
 

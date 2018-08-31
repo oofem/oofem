@@ -56,6 +56,8 @@ class object;
 
 namespace oofem {
 class FloatArray;
+template<int N> class FloatArrayF;
+template<int M, int N> class FloatMatrixF;
 class IntArray;
 class DataStream;
 
@@ -127,6 +129,9 @@ public:
     FloatMatrix(FloatMatrix && mat) : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
+    /// Initializer list constructor.
+    template<int M, int N>
+    FloatMatrix(const FloatMatrixF<N,M> &src) : nRows(N), nColumns(M), values(src.begin(), src.end()) { }
     /// Assignment operator.
     FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
@@ -144,8 +149,14 @@ public:
         values = std :: move(mat.values);
         return * this;
     }
-    /// Destructor.
-    ~FloatMatrix() {}
+    /// Assignment operator, adjusts size of the receiver if necessary.
+    template<int N, int M>
+    FloatMatrix &operator=(const FloatMatrixF<N,M> &mat) {
+        nRows = N;
+        nColumns = M;
+        values.assign(mat.begin(), mat.end());
+        return * this;
+    }
 
     /**
      * Checks size of receiver towards requested bounds.

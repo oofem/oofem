@@ -75,7 +75,7 @@ MaterialStatus *
 MDM :: CreateStatus(GaussPoint *gp) const
 {
     if ( dynamic_cast< Microplane * >(gp) ) {
-        return NULL;
+        return nullptr;
     } else {
         return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);
     }
@@ -302,7 +302,7 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     }
 
     ParEpp = Ep / ( 1. - ParMd ); // 1d sv reduction
-    fmicroplane = linearElasticMaterial->give('E', gp) * ParEpp;
+    fmicroplane = linearElasticMaterial.give('E', gp) * ParEpp;
     // en /= (1.-ParMd*sv);
     en /= ( 1. - ParMd * sv / ( fmicroplane ) ); // suggested by P.Grassl (ParMd is unit dependent)
 
@@ -467,9 +467,9 @@ MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC
     FloatMatrix de;
     if ( mdmMode == mdm_3d ) {
         // PDC components in 3d mode are in full 3d format, even in planeStrain situation
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(de, TangentStiffness, gp, tStep);
+        linearElasticMaterial.give3dMaterialStiffnessMatrix(de, TangentStiffness, gp, tStep);
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(de, TangentStiffness, gp, tStep);
+        linearElasticMaterial.giveStiffnessMatrix(de, TangentStiffness, gp, tStep);
     }
 
     stressPDC.beProductOf(de, strainPDC);
@@ -529,7 +529,7 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, TangentStiffness, gp, tStep);
+    this->linearElasticMaterial.giveStiffnessMatrix(answer, TangentStiffness, gp, tStep);
     //answer = de;
     //return;
     // if (isVirgin()) return ;
@@ -854,8 +854,7 @@ MDM :: initializeFrom(InputRecord *ir)
         if ( result != IRRT_OK ) return result;
     }
 
-    linearElasticMaterial = new IsotropicLinearElasticMaterial( 1, MicroplaneMaterial :: giveDomain() );
-    result = linearElasticMaterial->initializeFrom(ir);
+    result = linearElasticMaterial.initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
 #ifdef MDM_MAPPING_DEBUG
@@ -876,7 +875,7 @@ MDM :: initializeFrom(InputRecord *ir)
 
 void MDM :: giveInputRecord(DynamicInputRecord &input)
 {
-    linearElasticMaterial->giveInputRecord(input);
+    linearElasticMaterial.giveInputRecord(input);
     MicroplaneMaterial :: giveInputRecord(input);
     StructuralNonlocalMaterialExtensionInterface :: giveInputRecord(input);
 #ifdef MDM_MAPPING_DEBUG
@@ -1003,7 +1002,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
     // determine params from macroscopic ones
     if ( nonlocal ) {
         // formulas derived for 3d case
-        double EModulus = linearElasticMaterial->give('E', gp);
+        double EModulus = linearElasticMaterial.give('E', gp);
         double gammaf = ( EModulus * this->Gf ) / ( this->R * this->Ft * this->Ft );
         double gamma  = gammaf / ( 1.47 - 0.0014 * gammaf );
         double f = this->Ft / ( 1.56 + 0.006 * gamma ); // microplane tensile strength
@@ -1038,7 +1037,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
         dir.at(3) = dirs.at(3, indx);
 
         h  = gp->giveElement()->giveCharacteristicLength(dir);
-        double E  = this->giveLinearElasticMaterial()->give(Ex, gp);
+        double E  = linearElasticMaterial.give(Ex, gp);
         Ep = this->mdm_Ep;
         if ( nsd == 2 ) {
             Efp = ( Gf / ( h * E * Ep ) + 1.2 * Ep ) / 1.75 - Ep;
@@ -1196,8 +1195,8 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
     toMap.at(1) = ( int ) IST_MicroplaneDamageValues;
 
     // Set up source element set if not set up by user
-    if ( sourceElemSet == NULL ) {
-        sourceElemSet = new Set(0, oldd);
+    if ( !sourceElemSet ) {
+        sourceElemSet = std::make_unique<Set>(0, oldd);
         IntArray el;
         // compile source list to contain all elements on old odmain with the same material id
         for ( int i = 1; i <= oldd->giveNumberOfElements(); i++ ) {

@@ -42,6 +42,8 @@
 #include "matconst.h"
 #include "element.h"
 
+#include <memory>
+
 ///@name Input fields for OrthotropicLinearElasticMaterial
 //@{
 #define _IFT_OrthotropicLinearElasticMaterial_Name "orthole"
@@ -101,30 +103,18 @@ class OrthotropicLinearElasticMaterial : public LinearElasticMaterial
 {
 protected:
     CS_type cs_type;
-    FloatMatrix *localCoordinateSystem;
-    FloatArray *helpPlaneNormal;
+    std::unique_ptr<FloatMatrix> localCoordinateSystem;
+    std::unique_ptr<FloatArray> helpPlaneNormal;
     // in localCoordinateSystem the unity vectors are stored
     // COLUMWISE (this is exception, but allows faster numerical
     // implementation)
 
 public:
 
-    OrthotropicLinearElasticMaterial(int n, Domain * d) : LinearElasticMaterial(n, d)
-    {
-        localCoordinateSystem = NULL;
-        helpPlaneNormal = NULL;
-        cs_type = unknownCS;
-    }
-    virtual ~OrthotropicLinearElasticMaterial()
-    {
-        if ( localCoordinateSystem ) {
-            delete localCoordinateSystem;
-        }
-
-        if ( helpPlaneNormal ) {
-            delete helpPlaneNormal;
-        }
-    }
+    OrthotropicLinearElasticMaterial(int n, Domain * d) : LinearElasticMaterial(n, d),
+        cs_type(unknownCS)
+    { }
+    virtual ~OrthotropicLinearElasticMaterial() { }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 

@@ -47,7 +47,7 @@ public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
     int giveNsd() override { return 1; }
 
-    //virtual FloatArray giveParametricCenter() const { return {0.}; }
+    //FloatArray giveParametricCenter() const override { return {0.}; }
 
     void boundaryGiveNodes(IntArray &answer, int boundary) override;
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -57,17 +57,17 @@ public:
 
     /**@name Surface interpolation services */
     //@{
-    virtual void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    void boundarySurfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    void boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+    double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary)
+    void boundarySurfaceGiveNodes(IntArray &answer, int boundary) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     //@}
 

@@ -84,8 +84,8 @@ public:
     Set(int n, Domain * d) : FEMComponent(n, d), mElementListIsSorted(false) { }
     virtual ~Set() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    IRResultType initializeFrom(InputRecord *ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
     /**
      * Returns list of elements within set.
      * @return List of element numbers.
@@ -148,7 +148,7 @@ public:
     /// Return True if given element is contained
     bool hasElement(int elem) const;
 
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
     /**
      * Renumbering of nodes (could change due to load balancing).
      */
@@ -158,11 +158,11 @@ public:
      */
     void updateLocalElementNumbering(EntityRenumberingFunctor &f);
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
 
-    virtual const char *giveClassName() const { return "Set"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Set_Name; }
+    const char *giveClassName() const override { return "Set"; }
+    const char *giveInputRecordName() const override { return _IFT_Set_Name; }
 
 protected:
     /**

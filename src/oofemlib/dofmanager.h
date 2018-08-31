@@ -414,7 +414,7 @@ public:
     std :: map< int, int > *giveIcMap() { return dofICmap; }
     //@}
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
     /**
      * Updates receiver after equilibrium in time step has been reached.
      * @param tStep Active time step.

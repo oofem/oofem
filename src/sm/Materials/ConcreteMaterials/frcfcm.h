@@ -229,7 +229,7 @@ protected:
     bool isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) override;
     double computeShearStiffnessRedistributionFactor(GaussPoint *gp, int ithCrackPlane, int jthCrackDirection) override;
     double computeOverallElasticStiffness() override;
-    double computeOverallElasticShearModulus(void) override { return this->computeOverallElasticStiffness() / ( 2. * ( 1. + this->giveLinearElasticMaterial()->givePoissonsRatio() ) ); }
+    double computeOverallElasticShearModulus(void) override { return this->computeOverallElasticStiffness() / ( 2. * ( 1. + linearElasticMaterial.givePoissonsRatio() ) ); }
 };
 } // end namespace oofem
 #endif // frcfcm_h

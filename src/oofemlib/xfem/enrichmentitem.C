@@ -66,11 +66,7 @@ const double EnrichmentItem :: mLevelSetRelTol = 1.0e-3;
 
 
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain),
-    mpEnrichmentFunc(NULL),
-    mpEnrichmentFrontStart(NULL),
-    mpEnrichmentFrontEnd(NULL),
     mEnrFrontIndex(0),
-    mpPropagationLaw(NULL),
     mPropLawIndex(0),
     mInheritBoundaryConditions(false),
     mInheritOrderedBoundaryConditions(false),
@@ -83,10 +79,6 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    delete mpEnrichmentFunc;
-    delete mpEnrichmentFrontStart;
-    delete mpEnrichmentFrontEnd;
-    delete mpPropagationLaw;
 }
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
@@ -463,14 +455,10 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
     }
 }
 
-void EnrichmentItem :: setPropagationLaw(PropagationLaw *ipPropagationLaw)
+void EnrichmentItem :: setPropagationLaw(std::unique_ptr<PropagationLaw> ipPropagationLaw)
 {
-	if(mpPropagationLaw != NULL) {
-		delete mpPropagationLaw;
-	}
-
-	mpPropagationLaw = ipPropagationLaw;
-	mPropLawIndex = 1;
+    mpPropagationLaw = std::move(ipPropagationLaw);
+    mPropLawIndex = 1;
 }
 
 void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep)
@@ -478,22 +466,22 @@ void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod, Tim
     //iExpMod.outputXFEM(*this);
 }
 
-void EnrichmentItem :: setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart, bool iDeleteOld)
+void EnrichmentItem :: setEnrichmentFrontStart(std::unique_ptr<EnrichmentFront> ipEnrichmentFrontStart, bool iDeleteOld)
 {
-	if(iDeleteOld) {
-		delete mpEnrichmentFrontStart;
-	}
+    if( ! iDeleteOld ) {
+        mpEnrichmentFrontStart.release(); ///@note This is bad bad code
+    }
 
-    mpEnrichmentFrontStart = ipEnrichmentFrontStart;
+    mpEnrichmentFrontStart = std::move(ipEnrichmentFrontStart);
 }
 
-void EnrichmentItem :: setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd, bool iDeleteOld)
+void EnrichmentItem :: setEnrichmentFrontEnd(std::unique_ptr<EnrichmentFront> ipEnrichmentFrontEnd, bool iDeleteOld)
 {
-	if(iDeleteOld) {
-		delete mpEnrichmentFrontEnd;
-	}
+    if ( !iDeleteOld ) {
+        mpEnrichmentFrontEnd.release(); ///@note This is bad bad code
+    }
 
-    mpEnrichmentFrontEnd = ipEnrichmentFrontEnd;
+    mpEnrichmentFrontEnd = std::move(ipEnrichmentFrontEnd);
 }
 
 bool EnrichmentItem :: tipIsTouchingEI(const TipInfo &iTipInfo)

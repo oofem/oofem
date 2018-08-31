@@ -149,13 +149,13 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
     for ( int i = 1; i <= ninterpelem; i++ ) {
         int elemNumber = nelem + i;
         d->resizeElements(elemNumber);
-        Element *elem = classFactory.createElement(elemType, elemNumber, d);
+        auto elem = classFactory.createElement(elemType, elemNumber, d);
         irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
         //irEl.setField( ncrosssect, _IFT_Element_crosssect);
         //irEl.setField( nmat, _IFT_Element_mat);
         elem->initializeFrom(& irEl);
         elem->setGlobalNumber(elemNumber);
-        d->setElement(elemNumber, elem);
+        d->setElement(elemNumber, std::move(elem));
     }
 }
 
@@ -166,13 +166,12 @@ Quasicontinuum :: addCrosssectionToInterpolationElements(Domain *d)
     // new crosssection
     int ncrosssect = d->giveNumberOfCrossSectionModels() + 1;
     d->resizeCrossSectionModels(ncrosssect);
-    CrossSection *crossSection;
-    crossSection = classFactory.createCrossSection("SimpleCS", ncrosssect, d);
+    auto crossSection = classFactory.createCrossSection("SimpleCS", ncrosssect, d);
     DynamicInputRecord irCS;
     irCS.setField(1.0, _IFT_SimpleCrossSection_thick);
     irCS.setField(1.0, _IFT_SimpleCrossSection_width);
     crossSection->initializeFrom(& irCS);
-    d->setCrossSection(ncrosssect, crossSection);
+    d->setCrossSection(ncrosssect, std::move(crossSection));
 
     for ( int i = 1; i <= interpolationElementNumbers.giveSize(); i++ ) {
         int elNum = interpolationElementNumbers.at(i);
@@ -188,14 +187,14 @@ Quasicontinuum :: applyApproach1(Domain *d)
     // new material with zero stiffness
     int nmat = d->giveNumberOfMaterialModels() + 1;
     d->resizeMaterials(nmat);
-    Material *mat = classFactory.createMaterial("IsoLE", nmat, d);
+    auto mat = classFactory.createMaterial("IsoLE", nmat, d);
     DynamicInputRecord irMat;
     irMat.setField(1.e-20, _IFT_IsotropicLinearElasticMaterial_e);
     irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_n);
     irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha);
     irMat.setField(0.0, _IFT_Material_density);
     mat->initializeFrom(& irMat);
-    d->setMaterial(nmat, mat);
+    d->setMaterial(nmat, std::move(mat));
 
 
     // add material and CS to interpolation elements
@@ -321,7 +320,7 @@ Quasicontinuum :: applyApproach2(Domain *d, int homMtrxType, double volumeOfInte
     // new material with homogenized stiffness
     int nmat = d->giveNumberOfMaterialModels() + 1;
     d->resizeMaterials(nmat);
-    Material *mat;
+    std::unique_ptr<Material> mat;
     DynamicInputRecord irMat;
     // isotropic
     if ( homMtrxType == 1 ) {
@@ -361,7 +360,7 @@ Quasicontinuum :: applyApproach2(Domain *d, int homMtrxType, double volumeOfInte
         OOFEM_ERROR("Invalid homMtrxType");
     }
     mat->initializeFrom(& irMat);
-    d->setMaterial(nmat, mat);
+    d->setMaterial(nmat, std::move(mat));
 
 
     // add material to interpolation elements
@@ -544,14 +543,14 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
         for ( int i = 1; i <= noIntEl; i++ ) {
             nmat++;
             homogenizationOfStiffMatrix(homogenizedE, homogenizedNu, individualStiffnessMatrices [ i - 1 ]);
-            Material *mat = classFactory.createMaterial("IsoLE", nmat, d);
+            auto mat = classFactory.createMaterial("IsoLE", nmat, d);
             irMat.setField(homogenizedE, _IFT_IsotropicLinearElasticMaterial_e);
             irMat.setField(homogenizedNu, _IFT_IsotropicLinearElasticMaterial_n);
             irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha);
             irMat.setField(0.0, _IFT_Material_density);
 
             mat->initializeFrom(& irMat);
-            d->setMaterial(nmat, mat);
+            d->setMaterial(nmat, std::move(mat));
         }
 
         // anisotropic
@@ -559,7 +558,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
         for ( int i = 1; i <= noIntEl; i++ ) {
             FloatMatrix &Da = individualStiffnessMatrices [ i - 1 ];
             nmat++;
-            Material *mat = classFactory.createMaterial("AnisoLE", nmat, d);
+            auto mat = classFactory.createMaterial("AnisoLE", nmat, d);
             FloatArray stiff;
             FloatArray alpha(6);
             if ( nDimensions == 2 ) {
@@ -584,7 +583,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
             irMat.setField(0.0, _IFT_Material_density);
 
             mat->initializeFrom(& irMat);
-            d->setMaterial(nmat, mat);
+            d->setMaterial(nmat, std::move(mat));
         }
     } else {
         OOFEM_ERROR("Invalid homMtrxType");

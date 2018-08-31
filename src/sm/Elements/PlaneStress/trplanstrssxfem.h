@@ -103,7 +103,7 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void computeField(ValueModeType mode, TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer) override;
-    virtual void giveElementDofIDMask(IntArray &answer) const;
+    void giveElementDofIDMask(IntArray &answer) const override;
 
     /// VTK Interface
     void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) override;

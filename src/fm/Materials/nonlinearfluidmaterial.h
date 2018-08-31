@@ -69,9 +69,9 @@ public:
 
     virtual ~NonlinearFluidMaterialStatus() { }
 
-    virtual void initTempStatus();
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *);
+    void updateYourself(TimeStep *tStep) override;
 
     const FloatArray &giveTempDeviatoricStressVector() { return temp_deviatoricStressVector; }
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
@@ -80,7 +80,7 @@ public:
     void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
     void letTempStrainNorm2Be(double v) { temp_norm2 = v; }
 
-    virtual const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }
+    const char *giveClassName() const override { return "NonlinearFluidMaterialStatus"; }
 };
 
 /**

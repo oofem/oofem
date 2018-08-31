@@ -36,12 +36,35 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
+
+FloatArrayF<6>
+FEI2dTrQuad :: evalN(const FloatArrayF<2> &lcoords)
+{
+    double l1 = lcoords[0];
+    double l2 = lcoords[1];
+    double l3 = 1. - l1 - l2;
+
+    return {
+        ( 2. * l1 - 1. ) * l1,
+        ( 2. * l2 - 1. ) * l2,
+        ( 2. * l3 - 1. ) * l3,
+        4. * l1 * l2,
+        4. * l2 * l3,
+        4. * l3 * l1
+    };
+}
+
 void
 FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    answer = evalN(lcoords);
+#else
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
     double l3 = 1. - l1 - l2;
@@ -54,11 +77,63 @@ FEI2dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
         4. * l2 * l3,
         4. * l3 * l1
     };
+#endif
 }
+
+
+FloatMatrixF<2,6>
+FEI2dTrQuad :: evaldNdxi(const FloatArrayF<2> &lcoords)
+{
+    double l1 = lcoords[0];
+    double l2 = lcoords[1];
+    double l3 = 1.0 - l1 - l2;
+
+    return {
+        4.0 * l1 - 1.0, // col0
+        0.0,
+        0.0, // col1
+        4.0 * l2 - 1.0,
+        -1.0 * ( 4.0 * l3 - 1.0 ), // col2
+        -1.0 * ( 4.0 * l3 - 1.0 ),
+        4.0 * l2, // col3
+        4.0 * l1,
+        -4.0 * l2, // col4
+        4.0 * l3 - 4.0 * l2,
+        4.0 * l3 - 4.0 * l1, // col5
+        -4.0 * l1,
+    };
+}
+
+
+std::pair<double,FloatMatrixF<2,6>>
+FEI2dTrQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const
+{
+    auto dn = evaldNdxi(lcoords);
+    FloatMatrixF<2,2> jacT;
+    for ( int i = 1; i <= dn.cols(); i++ ) {
+        const auto &c = cellgeo.giveVertexCoordinates(i);
+        double x = c->at(xind);
+        double y = c->at(yind);
+
+        ///@todo check transpose
+        jacT(0, 0) += dn.at(1, i) * x;
+        jacT(0, 1) += dn.at(1, i) * y;
+        jacT(1, 0) += dn.at(2, i) * x;
+        jacT(1, 1) += dn.at(2, i) * y;
+    }
+
+    return {det(jacT), dot(inv(jacT), dn)};
+}
+
 
 double
 FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    auto tmp = evaldNdx(lcoords, cellgeo);
+    answer = tmp.second;
+    return tmp.first;
+#else
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
     this->evaldNdxi(dn, lcoords, cellgeo);
@@ -75,6 +150,7 @@ FEI2dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 
     answer.beProductTOf(dn, inv);
     return jacobianMatrix.giveDeterminant();
+#endif
 }
 
 void

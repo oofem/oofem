@@ -66,18 +66,10 @@
 namespace oofem {
 REGISTER_ExportModule(VTKExportModule)
 
-VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
-{
-    smoother = NULL;
-}
+VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport() { }
 
 
-VTKExportModule :: ~VTKExportModule()
-{
-    if ( this->smoother ) {
-        delete this->smoother;
-    }
-}
+VTKExportModule :: ~VTKExportModule() { }
 
 
 IRResultType
@@ -212,10 +204,7 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 void
 VTKExportModule :: initialize()
 {
-    if ( this->smoother ) {
-        delete this->smoother;
-        this->smoother = NULL;
-    }
+    this->smoother.reset();
     ExportModule :: initialize();
 }
 
@@ -751,11 +740,11 @@ VTKExportModule :: giveSmoother()
 {
     Domain *d = emodel->giveDomain(1);
 
-    if ( this->smoother == NULL ) {
+    if ( !this->smoother ) {
         this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
     }
 
-    return this->smoother;
+    return this->smoother.get();
 }
 
 

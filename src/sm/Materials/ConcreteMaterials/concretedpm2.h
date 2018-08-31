@@ -634,7 +634,7 @@ protected:
     double helem;
 
     /// Pointer for linear elastic material.
-    LinearElasticMaterial *linearElasticMaterial;
+    IsotropicLinearElasticMaterial linearElasticMaterial;
 
     /// Elastic Young's modulus.
     double eM;
@@ -687,9 +687,6 @@ public:
 
     const char *giveClassName() const override { return "ConcreteDPM2"; }
     const char *giveInputRecordName() const override { return _IFT_ConcreteDPM2_Name; }
-
-    LinearElasticMaterial *giveLinearElasticMaterial()
-    { return linearElasticMaterial; }
 
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
 

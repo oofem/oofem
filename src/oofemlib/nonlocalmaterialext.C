@@ -88,8 +88,6 @@ NonlocalMaterialExtensionInterface :: NonlocalMaterialExtensionInterface(Domain 
     averType = 0;
 
     gridSize = 0;
-    grid = NULL;
-    minDist2 = NULL;
     initDiag = 0.;
     order = 1;
     centDiff = 2;
@@ -841,8 +839,8 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     if ( averType >= 2 && averType <= 6 ) { // eikonal models
         gridSize = 10; // default value
         IR_GIVE_OPTIONAL_FIELD(ir, gridSize, _IFT_NonlocalMaterialExtensionInterface_gridsize);
-        grid = new Grid(2 *gridSize + 1, 2 *gridSize + 1);
-        minDist2 = new FloatMatrix(2 *gridSize + 1, 2 *gridSize + 1);
+        grid = std::make_unique<Grid>(2 *gridSize + 1, 2 *gridSize + 1);
+        minDist2 = std::make_unique<FloatMatrix>(2 *gridSize + 1, 2 *gridSize + 1);
         order = 1; // default value
         IR_GIVE_OPTIONAL_FIELD(ir, order, _IFT_NonlocalMaterialExtensionInterface_order);
         initDiag = 0.; // default value

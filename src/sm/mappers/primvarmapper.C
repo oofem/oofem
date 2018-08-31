@@ -89,11 +89,11 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
     std :: unique_ptr< SparseMtrx > K;
     std :: unique_ptr< SparseLinearSystemNM > solver;
 
-    solver.reset( classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod) );
+    solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
     if (!solver) {
-        solver.reset( classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod) );
+        solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
     }
-    K.reset( classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true)) );
+    K = classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true));
 
     K->buildInternalStructure( engngMod, iNewDom.giveNumber(), num );
 

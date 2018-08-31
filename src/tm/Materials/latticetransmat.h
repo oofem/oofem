@@ -76,7 +76,7 @@ public:
     /// Destructor
     virtual ~LatticeTransportMaterialStatus() { }
 
-    void printOutputAt(FILE *, TimeStep *);
+    void printOutputAt(FILE *, TimeStep *) override;
 
     /// Returns pressure
     double givePressure() { return field.at(1); }

@@ -172,7 +172,7 @@ private:
     /// Determines if state variables should be updated or not (>0 updates).
     int IFAD;
 
-    LinearElasticMaterial *linearElasticMaterial;
+    IsotropicLinearElasticMaterial linearElasticMaterial;
 
 public:
     Concrete2(int n, Domain * d);

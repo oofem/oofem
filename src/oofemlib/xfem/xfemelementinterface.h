@@ -79,7 +79,7 @@ public:
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
 
-    virtual const char *giveClassName() const { return "XfemElementInterface"; }
+    const char *giveClassName() const override { return "XfemElementInterface"; }
     std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
 
 public:

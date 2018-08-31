@@ -254,9 +254,9 @@ protected:
 public:
     ParticleTopologyDescription(Domain *d);
     virtual ~ParticleTopologyDescription();
-    virtual bool instanciateYourself(DataReader &dr);
+    bool instanciateYourself(DataReader &dr) override;
 
-    virtual TopologyState updateYourself(TimeStep *tStep);
+    TopologyState updateYourself(TimeStep *tStep) override;
 
     /**
      * Generates a mesh from the topology.
@@ -269,16 +269,16 @@ public:
      * @param e_egt Element geometry types.
      * @param s_egt Segment geometry types.
      */
-    virtual void generateMesh(std :: vector< FloatArray > &nodes, std :: vector< IntArray > &elements, std :: vector< IntArray > &segments,
-                              std :: vector< IntArray > &n_markers, IntArray &e_markers, IntArray &s_markers, IntArray &e_egt, IntArray &s_egt);
+    void generateMesh(std :: vector< FloatArray > &nodes, std :: vector< IntArray > &elements, std :: vector< IntArray > &segments,
+                      std :: vector< IntArray > &n_markers, IntArray &e_markers, IntArray &s_markers, IntArray &e_egt, IntArray &s_egt);
 
-    virtual void replaceFEMesh();
+    void replaceFEMesh() override;
 
-    virtual void doOutput(TimeStep *tStep);
-    virtual void writeDataToFile(const char *name) const;
-    virtual void writeVTKFile(const char *name) const;
+    void doOutput(TimeStep *tStep) override;
+    void writeDataToFile(const char *name) const;
+    void writeVTKFile(const char *name) const;
 
-    virtual const char *giveClassName() const { return "ParticleTopologyDescription"; }
+    const char *giveClassName() const override { return "ParticleTopologyDescription"; }
 };
 } // end namespace oofem
 #endif // particletopologydescription_h

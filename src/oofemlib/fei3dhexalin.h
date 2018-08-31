@@ -38,6 +38,7 @@
 #include "feinterpol3d.h"
 
 namespace oofem {
+
 /**
  * Class representing implementation of linear hexahedra interpolation class.
  */
@@ -53,8 +54,13 @@ public:
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
 
     // Bulk
+    static FloatArrayF<8> evalN(const FloatArrayF<3> &lcoords);
+    static std::pair<double, FloatMatrixF<3,8>> evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo);
+    static FloatMatrixF<3,8> evaldNdxi(const FloatArrayF<3> &lcoords);
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     int giveNumberOfNodes() const override { return 8; }
@@ -83,7 +89,6 @@ public:
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
-    void giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords);
 };
 } // end namespace oofem
 #endif //  fei3dhexalin_h

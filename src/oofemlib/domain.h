@@ -476,27 +476,40 @@ public:
     /// Resizes the internal data structure to accommodate space for _newSize sets.
     void resizeSets(int _newSize);
 
+    ///@note Needed for some of the boost-python bindings. NOTE: This takes ownership of the pointers, so it's actually completely unsafe.
+    //@{
+    void py_setDofManager(int i, DofManager *obj);
+    void py_setElement(int i, Element *obj);
+    void py_setCrossSection(int i, CrossSection *obj);
+    void py_setMaterial(int i, Material *obj);
+    void py_setNonlocalBarrier(int i, NonlocalBarrier *obj);
+    void py_setBoundaryCondition(int i, GeneralBoundaryCondition *obj);
+    void py_setInitialCondition(int i, InitialCondition *obj);
+    void py_setFunction(int i, Function *obj);
+    void py_setSet(int i, Set *obj);
+    ///@}
+
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setDofManager(int i, DofManager *obj);
+    void setDofManager(int i, std::unique_ptr<DofManager> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setElement(int i, Element *obj);
+    void setElement(int i, std::unique_ptr<Element> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setCrossSection(int i, CrossSection *obj);
+    void setCrossSection(int i, std::unique_ptr<CrossSection> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setMaterial(int i, Material *obj);
+    void setMaterial(int i, std::unique_ptr<Material> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setNonlocalBarrier(int i, NonlocalBarrier *obj);
+    void setNonlocalBarrier(int i, std::unique_ptr<NonlocalBarrier> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setBoundaryCondition(int i, GeneralBoundaryCondition *obj);
+    void setBoundaryCondition(int i, std::unique_ptr<GeneralBoundaryCondition> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setInitialCondition(int i, InitialCondition *obj);
+    void setInitialCondition(int i, std::unique_ptr<InitialCondition> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setFunction(int i, Function *obj);
+    void setFunction(int i, std::unique_ptr<Function> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setSet(int i, Set *obj);
+    void setSet(int i, std::unique_ptr<Set> obj);
 
     /// Temporary function, sets xfemManager.
-    void setXfemManager(XfemManager *ipXfemManager);
+    void setXfemManager(std::unique_ptr<XfemManager> ipXfemManager);
 
     XfemManager *giveXfemManager();
     bool hasXfemManager();

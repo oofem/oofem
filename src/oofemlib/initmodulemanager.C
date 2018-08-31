@@ -53,7 +53,7 @@ InitModuleManager :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-InitModule *InitModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
+std::unique_ptr<InitModule> InitModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)
 {
     return classFactory.createInitModule(name, n, emodel);
 }

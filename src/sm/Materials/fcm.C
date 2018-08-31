@@ -43,21 +43,12 @@
 #include <cstring>
 
 namespace oofem {
-FCMMaterial :: FCMMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
-{
-    ecsMethod = ECSM_Unknown;
-    linearElasticMaterial = NULL;
-}
-
-
-FCMMaterial :: ~FCMMaterial()
-//
-// destructor
-//
+FCMMaterial :: FCMMaterial(int n, Domain *d) : StructuralMaterial(n, d),
+    linearElasticMaterial(n, d),
+    ecsMethod(ECSM_Unknown)
 {}
+
+FCMMaterial :: ~FCMMaterial() {}
 
 int
 FCMMaterial :: hasMaterialModeCapability(MaterialMode mode)
@@ -1257,7 +1248,6 @@ FCMMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
-    StructuralMaterial *lMat = static_cast< StructuralMaterial * >( this->giveLinearElasticMaterial() );
 
     MaterialMode mMode = gp->giveMaterialMode();
 
@@ -1270,7 +1260,7 @@ FCMMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 
     // ELASTIC MATRIX
     if ( ( rMode == ElasticStiffness ) || ( numberOfActiveCracks == 0 ) ) {
-        lMat->giveStiffnessMatrix(D, rMode, gp, tStep);
+        linearElasticMaterial.giveStiffnessMatrix(D, rMode, gp, tStep);
 
         overallElasticStiffness = this->computeOverallElasticStiffness();
         if ( overallElasticStiffness != ( this->give('E', gp) ) ) {
@@ -1283,7 +1273,7 @@ FCMMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 
     // SECANT OR TANGENT MATRIX - first in local direction
     nMaxCracks = status->giveMaxNumberOfCracks(gp);
-    lMat->giveStiffnessMatrix(De, rMode, gp, tStep);
+    linearElasticMaterial.giveStiffnessMatrix(De, rMode, gp, tStep);
 
     overallElasticStiffness = this->computeOverallElasticStiffness();
     if ( overallElasticStiffness != ( this->give('E', gp) ) ) {
@@ -1430,6 +1420,11 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
         return result;
     }
 
+    result = linearElasticMaterial.initializeFrom(ir);
+    if ( result != IRRT_OK ) {
+        return result;
+    }
+
     this->nAllowedCracks = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, nAllowedCracks, _IFT_FCM_nAllowedCracks);
 
@@ -1466,7 +1461,7 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
 double
 FCMMaterial :: give(int aProperty, GaussPoint *gp)
 {
-    return linearElasticMaterial->give(aProperty, gp);
+    return linearElasticMaterial.give(aProperty, gp);
 }
 
 

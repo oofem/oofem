@@ -58,7 +58,7 @@ InverseIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &eigv, FloatM
         OOFEM_ERROR("matrices size mismatch");
     }
 
-    SparseLinearSystemNM *solver = GiveClassFactory().createSparseLinSolver(ST_Direct, domain, engngModel);
+    auto solver = GiveClassFactory().createSparseLinSolver(ST_Direct, domain, engngModel);
 
     int nn = a.giveNumberOfColumns();
     int nc = min(2 * nroot, nroot + 8);

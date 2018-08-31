@@ -395,7 +395,7 @@ NRSolver :: giveLinearSolver()
         }
     }
 
-    linSolver.reset( classFactory.createSparseLinSolver(solverType, domain, engngModel) );
+    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( !linSolver ) {
         OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
     }

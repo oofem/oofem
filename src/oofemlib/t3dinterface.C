@@ -288,136 +288,55 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 int
 T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
 {
-  
-  std::ifstream inputStream;
-  inputStream.open( t3dOutFile );
-  if ( !inputStream.is_open() ) {
-    OOFEM_ERROR("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open T3D input stream (%s)", t3dOutFile);
-    return 0;
-  }
-   // create new domain
-  ( * dNew ) = new Domain( 2, this->domain->giveSerialNumber() + 1, this->domain->giveEngngModel() );
-  ( * dNew )->setDomainType( this->domain->giveDomainType() );
+    std::ifstream inputStream;
+    inputStream.open( t3dOutFile );
+    if ( !inputStream.is_open() ) {
+        OOFEM_ERROR("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open T3D input stream (%s)", t3dOutFile);
+        return 0;
+    }
+    // create new domain
+    ( * dNew ) = new Domain( 2, this->domain->giveSerialNumber() + 1, this->domain->giveEngngModel() );
+    ( * dNew )->setDomainType( this->domain->giveDomainType() );
 
-  std::string line;
+    std::string line;
 
-  //read first line from t3d out file - 4 numbers
-  // 2 degree of interpolation
-  // other are not important so far 
-  std::getline(inputStream, line);
-  //convert const char to char in order to use strtok
-  char *currentLine = new char[line.size() + 1];
-  std::strcpy ( currentLine, line.c_str() );
-  // tokenizing line
-  char *token = std::strtok(currentLine, " ");
-  // set counter to 0
-  int i = 0;
-  while (token != NULL) {
-    if(i == 0)
-	{}//int n1 = atoi(token);
-    else if (i == 1)
-	{}//int interp = atoi(token);
-    else if(i == 2)
-	{}//int n3 = atoi(token);
-    else if(i == 3)
-	{}//int n4 = atoi(token);
-    else
-      break;
-    token = std::strtok(NULL, " ");
-    i++;
-  }  
-
-
-  int nnodes,ntriangles,ntetras; // nedges,
-    
-  /*read second line from t3d out file
-    4 numbers
-    1 - number of nodes
-    2 - number of edges
-    3 - number of triangles
-    4 - number of tetras
-  */
-  std::getline(inputStream, line);
-  //convert const char to char in order to use strtok
-  currentLine = new char[line.size() + 1];
-  std::strcpy ( currentLine, line.c_str() );
-  // tokenizing line
-  token = std::strtok(currentLine, " ");
-  // set counter to 0
-  i = 0;
-  while (token != NULL) {
-    if(i == 0)
-      nnodes = atoi(token);
-    else if (i == 1)
-	{}//nedges = atoi(token);
-    else if(i == 2)
-      ntriangles = atoi(token);
-    else if(i == 3)
-      ntetras = atoi(token);
-    else
-      break;
-    token = std::strtok(NULL, " ");
-    i++;
-  }  
-  // create new domain
-  (*dNew)->resizeDofManagers(nnodes);
+    //read first line from t3d out file - 4 numbers
+    // 2 degree of interpolation
+    // other are not important so far 
+    std::getline(inputStream, line);
+    //convert const char to char in order to use strtok
+    char *currentLine = new char[line.size() + 1];
+    std::strcpy ( currentLine, line.c_str() );
+    // tokenizing line
+    char *token = std::strtok(currentLine, " ");
+    // set counter to 0
+    int i = 0;
+    while (token != nullptr) {
+        if(i == 0)
+            {}//int n1 = atoi(token);
+        else if (i == 1)
+            {}//int interp = atoi(token);
+        else if(i == 2)
+            {}//int n3 = atoi(token);
+        else if(i == 3)
+            {}//int n4 = atoi(token);
+        else
+            break;
+        token = std::strtok(nullptr, " ");
+        i++;
+    }
 
 
-  //one empty line
-  std::getline(inputStream, line);  
-  // create nodes
-  Node *node;
-  // read dofs
-  const IntArray dofIDArrayPtr = domain->giveDefaultNodeDofIDArry();
-  int ndofs = dofIDArrayPtr.giveSize();
-  // loop over number of nodes, read coordinates and create new nodes
-  for ( int inode = 1; inode <= nnodes; inode++ ) {
-      FloatArray coords(3);
-      std::getline(inputStream, line);  
-      //convert const char to char in order to use strtok
-      currentLine = new char[line.size() + 1];
-      std::strcpy ( currentLine, line.c_str() );
-      // tokenizing line
-      token = std::strtok(currentLine, " ");
-      // set counter to 0
-      i = 0;
-      while (token != NULL) {
-	if(i == 0)
-	    {}//int nodeNum = atoi(token);
-	else if (i == 1)
-	  coords.at(1) = atof(token);
-	else if(i == 2)
-	  coords.at(2) = atof(token);
-	else if(i == 3)
-	  coords.at(3) = atof(token);
-	else
-	  break;
-	token = std::strtok(NULL, " ");
-	i++;
-      }  
-      // newly created node
-      node = new Node(inode, * dNew);
-      //create new node with default DOFs
-      node->setNumberOfDofs(ndofs);
-      node->setCoordinates( coords );
-      // how to set boundary condition ??
-      //      node->setBoundaryFlag( mesh->giveNode(inode)->isBoundary() );
-      // ( * dNew )->setDofManager(inode, node);
+    int nnodes,ntriangles,ntetras; // nedges,
 
-  }//end loop over nodes
-
-  //read empty line 
-  std::getline(inputStream, line);  
-
-
-
-  Element *parentElementPtr, *elem;
-  parentElementPtr = domain->giveElement(1); //??km??
-  // loop over triangles, read dofman numbers and create new elements
-  for (int itriangle = 1; itriangle <= ntriangles; itriangle++) {
-    int elemNumber;
-    IntArray dofManagers(3);
-    std::getline(inputStream, line); 
+    /*read second line from t3d out file
+        4 numbers
+        1 - number of nodes
+        2 - number of edges
+        3 - number of triangles
+        4 - number of tetras
+    */
+    std::getline(inputStream, line);
     //convert const char to char in order to use strtok
     currentLine = new char[line.size() + 1];
     std::strcpy ( currentLine, line.c_str() );
@@ -425,155 +344,222 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
     token = std::strtok(currentLine, " ");
     // set counter to 0
     i = 0;
-    while (token != NULL) {
-      if(i == 0)
-	elemNumber = atoi(token);
-      else if (i >= 1 && i<=4)
-	dofManagers.at(i) = atof(token);
-      else
-	break;
-      token = std::strtok(NULL, " ");
-      i++;
-      } 
-    elem = classFactory.createElement(parentElementPtr->giveClassName(), elemNumber, * dNew);
-    elem->setDofManagers( dofManagers );
-    elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
-    elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
-    //
-    // ...
-    //
+    while (token != nullptr) {
+        if(i == 0)
+            nnodes = atoi(token);
+        else if (i == 1)
+            {}//nedges = atoi(token);
+        else if(i == 2)
+            ntriangles = atoi(token);
+        else if(i == 3)
+            ntetras = atoi(token);
+        else
+            break;
+        token = std::strtok(nullptr, " ");
+        i++;
+    }
+    // create new domain
+    (*dNew)->resizeDofManagers(nnodes);
 
-  }//end loop over triangles 
+    //one empty line
+    std::getline(inputStream, line);  
+    // create nodes
+    // read dofs
+    const IntArray dofIDArrayPtr = domain->giveDefaultNodeDofIDArry(); ///@todo This is bad idea, dofs can be autogenerated. Don't fix the dofs. This method should be removed.
+    int ndofs = dofIDArrayPtr.giveSize();
+    // loop over number of nodes, read coordinates and create new nodes
+    for ( int inode = 1; inode <= nnodes; inode++ ) {
+        FloatArray coords(3);
+        std::getline(inputStream, line);  
+        //convert const char to char in order to use strtok
+        currentLine = new char[line.size() + 1];
+        std::strcpy ( currentLine, line.c_str() );
+        // tokenizing line
+        token = std::strtok(currentLine, " ");
+        // set counter to 0
+        i = 0;
+        while (token != nullptr) {
+            if(i == 0)
+                {}//int nodeNum = atoi(token);
+            else if (i == 1)
+                coords.at(1) = atof(token);
+            else if(i == 2)
+                coords.at(2) = atof(token);
+            else if(i == 3)
+                coords.at(3) = atof(token);
+            else
+                break;
+            token = std::strtok(NULL, " ");
+            i++;
+        }
+        // newly created node
+        auto node = std::make_unique<Node>(inode, * dNew);
+        //create new node with default DOFs
+        node->setNumberOfDofs(ndofs);
+        node->setCoordinates( coords );
+        // how to set boundary condition ??
+        //      node->setBoundaryFlag( mesh->giveNode(inode)->isBoundary() );
+        // ( * dNew )->setDofManager(inode, std::move(node));
 
-  
-// loop over tetras, read dofman numbers and create new elements
-  for (int itetra = 1; itetra <= ntetras; itetra++) {
-    int elemNumber;
-    IntArray dofManagers(4);
-    std::getline(inputStream, line); 
-    //convert const char to char in order to use strtok
-    currentLine = new char[line.size() + 1];
-    std::strcpy ( currentLine, line.c_str() );
-    // tokenizing line
-    token = std::strtok(currentLine, " ");
-       // set counter to 0
-    i = 0;
-    while (token != NULL) {
-      if(i == 0)
-	elemNumber = atoi(token);
-      else if (i >= 1 && i<=4)
-	dofManagers.at(i) = atof(token);
-      else
-	break;
-      token = std::strtok(NULL, " ");
-      i++;
-    } 
-    //elem = classFactory.createElement(parentElementPtr->giveClassName(), elemNumber, * dNew);
-    elem = classFactory.createElement("LTRSpace", elemNumber, * dNew);
-    elem->setDofManagers( dofManagers );
-    elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
-    elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
-    (*dNew)->setElement(elemNumber, elem);
-  }//end loop over tetras
-  
-  
-  
-  CrossSection *crossSection;
-  Material *mat;
-  NonlocalBarrier *barrier;
-  GeneralBoundaryCondition *bc;
-  InitialCondition *ic;
-  //LoadTimeFunction *ltf;
-  Function *ltf;
-  std::string name;
-  
-  // copy of crossections from old domain
-  int ncrosssect = domain->giveNumberOfCrossSectionModels();
-  ( * dNew )->resizeCrossSectionModels(ncrosssect);
-  for ( int i = 1; i <= ncrosssect; i++ ) {
-    DynamicInputRecord ir;
-    domain->giveCrossSection(i)->giveInputRecord(ir);
-    ir.giveRecordKeywordField(name);
-    
-    crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
-    crossSection->initializeFrom(&ir);
-    ( * dNew )->setCrossSection(i, crossSection);
-  }
-  
-  // copy of materials  from old domain
-  int nmat = domain->giveNumberOfMaterialModels();
-  ( * dNew )->resizeMaterials(nmat);
-  for ( int i = 1; i <= nmat; i++ ) {
-    DynamicInputRecord ir;
-      domain->giveMaterial(i)->giveInputRecord(ir);
-      ir.giveRecordKeywordField(name);
-      
-      mat = classFactory.createMaterial(name.c_str(), i, * dNew);
-      mat->initializeFrom(&ir);
-      ( * dNew )->setMaterial(i, mat);
-  }
-  
-  // copy of crossections from old domain
-  int nbarriers = domain->giveNumberOfNonlocalBarriers();
-  ( * dNew )->resizeNonlocalBarriers(nbarriers);
-  for ( int i = 1; i <= nbarriers; i++ ) {
-      DynamicInputRecord ir;
-      domain->giveNonlocalBarrier(i)->giveInputRecord(ir);
-      ir.giveRecordKeywordField(name);
-      
-      barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
-      barrier->initializeFrom(&ir);
-      ( * dNew )->setNonlocalBarrier(i, barrier);
-  }
-  
+    }//end loop over nodes
+
+    //read empty line 
+    std::getline(inputStream, line);  
+
+
+    Element *parentElementPtr = domain->giveElement(1); //??km??
+    // loop over triangles, read dofman numbers and create new elements
+    for (int itriangle = 1; itriangle <= ntriangles; itriangle++) {
+        int elemNumber;
+        IntArray dofManagers(3);
+        std::getline(inputStream, line); 
+        //convert const char to char in order to use strtok
+        currentLine = new char[line.size() + 1];
+        std::strcpy ( currentLine, line.c_str() );
+        // tokenizing line
+        token = std::strtok(currentLine, " ");
+        // set counter to 0
+        i = 0;
+        while (token != nullptr) {
+            if(i == 0)
+                elemNumber = atoi(token);
+            else if (i >= 1 && i<=4)
+                dofManagers.at(i) = atof(token);
+            else
+                break;
+            token = std::strtok(nullptr, " ");
+            i++;
+        } 
+        auto elem = classFactory.createElement(parentElementPtr->giveClassName(), elemNumber, * dNew);
+        elem->setDofManagers( dofManagers );
+        elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
+        elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
+        //
+        // ...
+        //
+
+    }//end loop over triangles 
+
+
+    // loop over tetras, read dofman numbers and create new elements
+    for (int itetra = 1; itetra <= ntetras; itetra++) {
+        int elemNumber;
+        IntArray dofManagers(4);
+        std::getline(inputStream, line); 
+        //convert const char to char in order to use strtok
+        currentLine = new char[line.size() + 1];
+        std::strcpy ( currentLine, line.c_str() );
+        // tokenizing line
+        token = std::strtok(currentLine, " ");
+        // set counter to 0
+        i = 0;
+        while (token != nullptr) {
+            if(i == 0)
+                elemNumber = atoi(token);
+            else if (i >= 1 && i<=4)
+                dofManagers.at(i) = atof(token);
+            else
+                break;
+            token = std::strtok(nullptr, " ");
+            i++;
+        }
+        //elem = classFactory.createElement(parentElementPtr->giveClassName(), elemNumber, * dNew);
+        auto elem = classFactory.createElement("LTRSpace", elemNumber, * dNew);
+        elem->setDofManagers( dofManagers );
+        elem->setMaterial( parentElementPtr->giveMaterial()->giveNumber() );
+        elem->setCrossSection( parentElementPtr->giveCrossSection()->giveNumber() );
+        (*dNew)->setElement(elemNumber, std::move(elem));
+    }//end loop over tetras
+
+
+    std::string name;
+
+    // copy of crossections from old domain
+    int ncrosssect = domain->giveNumberOfCrossSectionModels();
+    ( * dNew )->resizeCrossSectionModels(ncrosssect);
+    for ( int i = 1; i <= ncrosssect; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveCrossSection(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
+
+        auto crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
+        crossSection->initializeFrom(&ir);
+        ( * dNew )->setCrossSection(i, std::move(crossSection));
+    }
+
+    // copy of materials  from old domain
+    int nmat = domain->giveNumberOfMaterialModels();
+    ( * dNew )->resizeMaterials(nmat);
+    for ( int i = 1; i <= nmat; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveMaterial(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
+
+        auto mat = classFactory.createMaterial(name.c_str(), i, * dNew);
+        mat->initializeFrom(&ir);
+        ( * dNew )->setMaterial(i, std::move(mat));
+    }
+
+    // copy of crossections from old domain
+    int nbarriers = domain->giveNumberOfNonlocalBarriers();
+    ( * dNew )->resizeNonlocalBarriers(nbarriers);
+    for ( int i = 1; i <= nbarriers; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveNonlocalBarrier(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
+
+        auto barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
+        barrier->initializeFrom(&ir);
+        ( * dNew )->setNonlocalBarrier(i, std::move(barrier));
+    }
+
     // copy of boundary conditions from old domain
-  int nbc = domain->giveNumberOfBoundaryConditions();
-  ( * dNew )->resizeBoundaryConditions(nbc);
-  for ( int i = 1; i <= nbc; i++ ) {
-    DynamicInputRecord ir;
-    domain->giveBc(i)->giveInputRecord(ir);
-    ir.giveRecordKeywordField(name);
-    
-    bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
-    bc->initializeFrom(&ir);
-    ( * dNew )->setBoundaryCondition(i, bc);
-  }
-  
-  // copy of initial conditions from old domain
-  int nic = domain->giveNumberOfInitialConditions();
-  ( * dNew )->resizeInitialConditions(nic);
-  for ( int i = 1; i <= nic; i++ ) {
-    DynamicInputRecord ir;
-    domain->giveIc(i)->giveInputRecord(ir);
-    ir.giveRecordKeywordField(name);
-    
-    ic = new InitialCondition(i, *dNew);
-    ic->initializeFrom(&ir);
-    ( * dNew )->setInitialCondition(i, ic);
-  }
-  
-  // copy of load time functions from old domain
-  //  int nltf = domain->giveNumberOfLoadTimeFunctions();
+    int nbc = domain->giveNumberOfBoundaryConditions();
+    ( * dNew )->resizeBoundaryConditions(nbc);
+    for ( int i = 1; i <= nbc; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveBc(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
+
+        auto bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
+        bc->initializeFrom(&ir);
+        ( * dNew )->setBoundaryCondition(i, std::move(bc));
+    }
+
+    // copy of initial conditions from old domain
+    int nic = domain->giveNumberOfInitialConditions();
+    ( * dNew )->resizeInitialConditions(nic);
+    for ( int i = 1; i <= nic; i++ ) {
+        DynamicInputRecord ir;
+        domain->giveIc(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
+
+        auto ic = std::make_unique<InitialCondition>(i, *dNew);
+        ic->initializeFrom(&ir);
+        ( * dNew )->setInitialCondition(i, std::move(ic));
+    }
+
+    // copy of load time functions from old domain
+    //  int nltf = domain->giveNumberOfLoadTimeFunctions();
     int nltf = domain->giveNumberOfFunctions();
-  // ( * dNew )->resizeLoadTimeFunctions(nltf);
-   ( * dNew )->resizeFunctions(nltf);
-  for ( int i = 1; i <= nltf; i++ ) {
-    DynamicInputRecord ir;
-    //domain->giveLoadTimeFunction(i)->giveInputRecord(ir);
-    domain->giveFunction(i)->giveInputRecord(ir);
-    ir.giveRecordKeywordField(name);
-    
-    //ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
-    ltf = classFactory.createFunction(name.c_str(), i, * dNew);
-    ltf->initializeFrom(&ir);
-    //( * dNew )->setLoadTimeFunction(i, ltf);
-    ( * dNew )->setFunction(i, ltf);
-  }
-  
-  // copy output manager settings from old domain
-  ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );  
- return 1;  
-  
+    // ( * dNew )->resizeLoadTimeFunctions(nltf);
+    ( * dNew )->resizeFunctions(nltf);
+    for ( int i = 1; i <= nltf; i++ ) {
+        DynamicInputRecord ir;
+        //domain->giveLoadTimeFunction(i)->giveInputRecord(ir);
+        domain->giveFunction(i)->giveInputRecord(ir);
+        ir.giveRecordKeywordField(name);
+        
+        //ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
+        auto ltf = classFactory.createFunction(name.c_str(), i, * dNew);
+        ltf->initializeFrom(&ir);
+        //( * dNew )->setLoadTimeFunction(i, ltf);
+        ( * dNew )->setFunction(i, std::move(ltf));
+    }
+
+    // copy output manager settings from old domain
+    ( * dNew )->giveOutputManager()->beCopyOf( domain->giveOutputManager() );  
+    return 1;
 }
 
 // used by HTS element to create export mesh to vtk

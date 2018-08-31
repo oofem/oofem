@@ -63,7 +63,7 @@ FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
 
-    this->giveLocalDerivative(dNduvw, lcoords);
+    this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 6);
     for ( int i = 1; i <= 6; i++ ) {
         coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
@@ -170,7 +170,7 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
 // Returns the jacobian matrix  J (x,y,z)/(ksi,eta,dzeta)  of the receiver.
 {
     FloatMatrix dNduvw, coords;
-    this->giveLocalDerivative(dNduvw, lcoords);
+    this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 6);
     for ( int i = 1; i <= 6; i++ ) {
         coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
@@ -180,7 +180,7 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
 
 
 void
-FEI3dWedgeLin :: giveLocalDerivative(FloatMatrix &dN, const FloatArray &lcoords)
+FEI3dWedgeLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &)
 {
     double u, v, w;
     u = lcoords.at(1);

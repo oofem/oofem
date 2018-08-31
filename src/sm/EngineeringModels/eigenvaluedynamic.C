@@ -66,7 +66,7 @@ EigenValueDynamic :: EigenValueDynamic(int i, EngngModel *master) : EngngModel(i
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
-        nMethod.reset( classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this) );
+        nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
         if ( !nMethod ) {
             OOFEM_ERROR("solver creation failed");
         }
@@ -167,10 +167,10 @@ void EigenValueDynamic :: solveYourself()
         std :: unique_ptr< SparseMtrx > stiffnessMatrix;
         std :: unique_ptr< SparseMtrx > massMatrix;
 
-        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         massMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
         this->assemble( *stiffnessMatrix, tStep, TangentAssembler(TangentStiffness), EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -204,7 +204,7 @@ void EigenValueDynamic :: doStepOutput(TimeStep *tStep)
         // export using export manager
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
         tStep->setNumber(i);
-        exportModuleManager->doOutput(tStep);
+        exportModuleManager.doOutput(tStep);
     }
 }
 

@@ -112,16 +112,16 @@ public:
     Natural2GlobalOrdering();
     virtual ~Natural2GlobalOrdering() { }
 
-    virtual void init(EngngModel *, int di, const UnknownNumberingScheme &n);
+    void init(EngngModel *, int di, const UnknownNumberingScheme &n) override;
 
-    virtual int giveNewEq(int leq);
-    virtual int giveOldEq(int eq);
+    int giveNewEq(int leq) override;
+    int giveOldEq(int eq) override;
 
-    virtual void map2New(IntArray &answer, const IntArray &src, int baseOffset = 0);
-    virtual void map2Old(IntArray &answer, const IntArray &src, int baseOffset = 0);
+    void map2New(IntArray &answer, const IntArray &src, int baseOffset = 0) override;
+    void map2Old(IntArray &answer, const IntArray &src, int baseOffset = 0) override;
 
-    int giveNumberOfLocalEqs() { return l_neqs; }
-    int giveNumberOfGlobalEqs() { return g_neqs; }
+    int giveNumberOfLocalEqs() override { return l_neqs; }
+    int giveNumberOfGlobalEqs() override { return g_neqs; }
 
     IntArray *giveN2Gmap() { return & locGlobMap; }
 };
@@ -140,13 +140,13 @@ public:
     Natural2LocalOrdering();
     virtual ~Natural2LocalOrdering() { }
 
-    virtual void init(EngngModel *, int di, const UnknownNumberingScheme &n);
+    void init(EngngModel *, int di, const UnknownNumberingScheme &n) override;
 
-    virtual int giveNewEq(int leq);
-    virtual int giveOldEq(int eq);
+    int giveNewEq(int leq) override;
+    int giveOldEq(int eq) override;
 
-    virtual void map2New(IntArray &answer, const IntArray &src, int baseOffset = 0);
-    virtual void map2Old(IntArray &answer, const IntArray &src, int baseOffset = 0);
+    void map2New(IntArray &answer, const IntArray &src, int baseOffset = 0) override;
+    void map2Old(IntArray &answer, const IntArray &src, int baseOffset = 0) override;
 
     IntArray *giveN2Lmap() { return & n2l; }
 };

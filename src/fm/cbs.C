@@ -123,7 +123,7 @@ CBS :: ~CBS()
 NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( !nMethod ) {
-        nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
         if ( !nMethod ) {
             OOFEM_ERROR("linear solver creation failed for lstype %d", solverType);
         }
@@ -284,7 +284,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                                          pnumPrescribed, this->giveDomain(1) );
 
 
-        lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        lhs = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
@@ -296,7 +296,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
-            mss.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            mss = classFactory.createSparseMtrx(sparseMtrxType);
             if ( !mss ) {
                 OOFEM_ERROR("sparse matrix creation failed");
             }

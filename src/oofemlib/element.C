@@ -766,11 +766,11 @@ Element :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 
     if (this->isActivated(tStep) ) {
-      for ( auto &iRule: integrationRulesArray ) {
-	iRule->printOutputAt(file, tStep);
-      }
+        for ( auto &iRule: integrationRulesArray ) {
+            iRule->printOutputAt(file, tStep);
+        }
     } else {
-      fprintf(file, "is not active in current time step\n");
+        fprintf(file, "is not active in current time step\n");
     }
 }
 
@@ -788,58 +788,46 @@ Element :: updateYourself(TimeStep *tStep)
     }
 }
 
-    
+
 bool
 Element :: isActivated(TimeStep *tStep)
 {
     if ( activityTimeFunction ) {
-	if ( tStep ) {
-	    return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) > 1.e-3 );
-	} else {
-	    return false;
-	}
+        if ( tStep ) {
+            return ( domain->giveFunction(activityTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) > 1.e-3 );
+        } else {
+            return false;
+        }
     } else {
-	return true;
+        return true;
     }
 }
-    
 
 
 bool
 Element :: isCast(TimeStep *tStep)
 {
+    // this approach used to work when material was assigned to element
+    //    if ( tStep->giveIntrinsicTime() >= this->giveMaterial()->giveCastingTime() )  
+    if ( tStep ) {
 
-         // this approach used to work when material was assigned to element
-          //    if ( tStep->giveIntrinsicTime() >= this->giveMaterial()->giveCastingTime() )  
+        double castingTime;
+        double tNow = tStep->giveIntrinsicTime();
 
-  
-  if ( tStep ) {
+        for ( auto &iRule : integrationRulesArray ) {
+            for ( auto &gp: *iRule ) {
+                castingTime = this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
 
-    double castingTime;    
-    double tNow = tStep->giveIntrinsicTime();
-    
-    if ( integrationRulesArray.size() > 0 ) {
-      
-      for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
-        IntegrationRule *iRule;
-        iRule = integrationRulesArray [ i ].get();
-        
-        for ( GaussPoint *gp: *iRule ) {
-          castingTime =  this->giveCrossSection()->giveMaterial(gp)->giveCastingTime();
-
-          if (tNow < castingTime ) {
-            return false;
-          }          
+                if ( tNow < castingTime ) {
+                    return false;
+                }
+            }
         }
-      }
+        return true;
+
+    } else {
+        return false;
     }
-    
-    return true;
-    
-  } else {
-    return false;
-  }
-  
 }
 
 void
@@ -1017,12 +1005,12 @@ contextIOResultType Element :: restoreContext(DataStream &stream, ContextMode mo
             // AND ALLOCATE NEW ONE
             integrationRulesArray.resize( _nrules );
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this ) );
+                integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this );
             }
         } else {
             for ( int i = 0; i < _nrules; i++ ) {
                 if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes[i] ) {
-                    integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this ) );
+                    integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes[i], i + 1, this );
                 }
             }
         }

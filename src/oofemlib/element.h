@@ -758,7 +758,7 @@ public:
      * this is invoked after all domain components are instanciated.
      * @return Zero value if check fail, otherwise nonzero.
      */
-    virtual int checkConsistency() { return 1; }
+    int checkConsistency() override { return 1; }
 
     /**
      * @return True, if receiver is activated for given solution step, otherwise false.
@@ -984,7 +984,7 @@ public:
      * to return an updated number of specified entity type based on old number.
      * @param f Decides the renumbering.
      */
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void updateLocalNumbering(EntityRenumberingFunctor &f) override;
 
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
     template< class T > void ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) );
@@ -1141,8 +1141,9 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
     contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
     contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
     const char *giveClassName() const override { return "Element"; }
+
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
 protected:
     /**

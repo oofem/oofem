@@ -60,7 +60,7 @@ public:
      * Returns receiver's load geometry type.
      * @return BodyLoadBGT.
      */
-    virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
+    bcGeomType giveBCGeoType() const override { return BodyLoadBGT; }
 };
 } // end namespace oofem
 #endif // bodyload_h

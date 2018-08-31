@@ -268,7 +268,7 @@ public:
      * updateBeforeNonlocalAverage member function of structural nonlocal material class.
      * @param tStep Time step.
      */
-    virtual void updateBeforeNonlocalAverage(TimeStep *tStep);
+    void updateBeforeNonlocalAverage(TimeStep *tStep) override;
     /**
      * Returns the "nonlocal" location array of receiver. This is necessary, when stiffness matrix
      * of nonlocal model is assembled. Since model is nonlocal, the value at given IP depends on
@@ -317,9 +317,9 @@ public:
 #endif
 
     // Interface for body loads applied by Sets:
-    virtual void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global = true);
-    virtual void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global = true);
+    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
+    void computeBoundarySurfaceLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global = true) override;
+    void computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep, bool global = true) override;
     /// computes edge interpolation matrix
     virtual void computeEdgeNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords);
     /**

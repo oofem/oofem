@@ -152,7 +152,7 @@ public:
      */
     virtual SparseLinearSystemNM *giveLinearSolver() { return nullptr; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
     virtual void convertPertMap();
     virtual void applyPerturbation(FloatArray* displacement);
 

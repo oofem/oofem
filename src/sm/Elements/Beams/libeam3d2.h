@@ -99,7 +99,7 @@ public:
 
     // Fibered cross section support functions
     void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
-                                                                 GaussPoint *slaveGp, TimeStep *tStep);
+                                                                 GaussPoint *slaveGp, TimeStep *tStep) override;
 
     Interface *giveInterface(InterfaceType it) override;
 
