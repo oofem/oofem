@@ -32,10 +32,13 @@
 */
 
 This directory contains sources to generate OOFEM bindings to Python programming language.
+Currently, Python version 3.x is supported, small changes are required for old Python 2.x.
 The boost.python library is required to be installed.
 
 To compile oofem python module, set "USE_PYTHON_BINDINGS" to "ON" when configuring 
-oofem target using cmake.
+oofem target using cmake. Also, if needed, set corresponding -DPYTHON_EXECUTABLE
+-DPYTHON_INCLUDE_DIR and -DPYTHON_LIBRARY. This is useful when more Python versions are available.
+
 
 For testing the bindings, the liboofem.so file must be somewhere where python looks for
 modules. This can be done e.g. by symlinking to the .so in the build directory by 

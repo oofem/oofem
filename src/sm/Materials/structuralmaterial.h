@@ -40,7 +40,7 @@
 #include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
-#include "stressstrainprincmode.h"
+#include "../stressstrainprincmode.h"
 #include "valuemodetype.h"
 #include <vector>
 

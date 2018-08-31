@@ -256,7 +256,7 @@ void pyclass_FloatArray()
         .def("computeSquaredNorm", &FloatArray::computeSquaredNorm, "Computes the square of the norm")
         .def("sum", &FloatArray::sum, "Computes the sum of receiver values")
 
-          .def("__str__", &FloatArray_str,"Return printable representation.")
+        .def("__str__", &FloatArray_str,"Return printable representation.")
 
         .def("__len__", &FloatArray::giveSize, "Returns the size of receiver")
         .def("__getitem__", &FloatArray::__getitem__, "Coefficient access function. Provides 0-based indexing access")
@@ -1420,7 +1420,7 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
     temp["kw"] = kw;
     str command =
         "ret = ''\n"
-        "for key,val in kw.iteritems():\n" // iterate over key,val pairs
+        "for key,val in kw.items():\n" // iterate over key,val pairs
         "  if key.lower()=='number' or key.lower()=='domain': continue\n" // do not include "number" and "domain" kws
         "  if key=='f_t': key='f(t)'\n" // handle f(t) loadTimeFunction field name
         "  ret += ' %s'%key\n" // add key
@@ -1433,7 +1433,7 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
         "      else: ret += ' %d'%(v.giveNumber())\n" // or any other object, that have giveNumber method (e.g. nodes can be passed to elemnt function as they are, without the need of extracting their numbers first
         "  else: ret += ' %d'%(val.giveNumber())\n" // add arbitrary object with giveNumber method
         "ret = ret.lower()\n" // finally make it lower case
-        "print ret\n"
+        "print(ret)\n"
         ;
     exec(command,temp,temp);
     // extract string from globals["ret"], convert it to char* and return OOFEMTXTInputRecord from it

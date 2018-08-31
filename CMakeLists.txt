@@ -602,9 +602,9 @@ if (USE_OOFEG)
 endif ()
 
 # Example of using liboofem with dynamic input record:
-add_executable(beam01 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam01.C)
-set_target_properties(beam01 PROPERTIES EXCLUDE_FROM_ALL TRUE)
-target_link_libraries (beam01 liboofem)
+add_executable(beam2d_1 ${oofem_SOURCE_DIR}/bindings/oofemlib/beam2d_1.C)
+set_target_properties(beam2d_1 PROPERTIES EXCLUDE_FROM_ALL TRUE)
+target_link_libraries (beam2d_1 liboofem)
 
 add_executable(hexgrid ${oofem_SOURCE_DIR}/bindings/oofemlib/hexgrid.C)
 set_target_properties(hexgrid PROPERTIES EXCLUDE_FROM_ALL TRUE)

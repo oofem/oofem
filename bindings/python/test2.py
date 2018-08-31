@@ -12,8 +12,9 @@ problem = liboofem.linearStatic(nSteps=3, outFile="test2.out")
 # domain (if no engngModel specified to domain, it is asigned to the last one created)
 domain = liboofem.domain(1, 1, problem, liboofem.domainType._2dBeamMode, tstep_all=True, dofman_all=True, element_all=True)
 problem.setDomain(1, domain, True)
+#Current implementation does not read modules, no output is created
 vtkxmlModule = liboofem.vtkxml(1,problem,tstep_all=True,vars=[1,4],primvars=[1])
-
+#domain.giveEngngModel().giveExportModuleManager()
 
 # time functions (time functions parameter f(t) has to be written as f_t - due to the parenthesis, otherwise all kw keys match oofem input file ones)
 # if no domain specified, ltf is asigned to the last one created (valid for all FEMComponents classes)
@@ -34,12 +35,12 @@ bcs = (bc1, bc2, eLoad, nLoad, tLoad)
 
 # nodes
 # if one value is passed as parameter where oofem expects array of values, it must be passed as tuple or list (see load in n4)
-n1 = liboofem.node(1, domain, coords=(0., 0.,0. ), bc=(0,1,0))
-n2 = liboofem.node(2, domain, coords=(2.4,0.,0. ), bc=(0,0,0))
-n3 = liboofem.node(3, domain, coords=(3.8,0.,0. ), bc=(0,0,bc1))
-n4 = liboofem.node(4, domain, coords=(5.8,0.,1.5), bc=(0,0,0), load=(4,))
-n5 = liboofem.node(5, domain, coords=(7.8,0.,3.0), bc=(0,1,0))
-n6 = liboofem.node(6, domain, coords=(2.4,0.,3.0), bc=(bc1,1,bc2))
+n1 = liboofem.node(1, domain, coords=(0.,  0., 0. ), bc=(0,1,0))
+n2 = liboofem.node(2, domain, coords=(2.4, 0., 0. ), bc=(0,0,0))
+n3 = liboofem.node(3, domain, coords=(3.8, 0., 0. ), bc=(0,0,bc1))
+n4 = liboofem.node(4, domain, coords=(5.8, 0., 1.5), bc=(0,0,0), load=(4,))
+n5 = liboofem.node(5, domain, coords=(7.8, 0., 3.0), bc=(0,1,0))
+n6 = liboofem.node(6, domain, coords=(2.4, 0., 3.0), bc=(bc1,1,bc2))
 nodes = (n1, n2, n3, n4, n5, n6)
 
 # material and cross section
@@ -73,9 +74,11 @@ for ltf in ltfs:
    domain.setFunction(ltf.number, ltf)
 
 
+print("\nSolving problem")
 problem.checkProblemConsistency()
 problem.init()
 problem.postInitialize()
 problem.setRenumberFlag()
 problem.solveYourself()
 problem.terminateAnalysis()
+print("\nProblem solved")

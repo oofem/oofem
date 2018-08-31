@@ -41,7 +41,7 @@
 #include "matconst.h"
 #include "matstatus.h"
 #include "interface.h"
-#include "stressstrainprincmode.h"
+#include "../stressstrainprincmode.h"
 
 ///@name Input fields for WinklerMaterial
 //@{
