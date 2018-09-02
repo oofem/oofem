@@ -66,9 +66,9 @@ FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellG
 std::pair<double, FloatMatrixF<1,3>>
 FEI1dQuad :: evaldNdx(double ksi, const FEICellGeometry &cellgeo) const
 {
-    double x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
-    double x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
-    double x3 = cellgeo.giveVertexCoordinates(3)->at(cindx);
+    double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);
+    double x3 = cellgeo.giveVertexCoordinates(3).at(cindx);
 
     double J = 1. / 2. * ( 2 * ksi - 1 ) * x1 + 1. / 2. * ( 2 * ksi + 1 ) * x2 - 2. * ksi * x3;
 
@@ -102,23 +102,21 @@ FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const F
     answer.resize(1);
 
     this->evalN(n, lcoords, cellgeo);
-    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
-                    n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) + n.at(3) * cellgeo.giveVertexCoordinates(3)->at(cindx) );
+    answer.at(1) = n.at(1) * cellgeo.giveVertexCoordinates(1).at(cindx) +
+                   n.at(2) * cellgeo.giveVertexCoordinates(2).at(cindx) +
+                   n.at(3) * cellgeo.giveVertexCoordinates(3).at(cindx);
 }
 
 int
 FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    double x1, x2, x3;
-    double a, b, c;
+    double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);
+    double x3 = cellgeo.giveVertexCoordinates(3).at(cindx);
 
-    x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
-    x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
-    x3 = cellgeo.giveVertexCoordinates(3)->at(cindx);
-
-    a = 0.5 * ( x1 + x2 ) - x3;
-    b = 0.5 * ( x2 - x1 );
-    c = x3 - coords.at(1);
+    double a = 0.5 * ( x1 + x2 ) - x3;
+    double b = 0.5 * ( x2 - x1 );
+    double c = x3 - coords.at(1);
 
     answer.resize(1);
     if ( fabs(a) < 1.e-6 ) {
@@ -148,21 +146,19 @@ FEI1dQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FE
 double
 FEI1dQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double x1, x2, x3, J, ksi;
+    double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);
+    double x3 = cellgeo.giveVertexCoordinates(3).at(cindx);
+    double ksi = lcoords.at(1);
 
-    x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
-    x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
-    x3 = cellgeo.giveVertexCoordinates(3)->at(cindx);
-    ksi = lcoords.at(1);
-
-    J = 1. / 2. * ( 2 * ksi - 1 ) * x1 + 1. / 2. * ( 2 * ksi + 1 ) * x2 - 2. * ksi * x3;
+    double J = 1. / 2. * ( 2 * ksi - 1 ) * x1 + 1. / 2. * ( 2 * ksi + 1 ) * x2 - 2. * ksi * x3;
     return J;
 }
 
 double
 FEI1dQuad :: giveLength(const FEICellGeometry &cellgeo) const
 {
-    return fabs( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
+    return fabs( cellgeo.giveVertexCoordinates(2).at(cindx) - cellgeo.giveVertexCoordinates(1).at(cindx) );
 }
 
 

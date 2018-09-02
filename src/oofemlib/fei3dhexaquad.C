@@ -273,7 +273,7 @@ FEI3dHexaQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &
     FloatMatrixF<3,20> coords;
     for ( int i = 0; i < 20; i++ ) {
         ///@todo cellgeo should give a FloatArrayF<3>, this will add a "costly" construction now:
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i+1), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i+1), i);
     }
     auto jacT = dotT(dNduvw, coords);
     return {det(jacT), dot(inv(jacT), dNduvw)};
@@ -292,7 +292,7 @@ FEI3dHexaQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize( 3, dNduvw.giveNumberOfRows() );
     for ( int i = 1; i <= dNduvw.giveNumberOfRows(); i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
     inv.beInverseOf(jacobianMatrix);
@@ -310,16 +310,16 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, con
     this->evalN(n, lcoords, cellgeo);
     answer.clear();
     for ( int i = 1; i <= n.giveSize(); i++ ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
 double FEI3dHexaQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    const FloatArray *n1 = cellgeo.giveVertexCoordinates(1);
-    const FloatArray *n2 = cellgeo.giveVertexCoordinates(7);
+    const FloatArray &n1 = cellgeo.giveVertexCoordinates(1);
+    const FloatArray &n2 = cellgeo.giveVertexCoordinates(7);
     ///@todo Change this so that it is not dependent on node order.
-    return n1->distance(n2);
+    return n1.distance(n2);
 }
 
 
@@ -394,9 +394,9 @@ void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const Floa
     double u = lcoords.at(1);
     this->computeLocalEdgeMapping(eNodes, iedge);
     answer.clear();
-    answer.add( 0.5 * ( u - 1. ) * u, * cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
-    answer.add( 0.5 * ( u - 1. ) * u, * cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
-    answer.add( 1. - u * u,       * cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
+    answer.add( 0.5 * ( u - 1. ) * u, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
+    answer.add( 0.5 * ( u - 1. ) * u, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
+    answer.add( 1. - u * u, cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
 }
 
 void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -406,9 +406,9 @@ void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatAr
     FloatArray dNdu;
     double u = lcoords.at(1);
     this->computeLocalEdgeMapping(eNodes, iedge);
-    dNdu.add( u - 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
-    dNdu.add( u + 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
-    dNdu.add( -2. * u, * cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
+    dNdu.add( u - 0.5, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
+    dNdu.add( u + 0.5, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
+    dNdu.add( -2. * u, cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
     // Why matrix output?
     answer.resize(3, 1);
     answer.setColumn(dNdu, 1);
@@ -420,9 +420,9 @@ double FEI3dHexaQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArr
     FloatArray dNdu;
     double u = lcoords.at(1);
     this->computeLocalEdgeMapping(eNodes, iedge);
-    dNdu.add( u - 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
-    dNdu.add( u + 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
-    dNdu.add( -2. * u, * cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
+    dNdu.add( u - 0.5, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
+    dNdu.add( u + 0.5, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
+    dNdu.add( -2. * u, cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
     return dNdu.computeNorm();
 }
 
@@ -564,8 +564,8 @@ FEI3dHexaQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArr
     dNdeta.at(8) = -eta * ( 1. + ksi );
 
     for ( int i = 1; i <= 8; ++i ) {
-        a.add( dNdksi.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
-        b.add( dNdeta.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+        a.add( dNdksi.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+        b.add( dNdeta.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
     }
 
     answer.beVectorProductOf(a, b);
@@ -585,7 +585,7 @@ FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -694,7 +694,7 @@ FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize( 3, dNduvw.giveNumberOfRows() );
     for ( int i = 1; i <= dNduvw.giveNumberOfRows(); i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
 }
@@ -706,14 +706,14 @@ FEI3dHexaQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     IntArray fNodes;
     this->computeLocalSurfaceMapping(fNodes, iEdge);
 
-    const FloatArray &c1 = * cellgeo.giveVertexCoordinates( fNodes.at(1) );
-    const FloatArray &c2 = * cellgeo.giveVertexCoordinates( fNodes.at(2) );
-    const FloatArray &c3 = * cellgeo.giveVertexCoordinates( fNodes.at(3) );
-    const FloatArray &c4 = * cellgeo.giveVertexCoordinates( fNodes.at(4) );
-    const FloatArray &c5 = * cellgeo.giveVertexCoordinates( fNodes.at(5) );
-    const FloatArray &c6 = * cellgeo.giveVertexCoordinates( fNodes.at(6) );
-    const FloatArray &c7 = * cellgeo.giveVertexCoordinates( fNodes.at(7) );
-    const FloatArray &c8 = * cellgeo.giveVertexCoordinates( fNodes.at(8) );
+    const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const FloatArray &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const FloatArray &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
+    const FloatArray &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
+    const FloatArray &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
+    const FloatArray &c7 = cellgeo.giveVertexCoordinates( fNodes.at(7) );
+    const FloatArray &c8 = cellgeo.giveVertexCoordinates( fNodes.at(8) );
 
     // Generated with Mathematica (rather unwieldy expression, tried to simplify it as good as possible, but it could probably be better)
     return (

@@ -175,8 +175,8 @@ FEI2dQuadBiQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry
     FloatMatrixF<2,2> jacT;
     for ( int i = 1; i <= dn.cols(); i++ ) {
         const auto &c = cellgeo.giveVertexCoordinates(i);
-        double x = c->at(xind);
-        double y = c->at(yind);
+        double x = c.at(xind);
+        double y = c.at(yind);
 
         ///@todo check transpose
         jacT(0, 0) += dn.at(1, i) * x;

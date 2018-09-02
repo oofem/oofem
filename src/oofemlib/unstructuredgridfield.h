@@ -75,7 +75,7 @@ protected:
       coords = v.coords;
       return *this;
     }
-    const FloatArray* getCoordinates() const {return &coords;}
+    const FloatArray& getCoordinates() const { return coords; }
   };
 
 
@@ -115,7 +115,7 @@ protected:
       int giveNumberOfVertices() const override {
         return this->cell->giveNumberOfVertices();
       }
-      const FloatArray *giveVertexCoordinates(int i) const override
+      const FloatArray &giveVertexCoordinates(int i) const override
       {
         return ((cell->getVertex(i-1))->getCoordinates());
       }
@@ -154,12 +154,12 @@ protected:
     void giveBoundingBox(BoundingBox& bb) const  {
       double size;
       FloatArray bb0, bb1;
-      bb1 = bb0 = *(this->getVertex(0)->getCoordinates());
+      bb1 = bb0 = this->getVertex(0)->getCoordinates();
 
       for ( int i = 1; i < this->giveNumberOfVertices(); ++i ) {
-        const FloatArray *coordinates = this->getVertex(i)->getCoordinates();
-        bb0.beMinOf(bb0, * coordinates);
-        bb1.beMaxOf(bb1, * coordinates);
+        const auto &coordinates = this->getVertex(i)->getCoordinates();
+        bb0.beMinOf(bb0, coordinates);
+        bb1.beMaxOf(bb1, coordinates);
       }
       bb1.subtract(bb0);
       int nsd = bb1.giveSize();
@@ -366,8 +366,8 @@ protected:
             
             int idOfClosestPoint=-1;
             for(int i=0;i<(int) this->vertexList.size();i++){
-                const FloatArray *pcoords=this->vertexList[i].getCoordinates();
-                dist=sqrt( pow(coords[0]-pcoords->at(1),2)+pow(coords[1]-pcoords->at(2),2)+pow(coords[2]-pcoords->at(3),2) );
+                const auto &pcoords = this->vertexList[i].getCoordinates();
+                dist=sqrt( pow(coords[0]-pcoords.at(1),2)+pow(coords[1]-pcoords.at(2),2)+pow(coords[2]-pcoords.at(3),2) );
                 if((dist<minDist) || (!i)){
                     minDist=dist;
                     idOfClosestPoint=i;
@@ -405,14 +405,14 @@ protected:
       // get octree bbox
       std::vector<Vertex>::iterator it = vertexList.begin();
       FloatArray cmax, cmin;
-      cmax= cmin = *((*it).getCoordinates());
+      cmax = cmin = (*it).getCoordinates();
       int nsd  = cmin.giveSize();
       ++it;
       for (; it != vertexList.end(); ++it) {
-        const FloatArray *vc = (*it).getCoordinates();
+          const auto &vc = (*it).getCoordinates();
         for (int j=0; j<nsd; j++)  {
-          cmax(j)=max(cmax(j), (*vc)(j));
-          cmin(j)=min(cmin(j), (*vc)(j));
+          cmax(j)=max(cmax(j), vc(j));
+          cmin(j)=min(cmin(j), vc(j));
         }
       }
       // introduce origin shift (if set up)

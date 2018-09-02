@@ -148,7 +148,7 @@ FEI3dWedgeLin :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &
     auto dNduvw = evaldNdxi(lcoords);
     FloatMatrixF<3,6> coords;
     for ( int i = 0; i < 6; i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i+1), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i+1), i);
     }
     auto jacT = dotT(dNduvw, coords);
     return {det(jacT), dot(inv(jacT), dNduvw)};
@@ -163,7 +163,7 @@ FEI3dWedgeLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 6);
     for ( int i = 1; i <= 6; i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
     inv.beInverseOf(jacobianMatrix);
@@ -182,17 +182,17 @@ FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 
     answer.clear();
     for ( int i = 1; i <= 6; i++ ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
 
 double FEI3dWedgeLin :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    const FloatArray *n1 = cellgeo.giveVertexCoordinates(1);
-    const FloatArray *n2 = cellgeo.giveVertexCoordinates(6);
+    const FloatArray &n1 = cellgeo.giveVertexCoordinates(1);
+    const FloatArray &n2 = cellgeo.giveVertexCoordinates(6);
     ///@todo Change this so that it is not dependent on node order.
-    return n1->distance(n2);
+    return n1.distance(n2);
 }
 
 #define POINT_TOL 1.e-3
@@ -270,7 +270,7 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 6);
     for ( int i = 1; i <= 6; i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
 }
@@ -304,7 +304,7 @@ FEI3dWedgeLin :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArra
 
     answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -377,7 +377,7 @@ FEI3dWedgeLin :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 

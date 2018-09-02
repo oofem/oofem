@@ -70,12 +70,12 @@ void FEI2dLineQuad :: local2global(FloatArray &answer, const FloatArray &lcoords
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
     answer.resize(2);
-    answer.at(1) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                    n(1) * cellgeo.giveVertexCoordinates(2)->at(xind) +
-                    n(2) * cellgeo.giveVertexCoordinates(3)->at(xind) );
-    answer.at(2) = ( n(0) * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                    n(1) * cellgeo.giveVertexCoordinates(2)->at(yind) +
-                    n(2) * cellgeo.giveVertexCoordinates(3)->at(yind) );
+    answer.at(1) = n(0) * cellgeo.giveVertexCoordinates(1).at(xind) +
+                   n(1) * cellgeo.giveVertexCoordinates(2).at(xind) +
+                   n(2) * cellgeo.giveVertexCoordinates(3).at(xind);
+    answer.at(2) = n(0) * cellgeo.giveVertexCoordinates(1).at(yind) +
+                   n(1) * cellgeo.giveVertexCoordinates(2).at(yind) +
+                   n(2) * cellgeo.giveVertexCoordinates(3).at(yind);
 }
 
 int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
@@ -83,12 +83,12 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
     double x1_x2, y1_y2, px_x3, py_y3, x3_x2_x1, y3_y2_y1;
     double b0, b1, b2, b3;
 
-    x1_x2 = cellgeo.giveVertexCoordinates(1)->at(xind) - cellgeo.giveVertexCoordinates(2)->at(xind);
-    y1_y2 = cellgeo.giveVertexCoordinates(1)->at(yind) - cellgeo.giveVertexCoordinates(2)->at(yind);
-    px_x3 = gcoords.at(1) - cellgeo.giveVertexCoordinates(3)->at(xind);
-    py_y3 = gcoords.at(2) - cellgeo.giveVertexCoordinates(3)->at(yind);
-    x3_x2_x1 = 2 * cellgeo.giveVertexCoordinates(3)->at(xind) - cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
-    y3_y2_y1 = 2 * cellgeo.giveVertexCoordinates(3)->at(yind) - cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
+    x1_x2 = cellgeo.giveVertexCoordinates(1).at(xind) - cellgeo.giveVertexCoordinates(2).at(xind);
+    y1_y2 = cellgeo.giveVertexCoordinates(1).at(yind) - cellgeo.giveVertexCoordinates(2).at(yind);
+    px_x3 = gcoords.at(1) - cellgeo.giveVertexCoordinates(3).at(xind);
+    py_y3 = gcoords.at(2) - cellgeo.giveVertexCoordinates(3).at(yind);
+    x3_x2_x1 = 2 * cellgeo.giveVertexCoordinates(3).at(xind) - cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
+    y3_y2_y1 = 2 * cellgeo.giveVertexCoordinates(3).at(yind) - cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
 
     b0 = 0.50 * ( x1_x2 * px_x3 + y1_y2 * py_y3 );
     b1 = 0.25 * ( x1_x2 * x1_x2 + y1_y2 * y1_y2 ) + x3_x2_x1 * px_x3 + y3_y2_y1 * py_y3;
@@ -136,7 +136,7 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
 
 void FEI2dLineQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
-    edgeNodes = { 1, 2, 3};
+    edgeNodes = {1, 2, 3};
 }
 
 void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -153,13 +153,13 @@ void FEI2dLineQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
     answer(1) =  0.5 + xi;
     answer(2) = -2.0 * xi;
 
-    double es1 = answer(0) * cellgeo.giveVertexCoordinates(1)->at(xind) +
-    answer(1) * cellgeo.giveVertexCoordinates(2)->at(xind) +
-    answer(2) * cellgeo.giveVertexCoordinates(3)->at(xind);
+    double es1 = answer(0) * cellgeo.giveVertexCoordinates(1).at(xind) +
+                 answer(1) * cellgeo.giveVertexCoordinates(2).at(xind) +
+                 answer(2) * cellgeo.giveVertexCoordinates(3).at(xind);
 
-    double es2 = answer(0) * cellgeo.giveVertexCoordinates(1)->at(yind) +
-    answer(1) * cellgeo.giveVertexCoordinates(2)->at(yind) +
-    answer(2) * cellgeo.giveVertexCoordinates(3)->at(yind);
+    double es2 = answer(0) * cellgeo.giveVertexCoordinates(1).at(yind) +
+                 answer(1) * cellgeo.giveVertexCoordinates(2).at(yind) +
+                 answer(2) * cellgeo.giveVertexCoordinates(3).at(yind);
 
     double J = sqrt(es1 * es1 + es2 * es2);
     answer.times(1 / J);
@@ -175,13 +175,13 @@ double FEI2dLineQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
 
     normal.resize(2);
 
-    normal.at(1) = -dN1dxi *cellgeo.giveVertexCoordinates(1)->at(yind) +
-    - dN2dxi *cellgeo.giveVertexCoordinates(2)->at(yind) +
-    - dN3dxi *cellgeo.giveVertexCoordinates(3)->at(yind);
+    normal.at(1) = - dN1dxi *cellgeo.giveVertexCoordinates(1).at(yind) +
+                   - dN2dxi *cellgeo.giveVertexCoordinates(2).at(yind) +
+                   - dN3dxi *cellgeo.giveVertexCoordinates(3).at(yind);
 
-    normal.at(2) = dN1dxi * cellgeo.giveVertexCoordinates(1)->at(xind) +
-    dN2dxi *cellgeo.giveVertexCoordinates(2)->at(xind) +
-    dN3dxi *cellgeo.giveVertexCoordinates(3)->at(xind);
+    normal.at(2) = dN1dxi * cellgeo.giveVertexCoordinates(1).at(xind) +
+                   dN2dxi *cellgeo.giveVertexCoordinates(2).at(xind) +
+                   dN3dxi *cellgeo.giveVertexCoordinates(3).at(xind);
 
     return normal.normalize();
 }
@@ -199,12 +199,12 @@ double FEI2dLineQuad :: giveTransformationJacobian(const FloatArray &lcoords, co
     double a2 =  0.5 + xi;
     double a3 = -2.0 * xi;
 
-    double es1 = a1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
-    a2 *cellgeo.giveVertexCoordinates(2)->at(xind) +
-    a3 *cellgeo.giveVertexCoordinates(3)->at(xind);
-    double es2 = a1 * cellgeo.giveVertexCoordinates(1)->at(yind) +
-    a2 *cellgeo.giveVertexCoordinates(2)->at(yind) +
-    a3 *cellgeo.giveVertexCoordinates(3)->at(yind);
+    double es1 = a1 * cellgeo.giveVertexCoordinates(1).at(xind) +
+                 a2 * cellgeo.giveVertexCoordinates(2).at(xind) +
+                 a3 * cellgeo.giveVertexCoordinates(3).at(xind);
+    double es2 = a1 * cellgeo.giveVertexCoordinates(1).at(yind) +
+                 a2 * cellgeo.giveVertexCoordinates(2).at(yind) +
+                 a3 * cellgeo.giveVertexCoordinates(3).at(yind);
 
     return sqrt(es1 * es1 + es2 * es2);
 }
@@ -216,12 +216,12 @@ void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Fl
     double dN2dxi =  0.5 + xi;
     double dN3dxi = -2.0 * xi;
 
-    double es1 = dN1dxi * cellgeo.giveVertexCoordinates(1)->at(xind) +
-    dN2dxi *cellgeo.giveVertexCoordinates(2)->at(xind) +
-    dN3dxi *cellgeo.giveVertexCoordinates(3)->at(xind);
-    double es2 = dN1dxi * cellgeo.giveVertexCoordinates(1)->at(yind) +
-    dN2dxi *cellgeo.giveVertexCoordinates(2)->at(yind) +
-    dN3dxi *cellgeo.giveVertexCoordinates(3)->at(yind);
+    double es1 = dN1dxi * cellgeo.giveVertexCoordinates(1).at(xind) +
+                 dN2dxi * cellgeo.giveVertexCoordinates(2).at(xind) +
+                 dN3dxi * cellgeo.giveVertexCoordinates(3).at(xind);
+    double es2 = dN1dxi * cellgeo.giveVertexCoordinates(1).at(yind) +
+                 dN2dxi * cellgeo.giveVertexCoordinates(2).at(yind) +
+                 dN3dxi * cellgeo.giveVertexCoordinates(3).at(yind);
 
     double J = sqrt(es1 * es1 + es2 * es2);
 
@@ -241,20 +241,17 @@ double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeom
 
 double FEI2dLineQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    const FloatArray *node;
-    double x1, x2, x3, y1, y2, y3;
+    const auto &node1 = cellgeo.giveVertexCoordinates(1);
+    double x1 = node1.at(xind);
+    double y1 = node1.at(yind);
 
-    node = cellgeo.giveVertexCoordinates(1);
-    x1 = node->at(xind);
-    y1 = node->at(yind);
+    const auto &node2 = cellgeo.giveVertexCoordinates(2);
+    double x2 = node2.at(xind);
+    double y2 = node2.at(yind);
 
-    node = cellgeo.giveVertexCoordinates(2);
-    x2 = node->at(xind);
-    y2 = node->at(yind);
-
-    node = cellgeo.giveVertexCoordinates(3);
-    x3 = node->at(xind);
-    y3 = node->at(yind);
+    const auto &node3 = cellgeo.giveVertexCoordinates(3);
+    double x3 = node3.at(xind);
+    double y3 = node3.at(yind);
 
     return ( x1 * y2 - x2 * y1 + 4 * ( x3 * ( y1 - y2 ) + y3 * ( x2 - x1 ) ) ) / 3.0;
 }

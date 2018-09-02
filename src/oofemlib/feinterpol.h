@@ -68,7 +68,7 @@ public:
     FEICellGeometry() { }
     virtual ~FEICellGeometry() { }
     virtual int giveNumberOfVertices() const = 0;
-    virtual const FloatArray *giveVertexCoordinates(int i) const = 0;
+    virtual const FloatArray &giveVertexCoordinates(int i) const = 0;
 };
 
 
@@ -78,6 +78,7 @@ public:
  */
 class OOFEM_EXPORT FEIVoidCellGeometry : public FEICellGeometry
 {
+    FloatArray tmp;
 public:
     FEIVoidCellGeometry() : FEICellGeometry() { }
     virtual ~FEIVoidCellGeometry() { }
@@ -86,10 +87,10 @@ public:
         OOFEM_ERROR("no reference geometry");
         return 0;
     }
-    const FloatArray *giveVertexCoordinates(int i) const override
+    const FloatArray &giveVertexCoordinates(int i) const override
     {
         OOFEM_ERROR("no reference geometry");
-        return NULL;
+        return tmp;
     }
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };
@@ -106,9 +107,9 @@ public:
         FEICellGeometry(), elem(elem) { }
     virtual ~FEIElementGeometryWrapper() { }
     int giveNumberOfVertices() const override;
-    const FloatArray *giveVertexCoordinates(int i) const override
+    const FloatArray &giveVertexCoordinates(int i) const override
     {
-        return &(elem->giveNode(i)->giveNodeCoordinates());
+        return elem->giveNode(i)->giveNodeCoordinates();
     }
 };
 
@@ -126,7 +127,7 @@ public:
         FEICellGeometry(), coords(coords) { }
     virtual ~FEIVertexListGeometryWrapper() { }
     int giveNumberOfVertices() const override { return (int)this->coords.size(); }
-    const FloatArray *giveVertexCoordinates(int i) const override { return &this->coords [ i - 1 ]; }
+    const FloatArray &giveVertexCoordinates(int i) const override { return this->coords [ i - 1 ]; }
 };
 
 /**

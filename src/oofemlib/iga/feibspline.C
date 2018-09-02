@@ -227,7 +227,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         int uind = span[0] - degree [ 0 ];
         int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
             jacobian(0, 0) += ders [ 0 ](1, k) * vertexCoords[0];       // dx/du=sum(dNu/du*x)
         }
 
@@ -252,7 +252,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
 
                 tmp1[0] += ders [ 0 ](1, k) * vertexCoords[0];            // sum(dNu/du*x)
                 tmp1[1] += ders [ 0 ](1, k) * vertexCoords[1]; // sum(dNu/du*y)
@@ -303,7 +303,7 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
                 tmp1.zero();
                 tmp2.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                    const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
 
                     tmp1[0] += ders [ 0 ](1, k) * vertexCoords[0];                // sum(dNu/du*x)
                     tmp1[1] += ders [ 0 ](1, k) * vertexCoords[1];                // sum(dNu/du*y)
@@ -405,7 +405,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
         int uind = span[0] - degree [ 0 ];
         int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
             answer[0] += N [ 0 ][k] * vertexCoords[0];
         }
     } else if ( nsd == 2 ) {
@@ -417,7 +417,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
 
                 tmp[0] += N [ 0 ][k] * vertexCoords[0];
                 tmp[1] += N [ 0 ][k] * vertexCoords[1];
@@ -441,7 +441,7 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                    const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                     tmp.add(N [ 0 ][k], vertexCoords);
                 }
 
@@ -485,7 +485,7 @@ void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
         int uind = span[0] - degree [ 0 ];
         int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
             jacobian(0, 0) += ders [ 0 ](1, k) * vertexCoords[0];       // dx/du=sum(dNu/du*x)
         }
     } else if ( nsd == 2 ) {
@@ -498,7 +498,7 @@ void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
 
                 tmp1[0] += ders [ 0 ](1, k) * vertexCoords[0]; // sum(dNu/du*x)
                 tmp1[1] += ders [ 0 ](1, k) * vertexCoords[1]; // sum(dNu/du*y)
@@ -532,7 +532,7 @@ void BSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
                 tmp1.zero();
                 tmp2.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                    const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
 
                     tmp1.add(ders [ 0 ](1, k), vertexCoords); // sum(dNu/du*x)
                     tmp2.add(ders [ 0 ](0, k), vertexCoords); // sum(Nu*x)

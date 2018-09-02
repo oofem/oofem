@@ -112,7 +112,6 @@ void
 FEInterpolation2d :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 // Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
 {
-    double x, y;
     FloatMatrix dn;
 
     jacobianMatrix.resize(2, 2);
@@ -121,8 +120,8 @@ FEInterpolation2d :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Flo
     this->evaldNdxi(dn, lcoords, cellgeo );
 
     for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
-        x = cellgeo.giveVertexCoordinates(i)->at(xind);
-        y = cellgeo.giveVertexCoordinates(i)->at(yind);
+        double x = cellgeo.giveVertexCoordinates(i).at(xind);
+        double y = cellgeo.giveVertexCoordinates(i).at(yind);
 
         jacobianMatrix.at(1, 1) += dn.at(i, 1) * x;
         jacobianMatrix.at(2, 1) += dn.at(i, 1) * y;

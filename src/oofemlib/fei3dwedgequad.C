@@ -196,7 +196,7 @@ FEI3dWedgeQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry 
     auto dNduvw = evaldNdxi(lcoords);
     FloatMatrixF<3,15> coords;
     for ( int i = 0; i < 15; i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i+1), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i+1), i);
     }
     auto jacT = dotT(dNduvw, coords);
     return {det(jacT), dot(inv(jacT), dNduvw)};
@@ -210,7 +210,7 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 15);
     for ( int i = 1; i <= 15; i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
     inv.beInverseOf(jacobianMatrix);
@@ -253,9 +253,9 @@ FEI3dWedgeQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, co
     answer.resize(3);
     answer.zero();
     for ( int i = 1; i <= 15; i++ ) {
-        answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(1);
-        answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(2);
-        answer.at(3) += n.at(i) * cellgeo.giveVertexCoordinates(i)->at(3);
+        answer.at(1) += n.at(i) * cellgeo.giveVertexCoordinates(i).at(1);
+        answer.at(2) += n.at(i) * cellgeo.giveVertexCoordinates(i).at(2);
+        answer.at(3) += n.at(i) * cellgeo.giveVertexCoordinates(i).at(3);
     }
 }
 
@@ -286,7 +286,7 @@ FEI3dWedgeQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatA
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize(3, 15);
     for ( int i = 1; i <= 15; i++ ) {
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
 }
@@ -318,7 +318,7 @@ void FEI3dWedgeQuad :: edgeLocal2global(FloatArray &answer, int iedge, const Flo
 
     answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -402,7 +402,7 @@ FEI3dWedgeQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
 }
 
@@ -482,8 +482,8 @@ FEI3dWedgeQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatAr
     }
 
     for ( int i = 1; i <= snodes.giveSize(); ++i ) {
-        a.add( dNdksi.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
-        b.add( dNdeta.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+        a.add( dNdksi.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+        b.add( dNdeta.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
     }
 
     answer.beVectorProductOf(a, b);

@@ -87,7 +87,7 @@ FEI3dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const 
     this->evalN(n, lcoords, cellgeo);
     answer.resize(0);
     for ( int i = 1; i <= 3; ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -145,7 +145,7 @@ FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(0);
     for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N[i], * cellgeo.giveVertexCoordinates( edgeNodes[i] ) );
+        answer.add( N[i], cellgeo.giveVertexCoordinates( edgeNodes[i] ) );
     }
 }
 
@@ -224,7 +224,7 @@ FEI3dTrLin :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.resize(0);
     for ( int i = 1; i <= N.giveSize(); ++i ) {
-        answer.add( N.at(i), * cellgeo.giveVertexCoordinates(i) );
+        answer.add( N.at(i), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -245,8 +245,8 @@ FEI3dTrLin :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Flo
     G1.resize(0);
     G2.resize(0);
     for ( int i = 0; i < 3; ++i ) {
-        G1.add( dNdxi(i, 1), * cellgeo.giveVertexCoordinates(i) );
-        G2.add( dNdxi(i, 2), * cellgeo.giveVertexCoordinates(i) );
+        G1.add( dNdxi(i, 1), cellgeo.giveVertexCoordinates(i) );
+        G2.add( dNdxi(i, 2), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -319,9 +319,8 @@ double
 FEI3dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
 {
     // A = 0.5 * |AB x AC|
-    FloatArray AB, AC;
-    AB = *cellgeo.giveVertexCoordinates(2) - *cellgeo.giveVertexCoordinates(1);
-    AC = *cellgeo.giveVertexCoordinates(3) - *cellgeo.giveVertexCoordinates(1);
+    FloatArray AB = cellgeo.giveVertexCoordinates(2) - cellgeo.giveVertexCoordinates(1);
+    FloatArray AC = cellgeo.giveVertexCoordinates(3) - cellgeo.giveVertexCoordinates(1);
     FloatArray temp;
     temp.beVectorProductOf(AB, AC);
     return 0.5 * temp.computeNorm();

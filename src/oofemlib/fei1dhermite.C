@@ -126,23 +126,22 @@ void
 FEI1dHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;
-    answer.resize(1);
-
     this->evalN(n, lcoords, cellgeo);
-    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
-                    n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) + n.at(3) * cellgeo.giveVertexCoordinates(3)->at(cindx) );
+
+    answer.resize(1);
+    answer.at(1) = n.at(1) * cellgeo.giveVertexCoordinates(1).at(cindx) +
+                   n.at(2) * cellgeo.giveVertexCoordinates(2).at(cindx) +
+                   n.at(3) * cellgeo.giveVertexCoordinates(3).at(cindx);
 }
 
 int
 FEI1dHermite :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    double ksi, x1, x2;
+    double x1 = cellgeo.giveVertexCoordinates(1).at(cindx);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(cindx);
+
+    double ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
     answer.resize(1);
-
-    x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
-    x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
-
-    ksi = ( 2.0 * coords.at(1) - ( x1 + x2 ) ) / ( x2 - x1 );
     answer.at(1) = clamp(ksi, -1., 1.);
     return fabs(ksi) <= 1.0;
 }
@@ -158,6 +157,6 @@ FEI1dHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 double
 FEI1dHermite :: giveLength(const FEICellGeometry &cellgeo) const
 {
-    return fabs( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
+    return fabs( cellgeo.giveVertexCoordinates(2).at(cindx) - cellgeo.giveVertexCoordinates(1).at(cindx) );
 }
 } // end namespace oofem

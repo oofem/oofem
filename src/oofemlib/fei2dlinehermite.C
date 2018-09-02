@@ -40,9 +40,8 @@
 namespace oofem {
 double FEI2dLineHermite :: giveLength(const FEICellGeometry &cellgeo) const
 {
-    double x2_x1, y2_y1;
-    x2_x1 = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
-    y2_y1 = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
+    double x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
+    double y2_y1 = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1);
 }
 
@@ -67,8 +66,8 @@ double FEI2dLineHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoor
     this->edgeEvaldNds(dNds, 1, lcoords, cellgeo);
     // Tangent line to project on
     FloatArray vec(2);
-    vec.at(1) = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
-    vec.at(2) = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
+    vec.at(1) = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
+    vec.at(2) = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
     double detJ = vec.normalize() * 0.5;
 
     answer.beDyadicProductOf(dNds, vec);
@@ -81,22 +80,19 @@ void FEI2dLineHermite :: local2global(FloatArray &answer, const FloatArray &lcoo
     this->evalN(n, lcoords, cellgeo);
     answer.resize( max(xind, yind) );
     answer.zero();
-    answer.at(xind) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                       n.at(2) * cellgeo.giveVertexCoordinates(2)->at(xind) );
-    answer.at(yind) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                       n.at(2) * cellgeo.giveVertexCoordinates(2)->at(yind) );
+    answer.at(xind) = n.at(1) * cellgeo.giveVertexCoordinates(1).at(xind) +
+                      n.at(2) * cellgeo.giveVertexCoordinates(2).at(xind);
+    answer.at(yind) = n.at(1) * cellgeo.giveVertexCoordinates(1).at(yind) +
+                      n.at(2) * cellgeo.giveVertexCoordinates(2).at(yind);
 }
 
 int FEI2dLineHermite :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
-    double xi;
-    double x2_x1, y2_y1;
-
-    x2_x1 = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
-    y2_y1 = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
+    double x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
+    double y2_y1 = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
 
     // Projection of the global coordinate gives the value interpolated in [0,1].
-    xi = ( x2_x1 * gcoords(0) + y2_y1 * gcoords(1) ) / ( sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) );
+    double xi = ( x2_x1 * gcoords(0) + y2_y1 * gcoords(1) ) / ( sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) );
     // Map to [-1,1] domain.
     xi = xi * 2.0 - 1.0;
 
@@ -111,8 +107,6 @@ void FEI2dLineHermite :: edgeEvaldNds(FloatArray &answer, int iedge, const Float
     double ksi = lcoords.at(1);
 
     answer.resize(4);
-    answer.zero();
-
     answer.at(1) =  1.5 * ( ksi * ksi - 1.0 ) * l_inv;
     answer.at(2) =  0.25 * ( ksi - 1.0 ) * ( 3.0 * ksi + 1.0 );
     answer.at(3) = -1.5 * ( ksi * ksi - 1.0 ) * l_inv;
@@ -125,8 +119,6 @@ void FEI2dLineHermite :: edgeEvald2Nds2(FloatArray &answer, int iedge, const Flo
     double ksi = lcoords.at(1);
 
     answer.resize(4);
-    answer.zero();
-
     answer.at(1) =  l_inv * 6.0 * ksi * l_inv;
     answer.at(2) =  l_inv * ( 3.0 * ksi - 1.0 );
     answer.at(3) = -l_inv * 6.0 * ksi * l_inv;
@@ -136,8 +128,8 @@ void FEI2dLineHermite :: edgeEvald2Nds2(FloatArray &answer, int iedge, const Flo
 double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     normal.resize(2);
-    normal.at(1) = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
-    normal.at(2) = -( cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind) );
+    normal.at(1) = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
+    normal.at(2) = -( cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind) );
 
     return normal.normalize() * 0.5;
 }
@@ -145,8 +137,8 @@ double FEI2dLineHermite :: edgeEvalNormal(FloatArray &normal, int iedge, const F
 double FEI2dLineHermite :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double x2_x1, y2_y1;
-    x2_x1 = cellgeo.giveVertexCoordinates(2)->at(xind) - cellgeo.giveVertexCoordinates(1)->at(xind);
-    y2_y1 = cellgeo.giveVertexCoordinates(2)->at(yind) - cellgeo.giveVertexCoordinates(1)->at(yind);
+    x2_x1 = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
+    y2_y1 = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) * 0.5;
 }
 

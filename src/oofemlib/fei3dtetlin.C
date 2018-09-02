@@ -76,20 +76,20 @@ FEI3dTetLin :: evaldNdx(const FEICellGeometry &cellgeo)
     //auto [x3, y3, z3] = cellgeo.giveVertexCoordinates(3);
     //auto [x4, y4, z4] = cellgeo.giveVertexCoordinates(4);
 
-    double x1 = cellgeo.giveVertexCoordinates(1)->at(1);
-    double x2 = cellgeo.giveVertexCoordinates(2)->at(1);
-    double x3 = cellgeo.giveVertexCoordinates(3)->at(1);
-    double x4 = cellgeo.giveVertexCoordinates(4)->at(1);
+    double x1 = cellgeo.giveVertexCoordinates(1).at(1);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(1);
+    double x3 = cellgeo.giveVertexCoordinates(3).at(1);
+    double x4 = cellgeo.giveVertexCoordinates(4).at(1);
 
-    double y1 = cellgeo.giveVertexCoordinates(1)->at(2);
-    double y2 = cellgeo.giveVertexCoordinates(2)->at(2);
-    double y3 = cellgeo.giveVertexCoordinates(3)->at(2);
-    double y4 = cellgeo.giveVertexCoordinates(4)->at(2);
+    double y1 = cellgeo.giveVertexCoordinates(1).at(2);
+    double y2 = cellgeo.giveVertexCoordinates(2).at(2);
+    double y3 = cellgeo.giveVertexCoordinates(3).at(2);
+    double y4 = cellgeo.giveVertexCoordinates(4).at(2);
 
-    double z1 = cellgeo.giveVertexCoordinates(1)->at(3);
-    double z2 = cellgeo.giveVertexCoordinates(2)->at(3);
-    double z3 = cellgeo.giveVertexCoordinates(3)->at(3);
-    double z4 = cellgeo.giveVertexCoordinates(4)->at(3);
+    double z1 = cellgeo.giveVertexCoordinates(1).at(3);
+    double z2 = cellgeo.giveVertexCoordinates(2).at(3);
+    double z3 = cellgeo.giveVertexCoordinates(3).at(3);
+    double z4 = cellgeo.giveVertexCoordinates(4).at(3);
 
     double detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
@@ -123,20 +123,20 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, detJ;
     answer.resize(4, 3);
 
-    x1 = cellgeo.giveVertexCoordinates(1)->at(1);
-    x2 = cellgeo.giveVertexCoordinates(2)->at(1);
-    x3 = cellgeo.giveVertexCoordinates(3)->at(1);
-    x4 = cellgeo.giveVertexCoordinates(4)->at(1);
+    x1 = cellgeo.giveVertexCoordinates(1).at(1);
+    x2 = cellgeo.giveVertexCoordinates(2).at(1);
+    x3 = cellgeo.giveVertexCoordinates(3).at(1);
+    x4 = cellgeo.giveVertexCoordinates(4).at(1);
 
-    y1 = cellgeo.giveVertexCoordinates(1)->at(2);
-    y2 = cellgeo.giveVertexCoordinates(2)->at(2);
-    y3 = cellgeo.giveVertexCoordinates(3)->at(2);
-    y4 = cellgeo.giveVertexCoordinates(4)->at(2);
+    y1 = cellgeo.giveVertexCoordinates(1).at(2);
+    y2 = cellgeo.giveVertexCoordinates(2).at(2);
+    y3 = cellgeo.giveVertexCoordinates(3).at(2);
+    y4 = cellgeo.giveVertexCoordinates(4).at(2);
 
-    z1 = cellgeo.giveVertexCoordinates(1)->at(3);
-    z2 = cellgeo.giveVertexCoordinates(2)->at(3);
-    z3 = cellgeo.giveVertexCoordinates(3)->at(3);
-    z4 = cellgeo.giveVertexCoordinates(4)->at(3);
+    z1 = cellgeo.giveVertexCoordinates(1).at(3);
+    z2 = cellgeo.giveVertexCoordinates(2).at(3);
+    z3 = cellgeo.giveVertexCoordinates(3).at(3);
+    z4 = cellgeo.giveVertexCoordinates(4).at(3);
 
     detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
@@ -175,7 +175,7 @@ FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 
     answer.clear();
     for ( int i = 1; i <= 4; i++ ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -187,20 +187,20 @@ FEI3dTetLin :: global2local(FloatArray &answer, const FloatArray &coords, const 
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, xp, yp, zp, volume;
     answer.resize(4);
 
-    x1 = cellgeo.giveVertexCoordinates(1)->at(1);
-    x2 = cellgeo.giveVertexCoordinates(2)->at(1);
-    x3 = cellgeo.giveVertexCoordinates(3)->at(1);
-    x4 = cellgeo.giveVertexCoordinates(4)->at(1);
+    x1 = cellgeo.giveVertexCoordinates(1).at(1);
+    x2 = cellgeo.giveVertexCoordinates(2).at(1);
+    x3 = cellgeo.giveVertexCoordinates(3).at(1);
+    x4 = cellgeo.giveVertexCoordinates(4).at(1);
 
-    y1 = cellgeo.giveVertexCoordinates(1)->at(2);
-    y2 = cellgeo.giveVertexCoordinates(2)->at(2);
-    y3 = cellgeo.giveVertexCoordinates(3)->at(2);
-    y4 = cellgeo.giveVertexCoordinates(4)->at(2);
+    y1 = cellgeo.giveVertexCoordinates(1).at(2);
+    y2 = cellgeo.giveVertexCoordinates(2).at(2);
+    y3 = cellgeo.giveVertexCoordinates(3).at(2);
+    y4 = cellgeo.giveVertexCoordinates(4).at(2);
 
-    z1 = cellgeo.giveVertexCoordinates(1)->at(3);
-    z2 = cellgeo.giveVertexCoordinates(2)->at(3);
-    z3 = cellgeo.giveVertexCoordinates(3)->at(3);
-    z4 = cellgeo.giveVertexCoordinates(4)->at(3);
+    z1 = cellgeo.giveVertexCoordinates(1).at(3);
+    z2 = cellgeo.giveVertexCoordinates(2).at(3);
+    z3 = cellgeo.giveVertexCoordinates(3).at(3);
+    z4 = cellgeo.giveVertexCoordinates(4).at(3);
 
     xp = coords.at(1);
     yp = coords.at(2);
@@ -247,20 +247,20 @@ FEI3dTetLin :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
 {
     double detJ, x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
 
-    x1 = cellgeo.giveVertexCoordinates(1)->at(1);
-    x2 = cellgeo.giveVertexCoordinates(2)->at(1);
-    x3 = cellgeo.giveVertexCoordinates(3)->at(1);
-    x4 = cellgeo.giveVertexCoordinates(4)->at(1);
+    x1 = cellgeo.giveVertexCoordinates(1).at(1);
+    x2 = cellgeo.giveVertexCoordinates(2).at(1);
+    x3 = cellgeo.giveVertexCoordinates(3).at(1);
+    x4 = cellgeo.giveVertexCoordinates(4).at(1);
 
-    y1 = cellgeo.giveVertexCoordinates(1)->at(2);
-    y2 = cellgeo.giveVertexCoordinates(2)->at(2);
-    y3 = cellgeo.giveVertexCoordinates(3)->at(2);
-    y4 = cellgeo.giveVertexCoordinates(4)->at(2);
+    y1 = cellgeo.giveVertexCoordinates(1).at(2);
+    y2 = cellgeo.giveVertexCoordinates(2).at(2);
+    y3 = cellgeo.giveVertexCoordinates(3).at(2);
+    y4 = cellgeo.giveVertexCoordinates(4).at(2);
 
-    z1 = cellgeo.giveVertexCoordinates(1)->at(3);
-    z2 = cellgeo.giveVertexCoordinates(2)->at(3);
-    z3 = cellgeo.giveVertexCoordinates(3)->at(3);
-    z4 = cellgeo.giveVertexCoordinates(4)->at(3);
+    z1 = cellgeo.giveVertexCoordinates(1).at(3);
+    z2 = cellgeo.giveVertexCoordinates(2).at(3);
+    z3 = cellgeo.giveVertexCoordinates(3).at(3);
+    z4 = cellgeo.giveVertexCoordinates(4).at(3);
 
     detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
@@ -290,12 +290,12 @@ FEI3dTetLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
     l = this->edgeComputeLength(edgeNodes, cellgeo);
     coeff = 1.0 / l / l;
 
-    x1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(1);
-    y1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(2);
-    z1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(3);
-    x2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(1);
-    y2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(2);
-    z2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(3);
+    x1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(1);
+    y1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(2);
+    z1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(3);
+    x2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(1);
+    y2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(2);
+    z2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(3);
 
     answer.resize(2, 3);
     answer.at(1, 1) = ( x1 - x2 ) * coeff;
@@ -317,12 +317,12 @@ FEI3dTetLin :: edgeLocal2global(FloatArray &answer, int iedge,
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(3);
-    answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(1) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(1) );
-    answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(2) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(2) );
-    answer.at(3) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(3) +
-                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(3) );
+    answer.at(1) = n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(1) +
+                   n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(1);
+    answer.at(2) = n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(2) +
+                   n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(2);
+    answer.at(3) = n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(3) +
+                   n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(3);
 }
 
 
@@ -370,7 +370,7 @@ FEI3dTetLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 double
 FEI3dTetLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
-    return cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->distance( cellgeo.giveVertexCoordinates( edgeNodes.at(1) ) );
+    return cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).distance( cellgeo.giveVertexCoordinates( edgeNodes.at(1) ) );
 }
 
 void
@@ -387,25 +387,24 @@ void
 FEI3dTetLin :: surfaceLocal2global(FloatArray &answer, int iedge,
                                    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l1, l2, l3;
-    answer.resize(3);
     IntArray nodes(3);
 
     computeLocalSurfaceMapping(nodes, iedge);
 
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = 1.0 - l1 - l2;
+    double l1 = lcoords.at(1);
+    double l2 = lcoords.at(2);
+    double l3 = 1.0 - l1 - l2;
 
-    answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(1) +
-                    l2 * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(1) +
-                    l3 * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(1) );
-    answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(2) +
-                    l2 * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(2) +
-                    l3 * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(2) );
-    answer.at(3) = ( l1 * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(3) +
-                    l2 * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(3) +
-                    l3 * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(3) );
+    answer.resize(3);
+    answer.at(1) = l1 * cellgeo.giveVertexCoordinates( nodes.at(1) ).at(1) +
+                   l2 * cellgeo.giveVertexCoordinates( nodes.at(2) ).at(1) +
+                   l3 * cellgeo.giveVertexCoordinates( nodes.at(3) ).at(1);
+    answer.at(2) = l1 * cellgeo.giveVertexCoordinates( nodes.at(1) ).at(2) +
+                   l2 * cellgeo.giveVertexCoordinates( nodes.at(2) ).at(2) +
+                   l3 * cellgeo.giveVertexCoordinates( nodes.at(3) ).at(2);
+    answer.at(3) = l1 * cellgeo.giveVertexCoordinates( nodes.at(1) ).at(3) +
+                   l2 * cellgeo.giveVertexCoordinates( nodes.at(2) ).at(3) +
+                   l3 * cellgeo.giveVertexCoordinates( nodes.at(3) ).at(3);
 }
 
 void
@@ -437,8 +436,8 @@ FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray
     IntArray snodes(3);
     this->computeLocalSurfaceMapping(snodes, isurf);
 
-    a.beDifferenceOf( * cellgeo.giveVertexCoordinates( snodes.at(2) ), * cellgeo.giveVertexCoordinates( snodes.at(1) ) );
-    b.beDifferenceOf( * cellgeo.giveVertexCoordinates( snodes.at(3) ), * cellgeo.giveVertexCoordinates( snodes.at(1) ) );
+    a.beDifferenceOf( cellgeo.giveVertexCoordinates( snodes.at(2) ), cellgeo.giveVertexCoordinates( snodes.at(1) ) );
+    b.beDifferenceOf( cellgeo.giveVertexCoordinates( snodes.at(3) ), cellgeo.giveVertexCoordinates( snodes.at(1) ) );
     answer.beVectorProductOf(a, b);
 
     return answer.normalize();
@@ -489,9 +488,9 @@ FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
     IntArray fNodes;
     this->computeLocalSurfaceMapping(fNodes, iEdge);
 
-    const FloatArray &c1 = * cellgeo.giveVertexCoordinates( fNodes.at(1) );
-    const FloatArray &c2 = * cellgeo.giveVertexCoordinates( fNodes.at(2) );
-    const FloatArray &c3 = * cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const FloatArray &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
 
     return ( ( c2.at(1) * c3.at(2) - c3.at(1) * c2.at(2) ) * c1.at(3) +
             ( c3.at(1) * c1.at(2) - c1.at(1) * c3.at(2) ) * c2.at(3) +

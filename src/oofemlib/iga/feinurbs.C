@@ -68,7 +68,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
         int uind = span[0] - degree [ 0 ];
         int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            answer.at(c++) = val = N [ 0 ][k] * cellgeo.giveVertexCoordinates(ind + k)->at(2);       // Nu*w
+            answer.at(c++) = val = N [ 0 ][k] * cellgeo.giveVertexCoordinates(ind + k).at(2);       // Nu*w
             sum += val;
         }
     } else if ( nsd == 2 ) {
@@ -77,7 +77,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
         int ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                answer.at(c++) = val = N [ 0 ][k] * N [ 1 ][l] * cellgeo.giveVertexCoordinates(ind + k)->at(3); // Nu*Nv*w
+                answer.at(c++) = val = N [ 0 ][k] * N [ 1 ][l] * cellgeo.giveVertexCoordinates(ind + k).at(3); // Nu*Nv*w
                 sum += val;
             }
 
@@ -92,7 +92,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
             int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    answer.at(c++) = val = N [ 0 ][k] * N [ 1 ][l] * N [ 2 ][m] * cellgeo.giveVertexCoordinates(ind + k)->at(4);     // Nu*Nv*Nt*w
+                    answer.at(c++) = val = N [ 0 ][k] * N [ 1 ][l] * N [ 2 ][m] * cellgeo.giveVertexCoordinates(ind + k).at(4);     // Nu*Nv*Nt*w
                     sum += val;
                 }
 
@@ -171,7 +171,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                 double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
@@ -308,7 +308,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         int uind = span[0] - degree [ 0 ];
         int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
             double w = vertexCoords[1];
 
             Aders [ 0 ][0] += ders [ 0 ](0, k) * vertexCoords[0] * w;   // xw=sum(Nu*x*w)
@@ -330,7 +330,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         int cnt = 0;
         ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            double w = cellgeo.giveVertexCoordinates(ind + k)->at(2);
+            double w = cellgeo.giveVertexCoordinates(ind + k).at(2);
             // [dNu/du*w*sum(Nu*w) - Nu*w*sum(dNu/du*w)] / [J*sum(Nu*w)^2]
             answer(cnt, 0) = ders [ 0 ](1, k) * w * weight - ders [ 0 ](0, k) * w * wders[1] / product;
             cnt++;
@@ -346,7 +346,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                 double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
@@ -391,7 +391,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
         ind = vind * numberOfControlPoints [ 0 ] + uind + 1;
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                double w = cellgeo.giveVertexCoordinates(ind + k)->at(3);
+                double w = cellgeo.giveVertexCoordinates(ind + k).at(3);
                 // dNu/du*Nv*w*sum(Nu*Nv*w) - Nu*Nv*w*sum(dNu/du*Nv*w)
                 tmp1[0] = ders [ 0 ](1, k) * ders [ 1 ](0, l) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * w * wders[1];
                 // Nu*dNv/dv*w*sum(Nu*Nv*w) - Nu*Nv*w*sum(Nu*dNv/dv*w)
@@ -422,7 +422,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
                 tmp1.zero();
                 tmp2.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                    const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                     double w = vertexCoords[3];
 
                     tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w;              // sum(Nu*x*w)
@@ -503,7 +503,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             int indx = ind;
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    double w = cellgeo.giveVertexCoordinates(ind + k)->at(4);
+                    double w = cellgeo.giveVertexCoordinates(ind + k).at(4);
                     // dNu/du*Nv*Nt*w*sum(Nu*Nv*Nt*w) - Nu*Nv*Nt*w*sum(dNu/du*Nv*Nt*w)
                     tmp1[0] = ders [ 0 ](1, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m) * w * wders[1];
                     // Nu*dNv/dv*Nt*w*sum(Nu*Nv*Nt*w) - Nu*Nv*Nt*w*sum(Nu*dNv/dv*Nt*w)
@@ -565,7 +565,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
         int uind = span[0] - degree [ 0 ];
         int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
             double w = vertexCoords[1];
             answer[0] += N [ 0 ][k] * vertexCoords[0] * w;       // xw=sum(Nu*x*w)
             weight    += N [ 0 ][k] * w;                                // w=sum(Nu*w)
@@ -579,7 +579,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
         for ( int l = 0; l <= degree [ 1 ]; l++ ) {
             tmp.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                 double w = vertexCoords[2];
                 tmp[0] += N [ 0 ][k] * vertexCoords[0] * w; // sum(Nu*x*w)
                 tmp[1] += N [ 0 ][k] * vertexCoords[1] * w; // sum(Nu*y*w)
@@ -604,11 +604,11 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
             for ( int l = 0; l <= degree [ 1 ]; l++ ) {
                 tmp.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                    const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                     double w = vertexCoords[3];
-                    tmp[0] += N [ 0 ][k] * vertexCoords[1] * w;               // sum(Nu*x*w)
-                    tmp[1] += N [ 0 ][k] * vertexCoords[2] * w;               // sum(Nu*y*w)
-                    tmp[2] += N [ 0 ][k] * vertexCoords[3] * w;               // sum(Nu*z*w)
+                    tmp[0] += N [ 0 ][k] * vertexCoords[0] * w;               // sum(Nu*x*w)
+                    tmp[1] += N [ 0 ][k] * vertexCoords[1] * w;               // sum(Nu*y*w)
+                    tmp[2] += N [ 0 ][k] * vertexCoords[2] * w;               // sum(Nu*z*w)
                     tmp[3] += N [ 0 ][k] * w;                                        // sum(Nu*w)
                 }
 
@@ -694,7 +694,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                 double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
@@ -809,7 +809,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
         int uind = span[0] - degree [ 0 ];
         int ind = uind + 1;
         for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
             double w = vertexCoords[1];
 
             Aders [ 0 ][0] += ders [ 0 ](0, k) * vertexCoords[0] * w;   // xw=sum(Nu*x*w)
@@ -834,7 +834,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
             tmp1.zero();
             tmp2.zero();
             for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                 double w = vertexCoords[2];
 
                 tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w; // sum(Nu*x*w)
@@ -888,7 +888,7 @@ void NURBSInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const Flo
                 tmp1.zero();
                 tmp2.zero();
                 for ( int k = 0; k <= degree [ 0 ]; k++ ) {
-                    const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates(ind + k);
+                    const auto &vertexCoords = cellgeo.giveVertexCoordinates(ind + k);
                     double w = vertexCoords[3];
 
                     tmp1[0] += ders [ 0 ](0, k) * vertexCoords[0] * w;              // sum(Nu*x*w)

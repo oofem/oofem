@@ -154,7 +154,7 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
                 N[i] = this->basisFunction(lcoords[i], degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask[k] - 1 ] [ i ]);
             }
 
-            answer[k] = val = N[0] * N[1] * cellgeo.giveVertexCoordinates( mask[k] )->at(3);        // Nu*Nv*w
+            answer[k] = val = N[0] * N[1] * cellgeo.giveVertexCoordinates( mask[k] ).at(3);        // Nu*Nv*w
             sum += val;
         }
     }
@@ -228,7 +228,7 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
 
             // calculation of jacobian matrix in similar fashion as A4.4
             // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates( mask[k] );
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates( mask[k] );
             double w = vertexCoords[2];
             double xw = vertexCoords[0] * w;
             double yw = vertexCoords[1] * w;
@@ -280,7 +280,7 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         double product = Jacob * weight * weight;
 
         for ( int k = 0; k < count; k++ ) {
-            double w = cellgeo.giveVertexCoordinates( mask[k] )->at(3);
+            double w = cellgeo.giveVertexCoordinates( mask[k] ).at(3);
             // dNu/du*Nv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(dNu/du*Nv*w)
             temp[0] = ders [ 0 ](1, k) * ders [ 1 ](0, k) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, k) * w * wders(1, 0);
             // Nu*dNv/dv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(Nu*dNv/dv*w)
@@ -330,7 +330,7 @@ void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
                 N[i] = this->basisFunction(lcoords[i], degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask[k] - 1 ] [ i ]);
             }
 
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates( mask[k] );
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates( mask[k] );
             double w = vertexCoords[2];
             double xw = vertexCoords[0] * w;
             double yw = vertexCoords[1] * w;
@@ -404,7 +404,7 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
 
             // calculation of jacobian matrix in similar fashion as A4.4
             // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
-            const FloatArray &vertexCoords = *cellgeo.giveVertexCoordinates( mask[k] );
+            const auto &vertexCoords = cellgeo.giveVertexCoordinates( mask[k] );
             double w = vertexCoords[2];
             double xw = vertexCoords[0] * w;
             double yw = vertexCoords[1] * w;

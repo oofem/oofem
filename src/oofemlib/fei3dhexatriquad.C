@@ -225,8 +225,8 @@ FEI3dHexaTriQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const Float
 
     this->computeLocalSurfaceMapping(snodes, isurf);
     for ( int i = 1; i <= 9; ++i ) {
-        e1.add( dNdu.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
-        e2.add( dNdv.at(i), * cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+        e1.add( dNdu.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
+        e2.add( dNdv.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
     }
 
     answer.beVectorProductOf(e1, e2);
@@ -459,7 +459,7 @@ FEI3dHexaTriQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometr
     FloatMatrixF<3,27> coords;
     for ( int i = 0; i < 27; i++ ) {
         ///@todo cellgeo should give a FloatArrayF<3>, this will add a "costly" construction now:
-        coords.setColumn(* cellgeo.giveVertexCoordinates(i+1), i);
+        coords.setColumn(cellgeo.giveVertexCoordinates(i+1), i);
     }
     auto jacT = dotT(dNduvw, coords);
     return {det(jacT), dot(inv(jacT), dNduvw)};
@@ -479,15 +479,15 @@ FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo)
     IntArray fNodes;
     this->computeLocalSurfaceMapping(fNodes, iSurf);
 
-    const FloatArray &c1 = * cellgeo.giveVertexCoordinates( fNodes.at(1) );
-    const FloatArray &c2 = * cellgeo.giveVertexCoordinates( fNodes.at(2) );
-    const FloatArray &c3 = * cellgeo.giveVertexCoordinates( fNodes.at(3) );
-    const FloatArray &c4 = * cellgeo.giveVertexCoordinates( fNodes.at(4) );
-    const FloatArray &c5 = * cellgeo.giveVertexCoordinates( fNodes.at(5) );
-    const FloatArray &c6 = * cellgeo.giveVertexCoordinates( fNodes.at(6) );
-    const FloatArray &c7 = * cellgeo.giveVertexCoordinates( fNodes.at(7) );
-    const FloatArray &c8 = * cellgeo.giveVertexCoordinates( fNodes.at(8) );
-    const FloatArray &c9 = * cellgeo.giveVertexCoordinates( fNodes.at(9) );
+    const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const FloatArray &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const FloatArray &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
+    const FloatArray &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
+    const FloatArray &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
+    const FloatArray &c7 = cellgeo.giveVertexCoordinates( fNodes.at(7) );
+    const FloatArray &c8 = cellgeo.giveVertexCoordinates( fNodes.at(8) );
+    const FloatArray &c9 = cellgeo.giveVertexCoordinates( fNodes.at(9) );
 
     // Generated with Mathematica (rather unwieldy expression, tried to simplify it as good as possible, but it could probably be better)
     return (

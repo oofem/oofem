@@ -129,7 +129,7 @@ FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
     this->evalN(n, lcoords, cellgeo);
     answer.clear();
     for ( int i = 1; i <= 6; ++i ) {
-        answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
+        answer.add( n.at(i), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -143,21 +143,18 @@ FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
     ///@todo this is for linear triangle
     int xind = 1;
     int yind = 2;
-    
-    
-    double detJ, x1, x2, x3, y1, y2, y3;
+
+    double x1 = cellgeo.giveVertexCoordinates(1).at(xind);
+    double x2 = cellgeo.giveVertexCoordinates(2).at(xind);
+    double x3 = cellgeo.giveVertexCoordinates(3).at(xind);
+
+    double y1 = cellgeo.giveVertexCoordinates(1).at(yind);
+    double y2 = cellgeo.giveVertexCoordinates(2).at(yind);
+    double y3 = cellgeo.giveVertexCoordinates(3).at(yind);
+
+    double detJ = x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
+
     answer.resize(3);
-
-    x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
-    x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
-    x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
-
-    y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
-    y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
-    y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
-
-    detJ = x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
-
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * gcoords.at(xind) + ( x3 - x2 ) * gcoords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * gcoords.at(xind) + ( x1 - x3 ) * gcoords.at(yind) ) / detJ;
     answer.at(3) = 1. - answer.at(1) - answer.at(2);
@@ -173,7 +170,7 @@ FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const
             inside = false;
         }
     }
-    
+
     return inside;
 
 }
@@ -226,7 +223,7 @@ FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
-        answer.add( N[i], * cellgeo.giveVertexCoordinates( edgeNodes[i] ) );
+        answer.add( N[i], cellgeo.giveVertexCoordinates( edgeNodes[i] ) );
     }
 }
 
@@ -238,9 +235,9 @@ FEI3dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
     FloatArray dNdu;
     double u = lcoords.at(1);
     this->computeLocalEdgeMapping(eNodes, iedge);
-    dNdu.add( u - 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
-    dNdu.add( u + 0.5, * cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
-    dNdu.add( -2. * u, * cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
+    dNdu.add( u - 0.5, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
+    dNdu.add( u + 0.5, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
+    dNdu.add( -2. * u, cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
     return dNdu.computeNorm();
 }
 
@@ -324,7 +321,7 @@ FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 
     answer.clear();
     for ( int i = 1; i <= N.giveSize(); ++i ) {
-        answer.add( N.at(i), * cellgeo.giveVertexCoordinates(i) );
+        answer.add( N.at(i), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -345,8 +342,8 @@ FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Fl
     G1.clear();
     G2.clear();
     for ( int i = 0; i < 6; ++i ) {
-        G1.add( dNdxi(i, 1), * cellgeo.giveVertexCoordinates(i) );
-        G2.add( dNdxi(i, 2), * cellgeo.giveVertexCoordinates(i) );
+        G1.add( dNdxi(i, 1), cellgeo.giveVertexCoordinates(i) );
+        G2.add( dNdxi(i, 2), cellgeo.giveVertexCoordinates(i) );
     }
 }
 
@@ -421,27 +418,24 @@ double
 FEI3dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
 {
     ///@todo this only correct for a planar triangle in the xy-plane
-    const FloatArray *p;
-    double x1, x2, x3, x4, x5, x6, y1, y2, y3, y4, y5, y6;
-
-    p = cellgeo.giveVertexCoordinates(1);
-    x1 = p->at(1);
-    y1 = p->at(2);
-    p = cellgeo.giveVertexCoordinates(2);
-    x2 = p->at(1);
-    y2 = p->at(2);
-    p = cellgeo.giveVertexCoordinates(3);
-    x3 = p->at(1);
-    y3 = p->at(2);
-    p = cellgeo.giveVertexCoordinates(4);
-    x4 = p->at(1);
-    y4 = p->at(2);
-    p = cellgeo.giveVertexCoordinates(5);
-    x5 = p->at(1);
-    y5 = p->at(2);
-    p = cellgeo.giveVertexCoordinates(6);
-    x6 = p->at(1);
-    y6 = p->at(2);
+    const auto &p1 = cellgeo.giveVertexCoordinates(1);
+    double x1 = p1.at(1);
+    double y1 = p1.at(2);
+    const auto &p2 = cellgeo.giveVertexCoordinates(2);
+    double x2 = p2.at(1);
+    double y2 = p2.at(2);
+    const auto &p3 = cellgeo.giveVertexCoordinates(3);
+    double x3 = p3.at(1);
+    double y3 = p3.at(2);
+    const auto &p4 = cellgeo.giveVertexCoordinates(4);
+    double x4 = p4.at(1);
+    double y4 = p4.at(2);
+    const auto &p5 = cellgeo.giveVertexCoordinates(5);
+    double x5 = p5.at(1);
+    double y5 = p5.at(2);
+    const auto &p6 = cellgeo.giveVertexCoordinates(6);
+    double x6 = p6.at(1);
+    double y6 = p6.at(2);
 
     return (4*(-(x4*y1) + x6*y1 + x4*y2 - x5*y2 + x5*y3 - x6*y3) + x2*(y1 - y3 - 4*y4 + 4*y5) +
             x1*(-y2 + y3 + 4*y4 - 4*y6) + x3*(-y1 + y2 - 4*y5 + 4*y6))/6;

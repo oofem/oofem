@@ -63,7 +63,7 @@ double FEInterpolation1d :: boundaryGiveTransformationJacobian(int boundary, con
 
 void FEInterpolation1d :: boundaryLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    answer = * cellgeo.giveVertexCoordinates(boundary);
+    answer = cellgeo.giveVertexCoordinates(boundary);
 }
 
 std::unique_ptr<IntegrationRule> FEInterpolation1d :: giveIntegrationRule(int order)

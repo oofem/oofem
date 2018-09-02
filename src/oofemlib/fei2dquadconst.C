@@ -60,14 +60,14 @@ FEI2dQuadConst :: local2global(FloatArray &answer, const FloatArray &lcoords, co
 {
     answer.resize(2);
 
-    answer.at(1) = 0.25 * ( cellgeo.giveVertexCoordinates(1)->at(xind) +
-                           cellgeo.giveVertexCoordinates(2)->at(xind) +
-                           cellgeo.giveVertexCoordinates(3)->at(xind) +
-                           cellgeo.giveVertexCoordinates(4)->at(xind) );
-    answer.at(2) = 0.25 * ( cellgeo.giveVertexCoordinates(1)->at(yind) +
-                           cellgeo.giveVertexCoordinates(2)->at(yind) +
-                           cellgeo.giveVertexCoordinates(3)->at(yind) +
-                           cellgeo.giveVertexCoordinates(4)->at(yind) );
+    answer.at(1) = 0.25 * ( cellgeo.giveVertexCoordinates(1).at(xind) +
+                            cellgeo.giveVertexCoordinates(2).at(xind) +
+                            cellgeo.giveVertexCoordinates(3).at(xind) +
+                            cellgeo.giveVertexCoordinates(4).at(xind) );
+    answer.at(2) = 0.25 * ( cellgeo.giveVertexCoordinates(1).at(yind) +
+                            cellgeo.giveVertexCoordinates(2).at(yind) +
+                            cellgeo.giveVertexCoordinates(3).at(yind) +
+                            cellgeo.giveVertexCoordinates(4).at(yind) );
 }
 
 
@@ -143,8 +143,8 @@ FEI2dQuadConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &
     int nodeA = edgeNodes.at(1);
     int nodeB = edgeNodes.at(2);
 
-    double dx = cellgeo.giveVertexCoordinates(nodeB)->at(xind) - cellgeo.giveVertexCoordinates(nodeA)->at(xind);
-    double dy = cellgeo.giveVertexCoordinates(nodeB)->at(yind) - cellgeo.giveVertexCoordinates(nodeA)->at(yind);
+    double dx = cellgeo.giveVertexCoordinates(nodeB).at(xind) - cellgeo.giveVertexCoordinates(nodeA).at(xind);
+    double dy = cellgeo.giveVertexCoordinates(nodeB).at(yind) - cellgeo.giveVertexCoordinates(nodeA).at(yind);
     return sqrt(dx * dx + dy * dy);
 }
 
