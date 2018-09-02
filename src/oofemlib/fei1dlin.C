@@ -36,12 +36,20 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 
 namespace oofem {
 double
 FEI1dLin :: giveLength(const FEICellGeometry &cellgeo) const
 {
     return fabs( cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx) );
+}
+
+FloatArrayF<2>
+FEI1dLin :: evalN(double ksi)
+{
+    return {( 1. - ksi ) * 0.5, ( 1. + ksi ) * 0.5};
 }
 
 void
@@ -52,6 +60,13 @@ FEI1dLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGe
 
     answer.at(1) = ( 1. - ksi ) * 0.5;
     answer.at(2) = ( 1. + ksi ) * 0.5;
+}
+
+std::pair<double, FloatMatrixF<1,2>>
+FEI1dLin :: evaldNdx(const FEICellGeometry &cellgeo) const
+{
+    double l = cellgeo.giveVertexCoordinates(2)->at(cindx) - cellgeo.giveVertexCoordinates(1)->at(cindx);
+    return {0.5 * l, {-1.0 / l, 1.0 / l}};
 }
 
 double

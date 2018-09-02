@@ -36,23 +36,90 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
+
+FloatArrayF<4>
+FEI3dTetLin :: evalN(const FloatArrayF<3> &lcoords)
+{
+    return {
+        lcoords[0],
+        lcoords[1],
+        lcoords[2],
+        1.0 - lcoords[0] - lcoords[1] - lcoords[2]
+    };
+}
+
 void
 FEI3dTetLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    answer = evalN(lcoords);
+#else
     answer.resize(4);
 
     answer.at(1) = lcoords.at(1);
     answer.at(2) = lcoords.at(2);
     answer.at(3) = lcoords.at(3);
     answer.at(4) = 1. - lcoords.at(1) - lcoords.at(2) - lcoords.at(3);
+#endif
+}
+
+std::pair<double, FloatMatrixF<3,4>>
+FEI3dTetLin :: evaldNdx(const FEICellGeometry &cellgeo)
+{
+    //auto [x1, y1, z1] = cellgeo.giveVertexCoordinates(1);
+    //auto [x2, y2, z2] = cellgeo.giveVertexCoordinates(2);
+    //auto [x3, y3, z3] = cellgeo.giveVertexCoordinates(3);
+    //auto [x4, y4, z4] = cellgeo.giveVertexCoordinates(4);
+
+    double x1 = cellgeo.giveVertexCoordinates(1)->at(1);
+    double x2 = cellgeo.giveVertexCoordinates(2)->at(1);
+    double x3 = cellgeo.giveVertexCoordinates(3)->at(1);
+    double x4 = cellgeo.giveVertexCoordinates(4)->at(1);
+
+    double y1 = cellgeo.giveVertexCoordinates(1)->at(2);
+    double y2 = cellgeo.giveVertexCoordinates(2)->at(2);
+    double y3 = cellgeo.giveVertexCoordinates(3)->at(2);
+    double y4 = cellgeo.giveVertexCoordinates(4)->at(2);
+
+    double z1 = cellgeo.giveVertexCoordinates(1)->at(3);
+    double z2 = cellgeo.giveVertexCoordinates(2)->at(3);
+    double z3 = cellgeo.giveVertexCoordinates(3)->at(3);
+    double z4 = cellgeo.giveVertexCoordinates(4)->at(3);
+
+    double detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
+            ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
+            ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
+
+    FloatMatrixF<3,4> ans = {
+        -( ( y3 - y2 ) * ( z4 - z2 ) - ( y4 - y2 ) * ( z3 - z2 ) ),
+        -( ( x4 - x2 ) * ( z3 - z2 ) - ( x3 - x2 ) * ( z4 - z2 ) ),
+        -( ( x3 - x2 ) * ( y4 - y2 ) - ( x4 - x2 ) * ( y3 - y2 ) ),
+        ( y4 - y3 ) * ( z1 - z3 ) - ( y1 - y3 ) * ( z4 - z3 ),
+        ( x1 - x3 ) * ( z4 - z3 ) - ( x4 - x3 ) * ( z1 - z3 ),
+        ( x4 - x3 ) * ( y1 - y3 ) - ( x1 - x3 ) * ( y4 - y3 ),
+        -( ( y1 - y4 ) * ( z2 - z4 ) - ( y2 - y4 ) * ( z1 - z4 ) ),
+        -( ( x2 - x4 ) * ( z1 - z4 ) - ( x1 - x4 ) * ( z2 - z4 ) ),
+        -( ( x1 - x4 ) * ( y2 - y4 ) - ( x2 - x4 ) * ( y1 - y4 ) ),
+        ( y2 - y1 ) * ( z3 - z1 ) - ( y3 - y1 ) * ( z2 - z1 ),
+        ( x3 - x1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( z3 - z1 ),
+        ( x2 - x1 ) * ( y3 - y1 ) - ( x3 - x1 ) * ( y2 - y1 ),
+    };
+    return {detJ, ans * (1. / detJ)};
 }
 
 double
 FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    auto tmp = evaldNdx(lcoords, cellgeo);
+    answer = tmp.second;
+    return tmp.first;
+#else
     double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4, detJ;
     answer.resize(4, 3);
 
@@ -97,6 +164,7 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
     answer.times(1. / detJ);
 
     return detJ;
+#endif
 }
 
 void

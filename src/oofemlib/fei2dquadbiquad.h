@@ -59,6 +59,10 @@ class OOFEM_EXPORT FEI2dQuadBiQuad : public FEI2dQuadQuad
 public:
     FEI2dQuadBiQuad(int ind1, int ind2) : FEI2dQuadQuad(ind1, ind2) { }
 
+    static FloatArrayF<9> evalN(const FloatArrayF<2> &lcoords);
+    static FloatMatrixF<2,9> evaldNdxi(const FloatArrayF<2> &lcoords);
+    std::pair<double, FloatMatrixF<2,9>> evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const;
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     int giveNumberOfNodes() const override { return 9; }

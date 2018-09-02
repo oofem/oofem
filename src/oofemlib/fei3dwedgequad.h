@@ -62,6 +62,10 @@ public:
     integrationDomain giveBoundarySurfaceIntegrationDomain(int isurf) const override { return this->giveBoundaryIntegrationDomain(isurf); }
     integrationDomain giveBoundaryEdgeIntegrationDomain(int iedge) const override { return _Line; }
 
+    static FloatArrayF<15> evalN(const FloatArrayF<3> &lcoords);
+    static std::pair<double, FloatMatrixF<3,15>> evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo);
+    static FloatMatrixF<3,15> evaldNdxi(const FloatArrayF<3> &lcoords);
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void evaldNdxi(FloatMatrix & answer, const FloatArray & lcoords, const FEICellGeometry & cellgeo) override;

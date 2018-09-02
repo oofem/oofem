@@ -36,9 +36,18 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
+
+FloatArrayF<3>
+FEI2dTrLin :: evalN(const FloatArrayF<2> &lcoords)
+{
+    return {lcoords[0], lcoords[1], 1. - lcoords[0] - lcoords[1]};
+}
+
 void
 FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -48,6 +57,26 @@ FEI2dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICell
         1. - lcoords.at(1) - lcoords.at(2)
     };
 }
+
+std::pair<double, FloatMatrixF<2,3>>
+FEI2dTrLin :: evaldNdx(const FEICellGeometry &cellgeo) const
+{
+    double x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
+    double x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
+    double x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
+    double y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
+    double y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
+    double y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
+    double detJ = x1 * ( y2 - y3 ) + x2 * ( y3 - y1 ) + x3 * ( y1 - y2 );
+
+    FloatMatrixF<2,3> ans = {
+        y2 - y3, y3 - y1, y1 - y2,
+        x3 - x2, x1 - x3, x2 - x1,
+    };
+
+    return {detJ, ans * (1./detJ)};
+}
+
 
 double
 FEI2dTrLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

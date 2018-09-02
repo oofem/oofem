@@ -36,6 +36,8 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -121,9 +123,35 @@ FEI3dTetQuad :: giveVolume(const FEICellGeometry &cellgeo) const
     return area;
 }
 
+FloatArrayF<10>
+FEI3dTetQuad :: evalN(const FloatArrayF<3> &lcoords)
+{
+    //auto [x1,x2,x3] = lcoords;
+    double x1 = lcoords[0];
+    double x2 = lcoords[1];
+    double x3 = lcoords[2];
+    double x4 = 1.0 - x1 - x2 - x3;
+
+    return {
+        x1 * ( 2 * x1 - 1 ),
+        x2 * ( 2 * x2 - 1 ),
+        x3 * ( 2 * x3 - 1 ),
+        x4 * ( 2 * x4 - 1 ),
+        4 * x1 * x2,
+        4 * x2 * x3,
+        4 * x3 * x1,
+        4 * x1 * x4,
+        4 * x2 * x4,
+        4 * x3 * x4
+    };
+}
+
 void
 FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    answer = evalN(lcoords);
+#else
     double x1 = lcoords[0];
     double x2 = lcoords[1];
     double x3 = lcoords[2];
@@ -141,11 +169,30 @@ FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer[7] = 4 * x1 * x4;
     answer[8] = 4 * x2 * x4;
     answer[9] = 4 * x3 * x4;
+#endif
+}
+
+std::pair<double, FloatMatrixF<3,10>>
+FEI3dTetQuad :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo)
+{
+    auto dNduvw = evaldNdxi(lcoords);
+    FloatMatrixF<3,10> coords;
+    for ( int i = 0; i < 10; i++ ) {
+        ///@todo cellgeo should give a FloatArrayF<3>, this will add a "costly" construction now:
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i+1), i);
+    }
+    auto jacT = dotT(dNduvw, coords);
+    return {det(jacT), dot(inv(jacT), dNduvw)};
 }
 
 double
 FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    auto tmp = evaldNdx(lcoords, cellgeo);
+    answer = tmp.second;
+    return tmp.first;
+#else
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
     this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize( 3, dNduvw.giveNumberOfRows() );
@@ -157,11 +204,57 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 
     answer.beProductOf(dNduvw, inv);
     return jacobianMatrix.giveDeterminant();
+#endif
+}
+
+FloatMatrixF<3,10>
+FEI3dTetQuad :: evaldNdxi(const FloatArrayF<3> &lcoords)
+{
+    double x1 = lcoords[0];
+    double x2 = lcoords[1];
+    double x3 = lcoords[2];
+    double x4 = 1.0 - x1 - x2 - x3;
+
+    return {
+        4. * x1 - 1, // 1
+        0.,
+        0.,
+        0., // 2
+        4. * x2 - 1,
+        0.,
+        0., // 3
+        0.,
+        4. * x3 - 1,
+        -4. * x4 + 1, // 4
+        -4. * x4 + 1,
+        -4. * x4 + 1,
+        4. * x2, // 5
+        4. * x1,
+        0.,
+        0., // 6
+        4. * x3,
+        4. * x2,
+        4. * x3, // 7
+        0.,
+        4. * x1,
+        4. * ( x4 - x1 ), // 8
+        -4. * x1,
+        -4. * x1,
+        -4. * x2, // 9
+        4. * ( x4 - x2 ),
+        -4. * x2,
+        -4. * x3, // 10
+        -4. * x3,
+        4. * ( x4 - x3 )
+    };
 }
 
 void
 FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords , const FEICellGeometry &cellgeo)
 {
+#if 0
+    answer = evaldNdxi(lcoords);
+#else
     double x1 = lcoords[0];
     double x2 = lcoords[1];
     double x3 = lcoords[2];
@@ -204,6 +297,7 @@ FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords , const
     answer(7, 2) = -4 * x1;
     answer(8, 2) = -4 * x2;
     answer(9, 2) = 4 * ( x4 - x3 );
+#endif
 }
 
 

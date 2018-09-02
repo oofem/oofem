@@ -57,6 +57,9 @@ public:
 
     double giveLength(const FEICellGeometry &cellgeo) const override;
 
+    static FloatArrayF<3> evalN(double ksi);
+    std::pair<double, FloatMatrixF<1,3>> evaldNdx(double ksi, const FEICellGeometry &cellgeo) const;
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

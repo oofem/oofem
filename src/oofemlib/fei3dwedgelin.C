@@ -35,10 +35,31 @@
 #include "fei3dwedgelin.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "intarray.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
+
+FloatArrayF<6>
+FEI3dWedgeLin :: evalN(const FloatArrayF<3> &lcoords)
+{
+    double u = lcoords[0];
+    double v = lcoords[1];
+    double w = lcoords[2];
+    double x = 1. - u - v;
+    return {
+        0.5 * ( 1. - w ) * x,
+        0.5 * ( 1. - w ) * u,
+        0.5 * ( 1. - w ) * v,
+        0.5 * ( 1. + w ) * x,
+        0.5 * ( 1. + w ) * u,
+        0.5 * ( 1. + w ) * v,
+    };
+}
+
+
 void
 FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -55,6 +76,82 @@ FEI3dWedgeLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
     answer.at(4) = 0.5 * ( 1. + w ) * ( 1. - u - v );
     answer.at(5) = 0.5 * ( 1. + w ) * u;
     answer.at(6) = 0.5 * ( 1. + w ) * v;
+}
+
+
+FloatMatrixF<3,6>
+FEI3dWedgeLin :: evaldNdxi(const FloatArrayF<3> &lcoords)
+{
+    double u = lcoords.at(1);
+    double v = lcoords.at(2);
+    double w = lcoords.at(3);
+    double x = 1. - u - v;
+
+    return {
+        -0.5 * ( 1. - w ),
+        -0.5 * ( 1. - w ),
+        -0.5 * x,
+        0.5 * ( 1. - w ),
+        0.,
+        -0.5 * u,
+        0.,
+        0.5 * ( 1. - w ),
+        -0.5 * v,
+        -0.5 * ( 1. + w ),
+        -0.5 * ( 1. + w ),
+        0.5 * x,
+        0.5 * ( 1. + w ),
+        0.,
+        0.5 * u,
+        0.,
+        0.5 * ( 1. + w ),
+        0.5 * v,
+    };
+}
+
+
+void
+FEI3dWedgeLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &)
+{
+    double u = lcoords.at(1);
+    double v = lcoords.at(2);
+    double w = lcoords.at(3);
+
+    dN.resize(6, 3);
+
+    dN.at(1, 1) = -0.5 * ( 1. - w );
+    dN.at(2, 1) =  0.5 * ( 1. - w );
+    dN.at(3, 1) =  0.;
+    dN.at(4, 1) = -0.5 * ( 1. + w );
+    dN.at(5, 1) =  0.5 * ( 1. + w );
+    dN.at(6, 1) =  0.;
+
+    dN.at(1, 2) = -0.5 * ( 1. - w );
+    dN.at(2, 2) =  0.;
+    dN.at(3, 2) =  0.5 * ( 1. - w );
+    dN.at(4, 2) = -0.5 * ( 1. + w );
+    dN.at(5, 2) =  0.;
+    dN.at(6, 2) =  0.5 * ( 1. + w );
+
+    dN.at(1, 3) = -0.5 * ( 1. - u - v );
+    dN.at(2, 3) = -0.5 * u;
+    dN.at(3, 3) = -0.5 * v;
+    dN.at(4, 3) =  0.5 * ( 1. - u - v );
+    dN.at(5, 3) =  0.5 * u;
+    dN.at(6, 3) =  0.5 * v;
+}
+
+
+std::pair<double, FloatMatrixF<3,6>>
+FEI3dWedgeLin :: evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo)
+{
+    auto dNduvw = evaldNdxi(lcoords);
+    FloatMatrixF<3,6> coords;
+    for ( int i = 0; i < 6; i++ ) {
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i+1), i);
+    }
+    auto jacT = dotT(dNduvw, coords);
+    return {det(jacT), dot(inv(jacT), dNduvw)};
 }
 
 
@@ -176,39 +273,6 @@ FEI3dWedgeLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
         coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
     }
     jacobianMatrix.beProductOf(coords, dNduvw);
-}
-
-
-void
-FEI3dWedgeLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &)
-{
-    double u, v, w;
-    u = lcoords.at(1);
-    v = lcoords.at(2);
-    w = lcoords.at(3);
-
-    dN.resize(6, 3);
-
-    dN.at(1, 1) = -0.5 * ( 1. - w );
-    dN.at(2, 1) =  0.5 * ( 1. - w );
-    dN.at(3, 1) =  0.;
-    dN.at(4, 1) = -0.5 * ( 1. + w );
-    dN.at(5, 1) =  0.5 * ( 1. + w );
-    dN.at(6, 1) =  0.;
-
-    dN.at(1, 2) = -0.5 * ( 1. - w );
-    dN.at(2, 2) =  0.;
-    dN.at(3, 2) =  0.5 * ( 1. - w );
-    dN.at(4, 2) = -0.5 * ( 1. + w );
-    dN.at(5, 2) =  0.;
-    dN.at(6, 2) =  0.5 * ( 1. + w );
-
-    dN.at(1, 3) = -0.5 * ( 1. - u - v );
-    dN.at(2, 3) = -0.5 * u;
-    dN.at(3, 3) = -0.5 * v;
-    dN.at(4, 3) =  0.5 * ( 1. - u - v );
-    dN.at(5, 3) =  0.5 * u;
-    dN.at(6, 3) =  0.5 * v;
 }
 
 

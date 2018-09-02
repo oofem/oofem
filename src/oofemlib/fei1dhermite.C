@@ -36,8 +36,17 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 
 namespace oofem {
+
+FloatArrayF<4>
+FEI1dHermite :: evalN(double ksi)
+{
+    return {ksi * ( ksi - 1. ) * 0.5, ksi * ( 1. + ksi ) * 0.5, ( 1. - ksi * ksi )};
+}
+
 void
 FEI1dHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -51,6 +60,20 @@ FEI1dHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
     answer.at(2) =  0.125 * l * ( 1.0 - ksi ) * ( 1.0 - ksi ) * ( 1.0 + ksi );
     answer.at(3) = 0.25 * ( 1.0 + ksi ) * ( 1.0 + ksi ) * ( 2.0 - ksi );
     answer.at(4) = -0.125 * l * ( 1.0 + ksi ) * ( 1.0 + ksi ) * ( 1.0 - ksi );
+}
+
+std::pair<double, FloatMatrixF<1,4>>
+FEI1dHermite :: evaldNdx(double ksi, const FEICellGeometry &cellgeo) const
+{
+    double l = this->giveLength(cellgeo);
+    double l_inv = 1.0 / l;
+    FloatMatrixF<1,4> ans = {
+        1.5 * ( -1.0 + ksi * ksi ) * l_inv,
+        0.25 * ( ksi - 1.0 ) * ( 1.0 + 3.0 * ksi ),
+        -1.5 * ( -1.0 + ksi * ksi ) * l_inv,
+        0.25 * ( ksi - 1.0 ) * ( 1.0 + 3.0 * ksi )
+    };
+    return {0.5 * l, ans};
 }
 
 double
@@ -71,9 +94,23 @@ FEI1dHermite :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
     return 0.5 * l;
 }
 
+FloatMatrixF<1,4>
+FEI1dHermite :: evald2Ndx2(double ksi, const FEICellGeometry &cellgeo) const
+{
+    double l_inv = 1.0 / this->giveLength(cellgeo);
+
+    return {
+        l_inv * 6.0 * ksi * l_inv,
+        l_inv * ( 3.0 * ksi - 1.0 ),
+        -l_inv * 6.0 * ksi * l_inv,
+        l_inv * ( 3.0 * ksi + 1.0 )
+    };
+}
+
 void
 FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+    //answer = evald2Ndx2(lcoords[0]);
     double l_inv = 1.0 / this->giveLength(cellgeo);
     double ksi = lcoords.at(1);
     answer.resize(1, 4);

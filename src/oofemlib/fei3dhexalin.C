@@ -127,7 +127,7 @@ void
 FEI3dHexaLin :: evaldNdxi(FloatMatrix &dN, const FloatArray &lcoords, const FEICellGeometry &)
 {
 #if 0
-    dN = to_dynamic(evaldNdxi(lcoords));
+    dN = evaldNdxi(lcoords);
 #else
     double u, v, w;
     u = lcoords.at(1);

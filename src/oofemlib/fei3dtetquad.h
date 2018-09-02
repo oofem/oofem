@@ -57,6 +57,10 @@ public:
     double giveVolume(const FEICellGeometry &cellgeo) const override;
 
     // Bulk
+    static FloatArrayF<10> evalN(const FloatArrayF<3> &lcoords);
+    static std::pair<double, FloatMatrixF<3,10>> evaldNdx(const FloatArrayF<3> &lcoords, const FEICellGeometry &cellgeo);
+    static FloatMatrixF<3,10> evaldNdxi(const FloatArrayF<3> &lcoords);
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

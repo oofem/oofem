@@ -36,11 +36,23 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 
 namespace oofem {
+
+FloatArrayF<3>
+FEI1dQuad :: evalN(double ksi)
+{
+    return {ksi * ( ksi - 1. ) * 0.5, ksi * ( 1. + ksi ) * 0.5, ( 1. - ksi * ksi )};
+}
+
 void
 FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    answer = evalN(lcoords[0]);
+#else
     double ksi = lcoords.at(1);
     answer.resize(3);
     answer.zero();
@@ -48,7 +60,26 @@ FEI1dQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellG
     answer.at(1) = ksi * ( ksi - 1. ) * 0.5;
     answer.at(2) = ksi * ( 1. + ksi ) * 0.5;
     answer.at(3) = ( 1. - ksi * ksi );
+#endif
 }
+
+std::pair<double, FloatMatrixF<1,3>>
+FEI1dQuad :: evaldNdx(double ksi, const FEICellGeometry &cellgeo) const
+{
+    double x1 = cellgeo.giveVertexCoordinates(1)->at(cindx);
+    double x2 = cellgeo.giveVertexCoordinates(2)->at(cindx);
+    double x3 = cellgeo.giveVertexCoordinates(3)->at(cindx);
+
+    double J = 1. / 2. * ( 2 * ksi - 1 ) * x1 + 1. / 2. * ( 2 * ksi + 1 ) * x2 - 2. * ksi * x3;
+
+    FloatMatrixF<1, 3> ans = {
+        ( -1. / 2. + ksi ) / J,
+        ( 1. / 2. + ksi ) / J,
+        -2. * ksi / J,
+    };
+    return {J, ans};
+}
+
 
 double
 FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

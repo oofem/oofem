@@ -54,6 +54,9 @@ public:
     Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
 
     // Bulk
+    static FloatArrayF<3> evalN(const FloatArrayF<2> &lcoords);
+    std::pair<double,FloatMatrixF<2,3>> evaldNdx(const FEICellGeometry &cellgeo) const;
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void local2global(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo) override;

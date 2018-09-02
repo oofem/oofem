@@ -36,6 +36,8 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -80,6 +82,25 @@ FEI2dQuadQuad :: giveArea(const FEICellGeometry &cellgeo) const
     return fabs(p1 + p2 * 4.0) / 6.; // Expression derived with mathematica, but not verified in any computations
 }
 
+
+FloatArrayF<8>
+FEI2dQuadQuad :: evalN(const FloatArrayF<2> &lcoords)
+{
+    double ksi = lcoords[0];
+    double eta = lcoords[1];
+    return {
+        ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. ),
+        ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. ),
+        ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. ),
+        ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. ),
+        0.5 * ( 1. - ksi * ksi ) * ( 1. + eta ),
+        0.5 * ( 1. - ksi ) * ( 1. - eta * eta ),
+        0.5 * ( 1. - ksi * ksi ) * ( 1. - eta ),
+        0.5 * ( 1. + ksi ) * ( 1. - eta * eta )
+    };
+}
+
+
 void
 FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
@@ -100,9 +121,95 @@ FEI2dQuadQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEIC
     };
 }
 
+
+FloatMatrixF<2,8>
+FEI2dQuadQuad :: evaldNdxi(const FloatArrayF<2> &lcoords)
+{
+    double ksi = lcoords.at(1);
+    double eta = lcoords.at(2);
+
+    return {
+        0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta ), // 1
+        0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi ),
+        -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta ), // 2
+        0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi ),
+        -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta ), // 3
+        -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi ),
+        0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta ), // 4
+        -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi ),
+        -ksi * ( 1. + eta ), // 5
+        0.5 * ( 1. - ksi * ksi ),
+        -0.5 * ( 1. - eta * eta ), // 6
+        -eta * ( 1. - ksi ),
+        -ksi * ( 1. - eta ), // 7
+        -0.5 * ( 1. - ksi * ksi ),
+        0.5 * ( 1. - eta * eta ), // 8
+        -eta * ( 1. + ksi )
+    };
+}
+
+
+void FEI2dQuadQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
+#if 0
+    answer = dNdxi(lcoords);
+#else
+    double ksi, eta;
+    ksi = lcoords.at(1);
+    eta = lcoords.at(2);
+    answer.resize(8, 2);
+
+    // dn/dxi
+    answer.at(1, 1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
+    answer.at(2, 1) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
+    answer.at(3, 1) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
+    answer.at(4, 1) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
+    answer.at(5, 1) = -ksi * ( 1. + eta );
+    answer.at(6, 1) = -0.5 * ( 1. - eta * eta );
+    answer.at(7, 1) = -ksi * ( 1. - eta );
+    answer.at(8, 1) =  0.5 * ( 1. - eta * eta );
+
+    answer.at(1, 2) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
+    answer.at(2, 2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
+    answer.at(3, 2) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
+    answer.at(4, 2) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
+    answer.at(5, 2) =  0.5 * ( 1. - ksi * ksi );
+    answer.at(6, 2) = -eta * ( 1. - ksi );
+    answer.at(7, 2) = -0.5 * ( 1. - ksi * ksi );
+    answer.at(8, 2) = -eta * ( 1. + ksi );
+#endif
+}
+
+
+std::pair<double, FloatMatrixF<2,8>> 
+FEI2dQuadQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const
+{
+    auto dn = evaldNdxi(lcoords);
+    FloatMatrixF<2,2> jacT;
+    for ( int i = 1; i <= dn.cols(); i++ ) {
+        const auto &c = cellgeo.giveVertexCoordinates(i);
+        double x = c->at(xind);
+        double y = c->at(yind);
+
+        ///@todo check transpose
+        jacT(0, 0) += dn.at(1, i) * x;
+        jacT(0, 1) += dn.at(1, i) * y;
+        jacT(1, 0) += dn.at(2, i) * x;
+        jacT(1, 1) += dn.at(2, i) * y;
+    }
+
+    return {det(jacT), dot(inv(jacT), dn)};
+}
+
+
 double
 FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
+#if 0
+    auto tmp = evaldNdx(lcoords, cellgeo);
+    answer = tmp.second;
+    return tmp.first;
+#else
     FloatMatrix jacobianMatrix(2, 2), inv, dn;
 
     this->evaldNdxi(dn, lcoords, cellgeo);
@@ -119,6 +226,7 @@ FEI2dQuadQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const 
 
     answer.beProductTOf(dn, inv);
     return jacobianMatrix.giveDeterminant();
+#endif
 }
 
 void
@@ -248,34 +356,6 @@ double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
     - dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind);
 
     return normal.normalize();
-}
-
-
-void FEI2dQuadQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-{
-    double ksi, eta;
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
-    answer.resize(8, 2);
-
-    // dn/dxi
-    answer.at(1, 1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
-    answer.at(2, 1) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
-    answer.at(3, 1) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
-    answer.at(4, 1) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
-    answer.at(5, 1) = -ksi * ( 1. + eta );
-    answer.at(6, 1) = -0.5 * ( 1. - eta * eta );
-    answer.at(7, 1) = -ksi * ( 1. - eta );
-    answer.at(8, 1) =  0.5 * ( 1. - eta * eta );
-
-    answer.at(1, 2) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
-    answer.at(2, 2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
-    answer.at(3, 2) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
-    answer.at(4, 2) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
-    answer.at(5, 2) =  0.5 * ( 1. - ksi * ksi );
-    answer.at(6, 2) = -eta * ( 1. - ksi );
-    answer.at(7, 2) = -0.5 * ( 1. - ksi * ksi );
-    answer.at(8, 2) = -eta * ( 1. + ksi );
 }
 
 
