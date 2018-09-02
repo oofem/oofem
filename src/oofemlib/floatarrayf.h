@@ -399,5 +399,29 @@ inline void swap_46(FloatArrayF<9> &t)
     std::swap( t[7], t[8] );
 }
 
+template<int N>
+FloatArrayF<N> max(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
+{
+    FloatArrayF<N> out;
+    for (int i; i < N; ++i) {
+        out[i] = std::max(a[i], b[i]);
+    }
+    return out;
+}
+
+template<int N>
+FloatArrayF<N> min(const FloatArray &a, const FloatArray &b)
+{
+    FloatArrayF<N> out;
+    for (int i; i < N; ++i) {
+        out[i] = std::min(a[i], b[i]);
+    }
+    return out;
+}
+
+/// I expressed in Voigt form
+const FloatArrayF<6> I6 = {1., 1., 1., 0., 0., 0.};
+
+
 } // end namespace oofem
 #endif // floatarrayf_h

@@ -358,6 +358,16 @@ FloatMatrixF<N,M> operator * ( const FloatMatrixF<N,M> & x, double a )
 }
 
 template<int N, int M>
+FloatMatrixF<N,M> operator / ( const FloatMatrixF<N,M> & x, double a )
+{
+    FloatMatrixF<N,M> out;
+    for ( int i = 0; i < N*M; ++i ) {
+        out[i] = x[i] / a;
+    }
+    return out;
+}
+
+template<int N, int M>
 FloatMatrixF<N,M> operator + ( const FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
     FloatMatrixF<N,M> out;
@@ -473,12 +483,12 @@ inline FloatMatrixF<3,3> local_cs(const FloatArrayF<3> &normal)
 
 /// Constructs transposed matrix
 template<int N, int M>
-FloatMatrixF<N,N> transpose(const FloatMatrixF<N,N> &mat)
+FloatMatrixF<M,N> transpose(const FloatMatrixF<N,M> &mat)
 {
-    FloatMatrixF<N,M> out;
+    FloatMatrixF<M,N> out;
     for ( int i = 0; i < N; ++i ) {
         for ( int j = 0; j < M; ++i ) {
-            out(i, i) = mat(j, i);
+            out(j, i) = mat(i, j);
         }
     }
     return out;
@@ -608,12 +618,11 @@ FloatArrayF<N> column(const FloatMatrixF<N,M> &mat, int col)
     return ans;
 }
 
-#if 0
 /**
  * Symmetrizes and stores a matrix in Voigt form:
  * x_11, x_22, x_33, x_23, x_13, x_12, x_32, x_31, x_21
  */
-FloatMatrixF<3,3> from_voigt_form(const FloatArrayF<9> &v)
+inline FloatMatrixF<3,3> from_voigt_form(const FloatArrayF<9> &v)
 {
     return {
         v[0], v[8], v[7], 
@@ -626,7 +635,7 @@ FloatMatrixF<3,3> from_voigt_form(const FloatArrayF<9> &v)
  * Symmetrizes and stores a matrix in Voigt form:
  * x_11, x_22, x_33, x_23, x_13, x_12, x_32, x_31, x_21
  */
-FloatArrayF<9> to_voigt_form(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<9> to_voigt_form(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -645,7 +654,7 @@ FloatArrayF<9> to_voigt_form(const FloatMatrixF<3,3> &t)
  * Symmetrizes and stores a matrix in stress Voigt form:
  * s_11, s_22, s_33, s_23, s_13, s_12
  */
-FloatMatrixF<3,3> from_voigt_stress(const FloatArrayF<6> &v)
+inline FloatMatrixF<3,3> from_voigt_stress(const FloatArrayF<6> &v)
 {
     return {
         v[0], v[5], v[4], 
@@ -658,7 +667,7 @@ FloatMatrixF<3,3> from_voigt_stress(const FloatArrayF<6> &v)
  * Symmetrizes and stores a matrix in stress Voigt form:
  * s_11, s_22, s_33, s_23, s_13, s_12
  */
-FloatArrayF<6> to_voigt_stress(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<6> to_voigt_stress(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -674,7 +683,7 @@ FloatArrayF<6> to_voigt_stress(const FloatMatrixF<3,3> &t)
  * Converts Voigt vector to matrix form:
  * e_11, e_22, e_33, v_23, v_13, v_12
  */
-FloatMatrixF<3,3> from_voigt_strain(const FloatArrayF<6> &v)
+inline FloatMatrixF<3,3> from_voigt_strain(const FloatArrayF<6> &v)
 {
     return {
         v[0], 0.5*v[5], 0.5*v[4],
@@ -687,7 +696,7 @@ FloatMatrixF<3,3> from_voigt_strain(const FloatArrayF<6> &v)
  * Symmetrizes and stores a matrix in strain Voigt form:
  * e_11, e_22, e_33, v_23, v_13, v_12
  */
-FloatArrayF<6> to_voigt_strain(const FloatMatrixF<3,3> &t)
+inline FloatArrayF<6> to_voigt_strain(const FloatMatrixF<3,3> &t)
 {
     return {
         t(0, 0),
@@ -698,7 +707,6 @@ FloatArrayF<6> to_voigt_strain(const FloatMatrixF<3,3> &t)
         ( t(0, 1) + t(1, 0) )
     };
 }
-#endif
 
 /**
  * Constructs diagonal matrix from vector.
@@ -774,8 +782,8 @@ FloatMatrixF<N,N> eye()
     return out;
 }
 
-/// Returns the I_dev matrix in Voigt (stress) form
-const FloatMatrixF<6,6> I_dev = {
+/// I_dev matrix in Voigt (stress) form
+const FloatMatrixF<6,6> I_dev6 = {
     2./3., -1./3., -1/3., 0., 0., 0.,
     -1./3., 2./3., -1/3., 0., 0., 0.,
     -1./3., -1./3., 2/3., 0., 0., 0.,
@@ -783,6 +791,17 @@ const FloatMatrixF<6,6> I_dev = {
     0., 0., 0., 0., 0.5, 0.,
     0., 0., 0., 0., 0., 0.5,
 };
+
+/// I(x)I expressed in Voigt form
+const FloatMatrixF<6,6> I6_I6 = {
+    1., 1., 1., 0., 0., 0.,
+    1., 1., 1., 0., 0., 0.,
+    1., 1., 1., 0., 0., 0.,
+    0., 0., 0., 0., 0., 0.,
+    0., 0., 0., 0., 0., 0.,
+    0., 0., 0., 0., 0., 0.,
+};
+
 
 /**
  * Constructs "N" matrix
