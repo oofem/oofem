@@ -201,7 +201,7 @@ void ParticleTopologyDescription :: addLineSegment(int id, const FloatArray &p0,
         new_foot = p0;
         new_foot.add(xi * line_length, v);
 
-        distance2 = grid_p.distance_square(new_foot);
+        distance2 = distance_square(grid_p, new_foot);
 
         if ( distance2 < tubeWidth2 ) {
             if ( ( point = it.getPoint() ) ) {
@@ -239,7 +239,7 @@ void ParticleTopologyDescription :: addCircleSegment(int id, const FloatArray &c
         new_foot(0) = c(0) + cos(v) * r;
         new_foot(1) = c(1) + sin(v) * r;
 
-        distance2 = grid_p.distance_square(new_foot);
+        distance2 = distance_square(grid_p, new_foot);
 
         if ( distance2 < tubeWidth2 ) {
             if ( ( point = it.getPoint() ) ) {
@@ -269,7 +269,7 @@ void ParticleTopologyDescription :: addCorner(int id, const FloatArray &c, Parti
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->beginAt(x0, x1); !it.end(); ++it ) {
         if ( ( point = it.getPoint() ) ) {
             if ( point->id == id ) {
-                if ( point->corner.giveSize() < 0 || point->foot.distance_square(point->corner) > point->foot.distance_square(c) ) {
+                if ( point->corner.giveSize() < 0 || distance_square(point->foot, point->corner) > distance_square(point->foot, c) ) {
                     point->corner = c;
                 }
             }
@@ -293,7 +293,7 @@ TopologyState ParticleTopologyDescription :: updateYourself(TimeStep *tStep)
 
     this->resampled = false;
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
-        if ( ( p = it.getPoint() ) != NULL ) {
+        if ( ( p = it.getPoint() ) != nullptr ) {
             bool state = this->findDisplacement(displacement, p->id, p->foot, tStep);
             if ( state ) {
                 p->foot.add(displacement);
@@ -350,7 +350,7 @@ TopologyState ParticleTopologyDescription :: checkOverlap()
     distance_limit = this->tubeWidth / 2;
 
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
-        if ( ( p0 = it.getPoint() ) != NULL && p0->id > 0 ) {
+        if ( ( p0 = it.getPoint() ) != nullptr && p0->id > 0 ) {
             // Use either total distance or the local?
             this->getBoundingBox(x0, x1, p0->foot, this->tubeWidth + 2 * p0->total_displacement.computeNorm() + distance_limit);
             this->grid->getPointsWithin(points, x0, x1);
@@ -374,9 +374,9 @@ TopologyState ParticleTopologyDescription :: checkOverlap()
                 // This part turned out to be incredibly difficult; Merging of different surfaces (creating a new one, with end points accordingly).
 #if 0
                 else {
-                    double distance = p0->foot.distance_square(p1->foot);
+                    double distance = distance_square(p0->foot, p1->foot);
                     if ( distance < distance_limit ) {
-                        if ( p0->corner.giveSize() > 0 && distance < p0->foot.distance_square(p0->corner) ) {
+                        if ( p0->corner.giveSize() > 0 && distance < distance_square(p0->foot, p0->corner) ) {
                             p0->removal = true;
                             p1->removal = true;
                         } else {
@@ -484,7 +484,7 @@ void ParticleTopologyDescription :: calculateShortestDistance(const ParticlePoin
     for ( pos[0] = ind0[0]; pos[0] < ind1[0]; pos[0]++ ) {
         for ( pos[1] = ind0[1]; pos[1] < ind1[1]; pos[1]++ ) {
             g.getGridCoord(grid_point, pos);
-            if ( grid_point.distance_square(p0->foot) > radius * radius ) {  // Quick optimization (might give false negatives, but that is acceptable.)
+            if ( distance_square(grid_point, p0->foot) > radius * radius ) {  // Quick optimization (might give false negatives, but that is acceptable.)
                 continue;
             }
 
@@ -585,7 +585,7 @@ double ParticleTopologyDescription :: shortestDistanceFromCurve(const FloatArray
     normal[1] = n0[1] + t0[1] * ( -fp );
     normal.normalize();
 
-    return foot.distance_square(p);
+    return distance_square(foot, p);
 }
 
 void ParticleTopologyDescription :: resample()
@@ -604,7 +604,7 @@ void ParticleTopologyDescription :: resample()
     int total_points = 0;
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
         total_points++;
-        if ( ( origin = it.getPoint() ) != NULL ) {
+        if ( ( origin = it.getPoint() ) != nullptr ) {
             this->collectNeighbors(neighbours, origin, maxdisp);
             this->calculateShortestDistance(origin, neighbours, *new_grid);
         }
@@ -656,7 +656,7 @@ void ParticleTopologyDescription :: collectNeighbors(std :: list< ParticlePoint 
             continue;
         }
 
-        if ( origin->foot.distance_square(p->foot) > 4 * this->tubeWidth * this->tubeWidth ) {
+        if ( distance_square(origin->foot, p->foot) > 4 * this->tubeWidth * this->tubeWidth ) {
             continue;
         }
         temp.beDifferenceOf(p->foot, origin->foot);
@@ -779,7 +779,7 @@ void ParticleTopologyDescription :: writeDataToFile(const char *name) const
     ParticlePoint *p;
 
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
-        if ( ( p = it.getPoint() ) != NULL ) {
+        if ( ( p = it.getPoint() ) != nullptr ) {
             it.getGridPoint(grid_coord);
 
             dims = grid_coord.giveSize();
@@ -831,7 +831,7 @@ void ParticleTopologyDescription :: writeVTKFile(const char *name) const
 
     int i = 0;
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
-        if ( ( p = it.getPoint() ) != NULL ) {
+        if ( ( p = it.getPoint() ) != nullptr ) {
             points->InsertNextPoint(p->foot[0], p->foot[1], dims == 3 ? p->foot[2] : 0.0);
             vertex = vtkSmartPointer< vtkVertex > :: New();
             vertex->GetPointIds()->SetId(0, i);
@@ -915,7 +915,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
     int total_nodes = 0;
 
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
-        if ( ( origin = it.getPoint() ) != NULL ) {
+        if ( ( origin = it.getPoint() ) != nullptr ) {
             origin->node = 0;
         }
     }
@@ -936,7 +936,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
         n.c = cit->foot;
         nodes.push_back(n);
         for ( std :: list< ParticlePoint > :: iterator cit_ = this->corners.begin(); cit_ != this->corners.end(); ++cit_ ) {
-            if ( cit->foot.distance_square(cit_->foot) <= merge2 && cit_->node == 0 ) {
+            if ( distance_square(cit->foot, cit_->foot) <= merge2 && cit_->node == 0 ) {
                 cit_->node = cit->node;
                 cit_->foot = cit->foot; // For consistency, merge the points which are merged in the mesh
             }
@@ -945,7 +945,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
         this->getBoundingBox(x0, x1, cit->foot, 2 * this->tubeWidth);
         this->grid->getPointsWithin(points, x0, x1);
         for ( auto pit = points.begin(); pit != points.end(); pit++ ) {
-            if ( ( cit->foot.distance_square( ( * pit )->foot ) <= merge2 ) && ( * pit )->node == 0 ) {
+            if ( ( distance_square(cit->foot, ( * pit )->foot ) <= merge2 ) && ( * pit )->node == 0 ) {
                 ( * pit )->node = cit->node;
                 ( * pit )->foot = cit->foot;
             }
@@ -953,7 +953,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
     }
 
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
-        if ( ( origin = it.getPoint() ) != NULL ) {
+        if ( ( origin = it.getPoint() ) != nullptr ) {
             if ( origin->node != 0 ) {
                 continue;
             }
@@ -976,7 +976,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
                      * lcoord.at(lcoord.giveSize()) = 0.0;
                      * if ( lcoord.computeSquaredNorm() <= limit*limit && (ln < this->tubeWidth && origin->normal.dotProduct((*pit)->normal) ) {
                      */
-                    if ( origin->foot.distance_square( ( * pit )->foot ) <= merge2 ) {
+                    if ( distance_square(origin->foot, ( * pit )->foot ) <= merge2 ) {
                         ( * pit )->node = origin->node;
                         ( * pit )->foot = origin->foot;
                     }
@@ -990,7 +990,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
     double max_value = 2 * this->tubeWidth; // No connections further away than this.
     double front_dist, back_dist, b_front_dist, b_back_dist;
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
-        if ( ( origin = it.getPoint() ) != NULL ) {
+        if ( ( origin = it.getPoint() ) != nullptr ) {
             toLocalCoord.beLocalCoordSys(origin->normal);
 
             edge e0, e1;
@@ -1153,11 +1153,11 @@ void ParticleTopologyDescription :: generateMesh(std :: vector< FloatArray > &no
 #if 0 // Replace by this...
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
         ParticlePoint *origin;
-        if ( ( origin = it.getPoint() ) != NULL ) {
+        if ( ( origin = it.getPoint() ) != nullptr ) {
             double dist2, min_dist2 = 1e100;
             int min_i = 0;
             for ( int i = 1; i <= ( int ) nodes.size(); ++i ) {
-                dist2 = nodes [ i - 1 ].distance_square(point->foot);
+                dist2 = distance_square(nodes [ i - 1 ], point->foot);
                 if ( dist2 < min_dist2 ) {
                     min_dist2 = dist2;
                     min_i = i;
@@ -1171,7 +1171,7 @@ void ParticleTopologyDescription :: generateMesh(std :: vector< FloatArray > &no
         double dist2, min_dist2 = 1e100;
         int min_i = 0;
         for ( int i = 1; i <= ( int ) nodes.size(); ++i ) {
-            dist2 = nodes [ i - 1 ].distance_square(cit->foot);
+            dist2 = distance_square(nodes [ i - 1 ], cit->foot);
             if ( dist2 < min_dist2 ) {
                 min_dist2 = dist2;
                 min_i = i;

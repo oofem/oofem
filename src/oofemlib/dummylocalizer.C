@@ -160,16 +160,16 @@ GaussPoint *
 DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP)
 {
     double minDist = 0.0;
-    GaussPoint *answer = NULL;
+    GaussPoint *answer = nullptr;
     FloatArray jGpCoords;
 
     for ( auto &elem : this->giveDomain()->giveElements() ) {
         if ( ( region < 0 ) || ( region == elem->giveRegionNumber() ) ) {
-            for ( GaussPoint *jGp: *elem->giveDefaultIntegrationRulePtr() ) {
+            for ( auto &jGp: *elem->giveDefaultIntegrationRulePtr() ) {
                 if ( elem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                    double distance = coords.distance(jGpCoords);
-                    if ( answer == NULL || distance < minDist ) {
-                        minDist = distance;
+                    double dist = distance(coords, jGpCoords);
+                    if ( answer == nullptr || dist < minDist ) {
+                        minDist = dist;
                         answer = jGp;
                     }
                 }
@@ -190,9 +190,9 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
     nelem = this->giveDomain()->giveNumberOfElements();
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ielem = this->giveDomain()->giveElement(i);
-        for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
+        for ( auto &jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
             if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                double currDist = coords.distance(jGpCoords);
+                double currDist = distance(coords, jGpCoords);
                 if ( currDist <= radius ) {
                     elemSet.insertSortedOnce(i);
                 }
@@ -209,8 +209,8 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
     for ( int i = 1; i <= nnode; i++ ) {
         DofManager *idofman = this->giveDomain()->giveDofManager(i);
         Node *inode = dynamic_cast< Node * >(idofman);
-        if ( inode != NULL ) {
-            if ( coords.distance( inode->giveCoordinates() ) <= radius ) {
+        if ( inode ) {
+            if ( distance(coords, *inode->giveCoordinates()) <= radius ) {
                 nodeSet.push_back(i);
             }
         }
@@ -221,19 +221,19 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
 Node *
 DummySpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &coords, double maxDist)
 {
-    Node *closest = NULL;
+    Node *closest = nullptr;
     double maxdist = 0.;
     for ( auto &dman : this->giveDomain()->giveDofManagers() ) {
         Node *node = dynamic_cast< Node* >( dman.get() );
         if ( node ) {
-            double dist = coords.distance( node->giveCoordinates() );
-            if ( closest == NULL || dist < maxdist ) {
+            double dist = distance(coords, *node->giveCoordinates());
+            if ( closest == nullptr || dist < maxdist ) {
                 closest = node;
                 maxdist = dist;
             }
         }
     }
-    return maxdist > maxDist ? closest : NULL;
+    return maxdist > maxDist ? closest : nullptr;
 }
 
 } // end namespace oofem

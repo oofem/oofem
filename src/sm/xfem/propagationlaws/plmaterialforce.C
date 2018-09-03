@@ -72,13 +72,13 @@ bool PLMaterialForce :: propagateInterface(Domain &iDomain, EnrichmentFront &iEn
     SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
     FloatArray lCoords, closest;
 //    printf("tipInfo.mGlobalCoord: \n"); tipInfo.mGlobalCoord.printYourself();
-    if( tipInfo.mGlobalCoord.giveSize() == 0 ) {
-    	return false;
+    if ( tipInfo.mGlobalCoord.giveSize() == 0 ) {
+        return false;
     }
 
     localizer->giveElementClosestToPoint(lCoords, closest, tipInfo.mGlobalCoord);
 
-    if(closest.distance(tipInfo.mGlobalCoord) > 1.0e-9) {
+    if ( distance(closest, tipInfo.mGlobalCoord) > 1.0e-9 ) {
 //        printf("Tip is outside all elements.\n");
         return false;
     }
@@ -110,7 +110,7 @@ bool PLMaterialForce :: propagateInterface(Domain &iDomain, EnrichmentFront &iEn
 //    printf("dir: "); dir.printYourself();
 
     const double cosAngTol = 1.0/sqrt(2.0);
-    if(tipInfo.mTangDir.dotProduct(dir) < cosAngTol) {
+    if ( tipInfo.mTangDir.dotProduct(dir) < cosAngTol ) {
         // Do not allow sharper turns than 45 degrees
 
         if( tipInfo.mNormalDir.dotProduct(dir) > 0.0 ) {

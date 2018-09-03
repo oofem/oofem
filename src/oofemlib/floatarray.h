@@ -559,7 +559,14 @@ FloatArray &operator += ( FloatArray & x, const FloatArray & y );
 FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
 
 double norm(const FloatArray &x);
+double norm_square(const FloatArray &x);
 double dot(const FloatArray &x, const FloatArray &y);
+double distance(const FloatArray &x, const FloatArray &y);
+double distance_square(const FloatArray &x, const FloatArray &y);
+bool isfinite(const FloatArray &x);
+bool iszero(const FloatArray &x);
+double sum(const FloatArray & x);
+double product(const FloatArray & x);
 //@}
 } // end namespace oofem
 #endif // floatarray_h

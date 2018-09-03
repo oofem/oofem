@@ -428,9 +428,9 @@ Subdivision :: RS_Triangle :: evaluateLongestEdge()
     if ( !this->leIndex ) {     // prevent multiple evaluation
         double elength1, elength2, elength3;
 
-        elength1 = mesh->giveNode( this->nodes.at(1) )->giveCoordinates()->distance_square( * ( mesh->giveNode( this->nodes.at(2) )->giveCoordinates() ) );
-        elength2 = mesh->giveNode( this->nodes.at(2) )->giveCoordinates()->distance_square( * ( mesh->giveNode( this->nodes.at(3) )->giveCoordinates() ) );
-        elength3 = mesh->giveNode( this->nodes.at(3) )->giveCoordinates()->distance_square( * ( mesh->giveNode( this->nodes.at(1) )->giveCoordinates() ) );
+        elength1 = distance_square( *mesh->giveNode( this->nodes.at(1) )->giveCoordinates(), * ( mesh->giveNode( this->nodes.at(2) )->giveCoordinates() ) );
+        elength2 = distance_square( *mesh->giveNode( this->nodes.at(2) )->giveCoordinates(), * ( mesh->giveNode( this->nodes.at(3) )->giveCoordinates() ) );
+        elength3 = distance_square( *mesh->giveNode( this->nodes.at(3) )->giveCoordinates(), * ( mesh->giveNode( this->nodes.at(1) )->giveCoordinates() ) );
 
         leIndex = 1;
         if ( elength2 > elength1 ) {
@@ -525,12 +525,12 @@ Subdivision :: RS_Tetra :: evaluateLongestEdge()
         ind [ 5 ] = ed [ nd [ 2 ] ] [ nd [ 3 ] ];
 
         // evaluate edge lengths from smallest node id !!!
-        elength [ 0 ] = mesh->giveNode(l_nd [ 0 ])->giveCoordinates()->distance_square( * ( mesh->giveNode(l_nd [ 1 ])->giveCoordinates() ) );
-        elength [ 1 ] = mesh->giveNode(l_nd [ 0 ])->giveCoordinates()->distance_square( * ( mesh->giveNode(l_nd [ 2 ])->giveCoordinates() ) );
-        elength [ 2 ] = mesh->giveNode(l_nd [ 0 ])->giveCoordinates()->distance_square( * ( mesh->giveNode(l_nd [ 3 ])->giveCoordinates() ) );
-        elength [ 3 ] = mesh->giveNode(l_nd [ 1 ])->giveCoordinates()->distance_square( * ( mesh->giveNode(l_nd [ 2 ])->giveCoordinates() ) );
-        elength [ 4 ] = mesh->giveNode(l_nd [ 1 ])->giveCoordinates()->distance_square( * ( mesh->giveNode(l_nd [ 3 ])->giveCoordinates() ) );
-        elength [ 5 ] = mesh->giveNode(l_nd [ 2 ])->giveCoordinates()->distance_square( * ( mesh->giveNode(l_nd [ 3 ])->giveCoordinates() ) );
+        elength [ 0 ] = distance_square( *mesh->giveNode(l_nd [ 0 ])->giveCoordinates(), * ( mesh->giveNode(l_nd [ 1 ])->giveCoordinates() ) );
+        elength [ 1 ] = distance_square( *mesh->giveNode(l_nd [ 0 ])->giveCoordinates(), * ( mesh->giveNode(l_nd [ 2 ])->giveCoordinates() ) );
+        elength [ 2 ] = distance_square( *mesh->giveNode(l_nd [ 0 ])->giveCoordinates(), * ( mesh->giveNode(l_nd [ 3 ])->giveCoordinates() ) );
+        elength [ 3 ] = distance_square( *mesh->giveNode(l_nd [ 1 ])->giveCoordinates(), * ( mesh->giveNode(l_nd [ 2 ])->giveCoordinates() ) );
+        elength [ 4 ] = distance_square( *mesh->giveNode(l_nd [ 1 ])->giveCoordinates(), * ( mesh->giveNode(l_nd [ 3 ])->giveCoordinates() ) );
+        elength [ 5 ] = distance_square( *mesh->giveNode(l_nd [ 2 ])->giveCoordinates(), * ( mesh->giveNode(l_nd [ 3 ])->giveCoordinates() ) );
 
         // get absolutely largest edge and the largest edge on individual sides
         // process edges in the same order in which their length was evaluated !!!

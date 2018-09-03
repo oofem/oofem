@@ -180,20 +180,20 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, const FloatArra
     for ( int ielem = 1; ielem <= patchList.giveSize(); ielem++ ) {
         element = patchDomain->giveElement( patchList.at(ielem) );
         iRule = element->giveDefaultIntegrationRulePtr();
-        for ( GaussPoint *srcgp: *iRule ) {
+        for ( auto &srcgp: *iRule ) {
             if ( element->computeGlobalCoordinates( srcgpcoords, * ( srcgp->giveNaturalCoordinates() ) ) ) {
                 element->giveIPValue(dam, srcgp, IST_PrincipalDamageTensor, tStep);
                 if ( this->stateFilter ) {
                     // consider only points with same state
                     if ( ( ( state == 1 ) && ( norm(dam) > 1.e-3 ) ) || ( ( ( state == 0 ) && norm(dam) < 1.e-3 ) ) ) {
                         npoints++;
-                        dist.at(npoints) = coords.distance(srcgpcoords);
+                        dist.at(npoints) = distance(coords, srcgpcoords);
                         gpList [ npoints - 1 ] = srcgp;
                     }
                 } else {
                     // take all points into account
                     npoints++;
-                    dist.at(npoints) = coords.distance(srcgpcoords);
+                    dist.at(npoints) = distance(coords, srcgpcoords);
                     gpList [ npoints - 1 ] = srcgp;
                 }
             } else {

@@ -142,9 +142,9 @@ bool PLHoopStressCirc :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
                 // crack tip multiplied by a constant factor.
                 // ( This choice implies that we hope that the element has reasonable
                 // aspect ratio.)
-                const FloatArray &x1 = * ( el->giveDofManager(1)->giveCoordinates() );
-                const FloatArray &x2 = * ( el->giveDofManager(2)->giveCoordinates() );
-                const double l = 1.0 * x1.distance(x2);
+                const auto &x1 = * ( el->giveDofManager(1)->giveCoordinates() );
+                const auto &x2 = * ( el->giveDofManager(2)->giveCoordinates() );
+                const double l = 1.0 * distance(x1, x2);
 
                 // Use the octree to get all elements that have
                 // at least one Gauss point in a certain region around the tip.
@@ -189,7 +189,7 @@ bool PLHoopStressCirc :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
                             inFrontOfCrack = false;
                         }
 
-                        double r = circPoints [ pointIndex ].distance(globalCoord);
+                        double r = distance(circPoints [ pointIndex ], globalCoord);
 
                         if ( r < l && inFrontOfCrack ) {
                             double w = ( ( l - r ) / ( pow(2.0 * M_PI, 1.5) * pow(l, 3) ) ) * exp( -0.5 * pow(r, 2) / pow(l, 2) );

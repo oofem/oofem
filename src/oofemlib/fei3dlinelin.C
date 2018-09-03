@@ -42,7 +42,7 @@ namespace oofem {
 double
 FEI3dLineLin :: giveLength(const FEICellGeometry &cellgeo) const
 {
-    return cellgeo.giveVertexCoordinates(2).distance( cellgeo.giveVertexCoordinates(1) );
+    return distance(cellgeo.giveVertexCoordinates(2), cellgeo.giveVertexCoordinates(1));
 }
 
 void

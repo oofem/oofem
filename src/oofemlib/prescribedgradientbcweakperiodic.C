@@ -49,21 +49,21 @@ void PrescribedGradientBCWeakPeriodic :: checkIfCorner(bool &oIsCorner, bool &oD
     oDuplicatable = false;
 
     FloatArray cornerPos = mLC;
-    if ( iPos.distance(cornerPos) < iNodeDistTol ) {
+    if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
     }
 
     cornerPos = {
         mUC [ 0 ], mLC [ 1 ]
     };
-    if ( iPos.distance(cornerPos) < iNodeDistTol ) {
+    if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
     }
 
     cornerPos = {
         mUC [ 0 ], mUC [ 1 ]
     };
-    if ( iPos.distance(cornerPos) < iNodeDistTol ) {
+    if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
         if ( mTractionInterpOrder == 1 ) {
             oDuplicatable = true;
@@ -73,7 +73,7 @@ void PrescribedGradientBCWeakPeriodic :: checkIfCorner(bool &oIsCorner, bool &oD
     cornerPos = {
         mLC [ 0 ], mUC [ 1 ]
     };
-    if ( iPos.distance(cornerPos) < iNodeDistTol ) {
+    if ( distance(iPos, cornerPos) < iNodeDistTol ) {
         oIsCorner = true;
     }
 }

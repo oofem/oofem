@@ -243,9 +243,9 @@ FEI2dQuadQuad :: local2global(FloatArray &answer, const FloatArray &lcoords,  co
 
 double FEI2dQuadQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    const FloatArray &n1 = cellgeo.giveVertexCoordinates(1);
-    const FloatArray &n2 = cellgeo.giveVertexCoordinates(3);
-    return n1.distance(n2);
+    const auto &n1 = cellgeo.giveVertexCoordinates(1);
+    const auto &n2 = cellgeo.giveVertexCoordinates(3);
+    return distance(n1, n2);
 }
 
 bool FEI2dQuadQuad :: inside(const FloatArray &lcoords) const

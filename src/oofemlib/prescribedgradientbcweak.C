@@ -1483,7 +1483,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
         oPosMinus = iPosPlus;
         const double distTol = 1.0e-12;
 
-//      if ( iPosPlus.distance(mUC) < distTol ) {
+//      if ( distance(iPosPlus, mUC) < distTol ) {
 //          printf("iPosPlus: %.12e %.12e\n", iPosPlus [ 0 ], iPosPlus [ 1 ]);
 //          OOFEM_ERROR("Unmappable point.")
 //      }
@@ -1597,7 +1597,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
 //        const double distTol = 1.0e-16;
         const double distTol = l_box*1.0e-10;
 
-//        if ( iPosMinus.distance(mLC) < distTol ) {
+//        if ( distance(iPosMinus, mLC) < distTol ) {
 //            printf("iPosMinus: %.12e %.12e\n", iPosMinus [ 0 ], iPosMinus [ 1 ]);
 //            OOFEM_ERROR("Unmappable point.")
 //        }
@@ -1708,7 +1708,7 @@ void PrescribedGradientBCWeak :: computeDomainBoundingBox(Domain &iDomain, Float
 
     for ( int i = 1; i <= numNodes; i++ ) {
         DofManager *dMan = iDomain.giveDofManager(i);
-        const FloatArray &coord = * ( dMan->giveCoordinates() );
+        const auto &coord = * ( dMan->giveCoordinates() );
 
         for ( int j = 0; j < nsd; j++ ) {
             if ( coord [ j ] < lc [ j ] ) {
@@ -1797,8 +1797,8 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
             mandatory_to_keep = true;
         }
 
-        DofManager *bndNode   = domain->giveDofManager(it->first);
-        const FloatArray &x    = * ( bndNode->giveCoordinates() );
+        DofManager *bndNode = domain->giveDofManager(it->first);
+        const FloatArray &x = * ( bndNode->giveCoordinates() );
         FloatArray xPlus = x;
 
         if ( !boundaryPointIsOnActiveBoundary(x) ) {
@@ -1827,11 +1827,11 @@ void PrescribedGradientBCWeak :: findCrackBndIntersecCoord(std::vector<FloatArra
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
         // Add the start and end nodes of the segment
-        DofManager *startNode   = e->giveDofManager(bNodes [ 0 ]);
-        const FloatArray &xS    = * ( startNode->giveCoordinates() );
+        DofManager *startNode = e->giveDofManager(bNodes [ 0 ]);
+        const auto &xS = * ( startNode->giveCoordinates() );
 
-        DofManager *endNode     = e->giveDofManager(bNodes [ 1 ]);
-        const FloatArray &xE    = * ( endNode->giveCoordinates() );
+        DofManager *endNode = e->giveDofManager(bNodes [ 1 ]);
+        const auto &xE = * ( endNode->giveCoordinates() );
 
         FloatArray xC;
         xC.beScaled(0.5, xS);
@@ -1909,7 +1909,7 @@ void PrescribedGradientBCWeak :: removeClosePoints(std::vector<FloatArray> &ioCo
     size_t j = 0;
 
     for ( size_t i = 1; i < ioCoords.size(); i++ ) {
-        if ( ioCoords[i].distance_square(tmp[j]) > tol2 ) {
+        if ( distance_square(ioCoords[i], tmp[j]) > tol2 ) {
             tmp.push_back(ioCoords[i]);
             j++;
         }
@@ -1931,8 +1931,8 @@ void PrescribedGradientBCWeak :: removeSegOverHoles(TracSegArray &ioTSeg, const 
     const double tol2 = iAbsTol*iAbsTol;
 
     for ( auto &l : ioTSeg.mInteriorSegments ) {
-        const FloatArray &xS = l.giveVertex(1);
-        const FloatArray &xE = l.giveVertex(2);
+        const auto &xS = l.giveVertex(1);
+        const auto &xE = l.giveVertex(2);
         FloatArray xPlus = {0.5*(xS[0]+xE[0]), 0.5*(xS[1]+xE[1])};
 
         FloatArray lcoordsPlus, closestPlus;
@@ -1943,7 +1943,7 @@ void PrescribedGradientBCWeak :: removeSegOverHoles(TracSegArray &ioTSeg, const 
         FloatArray lcoordsMinus, closestMinus;
         localizer->giveElementClosestToPoint(lcoordsMinus, closestMinus, xMinus);
 
-        if ( !(xPlus.distance_square(closestPlus) > tol2 || xMinus.distance_square(closestMinus) > tol2) ) {
+        if ( !(distance_square(xPlus, closestPlus) > tol2 || distance_square(xMinus, closestMinus) > tol2) ) {
             tmp.push_back(l);
         }
     }

@@ -330,23 +330,22 @@ TrPlaneStrRot :: giveArea()
 void
 TrPlaneStrRot :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
 {
-    FloatArray *nc1, *nc2, *nc3;
-    nc1 = this->giveNode(1)->giveCoordinates();
-    nc2 = this->giveNode(2)->giveCoordinates();
-    nc3 = this->giveNode(3)->giveCoordinates();
+    const auto &nc1 = *this->giveNode(1)->giveCoordinates();
+    const auto &nc2 = *this->giveNode(2)->giveCoordinates();
+    const auto &nc3 = *this->giveNode(3)->giveCoordinates();
 
-    x.at(1) = nc1->at(1);
-    x.at(2) = nc2->at(1);
-    x.at(3) = nc3->at(1);
+    x.at(1) = nc1.at(1);
+    x.at(2) = nc2.at(1);
+    x.at(3) = nc3.at(1);
 
-    y.at(1) = nc1->at(2);
-    y.at(2) = nc2->at(2);
-    y.at(3) = nc3->at(2);
+    y.at(1) = nc1.at(2);
+    y.at(2) = nc2.at(2);
+    y.at(3) = nc3.at(2);
 
     //if (z) {
-    //  z[0] = nc1->at(3);
-    //  z[1] = nc2->at(3);
-    //  z[2] = nc3->at(3);
+    //  z[0] = nc1.at(3);
+    //  z[1] = nc2.at(3);
+    //  z[2] = nc3.at(3);
     //}
 }
 

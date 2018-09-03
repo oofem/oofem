@@ -62,25 +62,20 @@ namespace oofem {
 REGISTER_NucleationCriterion(NCPrincipalStress)
 
 NCPrincipalStress::NCPrincipalStress(Domain *ipDomain):
-NucleationCriterion(ipDomain),
-mStressThreshold(0.0),
-mInitialCrackLength(0.0),
-mMatForceRadius(0.0),
-mIncrementLength(0.0),
-mCrackPropThreshold(0.0),
-mCutOneEl(false),
-mCrossSectionInd(2)
+    NucleationCriterion(ipDomain),
+    mStressThreshold(0.0),
+    mInitialCrackLength(0.0),
+    mMatForceRadius(0.0),
+    mIncrementLength(0.0),
+    mCrackPropThreshold(0.0),
+    mCutOneEl(false),
+    mCrossSectionInd(2)
+{ }
+
+NCPrincipalStress::~NCPrincipalStress() { }
+
+std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichmentItems()
 {
-
-}
-
-NCPrincipalStress::~NCPrincipalStress() {
-
-}
-
-std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichmentItems() {
-
-
 	SpatialLocalizer *octree = this->mpDomain->giveSpatialLocalizer();
 	XfemManager *xMan = mpDomain->giveXfemManager();
 
@@ -91,17 +86,13 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 
 	// Loop over all elements and all bulk GP.
 	for(auto &el : mpDomain->giveElements() ) {
-
 		int numIR = el->giveNumberOfIntegrationRules();
-
 		int csNum = el->giveCrossSection()->giveNumber();
 
 		if(csNum == mCrossSectionInd || true) {
 
 			for(int irInd = 0; irInd < numIR; irInd++) {
 				IntegrationRule *ir = el->giveIntegrationRule(irInd);
-
-
 
 				int numGP = ir->giveNumberOfIntegrationPoints();
 
@@ -114,7 +105,7 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 
 						StructuralMaterialStatus *ms = dynamic_cast<StructuralMaterialStatus*>(gp->giveMaterialStatus());
 
-						if(ms != NULL) {
+						if ( ms ) {
 
 							const FloatArray &stress = ms->giveTempStressVector();
 
@@ -122,7 +113,7 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 							FloatMatrix principalDirs;
 							StructuralMaterial::computePrincipalValDir(principalVals, principalDirs, stress, principal_stress);
 
-							if(principalVals[0] > mStressThreshold) {
+							if ( principalVals[0] > mStressThreshold ) {
 
 
 
@@ -150,7 +141,7 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 								FloatArray pe = pc;
 								pe.add(0.5*mInitialCrackLength, crackTangent);
 
-								if(mCutOneEl) {
+								if ( mCutOneEl ) {
 									// If desired, ensure that the crack cuts exactly one element.
 									Line line(ps, pe);
 									std::vector<FloatArray> intersecPoints;
@@ -173,11 +164,10 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 
 		//							printf("intersecPoints.size(): %lu\n", intersecPoints.size());
 
-									if(intersecPoints.size() == 2) {
+									if ( intersecPoints.size() == 2 ) {
 										ps = std::move(intersecPoints[0]);
 										pe = std::move(intersecPoints[1]);
-									}
-									else {
+									} else {
 										OOFEM_ERROR("intersecPoints.size() != 2")
 									}
 								}
@@ -197,35 +187,35 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 								bool insertionAllowed = true;
 
 								Element *el_s = octree->giveElementContainingPoint(ps);
-								if(el_s) {
-									if( xMan->isElementEnriched(el_s) ) {
+								if ( el_s ) {
+									if ( xMan->isElementEnriched(el_s) ) {
 										insertionAllowed = false;
 									}
 								}
 
 								Element *el_c = octree->giveElementContainingPoint(pc);
-								if(el_c) {
-									if( xMan->isElementEnriched(el_c) ) {
+								if ( el_c ) {
+									if ( xMan->isElementEnriched(el_c) ) {
 										insertionAllowed = false;
 									}
 								}
 
 								Element *el_e = octree->giveElementContainingPoint(pe);
-								if(el_e) {
-									if( xMan->isElementEnriched(el_e) ) {
+								if ( el_e ) {
+									if ( xMan->isElementEnriched(el_e) ) {
 										insertionAllowed = false;
 									}
 								}
 
-								for(const auto &x: center_coord_inserted_cracks) {
-									if( x.distance(pc) <  2.0*mInitialCrackLength) {
+								for ( const auto &x: center_coord_inserted_cracks ) {
+                                    if ( distance(x, pc) <  2.0*mInitialCrackLength ) {
 										insertionAllowed = false;
-										break;
 										printf("Preventing insertion.\n");
+										break;
 									}
 								}
 
-								if(insertionAllowed) {
+								if ( insertionAllowed ) {
 									int n = xMan->giveNumberOfEnrichmentItems() + 1;
 									std::unique_ptr<Crack> crack = std::make_unique<Crack>(n, xMan, mpDomain);
 

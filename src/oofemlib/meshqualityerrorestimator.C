@@ -71,14 +71,12 @@ double MeshQualityErrorEstimator :: computeTriangleRadiusError(Element *elem)
 {
     // Outside/inside circle radius fraction based for quality measurement.
     // Zero for a perfect triangle,
-    double a, b, c;
-    FloatArray *c1, *c2, *c3;
-    c1 = elem->giveNode(1)->giveCoordinates();
-    c2 = elem->giveNode(2)->giveCoordinates();
-    c3 = elem->giveNode(3)->giveCoordinates();
-    a = c1->distance(* c2);
-    b = c1->distance(* c3);
-    c = c2->distance(* c3);
+    const auto &c1 = *elem->giveNode(1)->giveCoordinates();
+    const auto &c2 = *elem->giveNode(2)->giveCoordinates();
+    const auto &c3 = *elem->giveNode(3)->giveCoordinates();
+    double a = distance(c1, c2);
+    double b = distance(c1, c3);
+    double c = distance(c2, c3);
     return a * b * c / ( ( b + c - a ) * ( a + c - b ) * ( a + b - c ) ) - 1.0;
     // Reciprocal error would be;
     // (b+c-a)*(a+c-b)*(a+b-c)/(a*b*c - (b+c-a)*(a+c-b)*(a+b-c));
@@ -90,7 +88,7 @@ double MeshQualityErrorEstimator :: computeJacobianError(FEInterpolation &fei, I
     double min_rcond = 1.0, rcond;
     FloatMatrix jac;
 
-    for ( GaussPoint *gp: ir ) {
+    for ( auto &gp: ir ) {
         fei.giveJacobianMatrixAt( jac, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(elem) );
         rcond = jac.computeReciprocalCondition() * sgn( jac.giveDeterminant() ); // Signed rcond. as inverted mappings are particularly bad.
         if ( rcond < min_rcond ) {
@@ -102,9 +100,9 @@ double MeshQualityErrorEstimator :: computeJacobianError(FEInterpolation &fei, I
 
 double MeshQualityErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 {
-    double error = 0.0, temp;
+    double error = 0.0;
     for ( auto &elem : this->domain->giveElements() ) {
-        temp = this->giveElementError(unknownET, elem.get(), tStep);
+        double temp = this->giveElementError(unknownET, elem.get(), tStep);
         if ( temp > error ) {
             error = temp;
         }

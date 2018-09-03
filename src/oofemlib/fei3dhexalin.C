@@ -459,18 +459,16 @@ FEI3dHexaLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 double
 FEI3dHexaLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
-    return cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).distance( cellgeo.giveVertexCoordinates( edgeNodes.at(1) ) );
+    return distance(cellgeo.giveVertexCoordinates( edgeNodes.at(2) ), cellgeo.giveVertexCoordinates( edgeNodes.at(1) ));
 }
 
 void
 FEI3dHexaLin :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double ksi, eta;
+    double ksi = lcoords.at(1);
+    double eta = lcoords.at(2);
+
     answer.resize(4);
-
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
-
     answer.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
     answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
     answer.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25;

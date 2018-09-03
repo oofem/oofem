@@ -654,7 +654,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
 double
 NonlocalMaterialExtensionInterface :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
 {
-    return computeWeightFunction( src.distance(coord) );
+    return computeWeightFunction( distance(src, coord) );
 }
 
 double

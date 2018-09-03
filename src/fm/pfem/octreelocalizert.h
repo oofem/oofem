@@ -534,9 +534,9 @@ protected:
 
 public:
     /// Constuctor
-    InsertNode(Domain *d) {
-        domain = d;
-    }
+    InsertNode(Domain *d) :
+        domain(d)
+    { }
     /// Destructor
     ~InsertNode() { }
 
@@ -580,9 +580,9 @@ protected:
 
 public:
     /// Constructor
-    InsertTriangleBasedOnCircumcircle(Domain *d) {
-        domain = d;
-    }
+    InsertTriangleBasedOnCircumcircle(Domain *d) :
+        domain(d)
+    { }
     /// Destructor
     ~InsertTriangleBasedOnCircumcircle() { }
 
@@ -650,7 +650,7 @@ public:
 class ClosestNode : public SL_Evaluation_Functor< int >
 {
 protected:
-    FloatArray *startingPosition;
+    FloatArray startingPosition;
     Domain *domain;
     int CNindex;
     double distanceToClosestNode;
@@ -664,11 +664,11 @@ public:
      * @param pos Starting position of the search
      * @param d Domain containing nodes
      */
-    ClosestNode(FloatArray *pos, Domain *d) {
-        initFlag = false;
-        startingPosition = pos;
-        domain = d;
-    }
+    ClosestNode(const FloatArray &pos, Domain *d) :
+        startingPosition(pos),
+        domain(d),
+        initFlag(false)
+    { }
     /// Destructor
     ~ClosestNode() { }
 
@@ -678,7 +678,7 @@ public:
      */
     void giveStartingPosition(FloatArray &position) override
     {
-        position = * startingPosition;
+        position = startingPosition;
     }
 
     /**
@@ -690,20 +690,20 @@ public:
     bool evaluate(int &nodeNr) override
     {
         if ( initFlag ) {
-            double distance = startingPosition->distance( this->domain->giveNode(nodeNr)->giveCoordinates() );
+            double dist = distance(startingPosition, *this->domain->giveNode(nodeNr)->giveCoordinates());
 
-            if ( ( distance - distanceToClosestNode ) <= distance * 0.001 ) {
-                if ( ( distance - distanceToClosestNode ) >= -0.001 * distance ) {
+            if ( ( dist - distanceToClosestNode ) <= dist * 0.001 ) {
+                if ( ( dist - distanceToClosestNode ) >= -0.001 * dist ) {
                     closestNodeIndices.push_back(nodeNr);
                 } else {
                     closestNodeIndices.clear();
                     closestNodeIndices.push_back(nodeNr);
-                    distanceToClosestNode = distance;
+                    distanceToClosestNode = dist;
                 }
             }
         } else {
             closestNodeIndices.push_back(nodeNr);
-            distanceToClosestNode = startingPosition->distance( this->domain->giveNode( * ( closestNodeIndices.begin() ) )->giveCoordinates() );
+            distanceToClosestNode = distance(startingPosition, *this->domain->giveNode( * ( closestNodeIndices.begin() ) )->giveCoordinates());
             initFlag = true;
         }
 
@@ -726,7 +726,7 @@ public:
     bool isBBXStage2Defined(BoundingBox &BBXStage2) override
     {
         if ( initFlag ) {
-            BBXStage2.setOrigin(* startingPosition);
+            BBXStage2.setOrigin(startingPosition);
             BBXStage2.setSize(distanceToClosestNode);
             return true;
         }                 else {
@@ -744,7 +744,7 @@ public:
 class ElementCircumCirclesContainingNode : public SL_Evaluation_Functor< DelaunayTriangle * >
 {
 protected:
-    FloatArray *startingPosition;
+    FloatArray startingPosition;
     Domain *domain;
     std :: list< DelaunayTriangle * >result;
 
@@ -754,11 +754,10 @@ public:
      * @param pos Starting position of the search
      * @param d Domain containing nodes the triangles are defined by
      */
-    ElementCircumCirclesContainingNode(FloatArray *pos, Domain *d)
-    {
-        startingPosition = pos;
-        domain = d;
-    }
+    ElementCircumCirclesContainingNode(FloatArray pos, Domain *d) :
+        startingPosition(std::move(pos)),
+        domain(d)
+    { }
     ~ElementCircumCirclesContainingNode() { }
 
     /**
@@ -774,7 +773,7 @@ public:
         centerCoords.at(2) = DTptr->giveYCenterCoordinate();
         centerCoords.at(3) = 0.0;
 
-        if ( ( startingPosition->distance(centerCoords) ) < radius ) {
+        if ( distance(startingPosition, centerCoords) < radius ) {
             result.push_back(DTptr);
             return true;
         } else {
@@ -788,7 +787,7 @@ public:
      */
     void giveStartingPosition(FloatArray &answer) override
     {
-        answer = * startingPosition;
+        answer = startingPosition;
     }
 
     /**

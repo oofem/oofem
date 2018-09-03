@@ -370,7 +370,7 @@ FEI3dTetLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 double
 FEI3dTetLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
-    return cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).distance( cellgeo.giveVertexCoordinates( edgeNodes.at(1) ) );
+    return distance(cellgeo.giveVertexCoordinates( edgeNodes.at(2) ), cellgeo.giveVertexCoordinates( edgeNodes.at(1) ));
 }
 
 void

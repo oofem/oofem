@@ -189,10 +189,10 @@ FEI3dWedgeLin :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 
 double FEI3dWedgeLin :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    const FloatArray &n1 = cellgeo.giveVertexCoordinates(1);
-    const FloatArray &n2 = cellgeo.giveVertexCoordinates(6);
+    const auto &n1 = cellgeo.giveVertexCoordinates(1);
+    const auto &n2 = cellgeo.giveVertexCoordinates(6);
     ///@todo Change this so that it is not dependent on node order.
-    return n1.distance(n2);
+    return distance(n1, n2);
 }
 
 #define POINT_TOL 1.e-3

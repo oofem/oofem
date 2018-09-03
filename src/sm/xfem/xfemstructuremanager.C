@@ -416,11 +416,11 @@ void XfemStructureManager :: mergeCloseCracks()
                     }
 
                     ////////////////////////////////////////////////////////////////
-                    if ( ps_i.distance(ps_j) < dist_tol ) {
-                        printf("ps_i.distance(ps_j) < dist_tol\n");
+                    if ( distance(ps_i, ps_j) < dist_tol ) {
+                        printf("distance(ps_i, ps_j) < dist_tol\n");
 
                         // Merging is not reasonable if the tips are close to parallel
-                        if( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontStart(), crack_j->giveEnrichmentFrontStart()) ) {
+                        if ( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontStart(), crack_j->giveEnrichmentFrontStart()) ) {
                             printf("Preventing merge due to parallel tips.\n");
                         } else {
                             // Append points to the start of polygonLine_i
@@ -450,8 +450,8 @@ void XfemStructureManager :: mergeCloseCracks()
                     }
 
                     ////////////////////////////////////////////////////////////////
-                    if ( ps_i.distance(pe_j) < dist_tol ) {
-                        printf("ps_i.distance(pe_j) < dist_tol\n");
+                    if ( distance(ps_i, pe_j) < dist_tol ) {
+                        printf("distance(ps_i, pe_j) < dist_tol\n");
 
 #if 1
                         if ( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontStart(), crack_j->giveEnrichmentFrontEnd()) ) {
@@ -486,8 +486,8 @@ void XfemStructureManager :: mergeCloseCracks()
 
 
                     ////////////////////////////////////////////////////////////////
-                    if ( pe_i.distance(ps_j) < dist_tol ) {
-                        printf("pe_i.distance(ps_j) < dist_tol\n");
+                    if ( distance(pe_i, ps_j) < dist_tol ) {
+                        printf("distance(pe_i, ps_j) < dist_tol\n");
 
                         if ( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontEnd(), crack_j->giveEnrichmentFrontStart()) ) {
                             printf("Preventing merge due to parallel tips.\n");
@@ -519,10 +519,10 @@ void XfemStructureManager :: mergeCloseCracks()
                     }
 
                     ////////////////////////////////////////////////////////////////
-                    if ( pe_i.distance(pe_j) < dist_tol ) {
-                        printf("pe_i.distance(pe_j) < dist_tol\n");
+                    if ( distance(pe_i, pe_j) < dist_tol ) {
+                        printf("distance(pe_i, pe_j) < dist_tol\n");
 
-                        if( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontEnd(), crack_j->giveEnrichmentFrontEnd()) ) {
+                        if ( !tipsHaveOppositeDirection(crack_i->giveEnrichmentFrontEnd(), crack_j->giveEnrichmentFrontEnd()) ) {
                             printf("Preventing merge due to parallel tips.\n");
                         } else {
 

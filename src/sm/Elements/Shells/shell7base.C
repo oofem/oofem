@@ -2022,7 +2022,7 @@ Shell7Base :: CopyIPvaluesToNodes(std::vector<FloatArray> &recoveredValues, int 
             IntegrationPoint *ip = iRule->getIntegrationPoint(j);
             const FloatArray &ipCoords = ip->giveNaturalCoordinates();
             ///TODO z-coord in parent shell. 
-            double dist = nodeCoords.distance(ipCoords);
+            double dist = distance(nodeCoords, ipCoords);
             if ( dist < distOld ) {
                 closestIPArray.at(i) = j;
                 distOld = dist;

@@ -174,9 +174,9 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
                 cc = domain->giveNode(ci)->giveCoordinates();
 
                 // a = distance of BC
-                a = cc->distance(bc);
+                a = distance(*cc, *bc);
                 // b = distance of AC
-                b = cc->distance(ac);
+                b = distance(*cc, *ac);
                 // compute fi angle
                 cb.beDifferenceOf(* bc, * cc);
                 cb.normalize();

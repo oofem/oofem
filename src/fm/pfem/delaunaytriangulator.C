@@ -409,10 +409,10 @@ DelaunayTriangulator :: initializeTimers()
 void
 DelaunayTriangulator :: findNonDelaunayTriangles(int insertedNode, InsertTriangleBasedOnCircumcircle &tInsert, std :: list< Edge2D > &polygon)
 {
-    DofManager *dman = domain->giveDofManager(insertedNode);
-    FloatArray *nodeCoords =  ( ( ( Node * ) dman )->giveCoordinates() );
+    DofManager *node = domain->giveNode(insertedNode);
+    const auto &nodeCoords = *node->giveCoordinates();
 
-    ElementCircumCirclesContainingNode findElements(nodeCoords, domain);
+    ElementCircumCirclesContainingNode findElements(&nodeCoords, domain);
     std :: list< DelaunayTriangle * >nonDelaunayTriangles;
     std :: list< DelaunayTriangle * > :: iterator triangleIT;
 
@@ -548,52 +548,49 @@ void DelaunayTriangulator :: buildInitialBBXMesh(InsertTriangleBasedOnCircumcirc
 void
 DelaunayTriangulator:: computeBBXBasedOnNodeData(BoundingBox &BBX)
 {
-  int i, j, init = 1, nnode = this->domain->giveNumberOfDofManagers();
-  double rootSize, resolutionLimit;
-  FloatArray minc(3), maxc(3), * coords;
-  DofManager *dman;
+    int init = 1, nnode = this->domain->giveNumberOfDofManagers();
+    FloatArray minc(3), maxc(3);
 
-  // first determine domain extends (bounding box), and check for degenerated domain type
-  for ( i = 1; i <= nnode; i++ ) {
-    dman = domain->giveDofManager(i);
-    coords = static_cast< Node * >( dman )->giveCoordinates();
-    if ( init ) {
-      init = 0;
-      for ( j = 1; j <= coords->giveSize(); j++ ) {
-	minc.at(j) = maxc.at(j) = coords->at(j);
-      }
-    } else {
-      for ( j = 1; j <= coords->giveSize(); j++ ) {
-	if ( coords->at(j) < minc.at(j) ) {
-	  minc.at(j) = coords->at(j);
-	}
-	
-	if ( coords->at(j) > maxc.at(j) ) {
-	  maxc.at(j) = coords->at(j);
-	}
-      }
+    // first determine domain extends (bounding box), and check for degenerated domain type
+    for ( int i = 1; i <= nnode; i++ ) {
+        auto node = domain->giveNode(i);
+        const auto &coords = node->giveCoordinates();
+        if ( init ) {
+            init = 0;
+            for ( int j = 1; j <= coords->giveSize(); j++ ) {
+                minc.at(j) = maxc.at(j) = coords->at(j);
+            }
+        } else {
+            for ( int j = 1; j <= coords->giveSize(); j++ ) {
+                if ( coords->at(j) < minc.at(j) ) {
+                    minc.at(j) = coords->at(j);
+                }
+                if ( coords->at(j) > maxc.at(j) ) {
+                    maxc.at(j) = coords->at(j);
+                }
+            }
+        }
+    }                 // end loop over nodes
+
+    BBX.setOrigin(minc);
+
+    // determine root size
+    double rootSize = 0.0;
+    for ( int i = 1; i <= 3; i++ ) {
+        rootSize = 1.000001 * max( rootSize, maxc.at(i) - minc.at(i) );
     }
-  }                 // end loop over nodes
-  
-  BBX.setOrigin(minc);
-  
-  // determine root size
-  rootSize = 0.0;
-  for ( i = 1; i <= 3; i++ ) {
-    rootSize = 1.000001 * max( rootSize, maxc.at(i) - minc.at(i) );
-  }
-  
-  BBX.setSize(rootSize);
-  
-  // check for degenerated domain
-  resolutionLimit = min(1.e-3, rootSize / 1.e6);
-  for ( i = 1; i <= 3; i++ ) {
-    if ( ( maxc.at(i) - minc.at(i) ) > resolutionLimit ) {
-      BBX.setMask(i, 1);
-    } else {
-      BBX.setMask(i, 0);
+
+    BBX.setSize(rootSize);
+
+    // check for degenerated domain
+    double resolutionLimit = min(1.e-3, rootSize / 1.e6);
+    for ( int i = 1; i <= 3; i++ ) {
+        if ( ( maxc.at(i) - minc.at(i) ) > resolutionLimit ) {
+            BBX.setMask(i, 1);
+        } else {
+            BBX.setMask(i, 0);
+        }
     }
-  }
 }
 
 

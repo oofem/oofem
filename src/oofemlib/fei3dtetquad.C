@@ -380,7 +380,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 double
 FEI3dTetQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    return cellgeo.giveVertexCoordinates(1).distance( cellgeo.giveVertexCoordinates(2) );
+    return distance(cellgeo.giveVertexCoordinates(1), cellgeo.giveVertexCoordinates(2));
 }
 
 

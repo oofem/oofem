@@ -523,8 +523,8 @@ SPRNodalRecoveryModel :: determineValuesFromPatch(FloatArray &dofManValues, IntA
     FloatArray P, vals;
 
     for ( int dofMan = 1; dofMan <= ndofMan; dofMan++ ) {
-        FloatArray *coords = domain->giveNode( dofManToDetermine.at(dofMan) )->giveCoordinates();
-        this->computePolynomialTerms(P, * coords, type);
+        const FloatArray &coords = * domain->giveNode( dofManToDetermine.at(dofMan) )->giveCoordinates();
+        this->computePolynomialTerms(P, coords, type);
         vals.beTProductOf(a, P);
 
         // assemble values
@@ -538,7 +538,7 @@ SPRNodalRecoveryModel :: determineValuesFromPatch(FloatArray &dofManValues, IntA
 }
 
 void
-SPRNodalRecoveryModel :: computePolynomialTerms(FloatArray &P, FloatArray &coords, SPRPatchType type)
+SPRNodalRecoveryModel :: computePolynomialTerms(FloatArray &P, const FloatArray &coords, SPRPatchType type)
 {
     if ( type == SPRPatchType_2dxy ) {
         P.resize(3);

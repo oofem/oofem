@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
                 
                 bool found = false;
                 for ( auto &inc : rveInclusions )
-                    if ( c.distance(inc.first) <= inc.second ) {
+                    if ( distance(c, inc.first) <= inc.second ) {
                         found = true;
                         break;
                     }

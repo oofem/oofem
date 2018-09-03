@@ -71,8 +71,8 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
         FloatArray lcoords, closest;
         Element *closestEl = localizer->giveElementClosestToPoint(lcoords, closest, iTipInfo.mGlobalCoord);
 
-        if ( closestEl != NULL ) {
-            if ( closest.distance(iTipInfo.mGlobalCoord) < 1.0e-9 ) {
+        if ( closestEl != nullptr ) {
+            if ( distance(closest, iTipInfo.mGlobalCoord) < 1.0e-9 ) {
                 int elInd = closestEl->giveGlobalNumber();
                 int elPlaceInArray = iDomain.giveElementPlaceInArray(elInd);
                 elList.insertSortedOnce( elPlaceInArray );
@@ -103,7 +103,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 //        int elPlaceInArray = iDomain.giveElementPlaceInArray(elIndex);
         NLStructuralElement *el = dynamic_cast<NLStructuralElement*>( iDomain.giveElement(elIndex) );
 
-        if ( el == NULL ) {
+        if ( el == nullptr ) {
             OOFEM_ERROR("Could not cast to NLStructuralElement.")
         }
 
@@ -140,7 +140,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 
             // Compute Eshelby stress
             StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection*>( gp->giveCrossSection() );
-            if (cs != NULL) {
+            if (cs != nullptr) {
 
                 FloatArray Fv;
                 el->computeDeformationGradientVector(Fv, gp, tStep);
@@ -183,15 +183,11 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 double MaterialForceEvaluator::computeWeightFunctionInPoint(const FloatArray &iCoord, const FloatArray &iTipCoord, const double &iRadius) const
 {
     double weight = 0.0;
-
-    double r = iTipCoord.distance(iCoord);
-
+    double r = distance(iTipCoord, iCoord);
 //    if(r <= iRadius) {
         weight = 1.0 - r/iRadius;
 //    }
-
 //    printf("r: %e weight: %e\n", r, weight);
-
     return weight;
 }
 

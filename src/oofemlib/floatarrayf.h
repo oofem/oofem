@@ -95,9 +95,10 @@ public:
     inline double &at(int i)
     {
 #ifndef NDEBUG
-        this->checkBounds( i );
-#endif
+        return values.at( i - 1 );
+#else
         return values [ i - 1 ];
+#endif
     }
     /**
      * Coefficient access function. Returns l-value of coefficient at given
@@ -107,9 +108,10 @@ public:
     inline double at(int i) const
     {
 #ifndef NDEBUG
-        this->checkBounds( i );
-#endif
+        return values.at( i - 1 );
+#else
         return values [ i - 1 ];
+#endif
     }
 
     /**
@@ -120,42 +122,27 @@ public:
     inline double &operator[] (int i)
     {
 #ifndef NDEBUG
-        if ( i >= this->size() ) {
-            OOFEM_ERROR( "array error on index : %d >= %d", i, this->size() );
-        }
-#endif
+        return values.at( i - 1 );
+#else
         return values [ i ];
+#endif
     }
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Provides 0-based indexing access.
      * @param i Position of coefficient in array.
      */
-    inline const double &operator() (int i) const { return this->operator[](i); } 
     inline const double &operator[] (int i) const { 
 #ifndef NDEBUG
-        if ( i >= this->size() ) {
-            OOFEM_ERROR( "array error on index : %d >= %d", i, this->size() );
-        }
-#endif
+        return values.at( i - 1 );
+#else
         return values [ i ];
-    }
-    /**
-     * Checks size of receiver towards requested bounds.
-     * Current implementation will call exit(1), if dimension
-     * mismatch found.
-     * @param i Required size of receiver.
-     */
-    void checkBounds(int i) const
-    {
-        if ( i <= 0 ) {
-            OOFEM_ERROR("array error on index : %d <= 0", i);
-        } else if ( i > this->size() ) {
-            OOFEM_ERROR("array error on index : %d > %d", i, this->size());
-        }
+#endif
     }
     /// Returns the size of receiver.
     int size() const { return N; }
+    /// Returns the size of receiver.
+    int giveSize() const { return N; }
     /**
      * Print receiver on stdout with custom name.
      * @param name Display name of reciever.
@@ -177,7 +164,7 @@ public:
 
     contextIOResultType storeYourself(DataStream &stream) const
     {
-        if ( !stream.write(this->givePointer(), size) ) {
+        if ( !stream.write(this->givePointer(), this->size()) ) {
             return CIO_IOERR;
         }
         return CIO_OK;
@@ -185,7 +172,7 @@ public:
 
     contextIOResultType restoreYourself(DataStream &stream)
     {
-        if ( !stream.read(this->givePointer(), size) ) {
+        if ( !stream.read(this->givePointer(), this->size()) ) {
             return CIO_IOERR;
         }
         return CIO_OK;
@@ -288,8 +275,8 @@ FloatArrayF<N> &operator -= ( FloatArrayF<N> & x, const FloatArrayF<N> & y )
 template<int N>
 FloatArrayF<N> &operator *= ( FloatArrayF<N> & x, double a )
 {
-    for ( int i = 0; i < N; ++i ) {
-        x[i] *= a;
+    for ( auto &v : x ) {
+        v *= a;
     }
     return x;
 }
@@ -297,8 +284,8 @@ FloatArrayF<N> &operator *= ( FloatArrayF<N> & x, double a )
 template<int N>
 FloatArrayF<N> &operator /= ( FloatArrayF<N> & x, double a )
 {
-    for ( int i = 0; i < N; ++i ) {
-        x[i] /= a;
+    for ( auto &v : x ) {
+        v /= a;
     }
     return x;
 }
@@ -306,15 +293,15 @@ FloatArrayF<N> &operator /= ( FloatArrayF<N> & x, double a )
 template<int N>
 FloatArrayF<N> operator ^= ( FloatArrayF<N> & x, double a)
 {
-    for ( int i = 0; i < N; ++i ) {
-        x[i] = std::pow(x[i], a);
+    for ( auto &v : x ) {
+        v = std::pow(v, a);
     }
 }
 
 
 /// Returns true if all coefficients of the receiver are 0, else false.
 template<int N>
-bool isZero(const FloatArrayF<N> &x)
+bool iszero(const FloatArrayF<N> &x)
 {
     for ( auto &x : x ) {
         if ( x != 0. ) {
@@ -338,13 +325,20 @@ bool isfinite( const FloatArrayF<N> &x )
 
 /// Computes the L2 norm of x
 template<int N>
-double norm( const FloatArrayF<N> & x )
+double norm_squared( const FloatArrayF<N> & x )
 {
     double ans = 0.;
     for ( auto &val : x ) {
         ans += val * val;
     }
-    return std::sqrt(ans);
+    return ans;
+}
+
+/// Computes the L2 norm of x
+template<int N>
+double norm( const FloatArrayF<N> & x )
+{
+    return std::sqrt(norm_squared(x));
 }
 
 /// Computes the sum of x
@@ -359,6 +353,20 @@ template<int N>
 double product( const FloatArrayF<N> & x )
 {
     return std::accumulate(x.begin(), x.end(), 1.0, [](double a, double b) { return a*b; });
+}
+
+/// Computes the norm(a-b)^2
+template<int N>
+FloatArrayF<N> distance_squared(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
+{
+    return norm_squared(a-b);
+}
+
+/// Computes the norm(a-b)
+template<int N>
+FloatArrayF<N> distance(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
+{
+    return norm(a-b);
 }
 
 /// Computes @$ x \cross y @$

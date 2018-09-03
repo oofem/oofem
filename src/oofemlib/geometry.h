@@ -96,7 +96,7 @@ public:
     virtual BasicGeometry *Clone() = 0;
 
     /// Computes normal signed distance between this object and a point.
-    virtual double computeDistanceTo(const FloatArray *point) { return 0; }
+    virtual double computeDistanceTo(const FloatArray &point) { return 0; }
 
 
     // For debugging
@@ -144,7 +144,7 @@ public:
     int giveNrVertices() const { return (int)mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
     virtual bool isInside(Element *el) { return false; }
-    virtual bool isInside(FloatArray &point) { return false; }
+    virtual bool isInside(const FloatArray &point) { return false; }
     virtual void printYourself() { }
     /**
      * Stores the state of receiver to output stream.
@@ -195,12 +195,12 @@ public:
 
     BasicGeometry *Clone() override { return new Line(*this); }
 
-    double computeDistanceTo(const FloatArray *point) override;
+    double computeDistanceTo(const FloatArray &point) override;
     /// Computes tangential distance to a point
 
     void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const override { OOFEM_ERROR("not implemented"); }
 
-    double computeTangentialDistanceToEnd(FloatArray *point);
+    double computeTangentialDistanceToEnd(const FloatArray &point);
 
     void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const override;
 
@@ -215,7 +215,7 @@ public:
     bool intersects(Element *element) override;
     bool isOutside(BasicGeometry *bg) override;
 
-    double giveLength() const { return mVertices[0].distance( mVertices[1] ); }
+    double giveLength() const { return distance( mVertices[0], mVertices[1] ); }
 };
 
 class OOFEM_EXPORT Triangle : public BasicGeometry
@@ -284,7 +284,7 @@ public:
     int computeNumberOfIntersectionPoints(Element *element) override;
     bool isOutside(BasicGeometry *bg) override;
     bool isInside(Element *element) override;
-    bool isInside(FloatArray &point) override;
+    bool isInside(const FloatArray &point) override;
     void printYourself() override;
 
     double giveRadius() const {return radius;}
@@ -330,7 +330,7 @@ public:
     int computeNumberOfIntersectionPoints(Element *element) override;
     bool isOutside(BasicGeometry *bg) override;
     bool isInside(Element *element) override;
-    bool isInside(FloatArray &point) override;
+    bool isInside(const FloatArray &point) override;
 
 #ifdef __BOOST_MODULE
     virtual void calcBoundingBox(bPoint2 &oLC, bPoint2 &oUC);
@@ -378,14 +378,14 @@ public:
     /// Computes the normal distance to the surface not to the center.
     IRResultType initializeFrom(InputRecord *ir) override;
 #if 0
-    double computeDistanceTo(FloatArray *point) override;
+    double computeDistanceTo(FloatArray &point) override;
     const char *giveClassName() const override { return "Circle"; }
     bool intersects(Element *element) override;
     void computeIntersectionPoints(Element *element, std :: vector< FloatArray > *intersecPoints) override;
     void computeIntersectionPoints(Line *l, std :: vector< FloatArray > *intersecPoints) override;
     bool isOutside(BasicGeometry *bg) override;
     bool isInside(Element *element) override;
-    bool isInside(FloatArray &point) override;
+    bool isInside(const FloatArray &point) override;
 #endif
 };
 } // end namespace oofem

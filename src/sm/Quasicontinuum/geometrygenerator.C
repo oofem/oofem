@@ -153,7 +153,7 @@ GeometryGenerator :: CheckDistances(double R, FloatArray coords, int n)
 
     double R2 = R * R;
     for ( int i = 1; i <= n; i++ ) {
-        double distance2 = coords.distance_square(Particles [ i - 1 ]);
+        double distance2 = distance_square(coords, Particles [ i - 1 ]);
         if ( distance2 < R2 ) {
             return false;
         }

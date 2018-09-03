@@ -318,7 +318,7 @@ public:
 
     bool operator()(const FloatArray &iVec1, const FloatArray &iVec2) const
     {
-        return mStartPos.distance_square(iVec1) < mStartPos.distance_square(iVec2);
+        return distance_square(mStartPos, iVec1) < distance_square(mStartPos, iVec2);
     }
 
 private:
@@ -348,24 +348,20 @@ public:
 
         if ( mSideInd == 0 ) {
             const FloatArray &x = { mUC [ 0 ], mLC [ 1 ] };
-            double dist = Lx + iPos.distance(x);
-            return dist;
+            return Lx + distance(iPos, x);
         }
 
         if ( mSideInd == 1 ) {
-            double dist = Lx + Ly + iPos.distance(mUC);
-            return dist;
+            return Lx + Ly + distance(iPos, mUC);
         }
 
         if ( mSideInd == 2 ) {
             const FloatArray &x = { mLC [ 0 ], mUC [ 1 ] };
-            double dist = Lx + Ly + Lx + iPos.distance(x);
-            return dist;
+            return Lx + Ly + Lx + distance(iPos, x);
         }
 
         if ( mSideInd == 3 ) {
-            double dist = iPos.distance(mLC);
-            return dist;
+            return distance(iPos, mLC);
         }
 
         OOFEM_ERROR("Could not compute distance.")
@@ -401,45 +397,40 @@ public:
         double Lx = mUC [ 0 ] - mLC [ 0 ];
         double Ly = mUC [ 1 ] - mLC [ 1 ];
 
-
         int sideInd = -1;
 
-        if( iPos[0] > Lx - Lx*mRelTol ) {
-        	sideInd = 0;
+        if ( iPos[0] > Lx - Lx*mRelTol ) {
+            sideInd = 0;
         }
 
-        if( iPos[1] > Ly - Ly*mRelTol ) {
-        	sideInd = 1;
+        if ( iPos[1] > Ly - Ly*mRelTol ) {
+            sideInd = 1;
         }
 
-        if( iPos[0] < Lx*mRelTol ) {
-        	sideInd = 2;
+        if ( iPos[0] < Lx*mRelTol ) {
+            sideInd = 2;
         }
 
-        if( iPos[1] < Ly*mRelTol ) {
-        	sideInd = 3;
+        if ( iPos[1] < Ly*mRelTol ) {
+            sideInd = 3;
         }
 
         if ( sideInd == 0 ) {
             const FloatArray &x = { mUC [ 0 ], mLC [ 1 ] };
-            double dist = Lx + iPos.distance(x);
-            return dist;
+            return Lx + distance(iPos, x);
         }
 
         if ( sideInd == 1 ) {
-            double dist = Lx + Ly + iPos.distance(mUC);
-            return dist;
+            return Lx + Ly + distance(iPos, mUC);
         }
 
         if ( sideInd == 2 ) {
             const FloatArray &x = { mLC [ 0 ], mUC [ 1 ] };
-            double dist = Lx + Ly + Lx + iPos.distance(x);
-            return dist;
+            return Lx + Ly + Lx + distance(iPos, x);
         }
 
         if ( sideInd == 3 ) {
-            double dist = iPos.distance(mLC);
-            return dist;
+            return distance(iPos, mLC);
         }
 
         OOFEM_ERROR("Could not compute distance.")

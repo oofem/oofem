@@ -79,7 +79,7 @@
 namespace oofem {
 XfemStructuralElementInterface :: XfemStructuralElementInterface(Element *e) :
     XfemElementInterface(e),
-    mpCZMat(NULL),
+    mpCZMat(nullptr),
     mCZMaterialNum(-1),
     mCSNumGaussPoints(4),
 	mIncludeBulkJump(true),
@@ -98,7 +98,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
     bool partitionSucceeded = false;
 
 
-    if ( mpCZMat != NULL ) {
+    if ( mpCZMat != nullptr ) {
         mpCZIntegrationRules_tmp.clear();
         mpCZExtraIntegrationRules_tmp.clear();
         mIntRule_tmp.clear();
@@ -108,7 +108,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     if ( xMan->isElementEnriched(element) ) {
-        if ( mpCZMat == NULL && mCZMaterialNum > 0 ) {
+        if ( mpCZMat == nullptr && mCZMaterialNum > 0 ) {
             initializeCZMaterial();
         }
 
@@ -150,9 +150,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                     }
 
 
-                    if ( mpCZMat != NULL ) {
+                    if ( mpCZMat != nullptr ) {
                         Crack *crack = dynamic_cast< Crack * >( xMan->giveEnrichmentItem(eiIndex) );
-                        if ( crack == NULL ) {
+                        if ( crack == nullptr ) {
                             OOFEM_ERROR("Cohesive zones are only available for cracks.")
                         }
 
@@ -208,9 +208,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
                             }
 
-                            for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ cz_rule_ind ] ) {
+                            for ( auto &gp: *mpCZIntegrationRules_tmp [ cz_rule_ind ] ) {
                                 double gw = gp->giveWeight();
-                                double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+                                double segLength = distance(crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
                                 gw *= 0.5 * segLength;
                                 gp->setWeight(gw);
 
@@ -253,11 +253,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             }
 
 
-                            if(mIncludeBulkCorr) {
+                            if ( mIncludeBulkCorr ) {
 
-								for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ cz_rule_ind ] ) {
+								for ( auto &gp: *mpCZExtraIntegrationRules_tmp [ cz_rule_ind ] ) {
 									double gw = gp->giveWeight();
-									double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+                                    double segLength = distance(crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 									gw *= 0.5 * segLength;
 									gp->setWeight(gw);
 
@@ -265,20 +265,19 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 									StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
 									if ( ms ) {
 										ms->letNormalBe(crackNormal);
-									}
-									else {
+									} else {
 										StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( gp->giveMaterialStatus() );
 
-										if(fe2ms) {
+										if ( fe2ms ) {
 											fe2ms->letNormalBe(crackNormal);
 
 											PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
-											if(bc) {
+											if ( bc) {
 												FloatArray periodicityNormal = crackNormal;
 												periodicityNormal.normalize();
 
-												if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+												if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
 													// Rotate 90 degrees (works equally well for periodicity)
 													periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
 												}
@@ -287,8 +286,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 												bc->recomputeTractionMesh();
 
 											}
-										}
-										else {
+										} else {
 											// Macroscale material model: nothing needs to be done.
 										}
 									}
@@ -322,9 +320,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                         // Add cohesive zone Gauss points
 
-                        if ( mpCZMat != NULL ) {
+                        if ( mpCZMat != nullptr ) {
                             Crack *crack = dynamic_cast< Crack * >( xMan->giveEnrichmentItem(eiIndex) );
-                            if ( crack == NULL ) {
+                            if ( crack == nullptr ) {
                                 OOFEM_ERROR("Cohesive zones are only available for cracks.")
                             }
 
@@ -336,10 +334,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                             for ( int segIndex = 0; segIndex < numSeg; segIndex++ ) {
                                 int czRuleNum = 1;
-                                mpCZIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                                mpCZIntegrationRules_tmp.emplace_back( std::make_unique<GaussIntegrationRule>(czRuleNum, element) );
 
-                                if(mIncludeBulkCorr) {
-                                	mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                                if ( mIncludeBulkCorr ) {
+                                    mpCZExtraIntegrationRules_tmp.emplace_back( std::make_unique<GaussIntegrationRule>(czRuleNum, element) );
                                 }
 
                                 size_t newRuleInd = mpCZIntegrationRules_tmp.size() - 1;
@@ -353,13 +351,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                 if ( crackTang.computeSquaredNorm() > tol2 ) {
                                     crackTang.normalize();
-                                }
-                                else {
-                                	// Oops, we got a segment of length zero.
-                                	// These Gauss weights will be zero, so we can
-                                	// set the tangent to anything reasonable
-                                	crackTang = {0.0, 1.0};
-
+                                } else {
+                                    // Oops, we got a segment of length zero.
+                                    // These Gauss weights will be zero, so we can
+                                    // set the tangent to anything reasonable
+                                    crackTang = {0.0, 1.0};
                                 }
 
                                 FloatArray crackNormal = {
@@ -369,14 +365,14 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 mpCZIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                                if(mIncludeBulkCorr) {
+                                if ( mIncludeBulkCorr ) {
                                 	mpCZExtraIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
                                 }
 
-                                for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ newRuleInd ] ) {
+                                for ( auto &gp: *mpCZIntegrationRules_tmp [ newRuleInd ] ) {
                                     double gw = gp->giveWeight();
-                                    double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+                                    double segLength = distance(crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
                                     gw *= 0.5 * segLength;
                                     gp->setWeight(gw);
 
@@ -384,8 +380,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
                                     if ( ms ) {
                                         ms->letNormalBe(crackNormal);
-                                    }
-                                    else {
+                                    } else {
                                     	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
 
                                     	if(fe2ms) {
@@ -418,11 +413,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     crack->AppendCohesiveZoneGaussPoint(gp);
                                 }
 
-                                if(mIncludeBulkCorr) {
+                                if ( mIncludeBulkCorr ) {
 
-									for ( GaussPoint *gp: *mpCZExtraIntegrationRules_tmp [ newRuleInd ] ) {
+									for ( auto &gp: *mpCZExtraIntegrationRules_tmp [ newRuleInd ] ) {
 										double gw = gp->giveWeight();
-										double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
+                                        double segLength = distance(crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 										gw *= 0.5 * segLength;
 										gp->setWeight(gw);
 
@@ -431,21 +426,20 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 										StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
 										if ( ms ) {
 											ms->letNormalBe(crackNormal);
-										}
-										else {
+										} else {
 											StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
 
-											if(fe2ms) {
+											if ( fe2ms ) {
 												fe2ms->letNormalBe(crackNormal);
 
 												PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
-												if(bc) {
+												if ( bc ) {
 													FloatArray periodicityNormal = crackNormal;
 
 													periodicityNormal.normalize();
 
-													if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+													if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
 														// Rotate 90 degrees (works equally well for periodicity)
 														periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
 													}
@@ -453,8 +447,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 													bc->setPeriodicityNormal(periodicityNormal);
 													bc->recomputeTractionMesh();
 												}
-											}
-											else {
+											} else {
 												OOFEM_ERROR("Failed to fetch material status.");
 											}
 										}
@@ -527,7 +520,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             std :: vector< FloatArray >czGPCoord;
 
             for ( size_t czRulInd = 0; czRulInd < mpCZIntegrationRules_tmp.size(); czRulInd++ ) {
-                for ( GaussPoint *gp: *mpCZIntegrationRules_tmp [ czRulInd ] ) {
+                for ( auto &gp: *mpCZIntegrationRules_tmp [ czRulInd ] ) {
                     czGPCoord.push_back( gp->giveGlobalCoordinates() );
                 }
             }
@@ -535,11 +528,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             double time = 0.0;
 
             Domain *dom = element->giveDomain();
-            if ( dom != NULL ) {
+            if ( dom != nullptr ) {
                 EngngModel *em = dom->giveEngngModel();
-                if ( em != NULL ) {
+                if ( em != nullptr ) {
                     TimeStep *ts = em->giveCurrentStep();
-                    if ( ts != NULL ) {
+                    if ( ts != nullptr ) {
                         time = ts->giveTargetTime();
                     }
                 }
@@ -557,14 +550,14 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
         bool map_state_variables = true;
-        if(map_state_variables) {
+        if ( map_state_variables ) {
 
             ////////////////////////////////////////////////////////////////////////
         	// Copy bulk GPs
         	int num_ir_new = mIntRule_tmp.size();
         	for( int i = 0; i < num_ir_new; i++ ) {
 
-        		for(GaussPoint *gp_new : *(mIntRule_tmp[i]) ) {
+        		for( auto &gp_new : *(mIntRule_tmp[i]) ) {
 
 
         			// Fetch new material status. Create it if it does not exist.
@@ -582,16 +575,15 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         			double closest_dist = 0.0;
         			MaterialStatus *ms_old = giveClosestGP_MatStat( closest_dist, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
 
-        			if(ms_old) {
+        			if ( ms_old ) {
 
 						// Copy state variables.
 						MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
 
-						if(mapper_interface) {
+						if ( mapper_interface ) {
 //							printf("Successfully casted to MaterialStatusMapperInterface.\n");
 							mapper_interface->copyStateVariables(*ms_old);
-						}
-						else {
+						} else {
 							OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
 						}
         			}
@@ -610,11 +602,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 				num_ir_new = mpCZIntegrationRules_tmp.size();
 				for( int i = 0; i < num_ir_new; i++ ) {
 
-					for(GaussPoint *gp_new : *(mpCZIntegrationRules_tmp[i]) ) {
+					for( auto &gp_new : *(mpCZIntegrationRules_tmp[i]) ) {
 
 						// Fetch new material status. Create it if it does not exist.
 						MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-						if(!ms_new) {
+						if ( !ms_new ) {
 							ms_new = mpCZMat->CreateStatus(gp_new);
 						}
 
@@ -626,28 +618,27 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 	        			// also consider mapping from bulk GPs.
 	        			XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( element->giveDomain()->giveXfemManager() );
 	        			bool non_std_cz = false;
-	        			if(xsMan) {
+	        			if ( xsMan ) {
 	        				non_std_cz = xsMan->giveUseNonStdCz();
 	        			}
 
-	        			if(non_std_cz) {
+	        			if ( non_std_cz ) {
 							double closest_dist_bulk = 0.0;
 							MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
-							if( closest_dist_bulk < closest_dist_cz ) {
+							if ( closest_dist_bulk < closest_dist_cz ) {
 								printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
 								ms_old = ms_old_bulk;
 							}
 	        			}
 
-	        			if(ms_old) {
+	        			if ( ms_old ) {
 
 							// Copy state variables.
 							MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
 
 							if(mapper_interface) {
 								mapper_interface->copyStateVariables(*ms_old);
-							}
-							else {
+							} else {
 								OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
 							}
 	        			}
@@ -666,9 +657,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         	if( mCZMaterialNum > 0 && mIncludeBulkCorr ) {
 
         		num_ir_new = mpCZExtraIntegrationRules_tmp.size();
-        		for( int i = 0; i < num_ir_new; i++ ) {
+        		for ( int i = 0; i < num_ir_new; i++ ) {
 
-        			for(GaussPoint *gp_new : *(mpCZExtraIntegrationRules_tmp[i]) ) {
+        			for( auto &gp_new : *(mpCZExtraIntegrationRules_tmp[i]) ) {
 
         				// Fetch new material status. Create it if it does not exist.
         				MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
@@ -741,25 +732,24 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 MaterialStatus* XfemStructuralElementInterface :: giveClosestGP_MatStat(double &oClosestDist, std :: vector< std :: unique_ptr< IntegrationRule > > &iRules, const FloatArray &iCoord)
 {
+    double min_dist2 = std::numeric_limits<double>::max();
+    MaterialStatus *closest_ms = nullptr;
 
-	double min_dist2 = std::numeric_limits<double>::max();
-	MaterialStatus *closest_ms = NULL;
+    for(size_t i = 0; i < iRules.size(); i++) {
+        for( auto &gp : *(iRules[i]) ) {
 
-	for(size_t i = 0; i < iRules.size(); i++) {
-		for(GaussPoint *gp : *(iRules[i]) ) {
+            const FloatArray &x = gp->giveGlobalCoordinates();
+            double d2 = distance_square(x, iCoord);
+            if ( d2 < min_dist2 ) {
+                min_dist2 = d2;
+                closest_ms = dynamic_cast<MaterialStatus*>( gp->giveMaterialStatus() );
+            }
 
-			const FloatArray &x = gp->giveGlobalCoordinates();
-			if( x.distance_square(iCoord) < min_dist2 ) {
-				min_dist2 = x.distance_square(iCoord);
-//				printf("min_dist2: %e\n", min_dist2 );
-				closest_ms = dynamic_cast<MaterialStatus*>( gp->giveMaterialStatus() );
-			}
+        }
+    }
 
-		}
-	}
-
-	oClosestDist = sqrt(min_dist2);
-	return closest_ms;
+    oClosestDist = sqrt(min_dist2);
+    return closest_ms;
 }
 
 double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2MaterialStatus *iFe2Ms)
@@ -798,7 +788,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 {
     if ( element->giveDomain()->hasXfemManager() ) {
         XfemManager *xMan = element->giveDomain()->giveXfemManager();
-        CrossSection *cs = NULL;
+        CrossSection *cs = nullptr;
 
         const std :: vector< int > &materialModifyingEnrItemIndices = xMan->giveMaterialModifyingEnrItemIndices();
         for ( size_t i = 0; i < materialModifyingEnrItemIndices.size(); i++ ) {
@@ -807,7 +797,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
             if ( ei.isMaterialModified(* gp, * element, cs) ) {
                 StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
 
-                if ( structCS != NULL ) {
+                if ( structCS != nullptr ) {
                     if ( mUsePlaneStrain ) {
                         structCS->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
                     } else {
@@ -834,15 +824,15 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
-    if ( cs == NULL ) {
-        OOFEM_ERROR("cs == NULL.");
+    if ( cs == nullptr ) {
+        OOFEM_ERROR("cs == nullptr.");
     }
 
     if ( element->giveDomain()->hasXfemManager() ) {
         XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
 
-        CrossSection *csInclusion = NULL;
+        CrossSection *csInclusion = nullptr;
         const std :: vector< int > &materialModifyingEnrItemIndices = xMan->giveMaterialModifyingEnrItemIndices();
         for ( size_t i = 0; i < materialModifyingEnrItemIndices.size(); i++ ) {
             EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(materialModifyingEnrItemIndices [ i ]) );
@@ -850,7 +840,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
             if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
                 StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
-                if ( structCSInclusion != NULL ) {
+                if ( structCSInclusion != nullptr ) {
                     if ( mUsePlaneStrain ) {
                         structCSInclusion->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
                     } else {
@@ -883,7 +873,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
 			size_t numSeg = mpCZIntegrationRules.size();
 			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-				for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
+				for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
 					////////////////////////////////////////////////////////
 					// Compute a (slightly modified) N-matrix
 
@@ -898,7 +888,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
 					// Fetch material status and get normal
 					StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-					if ( ms == NULL ) {
+					if ( ms == nullptr ) {
 						OOFEM_ERROR("Failed to fetch material status.");
 					}
 
@@ -945,7 +935,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
 					GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
 
-					GaussPoint *bulk_gp = NULL;
+					GaussPoint *bulk_gp = nullptr;
 					if(mIncludeBulkCorr) {
 						bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
 					}
@@ -957,7 +947,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
 			    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
 
-			    	if(fe2ms == NULL) {
+			    	if(fe2ms == nullptr) {
 			    		OOFEM_ERROR("The material status is not of an allowed type.")
 			    	}
 
@@ -1151,7 +1141,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 
 			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-				for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
+				for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
 					////////////////////////////////////////////////////////
 					// Compute a (slightly modified) N-matrix
 
@@ -1203,7 +1193,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 						// Fetch material status and get normal
 						StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-						if ( ms == NULL ) {
+						if ( ms == nullptr ) {
 							OOFEM_ERROR("Failed to fetch material status.");
 						}
 
@@ -1242,7 +1232,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 						// Fetch material status and get normal
 						StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-						if ( ms == NULL ) {
+						if ( ms == nullptr ) {
 							OOFEM_ERROR("Failed to fetch material status.");
 						}
 
@@ -1298,13 +1288,13 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 	    }
 
 		for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-//			for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
+//			for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
 			for(int gpInd = 0; gpInd < mpCZIntegrationRules[ segIndex ]->giveNumberOfIntegrationPoints(); gpInd++) {
 
 				GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
 
-				GaussPoint *bulk_gp = NULL;
-				StructuralMaterial *bulkMat = NULL;
+				GaussPoint *bulk_gp = nullptr;
+				StructuralMaterial *bulkMat = nullptr;
 				if(mIncludeBulkCorr) {
 					bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
 					bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
@@ -1318,7 +1308,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
 		    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
 
-		    	if(fe2ms == NULL) {
+		    	if(fe2ms == nullptr) {
 		    		OOFEM_ERROR("The material status is not of an allowed type.")
 		    	}
 
@@ -1500,7 +1490,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangentAt(FloatMatrix &ans
 void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
     StructuralElement *structEl = dynamic_cast< StructuralElement * >( element );
-    if ( structEl == NULL ) {
+    if ( structEl == nullptr ) {
         OOFEM_ERROR("Not a structural element");
     }
 
@@ -1519,11 +1509,11 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 
     mass = 0.;
 
-    for ( GaussPoint *gp: *element->giveIntegrationRule(0) ) {
+    for ( auto &gp: *element->giveIntegrationRule(0) ) {
         structEl->computeNmatrixAt(gp->giveNaturalCoordinates(), n);
         density = structEl->giveStructuralCrossSection()->give('d', gp);
 
-        if ( ipDensity != NULL ) {
+        if ( ipDensity != nullptr ) {
             // Override density if desired
             density = * ipDensity;
         }
@@ -1606,7 +1596,7 @@ void XfemStructuralElementInterface :: initializeCZMaterial()
 
         mpCZMat = this->element->giveDomain()->giveMaterial(mCZMaterialNum);
 
-        if ( mpCZMat == NULL ) {
+        if ( mpCZMat == nullptr ) {
             OOFEM_ERROR("Failed to fetch pointer for mpCZMat.");
         }
     }
@@ -1688,7 +1678,7 @@ void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std :: vec
 
             // Check start tip
             EnrFrontIntersection *efStart = dynamic_cast< EnrFrontIntersection * >( eiCandidate->giveEnrichmentFrontStart() );
-            if ( efStart != NULL ) {
+            if ( efStart != nullptr ) {
                 const TipInfo &tipInfo = efStart->giveTipInfo();
 
                 if ( ei->tipIsTouchingEI(tipInfo) ) {
@@ -1699,7 +1689,7 @@ void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std :: vec
 
             // Check end tip
             EnrFrontIntersection *efEnd = dynamic_cast< EnrFrontIntersection * >( eiCandidate->giveEnrichmentFrontEnd() );
-            if ( efEnd != NULL ) {
+            if ( efEnd != nullptr ) {
                 const TipInfo &tipInfo = efEnd->giveTipInfo();
 
                 if ( ei->tipIsTouchingEI(tipInfo) ) {
@@ -1765,9 +1755,9 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
             triCenter.times(1.0 / 3.0);
 
             double meanEdgeLength = 0.0;
-            meanEdgeLength += ( 1.0 / 3.0 ) * tri.giveVertex(1).distance( tri.giveVertex(2) );
-            meanEdgeLength += ( 1.0 / 3.0 ) * tri.giveVertex(2).distance( tri.giveVertex(3) );
-            meanEdgeLength += ( 1.0 / 3.0 ) * tri.giveVertex(3).distance( tri.giveVertex(1) );
+            meanEdgeLength += ( 1.0 / 3.0 ) * distance(tri.giveVertex(1), tri.giveVertex(2) );
+            meanEdgeLength += ( 1.0 / 3.0 ) * distance(tri.giveVertex(2), tri.giveVertex(3) );
+            meanEdgeLength += ( 1.0 / 3.0 ) * distance(tri.giveVertex(3), tri.giveVertex(1) );
 
             const double relPertLength = XfemTolerances :: giveRelLengthTolTight();
 
@@ -1844,7 +1834,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         double tangSignDist = levelSetTang, arcPos = 0.0;
 
                         GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );
-                        if ( geoEI != NULL ) {
+                        if ( geoEI != nullptr ) {
                             // TODO: Consider removing this special treatment. /ES
                             geoEI->giveGeometry()->computeTangentialSignDist(tangSignDist, x, arcPos);
                         }

@@ -120,11 +120,11 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
     } else {
         // Take the minimum of any region
         double mindist = 0.0, distance;
-        oelem = NULL;
+        oelem = nullptr;
         for ( int i = 1; i <= regList.giveSize(); ++i ) {
             Element *tmpelem = sl->giveElementClosestToPoint( lcoords, closest, coords, regList.at(i) );
-            if ( tmpelem != NULL ) {
-                distance = closest.distance_square(coords);
+            if ( tmpelem ) {
+                distance = distance_square(closest, coords);
                 if ( distance < mindist || i == 1 ) {
                     mindist = distance;
                     oelem = tmpelem;

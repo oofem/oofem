@@ -49,16 +49,16 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, const Flo
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
     FloatArray jGpCoords;
-    double distance, minDist = 1.e6;
+    double minDist = 1.e6;
     Element *srcElem;
 
     if ( ( srcElem = sl->giveElementContainingPoint(coords, elemSet) ) ) {
-        this->source = NULL;
-        for ( GaussPoint *jGp: *srcElem->giveDefaultIntegrationRulePtr() ) {
+        this->source = nullptr;
+        for ( auto &jGp: *srcElem->giveDefaultIntegrationRulePtr() ) {
             if ( srcElem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
-                distance = coords.distance(jGpCoords);
-                if ( distance < minDist ) {
-                    minDist = distance;
+                double dist = distance(coords, jGpCoords);
+                if ( dist < minDist ) {
+                    minDist = dist;
                     this->source = jGp;
                 }
             }

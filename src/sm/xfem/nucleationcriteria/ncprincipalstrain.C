@@ -186,10 +186,10 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 								}
 
 								for(const auto &x: center_coord_inserted_cracks) {
-									if( x.distance(pc) <  2.0*mInitialCrackLength) {
+									if( distance(x, pc) <  2.0*mInitialCrackLength) {
 										insertionAllowed = false;
-										break;
 										printf("Preventing insertion.\n");
+										break;
 									}
 								}
 

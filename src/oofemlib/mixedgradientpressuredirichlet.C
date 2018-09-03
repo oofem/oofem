@@ -132,10 +132,10 @@ Dof *MixedGradientPressureDirichlet :: giveMasterDof(ActiveDof *dof, int mdof)
 void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
 {
     DofIDItem id = dof->giveDofID();
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
+    const auto &coords = *dof->giveDofManager()->giveCoordinates();
 
     FloatArray dx;
-    dx.beDifferenceOf(* coords, this->centerCoord);
+    dx.beDifferenceOf(coords, this->centerCoord);
 
     int nsd = dx.giveSize(); // Number of spatial dimensions
 
@@ -185,14 +185,10 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
 double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArray &dev, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     DofIDItem id = dof->giveDofID();
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
-
-    if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
-        OOFEM_ERROR("Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize() );
-    }
+    const auto &coords = *dof->giveDofManager()->giveCoordinates();
 
     FloatArray dx;
-    dx.beDifferenceOf(* coords, this->centerCoord);
+    dx.beDifferenceOf(coords, this->centerCoord);
 
     int nsd = dx.giveSize(); // Number of spatial dimensions
 

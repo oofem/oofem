@@ -82,13 +82,13 @@ IntElLine2IntPen :: initializeFrom(InputRecord *ir)
 
 //    IntArray nodeInd = {dofManArray.at(2), dofManArray.at(3), dofManArray.at(4)};
 
-//    double L2 = x1.distance_square(x2);
+//    double L2 = distance_square(x1, x2);
 //    printf("L2: %e\n", L2);
 
-//    double L3 = x1.distance_square(x3);
+//    double L3 = distance_square(x1, x3);
 //    printf("L3: %e\n", L3);
 
-//    double L4 = x1.distance_square(x4);
+//    double L4 = distance_square(x1, x4);
 //    printf("L4: %e\n", L4);
 //
 //    FloatArray dist2 = {L2, L3, L4};

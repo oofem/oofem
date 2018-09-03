@@ -103,7 +103,7 @@ private:
     void determineValuesFromPatch(FloatArray &dofManValues, IntArray &dofManCount,
                                   IntArray &regionNodalNumbers, IntArray &dofManToDetermine,
                                   FloatMatrix &a, SPRPatchType type);
-    void computePolynomialTerms(FloatArray &P, FloatArray &coords, SPRPatchType type);
+    void computePolynomialTerms(FloatArray &P, const FloatArray &coords, SPRPatchType type);
     int  giveNumberOfUnknownPolynomialCoefficients(SPRPatchType regType);
     SPRPatchType determinePatchType(Set &elementList);
 

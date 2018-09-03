@@ -921,10 +921,46 @@ double dot(const FloatArray &x, const FloatArray &y)
     return x.dotProduct(y);
 }
 
+double distance(const FloatArray &x, const FloatArray &y)
+{
+    return x.distance(y);
+}
+
+double distance_square(const FloatArray &x, const FloatArray &y)
+{
+    return x.distance_square(y);
+}
+
 double norm(const FloatArray &x)
 {
     return x.computeNorm();
 }
+
+double norm_square(const FloatArray &x)
+{
+    return x.computeSquaredNorm();
+}
+
+bool isfinite(const FloatArray &x)
+{
+    return x.isFinite();
+}
+
+bool iszero(const FloatArray &x)
+{
+    return x.containsOnlyZeroes();
+}
+
+double sum(const FloatArray & x)
+{
+    return x.sum();
+}
+
+double product(const FloatArray & x)
+{
+    return x.product();
+}
+
 
 // End of IML compat
 

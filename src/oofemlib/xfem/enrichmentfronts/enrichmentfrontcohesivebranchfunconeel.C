@@ -103,7 +103,7 @@ void EnrFrontCohesiveBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< doub
     const FloatArray &xTip = mTipInfo.mGlobalCoord;
     const FloatArray &gpCoord = iGP.giveGlobalCoordinates();
 
-    double radius = gpCoord.distance(xTip);
+    double radius = distance(gpCoord, xTip);
 
     std :: vector< double >jumps;
     mpBranchFunc.giveJump(jumps, radius);

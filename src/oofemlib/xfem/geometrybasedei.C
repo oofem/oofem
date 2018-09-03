@@ -630,9 +630,9 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
             double phiE = 1.0;
             bool foundPhiE = evalLevelSetNormalInNode( phiE, neGlob, element->giveNode(neLoc)->giveNodeCoordinates() );
 
-            const FloatArray &xS = * ( element->giveNode(nsLoc)->giveCoordinates() );
-            const FloatArray &xE = * ( element->giveNode(neLoc)->giveCoordinates() );
-            const double edgeLength2 = xS.distance_square(xE);
+            const auto &xS = * ( element->giveNode(nsLoc)->giveCoordinates() );
+            const auto &xE = * ( element->giveNode(neLoc)->giveCoordinates() );
+            const double edgeLength2 = distance_square(xS, xE);
             const double gammaRelTol = 1.0e-2;
 
             if ( ( foundPhiS && foundPhiE ) && phiS * phiE < mLevelSetRelTol * mLevelSetRelTol * edgeLength2 ) {
@@ -643,8 +643,8 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                 // Compute the exact value of the tangential level set
                 // from the discretized geometry instead of interpolating.
                 double tangDist = 0.0, arcPos = 0.0;
-                const FloatArray &posI = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
-                const FloatArray &posJ = * ( element->giveDofManager(neLoc)->giveCoordinates() );
+                const auto &posI = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
+                const auto &posJ = * ( element->giveDofManager(neLoc)->giveCoordinates() );
                 FloatArray pos;
                 pos.add(0.5 * ( 1.0 - xi ), posI);
                 pos.add(0.5 * ( 1.0 + xi ), posJ);
@@ -671,7 +671,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
                         int numPointsOld = oIntersectionPoints.size();
                         for ( int k = 1; k <= numPointsOld; k++ ) {
-                            double dist = ps.distance(oIntersectionPoints [ k - 1 ]);
+                            double dist = distance(ps, oIntersectionPoints [ k - 1 ]);
 
                             if ( dist < mLevelSetTol ) {
                                 alreadyFound = true;
@@ -693,7 +693,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
                         numPointsOld = oIntersectionPoints.size();
                         for ( int k = 1; k <= numPointsOld; k++ ) {
-                            double dist = pe.distance(oIntersectionPoints [ k - 1 ]);
+                            double dist = distance(pe, oIntersectionPoints [ k - 1 ]);
 
                             if ( dist < mLevelSetTol ) {
                                 alreadyFound = true;
@@ -731,7 +731,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
                         int numPointsOld = oIntersectionPoints.size();
                         for ( int k = 1; k <= numPointsOld; k++ ) {
-                            double dist = p.distance(oIntersectionPoints [ k - 1 ]);
+                            double dist = distance(p, oIntersectionPoints [ k - 1 ]);
 
                             if ( dist < mLevelSetTol ) {
                                 alreadyFound = true;
@@ -858,7 +858,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
                     int numPointsOld = oIntersectionPoints.size();
                     for ( int k = 1; k <= numPointsOld; k++ ) {
-                        double dist = ps.distance(oIntersectionPoints [ k - 1 ]);
+                        double dist = distance(ps, oIntersectionPoints [ k - 1 ]);
 
                         if ( dist < mLevelSetTol ) {
                             alreadyFound = true;
@@ -880,7 +880,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
                     numPointsOld = oIntersectionPoints.size();
                     for ( int k = 1; k <= numPointsOld; k++ ) {
-                        double dist = pe.distance(oIntersectionPoints [ k - 1 ]);
+                        double dist = distance(pe, oIntersectionPoints [ k - 1 ]);
 
                         if ( dist < mLevelSetTol ) {
                             alreadyFound = true;
@@ -919,7 +919,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
                     int numPointsOld = oIntersectionPoints.size();
                     for ( int k = 1; k <= numPointsOld; k++ ) {
-                        double dist = p.distance(oIntersectionPoints [ k - 1 ]);
+                        double dist = distance(p, oIntersectionPoints [ k - 1 ]);
 
                         if ( dist < mLevelSetTol ) {
                             alreadyFound = true;
@@ -1024,8 +1024,9 @@ bool GeometryBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,
     bool foundTip = false;
 
     for ( size_t i = 0; i < tipInfos.size(); i++ ) {
-        if ( tipInfos [ i ].mGlobalCoord.distance_square(iElCenter) < minDist2 ) {
-            minDist2 = tipInfos [ i ].mGlobalCoord.distance_square(iElCenter);
+        double d2 = distance_square(tipInfos [ i ].mGlobalCoord, iElCenter);
+        if ( d2 < minDist2 ) {
+            minDist2 = d2;
             minIndex = i;
             foundTip = true;
         }

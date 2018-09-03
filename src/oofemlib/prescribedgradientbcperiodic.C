@@ -119,21 +119,21 @@ void PrescribedGradientBCPeriodic :: findSlaveToMasterMap()
 
     this->slavemap.clear();
     for ( int inode : nodes ) {
-        Node *masterNode = NULL;
+        Node *masterNode = nullptr;
         Node *node = this->domain->giveNode(inode);
-        const FloatArray &masterCoord = *node->giveCoordinates();
+        const auto &masterCoord = *node->giveCoordinates();
         //printf("node %d\n", node->giveLabel()); masterCoord.printYourself();
         // The difficult part, what offset to subtract to find the master side;
-        for ( FloatArray &testJump : jumps ) {
+        for ( const FloatArray &testJump : jumps ) {
             coord.beDifferenceOf(masterCoord, testJump);
             masterNode = sl->giveNodeClosestToPoint(coord, fabs(jump.at(1))*1e-5);
-            if ( masterNode != NULL ) {
+            if ( masterNode ) {
                 //printf("Found master (%d) to node %d (distance = %e)\n",  masterNode->giveNumber(), node->giveNumber(),
-                //       masterNode->giveCoordinates()->distance(coord));
+                //       distance(*masterNode->giveCoordinates(), coord));
                 break;
             }
         }
-        if ( masterNode != NULL ) {
+        if ( masterNode ) {
             this->slavemap.insert({node->giveNumber(), masterNode->giveNumber()});
         } else {
             OOFEM_ERROR("Couldn't find master node!");
@@ -154,7 +154,7 @@ int PrescribedGradientBCPeriodic :: giveNumberOfMasterDofs(ActiveDof *dof)
 Dof *PrescribedGradientBCPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
 {
     if ( this->isStrainDof(dof) ) {
-        return NULL;
+        return nullptr;
     }
     if ( mdof == 1 ) {
         int node = this->slavemap[dof->giveDofManager()->giveNumber()];
@@ -163,8 +163,8 @@ Dof *PrescribedGradientBCPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
         return this->domain->giveDofManager(node)->giveDofWithID(dof->giveDofID());
     } else {
         DofIDItem dofid = dof->giveDofID();
-        FloatArray *coords = dof->giveDofManager()->giveCoordinates();
-        int nsd = coords->giveSize();
+        const auto &coords = *dof->giveDofManager()->giveCoordinates();
+        int nsd = coords.giveSize();
         if ( dofid == D_u || dofid == V_u ) {
             return this->strain->giveDofWithID(strain_id[nsd*(mdof-2)]);
         } else if ( dofid == D_v || dofid == V_v ) {
@@ -262,11 +262,11 @@ void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tS
 void PrescribedGradientBCPeriodic :: computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
-    FloatArray *masterCoords = master->giveCoordinates();
+    const auto &coords = *dof->giveDofManager()->giveCoordinates();
+    const auto &masterCoords = *master->giveCoordinates();
 
     FloatArray dx;
-    dx.beDifferenceOf(* coords, * masterCoords );
+    dx.beDifferenceOf(coords, masterCoords);
 
     int nsd = dx.giveSize(); // Number of spatial dimensions
 
@@ -283,10 +283,10 @@ double PrescribedGradientBCPeriodic :: giveUnknown(double val, ValueModeType mod
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
     DofIDItem id = dof->giveDofID();
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
-    FloatArray *masterCoords = master->giveCoordinates();
+    const auto &coords = *dof->giveDofManager()->giveCoordinates();
+    const auto &masterCoords = *master->giveCoordinates();
     FloatArray dx, uM;
-    dx.beDifferenceOf(* coords, * masterCoords );
+    dx.beDifferenceOf(coords, masterCoords);
 
     int ind;
     if ( id == D_u || id == V_u || id == P_f || id == T_f ) {

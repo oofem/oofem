@@ -270,7 +270,7 @@ void ParticleGrid<Point> :: init ( const IntArray &res, const FloatArray &bb0, c
 
     this->data = new RefinedParticlePoint*[this->total];
     for ( int i = 0; i < this->total; ++i ) {
-        this->data[i] = NULL;
+        this->data[i] = nullptr;
     }
 }
 
@@ -459,15 +459,15 @@ template <class Point>
 bool ParticleGrid<Point> :: getPoint ( Point *&answer, int ind ) const
 {
     RefinedParticlePoint *rp = this->data[ind];
-    if ( rp == NULL ) { // Not active
-        answer = NULL;
+    if ( rp == nullptr ) { // Not active
+        answer = nullptr;
         return false;
     } else {
         if ( rp->point ) { // Active and has a point
             answer = rp->point;
             return true;
         } else { // Active and has a sub grid
-            answer = NULL;
+            answer = nullptr;
             return false;
         }
     }
@@ -479,7 +479,7 @@ void ParticleGrid<Point> :: setPoint ( Point *point, int ind )
     this->clearPosition ( ind );
     this->data[ind] = new RefinedParticlePoint;
     this->data[ind]->point = point;
-    this->data[ind]->subgrid = NULL;
+    this->data[ind]->subgrid = nullptr;
 }
 
 template <class Point>
@@ -501,22 +501,22 @@ void ParticleGrid<Point> :: clearPosition ( int ind )
         }
         delete rp;
     }
-    this->data[ind] = NULL;
+    this->data[ind] = nullptr;
 }
 
 template <class Point>
 bool ParticleGrid<Point> :: getSubGrid ( ParticleGrid<Point> *&subgrid, int ind ) const
 {
     RefinedParticlePoint *rp = this->data[ind];
-    if ( rp == NULL ) {
-        subgrid = NULL;
+    if ( rp == nullptr ) {
+        subgrid = nullptr;
         return false;
     } else {
         if ( rp->subgrid ) {
             subgrid = rp->subgrid;
             return true;
         } else {
-            subgrid = NULL;
+            subgrid = nullptr;
             return false;
         }
     }
@@ -544,7 +544,7 @@ void ParticleGrid<Point> :: createSubGrid ( ParticleGrid<Point> *&subgrid, const
     int ind = this->giveIndex ( pos );
     this->clearPosition ( ind );
     this->data[ind] = new RefinedParticlePoint;
-    this->data[ind]->point = NULL;
+    this->data[ind]->point = nullptr;
     this->data[ind]->subgrid = subgrid;
 }
 
@@ -566,17 +566,17 @@ protected:
 public:
     /// Constructor.
     ParticleGridIterator() :
-        index ( 0 ), endind ( 0 ), sub_it ( NULL ), grid ( NULL ), ind0(), ind1(), limited ( false ) {}
+        index ( 0 ), endind ( 0 ), sub_it ( nullptr ), grid ( nullptr ), ind0(), ind1(), limited ( false ) {}
     /// Constructor.
     ParticleGridIterator ( ParticleGrid<Point> *g ) :
-        index ( 0 ), endind ( g->total ), sub_it ( NULL ), grid ( g ), ind0(), ind1(), limited ( false ) {
+        index ( 0 ), endind ( g->total ), sub_it ( nullptr ), grid ( g ), ind0(), ind1(), limited ( false ) {
         if ( this->grid->data[this->index] && this->grid->data[this->index]->subgrid ) {
             this->sub_it = new ParticleGridIterator<Point> ( this->grid->data[this->index]->subgrid );
         }
     }
     /// Constructor.
     ParticleGridIterator ( ParticleGrid<Point> *g, IntArray ind0, IntArray ind1 ) :
-        index ( 0 ), sub_it ( NULL ), grid ( g ), ind0 ( ind0 ), ind1 ( ind1 ), limited ( true ) {
+        index ( 0 ), sub_it ( nullptr ), grid ( g ), ind0 ( ind0 ), ind1 ( ind1 ), limited ( true ) {
         IntArray end = ind1;
         end.add ( -1 );
         this->endind = this->grid->giveIndex ( end ) + 1;
@@ -602,15 +602,15 @@ public:
 
     Point *getPoint() {
         if ( this->end() ) {
-            return NULL;
+            return nullptr;
         }
         if ( this->subGridActive() ) {
             return this->sub_it->getPoint();
         }
-        if ( this->grid->data[this->index] != NULL ) {
+        if ( this->grid->data[this->index] != nullptr ) {
             return this->grid->data[this->index]->point;
         }
-        return NULL;
+        return nullptr;
     }
 
     int getIndex() {
@@ -628,7 +628,7 @@ public:
     }
 
     bool subGridActive() const {
-        return this->sub_it != NULL;
+        return this->sub_it != nullptr;
     }
 
     void getGridPoint ( FloatArray &x ) {
@@ -647,7 +647,7 @@ public:
                 return;
             } else {
                 delete this->sub_it;
-                this->sub_it = NULL;
+                this->sub_it = nullptr;
             }
         }
         this->index++;

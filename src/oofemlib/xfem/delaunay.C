@@ -69,8 +69,8 @@ bool Delaunay :: isInsideCC(const FloatArray &iP, const FloatArray &iP1, const F
     double r = tr.getRadiusOfCircumCircle();
     FloatArray circumCenter;
     tr.computeCenterOfCircumCircle(circumCenter);
-    double distance = circumCenter.distance(iP);
-    if ( distance < r ) {
+    double dist = distance(circumCenter, iP);
+    if ( dist < r ) {
         return true;
     } else {
         return false;
@@ -90,9 +90,9 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :
         const double relTol2 = 1.0e-6;
 
         std :: vector< double >dist_square = {
-            iVertices [ 0 ].distance_square(iVertices [ 1 ]),
-            iVertices [ 0 ].distance_square(iVertices [ 2 ]),
-            iVertices [ 0 ].distance_square(iVertices [ 3 ])
+            distance(iVertices [ 0 ], iVertices [ 1 ]),
+            distance(iVertices [ 0 ], iVertices [ 2 ]),
+            distance(iVertices [ 0 ], iVertices [ 3 ])
         };
 
         std :: sort( dist_square.begin(), dist_square.end() );
@@ -101,16 +101,18 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :
         if ( fabs(dist_square [ 2 ] - dist_square [ 1 ] - dist_square [ 0 ]) < relTol2 * dist_square [ 2 ] ) {
             // We found a rectangle
 
-            double maxDist_square = iVertices [ 0 ].distance_square(iVertices [ 1 ]);
+            double maxDist_square = distance_square(iVertices [ 0 ], iVertices [ 1 ]);
             int maxDistInd = 1;
 
-            if ( iVertices [ 0 ].distance_square(iVertices [ 2 ]) > maxDist_square ) {
-                maxDist_square = iVertices [ 0 ].distance_square(iVertices [ 2 ]);
+            double d2 = distance_square(iVertices [ 0 ], iVertices [ 2 ]); 
+            if ( d2 > maxDist_square ) {
+                maxDist_square = d2;
                 maxDistInd = 2;
             }
 
-            if ( iVertices [ 0 ].distance_square(iVertices [ 3 ]) > maxDist_square ) {
-                maxDist_square = iVertices [ 0 ].distance_square(iVertices [ 3 ]);
+            double d2b = distance_square(iVertices [ 0 ], iVertices [ 3 ]);
+            if ( d2b > maxDist_square ) {
+                maxDist_square = d2b;
                 maxDistInd = 3;
             }
 

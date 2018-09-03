@@ -246,7 +246,7 @@ TrabBoneNL :: giveInputRecord(DynamicInputRecord &input)
 double
 TrabBoneNL :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
 {
-    double dist = src.distance(coord);
+    double dist = distance(src, coord);
 
     if ( ( dist >= 0. ) && ( dist <= this->R ) ) {
         double help = ( 1. - dist * dist / ( R * R ) );

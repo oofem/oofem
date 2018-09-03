@@ -1148,7 +1148,7 @@ Shell7BasePhFi :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, 
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             ip = iRule->getIntegrationPoint(j);
             ipCoords = *ip->giveCoordinates();
-            double dist = nodeCoords.distance(ipCoords);
+            double dist = distance(nodeCoords, ipCoords);
             if ( dist < distOld ) {
                 closestIPArray.at(i) = j;
                 distOld = dist;

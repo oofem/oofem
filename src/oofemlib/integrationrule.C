@@ -95,9 +95,9 @@ GaussPoint *
 IntegrationRule :: findIntegrationPointClosestTo(const FloatArray &lcoord)
 {
     double mindist = -1.;
-    GaussPoint *minGp = NULL;
+    GaussPoint *minGp = nullptr;
     for ( GaussPoint *gp: *this ) {
-        double dist = lcoord.distance_square(gp->giveNaturalCoordinates());
+        double dist = distance_square(lcoord, gp->giveNaturalCoordinates());
         if ( dist <= mindist || mindist < 0. ) {
             mindist = dist;
             minGp = gp;
@@ -111,7 +111,7 @@ void
 IntegrationRule :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    for ( GaussPoint *gp: *this ) {
+    for ( auto &gp: *this ) {
         gp->printOutputAt(file, tStep);
     }
 }
@@ -120,7 +120,7 @@ void
 IntegrationRule :: updateYourself(TimeStep *tStep)
 {
     // Updates the receiver at end of step.
-    for ( GaussPoint *gp: *this ) {
+    for ( auto &gp: *this ) {
         gp->updateYourself(tStep);
     }
 }

@@ -148,7 +148,7 @@ MazarsNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArra
 {
     // Bell shaped function decaying with the distance.
 
-    double dist = src.distance(coord);
+    double dist = distance(src, coord);
 
     if ( ( dist >= 0. ) && ( dist <= this->R ) ) {
         double help = ( 1. - dist * dist / ( R * R ) );

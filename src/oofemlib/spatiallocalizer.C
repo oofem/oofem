@@ -71,7 +71,7 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoo
 
     if ( !interp->global2local( lcoords, gcoords, FEIElementGeometryWrapper(element) ) ) { // Outside element
         interp->local2global( closest, lcoords, FEIElementGeometryWrapper(element) );
-        return closest.distance(gcoords);
+        return distance(closest, gcoords);
     } else {
         closest = gcoords;
         return 0.0;

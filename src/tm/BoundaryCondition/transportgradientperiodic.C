@@ -119,7 +119,7 @@ void TransportGradientPeriodic :: findSlaveToMasterMap()
 
     this->slavemap.clear();
     for ( int inode : nodes ) {
-        Node *masterNode = NULL;
+        Node *masterNode = nullptr;
         Node *node = this->domain->giveNode(inode);
         const FloatArray &masterCoord = *node->giveCoordinates();
         //printf("node %d\n", node->giveLabel()); masterCoord.printYourself();
@@ -127,9 +127,9 @@ void TransportGradientPeriodic :: findSlaveToMasterMap()
         for ( FloatArray &testJump : jumps ) {
             coord.beDifferenceOf(masterCoord, testJump);
             masterNode = sl->giveNodeClosestToPoint(coord, maxdist);
-            if ( masterNode != NULL ) {
+            if ( masterNode ) {
                 //printf("Found master (%d) to node %d (distance = %e)\n",  masterNode->giveNumber(), node->giveNumber(),
-                //       masterNode->giveCoordinates()->distance(coord));
+                //       distance(*masterNode->giveCoordinates(), coord));
                 break;
             }
         }
@@ -172,7 +172,7 @@ int TransportGradientPeriodic :: giveNumberOfMasterDofs(ActiveDof *dof)
 Dof *TransportGradientPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
 {
     if ( this->isGradDof(dof) ) {
-        return NULL;
+        return nullptr;
     }
     if ( mdof == 1 ) {
         int node = this->slavemap[dof->giveDofManager()->giveNumber()];

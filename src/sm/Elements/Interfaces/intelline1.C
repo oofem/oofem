@@ -136,7 +136,6 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
             r += N.at(i) * X_i;
         }
         return ds * r;
-        
     } else { // regular 2d
         double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
         return ds * thickness;
@@ -150,8 +149,6 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
     this->axisymmode = false;
     this->axisymmode = ir->hasField(_IFT_IntElLine1_axisymmode);
     IRResultType result = StructuralInterfaceElement :: initializeFrom(ir);
-
-
 
     // Check if node numbering is ok
     int nodeInd1 = this->giveDofManagerNumber(1);
@@ -172,14 +169,13 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
     const FloatArray &x3 = *(node3->giveCoordinates());
 
 
-    double L2 = x1.distance_square(x2);
-    double L3 = x1.distance_square(x3);
+    double L2 = distance_square(x1, x2);
+    double L3 = distance_square(x1, x3);
 
-
-    if(L2 < L3) {
-    	printf("Renumbering element %d\n.\n", this->giveNumber());
-    	IntArray dofManArrayTmp = {dofManArray.at(3), dofManArray.at(1), dofManArray.at(4), dofManArray.at(2)};
-    	dofManArray = std::move(dofManArrayTmp);
+    if ( L2 < L3 ) {
+        printf("Renumbering element %d\n.\n", this->giveNumber());
+        IntArray dofManArrayTmp = {dofManArray.at(3), dofManArray.at(1), dofManArray.at(4), dofManArray.at(2)};
+        dofManArray = std::move(dofManArrayTmp);
     }
 
 

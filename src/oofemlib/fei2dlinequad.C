@@ -115,14 +115,14 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
         }
     }
 
-    double min_distance2 = 0.0, min_xi = 0, distance2;
+    double min_distance2 = 0.0, min_xi = 0;
     FloatArray f(2);
     answer.resize(1);
 
     for ( int i = 0; i < points; i++ ) {
         answer(0) = p [ i ];
         this->local2global(f, answer, cellgeo);
-        distance2 = f.distance_square(gcoords);
+        double distance2 = distance_square(f, gcoords);
         if ( i == 0 || distance2 < min_distance2 ) {
             min_distance2 = distance2;
             min_xi = answer(0);

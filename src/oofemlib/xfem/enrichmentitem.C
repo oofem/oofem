@@ -404,7 +404,7 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
     const double tol = 1.0e-20;
 
     // Compute polar coordinates
-    oR = iOrigin.distance(iPos);
+    oR = distance(iOrigin, iPos);
 
     if ( oR > tol ) {
         q.times(1.0 / oR);

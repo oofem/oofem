@@ -110,17 +110,10 @@ FreemInterface :: createInput(Domain *d, TimeStep *tStep)
 void
 FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, TimeStep *tStep)
 {
-    int neighbour, candidate, found, jelemNodes;
-    int nnodes = d->giveNumberOfDofManagers();
-    double dist;
-    const IntArray *candidateConnectivity;
-    FloatArray *neighbourCoords;
-    Element *jelem;
-    Node *candNode;
-    std :: list< int >queue;
-
+    std :: list< int > queue;
 
     // loop over nodes
+    int nnodes = d->giveNumberOfDofManagers();
     for ( int i = 1; i <= nnodes; i++ ) {
         if ( !dynamic_cast< Node * >( d->giveDofManager(i) ) ) {
             continue;
@@ -131,24 +124,24 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
 
         while ( !queue.empty() ) {
             // extract candidate
-            candidate = * ( queue.begin() );
+            int candidate = * ( queue.begin() );
             queue.erase( queue.begin() );
 
-            candNode  = static_cast< Node * >( d->giveDofManager(candidate) );
+            Node *candNode = static_cast< Node * >( d->giveDofManager(candidate) );
             // find candidate neighbours
-            candidateConnectivity = d->giveConnectivityTable()->giveDofManConnectivityArray(candidate);
+            const IntArray *candidateConnectivity = d->giveConnectivityTable()->giveDofManConnectivityArray(candidate);
             for ( int j = 1; j <= candidateConnectivity->giveSize(); j++ ) {
-                jelem = d->giveElement( candidateConnectivity->at(j) );
-                jelemNodes = jelem->giveNumberOfNodes();
+                Element *jelem = d->giveElement( candidateConnectivity->at(j) );
+                int jelemNodes = jelem->giveNumberOfNodes();
                 for ( int k = 1; k <= jelemNodes; k++ ) {
-                    neighbour = jelem->giveNode(k)->giveNumber();
+                    int neighbour = jelem->giveNode(k)->giveNumber();
                     if ( neighbour == candidate ) {
                         continue;
                     }
 
                     // neighbour found, check if smoothing necessary
-                    neighbourCoords = jelem->giveNode(k)->giveCoordinates();
-                    dist = candNode->giveCoordinates()->distance(neighbourCoords);
+                    const auto &neighbourCoords = *jelem->giveNode(k)->giveCoordinates();
+                    double dist = distance(*candNode->giveCoordinates(), neighbourCoords);
                     // overshoot criteria
                     if ( ( ( nodalDensities.at(neighbour) / nodalDensities.at(candidate) ) > 1.3 ) &&
                         ( nodalDensities.at(neighbour) > 1.0 * dist ) ) {
@@ -156,10 +149,10 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         nodalDensities.at(neighbour) = max( 1.0 * dist, nodalDensities.at(candidate) );
                         // printf ("o");
                         // put candidate into queue if not yet added present
-                        found = 0;
+                        bool found = false;
                         for ( int q: queue ) {
                             if ( q == neighbour ) {
-                                found = 1;
+                                found = true;
                                 break;
                             }
                         }
@@ -174,10 +167,10 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         nodalDensities.at(neighbour) = nodalDensities.at(candidate) + 2.2 * dist;
                         //printf ("g");
                         // put candidate into queue if not yet added present
-                        found = 0;
+                        bool found = false;
                         for ( int q: queue ) {
                             if ( q == neighbour ) {
-                                found = 1;
+                                found = true;
                                 break;
                             }
                         }

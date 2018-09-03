@@ -175,7 +175,7 @@ protected:
 
       if ( !interp->global2local( lcoords, gcoords, FEICellGeometryWrapper(this) ) ) { // Outside element
         interp->local2global( closest, lcoords, FEICellGeometryWrapper(this) );
-        return closest.distance(gcoords);
+        return distance(closest, gcoords);
       } else {
         closest = gcoords;
         return 0.0;

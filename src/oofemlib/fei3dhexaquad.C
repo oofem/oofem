@@ -316,10 +316,10 @@ FEI3dHexaQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, con
 
 double FEI3dHexaQuad :: giveCharacteristicLength(const FEICellGeometry &cellgeo) const
 {
-    const FloatArray &n1 = cellgeo.giveVertexCoordinates(1);
-    const FloatArray &n2 = cellgeo.giveVertexCoordinates(7);
+    const auto &n1 = cellgeo.giveVertexCoordinates(1);
+    const auto &n2 = cellgeo.giveVertexCoordinates(7);
     ///@todo Change this so that it is not dependent on node order.
-    return n1.distance(n2);
+    return distance(n1, n2);
 }
 
 

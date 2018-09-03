@@ -705,9 +705,9 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
     DofManager *p;
     // loop over all particles (nodes in existing domain)
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        double distance = coords.distance( d->giveDofManager(i)->giveCoordinates() );
-        if ( distance < minDistance ) {
-            minDistance = distance;
+        double dist = distance(coords, *d->giveDofManager(i)->giveCoordinates() );
+        if ( dist < minDistance ) {
+            minDistance = dist;
             p = d->giveDofManager(i);
         }
     }

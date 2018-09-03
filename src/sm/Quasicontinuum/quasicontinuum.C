@@ -820,7 +820,7 @@ Quasicontinuum :: stiffnessAssignment(std :: vector< FloatMatrix > &individualSt
         // check: is stiff. assigned to all parts of the link?
         // TO DO: the same check is done in "computeIntersectionsOfLinkWith...".
         //        Use only return value here
-        double totalLength = qn1->giveCoordinates()->distance(qn2->giveCoordinates());
+        double totalLength = distance(*qn1->giveCoordinates(), *qn2->giveCoordinates());
         lengths.times(1 / totalLength); // it is better to use relative lengths
         double sumLength = lengths.sum();
         if ( sumLength < 0.9999 or sumLength > 1.0001 ) {
@@ -873,10 +873,10 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
     }
 
     // coordinates of ending nodes
-    FloatArray &X1 = *qn1->giveCoordinates();
-    FloatArray &X2 = *qn2->giveCoordinates();
+    const auto &X1 = *qn1->giveCoordinates();
+    const auto &X2 = *qn2->giveCoordinates();
 
-    double TotalLength = X2.distance(X1);
+    double TotalLength = distance(X2, X1);
 
     int numberOfIntersected = 0; // number of intersected elements
 
@@ -888,9 +888,9 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
     int iel = end1;
     FloatArray iLens;
 
-    FloatArray &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-    FloatArray &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-    FloatArray &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
+    const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
+    const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
+    const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
     numberOfIntersected = intersectionTestSegmentTriangle2D(intersectCoords, A, B, C, X1, X2);
 
     switch ( numberOfIntersected ) {
@@ -899,7 +899,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
         intersected.followedBy(iel);     // cislo elementu
         break;
     case 1:     // link starts in this element
-        iLen = X1.distance(intersectCoords[0]);
+        iLen = distance(X1, intersectCoords[0]);
         if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
             lengths.push_back(iLen);
             intersected.followedBy(iel);
@@ -913,7 +913,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
         //lengths of all possible cobmination of intersection points
         iLens.resize(numberOfIntersected);
         for ( int nn = 1; nn <= numberOfIntersected; nn++ ) {
-            iLens.at(nn) = X1.distance(intersectCoords[nn - 1]);
+            iLens.at(nn) = distance(X1, intersectCoords[nn - 1]);
         }
         iLen = iLens.at( iLens.giveIndexMaxElem() );     // real length is maximal one
         if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
@@ -968,9 +968,9 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
         for ( int k = 1; k <= neighboursList.giveSize(); k++ ) { // testing of neighbouring elements
             iel = neighboursList.at(k);
 
-            FloatArray &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-            FloatArray &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-            FloatArray &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
+            const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
+            const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
+            const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
             numberOfIntersected = intersectionTestSegmentTriangle2D(intersectCoords, A, B, C, X1, X2);
 
             bool breakFor = false; // go to next element?
@@ -980,7 +980,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
                 continue;
             case 1: // link ends here or there in only fake intersection
                 if ( iel == end2 ) { // end of the link in in this element
-                    iLen = X2.distance(intersectCoords[0]);
+                    iLen = distance(X2, intersectCoords[0]);
                     if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
                         lengths.push_back(iLen);
                         intersected.followedBy(iel);
@@ -999,7 +999,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
                     //lengths of all possible cobmination of intersection points
                     iLens.resize(numberOfIntersected);
                     for ( int nn = 1; nn <= numberOfIntersected; nn++ ) {
-                        iLens.at(nn) = X2.distance(intersectCoords[nn - 1]);
+                        iLens.at(nn) = distance(X2, intersectCoords[nn - 1]);
                     }
                     iLen = iLens.at( iLens.giveIndexMaxElem() ); // real length is maximal
                     if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
@@ -1019,7 +1019,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
                     for ( int nn = 1; nn < numberOfIntersected; nn++ ) {
                         for ( int ii = nn + 1; ii <= numberOfIntersected; ii++ ) {
                             m += 1;
-                            iLens.at(m) = intersectCoords[ii - 1].distance(intersectCoords[nn - 1]);
+                            iLens.at(m) = distance(intersectCoords[ii - 1], intersectCoords[nn - 1]);
                         }
                     }
                     iLen = iLens.at( iLens.giveIndexMaxElem() ); // real length is maximum
@@ -1074,10 +1074,10 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
     }
 
     // coordinates of ending nodes
-    FloatArray &X1 = *qn1->giveCoordinates();
-    FloatArray &X2 = *qn2->giveCoordinates();
+    const auto &X1 = *qn1->giveCoordinates();
+    const auto &X2 = *qn2->giveCoordinates();
 
-    double TotalLength = X2.distance(X1);
+    double TotalLength = distance(X2, X1);
 
     int numberOfIntersected = 0; // number of intersected elements
 
@@ -1089,10 +1089,10 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
     int iel = end1;
     FloatArray iLens;
 
-    FloatArray &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-    FloatArray &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-    FloatArray &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
-    FloatArray &D = *d->giveElement(iel)->giveNode(4)->giveCoordinates();
+    const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
+    const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
+    const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
+    const auto &D = *d->giveElement(iel)->giveNode(4)->giveCoordinates();
     numberOfIntersected = intersectionTestSegmentTetrahedra3D(intersectCoords, A, B, C, D, X1, X2);
 
     switch ( numberOfIntersected ) {
@@ -1101,7 +1101,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
         intersected.followedBy(iel);     // cislo elementu
         break;
     case 1:     // link starts in this element
-        iLen = X1.distance(intersectCoords[0]);
+        iLen = distance(X1, intersectCoords[0]);
         if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
             lengths.push_back(iLen);
             intersected.followedBy(iel);
@@ -1115,7 +1115,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
         //lengths of all possible cobmination of intersection points
         iLens.resize(numberOfIntersected);
         for ( int nn = 1; nn <= numberOfIntersected; nn++ ) {
-            iLens.at(nn) = X1.distance(intersectCoords[nn - 1]);
+            iLens.at(nn) = distance(X1, intersectCoords[nn - 1]);
         }
         iLen = iLens.at( iLens.giveIndexMaxElem() );     // real length is maximal one
         if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
@@ -1170,10 +1170,10 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
         for ( int k = 1; k <= neighboursList.giveSize(); k++ ) { // testing of neighbouring elements
             int iel = neighboursList.at(k);
 
-            FloatArray &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-            FloatArray &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-            FloatArray &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
-            FloatArray &D = *d->giveElement(iel)->giveNode(4)->giveCoordinates();
+            const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
+            const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
+            const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
+            const auto &D = *d->giveElement(iel)->giveNode(4)->giveCoordinates();
             int numberOfIntersected = intersectionTestSegmentTetrahedra3D(intersectCoords, A, B, C, D, X1, X2);
 
 
@@ -1184,7 +1184,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
                 continue; // zadna tuhost se prvku neprirazuje
             case 1: // link ends here or there in only fake intersection
                 if ( iel == end2 ) { // end of the link in in this element
-                    iLen = X2.distance(intersectCoords[0]);
+                    iLen = distance(X2, intersectCoords[0]);
                     if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
                         lengths.push_back(iLen);
                         intersected.followedBy(iel);
@@ -1203,7 +1203,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
                     //lengths of all possible cobmination of intersection points
                     iLens.resize(numberOfIntersected);
                     for ( int nn = 1; nn <= numberOfIntersected; nn++ ) {
-                        iLens.at(nn) = X2.distance(intersectCoords[nn - 1]);
+                        iLens.at(nn) = distance(X2, intersectCoords[nn - 1]);
                     }
                     iLen = iLens.at( iLens.giveIndexMaxElem() ); // real length is maximal
                     if ( iLen / TotalLength >= 1.e-6 ) { // intersection is not negligible
@@ -1223,7 +1223,7 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
                     for ( int nn = 1; nn <= numberOfIntersected; nn++ ) {
                         for ( int ii = nn + 1; ii <= numberOfIntersected; ii++ ) {
                             m += 1;
-                            iLens.at(m) = intersectCoords[ii - 1].distance(intersectCoords[nn - 1]);
+                            iLens.at(m) = distance(intersectCoords[ii - 1], intersectCoords[nn - 1]);
                         }
                     }
                     iLen = iLens.at( iLens.giveIndexMaxElem() ); // real length is maximum
@@ -1308,7 +1308,7 @@ Quasicontinuum :: intersectionTestSegmentTrianglePlucker3D(FloatArray  &intersec
     intersectCoords.clear();
 
     // directional vektor
-    double L = X2.distance(X1);
+    double L = distance(X2, X1);
     double Ur1 = ( X2.at(1) - X1.at(1) ) / L;
     double Ur2 = ( X2.at(2) - X1.at(2) ) / L;
     double Ur3 = ( X2.at(3) - X1.at(3) ) / L;

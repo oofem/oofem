@@ -1132,16 +1132,15 @@ Element :: giveLengthInDir(const FloatArray &normalToCrackPlane)
 // (exploited by the crack band approach)
 //
 {
-    FloatArray *coords;
-    double maxDis, minDis, dis;
+    double maxDis, minDis;
     int nnode = giveNumberOfNodes();
 
-    coords = this->giveNode(1)->giveCoordinates();
-    minDis = maxDis = normalToCrackPlane.dotProduct( * coords, coords->giveSize() );
+    const auto &coords = *this->giveNode(1)->giveCoordinates();
+    minDis = maxDis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
 
     for ( int i = 2; i <= nnode; i++ ) {
-        coords = this->giveNode(i)->giveCoordinates();
-        dis = normalToCrackPlane.dotProduct( * coords, coords->giveSize() );
+        const auto &coords = *this->giveNode(i)->giveCoordinates();
+        double dis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
         if ( dis > maxDis ) {
             maxDis = dis;
         } else if ( dis < minDis ) {

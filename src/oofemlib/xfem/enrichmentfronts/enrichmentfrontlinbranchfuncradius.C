@@ -69,9 +69,9 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: unordered_map< in
 
     for ( int i = 1; i <= nNodes; i++ ) {
         DofManager *dMan = d->giveDofManager(i);
-        const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+        const auto &nodePos = * ( dMan->giveCoordinates() );
 
-        double radius2 = iTipInfo.mGlobalCoord.distance_square(nodePos);
+        double radius2 = distance_square(iTipInfo.mGlobalCoord, nodePos);
 
         if ( radius2 < mEnrichmentRadius * mEnrichmentRadius ) {
             if ( ( ioNodeEnrMarkerMap [ i ] == NodeEnr_START_TIP && iTipInfo.mTipIndex == 1 ) ||
@@ -152,7 +152,7 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< doubl
 {
     const FloatArray &xTip = mTipInfo.mGlobalCoord;
     const FloatArray &gpCoord = iGP.giveGlobalCoordinates();
-    double radius = gpCoord.distance(xTip);
+    double radius = distance(gpCoord, xTip);
 
     std :: vector< double >jumps;
     mpBranchFunc.giveJump(jumps, radius);

@@ -139,7 +139,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
     // XFEM part of B-matrix
     double enrDofsScaleFactor = 1.0;
-    XfemManager *xMan = NULL;
+    XfemManager *xMan = nullptr;
     if ( iEl.giveDomain()->hasXfemManager() ) {
         xMan = iEl.giveDomain()->giveXfemManager();
         enrDofsScaleFactor = xMan->giveEnrDofScaleFactor();
@@ -491,7 +491,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     GeometryBasedEI *ei = dynamic_cast< GeometryBasedEI * >( xMan->giveEnrichmentItem(iEnrItemIndex) );
 
-    if ( ei == NULL ) {
+    if ( ei == nullptr ) {
         oIntersection = false;
         return;
     }
@@ -537,7 +537,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         }
         int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
         if ( foundTip ) {
-        	oPointPartitions.clear();
+            oPointPartitions.clear();
 
             // Divide into subdomains
             int triPassed = 0;
@@ -545,8 +545,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 IntArray bNodes;
                 this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
 
-
-                if( bNodes.giveSize() == 2 ) {
+                if ( bNodes.giveSize() == 2 ) {
 
 					int nsLoc = bNodes.at(1);
 					int neLoc = bNodes.at( bNodes.giveSize() );
@@ -566,32 +565,31 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 						oPointPartitions [ triPassed ].push_back(coordS);
 						oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
 						triPassed++;
-					} else   {
+					} else {
 						oPointPartitions.push_back( std :: vector< FloatArray >() );
 						oPointPartitions [ triPassed ].push_back(tipCoord);
 						oPointPartitions [ triPassed ].push_back(coordS);
 						oPointPartitions [ triPassed ].push_back(coordE);
 						triPassed++;
 					}
-                }
-                else if( bNodes.giveSize() == 3 ) {
+                } else if( bNodes.giveSize() == 3 ) {
 
                 	// Start
-					const FloatArray &coordS = * ( element->giveDofManager(bNodes[0])->giveCoordinates() );
+					const auto &coordS = * ( element->giveDofManager(bNodes[0])->giveCoordinates() );
 
 					// Center
-					const FloatArray &coordC = * ( element->giveDofManager(bNodes[2])->giveCoordinates() );
+					const auto &coordC = * ( element->giveDofManager(bNodes[2])->giveCoordinates() );
 
 					// End
-					const FloatArray &coordE = * ( element->giveDofManager(bNodes[1])->giveCoordinates() );
+					const auto &coordE = * ( element->giveDofManager(bNodes[1])->giveCoordinates() );
 
 
 					if ( i == intersecEdgeInd [ 0 ] ) {
 
 						// Check if the intersection point is closer to the start or end, compared to the center point.
-						double dist_S_2 = intersecPoints[0].distance_square(coordS);
-//						double dist_E_2 = intersecPoints[0].distance_square(coordE);
-						double dist_C_2 = coordC.distance_square(coordS);
+						double dist_S_2 = distance_square(intersecPoints[0], coordS);
+//						double dist_E_2 = distance_square(intersecPoints[0], coordE);
+                        double dist_C_2 = distance_square(coordC, coordS);
 
 						if( dist_S_2 < dist_C_2 ) {
 							oPointPartitions.push_back( std :: vector< FloatArray >() );
@@ -612,8 +610,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 							oPointPartitions [ triPassed ].push_back(coordC);
 							triPassed++;
 
-						}
-						else {
+						} else {
 
 							oPointPartitions.push_back( std :: vector< FloatArray >() );
 							oPointPartitions [ triPassed ].push_back(coordC);
@@ -637,7 +634,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 						}
 
 
-					} else   {
+					} else {
 						oPointPartitions.push_back( std :: vector< FloatArray >() );
 						oPointPartitions [ triPassed ].push_back(tipCoord);
 						oPointPartitions [ triPassed ].push_back(coordS);
@@ -717,7 +714,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     GeometryBasedEI *ei = dynamic_cast< GeometryBasedEI * >( xMan->giveEnrichmentItem(iEnrItemIndex) );
 
-    if ( ei == NULL ) {
+    if ( ei == nullptr ) {
         oIntersection = false;
         return;
     }
@@ -859,7 +856,7 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
     FEInterpolation *interp = element->giveInterpolation(); // Geometry interpolation
     IntArray edgeNodes;
     FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
-    if ( interp2d == NULL ) {
+    if ( interp2d == nullptr ) {
         OOFEM_ERROR("In XfemElementInterface :: partitionEdgeSegment: failed to cast to FEInterpolation2d.\n")
     }
     interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
@@ -985,14 +982,14 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
     size_t numSeg = mpCZIntegrationRules.size();
 
     for ( size_t i = 0; i < numSeg; i++ ) {
-        if ( mpCZIntegrationRules [ i ] != NULL ) {
+        if ( mpCZIntegrationRules [ i ] != nullptr ) {
             mpCZIntegrationRules [ i ]->updateYourself(tStep);
         }
     }
 
     numSeg = mpCZExtraIntegrationRules.size();
     for ( size_t i = 0; i < numSeg; i++ ) {
-        if ( mpCZExtraIntegrationRules [ i ] != NULL ) {
+        if ( mpCZExtraIntegrationRules [ i ] != nullptr ) {
             mpCZExtraIntegrationRules [ i ]->updateYourself(tStep);
         }
     }
@@ -1046,7 +1043,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
 
             GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );
 
-            if ( geoEI != NULL ) {
+            if ( geoEI != nullptr ) {
                 if ( geoEI->isDofManEnriched(* dMan) ) {
                     int numEnr = geoEI->giveNumDofManEnrichments(* dMan);
 
