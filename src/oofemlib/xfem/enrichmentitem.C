@@ -114,11 +114,11 @@ EnrichmentItem :: giveNumberOfEnrDofs() const
 {
     int numEnrDofs = mpEnrichmentFunc->giveNumberOfDofs();
 
-    if ( mpEnrichmentFrontStart != NULL ) {
+    if ( mpEnrichmentFrontStart ) {
         numEnrDofs = max( numEnrDofs, mpEnrichmentFrontStart->giveMaxNumEnrichments() );
     }
 
-    if ( mpEnrichmentFrontEnd != NULL ) {
+    if ( mpEnrichmentFrontEnd ) {
         numEnrDofs = max( numEnrDofs, mpEnrichmentFrontEnd->giveMaxNumEnrichments() );
     }
 
@@ -138,7 +138,7 @@ bool EnrichmentItem :: isElementEnriched(const Element *element) const
 
 int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
 {
-    int nodeInd     = iDMan.giveGlobalNumber();
+    int nodeInd = iDMan.giveGlobalNumber();
     auto res = mNodeEnrMarkerMap.find(nodeInd);
 
     if ( res != mNodeEnrMarkerMap.end() ) {
@@ -176,7 +176,7 @@ bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSe
 
 bool EnrichmentItem :: hasPropagatingFronts() const
 {
-    if ( mpPropagationLaw == NULL ) {
+    if ( mpPropagationLaw == nullptr ) {
         return false;
     }
 
@@ -293,21 +293,21 @@ void EnrichmentItem :: createEnrichedDofs()
         if ( isDofManEnriched(* dMan) ) {
             //printf("dofMan %i is enriched \n", dMan->giveNumber());
             computeEnrichedDofManDofIdArray(EnrDofIdArray, * dMan);
-            
+
             // Collect boundary condition ID of existing dofs
             IntArray bcIndexArray;
             for ( Dof *dof: *dMan ) {
                 bcIndexArray.followedBy(dof->giveBcId());
-            }    
-            
+            }
+
             bool foundBC = false;
             IntArray nonZeroBC;
             if ( !bcIndexArray.containsOnlyZeroes() ) {
                 // BC is found on dofs  
                 foundBC = true;
                 nonZeroBC.findNonzeros(bcIndexArray);
-            }             
-            
+            }
+
             int iDof(1);
             for ( auto &dofid: EnrDofIdArray ) {
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofid ) ) ) {
@@ -346,7 +346,7 @@ void EnrichmentItem :: createEnrichedDofs()
 
         computeEnrichedDofManDofIdArray(EnrDofIdArray, * dMan);
         std :: vector< DofIDItem >dofsToRemove;
-        for ( Dof *dof: *dMan ) {
+        for ( auto &dof: *dMan ) {
             DofIDItem dofID = dof->giveDofID();
 
             if ( dofID >= DofIDItem(poolStart) && dofID <= DofIDItem(poolEnd) ) {
@@ -490,7 +490,7 @@ bool EnrichmentItem :: tipIsTouchingEI(const TipInfo &iTipInfo)
     SpatialLocalizer *localizer = giveDomain()->giveSpatialLocalizer();
 
     Element *tipEl = localizer->giveElementContainingPoint(iTipInfo.mGlobalCoord);
-    if ( tipEl != NULL ) {
+    if ( tipEl ) {
         // Check if the candidate tip is located on the current crack
         FloatArray N;
         FloatArray locCoord;

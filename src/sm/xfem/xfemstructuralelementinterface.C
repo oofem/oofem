@@ -82,12 +82,9 @@ XfemStructuralElementInterface :: XfemStructuralElementInterface(Element *e) :
     mpCZMat(nullptr),
     mCZMaterialNum(-1),
     mCSNumGaussPoints(4),
-	mIncludeBulkJump(true),
-	mIncludeBulkCorr(true)
-{
-
-
-}
+    mIncludeBulkJump(true),
+    mIncludeBulkCorr(true)
+{}
 
 XfemStructuralElementInterface :: ~XfemStructuralElementInterface() {}
 
@@ -166,10 +163,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
                             int czRuleNum = 1;
-                            mpCZIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                            mpCZIntegrationRules_tmp.push_back( std::make_unique<GaussIntegrationRule>(czRuleNum, element) );
 
-                            if(mIncludeBulkCorr) {
-                            	mpCZExtraIntegrationRules_tmp.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
+                            if ( mIncludeBulkCorr ) {
+                                mpCZExtraIntegrationRules_tmp.push_back( std::make_unique<GaussIntegrationRule>(czRuleNum, element) );
                             }
 
                             size_t cz_rule_ind = mpCZIntegrationRules_tmp.size() - 1;
@@ -187,13 +184,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                             if ( crackTang.computeSquaredNorm() > tol2 ) {
                                 crackTang.normalize();
-                            }
-                            else {
-                            	// Oops, we got a segment of length zero.
-                            	// These Gauss weights will be zero, so we can
-                            	// set the tangent to anything reasonable
-                            	crackTang = {0.0, 1.0};
-
+                            } else {
+                                // Oops, we got a segment of length zero.
+                                // These Gauss weights will be zero, so we can
+                                // set the tangent to anything reasonable
+                                crackTang = {0.0, 1.0};
                             }
 
                             FloatArray crackNormal = {
@@ -203,8 +198,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             mpCZIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                            if(mIncludeBulkCorr) {
-                            	mpCZExtraIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                            if ( mIncludeBulkCorr ) {
+                                mpCZExtraIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                            crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
                             }
 
@@ -218,34 +213,31 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
                                 if ( ms ) {
                                     ms->letNormalBe(crackNormal);
+                                } else {
+                                    StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
+
+                                    if ( fe2ms ) {
+                                        fe2ms->letNormalBe(crackNormal);
+
+                                        PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+
+                                        if ( bc ) {
+                                            FloatArray periodicityNormal = crackNormal;
+
+                                            periodicityNormal.normalize();
+
+                                            if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+                                                // Rotate 90 degrees (works equally well for periodicity)
+                                                periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                            }
+
+                                            bc->setPeriodicityNormal(periodicityNormal);
+                                            bc->recomputeTractionMesh();
+                                        }
+                                    } else {
+                                        OOFEM_ERROR("Failed to fetch material status.");
+                                    }
                                 }
-                                else {
-                                	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
-
-                                	if(fe2ms) {
-                                		fe2ms->letNormalBe(crackNormal);
-
-                                		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
-
-                                		if(bc) {
-                                			FloatArray periodicityNormal = crackNormal;
-
-                                			periodicityNormal.normalize();
-
-                                			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
-                                				// Rotate 90 degrees (works equally well for periodicity)
-                                				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
-                                			}
-
-                                			bc->setPeriodicityNormal(periodicityNormal);
-                                			bc->recomputeTractionMesh();
-                                		}
-                                	}
-                                	else {
-                                		OOFEM_ERROR("Failed to fetch material status.");
-                                	}
-                                }
-
 
                                 // Give Gauss point reference to the enrichment item
                                 // to simplify post processing.
@@ -254,54 +246,49 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
                             if ( mIncludeBulkCorr ) {
-
-								for ( auto &gp: *mpCZExtraIntegrationRules_tmp [ cz_rule_ind ] ) {
-									double gw = gp->giveWeight();
+                                for ( auto &gp: *mpCZExtraIntegrationRules_tmp [ cz_rule_ind ] ) {
+                                    double gw = gp->giveWeight();
                                     double segLength = distance(crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
-									gw *= 0.5 * segLength;
-									gp->setWeight(gw);
+                                    gw *= 0.5 * segLength;
+                                    gp->setWeight(gw);
 
-									// Fetch material status and set normal
-									StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
-									if ( ms ) {
-										ms->letNormalBe(crackNormal);
-									} else {
-										StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( gp->giveMaterialStatus() );
+                                    // Fetch material status and set normal
+                                    StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( gp->giveMaterialStatus() );
+                                    if ( ms ) {
+                                        ms->letNormalBe(crackNormal);
+                                    } else {
+                                        StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( gp->giveMaterialStatus() );
 
-										if ( fe2ms ) {
-											fe2ms->letNormalBe(crackNormal);
+                                        if ( fe2ms ) {
+                                            fe2ms->letNormalBe(crackNormal);
 
-											PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+                                            PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
-											if ( bc) {
-												FloatArray periodicityNormal = crackNormal;
-												periodicityNormal.normalize();
+                                            if ( bc) {
+                                                FloatArray periodicityNormal = crackNormal;
+                                                periodicityNormal.normalize();
 
-												if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
-													// Rotate 90 degrees (works equally well for periodicity)
-													periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
-												}
+                                                if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+                                                    // Rotate 90 degrees (works equally well for periodicity)
+                                                    periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                                }
 
-												bc->setPeriodicityNormal(periodicityNormal);
-												bc->recomputeTractionMesh();
+                                                bc->setPeriodicityNormal(periodicityNormal);
+                                                bc->recomputeTractionMesh();
 
-											}
-										} else {
-											// Macroscale material model: nothing needs to be done.
-										}
-									}
-
-								}
-
+                                            }
+                                        } else {
+                                            // Macroscale material model: nothing needs to be done.
+                                        }
+                                    }
+                                }
                             }
-
                         }
                     }
 
                     partitionSucceeded = true;
                 }
-            } // if(firstIntersection)
-            else {
+            } else { // if ( firstIntersection )
                 // Loop over triangles
                 std :: vector< Triangle >allTriCopy;
                 for ( size_t triIndex = 0; triIndex < mSubTri.size(); triIndex++ ) {
@@ -366,7 +353,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
                                 if ( mIncludeBulkCorr ) {
-                                	mpCZExtraIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                                    mpCZExtraIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
                                                                                                  crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
                                 }
 
@@ -381,32 +368,30 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     if ( ms ) {
                                         ms->letNormalBe(crackNormal);
                                     } else {
-                                    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
+                                        StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
 
-                                    	if(fe2ms) {
-                                    		fe2ms->letNormalBe(crackNormal);
+                                        if ( fe2ms ) {
+                                            fe2ms->letNormalBe(crackNormal);
 
-                                    		PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+                                            PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
-                                    		if(bc) {
-                                    			FloatArray periodicityNormal = crackNormal;
+                                            if ( bc ) {
+                                                FloatArray periodicityNormal = crackNormal;
 
-                                    			periodicityNormal.normalize();
+                                                periodicityNormal.normalize();
 
-                                    			if( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
-                                    				// Rotate 90 degrees (works equally well for periodicity)
-                                    				periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
-                                    			}
+                                                if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+                                                    // Rotate 90 degrees (works equally well for periodicity)
+                                                    periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                                }
 
-                                    			bc->setPeriodicityNormal(periodicityNormal);
-                                    			bc->recomputeTractionMesh();
-                                    		}
-                                    	}
-                                    	else {
-                                    		OOFEM_ERROR("Failed to fetch material status.");
-                                    	}
+                                                bc->setPeriodicityNormal(periodicityNormal);
+                                                bc->recomputeTractionMesh();
+                                            }
+                                        } else {
+                                            OOFEM_ERROR("Failed to fetch material status.");
+                                        }
                                     }
-
 
                                     // Give Gauss point reference to the enrichment item
                                     // to simplify post processing.
@@ -415,48 +400,47 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                                 if ( mIncludeBulkCorr ) {
 
-									for ( auto &gp: *mpCZExtraIntegrationRules_tmp [ newRuleInd ] ) {
-										double gw = gp->giveWeight();
+                                    for ( auto &gp: *mpCZExtraIntegrationRules_tmp [ newRuleInd ] ) {
+                                        double gw = gp->giveWeight();
                                         double segLength = distance(crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
-										gw *= 0.5 * segLength;
-										gp->setWeight(gw);
+                                        gw *= 0.5 * segLength;
+                                        gp->setWeight(gw);
 
 
-										// Fetch material status and set normal
-										StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-										if ( ms ) {
-											ms->letNormalBe(crackNormal);
-										} else {
-											StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
+                                        // Fetch material status and set normal
+                                        StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
+                                        if ( ms ) {
+                                            ms->letNormalBe(crackNormal);
+                                        } else {
+                                            StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>( mpCZMat->giveStatus(gp) );
 
-											if ( fe2ms ) {
-												fe2ms->letNormalBe(crackNormal);
+                                            if ( fe2ms ) {
+                                                fe2ms->letNormalBe(crackNormal);
 
-												PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
+                                                PrescribedGradientBCWeak *bc = dynamic_cast<PrescribedGradientBCWeak*>( fe2ms->giveBC() );
 
-												if ( bc ) {
-													FloatArray periodicityNormal = crackNormal;
+                                                if ( bc ) {
+                                                    FloatArray periodicityNormal = crackNormal;
 
-													periodicityNormal.normalize();
+                                                    periodicityNormal.normalize();
 
-													if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
-														// Rotate 90 degrees (works equally well for periodicity)
-														periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
-													}
+                                                    if ( periodicityNormal(0) < 0.0 && periodicityNormal(1) < 0.0 ) {
+                                                        // Rotate 90 degrees (works equally well for periodicity)
+                                                        periodicityNormal = {periodicityNormal(1), -periodicityNormal(0)};
+                                                    }
 
-													bc->setPeriodicityNormal(periodicityNormal);
-													bc->recomputeTractionMesh();
-												}
-											} else {
-												OOFEM_ERROR("Failed to fetch material status.");
-											}
-										}
+                                                    bc->setPeriodicityNormal(periodicityNormal);
+                                                    bc->recomputeTractionMesh();
+                                                }
+                                            } else {
+                                                OOFEM_ERROR("Failed to fetch material status.");
+                                            }
+                                        }
 
-
-										// Give Gauss point reference to the enrichment item
-										// to simplify post processing.
-										crack->AppendCohesiveZoneGaussPoint(gp);
-									}
+                                        // Give Gauss point reference to the enrichment item
+                                        // to simplify post processing.
+                                        crack->AppendCohesiveZoneGaussPoint(gp);
+                                    }
                                 }
                             }
                         }
@@ -472,14 +456,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         // Refine triangles if desired
         int numRefs = xMan->giveNumTriRefs();
 
-        for(int i = 0; i < numRefs; i++) {
-
+        for ( int i = 0; i < numRefs; i++ ) {
             std :: vector< Triangle > triRef;
-
-            for(const Triangle &tri : mSubTri) {
+            for ( const auto &tri : mSubTri ) {
                 Triangle::refineTriangle(triRef, tri);
             }
-
             mSubTri = triRef;
         }
 
@@ -508,7 +489,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
         if ( partitionSucceeded ) {
             std :: vector< std :: unique_ptr< IntegrationRule > >intRule;
-            mIntRule_tmp.emplace_back( new PatchIntegrationRule(ruleNum, element, mSubTri) );
+            mIntRule_tmp.push_back( std::make_unique<PatchIntegrationRule>(ruleNum, element, mSubTri) );
             mIntRule_tmp [ 0 ]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
         }
 
@@ -548,183 +529,162 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         }
 
 
-
         bool map_state_variables = true;
         if ( map_state_variables ) {
 
             ////////////////////////////////////////////////////////////////////////
-        	// Copy bulk GPs
-        	int num_ir_new = mIntRule_tmp.size();
-        	for( int i = 0; i < num_ir_new; i++ ) {
+            // Copy bulk GPs
+            int num_ir_new = mIntRule_tmp.size();
+            for ( int i = 0; i < num_ir_new; i++ ) {
 
-        		for( auto &gp_new : *(mIntRule_tmp[i]) ) {
-
-
-        			// Fetch new material status. Create it if it does not exist.
-        			MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-        			if(!ms_new) {
-        				StructuralElement *s_el = dynamic_cast<StructuralElement*>(element);
-        				StructuralCrossSection *cs = s_el->giveStructuralCrossSection();
-        				cs->createMaterialStatus(*gp_new);
-        				ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-        			}
+                for ( auto &gp_new : *mIntRule_tmp[i] ) {
 
 
+                    // Fetch new material status. Create it if it does not exist.
+                    MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+                    if ( !ms_new ) {
+                        StructuralElement *s_el = dynamic_cast<StructuralElement*>(element);
+                        StructuralCrossSection *cs = s_el->giveStructuralCrossSection();
+                        cs->createMaterialStatus(*gp_new);
+                        ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+                    }
 
-        			// Find closest old GP.
-        			double closest_dist = 0.0;
-        			MaterialStatus *ms_old = giveClosestGP_MatStat( closest_dist, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
+                    // Find closest old GP.
+                    double closest_dist = 0.0;
+                    MaterialStatus *ms_old = giveClosestGP_MatStat( closest_dist, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
 
-        			if ( ms_old ) {
+                    if ( ms_old ) {
+                        // Copy state variables.
+                        MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
 
-						// Copy state variables.
-						MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
+                        if ( mapper_interface ) {
+                            //printf("Successfully casted to MaterialStatusMapperInterface.\n");
+                            mapper_interface->copyStateVariables(*ms_old);
+                        } else {
+                            OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
+                        }
+                    }
 
-						if ( mapper_interface ) {
-//							printf("Successfully casted to MaterialStatusMapperInterface.\n");
-							mapper_interface->copyStateVariables(*ms_old);
-						} else {
-							OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
-						}
-        			}
+                }
 
-        		}
-
-        	}
-            ////////////////////////////////////////////////////////////////////////
-
-
+            }
 
             ////////////////////////////////////////////////////////////////////////
-        	// Copy CZ GPs
-        	if( mCZMaterialNum > 0 ) {
+            // Copy CZ GPs
+            if ( mCZMaterialNum > 0 ) {
 
-				num_ir_new = mpCZIntegrationRules_tmp.size();
-				for( int i = 0; i < num_ir_new; i++ ) {
+                num_ir_new = mpCZIntegrationRules_tmp.size();
+                for ( int i = 0; i < num_ir_new; i++ ) {
 
-					for( auto &gp_new : *(mpCZIntegrationRules_tmp[i]) ) {
+                    for ( auto &gp_new : *(mpCZIntegrationRules_tmp[i]) ) {
 
-						// Fetch new material status. Create it if it does not exist.
-						MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-						if ( !ms_new ) {
-							ms_new = mpCZMat->CreateStatus(gp_new);
-						}
+                        // Fetch new material status. Create it if it does not exist.
+                        MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+                        if ( !ms_new ) {
+                            ms_new = mpCZMat->CreateStatus(gp_new);
+                        }
 
-	        			// Find closest old GP.
-	        			double closest_dist_cz = 0.0;
-	        			MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZIntegrationRules , gp_new->giveGlobalCoordinates());
+                        // Find closest old GP.
+                        double closest_dist_cz = 0.0;
+                        MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZIntegrationRules , gp_new->giveGlobalCoordinates());
 
-	        			// If we are using the nonstandard cz formulation, we
-	        			// also consider mapping from bulk GPs.
-	        			XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( element->giveDomain()->giveXfemManager() );
-	        			bool non_std_cz = false;
-	        			if ( xsMan ) {
-	        				non_std_cz = xsMan->giveUseNonStdCz();
-	        			}
+                        // If we are using the nonstandard cz formulation, we
+                        // also consider mapping from bulk GPs.
+                        XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( element->giveDomain()->giveXfemManager() );
+                        bool non_std_cz = false;
+                        if ( xsMan ) {
+                            non_std_cz = xsMan->giveUseNonStdCz();
+                        }
 
-	        			if ( non_std_cz ) {
-							double closest_dist_bulk = 0.0;
-							MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
-							if ( closest_dist_bulk < closest_dist_cz ) {
-								printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
-								ms_old = ms_old_bulk;
-							}
-	        			}
+                        if ( non_std_cz ) {
+                            double closest_dist_bulk = 0.0;
+                            MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
+                            if ( closest_dist_bulk < closest_dist_cz ) {
+                                printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
+                                ms_old = ms_old_bulk;
+                            }
+                        }
 
-	        			if ( ms_old ) {
+                        if ( ms_old ) {
 
-							// Copy state variables.
-							MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
+                            // Copy state variables.
+                            MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
 
-							if(mapper_interface) {
-								mapper_interface->copyStateVariables(*ms_old);
-							} else {
-								OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
-							}
-	        			}
+                            if ( mapper_interface ) {
+                                mapper_interface->copyStateVariables(*ms_old);
+                            } else {
+                                OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
+                            }
+                        }
 
-					}
-				}
-        	}
-
-            ////////////////////////////////////////////////////////////////////////
-
-
-
+                    }
+                }
+            }
 
             ////////////////////////////////////////////////////////////////////////
-        	// Copy "extra" CZ GPs (Used for non-standard CZ model)
-        	if( mCZMaterialNum > 0 && mIncludeBulkCorr ) {
+            // Copy "extra" CZ GPs (Used for non-standard CZ model)
+            if ( mCZMaterialNum > 0 && mIncludeBulkCorr ) {
 
-        		num_ir_new = mpCZExtraIntegrationRules_tmp.size();
-        		for ( int i = 0; i < num_ir_new; i++ ) {
+                num_ir_new = mpCZExtraIntegrationRules_tmp.size();
+                for ( int i = 0; i < num_ir_new; i++ ) {
 
-        			for( auto &gp_new : *(mpCZExtraIntegrationRules_tmp[i]) ) {
+                    for ( auto &gp_new : *(mpCZExtraIntegrationRules_tmp[i]) ) {
 
-        				// Fetch new material status. Create it if it does not exist.
-        				MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-        				if(!ms_new) {
-        					ms_new = mpCZMat->CreateStatus(gp_new);
-        				}
+                        // Fetch new material status. Create it if it does not exist.
+                        MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
+                        if ( !ms_new ) {
+                            ms_new = mpCZMat->CreateStatus(gp_new);
+                        }
 
-        				// Find closest old GP.
-        				double closest_dist_cz = 0.0;
-        				MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZExtraIntegrationRules , gp_new->giveGlobalCoordinates());
+                        // Find closest old GP.
+                        double closest_dist_cz = 0.0;
+                        MaterialStatus *ms_old = giveClosestGP_MatStat(closest_dist_cz, mpCZExtraIntegrationRules , gp_new->giveGlobalCoordinates());
 
-        				// If we are using the nonstandard cz formulation, we
-        				// also consider mapping from bulk GPs.
-        				XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( element->giveDomain()->giveXfemManager() );
-        				bool non_std_cz = false;
-        				if(xsMan) {
-        					non_std_cz = xsMan->giveUseNonStdCz();
-        				}
+                        // If we are using the nonstandard cz formulation, we
+                        // also consider mapping from bulk GPs.
+                        XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( element->giveDomain()->giveXfemManager() );
+                        bool non_std_cz = false;
+                        if ( xsMan ) {
+                            non_std_cz = xsMan->giveUseNonStdCz();
+                        }
 
-        				if(non_std_cz) {
-        					double closest_dist_bulk = 0.0;
-        					MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
-        					if( closest_dist_bulk < closest_dist_cz ) {
-        						printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
-        						ms_old = ms_old_bulk;
-        					}
-        				}
+                        if ( non_std_cz ) {
+                            double closest_dist_bulk = 0.0;
+                            MaterialStatus *ms_old_bulk = giveClosestGP_MatStat(closest_dist_bulk, element->giveIntegrationRulesArray() , gp_new->giveGlobalCoordinates());
+                            if ( closest_dist_bulk < closest_dist_cz ) {
+                                printf("Bulk is closest. Dist: %e\n", closest_dist_bulk);
+                                ms_old = ms_old_bulk;
+                            }
+                        }
 
-        				if(ms_old) {
+                        if ( ms_old ) {
 
-        					// Copy state variables.
-        					MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
+                            // Copy state variables.
+                            MaterialStatusMapperInterface *mapper_interface = dynamic_cast<MaterialStatusMapperInterface*>( ms_new );
 
-        					if(mapper_interface) {
-        						mapper_interface->copyStateVariables(*ms_old);
-        					}
-        					else {
-        						OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
-        					}
-        				}
+                            if ( mapper_interface ) {
+                                mapper_interface->copyStateVariables(*ms_old);
+                            } else {
+                                OOFEM_ERROR("Failed casting to MaterialStatusMapperInterface.")
+                            }
+                        }
 
-        			}
-        		}
-        	}
-        	else {
-//        		printf("No extra CZ GPs to map.\n");
-        	}
-
-            ////////////////////////////////////////////////////////////////////////
-
-
+                    }
+                }
+            } else {
+                //printf("No extra CZ GPs to map.\n");
+            }
         }
-
-
     }
 
-
     if ( partitionSucceeded ) {
-		mpCZIntegrationRules = std::move(mpCZIntegrationRules_tmp);
+        mpCZIntegrationRules = std::move(mpCZIntegrationRules_tmp);
 
-		if(mIncludeBulkCorr) {
-			mpCZExtraIntegrationRules = std::move(mpCZExtraIntegrationRules_tmp);
-		}
+        if ( mIncludeBulkCorr ) {
+            mpCZExtraIntegrationRules = std::move(mpCZExtraIntegrationRules_tmp);
+        }
 
-		element->setIntegrationRules( std :: move(mIntRule_tmp) );
+        element->setIntegrationRules( std :: move(mIntRule_tmp) );
     }
 
     return partitionSucceeded;
@@ -735,8 +695,8 @@ MaterialStatus* XfemStructuralElementInterface :: giveClosestGP_MatStat(double &
     double min_dist2 = std::numeric_limits<double>::max();
     MaterialStatus *closest_ms = nullptr;
 
-    for(size_t i = 0; i < iRules.size(); i++) {
-        for( auto &gp : *(iRules[i]) ) {
+    for ( size_t i = 0; i < iRules.size(); i++ ) {
+        for ( auto &gp : *(iRules[i]) ) {
 
             const FloatArray &x = gp->giveGlobalCoordinates();
             double d2 = distance_square(x, iCoord);
@@ -756,32 +716,30 @@ double XfemStructuralElementInterface :: computeEffectiveSveSize(StructuralFE2Ma
 {
 
 #if 0
-	return 1.0*sqrt( iFe2Ms->giveBC()->domainSize() );
-//	return 2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
+    //return 1.0*sqrt( iFe2Ms->giveBC()->domainSize() );
+    //return 2.0*sqrt( iFe2Ms->giveBC()->domainSize() );
 
 #else
-	// TODO: Cover also angle < 0 and angle > 90.
+    // TODO: Cover also angle < 0 and angle > 90.
 
-	const FloatArray &n = iFe2Ms->giveNormal();
-	double l_box = sqrt( iFe2Ms->giveBC()->domainSize() );
+    const FloatArray &n = iFe2Ms->giveNormal();
+    double l_box = sqrt( iFe2Ms->giveBC()->domainSize() );
 
-	const FloatArray t = {n(1), -n(0)};
-	double angle = atan2( t(1), t(0) );
+    const FloatArray t = {n(1), -n(0)};
+    double angle = atan2( t(1), t(0) );
 
-	if( angle < 0.25*M_PI ){
-		// angle < 45 degrees
+    if ( angle < 0.25*M_PI ) {
+        // angle < 45 degrees
 
-		double l_s = l_box*(cos(angle));
-		return l_s;
-	}
-	else {
-		// angle >= 45 degrees
+        double l_s = l_box*(cos(angle));
+        return l_s;
+    } else {
+        // angle >= 45 degrees
 
-		double l_s = l_box*(sin(angle));
-		return l_s;
-	}
+        double l_s = l_box*(sin(angle));
+        return l_s;
+    }
 #endif
-
 }
 
 void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
@@ -865,207 +823,201 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
 void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep)
 {
-	if(!useNonStdCz()) {
+    if ( !useNonStdCz() ) {
 
-		if ( hasCohesiveZone() ) {
-			FloatArray solVec;
-			element->computeVectorOf(VM_Total, tStep, solVec);
+        if ( hasCohesiveZone() ) {
+            FloatArray solVec;
+            element->computeVectorOf(VM_Total, tStep, solVec);
 
-			size_t numSeg = mpCZIntegrationRules.size();
-			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-				for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
-					////////////////////////////////////////////////////////
-					// Compute a (slightly modified) N-matrix
+            size_t numSeg = mpCZIntegrationRules.size();
+            for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
+                for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
+                    ////////////////////////////////////////////////////////
+                    // Compute a (slightly modified) N-matrix
 
-					FloatMatrix NMatrix;
-					computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
-					////////////////////////////////////////////////////////
-
-
-					// Traction
-					FloatArray T2D;
+                    FloatMatrix NMatrix;
+                    computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
+                    ////////////////////////////////////////////////////////
 
 
-					// Fetch material status and get normal
-					StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-					if ( ms == nullptr ) {
-						OOFEM_ERROR("Failed to fetch material status.");
-					}
-
-					ms->setNewlyInserted(false); //TODO: Do this in a better place. /ES
-
-					FloatArray crackNormal( ms->giveNormal() );
-
-					// Compute jump vector
-					FloatArray jump2D;
-					computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
+                    // Traction
+                    FloatArray T2D;
 
 
-					computeGlobalCohesiveTractionVector(T2D, jump2D, crackNormal, NMatrix, * gp, tStep);
+                    // Fetch material status and get normal
+                    StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
+                    if ( ms == nullptr ) {
+                        OOFEM_ERROR("Failed to fetch material status.");
+                    }
 
-					// Add to internal force
-					FloatArray NTimesT;
+                    ms->setNewlyInserted(false); //TODO: Do this in a better place. /ES
 
-					NTimesT.beTProductOf(NMatrix, T2D);
-					CrossSection *cs  = element->giveCrossSection();
-					double thickness = cs->give(CS_Thickness, gp);
-					double dA = thickness * gp->giveWeight();
-					answer.add(dA, NTimesT);
-				}
-			}
-		}
-	}
-	else {
-		// Non-standard cz formulation.
-//		printf("Using non-standard cz formulation.\n");
+                    FloatArray crackNormal( ms->giveNormal() );
 
-		if ( hasCohesiveZone() ) {
-			FloatArray solVec;
-			element->computeVectorOf(VM_Total, tStep, solVec);
-
-		    StructuralFE2Material *fe2Mat = dynamic_cast<StructuralFE2Material*>(mpCZMat);
-		    if(!fe2Mat) {
-		    	OOFEM_ERROR("Failed to cast StructuralFE2Material*.")
-		    }
+                    // Compute jump vector
+                    FloatArray jump2D;
+                    computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
 
 
-			size_t numSeg = mpCZIntegrationRules.size();
-			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-				for(int gpInd = 0; gpInd < mpCZIntegrationRules[ segIndex ]->giveNumberOfIntegrationPoints(); gpInd++) {
+                    computeGlobalCohesiveTractionVector(T2D, jump2D, crackNormal, NMatrix, * gp, tStep);
 
-					GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
+                    // Add to internal force
+                    FloatArray NTimesT;
 
-					GaussPoint *bulk_gp = nullptr;
-					if(mIncludeBulkCorr) {
-						bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
-					}
+                    NTimesT.beTProductOf(NMatrix, T2D);
+                    CrossSection *cs  = element->giveCrossSection();
+                    double thickness = cs->give(CS_Thickness, gp);
+                    double dA = thickness * gp->giveWeight();
+                    answer.add(dA, NTimesT);
+                }
+            }
+        }
+    } else {
+        // Non-standard cz formulation.
+        //printf("Using non-standard cz formulation.\n");
 
-				    StructuralMaterial *bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
-				    if(!bulkMat) {
-				    	OOFEM_ERROR("Failed to fetch bulk material.")
-				    }
+        if ( hasCohesiveZone() ) {
+            FloatArray solVec;
+            element->computeVectorOf(VM_Total, tStep, solVec);
 
-			    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
+            StructuralFE2Material *fe2Mat = dynamic_cast<StructuralFE2Material*>(mpCZMat);
+            if ( !fe2Mat ) {
+                OOFEM_ERROR("Failed to cast StructuralFE2Material*.")
+            }
 
-			    	if(fe2ms == nullptr) {
-			    		OOFEM_ERROR("The material status is not of an allowed type.")
-			    	}
+            size_t numSeg = mpCZIntegrationRules.size();
+            for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
+                for ( int gpInd = 0; gpInd < mpCZIntegrationRules[ segIndex ]->giveNumberOfIntegrationPoints(); gpInd++ ) {
 
-					////////////////////////////////////////////////////////
-					// Compute jump
+                    GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
 
-					// Compute a (slightly modified) N-matrix
-					FloatMatrix NMatrix;
-					computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
+                    GaussPoint *bulk_gp = nullptr;
+                    if ( mIncludeBulkCorr ) {
+                        bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
+                    }
 
-					FloatArray jump2D;
-					computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
+                    StructuralMaterial *bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
+                    if ( !bulkMat ) {
+                        OOFEM_ERROR("Failed to fetch bulk material.")
+                    }
 
-					////////////////////////////////////////////////////////
-					// Fetch normal
-					FloatArray crackNormal( fe2ms->giveNormal() );
+                    StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
 
+                    if ( fe2ms == nullptr ) {
+                        OOFEM_ERROR("The material status is not of an allowed type.")
+                    }
 
-					////////////////////////////////////////////////////////
-					// Fetch L_s
-					double l_s = computeEffectiveSveSize( fe2ms );
+                    ////////////////////////////////////////////////////////
+                    // Compute jump
 
+                    // Compute a (slightly modified) N-matrix
+                    FloatMatrix NMatrix;
+                    computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
 
-					////////////////////////////////////////////////////////
-					// Construct strain (only consider the smeared jump for now)
-					FloatArray smearedJumpStrain = {jump2D(0)*crackNormal(0)/l_s, jump2D(1)*crackNormal(1)/l_s, 0.0, 0.0, 0.0, (1.0/l_s)*( jump2D(0)*crackNormal(1) + jump2D(1)*crackNormal(0) )};
+                    FloatArray jump2D;
+                    computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
 
-					FloatArray smearedBulkStrain(6);
-					smearedBulkStrain.zero();
-					FloatMatrix BAvg;
-
-					if(mIncludeBulkJump) {
-						////////////////////////////////////////////////////////
-						// Bulk contribution to SVE strain
-
-						// Crack gp coordinates
-						const FloatArray &xC = gp->giveGlobalCoordinates();
-
-						// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
-						double eps = 1.0e-6;
-						FloatArray xPert = xC;
-
-						xPert.add(eps, crackNormal);
-						FloatArray locCoordPert;
-						element->computeLocalCoordinates(locCoordPert, xPert);
-
-						FloatMatrix BPlus;
-						this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
-
-						xPert = xC;
-						xPert.add(-eps, crackNormal);
-						element->computeLocalCoordinates(locCoordPert, xPert);
-
-						FloatMatrix BMinus;
-						this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
-
-						BAvg = BPlus;
-						BAvg.add(1.0, BMinus);
-						BAvg.times(0.5);
-
-						smearedBulkStrain.beProductOf(BAvg, solVec);
-
-						if( smearedBulkStrain.giveSize() == 4 ) {
-							smearedBulkStrain = {smearedBulkStrain(0), smearedBulkStrain(1), smearedBulkStrain(2), 0.0, 0.0, smearedBulkStrain(3)};
-						}
-
-						FloatArray smearedJumpStrainTemp = smearedJumpStrain;
-
-						smearedJumpStrain.add(smearedBulkStrain);
-					}
+                    ////////////////////////////////////////////////////////
+                    // Fetch normal
+                    FloatArray crackNormal( fe2ms->giveNormal() );
 
 
-					////////////////////////////////////////////////////////
-					// Compute homogenized stress
-					StructuralElement *se = dynamic_cast<StructuralElement*>(this->element);
-					if(!se) {
-						OOFEM_ERROR("Failed to cast StructuralElement.")
-					}
-
-					FloatArray stressVec;
-
-					fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
-//					printf("stressVec: "); stressVec.printYourself();
+                    ////////////////////////////////////////////////////////
+                    // Fetch L_s
+                    double l_s = computeEffectiveSveSize( fe2ms );
 
 
-					FloatArray trac = {stressVec(0)*crackNormal(0)+stressVec(5)*crackNormal(1), stressVec(5)*crackNormal(0)+stressVec(1)*crackNormal(1)};
+                    ////////////////////////////////////////////////////////
+                    // Construct strain (only consider the smeared jump for now)
+                    FloatArray smearedJumpStrain = {jump2D(0)*crackNormal(0)/l_s, jump2D(1)*crackNormal(1)/l_s, 0.0, 0.0, 0.0, (1.0/l_s)*( jump2D(0)*crackNormal(1) + jump2D(1)*crackNormal(0) )};
 
-					////////////////////////////////////////////////////////
-					// Standard part
+                    FloatArray smearedBulkStrain(6);
+                    smearedBulkStrain.zero();
+                    FloatMatrix BAvg;
 
-					// Add to internal force
-					FloatArray NTimesT;
+                    if ( mIncludeBulkJump ) {
+                        ////////////////////////////////////////////////////////
+                        // Bulk contribution to SVE strain
 
-					NTimesT.beTProductOf(NMatrix, trac);
-					CrossSection *cs  = element->giveCrossSection();
-					double thickness = cs->give(CS_Thickness, gp);
-					double dA = thickness * gp->giveWeight();
-					answer.add(dA, NTimesT);
+                        // Crack gp coordinates
+                        const FloatArray &xC = gp->giveGlobalCoordinates();
+
+                        // For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
+                        double eps = 1.0e-6;
+                        FloatArray xPert = xC;
+
+                        xPert.add(eps, crackNormal);
+                        FloatArray locCoordPert;
+                        element->computeLocalCoordinates(locCoordPert, xPert);
+
+                        FloatMatrix BPlus;
+                        this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
+
+                        xPert = xC;
+                        xPert.add(-eps, crackNormal);
+                        element->computeLocalCoordinates(locCoordPert, xPert);
+
+                        FloatMatrix BMinus;
+                        this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
+
+                        BAvg = BPlus;
+                        BAvg.add(1.0, BMinus);
+                        BAvg.times(0.5);
+
+                        smearedBulkStrain.beProductOf(BAvg, solVec);
+
+                        if ( smearedBulkStrain.giveSize() == 4 ) {
+                            smearedBulkStrain = {smearedBulkStrain(0), smearedBulkStrain(1), smearedBulkStrain(2), 0.0, 0.0, smearedBulkStrain(3)};
+                        }
+
+                        FloatArray smearedJumpStrainTemp = smearedJumpStrain;
+
+                        smearedJumpStrain.add(smearedBulkStrain);
+                    }
 
 
-					if(mIncludeBulkCorr) {
+                    ////////////////////////////////////////////////////////
+                    // Compute homogenized stress
+                    StructuralElement *se = dynamic_cast<StructuralElement*>(this->element);
+                    if ( !se ) {
+                        OOFEM_ERROR("Failed to cast StructuralElement.")
+                    }
 
-						FloatArray stressVecBulk;
-						bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
+                    FloatArray stressVec;
 
-						////////////////////////////////////////////////////////
-						// Non-standard jump part
-						FloatArray stressV4 = {stressVec(0)-stressVecBulk(0), stressVec(1)-stressVecBulk(1), stressVec(2)-stressVecBulk(2), stressVec(5)-stressVecBulk(5)};
-						FloatArray BTimesT;
-						BTimesT.beTProductOf(BAvg, stressV4);
-						answer.add(1.0*dA*l_s, BTimesT);
-					}
+                    fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
+                    //printf("stressVec: "); stressVec.printYourself();
 
-				}
-			}
-		}
 
-	}
+                    FloatArray trac = {stressVec(0)*crackNormal(0)+stressVec(5)*crackNormal(1), stressVec(5)*crackNormal(0)+stressVec(1)*crackNormal(1)};
+
+                    ////////////////////////////////////////////////////////
+                    // Standard part
+
+                    // Add to internal force
+                    FloatArray NTimesT;
+
+                    NTimesT.beTProductOf(NMatrix, trac);
+                    CrossSection *cs  = element->giveCrossSection();
+                    double thickness = cs->give(CS_Thickness, gp);
+                    double dA = thickness * gp->giveWeight();
+                    answer.add(dA, NTimesT);
+
+                    if ( mIncludeBulkCorr ) {
+                        FloatArray stressVecBulk;
+                        bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
+
+                        ////////////////////////////////////////////////////////
+                        // Non-standard jump part
+                        FloatArray stressV4 = {stressVec(0)-stressVecBulk(0), stressVec(1)-stressVecBulk(1), stressVec(2)-stressVecBulk(2), stressVec(5)-stressVecBulk(5)};
+                        FloatArray BTimesT;
+                        BTimesT.beTProductOf(BAvg, stressV4);
+                        answer.add(1.0*dA*l_s, BTimesT);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void XfemStructuralElementInterface :: computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep)
@@ -1074,19 +1026,12 @@ void XfemStructuralElementInterface :: computeGlobalCohesiveTractionVector(Float
     F.resize(3, 3);
     F.beUnitMatrix();         // TODO: Compute properly
 
-
-    FloatArray jump3D = {
-        iJump.at(1), iJump.at(2), 0.0
-    };
+    FloatArray jump3D = {iJump.at(1), iJump.at(2), 0.0};
 
 
-    FloatArray crackNormal3D = {
-        iCrackNormal.at(1), iCrackNormal.at(2), 0.0
-    };
+    FloatArray crackNormal3D = {iCrackNormal.at(1), iCrackNormal.at(2), 0.0};
 
-    FloatArray ez = {
-        0.0, 0.0, 1.0
-    };
+    FloatArray ez = {0.0, 0.0, 1.0};
     FloatArray crackTangent3D;
     crackTangent3D.beVectorProductOf(crackNormal3D, ez);
 
@@ -1098,386 +1043,373 @@ void XfemStructuralElementInterface :: computeGlobalCohesiveTractionVector(Float
     FloatArray TLoc, jump3DLoc, TLocRenumbered(3);
     jump3DLoc.beTProductOf(locToGlob, jump3D);
 
-    FloatArray jump3DLocRenumbered = {
-        jump3DLoc.at(3), jump3DLoc.at(1), jump3DLoc.at(2)
-    };
+    FloatArray jump3DLocRenumbered = {jump3DLoc.at(3), jump3DLoc.at(1), jump3DLoc.at(2)};
 
     StructuralInterfaceMaterial *intMat = dynamic_cast<StructuralInterfaceMaterial*>(mpCZMat);
-    if(intMat) {
-    	intMat->giveFirstPKTraction_3d(TLocRenumbered, & iGP, jump3DLocRenumbered, F, tStep);
-    }
-    else {
-    	OOFEM_ERROR("Failed to cast StructuralInterfaceMaterial*.")
+    if ( intMat ) {
+        intMat->giveFirstPKTraction_3d(TLocRenumbered, & iGP, jump3DLocRenumbered, F, tStep);
+    } else {
+        OOFEM_ERROR("Failed to cast StructuralInterfaceMaterial*.")
     }
 
-    TLoc = {
-        TLocRenumbered.at(2), TLocRenumbered.at(3), TLocRenumbered.at(1)
-    };
-
+    TLoc = {TLocRenumbered.at(2), TLocRenumbered.at(3), TLocRenumbered.at(1)};
 
     FloatArray T;
     T.beProductOf(locToGlob, TLoc);
 
-    oT = {
-        T.at(1), T.at(2)
-    };
+    oT = {T.at(1), T.at(2)};
 }
 
 void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
 {
+    if ( !useNonStdCz() ) {
+
+        if ( hasCohesiveZone() ) {
+            FloatArray solVec;
+            element->computeVectorOf(VM_Total, tStep, solVec);
+
+            size_t numSeg = mpCZIntegrationRules.size();
+
+            StructuralInterfaceMaterial *intMat = dynamic_cast<StructuralInterfaceMaterial*>(mpCZMat);
+            if ( !intMat ) {
+                OOFEM_ERROR("Failed to cast StructuralInterfaceMaterial*.")
+            }
 
-	if(!useNonStdCz()) {
+            for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
+                for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
+                    ////////////////////////////////////////////////////////
+                    // Compute a (slightly modified) N-matrix
 
-		if ( hasCohesiveZone() ) {
-			FloatArray solVec;
-			element->computeVectorOf(VM_Total, tStep, solVec);
+                    FloatMatrix NMatrix;
+                    computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
 
-			size_t numSeg = mpCZIntegrationRules.size();
+                    ////////////////////////////////////////////////////////
+                    // Compute jump vector
+                    FloatArray jump2D;
+                    computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
 
-		    StructuralInterfaceMaterial *intMat = dynamic_cast<StructuralInterfaceMaterial*>(mpCZMat);
-		    if(!intMat) {
-		    	OOFEM_ERROR("Failed to cast StructuralInterfaceMaterial*.")
-		    }
+                    FloatArray jump3D = {
+                        0.0, jump2D.at(1), jump2D.at(2)
+                    };
 
+                    // Compute traction
+                    FloatMatrix F;
+                    F.resize(3, 3);
+                    F.beUnitMatrix();                     // TODO: Compute properly
 
-			for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-				for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
-					////////////////////////////////////////////////////////
-					// Compute a (slightly modified) N-matrix
+                    FloatMatrix K3DRenumbered, K3DGlob;
 
-					FloatMatrix NMatrix;
-					computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
+                    FloatMatrix K2D;
+                    K2D.resize(2, 2);
+                    K2D.zero();
 
-					////////////////////////////////////////////////////////
-					// Compute jump vector
-					FloatArray jump2D;
-					computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
+                    if ( intMat->hasAnalyticalTangentStiffness() ) {
+                        ///////////////////////////////////////////////////
+                        // Analytical tangent
 
-					FloatArray jump3D = {
-						0.0, jump2D.at(1), jump2D.at(2)
-					};
+                        FloatMatrix K3D;
+                        intMat->give3dStiffnessMatrix_dTdj(K3DRenumbered, TangentStiffness, gp, tStep);
 
-					// Compute traction
-					FloatMatrix F;
-					F.resize(3, 3);
-					F.beUnitMatrix();                     // TODO: Compute properly
+                        K3D.resize(3, 3);
+                        K3D.zero();
+                        K3D.at(1, 1) = K3DRenumbered.at(2, 2);
+                        K3D.at(1, 2) = K3DRenumbered.at(2, 3);
+                        K3D.at(1, 3) = K3DRenumbered.at(2, 1);
 
-					FloatMatrix K3DRenumbered, K3DGlob;
+                        K3D.at(2, 1) = K3DRenumbered.at(3, 2);
+                        K3D.at(2, 2) = K3DRenumbered.at(3, 3);
+                        K3D.at(2, 3) = K3DRenumbered.at(3, 1);
 
+                        K3D.at(3, 1) = K3DRenumbered.at(1, 2);
+                        K3D.at(3, 2) = K3DRenumbered.at(1, 3);
+                        K3D.at(3, 3) = K3DRenumbered.at(1, 1);
 
-					FloatMatrix K2D;
-					K2D.resize(2, 2);
-					K2D.zero();
 
-					if ( intMat->hasAnalyticalTangentStiffness() ) {
-						///////////////////////////////////////////////////
-						// Analytical tangent
+                        // Fetch material status and get normal
+                        StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
+                        if ( ms == nullptr ) {
+                            OOFEM_ERROR("Failed to fetch material status.");
+                        }
 
-						FloatMatrix K3D;
-						intMat->give3dStiffnessMatrix_dTdj(K3DRenumbered, TangentStiffness, gp, tStep);
+                        FloatArray crackNormal( ms->giveNormal() );
 
-						K3D.resize(3, 3);
-						K3D.zero();
-						K3D.at(1, 1) = K3DRenumbered.at(2, 2);
-						K3D.at(1, 2) = K3DRenumbered.at(2, 3);
-						K3D.at(1, 3) = K3DRenumbered.at(2, 1);
+                        FloatArray crackNormal3D = {
+                            crackNormal.at(1), crackNormal.at(2), 0.0
+                        };
 
-						K3D.at(2, 1) = K3DRenumbered.at(3, 2);
-						K3D.at(2, 2) = K3DRenumbered.at(3, 3);
-						K3D.at(2, 3) = K3DRenumbered.at(3, 1);
+                        FloatArray ez = {
+                            0.0, 0.0, 1.0
+                        };
+                        FloatArray crackTangent3D;
+                        crackTangent3D.beVectorProductOf(crackNormal3D, ez);
 
-						K3D.at(3, 1) = K3DRenumbered.at(1, 2);
-						K3D.at(3, 2) = K3DRenumbered.at(1, 3);
-						K3D.at(3, 3) = K3DRenumbered.at(1, 1);
+                        FloatMatrix locToGlob(3, 3);
+                        locToGlob.setColumn(crackTangent3D, 1);
+                        locToGlob.setColumn(crackNormal3D, 2);
+                        locToGlob.setColumn(ez, 3);
 
 
-						// Fetch material status and get normal
-						StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-						if ( ms == nullptr ) {
-							OOFEM_ERROR("Failed to fetch material status.");
-						}
+                        FloatMatrix tmp3(3, 3);
+                        tmp3.beProductTOf(K3D, locToGlob);
+                        K3DGlob.beProductOf(locToGlob, tmp3);
 
-						FloatArray crackNormal( ms->giveNormal() );
+                        K2D.at(1, 1) = K3DGlob.at(1, 1);
+                        K2D.at(1, 2) = K3DGlob.at(1, 2);
+                        K2D.at(2, 1) = K3DGlob.at(2, 1);
+                        K2D.at(2, 2) = K3DGlob.at(2, 2);
+                    } else {
+                        ///////////////////////////////////////////////////
+                        // Numerical tangent
+                        double eps = 1.0e-9;
 
-						FloatArray crackNormal3D = {
-							crackNormal.at(1), crackNormal.at(2), 0.0
-						};
+                        FloatArray T, TPert;
 
-						FloatArray ez = {
-							0.0, 0.0, 1.0
-						};
-						FloatArray crackTangent3D;
-						crackTangent3D.beVectorProductOf(crackNormal3D, ez);
+                        // Fetch material status and get normal
+                        StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
+                        if ( ms == nullptr ) {
+                            OOFEM_ERROR("Failed to fetch material status.");
+                        }
 
-						FloatMatrix locToGlob(3, 3);
-						locToGlob.setColumn(crackTangent3D, 1);
-						locToGlob.setColumn(crackNormal3D, 2);
-						locToGlob.setColumn(ez, 3);
+                        FloatArray crackNormal( ms->giveNormal() );
 
+                        computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, * gp, tStep);
 
-						FloatMatrix tmp3(3, 3);
-						tmp3.beProductTOf(K3D, locToGlob);
-						K3DGlob.beProductOf(locToGlob, tmp3);
 
-						K2D.at(1, 1) = K3DGlob.at(1, 1);
-						K2D.at(1, 2) = K3DGlob.at(1, 2);
-						K2D.at(2, 1) = K3DGlob.at(2, 1);
-						K2D.at(2, 2) = K3DGlob.at(2, 2);
-					} else {
-						///////////////////////////////////////////////////
-						// Numerical tangent
-						double eps = 1.0e-9;
+                        FloatArray jump2DPert;
 
-						FloatArray T, TPert;
 
-						// Fetch material status and get normal
-						StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
-						if ( ms == nullptr ) {
-							OOFEM_ERROR("Failed to fetch material status.");
-						}
+                        jump2DPert = jump2D;
+                        jump2DPert.at(1) += eps;
+                        computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, * gp, tStep);
 
-						FloatArray crackNormal( ms->giveNormal() );
+                        K2D.at(1, 1) = ( TPert.at(1) - T.at(1) ) / eps;
+                        K2D.at(2, 1) = ( TPert.at(2) - T.at(2) ) / eps;
 
-						computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, * gp, tStep);
+                        jump2DPert = jump2D;
+                        jump2DPert.at(2) += eps;
+                        computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, * gp, tStep);
 
+                        K2D.at(1, 2) = ( TPert.at(1) - T.at(1) ) / eps;
+                        K2D.at(2, 2) = ( TPert.at(2) - T.at(2) ) / eps;
 
-						FloatArray jump2DPert;
+                        computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, * gp, tStep);
+                    }
 
+                    FloatMatrix tmp, tmp2;
+                    tmp.beProductOf(K2D, NMatrix);
+                    tmp2.beTProductOf(NMatrix, tmp);
 
-						jump2DPert = jump2D;
-						jump2DPert.at(1) += eps;
-						computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, * gp, tStep);
+                    CrossSection *cs  = element->giveCrossSection();
+                    double thickness = cs->give(CS_Thickness, gp);
+                    double dA = thickness * gp->giveWeight();
+                    answer.add(dA, tmp2);
+                }
+            }
+        }
+    } else {
+        // Non-standard cz formulation.
 
-						K2D.at(1, 1) = ( TPert.at(1) - T.at(1) ) / eps;
-						K2D.at(2, 1) = ( TPert.at(2) - T.at(2) ) / eps;
 
-						jump2DPert = jump2D;
-						jump2DPert.at(2) += eps;
-						computeGlobalCohesiveTractionVector(TPert, jump2DPert, crackNormal, NMatrix, * gp, tStep);
+        FloatArray solVec;
+        element->computeVectorOf(VM_Total, tStep, solVec);
 
-						K2D.at(1, 2) = ( TPert.at(1) - T.at(1) ) / eps;
-						K2D.at(2, 2) = ( TPert.at(2) - T.at(2) ) / eps;
+        size_t numSeg = mpCZIntegrationRules.size();
 
-						computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, * gp, tStep);
-					}
+        StructuralFE2Material *fe2Mat = dynamic_cast<StructuralFE2Material*>(mpCZMat);
+        if ( !fe2Mat ) {
+            OOFEM_ERROR("Failed to cast StructuralFE2Material*.")
+        }
 
-					FloatMatrix tmp, tmp2;
-					tmp.beProductOf(K2D, NMatrix);
-					tmp2.beTProductOf(NMatrix, tmp);
+        for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
+            //for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
+            for ( int gpInd = 0; gpInd < mpCZIntegrationRules[ segIndex ]->giveNumberOfIntegrationPoints(); gpInd++ ) {
 
-					CrossSection *cs  = element->giveCrossSection();
-					double thickness = cs->give(CS_Thickness, gp);
-					double dA = thickness * gp->giveWeight();
-					answer.add(dA, tmp2);
-				}
-			}
-		}
-	}
-	else {
-		// Non-standard cz formulation.
+                GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
 
+                GaussPoint *bulk_gp = nullptr;
+                StructuralMaterial *bulkMat = nullptr;
+                if ( mIncludeBulkCorr ) {
+                    bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
+                    bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
 
-		FloatArray solVec;
-		element->computeVectorOf(VM_Total, tStep, solVec);
+                    if ( !bulkMat ) {
+                        OOFEM_ERROR("Failed to fetch bulk material.")
+                    }
 
-		size_t numSeg = mpCZIntegrationRules.size();
+                }
 
-	    StructuralFE2Material *fe2Mat = dynamic_cast<StructuralFE2Material*>(mpCZMat);
-	    if(!fe2Mat) {
-	    	OOFEM_ERROR("Failed to cast StructuralFE2Material*.")
-	    }
 
-		for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-//			for ( auto &gp: *mpCZIntegrationRules [ segIndex ] ) {
-			for(int gpInd = 0; gpInd < mpCZIntegrationRules[ segIndex ]->giveNumberOfIntegrationPoints(); gpInd++) {
+                StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
 
-				GaussPoint *gp = mpCZIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
+                if ( fe2ms == nullptr ) {
+                    OOFEM_ERROR("The material status is not of an allowed type.")
+                }
 
-				GaussPoint *bulk_gp = nullptr;
-				StructuralMaterial *bulkMat = nullptr;
-				if(mIncludeBulkCorr) {
-					bulk_gp = mpCZExtraIntegrationRules[ segIndex ]->getIntegrationPoint(gpInd);
-					bulkMat = dynamic_cast<StructuralMaterial*>( element->giveCrossSection()->giveMaterial(bulk_gp) );
+                ////////////////////////////////////////////////////////
+                // Compute a (slightly modified) N-matrix
 
-				    if(!bulkMat) {
-				    	OOFEM_ERROR("Failed to fetch bulk material.")
-				    }
+                FloatMatrix NMatrix;
+                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
 
-				}
 
+                ////////////////////////////////////////////////////////
+                // Fetch normal
+                FloatArray n( fe2ms->giveNormal() );
 
-		    	StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*> ( gp->giveMaterialStatus() );
+                // Traction part of tangent
+                FloatMatrix C;
+                fe2Mat->give3dMaterialStiffnessMatrix(C, TangentStiffness, gp, tStep);
 
-		    	if(fe2ms == nullptr) {
-		    		OOFEM_ERROR("The material status is not of an allowed type.")
-		    	}
+                FloatMatrix CBulk;
+                if ( mIncludeBulkCorr ) {
+                    bulkMat->give3dMaterialStiffnessMatrix(CBulk, TangentStiffness, bulk_gp, tStep);
+                }
 
-		    	////////////////////////////////////////////////////////
-				// Compute a (slightly modified) N-matrix
+                ////////////////////////////////////////////////////////
+                // Fetch L_s
+                double l_s = computeEffectiveSveSize( fe2ms );
 
-				FloatMatrix NMatrix;
-				computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
+                FloatMatrix Ka(2,2);
+                double a1 = 1.0;
+                double a2 = 1.0;
+                double a3 = 1.0;
+                Ka(0,0) = (0.5/l_s)*(    C(0,0)*n(0)*n(0) + a2*C(0,5)*n(0)*n(1) + a1*C(5,0)*n(1)*n(0) + a3*C(5,5)*n(1)*n(1) ) +
+                        (0.5/l_s)*(    C(0,0)*n(0)*n(0) + a2*C(0,5)*n(0)*n(1) + a1*C(5,0)*n(1)*n(0) + a3*C(5,5)*n(1)*n(1) );
 
+                Ka(0,1) = (0.5/l_s)*( a2*C(0,5)*n(0)*n(0) +    C(0,1)*n(0)*n(1) + a3*C(5,5)*n(1)*n(0) + a1*C(5,1)*n(1)*n(1) ) +
+                        (0.5/l_s)*( a2*C(0,5)*n(0)*n(0) +    C(0,1)*n(0)*n(1) + a3*C(5,5)*n(1)*n(0) + a1*C(5,1)*n(1)*n(1) );
 
-				////////////////////////////////////////////////////////
-				// Fetch normal
-				FloatArray n( fe2ms->giveNormal() );
 
-				// Traction part of tangent
-				FloatMatrix C;
-				fe2Mat->give3dMaterialStiffnessMatrix(C, TangentStiffness, gp, tStep);
+                Ka(1,0) = (0.5/l_s)*( a1*C(5,0)*n(0)*n(0) + a3*C(5,5)*n(0)*n(1) +    C(1,0)*n(1)*n(0) + a2*C(1,5)*n(1)*n(1) ) +
+                        (0.5/l_s)*( a1*C(5,0)*n(0)*n(0) + a3*C(5,5)*n(0)*n(1) +    C(1,0)*n(1)*n(0) + a2*C(1,5)*n(1)*n(1) );
 
-				FloatMatrix CBulk;
-				if(mIncludeBulkCorr) {
-					bulkMat->give3dMaterialStiffnessMatrix(CBulk, TangentStiffness, bulk_gp, tStep);
-				}
 
+                Ka(1,1) = (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) ) +
+                        (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) );
 
-				////////////////////////////////////////////////////////
-				// Fetch L_s
-				double l_s = computeEffectiveSveSize( fe2ms );
 
-				FloatMatrix Ka(2,2);
-				double a1 = 1.0;
-				double a2 = 1.0;
-				double a3 = 1.0;
-				Ka(0,0) = (0.5/l_s)*(    C(0,0)*n(0)*n(0) + a2*C(0,5)*n(0)*n(1) + a1*C(5,0)*n(1)*n(0) + a3*C(5,5)*n(1)*n(1) ) +
-						  (0.5/l_s)*(    C(0,0)*n(0)*n(0) + a2*C(0,5)*n(0)*n(1) + a1*C(5,0)*n(1)*n(0) + a3*C(5,5)*n(1)*n(1) );
+                FloatMatrix tmp, tmp2;
+                tmp.beProductOf(Ka, NMatrix);
+                tmp2.beTProductOf(NMatrix, tmp);
 
-				Ka(0,1) = (0.5/l_s)*( a2*C(0,5)*n(0)*n(0) +    C(0,1)*n(0)*n(1) + a3*C(5,5)*n(1)*n(0) + a1*C(5,1)*n(1)*n(1) ) +
-						  (0.5/l_s)*( a2*C(0,5)*n(0)*n(0) +    C(0,1)*n(0)*n(1) + a3*C(5,5)*n(1)*n(0) + a1*C(5,1)*n(1)*n(1) );
+                CrossSection *cs  = element->giveCrossSection();
+                double thickness = cs->give(CS_Thickness, gp);
+                double dA = thickness * gp->giveWeight();
+                answer.add(dA, tmp2);
 
 
-				Ka(1,0) = (0.5/l_s)*( a1*C(5,0)*n(0)*n(0) + a3*C(5,5)*n(0)*n(1) +    C(1,0)*n(1)*n(0) + a2*C(1,5)*n(1)*n(1) ) +
-						  (0.5/l_s)*( a1*C(5,0)*n(0)*n(0) + a3*C(5,5)*n(0)*n(1) +    C(1,0)*n(1)*n(0) + a2*C(1,5)*n(1)*n(1) );
 
+                FloatMatrix BAvg;
 
-				Ka(1,1) = (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) ) +
-						  (0.5/l_s)*( a3*C(5,5)*n(0)*n(0) + a1*C(5,1)*n(0)*n(1) + a2*C(1,5)*n(1)*n(0) +    C(1,1)*n(1)*n(1) );
+                if ( mIncludeBulkJump ) {
+                    ////////////////////////////////////////////////////////
+                    // Bulk contribution to SVE strain
 
+                    // Crack gp coordinates
+                    const FloatArray &xC = gp->giveGlobalCoordinates();
 
-				FloatMatrix tmp, tmp2;
-				tmp.beProductOf(Ka, NMatrix);
-				tmp2.beTProductOf(NMatrix, tmp);
+                    // For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
+                    double eps = 1.0e-6;
+                    FloatArray xPert = xC;
 
-				CrossSection *cs  = element->giveCrossSection();
-				double thickness = cs->give(CS_Thickness, gp);
-				double dA = thickness * gp->giveWeight();
-				answer.add(dA, tmp2);
+                    xPert.add(eps, n);
+                    FloatArray locCoordPert;
+                    element->computeLocalCoordinates(locCoordPert, xPert);
 
+                    FloatMatrix BPlus;
+                    this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
 
+                    xPert = xC;
+                    xPert.add(-eps, n);
+                    element->computeLocalCoordinates(locCoordPert, xPert);
 
-				FloatMatrix BAvg;
+                    FloatMatrix BMinus;
+                    this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
 
-				if(mIncludeBulkJump) {
-					////////////////////////////////////////////////////////
-					// Bulk contribution to SVE strain
+                    BAvg = BPlus;
+                    BAvg.add(1.0, BMinus);
+                    BAvg.times(0.5);
 
-					// Crack gp coordinates
-					const FloatArray &xC = gp->giveGlobalCoordinates();
 
-					// For now, we will just perturb the coordinates of the GP to compute B^- and B^+ numerically.
-					double eps = 1.0e-6;
-					FloatArray xPert = xC;
+                    FloatMatrix Kb(2,4); // Implicitly assumes plane strain. Fix later.
 
-					xPert.add(eps, n);
-					FloatArray locCoordPert;
-					element->computeLocalCoordinates(locCoordPert, xPert);
+                    Kb(0,0) = C(0,0)*n(0) + C(5,0)*n(1);
+                    Kb(0,1) = C(0,1)*n(0) + C(5,1)*n(1);
+                    Kb(0,3) = C(0,5)*n(0) + C(5,5)*n(1);
 
-					FloatMatrix BPlus;
-					this->ComputeBOrBHMatrix(BPlus, *gp, *element, false, locCoordPert);
+                    Kb(1,0) = C(5,0)*n(0) + C(1,0)*n(1);
+                    Kb(1,1) = C(5,1)*n(0) + C(1,1)*n(1);
+                    Kb(1,3) = C(5,5)*n(0) + C(1,5)*n(1);
 
-					xPert = xC;
-					xPert.add(-eps, n);
-					element->computeLocalCoordinates(locCoordPert, xPert);
+                    tmp.beProductOf(Kb, BAvg);
+                    tmp2.beTProductOf(NMatrix, tmp);
+                    answer.add(dA, tmp2);
+                }
 
-					FloatMatrix BMinus;
-					this->ComputeBOrBHMatrix(BMinus, *gp, *element, false, locCoordPert);
+                ////////////////////////////////////////////////////////
+                // Non-standard bulk contribution
 
-					BAvg = BPlus;
-					BAvg.add(1.0, BMinus);
-					BAvg.times(0.5);
+                if ( mIncludeBulkCorr ) {
 
+                    tmp.beTranspositionOf(tmp2);
+                    answer.add(1.0*dA, tmp);
 
-					FloatMatrix Kb(2,4); // Implicitly assumes plane strain. Fix later.
 
-					Kb(0,0) = C(0,0)*n(0) + C(5,0)*n(1);
-					Kb(0,1) = C(0,1)*n(0) + C(5,1)*n(1);
-					Kb(0,3) = C(0,5)*n(0) + C(5,5)*n(1);
+                    FloatMatrix C4(4,4);
+                    C4(0,0) = C(0,0);
+                    C4(0,1) = C(0,1);
+                    C4(0,2) = C(0,2);
+                    C4(0,3) = C(0,5);
 
-					Kb(1,0) = C(5,0)*n(0) + C(1,0)*n(1);
-					Kb(1,1) = C(5,1)*n(0) + C(1,1)*n(1);
-					Kb(1,3) = C(5,5)*n(0) + C(1,5)*n(1);
+                    C4(1,0) = C(1,0);
+                    C4(1,1) = C(1,1);
+                    C4(1,2) = C(1,2);
+                    C4(1,3) = C(1,5);
 
-					tmp.beProductOf(Kb, BAvg);
-					tmp2.beTProductOf(NMatrix, tmp);
-					answer.add(dA, tmp2);
-				}
+                    C4(2,0) = C(2,0);
+                    C4(2,1) = C(2,1);
+                    C4(2,2) = C(2,2);
+                    C4(2,3) = C(2,5);
 
-				////////////////////////////////////////////////////////
-				// Non-standard bulk contribution
+                    C4(3,0) = C(5,0);
+                    C4(3,1) = C(5,1);
+                    C4(3,2) = C(5,2);
+                    C4(3,3) = C(5,5);
 
-				if(mIncludeBulkCorr) {
+                    tmp.beProductOf(C4, BAvg);
+                    tmp2.beTProductOf(BAvg, tmp);
+                    answer.add(1.0*dA*l_s, tmp2);
 
-					tmp.beTranspositionOf(tmp2);
-					answer.add(1.0*dA, tmp);
+                    FloatMatrix C4Bulk(4,4);
+                    C4Bulk(0,0) = CBulk(0,0);
+                    C4Bulk(0,1) = CBulk(0,1);
+                    C4Bulk(0,2) = CBulk(0,2);
+                    C4Bulk(0,3) = CBulk(0,5);
 
+                    C4Bulk(1,0) = CBulk(1,0);
+                    C4Bulk(1,1) = CBulk(1,1);
+                    C4Bulk(1,2) = CBulk(1,2);
+                    C4Bulk(1,3) = CBulk(1,5);
 
-					FloatMatrix C4(4,4);
-					C4(0,0) = C(0,0);
-					C4(0,1) = C(0,1);
-					C4(0,2) = C(0,2);
-					C4(0,3) = C(0,5);
+                    C4Bulk(2,0) = CBulk(2,0);
+                    C4Bulk(2,1) = CBulk(2,1);
+                    C4Bulk(2,2) = CBulk(2,2);
+                    C4Bulk(2,3) = CBulk(2,5);
 
-					C4(1,0) = C(1,0);
-					C4(1,1) = C(1,1);
-					C4(1,2) = C(1,2);
-					C4(1,3) = C(1,5);
+                    C4Bulk(3,0) = CBulk(5,0);
+                    C4Bulk(3,1) = CBulk(5,1);
+                    C4Bulk(3,2) = CBulk(5,2);
+                    C4Bulk(3,3) = CBulk(5,5);
 
-					C4(2,0) = C(2,0);
-					C4(2,1) = C(2,1);
-					C4(2,2) = C(2,2);
-					C4(2,3) = C(2,5);
+                    tmp.beProductOf(C4Bulk, BAvg);
+                    tmp2.beTProductOf(BAvg, tmp);
+                    answer.add(-1.0*dA*l_s, tmp2);
+                }
 
-					C4(3,0) = C(5,0);
-					C4(3,1) = C(5,1);
-					C4(3,2) = C(5,2);
-					C4(3,3) = C(5,5);
+            }
+        }
 
-					tmp.beProductOf(C4, BAvg);
-					tmp2.beTProductOf(BAvg, tmp);
-					answer.add(1.0*dA*l_s, tmp2);
-
-					FloatMatrix C4Bulk(4,4);
-					C4Bulk(0,0) = CBulk(0,0);
-					C4Bulk(0,1) = CBulk(0,1);
-					C4Bulk(0,2) = CBulk(0,2);
-					C4Bulk(0,3) = CBulk(0,5);
-
-					C4Bulk(1,0) = CBulk(1,0);
-					C4Bulk(1,1) = CBulk(1,1);
-					C4Bulk(1,2) = CBulk(1,2);
-					C4Bulk(1,3) = CBulk(1,5);
-
-					C4Bulk(2,0) = CBulk(2,0);
-					C4Bulk(2,1) = CBulk(2,1);
-					C4Bulk(2,2) = CBulk(2,2);
-					C4Bulk(2,3) = CBulk(2,5);
-
-					C4Bulk(3,0) = CBulk(5,0);
-					C4Bulk(3,1) = CBulk(5,1);
-					C4Bulk(3,2) = CBulk(5,2);
-					C4Bulk(3,3) = CBulk(5,5);
-
-					tmp.beProductOf(C4Bulk, BAvg);
-					tmp2.beTProductOf(BAvg, tmp);
-					answer.add(-1.0*dA*l_s, tmp2);
-				}
-
-			}
-		}
-
-	}
+    }
 }
 
 void XfemStructuralElementInterface :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep)
@@ -1604,26 +1536,22 @@ void XfemStructuralElementInterface :: initializeCZMaterial()
 
 bool XfemStructuralElementInterface :: useNonStdCz()
 {
-	if(element->giveDomain()->hasXfemManager())
-	{
-		XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
-		XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( xMan );
+    if ( element->giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
+        XfemStructureManager *xsMan = dynamic_cast<XfemStructureManager*>( xMan );
 
-		if(xsMan) {
-			if(xsMan->giveUseNonStdCz()) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		else {
-			return false;
-		}
-	}
-	else {
-		return false;
-	}
+        if ( xsMan ) {
+            if ( xsMan->giveUseNonStdCz() ) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
 }
 
 void XfemStructuralElementInterface :: XfemElementInterface_computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
@@ -1840,7 +1768,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         }
 
 
-                        if(!evaluationSucceeded) {
+                        if ( !evaluationSucceeded ) {
 //                            printf("!evaluationSucceeded.\n");
                         }
 
@@ -1903,14 +1831,14 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
             IntegrationRule *iRule = element->giveIntegrationRule(0);
             computeIPAverageInTriangle(average, iRule, element, type, tStep, mSubTri[triInd-1]);
 
-            if(average.giveSize() == 0) {
+            if ( average.giveSize() == 0 ) {
                 VTKXMLExportModule :: computeIPAverage(average, iRule, element, type, tStep);
             }
 
 
             FloatArray averageVoigt;
 
-            if( average.giveSize() == 6 ) {
+            if ( average.giveSize() == 6 ) {
 
                 averageVoigt.resize(9);
 
@@ -1920,9 +1848,8 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                 averageVoigt.at(6) = averageVoigt.at(8) = average.at(4);
                 averageVoigt.at(3) = averageVoigt.at(7) = average.at(5);
                 averageVoigt.at(2) = averageVoigt.at(4) = average.at(6);
-            }
-            else {
-                if(average.giveSize() == 1) {
+            } else {
+                if ( average.giveSize() == 1 ) {
                     averageVoigt.resize(1);
                     averageVoigt.at(1) = average.at(1);
                 }
@@ -2026,7 +1953,7 @@ void XfemStructuralElementInterface :: computeIPAverageInTriangle(FloatArray &an
             FloatArray globCoord = ip->giveGlobalCoordinates();
 //            globCoord.resizeWithValues(2);
 
-            if( iTri.pointIsInTriangle(globCoord) ) {
+            if ( iTri.pointIsInTriangle(globCoord) ) {
                 elem->giveIPValue(temp, ip, isType, tStep);
                 gptot += ip->giveWeight();
                 answer.add(ip->giveWeight(), temp);
