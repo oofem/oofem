@@ -508,7 +508,7 @@ void
 Delamination :: appendInputRecords(DynamicDataReader &oDR)
 {
     ///@todo almost everything is copied from EnrichmentItem :: giveInputRecord, should be written in a better way
-    DynamicInputRecord *eiRec = new DynamicInputRecord();
+    auto eiRec = std::make_unique<DynamicInputRecord>();
     FEMComponent :: giveInputRecord(* eiRec);
 
     eiRec->setField(mEnrFrontIndex, _IFT_EnrichmentItem_front);
@@ -525,17 +525,17 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
     }
 
 
-    oDR.insertInputRecord(DataReader :: IR_enrichItemRec, eiRec);
+    oDR.insertInputRecord(DataReader :: IR_enrichItemRec, std::move(eiRec));
 
     // Enrichment function
-    DynamicInputRecord *efRec = new DynamicInputRecord();
+    auto efRec = std::make_unique<DynamicInputRecord>();
     mpEnrichmentFunc->giveInputRecord(* efRec);
-    oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, efRec);
+    oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, std::move(efRec));
 
 
     // Enrichment domain
 
-    DynamicInputRecord *geoRec = new DynamicInputRecord();
+    auto geoRec = std::make_unique<DynamicInputRecord>();
     geoRec->setRecordKeywordField(this->giveInputRecordName(), 1);
 
     IntArray idList;
@@ -546,24 +546,24 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
 
     geoRec->setField(idList, _IFT_ListBasedEI_list);
 
-    oDR.insertInputRecord(DataReader :: IR_geoRec, geoRec);
+    oDR.insertInputRecord(DataReader :: IR_geoRec, std::move(geoRec));
 
     // Enrichment front
     if ( mEnrFrontIndex != 0 ) {
-        DynamicInputRecord *efrRecStart = new DynamicInputRecord();
+        auto efrRecStart = std::make_unique<DynamicInputRecord>();
         mpEnrichmentFrontStart->giveInputRecord(* efrRecStart);
-        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecStart);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, std::move(efrRecStart));
 
-        DynamicInputRecord *efrRecEnd = new DynamicInputRecord();
+        auto efrRecEnd = std::make_unique<DynamicInputRecord>();
         mpEnrichmentFrontEnd->giveInputRecord(* efrRecEnd);
-        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecEnd);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, std::move(efrRecEnd));
     }
 
     if ( mPropLawIndex != 0 ) {
         // Propagation law
-        DynamicInputRecord *plRec = new DynamicInputRecord();
+        auto plRec = std::make_unique<DynamicInputRecord>();
         this->mpPropagationLaw->giveInputRecord(* plRec);
-        oDR.insertInputRecord(DataReader :: IR_propagationLawRec, plRec);
+        oDR.insertInputRecord(DataReader :: IR_propagationLawRec, std::move(plRec));
     }
 }
 

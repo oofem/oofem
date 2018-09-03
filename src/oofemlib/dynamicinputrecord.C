@@ -46,21 +46,21 @@
 #include <sstream>
 
 namespace oofem {
-DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, FloatArray coord)
+std::unique_ptr<DynamicInputRecord> CreateNodeIR(int i, InputFieldType nodeType, FloatArray coord)
 {
-    DynamicInputRecord *result = new DynamicInputRecord(nodeType, i);
+    auto result = std::make_unique<DynamicInputRecord>(nodeType, i);
     result->setField(std :: move(coord), _IFT_Node_coords);
-    return result;
+    return std::move(result);
 }
 
-DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs)
+std::unique_ptr<DynamicInputRecord> CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs)
 {
-    DynamicInputRecord *result = new DynamicInputRecord(elementType, i);
+    auto result = std::make_unique<DynamicInputRecord>(elementType, i);
     result->setField(std :: move(nodes), _IFT_Element_nodes);
     if ( cs != 0 ) {
         result->setField(cs, _IFT_Element_crosssect);
     }
-    return result;
+    return std::move(result);
 }
 
 

@@ -312,7 +312,7 @@ IRResultType NCPrincipalStress::initializeFrom(InputRecord *ir) {
 
 void NCPrincipalStress :: appendInputRecords(DynamicDataReader &oDR)
 {
-    DynamicInputRecord *ir = new DynamicInputRecord();
+    auto ir = std::make_unique<DynamicInputRecord>();
 
     ir->setRecordKeywordField( this->giveInputRecordName(), 1 );
 
@@ -322,12 +322,12 @@ void NCPrincipalStress :: appendInputRecords(DynamicDataReader &oDR)
     ir->setField(mIncrementLength, _IFT_NCPrincipalStress_IncrementLength);
     ir->setField(mCrackPropThreshold, _IFT_NCPrincipalStress_CrackPropThreshold);
 
-    oDR.insertInputRecord(DataReader :: IR_crackNucleationRec, ir);
+    oDR.insertInputRecord(DataReader :: IR_crackNucleationRec, std::move(ir));
 
     // Enrichment function
-    DynamicInputRecord *efRec = new DynamicInputRecord();
+    auto efRec = std::make_unique<DynamicInputRecord>();
     mpEnrichmentFunc->giveInputRecord(* efRec);
-    oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, efRec);
+    oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, std::move(efRec));
 }
 
 } /* namespace oofem */

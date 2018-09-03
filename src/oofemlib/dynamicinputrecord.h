@@ -45,10 +45,10 @@ class FEMComponent;
 class DynamicInputRecord;
 
 /// Helper function for creating a dynamic input record for a node
-OOFEM_EXPORT DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, FloatArray coord);
+OOFEM_EXPORT std::unique_ptr<DynamicInputRecord> CreateNodeIR(int i, InputFieldType nodeType, FloatArray coord);
 
 /// Helper function for creating elements (with optional cross-section number).
-OOFEM_EXPORT DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs = 0);
+OOFEM_EXPORT std::unique_ptr<DynamicInputRecord> CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs = 0);
 
 /**
  * Class representing the a dynamic Input Record.

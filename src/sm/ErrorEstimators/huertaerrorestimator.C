@@ -1178,7 +1178,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             for ( int m = 0; m < level + 2; m++, u += du, pos++ ) {
                 nd = connectivity->at(pos);
                 if ( localNodeIdArray.at(nd) == 0 ) {
-                    DynamicInputRecord *ir = new DynamicInputRecord();
+                    auto ir = std::make_unique<DynamicInputRecord>();
 
                     localNodeIdArray.at(nd) = ++localNodeId;
                     globalNodeIdArray.at(localNodeId) = nd;
@@ -1286,7 +1286,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                         }
                     }
 
-                    refinedReader.insertInputRecord(DataReader :: IR_dofmanRec, ir);
+                    refinedReader.insertInputRecord(DataReader :: IR_dofmanRec, std::move(ir));
                 }
             }
         }
@@ -1309,7 +1309,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             hasLoad = refinedElement->giveBoundaryLoadArray1D(inode, element, boundaryLoadArray);
 
             for ( int m = 0; m < level + 1; m++ ) {
-                DynamicInputRecord *ir = new DynamicInputRecord();
+                auto ir = std::make_unique<DynamicInputRecord>();
                 localElemId++;
                 ir->setRecordKeywordField(edgetype, localElemId);
 
@@ -1354,7 +1354,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                     }
                 }
 
-                refinedReader.insertInputRecord(DataReader :: IR_elemRec, ir);
+                refinedReader.insertInputRecord(DataReader :: IR_elemRec, std::move(ir));
             }
         }
     }
@@ -1431,11 +1431,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                             // first loadtime function must be constant 1.0
                             for ( int idof = 1; idof <= dofs; idof++ ) {
-                                DynamicInputRecord *ir = new DynamicInputRecord();
+                                auto ir = std::make_unique<DynamicInputRecord>();
                                 ir->setRecordKeywordField(_IFT_BoundaryCondition_Name, ++localBcId);
                                 ir->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                                 ir->setField(uFine.at(idof), _IFT_BoundaryCondition_PrescribedValue);
-                                refinedReader.insertInputRecord(DataReader :: IR_bcRec, ir);
+                                refinedReader.insertInputRecord(DataReader :: IR_bcRec, std::move(ir));
                             }
                         }
                     }
@@ -1625,7 +1625,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                 for ( m = 0; m < level + 2; m++, u += du, pos++ ) {
                     nd = connectivity->at(pos);
                     if ( localNodeIdArray.at(nd) == 0 ) {
-                        DynamicInputRecord *ir = new DynamicInputRecord();
+                        auto ir = std::make_unique<DynamicInputRecord>();
                         ir->setRecordKeywordField("node", localNodeId);
 
                         localNodeIdArray.at(nd) = ++localNodeId;
@@ -1757,7 +1757,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                             }
                         }
 
-                        refinedReader.insertInputRecord(DataReader :: IR_dofmanRec, ir);
+                        refinedReader.insertInputRecord(DataReader :: IR_dofmanRec, std::move(ir));
                     }
                 }
             }
@@ -1784,7 +1784,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
 
             for ( n = 0; n < level + 1; n++ ) {
                 for ( m = 0; m < level + 1; m++ ) {
-                    DynamicInputRecord *ir = new DynamicInputRecord();
+                    auto ir = std::make_unique<DynamicInputRecord>();
                     ir->setRecordKeywordField(quadtype, localElemId);
 
                     localElemId++;
@@ -1847,7 +1847,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                         }
                     }
 
-                    refinedReader.insertInputRecord(DataReader :: IR_elemRec, ir);
+                    refinedReader.insertInputRecord(DataReader :: IR_elemRec, std::move(ir));
                 }
             }
         }
@@ -1959,11 +1959,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
 
                                 // first loadtime function must be constant 1.0
                                 for ( int idof = 1; idof <= dofs; idof++ ) {
-                                    DynamicInputRecord *ir = new DynamicInputRecord();
+                                    auto ir = std::make_unique<DynamicInputRecord>();
                                     ir->setRecordKeywordField("BoundaryCondition", ++localBcId);
                                     ir->setField(1, "Function");
                                     ir->setField(uFine.at(idof), "prescribedvalue");
-                                    refinedReader.insertInputRecord(DataReader :: IR_bcRec, ir);
+                                    refinedReader.insertInputRecord(DataReader :: IR_bcRec, std::move(ir));
                                 }
                             }
                         }
@@ -2219,7 +2219,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                     for ( m = 0; m < level + 2; m++, u += du, pos++ ) {
                         nd = connectivity->at(pos);
                         if ( localNodeIdArray.at(nd) == 0 ) {
-                            DynamicInputRecord *ir = new DynamicInputRecord();
+                            auto ir = std::make_unique<DynamicInputRecord>();
                             ir->setRecordKeywordField("node", localNodeId);
 
                             localNodeIdArray.at(nd) = ++localNodeId;
@@ -2403,7 +2403,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                 }
                             }
 
-                            refinedReader.insertInputRecord(DataReader :: IR_dofmanRec, ir);
+                            refinedReader.insertInputRecord(DataReader :: IR_dofmanRec, std::move(ir));
                         }
                     }
                 }
@@ -2432,7 +2432,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             for ( k = 0; k < level + 1; k++ ) {
                 for ( n = 0; n < level + 1; n++ ) {
                     for ( m = 0; m < level + 1; m++ ) {
-                        DynamicInputRecord *ir = new DynamicInputRecord();
+                        auto ir = std::make_unique<DynamicInputRecord>();
 
                         localElemId++;
 
@@ -2511,7 +2511,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                             }
                         }
 
-                        refinedReader.insertInputRecord(DataReader :: IR_elemRec, ir);
+                        refinedReader.insertInputRecord(DataReader :: IR_elemRec, std::move(ir));
                     }
                 }
             }
@@ -2656,11 +2656,11 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
 
                                     // first loadtime function must be constant 1.0
                                     for ( int idof = 1; idof <= dofs; idof++ ) {
-                                        DynamicInputRecord *ir = new DynamicInputRecord();
+                                        auto ir = std::make_unique<DynamicInputRecord>();
                                         ir->setRecordKeywordField("boundarycondition", ++localBcId);
                                         ir->setField(1, "Function");
                                         ir->setField(uFine.at(idof), "prescribedvalue");
-                                        refinedReader.insertInputRecord(DataReader :: IR_bcRec, ir);
+                                        refinedReader.insertInputRecord(DataReader :: IR_bcRec, std::move(ir));
                                     }
                                 }
                             }
@@ -3916,14 +3916,14 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     refinedReader.setDescription(line);
 
     if ( dynamic_cast< AdaptiveLinearStatic * >(problem) ) {
-        DynamicInputRecord *ir = new DynamicInputRecord();
+        auto ir = std::make_unique<DynamicInputRecord>();
         ir->setRecordKeywordField(_IFT_LinearStatic_Name, 0);
         ir->setField(1, _IFT_EngngModel_nsteps);
         ir->setField(renumber, _IFT_EngngModel_renumberFlag);
 #ifdef USE_CONTEXT_FILE
         ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
-        refinedReader.insertInputRecord(DataReader :: IR_emodelRec, ir);
+        refinedReader.insertInputRecord(DataReader :: IR_emodelRec, std::move(ir));
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >(problem) ) {
         InputRecord *ir;
         nmstep = tStep->giveMetaStepNumber();
@@ -3971,7 +3971,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
         }
 
         if ( problemId != 0 ) {
-            DynamicInputRecord *ir = new DynamicInputRecord();
+            auto ir = std::make_unique<DynamicInputRecord>();
 
             int bcSize = controlNode.giveSize(), ddActiveSize = 0;
 
@@ -4043,7 +4043,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 ir->setField(0.1, "requiredError");
                 ir->setField(0.01, "minelemsize");
 
-                refinedReader.insertInputRecord(DataReader :: IR_emodelRec, ir);
+                refinedReader.insertInputRecord(DataReader :: IR_emodelRec, std::move(ir));
 
                 // IMPORTANT: the total number of steps should be equal to the current step number
                 //            (to enable skipUpdate)
@@ -4051,16 +4051,16 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 
                 // create fictitious metasteps
                 for ( i = 1; i < nmstep; i++ ) {
-                    DynamicInputRecord *ir_meta = new DynamicInputRecord();
+                    auto ir_meta = std::make_unique<DynamicInputRecord>();
                     ir_meta->setRecordKeywordField(_IFT_MetaStep_Name, i);
                     ir_meta->setField(problem->giveMetaStep(i)->giveNumberOfSteps(), _IFT_MetaStep_nsteps);
                     ir_meta->setField(rtolv, "rtolv");
-                    refinedReader.insertInputRecord(DataReader :: IR_mstepRec, ir_meta);
+                    refinedReader.insertInputRecord(DataReader :: IR_mstepRec, std::move(ir_meta));
                     nsteps += problem->giveMetaStep(i)->giveNumberOfSteps();
                 }
 
                 // create active metastep
-                ir = new DynamicInputRecord();
+                ir = std::make_unique<DynamicInputRecord>();
                 ir->setRecordKeywordField(_IFT_MetaStep_Name, nmstep);
                 ir->setField(tStep->giveNumber() - nsteps, _IFT_MetaStep_nsteps);
                 ir->setField(rtolv, "rtolv");
@@ -4116,7 +4116,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             // use last funcs to control dd
             ir->setField(funcs, _IFT_NRSolver_ddfunc);
 
-            refinedReader.insertInputRecord(DataReader :: IR_mstepRec, ir);
+            refinedReader.insertInputRecord(DataReader :: IR_mstepRec, std::move(ir));
         } else {
             // it makes not too much sense to solve exact problem from beginning if adaptive restart is used
             // because the mesh may be already derefined in regions of no interest (but anyway ...)
@@ -4128,7 +4128,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
             // do not prescribe skipUpdate here !!!
 
             // HUHU dodelat metasteps, dodelat paralelni zpracovani
-            DynamicInputRecord *ir = new DynamicInputRecord();
+            auto ir = std::make_unique<DynamicInputRecord>();
             ir->setRecordKeywordField("nonlinearstatic", 0);
             ir->setField( ( int ) ( problem->giveCurrentStep()->giveTargetTime() + 1.5 ), "nsteps" );
             ir->setField(renumber, "renumber");
@@ -4186,22 +4186,22 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
                 break;
             }
 
-            refinedReader.insertInputRecord(DataReader :: IR_emodelRec, ir);
+            refinedReader.insertInputRecord(DataReader :: IR_emodelRec, std::move(ir));
         }
     } else {
         OOFEM_ERROR("Unsupported analysis type");
     }
 
-    DynamicInputRecord *ir = new DynamicInputRecord();
+    auto ir = std::make_unique<DynamicInputRecord>();
     ir->setField(this->domain->giveNumberOfSpatialDimensions(), _IFT_Domain_numberOfSpatialDimensions);
     if ( this->domain->isAxisymmetric() ) {
         ir->setField(_IFT_Domain_axisymmetric);
     }
 
 
-    refinedReader.insertInputRecord(DataReader :: IR_domainCompRec, ir);
+    refinedReader.insertInputRecord(DataReader :: IR_domainCompRec, std::move(ir));
 
-    ir = new DynamicInputRecord();
+    ir = std::make_unique<DynamicInputRecord>();
     ir->setRecordKeywordField(_IFT_OutputManager_Name, 0);
 #ifdef USE_OUTPUT_FILE
     ir->setField(_IFT_OutputManager_tstepall);
@@ -4209,9 +4209,9 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     ir->setField(_IFT_OutputManager_elementall);
 #endif
 
-    refinedReader.insertInputRecord(DataReader :: IR_outManRec, ir);
+    refinedReader.insertInputRecord(DataReader :: IR_outManRec, std::move(ir));
 
-    ir = new DynamicInputRecord();
+    ir = std::make_unique<DynamicInputRecord>();
     ir->setRecordKeywordField("", 0);
     ir->setField(nodes, _IFT_Domain_ndofman);
     ir->setField(elems, _IFT_Domain_nelem);
@@ -4219,7 +4219,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     ir->setField(csects, _IFT_Domain_nmat);
     ir->setField(loads, _IFT_Domain_nbc);
     ir->setField(funcs, _IFT_Domain_nfunct);
-    refinedReader.insertInputRecord(DataReader :: IR_domainCompRec, ir);
+    refinedReader.insertInputRecord(DataReader :: IR_domainCompRec, std::move(ir));
 }
 
 
@@ -4232,21 +4232,21 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog1(int csects, int mats, int loa
     /* copy csects, mats, loads */
 
     for ( int i = 1; i <= csects; i++ ) {
-        DynamicInputRecord *ir = new DynamicInputRecord();
+        auto ir = std::make_unique<DynamicInputRecord>();
         domain->giveCrossSection(i)->giveInputRecord(* ir);
-        refinedReader.insertInputRecord(DataReader :: IR_crosssectRec, ir);
+        refinedReader.insertInputRecord(DataReader :: IR_crosssectRec, std::move(ir));
     }
 
     for ( int i = 1; i <= mats; i++ ) {
-        DynamicInputRecord *ir = new DynamicInputRecord();
+        auto ir = std::make_unique<DynamicInputRecord>();
         domain->giveMaterial(i)->giveInputRecord(* ir);
-        refinedReader.insertInputRecord(DataReader :: IR_matRec, ir);
+        refinedReader.insertInputRecord(DataReader :: IR_matRec, std::move(ir));
     }
 
     for ( int i = 1; i <= loads; i++ ) {
-        DynamicInputRecord *ir = new DynamicInputRecord();
+        auto ir = std::make_unique<DynamicInputRecord>();
         domain->giveLoad(i)->giveInputRecord(* ir);
-        refinedReader.insertInputRecord(DataReader :: IR_bcRec, ir);
+        refinedReader.insertInputRecord(DataReader :: IR_bcRec, std::move(ir));
     }
 }
 
@@ -4260,17 +4260,17 @@ HuertaErrorEstimator :: setupRefinedProblemEpilog2(int funcs)
     /* copy tfuncs */
 
     for ( int i = 1; i <= funcs; i++ ) {
-        DynamicInputRecord *ir = new DynamicInputRecord();
+        auto ir = std::make_unique<DynamicInputRecord>();
         domain->giveFunction(i)->giveInputRecord(* ir);
-        refinedReader.insertInputRecord(DataReader :: IR_funcRec, ir);
+        refinedReader.insertInputRecord(DataReader :: IR_funcRec, std::move(ir));
     }
 
     if ( this->mode == HEE_nlinear ) {
-        DynamicInputRecord *ir = new DynamicInputRecord();
+        auto ir = std::make_unique<DynamicInputRecord>();
         ir->setRecordKeywordField(_IFT_HeavisideTimeFunction_Name, funcs + 1);
         ir->setField(this->domain->giveEngngModel()->giveCurrentStep()->giveTargetTime() - 0.1, _IFT_HeavisideTimeFunction_origin);
         ir->setField(1., _IFT_HeavisideTimeFunction_value);
-        refinedReader.insertInputRecord(DataReader :: IR_funcRec, ir);
+        refinedReader.insertInputRecord(DataReader :: IR_funcRec, std::move(ir));
     }
 }
 } // end namespace oofem

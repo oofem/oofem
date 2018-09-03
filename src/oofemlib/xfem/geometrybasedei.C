@@ -177,7 +177,7 @@ void GeometryBasedEI :: updateDofIdPool()
 
 void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
 {
-    DynamicInputRecord *eiRec = new DynamicInputRecord();
+    auto eiRec = std::unique_ptr<DynamicInputRecord>();
     FEMComponent :: giveInputRecord(* eiRec);
 
     eiRec->setField(mEnrFrontIndex,                     _IFT_EnrichmentItem_front);
@@ -190,36 +190,35 @@ void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
         eiRec->setField(_IFT_EnrichmentItem_inheritorderedbc);
     }
 
-    oDR.insertInputRecord(DataReader :: IR_enrichItemRec, eiRec);
-
+    oDR.insertInputRecord(DataReader :: IR_enrichItemRec, std::move(eiRec));
 
     // Enrichment function
-    DynamicInputRecord *efRec = new DynamicInputRecord();
+    auto efRec = std::unique_ptr<DynamicInputRecord>();
     mpEnrichmentFunc->giveInputRecord(* efRec);
-    oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, efRec);
+    oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, std::move(efRec));
 
     // Geometry
-    DynamicInputRecord *geoRec = new DynamicInputRecord();
+    auto geoRec = std::unique_ptr<DynamicInputRecord>();
     mpBasicGeometry->giveInputRecord(* geoRec);
-    oDR.insertInputRecord(DataReader :: IR_geoRec, geoRec);
+    oDR.insertInputRecord(DataReader :: IR_geoRec, std::move(geoRec));
 
 
     // Enrichment front
     if ( mEnrFrontIndex != 0 ) {
-        DynamicInputRecord *efrRecStart = new DynamicInputRecord();
+        auto efrRecStart = std::unique_ptr<DynamicInputRecord>();
         mpEnrichmentFrontStart->giveInputRecord(* efrRecStart);
-        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecStart);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, std::move(efrRecStart));
 
-        DynamicInputRecord *efrRecEnd = new DynamicInputRecord();
+        auto efrRecEnd = std::unique_ptr<DynamicInputRecord>();
         mpEnrichmentFrontEnd->giveInputRecord(* efrRecEnd);
-        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecEnd);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, std::move(efrRecEnd));
     }
 
     // Propagation law
     if ( mPropLawIndex != 0 ) {
-        DynamicInputRecord *plRec = new DynamicInputRecord();
+        auto plRec = std::unique_ptr<DynamicInputRecord>();
         this->mpPropagationLaw->giveInputRecord(* plRec);
-        oDR.insertInputRecord(DataReader :: IR_propagationLawRec, plRec);
+        oDR.insertInputRecord(DataReader :: IR_propagationLawRec, std::move(plRec));
     }
 }
 

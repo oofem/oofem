@@ -73,7 +73,7 @@ public:
      * @param type Currently ignored, but left here for consistency with giveInputRecord
      * @param record New record to be added at the end. New input records have to be added in the same order as the text input files do it.
      */
-    void insertInputRecord(InputRecordType type, InputRecord *record);
+    void insertInputRecord(InputRecordType type, std::unique_ptr<InputRecord> record);
 
     /**
      * Sets the output file name. Used for writing input files.

@@ -1260,7 +1260,7 @@ void ParticleTopologyDescription :: replaceFEMesh()
     new_d->resizeSets( regionSet.giveSize() );
 
     for ( int i = 1; i <= ( int ) nodes.size(); ++i ) {
-        //DynamicInputRecord *dir = new DynamicInputRecord(_IFT_Node_Name, i);
+        //auto dir = std::make_unique<DynamicInputRecord>(_IFT_Node_Name, i);
         //dir->setField(nodes[i-1], _IFT_Node_coords);
         //dr->insertInputRecord(IR_dofmanRec, dir);
         auto node = std::make_unique<Node>(i, new_d);
@@ -1270,7 +1270,7 @@ void ParticleTopologyDescription :: replaceFEMesh()
 
     for ( int i = 1; i <= ( int ) elements.size(); ++i ) {
         int r = e_markers.at(i);
-        //DynamicInputRecord *dir = new DynamicInputRecord(regionElementType[ r-1 ], i);
+        //auto dir = std::make_unique<DynamicInputRecord>(regionElementType[ r-1 ], i);
         //dir->setField(r, _IFT_Element_crosssect);
         //dir->setField(elements[i-1], _IFT_Element_nodes);
         //dr->insertInputRecord(IR_elemRec, dir);
@@ -1284,7 +1284,7 @@ void ParticleTopologyDescription :: replaceFEMesh()
 
     for ( int i = 1; i <= ( int ) segments.size(); ++i ) {
         int r = s_markers.at(i);
-        //DynamicInputRecord *dir = new DynamicInputRecord(regionElementType[ r-1 ], segments.size() + i);
+        //DynamicInputRecord *dir = std::make_unique<DynamicInputRecord>(regionElementType[ r-1 ], segments.size() + i);
         //dir->setField(r, _IFT_Element_crosssect);
         //dir->setField(segments[i-1], _IFT_Element_nodes);
         //dr->insertInputRecord(IR_elemRec, dir);
@@ -1300,7 +1300,7 @@ void ParticleTopologyDescription :: replaceFEMesh()
     }
 
     for ( int i = 1; i <= ( int ) boundarySets.size(); ++i ) {
-        //DynamicInputRecord *dir = new DynamicInputRecord(_IFT_Set_Name, i);
+        //DynamicInputRecord *dir = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, i);
         //dir->setField(boundarySets[i-1], _IFT_Set_elementBoundaries);
         //dr->insertInputRecord(IR_setRec, dir);
         auto set = std::make_unique<Set>(1, new_d);

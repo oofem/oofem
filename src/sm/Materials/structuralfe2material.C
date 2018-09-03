@@ -412,7 +412,7 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
             IRResultType result; // Required by IR_GIVE_FIELD macro
             std::vector<std::unique_ptr<EnrichmentItem>> eiList;
 
-            //DynamicInputRecord *xmanRec = new DynamicInputRecord();
+            //DynamicInputRecord *xmanRec = std::make_unique<DynamicInputRecord>();
             //ext_xMan->giveInputRecord(* xmanRec);
             //dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
 

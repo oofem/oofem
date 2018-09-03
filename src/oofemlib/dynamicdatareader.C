@@ -50,10 +50,10 @@ DynamicDataReader :: ~DynamicDataReader()
 }
 
 void
-DynamicDataReader :: insertInputRecord(InputRecordType type, InputRecord *record)
+DynamicDataReader :: insertInputRecord(InputRecordType type, std::unique_ptr<InputRecord> record)
 {
     // Should care about the record type, but its a hassle.
-    this->recordList.emplace_back(record);
+    this->recordList.push_back(std::move(record));
     this->it = recordList.end();
 }
 

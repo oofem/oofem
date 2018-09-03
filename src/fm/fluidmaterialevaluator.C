@@ -171,8 +171,8 @@ void FluidMaterialEvaluator :: solveYourself()
                     resVol = strainVolC - strainVol;
                 }
 
-                OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e, Resvol = %e\n", istep, imat, iter, res.computeNorm(), resVol );
-                if ( res.computeNorm() <= tolerance && resVol <= tolerance ) { ///@todo More flexible control of convergence needed. Something relative?
+                OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e, Resvol = %e\n", istep, imat, iter, norm(res), resVol );
+                if ( norm(res) <= tolerance && resVol <= tolerance ) { ///@todo More flexible control of convergence needed. Something relative?
                     break;
                 }
                 if ( ndim == 3 ) {

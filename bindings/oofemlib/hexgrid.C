@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
     FloatArray rvePosition;
     
     DynamicDataReader myData("hexgrid");
-    DynamicInputRecord *myInput;
+    std::unique_ptr<DynamicInputRecord> myInput;
 
     // Read the file with all inclusions:
     std :: ifstream datafile(inclusion_file, std :: ios :: binary);
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     myData.setDescription("Internally generated hex grid");
 
     //Problem
-    myInput = new DynamicInputRecord(_IFT_StationaryTransportProblem_Name);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_StationaryTransportProblem_Name);
     myInput->setField(1, _IFT_EngngModel_nsteps);
     myInput->setField(1e-6, _IFT_NRSolver_rtolf);
     myInput->setField(3, _IFT_EngngModel_lstype);
@@ -139,32 +139,32 @@ int main(int argc, char *argv[])
     myInput->setField(1, _IFT_ModuleManager_nmodules);
     myInput->setField(_IFT_EngngModel_suppressOutput);
     myInput->setField(_IFT_StationaryTransportProblem_keepTangent);
-    myData.insertInputRecord(DataReader::IR_emodelRec, myInput);
+    myData.insertInputRecord(DataReader::IR_emodelRec, std::move(myInput));
 
     // VTKXML tstep_all domain_all primvars 1 6 cellvars 3 103 56 41'
-    myInput = new DynamicInputRecord(_IFT_VTKXMLExportModule_Name);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_VTKXMLExportModule_Name);
     myInput->setField(_IFT_ExportModule_tstepall);
     myInput->setField(_IFT_ExportModule_domainall);
     myInput->setField(IntArray{6}, _IFT_VTKXMLExportModule_primvars);
     myInput->setField(IntArray{103, 56, 41}, _IFT_VTKXMLExportModule_cellvars);
-    myData.insertInputRecord(DataReader::DataReader::IR_expModuleRec, myInput);
+    myData.insertInputRecord(DataReader::DataReader::IR_expModuleRec, std::move(myInput));
 
     //Domain
     ///@todo Remove this.
-    myInput = new DynamicInputRecord();
+    myInput = std::make_unique<DynamicInputRecord>();
     std::string help = "3d";
     // myInput->setRecordKeywordField("domain", 1);
     myInput->setField(help, _IFT_Domain_type);
-    myData.insertInputRecord(DataReader::IR_domainRec, myInput);
+    myData.insertInputRecord(DataReader::IR_domainRec, std::move(myInput));
 
     //Output
-    myInput = new DynamicInputRecord();
+    myInput = std::make_unique<DynamicInputRecord>();
     //myInput->setRecordKeywordField(_IFT_OutputManager_name, 1);
     myInput->setField(_IFT_OutputManager_Name);
-    myData.insertInputRecord(DataReader::IR_outManRec, myInput);
+    myData.insertInputRecord(DataReader::IR_outManRec, std::move(myInput));
 
     //Components size record
-    myInput = new DynamicInputRecord();
+    myInput = std::make_unique<DynamicInputRecord>();
     myInput->setField(n*n*n, _IFT_Domain_ndofman);
     myInput->setField(nelem*nelem*nelem, _IFT_Domain_nelem);
     myInput->setField(2, _IFT_Domain_ncrosssect);
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
     myInput->setField(1, _IFT_Domain_nfunct);
     myInput->setField(12, _IFT_Domain_nset);
     myInput->setField(3, _IFT_Domain_numberOfSpatialDimensions);
-    myData.insertInputRecord(DataReader::IR_domainCompRec, myInput);
+    myData.insertInputRecord(DataReader::IR_domainCompRec, std::move(myInput));
     
     //Nodes
     for (int nz = 0; nz < n; ++nz) {
@@ -303,33 +303,33 @@ int main(int argc, char *argv[])
             zm.followedBy({e, 2});
         }
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 1);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 1);
     myInput->setField(xm, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 2);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 2);
     myInput->setField(ym, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 3);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 3);
     myInput->setField(zm, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 4);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 4);
     myInput->setField(xp, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 5);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 5);
     myInput->setField(yp, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 6);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 6);
     myInput->setField(zp, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 7);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 7);
     myInput->setField(IntArray{(n*n*n + n*n + n) / 2}, _IFT_Set_nodes);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
     IntArray totm, totp, tot;
     totm.followedBy(xm);
@@ -343,17 +343,17 @@ int main(int argc, char *argv[])
     tot.followedBy(totm);
     tot.followedBy(totp);
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 8);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 8);
     myInput->setField(tot, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 9);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 9);
     myInput->setField(totp, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 10);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 10);
     myInput->setField(totm, _IFT_Set_elementBoundaries);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
     // Check for inclusions:
     auto rveInclusions = getInclusionsInBox(rvePosition, rveSize, inclusions);
@@ -379,38 +379,38 @@ int main(int argc, char *argv[])
             }
 
     printf("Final inclusion fraction: %.3f\n", (double)emat2.giveSize() / (nelem * nelem * nelem));
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 11);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 11);
     myInput->setField(emat1, _IFT_Set_elements);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_Set_Name, 12);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_Set_Name, 12);
     myInput->setField(emat2, _IFT_Set_elements);
-    myData.insertInputRecord(DataReader::IR_setRec, myInput);
+    myData.insertInputRecord(DataReader::IR_setRec, std::move(myInput));
     
     //CrossSection
     for ( int i = 1; i <= 2; ++i ) {
-        myInput = new DynamicInputRecord(_IFT_SimpleTransportCrossSection_Name, i);
+        myInput = std::make_unique<DynamicInputRecord>(_IFT_SimpleTransportCrossSection_Name, i);
         myInput->setField(i, _IFT_SimpleTransportCrossSection_material);
         myInput->setField(10 + i, _IFT_CrossSection_SetNumber);
-        myData.insertInputRecord(DataReader::IR_crosssectRec, myInput);
+        myData.insertInputRecord(DataReader::IR_crosssectRec, std::move(myInput));
     }
 
     //Material
-    myInput = new DynamicInputRecord(_IFT_IsotropicHeatTransferMaterial_Name, 1);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_IsotropicHeatTransferMaterial_Name, 1);
     myInput->setField(1.0, _IFT_IsotropicHeatTransferMaterial_k);
     myInput->setField(1.0, _IFT_IsotropicHeatTransferMaterial_c);
     myInput->setField(1.0, _IFT_Material_density);
-    myData.insertInputRecord(DataReader::IR_matRec, myInput);
+    myData.insertInputRecord(DataReader::IR_matRec, std::move(myInput));
 
-    myInput = new DynamicInputRecord(_IFT_IsotropicHeatTransferMaterial_Name, 2);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_IsotropicHeatTransferMaterial_Name, 2);
     myInput->setField(k, _IFT_IsotropicHeatTransferMaterial_k);
     myInput->setField(1.0, _IFT_IsotropicHeatTransferMaterial_c);
     myInput->setField(1.0, _IFT_Material_density);
-    myData.insertInputRecord(DataReader::IR_matRec, myInput);
+    myData.insertInputRecord(DataReader::IR_matRec, std::move(myInput));
 
     //Boundary Conditions
     if ( bc == "d" || bc == "md" ) {
-        myInput = new DynamicInputRecord(_IFT_TransportGradientDirichlet_Name, 1);
+        myInput = std::make_unique<DynamicInputRecord>(_IFT_TransportGradientDirichlet_Name, 1);
         myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         myInput->setField(IntArray{10}, _IFT_GeneralBoundaryCondition_dofs);
         myInput->setField(FloatArray{0., 0., 0.}, _IFT_TransportGradientDirichlet_centerCoords);
@@ -420,9 +420,9 @@ int main(int argc, char *argv[])
             myInput->setField(IntArray{1, 2, 3, 4, 5, 6}, _IFT_TransportGradientDirichlet_surfSets);
             myInput->setField(_IFT_TransportGradientDirichlet_tractionControl);
         }
-        myData.insertInputRecord(DataReader::IR_bcRec, myInput);
+        myData.insertInputRecord(DataReader::IR_bcRec, std::move(myInput));
     } else if ( bc == "n" || bc == "mn" ) {
-        myInput = new DynamicInputRecord(_IFT_TransportGradientNeumann_Name, 1);
+        myInput = std::make_unique<DynamicInputRecord>(_IFT_TransportGradientNeumann_Name, 1);
         myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         myInput->setField(IntArray{10}, _IFT_GeneralBoundaryCondition_dofs);
         myInput->setField(FloatArray{0., 0., 0.}, _IFT_TransportGradientNeumann_centerCoords);
@@ -432,9 +432,9 @@ int main(int argc, char *argv[])
         if ( bc == "mn" ) {
             myInput->setField(_IFT_TransportGradientNeumann_dispControl);
         }
-        myData.insertInputRecord(DataReader::IR_bcRec, myInput);
+        myData.insertInputRecord(DataReader::IR_bcRec, std::move(myInput));
     } else if ( bc == "p" ) {
-        myInput = new DynamicInputRecord(_IFT_TransportGradientPeriodic_Name, 1);
+        myInput = std::make_unique<DynamicInputRecord>(_IFT_TransportGradientPeriodic_Name, 1);
         myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         myInput->setField(IntArray{10}, _IFT_GeneralBoundaryCondition_dofs);
         myInput->setField(FloatArray{0., 0., 0.}, _IFT_TransportGradientPeriodic_centerCoords);
@@ -444,21 +444,21 @@ int main(int argc, char *argv[])
         myInput->setField(9, _IFT_GeneralBoundaryCondition_set);
         myInput->setField(10, _IFT_TransportGradientPeriodic_masterSet);
 
-        myData.insertInputRecord(DataReader::IR_bcRec, myInput);
+        myData.insertInputRecord(DataReader::IR_bcRec, std::move(myInput));
     }
-    myInput = new DynamicInputRecord(_IFT_BoundaryCondition_Name, 2);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_BoundaryCondition_Name, 2);
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
     myInput->setField(FloatArray{0.}, _IFT_BoundaryCondition_values);
     myInput->setField(IntArray{T_f}, _IFT_GeneralBoundaryCondition_dofs);
     /// @note If the mesh doesn't have a "center" node, then the centerCoords need to be changed to reflect this fixed point!
     /// Fixing the center point should only be done for Neumann b.c.s, though not actually needed with KSP-solvers.
     myInput->setField(0, _IFT_GeneralBoundaryCondition_set);
-    myData.insertInputRecord(DataReader::IR_bcRec, myInput);
+    myData.insertInputRecord(DataReader::IR_bcRec, std::move(myInput));
 
     //Functions
-    myInput = new DynamicInputRecord(_IFT_ConstantFunction_Name, 1);
+    myInput = std::make_unique<DynamicInputRecord>(_IFT_ConstantFunction_Name, 1);
     myInput->setField(1.0, _IFT_ConstantFunction_f);
-    myData.insertInputRecord(DataReader::IR_funcRec, myInput);
+    myData.insertInputRecord(DataReader::IR_funcRec, std::move(myInput));
 
     timer.stopTimer();
     printf("Mesh generation time %.3f s\n", timer.getUtime());
