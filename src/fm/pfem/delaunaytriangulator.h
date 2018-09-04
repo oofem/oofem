@@ -85,14 +85,12 @@ protected:
     Timer creativeTimer;
     /// Contains all triangles (even not valid)
     std :: list< DelaunayTriangle * >generalTriangleList;
-    std :: list< DelaunayTriangle * > :: iterator genIT;
 
     /// Contains resulting alpha-shape in form of a list
     std :: list< AlphaEdge2D * >alphaShapeEdgeList;
 
     /// contains all edges of the triangulation
     std :: list< AlphaEdge2D * >edgeList;
-    std :: list< AlphaEdge2D * > :: iterator elIT;
 
     /// Octree with Delaunay triangles allowing fast search
     OctreeSpatialLocalizerT< DelaunayTriangle * >triangleOctree;
@@ -108,7 +106,7 @@ public:
 
 private:
     /// Edge is added to the polygon only if it's not contained. Otherwise both are removed (edge shared by two non-Delaunay triangles).
-    void addUniqueEdgeToPolygon(Edge2D *edge, std :: list< Edge2D > &polygon);
+    void addUniqueEdgeToPolygon(Edge2D edge, std :: list< Edge2D > &polygon);
 
     /// Identifies the bounding box of pfemparticles and creates initial triangulation consisting of 2 triangles conecting bounding box nodes
     void buildInitialBBXMesh(InsertTriangleBasedOnCircumcircle &tInsert);
@@ -121,7 +119,7 @@ private:
     /**
      * Fills the edgeList with unique alphaEdges. If an edge is already contained a pointer to it is returned and inserted edge is removed.
      */
-    AlphaEdge2D *giveBackEdgeIfAlreadyContainedInList(AlphaEdge2D *alphaEdge);
+    AlphaEdge2D *giveBackEdgeIfAlreadyContainedInList(AlphaEdge2D &alphaEdge);
 
     /// Iterates through the edgeList container and compares alpha-value with alphaEdge bounds. Alpha shape is stored in the alphaShapeEdgeList
     void giveAlphaShape();

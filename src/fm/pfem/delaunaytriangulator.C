@@ -60,39 +60,33 @@ DelaunayTriangulator :: DelaunayTriangulator(Domain *d, double setAlpha) :
 
 DelaunayTriangulator :: ~DelaunayTriangulator()
 {
-    // clean up triangle list
-    for ( genIT = generalTriangleList.begin(); genIT != generalTriangleList.end(); ) {
-        delete( * genIT );
-        genIT = generalTriangleList.erase(genIT);
+    for ( auto tri : generalTriangleList ) {
+        delete tri;
     }
 
-    for ( elIT = edgeList.begin(); elIT != edgeList.end(); ++elIT ) {
-        delete( * elIT );
+    for ( auto edge : edgeList ) {
+        delete edge;
     }
 }
 
 
 
-void DelaunayTriangulator :: addUniqueEdgeToPolygon(Edge2D *edge, std :: list< Edge2D > &polygon)
+void DelaunayTriangulator :: addUniqueEdgeToPolygon(Edge2D edge, std :: list< Edge2D > &polygon)
 {
-    std :: list< Edge2D > :: iterator pos;
-    int addingMask = 1;
+    int do_add = 1;
 
-    if ( !polygon.empty() ) {
-        for ( pos = polygon.begin(); pos != polygon.end(); ) {
-            if ( ( * pos ) == * edge ) {
-                pos = polygon.erase(pos);
-                delete edge;
-                addingMask = 0;
-                break;
-            } else {
-                ++pos;
-            }
+    for ( auto pos = polygon.begin(); pos != polygon.end(); ) {
+        if ( ( * pos ) == edge ) {
+            pos = polygon.erase(pos);
+            do_add = 0;
+            break;
+        } else {
+            ++pos;
         }
     }
 
-    if ( addingMask ) {
-        polygon.push_back(* edge);
+    if ( do_add ) {
+        polygon.push_back(edge);
     }
 }
 
@@ -142,7 +136,6 @@ void DelaunayTriangulator :: writeMesh()
 {
     int num = 1;
     int nelem = generalTriangleList.size();
-    Element *elem;
     IntArray dmans(3);
     DofManager *dman;
     DofIDItem type;
@@ -160,10 +153,10 @@ void DelaunayTriangulator :: writeMesh()
 
     domain->resizeElements(nelem);
     //from domain.C
-    for ( genIT = generalTriangleList.begin(); genIT != generalTriangleList.end(); genIT++ ) {
-        elem = new TR1_2D_PFEM(num, domain, ( * genIT )->giveNode(1), ( * genIT )->giveNode(2), ( * genIT )->giveNode(3), mat, cs);
+    for ( auto gen : generalTriangleList ) {
+        auto elem = std::make_unique<TR1_2D_PFEM>(num, domain, gen->giveNode(1), gen->giveNode(2), gen->giveNode(3), mat, cs);
 
-        domain->setElement(num, elem);
+        domain->setElement(num, std::move(elem));
         num++;
     }
 
@@ -177,10 +170,10 @@ void DelaunayTriangulator :: writeMesh()
         }
 
         // and then prescribe zero pressure on the free surface
-        for ( elIT = alphaShapeEdgeList.begin(); elIT != alphaShapeEdgeList.end(); elIT++ ) {
+        for ( auto el : alphaShapeEdgeList ) {
             bool oneIsFree = false;
             hasNoBcOnItself = true;
-            dman = domain->giveDofManager( ( * elIT )->giveFirstNodeNumber() );
+            dman = domain->giveDofManager( el->giveFirstNodeNumber() );
             for ( Dof *dof: *dman ) {
                 type = dof->giveDofID();
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
@@ -196,7 +189,7 @@ void DelaunayTriangulator :: writeMesh()
             dynamic_cast< PFEMParticle * >( dman )->setOnAlphaShape();
 
             hasNoBcOnItself = true;
-            dman = domain->giveDofManager( ( * elIT )->giveSecondNodeNumber() );
+            dman = domain->giveDofManager( el->giveSecondNodeNumber() );
             for ( Dof *dof: *dman ) {
                 type = dof->giveDofID();
                 if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
@@ -212,10 +205,10 @@ void DelaunayTriangulator :: writeMesh()
             dynamic_cast< PFEMParticle * >( dman )->setOnAlphaShape();
 
             if ( oneIsFree ) {
-                Dof *dofOnNode1 = domain->giveDofManager( ( * elIT )->giveFirstNodeNumber() )->giveDofWithID(P_f);
+                Dof *dofOnNode1 = domain->giveDofManager( el->giveFirstNodeNumber() )->giveDofWithID(P_f);
                 dofOnNode1->setBcId(pressureBC);
 
-                Dof *dofOnNode2 = domain->giveDofManager( ( * elIT )->giveSecondNodeNumber() )->giveDofWithID(P_f);
+                Dof *dofOnNode2 = domain->giveDofManager( el->giveSecondNodeNumber() )->giveDofWithID(P_f);
                 dofOnNode2->setBcId(pressureBC);
             }
         }
@@ -228,28 +221,28 @@ void DelaunayTriangulator :: computeAlphaComplex()
     bool alphaLengthInitialized = false;
     double minimalLength = 1.e6;
 
-    for ( genIT = generalTriangleList.begin(); genIT != generalTriangleList.end(); genIT++ ) {
+    for ( auto &gen : generalTriangleList ) {
         if ( alphaLengthInitialized ) {
-            minimalLength = min( ( * genIT )->giveShortestEdgeLength(), minimalLength );
+            minimalLength = min( gen->giveShortestEdgeLength(), minimalLength );
         } else {
-            minimalLength = ( * genIT )->giveShortestEdgeLength();
+            minimalLength = gen->giveShortestEdgeLength();
             alphaLengthInitialized = true;
         }
 
-        int par1 = ( * genIT )->giveNode(1);
-        int par2 = ( * genIT )->giveNode(2);
-        int par3 = ( * genIT )->giveNode(3);
-        double ccRadius = ( * genIT )->giveCircumRadius();
+        int par1 = gen->giveNode(1);
+        int par2 = gen->giveNode(2);
+        int par3 = gen->giveNode(3);
+        double ccRadius = gen->giveCircumRadius();
 
         AlphaEdge2D *containedEdge;
 
-        AlphaEdge2D *edge1 = new AlphaEdge2D( par1, par2, ( * genIT )->giveEdgeLength(1, 2) );
+        AlphaEdge2D *edge1 = new AlphaEdge2D( par1, par2, gen->giveEdgeLength(1, 2) );
 
-        containedEdge = giveBackEdgeIfAlreadyContainedInList(edge1);
+        containedEdge = giveBackEdgeIfAlreadyContainedInList(*edge1);
 
         if ( containedEdge ) {
             delete edge1;
-            containedEdge->setSharing( 2, ( * genIT ) );
+            containedEdge->setSharing( 2, gen );
             double outAlph = containedEdge->giveOuterAlphaBound();
             if ( ccRadius < outAlph ) {
                 containedEdge->setOuterAlphaBound(ccRadius);
@@ -268,17 +261,17 @@ void DelaunayTriangulator :: computeAlphaComplex()
             edge1->setInnerAlphaBound(ccRadius);
             edge1->setHullFlag(true);
 
-            edge1->setSharing( 1, ( * genIT ) );
+            edge1->setSharing( 1, gen );
             edgeList.push_back(edge1);
         }
 
-        AlphaEdge2D *edge2 = new AlphaEdge2D( par2, par3, ( * genIT )->giveEdgeLength(2, 3) );
+        AlphaEdge2D *edge2 = new AlphaEdge2D( par2, par3, gen->giveEdgeLength(2, 3) );
 
-        containedEdge = giveBackEdgeIfAlreadyContainedInList(edge2);
+        containedEdge = giveBackEdgeIfAlreadyContainedInList(*edge2);
 
         if ( containedEdge ) {
             delete edge2;
-            containedEdge->setSharing( 2, ( * genIT ) );
+            containedEdge->setSharing( 2, gen );
 
             double outAlph = containedEdge->giveOuterAlphaBound();
             if ( ccRadius < outAlph ) {
@@ -298,17 +291,17 @@ void DelaunayTriangulator :: computeAlphaComplex()
             edge2->setInnerAlphaBound(ccRadius);
             edge2->setHullFlag(true);
 
-            edge2->setSharing( 1, ( * genIT ) );
+            edge2->setSharing( 1, gen );
             edgeList.push_back(edge2);
         }
 
-        AlphaEdge2D *edge3 = new AlphaEdge2D( par3, par1, ( * genIT )->giveEdgeLength(3, 1) );
+        AlphaEdge2D *edge3 = new AlphaEdge2D( par3, par1, gen->giveEdgeLength(3, 1) );
 
-        containedEdge = giveBackEdgeIfAlreadyContainedInList(edge3);
+        containedEdge = giveBackEdgeIfAlreadyContainedInList(*edge3);
 
         if ( containedEdge ) {
             delete edge3;
-            containedEdge->setSharing( 2, ( * genIT ) );
+            containedEdge->setSharing( 2, gen );
 
             double outAlph = containedEdge->giveOuterAlphaBound();
             if ( ccRadius < outAlph ) {
@@ -328,7 +321,7 @@ void DelaunayTriangulator :: computeAlphaComplex()
             edge3->setInnerAlphaBound(ccRadius);
             edge3->setHullFlag(true);
 
-            edge3->setSharing( 1, ( * genIT ) );
+            edge3->setSharing( 1, gen );
             edgeList.push_back(edge3);
         }
     }
@@ -338,56 +331,50 @@ void DelaunayTriangulator :: computeAlphaComplex()
 
 //gives back pointer from edgeList
 //////////////////////////////////////////////////////////////////////////
-AlphaEdge2D *DelaunayTriangulator :: giveBackEdgeIfAlreadyContainedInList(AlphaEdge2D *alphaEdge)
+AlphaEdge2D *DelaunayTriangulator :: giveBackEdgeIfAlreadyContainedInList(AlphaEdge2D &alphaEdge)
 {
-    AlphaEdge2D *foundEdge = NULL;
-
-    if ( !edgeList.empty() ) {
-        for ( elIT = edgeList.begin(); elIT != edgeList.end(); ++elIT ) {
-            if ( ( * * elIT ) == ( * alphaEdge ) ) {
-                foundEdge = * elIT;
-                edgeList.erase(elIT);
-                break;
-            }
+    for ( auto elIT = edgeList.begin(); elIT != edgeList.end(); ++elIT ) {
+        if ( ( * * elIT ) == alphaEdge ) {
+            AlphaEdge2D *foundEdge = * elIT;
+            edgeList.erase(elIT);
+            return foundEdge;
         }
     }
 
-    return foundEdge;
+    return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////
 void DelaunayTriangulator :: giveAlphaShape()
 {
-    double outBound, innBound;
-
-    for ( elIT = edgeList.begin(); elIT != edgeList.end(); elIT++ ) {
+    for ( auto el : edgeList ) {
         // Option 2 : setting bounds vor computed Alpha
-        //double alpha = max(min(alphaValue * (*elIT)->giveLength(), maxAlpha), minAlpha);
+        //double alpha = max(min(alphaValue * el->giveLength(), maxAlpha), minAlpha);
         double alpha = alphaValue;
-        outBound = ( * elIT )->giveOuterAlphaBound();
+        double outBound = el->giveOuterAlphaBound();
 
         //innerBound = infinity
-        if ( ( * elIT )->giveHullFlag() ) {
+        if ( el->giveHullFlag() ) {
             if ( alpha > outBound ) {
-                alphaShapeEdgeList.push_back(* elIT);
+                alphaShapeEdgeList.push_back(el);
             } else {
                 //invalidating element
-                ( * elIT )->giveShared(1)->setValidFlag(false);
+                el->giveShared(1)->setValidFlag(false);
             }
         } else {
-            innBound = ( * elIT )->giveInnerAlphaBound();
+            double innBound = el->giveInnerAlphaBound();
             if ( alpha > outBound && alpha < innBound ) {
-                alphaShapeEdgeList.push_back(* elIT);
-                if ( ( * elIT )->giveShared(1)->giveCircumRadius() > alpha ) {
-                    ( * elIT )->giveShared(1)->setValidFlag(false);
+                alphaShapeEdgeList.push_back(el);
+                if ( el->giveShared(1)->giveCircumRadius() > alpha ) {
+                    el->giveShared(1)->setValidFlag(false);
                 } else {
-                    ( * elIT )->giveShared(2)->setValidFlag(false);
+                    el->giveShared(2)->setValidFlag(false);
                 }
             }
 
             if ( alpha < outBound ) {
                 for ( int i = 1; i <= 2; i++ ) {
-                    ( * elIT )->giveShared(i)->setValidFlag(false);
+                    el->giveShared(i)->setValidFlag(false);
                 }
             }
         }
@@ -412,27 +399,18 @@ DelaunayTriangulator :: findNonDelaunayTriangles(int insertedNode, InsertTriangl
     DofManager *node = domain->giveNode(insertedNode);
     const auto &nodeCoords = *node->giveCoordinates();
 
-    ElementCircumCirclesContainingNode findElements(&nodeCoords, domain);
-    std :: list< DelaunayTriangle * >nonDelaunayTriangles;
-    std :: list< DelaunayTriangle * > :: iterator triangleIT;
+    ElementCircumCirclesContainingNode findElements(nodeCoords, domain);
+    std :: list< DelaunayTriangle * > nonDelaunayTriangles;
 
     this->searchingTimer.resumeTimer();
     triangleOctree.proceedDataOnFilterAndRemoveFromOctree(nonDelaunayTriangles, findElements, tInsert, searchingTimer);
     this->searchingTimer.pauseTimer();
 
     this->polygonTimer.resumeTimer();
-    for ( triangleIT = nonDelaunayTriangles.begin(); triangleIT != nonDelaunayTriangles.end(); ++triangleIT ) {
-        DelaunayTriangle *triangle;
-        triangle = * triangleIT;
-        Edge2D *edge1 = new Edge2D( triangle->giveNode(1), triangle->giveNode(2) );
-        addUniqueEdgeToPolygon(edge1, polygon);
-
-        Edge2D *edge2 = new Edge2D( triangle->giveNode(2), triangle->giveNode(3) );
-        addUniqueEdgeToPolygon(edge2, polygon);
-
-        Edge2D *edge3 = new Edge2D( triangle->giveNode(3), triangle->giveNode(1) );
-        addUniqueEdgeToPolygon(edge3, polygon);
-
+    for ( auto triangle : nonDelaunayTriangles ) {
+        addUniqueEdgeToPolygon({triangle->giveNode(1), triangle->giveNode(2)}, polygon);
+        addUniqueEdgeToPolygon({triangle->giveNode(2), triangle->giveNode(3)}, polygon);
+        addUniqueEdgeToPolygon({triangle->giveNode(3), triangle->giveNode(1)}, polygon);
         triangle->setValidFlag(false);
     }
 
@@ -442,8 +420,7 @@ DelaunayTriangulator :: findNonDelaunayTriangles(int insertedNode, InsertTriangl
 void
 DelaunayTriangulator :: meshPolygon(int insertedNode, InsertTriangleBasedOnCircumcircle &tInsert, std :: list< Edge2D > &polygon)
 {
-    std :: list< Edge2D > :: iterator polygonIT;
-    for ( polygonIT = polygon.begin(); polygonIT != polygon.end(); polygonIT++ ) {
+    for ( auto polygonIT = polygon.begin(); polygonIT != polygon.end(); polygonIT++ ) {
         DelaunayTriangle *newTriangle = new DelaunayTriangle(domain, ( * polygonIT ).giveFirstNodeNumber(), ( * polygonIT ).giveSecondNodeNumber(), insertedNode);
 
         this->creativeTimer.resumeTimer();
@@ -480,7 +457,7 @@ DelaunayTriangulator :: giveTimeReport()
 void
 DelaunayTriangulator :: cleanUpTriangleList()
 {
-    for ( genIT = generalTriangleList.begin(); genIT != generalTriangleList.end(); ) {
+    for ( auto genIT = generalTriangleList.begin(); genIT != generalTriangleList.end(); ) {
         int node1 = ( * genIT )->giveNode(1);
         int node2 = ( * genIT )->giveNode(2);
         int node3 = ( * genIT )->giveNode(3);
@@ -507,7 +484,7 @@ void DelaunayTriangulator :: buildInitialBBXMesh(InsertTriangleBasedOnCircumcirc
 
     FloatArray coords;
 
-    Node *bottomLeftNode = new Node(nnode + 1, domain);
+    auto bottomLeftNode = std::make_unique<Node>(nnode + 1, domain);
     BBX.giveOrigin(coords);
     double diff = BBX.giveSize();
     for ( int ci = 1; ci <= 2; ci++ ) {
@@ -516,30 +493,29 @@ void DelaunayTriangulator :: buildInitialBBXMesh(InsertTriangleBasedOnCircumcirc
 
     bottomLeftNode->setCoordinates(coords);
 
-    Node *bottomRightNode = new Node(nnode + 2, domain);
+    auto bottomRightNode = std::make_unique<Node>(nnode + 2, domain);
     coords.at(1) += BBX.giveSize() + 2.0 * diff;
     bottomRightNode->setCoordinates(coords);
 
-    Node *topRightNode = new Node(nnode + 3, domain);
+    auto topRightNode = std::make_unique<Node>(nnode + 3, domain);
     coords.at(2) += BBX.giveSize() + 2.0 * diff;
     topRightNode->setCoordinates(coords);
 
-    Node *topLeftNode = new Node(nnode + 4, domain);
+    auto topLeftNode = std::make_unique<Node>(nnode + 4, domain);
     coords.at(1) -= BBX.giveSize() + 2.0 * diff;
     topLeftNode->setCoordinates(coords);
 
     domain->resizeDofManagers(nnode + 4);
-    domain->setDofManager(nnode + 1, bottomLeftNode);
-    domain->setDofManager(nnode + 2, bottomRightNode);
-    domain->setDofManager(nnode + 3, topRightNode);
-    domain->setDofManager(nnode + 4, topLeftNode);
+    domain->setDofManager(nnode + 1, std::move(bottomLeftNode));
+    domain->setDofManager(nnode + 2, std::move(bottomRightNode));
+    domain->setDofManager(nnode + 3, std::move(topRightNode));
+    domain->setDofManager(nnode + 4, std::move(topLeftNode));
 
     DelaunayTriangle *firstTriangle = new DelaunayTriangle(domain, nnode + 1, nnode + 2, nnode + 3);
     generalTriangleList.push_back(firstTriangle);
 
     DelaunayTriangle *secondTriangle = new DelaunayTriangle(domain, nnode + 3, nnode + 4, nnode + 1);
     generalTriangleList.push_back(secondTriangle);
-
 
     triangleOctree.insertMemberIntoOctree(firstTriangle, tInsert);
     triangleOctree.insertMemberIntoOctree(secondTriangle, tInsert);
