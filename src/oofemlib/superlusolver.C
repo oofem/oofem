@@ -345,7 +345,6 @@ SuperLUSolver :: convertRhs(SuperMatrix *X, FloatArray &x)
 int_t SuperLUSolver :: dPrint_CompCol_Matrix(SuperMatrix *A)
 {
     NCformat *Astore;
-    register int_t i;
     double *dp;
 
     printf("\nCompCol matrix: ");
@@ -354,15 +353,15 @@ int_t SuperLUSolver :: dPrint_CompCol_Matrix(SuperMatrix *A)
     dp = ( double * ) Astore->nzval;
     printf("nrow " IFMT ", ncol " IFMT ", nnz " IFMT "\n", A->nrow, A->ncol, Astore->nnz);
     printf("\nnzval: ");
-    for ( i = 0; i < Astore->nnz; ++i ) {
+    for ( int_t i = 0; i < Astore->nnz; ++i ) {
         printf("%f  ", dp [ i ]);
     }
     printf("\nrowind: ");
-    for ( i = 0; i < Astore->nnz; ++i ) {
+    for ( int_t i = 0; i < Astore->nnz; ++i ) {
         printf(IFMT, Astore->rowind [ i ]);
     }
     printf("\ncolptr: ");
-    for ( i = 0; i <= A->ncol; ++i ) {
+    for ( int_t i = 0; i <= A->ncol; ++i ) {
         printf(IFMT, Astore->colptr [ i ]);
     }
     printf("\nend CompCol matrix.\n");
@@ -373,7 +372,6 @@ int_t SuperLUSolver :: dPrint_CompCol_Matrix(SuperMatrix *A)
 int_t SuperLUSolver :: dPrint_Dense_Matrix(SuperMatrix *A)
 {
     DNformat *Astore;
-    register int_t i;
     double *dp;
 
     printf("\nDense matrix: ");
@@ -383,7 +381,7 @@ int_t SuperLUSolver :: dPrint_Dense_Matrix(SuperMatrix *A)
     printf("nrow " IFMT ", ncol " IFMT ", lda " IFMT "\n",
            A->nrow, A->ncol, Astore->lda);
     printf("\nnzval: ");
-    for ( i = 0; i < A->nrow; ++i ) {
+    for ( int_t i = 0; i < A->nrow; ++i ) {
         printf("%f  ", dp [ i ]);
     }
     printf("\nend Dense matrix.\n");
@@ -395,11 +393,11 @@ int_t
 dCheckZeroDiagonal(int_t n, int_t *rowind, int_t *colbeg,
                    int_t *colend, int_t *perm)
 {
-    register int_t i, j, nzd, nd = 0;
+    int_t nd = 0;
 
-    for ( j = 0; j < n; ++j ) {
-        nzd = 0;
-        for ( i = colbeg [ j ]; i < colend [ j ]; ++i ) {
+    for ( int_t j = 0; j < n; ++j ) {
+        int_t nzd = 0;
+        for ( int_t i = colbeg [ j ]; i < colend [ j ]; ++i ) {
             if ( perm [ rowind [ i ] ] == j ) {
                 nzd = 1;
                 ++nd;
