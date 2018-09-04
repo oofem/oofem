@@ -5,8 +5,6 @@
 #include <math.h>
 
 namespace oofem {
-#define MIN(a, b) ( ( a ) > ( b ) ? ( b ) : ( a ) )
-#define MAX(a, b) ( ( a ) > ( b ) ? ( a ) : ( b ) )
 
 // NB: When using matrix indices (i,j), they run from 1 to (m,n).
 // When using 1-dim array index 'ind', it runs from 0 to (m*n-1).
@@ -43,13 +41,12 @@ int jcalcOffsets[] = {
 };
 
 
-Grid :: Grid(int N, int M)
+Grid :: Grid(int N, int M) :
+    n(N), m(M),
+    T(m, n),
+    F(m, n)
 {
-    n = N;
-    m = M;
     solutionAvailable = false;
-    T = new FloatMatrix(m, n);
-    F = new FloatMatrix(m, n);
 
     // (calloc sets all bits of the allocated memory to zero, so the initial values are "false")
     Frozen = ( bool * ) calloc( m * n, sizeof( bool ) );
@@ -58,8 +55,6 @@ Grid :: Grid(int N, int M)
 
 Grid :: ~Grid()
 {
-    delete T;
-    delete F;
     if ( Frozen ) {
         free(Frozen);
     }
@@ -135,53 +130,53 @@ Grid :: setZeroValues(FloatMatrix *gridCoords)
         int CPInd = ij2ind(i, j, m);
 
         // Calculate time-distance of nearest grid node and freeze the value
-        double Fij = F->at(i, j);
-        T->at(i, j) = sqrt( ( i - CPy ) * ( i - CPy ) + ( j - CPx ) * ( j - CPx ) ) / Fij;
+        double Fij = F.at(i, j);
+        T.at(i, j) = sqrt( ( i - CPy ) * ( i - CPy ) + ( j - CPx ) * ( j - CPx ) ) / Fij;
         Frozen [ CPInd ] = true;
 
         // For four direct neighbors or all eight neighbours of the nearest grid node, do the same
         // (depending on parameter initDiag)
 
-        int nInd, ni, nj;
-        double time;
         if ( initDiag <= 0. ) { // initialize direct neighbors only
             for ( int neigh = 0; neigh < 4; neigh++ ) {
-                ni = i + iOffsets [ neigh ];
-                nj = j + jOffsets [ neigh ];
+                int ni = i + iOffsets [ neigh ];
+                int nj = j + jOffsets [ neigh ];
                 if ( isInDomain(ni, nj, m, n) ) {
-                    nInd = ij2ind(ni, nj, m);
+                    int nInd = ij2ind(ni, nj, m);
+                    double time;
                     if ( centDiff > 0 ) { // use the average speed
-                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / ( 0.5 * ( Fij + F->at(ni, nj) ) );
+                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / ( 0.5 * ( Fij + F.at(ni, nj) ) );
                     } else { // use the speed at the arrival point
-                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / F->at(ni, nj);
+                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / F.at(ni, nj);
                     }
                     if ( Frozen [ nInd ] ) {
-                        T->at(ni, nj) = MIN( time, T->at(ni, nj) );
+                        T.at(ni, nj) = std::min( time, T.at(ni, nj) );
                     } else {
-                        T->at(ni, nj) = time;
+                        T.at(ni, nj) = time;
                         Frozen [ nInd ] = true;
                     }
                 }
             }
         } else { // initialize all neighbors
             for ( int neigh = 0; neigh < 8; neigh++ ) {
-                ni = i + iOffsets_full [ neigh ];
-                nj = j + jOffsets_full [ neigh ];
+                int ni = i + iOffsets_full [ neigh ];
+                int nj = j + jOffsets_full [ neigh ];
                 if ( isInDomain(ni, nj, m, n) ) {
-                    nInd = ij2ind(ni, nj, m);
+                    int nInd = ij2ind(ni, nj, m);
+                    double time;
                     if ( centDiff > 0 ) { // use the average speed
-                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / ( 0.5 * ( Fij + F->at(ni, nj) ) );
+                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / ( 0.5 * ( Fij + F.at(ni, nj) ) );
                     } else { // use the speed at the arrival point
-                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / F->at(ni, nj);
+                        time = sqrt( ( ni - CPy ) * ( ni - CPy ) + ( nj - CPx ) * ( nj - CPx ) ) / F.at(ni, nj);
                     }
                     // for diagonal neighbors, use initDiag as a scaling factor
                     if ( is_diag [ neigh ] ) {
                         time *= initDiag;
                     }
                     if ( Frozen [ nInd ] ) {
-                        T->at(ni, nj) = MIN( time, T->at(ni, nj) );
+                        T.at(ni, nj) = std::min( time, T.at(ni, nj) );
                     } else {
-                        T->at(ni, nj) = time;
+                        T.at(ni, nj) = time;
                         Frozen [ nInd ] = true;
                     }
                 }
@@ -195,7 +190,7 @@ Grid :: setZeroValues(FloatMatrix *gridCoords)
 void
 Grid :: setSolutionValueAt(int i, int j, double value)
 {
-    T->at(i, j) = value;
+    T.at(i, j) = value;
     // after each external change, the solution becomes invalid
     solutionAvailable = false;
 }
@@ -209,7 +204,7 @@ Grid :: giveSolutionValueAt(int i, int j)
         // TBD: one should check eFlag and send an error message if it is > 0
         solutionAvailable = true;
     }
-    return T->at(i, j);
+    return T.at(i, j);
 }
 
 void
@@ -218,7 +213,7 @@ Grid :: printSolutionAsData()
     for ( int j = 1; j <= n; j++ ) {
         printf("\n");
         for ( int i = 1; i <= m; i++ ) {
-            printf( "%d %d %g\n", j, i, T->at(i, j) );
+            printf( "%d %d %g\n", j, i, T.at(i, j) );
         }
     }
 }
@@ -227,9 +222,6 @@ Grid :: printSolutionAsData()
 void
 Grid :: fastMarch(int &eFlag)
 {
-    double time;
-    int i, j, ni, nj, nInd;
-    int tmpFlag = 0;
     eFlag = 0;
 
     // Create the initial narrow band
@@ -240,17 +232,18 @@ Grid :: fastMarch(int &eFlag)
     // Loop over all grid points (not efficient, but done only once)
     for ( int ind = 0; ind < ( m * n ); ind++ ) {
         if ( Frozen [ ind ] ) {
-            i = ind2i(ind, m);
-            j = ind2j(ind, m);
+            int i = ind2i(ind, m);
+            int j = ind2j(ind, m);
 
             for ( int neigh = 0; neigh < 4; neigh++ ) {
-                ni = i + iOffsets [ neigh ];
-                nj = j + jOffsets [ neigh ];
-                nInd = ij2ind(ni, nj, m);
+                int ni = i + iOffsets [ neigh ];
+                int nj = j + jOffsets [ neigh ];
+                int nInd = ij2ind(ni, nj, m);
 
                 if ( isInDomain(ni, nj, m, n) && !Frozen [ nInd ] ) {
                     if ( !narrowBand->isInHeap(nInd) ) {
-                        time = calcTime(ni, nj, F->at(ni, nj), order, tmpFlag);
+                        int tmpFlag = 0;
+                        double time = calcTime(ni, nj, F.at(ni, nj), order, tmpFlag);
                         narrowBand->insert(time, nInd);
                         if ( tmpFlag > eFlag ) {
                             eFlag = tmpFlag;
@@ -265,23 +258,24 @@ Grid :: fastMarch(int &eFlag)
     int CPInd;
     while ( narrowBand->nElems() > 0 ) {
         // Get minimal time-distance and index of this narrow-band element
-        time = narrowBand->getSmallest(& CPInd);
-        i = ind2i(CPInd, m);
-        j = ind2j(CPInd, m);
+        double time = narrowBand->getSmallest(& CPInd);
+        int i = ind2i(CPInd, m);
+        int j = ind2j(CPInd, m);
 
         // Freeze and set time
         Frozen [ CPInd ] = true;
-        T->at(i, j) = time;
+        T.at(i, j) = time;
 
         // For all neighbours
         for ( int neigh = 0; neigh < 4; neigh++ ) {
-            ni      = i + iOffsets [ neigh ];
-            nj      = j + jOffsets [ neigh ];
-            nInd = ij2ind(ni, nj, m);
+            int ni = i + iOffsets [ neigh ];
+            int nj = j + jOffsets [ neigh ];
+            int nInd = ij2ind(ni, nj, m);
 
             // If valid for consideration
             if ( isInDomain(ni, nj, m, n) && !Frozen [ nInd ] ) {
-                time = calcTime(ni, nj, F->at(ni, nj), order, tmpFlag);
+                int tmpFlag;
+                double time = calcTime(ni, nj, F.at(ni, nj), order, tmpFlag);
                 // If T(ni,nj) has not been previously calculated
                 if ( !narrowBand->isInHeap(nInd) ) {
                     narrowBand->insert(time, nInd);
@@ -300,7 +294,8 @@ Grid :: fastMarch(int &eFlag)
 
 // Time-dist calculation (for a grid with unit spacing)
 double
-Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
+Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag)
+{
     // Get infinity.
     // NB: Is this good practice? As in the matlab code, using Inf as
     // a flag simplifies the code, so that's why I use this. Maybe this
@@ -320,19 +315,16 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
     // time calculated
     double time;
 
-    // Indices of neighbouring nodes
-    int ni, nj, nInd;
-
     // Variables used in the final formula
     double xmin1 = 0., xmin2, ymin1 = 0., ymin2;
 
     // Get values at surrounding nodes (at those that are frozen)
     for ( int iter = 0; iter < 8; iter++ ) {
-        ni = i + icalcOffsets [ iter ];
-        nj = j + jcalcOffsets [ iter ];
-        nInd = ij2ind(ni, nj, m);
+        int ni = i + icalcOffsets [ iter ];
+        int nj = j + jcalcOffsets [ iter ];
+        int nInd = ij2ind(ni, nj, m);
         if ( isInDomain(ni, nj, m, n) && Frozen [ nInd ] ) {
-            CrossVals [ iter ] = T->at(ni, nj);
+            CrossVals [ iter ] = T.at(ni, nj);
         } else {
             CrossVals [ iter ] = Inf;
         }
@@ -342,7 +334,7 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
     if ( ( CrossVals [ 1 ] == Inf ) && ( CrossVals [ 2 ] == Inf ) &&
          ( CrossVals [ 5 ] == Inf ) && ( CrossVals [ 6 ] == Inf ) ) {
         eFlag = 0;
-        time = Inf;
+        double time = Inf;
         return time;
     }
 
@@ -357,11 +349,12 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
     case 1:
         // Contribution of y-direction
         if ( !( ( CrossVals [ 1 ] == Inf ) && ( CrossVals [ 2 ] == Inf ) ) ) {
-            ymin1 = MIN(CrossVals [ 1 ], CrossVals [ 2 ]);
+            ymin1 = std::min(CrossVals [ 1 ], CrossVals [ 2 ]);
             a += 1.;
             b -= 2. * ymin1;
             c += ymin1 * ymin1;
             //mj
+            int ni, nj;
             if ( CrossVals [ 1 ] < CrossVals [ 2 ] ) {
                 ni = i + icalcOffsets [ 1 ];
                 nj = j + jcalcOffsets [ 1 ];
@@ -369,17 +362,18 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
                 ni = i + icalcOffsets [ 2 ];
                 nj = j + jcalcOffsets [ 2 ];
             }
-            Fy = F->at(ni, nj);
+            Fy = F.at(ni, nj);
             //end mj
         }
 
         // Contribution of x-direction
         if ( !( ( CrossVals [ 5 ] == Inf ) && ( CrossVals [ 6 ] == Inf ) ) ) {
-            xmin1 = MIN(CrossVals [ 5 ], CrossVals [ 6 ]);
+            xmin1 = std::min(CrossVals [ 5 ], CrossVals [ 6 ]);
             a += 1.;
             b -= 2. * xmin1;
             c += xmin1 * xmin1;
             //mj
+            int ni, nj;
             if ( CrossVals [ 5 ] < CrossVals [ 6 ] ) {
                 ni = i + icalcOffsets [ 5 ];
                 nj = j + jcalcOffsets [ 5 ];
@@ -387,7 +381,7 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
                 ni = i + icalcOffsets [ 6 ];
                 nj = j + jcalcOffsets [ 6 ];
             }
-            Fx = F->at(ni, nj);
+            Fx = F.at(ni, nj);
             //end mj
         }
         break;
@@ -400,9 +394,9 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
             if ( CrossVals [ 1 ] < CrossVals [ 2 ] ) {
                 ymin1 = CrossVals [ 1 ];
                 //mj
-                ni = i + icalcOffsets [ 1 ];
-                nj = j + jcalcOffsets [ 1 ];
-                Fy = F->at(ni, nj);
+                int ni = i + icalcOffsets [ 1 ];
+                int nj = j + jcalcOffsets [ 1 ];
+                Fy = F.at(ni, nj);
                 //end mj
                 if ( CrossVals [ 0 ] <= CrossVals [ 1 ] ) { //second-order formula can be applied
                     ymin2 = CrossVals [ 0 ];
@@ -417,9 +411,9 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
             } else {
                 ymin1 = CrossVals [ 2 ];
                 //mj
-                ni = i + icalcOffsets [ 2 ];
-                nj = j + jcalcOffsets [ 2 ];
-                Fy = F->at(ni, nj);
+                int ni = i + icalcOffsets [ 2 ];
+                int nj = j + jcalcOffsets [ 2 ];
+                Fy = F.at(ni, nj);
                 //end mj
                 if ( CrossVals [ 3 ] <= CrossVals [ 2 ] ) { //second-order formula can be applied
                     ymin2 = CrossVals [ 3 ];
@@ -438,9 +432,9 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
             if ( CrossVals [ 5 ] < CrossVals [ 6 ] ) {
                 xmin1 = CrossVals [ 5 ];
                 //mj
-                ni = i + icalcOffsets [ 5 ];
-                nj = j + jcalcOffsets [ 5 ];
-                Fx = F->at(ni, nj);
+                int ni = i + icalcOffsets [ 5 ];
+                int nj = j + jcalcOffsets [ 5 ];
+                Fx = F.at(ni, nj);
                 //end mj
                 if ( CrossVals [ 4 ] <= CrossVals [ 5 ] ) { //second-order formula can be applied
                     xmin2 = CrossVals [ 4 ];
@@ -455,9 +449,9 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
             } else {
                 xmin1 = CrossVals [ 6 ];
                 //mj
-                ni = i + icalcOffsets [ 6 ];
-                nj = j + jcalcOffsets [ 6 ];
-                Fx = F->at(ni, nj);
+                int ni = i + icalcOffsets [ 6 ];
+                int nj = j + jcalcOffsets [ 6 ];
+                Fx = F.at(ni, nj);
                 //end mj
                 if ( CrossVals [ 7 ] <= CrossVals [ 6 ] ) { //second-order formula can be applied
                     xmin2 = CrossVals [ 7 ];
@@ -496,7 +490,7 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
     if ( ( d < 0.0 ) && ( ord == 2 ) ) {
         // if second-order method did not work, try first-order formula
         time = calcTime(i, j, Fij, 1, tmpFlag);
-        eFlag = MAX(1, tmpFlag);
+        eFlag = std::max(1, tmpFlag);
     } else if ( ( d < 0.0 ) && ( ord == 1 ) ) {
         if ( ( CrossVals [ 1 ] == Inf ) && ( CrossVals [ 2 ] == Inf ) ) {
             ymin1 = Inf;
@@ -506,7 +500,7 @@ Grid :: calcTime(int i, int j, double Fij, int ord, int &eFlag) {
         }
 
         eFlag = 2;
-        time = MIN(xmin1, ymin1) + 1.0 / Fij;
+        time = std::min(xmin1, ymin1) + 1.0 / Fij;
     } else {
         eFlag = 0;
         time = ( -b + sqrt(d) ) / ( 2.0 * a );

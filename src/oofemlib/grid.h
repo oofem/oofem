@@ -50,8 +50,8 @@ public:
 
     /// Method setting the values of the prescribed field (e.g., front velocities)
     //void setPrescribedField(double *PF);
-    void setPrescribedFieldValue(int i, int j, double val) { F->at(i, j) = val; }
-    FloatMatrix *givePrescribedField() { return F; }
+    void setPrescribedFieldValue(int i, int j, double val) { F.at(i, j) = val; }
+    FloatMatrix &givePrescribedField() { return F; }
 
     /// Methods setting the values of the unknown field at selected points (e.g., zero times)
     void setZeroValues(FloatMatrix *gridCoords);
@@ -75,10 +75,10 @@ private:
     bool solutionAvailable;
 
     /// Matrix storing the values of the unknown (computed) field (e.g., arrival times)
-    FloatMatrix *T;
+    FloatMatrix T;
 
     /// Matrix storing the values of the prescribed field (e.g., front velocities)
-    FloatMatrix *F;
+    FloatMatrix F;
 
     /// Array storing indicators of frozen points (at which the solution is already known)
     bool *Frozen;
