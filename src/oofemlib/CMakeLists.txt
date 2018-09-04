@@ -147,7 +147,6 @@ set (core_cs
     )
 
 set (core_td
-    particletopologydescription.C
     )
 
 set (core_dofman
