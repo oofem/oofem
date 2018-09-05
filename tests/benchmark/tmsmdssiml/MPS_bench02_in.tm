@@ -109,7 +109,7 @@ Brick1ht 27 nodes 8  62 70 71 63 38 46 47 39 BoundaryLoads 2 12 1
 Brick1ht 28 nodes 8  63 71 72 64 39 47 48 40 BoundaryLoads 4 8 5 12 1
 Set 1 elementranges {(1 28)}
 Set 2 nodes 9 1 9 17 25 33 41 49 57 65
-SimpleCS 1 material 1 set 1
+SimpleTransportCS 1 mat 1 set 1
 HydratingConcreteMat 1 d 2403.24 k 1.471 c 961.929 hydrationmodeltype 2 Qpot 471.15 masscement 279.904 b1 0.0001624 b2 0.0014 eta 7 dohinf 0.85 activationenergy 38300 castingTime 0. DoH1 0 P1 0
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 20 set 2
 ConstantSurfaceLoad 2 loadTimeFunction 1 components 1 20 properties 1 a 0 loadtype 3
