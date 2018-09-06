@@ -90,7 +90,6 @@
 //@}
 
 namespace oofem {
-class Microplane;
 
 /**
  * Material status class MDMStatus associated to MDM matarial
@@ -268,9 +267,6 @@ public:
     const char *giveInputRecordName() const override { return _IFT_MDM_Name; }
     const char *giveClassName() const override { return "MDM"; }
 
-    void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
-                                        const FloatArray &strain, TimeStep *tStep) override { }
-
     void initializeData(int numberOfMicroplanes) override;
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
@@ -298,12 +294,11 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) override { return nullptr; }
     void computeDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,
                              GaussPoint *gp, TimeStep *tStep);
     void computeLocalDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,
                                   GaussPoint *gp, TimeStep *tStep);
-    double computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray &strain);
+    double computeDamageOnPlane(GaussPoint *gp, int mnumber, const FloatArray &strain);
     void computePDC(FloatMatrix &tempDamageTensor, FloatArray &tempDamageTensorEigenVals,
                     FloatMatrix &tempDamageTensorEigenVec);
     void transformStrainToPDC(FloatArray &answer, FloatArray &strain,

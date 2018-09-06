@@ -40,7 +40,6 @@
 #include "sm/Materials/isolinearelasticmaterial.h"
 #include "mmaclosestiptransfer.h"
 #include "nonlocalmaterialext.h"
-#include "microplane.h"
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
@@ -74,11 +73,7 @@ MMAClosestIPTransfer MDM :: mapper2;
 MaterialStatus *
 MDM :: CreateStatus(GaussPoint *gp) const
 {
-    if ( dynamic_cast< Microplane * >(gp) ) {
-        return nullptr;
-    } else {
-        return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);
-    }
+    return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);
 }
 
 
@@ -206,20 +201,15 @@ void
 MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStrain,
                                 GaussPoint *gp, TimeStep *tStep)
 {
-    int im1;
-    double PsiOld, Psi;
     FloatArray damageVector(6);
-    Microplane *mPlane;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
     // Loop over microplanes.
     for ( int im = 0; im < numberOfMicroplanes; im++ ) {
-        mPlane = this->giveMicroplane(im, gp);
-        im1 = im + 1;
+        int im1 = im + 1;
 
-        Psi = computeDamageOnPlane(gp, mPlane, totalStrain);
-
-        PsiOld = status->giveMicroplaneDamage(im1);
+        double Psi = computeDamageOnPlane(gp, im1, totalStrain);
+        double PsiOld = status->giveMicroplaneDamage(im1);
         if ( PsiOld > Psi ) {
             Psi = PsiOld;
         }
@@ -274,7 +264,7 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
 #define HUGE_RELATIVE_COMPLIANCE 1.e20
 
 double
-MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray &strain)
+MDM :: computeDamageOnPlane(GaussPoint *gp, int mnumber, const FloatArray &strain)
 {
     double en, em, el, Ep, Efp, ParEpp;
     double Enorm = 0.0, sv = 0.0, answer = 0.0;
@@ -284,9 +274,9 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
     StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
 
     StructuralMaterial :: giveFullSymVectorForm( fullStrain, strain, gp->giveMaterialMode() );
-    en = this->computeNormalStrainComponent(mplane, fullStrain);
-    em = this->computeShearMStrainComponent(mplane, fullStrain);
-    el = this->computeShearLStrainComponent(mplane, fullStrain);
+    en = this->computeNormalStrainComponent(mnumber, fullStrain);
+    em = this->computeShearMStrainComponent(mnumber, fullStrain);
+    el = this->computeShearLStrainComponent(mnumber, fullStrain);
 
 
     // request raw parameters
@@ -1111,14 +1101,12 @@ MDM :: initializeData(int numberOfMicroplanes)
             OOFEM_ERROR("required number of microplanes too big");
         }
 
-        int iplane;
-        int i, ii, jj;
         double alpha = M_PI / numberOfMicroplanes;
         FloatArray n(3), m(3), l(3);
 
         int ij [ 6 ] [ 2 ] = { { 1, 1 }, { 2, 2 }, { 3, 3 }, { 2, 3 }, { 3, 1 }, { 1, 2 } };
 
-        for ( iplane = 0; iplane < numberOfMicroplanes; iplane++ ) {
+        for ( int iplane = 0; iplane < numberOfMicroplanes; iplane++ ) {
             microplaneWeights [ iplane ] = alpha;
 
             n.at(1) = microplaneNormals [ iplane ] [ 0 ] = cos(iplane * alpha);
@@ -1134,9 +1122,9 @@ MDM :: initializeData(int numberOfMicroplanes)
             l.at(2) = 0.0;
             l.at(3) = 1.0;
 
-            for ( i = 0; i < 6; i++ ) {
-                ii = ij [ i ] [ 0 ];
-                jj = ij [ i ] [ 1 ];
+            for ( int i = 0; i < 6; i++ ) {
+                int ii = ij [ i ] [ 0 ];
+                int jj = ij [ i ] [ 1 ];
 
                 N [ iplane ] [ i ] = n.at(ii) * n.at(jj);
                 M [ iplane ] [ i ] = 0.5 * ( m.at(ii) * n.at(jj) + m.at(jj) * n.at(ii) );

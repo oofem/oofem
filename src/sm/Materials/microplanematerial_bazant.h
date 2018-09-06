@@ -63,12 +63,16 @@ public:
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
 
     /**
+    * Computes stress on given microplane (volumetric, deviatoric normal stresses and shead stresses)
+    */
+    virtual MicroplaneState giveRealMicroplaneStressVector(GaussPoint *gp, int mnumber, const MicroplaneState &strain, TimeStep *tStep) const = 0;
+
+    /**
      * Updates the volumetric stress component after computing real stress microplane vectors.
      */
-    virtual void updateVolumetricStressTo(Microplane *mPlane, double sigv) = 0;
+    virtual void updateVolumetricStressTo(GaussPoint *gp, int mnumber, double sigv) const = 0;
 
     const char *giveClassName() const override { return "MicroplaneMaterial_Bazant"; }
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new StructuralMaterialStatus(1, domain, gp); }
 };
 } // end namespace oofem
 #endif // microplanematerial_bazant_h

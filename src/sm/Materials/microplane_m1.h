@@ -108,7 +108,6 @@ public:
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep) override;
-    void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane, const FloatArray &strain, TimeStep *tStep) override {}
 
     const char *giveClassName() const override { return "M1Material"; }
     const char *giveInputRecordName() const override { return _IFT_M1Material_Name; }
@@ -116,8 +115,6 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(1, domain, gp); }
 
-protected:
-    MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) override { return new M1MaterialStatus(1, domain, gp); }
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
 } // end namespace oofem
@@ -207,7 +204,6 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(1, domain, gp); }
 
 protected:
-    MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) override { return new M1MaterialStatus(1, domain, gp); }
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
 } // end namespace oofem

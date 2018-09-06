@@ -301,7 +301,6 @@ set (sm_unsorted
     particle.C
     refinedelement.C
     refinedmesh.C
-    microplane.C
     gpinitmodule.C
     stressstrainbasevector.C stressvector.C strainvector.C
     mappers/primvarmapper.C

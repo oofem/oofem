@@ -37,6 +37,7 @@
 
 #include "sm/Materials/structuralmaterial.h"
 #include "matconst.h"
+#include "floatarrayf.h"
 
 ///@name Input fields for MicroplaneMaterial
 //@{
@@ -46,9 +47,18 @@
 //@}
 
 namespace oofem {
-class Microplane;
 
 #define MAX_NUMBER_OF_MICROPLANES 61
+
+/// Defines the stress or strain state in a micro plane
+struct MicroplaneState
+{
+    double n = 0.;
+    double v = 0.;
+    double m = 0.;
+    double l = 0.;
+};
+
 
 /**
  * Abstract base class for all microplane models.
@@ -66,28 +76,28 @@ protected:
     int numberOfMicroplanes;
 
     /// Integration weights of microplanes.
-    double microplaneWeights [ MAX_NUMBER_OF_MICROPLANES ];
+    FloatArray microplaneWeights;
     /// Normals of microplanes.
-    double microplaneNormals [ MAX_NUMBER_OF_MICROPLANES ] [ 3 ];
+    std::vector<FloatArrayF<3>> microplaneNormals;
 
     /// Kronecker's delta.
-    double Kronecker [ 6 ];
+    FloatArrayF<6> Kronecker;
 
     /**
      * Normal projection tensors for all microplanes.
      * Due to symmetry, compressed form is stored.
      */
-    double N [ MAX_NUMBER_OF_MICROPLANES ] [ 6 ];
+    std::vector<FloatArrayF<6>> N;
     /**
      * Shear projection tensors (m direction) for all microplanes.
      * Due to symmetry, compressed form is stored.
      */
-    double M [ MAX_NUMBER_OF_MICROPLANES ] [ 6 ];
+    std::vector<FloatArrayF<6>> M;
     /**
      * Shear projection tensors (l direction) for all microplanes.
      * Due to symmetry, compressed form is stored.
      */
-    double L [ MAX_NUMBER_OF_MICROPLANES ] [ 6 ];
+    std::vector<FloatArrayF<6>> L;
 
     /// Young's modulus
     double E;
@@ -107,61 +117,38 @@ public:
     virtual ~MicroplaneMaterial() { }
 
     /**
-     * Computes real stress vector on given microplane
-     * (the meaning of  values depends on particular implementation,
-     * e.g, can contain volumetric, deviatoric normal stresses and shear stresses on microplane)
-     * for given increment of microplane strains.
-     * @param answer Computed result.
-     * @param mplane Pointer to microplane object, for which response is computed.
-     * @param strain Strain vector.
-     * @param tStep Time step.
-     */
-    virtual void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane,
-                                                const FloatArray &strain, TimeStep *tStep) = 0;
-
-    /**
      * Computes the length of normal strain vector on given microplane.
      */
-    double computeNormalStrainComponent(Microplane *mplane, const FloatArray &macroStrain);
+    double computeNormalStrainComponent(int mnumber, const FloatArray &macroStrain);
     /**
      * Computes the normal volumetric component of macro strain on given microplane.
      */
-    double computeNormalVolumetricStrainComponent(Microplane *mplane, const FloatArray &macroStrain);
+    double computeNormalVolumetricStrainComponent(const FloatArray &macroStrain);
     /**
      * Computes the normal deviatoric component of macro strain on given microplane.
      */
-    double computeNormalDeviatoricStrainComponent(Microplane *mplane, const FloatArray &macroStrain);
+    double computeNormalDeviatoricStrainComponent(int mnumber, const FloatArray &macroStrain);
     /**
      * Computes the shear component (in m direction) of macro strain on given microplane.
      */
-    double computeShearMStrainComponent(Microplane *mplane, const FloatArray &macroStrain);
+    double computeShearMStrainComponent(int mnumber, const FloatArray &macroStrain);
     /**
      * Computes the shear component (in l direction) of macro strain on given microplane.
      */
-    double computeShearLStrainComponent(Microplane *mplane, const FloatArray &macroStrain);
+    double computeShearLStrainComponent(int mnumber, const FloatArray &macroStrain);
     /**
      * Computes the vector of all micro stress components (Ev, En, Em, El) of macro strain
      * vector on given microplane.
      */
-    void computeStrainVectorComponents(FloatArray &answer, Microplane *mplane,
-                                       const FloatArray &macroStrain);
+    MicroplaneState computeStrainVectorComponents(int mnumber, const FloatArray &macroStrain);
 
 
-    /**
-     * Computes normal of given microplane.
-     * @param answer Normal of given microplane.
-     * @param mplane Microplane, which normal will be computed.
-     */
-    virtual void giveMicroplaneNormal(FloatArray &answer, Microplane *mplane);
     /**
      * Returns microplane integration weight.
      * @param mplane Microplane.
      * @return Integration weight of given microplane.
      */
-    virtual double giveMicroplaneIntegrationWeight(Microplane *mplane);
-
-    /// Returns i-th microplane belonging to master-macro-integration point. )-based indexing.
-    Microplane *giveMicroplane(int i, GaussPoint *masterGp);
+    double giveMicroplaneIntegrationWeight(int mnumber);
 
     /**
      * Initializes internal data (integration weights,
@@ -170,27 +157,13 @@ public:
      */
     virtual void initializeData(int numberOfMicroplanes);
 
-    /**
-     * Returns corresponding material mode for microplane according to macro integration mode
-     */
-    virtual MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode masterMode);
-
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,
                                        GaussPoint *gp,
                                        TimeStep *tStep) override;
 
-    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
-    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
-
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
-
-    virtual IntegrationPointStatus *giveMicroplaneStatus(GaussPoint *gp);
-
-protected:
-    virtual MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) = 0;
-    void initTempStatus(GaussPoint *gp) override;
 };
 } // end namespace oofem
 #endif // microplanematerial_h

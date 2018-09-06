@@ -59,14 +59,26 @@ namespace oofem {
  */
 class M4MaterialStatus : public StructuralMaterialStatus
 {
+protected:
+    std::vector<MicroplaneState> microplaneStrain, tempMicroplaneStrain;
+    std::vector<MicroplaneState> microplaneStress, tempMicroplaneStress;
+
 public:
-    M4MaterialStatus(int n, Domain *d, GaussPoint *g);
+    M4MaterialStatus(int n, Domain *d, GaussPoint *g, int nplanes);
     virtual ~M4MaterialStatus();
 
     const char *giveClassName() const override { return "M4MaterialStatus"; }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
+
+    const MicroplaneState &giveMicroplaneStrain(int mnumber) const { return microplaneStrain[mnumber-1]; }
+    const MicroplaneState &giveMicroplaneStress(int mnumber) const { return microplaneStress[mnumber-1]; }
+
+    const MicroplaneState &giveTempMicroplaneStress(int mnumber) const { return tempMicroplaneStress[mnumber-1]; }
+
+    void letTempMicroplaneStrainBe(int mnumber, const MicroplaneState &state) { tempMicroplaneStrain[mnumber-1] = state; }
+    void letTempMicroplaneStressBe(int mnumber, const MicroplaneState &state) { tempMicroplaneStress[mnumber-1] = state; }
 
     contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
     contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
@@ -99,26 +111,25 @@ public:
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    void giveRealMicroplaneStressVector(FloatArray &answer, Microplane *mplane, const FloatArray &strain, TimeStep *tStep) override;
+    MicroplaneState giveRealMicroplaneStressVector(GaussPoint *gp, int mnumber, const MicroplaneState &strain, TimeStep *tStep) const override;
 
-    double macbra(double x);
-    double FVplus(double ev, double k1, double c13, double c14, double c15, double Ev);
-    double FVminus(double ev, double k1, double k3, double k4, double E);
-    double FDminus(double ed, double k1, double c7, double c8, double c9, double E);
-    double FDplus(double ed, double k1, double c5, double c6, double c7, double c20, double E);
-    double FN(double en, double sv, double k1, double c1, double c2, double c3, double c4,
+    static double FVplus(double ev, double k1, double c13, double c14, double c15, double Ev);
+    static double FVminus(double ev, double k1, double k3, double k4, double E);
+    static double FDminus(double ed, double k1, double c7, double c8, double c9, double E);
+    static double FDplus(double ed, double k1, double c5, double c6, double c7, double c20, double E);
+    static double FN(double en, double sv, double k1, double c1, double c2, double c3, double c4,
               double E, double Ev);
-    double FT(double sn, double ev, double k1, double k2, double c10,
+    static double FT(double sn, double ev, double k1, double k2, double c10,
               double c11, double c12, double Et);
 
-    void updateVolumetricStressTo(Microplane *mPlane, double sigv) override;
+    void updateVolumetricStressTo(GaussPoint *gp, int mnumber, double sigv) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     const char *giveInputRecordName() const override { return _IFT_M4Material_Name; }
     const char *giveClassName() const override { return "M4Material"; }
 
 protected:
-    MaterialStatus *CreateMicroplaneStatus(GaussPoint *gp) override { return new M4MaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M4MaterialStatus(1, domain, gp, numberOfMicroplanes); }
 };
 } // end namespace oofem
 #endif // m4_h

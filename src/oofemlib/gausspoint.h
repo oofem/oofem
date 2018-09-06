@@ -129,9 +129,6 @@ public:
 
     GaussPoint(IntegrationRule *ir, int n, double w, MaterialMode mode);
 
-    /// Destructor
-    virtual ~GaussPoint();
-
     /// Returns i-th natural element coordinate of receiver
     double giveNaturalCoordinate(int i) const { return naturalCoordinates.at(i); }
     /// Returns coordinate array of receiver.
@@ -177,7 +174,7 @@ public:
     }
 
     /// Returns  integration weight of receiver.
-    virtual double giveWeight() { return weight; }
+    double giveWeight() { return weight; }
     void setWeight(double w) { weight = w; }
     /// Returns number of receiver.
     int giveNumber() { return number; }
@@ -247,53 +244,20 @@ public:
      * associated status is called. The same function is also invoked for all available
      * slaves of receiver.
      */
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep);
     /**
      * Updates internal state of receiver after finishing time step.
      * Material::updateYourself (receiver, tStep) function is called to
      * update material status. Same function is also invoked for
      * all receiver's slaves.
      */
-    virtual void updateYourself(TimeStep *tStep);
-
-    // store & restore context functions
-    /*
-     * Stores receiver state to output stream, including associated material status.
-     * Warning: Slaves are not saved, they must be saved by corresponding
-     * cross section or material model, which creates these slaves.
-     * This is because they may have special weights and coordinates,
-     * and these are not saved into context file, because they remain the same
-     * during whole solution (only variables which vary are stored into context).
-     * Note: does not invoke FEMComponents saveContext, since this writes only
-     * class id header, but typically due to large number of IPs,
-     * this is avoided.
-     * @exception throws an ContextIOERR exception if error encountered.
-     */
-    //contextIOResultType saveContext (FILE* stream, void *obj = NULL);
-    /*
-     * Restores receiver state to output stream, including associated material status.
-     * Warning: Slaves are not restored, they must be restored by corresponding
-     * cross section or material model, which creates these slaves.
-     * This is because they may have special weights and coordinates,
-     * and these are not saved into context file, because they remain the same
-     * during whole solution (only variables which vary are stored into context).
-     * Note: does not invoke FEMComponents restoreContext, since this writes only
-     * class id header, but typically due to large number of IPs,
-     * this is avoided.
-     * @exception throws an ContextIOERR exception if error encountered.
-     */
-    //contextIOResultType restoreContext(FILE* stream, void *obj = NULL);
+    void updateYourself(TimeStep *tStep);
 
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const { return "GaussPoint"; }
-    /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    const char *giveClassName() const { return "GaussPoint"; }
 
     friend class LayeredCrossSection;
-    friend class MicroplaneMaterial;
     friend class FiberedCrossSection;
-    //friend class Material;
-    //friend class LayeredMaterial;
 };
 
 typedef GaussPoint IntegrationPoint;
