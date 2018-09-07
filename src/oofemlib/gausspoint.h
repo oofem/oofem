@@ -129,6 +129,8 @@ public:
 
     GaussPoint(IntegrationRule *ir, int n, double w, MaterialMode mode);
 
+    ~GaussPoint();
+
     /// Returns i-th natural element coordinate of receiver
     double giveNaturalCoordinate(int i) const { return naturalCoordinates.at(i); }
     /// Returns coordinate array of receiver.
