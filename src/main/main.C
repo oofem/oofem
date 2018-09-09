@@ -83,12 +83,6 @@
 
 using namespace oofem;
 
-void freeStoreError()
-// This function is called whenever operator "new" is unable to allocate memory.
-{
-    OOFEM_FATAL("free store exhausted");
-}
-
 // debug
 void oofem_debug(EngngModel &emodel);
 
@@ -99,11 +93,25 @@ void oofem_print_epilog();
 // Finalize PETSc, SLEPc and MPI
 void oofem_finalize_modules();
 
+// Handler for uncaught exceptions
+void exception_handler() {
+    try {
+        auto eptr = std::current_exception();
+        if (eptr) {
+            std::rethrow_exception(eptr);
+        }
+    } catch(const std::exception& e) {
+        fprintf(stderr, "Caught exception: %s\n", e.what());
+        print_stacktrace();
+        exit(1);
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
-#ifndef _MSC_VER
-    std :: set_new_handler(freeStoreError);   // prevents memory overflow
-#endif
+    // Stack trace on uncaught exceptions;
+    std::set_terminate( exception_handler );
 
     int adaptiveRestartFlag = 0, restartStep = 0;
     bool parallelFlag = false, renumberFlag = false, debugFlag = false, contextFlag = false, restartFlag = false,

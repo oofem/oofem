@@ -45,6 +45,11 @@ class DataReader;
 class EngngModel;
 
 /**
+ * Helper that prints a stack trace (only available on GCC)
+ */
+void print_stacktrace(FILE *out = stderr, int skip = 0, unsigned int max_frames = 63);
+
+/**
  * Instanciates the new problem.
  * @param dr DataReader containing the problem data.
  * @param mode Mode determining macro or micro problem.
