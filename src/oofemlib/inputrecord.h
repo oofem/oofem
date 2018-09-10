@@ -39,6 +39,7 @@
 #include <list>
 #include <string>
 #include <memory>
+#include <exception>
 
 #include "logger.h" // for missing __func__ in MSC
 #include "oofemcfg.h"
@@ -198,5 +199,38 @@ public:
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
 };
+
+
+class InputException : public std::exception
+{
+public:
+    std::string record;
+    std::string keyword;
+    int number;
+    InputException(const InputRecord &ir, std::string keyword, int number);
+};
+
+
+class MissingKeywordInputException : public InputException
+{
+protected:
+    std::string msg;
+
+public:
+    MissingKeywordInputException(const InputRecord &ir, std::string keyword, int number);
+    const char* what() const noexcept override;
+};
+
+
+class BadFormatInputException : public InputException
+{
+protected:
+    std::string msg;
+
+public:
+    BadFormatInputException(const InputRecord &ir, std::string keyword, int number);
+    const char* what() const noexcept override;
+};
+
 } // end namespace oofem
 #endif // inputrecord_h

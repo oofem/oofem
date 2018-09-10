@@ -180,4 +180,36 @@ InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
         return r;
     }
 }
+
+
+InputException::InputException(const InputRecord& ir, std::string keyword, int number) : 
+    record(ir.giveRecordAsString()), keyword(std::move(keyword)), number(number)
+{ }
+
+
+MissingKeywordInputException::MissingKeywordInputException(const InputRecord& ir, std::string kw, int n) :
+    InputException(ir, std::move(kw), n)
+{
+    msg = "Missing keyword \"" + keyword + "\" on input " + std::to_string(number) + "\nRecord: \"" + record + "\"";
+}
+
+
+BadFormatInputException::BadFormatInputException(const InputRecord& ir, std::string kw, int n) :
+    InputException(ir, std::move(kw), n)
+{
+    msg = "Bad format for record \"" + keyword + "\" on input " + std::to_string(number) + "\nRecord: \"" + record + "\"";
+}
+
+
+const char* MissingKeywordInputException::what() const noexcept
+{ 
+    return msg.c_str();
+}
+
+
+const char* BadFormatInputException::what() const noexcept
+{
+    return msg.c_str();
+}
+
 } // end namespace oofem
