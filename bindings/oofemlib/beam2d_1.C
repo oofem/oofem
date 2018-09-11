@@ -216,4 +216,7 @@ int main(int argc, char *argv[])
     auto em = InstanciateProblem(myData, _processor, 0);
     myData.finish();
     em->solveYourself();
+    
+    //example of accessing nodal coordinates
+    em->giveDomain(1)->giveDofManager(2)->giveCoordinates()->printYourself();
 }

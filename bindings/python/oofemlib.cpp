@@ -1412,7 +1412,9 @@ e.g. in function:
 */
 OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
 {
-    bp::dict temp(import("__main__").attr("__dict__"));
+    //bp::dict temp(import("__main__").attr("__dict__"));
+    //Python3
+    bp::object temp(import("__main__").attr("__dict__"));
     temp["kw"] = kw;
     str command =
         "ret = ''\n"
@@ -1427,10 +1429,12 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
         "    for v in val:\n" // and then its values
         "      if isinstance(v,(int,float,str)): ret += ' %s'%v\n" // int, float, str
         "      else: ret += ' %d'%(v.giveNumber())\n" // or any other object, that have giveNumber method (e.g. nodes can be passed to elemnt function as they are, without the need of extracting their numbers first
-        "  else: ret += ' %d'%(val.giveNumber())\n" // add arbitrary object with giveNumber method
+        "  else: ret += ' %d'%(val.giveNumber())\n\n" // add arbitrary object with giveNumber method
         "ret = ret.lower()\n" // finally make it lower case
         "print(ret)\n"
         ;
+    
+    //Execute Python commands using boost::python::exec()
     exec(command,temp,temp);
     // extract string from globals["ret"], convert it to char* and return OOFEMTXTInputRecord from it
     //return OOFEMTXTInputRecord( ( extract<string>(temp["ret"])() ).c_str() );
