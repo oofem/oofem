@@ -107,8 +107,8 @@ public:
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
 
 #ifdef keep_track_of_strains
@@ -221,8 +221,8 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     // store & restore context functions
-    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
-    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,

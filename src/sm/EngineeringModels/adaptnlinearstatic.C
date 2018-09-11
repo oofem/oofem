@@ -726,36 +726,26 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 }
 
 
-contextIOResultType
+void
 AdaptiveNonLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
+    NonLinearStatic :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = NonLinearStatic :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = timeStepLoadLevels.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
+void
 AdaptiveNonLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    NonLinearStatic :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = NonLinearStatic :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = timeStepLoadLevels.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

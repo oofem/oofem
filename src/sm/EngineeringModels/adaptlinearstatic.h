@@ -72,7 +72,7 @@ public:
     int initializeAdaptive(int tStepNumber) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     void updateDomainLinks() override;
 

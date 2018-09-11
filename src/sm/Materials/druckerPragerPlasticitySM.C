@@ -132,17 +132,12 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, " %.4e\n", kappa);
 }
 
-contextIOResultType
-DruckerPragerPlasticitySMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+DruckerPragerPlasticitySMStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
     if ( ( iores = plasticStrainDeviator.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -158,22 +153,15 @@ DruckerPragerPlasticitySMStatus :: saveContext(DataStream &stream, ContextMode m
     if ( !stream.write(temp_state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-DruckerPragerPlasticitySMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+DruckerPragerPlasticitySMStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( ( iores = plasticStrainDeviator.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -189,8 +177,6 @@ DruckerPragerPlasticitySMStatus :: restoreContext(DataStream &stream, ContextMod
     if ( !stream.read(temp_state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 //   *************************************************************

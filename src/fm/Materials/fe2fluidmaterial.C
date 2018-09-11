@@ -363,25 +363,17 @@ void FE2FluidMaterialStatus :: initTempStatus()
     FluidDynamicMaterialStatus :: initTempStatus();
 }
 
-contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void FE2FluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = FluidDynamicMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return this->rve->saveContext(stream, mode);
+    FluidDynamicMaterialStatus :: saveContext(stream, mode);
+    this->rve->saveContext(stream, mode);
 }
 
-contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void FE2FluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FluidDynamicMaterialStatus :: restoreContext(stream, mode);
     this->markOldTangents();
-
-    return this->rve->restoreContext(stream, mode);
+    this->rve->restoreContext(stream, mode);
 }
 
 void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }

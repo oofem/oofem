@@ -251,39 +251,29 @@ void EigenValueDynamic :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType EigenValueDynamic :: saveContext(DataStream &stream, ContextMode mode)
+void EigenValueDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
+    EngngModel :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = eigVal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     this->field->saveContext(stream);
-
-    return CIO_OK;
 }
 
 
-contextIOResultType EigenValueDynamic :: restoreContext(DataStream &stream, ContextMode mode)
+void EigenValueDynamic :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    EngngModel :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = eigVal.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     this->field->restoreContext(stream);
-
-    return CIO_OK;
 }
 
 

@@ -132,20 +132,18 @@ Dof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
     }
 }
 
-contextIOResultType
-Dof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+Dof :: saveContext(DataStream &stream, ContextMode mode)
 {
     int _val = dofID;
     if ( !stream.write(_val) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-Dof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+Dof :: restoreContext(DataStream &stream, ContextMode mode)
 {
     // restore dofid
     int _val;
@@ -154,8 +152,6 @@ Dof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
     }
 
     dofID = ( DofIDItem ) _val;
-
-    return CIO_OK;
 }
 
 void

@@ -178,26 +178,22 @@ void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 
 
 
-contextIOResultType
-PiecewiseLinFunction :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+PiecewiseLinFunction :: saveContext(DataStream &stream, ContextMode mode)
 {
     if ( mode & CM_Definition ) {
         dates.storeYourself(stream);
         values.storeYourself(stream);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-PiecewiseLinFunction :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+PiecewiseLinFunction :: restoreContext(DataStream &stream, ContextMode mode)
 {
     if ( mode & CM_Definition ) {
         dates.restoreYourself(stream);
         values.restoreYourself(stream);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

@@ -340,17 +340,11 @@ IsoInterfaceDamageMaterialStatus_2 :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-IsoInterfaceDamageMaterialStatus_2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+IsoInterfaceDamageMaterialStatus_2 :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralInterfaceMaterialStatus :: saveContext(stream, mode);
 
-    // save parent class status
-    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
     if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -358,21 +352,13 @@ IsoInterfaceDamageMaterialStatus_2 :: saveContext(DataStream &stream, ContextMod
     if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-IsoInterfaceDamageMaterialStatus_2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+IsoInterfaceDamageMaterialStatus_2 :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralInterfaceMaterialStatus :: restoreContext(stream, mode);
 
-    // read parent class status
-    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -380,7 +366,5 @@ IsoInterfaceDamageMaterialStatus_2 :: restoreContext(DataStream &stream, Context
     if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

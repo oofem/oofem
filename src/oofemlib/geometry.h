@@ -150,20 +150,16 @@ public:
      * Stores the state of receiver to output stream.
      * @param stream Context stream.
      * @param mode Determines amount of info in stream.
-     * @param obj Special parameter, used to pass optional parameters.
-     * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual void saveContext(DataStream &stream, ContextMode mode) { }
     /**
      * Restores the state of receiver from output stream.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
-     * @param obj Special parameter for sending extra information.
-     * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual void restoreContext(DataStream &stream, ContextMode mode) { }
 
 #ifdef __OOFEG
     virtual void draw(oofegGraphicContext &gc) { }

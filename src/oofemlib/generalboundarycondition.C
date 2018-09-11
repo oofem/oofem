@@ -127,13 +127,10 @@ GeneralBoundaryCondition :: giveInputRecord(DynamicInputRecord &input)
     }
 }
 
-contextIOResultType
-GeneralBoundaryCondition :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+GeneralBoundaryCondition :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.write(timeFunction) ) {
@@ -142,6 +139,7 @@ GeneralBoundaryCondition :: saveContext(DataStream &stream, ContextMode mode, vo
         if ( !stream.write(valType) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        contextIOResultType iores;
         if ( ( iores = dofs.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -152,27 +150,23 @@ GeneralBoundaryCondition :: saveContext(DataStream &stream, ContextMode mode, vo
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-GeneralBoundaryCondition :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+GeneralBoundaryCondition :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    int _val;
-    contextIOResultType iores;
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.read(timeFunction) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        int _val;
         if ( !stream.read(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
+        contextIOResultType iores;
         valType  = (bcValType) _val;
         if ( ( iores = dofs.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -184,7 +178,5 @@ GeneralBoundaryCondition :: restoreContext(DataStream &stream, ContextMode mode,
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

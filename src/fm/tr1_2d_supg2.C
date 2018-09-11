@@ -1875,48 +1875,18 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full element context (saves state variables, that completely describe
-// current state)
-//
+void TR1_2D_SUPG2 :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = SUPGElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = LEPlicElementInterface :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    SUPGElement :: saveContext(stream, mode);
+    LEPlicElementInterface :: saveContext(stream, mode);
 }
 
 
-
-contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full element context (saves state variables, that completely describe
-// current state)
-//
+void TR1_2D_SUPG2 :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = SUPGElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = LEPlicElementInterface :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-
-    return CIO_OK;
+    SUPGElement :: restoreContext(stream, mode);
+    LEPlicElementInterface :: restoreContext(stream, mode);
 }
-
-
 
 
 #ifdef __OOFEG

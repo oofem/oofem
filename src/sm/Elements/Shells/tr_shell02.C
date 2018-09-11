@@ -305,38 +305,23 @@ TR_SHELL02 :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-
-contextIOResultType
-TR_SHELL02 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+TR_SHELL02 :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores =  StructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-    if ( ( iores =  this->plate->saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-    if ( ( iores = this->membrane->saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-    return iores;
+    StructuralElement :: saveContext(stream, mode);
+    this->plate->saveContext(stream, mode);
+    this->membrane->saveContext(stream, mode);
 }
 
-contextIOResultType
-TR_SHELL02 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+
+void
+TR_SHELL02 :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores =  StructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-    if ( ( iores =   this->plate->restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-    if ( ( iores =  this->membrane->restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-    return iores;
+    StructuralElement :: restoreContext(stream, mode);
+    this->plate->restoreContext(stream, mode);
+    this->membrane->restoreContext(stream, mode);
 }
+
 
 IntegrationRule *
 TR_SHELL02 :: ZZErrorEstimatorI_giveIntegrationRule()

@@ -171,8 +171,8 @@ public:
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int);
 
-    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
-    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
     int checkConsistency() override;
 

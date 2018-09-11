@@ -220,8 +220,8 @@ public:
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode mode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int slaveIndex);
 
-    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
-    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
 
     void mapLayerGpCoordsToShellCoords(std :: vector< std :: unique_ptr< IntegrationRule > > &layerIntegrationRulesArray);

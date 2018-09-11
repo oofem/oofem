@@ -132,38 +132,30 @@ BoundaryCondition :: scale(double s)
 }
 
 
-contextIOResultType
-BoundaryCondition :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BoundaryCondition :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = GeneralBoundaryCondition :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    GeneralBoundaryCondition :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
-      if ( (iores = values.storeYourself(stream) ) != CIO_OK ) {
+        contextIOResultType iores;
+        if ( (iores = values.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-BoundaryCondition :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BoundaryCondition :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = GeneralBoundaryCondition :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    GeneralBoundaryCondition :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
-      if ( (iores = values.restoreYourself(stream) ) != CIO_OK ) {
+        contextIOResultType iores;
+        if ( (iores = values.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

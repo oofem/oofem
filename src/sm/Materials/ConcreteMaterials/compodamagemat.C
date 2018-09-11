@@ -647,24 +647,13 @@ void CompoDamageMatStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType CompoDamageMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj = NULL)
+void CompoDamageMatStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    StructuralMaterialStatus :: saveContext(stream, mode);
 }
 
-contextIOResultType CompoDamageMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) {
-    contextIOResultType iores;
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+void CompoDamageMatStatus :: restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 }
 } // end namespace oofem

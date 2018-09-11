@@ -67,8 +67,8 @@ public:
 
     void updateYourself(TimeStep *tStep) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     double giveMPS() const { return microprestress_old; }
     void setMPS(double src) { microprestress_new = src; }

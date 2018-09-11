@@ -64,7 +64,7 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
     case VM_Velocity:       return 'v';
 
     case VM_Acceleration:   return 'a';
-      
+
     case VM_TotalIntrinsic: return 'i';
 
     default: OOFEM_ERROR("unsupported ValueModeType");
@@ -247,23 +247,23 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
 }
 
 
-ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line)
+ContextIOERR :: ContextIOERR(contextIOResultType e, const char *file, int line) :
+    error(e),
+    msg(nullptr),
+    file(file),
+    line(line)
 {
-    error = e;
-    this->file = file;
-    this->line = line;
-    this->msg = NULL;
+    this->full_message = "ContextIOERR " + std::to_string(error) + " at line " + std::to_string(line) + " in file \"" + file + "\"";
 }
 
-ContextIOERR :: ContextIOERR(contextIOResultType e, const char *msg, const char *file, int line)
+ContextIOERR :: ContextIOERR(contextIOResultType e, const char *msg, const char *file, int line) :
+    error(e),
+    msg(msg),
+    file(file),
+    line(line)
 {
-    error = e;
-    this->file = file;
-    this->line = line;
-    this->msg  = msg;
+    this->full_message = "ContextIOERR " + std::to_string(error) + " at line " + std::to_string(line) + " in file \"" + file + "\":" + this->msg;
 }
-
-ContextIOERR :: ~ContextIOERR() { }
 
 
 void

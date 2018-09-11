@@ -100,8 +100,8 @@ public:
     integrationDomain giveIntegrationDomain() const override { return _Line; }
     MaterialMode giveMaterialMode() override { return _3dBeam; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
 protected:
     // edge load support

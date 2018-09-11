@@ -291,17 +291,17 @@ M4MaterialStatus :: updateYourself(TimeStep *tStep)
     microplaneStress = tempMicroplaneStress;
 }
 
-contextIOResultType
-M4MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+M4MaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    // todo, save microplanestress etc.
-    return StructuralMaterialStatus :: saveContext(stream, mode, obj);
+    StructuralMaterialStatus :: saveContext(stream, mode);
+    /// @todo, save microplanestress etc.
 }
 
-contextIOResultType
-M4MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+M4MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    // todo, save microplanestress etc.
-    return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+    /// @todo, save microplanestress etc.
 }
 } // end namespace oofem

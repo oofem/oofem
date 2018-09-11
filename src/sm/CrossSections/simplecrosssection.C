@@ -847,50 +847,35 @@ SimpleCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
     return this->giveMaterial(gp)->estimatePackSize(buff, gp);
 }
 
-contextIOResultType
-SimpleCrossSection :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+SimpleCrossSection :: saveContext(DataStream &stream, ContextMode mode)
 {
-  // saves full element context (saves state variables, that completely describe current state)
-  contextIOResultType iores;
-  
-  if ( ( iores = StructuralCrossSection :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-    THROW_CIOERR(iores);
-  }
+    StructuralCrossSection :: saveContext(stream, mode);
 
-  if ( mode & CM_Definition ) {
-    if ( !stream.write(materialNumber) ) {
-      THROW_CIOERR(CIO_IOERR);
+    if ( mode & CM_Definition ) {
+        if ( !stream.write(materialNumber) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(czMaterialNumber) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
-    if ( !stream.write(czMaterialNumber) ) {
-      THROW_CIOERR(CIO_IOERR);
-    }
-  }
-  
-  return CIO_OK;
 }
-  
-contextIOResultType
-SimpleCrossSection :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+
+void
+SimpleCrossSection :: restoreContext(DataStream &stream, ContextMode mode)
 {
-  contextIOResultType iores;
+    StructuralCrossSection :: restoreContext(stream, mode);
 
-  if ( ( iores = StructuralCrossSection :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-    THROW_CIOERR(iores);
-  }
+    if ( mode & CM_Definition ) {
+        if ( !stream.read(materialNumber) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
 
-  if ( mode & CM_Definition ) {
-    if ( !stream.read(materialNumber) ) {
-      THROW_CIOERR(CIO_IOERR);
+        if ( !stream.read(czMaterialNumber) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
-
-    if ( !stream.read(czMaterialNumber) ) {
-      THROW_CIOERR(CIO_IOERR);
-    }
-  }
-
-    return CIO_OK;
 }
-  
-
 
 } // end namespace oofem

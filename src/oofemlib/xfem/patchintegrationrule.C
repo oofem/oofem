@@ -155,18 +155,18 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     }
 
     XfemManager *xMan = elem->giveDomain()->giveXfemManager();
-    if ( xMan != NULL ) {
+    if ( xMan ) {
         if ( xMan->giveVtkDebug() ) {
             double time = 0.0;
 
             Element *el = this->elem;
-            if ( el != NULL ) {
+            if ( el ) {
                 Domain *dom = el->giveDomain();
-                if ( dom != NULL ) {
+                if ( dom ) {
                     EngngModel *em = dom->giveEngngModel();
-                    if ( em != NULL ) {
+                    if ( em ) {
                         TimeStep *ts = em->giveCurrentStep();
-                        if ( ts != NULL ) {
+                        if ( ts ) {
                             time = ts->giveTargetTime();
                         }
                     }
@@ -272,18 +272,18 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     }
 
     XfemManager *xMan = elem->giveDomain()->giveXfemManager();
-    if ( xMan != NULL ) {
+    if ( xMan ) {
         if ( xMan->giveVtkDebug() ) {
             double time = 0.0;
 
             Element *el = this->elem;
-            if ( el != NULL ) {
+            if ( el ) {
                 Domain *dom = el->giveDomain();
-                if ( dom != NULL ) {
+                if ( dom ) {
                     EngngModel *em = dom->giveEngngModel();
-                    if ( em != NULL ) {
+                    if ( em ) {
                         TimeStep *ts = em->giveCurrentStep();
-                        if ( ts != NULL ) {
+                        if ( ts ) {
                             time = ts->giveTargetTime();
                         }
                     }
@@ -304,61 +304,36 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
 }
 
 
-contextIOResultType
-PatchIntegrationRule :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+PatchIntegrationRule :: saveContext(DataStream &stream, ContextMode mode)
 {
-    // TODO: Implement
+    /// @todo Implement me
+    IntegrationRule :: saveContext(stream, mode);
 
-    //
-    // saves full  context (saves state variables, that completely describe
-    // current state)
-    //
-
-    // save parent data
-    contextIOResultType iores;
-
-    if ( ( iores = IntegrationRule :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
+#if 0
+    // save patch data
+    if ( this->patch ) {
+        // store patch type
+        int _type = this->patch->givePatchType();
+        if ( !stream.write(_type) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        patch->saveContext(stream, mode);
+    } else {
+        OOFEM_ERROR("can't store NULL patch");
     }
-
-    /*
-     *  // save patch data
-     *  if ( this->patch ) {
-     *      // store patch type
-     *      int _type = this->patch->givePatchType();
-     *      if ( !stream.write(_type) ) {
-     *          THROW_CIOERR(CIO_IOERR);
-     *      }
-     *
-     *      patch->saveContext(stream, mode, obj);
-     *  } else {
-     *      OOFEM_ERROR("can't store NULL patch");
-     *  }
-     */
-    return CIO_OK;
+#endif
 }
 
-contextIOResultType
-PatchIntegrationRule :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+PatchIntegrationRule :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    // TODO: Implement
-
-    //
-    // restores full element context (saves state variables, that completely describe
-    // current state)
-    //
-
-    contextIOResultType iores;
-
-    if ( ( iores = IntegrationRule :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    /// @todo Implement me
+    IntegrationRule :: restoreContext(stream, mode);
 
     int _ptype;
     if ( !stream.read(_ptype) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

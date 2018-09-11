@@ -256,16 +256,18 @@ M1MaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 }
 
-contextIOResultType
-M1MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+M1MaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    return StructuralMaterialStatus :: saveContext(stream, mode, obj);
+    StructuralMaterialStatus :: saveContext(stream, mode);
+    ///@todo All fields
 }
 
-contextIOResultType
-M1MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+M1MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+    ///@todo All fields
 }
 
 #else
@@ -490,16 +492,16 @@ M1MaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 }
 
-contextIOResultType
-M1MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+M1MaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    return StructuralMaterialStatus :: saveContext(stream, mode, obj);
+    StructuralMaterialStatus :: saveContext(stream, mode);
 }
 
-contextIOResultType
-M1MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+M1MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 }
 
 #endif // end of old implementation

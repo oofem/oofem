@@ -95,8 +95,8 @@ public:
     void updateYourself(TimeStep *tStep) override;
     void updateInternalState(TimeStep *tStep) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
     void postInitialize() override;
     void updateLocalNumbering(EntityRenumberingFunctor &f) override;
     void setCrossSection(int csIndx) override;

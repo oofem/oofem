@@ -160,15 +160,13 @@ Load :: scale(double s)
 }
 
 
-contextIOResultType
-Load :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+Load :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = GeneralBoundaryCondition :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    GeneralBoundaryCondition :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
+        contextIOResultType iores;
         if ( ( iores = componentArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -179,20 +177,16 @@ Load :: saveContext(DataStream &stream, ContextMode mode, void *obj)
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-Load :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+Load :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = GeneralBoundaryCondition :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    GeneralBoundaryCondition :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
+        contextIOResultType iores;
         if ( ( iores = componentArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -203,8 +197,6 @@ Load :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
   

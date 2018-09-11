@@ -688,13 +688,11 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int pac
     return 0;
 }
 
-contextIOResultType NlDEIDynamic :: saveContext(DataStream &stream, ContextMode mode)
+void NlDEIDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralEngngModel :: saveContext(stream, mode);
 
     if ( ( iores = previousIncrementOfDisplacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -715,18 +713,14 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream &stream, ContextMode 
     if ( !stream.write(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType NlDEIDynamic :: restoreContext(DataStream &stream, ContextMode mode)
+void NlDEIDynamic :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralEngngModel :: restoreContext(stream, mode);
 
     if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -747,8 +741,6 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream &stream, ContextMo
     if ( !stream.read(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 

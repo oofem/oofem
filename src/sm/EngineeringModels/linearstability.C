@@ -372,39 +372,29 @@ void LinearStability :: setActiveVector(int activeVector)
 }
 
 
-contextIOResultType LinearStability :: saveContext(DataStream &stream, ContextMode mode)
+void LinearStability :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralEngngModel :: saveContext(stream, mode);
 
     field->saveContext(stream);
 
+    contextIOResultType iores;
     if ( ( iores = eigVal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType LinearStability :: restoreContext(DataStream &stream, ContextMode mode)
+void LinearStability :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralEngngModel :: restoreContext(stream, mode);
 
     field->restoreContext(stream);
 
+    contextIOResultType iores;
     if ( ( iores = eigVal.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

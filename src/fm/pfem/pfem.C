@@ -706,46 +706,22 @@ PFEM :: updateDofUnknownsDictionaryVelocities(DofManager *inode, TimeStep *tStep
 
 
 // NOT ACTIVE
-contextIOResultType
+void
 PFEM :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = PressureField.saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = VelocityField.saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    EngngModel :: saveContext(stream, mode);
+    PressureField.saveContext(stream, mode);
+    VelocityField.saveContext(stream, mode);
 }
 
 
 // NOT ACTIVE
-contextIOResultType
+void
 PFEM :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = PressureField.restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = VelocityField.restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    EngngModel :: restoreContext(stream, mode);
+    PressureField.restoreContext(stream, mode);
+    VelocityField.restoreContext(stream, mode);
 }
 
 

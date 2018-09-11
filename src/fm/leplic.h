@@ -130,18 +130,14 @@ public:
      * Only non-temp internal history variables are stored.
      * @param stream stream where to write data
      * @param mode determines amount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
      */
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void saveContext(DataStream &stream, ContextMode mode);
     /**
      * Restores context of receiver from given stream.
      * @param stream stream where to read data
      * @param mode determines amount of info required in stream (state, definition,...)
-     * @param obj pointer to integration point, which invokes this method
-     * @return contextIOResultType.
      */
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void restoreContext(DataStream &stream, ContextMode mode);
 };
 
 /**

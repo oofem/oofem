@@ -183,8 +183,8 @@ public:
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
-    contextIOResultType saveContext(DataStream &, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
     const char *giveClassName() const override { return "ConcreteDPM2Status"; }
 
     // Inline functions for access to state variables

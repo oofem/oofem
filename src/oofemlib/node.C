@@ -556,21 +556,14 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
 }
 
 
-contextIOResultType
-Node :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full node context (saves state variables, that completely describe
-// current state)
-//
+void
+Node :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = DofManager :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    DofManager :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         int _haslcs = hasLocalCS();
+        contextIOResultType iores;
         if ( ( iores = coordinates.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -585,26 +578,17 @@ Node :: saveContext(DataStream &stream, ContextMode mode, void *obj)
             }
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-Node :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full node context (saves state variables, that completely describe
-// current state)
-//
+void
+Node :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = DofManager :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    DofManager :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         int _haslcs;
+        contextIOResultType iores;
         if ( ( iores = coordinates.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -622,8 +606,6 @@ Node :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
             localCoordinateSystem = nullptr;
         }
     }
-
-    return CIO_OK;
 }
 
 

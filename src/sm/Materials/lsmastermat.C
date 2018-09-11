@@ -457,38 +457,19 @@ LargeStrainMasterMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-// saves full information stored in this status
-// temporary variables are NOT stored
-contextIOResultType
-LargeStrainMasterMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+LargeStrainMasterMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
     StructuralMaterial *sMat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);
     // save parent class status
-    if ( ( iores = mS->saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
-
-    return CIO_OK;
+    mS->saveContext(stream, mode);
 }
 
 
-contextIOResultType
-LargeStrainMasterMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+LargeStrainMasterMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK; // return succes
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 }
 } // end namespace oofem

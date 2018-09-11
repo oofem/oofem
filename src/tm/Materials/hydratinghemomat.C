@@ -241,43 +241,22 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
     return answer;
 }
 
-contextIOResultType
+void
 HydratingHeMoMaterial :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-// saves full status for this material, also invokes saving
-// for sub-objects of this.
 {
-    contextIOResultType iores;
-
-    // write parent data
-    if ( ( iores = TransportMaterial :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    TransportMaterial :: saveIPContext(stream, mode, gp);
 
     // save hydration model data - maybe should check hydration option?
-    if ( ( iores = HydrationModelInterface :: saveContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    HydrationModelInterface :: saveContext(stream, mode);
 }
 
-contextIOResultType
+void
 HydratingHeMoMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-// restores full status for this material, also invokes restoring for sub-objects of this.
 {
-    contextIOResultType iores;
-
-    // read parent data
-    if ( ( iores = TransportMaterial :: restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    TransportMaterial :: restoreIPContext(stream, mode, gp);
 
     // read hydration model data - maybe should check hydration option?
-    if ( ( iores = HydrationModelInterface :: restoreContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    HydrationModelInterface :: restoreContext(stream, mode);
 }
 
 int

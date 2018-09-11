@@ -743,53 +743,31 @@ Eurocode2CreepMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-Eurocode2CreepMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-//
+void
+Eurocode2CreepMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    KelvinChainMaterialStatus :: saveContext(stream, mode);
 
-    if ( ( iores = KelvinChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write maturity value
     if ( !stream.write(maturity) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    // write temperature value
     if ( !stream.write(temperature) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-Eurocode2CreepMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restore the state variables from a stream
-//
+void
+Eurocode2CreepMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = KelvinChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    KelvinChainMaterialStatus :: restoreContext(stream, mode);
 
-    // read maturity value
     if ( !stream.read(maturity) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
-    // read temperature value
     if ( !stream.read(temperature) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
-
-
-    return CIO_OK;
 }
 } // end namespace oofem

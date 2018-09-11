@@ -455,17 +455,11 @@ IsotropicDamageMaterialStatus :: giveCrackVector(FloatArray &answer)
 }
 
 
-contextIOResultType
-IsotropicDamageMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+IsotropicDamageMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralMaterialStatus :: saveContext(stream, mode);
 
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
     if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -484,21 +478,13 @@ IsotropicDamageMaterialStatus :: saveContext(DataStream &stream, ContextMode mod
     }
 
 #endif
-
-    return CIO_OK;
 }
 
-contextIOResultType
-IsotropicDamageMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+IsotropicDamageMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -517,8 +503,6 @@ IsotropicDamageMaterialStatus :: restoreContext(DataStream &stream, ContextMode 
     }
 
 #endif
-
-    return CIO_OK;
 }
 
 #ifdef keep_track_of_dissipated_energy

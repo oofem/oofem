@@ -1153,44 +1153,23 @@ FRCFCMStatus :: updateYourself(TimeStep *tStep)
 
 
 
-contextIOResultType
-FRCFCMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+FRCFCMStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = ConcreteFCMStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    ConcreteFCMStatus :: saveContext(stream, mode);
 
     if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-FRCFCMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+FRCFCMStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = ConcreteFCMStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    ConcreteFCMStatus :: restoreContext(stream, mode);
 
     if ( !stream.read(damage) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK; // return succes
 }
 } // end namespace oofem

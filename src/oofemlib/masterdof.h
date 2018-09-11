@@ -145,8 +145,8 @@ public:
 
     double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     void setBcId(int bcId) override { this->bc = bcId; }
     void setIcId(int icId) override { this->ic = icId; }

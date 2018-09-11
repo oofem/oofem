@@ -1942,22 +1942,12 @@ FCMMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 
-contextIOResultType
-FCMMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+FCMMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
-
     if ( ( iores = crackStatuses.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -1997,25 +1987,14 @@ FCMMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj
     if ( ( iores = transMatrix_L2Gstress.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-FCMMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+FCMMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
-
     if ( ( iores = crackStatuses.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -2051,7 +2030,5 @@ FCMMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *
     if ( ( iores = transMatrix_L2Gstress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK; // return succes
 }
 } // end namespace oofem

@@ -650,14 +650,12 @@ NonLinearStatic :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType
+void
 NonLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    EngngModel :: saveContext(stream, mode);
 
     if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -687,19 +685,15 @@ NonLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
     if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
+void
 NonLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    EngngModel :: restoreContext(stream, mode);
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->restoreContext (stream)) !=CIO_OK) THROW_CIOERR(iores);
 
@@ -734,8 +728,6 @@ NonLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
     if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

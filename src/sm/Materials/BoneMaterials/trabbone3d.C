@@ -1254,15 +1254,13 @@ TrabBone3DStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-TrabBone3DStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+TrabBone3DStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralMaterialStatus :: saveContext(stream, mode);
 
     if ( ( iores = plasDef.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -1304,19 +1302,16 @@ TrabBone3DStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
      * THROW_CIOERR(iores);
      * }
      */
-    return CIO_OK;
 }
 
 
-contextIOResultType
-TrabBone3DStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+TrabBone3DStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
     // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 
     // read raw data
     if ( ( iores = plasDef.restoreYourself(stream) ) != CIO_OK ) {
@@ -1359,10 +1354,6 @@ TrabBone3DStatus :: restoreContext(DataStream &stream, ContextMode mode, void *o
      * THROW_CIOERR(iores);
      * }
      */
-
-
-
-    return CIO_OK;
 }
 
 

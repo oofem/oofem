@@ -822,42 +822,23 @@ B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-B3SolidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-//
+void
+B3SolidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    KelvinChainMaterialStatus :: saveContext(stream, mode);
 
-    if ( ( iores = KelvinChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write microprestress value
     if ( !stream.write(microprestress_old) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-B3SolidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restore the state variables from a stream
-//
+void
+B3SolidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = KelvinChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    KelvinChainMaterialStatus :: restoreContext(stream, mode);
 
-    // read microprestress value
     if ( !stream.read(microprestress_old) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

@@ -222,8 +222,8 @@ public:
     void setStepLength(double s) override { deltaL = s; }
     IRResultType initializeFrom(InputRecord *ir) override;
     bool referenceLoad() const override { return true; }
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
     void setDomain(Domain *d) override {
         this->domain = d;
         if ( linSolver ) {

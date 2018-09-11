@@ -472,34 +472,20 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
     }
 }
 
-contextIOResultType
+
+void
 NonStationaryTransportProblem :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-     UnknownsField->saveContext(stream);
-
-    return CIO_OK;
+    EngngModel :: saveContext(stream, mode);
+    UnknownsField->saveContext(stream);
 }
 
 
-
-contextIOResultType
+void
 NonStationaryTransportProblem :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    EngngModel :: restoreContext(stream, mode);
     UnknownsField->restoreContext(stream);
-
-    return CIO_OK;
 }
 
 

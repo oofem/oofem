@@ -158,8 +158,8 @@ public:
      */
     void updateLocalElementNumbering(EntityRenumberingFunctor &f);
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     const char *giveClassName() const override { return "Set"; }
     const char *giveInputRecordName() const override { return _IFT_Set_Name; }

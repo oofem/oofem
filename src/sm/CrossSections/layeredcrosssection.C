@@ -1115,61 +1115,33 @@ LayeredCrossSection :: printYourself()
 }
 
 
-contextIOResultType
+void
 LayeredCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
-//
-// saves full material context (saves state variables, that completely describe
-// current state)
-// stores also slaves records of master gp
-//
 {
-    contextIOResultType iores;
-
-    if ( ( iores = CrossSection :: saveIPContext(stream, mode, masterGp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    CrossSection :: saveIPContext(stream, mode, masterGp);
 
     // saved master gp record;
-
     // and now save slave gp of master:
     for ( int i = 1; i <= numberOfLayers; i++ ) {
         GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
-        if ( ( iores = mat->saveIPContext(stream, mode, slaveGP) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        mat->saveIPContext(stream, mode, slaveGP);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
+void
 LayeredCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
-//
-// restores full material context (saves state variables, that completely describe
-// current state)
-//
-// restores also slaves of master gp
-//
 {
-    contextIOResultType iores;
-
-    if ( ( iores = CrossSection :: restoreIPContext(stream, mode, masterGp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);                                                                    // saved masterGp
-    }
+    CrossSection :: restoreIPContext(stream, mode, masterGp);
 
     // and now save slave gp of master:
     for ( int i = 1; i <= numberOfLayers; i++ ) {
         // creates also slaves if they don't exists
         GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, i - 1);
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(i) ) );
-        if ( ( iores = mat->restoreIPContext(stream, mode, slaveGP) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        mat->restoreIPContext(stream, mode, slaveGP);
     }
-
-    return CIO_OK;
 }
 
 

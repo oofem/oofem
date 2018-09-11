@@ -291,8 +291,8 @@ public:
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments.

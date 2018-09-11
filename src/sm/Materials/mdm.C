@@ -1381,16 +1381,12 @@ MDMStatus :: MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g) :
 
 MDMStatus :: ~MDMStatus() { }
 
-contextIOResultType
-MDMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+MDMStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = Psi.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -1406,21 +1402,15 @@ MDMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
     if ( ( iores = damageTensorEigenVectors.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-MDMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+MDMStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = Psi.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -1436,8 +1426,6 @@ MDMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
     if ( ( iores = damageTensorEigenVectors.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 void

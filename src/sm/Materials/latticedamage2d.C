@@ -788,22 +788,12 @@ LatticeDamage2dStatus :: setOldNormalStress(double val)
 }
 
 
-contextIOResultType
-LatticeDamage2dStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+LatticeDamage2dStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-
-
-    // write a raw data
     if ( ( iores = reducedStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -849,8 +839,6 @@ LatticeDamage2dStatus :: saveContext(DataStream &stream, ContextMode mode, void 
     if ( !stream.write(biot) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 void
@@ -890,23 +878,16 @@ LatticeDamage2dStatus :: giveCrackFlag()
 }
 
 
-contextIOResultType
-LatticeDamage2dStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+LatticeDamage2dStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 
+    contextIOResultType iores;
     if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // read raw data
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -946,8 +927,5 @@ LatticeDamage2dStatus :: restoreContext(DataStream &stream, ContextMode mode, vo
     if ( !stream.read(biot) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-
-    return CIO_OK;
 }
 }     // end namespace oofem

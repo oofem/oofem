@@ -375,9 +375,9 @@ public:
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;
     /// Stores receiver state to output stream.
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual void saveContext(DataStream &stream, ContextMode mode);
     /// Restores the receiver state previously written in stream.
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual void restoreContext(DataStream &stream, ContextMode mode);
     /// Overwrites the boundary condition id (0-inactive BC), intended for specific purposes such as coupling of bc's in multiscale simulations
     virtual void setBcId(int bcId) { }
     /// Overwrites the initial condition id (0-inactive IC)

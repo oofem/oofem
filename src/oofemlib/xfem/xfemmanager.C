@@ -265,10 +265,8 @@ void XfemManager :: setDomain(Domain *ipDomain)
     }
 }
 
-contextIOResultType XfemManager :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void XfemManager :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
     if ( mode & CM_Definition ) {
         if ( !stream.write(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -283,19 +281,13 @@ contextIOResultType XfemManager :: saveContext(DataStream &stream, ContextMode m
             }
         }
 
-        if ( ( iores = object->saveContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        object->saveContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType XfemManager :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void XfemManager :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
     if ( mode & CM_Definition ) {
         if ( !stream.read(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -318,12 +310,8 @@ contextIOResultType XfemManager :: restoreContext(DataStream &stream, ContextMod
             obj = this->giveEnrichmentItem(i);
         }
 
-        if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
+        obj->restoreContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 void XfemManager :: updateYourself(TimeStep *tStep)

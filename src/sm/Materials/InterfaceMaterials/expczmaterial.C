@@ -207,17 +207,11 @@ ExpCZMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 #if 0
-contextIOResultType
-ExpCZMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ExpCZMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralInterfaceMaterialStatus :: saveContext(stream, mode);
 
-    // save parent class status
-    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
     if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -225,21 +219,13 @@ ExpCZMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *o
     if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-ExpCZMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ExpCZMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralInterfaceMaterialStatus :: restoreContext(stream, mode);
 
-    // read parent class status
-    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -247,8 +233,6 @@ ExpCZMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void
     if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 #endif
 } // end namespace oofem

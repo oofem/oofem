@@ -128,17 +128,10 @@ MPSDamMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 
-contextIOResultType
-MPSDamMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-//
+void
+MPSDamMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = MPSMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    MPSMaterialStatus :: saveContext(stream, mode);
 
     if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -152,6 +145,7 @@ MPSDamMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *
         THROW_CIOERR(CIO_IOERR);
     }
 
+    contextIOResultType iores;
     if ( ( iores = crackVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -167,51 +161,41 @@ MPSDamMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *
     if ( ( iores = effectiveStressVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-MPSDamMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restore the state variables from a stream
-//
+void
+MPSDamMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = MPSMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    MPSMaterialStatus :: restoreContext(stream, mode);
 
     if ( !stream.read(kappa) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( !stream.read(damage) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( !stream.read(charLength) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
+    contextIOResultType iores;
     if ( ( iores = crackVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( !stream.read(var_e0) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( !stream.read(var_gf) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( ( iores = effectiveStressVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-
-    return CIO_OK;
 }
 
 //   ***********************************************************************************

@@ -177,8 +177,8 @@ public:
     const FloatArray &giveComponentArray() const;
     void setComponentArray(FloatArray &arry) { componentArray = std::move(arry); }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 } // end namespace oofem
 #endif // load_h

@@ -135,46 +135,4 @@ void GaussPoint :: updateYourself(TimeStep *tStep)
     }
 }
 
-
-
-/*
- * contextIOResultType
- * GaussPoint :: saveContext (FILE* stream, void *obj)
- * //
- * // saves full gp context (saves state variables, that completely describe
- * // current state)
- * // does not saves the slave - records
- * // this task is done at the layeredCrossSection level
- * {
- *
- * contextIOResultType iores;
- *
- * if ((iores = this->giveMaterial()->saveContext(stream,(void*) this)) != CIO_OK) THROW_CIOERR(iores);
- * // if (matStatusDict->saveContext(stream,obj) != 1)
- * //   error ("saveContext io error encountered");
- *
- * return CIO_OK;
- *
- * }
- *
- *
- * contextIOResultType
- * GaussPoint :: restoreContext (FILE* stream, void *obj)
- * //
- * // restores full material context (saves state variables, that completely describe
- * // current state)
- * // does not restores the slave - records
- * // this task is done at the layeredCrossSection level
- * //
- * {
- *
- * contextIOResultType iores;
- * if ((iores = this->giveMaterial()->restoreContext(stream,(void*) this)) != CIO_OK) THROW_CIOERR(iores);
- * //if (matStatusDict->restoreContext(stream,obj) != 1)
- * //  error ("restoreContext io error encountered");
- *
- * return CIO_OK;
- *
- * }
- */
 } // end namespace oofem

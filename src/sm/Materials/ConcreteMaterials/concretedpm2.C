@@ -247,16 +247,12 @@ ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}\n");
 }
 
-contextIOResultType
-ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -345,21 +341,15 @@ ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode, void *ob
     }
 
 #endif
-    return CIO_OK;
 }
 
 
-contextIOResultType
-ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -449,7 +439,6 @@ ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode, void 
     }
 
 #endif
-    return CIO_OK;
 }
 
 #ifdef keep_track_of_dissipated_energy

@@ -112,29 +112,17 @@ RVEStokesFlowMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-RVEStokesFlowMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+RVEStokesFlowMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = TransportMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    TransportMaterialStatus :: saveContext(stream, mode);
 }
 
 
-contextIOResultType
-RVEStokesFlowMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+RVEStokesFlowMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = TransportMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    TransportMaterialStatus :: restoreContext(stream, mode);
 }
 
 RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : TransportMaterial(n, d)

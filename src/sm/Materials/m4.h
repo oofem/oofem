@@ -80,8 +80,8 @@ public:
     void letTempMicroplaneStrainBe(int mnumber, const MicroplaneState &state) { tempMicroplaneStrain[mnumber-1] = state; }
     void letTempMicroplaneStressBe(int mnumber, const MicroplaneState &state) { tempMicroplaneStress[mnumber-1] = state; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 
 

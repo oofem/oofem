@@ -261,35 +261,25 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-contextIOResultType LinearStatic :: saveContext(DataStream &stream, ContextMode mode)
+void LinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralEngngModel :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType LinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
+void LinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralEngngModel :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

@@ -511,49 +511,32 @@ SteelRelaxMatStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-// saves full information stored in this status
-// temporary variables are NOT stored
-contextIOResultType
-SteelRelaxMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+SteelRelaxMatStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralMaterialStatus :: saveContext(stream, mode);
 
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
     if ( !stream.write(relaxIntVariable) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( !stream.write(prestress) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-
-contextIOResultType
-SteelRelaxMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+SteelRelaxMatStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 
     if ( !stream.read(relaxIntVariable) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
-    return CIO_OK; // return succes
+    if ( !stream.read(prestress) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
 }
 } // end namespace oofem

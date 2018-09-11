@@ -785,21 +785,12 @@ PlasticMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-PlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+PlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
     if ( ( iores = plasticStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -815,24 +806,15 @@ PlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void 
     if ( !stream.write(gamma) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-PlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+PlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -848,8 +830,6 @@ PlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, vo
     if ( !stream.read(gamma) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK; // return success
 }
 
 void PlasticMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)

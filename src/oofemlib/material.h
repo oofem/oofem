@@ -212,19 +212,17 @@ public:
      * @param stream Output stream.
      * @param mode Determines amount of info required in stream (state, definition, ...).
      * @param gp integration point.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
     /**
      * Reads integration point state to output stream.
      * @param stream Output stream.
      * @param mode Determines amount of info required in stream (state, definition, ...).
      * @param gp integration point.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     /**
      * Allows programmer to test some internal data, before computation begins.
@@ -328,21 +326,17 @@ public:
      * Stores receiver state to output stream.
      * @param stream Output stream.
      * @param mode Determines amount of info required in stream (state, definition, ...).
-     * @param obj Special parameter, used only to send particular integration point to material class version of this method.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
     /**
      * Restores the receiver state previously written in stream.
      * @see saveContext
      * @param stream Input stream.
      * @param mode Determines amount of info available in stream (state, definition, ...).
-     * @param obj Special parameter for sending extra information.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 } // end namespace oofem
 #endif // material_h

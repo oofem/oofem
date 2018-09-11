@@ -80,8 +80,8 @@ public:
     double giveUnknown(ValueModeType mode, TimeStep *tStep) override;
     double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     dofType giveDofType() override { return DT_active; }
     const char *giveClassName() const override { return "ActiveDof"; }

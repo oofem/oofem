@@ -69,14 +69,13 @@ public:
     /// Sets the local equivalent strain for average to given value.
     void setLocalEquivalentStrainForAverage(double ls) { localEquivalentStrainForAverage = ls; }
 
-    const char *giveInputRecordName() const override { return _IFT_MazarsNLMaterial_Name; }
     const char *giveClassName() const override { return "MazarsNLMaterialStatus"; }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     /**
      * Interface requesting service.

@@ -120,8 +120,8 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
+    virtual void saveContext(DataStream &stream, ContextMode mode);
+    virtual void restoreContext(DataStream &stream, ContextMode mode);
 
     virtual Element *giveElement() { return this; }
 

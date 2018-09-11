@@ -99,8 +99,8 @@ public:
     void updateInternalRHS(FloatArray &answer, TimeStep *tStep, Domain *d, FloatArray *eNorm) override;
     void updateMatrix(SparseMtrx &mat, TimeStep *tStep, Domain *d) override;
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     virtual void applyIC();
 

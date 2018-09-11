@@ -365,26 +365,14 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
 }
 
 
-contextIOResultType IncrementalLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
+void IncrementalLinearStatic :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    StructuralEngngModel :: saveContext(stream, mode);
 }
 
 
-contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
+void IncrementalLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    StructuralEngngModel :: restoreContext(stream, mode);
 }
 } // end namespace oofem

@@ -212,14 +212,12 @@ int SlaveDof :: __givePrescribedEquationNumber()
     return 0;
 }
 
-contextIOResultType SlaveDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void SlaveDof :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Dof :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
+        contextIOResultType iores;
         if ( !stream.write(countOfMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -249,18 +247,14 @@ contextIOResultType SlaveDof :: saveContext(DataStream &stream, ContextMode mode
             THROW_CIOERR(iores);
         }
     } // if ( mode & CM_Definition )
-
-    return CIO_OK;
 }
 
-contextIOResultType SlaveDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void SlaveDof :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Dof :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
+        contextIOResultType iores;
         if ( !stream.read(countOfMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -286,8 +280,6 @@ contextIOResultType SlaveDof :: restoreContext(DataStream &stream, ContextMode m
             THROW_CIOERR(iores);
         }
     } // if ( mode & CM_Definition )
-
-    return CIO_OK;
 }
 
 

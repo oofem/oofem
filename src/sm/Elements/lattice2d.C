@@ -395,13 +395,9 @@ Lattice2d :: giveGpCoordinates(FloatArray &answer)
 }
 
 
-contextIOResultType Lattice2d :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void Lattice2d :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores =  LatticeStructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    LatticeStructuralElement :: saveContext(stream, mode);
 
     if ( ( mode & CM_Definition ) ) {
 
@@ -417,6 +413,7 @@ contextIOResultType Lattice2d :: saveContext(DataStream &stream, ContextMode mod
             THROW_CIOERR(CIO_IOERR);
         }
 
+        contextIOResultType iores;
         if ( ( iores = couplingNumbers.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -425,19 +422,12 @@ contextIOResultType Lattice2d :: saveContext(DataStream &stream, ContextMode mod
             THROW_CIOERR(iores);
         }
     }
-
-    return CIO_OK;
 }
 
 
-
-contextIOResultType Lattice2d :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void Lattice2d :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = LatticeStructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    LatticeStructuralElement :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
 
@@ -453,6 +443,7 @@ contextIOResultType Lattice2d :: restoreContext(DataStream &stream, ContextMode 
             THROW_CIOERR(CIO_IOERR);
         }
 
+        contextIOResultType iores;
         if ( ( iores = couplingNumbers.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -460,10 +451,7 @@ contextIOResultType Lattice2d :: restoreContext(DataStream &stream, ContextMode 
         if ( ( iores = gpCoords.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-
     }
-
-    return CIO_OK;
 }
 
 #ifdef __OOFEG

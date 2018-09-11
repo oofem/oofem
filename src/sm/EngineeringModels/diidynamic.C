@@ -621,13 +621,11 @@ DIIDynamic :: determineConstants(TimeStep *tStep)
 }
 
 
-contextIOResultType DIIDynamic :: saveContext(DataStream &stream, ContextMode mode)
+void DIIDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    EngngModel :: saveContext(stream, mode);
 
     if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -648,17 +646,13 @@ contextIOResultType DIIDynamic :: saveContext(DataStream &stream, ContextMode mo
     if ( ( iores = previousIncrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType DIIDynamic :: restoreContext(DataStream &stream, ContextMode mode)
+void DIIDynamic :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    EngngModel :: restoreContext(stream, mode);
 
     if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -679,7 +673,5 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream &stream, ContextMode
     if ( ( iores = previousIncrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

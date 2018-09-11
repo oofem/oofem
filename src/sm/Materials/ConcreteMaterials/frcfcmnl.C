@@ -858,20 +858,12 @@ FRCFCMNLStatus :: updateYourself(TimeStep *tStep)
 
 
 
-contextIOResultType
-FRCFCMNLStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+FRCFCMNLStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    FRCFCMStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = FRCFCMStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = fiberStressLoc.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -879,24 +871,14 @@ FRCFCMNLStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
     if ( ( iores = fiberStressNL.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-FRCFCMNLStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+FRCFCMNLStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    FRCFCMStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = FRCFCMStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-
     if ( ( iores = fiberStressLoc.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -904,8 +886,6 @@ FRCFCMNLStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj
     if ( ( iores = fiberStressNL.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK; // return succes
 }
 
 

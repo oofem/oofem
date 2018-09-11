@@ -515,44 +515,23 @@ MazarsMaterialStatus :: MazarsMaterialStatus(int n, Domain *d, GaussPoint *g) :
     lec = 0.0;
 }
 
-contextIOResultType
-MazarsMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+MazarsMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    // save parent class status
-    if ( ( iores = IsotropicDamageMaterial1Status :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    IsotropicDamageMaterial1Status :: saveContext(stream, mode);
 
-    // write a raw data
     if ( !stream.write(lec) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-MazarsMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+MazarsMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    // read parent class status
-    if ( ( iores = IsotropicDamageMaterial1Status :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    IsotropicDamageMaterial1Status :: restoreContext(stream, mode);
 
-    // read raw data
     if ( !stream.read(lec) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

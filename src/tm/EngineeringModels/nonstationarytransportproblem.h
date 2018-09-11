@@ -144,8 +144,8 @@ public:
     void solveYourselfAt(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
     double giveUnknownComponent(ValueModeType, TimeStep *tStep, Domain *d, Dof *dof) override;
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     void updateDomainLinks() override;
 

@@ -77,8 +77,8 @@ public:
     double giveKappa_nl() { return kappa_nl; }
     double giveKappa_hat() { return kappa_hat; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     Interface *giveInterface(InterfaceType) override;
 };

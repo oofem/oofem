@@ -375,14 +375,10 @@ BinghamFluidMaterial2Status :: initTempStatus()
 }
 
 
-contextIOResultType
-BinghamFluidMaterial2Status :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BinghamFluidMaterial2Status :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FluidDynamicMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FluidDynamicMaterialStatus :: saveContext(stream, mode);
 
     if ( !stream.write(devStrainMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -391,19 +387,13 @@ BinghamFluidMaterial2Status :: saveContext(DataStream &stream, ContextMode mode,
     if ( !stream.write(devStressMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-BinghamFluidMaterial2Status :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BinghamFluidMaterial2Status :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FluidDynamicMaterialStatus :: restoreContext(stream, mode);
 
     if ( !stream.read(devStrainMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -412,8 +402,6 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream &stream, ContextMode mo
     if ( !stream.read(devStressMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 

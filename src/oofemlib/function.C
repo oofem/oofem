@@ -118,39 +118,29 @@ Function :: evaluate(const std :: map< std :: string, FunctionArgument > &valDic
     return ans[0];
 }
 
-contextIOResultType
-Function :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+Function :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.write(parameterType) ) {
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-Function :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+Function :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.read(parameterType) ) {
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 } // end namespace oofem

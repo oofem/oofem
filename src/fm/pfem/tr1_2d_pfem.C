@@ -405,28 +405,15 @@ TR1_2D_PFEM :: computeCriticalTimeStep(TimeStep *tStep)
 }
 
 
-contextIOResultType TR1_2D_PFEM :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void TR1_2D_PFEM :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = PFEMElement2d :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    PFEMElement2d :: saveContext(stream, mode);
 }
 
 
-contextIOResultType TR1_2D_PFEM :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void TR1_2D_PFEM :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = PFEMElement2d :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-
-    return CIO_OK;
+    PFEMElement2d :: restoreContext(stream, mode);
 }
 
 

@@ -59,39 +59,29 @@ ConstantFunction :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->value, _IFT_ConstantFunction_f);
 }
 
-contextIOResultType
-ConstantFunction :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ConstantFunction :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = Function :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Function :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.write(value) ) {
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-ConstantFunction :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ConstantFunction :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = Function :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Function :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.read(value) ) {
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 } // end namespace oofem

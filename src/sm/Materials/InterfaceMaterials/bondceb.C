@@ -219,39 +219,23 @@ BondCEBMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-BondCEBMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BondCEBMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralInterfaceMaterialStatus :: saveContext(stream, mode);
 
-    // save parent class status
-    if ( ( iores = StructuralInterfaceMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
     if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-BondCEBMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BondCEBMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralInterfaceMaterialStatus :: restoreContext(stream, mode);
 
-    // read parent class status
-    if ( ( iores = StructuralInterfaceMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

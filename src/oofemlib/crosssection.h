@@ -278,22 +278,20 @@ public:
      * @param stream Output stream.
      * @param mode Determines amount of info required in stream (state, definition, ...).
      * @param gp integration point.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
     /**
      * Reads integration point state to output stream.
      * @param stream Output stream.
      * @param mode Determines amount of info required in stream (state, definition, ...).
      * @param gp integration point.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 } // end namespace oofem
 #endif // crosssection_h

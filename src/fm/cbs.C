@@ -474,37 +474,27 @@ CBS :: updateInternalState(TimeStep *tStep)
 }
 
 
-contextIOResultType
+void
 CBS :: saveContext(DataStream &stream, ContextMode mode)
 {
+    EngngModel :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = prescribedTractionPressure.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
+void
 CBS :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    EngngModel :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = prescribedTractionPressure.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

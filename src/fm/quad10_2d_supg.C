@@ -574,37 +574,18 @@ Quad10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
 }
 
 
-contextIOResultType
-Quad10_2D_SUPG :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full element context (saves state variables, that completely describe
-// current state)
-//
+void
+Quad10_2D_SUPG :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = SUPGElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    SUPGElement :: saveContext(stream, mode);
 }
 
 
 
-contextIOResultType Quad10_2D_SUPG :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full element context (saves state variables, that completely describe
-// current state)
-//
+void
+Quad10_2D_SUPG :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = SUPGElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    SUPGElement :: restoreContext(stream, mode);
 }
 
 

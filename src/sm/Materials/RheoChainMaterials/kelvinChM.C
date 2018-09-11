@@ -310,28 +310,15 @@ KelvinChainMaterialStatus :: initTempStatus()
     RheoChainMaterialStatus :: initTempStatus();
 }
 
-contextIOResultType
-KelvinChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+KelvinChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    RheoChainMaterialStatus :: saveContext(stream, mode);
 }
 
-
-contextIOResultType
-KelvinChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+KelvinChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    RheoChainMaterialStatus :: restoreContext(stream, mode);
 }
 } // end namespace oofem

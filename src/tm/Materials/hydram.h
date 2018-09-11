@@ -136,8 +136,8 @@ public:
     void updateYourself(TimeStep *tStep) override;
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     const char *giveClassName() const override { return "HydrationModelStatus"; }
 };
@@ -318,21 +318,17 @@ public:
      */
     IRResultType initializeFrom(InputRecord *ir);
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL)
+    void saveContext(DataStream &stream, ContextMode mode)
     {
         if ( hydrationModel ) {
-            hydrationModel->saveContext(stream, mode, obj);
+            hydrationModel->saveContext(stream, mode);
         }
-
-        return CIO_OK;
     }
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL)
+    void restoreContext(DataStream &stream, ContextMode mode)
     {
         if ( hydrationModel ) {
-            hydrationModel->restoreContext(stream, mode, obj);
+            hydrationModel->restoreContext(stream, mode);
         }
-
-        return CIO_OK;
     }
 
     /**

@@ -118,18 +118,12 @@ TransportMaterialStatus :: initTempStatus()
 }
 
 
-contextIOResultType
-TransportMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full ms context (saves state variables, that completely describe
-// current state)
+void
+TransportMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    MaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = gradient.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -141,24 +135,15 @@ TransportMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, voi
     if ( ( iores = flux.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-TransportMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full material context (saves state variables, that completely describe
-// current state)
-//
+void
+TransportMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    MaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = gradient.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -168,8 +153,6 @@ TransportMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, 
     if ( ( iores = flux.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

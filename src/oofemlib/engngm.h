@@ -650,10 +650,9 @@ public:
      * integration points (and material statuses) are stored.
      * @param stream Context stream.
      * @param mode Determines amount of info in stream.
-     * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
+    virtual void saveContext(DataStream &stream, ContextMode mode);
     /**
      * Restores the state of model from output stream. Restores not only the receiver state,
      * but also same function is invoked for all DofManagers and Elements in associated
@@ -666,10 +665,9 @@ public:
      * context.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
-     * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    virtual void restoreContext(DataStream &stream, ContextMode mode);
     /**
      * Updates domain links after the domains of receiver have changed. Used mainly after
      * restoring context - the domains may change and this service is then used

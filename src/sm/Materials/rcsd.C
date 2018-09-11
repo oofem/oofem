@@ -562,21 +562,11 @@ RCSDMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-RCSDMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+RCSDMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    RCM2MaterialStatus :: saveContext(stream, mode);
 
-    // save parent class status
-    if ( ( iores = RCM2MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
     if ( !stream.write(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -589,28 +579,19 @@ RCSDMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *ob
         THROW_CIOERR(CIO_IOERR);
     }
 
+    contextIOResultType iores;
     if ( ( iores = Ds0.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-RCSDMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+RCSDMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    RCM2MaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = RCM2MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( !stream.read(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -626,7 +607,5 @@ RCSDMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void 
     if ( ( iores = Ds0.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK; // return succes
 }
 } // end namespace oofem

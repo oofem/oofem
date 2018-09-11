@@ -272,39 +272,27 @@ TrabBoneEmbedStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-TrabBoneEmbedStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+TrabBoneEmbedStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
     // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralMaterialStatus :: saveContext(stream, mode);
 
     // write a raw data
     //if (fwrite(&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
     //if (fwrite(&damage,sizeof(double),1,stream)!= 1) THROW_CIOERR(CIO_IOERR);
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-TrabBoneEmbedStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+TrabBoneEmbedStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
     // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 
     // read raw data
     //if (fread (&kappa,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
     //if (fread (&damage,sizeof(double),1,stream) != 1) THROW_CIOERR(CIO_IOERR);
-
-    return CIO_OK;
 }
 
 

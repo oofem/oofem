@@ -81,8 +81,8 @@ public:
     void updateYourself(TimeStep *tStep) override;
     int checkConsistency() override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep) override;
     void LS_PCS_computedN(FloatMatrix &answer) override;

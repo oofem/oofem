@@ -296,13 +296,9 @@ void MasterDof :: printYourself()
 }
 
 
-contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void MasterDof :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Dof :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.write(bc) ) {
@@ -322,18 +318,12 @@ contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mod
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
         unknowns.saveContext(stream);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void MasterDof :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Dof :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.read(bc) ) {
@@ -354,7 +344,5 @@ contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
         unknowns.restoreContext(stream);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

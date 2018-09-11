@@ -77,8 +77,8 @@ public:
     int giveTempYieldFlag() { return temp_yield_flag; }
     int giveYieldFlag() { return yield_flag; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

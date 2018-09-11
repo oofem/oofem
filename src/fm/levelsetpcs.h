@@ -170,8 +170,8 @@ public:
     // identification
     const char *giveClassName() const override { return "LevelSetPCS"; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
 protected:
     void pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *tStep, PCSEqType t);

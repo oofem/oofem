@@ -264,15 +264,12 @@ void Set :: updateLocalElementNumbering(EntityRenumberingFunctor &f)
 }
 
 
-contextIOResultType Set :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void Set :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: saveContext(stream, mode);
 
     if ( ( mode & CM_Definition ) ) {
+        contextIOResultType iores;
         if ( ( iores = elements.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -286,19 +283,14 @@ contextIOResultType Set :: saveContext(DataStream &stream, ContextMode mode, voi
             THROW_CIOERR(iores);
         }
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType Set :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void Set :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
+        contextIOResultType iores;
         if ( ( iores = elements.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -314,7 +306,5 @@ contextIOResultType Set :: restoreContext(DataStream &stream, ContextMode mode, 
     }
 
     this->totalNodes.clear();
-
-    return CIO_OK;
 }
 }

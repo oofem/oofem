@@ -72,28 +72,23 @@ HydrationModelStatus :: updateYourself(TimeStep *tStep)
 }
 
 //modified_zh 25.6.2004 obj = NULL is set in .h
-contextIOResultType
-HydrationModelStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-// saves current context(state) into stream
+void
+HydrationModelStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
     if ( !stream.write(hydrationDegree) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 //modified_zh 25.6.2004 obj = NULL is set in .h
-contextIOResultType
-HydrationModelStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-// restores current context(state) from stream
+void
+HydrationModelStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
     if ( !stream.read(hydrationDegree) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     tempHydrationDegree = hydrationDegree; // for oofeg
-    return CIO_OK;
 }
 
 

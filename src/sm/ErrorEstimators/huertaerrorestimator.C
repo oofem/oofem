@@ -638,8 +638,8 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
 }
 
 
-contextIOResultType
-HuertaErrorEstimator :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+HuertaErrorEstimator :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     TimeStep *tStep = this->domain->giveEngngModel()->giveCurrentStep();
@@ -649,9 +649,7 @@ HuertaErrorEstimator :: saveContext(DataStream &stream, ContextMode mode, void *
     }
 
     // save parent class status
-    if ( ( iores = ErrorEstimator :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    ErrorEstimator :: saveContext(stream, mode);
 
     if ( ( iores = this->eNorms.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -661,20 +659,16 @@ HuertaErrorEstimator :: saveContext(DataStream &stream, ContextMode mode, void *
     if ( !stream.write(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-HuertaErrorEstimator :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+HuertaErrorEstimator :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
     // read parent class status
-    if ( ( iores = ErrorEstimator :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    ErrorEstimator :: restoreContext(stream, mode);
 
     if ( ( iores = eNorms.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -684,8 +678,6 @@ HuertaErrorEstimator :: restoreContext(DataStream &stream, ContextMode mode, voi
     if ( !stream.read(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 

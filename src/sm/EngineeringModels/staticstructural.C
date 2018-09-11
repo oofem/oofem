@@ -441,31 +441,17 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 }
 
 
-contextIOResultType StaticStructural :: saveContext(DataStream &stream, ContextMode mode)
+void StaticStructural :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    StructuralEngngModel :: saveContext(stream, mode);
     this->field->saveContext(stream);
-
-    return CIO_OK;
 }
 
 
-contextIOResultType StaticStructural :: restoreContext(DataStream &stream, ContextMode mode)
+void StaticStructural :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = StructuralEngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    StructuralEngngModel :: restoreContext(stream, mode);
     this->field->restoreContext(stream);
-
-    return CIO_OK;
 }
 
 

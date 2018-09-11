@@ -286,28 +286,15 @@ MaxwellChainMaterialStatus :: initTempStatus()
     RheoChainMaterialStatus :: initTempStatus();
 }
 
-contextIOResultType
-MaxwellChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+MaxwellChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = RheoChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    RheoChainMaterialStatus :: saveContext(stream, mode);
 }
 
-
-contextIOResultType
-MaxwellChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+MaxwellChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores = RheoChainMaterialStatus :: restoreContext(stream, mode, obj);
-
-    if ( iores != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    RheoChainMaterialStatus :: restoreContext(stream, mode);
 }
 } // end namespace oofem

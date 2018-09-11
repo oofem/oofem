@@ -787,31 +787,20 @@ RankineMatStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-// saves full information stored in this status
-// temporary variables are NOT stored
-contextIOResultType
-RankineMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+RankineMatStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
-
-    // write plastic strain (vector)
     if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // write cumulative plastic strain (scalar)
     if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    // write damage (scalar)
     if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -824,37 +813,24 @@ RankineMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
     if ( !stream.write(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 #endif
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-RankineMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+RankineMatStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read plastic strain (vector)
     if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // read cumulative plastic strain (scalar)
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    // read damage (scalar)
     if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -867,10 +843,7 @@ RankineMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *o
     if ( !stream.read(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 #endif
-
-    return CIO_OK; // return success
 }
 
 

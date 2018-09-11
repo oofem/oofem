@@ -444,8 +444,8 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void printYourself() override;
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     /// Returns true if dof of given type is allowed to be associated to receiver
     virtual bool isDofTypeCompatible(dofType type) const { return false; }

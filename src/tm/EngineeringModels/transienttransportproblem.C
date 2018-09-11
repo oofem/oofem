@@ -400,33 +400,19 @@ TransientTransportProblem :: updateYourself(TimeStep *tStep)
     EngngModel :: updateYourself(tStep);
 }
 
-contextIOResultType
+void
 TransientTransportProblem :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    EngngModel :: saveContext(stream, mode);
     field->saveContext(stream);
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
+void
 TransientTransportProblem :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    EngngModel :: restoreContext(stream, mode);
     field->restoreContext(stream);
-
-    return CIO_OK;
 }
 
 

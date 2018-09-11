@@ -123,8 +123,8 @@ public:
     const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
     const char *giveClassName() const override { return "StaticStructural"; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) override;
 };

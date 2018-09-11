@@ -182,8 +182,8 @@ public:
     bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_simpleSlave || type == DT_active ); }
     virtual int giveQcNodeType() { return 0; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) override;

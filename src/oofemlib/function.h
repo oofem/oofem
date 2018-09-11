@@ -142,8 +142,8 @@ public:
     virtual double evaluateAccelerationAtTime(double t) = 0;
 
     double giveFunctionParameter(int paramID);
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 } // end namespace oofem
 #endif // function_h

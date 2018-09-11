@@ -172,14 +172,12 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 }
 
 
-contextIOResultType
-FluidDynamicMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+FluidDynamicMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    MaterialStatus :: saveContext(stream, mode);
 
+    contextIOResultType iores;
     if ( ( iores = deviatoricStressVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -187,19 +185,15 @@ FluidDynamicMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, 
     if ( ( iores = deviatoricStrainRateVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-FluidDynamicMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+FluidDynamicMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    MaterialStatus :: restoreContext(stream, mode);
 
+    contextIOResultType iores;
     if ( ( iores = deviatoricStressVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -207,7 +201,5 @@ FluidDynamicMaterialStatus :: restoreContext(DataStream &stream, ContextMode mod
     if ( ( iores = deviatoricStrainRateVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

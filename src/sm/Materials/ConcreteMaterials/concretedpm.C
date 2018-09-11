@@ -171,18 +171,12 @@ ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "}\n");
 }
 
-contextIOResultType
-ConcreteDPMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ConcreteDPMStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
-
     if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -214,22 +208,15 @@ ConcreteDPMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj
     if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-ConcreteDPMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+ConcreteDPMStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -261,8 +248,6 @@ ConcreteDPMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *
     if ( !stream.read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 int

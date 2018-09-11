@@ -494,49 +494,27 @@ RCSDNLMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType
-RCSDNLMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+RCSDNLMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    RCSDEMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = RCSDEMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
     if ( ( iores = nonlocalStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-RCSDNLMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+void
+RCSDNLMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    RCSDEMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = RCSDEMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
-
     if ( ( iores = nonlocalStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK; // return success
 }
 
 
@@ -546,7 +524,7 @@ RCSDNLMaterialStatus :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
         return this;
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

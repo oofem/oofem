@@ -156,8 +156,8 @@ public:
 
     double giveLoadLevel() override { return cumulatedLoadLevel + loadLevel; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     void updateDomainLinks() override;
 

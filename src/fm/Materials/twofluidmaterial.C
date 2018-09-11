@@ -210,20 +210,18 @@ TwoFluidMaterialStatus :: initTempStatus()
 }
 
 
-contextIOResultType
-TwoFluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+TwoFluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    this->giveSlaveGaussPoint0()->giveMaterialStatus()->saveContext(stream, mode, obj);
-    this->giveSlaveGaussPoint1()->giveMaterialStatus()->saveContext(stream, mode, obj);
-    return CIO_OK;
+    this->giveSlaveGaussPoint0()->giveMaterialStatus()->saveContext(stream, mode);
+    this->giveSlaveGaussPoint1()->giveMaterialStatus()->saveContext(stream, mode);
 }
 
 
-contextIOResultType
-TwoFluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+TwoFluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    this->giveSlaveGaussPoint0()->giveMaterialStatus()->restoreContext(stream, mode, obj);
-    this->giveSlaveGaussPoint1()->giveMaterialStatus()->restoreContext(stream, mode, obj);
-    return CIO_OK;
+    this->giveSlaveGaussPoint0()->giveMaterialStatus()->restoreContext(stream, mode);
+    this->giveSlaveGaussPoint1()->giveMaterialStatus()->restoreContext(stream, mode);
 }
 } // end namespace oofem

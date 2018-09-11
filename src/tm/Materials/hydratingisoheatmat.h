@@ -92,8 +92,8 @@ public:
                                    GaussPoint *gp,
                                    TimeStep *tStep) override;
 
-    contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
-    contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
+    void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
     // identification and auxiliary functions
     const char *giveInputRecordName() const override { return _IFT_HydratingIsoHeatMaterial_Name; }

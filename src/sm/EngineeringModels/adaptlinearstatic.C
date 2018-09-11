@@ -128,14 +128,9 @@ AdaptiveLinearStatic :: initializeAdaptive(int tStepNumber)
 }
 
 
-contextIOResultType AdaptiveLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
+void AdaptiveLinearStatic :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = LinearStatic :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    LinearStatic :: restoreContext(stream, mode);
 }
 
 IRResultType

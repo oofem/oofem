@@ -107,39 +107,19 @@ CrossSection :: printYourself()
 }
 
 
-contextIOResultType
+void
 CrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-//
-// saves full material context (saves state variables, that completely describe
-// current state)
-//
 {
-    contextIOResultType iores;
     Material *mat = this->giveMaterial(gp);
-
-    if ( ( iores = mat->saveIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    mat->saveIPContext(stream, mode, gp);
 }
 
 
-contextIOResultType
+void
 CrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-//
-// restores full material context (saves state variables, that completely describe
-// current state)
-//
 {
-    contextIOResultType iores;
     Material *mat = this->giveMaterial(gp);
-
-    if ( ( iores = mat->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    mat->restoreIPContext(stream, mode, gp);
 }
 
 bool
@@ -182,46 +162,31 @@ CrossSection :: predictRelativeComputationalCost(GaussPoint *gp)
 }
 
 
-contextIOResultType CrossSection :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-// saves full element context (saves state variables, that completely describe current state)
+void CrossSection :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: saveContext(stream, mode);
 
     if ( ( mode & CM_Definition ) ) {
-      propertyDictionary.saveContext (stream) ;
+        propertyDictionary.saveContext (stream) ;
 
-      if ( !stream.write(setNumber) ) {
+        if ( !stream.write(setNumber) ) {
             THROW_CIOERR(CIO_IOERR);
-      }
+        }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType CrossSection :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-// restores full element context (saves state variables, that completely describe current state)
+void CrossSection :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
-      propertyDictionary.restoreContext(stream);
+        propertyDictionary.restoreContext(stream);
 
-      if ( !stream.read(setNumber) ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
-
+        if ( !stream.read(setNumber) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
-    return CIO_OK;
 }
 
-  
 } // end namespace oofem

@@ -1526,10 +1526,10 @@ void
 EngngModel :: updateDomainLinks()
 {
     this->giveExportModuleManager()->initialize();
-};
+}
 
 
-contextIOResultType EngngModel :: saveContext(DataStream &stream, ContextMode mode)
+void EngngModel :: saveContext(DataStream &stream, ContextMode mode)
 //
 // this procedure is used mainly for two reasons:
 //
@@ -1583,16 +1583,12 @@ contextIOResultType EngngModel :: saveContext(DataStream &stream, ContextMode mo
     // store nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetaStepNumber() ) );
     if ( nmethod ) {
-        if ( ( iores = nmethod->saveContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        nmethod->saveContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType EngngModel :: restoreContext(DataStream &stream, ContextMode mode)
+void EngngModel :: restoreContext(DataStream &stream, ContextMode mode)
 //
 // this procedure is used mainly for two reasons:
 //
@@ -1668,16 +1664,12 @@ contextIOResultType EngngModel :: restoreContext(DataStream &stream, ContextMode
     // restore nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveCurrentMetaStep() );
     if ( nmethod ) {
-        if ( ( iores = nmethod->restoreContext(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        nmethod->restoreContext(stream, mode);
     }
 
     this->updateDomainLinks();
     this->updateAttributes( this->giveCurrentMetaStep() );
     this->initStepIncrements();
-
-    return CIO_OK;
 }
 
 

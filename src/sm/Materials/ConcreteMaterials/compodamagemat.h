@@ -111,8 +111,8 @@ public:
     /// Characteristic element length at IP in three perpendicular planes aligned with material orientation
     FloatArray elemCharLength;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     const char *giveClassName() const override { return "CompoDamageMatStatus"; }
 };

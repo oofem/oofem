@@ -168,13 +168,10 @@ BoundaryLoad :: giveTemperOffset(void)
     return this->temperOffset;
 }
 
-contextIOResultType
-BoundaryLoad :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BoundaryLoad :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = Load :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Load :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.write(lType) ) {
@@ -183,7 +180,6 @@ BoundaryLoad :: saveContext(DataStream &stream, ContextMode mode, void *obj)
         if ( !stream.write(coordSystemType) ) {
           THROW_CIOERR(CIO_IOERR);
         }
-      
         propertyDictionary.saveContext(stream);
         propertyTimeFunctDictionary.saveContext(stream);
 
@@ -191,31 +187,26 @@ BoundaryLoad :: saveContext(DataStream &stream, ContextMode mode, void *obj)
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-BoundaryLoad :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+BoundaryLoad :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    int _val;
-    contextIOResultType iores;
-    if ( ( iores = Load :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Load :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
+        int _val;
         if ( !stream.read(_val) ) {
           THROW_CIOERR(CIO_IOERR);
         }
         lType = (bcType) _val;
-        
+
         if ( !stream.read(_val) ) {
           THROW_CIOERR(CIO_IOERR);
         }
         coordSystemType = (CoordSystType) _val;
-      
+
         propertyDictionary.restoreContext(stream);
         propertyTimeFunctDictionary.restoreContext(stream);
 
@@ -223,10 +214,6 @@ BoundaryLoad :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
-
-  
 } // end namespace oofem

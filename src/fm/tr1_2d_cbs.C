@@ -1106,43 +1106,21 @@ TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 
-contextIOResultType TR1_2D_CBS :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void TR1_2D_CBS :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = CBSElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    CBSElement :: saveContext(stream, mode);
     //<RESTRICTED_SECTION>
-    if ( ( iores = LEPlicElementInterface :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    LEPlicElementInterface :: saveContext(stream, mode);
     //</RESTRICTED_SECTION>
-
-    return CIO_OK;
 }
 
 
-
-contextIOResultType TR1_2D_CBS :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void TR1_2D_CBS :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = CBSElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    CBSElement :: restoreContext(stream, mode);
     //<RESTRICTED_SECTION>
-    if ( ( iores = LEPlicElementInterface :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    LEPlicElementInterface :: restoreContext(stream, mode);
     //</RESTRICTED_SECTION>
-
-
-    return CIO_OK;
 }
 
 

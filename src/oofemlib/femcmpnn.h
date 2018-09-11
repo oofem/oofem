@@ -139,21 +139,17 @@ public:
      * Stores receiver state to output stream.
      * @param stream Output stream.
      * @param mode Determines amount of info required in stream (state, definition, ...).
-     * @param obj Special parameter, used only to send particular integration point to material class version of this method.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual void saveContext(DataStream &stream, ContextMode mode);
     /**
      * Restores the receiver state previously written in stream.
      * @see saveContext
      * @param stream Input stream.
      * @param mode Determines amount of info available in stream (state, definition, ...).
-     * @param obj Special parameter for sending extra information.
-     * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual void restoreContext(DataStream &stream, ContextMode mode);
     /**
      * Allows programmer to test some internal data, before computation begins.
      * For example, one may use this function, to ensure that element has material with

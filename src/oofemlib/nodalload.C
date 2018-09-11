@@ -59,41 +59,33 @@ void NodalLoad :: giveInputRecord(DynamicInputRecord &input)
     Load :: giveInputRecord(input);
     input.setField(this->coordSystemType, _IFT_NodalLoad_cstype);
 }
-contextIOResultType
-NodalLoad :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+
+
+void
+NodalLoad :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = Load :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Load :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.write(coordSystemType) ) {
           THROW_CIOERR(CIO_IOERR);
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-NodalLoad :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+NodalLoad :: restoreContext(DataStream &stream, ContextMode mode)
 {
-  int _val;
-    contextIOResultType iores;
-    if ( ( iores = Load :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Load :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
+        int _val;
         if ( !stream.read(_val) ) {
           THROW_CIOERR(CIO_IOERR);
         }
         coordSystemType = (CoordSystType) _val;
     }
-
-    return CIO_OK;
 }
 
 

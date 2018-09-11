@@ -35,6 +35,8 @@
 #ifndef contextioerr_h
 #define contextioerr_h
 
+#include <exception>
+
 #include "oofemcfg.h"
 #include "contextioresulttype.h"
 
@@ -43,18 +45,18 @@ namespace oofem {
  * Context IO exception class
  * @todo Document more.
  */
-class OOFEM_EXPORT ContextIOERR
+class OOFEM_EXPORT ContextIOERR : public std::exception
 {
     contextIOResultType error;
     const char *msg, *file;
     int line;
+    std::string full_message;
 
 public:
-
     ContextIOERR(contextIOResultType e, const char *file, int line);
     ContextIOERR(contextIOResultType e, const char *msg, const char *file, int line);
-    ~ContextIOERR();
 
+    const char* what() const noexcept override { return this->full_message.c_str(); }
     void print();
 };
 

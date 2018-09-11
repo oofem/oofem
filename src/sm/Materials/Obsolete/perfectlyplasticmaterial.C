@@ -710,55 +710,35 @@ PerfectlyPlasticMaterialStatus :: ~PerfectlyPlasticMaterialStatus()
 { }
 
 
-contextIOResultType
-PerfectlyPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-//
+void
+PerfectlyPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralMaterialStatus :: saveContext(stream, mode);
 
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write a raw data
     if ( !stream.write(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
+    contextIOResultType iores;
     if ( ( iores = plasticStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    // return result back
-    return CIO_OK;
 }
 
 
-contextIOResultType
-PerfectlyPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restore state variables from stream
-//
+void
+PerfectlyPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( !stream.read(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
+    contextIOResultType iores;
     if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    // return result back
-    return CIO_OK;
 }
 
 

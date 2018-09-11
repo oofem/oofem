@@ -76,8 +76,8 @@ public:
     int SetUpPointsOnTriangle(int nPoints, MaterialMode mode) override;
     int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 } // end namespace oofem
 #endif // patchintegrationrule_h

@@ -109,8 +109,8 @@ public:
     int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
     bool newDofHandling() override { return true; }
     IRResultType initializeFrom(InputRecord *ir) override;
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
     TimeStep *giveNextStep() override;
 
     double giveEigenValue(int eigNum) override { return eigVal.at(eigNum); }

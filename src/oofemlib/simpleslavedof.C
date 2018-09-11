@@ -146,16 +146,9 @@ SimpleSlaveDof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
 }
 
 
-contextIOResultType SimpleSlaveDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full node context (saves state variables, that completely describe
-// current state)
-//
+void SimpleSlaveDof :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Dof :: saveContext(stream, mode);
 
     if ( mode & CM_Definition ) {
 
@@ -170,22 +163,12 @@ contextIOResultType SimpleSlaveDof :: saveContext(DataStream &stream, ContextMod
             }
         }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType SimpleSlaveDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full node context (saves state variables, that completely describe
-// current state)
-//
+void SimpleSlaveDof :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    Dof :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.read(masterDofMngr) ) {
@@ -194,9 +177,6 @@ contextIOResultType SimpleSlaveDof :: restoreContext(DataStream &stream, Context
     }
 
     this->masterDofIndx = -1;
-
-
-    return CIO_OK;
 }
 
 void

@@ -70,7 +70,7 @@ namespace oofem {
 class PFEMPressureRhsAssembler : public VectorAssembler
 {
 public:
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
 };
 
 /**
@@ -84,8 +84,8 @@ protected:
 public:
     PFEMCorrectionRhsAssembler(double deltaT) : VectorAssembler(), deltaT(deltaT) {}
 
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
-    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+    void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const override;
 };
 
 /**
@@ -93,8 +93,8 @@ public:
  */
 class PFEMLaplaceVelocityAssembler : public VectorAssembler
 {
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
-    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+    void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const override;
 };
 
 /**
@@ -102,8 +102,8 @@ class PFEMLaplaceVelocityAssembler : public VectorAssembler
  */
 class PFEMMassVelocityAssembler : public VectorAssembler
 {
-    virtual void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const;
-    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+    void vectorFromElement(FloatArray &vec, Element &element, TimeStep *tStep, ValueModeType mode) const override;
+    void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const override;
 };
 
 /**
@@ -112,8 +112,8 @@ class PFEMMassVelocityAssembler : public VectorAssembler
 class PFEMPressureLaplacianAssembler : public MatrixAssembler
 {
 public:
-    virtual void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const;
-    virtual void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const;
+    void matrixFromElement(FloatMatrix &mat, Element &element, TimeStep *tStep) const override;
+    void locationFromElement(IntArray &loc, Element &element, const UnknownNumberingScheme &s, IntArray *dofIds = nullptr) const override;
 };
 
 /**
@@ -184,7 +184,7 @@ protected:
     VelocityNumberingScheme prescribedVns;
 
 public:
-    PFEM(int i, EngngModel *_master = NULL) :
+    PFEM(int i, EngngModel *_master = nullptr) :
         EngngModel(i, _master)
         , avLhs()
         , pLhs()
@@ -206,43 +206,43 @@ public:
     }
     ~PFEM() { }
 
-    void solveYourselfAt(TimeStep *);
+    void solveYourselfAt(TimeStep *) override;
     /**
      * Updates nodal values
      * (calls also this->updateDofUnknownsDictionary for updating dofs unknowns dictionaries
      * if model supports changes of static system). The element internal state update is also forced using
      * updateInternalState service.giv
      */
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    TimeStep *giveNextStep();
-    TimeStep *giveSolutionStepWhenIcApply();
-    NumericalMethod *giveNumericalMethod(MetaStep *);
+    TimeStep *giveNextStep() override;
+    TimeStep *giveSolutionStepWhenIcApply() override;
+    NumericalMethod *giveNumericalMethod(MetaStep *) override;
 
     /** Removes all elements and call DelaunayTriangulator to build up new mesh with new recognized boundary.
      *  Non-meshed particles are set free and move according Newton laws of motion
      */
-    virtual void preInitializeNextStep();
+    void preInitializeNextStep() override;
 
     //equation numbering using PressureNumberingScheme
-    virtual int forceEquationNumbering(int id);
+    int forceEquationNumbering(int id) override;
 
-    virtual int requiresUnknownsDictionaryUpdate() { return true; }
+    int requiresUnknownsDictionaryUpdate() override { return true; }
 
 
     /// Initialization from given input record
-    IRResultType initializeFrom(InputRecord *ir);
+    IRResultType initializeFrom(InputRecord *ir) override;
 
     // consistency check
-    virtual int checkConsistency(); // returns nonzero if o.k.
+    int checkConsistency() override; // returns nonzero if o.k.
     // identification
-    const char *giveClassName() const { return "PFEM"; }
-    fMode giveFormulation() { return AL; }
+    const char *giveClassName() const override { return "PFEM"; }
+    fMode giveFormulation() override { return AL; }
     //    fMode giveFormulation() { return TL; }
 
     /** DOF printing routine. Called by DofManagers to print Dof specific part.
@@ -252,15 +252,15 @@ public:
      *  @param iDof dof to be processed
      *  @param atTime solution step
      */
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime);
+    void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *atTime) override;
 
-    virtual int giveNumberOfDomainEquations(int, const UnknownNumberingScheme &num);
+    int giveNumberOfDomainEquations(int, const UnknownNumberingScheme &num) override;
 
-    virtual int giveNewEquationNumber(int domain, DofIDItem);
-    virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
+    int giveNewEquationNumber(int domain, DofIDItem) override;
+    int giveNewPrescribedEquationNumber(int domain, DofIDItem) override;
 
-    virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN); // { return ( int ) mode; }
-    virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
+    int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *stepN) override; // { return ( int ) mode; }
+    void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep) override;
 
     /// Writes pressures into the dof unknown dictionaries
     void updateDofUnknownsDictionaryPressure(DofManager *inode, TimeStep *tStep);

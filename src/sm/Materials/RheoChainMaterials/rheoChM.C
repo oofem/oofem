@@ -655,45 +655,19 @@ RheoChainMaterial :: giveEndOfTimeOfInterest()
     return this->endOfTimeOfInterest;
 }
 
-contextIOResultType
+void
 RheoChainMaterial :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-//
-// saves full status for this material, also invokes saving
-// for sub-objects of this
 {
-    contextIOResultType iores;
-
-    if ( ( iores = Material :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    if ( ( iores = giveLinearElasticMaterial()->saveIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    Material :: saveIPContext(stream, mode, gp);
+    giveLinearElasticMaterial()->saveIPContext(stream, mode, gp);
 }
 
-
-contextIOResultType
+void
 RheoChainMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-//
-// reads full status for this material, also invokes reading
-// of sub-objects of this
-//
 {
-    contextIOResultType iores;
-
-    if ( ( iores = Material :: restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    Material :: restoreIPContext(stream, mode, gp);
     // invoke possible restoring of statuses for submaterials
-    if ( ( iores = giveLinearElasticMaterial()->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    giveLinearElasticMaterial()->restoreIPContext(stream, mode, gp);
 }
 
 
@@ -798,19 +772,12 @@ RheoChainMaterialStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 }
 
-contextIOResultType
-RheoChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-//
+void
+RheoChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // write raw data
     for ( int i = 0; i < nUnits; i++ ) {
         if ( ( iores = hiddenVars [ i ].storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -820,24 +787,15 @@ RheoChainMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, voi
     if ( ( iores = shrinkageStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-RheoChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restore the state variables from a stream
-//
+void
+RheoChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    StructuralMaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     for ( int i = 0; i < nUnits; i++ ) {
         if ( ( iores = hiddenVars [ i ].restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -847,7 +805,5 @@ RheoChainMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, 
     if ( ( iores = shrinkageStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 } // end namespace oofem

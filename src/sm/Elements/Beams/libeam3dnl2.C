@@ -838,43 +838,27 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 }
 
 
-contextIOResultType
-LIBeam3dNL2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full element context (saves state variables, that completely describe
-// current state)
-//
+void
+LIBeam3dNL2 :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    if ( ( iores = NLStructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    NLStructuralElement :: saveContext(stream, mode);
 
     if ( ( iores = q.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
-LIBeam3dNL2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full element context (saves state variables, that completely describe
-// current state)
-//
+void
+LIBeam3dNL2 :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    if ( ( iores = NLStructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    NLStructuralElement :: restoreContext(stream, mode);
 
     if ( ( iores = q.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

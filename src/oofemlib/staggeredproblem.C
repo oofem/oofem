@@ -558,27 +558,23 @@ StaggeredProblem :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType
+void
 StaggeredProblem :: saveContext(DataStream &stream, ContextMode mode)
 {
     EngngModel :: saveContext(stream, mode);
     for ( auto &emodel: emodelList ) {
         emodel->saveContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType
+void
 StaggeredProblem :: restoreContext(DataStream &stream, ContextMode mode)
 {
     EngngModel :: restoreContext(stream, mode);
     for ( auto &emodel: this->emodelList ) {
         emodel->restoreContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 

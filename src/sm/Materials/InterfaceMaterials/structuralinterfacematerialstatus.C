@@ -112,16 +112,13 @@ void StructuralInterfaceMaterialStatus :: initTempStatus()
 }
 
 
-contextIOResultType
-StructuralInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+StructuralInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
 #if 0
+    MaterialStatus :: saveContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = strainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -130,20 +127,16 @@ StructuralInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode
         THROW_CIOERR(iores);
     }
 #endif
-    return CIO_OK;
 }
 
 
-contextIOResultType
-StructuralInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+StructuralInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
 #if 0
+    MaterialStatus :: restoreContext(stream, mode);
+
     contextIOResultType iores;
-
-    if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
     if ( ( iores = strainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -152,7 +145,6 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextM
         THROW_CIOERR(iores);
     }
 #endif
-    return CIO_OK;
 }
 
 void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)

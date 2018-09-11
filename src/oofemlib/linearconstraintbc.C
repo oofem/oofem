@@ -203,11 +203,11 @@ void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, s
 }
 
 
-contextIOResultType
-LinearConstraintBC :: saveContext(DataStream &stream, ContextMode mode, void *obj)
+void
+LinearConstraintBC :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
     if ( mode & CM_Definition ) {
+        contextIOResultType iores;
         if ( ( iores = weights.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -234,19 +234,15 @@ LinearConstraintBC :: saveContext(DataStream &stream, ContextMode mode, void *ob
         }
     }
 
-    if ( ( iores = md->saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    md->saveContext(stream, mode);
 }
 
 
-contextIOResultType
-LinearConstraintBC :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
+void
+LinearConstraintBC :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
     if ( mode & CM_Definition ) {
+        contextIOResultType iores;
         if ( ( iores = weights.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -273,10 +269,6 @@ LinearConstraintBC :: restoreContext(DataStream &stream, ContextMode mode, void 
         }
     }
 
-    if ( ( iores = md->restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    md->restoreContext(stream, mode);
 }
 } //end of oofem namespace

@@ -165,8 +165,8 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 } // end namespace oofem
 #endif // generalbc_h

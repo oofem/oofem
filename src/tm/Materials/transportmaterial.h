@@ -75,8 +75,8 @@ public:
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     ///@todo REMOVE THESE:
     /// Assigns temporary state vector from a given vector v.

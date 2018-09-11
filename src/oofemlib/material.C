@@ -170,64 +170,30 @@ Material :: printYourself()
 // store & restore context - material info in gp not saved now!
 //
 
-contextIOResultType
+void
 Material :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-//
-// saves full material status (saves state variables, that completely describe
-// current state) stored in gp->matstatusDict with key = this->giveNumber()
-// storing of corresponding context if it is defined for current material in
-// gp status dictionary should be performed here by overloading this function.
-// (such code should invoke also corresponding function for yield conditions,
-// submaterials and so on)
-//
-
-//
 {
-    contextIOResultType iores;
-
-    if ( gp == NULL ) {
+    if ( gp == nullptr ) {
         THROW_CIOERR(CIO_BADOBJ);
     }
 
-    // write raw data - we save status there for this
     MaterialStatus *status = this->giveStatus(gp);
-
     if ( status ) {
-        if ( ( iores = status->saveContext(stream, mode, gp) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        status->saveContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
+void
 Material :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
-//
-// restores full material status (saves state variables, that completely describe
-// current state) stored in gp->matstatusDict with key = this->giveNumber()
-// restoring of corresponding context if it is defined for current material in
-// gp status dictionary should be performed here by overloading this function.
-// (such code should invoke also corresponding function for yield conditions,
-//  submaterials and so on)
-//
-
-//
 {
-    contextIOResultType iores;
-    if ( gp == NULL ) {
+    if ( gp == nullptr ) {
         THROW_CIOERR(CIO_BADOBJ);
     }
 
-    // read raw data - context
-    MaterialStatus *status =  this->giveStatus(gp);
+    MaterialStatus *status = this->giveStatus(gp);
     if ( status ) {
-        if ( ( iores = status->restoreContext(stream, mode, gp) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        status->restoreContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 
@@ -285,46 +251,31 @@ Material :: initMaterial(Element *element)
 }
 
 
-contextIOResultType Material :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-// saves full element context (saves state variables, that completely describe current state)
+void Material :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: saveContext(stream, mode);
 
     if ( ( mode & CM_Definition ) ) {
-      propertyDictionary.saveContext (stream) ;
+        propertyDictionary.saveContext(stream);
 
-      if ( !stream.write(castingTime) ) {
+        if ( !stream.write(castingTime) ) {
             THROW_CIOERR(CIO_IOERR);
-      }
+        }
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType Material :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-// restores full element context (saves state variables, that completely describe current state)
+void Material :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
-      propertyDictionary.restoreContext(stream);
+        propertyDictionary.restoreContext(stream);
 
-      if ( !stream.read(castingTime) ) {
-        THROW_CIOERR(CIO_IOERR);
-      }
-
+        if ( !stream.read(castingTime) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
-    return CIO_OK;
 }
 
-  
 } // end namespace oofem

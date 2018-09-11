@@ -125,8 +125,8 @@ public:
     const char *giveClassName() const override { return "BoundaryCondition"; }
     const char *giveInputRecordName() const override { return _IFT_BoundaryCondition_Name; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 } // end namespace oofem
 #endif // boudary_h

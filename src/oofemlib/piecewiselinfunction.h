@@ -67,8 +67,8 @@ public:
     const char *giveClassName() const override { return "PiecewiseLinFunction"; }
     const char *giveInputRecordName() const override { return _IFT_PiecewiseLinFunction_Name; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     double evaluateAtTime(double t) override;
     double evaluateVelocityAtTime(double t) override;

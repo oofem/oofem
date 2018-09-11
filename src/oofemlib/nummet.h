@@ -113,8 +113,8 @@ public:
 
     virtual void setDomain(Domain *d) { domain = d; }
 
-    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
-    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) { return CIO_OK; }
+    virtual void saveContext(DataStream &stream, ContextMode mode) { }
+    virtual void restoreContext(DataStream &stream, ContextMode mode) { }
 };
 } // end namespace oofem
 #endif // nummet_h

@@ -1242,23 +1242,14 @@ Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 
 MaterialStatus *
 Concrete2 :: CreateStatus(GaussPoint *gp) const
-/*
- * creates new  material status  corresponding to this class
- */
 {
-    Concrete2MaterialStatus *status;
-
-    status = new Concrete2MaterialStatus(1, this->giveDomain(), gp);
-    return status;
+    return new Concrete2MaterialStatus(1, this->giveDomain(), gp);
 }
 
 
 
 Concrete2MaterialStatus :: Concrete2MaterialStatus(int n, Domain *d, GaussPoint *g) :
     StructuralMaterialStatus(n, d, g), plasticStrainVector(), plasticStrainIncrementVector()
-    //
-    // constructor
-    //
 {
     SCCM = EPM = E0PM = SRF = SEZ = 0.0;
     SCTM = -1.0;     // init status if SCTM < 0.;
@@ -1267,22 +1258,13 @@ Concrete2MaterialStatus :: Concrete2MaterialStatus(int n, Domain *d, GaussPoint 
 
 
 Concrete2MaterialStatus :: ~Concrete2MaterialStatus()
-//
-// DEstructor
-//
 { }
 
-contextIOResultType
-Concrete2MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-//
-{
-    contextIOResultType iores;
 
-    if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+void
+Concrete2MaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterialStatus :: saveContext(stream, mode);
 
     // write a raw data
     if ( !stream.write(SCCM) ) {
@@ -1309,26 +1291,19 @@ Concrete2MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, voi
         THROW_CIOERR(CIO_IOERR);
     }
 
+    contextIOResultType iores;
     if ( ( iores = plasticStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    // return result back
-    return CIO_OK;
 }
 
 
-contextIOResultType
-Concrete2MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restore state variables from stream
-//
+void
+Concrete2MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    StructuralMaterialStatus :: restoreContext(stream, mode);
 
     // read raw data
     if ( !stream.read(SCCM) ) {
@@ -1358,11 +1333,7 @@ Concrete2MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, 
     if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    // return result back
-    return CIO_OK;
 }
-
 
 
 void

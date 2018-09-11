@@ -206,20 +206,16 @@ public:
      * Stores the state of receiver to output stream.
      * @param stream Context stream.
      * @param mode Determines amount of info in stream.
-     * @param obj Special parameter, used to pass optional parameters.
-     * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void saveContext(DataStream &stream, ContextMode mode);
     /**
      * Restores the state of receiver from output stream.
      * @param stream Context file.
      * @param mode Determines amount of info in stream.
-     * @param obj Special parameter for sending extra information.
-     * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void restoreContext(DataStream &stream, ContextMode mode);
 
 
     /**

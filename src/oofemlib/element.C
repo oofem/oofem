@@ -868,17 +868,12 @@ Element::giveBoundarySurfaceIntegrationRule(int order, int boundary)
 }
 
 
-contextIOResultType Element :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-// saves full element context (saves state variables, that completely describe current state)
+void Element :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    int _val;
-
-    if ( ( iores = FEMComponent :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: saveContext(stream, mode);
 
     if ( ( mode & CM_Definition ) ) {
+        contextIOResultType iores;
         if ( !stream.write(numberOfDofMans) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -922,7 +917,7 @@ contextIOResultType Element :: saveContext(DataStream &stream, ContextMode mode,
         }
 
         for ( auto &iRule: integrationRulesArray ) {
-            _val = iRule->giveIntegrationRuleType();
+            int _val = iRule->giveIntegrationRuleType();
             if ( !stream.write(_val) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
@@ -944,24 +939,17 @@ contextIOResultType Element :: saveContext(DataStream &stream, ContextMode mode,
     }
 
     for ( auto &iRule: integrationRulesArray ) {
-        if ( ( iores = iRule->saveContext(stream, mode, obj) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        iRule->saveContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType Element :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-// restores full element context (saves state variables, that completely describe current state)
+void Element :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
     int _nrules;
 
-    if ( ( iores = FEMComponent :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    FEMComponent :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.read(numberOfDofMans) ) {
@@ -1032,12 +1020,8 @@ contextIOResultType Element :: restoreContext(DataStream &stream, ContextMode mo
 
 
     for ( auto &iRule: integrationRulesArray ) {
-        if ( ( iores = iRule->restoreContext(stream, mode, this) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
+        iRule->restoreContext(stream, mode);
     }
-
-    return CIO_OK;
 }
 
 
@@ -1049,7 +1033,7 @@ Element :: computeVolumeAreaOrLength()
     double answer = 0.;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     if ( iRule ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( auto &gp: *iRule ) {
             answer += this->computeVolumeAround(gp);
         }
 

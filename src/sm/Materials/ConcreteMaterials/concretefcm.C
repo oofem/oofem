@@ -835,7 +835,6 @@ ConcreteFCMStatus :: initTempStatus()
 }
 
 
-
 void
 ConcreteFCMStatus :: updateYourself(TimeStep *tStep)
 //
@@ -853,42 +852,22 @@ ConcreteFCMStatus :: giveInterface(InterfaceType type)
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
         return static_cast< RandomMaterialStatusExtensionInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
 
-
-contextIOResultType
-ConcreteFCMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-// no temp variables stored
-//
+void
+ConcreteFCMStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    // save parent class status
-    if ( ( iores = FCMMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK;
+    FCMMaterialStatus :: saveContext(stream, mode);
 }
 
-contextIOResultType
-ConcreteFCMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restores full information stored in stream to this Status
-//
+
+void
+ConcreteFCMStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    // read parent class status
-    if ( ( iores = FCMMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    return CIO_OK; // return succes
+    FCMMaterialStatus :: restoreContext(stream, mode);
 }
+
 } // end namespace oofem

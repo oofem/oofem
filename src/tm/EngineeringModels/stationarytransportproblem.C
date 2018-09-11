@@ -280,34 +280,19 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
     }
 }
 
-contextIOResultType
+void
 StationaryTransportProblem :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    EngngModel :: saveContext(stream, mode);
     UnknownsField->saveContext(stream);
-
-    return CIO_OK;
 }
 
 
-
-contextIOResultType
+void
 StationaryTransportProblem :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    EngngModel :: restoreContext(stream, mode);
     UnknownsField->restoreContext(stream);
-
-    return CIO_OK;
 }
 
 

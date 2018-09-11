@@ -100,29 +100,27 @@ int ProblemSequence :: checkProblemConsistency()
 }
 
 
-contextIOResultType ProblemSequence :: saveContext(DataStream &stream, ContextMode mode)
+void ProblemSequence :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType ret = EngngModel :: saveContext(stream, mode);
+    EngngModel :: saveContext(stream, mode);
 
     stream.write(activeModel);
 
-    for (auto &emodel : emodelList) {
+    for ( auto &emodel : emodelList ) {
         emodel->saveContext(stream, mode);
     }
-    return ret;
 }
 
 
-contextIOResultType ProblemSequence :: restoreContext(DataStream &stream, ContextMode mode)
+void ProblemSequence :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType ret = EngngModel :: restoreContext(stream, mode);
+    EngngModel :: restoreContext(stream, mode);
 
     stream.read(activeModel);
 
-    for (auto &emodel : emodelList) {
+    for ( auto &emodel : emodelList ) {
         emodel->restoreContext(stream, mode);
     }
-    return ret;
 }
 
 

@@ -737,13 +737,11 @@ NonLinearDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printMultipleOutputAt(stream, tStep, dofchar, dofmodes, 3);
 }
 
-contextIOResultType NonLinearDynamic :: saveContext(DataStream &stream, ContextMode mode)
+void NonLinearDynamic :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = EngngModel :: saveContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    EngngModel :: saveContext(stream, mode);
 
     if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -760,18 +758,14 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream &stream, ContextM
     if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 
-contextIOResultType NonLinearDynamic :: restoreContext(DataStream &stream, ContextMode mode)
+void NonLinearDynamic :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
 
-    if ( ( iores = EngngModel :: restoreContext(stream, mode) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    EngngModel :: restoreContext(stream, mode);
 
     if ( ( iores = incrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -788,8 +782,6 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream &stream, Conte
     if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return CIO_OK;
 }
 
 

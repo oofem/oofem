@@ -233,16 +233,16 @@ TrabBoneNLEmbedStatus :: updateYourself(TimeStep *tStep)
     TrabBoneEmbedStatus :: updateYourself(tStep);
 }
 
-contextIOResultType
-TrabBoneNLEmbedStatus :: saveContext(DataStream &stream, ContextMode mode,  void *obj)
+void
+TrabBoneNLEmbedStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    return TrabBoneEmbedStatus :: saveContext(stream, mode, obj);
+    TrabBoneEmbedStatus :: saveContext(stream, mode);
 }
 
-contextIOResultType
-TrabBoneNLEmbedStatus :: restoreContext(DataStream &stream, ContextMode mode,  void *obj)
+void
+TrabBoneNLEmbedStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    return TrabBoneEmbedStatus :: restoreContext(stream, mode, obj);
+    TrabBoneEmbedStatus :: restoreContext(stream, mode);
 }
 
 
@@ -252,7 +252,7 @@ TrabBoneNLEmbedStatus :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
         return this;
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 } // end namespace oofem

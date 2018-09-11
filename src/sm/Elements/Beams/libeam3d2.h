@@ -108,8 +108,8 @@ public:
     const char *giveClassName() const override { return "LIBeam3d2"; }
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
-    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj) override;
-    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

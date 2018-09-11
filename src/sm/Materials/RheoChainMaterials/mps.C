@@ -136,50 +136,32 @@ MPSMaterialStatus :: initTempStatus()
 
 }
 
-contextIOResultType
-MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// saves full information stored in this Status
-//
+void
+MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-
-    if ( ( iores = KelvinChainSolidMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
+    KelvinChainSolidMaterialStatus :: saveContext(stream, mode);
 
     if ( !stream.write(equivalentTime) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( !stream.write(flowTermViscosity) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
-contextIOResultType
-MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
-//
-// restore the state variables from a stream
-//
+void
+MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    if ( ( iores = KelvinChainSolidMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    KelvinChainSolidMaterialStatus :: restoreContext(stream, mode);
 
     if ( !stream.read(equivalentTime) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
 
     if ( !stream.read(flowTermViscosity) ) {
-        return CIO_IOERR;
+        THROW_CIOERR(CIO_IOERR);
     }
-
-    return CIO_OK;
 }
 
 //   **********************************************************************************************
