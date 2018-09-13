@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     myData.insertInputRecord(DataReader::IR_dofmanRec, CreateNodeIR(6, _IFT_Node_Name, {2.4, 0.0, 3.0}));
 
     //Elements
-    std::unique_ptr<DynamicInputRecord> beam:
+    std::unique_ptr<DynamicInputRecord> beam;
 
     beam = CreateElementIR(1, _IFT_Beam2d_Name, {1, 2});
     //beam->setField(IntArray{3, 1}, _IFT_Element_boundaryload);//moved to set
@@ -216,4 +216,7 @@ int main(int argc, char *argv[])
     auto em = InstanciateProblem(myData, _processor, 0);
     myData.finish();
     em->solveYourself();
+    
+    //example of accessing nodal coordinates
+    em->giveDomain(1)->giveDofManager(2)->giveCoordinates()->printYourself();
 }
