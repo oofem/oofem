@@ -201,6 +201,34 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
         localCoordinateSystem->beUnitMatrix();
     }
 
+    {
+        double ex = propertyDictionary.at(Ex);
+        double ey = propertyDictionary.at(Ey);
+        double ez = propertyDictionary.at(Ez);
+        double nxz = propertyDictionary.at(NYxz);
+        double nyz = propertyDictionary.at(NYyz);
+        double nxy = propertyDictionary.at(NYxy);
+        double nzx = nxz * ez / ex;
+        double nzy = nyz * ez / ey;
+        double nyx = nxy * ey / ex;
+        double eksi = 1. - ( nxy * nyx + nyz * nzy + nzx * nxz ) - ( nxy * nyz * nzx + nyx * nzy * nxz );
+
+        tangent = FloatMatrixF<6,6>();
+        tangent.at(1, 1) = ex * ( 1. - nyz * nzy ) / eksi;
+        tangent.at(1, 2) = ey * ( nxy + nxz * nzy ) / eksi;
+        tangent.at(1, 3) = ez * ( nxz + nyz * nxy ) / eksi;
+        tangent.at(2, 2) = ey * ( 1. - nxz * nzx ) / eksi;
+        tangent.at(2, 3) = ez * ( nyz + nyx * nxz ) / eksi;
+        tangent.at(3, 3) = ez * ( 1. - nyx * nxy ) / eksi;
+        tangent.at(4, 4) = propertyDictionary.at(Gyz);
+        tangent.at(5, 5) = propertyDictionary.at(Gxz);
+        tangent.at(6, 6) = propertyDictionary.at(Gxy);
+        tangent.symmetrized();
+        this->computesSubTangents();
+
+        alpha = {propertyDictionary.at(tAlphax), propertyDictionary.at(tAlphay), propertyDictionary.at(tAlphaz), 0., 0., 0.};
+    }
+
     return IRRT_OK;
 }
 
@@ -258,56 +286,14 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
                                                                   GaussPoint *gp,
                                                                   TimeStep *tStep)
 {
-    FloatMatrix rotationMatrix;
-
-    this->give3dLocalMaterialStiffnessMatrix(answer, mode, gp, tStep);
-
-    this->giveRotationMatrix(rotationMatrix, gp);
-    answer.rotatedWith(rotationMatrix);
-}
-
-
-void
-OrthotropicLinearElasticMaterial :: give3dLocalMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                       MatResponseMode mode,
-                                                                       GaussPoint *gp,
-                                                                       TimeStep *tStep)
-{
-    double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
-
-    nxz = this->give(NYxz, gp);
-    nyz = this->give(NYyz, gp);
-    nxy = this->give(NYxy, gp);
-    nzx = this->give(NYzx, gp);
-    nzy = this->give(NYzy, gp);
-    nyx = this->give(NYyx, gp);
-
-    eksi = 1. - ( nxy * nyx + nyz * nzy + nzx * nxz ) - ( nxy * nyz * nzx + nyx * nzy * nxz );
-
-    answer.resize(6, 6);
-    answer.zero();
-    // switched letters from original oofem -> now produces same material stiffness matrix as Abaqus method
-    answer.at(1, 1) =  this->give(Ex, gp) * ( 1. - nyz * nzy ) / eksi;
-    answer.at(1, 2) =  this->give(Ey, gp) * ( nxy + nxz * nzy ) / eksi;
-    answer.at(1, 3) =  this->give(Ez, gp) * ( nxz + nyz * nxy ) / eksi;
-    answer.at(2, 2) =  this->give(Ey, gp) * ( 1. - nxz * nzx ) / eksi;
-    answer.at(2, 3) =  this->give(Ez, gp) * ( nyz + nyx * nxz ) / eksi;
-    answer.at(3, 3) =  this->give(Ez, gp) * ( 1. - nyx * nxy ) / eksi;
-
-    // define the lower triangle
-    for ( int i = 1; i < 4; i++ ) {
-        for ( int j = 1; j < i; j++ ) {
-            answer.at(i, j) = answer.at(j, i);
-        }
-    }
-
-    answer.at(4, 4) =  this->give(Gyz, gp);
-    answer.at(5, 5) =  this->give(Gxz, gp);
-    answer.at(6, 6) =  this->give(Gxy, gp);
-
+    answer = tangent;
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
         answer.times(1. - this->preCastStiffnessReduction);
     }
+
+    FloatMatrix rotationMatrix;
+    this->giveRotationMatrix(rotationMatrix, gp);
+    answer.rotatedWith(rotationMatrix);
 }
 
 
@@ -404,17 +390,9 @@ OrthotropicLinearElasticMaterial :: giveRotationMatrix(FloatMatrix &answer, Gaus
 void
 OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer,
                                                                 GaussPoint *gp, TimeStep *tStep)
-//
-// returns a FloatArray(3) of coefficients of thermal dilatation in direction
-// of each (local) axis given by element lcs.
-//
 {
     FloatMatrix transf;
-    FloatArray help(6);
-    help.at(1) = this->give(tAlphax, gp);
-    help.at(2) = this->give(tAlphay, gp);
-    help.at(3) = this->give(tAlphaz, gp);
-
+    FloatArray help = alpha;
     this->giveRotationMatrix(transf, gp);
     answer.beProductOf(transf, help);
 }

@@ -58,6 +58,45 @@ LinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->preCastStiffnessReduction, _IFT_LinearElasticMaterial_preCastStiffRed);
 }
 
+void
+LinearElasticMaterial :: computesSubTangents()
+{
+    tangentPlaneStrain = {
+        tangent(0, 0), tangent(1, 0), tangent(2, 0), tangent(3, 0),
+        tangent(0, 1), tangent(1, 1), tangent(2, 1), tangent(3, 1),
+        tangent(0, 2), tangent(1, 2), tangent(2, 2), tangent(3, 2),
+        tangent(0, 3), tangent(1, 3), tangent(2, 3), tangent(3, 3),
+    };
+
+    auto c = inv(tangent);
+    FloatMatrixF<3,3> reduced = {
+        c(0,0), c(0,1), c(0,5),
+        c(1,0), c(1,1), c(1,5),
+        c(5,0), c(5,1), c(5,5),
+    };
+    tangentPlaneStress = inv(reduced);
+}
+
+void
+LinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                                       MatResponseMode mode,
+                                                       GaussPoint *gp,
+                                                       TimeStep *tStep)
+{
+    answer = tangent;
+
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
+        answer.times(1. - this->preCastStiffnessReduction);
+    }
+}
+
+
+void
+LinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = alpha;
+}
+
 
 void
 LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)

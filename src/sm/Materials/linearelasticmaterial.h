@@ -36,6 +36,8 @@
 #define linearelasticmaterial_h
 
 #include "sm/Materials/structuralmaterial.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 
 ///@name Input fields for LinearElasticMaterial
 //@{
@@ -66,6 +68,14 @@ protected:
     /// artificial isotropic damage to reflect reduction in stiffness for time < castingTime.
     double preCastStiffnessReduction;
 
+    /// Preconstructed 3d tangent
+    FloatMatrixF<6,6> tangent;
+    FloatMatrixF<4,4> tangentPlaneStrain;
+    FloatMatrixF<3,3> tangentPlaneStress;
+
+    /// Thermal expansion
+    FloatArrayF<6> alpha;
+
 public:
     /// Constructor.
     LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
@@ -74,6 +84,16 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
+
+    /**
+     * Computes the plane strain and plane stress tangents from the 3D tangent.
+     */
+    void computesSubTangents();
+
+    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                       MatResponseMode mode, GaussPoint *gp,
+                                       TimeStep *tStep) override;
+    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep) override;
     void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
