@@ -81,6 +81,8 @@ public:
      */
     void letDeviatoricStressVectorBe(FloatArray v) { deviatoricStressVector = std :: move(v); }
     void letDeviatoricStrainRateVectorBe(FloatArray v) { deviatoricStrainRateVector = std :: move(v); }
+
+    const char *giveClassName() const override { return "FluidDynamicMaterialStatus"; }
 };
 
 
