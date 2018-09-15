@@ -68,7 +68,7 @@ protected:
     std :: string mInputFile;
 
 public:
-    StructuralFE2MaterialStatus(int n, Domain * d, GaussPoint * g,  const std :: string & inputfile);
+    StructuralFE2MaterialStatus(int n, int rank, Domain * d, GaussPoint * g,  const std :: string & inputfile);
     virtual ~StructuralFE2MaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
@@ -78,7 +78,7 @@ public:
     void computeTangent(TimeStep *tStep);
 
     /// Creates/Initiates the RVE problem.
-    bool createRVE(int n, const std :: string &inputfile);
+    bool createRVE(int n, const std :: string &inputfile, int rank);
 
     /// Copies time step data to RVE.
     void setTimeStep(TimeStep *tStep);

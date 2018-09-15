@@ -81,7 +81,7 @@ public:
      * @param gp Gauss point that the status belongs to.
      * @param inputfile The input file describing the micro problem.
      */
-    FE2FluidMaterialStatus(int n, Domain * d, GaussPoint * gp, const std :: string & inputfile);
+    FE2FluidMaterialStatus(int n, int rank, Domain * d, GaussPoint * gp, const std :: string & inputfile);
     /// Destructor
     virtual ~FE2FluidMaterialStatus() {}
 
@@ -94,7 +94,7 @@ public:
     double giveVOFFraction() { return this->voffraction; }
 
     /// Creates/Initiates the RVE problem.
-    bool createRVE(int n, GaussPoint *gp, const std :: string &inputfile);
+    bool createRVE(int n, int rank, GaussPoint *gp, const std :: string &inputfile);
 
     /// Copies time step data to RVE.
     void setTimeStep(TimeStep *tStep);

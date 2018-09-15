@@ -61,7 +61,7 @@ protected:
     std :: unique_ptr< StokesFlowVelocityHomogenization > rve;
 
 public:
-    RVEStokesFlowMaterialStatus(int n, Domain * d, GaussPoint * g, const std :: string &inputfile);
+    RVEStokesFlowMaterialStatus(int n, int rank, Domain * d, GaussPoint * g, const std :: string &inputfile);
 
     virtual ~RVEStokesFlowMaterialStatus();
 

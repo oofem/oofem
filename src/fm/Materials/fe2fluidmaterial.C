@@ -296,7 +296,11 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 
 MaterialStatus *FE2FluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new FE2FluidMaterialStatus(n++, this->giveDomain(), gp, this->inputfile);
+    int rank = -1;
+    if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
+        rank = this->domain->giveEngngModel()->giveRank();
+    }
+    return new FE2FluidMaterialStatus(n++, rank, this->giveDomain(), gp, this->inputfile);
 }
 
 int FE2FluidMaterial :: checkConsistency()
@@ -304,18 +308,18 @@ int FE2FluidMaterial :: checkConsistency()
     return true;
 }
 
-FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std :: string &inputfile) :
+FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, int rank, Domain *d, GaussPoint *gp, const std :: string &inputfile) :
     FluidDynamicMaterialStatus(n, d, gp),
     voffraction(0.0),
     oldTangents(true)
 {
-    if ( !this->createRVE(n, gp, inputfile) ) {
+    if ( !this->createRVE(n, rank ,gp, inputfile) ) {
         OOFEM_ERROR("Couldn't create RVE");
     }
 }
 
 // Uses an input file for now, should eventually create the RVE itself.
-bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: string &inputfile)
+bool FE2FluidMaterialStatus :: createRVE(int n, int rank, GaussPoint *gp, const std :: string &inputfile)
 {
     OOFEMTXTDataReader dr( inputfile.c_str() );
     this->rve = InstanciateProblem(dr, _processor, 0); // Everything but nrsolver is updated.
@@ -328,8 +332,8 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
 
     std :: ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;
-    if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
-        name << "." << this->domain->giveEngngModel()->giveRank();
+    if ( rank >= 0 ) {
+        name << "." << rank;
     }
 
     this->rve->letOutputBaseFileNameBe( name.str() );
