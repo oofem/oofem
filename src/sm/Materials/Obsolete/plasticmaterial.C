@@ -856,9 +856,4 @@ void PlasticMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
     printf("Entering PlasticMaterialStatus :: copyAddVariables().\n");
 }
 
-void PlasticMaterialStatus :: printYourself()
-{
-    printf("I am a PlasticMaterialStatus. plasticStrainVector: \n");
-    plasticStrainVector.printYourself();
-}
 } // end namespace oofem

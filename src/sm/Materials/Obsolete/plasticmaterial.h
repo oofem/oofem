@@ -99,8 +99,6 @@ public:
 
     const char *giveClassName() const override { return "PlasticMaterialStatus"; }
 
-    void printYourself() override;
-
     /// Functions for MaterialStatusMapperInterface
     void copyStateVariables(const MaterialStatus &iStatus) override;
     void addStateVariables(const MaterialStatus &iStatus) override;
