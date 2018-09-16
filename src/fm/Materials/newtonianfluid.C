@@ -85,7 +85,7 @@ NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
 MaterialStatus *
 NewtonianFluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new FluidDynamicMaterialStatus(1, this->giveDomain(), gp);
+    return new FluidDynamicMaterialStatus(gp);
 }
 
 

@@ -54,7 +54,7 @@ namespace oofem {
 class HydratingTransportMaterialStatus : public TransportMaterialStatus, public HydrationModelStatusInterface
 {
 public:
-    HydratingTransportMaterialStatus(int n, Domain * d, GaussPoint * g) : TransportMaterialStatus(n, d, g), HydrationModelStatusInterface() { }
+    HydratingTransportMaterialStatus(GaussPoint * g) : TransportMaterialStatus(g), HydrationModelStatusInterface() { }
     virtual ~HydratingTransportMaterialStatus() { }
 
     Interface *giveInterface(InterfaceType t) override;

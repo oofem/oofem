@@ -702,7 +702,7 @@ Eurocode2CreepMaterial :: computeIncrementOfAutogenousShrinkageVector(FloatArray
 MaterialStatus *
 Eurocode2CreepMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new Eurocode2CreepMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new Eurocode2CreepMaterialStatus(gp, nUnits);
 }
 
 
@@ -721,8 +721,9 @@ Eurocode2CreepMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *g
 /**********     Eurocode2CreepMaterialStatus - HUMIDITY ****************************************/
 
 
-Eurocode2CreepMaterialStatus :: Eurocode2CreepMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits) :
-    KelvinChainMaterialStatus(n, d, g, nunits) {
+Eurocode2CreepMaterialStatus :: Eurocode2CreepMaterialStatus(GaussPoint *g, int nunits) :
+    KelvinChainMaterialStatus(g, nunits)
+{
     tempMaturity = 0.;
     maturity = tempMaturity;
 

@@ -93,7 +93,7 @@ protected:
 
 public:
     /// Constructor
-    IntMatBilinearCZFagerstromStatus(int n, Domain * d, GaussPoint * g);
+    IntMatBilinearCZFagerstromStatus(GaussPoint * g);
     /// Destructor
     virtual ~IntMatBilinearCZFagerstromStatus();
 
@@ -196,7 +196,7 @@ public:
 
     FloatArray giveInterfaceStrength() override { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZFagerstromStatus(1, domain, gp); } //@Martin: Why new?
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZFagerstromStatus(gp); }
     void printYourself() override;
 };
 } // end namespace oofem

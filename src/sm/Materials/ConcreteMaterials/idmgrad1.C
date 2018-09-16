@@ -450,11 +450,11 @@ IDGMaterial :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, Ga
 MaterialStatus *
 IDGMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new IDGMaterialStatus(1, IDGMaterial :: domain, gp);
+    return new IDGMaterialStatus(gp);
 }
 
 
-IDGMaterialStatus :: IDGMaterialStatus(int n, Domain *d, GaussPoint *g) : IsotropicDamageMaterial1Status(n, d, g)
+IDGMaterialStatus :: IDGMaterialStatus(GaussPoint *g) : IsotropicDamageMaterial1Status(g)
 { }
 
 

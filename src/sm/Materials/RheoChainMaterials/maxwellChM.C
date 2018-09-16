@@ -250,7 +250,7 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 MaterialStatus *
 MaxwellChainMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MaxwellChainMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new MaxwellChainMaterialStatus(gp, nUnits);
 }
 
 
@@ -262,9 +262,8 @@ MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
 
 /****************************************************************************************/
 
-MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(int n, Domain *d,
-                                                         GaussPoint *g, int nunits) :
-    RheoChainMaterialStatus(n, d, g, nunits) { }
+MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(GaussPoint *g, int nunits) :
+    RheoChainMaterialStatus(g, nunits) { }
 
 
 void

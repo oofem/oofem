@@ -2075,7 +2075,7 @@ AnisotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g),
+AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g),
     kappa(0.0), tempKappa(0.0),
     damage(3, 3), tempDamage(3, 3),
     strainZ(0.0), tempStrainZ(0.0),

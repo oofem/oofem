@@ -464,7 +464,7 @@ IntMatBilinearCZFagerstrom  :: printYourself()
 }
 
 
-IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
     oldMaterialJump.resize(3);
     oldMaterialJump.zero();

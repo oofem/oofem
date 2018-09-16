@@ -247,7 +247,7 @@ KelvinChainSolidMaterial :: CreateStatus(GaussPoint *gp) const
  * creates a new material status corresponding to this class
  */
 {
-    return new KelvinChainSolidMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new KelvinChainSolidMaterialStatus(gp, nUnits);
 }
 
 IRResultType
@@ -267,9 +267,8 @@ KelvinChainSolidMaterial :: computeCreepFunction(double t, double t_prime, Gauss
 
 /****************************************************************************************/
 
-KelvinChainSolidMaterialStatus :: KelvinChainSolidMaterialStatus(int n, Domain *d,
-                                                                 GaussPoint *g, int nunits) :
-    RheoChainMaterialStatus(n, d, g, nunits) { }
+KelvinChainSolidMaterialStatus :: KelvinChainSolidMaterialStatus(GaussPoint *g, int nunits) :
+    RheoChainMaterialStatus(g, nunits) { }
 
 void
 KelvinChainSolidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

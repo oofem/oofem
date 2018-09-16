@@ -300,7 +300,7 @@ MaterialStatus *FE2FluidMaterial :: CreateStatus(GaussPoint *gp) const
     if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
         rank = this->domain->giveEngngModel()->giveRank();
     }
-    return new FE2FluidMaterialStatus(n++, rank, this->giveDomain(), gp, this->inputfile);
+    return new FE2FluidMaterialStatus(n++, rank, gp, this->inputfile);
 }
 
 int FE2FluidMaterial :: checkConsistency()
@@ -308,8 +308,8 @@ int FE2FluidMaterial :: checkConsistency()
     return true;
 }
 
-FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, int rank, Domain *d, GaussPoint *gp, const std :: string &inputfile) :
-    FluidDynamicMaterialStatus(n, d, gp),
+FE2FluidMaterialStatus :: FE2FluidMaterialStatus(int n, int rank, GaussPoint *gp, const std :: string &inputfile) :
+    FluidDynamicMaterialStatus(gp),
     voffraction(0.0),
     oldTangents(true)
 {

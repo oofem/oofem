@@ -339,8 +339,8 @@ RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
 //=============================================================================
 
 
-RankineMatGradStatus :: RankineMatGradStatus(int n, Domain *d, GaussPoint *g) :
-    RankineMatStatus(n, d, g)
+RankineMatGradStatus :: RankineMatGradStatus(GaussPoint *g) :
+    RankineMatStatus(g)
 {
     nonlocalCumulatedStrain = 0;
 }

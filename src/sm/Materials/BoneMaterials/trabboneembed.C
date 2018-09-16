@@ -216,7 +216,7 @@ TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 //////////////////TRABECULAR BONE STATUS/////////////////////////
 /////////////////////////////////////////////////////////////////
 
-TrabBoneEmbedStatus :: TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+TrabBoneEmbedStatus :: TrabBoneEmbedStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
     alpha = 0.0;
     dam = 0.0;
@@ -298,8 +298,6 @@ TrabBoneEmbedStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
 MaterialStatus *TrabBoneEmbed :: CreateStatus(GaussPoint *gp) const
 {
-    TrabBoneEmbedStatus *status =
-        new  TrabBoneEmbedStatus(1, StructuralMaterial :: giveDomain(), gp);
-    return status;
+    return new TrabBoneEmbedStatus(gp);
 }
 } // end namespace oofem

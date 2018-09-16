@@ -40,8 +40,8 @@
 #include "structuralinterfacematerialstatus.h"
 #include "gausspoint.h"
 namespace oofem {
-StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), jump(3), traction(3), tempTraction(3), tempJump(3), firstPKTraction(3), tempFirstPKTraction(3), F(3, 3), tempF(3, 3),
+StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(GaussPoint *g) :
+    MaterialStatus(g), jump(3), traction(3), tempTraction(3), tempJump(3), firstPKTraction(3), tempFirstPKTraction(3), F(3, 3), tempF(3, 3),
     mNewlyInserted(true)
 {
     this->F.beUnitMatrix();
@@ -54,7 +54,6 @@ StructuralInterfaceMaterialStatus :: ~StructuralInterfaceMaterialStatus() { }
 
 void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-#if 1
     MaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "  jump ");
@@ -67,12 +66,10 @@ void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tS
         fprintf(file, " %.4e", val );
     }
     fprintf(file, "\n");
-#endif
 }
 
 
 void StructuralInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
-// Performs end-of-step updates.
 {
     MaterialStatus :: updateYourself(tStep);
 
@@ -84,27 +81,9 @@ void StructuralInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 void StructuralInterfaceMaterialStatus :: initTempStatus()
-//
-// initialize record at the begining of new load step
-//
 {
     MaterialStatus :: initTempStatus();
 
-    // see if vectors describing reached equilibrium are defined
-    if ( this->giveJump().giveSize() == 0 ) {
-        
-        this->jump.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
-        //this->jump.resize(3);
-        this->jump.zero();
-    }
-
-    if ( this->giveTraction().giveSize() == 0 ) {
-        this->traction.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
-        //this->traction.resize(3);
-        this->traction.zero();
-    }
-
-    // reset temp vars.
     this->tempJump            = this->jump;
     this->tempTraction        = this->traction;
     this->tempFirstPKTraction = this->firstPKTraction;

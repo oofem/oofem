@@ -551,7 +551,7 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode)
 }
 
 // constructor
-CompoDamageMatStatus :: CompoDamageMatStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+CompoDamageMatStatus :: CompoDamageMatStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
     //largest strain ever reached [6 tension, 6 compression]
     this->kappa.resize(12);

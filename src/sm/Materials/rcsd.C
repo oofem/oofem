@@ -470,8 +470,8 @@ RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int
 
 
 
-RCSDMaterialStatus :: RCSDMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    RCM2MaterialStatus(n, d, g), Ds0()
+RCSDMaterialStatus :: RCSDMaterialStatus(GaussPoint *g) :
+    RCM2MaterialStatus(g), Ds0()
 {
     maxEquivStrain = tempMaxEquivStrain = 0.0;
     damageCoeff = tempDamageCoeff = 1.0;
@@ -487,7 +487,6 @@ RCSDMaterialStatus :: ~RCSDMaterialStatus()
 void
 RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
@@ -496,7 +495,7 @@ RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "mode :rc ");
 
         if ( this->giveTempAlreadyCrack() ) {
-            for ( i = 1; i <= 3; i++ ) {
+            for ( int i = 1; i <= 3; i++ ) {
                 switch ( crackStatuses.at(i) ) {
                 case pscm_NONE:
                     strcpy(s, "NONE");

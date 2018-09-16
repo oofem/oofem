@@ -453,8 +453,8 @@ RCSDEMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, in
 
 
 
-RCSDEMaterialStatus :: RCSDEMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    RCM2MaterialStatus(n, d, g), Ds0()
+RCSDEMaterialStatus :: RCSDEMaterialStatus(GaussPoint *g) :
+    RCM2MaterialStatus(g), Ds0()
 {
     maxEquivStrain = tempMaxEquivStrain = 0.0;
     damageCoeff = tempDamageCoeff = 1.0;

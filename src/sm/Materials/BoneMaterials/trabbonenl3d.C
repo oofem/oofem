@@ -403,8 +403,8 @@ TrabBoneNL3D :: computeWeightFunction(const FloatArray &src, const FloatArray &c
 /////////TRABECULAR BONE NONLOCAL MATERIAL STATUS////////////////
 /////////////////////////////////////////////////////////////////
 
-TrabBoneNL3DStatus :: TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g) :
-    TrabBone3DStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
+TrabBoneNL3DStatus :: TrabBoneNL3DStatus(GaussPoint *g) :
+    TrabBone3DStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localCumPlastStrainForAverage = 0.0;
 }

@@ -270,7 +270,7 @@ TrabBoneMaterial :: initializeFrom(InputRecord *ir)
 //////////////////TRABECULAR BONE STATUS/////////////////////////
 /////////////////////////////////////////////////////////////////
 
-TrabBoneMaterialStatus :: TrabBoneMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+TrabBoneMaterialStatus :: TrabBoneMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
     alpha = 0.0;
     tempAlpha = 0.0;
@@ -417,6 +417,6 @@ TrabBoneMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
 MaterialStatus *TrabBoneMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new TrabBoneMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return new TrabBoneMaterialStatus(gp);
 }
 } // end namespace oofem

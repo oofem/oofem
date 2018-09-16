@@ -145,7 +145,7 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamage2dStatus(int n, Domain * d, GaussPoint * g);
+    LatticeDamage2dStatus(GaussPoint * g);
     /// Destructor
     virtual ~LatticeDamage2dStatus() { }
 

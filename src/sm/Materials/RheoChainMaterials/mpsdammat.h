@@ -101,7 +101,7 @@ protected:
 #endif
 
 public:
-    MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    MPSDamMaterialStatus(GaussPoint *g, int nunits);
     virtual ~MPSDamMaterialStatus() { }
 
     const FloatArray &giveViscoelasticStressVector() const override { return effectiveStressVector; }

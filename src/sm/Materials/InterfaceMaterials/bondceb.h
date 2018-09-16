@@ -66,7 +66,7 @@ protected:
 
 public:
     /// Constructor
-    BondCEBMaterialStatus(int n, Domain * d, GaussPoint * g);
+    BondCEBMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~BondCEBMaterialStatus();
 
@@ -137,7 +137,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new BondCEBMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new BondCEBMaterialStatus(gp); }
 
 protected:
     double evaluateBondStress(const double kappa);

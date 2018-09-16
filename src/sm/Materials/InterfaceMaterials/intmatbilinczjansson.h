@@ -94,7 +94,7 @@ protected:
 
 public:
     /// Constructor
-    IntMatBilinearCZJanssonStatus(int n, Domain * d, GaussPoint * g);
+    IntMatBilinearCZJanssonStatus(GaussPoint * g);
     /// Destructor
     virtual ~IntMatBilinearCZJanssonStatus();
 
@@ -190,7 +190,7 @@ public:
 
     FloatArray giveInterfaceStrength() override { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZJanssonStatus(1, domain, gp); } //@Martin: Why new?
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZJanssonStatus(gp); }
     void printYourself() override;
 };
 } // end namespace oofem

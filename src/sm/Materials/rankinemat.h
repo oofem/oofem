@@ -241,7 +241,7 @@ protected:
 #endif
 
 public:
-    RankineMatStatus(int n, Domain * d, GaussPoint * g);
+    RankineMatStatus(GaussPoint * g);
     virtual ~RankineMatStatus();
 
     const FloatArray & givePlasticStrain() const { return plasticStrain; }

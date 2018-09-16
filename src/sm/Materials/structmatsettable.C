@@ -88,7 +88,7 @@ StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 MaterialStatus *
 StructuralMaterialSettable :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return new StructuralMaterialStatus(gp);
 }
 
 

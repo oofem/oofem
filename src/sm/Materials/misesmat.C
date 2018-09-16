@@ -90,7 +90,7 @@ MisesMat :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 MisesMat :: CreateStatus(GaussPoint *gp) const
 {
-    return new MisesMatStatus(1, this->giveDomain(), gp);
+    return new MisesMatStatus(gp);
 }
 
 void
@@ -699,8 +699,8 @@ MisesMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
 //=============================================================================
 
-MisesMatStatus :: MisesMatStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), plasticStrain(6), tempPlasticStrain(), trialStressD()
+MisesMatStatus :: MisesMatStatus(GaussPoint *g) :
+    StructuralMaterialStatus(g), plasticStrain(6), tempPlasticStrain(), trialStressD()
 {
     stressVector.resize(6);
     strainVector.resize(6);

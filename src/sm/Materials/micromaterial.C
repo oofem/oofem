@@ -64,7 +64,7 @@ REGISTER_Material(MicroMaterial);
 
 // constructor
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
-MicroMaterialStatus :: MicroMaterialStatus(int n, Domain *d, GaussPoint *gp) : StructuralMaterialStatus(n, d, gp) { }
+MicroMaterialStatus :: MicroMaterialStatus(GaussPoint *gp) : StructuralMaterialStatus(gp) { }
 
 MicroMaterialStatus :: ~MicroMaterialStatus() { }
 
@@ -182,7 +182,7 @@ void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
 MaterialStatus *
 MicroMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MicroMaterialStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return new MicroMaterialStatus(gp);
 }
 
 

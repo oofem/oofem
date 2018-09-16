@@ -62,7 +62,7 @@ protected:
     double microprestress_new;
 
 public:
-    B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    B3SolidMaterialStatus(GaussPoint *g, int nunits);
     virtual ~B3SolidMaterialStatus() { }
 
     void updateYourself(TimeStep *tStep) override;

@@ -49,8 +49,8 @@
 namespace oofem {
 REGISTER_Material(DruckerPragerPlasticitySM);
 
-DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp) :
-    StructuralMaterialStatus(n, d, gp),
+DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(GaussPoint *gp) :
+    StructuralMaterialStatus(gp),
     plasticStrainDeviator( 6 ),
     tempPlasticStrainDeviator( 6 )
 {
@@ -782,7 +782,7 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
 MaterialStatus *
 DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 {
-    return new  DruckerPragerPlasticitySMStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return new  DruckerPragerPlasticitySMStatus(gp);
 }
 
 

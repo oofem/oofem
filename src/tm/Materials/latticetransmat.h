@@ -72,7 +72,7 @@ protected:
 
 public:
     ///Constructor
-    LatticeTransportMaterialStatus(int n, Domain * d, GaussPoint * g);
+    LatticeTransportMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~LatticeTransportMaterialStatus() { }
 

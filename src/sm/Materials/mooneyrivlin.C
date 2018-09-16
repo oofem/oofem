@@ -657,7 +657,7 @@ MooneyRivlinMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
 MaterialStatus *
 MooneyRivlinMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
+    return new StructuralMaterialStatus(gp);
 }
 
 

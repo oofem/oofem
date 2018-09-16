@@ -56,18 +56,18 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
 
     double normalJump = jump.at( 1 );
     FloatArray shearJump = { jump.at(2), jump.at(3) };
-        
+
     double normalStress = 0.0;
     FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
     this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
                               normalJump, shearJump );
-    
+
     // Set stress components in the traction vector
     answer.resize( 3 );
     answer.at( 1 ) = normalStress;
     answer.at( 2 ) = shearStress.at( 1 );
     answer.at( 3 ) = shearStress.at( 2 );
-    
+
     // Update gp
     status->setTempShearStressShift( tempShearStressShift );
     status->letTempJumpBe( jump );
@@ -81,7 +81,7 @@ IntMatCoulombContact :: giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, 
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
 
     double normalJump = jump.at( 1 );
-    FloatArray shearJump = FloatArray{ jump.at(2) };
+    FloatArray shearJump = FloatArray{ jump.at(2), 0. };
 
     double normalStress = 0.0;
     FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
@@ -130,7 +130,6 @@ void
 IntMatCoulombContact :: computeEngTraction(double &normalStress, FloatArray &shearStress,
                                          FloatArray &tempShearStressShift, double normalJump, const FloatArray &shearJump )
 {
-
     double maxShearStress = 0.0;
     double shift = -this->kn * this->stiffCoeff * normalClearance;
 
@@ -215,11 +214,10 @@ IntMatCoulombContact :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-IntMatCoulombContactStatus :: IntMatCoulombContactStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+IntMatCoulombContactStatus :: IntMatCoulombContactStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
-    int size = d->giveNumberOfSpatialDimensions() - 1;
-    shearStressShift.resize(size);
-    tempShearStressShift.resize(size);
+    shearStressShift.resize(2);
+    tempShearStressShift.resize(2);
     shearStressShift.zero();
     tempShearStressShift.zero();
 }
@@ -234,11 +232,7 @@ IntMatCoulombContactStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     StructuralInterfaceMaterialStatus::printOutputAt( file, tStep );
     fprintf(file, "status { ");
-    if(this->shearStressShift.giveSize() == 2) {
-        fprintf( file, "shearStressShift (%f, %f)", this->shearStressShift.at( 1 ), this->shearStressShift.at( 2 ) );
-    } else if(this->shearStressShift.giveSize() == 1) {
-        fprintf( file, "shearStressShift (%f)", this->shearStressShift.at( 1 ) );
-    }
+    fprintf( file, "shearStressShift (%f, %f)", this->shearStressShift.at( 1 ), this->shearStressShift.at( 2 ) );
     fprintf(file, "}\n");
 }
 

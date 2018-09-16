@@ -67,7 +67,7 @@ protected:
 
 public:
     /// Constructor.
-    MazarsMaterialStatus(int n, Domain * d, GaussPoint * g);
+    MazarsMaterialStatus(GaussPoint * g);
     /// Destructor.
     virtual ~MazarsMaterialStatus() { }
 
@@ -120,7 +120,7 @@ public:
     void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsMaterialStatus(gp); }
 
 protected:
     /**

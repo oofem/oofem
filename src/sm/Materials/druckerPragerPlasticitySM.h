@@ -87,7 +87,7 @@ protected:
 
 public:
     /// Constructor
-    DruckerPragerPlasticitySMStatus(int n, Domain * d, GaussPoint * gp);
+    DruckerPragerPlasticitySMStatus(GaussPoint * gp);
     /// Destructor
     virtual ~DruckerPragerPlasticitySMStatus();
 

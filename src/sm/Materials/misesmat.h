@@ -174,7 +174,7 @@ protected:
     FloatMatrix tempLeftCauchyGreen;
 
 public:
-    MisesMatStatus(int n, Domain * d, GaussPoint * g);
+    MisesMatStatus(GaussPoint * g);
     virtual ~MisesMatStatus();
 
     const FloatArray &givePlasticStrain() { return plasticStrain; }

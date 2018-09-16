@@ -1115,7 +1115,7 @@ double TrabBone3D :: predictRelativeRedistributionCost(GaussPoint *gp)
 
 
 
-TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+TrabBone3DStatus :: TrabBone3DStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
     kappa = 0.0;
     tempKappa = 0.0;
@@ -1359,6 +1359,6 @@ TrabBone3DStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
 MaterialStatus *TrabBone3D :: CreateStatus(GaussPoint *gp) const
 {
-    return new TrabBone3DStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return new TrabBone3DStatus(gp);
 }
 } //end namespace oofem

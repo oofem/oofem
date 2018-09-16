@@ -102,7 +102,7 @@ StructuralFE2Material :: CreateStatus(GaussPoint *gp) const
     if ( emodel->isParallel() && emodel->giveNumberOfProcesses() > 1 ) {
         rank = emodel->giveRank();
     }
-    return new StructuralFE2MaterialStatus(1, rank, this->giveDomain(), gp, this->inputfile);
+    return new StructuralFE2MaterialStatus(rank, gp, this->inputfile);
 }
 
 
@@ -254,15 +254,15 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
 //=============================================================================
 
 
-StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int n, int rank, Domain *d, GaussPoint * g,  const std :: string & inputfile) :
-    StructuralMaterialStatus(n, d, g),
+StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile) :
+    StructuralMaterialStatus(g),
     mNewlyInitialized(true)
 {
     mInputFile = inputfile;
 
     this->oldTangent = true;
 
-    if ( !this->createRVE(n, inputfile, rank) ) {
+    if ( !this->createRVE(1, inputfile, rank) ) { ///@TODO FIXME createRVE
         OOFEM_ERROR("Couldn't create RVE");
     }
 

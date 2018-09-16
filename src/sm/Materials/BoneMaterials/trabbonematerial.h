@@ -74,7 +74,7 @@ protected:
     FloatArray tempEpsp, epsp, tempDepsp;
 
 public:
-    TrabBoneMaterialStatus(int n, Domain * d, GaussPoint * g);
+    TrabBoneMaterialStatus(GaussPoint * g);
     virtual ~TrabBoneMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;

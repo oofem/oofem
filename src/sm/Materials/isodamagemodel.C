@@ -381,7 +381,7 @@ IsotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 
-IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
     kappa = tempKappa = 0.0;
     damage = tempDamage = 0.0;

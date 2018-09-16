@@ -206,17 +206,6 @@ public:
      * Sets Material status managed by receiver.
      * @param ptr Pointer to new status of receiver.
      * @return Pointer to new status.
-     * @deprecated should be removed since only one mat stat is saved in the integration point
-     */
-    IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr, int n)
-    {
-        return this->setMaterialStatus(ptr);
-    }
-
-    /**
-     * Sets Material status managed by receiver.
-     * @param ptr Pointer to new status of receiver.
-     * @return Pointer to new status.
      */
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
     {

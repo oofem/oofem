@@ -99,7 +99,7 @@ protected:
 
 public:
     /// Constructor
-    TwoFluidMaterialStatus(int n, Domain * d, GaussPoint * g, const std::array<Material*, 2> &slaveMaterial);
+    TwoFluidMaterialStatus(GaussPoint * g, const std::array<Material*, 2> &slaveMaterial);
     /// Destructor
     virtual ~TwoFluidMaterialStatus() { }
 

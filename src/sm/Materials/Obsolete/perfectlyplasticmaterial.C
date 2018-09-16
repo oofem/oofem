@@ -668,7 +668,7 @@ PerfectlyPlasticMaterial :: CreateStatus(GaussPoint *gp) const
  * creates new  material status  corresponding to this class
  */
 {
-    return new PerfectlyPlasticMaterialStatus(1, this->giveDomain(), gp);
+    return new PerfectlyPlasticMaterialStatus(gp);
 }
 
 
@@ -699,8 +699,8 @@ PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
 //##################################################################################################
 
 
-PerfectlyPlasticMaterialStatus :: PerfectlyPlasticMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g),  plasticStrainVector(), plasticStrainIncrementVector()
+PerfectlyPlasticMaterialStatus :: PerfectlyPlasticMaterialStatus(GaussPoint *g) :
+    StructuralMaterialStatus(g),  plasticStrainVector(), plasticStrainIncrementVector()
 {
     temp_yield_flag = yield_flag = 0; // elastic case at beginning
 }

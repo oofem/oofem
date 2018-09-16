@@ -575,7 +575,7 @@ RheoChainMaterial :: give3dLatticeStiffMtrx(FloatMatrix &answer,
 MaterialStatus *
 RheoChainMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new RheoChainMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new RheoChainMaterialStatus(gp, nUnits);
 }
 
 
@@ -689,9 +689,8 @@ RheoChainMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
 
 /****************************************************************************************/
 
-RheoChainMaterialStatus :: RheoChainMaterialStatus(int n, Domain *d,
-                                                   GaussPoint *g, int nunits) :
-    StructuralMaterialStatus(n, d, g),
+RheoChainMaterialStatus :: RheoChainMaterialStatus(GaussPoint *g, int nunits) :
+    StructuralMaterialStatus(g),
     nUnits(nunits),
     hiddenVars(nUnits),
     tempHiddenVars(nUnits),

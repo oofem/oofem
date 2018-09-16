@@ -35,7 +35,7 @@
 
 namespace oofem {
 // ======= class HydrationModelStatus implementation =======
-HydrationModelStatus :: HydrationModelStatus(int n, Domain *d, GaussPoint *g) : MaterialStatus(n, d, g)
+HydrationModelStatus :: HydrationModelStatus(GaussPoint *g) : MaterialStatus(g)
 {
     hydrationDegree = 0;
     tempHydrationDegree = 0;
@@ -568,7 +568,7 @@ HydrationModel :: mixedfindroot()
 MaterialStatus *
 HydrationModel :: CreateStatus(GaussPoint *gp) const
 {
-    return new HydrationModelStatus(1, this->giveDomain(), gp);
+    return new HydrationModelStatus(gp);
 }
 
 // ======= HydrationModelStatusInterface implementation =======

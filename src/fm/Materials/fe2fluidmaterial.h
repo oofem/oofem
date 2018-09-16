@@ -77,11 +77,11 @@ public:
     /**
      * Creates new material status.
      * @param n Material status number.
-     * @param d Domain that status belongs to.
+     * @param rank Parallel rank (ignored if negative).
      * @param gp Gauss point that the status belongs to.
      * @param inputfile The input file describing the micro problem.
      */
-    FE2FluidMaterialStatus(int n, int rank, Domain * d, GaussPoint * gp, const std :: string & inputfile);
+    FE2FluidMaterialStatus(int n, int rank, GaussPoint * gp, const std :: string & inputfile);
     /// Destructor
     virtual ~FE2FluidMaterialStatus() {}
 

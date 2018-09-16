@@ -1336,7 +1336,7 @@ IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
     if ( type == MaterialModelMapperInterfaceType ) {
         return static_cast< MaterialModelMapperInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -1344,19 +1344,19 @@ IsotropicDamageMaterial1 :: giveInterface(InterfaceType type)
 MaterialStatus *
 IsotropicDamageMaterial1 :: CreateStatus(GaussPoint *gp) const
 {
-    return new IsotropicDamageMaterial1Status(1, domain, gp);
+    return new IsotropicDamageMaterial1Status(gp);
 }
 
 MaterialStatus *
 IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
-    if ( status == NULL ) {
+    if ( status == nullptr ) {
         // create a new one
         status = this->CreateStatus(gp);
 
-        if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveNumber() );
+        if ( status ) {
+            gp->setMaterialStatus( status );
             this->_generateStatusVariables(gp);
         }
     }
@@ -1455,8 +1455,8 @@ IsotropicDamageMaterial1 :: MMI_finish(TimeStep *tStep)
 }
 
 
-IsotropicDamageMaterial1Status :: IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g) :
-    IsotropicDamageMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface()
+IsotropicDamageMaterial1Status :: IsotropicDamageMaterial1Status(GaussPoint *g) :
+    IsotropicDamageMaterialStatus(g), RandomMaterialStatusExtensionInterface()
 {
 }
 

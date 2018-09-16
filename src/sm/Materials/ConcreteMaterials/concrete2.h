@@ -103,7 +103,7 @@ protected:
     double SEZ;  ///< Current strain in transverse (z) direction.
 
 public:
-    Concrete2MaterialStatus(int n, Domain * d, GaussPoint * g);
+    Concrete2MaterialStatus(GaussPoint * g);
     virtual ~Concrete2MaterialStatus();
     void printOutputAt(FILE *file, TimeStep *tStep) override
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }

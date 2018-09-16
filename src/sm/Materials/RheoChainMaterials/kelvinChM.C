@@ -272,7 +272,7 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 MaterialStatus *
 KelvinChainMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new KelvinChainMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new KelvinChainMaterialStatus(gp, nUnits);
 }
 
 IRResultType
@@ -287,9 +287,8 @@ KelvinChainMaterial :: initializeFrom(InputRecord *ir)
 
 /****************************************************************************************/
 
-KelvinChainMaterialStatus :: KelvinChainMaterialStatus(int n, Domain *d,
-                                                       GaussPoint *g, int nunits) :
-    RheoChainMaterialStatus(n, d, g, nunits) { }
+KelvinChainMaterialStatus :: KelvinChainMaterialStatus(GaussPoint *g, int nunits) :
+    RheoChainMaterialStatus(g, nunits) { }
 
 void
 KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

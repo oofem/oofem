@@ -394,8 +394,8 @@ RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
 //*************status************
 //*******************************
 
-RankineMatNlStatus :: RankineMatNlStatus(int n, Domain *d, GaussPoint *g) :
-    RankineMatStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
+RankineMatNlStatus :: RankineMatNlStatus(GaussPoint *g) :
+    RankineMatStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localCumPlasticStrainForAverage = 0.0;
 }

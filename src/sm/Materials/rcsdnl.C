@@ -436,8 +436,8 @@ RCSDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray 
 
 
 
-RCSDNLMaterialStatus :: RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    RCSDEMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), nonlocalStrainVector(),
+RCSDNLMaterialStatus :: RCSDNLMaterialStatus(GaussPoint *g) :
+    RCSDEMaterialStatus(g), StructuralNonlocalMaterialStatusExtensionInterface(), nonlocalStrainVector(),
     tempNonlocalStrainVector(), localStrainVectorForAverage()
 {
     nonlocalStrainVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( g->giveMaterialMode() ) );

@@ -74,7 +74,7 @@ LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 LargeStrainMasterMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new LargeStrainMasterMaterialStatus(1, this->giveDomain(), gp, slaveMat);
+    return new LargeStrainMasterMaterialStatus(gp, domain, slaveMat);
 }
 
 
@@ -411,10 +411,12 @@ LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Int
 
 //=============================================================================
 
-LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s) : StructuralMaterialStatus(n, d, g),
+LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(GaussPoint *g, Domain *d, int s) :
+    StructuralMaterialStatus(g),
     Pmatrix(6, 6),
     TLmatrix(6, 6),
     transformationMatrix(6, 6),
+    domain(d),
     slaveMat(s)
 {
     Pmatrix.beUnitMatrix();

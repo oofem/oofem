@@ -163,7 +163,7 @@ public:
      * @param CemStat A pointer to existing microstructure, from which the 3D image is copied.
      * @param withMicrostructure Creates also 3D microstructure representation at the integration point.
      */
-    CemhydMatStatus(int n, Domain * d, GaussPoint * gp, CemhydMatStatus * CemStat, CemhydMat * cemhydmat, bool withMicrostructure);
+    CemhydMatStatus(GaussPoint * gp, CemhydMatStatus * CemStat, CemhydMat * cemhydmat, bool withMicrostructure);
     virtual ~CemhydMatStatus();
     //Interface *giveInterface(InterfaceType) override;
     const char *giveClassName() const override { return "CemhydMatStatus"; }

@@ -69,7 +69,7 @@ protected:
     __rcsdModeType rcsdMode, tempRcsdMode;
 public:
 
-    RCSDEMaterialStatus(int n, Domain * d, GaussPoint * g);
+    RCSDEMaterialStatus(GaussPoint * g);
     virtual ~RCSDEMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -132,7 +132,7 @@ public:
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &, TimeStep *) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCSDEMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCSDEMaterialStatus(gp); }
 
 protected:
     double computeCurrEquivStrain(GaussPoint *, const FloatArray &, double, TimeStep *tStep);

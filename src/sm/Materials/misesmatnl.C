@@ -451,8 +451,8 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
 
 /*********************************************status**************************************************************/
 
-MisesMatNlStatus :: MisesMatNlStatus(int n, Domain *d, GaussPoint *g) :
-    MisesMatStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
+MisesMatNlStatus :: MisesMatNlStatus(GaussPoint *g) :
+    MisesMatStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localCumPlasticStrainForAverage = 0.0;
 }

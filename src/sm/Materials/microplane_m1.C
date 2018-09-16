@@ -215,8 +215,8 @@ M1Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 }
 ////////////////////////////////////////////////////////////////////////////
 
-M1MaterialStatus :: M1MaterialStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), sigN(0), epspN(0), plasticState(0)
+M1MaterialStatus :: M1MaterialStatus(GaussPoint *g) :
+    StructuralMaterialStatus(g), sigN(0), epspN(0), plasticState(0)
 {}
 
 
@@ -459,8 +459,8 @@ M1Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
 ////////////////////////////////////////////////////////////////////////////
 
-M1MaterialStatus :: M1MaterialStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), sigN(0)
+M1MaterialStatus :: M1MaterialStatus(GaussPoint *g) :
+    StructuralMaterialStatus(g), sigN(0)
 {}
 
 

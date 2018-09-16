@@ -60,7 +60,7 @@ protected:
 
 public:
     /// Constructor
-    SimpleInterfaceMaterialStatus(int n, Domain * d, GaussPoint * g);
+    SimpleInterfaceMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~SimpleInterfaceMaterialStatus();
 
@@ -115,7 +115,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new SimpleInterfaceMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new SimpleInterfaceMaterialStatus(gp); }
 };
 } // end namespace oofem
 #endif // simpleinterfacemat_h

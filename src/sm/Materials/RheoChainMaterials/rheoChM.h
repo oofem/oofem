@@ -89,7 +89,7 @@ protected:
 #endif
 
 public:
-    RheoChainMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    RheoChainMaterialStatus(GaussPoint *g, int nunits);
     virtual ~RheoChainMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;

@@ -59,7 +59,7 @@ namespace oofem {
 class IntMatPhaseFieldStatus : public StructuralInterfaceMaterialStatus
 {
 public:
-    IntMatPhaseFieldStatus(int n, Domain * d, GaussPoint * g);
+    IntMatPhaseFieldStatus(GaussPoint * g);
     virtual ~IntMatPhaseFieldStatus() { }
 
     /// damage variable
@@ -100,7 +100,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatPhaseFieldStatus(1, domain, gp); }; 
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatPhaseFieldStatus(gp); }; 
 
     bool hasAnalyticalTangentStiffness() const override { return true; };
 

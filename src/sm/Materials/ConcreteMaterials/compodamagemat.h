@@ -68,7 +68,7 @@ class CompoDamageMatStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-    CompoDamageMatStatus(int n, Domain * d, GaussPoint * g);
+    CompoDamageMatStatus(GaussPoint * g);
     /// Destructor
     virtual ~CompoDamageMatStatus();
 
@@ -150,7 +150,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CompoDamageMatStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CompoDamageMatStatus(gp); }
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mmode,

@@ -357,16 +357,16 @@ CemhydMat :: initMaterial(Element *element)
     for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
         CemhydMatStatus *ms;
         if ( !MasterCemhydMatStatus && !eachGP ) {
-            ms = new CemhydMatStatus(1, domain, gp, NULL, this, 1);
+            ms = new CemhydMatStatus(gp, NULL, this, 1);
             MasterCemhydMatStatus = ms;
         } else if ( eachGP ) {
-            ms = new CemhydMatStatus(1, domain, gp, MasterCemhydMatStatus, this, 1);
+            ms = new CemhydMatStatus(gp, MasterCemhydMatStatus, this, 1);
         } else {
-            ms = new CemhydMatStatus(1, domain, gp, NULL, this, 0);
+            ms = new CemhydMatStatus(gp, nullptr, this, 0);
         }
 
 //         if(!gp->giveMaterialStatus()){
-            gp->setMaterialStatus( ms, this->giveNumber() );
+            gp->setMaterialStatus( ms );
 //         }
     }
 
@@ -457,7 +457,8 @@ CemhydMat :: CreateStatus(GaussPoint *gp) const
 
 //constructor allowing to copy a microstructure from another CemhydMatStatus
 //particular instance of CemhydMat in an integration point
-CemhydMatStatus :: CemhydMatStatus(int n, Domain *d, GaussPoint *gp, CemhydMatStatus *CemStat, CemhydMat *cemhydmat, bool withMicrostructure) : TransportMaterialStatus(n, d, gp)
+CemhydMatStatus :: CemhydMatStatus(GaussPoint *gp, CemhydMatStatus *CemStat, CemhydMat *cemhydmat, bool withMicrostructure) :
+    TransportMaterialStatus(gp)
 {
     int i, j, k;
     PartHeat = 0.;

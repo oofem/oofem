@@ -969,8 +969,8 @@ RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 
 
 
-RCM2MaterialStatus :: RCM2MaterialStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), crackStatuses(3), tempCrackStatuses(3),
+RCM2MaterialStatus :: RCM2MaterialStatus(GaussPoint *g) :
+    StructuralMaterialStatus(g), crackStatuses(3), tempCrackStatuses(3),
     maxCrackStrains(3), tempMaxCrackStrains(3), crackStrainVector(3),
     oldCrackStrainVector(3), crackDirs(3, 3), tempCrackDirs(3, 3), charLengths(3),
     //minEffStrainsForFullyOpenCrack(3),

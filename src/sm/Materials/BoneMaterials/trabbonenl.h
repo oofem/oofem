@@ -58,7 +58,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    TrabBoneNLStatus(int n, Domain * d, GaussPoint * g);
+    TrabBoneNLStatus(GaussPoint * g);
     virtual ~TrabBoneNLStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -115,7 +115,7 @@ public:
     void giveSupportRadius(double &radius) { radius = this->R; }
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNLStatus(1, TrabBoneMaterial :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNLStatus(gp); }
 };
 } // end namespace oofem
 #endif

@@ -98,7 +98,7 @@ protected:
 
 public:
     /// Constructor
-    AnisotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
+    AnisotropicDamageMaterialStatus(GaussPoint *g);
     /// Destructor
     virtual ~AnisotropicDamageMaterialStatus() {}
 
@@ -271,7 +271,7 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
     void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp, const FloatArray &totalStrain, double equivStrain, TimeStep *atTime);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new AnisotropicDamageMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new AnisotropicDamageMaterialStatus(gp); }
 
 protected:
 

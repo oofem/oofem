@@ -69,7 +69,7 @@ protected:
 
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
-    BinghamFluidMaterial2Status(int n, Domain * d, GaussPoint * g);
+    BinghamFluidMaterial2Status(GaussPoint * g);
     /// Destructor
     virtual ~BinghamFluidMaterial2Status() { }
 

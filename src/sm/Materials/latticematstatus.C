@@ -35,6 +35,6 @@
 #include "latticematstatus.h"
 
 namespace oofem {
-LatticeMaterialStatus :: LatticeMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 { }
 } // end namespace oofem

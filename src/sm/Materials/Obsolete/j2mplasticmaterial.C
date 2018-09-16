@@ -104,7 +104,7 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 J2MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MPlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return new MPlasticMaterialStatus(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 void

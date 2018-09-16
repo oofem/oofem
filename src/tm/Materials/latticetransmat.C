@@ -274,7 +274,7 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 MaterialStatus *
 LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new LatticeTransportMaterialStatus(1, LatticeTransportMaterial :: domain, gp);
+    return new LatticeTransportMaterialStatus(gp);
 }
 
 
@@ -308,8 +308,8 @@ LatticeTransportMaterialStatus :: initTempStatus()
 }
 
 
-LatticeTransportMaterialStatus :: LatticeTransportMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    TransportMaterialStatus(n, d, g)
+LatticeTransportMaterialStatus :: LatticeTransportMaterialStatus(GaussPoint *g) :
+    TransportMaterialStatus(g)
 {
     mass = 0.;
 }

@@ -92,7 +92,7 @@ protected:
     int nMaxCracks;
 
 public:
-    FCMMaterialStatus(int n, Domain *d, GaussPoint *g);
+    FCMMaterialStatus(GaussPoint *g);
     virtual ~FCMMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -249,7 +249,7 @@ public:
     /// computes total shear slip on a given crack plane (i = 1, 2, 3); the slip is computed from the temporary cracking strain
     virtual double computeShearSlipOnCrack(GaussPoint *gp, int i);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FCMMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FCMMaterialStatus(gp); }
 
 protected:
 

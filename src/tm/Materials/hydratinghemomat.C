@@ -279,6 +279,6 @@ HydratingHeMoMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
 MaterialStatus *
 HydratingHeMoMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new HydratingTransportMaterialStatus(1, domain, gp);
+    return new HydratingTransportMaterialStatus(gp);
 }
 } // end namespace oofem

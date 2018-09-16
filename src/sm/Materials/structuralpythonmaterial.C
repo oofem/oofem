@@ -128,7 +128,7 @@ void StructuralPythonMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 MaterialStatus *StructuralPythonMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralPythonMaterialStatus(this->giveDomain(), gp);
+    return new StructuralPythonMaterialStatus(gp);
 }
 
 void StructuralPythonMaterial :: callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
@@ -385,8 +385,8 @@ void StructuralPythonMaterialStatus :: initTempStatus()
 }
 
 
-StructuralPythonMaterialStatus :: StructuralPythonMaterialStatus(Domain *d, GaussPoint *gp) :
-    StructuralMaterialStatus(0, d, gp)
+StructuralPythonMaterialStatus :: StructuralPythonMaterialStatus(GaussPoint *gp) :
+    StructuralMaterialStatus(gp)
 {
 #if 0
     this->stateDict = PyDict_New();

@@ -55,7 +55,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    MisesMatGradStatus(int n, Domain * d, GaussPoint * g);
+    MisesMatGradStatus(GaussPoint * g);
     virtual ~MisesMatGradStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -124,7 +124,7 @@ public:
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MisesMatGradStatus(1, MisesMat :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MisesMatGradStatus(gp); }
 };
 } // end namespace oofem
 #define MisesMatGrad_h

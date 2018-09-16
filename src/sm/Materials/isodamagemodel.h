@@ -94,7 +94,7 @@ protected:
 
 public:
     /// Constructor
-    IsotropicDamageMaterialStatus(int n, Domain *d, GaussPoint *g);
+    IsotropicDamageMaterialStatus(GaussPoint *g);
     /// Destructor
     virtual ~IsotropicDamageMaterialStatus();
 
@@ -253,7 +253,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsotropicDamageMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsotropicDamageMaterialStatus(gp); }
 
 protected:
     /**

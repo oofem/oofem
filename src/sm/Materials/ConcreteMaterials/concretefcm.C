@@ -772,6 +772,7 @@ ConcreteFCM :: give(int aProperty, GaussPoint *gp)
     }
 }
 
+
 int
 ConcreteFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
@@ -779,17 +780,16 @@ ConcreteFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
 }
 
 
-
 MaterialStatus *
 ConcreteFCM :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
-    if ( status == NULL ) {
+    if ( status == nullptr ) {
         // create a new one
         status = this->CreateStatus(gp);
 
-        if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveNumber() );
+        if ( status ) {
+            gp->setMaterialStatus( status );
             this->_generateStatusVariables(gp);
         }
     }
@@ -805,8 +805,8 @@ ConcreteFCM :: giveStatus(GaussPoint *gp) const
 //                      CONCRETE FCM STATUS                     ///
 ///////////////////////////////////////////////////////////////////
 
-ConcreteFCMStatus :: ConcreteFCMStatus(int n, Domain *d, GaussPoint *gp) :
-    FCMMaterialStatus(n, d, gp), RandomMaterialStatusExtensionInterface()
+ConcreteFCMStatus :: ConcreteFCMStatus(GaussPoint *gp) :
+    FCMMaterialStatus(gp), RandomMaterialStatusExtensionInterface()
 {}
 
 

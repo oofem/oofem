@@ -258,7 +258,7 @@ void IntMatPhaseField :: giveInputRecord(DynamicInputRecord &input)
 
 
 
-IntMatPhaseFieldStatus :: IntMatPhaseFieldStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+IntMatPhaseFieldStatus :: IntMatPhaseFieldStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
     this->tempDrivingEnergy = 0.0;
     this->drivingEnergy = 0.0;

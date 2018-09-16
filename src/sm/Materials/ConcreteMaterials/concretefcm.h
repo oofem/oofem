@@ -68,7 +68,7 @@ namespace oofem {
 class ConcreteFCMStatus : public FCMMaterialStatus, public RandomMaterialStatusExtensionInterface
 {
 public:
-    ConcreteFCMStatus(int n, Domain *d, GaussPoint *g);
+    ConcreteFCMStatus(GaussPoint *g);
     virtual ~ConcreteFCMStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -102,7 +102,7 @@ public:
     const char *giveClassName() const override { return "ConcreteFCM"; }
     const char *giveInputRecordName() const override { return _IFT_ConcreteFCM_Name; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ConcreteFCMStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ConcreteFCMStatus(gp); }
 
     double give(int aProperty, GaussPoint *gp) override;
 

@@ -169,7 +169,7 @@ ExpCZMaterial :: printYourself()
     printf("  r     = %e \n", this->r);
 }
 
-ExpCZMaterialStatus :: ExpCZMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+ExpCZMaterialStatus :: ExpCZMaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 { }
 
 

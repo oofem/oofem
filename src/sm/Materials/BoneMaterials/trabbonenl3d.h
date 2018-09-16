@@ -59,7 +59,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    TrabBoneNL3DStatus(int n, Domain * d, GaussPoint * g);
+    TrabBoneNL3DStatus(GaussPoint * g);
     virtual ~TrabBoneNL3DStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -164,7 +164,7 @@ public:
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNL3DStatus(1, TrabBone3D :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNL3DStatus(gp); }
 };
 } // end namespace oofem
 #endif

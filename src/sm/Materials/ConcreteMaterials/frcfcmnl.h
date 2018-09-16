@@ -69,7 +69,7 @@ protected:
 
 
 public:
-    FRCFCMNLStatus(int n, Domain *d, GaussPoint *g);
+    FRCFCMNLStatus(GaussPoint *g);
     virtual ~FRCFCMNLStatus();
 
     /// LOCAL FIBER STRESSES (from crack opening)
@@ -117,7 +117,7 @@ public:
 
     Interface *giveInterface(InterfaceType it) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FRCFCMNLStatus(1, FRCFCM :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FRCFCMNLStatus(gp); }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

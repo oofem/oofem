@@ -87,7 +87,7 @@ MPlasticMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
 MaterialStatus *
 MPlasticMaterial2 :: CreateStatus(GaussPoint *gp) const
 {
-    return new MPlasticMaterial2Status(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return new MPlasticMaterial2Status(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 
@@ -2071,8 +2071,8 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
 // SmearedCrackingMaterialStatus Class
 //
 
-MPlasticMaterial2Status :: MPlasticMaterial2Status(int n, Domain *d, GaussPoint *g, int statusSize) :
-    StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
+MPlasticMaterial2Status :: MPlasticMaterial2Status(GaussPoint *g, int statusSize) :
+    StructuralMaterialStatus(g), plasticStrainVector(), tempPlasticStrainVector(),
     strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize),
     state_flag(MPlasticMaterial2Status :: PM_Elastic),
     temp_state_flag(MPlasticMaterial2Status :: PM_Elastic),

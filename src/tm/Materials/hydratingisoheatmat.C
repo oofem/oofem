@@ -249,7 +249,7 @@ HydratingIsoHeatMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
 MaterialStatus *
 HydratingIsoHeatMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new HydratingTransportMaterialStatus(1, domain, gp);
+    return new HydratingTransportMaterialStatus(gp);
 }
 
 

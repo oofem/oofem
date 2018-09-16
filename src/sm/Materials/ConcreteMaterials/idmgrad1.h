@@ -102,7 +102,7 @@ public:
 class IDGMaterialStatus : public IsotropicDamageMaterial1Status, GradDpMaterialStatusExtensionInterface
 {
 public:
-    IDGMaterialStatus(int n, Domain * d, GaussPoint * g);
+    IDGMaterialStatus(GaussPoint * g);
     virtual ~IDGMaterialStatus();
 
     const char *giveClassName() const override { return "IDGMaterialStatus"; }

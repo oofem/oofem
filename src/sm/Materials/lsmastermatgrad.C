@@ -69,7 +69,7 @@ LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode)
 MaterialStatus *
 LargeStrainMasterMaterialGrad :: CreateStatus(GaussPoint *gp) const
 {
-    return new LargeStrainMasterMaterialStatus(1, this->giveDomain(), gp, slaveMat);
+    return new LargeStrainMasterMaterialStatus(gp, domain, slaveMat);
 }
 
 

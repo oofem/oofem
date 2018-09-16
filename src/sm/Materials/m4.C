@@ -267,8 +267,8 @@ M4Material :: giveThermalDilatationVector(FloatArray &answer,
 
 ////////////////////////////////////////////////////////////////////////////
 
-M4MaterialStatus :: M4MaterialStatus(int n, Domain *d, GaussPoint *g, int nplanes) :
-    StructuralMaterialStatus(n, d, g),
+M4MaterialStatus :: M4MaterialStatus(GaussPoint *g, int nplanes) :
+    StructuralMaterialStatus(g),
     microplaneStrain(nplanes), tempMicroplaneStrain(nplanes),
     microplaneStress(nplanes), tempMicroplaneStress(nplanes)
 { }

@@ -79,7 +79,7 @@ TutorialMaterial :: giveInputRecord(DynamicInputRecord &ir)
 MaterialStatus *
 TutorialMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new TutorialMaterialStatus(1, this->giveDomain(), gp);
+    return new TutorialMaterialStatus(gp);
 }
 
 
@@ -243,8 +243,8 @@ TutorialMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 //=============================================================================
 
 
-TutorialMaterialStatus :: TutorialMaterialStatus(int n, Domain * d, GaussPoint * g) :
-    StructuralMaterialStatus(n, d, g),
+TutorialMaterialStatus :: TutorialMaterialStatus(GaussPoint * g) :
+    StructuralMaterialStatus(g),
     tempPlasticStrain(6), plasticStrain(6),
     tempDevTrialStress(6),
     tempK(0.), k(0.)

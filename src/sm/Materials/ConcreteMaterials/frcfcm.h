@@ -80,7 +80,7 @@ protected:
     double tempDamage;
 
 public:
-    FRCFCMStatus(int n, Domain *d, GaussPoint *g);
+    FRCFCMStatus(GaussPoint *g);
     virtual ~FRCFCMStatus();
 
     /// Returns the last equilibrated damage level.
@@ -116,7 +116,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FRCFCMStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FRCFCMStatus(gp); }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

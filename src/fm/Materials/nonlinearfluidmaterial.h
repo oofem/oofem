@@ -65,7 +65,7 @@ protected:
     double temp_norm2;
 
 public:
-    NonlinearFluidMaterialStatus(int n, Domain * d, GaussPoint * g);
+    NonlinearFluidMaterialStatus(GaussPoint * g);
 
     virtual ~NonlinearFluidMaterialStatus() { }
 

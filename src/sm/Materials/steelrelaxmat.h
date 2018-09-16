@@ -187,7 +187,7 @@ protected:
     double prestress;
 
 public:
-    SteelRelaxMatStatus(int n, Domain *d, GaussPoint *g);
+    SteelRelaxMatStatus(GaussPoint *g);
     virtual ~SteelRelaxMatStatus();
 
     void setTempRelaxIntVariable(double src) { tempRelaxIntVariable = src; }

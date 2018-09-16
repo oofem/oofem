@@ -58,7 +58,7 @@ protected:
 
 public:
     /// Constructor
-    MazarsNLMaterialStatus(int n, Domain * d, GaussPoint * g);
+    MazarsNLMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~MazarsNLMaterialStatus();
 
@@ -136,7 +136,7 @@ public:
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsNLMaterialStatus(gp); }
 
 protected:
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;

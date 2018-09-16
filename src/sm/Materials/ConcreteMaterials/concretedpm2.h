@@ -175,7 +175,7 @@ protected:
 
 public:
     /// Constructor
-    ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp);
+    ConcreteDPM2Status(GaussPoint *gp);
 
     /// Destructor
     virtual ~ConcreteDPM2Status();

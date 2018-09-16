@@ -237,7 +237,7 @@ IsoInterfaceDamageMaterial :: computeDamageParam(double &omega, double kappa, co
 }
 
 
-IsoInterfaceDamageMaterialStatus :: IsoInterfaceDamageMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+IsoInterfaceDamageMaterialStatus :: IsoInterfaceDamageMaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
     kappa = tempKappa = 0.0;
     damage = tempDamage = 0.0;

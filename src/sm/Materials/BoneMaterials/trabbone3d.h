@@ -110,7 +110,7 @@ protected:
 
 
 public:
-    TrabBone3DStatus(int n, Domain *d, GaussPoint *g);
+    TrabBone3DStatus(GaussPoint *g);
 
     virtual ~TrabBone3DStatus();
 

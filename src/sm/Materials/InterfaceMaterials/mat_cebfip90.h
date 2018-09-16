@@ -64,7 +64,7 @@ protected:
 
 public:
     /// Constructor.
-    CebFipSlip90MaterialStatus(int n, Domain * d, GaussPoint * g);
+    CebFipSlip90MaterialStatus(GaussPoint * g);
     /// Destructor.
     virtual ~CebFipSlip90MaterialStatus();
 
@@ -139,7 +139,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CebFipSlip90MaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CebFipSlip90MaterialStatus(gp); }
 };
 } // end namespace oofem
 #endif // mat_cebfip90_h

@@ -99,7 +99,7 @@ protected:
 
 public:
     /// Constructor
-    DustMaterialStatus(int n, Domain * d, GaussPoint * gp, double q0);
+    DustMaterialStatus(GaussPoint * gp, double q0);
 
     /// Destructor
     virtual ~DustMaterialStatus();

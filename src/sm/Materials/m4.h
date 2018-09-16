@@ -64,7 +64,7 @@ protected:
     std::vector<MicroplaneState> microplaneStress, tempMicroplaneStress;
 
 public:
-    M4MaterialStatus(int n, Domain *d, GaussPoint *g, int nplanes);
+    M4MaterialStatus(GaussPoint *g, int nplanes);
     virtual ~M4MaterialStatus();
 
     const char *giveClassName() const override { return "M4MaterialStatus"; }
@@ -129,7 +129,7 @@ public:
     const char *giveClassName() const override { return "M4Material"; }
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M4MaterialStatus(1, domain, gp, numberOfMicroplanes); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M4MaterialStatus(gp, numberOfMicroplanes); }
 };
 } // end namespace oofem
 #endif // m4_h

@@ -791,8 +791,8 @@ FRCFCMNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 ///////////////////////////////////////////////////////////////////
 
 
-FRCFCMNLStatus :: FRCFCMNLStatus(int n, Domain *d, GaussPoint *gp) :
-    FRCFCMStatus(n, d, gp), StructuralNonlocalMaterialStatusExtensionInterface(),
+FRCFCMNLStatus :: FRCFCMNLStatus(GaussPoint *gp) :
+    FRCFCMStatus(gp), StructuralNonlocalMaterialStatusExtensionInterface(),
     fiberStressLoc(), tempFiberStressLoc(), fiberStressNL(), tempFiberStressNL()
 {
     fiberStressLoc.resize(this->nMaxCracks);

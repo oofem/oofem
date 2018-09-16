@@ -68,7 +68,7 @@ protected:
     int temp_yield_flag;
 
 public:
-    PerfectlyPlasticMaterialStatus(int n, Domain * d, GaussPoint * g);
+    PerfectlyPlasticMaterialStatus(GaussPoint * g);
     virtual ~PerfectlyPlasticMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;

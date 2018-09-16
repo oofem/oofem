@@ -244,11 +244,11 @@ HydratingConcreteMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 MaterialStatus *
 HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 {
-    return new HydratingConcreteMatStatus(1, domain, gp);
+    return new HydratingConcreteMatStatus(gp);
 }
 
 
-HydratingConcreteMatStatus :: HydratingConcreteMatStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g)
+HydratingConcreteMatStatus :: HydratingConcreteMatStatus(GaussPoint *g) : TransportMaterialStatus(g)
 {
     //constructor
     power = 0.;

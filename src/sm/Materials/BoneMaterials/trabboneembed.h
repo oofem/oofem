@@ -66,7 +66,7 @@ protected:
     FloatArray densStress, tempPlasDef, plasDef, tempIncPlasDef;
 
 public:
-    TrabBoneEmbedStatus(int n, Domain * d, GaussPoint * g);
+    TrabBoneEmbedStatus(GaussPoint * g);
     virtual ~TrabBoneEmbedStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;

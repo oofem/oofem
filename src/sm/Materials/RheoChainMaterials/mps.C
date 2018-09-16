@@ -50,8 +50,8 @@ REGISTER_Material(MPSMaterial);
 
 
 
-MPSMaterialStatus :: MPSMaterialStatus(int n, Domain *d, GaussPoint *gp, int nunits) :
-    KelvinChainSolidMaterialStatus(n, d, gp, nunits)
+MPSMaterialStatus :: MPSMaterialStatus(GaussPoint *gp, int nunits) :
+    KelvinChainSolidMaterialStatus(gp, nunits)
 {
     hum = -1.;
     hum_increment = -1.;
@@ -520,7 +520,7 @@ MPSMaterial :: CreateStatus(GaussPoint *gp) const
  * creates a new material status corresponding to this class
  */
 {
-    return new MPSMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new MPSMaterialStatus(gp, nUnits);
 }
 
 

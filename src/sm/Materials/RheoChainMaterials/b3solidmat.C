@@ -789,7 +789,7 @@ B3SolidMaterial :: CreateStatus(GaussPoint *gp) const
  * creates a new material status corresponding to this class
  */
 {
-    return new B3SolidMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new B3SolidMaterialStatus(gp, nUnits);
 }
 
 
@@ -809,8 +809,8 @@ B3SolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, cons
 /**********     B3SolidMaterialStatus - HUMIDITY ****************************************/
 
 
-B3SolidMaterialStatus :: B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits) :
-    KelvinChainMaterialStatus(n, d, g, nunits) { }
+B3SolidMaterialStatus :: B3SolidMaterialStatus(GaussPoint *g, int nunits) :
+    KelvinChainMaterialStatus(g, nunits) { }
 
 void
 B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)

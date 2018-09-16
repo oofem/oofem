@@ -66,7 +66,7 @@ protected:
 
 public:
     /// Constructor.
-    IDNLMaterialStatus(int n, Domain *d, GaussPoint *g);
+    IDNLMaterialStatus(GaussPoint *g);
     /// Destructor.
     virtual ~IDNLMaterialStatus();
 
@@ -211,7 +211,7 @@ public:
     double predictRelativeComputationalCost(GaussPoint *gp) override;
     double predictRelativeRedistributionCost(GaussPoint *gp) override { return 1.0; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IDNLMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IDNLMaterialStatus(gp); }
 
 protected:
     void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override { }

@@ -112,7 +112,7 @@ TwoFluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 MaterialStatus *
 TwoFluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new TwoFluidMaterialStatus(1, domain, gp, {this->giveMaterial(0), this->giveMaterial(1)});
+    return new TwoFluidMaterialStatus(gp, {this->giveMaterial(0), this->giveMaterial(1)});
 }
 
 FluidDynamicMaterial *
@@ -175,11 +175,11 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
 
 
 
-TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const std::array<Material*, 2> &slaveMaterial) :
-    FluidDynamicMaterialStatus(n, d, gp),
+TwoFluidMaterialStatus :: TwoFluidMaterialStatus(GaussPoint *gp, const std::array<Material*, 2> &slaveMaterial) :
+    FluidDynamicMaterialStatus(gp),
     slaveGps{{{nullptr, 0, 0., gp->giveMaterialMode()}, {nullptr, 0, 0., gp->giveMaterialMode()}}}
 {
-    for ( int i = 0; i < 2; ++i ) slaveGps[i].setMaterialStatus( slaveMaterial[i]->CreateStatus( &slaveGps[i] ), n );
+    for ( int i = 0; i < 2; ++i ) slaveGps[i].setMaterialStatus( slaveMaterial[i]->CreateStatus( &slaveGps[i] ) );
 }
 
 

@@ -138,7 +138,7 @@ protected:
 class HydratingConcreteMatStatus : public TransportMaterialStatus
 {
 public:
-    HydratingConcreteMatStatus(int n, Domain * d, GaussPoint * g);
+    HydratingConcreteMatStatus(GaussPoint * g);
     virtual ~HydratingConcreteMatStatus();
     /// Returns actual degree of hydration at last known equilibrium.
     double giveDoHActual();

@@ -166,7 +166,7 @@ MaterialStatus *
 RankineMat :: CreateStatus(GaussPoint *gp) const
 {
     RankineMatStatus *status;
-    status = new RankineMatStatus(1, this->giveDomain(), gp);
+    status = new RankineMatStatus(gp);
     return status;
 }
 
@@ -699,8 +699,8 @@ RankineMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 // RANKINE MATERIAL STATUS
 //=============================================================================
 
-RankineMatStatus :: RankineMatStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), plasticStrain(), tempPlasticStrain()
+RankineMatStatus :: RankineMatStatus(GaussPoint *g) :
+    StructuralMaterialStatus(g), plasticStrain(), tempPlasticStrain()
 {
     damage = tempDamage = 0.;
     kappa = tempKappa = 0.;

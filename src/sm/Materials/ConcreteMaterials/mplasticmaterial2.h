@@ -94,7 +94,7 @@ protected:
     IntArray activeConditionMap, tempActiveConditionMap;
 
 public:
-    MPlasticMaterial2Status(int n, Domain * d, GaussPoint * g, int statusSize);
+    MPlasticMaterial2Status(GaussPoint * g, int statusSize);
     virtual ~MPlasticMaterial2Status();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;

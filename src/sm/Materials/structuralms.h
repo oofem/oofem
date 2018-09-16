@@ -88,8 +88,8 @@ protected:
     FloatArray tempFVector;
 
 public:
-    /// Constructor. Creates new StructuralMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
-    StructuralMaterialStatus(int n, Domain * d, GaussPoint * g);
+    /// Constructor. Creates new StructuralMaterialStatus with IntegrationPoint g.
+    StructuralMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~StructuralMaterialStatus();
 

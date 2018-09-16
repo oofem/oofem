@@ -7,6 +7,47 @@
 
 using namespace oofem;
 
+static void CopyD(benchmark::State& state) {
+    FloatMatrix D(3,3);
+    double E = 210;
+    double nu = 0.3;
+    double G = (E / ( 2.0 * ( 1. + nu ) ));
+    //double K = E / ( 3.0 * ( 1. - 2. * nu ) );
+    double ee = E / ( 1. - nu * nu );
+    FloatMatrixF<3,3> tangent = {
+        ee, nu*ee, 0.,
+        nu*ee, ee, 0.,
+        0., 0., G
+    };
+
+    for (auto _ : state) {
+        auto xxx = tangent;
+        benchmark::DoNotOptimize(xxx);
+    }
+}
+BENCHMARK(CopyD);
+
+static void ComputeD(benchmark::State& state) {
+    FloatMatrix D(3,3);
+    double E = 210;
+    double nu = 0.3;
+    double G = (E / ( 2.0 * ( 1. + nu ) ));
+    for (auto _ : state) {
+        double e = E;
+        double ee = e / ( 1. - nu * nu );
+        double shear = G;
+        D.resize(3, 3);
+        D.zero();
+        D.at(1, 1) = ee;
+        D.at(1, 2) = nu * ee;
+        D.at(2, 1) = nu * ee;
+        D.at(2, 2) = ee;
+        D.at(3, 3) = shear;
+        benchmark::DoNotOptimize(D);
+    }
+}
+BENCHMARK(ComputeD);
+
 #if 0
 const std::vector<FloatArrayF<3>> nodes_6 = {
     FloatArrayF<3>{0.,0.,0.},FloatArrayF<3>{2.,0.,0.},FloatArrayF<3>{0.,1.,0.},

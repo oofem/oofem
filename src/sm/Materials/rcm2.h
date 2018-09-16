@@ -101,7 +101,7 @@ protected:
     IntArray crackMap;
 
 public:
-    RCM2MaterialStatus(int n, Domain * d, GaussPoint * g);
+    RCM2MaterialStatus(GaussPoint * g);
     virtual ~RCM2MaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -217,7 +217,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCM2MaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCM2MaterialStatus(gp); }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
     { linearElasticMaterial->giveThermalDilatationVector(answer, gp, tStep); }

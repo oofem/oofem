@@ -68,7 +68,7 @@ protected:
 
 public:
     /// Constructor
-    IsoInterfaceDamageMaterialStatus(int n, Domain * d, GaussPoint * g);
+    IsoInterfaceDamageMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~IsoInterfaceDamageMaterialStatus();
 
@@ -160,7 +160,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsoInterfaceDamageMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsoInterfaceDamageMaterialStatus(gp); }
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

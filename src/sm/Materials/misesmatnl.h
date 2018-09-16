@@ -60,7 +60,7 @@ protected:
     double localCumPlasticStrainForAverage;
 
 public:
-    MisesMatNlStatus(int n, Domain * d, GaussPoint * g);
+    MisesMatNlStatus(GaussPoint * g);
     virtual ~MisesMatNlStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -166,7 +166,7 @@ public:
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MisesMatNlStatus(1, MisesMat :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MisesMatNlStatus(gp); }
 };
 } // end namespace oofem
 #define misesmatnl_h

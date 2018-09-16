@@ -51,8 +51,8 @@ REGISTER_Material(MPSDamMaterial);
 
 
 
-MPSDamMaterialStatus :: MPSDamMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits) :
-    MPSMaterialStatus(n, d, g, nunits), effectiveStressVector(), tempEffectiveStressVector()
+MPSDamMaterialStatus :: MPSDamMaterialStatus(GaussPoint *g, int nunits) :
+    MPSMaterialStatus(g, nunits), effectiveStressVector(), tempEffectiveStressVector()
 {
     kappa = tempKappa = 0.0;
     damage = tempDamage = 0.0;
@@ -793,7 +793,7 @@ MPSDamMaterial :: CreateStatus(GaussPoint *gp) const
  * creates a new material status corresponding to this class
  */
 {
-    return new MPSDamMaterialStatus(1, this->giveDomain(), gp, nUnits);
+    return new MPSDamMaterialStatus(gp, nUnits);
 }
 
 

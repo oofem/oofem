@@ -57,7 +57,7 @@ protected:
     double kappa_hat;
 
 public:
-    RankineMatNlStatus(int n, Domain * d, GaussPoint * g);
+    RankineMatNlStatus(GaussPoint * g);
     virtual ~RankineMatNlStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -178,7 +178,7 @@ public:
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RankineMatNlStatus(1, RankineMat :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RankineMatNlStatus(gp); }
 };
 } // end namespace oofem
 #endif

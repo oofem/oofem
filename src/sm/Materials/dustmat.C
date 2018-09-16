@@ -49,8 +49,8 @@
 namespace oofem {
 REGISTER_Material(DustMaterial);
 
-DustMaterialStatus :: DustMaterialStatus(int n, Domain *d, GaussPoint *gp, double q0) :
-    StructuralMaterialStatus(n, d, gp),
+DustMaterialStatus :: DustMaterialStatus(GaussPoint *gp, double q0) :
+    StructuralMaterialStatus(gp),
     plasticStrain( 6 ),
     tempPlasticStrain( 6 )
 {
@@ -546,7 +546,7 @@ DustMaterial :: giveIPValue(FloatArray &answer,
 MaterialStatus *
 DustMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new DustMaterialStatus( 1, StructuralMaterial :: giveDomain(), gp, this->giveQ0() );
+    return new DustMaterialStatus(gp, this->giveQ0() );
 }
 
 double

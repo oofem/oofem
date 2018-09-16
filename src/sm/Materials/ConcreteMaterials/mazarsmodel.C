@@ -509,8 +509,8 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
 }
 
 
-MazarsMaterialStatus :: MazarsMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    IsotropicDamageMaterial1Status(n, d, g)
+MazarsMaterialStatus :: MazarsMaterialStatus(GaussPoint *g) :
+    IsotropicDamageMaterial1Status(g)
 {
     lec = 0.0;
 }

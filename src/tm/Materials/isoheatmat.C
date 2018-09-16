@@ -187,18 +187,16 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp,
 MaterialStatus *
 IsotropicHeatTransferMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new IsotropicHeatTransferMaterialStatus(1, domain, gp);
+    return new IsotropicHeatTransferMaterialStatus(gp);
 }
 
-IsotropicHeatTransferMaterialStatus :: IsotropicHeatTransferMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g)
+IsotropicHeatTransferMaterialStatus :: IsotropicHeatTransferMaterialStatus(GaussPoint *g) : TransportMaterialStatus(g)
 {
-    //constructor
 }
 
 
 IsotropicHeatTransferMaterialStatus :: ~IsotropicHeatTransferMaterialStatus()
 {
-    //destructor
 }
 
 void

@@ -430,6 +430,6 @@ LinearElasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
 MaterialStatus *
 LinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
+    return new StructuralMaterialStatus(gp);
 }
 } // end namespace oofem

@@ -270,8 +270,8 @@ TrabBoneNL :: computeWeightFunction(const FloatArray &src, const FloatArray &coo
 // BEGIN: CONSTRUCTOR
 // init state variables
 
-TrabBoneNLStatus :: TrabBoneNLStatus(int n, Domain *d, GaussPoint *g) :
-    TrabBoneMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
+TrabBoneNLStatus :: TrabBoneNLStatus(GaussPoint *g) :
+    TrabBoneMaterialStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localCumPlastStrainForAverage = 0.0;
 }

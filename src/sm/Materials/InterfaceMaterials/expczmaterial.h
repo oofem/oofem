@@ -59,7 +59,7 @@ protected:
 
 public:
     /// Constructor
-    ExpCZMaterialStatus(int n, Domain * d, GaussPoint * g);
+    ExpCZMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~ExpCZMaterialStatus();
 
@@ -123,7 +123,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ExpCZMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ExpCZMaterialStatus(gp); }
     void printYourself() override;
 };
 } // end namespace oofem

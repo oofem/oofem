@@ -93,7 +93,7 @@ NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp)
 MaterialStatus *
 NonlinearFluidMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new NonlinearFluidMaterialStatus(1, this->giveDomain(), gp);
+    return new NonlinearFluidMaterialStatus(gp);
 }
 
 
@@ -158,8 +158,8 @@ NonlinearFluidMaterial :: checkConsistency()
     return 1;
 }
 
-NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    FluidDynamicMaterialStatus(n, d, g),
+NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus(GaussPoint *g) :
+    FluidDynamicMaterialStatus(g),
     temp_deviatoricStressVector(),
     temp_deviatoricStrainVector(),
     temp_norm2(0)

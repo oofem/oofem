@@ -154,7 +154,7 @@ BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp)
 MaterialStatus *
 BinghamFluidMaterial2 :: CreateStatus(GaussPoint *gp) const
 {
-    return new BinghamFluidMaterial2Status(1, this->giveDomain(), gp);
+    return new BinghamFluidMaterial2Status(gp);
 }
 
 
@@ -328,8 +328,8 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
 }
 
 
-BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, GaussPoint *g) :
-    FluidDynamicMaterialStatus(n, d, g),
+BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(GaussPoint *g) :
+    FluidDynamicMaterialStatus(g),
     devStrainMagnitude(0.0), temp_devStrainMagnitude(0.0),
     devStressMagnitude(0.0), temp_devStressMagnitude(0.0),
     temp_deviatoricStrainVector(6)

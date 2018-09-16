@@ -61,7 +61,7 @@ protected:
     IntArray plasticState;
 
 public:
-    M1MaterialStatus(int n, Domain *d, GaussPoint *g);
+    M1MaterialStatus(GaussPoint *g);
     virtual ~M1MaterialStatus();
 
     const char *giveClassName() const override { return "M1MaterialStatus"; }
@@ -113,7 +113,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_M1Material_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(gp); }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
@@ -147,7 +147,7 @@ protected:
     FloatArray sigN, tempSigN, sigNyield;
 
 public:
-    M1MaterialStatus(int n, Domain *d, GaussPoint *g);
+    M1MaterialStatus(GaussPoint *g);
     virtual ~M1MaterialStatus();
 
     // definition
@@ -201,7 +201,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_M1Material_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
     int hasMaterialModeCapability(MaterialMode mode) override;
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(gp); }
 
 protected:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;

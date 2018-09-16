@@ -1243,13 +1243,13 @@ Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 MaterialStatus *
 Concrete2 :: CreateStatus(GaussPoint *gp) const
 {
-    return new Concrete2MaterialStatus(1, this->giveDomain(), gp);
+    return new Concrete2MaterialStatus(gp);
 }
 
 
 
-Concrete2MaterialStatus :: Concrete2MaterialStatus(int n, Domain *d, GaussPoint *g) :
-    StructuralMaterialStatus(n, d, g), plasticStrainVector(), plasticStrainIncrementVector()
+Concrete2MaterialStatus :: Concrete2MaterialStatus(GaussPoint *g) :
+    StructuralMaterialStatus(g), plasticStrainVector(), plasticStrainIncrementVector()
 {
     SCCM = EPM = E0PM = SRF = SEZ = 0.0;
     SCTM = -1.0;     // init status if SCTM < 0.;

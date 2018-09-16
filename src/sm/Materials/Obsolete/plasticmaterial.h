@@ -68,7 +68,7 @@ protected:
     double gamma, temp_gamma;
 
 public:
-    PlasticMaterialStatus(int n, Domain * d, GaussPoint * g, int statusSize);
+    PlasticMaterialStatus(GaussPoint * g, int statusSize);
     virtual ~PlasticMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;

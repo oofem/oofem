@@ -102,7 +102,7 @@ J2Mat :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 J2Mat :: CreateStatus(GaussPoint *gp) const
 {
-    return new MPlasticMaterial2Status(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return new MPlasticMaterial2Status(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 int

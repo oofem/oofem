@@ -69,7 +69,7 @@ protected:
     double tempDamage;
 public:
     /// Constructor
-    IntMatIsoDamageStatus(int n, Domain *d, GaussPoint *g);
+    IntMatIsoDamageStatus(GaussPoint *g);
     /// Destructor
     virtual ~IntMatIsoDamageStatus();
 
@@ -165,7 +165,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatIsoDamageStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatIsoDamageStatus(gp); }
 
     void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
                                    GaussPoint *gp, TimeStep *tStep) override;

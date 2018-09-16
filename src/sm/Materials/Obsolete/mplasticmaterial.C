@@ -83,7 +83,7 @@ MPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
 MaterialStatus *
 MPlasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new MPlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return new MPlasticMaterialStatus(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 
@@ -1356,8 +1356,8 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 }
 
 
-MPlasticMaterialStatus :: MPlasticMaterialStatus(int n, Domain *d, GaussPoint *g, int statusSize) :
-    StructuralMaterialStatus(n, d, g), plasticStrainVector(), tempPlasticStrainVector(),
+MPlasticMaterialStatus :: MPlasticMaterialStatus(GaussPoint *g, int statusSize) :
+    StructuralMaterialStatus(g), plasticStrainVector(), tempPlasticStrainVector(),
     strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize),
     gamma(),
     tempGamma()

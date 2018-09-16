@@ -51,8 +51,8 @@ REGISTER_Material(RVEStokesFlow);
 
 int RVEStokesFlow :: n = 1;
 
-RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, int rank,Domain *d, GaussPoint *g, const std :: string &inputfile) :
-    TransportMaterialStatus(n, d, g), oldTangent(true)
+RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, int rank, GaussPoint *g, const std :: string &inputfile) :
+    TransportMaterialStatus(g), oldTangent(true)
 {
     OOFEM_LOG_INFO( "************************** Instanciating microproblem from file %s\n", inputfile.c_str() );
     OOFEMTXTDataReader dr( inputfile.c_str() );
@@ -241,7 +241,7 @@ RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
     if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
         rank = this->domain->giveEngngModel()->giveRank();
     }
-    return new RVEStokesFlowMaterialStatus(n++, rank, this->giveDomain(), gp, this->rveFilename);
+    return new RVEStokesFlowMaterialStatus(n++, rank, gp, this->rveFilename);
 }
 
 void

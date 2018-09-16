@@ -63,7 +63,7 @@ class MicroMaterialStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-    MicroMaterialStatus(int, Domain * d, GaussPoint * gp);
+    MicroMaterialStatus(GaussPoint * gp);
     /// Destructor
     virtual ~MicroMaterialStatus();
 

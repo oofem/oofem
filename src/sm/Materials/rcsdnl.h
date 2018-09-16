@@ -63,7 +63,7 @@ protected:
     FloatArray nonlocalStrainVector, tempNonlocalStrainVector, localStrainVectorForAverage;
 
 public:
-    RCSDNLMaterialStatus(int n, Domain * d, GaussPoint *gp);
+    RCSDNLMaterialStatus(GaussPoint *gp);
     virtual ~RCSDNLMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -147,7 +147,7 @@ public:
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCSDNLMaterialStatus(1, RCSDEMaterial :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCSDNLMaterialStatus(gp); }
 
 protected:
     double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &) override { return 1.0; }

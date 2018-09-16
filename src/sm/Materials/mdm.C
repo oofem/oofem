@@ -73,7 +73,7 @@ MMAClosestIPTransfer MDM :: mapper2;
 MaterialStatus *
 MDM :: CreateStatus(GaussPoint *gp) const
 {
-    return new MDMStatus(1, this->nsd, this->numberOfMicroplanes, MicroplaneMaterial :: giveDomain(), gp);
+    return new MDMStatus(gp, this->nsd, this->numberOfMicroplanes);
 }
 
 
@@ -1370,7 +1370,7 @@ MDM :: predictRelativeComputationalCost(GaussPoint *gp)
 
 
 
-MDMStatus :: MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), Psi(nmplanes), PsiTemp(nmplanes), DamageTensor(nsd, nsd), DamageTensorTemp(nsd, nsd), tempDamageTensorEigenValues(nsd), damageTensorEigenValues(nsd), tempDamageTensorEigenVectors(nsd, nsd), damageTensorEigenVectors(nsd, nsd)
+MDMStatus :: MDMStatus(GaussPoint *g, int nsd, int nmplanes) : StructuralMaterialStatus(g), StructuralNonlocalMaterialStatusExtensionInterface(), Psi(nmplanes), PsiTemp(nmplanes), DamageTensor(nsd, nsd), DamageTensorTemp(nsd, nsd), tempDamageTensorEigenValues(nsd), damageTensorEigenValues(nsd), tempDamageTensorEigenVectors(nsd, nsd), damageTensorEigenVectors(nsd, nsd)
 {
     for ( int i = 1; i <= nsd; i++ ) {
         damageTensorEigenValues.at(i) = tempDamageTensorEigenValues.at(i) = 1.0;

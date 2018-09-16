@@ -175,8 +175,8 @@ MazarsNLMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gau
 }
 
 
-MazarsNLMaterialStatus :: MazarsNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MazarsMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
+MazarsNLMaterialStatus :: MazarsNLMaterialStatus(GaussPoint *g) :
+    MazarsMaterialStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localEquivalentStrainForAverage = 0.0;
 }

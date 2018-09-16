@@ -133,8 +133,8 @@ FluidDynamicMaterial :: computeTangents2D(FloatMatrix &dsdd, FloatArray &dsdp, F
 }
 
 
-FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), deviatoricStressVector(6), deviatoricStrainRateVector(6)
+FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(GaussPoint *g) :
+    MaterialStatus(g), deviatoricStressVector(6), deviatoricStrainRateVector(6)
 { }
 
 void

@@ -837,8 +837,8 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-IDNLMaterialStatus :: IDNLMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    IsotropicDamageMaterial1Status(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface()
+IDNLMaterialStatus :: IDNLMaterialStatus(GaussPoint *g) :
+    IsotropicDamageMaterial1Status(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localEquivalentStrainForAverage = 0.0;
 }

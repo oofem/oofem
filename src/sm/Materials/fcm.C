@@ -1714,8 +1714,8 @@ FCMMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 }
 
 
-FCMMaterialStatus :: FCMMaterialStatus(int n, Domain *d, GaussPoint *gp) :
-    StructuralMaterialStatus(n, d, gp),
+FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
+    StructuralMaterialStatus(gp),
     crackStatuses(), tempCrackStatuses(),
     maxCrackStrains(), tempMaxCrackStrains(),
     crackStrainVector(), tempCrackStrainVector(),

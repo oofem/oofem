@@ -66,7 +66,7 @@ protected:
 
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
-    TransportMaterialStatus(int n, Domain * d, GaussPoint * g);
+    TransportMaterialStatus(GaussPoint * g);
     /// Destructor
     virtual ~TransportMaterialStatus() { }
 
@@ -194,7 +194,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TransportMaterialStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TransportMaterialStatus(gp); }
 };
 } // end namespace oofem
 #endif // transportmaterial_h

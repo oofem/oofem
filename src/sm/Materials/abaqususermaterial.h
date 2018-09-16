@@ -80,8 +80,6 @@ namespace oofem {
 class AbaqusUserMaterial : public StructuralMaterial
 {
 private:
-    /// Gausspoint counter
-    static int n;
     /// Dynamically loaded umat.
     void *umatobj;
 
@@ -179,7 +177,7 @@ protected:
 
 public:
     /// Constructor.
-    AbaqusUserMaterialStatus(int n, Domain * d, GaussPoint * gp, int numState);
+    AbaqusUserMaterialStatus(GaussPoint * gp, int numState);
     /// Destructor.
     virtual ~AbaqusUserMaterialStatus() { }
 

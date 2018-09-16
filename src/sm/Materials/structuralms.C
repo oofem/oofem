@@ -39,8 +39,8 @@
 #include "gausspoint.h"
 
 namespace oofem {
-StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
-    MaterialStatus(n, d, g), strainVector(), stressVector(),
+StructuralMaterialStatus :: StructuralMaterialStatus(GaussPoint *g) :
+    MaterialStatus(g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector(), FVector(), tempFVector()
 {
     int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );

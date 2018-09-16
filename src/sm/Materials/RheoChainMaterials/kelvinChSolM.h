@@ -45,7 +45,7 @@ namespace oofem {
 class KelvinChainSolidMaterialStatus : public RheoChainMaterialStatus
 {
 public:
-    KelvinChainSolidMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    KelvinChainSolidMaterialStatus(GaussPoint * g, int nunits);
     virtual ~KelvinChainSolidMaterialStatus() { }
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

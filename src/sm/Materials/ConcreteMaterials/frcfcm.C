@@ -1096,8 +1096,8 @@ FRCFCM :: computeOverallElasticStiffness(void)
 ///////////////////////////////////////////////////////////////////
 
 
-FRCFCMStatus :: FRCFCMStatus(int n, Domain *d, GaussPoint *gp) :
-    ConcreteFCMStatus(n, d, gp),
+FRCFCMStatus :: FRCFCMStatus(GaussPoint *gp) :
+    ConcreteFCMStatus(gp),
     damage(0.),
     tempDamage(0.)
 { }

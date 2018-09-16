@@ -123,7 +123,7 @@ protected:
 
 
 public:
-    MPSMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits);
+    MPSMaterialStatus(GaussPoint *g, int nunits);
     virtual ~MPSMaterialStatus() { }
 
     void initTempStatus() override;

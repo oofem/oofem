@@ -109,10 +109,11 @@ class LargeStrainMasterMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     FloatMatrix Pmatrix, TLmatrix, transformationMatrix;
+    Domain *domain;
     int slaveMat;
 
 public:
-    LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s);
+    LargeStrainMasterMaterialStatus(GaussPoint *g, Domain *d, int s);
     virtual ~LargeStrainMasterMaterialStatus();
 
     const FloatMatrix &givePmatrix() { return Pmatrix; }

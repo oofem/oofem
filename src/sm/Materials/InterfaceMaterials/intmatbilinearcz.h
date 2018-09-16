@@ -57,7 +57,7 @@ namespace oofem {
 class IntMatBilinearCZStatus : public StructuralInterfaceMaterialStatus
 {
 public:
-    IntMatBilinearCZStatus(int n, Domain * d, GaussPoint * g);
+    IntMatBilinearCZStatus(GaussPoint * g);
     virtual ~IntMatBilinearCZStatus();
 
     /// damage variable
@@ -133,7 +133,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZStatus(gp); }
     void printYourself() override;
 };
 } /* namespace oofem */

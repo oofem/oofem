@@ -141,7 +141,7 @@ protected:
 
 public:
     /// Constructor.
-    StructuralPythonMaterialStatus(Domain * d, GaussPoint * gp);
+    StructuralPythonMaterialStatus(GaussPoint * gp);
     /// Destructor.
     virtual ~StructuralPythonMaterialStatus();
 

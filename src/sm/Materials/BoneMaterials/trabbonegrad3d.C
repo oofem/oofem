@@ -338,8 +338,8 @@ TrabBoneGrad3D :: initializeFrom(InputRecord *ir)
 }
 
 
-TrabBoneGrad3DStatus :: TrabBoneGrad3DStatus(int n, Domain *d, GaussPoint *g) :
-    TrabBone3DStatus(n, d, g)
+TrabBoneGrad3DStatus :: TrabBoneGrad3DStatus(GaussPoint *g) :
+    TrabBone3DStatus(g)
 {
     nlKappa = 0;
 }

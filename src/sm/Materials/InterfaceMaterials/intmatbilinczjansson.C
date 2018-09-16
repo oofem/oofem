@@ -505,8 +505,8 @@ IntMatBilinearCZJansson  :: printYourself()
 }
 
 
-//IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+//IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(GaussPoint *g) : StructuralMaterialStatus(g)
+IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
     oldMaterialJump.resize(3);
     oldMaterialJump.zero();
@@ -517,7 +517,6 @@ IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(int n, Domain *d,
     QEffective = oldMaterialJump;
     tempQEffective = oldMaterialJump;
 
-        
     tempFInv.resize(3,3);
     tempFInv.beUnitMatrix();
 
@@ -525,7 +524,6 @@ IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(int n, Domain *d,
     old_dTdJ.zero();
 
     oldDamageDev = false;
-
 
 #if 0
     ///@todo Martin: Very bad implementation of intialisation of Rot

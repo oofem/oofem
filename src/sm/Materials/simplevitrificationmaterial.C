@@ -166,6 +166,6 @@ void SimpleVitrificationMaterial :: giveThermalDilatationVector(FloatArray &answ
 
 MaterialStatus *SimpleVitrificationMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(1, domain, gp);
+    return new StructuralMaterialStatus(gp);
 }
 } // end namespace oofem

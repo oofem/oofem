@@ -68,7 +68,7 @@ protected:
     std :: string mInputFile;
 
 public:
-    StructuralFE2MaterialStatus(int n, int rank, Domain * d, GaussPoint * g,  const std :: string & inputfile);
+    StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile);
     virtual ~StructuralFE2MaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }

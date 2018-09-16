@@ -181,7 +181,7 @@ BondCEBMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 
-BondCEBMaterialStatus :: BondCEBMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+BondCEBMaterialStatus :: BondCEBMaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
     kappa = tempKappa = 0.0;
 }

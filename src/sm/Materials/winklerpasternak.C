@@ -107,7 +107,7 @@ WinklerPasternakMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, Mat
 MaterialStatus *
 WinklerPasternakMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
+    return new StructuralMaterialStatus(gp);
 }
 
 

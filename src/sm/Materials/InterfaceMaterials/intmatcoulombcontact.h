@@ -61,7 +61,7 @@ protected:
     FloatArray shearStressShift, tempShearStressShift;
 
 public:
-    IntMatCoulombContactStatus(int n, Domain *d, GaussPoint *g);
+    IntMatCoulombContactStatus(GaussPoint *g);
     virtual ~IntMatCoulombContactStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -142,7 +142,7 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
     bool hasAnalyticalTangentStiffness() const override { return true; }
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatCoulombContactStatus(1, domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatCoulombContactStatus(gp); }
 };
 } // end namespace oofem
 #endif // simpleinterfacemat_h

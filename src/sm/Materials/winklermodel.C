@@ -136,7 +136,7 @@ WinklerMaterial::give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode
 MaterialStatus *
 WinklerMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
+    return new StructuralMaterialStatus(gp);
 }
 
 

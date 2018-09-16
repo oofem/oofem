@@ -106,7 +106,7 @@ protected:
     FloatMatrix tempDamageTensorEigenVectors, damageTensorEigenVectors;
 
 public:
-    MDMStatus(int n, int nsd, int nmplanes, Domain * d, GaussPoint * g);
+    MDMStatus(GaussPoint * g, int nsd, int nmplanes);
     virtual ~MDMStatus();
 
     void setTempDamageTensorEigenVals(FloatArray src) { tempDamageTensorEigenValues = std :: move(src); }

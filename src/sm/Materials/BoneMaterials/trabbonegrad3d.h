@@ -58,7 +58,7 @@ protected:
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
-    TrabBoneGrad3DStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneGrad3DStatus(GaussPoint *g);
     virtual ~TrabBoneGrad3DStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -115,7 +115,7 @@ public:
     void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneGrad3DStatus(1, TrabBone3D :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneGrad3DStatus(gp); }
 };
 } // end namespace oofem
 

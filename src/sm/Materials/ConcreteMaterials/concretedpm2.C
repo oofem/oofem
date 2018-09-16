@@ -51,8 +51,8 @@
 namespace oofem {
 REGISTER_Material(ConcreteDPM2);
 
-ConcreteDPM2Status :: ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp) :
-    StructuralMaterialStatus(n, d, gp),
+ConcreteDPM2Status :: ConcreteDPM2Status(GaussPoint *gp) :
+    StructuralMaterialStatus(gp),
     plasticStrain(6),
     tempPlasticStrain(6)
 {
@@ -2899,6 +2899,6 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
 MaterialStatus *
 ConcreteDPM2 :: CreateStatus(GaussPoint *gp) const
 {
-    return new  ConcreteDPM2Status(1, StructuralMaterial :: giveDomain(), gp);
+    return new  ConcreteDPM2Status(gp);
 }
 } //end of namespace

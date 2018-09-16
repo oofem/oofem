@@ -62,7 +62,7 @@ protected:
 
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and integration point g.
-    FluidDynamicMaterialStatus(int n, Domain * d, GaussPoint * g);
+    FluidDynamicMaterialStatus(GaussPoint * g);
     /// Destructor.
     virtual ~FluidDynamicMaterialStatus() { }
 

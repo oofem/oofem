@@ -187,7 +187,7 @@ CebFipSlip90Material :: computeBondForceStiffness(double s)
 }
 
 
-CebFipSlip90MaterialStatus :: CebFipSlip90MaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+CebFipSlip90MaterialStatus :: CebFipSlip90MaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
     kappa = tempKappa = 0.0;
 }

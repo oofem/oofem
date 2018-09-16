@@ -51,8 +51,8 @@ REGISTER_Material(ConcreteDPM);
 //static bool __dummy_ConcreteDPM_alt __attribute__((unused)) = GiveClassFactory().registerMaterial("concreteidp", matCreator< ConcreteDPM > );
 REGISTER_Material_Alt(ConcreteDPM, concreteidp);
 
-ConcreteDPMStatus :: ConcreteDPMStatus(int n, Domain *d, GaussPoint *gp) :
-    StructuralMaterialStatus(n, d, gp),
+ConcreteDPMStatus :: ConcreteDPMStatus(GaussPoint *gp) :
+    StructuralMaterialStatus(gp),
     plasticStrain(6),
     tempPlasticStrain(6)
 {
@@ -1855,6 +1855,6 @@ ConcreteDPM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
 MaterialStatus *
 ConcreteDPM :: CreateStatus(GaussPoint *gp) const
 {
-    return new ConcreteDPMStatus(1, StructuralMaterial :: giveDomain(), gp);
+    return new ConcreteDPMStatus(gp);
 }
 } // end namespace oofem

@@ -48,11 +48,9 @@
 namespace oofem {
 REGISTER_Material(AbaqusUserMaterial);
 
-int AbaqusUserMaterial :: n = 1;
-
 AbaqusUserMaterial :: AbaqusUserMaterial(int n, Domain *d) :
     StructuralMaterial(n, d),
-    umatobj(NULL), umat(NULL),
+    umatobj(nullptr), umat(nullptr),
     mStressInterpretation(0),
     mUseNumericalTangent(false),
     mPerturbation(1.0e-7)
@@ -143,7 +141,7 @@ void AbaqusUserMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new AbaqusUserMaterialStatus(n++, this->giveDomain(), gp, this->numState);
+    return new AbaqusUserMaterialStatus(gp, this->numState);
 }
 
 
@@ -641,8 +639,8 @@ void AbaqusUserMaterialStatus :: initTempStatus()
     tempStateVector = stateVector;
 }
 
-AbaqusUserMaterialStatus :: AbaqusUserMaterialStatus(int n, Domain *d, GaussPoint *gp, int numState) :
-    StructuralMaterialStatus(n, d, gp),
+AbaqusUserMaterialStatus :: AbaqusUserMaterialStatus(GaussPoint *gp, int numState) :
+    StructuralMaterialStatus(gp),
     numState(numState), stateVector(numState), tempStateVector(numState), hasTangentFlag(false)
 {
     strainVector.resize(6);
@@ -656,7 +654,6 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 void AbaqusUserMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
-// Prints the strains and stresses on the data file.
 {
     StructuralMaterialStatus :: printOutputAt(File, tStep);
 

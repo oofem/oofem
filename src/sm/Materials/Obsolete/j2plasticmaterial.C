@@ -105,7 +105,7 @@ void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 MaterialStatus *
 J2plasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
-    return new PlasticMaterialStatus(1, this->giveDomain(), gp, this->giveSizeOfReducedHardeningVarsVector(gp));
+    return new PlasticMaterialStatus(gp, this->giveSizeOfReducedHardeningVarsVector(gp));
 }
 
 

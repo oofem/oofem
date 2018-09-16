@@ -122,7 +122,7 @@ protected:
     double tempHydrationDegree;
 
 public:
-    HydrationModelStatus(int n, Domain * d, GaussPoint * g);
+    HydrationModelStatus(GaussPoint * g);
     virtual ~HydrationModelStatus() { }
 
     /// Returns the temp hydration degree.

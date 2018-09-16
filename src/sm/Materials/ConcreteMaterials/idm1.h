@@ -118,7 +118,7 @@ class IsotropicDamageMaterial1Status : public IsotropicDamageMaterialStatus, pub
 {
 public:
     /// Constructor
-    IsotropicDamageMaterial1Status(int n, Domain *d, GaussPoint *g);
+    IsotropicDamageMaterial1Status(GaussPoint *g);
     /// Destructor
     virtual ~IsotropicDamageMaterial1Status() { }
 

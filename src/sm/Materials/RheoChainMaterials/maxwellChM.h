@@ -44,7 +44,7 @@ namespace oofem {
 class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
-    MaxwellChainMaterialStatus(int n, Domain * d, GaussPoint * g, int nunits);
+    MaxwellChainMaterialStatus(GaussPoint * g, int nunits);
     virtual ~MaxwellChainMaterialStatus() { }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;

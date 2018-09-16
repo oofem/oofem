@@ -504,8 +504,8 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
 }
 
 
-MisesMatGradStatus :: MisesMatGradStatus(int n, Domain *d, GaussPoint *g) :
-    MisesMatStatus(n, d, g)
+MisesMatGradStatus :: MisesMatGradStatus(GaussPoint *g) :
+    MisesMatStatus(g)
 {
     nonlocalCumulatedStrain = 0;
 }

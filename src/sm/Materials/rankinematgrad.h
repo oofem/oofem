@@ -59,7 +59,7 @@ protected:
     double kappa_hat;
 
 public:
-    RankineMatGradStatus(int n, Domain * d, GaussPoint * g);
+    RankineMatGradStatus(GaussPoint * g);
     virtual ~RankineMatGradStatus() { }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
@@ -128,7 +128,7 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RankineMatGradStatus(1, RankineMat :: domain, gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RankineMatGradStatus(gp); }
 };
 } // end namespace oofem
 #define RankineMatGrad_h

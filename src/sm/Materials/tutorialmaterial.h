@@ -106,7 +106,7 @@ protected:
     double k;
 
 public:
-    TutorialMaterialStatus(int n, Domain * d, GaussPoint * g);
+    TutorialMaterialStatus(GaussPoint * g);
     virtual ~TutorialMaterialStatus() {}
 
     const FloatArray &givePlasticStrain() { return plasticStrain; }

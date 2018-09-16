@@ -160,7 +160,7 @@ SimpleInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
+SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
 {
     shearStressShift.resize(2);
     tempShearStressShift.resize(2);

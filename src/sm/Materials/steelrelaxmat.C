@@ -145,7 +145,7 @@ SteelRelaxMat :: initializeFrom(InputRecord *ir)
 MaterialStatus *
 SteelRelaxMat :: CreateStatus(GaussPoint *gp) const
 {
-    return new SteelRelaxMatStatus(1, this->giveDomain(), gp);
+    return new SteelRelaxMatStatus(gp);
 }
 
 void
@@ -468,7 +468,7 @@ SteelRelaxMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 
 //=============================================================================
 
-SteelRelaxMatStatus :: SteelRelaxMatStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
+SteelRelaxMatStatus :: SteelRelaxMatStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
     relaxIntVariable = tempRelaxIntVariable = 0.;
     prestress = 0.;

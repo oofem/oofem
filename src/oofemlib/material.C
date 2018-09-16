@@ -214,15 +214,15 @@ Material :: giveStatus(GaussPoint *gp) const
  */
 {
     MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
-    if ( status == NULL ) {
+    if ( status == nullptr ) {
         // create a new one
         status = this->CreateStatus(gp);
 
         // if newly created status is null
         // dont include it. specific instance
         // does not have status.
-        if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveNumber() );
+        if ( status ) {
+            gp->setMaterialStatus( status );
         }
     }
 
