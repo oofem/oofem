@@ -38,8 +38,10 @@
 #include "fm/Materials/fluiddynamicmaterial.h"
 #include "intarray.h"
 #include "matstatus.h"
+#include "gausspoint.h"
 
 #include <memory>
+#include <array>
 
 ///@name Input fields for TwoFluidMaterial
 //@{
@@ -48,7 +50,6 @@
 //@}
 
 namespace oofem {
-class GaussPoint;
 
 /**
  * Material coupling the behavior of two particular materials based on
@@ -92,12 +93,13 @@ protected:
 class TwoFluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
-    std :: unique_ptr< GaussPoint >slaveGp0;
-    std :: unique_ptr< GaussPoint >slaveGp1;
+    std::array<GaussPoint, 2> slaveGps;
+    ///@todo This should technically suffice;
+    //std::array<std::unique_ptr<MaterialStatus>, 2> slaveStatus;
 
 public:
     /// Constructor
-    TwoFluidMaterialStatus(int n, Domain * d, GaussPoint * g, const IntArray & slaveMaterial);
+    TwoFluidMaterialStatus(int n, Domain * d, GaussPoint * g, const std::array<Material*, 2> &slaveMaterial);
     /// Destructor
     virtual ~TwoFluidMaterialStatus() { }
 
@@ -110,8 +112,8 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
     const char *giveClassName() const override { return "TwoFluidMaterialStatus"; }
 
-    GaussPoint *giveSlaveGaussPoint0() { return this->slaveGp0.get(); }
-    GaussPoint *giveSlaveGaussPoint1() { return this->slaveGp1.get(); }
+    GaussPoint *giveSlaveGaussPoint0() { return &this->slaveGps[0]; }
+    GaussPoint *giveSlaveGaussPoint1() { return &this->slaveGps[1]; }
 };
 } // end namespace oofem
 #endif // twofluidmaterial_h
