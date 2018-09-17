@@ -76,6 +76,16 @@ public:
     template<typename... V> FloatMatrixF(V... x) : values{x...} { }
     /// Copy constructor.
     FloatMatrixF(const FloatMatrixF<N,M> &mat) : values(mat.values) {}
+    /// FloatMatrix conversion constructor.
+    FloatMatrixF(const FloatMatrix &mat)
+    {
+#ifndef NDEBUG
+        if ( mat.giveNumberOfRows() != N || mat.giveNumberOfColumns() != M ) {
+            OOFEM_ERROR("Can't convert dynamic float matrix of size %d x %d to fixed size %d x %d\n", mat.giveNumberOfRows(), mat.giveNumberOfColumns(), N, M);
+        }
+#endif
+        std::copy_n(mat.begin(), N*M, values.begin());
+    }
 
     /// Assignment operator
     FloatMatrixF &operator=(const FloatMatrixF<N,M> &mat)
@@ -224,7 +234,7 @@ public:
         ///@todo This method should only exist if we have N == M, how do I enforce this?
         for ( int i = 0; i < N; ++i ) {
             for ( int j = i; j < N; ++j ) {
-                (*this)(i, j) = a[i] * a[j] * dV;
+                (*this)(i, j) += a[i] * a[j] * dV;
             }
         }
     }
@@ -259,7 +269,7 @@ public:
         ///@todo This method should only exist if we have N == M, how do I enforce this?
         for ( int i = 0; i < N; ++i ) {
             for ( int j = 0; j < M; ++j ) {
-                (*this)(i, j) = a[i] * b[j] * dV;
+                (*this)(i, j) += a[i] * b[j] * dV;
             }
         }
     }
@@ -487,7 +497,7 @@ FloatMatrixF<M,N> transpose(const FloatMatrixF<N,M> &mat)
 {
     FloatMatrixF<M,N> out;
     for ( int i = 0; i < N; ++i ) {
-        for ( int j = 0; j < M; ++i ) {
+        for ( int j = 0; j < M; ++j ) {
             out(j, i) = mat(i, j);
         }
     }
@@ -563,19 +573,26 @@ FloatArrayF<N> dot(const FloatMatrixF<N,M> &m, const FloatArrayF<M> &x)
     return out;
 }
 
-/// Computes @$ m_ji x_j = x \cdot m @$
+/// Computes @$ x_j m_ji = x \cdot m = m^{\mathrm{T}} \cdot x @$
 template<int N, int M>
-FloatArrayF<N> dot(const FloatMatrixF<M,N> &m, const FloatArrayF<M> &x)
+FloatArrayF<N> dot(const FloatArrayF<M> &x, const FloatMatrixF<M,N> &m)
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < M; i++ ) {
+    for ( int i = 0; i < N; i++ ) {
         double sum = 0.;
-        for ( int j = 0; j < N; j++ ) {
+        for ( int j = 0; j < M; j++ ) {
             sum += x[j] * m(j, i);
         }
         out[i] = sum;
     }
     return out;
+}
+
+/// Computes @$ x_j m_ji = x \cdot m = m^{\mathrm{T}} \cdot x @$
+template<int N, int M>
+FloatArrayF<N> Tdot(const FloatMatrixF<M,N> &m, const FloatArrayF<M> &x)
+{
+    return dot(x, m);
 }
 
 /// Computes the dyadic product @f$ m_{ij} = a_i b_j @f$.
@@ -823,9 +840,9 @@ FloatMatrixF<NSD,N> Nmatrix(const FloatArrayF<N> &n)
 
 /// Constructs the B matrix for 3D momentum balance problems.
 template<int N>
-FloatMatrixF<N,6> Bmatrix_3d(const FloatMatrixF<3,N> &dN)
+FloatMatrixF<6, N*3> Bmatrix_3d(const FloatMatrixF<3,N> &dN)
 {
-    FloatMatrixF<N,6> B;
+    FloatMatrixF<6, N*3> B;
     for ( int j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
         B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
         B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
@@ -836,12 +853,12 @@ FloatMatrixF<N,6> Bmatrix_3d(const FloatMatrixF<3,N> &dN)
 
 /// Constructs the B matrix for plane stress momentum balance problems.
 template<int N>
-FloatMatrixF<3,N> Bmatrix_2d(const FloatMatrixF<2,N> &dN)
+FloatMatrixF<3,N*2> Bmatrix_2d(const FloatMatrixF<2,N> &dN)
 {
     FloatMatrixF<3,N*2> B;
     for ( int j = 0, k = 0; j < N; j++, k += 2 ) {
-        B(0, k + 0) = B(2, k + 1) = dN(j, 0);
-        B(1, k + 1) = B(2, k + 0) = dN(j, 1);
+        B(0, k + 0) = B(2, k + 1) = dN(0, j);
+        B(1, k + 1) = B(2, k + 0) = dN(1, j);
     }
     return B;
 }

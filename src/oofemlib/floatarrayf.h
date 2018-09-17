@@ -122,7 +122,7 @@ public:
     inline double &operator[] (int i)
     {
 #ifndef NDEBUG
-        return values.at( i - 1 );
+        return values.at( i );
 #else
         return values [ i ];
 #endif
@@ -134,7 +134,7 @@ public:
      */
     inline const double &operator[] (int i) const { 
 #ifndef NDEBUG
-        return values.at( i - 1 );
+        return values.at( i );
 #else
         return values [ i ];
 #endif
@@ -418,7 +418,7 @@ FloatArrayF<N> max(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 }
 
 template<int N>
-FloatArrayF<N> min(const FloatArray &a, const FloatArray &b)
+FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     FloatArrayF<N> out;
     for (int i; i < N; ++i) {
