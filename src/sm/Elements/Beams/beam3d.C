@@ -1123,10 +1123,10 @@ Beam3d :: computeInternalForcesFromBoundaryEdgeLoadVectorAtPoint(FloatArray &ans
     for ( GaussPoint *gp : *this->giveDefaultIntegrationRulePtr() ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
         this->computeGlobalCoordinates(coords, lcoords, pointCoords);
-        if ( load ) {
-            load->computeValues(t, tStep, coords, { D_u, D_v, D_w, R_u, R_v, R_w }, mode);
-        } else {
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValues(t, tStep, lcoords, { D_u, D_v, D_w, R_u, R_v, R_w }, mode);
+        } else {
+            load->computeValues(t, tStep, coords, { D_u, D_v, D_w, R_u, R_v, R_w }, mode);
         }
 
         if ( load->giveCoordSystMode() == Load :: CST_Global ) {
