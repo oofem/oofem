@@ -39,17 +39,15 @@
 #include "sm/Materials/structuralmaterial.h"
 #include "structuralinterfacematerialstatus.h"
 #include "gausspoint.h"
+
 namespace oofem {
+
 StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(GaussPoint *g) :
-    MaterialStatus(g), jump(3), traction(3), tempTraction(3), tempJump(3), firstPKTraction(3), tempFirstPKTraction(3), F(3, 3), tempF(3, 3),
-    mNewlyInserted(true)
+    MaterialStatus(g)
 {
-    this->F.beUnitMatrix();
-    this->tempF.beUnitMatrix();
+    F = eye<3>();
+    tempF = F;
 }
-
-
-StructuralInterfaceMaterialStatus :: ~StructuralInterfaceMaterialStatus() { }
 
 
 void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

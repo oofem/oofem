@@ -39,15 +39,7 @@
 namespace oofem {
 REGISTER_Material(IntMatDummyCZ);
 
-IntMatDummyCZ :: IntMatDummyCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-{
-
-}
-
-IntMatDummyCZ :: ~IntMatDummyCZ()
-{
-
-}
+IntMatDummyCZ :: IntMatDummyCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d) {}
 
 void IntMatDummyCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                                 const FloatMatrix &F, TimeStep *tStep)
@@ -56,8 +48,7 @@ void IntMatDummyCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp,
 
     status->letTempJumpBe(jump);
 
-    answer.resize(3);
-    answer.zero();
+    answer = {0., 0., 0.};
 }
 
 void IntMatDummyCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)

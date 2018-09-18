@@ -58,36 +58,33 @@ class IsoInterfaceDamageMaterialStatus : public StructuralInterfaceMaterialStatu
 {
 protected:
     /// Scalar measure of the largest equivalent displacement ever reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar measure of the largest equivalent displacement.
-    double tempKappa;
+    double tempKappa = 0.;
     /// Damage level of material.
-    double damage;
+    double damage = 0.;
     /// Non-equilibrated damage level of material.
-    double tempDamage;
+    double tempDamage = 0.;
 
 public:
     /// Constructor
     IsoInterfaceDamageMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~IsoInterfaceDamageMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level.
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated damage level.
-    double giveDamage() override { return damage; }
+    double giveDamage() const override { return damage; }
     /// Returns the temp. damage level.
-    double giveTempDamage() override { return tempDamage; }
+    double giveTempDamage() const override { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
-    // definition
     const char *giveClassName() const override { return "IsoInterfaceDamageMaterialStatus"; }
 
     void initTempStatus() override;
@@ -114,27 +111,25 @@ class IsoInterfaceDamageMaterial : public StructuralInterfaceMaterial
 {
 protected:
     /// Coefficient of thermal dilatation.
-    double tempDillatCoeff;
+    double tempDillatCoeff = 0.;
     /// Elastic properties (normal moduli).
-    double kn;
+    double kn = 0.;
     /// Shear moduli.
-    double ks;
+    double ks = 0.;
     /// Tension strength.
-    double ft;
+    double ft = 0.;
     /// Fracture energy.
-    double gf;
+    double gf = 0.;
     /// Limit elastic deformation.
-    double e0;
+    double e0 = 0.;
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed.
-    double maxOmega;
+    double maxOmega = 0.999999;
     /// Weight factor for the influence of shear component of displacement jump on equivalent strain.
-    double beta;
+    double beta = 0.;
 
 public:
     /// Constructor
     IsoInterfaceDamageMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~IsoInterfaceDamageMaterial();
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 
@@ -146,16 +141,16 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    void computeEquivalentStrain(double &kappa, const FloatArray &jump, GaussPoint *gp, TimeStep *tStep);
+    double computeEquivalentStrain(const FloatArray &jump, GaussPoint *gp, TimeStep *tStep);
 
     /**
-     * computes the value of damage parameter omega, based on given value of equivalent strain.
-     * @param[out] omega Contains result.
+     * Computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param kappa Equivalent strain measure.
      * @param strain Total strain vector in full form. (unnecessary?)
      * @param gp Integration point.
+     * @return omega.
      */
-    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
+    virtual double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp);
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

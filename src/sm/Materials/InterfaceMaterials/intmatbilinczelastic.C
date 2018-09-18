@@ -48,43 +48,33 @@ REGISTER_Material(IntMatBilinearCZElastic);
 IntMatBilinearCZElastic :: IntMatBilinearCZElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-IntMatBilinearCZElastic :: ~IntMatBilinearCZElastic() { }
-
-
 void
 IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
                                                   const FloatMatrix &F, TimeStep *tStep)
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
-    answer.resize( jumpVector.giveSize() );
-    answer.zero();
     /// @todo only study normal stress for now 
     // no degradation in shear
     // jumpVector = [normal shear1 shear2]
+    //auto [gn, gs1, gs2] = jumpVector;
     double gn  = jumpVector.at(1);
     double gs1 = jumpVector.at(2);
     double gs2 = jumpVector.at(3);
 
+    double normal;
     if ( gn <= 0.0 ) { // compresssion
-        answer.at(1) = this->knc * gn;
-        answer.at(2) = this->ks0 * gs1;
-        answer.at(3) = this->ks0 * gs2;
+        normal = this->knc * gn;
     } else if ( gn <= this->gn0 ) { // first linear part
-        answer.at(1) = this->kn0 * gn;
-        answer.at(2) = this->ks0 * gs1;
-        answer.at(3) = this->ks0 * gs2;
+        normal = this->kn0 * gn;
     } else if ( gn <= this->gnmax  ) {  // softening branch
-        answer.at(1) = this->sigfn + this->kn1 * ( gn - this->gn0 );
-        answer.at(2) = this->ks0 * gs1;
-        answer.at(3) = this->ks0 * gs2;
+        normal = this->sigfn + this->kn1 * ( gn - this->gn0 );
         //printf("Softening branch...\n");
     } else {
-        answer.at(1) = 0.0; // failed
-        answer.at(2) = this->ks0 * gs1;
-        answer.at(3) = this->ks0 * gs2;
+        normal = 0.0; // failed
         //printf("Failed...\n");
     }
+    answer = {normal, this->ks0 * gs1, this->ks0 * gs2};
 
     // update gp
     status->letTempJumpBe(jumpVector);
@@ -98,45 +88,29 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
-    const FloatArray &jumpVector = status->giveTempJump();
+    const auto &jumpVector = status->giveTempJump();
     double gn = jumpVector.at(1);
 
-    answer.resize(3, 3);
-    answer.zero();
+    double normal;
     if ( gn <= 0.0 ) { // compresssion
-        answer.at(1, 1) = this->knc;
-        answer.at(2, 2) = this->ks0;
-        answer.at(3, 3) = this->ks0;
+        normal = this->knc;
     } else if ( gn <= this->gn0 ) { // first linear part
-	answer.at(1, 1) = this->kn0;        
-	answer.at(2, 2) = this->ks0;
-        answer.at(3, 3) = this->ks0;
+        normal = this->kn0;
         //printf("Linear branch...\n");
     } else if ( gn <= this->gnmax  ) { // softening branch
-	answer.at(1, 1) = this->kn1;        
-	answer.at(2, 2) = this->ks0; // no degradation in shear
-        answer.at(3, 3) = this->ks0;
+        normal = this->kn1;
         //printf("Softening branch...\n");
     } else {
-	answer.at(1, 1) = 0.0; // failed        
-	answer.at(2, 2) = this->ks0;
-        answer.at(3, 3) = this->ks0;
+        normal = 0.0; // failed
         //printf("Failed...\n");
     }
+    answer.resize(3, 3);
+    answer.zero();
+    answer.at(1, 1) = normal;
+    answer.at(2, 2) = this->ks0;
+    answer.at(3, 3) = this->ks0;
 }
 
-
-int
-IntMatBilinearCZElastic :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
-{
-    if ( type == IST_DamageScalar ) {
-        answer.resize(1);
-        answer.at(1) = 0.0; // no damage
-        return 1;
-    } else {
-        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, tStep);
-    }
-}
 
 const double tolerance = 1.0e-12; // small number
 IRResultType

@@ -47,7 +47,6 @@ class StructuralInterfaceMaterialPhF : public StructuralInterfaceMaterial
 {
 public:
     StructuralInterfaceMaterialPhF(int n, Domain * d);
-    virtual ~StructuralInterfaceMaterialPhF() { }
 
     //virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep);
     virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep);

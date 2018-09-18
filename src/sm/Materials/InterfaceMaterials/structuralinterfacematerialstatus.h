@@ -39,11 +39,11 @@
 #include "floatarray.h"
 #include "matstatmapperint.h"
 #include "floatmatrix.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 
 namespace oofem {
 class GaussPoint;
-class Dictionary;
-class Domain;
 
 /**
  * This class implements a structural interface material status information. It is attribute of
@@ -54,48 +54,38 @@ class Domain;
  * StructuralInterfaceMaterial class.
  * It defines the traction, jump (discontinuity), deformation gradient and their temporary counterparts.
  * Functions for accessing these components are defined.
- *
- * Tasks:
- * This is abstract class - only basic functionality is supported like:
- * - maintaining and providing access to stress and strain vectors
- *   (including their increments)
- * - storing and restoring status on tape
- * - printingYourself()
- * - updating Yourself after a new equilibrium state has been reached.
  */
 class StructuralInterfaceMaterialStatus : public MaterialStatus, public MaterialStatusMapperInterface
 {
 protected:
     /// Equilibrated jump (discontinuity)
-    FloatArray jump;
+    FloatArrayF<3> jump;
     /// Equilibrated (engineering) traction vector
-    FloatArray traction;
+    FloatArrayF<3> traction;
     /// Temporary (engineering) traction vector
-    FloatArray tempTraction;
+    FloatArrayF<3> tempTraction;
     /// Temporary jump (discontinuity)
-    FloatArray tempJump;
+    FloatArrayF<3> tempJump;
 
     /// Equilibrated first Piola-Kirchhoff traction vector T
-    FloatArray firstPKTraction;
+    FloatArrayF<3> firstPKTraction;
     /// Temporary first Piola-Kirchhoff traction vector (to find balanced state)
-    FloatArray tempFirstPKTraction;
+    FloatArrayF<3> tempFirstPKTraction;
     /// Equilibrated deformation gradient in reduced form
-    FloatMatrix F;
+    FloatMatrixF<3,3> F;
     /// Temporary deformation gradient in reduced form (to find balanced state)
-    FloatMatrix tempF;
+    FloatMatrixF<3,3> tempF;
 
     /// Interface normal direction
-    FloatArray mNormalDir;
+    FloatArrayF<3> mNormalDir;
 
-    bool mNewlyInserted;
+    bool mNewlyInserted = true;
 
-    FloatArray projectedTraction;
+    FloatArrayF<2> projectedTraction;
 
 public:
     /// Constructor. Creates new StructuralInterfaceMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     StructuralInterfaceMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~StructuralInterfaceMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
@@ -106,45 +96,46 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
     /// Returns the const pointer to receiver's jump.
-    const FloatArray &giveJump() const { return jump; }
+    const FloatArrayF<3> &giveJump() const { return jump; }
     /// Returns the const pointer to receiver's traction vector.
-    const FloatArray &giveTraction() const { return traction; }
+    const FloatArrayF<3> &giveTraction() const { return traction; }
     /// Returns the const pointer to receiver's first Piola-Kirchhoff traction vector.
-    const FloatArray &giveFirstPKTraction() const { return firstPKTraction; }
+    const FloatArrayF<3> &giveFirstPKTraction() const { return firstPKTraction; }
     /// Returns the const pointer to receiver's deformation gradient vector.
-    const FloatMatrix &giveF() const { return F; }
+    const FloatMatrixF<3,3> &giveF() const { return F; }
     /// Returns the const pointer to receiver's temporary jump.
-    const FloatArray &giveTempJump() const { return tempJump; }
+    const FloatArrayF<3> &giveTempJump() const { return tempJump; }
     /// Returns the const pointer to receiver's temporary traction vector.
-    const FloatArray &giveTempTraction() const { return tempTraction; }
+    const FloatArrayF<3> &giveTempTraction() const { return tempTraction; }
     /// Returns the const pointer to receiver's temporary first Piola-Kirchhoff traction vector.
-    const FloatArray &giveTempFirstPKTraction() const { return tempFirstPKTraction; }
+    const FloatArrayF<3> &giveTempFirstPKTraction() const { return tempFirstPKTraction; }
     /// Returns the const pointer to receiver's temporary deformation gradient vector.
-    const FloatMatrix &giveTempF() const { return tempF; }
+    const FloatMatrixF<3,3> &giveTempF() const { return tempF; }
     /// Returns const reference to normal vector.
-    const FloatArray &giveNormal() const { return mNormalDir; }
+    const FloatArrayF<3> &giveNormal() const { return mNormalDir; }
     /// Returns the projected traction.
-    const FloatArray &giveProjectedTraction() const { return projectedTraction; }
+    const FloatArrayF<2> &giveProjectedTraction() const { return projectedTraction; }
     /// Assigns jump to given vector v.
-    void letJumpBe(FloatArray v) { jump = std :: move(v); }
+    void letJumpBe(const FloatArrayF<3> v) { jump = v; }
     /// Assigns traction to given vector v.
-    void letTractionBe(FloatArray v) { traction = std :: move(v); }
+    void letTractionBe(const FloatArrayF<3> v) { traction = v; }
     /// Assigns firstPKTraction to given vector v.
-    void letFirstPKTractionBe(FloatArray v) { firstPKTraction = std :: move(v); }
+    void letFirstPKTractionBe(const FloatArrayF<3> v) { firstPKTraction = v; }
     /// Assigns FVector to given vector v.
-    void letFBe(FloatMatrix v) { F = std :: move(v); }
+    void letFBe(const FloatMatrixF<3,3> v) { F = v; }
     /// Assigns tempTraction to given vector v.
-    void letTempTractionBe(FloatArray v) { tempTraction = std :: move(v); }
+    void letTempTractionBe(const FloatArrayF<3> v) { tempTraction = v; }
     /// Assigns tempJump to given vector v
-    void letTempJumpBe(FloatArray v) { tempJump = std :: move(v); }
+    void letTempJumpBe(const FloatArrayF<3> v) { tempJump = v; }
     /// Assigns tempFirstPKTraction to given vector v
-    void letTempFirstPKTractionBe(FloatArray v) { tempFirstPKTraction = std :: move(v); }
+    void letTempFirstPKTractionBe(const FloatArrayF<3> v) { tempFirstPKTraction = v; }
     /// Assigns tempFVector to given vector v
-    void letTempFBe(FloatMatrix v) { tempF = std :: move(v); }
+    void letTempFBe(const FloatMatrixF<3,3> &v) { tempF = v; }
     /// Assigns normal vector
-    void letNormalBe(FloatArray iN) { mNormalDir = std :: move(iN); }
+    void letNormalBe(const FloatArrayF<3> &iN) { mNormalDir = iN; }
     /// Assigns projeted traction
-    void letProjectedTractionBe(FloatArray iProjectedTraction) { projectedTraction = std :: move(iProjectedTraction); }
+    void letProjectedTractionBe(const FloatArrayF<2> &iProjectedTraction) { projectedTraction = iProjectedTraction; }
+    ///@TODO Projected tractions are *never* set. What is it supposed to be good for?
 
     const char *giveClassName() const override { return "StructuralInterfaceMaterialStatus"; }
 
@@ -152,11 +143,11 @@ public:
     void copyStateVariables(const MaterialStatus &iStatus) override;
     void addStateVariables(const MaterialStatus &iStatus) override;
 
-    bool giveNewlyInserted() const {return mNewlyInserted;}
-    void setNewlyInserted(bool iNewlyInserted) {mNewlyInserted = iNewlyInserted;}
+    bool giveNewlyInserted() const { return mNewlyInserted; }
+    void setNewlyInserted(bool iNewlyInserted) { mNewlyInserted = iNewlyInserted; }
 
-    virtual double giveDamage() { return 0.0; }     // no default damage
-    virtual double giveTempDamage() { return 0.0; } // no default damage
+    virtual double giveDamage() const { return 0.0; }     // no default damage
+    virtual double giveTempDamage() const { return 0.0; } // no default damage
 };
 } // end namespace oofem
 #endif // structuralinterfacematerialstatus_h

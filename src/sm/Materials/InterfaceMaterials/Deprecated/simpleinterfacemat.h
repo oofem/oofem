@@ -55,14 +55,12 @@ namespace oofem {
 class SimpleInterfaceMaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
-    bool shearYieldingFlag;
-    FloatArray shearStressShift, tempShearStressShift;
+    bool shearYieldingFlag = false;
+    FloatArrayF<2> shearStressShift, tempShearStressShift;
 
 public:
     /// Constructor
     SimpleInterfaceMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~SimpleInterfaceMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
@@ -71,10 +69,10 @@ public:
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    const FloatArray &giveShearStressShift();
-    void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; }
-    bool giveShearYieldingFlag(){return shearYieldingFlag;}
-    void setShearYieldingFlag(bool sY){ shearYieldingFlag = sY;}
+    const FloatArrayF<2> &giveShearStressShift() const { return shearStressShift; }
+    void setTempShearStressShift(const FloatArrayF<2> &newShearStressShift) { tempShearStressShift = newShearStressShift; }
+    bool giveShearYieldingFlag() { return shearYieldingFlag; }
+    void setShearYieldingFlag(bool sY) { shearYieldingFlag = sY; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -90,17 +88,15 @@ public:
 class SimpleInterfaceMaterial : public StructuralInterfaceMaterial
 {
 protected:
-  double kn, ks;
-    double stiffCoeff;
-    double frictCoeff;
+    double kn = 0., ks = 0.;
+    double stiffCoeff = 0.;
+    double frictCoeff = 0.;
     /// Normal distance which needs to be closed when interface element should act in compression (distance is 0 by default).
-    double normalClearance;
+    double normalClearance = 0.;
 
 public:
     /// Constructor
     SimpleInterfaceMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~SimpleInterfaceMaterial();
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 

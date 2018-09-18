@@ -45,15 +45,10 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-    REGISTER_Material(IntMatPhaseField);
+REGISTER_Material(IntMatPhaseField);
 
-    IntMatPhaseField::IntMatPhaseField(int n, Domain *d) : StructuralInterfaceMaterialPhF(n, d) {
+IntMatPhaseField::IntMatPhaseField(int n, Domain *d) : StructuralInterfaceMaterialPhF(n, d) {}
 
-}
-
-IntMatPhaseField::~IntMatPhaseField() {
-
-}
 
 int
 IntMatPhaseField :: hasMaterialModeCapability(MaterialMode mode)
@@ -70,36 +65,34 @@ void
 IntMatPhaseField :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep)
 {
     IntMatPhaseFieldStatus *status = static_cast< IntMatPhaseFieldStatus * >( this->giveStatus(gp) );
-    
+
     this->initTempStatus(gp);
 
-     double g = compute_g(damage);
-     
-     answer.resize( jump.giveSize() );
- 
-     answer.at(1) = g * k*jump.at(1);
-     answer.at(2) = g * k*jump.at(2);
-     
-     if ( jump.at(3) > 0.0 ) { // only degradation in tension
-         answer.at(3) = g * k*jump.at(3);
-     } else {
-         answer.at(3) = k*jump.at(3);
-     }
-     
-     double drivingEnergy = 0.5*k*jump.at(1)*jump.at(1) + 0.5*k*jump.at(2)*jump.at(2);
-     if ( jump.at(3) > 0.0 ) { 
-         drivingEnergy += 0.5*k*jump.at(3)*jump.at(3);
-     }
-     if ( drivingEnergy > status->giveTempDrivingEnergy() ) { // max val
-         status->letTempDrivingEnergyBe( drivingEnergy ); 
-     }
-     
-     status->tempDamage = damage; 
-    
-     status->letTempJumpBe(jump);
-     status->letTempTractionBe(answer);
+    double g = compute_g(damage);
 
-    
+    answer.resize( jump.giveSize() );
+ 
+    answer.at(1) = g * k*jump.at(1);
+    answer.at(2) = g * k*jump.at(2);
+
+    if ( jump.at(3) > 0.0 ) { // only degradation in tension
+        answer.at(3) = g * k*jump.at(3);
+    } else {
+        answer.at(3) = k*jump.at(3);
+    }
+
+    double drivingEnergy = 0.5*k*jump.at(1)*jump.at(1) + 0.5*k*jump.at(2)*jump.at(2);
+    if ( jump.at(3) > 0.0 ) { 
+        drivingEnergy += 0.5*k*jump.at(3)*jump.at(3);
+    }
+    if ( drivingEnergy > status->giveTempDrivingEnergy() ) { // max val
+        status->letTempDrivingEnergyBe( drivingEnergy ); 
+    }
+
+    status->tempDamage = damage; 
+
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(answer);
 }
 
 void
@@ -109,49 +102,44 @@ IntMatPhaseField :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMo
 
     FloatArray jump;
     jump = status->giveTempJump();
-    
+
     double damage = status->giveDamage();
     double g = compute_g(damage);
-    
+
     answer.resize(3, 3);
     answer.zero();
-
     answer.at(1, 1) = g*k;
     answer.at(2, 2) = g*k;
-    
+
     if ( jump.at(3) > 0.0 ) { // only degradation in tension
         answer.at(3,3) = g * k;
     } else {
         answer.at(3,3) = k;
     }
-    
 }
 
 
 void
 IntMatPhaseField :: giveTangents(FloatMatrix &Djj, FloatMatrix &Djd, FloatMatrix &Ddj, FloatMatrix &Ddd, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
- 
+{ 
     IntMatPhaseFieldStatus *status = static_cast< IntMatPhaseFieldStatus * >( this->giveStatus(gp) );
-    
-    FloatArray jump;
-    jump = status->giveTempJump();
-    
+
+    const auto &jump = status->giveTempJump();
+
     double damage = status->giveDamage();
     double g = compute_g(damage);
-    
+
     Djj.resize(3, 3);
     Djj.zero();
-    
     Djj.at(1, 1) = g*k;
     Djj.at(2, 2) = g*k;
-    
+
     if ( jump.at(3) > 0.0 ) { // only degradation in tension
         Djj.at(3,3) = g * k;
     } else {
         Djj.at(3,3) = k;
     }
-    
+
     double gPrime = compute_gPrime(damage);
     Djd.at(1, 1) = gPrime*k * jump.at(1);
     Djd.at(2, 2) = gPrime*k * jump.at(1);
@@ -160,16 +148,10 @@ IntMatPhaseField :: giveTangents(FloatMatrix &Djj, FloatMatrix &Djd, FloatMatrix
     } else {
         Djd.at(3,3) = 0;
     }
-    
-    
+
     // Df/Dd, f= max[ g'*(psi_s+psi_n+) ]
     Ddj.beTranspositionOf(Djd);
-    
     //Ddd = { g''* }
-    
-    
-    
-    
 }
 
 double 
@@ -177,7 +159,7 @@ IntMatPhaseField :: giveDrivingForce(GaussPoint *gp)
 {
     IntMatPhaseFieldStatus *status = static_cast< IntMatPhaseFieldStatus * >( this->giveStatus(gp) );
     double gPrime = compute_gPrime(status->giveDamage());
-    
+
     return  gPrime / this->Gc * status->giveTempDrivingEnergy(); 
 }
 
@@ -186,7 +168,7 @@ IntMatPhaseField :: giveDrivingForcePrime(GaussPoint *gp)
 {
     IntMatPhaseFieldStatus *status = static_cast< IntMatPhaseFieldStatus * >( this->giveStatus(gp) );    
     double gBis = compute_gBis(status->giveDamage());
-    
+
     return  gBis / this->Gc * status->giveTempDrivingEnergy();     
 }
 
@@ -230,12 +212,6 @@ IntMatPhaseField :: compute_gBis(const double d)
 }
 
 
-
-
-
-
-
-
 IRResultType
 IntMatPhaseField :: initializeFrom(InputRecord *ir)
 {
@@ -266,27 +242,22 @@ IntMatPhaseFieldStatus :: IntMatPhaseFieldStatus(GaussPoint *g) : StructuralInte
 }
 
 
-
 void
 IntMatPhaseFieldStatus :: initTempStatus()
 {
-    
     StructuralInterfaceMaterialStatus :: initTempStatus();
-    
     this->tempDrivingEnergy = 0.0;
     this->drivingEnergy = 0.0;
     this->tempDamage = 0.0;
 }
 
+
 void
 IntMatPhaseFieldStatus :: updateYourself(TimeStep *atTime)
 {
-    
     StructuralInterfaceMaterialStatus :: updateYourself(atTime);
     this->drivingEnergy = this->tempDrivingEnergy;
-    
 }
-
 
 
 } /* namespace oofem */

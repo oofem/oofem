@@ -75,16 +75,14 @@ class IntMatBilinearCZFagerstromRate : public IntMatBilinearCZFagerstrom
 {
 protected:
     /// Rate dependence coefficient
-    double c_star;
+    double c_star = 0.;
     /// Rate dependence exponent
-    double m;
+    double m = 0.;
     int checkConsistency() override;
 
 public:
     /// Constructor
     IntMatBilinearCZFagerstromRate(int n, Domain *d);
-    /// Destructor
-    virtual ~IntMatBilinearCZFagerstromRate();
 
     void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                  const FloatMatrix &F, TimeStep *tStep) override;

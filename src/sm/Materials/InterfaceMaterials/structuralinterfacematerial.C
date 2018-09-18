@@ -50,22 +50,22 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_InterfaceJump ) {
         answer = status->giveJump();
-        answer.resizeWithValues(3); // In case some model is not storing all components.
         return 1;
     } else if ( type == IST_InterfaceTraction ) {
         answer = status->giveTraction();
-        answer.resizeWithValues(3);
         return 1;
     } else if ( type == IST_InterfaceFirstPKTraction ) {
         answer = status->giveFirstPKTraction();
-        answer = status->giveTempFirstPKTraction();
-        answer.resizeWithValues(3);
         return 1;
     } else if ( type == IST_DeformationGradientTensor ) {
-        answer.beVectorForm( status->giveF() );
+        answer = to_voigt_form( status->giveF() );
         return 1;
     } else if ( type == IST_InterfaceNormal ) {
         answer = status->giveNormal();
+        return 1;
+    } else if ( type == IST_DamageScalar ) {
+        answer.resize(1);
+        answer.at(1) = status->giveDamage();
         return 1;
     } else {
         return Material :: giveIPValue(answer, gp, type, tStep);

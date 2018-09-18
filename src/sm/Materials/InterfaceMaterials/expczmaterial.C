@@ -48,10 +48,6 @@ ExpCZMaterial :: ExpCZMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n
 { }
 
 
-ExpCZMaterial :: ~ExpCZMaterial()
-{ }
-
-
 void
 ExpCZMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
@@ -60,19 +56,17 @@ ExpCZMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const Fl
     /// @todo only study normal stress for now
     // no degradation in shear
     // jumpVector = [normal shear1 shear2]
+    //auto [gn, gs1, gs2] = jump;
     double gn  = jump.at(1);
     double gs1 = jump.at(2);
     double gs2 = jump.at(3);
     double gs  = sqrt(gs1 * gs1 + gs2 * gs2);
 
-    double xin  = gn / ( gn0 + tolerance );
-    double xit  = gs / ( gs0 + tolerance );
-    double tn   = GIc / gn0 *exp(-xin) * ( xin * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( r - xin ) );
+    double xin = gn / ( gn0 + tolerance );
+    double xit = gs / ( gs0 + tolerance );
+    double tn  = GIc / gn0 *exp(-xin) * ( xin * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( r - xin ) );
 
-    answer.resize(3);
-    answer.at(1) = tn;
-    answer.at(2) = 0.0;
-    answer.at(3) = 0.0;
+    answer = {tn, 0., 0.};
 
     // update gp
     status->letTempJumpBe(jump);
@@ -85,7 +79,7 @@ ExpCZMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode 
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
 
-    const FloatArray &jumpVector = status->giveTempJump();
+    const auto &jumpVector = status->giveTempJump();
     // jumpVector = [normal shear1 shear2]
     double gn  = jumpVector.at(1);
     double gs1 = jumpVector.at(2);
@@ -93,14 +87,13 @@ ExpCZMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode 
     double gs  = sqrt(gs1 * gs1 + gs2 * gs2);
 
     if ( rMode == TangentStiffness ) {
-        answer.resize(3, 3);
-        answer.zero();
-
         double xin  = gn / ( gn0 + tolerance );
         double xit  = gs / ( gs0 + tolerance );
         double dtndgn = GIc / gn0 / gn0 *exp(-xin) *
         ( ( 1.0 - xin ) * exp(-xit * xit) + ( 1.0 - q ) / ( r - 1.0 ) * ( 1.0 - exp(-xit * xit) ) * ( -r + xin - 1.0 ) );
 
+        answer.resize(3, 3);
+        answer.zero();
         answer.at(1, 1) = dtndgn;
     }  else {
         OOFEM_ERROR("unknown MatResponseMode");
@@ -169,11 +162,8 @@ ExpCZMaterial :: printYourself()
     printf("  r     = %e \n", this->r);
 }
 
+
 ExpCZMaterialStatus :: ExpCZMaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
-{ }
-
-
-ExpCZMaterialStatus :: ~ExpCZMaterialStatus()
 { }
 
 

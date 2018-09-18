@@ -60,26 +60,23 @@ class BondCEBMaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
     /// Cumulative slip.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated cumulative slip.
-    double tempKappa;
+    double tempKappa = 0.;
 
 public:
     /// Constructor
     BondCEBMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~BondCEBMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the last equilibrated cumulative slip.
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temporary cumulative slip.
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temporary cumulative slip to the given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
 
-    // definition
     const char *giveClassName() const override { return "BondCEBMaterialStatus"; }
 
     void initTempStatus() override;
@@ -106,23 +103,21 @@ class BondCEBMaterial : public StructuralInterfaceMaterial
 {
 protected:
     /// Normal elastic stiffness.
-    double kn;
+    double kn = 0.;
     /// Shear elastic stiffness.
-    double ks;
+    double ks = 0.;
     /// Shear strength.
-    double taumax;
+    double taumax = 0.;
     /// Residual shear stress.
-    double tauf;
+    double tauf = 0.;
     /// Characteristic slip values.
-    double s0, s1, s2, s3;
+    double s0 = 0., s1 = 0., s2 = 0., s3 = 0.;
     /// Exponent.
-    double alpha;
+    double alpha = 0.4;
 
 public:
     /// Constructor
     BondCEBMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~BondCEBMaterial();
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 

@@ -54,11 +54,10 @@ namespace oofem {
 class IntMatElastic : public StructuralInterfaceMaterial
 {
 protected:
-    double k;
+    double k = 0.;
 
 public:
     IntMatElastic(int n, Domain * d);
-    virtual ~IntMatElastic();
 
     const char *giveClassName() const override { return "IntMatElastic"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatElastic_Name; }

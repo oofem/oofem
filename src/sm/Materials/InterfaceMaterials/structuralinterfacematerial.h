@@ -78,9 +78,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     StructuralInterfaceMaterial(int n, Domain * d);
-    /// Destructor.
-    virtual ~StructuralInterfaceMaterial() { }
-
 
     /**
      * Computes the first Piola-Kirchoff traction vector for given total jump/gap and integration point.

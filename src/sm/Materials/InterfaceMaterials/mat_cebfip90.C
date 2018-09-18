@@ -49,20 +49,15 @@ CebFipSlip90Material :: CebFipSlip90Material(int n, Domain *d) : StructuralInter
 { }
 
 
-CebFipSlip90Material :: ~CebFipSlip90Material()
-{ }
-
-
 void
 CebFipSlip90Material :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
-    double f, slip, tempKappa;
-
-    slip = jump.at(1);
+    double slip = jump.at(1);
     // compute value of loading function if strainLevel crit apply
-    f = fabs(slip) - status->giveKappa();
+    double f = fabs(slip) - status->giveKappa();
 
+    double tempKappa;
     if ( f <= 0.0 ) {
         // kappa do not grow
         tempKappa = status->giveKappa();
@@ -113,7 +108,7 @@ CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 {
     CebFipSlip90MaterialStatus *status = static_cast< CebFipSlip90MaterialStatus * >( this->giveStatus(gp) );
 
-    if ( type == IST_DamageScalar ) {     
+    if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = status->giveKappa();
         return 1;
@@ -188,13 +183,7 @@ CebFipSlip90Material :: computeBondForceStiffness(double s)
 
 
 CebFipSlip90MaterialStatus :: CebFipSlip90MaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
-{
-    kappa = tempKappa = 0.0;
-}
-
-
-CebFipSlip90MaterialStatus :: ~CebFipSlip90MaterialStatus()
-{ }
+{}
 
 
 void

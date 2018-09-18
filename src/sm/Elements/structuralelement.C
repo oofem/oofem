@@ -36,6 +36,7 @@
 #include "sm/CrossSections/structuralcrosssection.h"
 #include "sm/Materials/structuralmaterial.h"
 #include "sm/Materials/structuralms.h"
+#include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 #include "Loads/structtemperatureload.h"
 #include "sm/Materials/structuralnonlocalmaterialext.h"
 #include "Loads/structeigenstrainload.h"
@@ -754,11 +755,17 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     answer.clear();
 
     for ( GaussPoint *gp : *this->giveDefaultIntegrationRulePtr() ) {
-        StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
 
         if ( useUpdatedGpRecord == 1 ) {
-            stress = matStat->giveStressVector();
+            auto status = gp->giveMaterialStatus();
+            StructuralMaterialStatus *matStat = dynamic_cast< StructuralMaterialStatus * >( status );
+            if ( matStat )
+                stress = matStat->giveStressVector();
+            else {
+                StructuralInterfaceMaterialStatus *ms = static_cast< StructuralInterfaceMaterialStatus * >( status );
+                stress = ms->giveTraction();
+            }
         } else {
             if ( !this->isActivated(tStep) ) {
                 strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );

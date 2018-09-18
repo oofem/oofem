@@ -58,22 +58,20 @@ class CebFipSlip90MaterialStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
     /// Scalar measure of the largest slip reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar of the largest slip displacement.
-    double tempKappa;
+    double tempKappa = 0.;
 
 public:
     /// Constructor.
     CebFipSlip90MaterialStatus(GaussPoint * g);
-    /// Destructor.
-    virtual ~CebFipSlip90MaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level.
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
 
@@ -97,23 +95,21 @@ class CebFipSlip90Material : public StructuralInterfaceMaterial
 {
 protected:
     /// Max force (stress).
-    double tmax;
+    double tmax = 0.;
     /// Slip valu at begining of yield plateau.
-    double s1;
+    double s1 = 0.;
     /// Slip at end of plateau.
-    double s2;
+    double s2 = 0.;
     /// Slip when residual force/stress activated.
-    double s3;
+    double s3 = 0.;
     /// Residual force/stress.
-    double tres;
+    double tres = 0.;
     /// Alpha coeff.
-    double alpha;
+    double alpha = 0.;
 
 public:
     /// Constructor
     CebFipSlip90Material(int n, Domain * d);
-    /// Destructor
-    virtual ~CebFipSlip90Material();
 
     const char *giveInputRecordName() const override { return _IFT_CebFipSlip90Material_Name; }
     const char *giveClassName() const override { return "CebFipSlip90Material"; }

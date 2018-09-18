@@ -46,93 +46,20 @@ REGISTER_Material(IntMatCoulombContact);
 
 IntMatCoulombContact :: IntMatCoulombContact(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
-IntMatCoulombContact :: ~IntMatCoulombContact() { }
-
 
 void
 IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
+    auto tempShearStressShift = status->giveShearStressShift();
 
-    double normalJump = jump.at( 1 );
-    FloatArray shearJump = { jump.at(2), jump.at(3) };
+    double normalJump = jump[0];
+    FloatArrayF<2> shearJump{ jump[1], jump[2] };
 
-    double normalStress = 0.0;
-    FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
-    this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
-                              normalJump, shearJump );
-
-    // Set stress components in the traction vector
-    answer.resize( 3 );
-    answer.at( 1 ) = normalStress;
-    answer.at( 2 ) = shearStress.at( 1 );
-    answer.at( 3 ) = shearStress.at( 2 );
-
-    // Update gp
-    status->setTempShearStressShift( tempShearStressShift );
-    status->letTempJumpBe( jump );
-    status->letTempTractionBe( answer );
-}
-
-
-void
-IntMatCoulombContact :: giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep )
-{
-    IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
-
-    double normalJump = jump.at( 1 );
-    FloatArray shearJump = FloatArray{ jump.at(2), 0. };
-
-    double normalStress = 0.0;
-    FloatArray shearStress, tempShearStressShift = status->giveShearStressShift();
-    this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
-                              normalJump, shearJump );
-
-    // Set stress components in the traction vector
-    answer.resize( 2 );
-    answer.at( 1 ) = normalStress;
-    answer.at( 2 ) = shearStress.at( 1 );
-
-    // Update gp
-    status->setTempShearStressShift( tempShearStressShift );
-    status->letTempJumpBe( jump );
-    status->letTempTractionBe( answer );
-}
-
-
-void
-IntMatCoulombContact :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
-{
-    // Returns the (engineering) traction vector (normal stress only) in 1d based on the 
-    // spatial jump. The shear stress is not relevant in this case.
-
-    IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
-
-    double normalJump = jump.at( 1 );
-    FloatArray shearJump(0);
-
-    double normalStress = 0.0;
-    FloatArray shearStress, tempShearStressShift(0);
-    this->computeEngTraction( normalStress, shearStress, tempShearStressShift,
-                              normalJump, shearJump );
-
-    // Set stress components in the traction vector
-    answer.resize( 1 );
-    answer.at( 1 ) = normalStress;
-
-    // Update gp
-    status->letTempJumpBe( jump );
-    status->letTempTractionBe( answer );
-}
-
-
-void 
-IntMatCoulombContact :: computeEngTraction(double &normalStress, FloatArray &shearStress,
-                                         FloatArray &tempShearStressShift, double normalJump, const FloatArray &shearJump )
-{
     double maxShearStress = 0.0;
     double shift = -this->kn * this->stiffCoeff * normalClearance;
 
+    double normalStress;
     if ( normalJump + normalClearance <= 0. ) {
         normalStress = this->kn * ( normalJump + normalClearance ) + shift; //in compression and after the clearance gap closed
         maxShearStress = fabs( normalStress ) * this->frictCoeff;
@@ -140,38 +67,33 @@ IntMatCoulombContact :: computeEngTraction(double &normalStress, FloatArray &she
         normalStress = this->kn * this->stiffCoeff * ( normalJump + normalClearance ) + shift;
         maxShearStress = 0.;
     }
-
-    if ( shearJump.giveSize() != 0 ) {
-
-        shearStress = this->kn * shearJump - tempShearStressShift;
-        double dp = shearStress.computeNorm();
-        double eps = 1.0e-15; // small number
-        if ( dp > maxShearStress ) {
-            shearStress.times( maxShearStress / ( dp + eps ) );
-        }
-        tempShearStressShift = this->kn * shearJump - shearStress;
-
-    } else { // 1d -> no shear stresses
-        return;
+    auto shearStress = this->kn * shearJump - tempShearStressShift;
+    double dp = norm(shearStress);
+    double eps = 1.0e-15; // small number
+    if ( dp > maxShearStress ) {
+        shearStress *= maxShearStress / ( dp + eps );
     }
+    tempShearStressShift = this->kn * shearJump - shearStress;
+
+    // Set stress components in the traction vector
+    answer = {normalStress, shearStress[0], shearStress[1]};
+
+    // Update gp
+    status->setTempShearStressShift( tempShearStressShift );
+    status->letTempJumpBe( jump );
+    status->letTempTractionBe( answer );
 }
 
 
 void
-IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *tStep, int numSpaceDim)
-//
-// Returns characteristic material stiffness matrix of the receiver
-//
+IntMatCoulombContact :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
+                                                  GaussPoint *gp, TimeStep *tStep)
 {
-
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( this->giveStatus(gp) );
-    const FloatArray &jump = status->giveTempJump();
+    const auto &jump = status->giveTempJump();
+    double normalJump = jump[0]; //in status, normal is always the first component
 
-    double normalJump = jump.at( 1 );//in status, normal is always the first component
-    
-    answer.resize( numSpaceDim, numSpaceDim );
+    answer.resize(3, 3);
     answer.beUnitMatrix();
     if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
         if ( normalJump + normalClearance <= 0 ) {
@@ -182,7 +104,6 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
     } else {
         answer.times( this->kn );
     }
-
 }
 
 
@@ -215,16 +136,7 @@ IntMatCoulombContact :: giveInputRecord(DynamicInputRecord &input)
 
 
 IntMatCoulombContactStatus :: IntMatCoulombContactStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
-{
-    shearStressShift.resize(2);
-    tempShearStressShift.resize(2);
-    shearStressShift.zero();
-    tempShearStressShift.zero();
-}
-
-
-IntMatCoulombContactStatus :: ~IntMatCoulombContactStatus()
-{ }
+{}
 
 
 void
@@ -250,13 +162,6 @@ IntMatCoulombContactStatus :: updateYourself(TimeStep *tStep)
 {
     StructuralInterfaceMaterialStatus::updateYourself( tStep );
     shearStressShift = tempShearStressShift;
-}
-
-
-FloatArray
-IntMatCoulombContactStatus :: giveShearStressShift()
-{
-    return shearStressShift;
 }
 
 

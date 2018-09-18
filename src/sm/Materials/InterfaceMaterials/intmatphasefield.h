@@ -60,16 +60,16 @@ class IntMatPhaseFieldStatus : public StructuralInterfaceMaterialStatus
 {
 public:
     IntMatPhaseFieldStatus(GaussPoint * g);
-    virtual ~IntMatPhaseFieldStatus() { }
 
     /// damage variable
     double tempDamage;
-    double giveDamage() override { return tempDamage; }
-
     double tempDrivingEnergy;
     double drivingEnergy;
-    double giveTempDrivingEnergy() { return tempDrivingEnergy; }
-    double giveDrivingEnergy() { return drivingEnergy; }
+
+    double giveDamage() const override { return tempDamage; }
+
+    double giveTempDrivingEnergy() const { return tempDrivingEnergy; }
+    double giveDrivingEnergy() const { return drivingEnergy; }
     void letTempDrivingEnergyBe(double val) { this->tempDrivingEnergy = val; }
 
     const char *giveClassName() const override { return "IntMatPhaseFieldStatus"; }
@@ -82,12 +82,11 @@ public:
 class IntMatPhaseField : public StructuralInterfaceMaterialPhF
 {
 protected:
-    double k;
-    double Gc;
+    double k = 0.;
+    double Gc = 0.;
 
 public:
     IntMatPhaseField(int n, Domain * d);
-    virtual ~IntMatPhaseField();
 
     int hasMaterialModeCapability(MaterialMode mode) override;
     const char *giveClassName() const override { return "IntMatPhaseField"; }

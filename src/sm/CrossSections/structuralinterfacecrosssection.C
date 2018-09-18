@@ -48,15 +48,6 @@ StructuralInterfaceCrossSection :: giveInterfaceMaterial()
     return static_cast< StructuralInterfaceMaterial * >( this->giveDomain()->giveMaterial(this->materialNum) );
 }
 
-const FloatArray &
-StructuralInterfaceCrossSection :: giveTraction(IntegrationPoint *ip)
-{
-    // Returns the traction vector stored in the material status
-    //return static_cast< StructuralInterfaceMaterialStatus *> ( this->giveInterfaceMaterial()->giveStatus(ip) )->giveTraction();
-    return static_cast< StructuralInterfaceMaterialStatus * >( this->giveInterfaceMaterial()->giveStatus(ip) )->giveFirstPKTraction();
-}
-
-
 int
 StructuralInterfaceCrossSection :: checkConsistency()
 {

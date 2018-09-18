@@ -48,12 +48,7 @@ namespace oofem {
 REGISTER_Material(IsoInterfaceDamageMaterial_2);
 
 IsoInterfaceDamageMaterial_2 :: IsoInterfaceDamageMaterial_2(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-{
-    maxOmega = 0.999999;
-}
-
-
-IsoInterfaceDamageMaterial_2 :: ~IsoInterfaceDamageMaterial_2() { }
+{}
 
 
 void
@@ -305,10 +300,6 @@ IsoInterfaceDamageMaterialStatus_2 :: IsoInterfaceDamageMaterialStatus_2(GaussPo
     kappa = tempKappa = 0.0;
     damage = tempDamage = 0.0;
 }
-
-
-IsoInterfaceDamageMaterialStatus_2 :: ~IsoInterfaceDamageMaterialStatus_2()
-{ }
 
 
 void

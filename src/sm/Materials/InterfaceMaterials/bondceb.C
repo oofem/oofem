@@ -46,13 +46,7 @@ namespace oofem {
 REGISTER_Material(BondCEBMaterial);
 
 BondCEBMaterial :: BondCEBMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-{
-    tauf = 0.;
-    alpha = 0.4;
-}
-
-
-BondCEBMaterial :: ~BondCEBMaterial() { }
+{}
 
 
 void
@@ -182,13 +176,7 @@ BondCEBMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 BondCEBMaterialStatus :: BondCEBMaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
-{
-    kappa = tempKappa = 0.0;
-}
-
-
-BondCEBMaterialStatus :: ~BondCEBMaterialStatus()
-{ }
+{}
 
 
 void

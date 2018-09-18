@@ -57,25 +57,23 @@ class CohesiveInterfaceMaterial : public StructuralInterfaceMaterial
 {
 protected:
     /// Elastic properties (normal and shear moduli).
-    double kn, ks;
+    double kn = 0., ks = 0.;
 
     /// Reduction of normal stiffness when in tension
-    double stiffCoeffKn;
+    double stiffCoeffKn = 0.;
 
     /// Opening when material stiffness changes from kn to kn*stiffCoeffKn
-    double transitionOpening;
+    double transitionOpening = 0.;
 
     /// Smoothing region between tension and compression stiffness.
     /// Uses atan(smoothMag*x) function, where (smoothMag*x) needs to be 6
     /// to be 10% off the asymptotic value. SmoothMag is by default 1.e+4.
     /// Higher values mean sharper transition.
-    double smoothMag;
+    double smoothMag = 0.;
 
 public:
     /// Constructor
     CohesiveInterfaceMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~CohesiveInterfaceMaterial() { }
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 
@@ -84,8 +82,6 @@ public:
 
     void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
     void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
-
-    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

@@ -192,7 +192,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             }
 
                             FloatArray crackNormal = {
-                                -crackTang.at(2), crackTang.at(1)
+                                -crackTang.at(2), crackTang.at(1), 0.
                             };
 
                             mpCZIntegrationRules_tmp [ cz_rule_ind ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
@@ -346,7 +346,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 }
 
                                 FloatArray crackNormal = {
-                                    -crackTang.at(2), crackTang.at(1)
+                                    -crackTang.at(2), crackTang.at(1), 0.
                                 };
 
                                 mpCZIntegrationRules_tmp [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,

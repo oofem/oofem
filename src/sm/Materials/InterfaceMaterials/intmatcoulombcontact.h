@@ -58,19 +58,18 @@ namespace oofem {
 class IntMatCoulombContactStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
-    FloatArray shearStressShift, tempShearStressShift;
+    FloatArrayF<2> shearStressShift, tempShearStressShift;
 
 public:
     IntMatCoulombContactStatus(GaussPoint *g);
-    virtual ~IntMatCoulombContactStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    FloatArray giveShearStressShift();
-    void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; }
+    const FloatArrayF<2> &giveShearStressShift() const { return shearStressShift; }
+    void setTempShearStressShift(const FloatArrayF<2> &newShearStressShift) { tempShearStressShift = newShearStressShift; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -91,17 +90,16 @@ class IntMatCoulombContact : public StructuralInterfaceMaterial
 {
 protected:
     // Normal stiffness
-    double kn;
+    double kn = 0.;
     // Reduction factor of normal stiffness when material goes to tension
-    double stiffCoeff;
+    double stiffCoeff = 0.;
     // Friction coefficient
-    double frictCoeff;
+    double frictCoeff = 0.;
     /// Normal distance which needs to be closed when interface element should act in compression (distance is 0 by default).
-    double normalClearance;
+    double normalClearance = 0.;
 
 public:
     IntMatCoulombContact( int n, Domain *d );
-    virtual ~IntMatCoulombContact();
 
     const char *giveInputRecordName() const override { return _IFT_IntMatCoulombContact_Name; }
     const char *giveClassName() const override { return "IntMatCoulombContact"; }
@@ -109,34 +107,10 @@ public:
     void giveEngTraction_3d( FloatArray &answer, GaussPoint *gp,
                              const FloatArray &jump, TimeStep *tStep) override;
 
-    void giveEngTraction_2d( FloatArray &answer, GaussPoint *gp,
-                             const FloatArray &jump, TimeStep *tStep) override;
-
-    void giveEngTraction_1d( FloatArray &answer, GaussPoint *gp,
-                             const FloatArray &jump, TimeStep *tStep) override;
-
     void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                   GaussPoint *gp, TimeStep *tStep) override
-    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 3); }
+                                   GaussPoint *gp, TimeStep *tStep) override;
 
-    void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                   GaussPoint *gp, TimeStep *tStep) override
-    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 2); }
-
-    void give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                   GaussPoint *gp, TimeStep *tStep) override
-    { this->giveGeneralStiffnessMatrix(answer, rMode, gp, tStep, 1); }
-
-    // This method returns the stiffness matrix according to the size of 
-    // the spatial jump.
-    void giveGeneralStiffnessMatrix(FloatMatrix &answer,
-                                      MatResponseMode rMode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep, int numSpaceDim);
-
-    void computeEngTraction(double &normalStress, FloatArray &shearStress, 
-                             FloatArray &tempShearStressShift,
-                             double normalJump, const FloatArray &shearJump );
+    std::pair<double, FloatArrayF<2>> computeEngTraction(const FloatArrayF<2> &tempShearStressShift, double normalJump, const FloatArrayF<2> &shearJump );
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

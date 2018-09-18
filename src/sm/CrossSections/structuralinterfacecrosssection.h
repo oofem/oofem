@@ -108,7 +108,7 @@ public:
     }
     void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
     {
-        this->giveInterfaceMaterial()->giveEngTraction_2d(answer, gp, jump, tStep);   
+        this->giveInterfaceMaterial()->giveEngTraction_2d(answer, gp, jump, tStep);
     }
     void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
     {
@@ -126,7 +126,6 @@ public:
     //@}
 
     StructuralInterfaceMaterial *giveInterfaceMaterial();
-    const FloatArray &giveTraction(IntegrationPoint *ip);
 
     int checkConsistency() override;
 

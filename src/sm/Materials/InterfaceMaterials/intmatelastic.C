@@ -47,8 +47,6 @@ REGISTER_Material(IntMatElastic);
 
 IntMatElastic :: IntMatElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
-IntMatElastic :: ~IntMatElastic() { }
-
 
 void
 IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,

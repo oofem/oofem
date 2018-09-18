@@ -49,15 +49,8 @@ namespace oofem {
     REGISTER_Material( IntMatBilinearCZFagerstromRate );
 
 IntMatBilinearCZFagerstromRate :: IntMatBilinearCZFagerstromRate(int n, Domain *d) : IntMatBilinearCZFagerstrom(n, d)
-{
-    // constructor
-}
+{}
 
-
-IntMatBilinearCZFagerstromRate :: ~IntMatBilinearCZFagerstromRate()
-{
-    // destructor
-}
 
 ///@todo - need to rearrange traction and stiffness matrix so the first component is normal
 void 
@@ -68,7 +61,6 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
     // previous level of stress and current
     // strain increment, the only way, how to correctly update gp records
     //
-    
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
     FloatMatrix Finv;
@@ -94,7 +86,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
 
 
     // SUBROUTINE stress_damage_XFEM_direct_Mandel(dJ,N,Qold,old_alpha,Fci,Q,Ea,new_alpha,adtim,dalpha_new,dalpha_old,diss,sig_f,fall);
-    if (oldDamage < 0.99) {
+    if ( oldDamage < 0.99 ) {
         FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
 
         FloatMatrix Kstiff(3,3);
@@ -162,7 +154,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
         //    double bbb=1; ///@todo Should this be used for anything Martin? /JB
         //}
 
-        if (loadFun/sigf < 0.0000001) {
+        if ( loadFun/sigf < 0.0000001 ) {
             dAlpha = 0.0;   // new_alpha=old_alpha
             status->letTempEffectiveMandelTractionBe(Qtemp);
             Qtemp.times(1-oldDamage);
@@ -388,7 +380,6 @@ void IntMatBilinearCZFagerstromRate :: giveInputRecord(DynamicInputRecord &input
 
     input.setField(c_star, _IFT_IntMatBilinearCZFagerstromRate_cstar);
     input.setField(knc, _IFT_IntMatBilinearCZFagerstromRate_m);
-
 }
 
 int
@@ -416,7 +407,6 @@ IntMatBilinearCZFagerstromRate  :: printYourself()
     printf("-Rate parameters \n");
     printf("  c_star  = %e \n", this->c_star);
     printf("  m  = %e \n", this->m);
-
 }
 
 

@@ -48,9 +48,6 @@ REGISTER_Material(SimpleInterfaceMaterial);
 SimpleInterfaceMaterial :: SimpleInterfaceMaterial(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-SimpleInterfaceMaterial :: ~SimpleInterfaceMaterial() { }
-
-
 void
 SimpleInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
@@ -85,10 +82,7 @@ SimpleInterfaceMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp
     tempShearStressShift.subtract(shearTraction);
 
     double lim = 1.e+50;
-    answer.resize(3);
-    answer.at(1) = max(min(normalStress, lim), -lim);  //threshold on maximum/minimum
-    answer.at(2) = shearTraction.at(1);
-    answer.at(3) = shearTraction.at(2);
+    answer = {max(min(normalStress, lim), -lim), shearTraction.at(1), shearTraction.at(2)};
 
     // update gp
     status->setShearYieldingFlag(shearYieldingFlag);
@@ -107,11 +101,11 @@ SimpleInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatRes
     answer.resize(3, 3);
     if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
         if ( normalJump + normalClearance <= 0. ) {
-	      answer.at(1, 1) = kn;
-	      if ( status->giveShearYieldingFlag() )
-		answer.at(2, 2) = answer.at(3, 3) = 0;
-	      else
-		answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
+            answer.at(1, 1) = kn;
+            if ( status->giveShearYieldingFlag() )
+                answer.at(2, 2) = answer.at(3, 3) = 0;
+            else
+                answer.at(2, 2) = answer.at(3, 3) = ks;//this->kn; //in compression and after the clearance gap closed
         } else {
             answer.at(1, 1) = this->kn * this->stiffCoeff;
             answer.at(2, 2) = answer.at(3, 3) = 0;
@@ -161,17 +155,7 @@ SimpleInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(GaussPoint *g) : StructuralInterfaceMaterialStatus(g)
-{
-    shearStressShift.resize(2);
-    tempShearStressShift.resize(2);
-    shearStressShift.zero();
-    tempShearStressShift.zero();
-    shearYieldingFlag = false;
-}
-
-
-SimpleInterfaceMaterialStatus :: ~SimpleInterfaceMaterialStatus()
-{ }
+{}
 
 
 void
@@ -197,13 +181,6 @@ SimpleInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     StructuralInterfaceMaterialStatus :: updateYourself(tStep);
     shearStressShift = tempShearStressShift;
-}
-
-
-const FloatArray &
-SimpleInterfaceMaterialStatus :: giveShearStressShift()
-{
-    return shearStressShift;
 }
 
 

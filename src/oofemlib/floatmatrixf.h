@@ -788,6 +788,13 @@ void swap_46(FloatMatrixF<9,9> &t)
 }
 #endif
 
+/// Constructs a zero matrix (this is the default behavior when constructing a matrix, this is just for nicer syntax)
+template<int N,int M>
+FloatMatrixF<N,M> zero()
+{
+    return FloatMatrixF<N,M>();
+}
+
 /// Constructs an identity matrix
 template<int N>
 FloatMatrixF<N,N> eye()

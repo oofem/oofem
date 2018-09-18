@@ -60,12 +60,9 @@ protected:
 public:
     /// Constructor
     ExpCZMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~ExpCZMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    // definition
     const char *giveClassName() const override { return "ExpCZMaterialStatus"; }
 
     void initTempStatus() override;
@@ -92,25 +89,23 @@ class ExpCZMaterial : public StructuralInterfaceMaterial
 {
 protected:
     /// Material parameters
-    double kn0;
-    double ks0;
-    double GIc;
-    double GIIc;
-    double sigfn;
-    double sigfs;
+    double kn0 = 0.;
+    double ks0 = 0.;
+    double GIc = 0.;
+    double GIIc = 0.;
+    double sigfn = 0.;
+    double sigfs = 0.;
 
     /// normal jump at damage initiation
-    double gn0;
+    double gn0 = 0.;
     /// shear jump at damage initiations
-    double gs0;
-    double q;
-    double r;
+    double gs0 = 0.;
+    double q = 0.;
+    double r = 0.;
 
 public:
     /// Constructor
     ExpCZMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~ExpCZMaterial();
 
     int checkConsistency() override;
 

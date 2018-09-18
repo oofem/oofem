@@ -56,7 +56,6 @@ class IntMatDummyCZ : public StructuralInterfaceMaterial
 {
 public:
     IntMatDummyCZ(int n, Domain *d);
-    virtual ~IntMatDummyCZ();
 
     const char *giveClassName() const override { return "IntMatBilinearCZ"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatDummyCZ_Name; }

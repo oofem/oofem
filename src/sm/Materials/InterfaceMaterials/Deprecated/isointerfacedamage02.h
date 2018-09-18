@@ -60,32 +60,30 @@ class IsoInterfaceDamageMaterialStatus_2 : public StructuralInterfaceMaterialSta
 {
 protected:
     /// Scalar measure of the largest equivalent displacement ever reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar measure of the largest equivalent displacement.
-    double tempKappa;
+    double tempKappa = 0.;
     /// Damage level of material.
-    double damage;
+    double damage = 0.;
     /// Non-equilibrated damage level of material.
-    double tempDamage;
+    double tempDamage = 0.;
 
 public:
     /// Constructor
     IsoInterfaceDamageMaterialStatus_2(GaussPoint * g);
-    /// Destructor
-    virtual ~IsoInterfaceDamageMaterialStatus_2();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level.
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated damage level.
-    double giveDamage() override { return damage; }
+    double giveDamage() const override { return damage; }
     /// Returns the temp. damage level.
-    double giveTempDamage() override { return tempDamage; }
+    double giveTempDamage() const override { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
@@ -126,15 +124,15 @@ class IsoInterfaceDamageMaterial_2 : public StructuralInterfaceMaterial
 {
 protected:
     /// Elastic properties (normal moduli).
-    double kn;
+    double kn = 0.;
     /// Shear moduli.
-    double ks;
+    double ks = 0.;
     /// Tension strength.
-    double ft;
+    double ft = 0.;
     /// Limit elastic deformation.
-    double e0;
+    double e0 = 0.;
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed.
-    double maxOmega;
+    double maxOmega = 0.999999;
     /// Name of table file
     std :: string tablename;
     /// Damages read from the second column in the table file
@@ -145,8 +143,6 @@ protected:
 public:
     /// Constructor
     IsoInterfaceDamageMaterial_2(int n, Domain * d);
-    /// Destructor
-    virtual ~IsoInterfaceDamageMaterial_2();
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 

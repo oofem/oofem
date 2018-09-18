@@ -58,22 +58,21 @@ class IntMatBilinearCZStatus : public StructuralInterfaceMaterialStatus
 {
 public:
     IntMatBilinearCZStatus(GaussPoint * g);
-    virtual ~IntMatBilinearCZStatus();
 
     /// damage variable
-    double mDamageNew, mDamageOld;
+    double mDamageNew = 0., mDamageOld = 0.;
 
     /// Traction
-    FloatArray mTractionOld, mTractionNew;
+    FloatArrayF<3> mTractionOld, mTractionNew;
 
     /// Discontinuity
-    FloatArray mJumpOld, mJumpNew;
+    FloatArrayF<3> mJumpOld, mJumpNew;
 
     /**
      * Increment of plastic multiplier. Storing this allows
      * semi-explicit update of damage.
      */
-    double mPlastMultIncNew, mPlastMultIncOld;
+    double mPlastMultIncNew = 0., mPlastMultIncOld = 0.;
 
     const char *giveClassName() const override { return "IntMatBilinearCZStatus"; }
 
@@ -93,25 +92,22 @@ public:
  */
 class IntMatBilinearCZ : public StructuralInterfaceMaterial
 {
-public:
-    IntMatBilinearCZ(int n, Domain * d);
-    virtual ~IntMatBilinearCZ();
-
 protected:
-    /// Material parameters
-    double mPenaltyStiffness;
-    double mGIc;   // fracture energy, mode 1
-    double mGIIc;  // fracture energy, mode 2
-    double mSigmaF;  // max stress
+    double mPenaltyStiffness = 0.;
+    double mGIc = 0.;   // fracture energy, mode 1
+    double mGIIc = 0.;  // fracture energy, mode 2
+    double mSigmaF = 0.;  // max stress
 
-    double mMu;    // loading function parameter
-    double mGamma; // loading function parameter
+    double mMu = 0.;    // loading function parameter
+    double mGamma = 0.; // loading function parameter
 
-    bool mSemiExplicit; // If semi-explicit time integration should be used
+    bool mSemiExplicit = false; // If semi-explicit time integration should be used
 
     int checkConsistency() override;
 
 public:
+    IntMatBilinearCZ(int n, Domain * d);
+
     const char *giveClassName() const override { return "IntMatBilinearCZ"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatBilinearCZ_Name; }
 
@@ -125,11 +121,10 @@ public:
 
 private:
     // Help functions
-    double computeYieldFunction(const double &iTractionNormal, const double &iTractionTang) const;
-    void computeTraction(FloatArray &oT, const FloatArray &iTTrial, const double &iPlastMultInc) const;
+    double computeYieldFunction(double iTractionNormal, double iTractionTang) const;
+    FloatArrayF<3> computeTraction(const FloatArrayF<3> &iTTrial, double iPlastMultInc) const;
 
 public:
-    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
