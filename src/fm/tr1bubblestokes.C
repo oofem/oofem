@@ -144,40 +144,42 @@ void Tr1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(8);
-    double r_vol, pressure;
-    FloatMatrix dN, B(3, 8);
-    B.zero();
 
-    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
-    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
+    FloatArrayF<8> a_velocity = this->computeVectorOfVelocities(VM_Total, tStep);
+    FloatArrayF<3> a_pressure = this->computeVectorOfPressures(VM_Total, tStep);
 
-    FloatArray momentum, conservation;
+    FloatArrayF<8> momentum;
+    FloatArrayF<3> conservation;
 
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
+        const auto &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
-        this->interp.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-        double dA = detJ * gp->giveWeight();
+        auto N = this->interp.evalN( lcoords );
+        auto val = this->interp.evaldNdx( FEIElementGeometryWrapper(this) );
+        auto detJ = val.first;
+        auto dN = val.second;
+        auto dA = std::abs(detJ) * gp->giveWeight();
 
+        FloatArrayF<8> dNv;
+        FloatMatrixF<3,8> B;
         for ( int j = 0, k = 0; j < 3; j++, k += 2 ) {
-            dNv(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
-            dNv(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
+            dNv[k]     = B(0, k)     = B(2, k + 1) = dN(0, j);
+            dNv[k + 1] = B(1, k + 1) = B(2, k)     = dN(1, j);
         }
 
         // Bubble contribution;
-        dNv(6) = B(0, 6) = B(2, 7) = 27. * ( dN(0, 0) * N(1) * N(2) + N(0) * dN(1, 0) * N(2) + N(0) * N(1) * dN(2, 0) );
-        dNv(7) = B(1, 7) = B(2, 6) = 27. * ( dN(0, 1) * N(1) * N(2) + N(0) * dN(1, 1) * N(2) + N(0) * N(1) * dN(2, 1) );
+        dNv[6] = B(0, 6) = B(2, 7) = 27. * ( dN(0, 0) * N[1] * N[2] + N[0] * dN(1, 0) * N[2] + N[0] * N[1] * dN(2, 0) );
+        dNv[7] = B(1, 7) = B(2, 6) = 27. * ( dN(0, 1) * N[1] * N[2] + N[0] * dN(1, 1) * N[2] + N[0] * N[1] * dN(2, 1) );
 
-        pressure = N.dotProduct(a_pressure);
-        epsp.beProductOf(B, a_velocity);
+        auto pressure = dot(N, a_pressure);
+        auto epsp = dot(B, a_velocity);
 
-        mat->computeDeviatoricStress2D(devStress, r_vol, gp, epsp, pressure, tStep);
+        auto s_r = mat->computeDeviatoricStress2D(epsp, pressure, gp, tStep);
+        auto devStress = s_r.first;
+        auto r_vol = s_r.second;
 
-        momentum.plusProduct(B, devStress, dA);
-        momentum.add(-pressure * dA, dNv);
-        conservation.add(r_vol * dA, N);
+        momentum += Tdot(B, devStress * dA) + dNv * (-pressure * dA);
+        conservation += N * (r_vol * dA);
     }
 
     answer.resize(11);
@@ -188,20 +190,16 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
 
 void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    int load_number, load_id;
-    Load *load;
-    BodyLoad *bLoad;
-    bcGeomType ltype;
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
     answer.resize(11);
     answer.zero();
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
-        load_number = this->boundaryLoadArray.at(2 * i - 1);
-        load_id = this->boundaryLoadArray.at(2 * i);
-        load = this->domain->giveLoad(load_number);
-        ltype = load->giveBCGeoType();
+        int load_number = this->boundaryLoadArray.at(2 * i - 1);
+        int load_id = this->boundaryLoadArray.at(2 * i);
+        Load *load = this->domain->giveLoad(load_number);
+        bcGeomType ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
             this->computeBoundarySurfaceLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
@@ -211,13 +209,14 @@ void Tr1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeStep
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load  = domain->giveLoad( bodyLoadArray.at(i) );
-	if ((bLoad = dynamic_cast<BodyLoad*>(load))) {
-	  ltype = load->giveBCGeoType();
-	  if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeLoadVector(vec, bLoad, ExternalForcesVector, VM_Total, tStep);
-            answer.add(vec);
-	  }
+        Load *load  = domain->giveLoad( bodyLoadArray.at(i) );
+        BodyLoad *bLoad;
+        if ((bLoad = dynamic_cast<BodyLoad*>(load))) {
+            bcGeomType ltype = load->giveBCGeoType();
+            if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
+                this->computeLoadVector(vec, bLoad, ExternalForcesVector, VM_Total, tStep);
+                answer.add(vec);
+            }
         }
     }
 }
@@ -235,7 +234,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, Ch
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+        for ( auto &gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
@@ -275,7 +274,7 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, Ch
         f.zero();
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
-        for ( GaussPoint *gp: iRule ) {
+        for ( auto &gp: iRule ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             this->interp.edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
@@ -309,51 +308,48 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseM
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    FloatMatrix B(3, 8), EdB, K, G, Dp, DvT, C, Ed, dN;
-    FloatArray dNv(8), N, Ep, Cd, tmpA, tmpB;
-    double Cp;
-    B.zero();
+    FloatMatrixF<8,8> K;
+    FloatMatrixF<8,3> G, Dp;
+    FloatMatrixF<3,8> DvT;
+    FloatMatrixF<3,3> C;
 
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        const auto &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
-        double dA = detJ * gp->giveWeight();
-        this->interp.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+        auto N = this->interp.evalN( lcoords );
+        auto detj_dn = this->interp.evaldNdx( FEIElementGeometryWrapper(this) );
+        auto dN = detj_dn.second;
+        auto detJ = detj_dn.first;
+        auto dA = std::abs(detJ) * gp->giveWeight();
+
+        FloatArrayF<8> dN_V;
+        FloatMatrixF<3,8> B;
         for ( int j = 0, k = 0; j < 3; j++, k += 2 ) {
-            dNv(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
-            dNv(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
+            dN_V[k]     = B(0, k)     = B(2, k + 1) = dN(0, j);
+            dN_V[k + 1] = B(1, k + 1) = B(2, k)     = dN(1, j);
         }
 
         // Bubble contribution;
-        dNv(6) = B(0, 6) = B(2, 7) = 27. * ( dN(0, 0) * N(1) * N(2) + N(0) * dN(1, 0) * N(2) + N(0) * N(1) * dN(2, 0) );
-        dNv(7) = B(1, 7) = B(2, 6) = 27. * ( dN(0, 1) * N(1) * N(2) + N(0) * dN(1, 1) * N(2) + N(0) * N(1) * dN(2, 1) );
+        dN_V[6] = B(0, 6) = B(2, 7) = 27. * ( dN(0, 0) * N[1] * N[2] + N[0] * dN(1, 0) * N[2] + N[0] * N[1] * dN(2, 0) );
+        dN_V[7] = B(1, 7) = B(2, 6) = 27. * ( dN(0, 1) * N[1] * N[2] + N[0] * dN(1, 1) * N[2] + N[0] * N[1] * dN(2, 1) );
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->computeTangents2D(Ed, Ep, Cd, Cp, mode, gp, tStep);
+        //auto [Ed, Ep, Cd, Cp] = mat->computeTangents2D(mode, gp, tStep);
+        auto tangents = mat->computeTangents2D(mode, gp, tStep);
 
-        EdB.beProductOf(Ed, B);
-        K.plusProductSymmUpper(B, EdB, dA);
-        G.plusDyadUnsym(dNv, N, -dA);
-        C.plusDyadSymmUpper(N, Cp * dA);
-
-        tmpA.beTProductOf(B, Ep);
-        Dp.plusDyadUnsym(tmpA, N, dA);
-
-        tmpB.beTProductOf(B, Cd);
-        DvT.plusDyadUnsym(N, tmpB, dA);
+        K.plusProductSymmUpper(B, dot(tangents.dsdd, B), dA);
+        G.plusDyadUnsym(dN_V, N, -dA);
+        Dp.plusDyadUnsym(Tdot(B, tangents.dsdp), N, dA);
+        DvT.plusDyadUnsym(N, Tdot(B, tangents.dedd), dA);
+        C.plusDyadSymmUpper(N, tangents.dedp * dA);
     }
 
     K.symmetrized();
     C.symmetrized();
-
-    FloatMatrix GTDvT, GDp;
-    GTDvT.beTranspositionOf(G);
-    GTDvT.add(DvT);
-    GDp = G;
-    GDp.add(Dp);
+    auto GTDvT = transpose(G) + DvT;
+    auto GDp = G + Dp;
 
     answer.resize(11, 11);
     answer.zero();

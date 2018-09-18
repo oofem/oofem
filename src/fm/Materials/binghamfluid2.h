@@ -61,17 +61,15 @@ class BinghamFluidMaterial2Status : public FluidDynamicMaterialStatus
 {
 protected:
     /// Magnitude of deviatoric strains
-    double devStrainMagnitude, temp_devStrainMagnitude;
+    double devStrainMagnitude = 0., temp_devStrainMagnitude = 0.;
     /// Magnitude of deviatoric stresses
-    double devStressMagnitude, temp_devStressMagnitude;
+    double devStressMagnitude = 0., temp_devStressMagnitude = 0.;
     /// Deviatoric stresses and strains (reduced form).
-    FloatArray temp_deviatoricStrainVector;
+    FloatArrayF<6> temp_deviatoricStrainVector;
 
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
     BinghamFluidMaterial2Status(GaussPoint * g);
-    /// Destructor
-    virtual ~BinghamFluidMaterial2Status() { }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
@@ -89,8 +87,8 @@ public:
     void letTempDevStrainMagnitudeBe(double _val) { temp_devStrainMagnitude = _val; }
     void letTempDevStressMagnitudeBe(double _val) { temp_devStressMagnitude = _val; }
 
-    const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
-    void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
+    const FloatArrayF<6> &giveTempDeviatoricStrainVector() const { return temp_deviatoricStrainVector; }
+    void letTempDeviatoricStrainVectorBe(const FloatArrayF<6> &v) { temp_deviatoricStrainVector = v; }
 
     const char *giveClassName() const override { return "BinghamFluidMaterialStatus"; }
 };
@@ -104,13 +102,13 @@ class BinghamFluidMaterial2 : public FluidDynamicMaterial
 {
 protected:
     /// Viscosity.
-    double mu_0;
+    double mu_0 = 0.;
     /// Yield stress.
-    double tau_0;
-    double tau_c;
-    double mu_inf;
+    double tau_0 = 0.;
+    double tau_c = 0.;
+    double mu_inf = 1.e6;
     /// Stress growth rate - parameter controlling the shape of regularized model.
-    double stressGrowthRate;
+    double stressGrowthRate = BINGHAM_DEFAULT_STRESS_GROWTH_RATE;
 
 public:
     /**
@@ -119,14 +117,12 @@ public:
      * @param d Domain to which new material will belong.
      */
     BinghamFluidMaterial2(int n, Domain * d);
-    /// Destructor.
-    virtual ~BinghamFluidMaterial2() { }
 
-    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
+    FloatArrayF<6> computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void computeTangent3D(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<6,6> computeTangent3D(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
     double give(int aProperty, GaussPoint *gp) override;
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
@@ -136,11 +132,11 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    double computeActualViscosity(double tau, double shearRate);
-    double computeDevStrainMagnitude(const FloatArray &epsd);
-    double computeDevStressMagnitude(const FloatArray &sigd);
-    void computeDeviatoricStrain(FloatArray &answer, const FloatArray &eps);
-    void computeDeviatoricStress(FloatArray &answer, const FloatArray &deps, double nu);
+    double computeActualViscosity(double tau, double shearRate) const;
+    static double computeDevStrainMagnitude(const FloatArrayF<6> &epsd);
+    static double computeDevStressMagnitude(const FloatArrayF<6> &sigd);
+    static FloatArrayF<6> computeDeviatoricStrain(const FloatArrayF<6> &eps);
+    static FloatArrayF<6> computeDeviatoricStress(const FloatArrayF<6> &deps, double nu);
 
 #if 0
     void __debug(GaussPoint *gp, TimeStep *tStep);

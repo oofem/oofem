@@ -122,14 +122,9 @@ void FluidMaterialEvaluator :: solveYourself()
     // Note, strain == strain-rate (kept as strain for brevity)
     int maxiter = 100; // User input?
     double tolerance = 1.e-6; // Needs to be normalized somehow, or user input
-    double strainVol, pressure, strainVolC = 0.;
-    FloatArray stressDevC, deltaStrain, strainDev, stressDev, res;
-    stressDevC.resize( sControl.giveSize() );
-    res.resize( sControl.giveSize() );
+    double strainVolC = 0.;
+    FloatArray stressDevC( sControl.giveSize() ), res( sControl.giveSize() );
 
-    FloatMatrix tangent, reducedTangent;
-    FloatArray dsdp, dedd;
-    double dedp;
     for ( int istep = 1; istep <= this->numberOfSteps; ++istep ) {
         this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
         for ( int imat = 1; imat <= d->giveNumberOfMaterialModels(); ++imat ) {
@@ -137,8 +132,8 @@ void FluidMaterialEvaluator :: solveYourself()
             FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(imat) );
             FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus(gp) );
 
-            strainDev = status->giveDeviatoricStrainRateVector();
-            pressure = 0.; ///@todo We should ask the material model for this initial guess.
+            auto strainDev = status->giveDeviatoricStrainRateVector();
+            double pressure = 0.; ///@todo We should ask the material model for this initial guess.
             // Update the controlled parts
             for ( int j = 1; j <= eControl.giveSize(); ++j ) {
                 int p = eControl.at(j);
@@ -157,10 +152,19 @@ void FluidMaterialEvaluator :: solveYourself()
             }
 
             for ( int iter = 1; iter < maxiter; iter++ ) {
+                FloatMatrix tangent, reducedTangent;
+                FloatArray dsdp, dedd;
+                double dedp;
+                double strainVol;
+                FloatArray stressDev;
                 if ( ndim == 3 ) {
-                    mat->computeDeviatoricStress3D(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                    auto val = mat->computeDeviatoricStress3D(strainDev, pressure, gp, tStep);
+                    stressDev = val.first;
+                    strainVol = val.second;
                 } else {
-                    mat->computeDeviatoricStress2D(stressDev, strainVol, gp, strainDev, pressure, tStep);
+                    auto val = mat->computeDeviatoricStress2D({strainDev[0], strainDev[1], strainDev[5]}, pressure, gp, tStep);
+                    stressDev = val.first;
+                    strainVol = val.second;
                 }
 
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
@@ -176,9 +180,17 @@ void FluidMaterialEvaluator :: solveYourself()
                     break;
                 }
                 if ( ndim == 3 ) {
-                    mat->computeTangents3D(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                    auto t = mat->computeTangents3D(TangentStiffness, gp, tStep);
+                    tangent = t.dsdd;
+                    dsdp = t.dsdp;
+                    dedd = t.dedd;
+                    dedp = t.dedp; 
                 } else {
-                    mat->computeTangents2D(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                    auto t = mat->computeTangents2D(TangentStiffness, gp, tStep);
+                    tangent = t.dsdd;
+                    dsdp = t.dsdp;
+                    dedd = t.dedd;
+                    dedp = t.dedp; 
                 }
                 if ( res.giveSize() > 0 ) {
                     // Add mean part to make it invertible
@@ -193,6 +205,7 @@ void FluidMaterialEvaluator :: solveYourself()
                     reducedTangent.beSubMatrixOf(tangent, sControl, sControl);
 
                     // Update stress-controlled part of the strain
+                    FloatArray deltaStrain;
                     reducedTangent.solveForRhs(res, deltaStrain);
                     for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                         strainDev.at( sControl.at(j) ) += deltaStrain.at(j);

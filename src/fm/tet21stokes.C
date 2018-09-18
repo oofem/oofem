@@ -135,7 +135,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -150,7 +150,9 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
 
         epsp.beProductOf(B, a_velocity);
         pressure = Nh.dotProduct(a_pressure);
-        mat->computeDeviatoricStress3D(devStress, r_vol, gp, epsp, pressure, tStep);
+        auto val = mat->computeDeviatoricStress3D(epsp, pressure, gp, tStep);
+        devStress = val.first;
+        r_vol = val.second;
 
         momentum.plusProduct(B, devStress, dV);
         momentum.add(-pressure * dV, dN_V);
@@ -211,7 +213,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTy
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+        for ( auto &gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             double rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
@@ -252,7 +254,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTy
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
-        for ( GaussPoint *gp: iRule ) {
+        for ( auto &gp: iRule ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             this->interpolation_quad.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
@@ -283,49 +285,39 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTy
 void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    FloatMatrix B(6, 30), EdB, K, G, Dp, DvT, C, Ed, dN;
-    FloatArray dN_V(30), Nlin, Ep, Cd, tmpA, tmpB;
-    double Cp;
+    FloatMatrixF<30,30> K;
+    FloatMatrixF<30,4> G, Dp;
+    FloatMatrixF<4,30> DvT;
+    FloatMatrixF<4,4> C;
 
-    B.zero();
+    for ( auto &gp: *this->integrationRulesArray [ 0 ] ) {
+        const auto &lcoords = gp->giveNaturalCoordinates();
 
-    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
-        // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        auto Nlin = this->interpolation_lin.evalN( lcoords );
+        auto detj_dn = this->interpolation_quad.evaldNdx( lcoords, FEIElementGeometryWrapper(this) );
+        auto dN = detj_dn.second;
+        auto detJ = detj_dn.first;
+        auto dA = std::abs(detJ) * gp->giveWeight();
 
-        double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
-        double dV = detJ * gp->giveWeight();
-        this->interpolation_lin.evalN( Nlin, lcoords, FEIElementGeometryWrapper(this) );
-
-        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 3 ) {
-            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
-            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
-        }
+        auto dN_V = flatten(dN);
+        auto B = Bmatrix_3d(dN);
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->computeTangents3D(Ed, Ep, Cd, Cp, mode, gp, tStep);
+        //auto [Ed, Ep, Cd, Cp] = mat->computeTangents2D(mode, gp, tStep);
+        auto tangents = mat->computeTangents3D(mode, gp, tStep);
 
-        EdB.beProductOf(Ed, B);
-        K.plusProductSymmUpper(B, EdB, dV);
-        G.plusDyadUnsym(dN_V, Nlin, -dV);
-        C.plusDyadSymmUpper(Nlin, Cp * dV);
-
-        tmpA.beTProductOf(B, Ep);
-        Dp.plusDyadUnsym(tmpA, Nlin, dV);
-
-        tmpB.beTProductOf(B, Cd);
-        DvT.plusDyadUnsym(Nlin, tmpB, dV);
+        K.plusProductSymmUpper(B, dot(tangents.dsdd, B), dA);
+        G.plusDyadUnsym(dN_V, Nlin, -dA);
+        Dp.plusDyadUnsym(Tdot(B, tangents.dsdp), Nlin, dA);
+        DvT.plusDyadUnsym(Nlin, Tdot(B, tangents.dedd), dA);
+        C.plusDyadSymmUpper(Nlin, tangents.dedp * dA);
     }
 
     K.symmetrized();
     C.symmetrized();
-    FloatMatrix GTDvT, GDp;
-    GTDvT.beTranspositionOf(G);
-    GTDvT.add(DvT);
-    GDp = G;
-    GDp.add(Dp);
+    auto GTDvT = transpose(G) + DvT;
+    auto GDp = G + Dp;
 
     answer.resize(34, 34);
     answer.zero();
@@ -333,10 +325,6 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     answer.assemble(GDp, this->momentum_ordering, this->conservation_ordering);
     answer.assemble(GTDvT, this->conservation_ordering, this->momentum_ordering);
     answer.assemble(C, this->conservation_ordering);
-    //    K.printYourself();
-    //    GDp.printYourself();
-    //    GTDvT.printYourself();
-    //    C.printYourself();
 }
 
 FEInterpolation *Tet21Stokes :: giveInterpolation() const

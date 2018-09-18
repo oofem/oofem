@@ -60,9 +60,9 @@ class GaussPoint;
 class NonlinearFluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
-    FloatArray temp_deviatoricStressVector;
-    FloatArray temp_deviatoricStrainVector;
-    double temp_norm2;
+    FloatArrayF<6> temp_deviatoricStressVector;
+    FloatArrayF<6> temp_deviatoricStrainVector;
+    double temp_norm2 = 0.;
 
 public:
     NonlinearFluidMaterialStatus(GaussPoint * g);
@@ -73,11 +73,11 @@ public:
 
     void updateYourself(TimeStep *tStep) override;
 
-    const FloatArray &giveTempDeviatoricStressVector() { return temp_deviatoricStressVector; }
-    const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
+    const FloatArrayF<6> &giveTempDeviatoricStressVector() { return temp_deviatoricStressVector; }
+    const FloatArrayF<6> &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
     double giveTempStrainNorm2() { return temp_norm2; }
-    void letTempDeviatoricStressVectorBe(FloatArray v) { temp_deviatoricStressVector = std :: move(v); }
-    void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
+    void letTempDeviatoricStressVectorBe(const FloatArrayF<6> &v) { temp_deviatoricStressVector = v; }
+    void letTempDeviatoricStrainVectorBe(const FloatArrayF<6> &v) { temp_deviatoricStrainVector = v; }
     void letTempStrainNorm2Be(double v) { temp_norm2 = v; }
 
     const char *giveClassName() const override { return "NonlinearFluidMaterialStatus"; }
@@ -107,11 +107,11 @@ public:
 
     virtual ~NonlinearFluidMaterial() { }
 
-    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
+    FloatArrayF<6> computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void computeTangent3D(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<6,6> computeTangent3D(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
     double give(int aProperty, GaussPoint *) override;
 
     IRResultType initializeFrom(InputRecord *ir) override;

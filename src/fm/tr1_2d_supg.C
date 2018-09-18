@@ -322,17 +322,18 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
 void
 TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
-    FloatArray u, eps(3), stress;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
+    FloatArray u;
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
-    eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
-    eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
-    eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
-    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStress2D(
-        stress, integrationRulesArray [ 0 ]->getIntegrationPoint(0), eps, tStep);
-    stress.times(1. / Re);
+    FloatArrayF<3> eps = {
+        b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5),
+        c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6),
+        b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5),
+    };
+    auto stress = (1. / Re) * static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStress2D(
+        eps, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
     // \int dNu/dxj \Tau_ij
     answer.resize(6);
@@ -370,8 +371,8 @@ TR1_2D_SUPG :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespons
     _b.at(3, 5) = c [ 2 ];
     _b.at(3, 6) = b [ 2 ];
 
-    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeTangent2D(
-        _d, mode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    _d = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeTangent2D(
+        mode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
     _db.beProductOf(_d, _b);
     answer.resize(6, 6);
     answer.zero();
@@ -2235,13 +2236,13 @@ TR1_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 void
 TR1_2D_SUPG :: computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep)
 {
-    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStress2D(answer, gp, eps, tStep);
+    answer = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeDeviatoricStress2D(eps, gp, tStep);
 }
 
 void
 TR1_2D_SUPG :: computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeTangent2D(answer, mode, gp, tStep);
+    answer = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial()->computeTangent2D(mode, gp, tStep);
 }
 
 

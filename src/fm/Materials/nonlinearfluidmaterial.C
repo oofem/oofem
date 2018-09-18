@@ -73,7 +73,7 @@ NonlinearFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-NonlinearFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
+NonlinearFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const
 {
     return this->viscosity;
 }
@@ -97,58 +97,58 @@ NonlinearFluidMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-NonlinearFluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+FloatArrayF<6>
+NonlinearFluidMaterial :: computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const
 {
     NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
 
+    ///@todo This doesn't look like a strain norm?
     double normeps2 = eps[0] * eps[0] + eps[1] * eps[1] + eps[2] * eps[2] + 0.5 * ( eps[3] * eps[3] + eps[4] * eps[4] +  eps[5] * eps[5] );
 
-    answer = eps;
+    auto answer = eps;
     answer[3] *= 0.5;
     answer[4] *= 0.5;
     answer[5] *= 0.5;
-    answer.times( 2.0 * viscosity * ( 1.0 + c * pow(normeps2, alpha * 0.5) ) );
+    answer *= 2.0 * viscosity * ( 1.0 + c * pow(normeps2, alpha * 0.5) );
 
     status->letTempDeviatoricStressVectorBe(answer);
     status->letTempDeviatoricStrainVectorBe(eps);
     status->letTempStrainNorm2Be(normeps2);
+    return answer;
 }
 
-void
-NonlinearFluidMaterial :: computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+NonlinearFluidMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     NonlinearFluidMaterialStatus *status = static_cast< NonlinearFluidMaterialStatus * >( this->giveStatus(gp) );
     double normeps2 = status->giveTempStrainNorm2();
 
-    answer.resize(6, 6);
-    answer.beUnitMatrix();
+    auto answer = eye<6>();
     answer.at(4, 4) *= 0.5;
     answer.at(5, 5) *= 0.5;
     answer.at(6, 6) *= 0.5;
 
     if ( normeps2 != 0 ) {
-        FloatArray eps = status->giveTempDeviatoricStrainVector();
-        FloatMatrix op;
+        auto eps = status->giveTempDeviatoricStrainVector();
 
         eps.at(4) *= 0.5;
         eps.at(5) *= 0.5;
         eps.at(6) *= 0.5;
 
-        op.beDyadicProductOf(eps, eps);
-        answer.times( 2 * viscosity * ( 1 + c * pow(normeps2, alpha * 0.5) ) );
-        answer.add(2 * viscosity * c * alpha * pow(normeps2, alpha * 0.5 - 1), op);
+        auto op = dyad(eps, eps);
+        answer *= 2 * viscosity * ( 1 + c * pow(normeps2, alpha * 0.5) );
+        answer += (2 * viscosity * c * alpha * pow(normeps2, alpha * 0.5 - 1)) * op;
     } else {
-        answer.times(2 * viscosity);
+        answer *= 2 * viscosity;
     }
+    return answer;
 }
 
 int
 NonlinearFluidMaterial :: checkConsistency()
 {
     if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
-        double scale;
-        scale = domain->giveEngngModel()->giveVariableScale(VST_Density);
+        double scale = domain->giveEngngModel()->giveVariableScale(VST_Density);
         propertyDictionary.at('d') /= scale;
 
         scale = domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
@@ -159,10 +159,7 @@ NonlinearFluidMaterial :: checkConsistency()
 }
 
 NonlinearFluidMaterialStatus :: NonlinearFluidMaterialStatus(GaussPoint *g) :
-    FluidDynamicMaterialStatus(g),
-    temp_deviatoricStressVector(),
-    temp_deviatoricStrainVector(),
-    temp_norm2(0)
+    FluidDynamicMaterialStatus(g)
 { }
 
 void

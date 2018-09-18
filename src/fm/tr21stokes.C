@@ -135,36 +135,34 @@ void Tr21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dNv(12);
-    double r_vol, pressure;
-    FloatMatrix dN, B(3, 12);
-    B.zero();
 
-    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
-    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
+    FloatArrayF<12> a_velocity = this->computeVectorOfVelocities(VM_Total, tStep);
+    FloatArrayF<3> a_pressure = this->computeVectorOfPressures(VM_Total, tStep);
 
-    FloatArray momentum, conservation;
+    FloatArrayF<12> momentum;
+    FloatArrayF<3> conservation;
 
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
+        const auto &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
-        this->interpolation_lin.evalN( Nh, lcoords, FEIElementGeometryWrapper(this) );
-        double dA = detJ * gp->giveWeight();
+        auto Nh = this->interpolation_lin.evalN( lcoords );
+        auto val = this->interpolation_quad.evaldNdx( lcoords, FEIElementGeometryWrapper(this) );
+        auto detJ = val.first;
+        auto dN = val.second;
+        auto dA = std::abs(detJ) * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 2 ) {
-            dNv(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
-            dNv(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
-        }
+        auto dNv = flatten(dN);
+        auto B = Bmatrix_2d(dN);
 
-        pressure = Nh.dotProduct(a_pressure);
-        epsp.beProductOf(B, a_velocity);
+        auto pressure = dot(Nh, a_pressure);
+        auto epsp = dot(B, a_velocity);
 
-        mat->computeDeviatoricStress2D(devStress, r_vol, gp, epsp, pressure, tStep);
+        auto s_r = mat->computeDeviatoricStress2D(epsp, pressure, gp, tStep);
+        auto devStress = s_r.first;
+        auto r_vol = s_r.second;
 
-        momentum.plusProduct(B, devStress, dA);
-        momentum.add(-pressure * dA, dNv);
-        conservation.add(r_vol * dA, Nh);
+        momentum += Tdot(B, devStress * dA) + dNv * (-pressure * dA);
+        conservation += Nh * (r_vol * dA);
     }
 
     answer.resize(15);
@@ -192,16 +190,16 @@ void Tr21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *tSt
         }
     }
 
-    BodyLoad *bload;
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
         Load *load = domain->giveLoad( bodyLoadArray.at(i) );
-	if ((bload = dynamic_cast<BodyLoad*>(load))) {
-	  bcGeomType ltype = load->giveBCGeoType();
-	  if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
-            this->computeLoadVector(vec, bload, ExternalForcesVector, VM_Total, tStep);
-            answer.add(vec);
-	  }
+        BodyLoad *bload;
+        if ((bload = dynamic_cast<BodyLoad*>(load))) {
+            bcGeomType ltype = load->giveBCGeoType();
+            if ( ltype == BodyLoadBGT && load->giveBCValType() == ForceLoadBVT ) {
+                this->computeLoadVector(vec, bload, ExternalForcesVector, VM_Total, tStep);
+                answer.add(vec);
+            }
         }
     }
 }
@@ -219,7 +217,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTyp
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+        for ( auto &gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             double rho = mat->give('d', gp);
@@ -256,7 +254,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, CharTyp
         f.zero();
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
-        for ( GaussPoint *gp: iRule ) {
+        for ( auto &gp: iRule ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             this->interpolation_quad.edgeEvalN( N, boundary, lcoords, FEIElementGeometryWrapper(this) );
@@ -290,48 +288,39 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode m
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    FloatMatrix B(3, 12), EdB, K, G, Dp, DvT, C, Ed, dN;
-    FloatArray dN_V(12), Nlin, Ep, Cd, tmpA, tmpB;
-    double Cp;
+    FloatMatrixF<12,12> K;
+    FloatMatrixF<12,3> G, Dp;
+    FloatMatrixF<3,12> DvT;
+    FloatMatrixF<3,3> C;
 
-    B.zero();
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
+        const auto &lcoords = gp->giveNaturalCoordinates();
 
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        auto Nlin = this->interpolation_lin.evalN( lcoords );
+        auto detj_dn = this->interpolation_quad.evaldNdx( lcoords, FEIElementGeometryWrapper(this) );
+        auto dN = detj_dn.second;
+        auto detJ = detj_dn.first;
+        auto dA = std::abs(detJ) * gp->giveWeight();
 
-        this->interpolation_lin.evalN( Nlin, lcoords, FEIElementGeometryWrapper(this) );
-        double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
-        double dA = detJ * gp->giveWeight();
-
-        for ( int j = 0, k = 0; j < 6; j++, k += 2 ) {
-            dN_V(k)     = B(0, k)     = B(2, k + 1) = dN(j, 0);
-            dN_V(k + 1) = B(1, k + 1) = B(2, k)     = dN(j, 1);
-        }
+        auto dN_V = flatten(dN);
+        auto B = Bmatrix_2d(dN);
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->computeTangents2D(Ed, Ep, Cd, Cp, mode, gp, tStep);
+        //auto [Ed, Ep, Cd, Cp] = mat->computeTangents2D(mode, gp, tStep);
+        auto tangents = mat->computeTangents2D(mode, gp, tStep);
 
-        EdB.beProductOf(Ed, B);
-        K.plusProductSymmUpper(B, EdB, dA);
+        K.plusProductSymmUpper(B, dot(tangents.dsdd, B), dA);
         G.plusDyadUnsym(dN_V, Nlin, -dA);
-        C.plusDyadSymmUpper(Nlin, Cp * dA);
-
-        tmpA.beTProductOf(B, Ep);
-        Dp.plusDyadUnsym(tmpA, Nlin, dA);
-
-        tmpB.beTProductOf(B, Cd);
-        DvT.plusDyadUnsym(Nlin, tmpB, dA);
+        Dp.plusDyadUnsym(Tdot(B, tangents.dsdp), Nlin, dA);
+        DvT.plusDyadUnsym(Nlin, Tdot(B, tangents.dedd), dA);
+        C.plusDyadSymmUpper(Nlin, tangents.dedp * dA);
     }
 
     K.symmetrized();
     C.symmetrized();
-    FloatMatrix GTDvT, GDp;
-    GTDvT.beTranspositionOf(G);
-    GTDvT.add(DvT);
-    GDp = G;
-    GDp.add(Dp);
+    auto GTDvT = transpose(G) + DvT;
+    auto GDp = G + Dp;
 
     answer.resize(15, 15);
     answer.zero();

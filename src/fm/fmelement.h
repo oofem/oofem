@@ -63,8 +63,11 @@ public:
      */
     virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
 
-    virtual void computeVectorOfVelocities(ValueModeType mode, TimeStep *tStep, FloatArray &velocities);
-    virtual void computeVectorOfPressures(ValueModeType mode, TimeStep *tStep, FloatArray &pressures);
+    void computeVectorOfVelocities(ValueModeType mode, TimeStep *tStep, FloatArray &velocities);
+    void computeVectorOfPressures(ValueModeType mode, TimeStep *tStep, FloatArray &pressures);
+
+    FloatArray computeVectorOfVelocities(ValueModeType mode, TimeStep *tStep);
+    FloatArray computeVectorOfPressures(ValueModeType mode, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // fmelement_h

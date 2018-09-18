@@ -282,7 +282,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
 #ifdef __FM_MODULE
         gp->setMaterialMode(_3dFlow);
-        fluidMaterial->computeTangent3D(Ed, TangentStiffness, gp, tStep);
+        Ed = fluidMaterial->computeTangent3D(TangentStiffness, gp, tStep);
         gp->setMaterialMode(_3dMat);
 #else
         OOFEM_ERROR("Fluid module missing\n");
@@ -334,7 +334,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             // Compute Cauchy stress
             FloatArray fluidCauchyArray, epsf;
             FloatMatrix fluidCauchyMatrix;
-            double epsvol, pressure;
+            double pressure;
 
             epsf.beProductOf(B, aTotal);
             pressure = Nlin.dotProduct(aPressure);
@@ -344,7 +344,8 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 #endif
 
             gp->setMaterialMode(_3dFlow);
-            fluidMaterial->computeDeviatoricStress3D(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
+            auto stress_eps = fluidMaterial->computeDeviatoricStress3D(epsf, pressure, gp, tStep);
+            fluidCauchyArray = stress_eps.first;
             gp->setMaterialMode(_3dMat);
             fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchyArray);
 
@@ -716,7 +717,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
     FloatArray Strain, Stress, Nlin, dNv, a_inc, a_prev, aVelocity, aPressure, aGhostDisplacement, aIncGhostDisplacement, fluidStress, epsf, dpdivv;
     FloatArray momentum, conservation, auxstress, divv;
-    double pressure, epsvol = 0.0;
+    double pressure;
 
     if ( !tStep->isTheFirstStep() ) {
         this->computeVectorOf(VM_Total, tStep->givePreviousStep(), a_prev);
@@ -759,7 +760,8 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             // Momentum equation
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStress3D(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            auto val = fluidMaterial->computeDeviatoricStress3D(epsf, pressure, gp, tStep);
+            fluidStress = val.first;
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -806,7 +808,8 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
 
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStress3D(fluidCauchyArray, epsvol, gp, epsf, pressure, tStep);
+            auto val = fluidMaterial->computeDeviatoricStress3D(epsf, pressure, gp, tStep);
+            fluidCauchyArray = val.first;
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -869,7 +872,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
     FloatArray Strain, Stress, Nlin, dNv, a_inc, a_prev, aVelocity, aPressure, aGhostDisplacement, aIncGhostDisplacement, fluidStress, epsf, dpdivv;
     FloatArray momentum, conservation, auxstress, divv;
-    double pressure, epsvol = 0.0;
+    double pressure;
 
     if ( !tStep->isTheFirstStep() ) {
         this->computeVectorOf(VM_Total, tStep->givePreviousStep(), a_prev);
@@ -916,7 +919,8 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
             // Momentum equation
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStress3D(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            auto val = fluidMaterial->computeDeviatoricStress3D(epsf, pressure, gp, tStep);
+            fluidStress = val.first;
 #else
             OOFEM_ERROR("Missing FM module");
 #endif
@@ -974,7 +978,8 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolutionDebug(FloatArray &answer
 
             gp->setMaterialMode(_3dFlow);
 #ifdef __FM_MODULE
-            fluidMaterial->computeDeviatoricStress3D(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
+            auto val = fluidMaterial->computeDeviatoricStress3D(epsf, pressure, gp, tStep);
+            fluidCauchy = val.first;
 #else
             OOFEM_ERROR("Missing FM module");
 #endif

@@ -105,7 +105,7 @@ void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, IntArray &answer) co
 double Tet1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 void Tet1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode,
@@ -135,42 +135,44 @@ void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(15);
-    double r_vol, pressure;
-    FloatMatrix dN, B(6, 15);
-    B.zero();
 
-    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
-    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
+    FloatArrayF<15> a_velocity = this->computeVectorOfVelocities(VM_Total, tStep);
+    FloatArrayF<4> a_pressure = this->computeVectorOfPressures(VM_Total, tStep);
 
-    FloatArray momentum, conservation;
+    FloatArrayF<15> momentum;
+    FloatArrayF<4> conservation;
 
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
+        const auto &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
-        this->interp.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-        double dV = detJ * gp->giveWeight();
+        auto N = this->interp.evalN( lcoords );
+        auto detj_dn = this->interp.evaldNdx( FEIElementGeometryWrapper(this) );
+        auto dN = detj_dn.second;
+        auto detJ = detj_dn.first;
+        auto dV = std::abs(detJ) * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 3 ) {
-            dNv(k + 0) = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(j, 0);
-            dNv(k + 1) = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(j, 1);
-            dNv(k + 2) = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(j, 2);
+        FloatArrayF<15> dN_V;
+        FloatMatrixF<6,15> B;
+        for ( int j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
+            dN_V[k + 0] = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(0, j);
+            dN_V[k + 1] = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(1, j);
+            dN_V[k + 2] = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(2, j);
         }
 
         // Bubble contribution;
-        dNv(12) = B(0, 12) = B(5, 13) = B(4, 14) = dN(0, 0) * N(1) * N(2) * N(3) + N(0) * dN(1, 0) * N(2) * N(3) + N(0) * N(1) * dN(2, 0) * N(3) + N(0) * N(1) * N(2) * dN(3, 0);
-        dNv(13) = B(1, 13) = B(5, 12) = B(3, 14) = dN(0, 1) * N(1) * N(2) * N(3) + N(0) * dN(1, 1) * N(2) * N(3) + N(0) * N(1) * dN(2, 1) * N(3) + N(0) * N(1) * N(2) * dN(3, 1);
-        dNv(14) = B(2, 14) = B(4, 12) = B(3, 13) = dN(0, 2) * N(1) * N(2) * N(3) + N(0) * dN(1, 2) * N(2) * N(3) + N(0) * N(1) * dN(2, 2) * N(3) + N(0) * N(1) * N(2) * dN(3, 2);
+        dN_V[12] = B(0, 12) = B(5, 13) = B(4, 14) = dN(0, 0) * N[1] * N[2] * N[3] + N[0] * dN(1, 0) * N[2] * N[3] + N[0] * N[1] * dN(2, 0) * N[3] + N[0] * N[1] * N[2] * dN(3, 0);
+        dN_V[13] = B(1, 13) = B(5, 12) = B(3, 14) = dN(0, 1) * N[1] * N[2] * N[3] + N[0] * dN(1, 1) * N[2] * N[3] + N[0] * N[1] * dN(2, 1) * N[3] + N[0] * N[1] * N[2] * dN(3, 1);
+        dN_V[14] = B(2, 14) = B(4, 12) = B(3, 13) = dN(0, 2) * N[1] * N[2] * N[3] + N[0] * dN(1, 2) * N[2] * N[3] + N[0] * N[1] * dN(2, 2) * N[3] + N[0] * N[1] * N[2] * dN(3, 2);
 
-        pressure = N.dotProduct(a_pressure);
-        epsp.beProductOf(B, a_velocity);
+        auto pressure = dot(N, a_pressure);
+        auto epsp = dot(B, a_velocity);
 
-        mat->computeDeviatoricStress3D(devStress, r_vol, gp, epsp, pressure, tStep);
+        auto s_r = mat->computeDeviatoricStress3D(epsp, pressure, gp, tStep);
+        auto devStress = s_r.first;
+        auto r_vol = s_r.second;
 
-        momentum.plusProduct(B, devStress, dV);
-        momentum.add(-pressure * dV, dNv);
-        conservation.add(r_vol * dV, N);
+        momentum += Tdot(B, devStress * dV) + dN_V * (-pressure * dV);
+        conservation += N * (r_vol * dV);
     }
 
     answer.resize(19);
@@ -231,7 +233,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, C
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+        for ( auto &gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             rho = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveDensity(gp);
@@ -273,7 +275,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, BodyLoad *load, C
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
 
-        for ( GaussPoint *gp: iRule ) {
+        for ( auto &gp: iRule ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
 
             this->interp.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
@@ -310,54 +312,49 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponse
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    FloatMatrix B(6, 15), EdB, K, G, Dp, DvT, C, Ed, dN;
-    FloatArray dNv(15), N, Ep, Cd, tmpA, tmpB;
-    double Cp;
+    FloatMatrixF<15,15> K;
+    FloatMatrixF<15,4> G, Dp;
+    FloatMatrixF<4,15> DvT;
+    FloatMatrixF<4,4> C;
 
-    B.zero();
-
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        const auto &lcoords = gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
-        double dV = detJ * gp->giveWeight();
-        this->interp.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+        auto N = this->interp.evalN( lcoords );
+        auto detj_dn = this->interp.evaldNdx( FEIElementGeometryWrapper(this) );
+        auto dN = detj_dn.second;
+        auto detJ = detj_dn.first;
+        auto dA = std::abs(detJ) * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < 4; j++, k += 3 ) {
-            dNv(k + 0) = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(j, 0);
-            dNv(k + 1) = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(j, 1);
-            dNv(k + 2) = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(j, 2);
+        FloatArrayF<15> dN_V;
+        FloatMatrixF<6,15> B;
+        for ( int j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
+            dN_V[k + 0] = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(0, j);
+            dN_V[k + 1] = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(1, j);
+            dN_V[k + 2] = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(2, j);
         }
 
         // Bubble contribution;
-        dNv(12) = B(0, 12) = B(5, 13) = B(4, 14) = dN(0, 0) * N(1) * N(2) * N(3) + N(0) * dN(1, 0) * N(2) * N(3) + N(0) * N(1) * dN(2, 0) * N(3) + N(0) * N(1) * N(2) * dN(3, 0);
-        dNv(13) = B(1, 13) = B(5, 12) = B(3, 14) = dN(0, 1) * N(1) * N(2) * N(3) + N(0) * dN(1, 1) * N(2) * N(3) + N(0) * N(1) * dN(2, 1) * N(3) + N(0) * N(1) * N(2) * dN(3, 1);
-        dNv(14) = B(2, 14) = B(4, 12) = B(3, 13) = dN(0, 2) * N(1) * N(2) * N(3) + N(0) * dN(1, 2) * N(2) * N(3) + N(0) * N(1) * dN(2, 2) * N(3) + N(0) * N(1) * N(2) * dN(3, 2);
+        dN_V[12] = B(0, 12) = B(5, 13) = B(4, 14) = dN(0, 0) * N[1] * N[2] * N[3] + N[0] * dN(1, 0) * N[2] * N[3] + N[0] * N[1] * dN(2, 0) * N[3] + N[0] * N[1] * N[2] * dN(3, 0);
+        dN_V[13] = B(1, 13) = B(5, 12) = B(3, 14) = dN(0, 1) * N[1] * N[2] * N[3] + N[0] * dN(1, 1) * N[2] * N[3] + N[0] * N[1] * dN(2, 1) * N[3] + N[0] * N[1] * N[2] * dN(3, 1);
+        dN_V[14] = B(2, 14) = B(4, 12) = B(3, 13) = dN(0, 2) * N[1] * N[2] * N[3] + N[0] * dN(1, 2) * N[2] * N[3] + N[0] * N[1] * dN(2, 2) * N[3] + N[0] * N[1] * N[2] * dN(3, 2);
 
         // Computing the internal forces should have been done first.
         // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
-        mat->computeTangents3D(Ed, Ep, Cd, Cp, mode, gp, tStep);
+        auto tangents = mat->computeTangents3D(mode, gp, tStep);
 
-        EdB.beProductOf(Ed, B);
-        K.plusProductSymmUpper(B, EdB, dV);
-        G.plusDyadUnsym(dNv, N, -dV);
-        C.plusDyadSymmUpper(N, Cp * dV);
-
-        tmpA.beTProductOf(B, Ep);
-        Dp.plusDyadUnsym(tmpA, N, dV);
-
-        tmpB.beTProductOf(B, Cd);
-        DvT.plusDyadUnsym(N, tmpB, dV);
+        K.plusProductSymmUpper(B, dot(tangents.dsdd, B), dA);
+        G.plusDyadUnsym(dN_V, N, -dA);
+        Dp.plusDyadUnsym(Tdot(B, tangents.dsdp), N, dA);
+        DvT.plusDyadUnsym(N, Tdot(B, tangents.dedd), dA);
+        C.plusDyadSymmUpper(N, tangents.dedp * dA);
     }
 
     K.symmetrized();
     C.symmetrized();
-    FloatMatrix GTDvT, GDp;
-    GTDvT.beTranspositionOf(G);
-    GTDvT.add(DvT);
-    GDp = G;
-    GDp.add(Dp);
+    auto GTDvT = transpose(G) + DvT;
+    auto GDp = G + Dp;
 
     answer.resize(19, 19);
     answer.zero();

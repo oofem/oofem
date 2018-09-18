@@ -63,7 +63,7 @@ NewtonianFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-NewtonianFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
+NewtonianFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const
 {
     return this->viscosity;
 }
@@ -89,12 +89,12 @@ NewtonianFluidMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-NewtonianFluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+FloatArrayF<6>
+NewtonianFluidMaterial :: computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const
 {
     double ekk = eps.at(1) + eps.at(2) + eps.at(3);
 
-    answer = {
+    FloatArrayF<6> stress = {
         2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
         2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
         2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
@@ -103,22 +103,16 @@ NewtonianFluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoi
         eps.at(6) * viscosity
     };
 
-    static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStressVectorBe(answer);
+    static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStressVectorBe(stress);
     static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStrainRateVectorBe(eps);
+
+    return stress;
 }
 
-void
-NewtonianFluidMaterial :: computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+NewtonianFluidMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    answer.resize(6, 6);
-    answer.zero();
-
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 2.0 * viscosity * ( 2. / 3. );
-    answer.at(1, 2) = answer.at(1, 3) = -2.0 * viscosity * ( 1. / 3. );
-    answer.at(2, 1) = answer.at(2, 3) = -2.0 * viscosity * ( 1. / 3. );
-    answer.at(3, 1) = answer.at(3, 2) = -2.0 * viscosity * ( 1. / 3. );
-
-    answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = viscosity;
+    return 2 * viscosity * I_dev6;
 }
 
 

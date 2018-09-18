@@ -450,7 +450,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.resize(6);
     answer.zero();
     FloatArray u, eps(3), stress;
-    double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
+    double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
 
     this->computeVectorOfVelocities(VM_Total, tStep, u);
@@ -469,11 +469,10 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(ifluid) );
-        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
-            dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
+        for ( auto &gp: *integrationRulesArray [ ifluid ] ) {
+            double dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
-            mat->computeDeviatoricStress2D(stress, gp, eps, tStep);
-            stress.times(1. / Re);
+            stress = (1. / Re) * mat->computeDeviatoricStress2D(eps, gp, tStep);
 
             // \int dNu/dxj \Tau_ij
             for ( int i = 0; i < 3; i++ ) {
@@ -510,7 +509,6 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 void
 TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
-    double dV;
     //double dudx, dudy, dvdx, dvdy;
     answer.resize(6, 6);
     answer.zero();
@@ -554,11 +552,10 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(ifluid) );
-        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
-            dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
+        for ( auto &gp: *integrationRulesArray [ ifluid ] ) {
+            double dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
-
-            mat->computeTangent2D(_d, mode, gp, tStep);
+            _d = mat->computeTangent2D(mode, gp, tStep);
             _db.beProductOf(_d, _b);
             answer.plusProductSymmUpper(_b, _db, dV);
             //answer.plusProductSymmUpper (_bs,_db,dV*t_supg);
@@ -1195,7 +1192,7 @@ TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
         return static_cast< LEPlicElementInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -1203,28 +1200,19 @@ void
 TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, const FloatArray &eps, GaussPoint *gp, TimeStep *tStep)
 {
     /* one computes here average deviatoric stress, based on rule of mixture (this is used only for postprocessing) */
-    FloatArray s0, s1;
+    auto s0 = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeDeviatoricStress2D(eps, gp, tStep);
+    auto s1 = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeDeviatoricStress2D(eps, gp, tStep);
 
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeDeviatoricStress2D(s0, gp, eps, tStep);
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeDeviatoricStress2D(s1, gp, eps, tStep);
-
-    answer.resize(3);
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(i) = ( temp_vof ) * s0.at(i) + ( 1. - temp_vof ) * s1.at(i);
-    }
+    answer = temp_vof * s0 + ( 1. - temp_vof ) * s1;
 }
 
 void
 TR1_2D_SUPG2 :: computeTangent(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatMatrix t0, t1;
+    auto t0 = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeTangent2D(mode, gp, tStep);
+    auto t1 = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeTangent2D(mode, gp, tStep);
 
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(0) )->computeTangent2D(t0, mode, gp, tStep);
-    static_cast< FluidDynamicMaterial * >( this->_giveMaterial(1) )->computeTangent2D(t1, mode, gp, tStep);
-
-    answer = t0;
-    answer.times(temp_vof);
-    answer.add(1. - temp_vof, t1);
+    answer = temp_vof * t0 + (1. - temp_vof) * t1;
 }
 
 

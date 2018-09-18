@@ -68,10 +68,10 @@ public:
     /// Destructor.
     virtual ~NewtonianFluidMaterial() { }
 
-    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
 
-    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
-    void computeTangent3D(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<6,6> computeTangent3D(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     double give(int aProperty, GaussPoint *gp) override;
     IRResultType initializeFrom(InputRecord *ir) override;

@@ -77,7 +77,7 @@ TwoFluidMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-TwoFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
+TwoFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const
 {
     TwoFluidMaterialStatus *status = static_cast< TwoFluidMaterialStatus * >( this->giveStatus(gp) );
     double vof = this->giveTempVOF(gp);
@@ -121,41 +121,37 @@ TwoFluidMaterial :: giveMaterial(int i) const
     return static_cast< FluidDynamicMaterial * >( domain->giveMaterial( slaveMaterial[i] ) );
 }
 
-void
-TwoFluidMaterial :: computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)
+FloatArrayF<6>
+TwoFluidMaterial :: computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const
 {
     double vof = this->giveTempVOF(gp);
-    FloatArray v0, v1;
     TwoFluidMaterialStatus *status = static_cast< TwoFluidMaterialStatus * >( this->giveStatus(gp) );
 
-    this->giveMaterial(0)->computeDeviatoricStress3D(v0, status->giveSlaveGaussPoint0(), eps, tStep);
-    this->giveMaterial(1)->computeDeviatoricStress3D(v1, status->giveSlaveGaussPoint1(), eps, tStep);
+    auto v0 = this->giveMaterial(0)->computeDeviatoricStress3D(eps, status->giveSlaveGaussPoint0(), tStep);
+    auto v1 = this->giveMaterial(1)->computeDeviatoricStress3D(eps, status->giveSlaveGaussPoint1(), tStep);
 
-    answer.clear();
-    answer.add(1.0 - vof, v0);
-    answer.add(vof, v1);
+    auto stress = (1.0 - vof) * v0 + vof * v1;
 
     status->letDeviatoricStrainRateVectorBe(eps);
-    status->letDeviatoricStressVectorBe(answer);
+    status->letDeviatoricStressVectorBe(stress);
+
+    return stress;
 }
 
-void
-TwoFluidMaterial :: computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+TwoFluidMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix a0, a1;
     double vof = this->giveTempVOF(gp);
     TwoFluidMaterialStatus *status = static_cast< TwoFluidMaterialStatus * >( this->giveStatus(gp) );
 
-    this->giveMaterial(0)->computeTangent3D(a0, mode, status->giveSlaveGaussPoint0(), tStep);
-    this->giveMaterial(1)->computeTangent3D(a1, mode, status->giveSlaveGaussPoint1(), tStep);
+    auto a0 = this->giveMaterial(0)->computeTangent3D(mode, status->giveSlaveGaussPoint0(), tStep);
+    auto a1 = this->giveMaterial(1)->computeTangent3D(mode, status->giveSlaveGaussPoint1(), tStep);
 
-    answer.clear();
-    answer.add(1.0 - vof, a0);
-    answer.add(vof, a1);
+    return (1.0 - vof) * a0 + vof * a1;
 }
 
 double
-TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
+TwoFluidMaterial :: giveTempVOF(GaussPoint *gp) const
 {
     FloatArray vof(2);
     MaterialInterface *mi = domain->giveEngngModel()->giveMaterialInterface( domain->giveNumber() );

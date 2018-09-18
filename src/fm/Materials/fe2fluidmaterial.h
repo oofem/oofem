@@ -152,14 +152,13 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    void computeDeviatoricStress3D(FloatArray &stress_dev, double &r_vol, GaussPoint *gp, const FloatArray &eps, double pressure, TimeStep *tStep) override;
-    void computeDeviatoricStress3D(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep) override;
+    std::pair<FloatArrayF<6>, double> computeDeviatoricStress3D(const FloatArrayF<6> &eps, double pressure, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<6> computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void computeTangent3D(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void computeTangents3D(FloatMatrix &dsdd, FloatArray &dsdp, FloatArray &dedd, double &dedp,
-                               MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<6,6> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    Tangents<6> computeTangents3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
