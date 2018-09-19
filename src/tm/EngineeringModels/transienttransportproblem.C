@@ -58,6 +58,7 @@ TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *master
     alpha(0.5),
     dtFunction(0),
     prescribedTimes(),
+    initT(0.),
     deltaT(1.),
     keepTangent(false),
     lumped(false)
@@ -88,6 +89,10 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->alpha, _IFT_TransientTransportProblem_alpha);
 
+    if ( ir->hasField(_IFT_TransientTransportProblem_initt) ) {
+        IR_GIVE_FIELD(ir, initT, _IFT_TransientTransportProblem_initt);
+    }
+    
     prescribedTimes.clear();
     dtFunction = 0;
     if ( ir->hasField(_IFT_TransientTransportProblem_dtFunction) ) {
@@ -151,7 +156,7 @@ TransientTransportProblem :: giveDiscreteTime(int iStep)
     if ( iStep > 0 && iStep <= this->prescribedTimes.giveSize() ) {
         return ( this->prescribedTimes.at(iStep) );
     } else if ( iStep == 0 ) {
-        return 0.0;
+        return initT;
     }
 
     OOFEM_ERROR("invalid iStep");
@@ -181,7 +186,7 @@ TimeStep *TransientTransportProblem :: giveSolutionStepWhenIcApply(bool force)
     } else {
         if ( !stepWhenIcApply ) {
             double dt = this->giveDeltaT(1);
-            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, 0., dt, 0);
+            stepWhenIcApply = std::make_unique<TimeStep>(giveNumberOfTimeStepWhenIcApply(), this, 0, this->initT, dt, 0);
             // The initial step goes from [-dt, 0], so the intrinsic time is at: -deltaT  + alpha*dt
             stepWhenIcApply->setIntrinsicTime(-dt + alpha * dt);
         }

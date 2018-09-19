@@ -47,6 +47,7 @@
 #define _IFT_TransientTransportProblem_Name "transienttransport"
 #define _IFT_TransientTransportProblem_alpha "alpha" ///< Defines the time discretization of the value: @f$ u = u_n (1-\alpha) + u_{n+1} \alpha @f$.
 #define _IFT_TransientTransportProblem_deltaT "deltat" ///< Fixed timestep.
+#define _IFT_TransientTransportProblem_initt "initt" ///< Initial time
 #define _IFT_TransientTransportProblem_dtFunction "dtfunction" ///< Function that determines size of time step.
 #define _IFT_TransientTransportProblem_prescribedTimes "prescribedtimes" ///< Discrete times for each time step.
 #define _IFT_TransientTransportProblem_keepTangent "keeptangent" ///< Fixes the tangent to be reused on each step.
@@ -80,6 +81,8 @@ protected:
     double alpha;
     int dtFunction;
     FloatArray prescribedTimes;
+    /// Initial time from which the computation runs. Default is zero.
+    double initT;
     double deltaT;
     bool keepTangent, hasTangent;
     bool lumped;
