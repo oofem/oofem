@@ -1,0 +1,51 @@
+bondceb01.out
+Test case for BondCEB interface material - rebar pull-out. Added by Adam Sciegaj
+StaticStructural nsteps 20 deltat 1.0 rtolf 1.0e-4 MaxIter 20 initialguess 1 nmodules 1
+errorcheck
+#vtkxml tstep_all domain_all vars 2 98 99 stype 0 regionsets 1 3
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 4 ncrosssect 3 nmat 3 nbc 3 nic 0 nltf 1 nset 6
+node 1 coords 3 -0.1 0.1 0.0
+node 2 coords 3 0.1 0.1 0.0
+node 3 coords 3 -0.1 0.0 0.0
+node 4 coords 3 0.1 0.0 0.0
+node 5 coords 3 -0.1 -0.1 0.0
+node 6 coords 3 0.1 -0.1 0.0
+node 7 coords 3 -0.1 0.0 0.0
+node 8 coords 3 0.1 0.0 0.0
+planestress2d 1 nodes  4 1 3 4 2
+planestress2d 2 nodes  4 3 5 6 4
+truss2d 3 nodes 2 7 8 cs 1
+IntElLine1 4 nodes 4 3 4 7 8
+Set 1 elements 2 1 2
+Set 2 elements 1 3
+Set 3 elements 1 4
+Set 4 nodes 1 5
+Set 5 nodes 2 5 6
+Set 6 nodes 1 8
+SimpleCS 1 thick 0.2 material 1 set 1
+SimpleCS 2 area 3.1416e-4 material 2 set 2
+InterfaceCS 3 thickness 6.28319e-2 material 3 set 3
+IsoLE 1 d 1.0 E 3.36e10 n 0.2 tAlpha 1.0
+IsoLE 2 d 1.0 E 2e11 n 0.3 tAlpha 1.0
+bondceb 3 kn 6e12 ks 6.135e10 s1 0.001 s2 0.002 s3 0.0065 taumax 1.541e7 tauf 6.164e6
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 4
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 5
+BoundaryCondition 3 loadTimeFunction 1 dofs 1 1 values 1 8e-3 set 6
+PiecewiseLinFunction 1 t 2 0.0 20.0 f(t) 2 0.0 1.0
+
+#%BEGIN_CHECK% tolerance 1.e-3
+##Bond stress - slip values check
+#ELEMENT tStep 1 number 4 gp 3 keyword 98 component 2 value 2.917817920790832e-04
+#ELEMENT tStep 1 number 4 gp 3 keyword 99 component 2 value 9.415121170265339e+06
+#ELEMENT tStep 5 number 4 gp 4 keyword 98 component 2 value 1.895957776946900e-03
+#ELEMENT tStep 5 number 4 gp 4 keyword 99 component 2 value 1.541000000000000e+07
+#ELEMENT tStep 8 number 4 gp 2 keyword 98 component 2 value 2.933106041747347e-03
+#ELEMENT tStep 8 number 4 gp 2 keyword 99 component 2 value 1.349277811955645e+07
+#ELEMENT tStep 15 number 4 gp 1 keyword 98 component 2 value 5.809200067464972e-03
+#ELEMENT tStep 15 number 4 gp 1 keyword 99 component 2 value 7.583363594715305e+06
+#ELEMENT tStep 19 number 4 gp 4 keyword 98 component 2 value 7.558381673745631e-03
+#ELEMENT tStep 19 number 4 gp 4 keyword 99 component 2 value 6.164000000000000e+06
+##
+#%END_CHECK%
