@@ -201,6 +201,23 @@ public:
             (*this)(i, c) = src[i];
         }
     }
+
+    /**
+     * Extract sub matrix (can also reorder the matrix).
+     * Zero based indexing.
+     */
+    template<int P, int K>
+    FloatMatrixF<P,K> sub(const std::array<int, P> &rows, const std::array<int,K> &cols)
+    {
+        FloatMatrixF<P,K> out;
+        for ( int i = 0; i < P; ++i ) {
+            for ( int j = 0; j < K; ++j ) {
+                out(i, j) = (*this)(rows[i], cols[j]);
+            }
+        }
+        return out;
+    }
+
     /**
      * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
      * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the
