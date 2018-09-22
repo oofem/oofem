@@ -36,6 +36,7 @@
 #define intelline1_h
 
 #include "sm/Elements/Interfaces/structuralinterfaceelement.h"
+#include "floatmatrixf.h"
 
 #define _IFT_IntElLine1_Name "intelline1"
 #define _IFT_IntElLine1_axisymmode "axisymmode"
@@ -83,12 +84,12 @@ public:
 
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
-        this->giveInterfaceCrossSection()->giveEngTraction_2d(answer, gp, jump, tStep);
+        answer = this->giveInterfaceCrossSection()->giveEngTraction_2d(jump, gp, tStep);
     }
 
     void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
-        this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        answer = this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(rMode, ip, tStep);
     }
 
 #ifdef __OOFEG

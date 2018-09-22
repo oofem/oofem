@@ -124,7 +124,7 @@ IntMatIsoDamageTable :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-IntMatIsoDamageTable :: computeDamageParam(double kappa)
+IntMatIsoDamageTable :: computeDamageParam(double kappa) const
 {
     if ( kappa > this->e0 ) {
         // Linear interpolation between able values.

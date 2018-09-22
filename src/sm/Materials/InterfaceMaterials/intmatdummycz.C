@@ -41,20 +41,19 @@ REGISTER_Material(IntMatDummyCZ);
 
 IntMatDummyCZ :: IntMatDummyCZ(int n, Domain *d) : StructuralInterfaceMaterial(n, d) {}
 
-void IntMatDummyCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                                const FloatMatrix &F, TimeStep *tStep)
+FloatArrayF<3>
+IntMatDummyCZ :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
     status->letTempJumpBe(jump);
 
-    answer = {0., 0., 0.};
+    return {0., 0., 0.};
 }
 
-void IntMatDummyCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3> IntMatDummyCZ :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
-    answer.resize(3,3);
-    answer.zero();
+    return zero<3,3>();
 }
 
 IRResultType IntMatDummyCZ :: initializeFrom(InputRecord *ir)

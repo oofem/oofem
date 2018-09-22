@@ -17,18 +17,14 @@
 namespace oofem {
 REGISTER_Element(IntElLine1IntPen);
 
-IntElLine1IntPen::IntElLine1IntPen(int n, Domain * d) : IntElLine1(n, d) {
+IntElLine1IntPen::IntElLine1IntPen(int n, Domain * d) : IntElLine1(n, d)
+{
     numberOfDofMans = 6;
-
     numberOfGaussPoints = 4;
-
 }
 
-IntElLine1IntPen::~IntElLine1IntPen() {
-
-}
-
-int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
     FloatArray N;
     FEInterpolation *interp = this->giveInterpolation();
     interp->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
@@ -36,33 +32,28 @@ int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const Float
     answer.resize(this->giveDofManager(1)->giveCoordinates()->giveSize());
     answer.zero();
 
-
     double xi_0 = 0.;
     FloatArray xiScaled = {0.};
 
-    if(lcoords.at(1) < xi_0 ){
-    	xiScaled = {lcoords.at(1)*2. + 1.};
-    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+    if ( lcoords.at(1) < xi_0 ) {
+        xiScaled = {lcoords.at(1)*2. + 1.};
+        interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
 
-    	const FloatArray &x1 = *(this->giveDofManager(1)->giveCoordinates());
-    	answer.add(N.at(1), x1 );
+        const auto &x1 = *(this->giveDofManager(1)->giveCoordinates());
+        answer.add(N.at(1), x1 );
 
-    	const FloatArray &x3 = *(this->giveDofManager(3)->giveCoordinates());
-    	answer.add(N.at(2), x3 );
+        const FloatArray &x3 = *(this->giveDofManager(3)->giveCoordinates());
+        answer.add(N.at(2), x3 );
+    } else {
+        xiScaled = {lcoords.at(1)*2. - 1.};
+        interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+
+        const auto &x3 = *(this->giveDofManager(3)->giveCoordinates());
+        answer.add(N.at(1), x3 );
+
+        const auto &x2 = *(this->giveDofManager(2)->giveCoordinates());
+        answer.add(N.at(2), x2 );
     }
-    else {
-    	xiScaled = {lcoords.at(1)*2. - 1.};
-    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
-
-    	const FloatArray &x3 = *(this->giveDofManager(3)->giveCoordinates());
-    	answer.add(N.at(1), x3 );
-
-    	const FloatArray &x2 = *(this->giveDofManager(2)->giveCoordinates());
-    	answer.add(N.at(2), x2 );
-    }
-
-
-
 
     return true;
 }
@@ -70,16 +61,16 @@ int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const Float
 void
 IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
 {
-//	printf("Entering IntElLine2IntPen :: computeCovarBaseVectorAt\n");
+    //printf("Entering IntElLine2IntPen :: computeCovarBaseVectorAt\n");
 
-	// Since we are averaging over the whole element, always evaluate the base vectors at xi = 0.
+    // Since we are averaging over the whole element, always evaluate the base vectors at xi = 0.
 
-	FloatArray xi_0 = {0.0};
-//	FloatArray xi_0 = {ip->giveNaturalCoordinate(1)};
+    FloatArray xi_0 = {0.0};
+    //FloatArray xi_0 = {ip->giveNaturalCoordinate(1)};
 
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
-//    interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    //interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evaldNdxi( dNdxi, xi_0, FEIElementGeometryWrapper(this) );
 
     G.resize(2);
@@ -95,9 +86,7 @@ IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G
     X2_i = 0.5 * ( this->giveNode(2)->giveCoordinate(2) + this->giveNode(5)->giveCoordinate(2) );
     G.at(1) += dNdxi.at(2, 1) * X1_i;
     G.at(2) += dNdxi.at(2, 1) * X2_i;
-
 }
-
 
 
 void
@@ -267,16 +256,10 @@ IntElLine1IntPen :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
         }
     }
 
-
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
-
-
-
 #endif
-
-
 }
 
 
@@ -286,11 +269,11 @@ IntElLine1IntPen :: giveInternalForcesVector(FloatArray &answer,
 {
 #if 1
     // Computes internal forces
-	// For this element we use an "interior penalty" formulation, where
-	// the cohesive zone contribution is weakened, i.e. the traction and
-	// test function for the cohesive zone are projected onto a reduced
-	// space. The purpose of the projection is to improve the stability
-	// properties of the formulation, thereby avoiding traction oscilations.
+    // For this element we use an "interior penalty" formulation, where
+    // the cohesive zone contribution is weakened, i.e. the traction and
+    // test function for the cohesive zone are projected onto a reduced
+    // space. The purpose of the projection is to improve the stability
+    // properties of the formulation, thereby avoiding traction oscilations.
 
     FloatMatrix N;
     FloatArray u, traction, jump;
@@ -466,7 +449,6 @@ for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
 
 }
 
-
 #endif
 
 void
@@ -484,36 +466,34 @@ IntElLine1IntPen :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     answer.resize(2, 12);
     answer.zero();
 
-    if(ip->giveNaturalCoordinate(1) < xi_0 ){
-    	xiScaled = {ip->giveNaturalCoordinate(1)*2. + 1.};
-    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+    if ( ip->giveNaturalCoordinate(1) < xi_0 ) {
+        xiScaled = {ip->giveNaturalCoordinate(1)*2. + 1.};
+        interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
 
-		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
-//		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
-		answer.at(1, 5) = answer.at(2, 6) = -N.at(2);
+        answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
+        //answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
+        answer.at(1, 5) = answer.at(2, 6) = -N.at(2);
 
-		answer.at(1, 7) = answer.at(2, 8) = N.at(1);
-//		answer.at(1, 9) = answer.at(2, 10) = N.at(2);
-		answer.at(1, 11) = answer.at(2, 12) = N.at(2);
-    }
-    else {
-    	xiScaled = {ip->giveNaturalCoordinate(1)*2. - 1.};
-    	interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
+        answer.at(1, 7) = answer.at(2, 8) = N.at(1);
+        //answer.at(1, 9) = answer.at(2, 10) = N.at(2);
+        answer.at(1, 11) = answer.at(2, 12) = N.at(2);
+    } else {
+        xiScaled = {ip->giveNaturalCoordinate(1)*2. - 1.};
+        interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
 
-//		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
-		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
-		answer.at(1, 5) = answer.at(2, 6) = -N.at(1);
+        //answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
+        answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
+        answer.at(1, 5) = answer.at(2, 6) = -N.at(1);
 
-//		answer.at(1, 7) = answer.at(2, 8) = N.at(1);
-		answer.at(1, 9) = answer.at(2, 10) = N.at(2);
-		answer.at(1, 11) = answer.at(2, 12) = N.at(1);
+        //answer.at(1, 7) = answer.at(2, 8) = N.at(1);
+        answer.at(1, 9) = answer.at(2, 10) = N.at(2);
+        answer.at(1, 11) = answer.at(2, 12) = N.at(1);
     }
 
 }
 
 void
 IntElLine1IntPen :: computeGaussPoints()
-// Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );

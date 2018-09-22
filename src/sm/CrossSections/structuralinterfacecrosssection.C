@@ -43,7 +43,7 @@ namespace oofem {
 REGISTER_CrossSection(StructuralInterfaceCrossSection);
 
 StructuralInterfaceMaterial *
-StructuralInterfaceCrossSection :: giveInterfaceMaterial()
+StructuralInterfaceCrossSection :: giveInterfaceMaterial() const
 {
     return static_cast< StructuralInterfaceMaterial * >( this->giveDomain()->giveMaterial(this->materialNum) );
 }
@@ -79,83 +79,81 @@ StructuralInterfaceCrossSection :: initializeFrom(InputRecord *ir)
 }
 
 
-void
-StructuralInterfaceCrossSection :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+StructuralInterfaceCrossSection :: give1dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterial *mat = this->giveInterfaceMaterial();
     if ( mat->useNumericalTangent ) {
-        mat->give1dStiffnessMatrix_Eng_Num( answer, gp, tStep );
+        return mat->give1dStiffnessMatrix_Eng_Num( gp, tStep );
     } else if( mat->hasAnalyticalTangentStiffness() ) {
-        mat->give1dStiffnessMatrix_Eng( answer, rMode, gp, tStep );
+        return mat->give1dStiffnessMatrix_Eng( rMode, gp, tStep );
     } else {
         OOFEM_ERROR("Not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
-void
-StructuralInterfaceCrossSection :: give2dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<2,2>
+StructuralInterfaceCrossSection :: give2dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterial *mat = this->giveInterfaceMaterial();
     if ( mat->useNumericalTangent ) {
-        mat->give2dStiffnessMatrix_Eng_Num( answer, gp, tStep );
+        return mat->give2dStiffnessMatrix_Eng_Num( gp, tStep );
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
-        mat->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
+        return mat->give2dStiffnessMatrix_Eng( rMode, gp, tStep);
     } else {
         OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
-void
-StructuralInterfaceCrossSection :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+StructuralInterfaceCrossSection :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterial *mat = this->giveInterfaceMaterial( );
     if ( mat->useNumericalTangent ) {
-        mat->give3dStiffnessMatrix_Eng_Num(answer, gp, tStep);
+        return mat->give3dStiffnessMatrix_Eng_Num(gp, tStep);
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
-        mat->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
+        return mat->give3dStiffnessMatrix_Eng(rMode, gp, tStep);
     } else {
         OOFEM_ERROR("Not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
 
-
-
-void
-StructuralInterfaceCrossSection :: give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+StructuralInterfaceCrossSection :: give1dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterial *mat = this->giveInterfaceMaterial();
     if ( mat->useNumericalTangent ) {
-        mat->give1dStiffnessMatrix_dTdj_Num( answer, gp, tStep);
+        return mat->give1dStiffnessMatrix_dTdj_Num(gp, tStep);
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
-        mat->give1dStiffnessMatrix_dTdj(answer, rMode, gp, tStep);
+        return mat->give1dStiffnessMatrix_dTdj(rMode, gp, tStep);
     } else {
         OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
-void
-StructuralInterfaceCrossSection :: give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<2,2>
+StructuralInterfaceCrossSection :: give2dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterial *mat = this->giveInterfaceMaterial();
     if ( mat->useNumericalTangent ) {
-        mat->give2dStiffnessMatrix_dTdj_Num( answer, gp, tStep );
+        return mat->give2dStiffnessMatrix_dTdj_Num(gp, tStep );
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
-        mat->give2dStiffnessMatrix_dTdj(answer, rMode, gp, tStep);
+        return mat->give2dStiffnessMatrix_dTdj(rMode, gp, tStep);
     } else {
         OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
 
 
-void
-StructuralInterfaceCrossSection :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+StructuralInterfaceCrossSection :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterial *mat = this->giveInterfaceMaterial();
     if ( mat->useNumericalTangent ) {
-        mat->give3dStiffnessMatrix_dTdj_Num(answer, gp, tStep);
+        return mat->give3dStiffnessMatrix_dTdj_Num(gp, tStep);
     } else if ( mat->hasAnalyticalTangentStiffness() ) {
-        mat->give3dStiffnessMatrix_dTdj(answer, rMode, gp, tStep);
+        return mat->give3dStiffnessMatrix_dTdj(rMode, gp, tStep);
     } else {
         OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }

@@ -89,43 +89,42 @@ public:
      * services for corresponding material model defined for given integration point.
      * @param answer Contains result.
      * @param gp Integration point.
-     * @param reducedF Deformation gradient in reduced form.
+     * @param reduthiscedF Deformation gradient in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
     //@{
     // Pass all calls to the material
-    void giveFirstPKTraction_1d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep )
-    { this->giveInterfaceMaterial()->giveFirstPKTraction_1d(answer, gp, jump, F, tStep); }
-    void giveFirstPKTraction_2d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep )
-    { this->giveInterfaceMaterial()->giveFirstPKTraction_2d(answer, gp, jump, F, tStep); }
-    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep)
-    { this->giveInterfaceMaterial()->giveFirstPKTraction_3d(answer, gp, jump, F, tStep); }
+    double giveFirstPKTraction_1d(double jump, double F, GaussPoint *gp, TimeStep *tStep ) const
+    { return this->giveInterfaceMaterial()->giveFirstPKTraction_1d(jump, F, gp, tStep); }
+    FloatArrayF<2> giveFirstPKTraction_2d( const FloatArrayF<2> &jump, const FloatMatrixF<2,2> &F, GaussPoint *gp, TimeStep *tStep ) const
+    { return this->giveInterfaceMaterial()->giveFirstPKTraction_2d(jump, F, gp, tStep); }
+    FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+    { return this->giveInterfaceMaterial()->giveFirstPKTraction_3d(jump, F, gp, tStep); }
 
 
-    void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+    double giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep *tStep) const
     {
-        this->giveInterfaceMaterial()->giveEngTraction_1d(answer, gp, jump, tStep);
+        return this->giveInterfaceMaterial()->giveEngTraction_1d(jump, gp, tStep);
     }
-    void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+    FloatArrayF<2> giveEngTraction_2d(const FloatArrayF<2> &jump, GaussPoint *gp, TimeStep *tStep) const
     {
-        this->giveInterfaceMaterial()->giveEngTraction_2d(answer, gp, jump, tStep);
+        return this->giveInterfaceMaterial()->giveEngTraction_2d(jump, gp, tStep);
     }
-    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
     {
-        this->giveInterfaceMaterial()->giveEngTraction_3d(answer, gp, jump, tStep);
+        return this->giveInterfaceMaterial()->giveEngTraction_3d(jump, gp, tStep);
     }
 
-    void give1dStiffnessMatrix_dTdj( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
-    void give2dStiffnessMatrix_dTdj( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
-    void give3dStiffnessMatrix_dTdj( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
+    FloatMatrixF<1,1> give1dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+    FloatMatrixF<2,2> give2dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
 
-
-    void give1dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
-    void give2dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
-    void give3dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep );
+    FloatMatrixF<1,1> give1dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+    FloatMatrixF<2,2> give2dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
     //@}
 
-    StructuralInterfaceMaterial *giveInterfaceMaterial();
+    StructuralInterfaceMaterial *giveInterfaceMaterial() const;
 
     int checkConsistency() override;
 

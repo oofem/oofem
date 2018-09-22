@@ -48,19 +48,18 @@ REGISTER_Material(IntMatBilinearCZElastic);
 IntMatBilinearCZElastic :: IntMatBilinearCZElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-void
-IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
-                                                  const FloatMatrix &F, TimeStep *tStep)
+FloatArrayF<3>
+IntMatBilinearCZElastic :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const 
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
     /// @todo only study normal stress for now 
     // no degradation in shear
     // jumpVector = [normal shear1 shear2]
-    //auto [gn, gs1, gs2] = jumpVector;
-    double gn  = jumpVector.at(1);
-    double gs1 = jumpVector.at(2);
-    double gs2 = jumpVector.at(3);
+    //auto [gn, gs1, gs2] = jump;
+    double gn  = jump.at(1);
+    double gs1 = jump.at(2);
+    double gs2 = jump.at(3);
 
     double normal;
     if ( gn <= 0.0 ) { // compresssion
@@ -74,17 +73,18 @@ IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
         normal = 0.0; // failed
         //printf("Failed...\n");
     }
-    answer = {normal, this->ks0 * gs1, this->ks0 * gs2};
+    FloatArrayF<3> answer = {normal, this->ks0 * gs1, this->ks0 * gs2};
 
     // update gp
-    status->letTempJumpBe(jumpVector);
+    status->letTempJumpBe(jump);
     status->letTempFirstPKTractionBe(answer);
     status->letTempTractionBe(answer);
+    return answer;
 }
 
 
-void
-IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
@@ -104,11 +104,7 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
         normal = 0.0; // failed
         //printf("Failed...\n");
     }
-    answer.resize(3, 3);
-    answer.zero();
-    answer.at(1, 1) = normal;
-    answer.at(2, 2) = this->ks0;
-    answer.at(3, 3) = this->ks0;
+    return diag<3>({normal, this->ks0, this->ks0});
 }
 
 

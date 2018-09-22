@@ -48,25 +48,22 @@ REGISTER_Material(IntMatElastic);
 IntMatElastic :: IntMatElastic(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-void
-IntMatElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jumpVector,
-                                                  const FloatMatrix &F, TimeStep *tStep)
+FloatArrayF<3>
+IntMatElastic :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
-    answer.beScaled(k, jumpVector);
+    auto answer = k * jump;
 
-    status->letTempJumpBe(jumpVector);
+    status->letTempJumpBe(jump);
     status->letTempFirstPKTractionBe(answer);
     status->letTempTractionBe(answer);
 }
 
-void
-IntMatElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+IntMatElastic :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
-    answer.resize(3, 3);
-    answer.beUnitMatrix();
-    answer.times(k);
+    return eye<3>() * k;
 }
 
 IRResultType

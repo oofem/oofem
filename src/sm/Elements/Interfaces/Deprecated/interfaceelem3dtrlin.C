@@ -39,7 +39,9 @@
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "intarray.h"
 #include "mathfem.h"
 #include "sm/CrossSections/structuralinterfacecrosssection.h"
@@ -153,14 +155,14 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
 void
 InterfaceElement3dTrLin :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(answer, gp, strain, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(strain, gp, tStep);
 }
 
 
 void
 InterfaceElement3dTrLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(rMode, gp, tStep);
 }
 
 

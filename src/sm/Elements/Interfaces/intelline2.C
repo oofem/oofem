@@ -58,7 +58,6 @@ FEI2dLineLin IntElLine2 :: interpLin(1, 1);
 IntElLine2 :: IntElLine2(int n, Domain *aDomain) : IntElLine1(n, aDomain)
 {
     numberOfDofMans = 6;
-
     numberOfGaussPoints = 4;
     linear = false;
 }
@@ -67,40 +66,37 @@ IntElLine2 :: IntElLine2(int n, Domain *aDomain) : IntElLine1(n, aDomain)
 void
 IntElLine2 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 {
-
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
     FloatArray N;
     answer.resize(2, 12);
     answer.zero();
 
-    if(linear) {
-		interpLin.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    if ( linear ) {
+        interpLin.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
-		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
-		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
-//		answer.at(1, 5) = answer.at(2, 6) = -N.at(3);
+        answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
+        answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
+        //answer.at(1, 5) = answer.at(2, 6) = -N.at(3);
 
-		answer.at(1, 7) = answer.at(2, 8) = N.at(1);
-		answer.at(1, 9) = answer.at(2, 10) = N.at(2);
-//		answer.at(1, 11) = answer.at(2, 12) = N.at(3);
-    }
-    else {
-		interp.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        answer.at(1, 7) = answer.at(2, 8) = N.at(1);
+        answer.at(1, 9) = answer.at(2, 10) = N.at(2);
+        //answer.at(1, 11) = answer.at(2, 12) = N.at(3);
+    } else {
+        interp.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
-		answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
-		answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
-		answer.at(1, 5) = answer.at(2, 6) = -N.at(3);
+        answer.at(1, 1) = answer.at(2, 2) = -N.at(1);
+        answer.at(1, 3) = answer.at(2, 4) = -N.at(2);
+        answer.at(1, 5) = answer.at(2, 6) = -N.at(3);
 
-		answer.at(1, 7) = answer.at(2, 8) = N.at(1);
-		answer.at(1, 9) = answer.at(2, 10) = N.at(2);
-		answer.at(1, 11) = answer.at(2, 12) = N.at(3);
+        answer.at(1, 7) = answer.at(2, 8) = N.at(1);
+        answer.at(1, 9) = answer.at(2, 10) = N.at(2);
+        answer.at(1, 11) = answer.at(2, 12) = N.at(3);
     }
 }
 
 
 void
 IntElLine2 :: computeGaussPoints()
-// Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -120,8 +116,8 @@ IntElLine2 :: giveInterpolation() const
 IRResultType
 IntElLine2 :: initializeFrom(InputRecord *ir)
 {
-	linear = ir->hasField(_IFT_IntElLine2_LinearTraction);
-    return IntElLine1 :: initializeFrom(ir);   
+    linear = ir->hasField(_IFT_IntElLine2_LinearTraction);
+    return IntElLine1 :: initializeFrom(ir);
 }
 
 

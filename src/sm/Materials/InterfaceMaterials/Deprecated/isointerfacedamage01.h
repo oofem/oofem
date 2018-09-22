@@ -136,12 +136,12 @@ public:
     const char *giveInputRecordName() const override { return _IFT_IsoInterfaceDamageMaterial_Name; }
     const char *giveClassName() const override { return "IsoInterfaceDamageMaterial"; }
 
-    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
-    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    double computeEquivalentStrain(const FloatArray &jump, GaussPoint *gp, TimeStep *tStep);
+    double computeEquivalentStrain(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
@@ -150,7 +150,7 @@ public:
      * @param gp Integration point.
      * @return omega.
      */
-    virtual double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp);
+    virtual double computeDamageParam(double kappa, const FloatArrayF<3> &strain, GaussPoint *gp) const;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

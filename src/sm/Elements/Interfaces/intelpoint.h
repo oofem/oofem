@@ -37,6 +37,7 @@
 
 #include "sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "gaussintegrationrule.h"
+#include "floatmatrixf.h"
 
 ///@name Input fields for Material
 //@{
@@ -85,22 +86,22 @@ public:
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
         if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
-            this->giveInterfaceCrossSection()->giveEngTraction_3d(answer, gp, jump, tStep);
+            answer = this->giveInterfaceCrossSection()->giveEngTraction_3d(jump, gp, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
-            this->giveInterfaceCrossSection()->giveEngTraction_2d(answer, gp, jump, tStep);
+            answer = this->giveInterfaceCrossSection()->giveEngTraction_2d(jump, gp, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 1 ) {
-            this->giveInterfaceCrossSection()->giveEngTraction_1d(answer, gp, jump, tStep);
+            answer = {this->giveInterfaceCrossSection()->giveEngTraction_1d(jump.at(1), gp, tStep)};
         }
     }
 
     void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
         if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 3 ) {
-            this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+            answer = this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(rMode, ip, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
-            this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+            answer = this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(rMode, ip, tStep);
         } else if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 1 ) {
-            this->giveInterfaceCrossSection()->give1dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+            answer = this->giveInterfaceCrossSection()->give1dStiffnessMatrix_Eng(rMode, ip, tStep);
         }
     }
 

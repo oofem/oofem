@@ -133,11 +133,9 @@ public:
 
     bool hasAnalyticalTangentStiffness() const override { return true; } 
 
-    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
-                            const FloatArray &jump, TimeStep *tStep) override;
+    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp,TimeStep *tStep) const override;
 
-    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                const FloatMatrix &F, TimeStep *tStep) override;
+    FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -148,7 +146,7 @@ public:
      * @param tStep Time step.
      * @return Return parameter containing the corresponding equivalent jump (kappa)
      */
-    virtual double computeEquivalentJump(const FloatArray &jump);
+    virtual double computeEquivalentJump(const FloatArray &jump) const;
 
     /**
      * computes the value of damage parameter omega, based on given value of equivalent strain.
@@ -157,17 +155,15 @@ public:
      * @param gp Integration point.
      * @return omega.
      */
-    virtual double computeDamageParam(double kappa);
+    virtual double computeDamageParam(double kappa) const;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatIsoDamageStatus(gp); }
 
-    void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                   GaussPoint *gp, TimeStep *tStep) override;
-    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                   GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<2,2> give2dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

@@ -104,11 +104,9 @@ public:
     const char *giveInputRecordName() const override { return _IFT_IntMatCoulombContact_Name; }
     const char *giveClassName() const override { return "IntMatCoulombContact"; }
 
-    void giveEngTraction_3d( FloatArray &answer, GaussPoint *gp,
-                             const FloatArray &jump, TimeStep *tStep) override;
+    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                   GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     std::pair<double, FloatArrayF<2>> computeEngTraction(const FloatArrayF<2> &tempShearStressShift, double normalJump, const FloatArrayF<2> &shearJump );
 

@@ -43,6 +43,7 @@
 #include "feinterpol.h"
 #include "sm/CrossSections/structuralinterfacecrosssection.h"
 #include "classfactory.h"
+#include "floatmatrixf.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -87,9 +88,9 @@ InterfaceElem1d :: computeStressVector(FloatArray &answer, const FloatArray &str
 {
     setCoordMode();
     switch ( mode ) {
-    case ie1d_1d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_1d(answer, gp, strain, tStep); return;
-    case ie1d_2d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_2d(answer, gp, strain, tStep); return;
-    case ie1d_3d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(answer, gp, strain, tStep); return;
+        case ie1d_1d: answer = FloatArray{static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_1d(strain.at(1), gp, tStep)}; return;
+        case ie1d_2d: answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_2d(strain, gp, tStep); return;
+        case ie1d_3d: answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(strain, gp, tStep); return;
     }
 }
 
@@ -99,9 +100,9 @@ InterfaceElem1d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseM
 {
     setCoordMode();
     switch ( mode ) {
-    case ie1d_1d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give1dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
-    case ie1d_2d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
-    case ie1d_3d: static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(answer, rMode, gp, tStep); return;
+    case ie1d_1d: answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give1dStiffnessMatrix_Eng(rMode, gp, tStep); return;
+    case ie1d_2d: answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix_Eng(rMode, gp, tStep); return;
+    case ie1d_3d: answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(rMode, gp, tStep); return;
     }
 }
 

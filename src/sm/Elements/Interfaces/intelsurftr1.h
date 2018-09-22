@@ -37,6 +37,8 @@
 
 #include "sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "fei3dtrlin.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 
 #define _IFT_IntElSurfTr1_Name "intelsurftr1"
 
@@ -66,12 +68,12 @@ public:
 
     void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
-        this->giveInterfaceCrossSection()->giveEngTraction_3d(answer, gp, jump, tStep);
+        answer = this->giveInterfaceCrossSection()->giveEngTraction_3d(jump, gp, tStep);
     }
 
     void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
-        this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        answer = this->giveInterfaceCrossSection()->give3dStiffnessMatrix_Eng(rMode, ip, tStep);
     }
 
     // definition & identification

@@ -149,28 +149,28 @@ public:
     const char *giveInputRecordName() const override { return _IFT_IsoInterfaceDamageMaterial_2_Name; }
     const char *giveClassName() const override { return "IsoInterfaceDamageMaterial"; }
 
-    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
-    void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
-     * @param[out] kappa Return parameter containing the corresponding equivalent strain.
      * @param strain Total strain vector in full form.
      * @param gp Integration point.
      * @param tStep Time step.
+     * @return Equiv strain measure.
      */
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeEquivalentStrain(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * computes the value of damage parameter omega, based on given value of equivalent strain.
-     * @param[out] omega Contains result.
      * @param kappa Equivalent strain measure.
      * @param strain Total strain vector in full form. (unnecessary?)
      * @param gp Integration point.
+     * @return Omega.
      */
-    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp);
+    virtual double computeDamageParam(double kappa, const FloatArrayF<3> &strain, GaussPoint *gp) const;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

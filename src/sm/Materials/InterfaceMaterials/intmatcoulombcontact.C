@@ -47,8 +47,8 @@ REGISTER_Material(IntMatCoulombContact);
 IntMatCoulombContact :: IntMatCoulombContact(int n, Domain *d) : StructuralInterfaceMaterial(n, d) { }
 
 
-void
-IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+FloatArrayF<3>
+IntMatCoulombContact :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
     auto tempShearStressShift = status->giveShearStressShift();
@@ -76,34 +76,34 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
     tempShearStressShift = this->kn * shearJump - shearStress;
 
     // Set stress components in the traction vector
-    answer = {normalStress, shearStress[0], shearStress[1]};
+    FloatArrayF<3> answer = {normalStress, shearStress[0], shearStress[1]};
 
     // Update gp
     status->setTempShearStressShift( tempShearStressShift );
     status->letTempJumpBe( jump );
     status->letTempTractionBe( answer );
+    return answer;
 }
 
 
-void
-IntMatCoulombContact :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode,
-                                                  GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+IntMatCoulombContact :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * > ( this->giveStatus(gp) );
     const auto &jump = status->giveTempJump();
     double normalJump = jump[0]; //in status, normal is always the first component
 
-    answer.resize(3, 3);
-    answer.beUnitMatrix();
+    auto answer = eye<3>();
     if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
         if ( normalJump + normalClearance <= 0 ) {
-            answer.times( this->kn ); //in compression and after the clearance gap closed
+            answer *= this->kn; //in compression and after the clearance gap closed
         } else {
-            answer.times( this->kn * this->stiffCoeff );
+            answer *= this->kn * this->stiffCoeff;
         }
     } else {
-        answer.times( this->kn );
+        answer *= this->kn;
     }
+    return answer;
 }
 
 

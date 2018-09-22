@@ -49,8 +49,8 @@ IsoInterfaceDamageMaterial :: IsoInterfaceDamageMaterial(int n, Domain *d) : Str
 {}
 
 
-void
-IsoInterfaceDamageMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+FloatArrayF<3>
+IsoInterfaceDamageMaterial :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
 
@@ -59,7 +59,6 @@ IsoInterfaceDamageMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint 
 
     // compute value of loading function if strainLevel crit apply
     double tempKappa = status->giveKappa();
-
     double omega;
     if ( tempKappa >= equivStrain ) {
         // damage does not grow
@@ -71,65 +70,56 @@ IsoInterfaceDamageMaterial :: giveEngTraction_3d(FloatArray &answer, GaussPoint 
         omega = this->computeDamageParam(tempKappa, jump, gp);
     }
 
-    FloatMatrix de;
-    this->give3dStiffnessMatrix_Eng(de, ElasticStiffness, gp, tStep);
-    de.times(1.0 - omega);
-    answer.beProductOf(de, jump);
+    auto de = this->give3dStiffnessMatrix_Eng(ElasticStiffness, gp, tStep);
+    auto answer = (1.0 - omega) * dot(de, jump);
 
     // update gp
     status->letTempJumpBe(jump);
     status->letTempTractionBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
+
+    return answer;
 }
 
 
-void
-IsoInterfaceDamageMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+IsoInterfaceDamageMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
 
-    answer.resize(3, 3);
-    answer.zero();
-    answer.at(1, 1) = kn;
-    answer.at(2, 2) = ks;
-    answer.at(3, 3) = ks;
+    auto answer = diag<3>({kn, ks, ks});
 
     if ( rMode == ElasticStiffness ) {
-        return;
+        return answer;
     }
 
+    double un = status->giveTempJump().at(1);
     if ( rMode == SecantStiffness ) {
-        // Secant stiffness
-        double un = status->giveTempJump().at(1);
         // damage in tension only
         if ( un >= 0 ) {
             double om = min(status->giveTempDamage(), maxOmega);
-            answer.times(1.0 - om);
+            answer *= 1.0 - om;
         }
 
-        return;
-    } else {
-        // Tangent Stiffness
-        const auto &e = status->giveTempJump();
-        FloatArray se;
-        se.beProductOf(answer, e);
-
-        double un = status->giveTempJump().at(1);
+        return answer;
+    } else { // Tangent Stiffness
         // damage in tension only
         if ( un >= 0 ) {
             double om = min(status->giveTempDamage(), maxOmega);
-            answer.times(1.0 - om);
-            return;
+            answer *= 1.0 - om;
 #if 0
             // Unreachable code - commented out to supress compiler warnings
             double dom = -( -e0 / un / un * exp( -( ft / gf ) * ( un - e0 ) ) + e0 / un * exp( -( ft / gf ) * ( un - e0 ) ) * ( -( ft / gf ) ) );
             if ( ( om > 0. ) && ( status->giveTempKappa() > status->giveKappa() ) ) {
+                const auto &e = status->giveTempJump();
+                auto se = dot(answer, e);
                 answer.at(1, 1) -= se.at(1) * dom;
                 answer.at(2, 1) -= se.at(2) * dom;
             }
 #endif
         }
+        return answer;
     }
 }
 
@@ -206,7 +196,7 @@ IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-IsoInterfaceDamageMaterial :: computeEquivalentStrain(const FloatArray &jump, GaussPoint *gp, TimeStep *tStep)
+IsoInterfaceDamageMaterial :: computeEquivalentStrain(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
     double epsNplus = macbra( jump.at(1) );
     double epsT2 = jump.at(2) * jump.at(2);
@@ -217,7 +207,7 @@ IsoInterfaceDamageMaterial :: computeEquivalentStrain(const FloatArray &jump, Ga
 }
 
 double
-IsoInterfaceDamageMaterial :: computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp)
+IsoInterfaceDamageMaterial :: computeDamageParam(double kappa, const FloatArrayF<3> &strain, GaussPoint *gp) const
 {
     if ( kappa > this->e0 ) {
         return 1.0 - ( this->e0 / kappa ) * exp( -( ft / gf ) * ( kappa - e0 ) );

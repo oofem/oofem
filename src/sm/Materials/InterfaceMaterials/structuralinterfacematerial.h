@@ -40,6 +40,7 @@
 #include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
+#include "floatarrayf.h"
 
 ///@name Input fields for StructuralInterfaceMaterial
 //@{
@@ -91,17 +92,14 @@ public:
      * @param reducedF Deformation gradient in in reduced form.
      * @param tStep Current time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatMatrix &reducedF, TimeStep *tStep);
-    virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                         const FloatMatrix &reducedF, TimeStep *tStep);
-    virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatMatrix &F, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
+    virtual double giveFirstPKTraction_1d(double jump, double reducedF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<2> giveFirstPKTraction_2d(const FloatArrayF<2> &jump, const FloatMatrixF<2,2> &reducedF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
+    { OOFEM_ERROR("not implemented "); return FloatArrayF<3>(); }
 
-    virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
-    virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
-    virtual void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
+    virtual double giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<2> giveEngTraction_2d(const FloatArrayF<2> &jump, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Gives the tangent: @f$ \frac{\partial T}{\partial j} @f$.
@@ -111,21 +109,21 @@ public:
      * @param gp Gauss point.
      * @param tStep Time step.
      */
-    virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual FloatMatrixF<1,1> give1dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<2,2> give2dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    virtual FloatMatrixF<1,1> give1dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<2,2> give2dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 
-    void give1dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    void give2dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    void give3dStiffnessMatrix_dTdj_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    FloatMatrixF<1,1> give1dStiffnessMatrix_dTdj_Num(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<2,2> give2dStiffnessMatrix_dTdj_Num(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_dTdj_Num(GaussPoint *gp, TimeStep *tStep) const;
 
-    void give1dStiffnessMatrix_Eng_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    void give2dStiffnessMatrix_Eng_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
-    void give3dStiffnessMatrix_Eng_Num(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    FloatMatrixF<1,1> give1dStiffnessMatrix_Eng_Num(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<2,2> give2dStiffnessMatrix_Eng_Num(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng_Num(GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Tells if the model has implemented analytical tangent stiffness.

@@ -114,8 +114,8 @@ public:
     const char *giveInputRecordName() const override { return _IFT_CebFipSlip90Material_Name; }
     const char *giveClassName() const override { return "CebFipSlip90Material"; }
 
-    void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override;
-    void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    double giveEngTraction_1d(double jump, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<1,1> give1dStiffnessMatrix_Eng(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -125,12 +125,12 @@ public:
      * Computes the value of bond force/stress, based on given value of slip value.
      * @param kappa Slip value.
      */
-    double computeBondForce(double kappa);
+    double computeBondForce(double kappa) const;
     /**
      * Computes the value of bond force/stress stiffness, based on given value of slip value.
      * @param kappa Slip value.
      */
-    double computeBondForceStiffness(double kappa);
+    double computeBondForceStiffness(double kappa) const;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

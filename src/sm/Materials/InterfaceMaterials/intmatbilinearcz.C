@@ -100,10 +100,8 @@ int IntMatBilinearCZ :: checkConsistency()
     return 1;
 }
 
-void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                                const FloatMatrix &F, TimeStep *tStep)
+FloatArrayF<3> IntMatBilinearCZ :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const
 {
-
     double maxDamage = 0.99999999;
 
     IntMatBilinearCZStatus *status = static_cast< IntMatBilinearCZStatus * >( this->giveStatus(gp) );
@@ -122,15 +120,14 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
         status->mDamageNew = maxDamage;
         status->mDamageOld = maxDamage;
         status->mPlastMultIncNew = 0.0;
-        answer.resize(3);
-        answer.zero();
+        FloatArrayF<3> answer;
         status->mTractionNew = answer;
 
         status->letTempJumpBe(jump);
         status->letTempFirstPKTractionBe(answer);
         status->letTempTractionBe(answer);
 
-        return;
+        return answer;
     }
 
 
@@ -144,7 +141,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
         status->letTempFirstPKTractionBe(tractionTrial);
         status->letTempTractionBe(tractionTrial);
 
-        answer = tractionTrial;
+        auto answer = tractionTrial;
 //        answer.beScaled( ( 1.0 - status->mDamageNew ), answer );
         answer.at(1) *= ( 1.0 - status->mDamageNew );
         answer.at(2) *= ( 1.0 - status->mDamageNew );
@@ -153,7 +150,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
             answer.at(3) *= ( 1.0 - status->mDamageNew );
         }
 
-        return;
+        return answer;
     } else {
         // Iterate to find plastic strain increment.
         int maxIter = 50;
@@ -166,7 +163,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
 
         for ( int iter = 0; iter < maxIter; iter++ ) {
             // Evaluate residual (i.e. yield function)
-            answer = computeTraction(tractionTrial, plastMultInc);
+            auto answer = computeTraction(tractionTrial, plastMultInc);
 
             double TNormal = answer.at(3);
             double TTang = sqrt( pow(answer.at(1), 2.0) + pow(answer.at(2), 2.0) );
@@ -222,7 +219,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
                     }
                 }
 
-                return;
+                return answer;
             }
 
             // Numerical Jacobian
@@ -237,12 +234,13 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
     }
 
     OOFEM_ERROR("No convergence in.");
+    return {0., 0., 0.};
 }
 
-void IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3> IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_WARNING("not implemented. Use numerical Jacobian instead.");
-    this->give3dStiffnessMatrix_dTdj_Num(answer, gp, tStep);
+    return this->give3dStiffnessMatrix_dTdj_Num(gp, tStep);
 }
 
 double IntMatBilinearCZ :: computeYieldFunction(double iTractionNormal, double iTractionTang) const

@@ -84,17 +84,11 @@ public:
     /// Constructor
     IntMatBilinearCZFagerstromRate(int n, Domain *d);
 
-    void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                 const FloatMatrix &F, TimeStep *tStep) override;
+    FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const override;
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void printYourself() override;
-
-    /**
-     * Tells if the model has implemented analytical tangent stiffness.
-     * If not, the tangent must be computed numerically.
-     */
-    bool hasAnalyticalTangentStiffness() const override {return true;}
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 };
 } // end namespace oofem
 #endif // isointerfacedamage01_h

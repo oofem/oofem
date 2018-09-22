@@ -93,7 +93,7 @@ public:
     const char *giveClassName() const override { return "IntMatIsoDamageTable"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatIsoDamageTable_Name; }
 
-    double computeDamageParam(double kappa) override;
+    double computeDamageParam(double kappa) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
