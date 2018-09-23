@@ -61,15 +61,10 @@ class FEInterpolation;
 class StructuralInterfaceElementPhF : public StructuralInterfaceElement
 {
 protected:
-    /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
-    FloatArray initialDisplacements;
-    FEInterpolation *interpolation;
-    /// Flag indicating if geometrical nonlinearities apply.
-    int nlGeometry;
+    FEInterpolation *interpolation = nullptr;
 
-    
     IntArray loc_u, loc_d;
-    
+
 public:
     /**
      * Constructor. Creates structural element with given number, belonging to given domain.
@@ -77,14 +72,11 @@ public:
      * @param d Domain to which new material will belong.
      */
     StructuralInterfaceElementPhF(int n, Domain * d);
-    /// Destructor.
-    virtual ~StructuralInterfaceElementPhF();
 
     //FEInterpolation *giveInterpolation() const override { return interpolation; };
 
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
-    
     //Phf
     void computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     void computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
@@ -97,13 +89,13 @@ public:
     virtual void giveDofManDofIDMask_u(IntArray &answer) = 0;
     virtual void giveDofManDofIDMask_d(IntArray &answer) = 0;
     virtual void computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer );
-    
+
     virtual void getLocationArray_u( IntArray &answer )=0;
     virtual void getLocationArray_d( IntArray &answer )=0;
-    
+
     //remove
-    int computeNumberOfDofs();
-    
+    int computeNumberOfDofs() override;
+
     ///@todo move these to a cross section model later
     double internalLength;
     double giveInternalLength( ) { return internalLength; };
@@ -115,36 +107,28 @@ public:
     //double givePenaltyParameter() { return penaltyParameter; };
     //double psiBar0;
     //double givePsiBar0() { return psiBar0; };
-    
-    
+
     ///@todo put in material model
     double computeFreeEnergy( GaussPoint *gp, TimeStep *tStep );
-    
+
     virtual double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
-    
 
     void computeDisplacementUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN);
     void computeDamageUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN);
-    
-    
-    
+
     void computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
     void computeNStress_d( FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord );
-    
 
     //Interpolation matrices for phase field
     virtual void computeBd_matrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N);
-    
-    
+
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
     virtual void computeTraction(FloatArray &traction, IntegrationPoint *ip, FloatArray &jump, TimeStep *tStep);
     //virtual void computeSpatialJump(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     //int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     virtual void computeCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &G) = 0;
-    
-
     //@}
 
     // Overloaded methods.
@@ -158,16 +142,10 @@ public:
     //StructuralInterfaceCrossSection *giveInterfaceCrossSection();
 
     //virtual methods that should be overloaded by the elements
-    virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep)
+    virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, double damage, TimeStep *tStep)
     {
         OOFEM_ERROR("not implemented for the current element");
     }
-   
-
-
-protected:
-
-
 };
 } // end namespace oofem
 #endif // structuralinterfaceelement_h

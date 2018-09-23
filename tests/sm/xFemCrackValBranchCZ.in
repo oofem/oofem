@@ -6,22 +6,22 @@ errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 16 nelem 9 ncrosssect 1 nmat 2 nbc 3 nic 0 nltf 1 nxfemman 1 nset 4
-node 1     coords 2  0        0
-node 2     coords 2  2        0
-node 3     coords 2  2        2
-node 4     coords 2  0        2
-node 5     coords 2  0.666667 0
-node 6     coords 2  1.33333  0
-node 7     coords 2  2        0.666667
-node 8     coords 2  2        1.33333
-node 9     coords 2  1.33333  2
-node 10    coords 2  0.666667 2
-node 11    coords 2  0        1.33333 
-node 12    coords 2  0        0.666667
-node 13    coords 2  1.33333  0.666667
-node 14    coords 2  1.33333  1.33333 
-node 15    coords 2  0.666667  0.66668
-node 16    coords 2  0.666667  1.33335
+node 1     coords 3  0        0        0
+node 2     coords 3  2        0        0
+node 3     coords 3  2        2        0
+node 4     coords 3  0        2        0
+node 5     coords 3  0.666667 0        0
+node 6     coords 3  1.33333  0        0
+node 7     coords 3  2        0.666667 0
+node 8     coords 3  2        1.33333  0
+node 9     coords 3  1.33333  2        0
+node 10    coords 3  0.666667 2        0
+node 11    coords 3  0        1.33333  0
+node 12    coords 3  0        0.666667 0
+node 13    coords 3  1.33333  0.666667 0
+node 14    coords 3  1.33333  1.33333  0
+node 15    coords 3  0.666667 0.66668  0
+node 16    coords 3  0.666667 1.33335  0
 PlaneStress2DXfem 1    nodes 4   2   6   13  7   mat 1 nip 9 nlgeo 0 czmaterial 2
 PlaneStress2DXfem 2    nodes 4   7   13  14  8   mat 1 nip 9 nlgeo 0 czmaterial 2
 PlaneStress2DXfem 3    nodes 4   8   14  9   3   mat 1 nip 9 nlgeo 0 czmaterial 2

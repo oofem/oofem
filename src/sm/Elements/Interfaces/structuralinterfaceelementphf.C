@@ -50,16 +50,10 @@
 
 
 namespace oofem {
-StructuralInterfaceElementPhF :: StructuralInterfaceElementPhF(int n, Domain *aDomain) : StructuralInterfaceElement(n, aDomain),
-    interpolation(NULL),
-    nlGeometry(0)
+StructuralInterfaceElementPhF :: StructuralInterfaceElementPhF(int n, Domain *aDomain) : StructuralInterfaceElement(n, aDomain)
 {
     this->internalLength = 1.0e-1;
 }
-
-
-StructuralInterfaceElementPhF :: ~StructuralInterfaceElementPhF()
-{ }
 
 
 // remove later
@@ -70,18 +64,15 @@ StructuralInterfaceElementPhF :: computeDisplacementUnknowns(FloatArray &answer,
     this->giveDofManDofIDMask_u(dofIdArray);
     this->computeVectorOf(dofIdArray, valueMode, tStep, answer);
 }
-void
 
+
+void
 StructuralInterfaceElementPhF :: computeDamageUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *tStep)
 {
     IntArray dofIdArray;
     this->giveDofManDofIDMask_d(dofIdArray);
     this->computeVectorOf(dofIdArray, valueMode, tStep, answer);
 }
-
-
-
-
 
 
 void
@@ -92,18 +83,16 @@ StructuralInterfaceElementPhF :: computeLocationArrayOfDofIDs( const IntArray &d
     int k = 0;
     for(int i = 1; i <= this->giveNumberOfDofManagers(); i++) {
         DofManager *dMan = this->giveDofManager( i );
-        for(int j = 1; j <= dofIdArray.giveSize( ); j++) {
+        for( int j = 1; j <= dofIdArray.giveSize( ); j++ ) {
 
-            if(dMan->hasDofID( (DofIDItem) dofIdArray.at( j ) )) {
+            if ( dMan->hasDofID( (DofIDItem) dofIdArray.at( j ) ) ) {
                 // hack
-                
                 answer.followedBy( k + j );
             }
         }
         k += dMan->giveNumberOfDofs( );
     }
 }
-
 
 
 void
@@ -124,19 +113,15 @@ StructuralInterfaceElementPhF :: giveInternalForcesVector(FloatArray &answer, Ti
     this->giveInternalForcesVector_d(answer_d, tStep, useUpdatedGpRecord);
     answer.assemble(answer_u, loc_u);
     answer.assemble(answer_d, loc_d);
-    
 }
-
 
 
 void
 StructuralInterfaceElementPhF :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-
-    
     FloatMatrix N;
     FloatArray u, traction, jump;
-    
+
     IntArray dofIdArray;
     this->giveDofManDofIDMask_u(dofIdArray);
     this->computeVectorOf(dofIdArray, VM_Total, tStep, u);
@@ -145,37 +130,34 @@ StructuralInterfaceElementPhF :: giveInternalForcesVector_u(FloatArray &answer, 
     if ( initialDisplacements.giveSize() ) {
         u.subtract(initialDisplacements);
     }
-    
+
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
-    
+
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
-        
         this->computeNmatrixAt(ip, N);
-        
+
         jump.beProductOf(N, u);
         this->computeTraction(traction, ip, jump, tStep);
         //traction.resize(2);
-        
+
         // compute internal cohesive forces as f = N^T*traction dA
         double dA = this->computeAreaAround(ip);
         answer.plusProduct(N, traction, dA);
     }
-
 }
 
 void
 StructuralInterfaceElementPhF :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    
     // computes int_A ( N^t * ( d + l*f ) + B^t * l^2 * gradd(d)  )* dA
     FloatArray BStress, Nd, BS, a_d, grad_d;
     FloatMatrix B;
     answer.clear();
     this->computeDamageUnknowns( a_d, VM_Total, tStep );
-    
+
     double l = this->giveInternalLength();
-    
+
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {       
 
         // Part 1
@@ -185,10 +167,10 @@ StructuralInterfaceElementPhF :: giveInternalForcesVector_d(FloatArray &answer, 
         double facN = d + l * mat->giveDrivingForce(ip);
 
         this->giveInterpolation()->evalN(Nd, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));       
-        
+
         double dA = this->computeAreaAround(ip);
         answer.add(facN*dA, Nd);
-        
+
         // Part 2
         this->computeBd_matrixAt(ip, B );
         grad_d.beProductOf(B, { a_d.at(1), a_d.at(2) });    
@@ -196,16 +178,13 @@ StructuralInterfaceElementPhF :: giveInternalForcesVector_d(FloatArray &answer, 
         BS.beTProductOf(B, BStress);
         answer.add(dA, BS);
     }
-    
-    FloatArray temp;
-    temp = answer;
+
+    auto temp = answer;
     answer.resize(4);
     answer.zero();
     answer.assemble(temp,{1,2});
     answer.assemble(temp,{3,4});
-    
 }
-
 
 
 double
@@ -221,8 +200,6 @@ StructuralInterfaceElementPhF :: computeDamageAt(GaussPoint *gp, ValueModeType v
 }
 
 
-
-
 void
 StructuralInterfaceElementPhF :: computeNd_matrixAt(const FloatArray &lCoords, FloatMatrix &N)
 {
@@ -235,20 +212,14 @@ StructuralInterfaceElementPhF :: computeNd_matrixAt(const FloatArray &lCoords, F
 void
 StructuralInterfaceElementPhF :: computeBd_matrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-
     FloatMatrix dNdxi;
-
     FloatMatrix G;
     this->computeCovarBaseVectorsAt(gp, G);
-    
+
     this->giveInterpolation( )->evaldNdxi( dNdxi, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper( this ) );
     answer.beProductTOf(G,dNdxi);
     //answer.beTranspositionOf( dNdx );
-    
-    
 }
-
-
 
 
 int
@@ -256,14 +227,11 @@ StructuralInterfaceElementPhF :: computeNumberOfDofs()
 {
     //NLStructuralElement *el = static_cast< NLStructuralElement* >(this->giveElement( ) );
     int nDofs = 0;
-    for( int i = 1; i <= this->giveNumberOfDofManagers(); i++)
-    {
+    for( int i = 1; i <= this->giveNumberOfDofManagers(); i++) {
         nDofs += this->giveDofManager( i )->giveNumberOfDofs();
     }
     return nDofs;
 }
-
-
 
 
 void
@@ -277,17 +245,16 @@ StructuralInterfaceElementPhF :: computeStiffnessMatrix(FloatMatrix &answer, Mat
 
     this->getLocationArray_u(loc_u);
     this->getLocationArray_d(loc_d);
-    
+
     int nDofs = this->computeNumberOfDofs();
     answer.resize( nDofs, nDofs );
     answer.zero();
-    
+
     FloatMatrix answer1, answer2, answer3, answer4;
-    
+
     this->computeStiffnessMatrix_uu(answer1, rMode, tStep);
     //StructuralInterfaceElement :: computeStiffnessMatrix(answer1, rMode, tStep);
-    
-    
+
     //this->computeStiffnessMatrix_ud(answer2, rMode, tStep);
     //this->computeStiffnessMatrix_du(answer3, rMode, tStep); //symmetric
     //answer3.beTranspositionOf( answer2 );
@@ -298,32 +265,28 @@ StructuralInterfaceElementPhF :: computeStiffnessMatrix(FloatMatrix &answer, Mat
     //answer.assemble( answer2, loc_u, loc_d );
     //answer.assemble( answer3, loc_d, loc_u );
     answer.assemble( answer4, loc_d, loc_d );
-    
 }
-
 
 
 void
 StructuralInterfaceElementPhF :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    
-    
     // This is the regular stiffness matrix times G
-    
+
     // Computes the stiffness matrix of the receiver K_cohesive = int_A (  N^t * D * N ) dA
     // with the stiffness D = dT/dj
     FloatMatrix N, D, DN;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
     answer.clear();
-    
+
     FloatMatrix rotationMatGtoL;
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
-        
+
         this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
-        
+
         this->computeTransformationMatrixAt(ip, rotationMatGtoL);
         D.rotatedWith(rotationMatGtoL, 't');                      // transform stiffness to global coord system
-        
+
         this->computeNmatrixAt(ip, N);
         DN.beProductOf(D, N);
         double dA = this->computeAreaAround(ip);
@@ -333,17 +296,11 @@ StructuralInterfaceElementPhF :: computeStiffnessMatrix_uu(FloatMatrix &answer, 
             answer.plusProductUnsym(N, DN, dA);
         }
     }
-    
-    
+
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
 }
-    
-
-
-
-
 
 
 void
@@ -352,13 +309,11 @@ StructuralInterfaceElementPhF :: computeStiffnessMatrix_ud(FloatMatrix &answer, 
     FloatMatrix B, DB, N_d, DN, S(3,1);
     FloatArray stress;
 #if 1
-    
-    answer.resize(0,0);
-    
-    for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {        
-        
+    answer.clear();
+
+    for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
         double dA = this->computeAreaAround(ip);
-        
+
         // compute int_V ( B^t * D_B * B )dV
         this->computeNd_matrixAt(ip->giveNaturalCoordinates(), N_d);
         // stress
@@ -375,12 +330,9 @@ StructuralInterfaceElementPhF :: computeStiffnessMatrix_ud(FloatMatrix &answer, 
 }
 
 
-
-
 void
 StructuralInterfaceElementPhF :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-
     double l = this->giveInternalLength();
 
     FloatMatrix B_d, N_d;
@@ -389,30 +341,27 @@ StructuralInterfaceElementPhF :: computeStiffnessMatrix_dd(FloatMatrix &answer, 
     FloatMatrix rotationMatGtoL;
     for ( auto &ip: *this->giveDefaultIntegrationRulePtr() ) {
         StructuralInterfaceMaterialPhF *mat = static_cast< StructuralInterfaceMaterialPhF * >( this->giveInterfaceCrossSection()->giveInterfaceMaterial() );
-        
+
         this->computeNd_matrixAt(ip->giveNaturalCoordinates(), N_d);
         this->computeBd_matrixAt(ip, B_d);
-        
+
         // K_dd1 = ( 1 + l*f' ) * N^t*N;
         // K_dd2 = ( l*l ) * B^t*B;
         double dA = this->computeAreaAround(ip);
-        
+
         double fPrime = mat->giveDrivingForcePrime(ip);
         double factorN = 1.0 + l* fPrime;
         double factorB = l*l;
-        
+
         answer.plusProductUnsym(N_d, N_d, factorN * dA);
         answer.plusProductUnsym(B_d, B_d, factorB * dA);
-                
     }
 
-    FloatMatrix temp;
-    temp =answer;
+    auto temp = answer;
     answer.resize(4,4);
     answer.zero();
     answer.assemble(temp,{1,2},{1,2});
     answer.assemble(temp,{3,4},{3,4});
-
 }
 
 
@@ -425,15 +374,11 @@ StructuralInterfaceElementPhF :: computeTraction(FloatArray &traction, Integrati
     jump.rotatedWith(rotationMatGtoL, 'n');      // transform jump to local coord system
 
     double damage = this->computeDamageAt(ip, VM_Total, tStep);
-    
+
     this->giveEngTraction(traction, ip, jump, damage, tStep);
-    
-    
+
     traction.rotatedWith(rotationMatGtoL, 't');     // transform traction to global coord system
 }
-
-
-
 
 
 void
@@ -456,16 +401,12 @@ StructuralInterfaceElementPhF :: updateInternalState(TimeStep *tStep)
 
     // force updating strains & stresses
     for ( auto &iRule: integrationRulesArray ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( auto &gp: *iRule ) {
             this->computeSpatialJump(jumpL, gp, tStep);
             this->computeTraction(tractionG, gp, jumpL, tStep);
         }
     }
 }
-
-
-
-
 
 
 } // end namespace oofem

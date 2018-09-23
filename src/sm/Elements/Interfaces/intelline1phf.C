@@ -55,8 +55,6 @@ FEI2dLineLin IntElLine1PhF :: interp(1, 1);
 IntElLine1PhF :: IntElLine1PhF(int n, Domain *aDomain) : StructuralInterfaceElementPhF(n, aDomain)
 {
     numberOfDofMans = 4;
-    axisymmode = false;
-
     numberOfGaussPoints = 4;
 }
 
@@ -65,7 +63,6 @@ void
 IntElLine1PhF :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 {
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
-
     FloatArray N;
     FEInterpolation *interp = this->giveInterpolation();
     interp->evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
@@ -82,7 +79,6 @@ IntElLine1PhF :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 
 void
 IntElLine1PhF :: computeGaussPoints()
-// Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -92,14 +88,13 @@ IntElLine1PhF :: computeGaussPoints()
     }
 }
 
-void
-IntElLine1PhF :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
+FloatArrayF<2>
+IntElLine1PhF :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 {
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
     interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    G.resize(2);
-    G.zero();
+    FloatArrayF<2> G;
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
         double X1_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
@@ -107,16 +102,17 @@ IntElLine1PhF :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
         G.at(1) += dNdxi.at(i, 1) * X1_i;
         G.at(2) += dNdxi.at(i, 1) * X2_i;
     }
+    return G;
 }
+
 
 double
 IntElLine1PhF :: computeAreaAround(IntegrationPoint *ip)
 {
-    FloatArray G;
-    this->computeCovarBaseVectorAt(ip, G);
+    auto G = this->computeCovarBaseVectorAt(ip);
 
-    double weight  = ip->giveWeight();
-    double ds = sqrt( G.dotProduct(G) ) * weight;
+    double weight = ip->giveWeight();
+    double ds = norm(G) * weight;
     if ( this->axisymmode ) {
         int numNodes = this->giveNumberOfNodes();
         FloatArray N;
@@ -128,7 +124,6 @@ IntElLine1PhF :: computeAreaAround(IntegrationPoint *ip)
             r += N.at(i) * X_i;
         }
         return ds * r;
-        
     } else { // regular 2d
         double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
         return ds * thickness;
@@ -142,7 +137,6 @@ IntElLine1PhF :: initializeFrom(InputRecord *ir)
     this->axisymmode = false;
     this->axisymmode = ir->hasField(_IFT_IntElLine1PhF_axisymmode);
     return StructuralInterfaceElement :: initializeFrom(ir);
-    
 }
 
 
@@ -156,9 +150,8 @@ void
 IntElLine1PhF :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Transformation matrix to the local coordinate system
-    FloatArray G;
-    this->computeCovarBaseVectorAt(gp, G);
-    G.normalize();
+    auto G = this->computeCovarBaseVectorAt(gp, G);
+    G /= norm(G);
 
     answer.resize(2, 2);
     answer.at(1, 1) =  G.at(1);
@@ -185,7 +178,7 @@ void
 IntElLine1PhF :: giveDofManDofIDMask_d(IntArray &answer)
 {
     // use temperature for now
-    answer = {T_f};   
+    answer = {T_f};
 }
 
 void
@@ -203,12 +196,11 @@ IntElLine1PhF :: getLocationArray_d( IntArray &answer )
 void
 IntElLine1PhF :: giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep)
 {
-    
     StructuralInterfaceMaterialPhF *mat = static_cast< StructuralInterfaceMaterialPhF * >( this->giveInterfaceCrossSection()->giveInterfaceMaterial() );
     //double damage = this->computeDamageAt(gp, VM_Total, tStep);
-    
+
     //StructuralInterfaceMaterial *mat = this->giveInterfaceCrossSection()->giveInterfaceMaterial();
-    mat->giveEngTraction_2d(answer, gp, jump, damage, tStep);
+    answer = mat->giveEngTraction_2d(jump, damage, gp, tStep);
     //this->giveInterfaceCrossSection()->giveEngTraction_2d(answer, gp, jump, tStep);
 }
 
@@ -216,15 +208,11 @@ IntElLine1PhF :: giveEngTraction(FloatArray &answer, GaussPoint *gp, const Float
 void
 IntElLine1PhF::computeCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &G)
 {
-    
-    FloatArray G1;
-    this->computeCovarBaseVectorAt(gp, G1);
-    
+    auto G1 = this->computeCovarBaseVectorAt(gp);
+
     G.resize(2, 1);
-    G.at(1, 1) =  G1.at(1);
-    G.at(2, 1) =  G1.at(2);
-    
-    
+    G.at(1, 1) = G1.at(1);
+    G.at(2, 1) = G1.at(2);
 }
 
 

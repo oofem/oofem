@@ -49,17 +49,12 @@
 
 
 namespace oofem {
-StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain) : Element(n, aDomain),
-    interpolation(NULL),
-    nlGeometry(0)
+StructuralInterfaceElement :: StructuralInterfaceElement(int n, Domain *aDomain) : Element(n, aDomain)
 {
 }
 
-
-StructuralInterfaceElement :: ~StructuralInterfaceElement()
-{ }
-
-int StructuralInterfaceElement :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
+int StructuralInterfaceElement :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
+{
     FloatArray N;
     FEInterpolation *interp = this->giveInterpolation();
     interp->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
@@ -68,9 +63,9 @@ int StructuralInterfaceElement :: computeGlobalCoordinates(FloatArray &answer, c
     answer.zero();
 
     int numNodes = this->giveNumberOfNodes();
-    for(int i = 1; i <= numNodes/2; i++) {
-    	FloatArray &nodeCoord = *(this->giveDofManager(i)->giveCoordinates());
-    	answer.add(N.at(i), nodeCoord );
+    for ( int i = 1; i <= numNodes/2; i++ ) {
+        FloatArray &nodeCoord = *(this->giveDofManager(i)->giveCoordinates());
+        answer.add(N.at(i), nodeCoord );
     }
 
     return true;
@@ -143,8 +138,7 @@ StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, Integration
 
 
 void
-StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
-                                                       TimeStep *tStep, int useUpdatedGpRecord)
+StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // Computes internal forces
     // if useGpRecord == 1 then data stored in ip->giveStressVector() are used
@@ -278,6 +272,7 @@ StructuralInterfaceElement :: updateInternalState(TimeStep *tStep)
         }
     }
 }
+
 
 int
 StructuralInterfaceElement :: checkConsistency()

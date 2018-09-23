@@ -52,11 +52,10 @@ class IntElLine1PhF : public StructuralInterfaceElementPhF
 protected:
     static FEI2dLineLin interp;
     /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
-    bool axisymmode;
+    bool axisymmode = false;
 
 public:
     IntElLine1PhF(int n, Domain * d);
-    virtual ~IntElLine1PhF() { }
 
     FEInterpolation *giveInterpolation() const override;
 
@@ -65,7 +64,7 @@ public:
 
     double computeAreaAround(GaussPoint *gp) override;
     void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
-    void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
+    FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const;
 
     int testElementExtension(ElementExtension ext) override { return 0; }
 
@@ -79,7 +78,7 @@ public:
 
     void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
-        this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        answer = this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(rMode, ip, tStep);
     }
 
     void giveDofManDofIDMask_u(IntArray &answer) override;

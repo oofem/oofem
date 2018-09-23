@@ -60,8 +60,6 @@ IntElLine1 :: IntElLine1(int n, Domain *aDomain) :
     StructuralInterfaceElement(n, aDomain)
 {
     numberOfDofMans = 4;
-    axisymmode = false;
-
     numberOfGaussPoints = 4;
 }
 
@@ -70,10 +68,7 @@ void
 IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 {
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
-
-    FloatArray N;
-    FEInterpolation *interp = this->giveInterpolation();
-    interp->evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    auto N = interp.evalN(ip->giveNaturalCoordinates().at(1));
 
     answer.resize(2, 8);
     answer.zero();
@@ -87,7 +82,6 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 
 void
 IntElLine1 :: computeGaussPoints()
-// Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -100,14 +94,14 @@ IntElLine1 :: computeGaussPoints()
     }
 }
 
-void
-IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
+FloatArrayF<2>
+IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 {
-    FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
+    FloatMatrix dNdxi;
     interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    G.resize(2);
-    G.zero();
+
+    FloatArrayF<2> G;
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
         double X1_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
@@ -115,20 +109,19 @@ IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
         G.at(1) += dNdxi.at(i, 1) * X1_i;
         G.at(2) += dNdxi.at(i, 1) * X2_i;
     }
+    return G;
 }
 
 double
 IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
 {
-    FloatArray G;
-    this->computeCovarBaseVectorAt(ip, G);
+    auto G = this->computeCovarBaseVectorAt(ip);
 
-    double weight  = ip->giveWeight();
-    double ds = sqrt( G.dotProduct(G) ) * weight;
+    double weight = ip->giveWeight();
+    double ds = norm(G) * weight;
     if ( this->axisymmode ) {
         int numNodes = this->giveNumberOfNodes();
-        FloatArray N;
-        this->interp.evalN( N, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        auto N = this->interp.evalN(ip->giveNaturalCoordinates().at(1));
         // interpolate radius
         double r = 0.0;
         for ( int i = 1; i <= N.giveSize(); i++ ) {
@@ -146,7 +139,6 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
 IRResultType
 IntElLine1 :: initializeFrom(InputRecord *ir)
 {
-    this->axisymmode = false;
     this->axisymmode = ir->hasField(_IFT_IntElLine1_axisymmode);
     IRResultType result = StructuralInterfaceElement :: initializeFrom(ir);
 
@@ -154,19 +146,19 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
     int nodeInd1 = this->giveDofManagerNumber(1);
     int arrayInd1 = domain->giveDofManPlaceInArray(nodeInd1);
     DofManager *node1 = domain->giveDofManager(arrayInd1);
-    const FloatArray &x1 = *(node1->giveCoordinates());
+    const auto &x1 = *(node1->giveCoordinates());
 
 //    DofManager *node2 = this->giveDofManager(2);
     int nodeInd2 = this->giveDofManagerNumber(2);
     int arrayInd2 = domain->giveDofManPlaceInArray(nodeInd2);
     DofManager *node2 = domain->giveDofManager(arrayInd2);
-    const FloatArray &x2 = *(node2->giveCoordinates());
+    const auto &x2 = *(node2->giveCoordinates());
 
 //    DofManager *node3 = this->giveDofManager(3);
     int nodeInd3 = this->giveDofManagerNumber(3);
     int arrayInd3 = domain->giveDofManPlaceInArray(nodeInd3);
     DofManager *node3 = domain->giveDofManager(arrayInd3);
-    const FloatArray &x3 = *(node3->giveCoordinates());
+    const auto &x3 = *(node3->giveCoordinates());
 
 
     double L2 = distance_square(x1, x2);
@@ -174,10 +166,8 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
 
     if ( L2 < L3 ) {
         printf("Renumbering element %d\n.\n", this->giveNumber());
-        IntArray dofManArrayTmp = {dofManArray.at(3), dofManArray.at(1), dofManArray.at(4), dofManArray.at(2)};
-        dofManArray = std::move(dofManArrayTmp);
+        dofManArray = {dofManArray.at(3), dofManArray.at(1), dofManArray.at(4), dofManArray.at(2)};
     }
-
 
     return result;
 }
@@ -194,9 +184,8 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Transformation matrix to the local coordinate system
     // xy plane
-    FloatArray G;
-    this->computeCovarBaseVectorAt(gp, G);
-    G.normalize();
+    auto G = this->computeCovarBaseVectorAt(gp);
+    G /= norm(G);
 
     answer.resize(2, 2);
 //     answer.at(1, 1) =  G.at(1);//tangent vector
@@ -204,10 +193,10 @@ IntElLine1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 //     answer.at(1, 2) =  G.at(2);
 //     answer.at(2, 2) =  G.at(1);
     //normal is -G.at(2), G.at(1), perpendicular to nodes 1 2
-    answer.at(1, 1) =  -G.at(2);//normal vector
-    answer.at(2, 1) =  G.at(1);
-    answer.at(1, 2) =  G.at(1);
-    answer.at(2, 2) =  G.at(2);
+    answer.at(1, 1) = -G.at(2);//normal vector
+    answer.at(2, 1) = G.at(1);
+    answer.at(1, 2) = G.at(1);
+    answer.at(2, 2) = G.at(2);
 }
 
 FEInterpolation *

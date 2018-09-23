@@ -31,11 +31,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
-/*
- *
- *
- *  Author: Jim Brouzoulis
- */
 
 #ifndef intmatphasefield
 #define intmatphasefield
@@ -50,11 +45,11 @@
 #define _IFT_IntMatPhaseField_gc "gc"
 //@}
 
-
 namespace oofem {
 
 /**
  * Development cz-model using phase field
+ * @author Jim Brouzoulis
  */
 class IntMatPhaseFieldStatus : public StructuralInterfaceMaterialStatus
 {
@@ -62,9 +57,9 @@ public:
     IntMatPhaseFieldStatus(GaussPoint * g);
 
     /// damage variable
-    double tempDamage;
-    double tempDrivingEnergy;
-    double drivingEnergy;
+    double tempDamage = 0.;
+    double tempDrivingEnergy = 0.;
+    double drivingEnergy = 0.;
 
     double giveDamage() const override { return tempDamage; }
 
@@ -92,9 +87,9 @@ public:
     const char *giveClassName() const override { return "IntMatPhaseField"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatPhaseField_Name; }
 
-    void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const double damage, TimeStep *tStep) override;
-    void give3dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void giveTangents(FloatMatrix &jj, FloatMatrix &jd, FloatMatrix &dj, FloatMatrix &dd, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, double damage, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    void giveTangents(FloatMatrix &jj, FloatMatrix &jd, FloatMatrix &dj, FloatMatrix &dd, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
@@ -103,12 +98,12 @@ public:
 
     bool hasAnalyticalTangentStiffness() const override { return true; };
 
-    double giveDrivingForce(GaussPoint *gp) override;
-    double giveDrivingForcePrime(GaussPoint *gp) override;
+    double giveDrivingForce(GaussPoint *gp) const override;
+    double giveDrivingForcePrime(GaussPoint *gp) const override;
     //double compute_fPrime(const double d);
-    double compute_g(const double d);
-    double compute_gPrime(const double d);
-    double compute_gBis(const double d);
+    double compute_g(double d) const;
+    double compute_gPrime(double d) const;
+    double compute_gBis(double d) const;
 };
 
 } /* namespace oofem */

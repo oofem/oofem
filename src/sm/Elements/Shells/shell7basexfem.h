@@ -163,7 +163,6 @@ protected:
 
 public:
     Shell7BaseXFEM(int n, Domain * d);
-    virtual ~Shell7BaseXFEM();
     int checkConsistency() override;
 
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);

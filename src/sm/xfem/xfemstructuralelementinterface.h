@@ -51,7 +51,6 @@ class OOFEM_EXPORT XfemStructuralElementInterface : public XfemElementInterface
 {
 public:
     XfemStructuralElementInterface(Element *e);
-    virtual ~XfemStructuralElementInterface();
 
     /// Updates integration rule based on the triangulation.
     bool XfemElementInterface_updateIntegrationRule() override;
@@ -90,13 +89,13 @@ public:
     void giveIntersectionsTouchingCrack(std :: vector< int > &oTouchingEnrItemIndices, const std :: vector< int > &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan);
 
     // Cohesive Zone variables
-    Material *mpCZMat;
-    int mCZMaterialNum;
-    int mCSNumGaussPoints;
+    Material *mpCZMat = nullptr;
+    int mCZMaterialNum = -1;
+    int mCSNumGaussPoints = 4;
 
     // Options for nonstandard cohesive zone model
-    bool mIncludeBulkJump;
-    bool mIncludeBulkCorr;
+    bool mIncludeBulkJump = true;
+    bool mIncludeBulkCorr = true;
 
     // Store element subdivision for postprocessing
     std :: vector< Triangle >mSubTri;

@@ -58,6 +58,8 @@ IntMatElastic :: giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatM
     status->letTempJumpBe(jump);
     status->letTempFirstPKTractionBe(answer);
     status->letTempTractionBe(answer);
+    
+    return answer;
 }
 
 FloatMatrixF<3,3>

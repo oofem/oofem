@@ -66,9 +66,8 @@ class StructuralInterfaceElement : public Element
 protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.
     FloatArray initialDisplacements;
-    FEInterpolation *interpolation;
     /// Flag indicating if geometrical nonlinearities apply.
-    int nlGeometry;
+    bool nlGeometry = false;
 
 public:
     /**
@@ -77,15 +76,12 @@ public:
      * @param d Domain to which new material will belong.
      */
     StructuralInterfaceElement(int n, Domain * d);
-    /// Destructor.
-    virtual ~StructuralInterfaceElement();
 
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep) override;
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
 
-    FEInterpolation *giveInterpolation() const override { return interpolation; }
     /**
      * Computes the stiffness/tangent matrix of receiver. Default implementation computes element stiffness using
      * @f$ K=\int_{\Gamma} N^{\mathrm{T}} D N \mathrm{d}V @f$ formulae, where @f$ N @f$ is the element geometric matrix such
@@ -153,8 +149,8 @@ public:
     {
         OOFEM_ERROR("not implemented for the current element");
     }
-protected:
 
+protected:
     /**
      * Computes modified interpolation matrix (N) for the element which multiplied
      * with the unknowns vector (u) produces the spatial jump.

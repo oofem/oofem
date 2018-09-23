@@ -60,12 +60,12 @@ class IntElPoint : public StructuralInterfaceElement
 {
 protected:
     enum cmode { ie1d_1d, ie1d_2d, ie1d_3d } mode;
-    int referenceNode;
-    FloatArray normal;
-    double area;
+    int referenceNode = 0;
+    FloatArrayF<3> normal;
+    double area = 0.;
+
 public:
     IntElPoint(int n, Domain *d);
-    virtual ~IntElPoint() { }
 
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
@@ -115,7 +115,6 @@ protected:
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
     void computeGaussPoints() override;
 
-    void computeLocalSlipDir(FloatArray &normal);
     cmode giveCoordMode() const { return this->mode; }
     void setCoordMode();
 };

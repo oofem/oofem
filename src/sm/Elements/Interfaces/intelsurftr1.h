@@ -53,7 +53,6 @@ protected:
 
 public:
     IntElSurfTr1(int n, Domain *d);
-    virtual ~IntElSurfTr1() { }
 
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
     bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) override;

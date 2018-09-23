@@ -58,11 +58,10 @@ class IntElLine1 : public StructuralInterfaceElement
 protected:
     static FEI2dLineLin interp;
     /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
-    bool axisymmode;
+    bool axisymmode = false;
 
 public:
     IntElLine1(int n, Domain * d);
-    virtual ~IntElLine1() { }
 
     FEInterpolation *giveInterpolation() const override;
 
@@ -71,7 +70,7 @@ public:
 
     double computeAreaAround(GaussPoint *gp) override;
     void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
-    virtual void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
+    virtual FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const;
 
     int testElementExtension(ElementExtension ext) override { return 0; }
 

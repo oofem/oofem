@@ -57,7 +57,6 @@ protected:
 
 public:
     IntElLine1PF(int n, Domain *d);
-    virtual ~IntElLine1PF() { }
 
     virtual FEInterpolation *giveInterpolation() const;
 
@@ -66,7 +65,7 @@ public:
 
     virtual double computeAreaAround(GaussPoint *gp);
     virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeCovarBaseVectorAt(GaussPoint *gp, FloatArray &G);
+    virtual FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const;
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 
@@ -79,16 +78,15 @@ public:
 
     virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
     {
-        this->giveInterfaceCrossSection()->giveEngTraction_2d(answer, gp, jump, tStep);
+        answer = this->giveInterfaceCrossSection()->giveEngTraction_2d(jump, gp, tStep);
     }
 
     virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
     {
-        this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(answer, rMode, ip, tStep);
+        answer = this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(rMode, ip, tStep);
     }
 
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-
 
 
     // PF
@@ -109,26 +107,26 @@ public:
     virtual void computeBd_vectorAt(GaussPoint *gp, FloatArray &B);
     virtual void computeNd_vectorAt(const FloatArray &lCoords, FloatArray &N);
     virtual double computeFreeEnergy(GaussPoint *gp, TimeStep *tStep);
-    
+
     double computeOldG(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
-    double neg_MaCauley(double par)
+    double neg_MaCauley(double par) const
     {
-        return 0.5 * ( abs(par) - par );
+        return 0.5 * ( std::abs(par) - par );
     }
 
-    double neg_MaCauleyPrime(double par)
+    double neg_MaCauleyPrime(double par) const
     {
-        return 0.5 * ( abs(par)/(par + 1.0e-12) - 1.0 ); // 0.5*(sign - 1) taken from Ragnars code
+        return 0.5 * ( std::abs(par)/(par + 1.0e-12) - 1.0 ); // 0.5*(sign - 1) taken from Ragnars code
     }
 
-    double MaCauley(double par)
+    double MaCauley(double par) const
     {
-        return 0.5 * ( abs(par) + par );
+        return 0.5 * ( std::abs(par) + par );
     }
 
-    double MaCauleyPrime(double par)
+    double MaCauleyPrime(double par) const
     {
-        return 0.5 * ( abs(par)/(par + 1.0e-12) + 1.0 ); // 0.5*(sign + 1) taken from Ragnars code
+        return 0.5 * ( std::abs(par)/(par + 1.0e-12) + 1.0 ); // 0.5*(sign + 1) taken from Ragnars code
     }
 
 
@@ -136,7 +134,6 @@ public:
     void computeGMatrix(FloatMatrix &answer, const double damage, GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
 
 protected:
-
     FloatArray unknownVectorU;
     FloatArray unknownVectorD;
     FloatArray deltaUnknownVectorD;
@@ -144,7 +141,7 @@ protected:
     FloatArray deltaAlpha; 
     FloatArray alpha;
     FloatArray oldAlpha;
-    double prescribed_damage;
+    double prescribed_damage = 0.;
 
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();

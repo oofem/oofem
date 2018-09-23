@@ -44,23 +44,18 @@
 namespace oofem {
 REGISTER_Element(IntElLine2IntPen);
 
-IntElLine2IntPen::IntElLine2IntPen(int n, Domain * d):IntElLine2(n, d) {
+IntElLine2IntPen::IntElLine2IntPen(int n, Domain * d):IntElLine2(n, d)
+{
     numberOfDofMans = 6;
-
     numberOfGaussPoints = 4;
 }
 
-IntElLine2IntPen::~IntElLine2IntPen() {
-
-}
 
 IRResultType
 IntElLine2IntPen :: initializeFrom(InputRecord *ir)
 {
-    this->axisymmode = false;
     this->axisymmode = ir->hasField(_IFT_IntElLine1_axisymmode);
     IRResultType result = StructuralInterfaceElement :: initializeFrom(ir);
-
 
     // Check if node numbering is ok
 //    printf("this->dofManArray: "); this->dofManArray.printYourself();
@@ -131,22 +126,21 @@ IntElLine2IntPen :: initializeFrom(InputRecord *ir)
 }
 
 
-void
-IntElLine2IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
+FloatArrayF<2>
+IntElLine2IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 {
-//	printf("Entering IntElLine2IntPen :: computeCovarBaseVectorAt\n");
+    //printf("Entering IntElLine2IntPen :: computeCovarBaseVectorAt\n");
 
-	// Since we are averaging over the whole element, always evaluate the base vectors at xi = 0.
+    // Since we are averaging over the whole element, always evaluate the base vectors at xi = 0.
 
 	FloatArray xi_0 = {0.0};
 
-    FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
+    FloatMatrix dNdxi;
 //    interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evaldNdxi( dNdxi, xi_0, FEIElementGeometryWrapper(this) );
 
-    G.resize(2);
-    G.zero();
+    FloatArrayF<2> G;
     int numNodes = this->giveNumberOfNodes();
     for ( int i = 1; i <= dNdxi.giveNumberOfRows(); i++ ) {
         double X1_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
@@ -154,6 +148,7 @@ IntElLine2IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G
         G.at(1) += dNdxi.at(i, 1) * X1_i;
         G.at(2) += dNdxi.at(i, 1) * X2_i;
     }
+    return G;
 }
 
 void

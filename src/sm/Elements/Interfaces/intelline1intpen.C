@@ -58,8 +58,8 @@ int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const Float
     return true;
 }
 
-void
-IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
+FloatArrayF<2>
+IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip) const
 {
     //printf("Entering IntElLine2IntPen :: computeCovarBaseVectorAt\n");
 
@@ -73,19 +73,18 @@ IntElLine1IntPen :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G
     //interp->evaldNdxi( dNdxi, ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     interp->evaldNdxi( dNdxi, xi_0, FEIElementGeometryWrapper(this) );
 
-    G.resize(2);
-    G.zero();
+    FloatArrayF<2> G;
 
     double X1_i = 0.5 * ( this->giveNode(1)->giveCoordinate(1) + this->giveNode(4)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
     double X2_i = 0.5 * ( this->giveNode(1)->giveCoordinate(2) + this->giveNode(4)->giveCoordinate(2) );
     G.at(1) += dNdxi.at(1, 1) * X1_i;
     G.at(2) += dNdxi.at(1, 1) * X2_i;
 
-
     X1_i = 0.5 * ( this->giveNode(2)->giveCoordinate(1) + this->giveNode(5)->giveCoordinate(1) ); // (mean) point on the fictious mid surface
     X2_i = 0.5 * ( this->giveNode(2)->giveCoordinate(2) + this->giveNode(5)->giveCoordinate(2) );
     G.at(1) += dNdxi.at(2, 1) * X1_i;
     G.at(2) += dNdxi.at(2, 1) * X2_i;
+    return G;
 }
 
 

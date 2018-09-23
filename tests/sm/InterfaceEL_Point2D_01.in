@@ -12,7 +12,7 @@ node 3     coords 3 0    1.     0
 node 4     coords 3 0.5  1.     0
 node 5     coords 3 0.5  1.     0
 PlaneStress2D 1   nodes 4   1 2 4 3 crosssect 1
-IntELPoint 2 nodes 2   4 5 normal 2 1. 0.
+IntELPoint 2 nodes 2   4 5 normal 3 1. 0. 0.
 SimpleCS 1 thick 0.1 material 1
 InterfaceCS 2 material 2 set 4
 IsoLe 1 d 2500. E 40.e+3 n 0.15 talpha 2.40e-6 
