@@ -73,7 +73,12 @@ public:
      * Constructor (values are specified column-wise)
      * @note The syntax {{x,y,z},{...}} can be achieved by nested initializer_list, but 
      */
-    template<typename... V> FloatMatrixF(V... x) : values{x...} { }
+    template<typename... V, class = typename std::enable_if_t<sizeof...(V) == N*M>>
+    FloatMatrixF(V... x) : values{x...} { }
+    /**
+     * Empty ctor, initializes to zero.
+     */
+    FloatMatrixF() : values{} { }
     /// Copy constructor.
     FloatMatrixF(const FloatMatrixF<N,M> &mat) : values(mat.values) {}
     /// FloatMatrix conversion constructor.
@@ -85,6 +90,14 @@ public:
         }
 #endif
         std::copy_n(mat.begin(), N*M, values.begin());
+    }
+    template<typename... V> FloatMatrixF(const std::array<const FloatArrayF<N>,M> &x)
+    {
+        for (int i = 0; i < N; ++i) {
+            for (int j = 0; j < M; ++j) {
+                (*this)(i,j) = x[j][i];
+            }
+        }
     }
 
     /// Assignment operator
@@ -102,16 +115,13 @@ public:
     void checkBounds(int i, int j) const
     {
         if ( i <= 0 ) {
-            OOFEM_ERROR("matrix error on rows : %d < 0", i);
-        }
-        if ( j <= 0 ) {
-            OOFEM_ERROR("matrix error on columns : %d < 0", j);
-        }
-        if ( i > N ) {
-            OOFEM_ERROR("matrix error on rows : %d > %d", i, M);
-        }
-        if ( j > M ) {
-            OOFEM_ERROR("matrix error on columns : %d > %d", j, M);
+            throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " <= 0");
+        } else if ( j <= 0 ) {
+            throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " <= 0");
+        } else if ( i > N ) {
+            throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " < " + std::to_string(N));
+        } else if ( j > M ) {
+            throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " < " + std::to_string(M));
         }
     }
 

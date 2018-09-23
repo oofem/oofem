@@ -41,12 +41,6 @@
 
 namespace oofem {
 
-FloatArrayF<4>
-FEI1dHermite :: evalN(double ksi)
-{
-    return {ksi * ( ksi - 1. ) * 0.5, ksi * ( 1. + ksi ) * 0.5, ( 1. - ksi * ksi )};
-}
-
 void
 FEI1dHermite :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

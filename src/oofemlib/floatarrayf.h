@@ -81,8 +81,11 @@ public:
 #endif
         std::copy_n(x.begin(), N, values.begin());
     }
-    /// Ctor
-    template<typename... V> FloatArrayF(V... x) : values{x...} { }
+    /// Direct value ctor
+    template<typename... V, class = typename std::enable_if_t<sizeof...(V) == N>>
+    FloatArrayF(V... x) : values{x...} { }
+    /// Empty Ctor (zeroes)
+    FloatArrayF() : values{} { }
 
     /// Assignment operator
     void operator = (const FloatArrayF<N> &src) { values = src.values; }
@@ -428,7 +431,7 @@ FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 }
 
 /// I expressed in Voigt form
-const FloatArrayF<6> I6 = {1., 1., 1., 0., 0., 0.};
+const FloatArrayF<6> I6 {1., 1., 1., 0., 0., 0.};
 
 
 } // end namespace oofem

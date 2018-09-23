@@ -36,9 +36,16 @@
 #include "mathfem.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
+
+FloatArrayF<2> FEI2dLineLin :: evalN(double xi)
+{
+    return {( 1. - xi ) * 0.5, ( 1. + xi ) * 0.5};
+}
+
 void FEI2dLineLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double xi = lcoords(0);

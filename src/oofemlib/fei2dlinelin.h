@@ -62,6 +62,8 @@ public:
     int giveNumberOfEdges() const override { return 1; }
 
     // "Bulk"
+    static FloatArrayF<2> evalN(double xi);
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
