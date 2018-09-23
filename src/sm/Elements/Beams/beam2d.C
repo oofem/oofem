@@ -132,7 +132,7 @@ Beam2d :: computeGaussPoints()
         // the gauss point is used only when methods from crosssection and/or material
         // classes are requested
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
+        integrationRulesArray [ 0 ] = std :: make_unique< GaussIntegrationRule >(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
@@ -409,7 +409,6 @@ Beam2d :: initializeFrom(InputRecord *ir)
                 ghostNodes [ 1 ]->appendDof( new MasterDof(ghostNodes [ 1 ], mask [ val.at(i) - 4 ]) );
             }
         }
-
     }
     return IRRT_OK;
 }
@@ -436,7 +435,6 @@ Beam2d :: giveEndForcesVector(FloatArray &answer, TimeStep *tStep)
     if ( load.isNotEmpty() ) {
         answer.subtract(load);
     }
-
 }
 
 
@@ -461,11 +459,11 @@ Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
     for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
         const FloatArray &lcoords = gp->giveNaturalCoordinates();
         this->computeNmatrixAt(lcoords, N);
-        if ( load ) {
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
+            load->computeValues(t, tStep, lcoords, { D_u, D_w, R_v }, mode);
+        } else {
             this->computeGlobalCoordinates(coords, lcoords);
             load->computeValues(t, tStep, coords, { D_u, D_w, R_v }, mode);
-        } else {
-            load->computeValues(t, tStep, lcoords, { D_u, D_w, R_v }, mode);
         }
 
         if ( load->giveCoordSystMode() == Load :: CST_Global ) {
@@ -478,10 +476,10 @@ Beam2d :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, 
         answer.plusProduct(N, t, dl);
     }
 
-    if (global) {
-      // Loads from sets expects global c.s.
-      this->computeGtoLRotationMatrix(T);
-      answer.rotatedWith(T, 't');
+    if ( global ) {
+        // Loads from sets expects global c.s.
+        this->computeGtoLRotationMatrix(T);
+        answer.rotatedWith(T, 't');
     }
 }
 
@@ -504,12 +502,12 @@ Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
     } else if ( type == IST_BeamStrainCurvatureTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
-    } else if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ) { 
+    } else if ( type == IST_ShellForceTensor || type == IST_ShellStrainTensor ) {
         // Order in generalized strain is:
         // {\eps_x, \gamma_xz, \kappa_y}
-        const FloatArray &help = type == IST_ShellForceTensor ? 
-            static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector() :
-            static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        const FloatArray &help = type == IST_ShellForceTensor ?
+                                 static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector() :
+                                 static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
 
         answer.resize(6);
         answer.at(1) = help.at(1); // nx
@@ -520,9 +518,9 @@ Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
         answer.at(6) = 0.0;        // vxy
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
-        const FloatArray &help = type == IST_ShellMomentTensor ? 
-            static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector() :
-            static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        const FloatArray &help = type == IST_ShellMomentTensor ?
+                                 static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector() :
+                                 static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         answer.resize(6);
         answer.at(1) = 0.0;        // mx
         answer.at(2) = 0.0;        // my
@@ -542,7 +540,7 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     FloatArray rl, Fl;
 
-    fprintf(File, "beam element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
+    fprintf( File, "beam element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
     // ask for global element displacement vector
     this->computeVectorOf(VM_Total, tStep, rl);

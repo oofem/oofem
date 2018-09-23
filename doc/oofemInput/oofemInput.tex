@@ -1078,7 +1078,45 @@ under given identifiers. See file {\it field.h}.
 Then the subsequent analyses can get access to exported fields 
 and take them into account, if they support such feature.
 
-\subsection{Transient transport problem - linear case}
+\subsection{Transient transport problem}
+\label{TransientTransport}
+
+\begin{record}
+  \recentry{\entKeywordInst{TransientTransport}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn} $|$ \field{dTfunction}{in} $|$ {\field{prescribedtimes}{ra}}}
+  \recentry{}{\field{alpha}{rn}}
+  \recentry{}{\optField{initT}{rn}}
+  \recentry{}{\optFieldnotype{lumped}}
+  \recentry{}{\optFieldnotype{keeptangent}}
+  \recentry{}{\optField{exportfields}{ia}}
+\end{record}
+
+\textbf{Nonlinear} implicit
+integration scheme for transient transport problems. The generalized
+midpoint rule (sometimes called $\alpha$-method) is used for time discretization, with alpha parameter,
+which has limits $0\le\alpha\le1$. For $\alpha=0$ explicit Euler
+forward method is obtained, for $\alpha=0.5$ implicit trapezoidal rule
+is recovered, which is unconditionally stable, second-order accurate
+in $\Delta t$, and $\alpha=1.0$ yields implicit Euler backward method,
+which is unconditionally stable, and first-order accurate
+in $\Delta t$. \param{deltaT} is time step length used for
+integration, \param{nsteps} parameter specifies
+number of time steps to be solved. It is possible to define \param{dTfunction}
+with a number referring to corresponding time function, see section~\ref{_TimeFunctionsRecords}.
+Variable time step is advantageous when calculating large time intervals.
+
+The \param{initT} sets the initial time for integration, 0. by default.
+If \param{lumped} is set, then the stabilization of numerical
+algorithm using lumped capacity matrix will be used, reducing the
+initial oscillations.
+See section \ref{StationaryTransport} for an explanation on
+\param{exportfields}.
+
+This transport problem supports sets and changes in number of equations. It is possible to impose/remove Dirichlet boundary conditions during solution.
+
+
+
+\subsection{Transient transport problem - linear case - obsolete}
 \label{LinearTransientTransport}
 
 \begin{record}
@@ -1123,7 +1161,10 @@ Note: This problem type \textbf{requires transport module} and it
 can be used only when this module is included in your oofem
 configuration.
 
-\subsection{Transient transport problem - nonlinear case}
+
+
+
+\subsection{Transient transport problem - nonlinear case - obsolete}
 \label{TransientTransport}
 
 \begin{record}
