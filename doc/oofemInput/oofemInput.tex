@@ -940,6 +940,12 @@ then following\\
 \end{record}
 The meaning of parameters is the same as for extended syntax.
 
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. The scheme should be compatible with the solver type. See section
+\ref{sparselinsolver} for further details.
+
+
 %
 \subsection{Adaptive linear static}
 \label{AdaptiveLinearStatic}
@@ -1246,9 +1252,9 @@ and the following parameters should be provided: \param{lscale},
 \param{uscale}, and \param{dscale} representing typical length,
 velocity, and density scales.
 
-Parameter \param{lstype} allows to select solver for linear system of
-equations. Parameter \param{smtype} allows to select sparse matrix storage
-scheme. The scheme should be compatible with solver type. See section
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. The scheme should be compatible with the solver type. See section
 \ref{sparselinsolver} for further details.
 
 \subsection{Transient incompressible flow\\SUPG/PSPG Algorithm}
@@ -1316,11 +1322,10 @@ and the following parameters should be provided: \param{lscale},
 \param{uscale}, and \param{dscale} representing typical length,
 velocity, and density scales.
 
-Parameter \param{lstype} allows to select solver for linear system of
-equations. Parameter \param{smtype} allows to select sparse matrix storage
-scheme. Please note, that the present algorithm leads to a
-non-symmetrical system
-matrix. The scheme should be compatible with solver type. See section
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. Please note that the present algorithm leads to a
+non-symmetric matrix. The scheme should be compatible with the solver type. See section
 \ref{sparselinsolver} for further details.
 
 \subsection{Transient incompressible flow\\PFEM Algorithm}
@@ -1378,11 +1383,10 @@ specify relative norms for velocity and pressure difference of two subsequent it
 step. Default values are 1.e-8. By default maximal 50 iterations are performed, if
 not specified by \param{maxiter}.
 
-Parameter \param{lstype} allows to select solver for linear system of
-equations. Parameter \param{smtype} allows to select sparse matrix storage
-scheme. Please note, that the present algorithm leads to a
-non-symmetrical system
-matrix. The scheme should be compatible with solver type. See section
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. Please note that the present algorithm leads to a
+non-symmetric matrix. The scheme should be compatible with the solver type. See section
 \ref{sparselinsolver} for further details.
 
 
@@ -2554,16 +2558,16 @@ The sparselinsolverparams field has the following general syntax:\\
   \recentry{}{\optField{smtype}{in}}
   \recentry{}{\field{solverParams$^M$}{string}}
 \end{record}
-where parameter \param{lstype} allows to select solver for linear system of
-equations. Currently supported values are 0 (default) for direct solver
-(ST\_Direct), 1 for Iterative Method Library (IML) solver (ST\_IML),
-2 for Spooles direct solver, 3 for Petsc
-library family of solvers, and 4 for DirectSparseSolver (ST\_DSS).
-Parameter \param{smtype} allows to select sparse matrix storage
-scheme. The scheme should be compatible with solver type.
+where parameter \param{lstype} allows to select the solver for the linear system of
+equations. Currently supported values are 0 (default) for a direct solver
+(ST\_Direct), 1 for an Iterative Method Library (IML) solver (ST\_IML),
+2 for a Spooles direct solver, 3 for Petsc
+library family of solvers, and 4 for a DirectSparseSolver (ST\_DSS).
+Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. The scheme should be compatible with the solver type.
 Currently supported values (marked as ``id'') are summarized in table
 (\ref{linsolvstoragecompattable}). The 0 value is default and selects
-the symmetric skyline (SMT\_Skyline). Ther possible storage formats
+the symmetric skyline (SMT\_Skyline). Possible storage formats
 include unsymmetric skyline (SMT\_SkylineU),
 compressed column (SMT\_CompCol), dynamically growing compressed
 column (SMT\_DynCompCol), symmetric compressed column
