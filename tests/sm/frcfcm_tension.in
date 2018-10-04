@@ -152,8 +152,8 @@ set 13 elementranges {8}
 #
 #ELEMENT tStep  5 number 4 gp 1 keyword 1 component 1  value 8.000000e-01 tolerance 1.e-4
 #ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1  value 1.188800e+00 tolerance 1.e-4
-#ELEMENT tStep 25 number 4 gp 1 keyword 1 component 1  value 6.498400e-01 tolerance 1.e-4
-#ELEMENT tStep 35 number 4 gp 1 keyword 1 component 1  value 3.785700e-01 tolerance 1.e-4
+#ELEMENT tStep 25 number 4 gp 1 keyword 1 component 1  value 6.583240e-01 tolerance 1.e-4
+#ELEMENT tStep 35 number 4 gp 1 keyword 1 component 1  value 3.848863e-01 tolerance 1.e-4
 #ELEMENT tStep 45 number 4 gp 1 keyword 1 component 1  value 3.235400e+00 tolerance 1.e-4
 #ELEMENT tStep 55 number 4 gp 1 keyword 1 component 1  value 1.314200e+00 tolerance 1.e-4
 #ELEMENT tStep 65 number 4 gp 1 keyword 1 component 1  value 2.454600e-01 tolerance 1.e-4
@@ -163,8 +163,8 @@ set 13 elementranges {8}
 #
 #ELEMENT tStep  5 number 5 gp 1 keyword 1 component 1  value 8.000000e-01 tolerance 1.e-4
 #ELEMENT tStep 15 number 5 gp 1 keyword 1 component 1  value 1.188800e+00 tolerance 1.e-4
-#ELEMENT tStep 25 number 5 gp 1 keyword 1 component 1  value 6.498400e-01 tolerance 1.e-4
-#ELEMENT tStep 35 number 5 gp 1 keyword 1 component 1  value 3.785700e-01 tolerance 1.e-4
+#ELEMENT tStep 25 number 5 gp 1 keyword 1 component 1  value 6.583240e-01 tolerance 1.e-4
+#ELEMENT tStep 35 number 5 gp 1 keyword 1 component 1  value 3.848863e-01 tolerance 1.e-4
 #ELEMENT tStep 45 number 5 gp 1 keyword 1 component 1  value 3.235400e+00 tolerance 1.e-4
 #ELEMENT tStep 55 number 5 gp 1 keyword 1 component 1  value 1.314200e+00 tolerance 1.e-4
 #ELEMENT tStep 65 number 5 gp 1 keyword 1 component 1  value 2.454600e-01 tolerance 1.e-4
@@ -174,8 +174,8 @@ set 13 elementranges {8}
 #
 #ELEMENT tStep  5 number 6 gp 1 keyword 1 component 1  value 8.000000e-01 tolerance 5.e-5
 #ELEMENT tStep 15 number 6 gp 1 keyword 1 component 1  value 2.926100e+00 tolerance 5.e-5
-#ELEMENT tStep 25 number 6 gp 1 keyword 1 component 1  value 1.960000e+00 tolerance 5.e-5
-#ELEMENT tStep 35 number 6 gp 1 keyword 1 component 1  value 1.178100e+00 tolerance 5.e-5
+#ELEMENT tStep 25 number 6 gp 1 keyword 1 component 1  value 1.958498e+00 tolerance 5.e-5
+#ELEMENT tStep 35 number 6 gp 1 keyword 1 component 1  value 1.176897e+00 tolerance 5.e-5
 #ELEMENT tStep 45 number 6 gp 1 keyword 1 component 1  value 4.186100e+00 tolerance 5.e-5
 #ELEMENT tStep 55 number 6 gp 1 keyword 1 component 1  value 2.031900e+00 tolerance 5.e-5
 #ELEMENT tStep 65 number 6 gp 1 keyword 1 component 1  value 7.592900e-01 tolerance 5.e-5

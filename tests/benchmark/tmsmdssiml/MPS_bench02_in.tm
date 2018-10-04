@@ -79,34 +79,34 @@ node 69 coords 3 1.71429 0.5 0.5
 node 70 coords 3 2.14286 0.5 0.5
 node 71 coords 3 2.57143 0.5 0.5
 node 72 coords 3 3 0.5 0.5
-Brick1ht 1 nodes 8  25 33 34 26 1 9 10 2 BoundaryLoads 2 9 6
-Brick1ht 2 nodes 8  26 34 35 27 2 10 11 3 BoundaryLoads 2 9 6
-Brick1ht 3 nodes 8  27 35 36 28 3 11 12 4 BoundaryLoads 2 9 6
-Brick1ht 4 nodes 8  28 36 37 29 4 12 13 5 BoundaryLoads 2 9 6
-Brick1ht 5 nodes 8  29 37 38 30 5 13 14 6 BoundaryLoads 2 9 6
-Brick1ht 6 nodes 8  30 38 39 31 6 14 15 7 BoundaryLoads 2 9 6
-Brick1ht 7 nodes 8  31 39 40 32 7 15 16 8 BoundaryLoads 4 8 5 9 6
+Brick1ht 1 nodes 8  25 33 34 26 1 9 10 2 BoundaryLoads 2 4 6
+Brick1ht 2 nodes 8  26 34 35 27 2 10 11 3 BoundaryLoads 2 4 6
+Brick1ht 3 nodes 8  27 35 36 28 3 11 12 4 BoundaryLoads 2 4 6
+Brick1ht 4 nodes 8  28 36 37 29 4 12 13 5 BoundaryLoads 2 4 6
+Brick1ht 5 nodes 8  29 37 38 30 5 13 14 6 BoundaryLoads 2 4 6
+Brick1ht 6 nodes 8  30 38 39 31 6 14 15 7 BoundaryLoads 2 4 6
+Brick1ht 7 nodes 8  31 39 40 32 7 15 16 8 BoundaryLoads 4 3 5 4 6
 Brick1ht 8 nodes 8  33 41 42 34 9 17 18 10
 Brick1ht 9 nodes 8  34 42 43 35 10 18 19 11
 Brick1ht 10 nodes 8  35 43 44 36 11 19 20 12
 Brick1ht 11 nodes 8  36 44 45 37 12 20 21 13
 Brick1ht 12 nodes 8  37 45 46 38 13 21 22 14
 Brick1ht 13 nodes 8  38 46 47 39 14 22 23 15
-Brick1ht 14 nodes 8  39 47 48 40 15 23 24 16 BoundaryLoads 2 8 5
-Brick1ht 15 nodes 8  49 57 58 50 25 33 34 26 BoundaryLoads 4 9 6 12 1
-Brick1ht 16 nodes 8  50 58 59 51 26 34 35 27 BoundaryLoads 4 9 6 12 1
-Brick1ht 17 nodes 8  51 59 60 52 27 35 36 28 BoundaryLoads 4 9 6 12 1
-Brick1ht 18 nodes 8  52 60 61 53 28 36 37 29 BoundaryLoads 4 9 6 12 1
-Brick1ht 19 nodes 8  53 61 62 54 29 37 38 30 BoundaryLoads 4 9 6 12 1
-Brick1ht 20 nodes 8  54 62 63 55 30 38 39 31 BoundaryLoads 4 9 6 12 1
-Brick1ht 21 nodes 8  55 63 64 56 31 39 40 32 BoundaryLoads 6 8 5 9 6 12 1
-Brick1ht 22 nodes 8  57 65 66 58 33 41 42 34 BoundaryLoads 2 12 1
-Brick1ht 23 nodes 8  58 66 67 59 34 42 43 35 BoundaryLoads 2 12 1
-Brick1ht 24 nodes 8  59 67 68 60 35 43 44 36 BoundaryLoads 2 12 1
-Brick1ht 25 nodes 8  60 68 69 61 36 44 45 37 BoundaryLoads 2 12 1
-Brick1ht 26 nodes 8  61 69 70 62 37 45 46 38 BoundaryLoads 2 12 1
-Brick1ht 27 nodes 8  62 70 71 63 38 46 47 39 BoundaryLoads 2 12 1
-Brick1ht 28 nodes 8  63 71 72 64 39 47 48 40 BoundaryLoads 4 8 5 12 1
+Brick1ht 14 nodes 8  39 47 48 40 15 23 24 16 BoundaryLoads 2 3 5
+Brick1ht 15 nodes 8  49 57 58 50 25 33 34 26 BoundaryLoads 4 4 6 7 1
+Brick1ht 16 nodes 8  50 58 59 51 26 34 35 27 BoundaryLoads 4 4 6 7 1
+Brick1ht 17 nodes 8  51 59 60 52 27 35 36 28 BoundaryLoads 4 4 6 7 1
+Brick1ht 18 nodes 8  52 60 61 53 28 36 37 29 BoundaryLoads 4 4 6 7 1
+Brick1ht 19 nodes 8  53 61 62 54 29 37 38 30 BoundaryLoads 4 4 6 7 1
+Brick1ht 20 nodes 8  54 62 63 55 30 38 39 31 BoundaryLoads 4 4 6 7 1
+Brick1ht 21 nodes 8  55 63 64 56 31 39 40 32 BoundaryLoads 6 3 5 4 6 7 1
+Brick1ht 22 nodes 8  57 65 66 58 33 41 42 34 BoundaryLoads 2 7 1
+Brick1ht 23 nodes 8  58 66 67 59 34 42 43 35 BoundaryLoads 2 7 1
+Brick1ht 24 nodes 8  59 67 68 60 35 43 44 36 BoundaryLoads 2 7 1
+Brick1ht 25 nodes 8  60 68 69 61 36 44 45 37 BoundaryLoads 2 7 1
+Brick1ht 26 nodes 8  61 69 70 62 37 45 46 38 BoundaryLoads 2 7 1
+Brick1ht 27 nodes 8  62 70 71 63 38 46 47 39 BoundaryLoads 2 7 1
+Brick1ht 28 nodes 8  63 71 72 64 39 47 48 40 BoundaryLoads 4 3 5 7 1
 Set 1 elementranges {(1 28)}
 Set 2 nodes 9 1 9 17 25 33 41 49 57 65
 SimpleTransportCS 1 mat 1 set 1

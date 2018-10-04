@@ -100,7 +100,8 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         // constant c1 (=C1*R*T/M)
         IR_GIVE_FIELD(ir, c1, _IFT_B3SolidMaterial_c1);
         // t0- necessary for the initial value of microprestress = S0 (age when drying begins)
-        IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0);
+	//        IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0);
+	this->tS0 = this->relMatAge;
 
         // microprestress-sol-theory: read data for inverse desorption isotherm
         IR_GIVE_FIELD(ir, w_h, _IFT_B3Material_wh);
@@ -262,7 +263,7 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
     eta = this->computeFlowTermViscosity(gp, tStep);     //evaluated in the middle of the time-step
 
     ///@todo THREAD UNSAFE!
-    t_halfstep = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
+    t_halfstep = this->relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
     this->updateEparModuli( t_halfstep, gp, tStep );
 
     if ( this->EmoduliMode == 0 ) { //retardation spectrum used
@@ -436,7 +437,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
      */
 
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
-    double time = relMatAge + tStep->giveTargetTime() / timeFactor;
+    double time = this->relMatAge - this->castingTime + tStep->giveTargetTime() / timeFactor;
     int size;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
@@ -520,7 +521,7 @@ B3SolidMaterial :: computeSolidifiedVolume(TimeStep *tStep)
     //lambda0 = 1;     //[day]
     alpha = q3 / q2;
 
-    atAge = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
+    atAge = this->relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
     v = 1 / ( alpha + pow(lambda0 / atAge, m) );
 
     return v;
@@ -538,7 +539,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
         eta = 1. / ( q4 * c0 * S );
         //static_cast< B3SolidMaterialStatus* >( gp->giveMaterialStatus() )->setMPS(S);
     } else if ( this->MicroPrestress == 0 ) {
-        tHalfStep = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
+        tHalfStep = this->relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
         eta = 1. * tHalfStep / q4;
     } else {
         OOFEM_ERROR("mode is not supported");

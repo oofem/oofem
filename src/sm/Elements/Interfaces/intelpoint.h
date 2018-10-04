@@ -38,6 +38,7 @@
 #include "sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrixf.h"
+//#include "floatarrayf.h"
 
 ///@name Input fields for Material
 //@{
@@ -51,7 +52,9 @@ namespace oofem {
 /**
  * This class implements an interface element that connects two nodes.
  * In order to compute the normal and tangential direction of the slip plane, 
- * a reference node or specific direction must be specified in the input.
+ * a reference node or specific direction can be specified in the input.
+ * If neither are specified, then the normal direction are computed from the coordinates
+ * of the element's nodes.
  * The class adjusts dimensionality automatically to 1D, 2D, or 3D depending on domain.
  * @author Jim Brouzoulis
  * @author Borek Patzak
@@ -115,6 +118,9 @@ protected:
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
     void computeGaussPoints() override;
 
+    //    void computeLocalSlipDir(FloatArrayF &normal);
+    //    void computeLocalSlipDir(FloatArrayF<3> normal);
+        void computeLocalSlipDir(void);    
     cmode giveCoordMode() const { return this->mode; }
     void setCoordMode();
 };

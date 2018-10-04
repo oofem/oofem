@@ -73,7 +73,7 @@ simpleCS 2 material 2 area 7.8540e-005 set 2
 #
 # concrete (bricks):
 #Model for autogenous shrinkage is 0
-MPSdamMat   1 d 0.00244552 n 0.2 talpha 0.000010 mode 0 fc 40.000000 cc 200.000000 w/c 0.550000 a/c 10.680000 stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 300. endoftimeofinterest 864.e4 relMatAge 14400.000000 CoupledAnalysisType 3 t0 14400.000000 k3 35. p 1000. kTm 0.5 timeDepFracturing fib_s 0.200000 Ft28 1.9 Gf28 0.0001 b4_cem_type 0 b4_eps_au_infty -0.0018 isotropic temperInCelsius castingTime 28800.000000 checkSnapBack 1
+MPSdamMat   1 d 0.00244552 n 0.2 talpha 0.000010 mode 0 fc 40.000000 cc 200.000000 w/c 0.550000 a/c 10.680000 stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 300. endoftimeofinterest 864.e4 relMatAge 14400.000000 CoupledAnalysisType 3 k3 35. p 1000. kTm 0.5 timeDepFracturing fib_s 0.200000 Ft28 1.9 Gf28 0.0001 b4_cem_type 0 b4_eps_au_infty -0.0018 isotropic temperInCelsius castingTime 28800.000000 checkSnapBack 1
 # springs (interfaces):
 # steel (single):
 Steel1   2 d 78.5e-3 E 200.e3 n 0.3 talpha 10e-6 Ry 550.000000 castingTime 28800.000000

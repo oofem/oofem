@@ -179,6 +179,7 @@ set (sm_material
     Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/ConcreteMaterials/compodamagemat.C
     Materials/ConcreteMaterials/concretefcm.C
+    Materials/ConcreteMaterials/concretefcmviscoelastic.C
     Materials/ConcreteMaterials/frcfcm.C
     Materials/ConcreteMaterials/frcfcmnl.C
     Materials/RheoChainMaterials/rheoChM.C 

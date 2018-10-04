@@ -528,8 +528,9 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     propertyDictionary.add('E', eM);
     propertyDictionary.add('n', nu);
 
-    IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary.add(tAlpha, value);
+    // done in strucutral material
+    //IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
+    //propertyDictionary.add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
     kM = eM / ( 3. * ( 1. - 2. * nu ) );

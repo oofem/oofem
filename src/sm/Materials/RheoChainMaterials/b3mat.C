@@ -274,7 +274,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
      * returns average shrinkage strain vector of cross-section at drying
      */
     double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
-    double time = relMatAge + tStep->giveTargetTime() / timeFactor;
+    double time = this->relMatAge - this->castingTime + tStep->giveTargetTime() / timeFactor;
     int size;
     FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
@@ -324,7 +324,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     //  rprime  - coefficient
     //  at      - coeff relating stress-induced thermal strain and shrinkage
     double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
-    double time = relMatAge + tStep->giveTargetTime() / timeFactor;
+    double time = this->relMatAge - this->castingTime + tStep->giveTargetTime() / timeFactor;
     int err, tflag = 0, wflag = 0;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
     int size;

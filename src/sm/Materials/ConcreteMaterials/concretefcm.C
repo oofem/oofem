@@ -175,6 +175,9 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
         shearType = SHR_Const_ShearFactorCoeff;
         sf = 20.;
         IR_GIVE_OPTIONAL_FIELD(ir, sf, _IFT_ConcreteFCM_sf);
+
+	sf_numer = sf;
+	IR_GIVE_OPTIONAL_FIELD(ir, sf_numer, _IFT_ConcreteFCM_sf_numer);
         break;
 
     case 3: // w is the maximum reached crack opening, not the current value!
@@ -217,6 +220,10 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
 
         break;
 
+    case 3:
+        shearStrengthType = SHS_Residual_Ft;
+        break;
+
     default:
         OOFEM_WARNING("Shear stiffness reduction type number %d is unknown", softType);
         return IRRT_BAD_FORMAT;
@@ -227,21 +234,14 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
 
 
 double
-ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
+ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i)
 //
 // returns current cracking modulus according to crackStrain for i-th
 // crackplane
 //
 {
     ConcreteFCMStatus *status = static_cast< ConcreteFCMStatus * >( this->giveStatus(gp) );
-
-    double Cf = 0.;
-    double ef, emax, c1, c2, Le, Ncr, w;
-
-    double Ft = this->giveTensileStrength(gp);
-    double Gf = this->giveFractureEnergy(gp);
-    double ec =  status->giveTempCrackStrain(i);
-    double E = this->computeOverallElasticStiffness();
+    double E = this->computeOverallElasticStiffness(gp, tStep);
 
     if ( status->giveTempCrackStatus(i) == pscm_NONE ) {
         return E * fcm_BIGNUMBER;
@@ -252,6 +252,27 @@ ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
         return E * fcm_BIGNUMBER;
     }
 
+    return giveCrackingModulusInTension(rMode, gp, tStep, i);
+
+}
+
+  
+double
+ConcreteFCM :: giveCrackingModulusInTension(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i)
+{
+
+  ConcreteFCMStatus *status = static_cast< ConcreteFCMStatus * >( this->giveStatus(gp) );
+  
+  double Cf = 0.;
+  double ef, emax, c1, c2, Le, Ncr, w;
+  
+  double ft = this->giveTensileStrength(gp, tStep);
+  double Gf = this->giveFractureEnergy(gp, tStep);
+  double ec =  status->giveTempCrackStrain(i);
+  double E = this->computeOverallElasticStiffness(gp, tStep);
+    
+    
+  
     emax = max(status->giveMaxCrackStrain(i), ec);
 
     Le = status->giveCharLength(i);
@@ -267,54 +288,54 @@ ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
         if ( softType == ST_NONE ) {
             OOFEM_ERROR("For unknown reason the tensile strength has been exceeded and cracking has been initiated!");
         } else if ( softType == ST_Exponential ) {
-            ef = Gf / ( Ft * Le );
+            ef = Gf / ( ft * Le );
 
             if ( emax == 0. ) { // just initiated and closing crack
-                Cf = -Ft / ef;
+                Cf = -ft / ef;
             } else { // further softening - negative stiffness
-                Cf = -Ft / ef *exp(-ec / ef);
+                Cf = -ft / ef *exp(-ec / ef);
             }
         } else if ( softType == ST_Linear ) {
             // fracturing strain at zero traction
-            ef = 2. * Gf / ( Ft * Le );
+            ef = 2. * Gf / ( ft * Le );
 
             if ( ( ec >= ef )  || ( emax >= ef ) ) {
                 // fully open crack - no stiffness
                 Cf = 0.;
             } else { // further softening - negative stiffness
-                Cf = -Ft / ef;
+                Cf = -ft / ef;
             }
         } else if ( softType == ST_Hordijk ) {
             c1 = 3.;
             c2 = 6.93;
 
-            ef = 5.14 * Gf / Ft / Le;
+            ef = 5.14 * Gf / ft / Le;
 
             if ( ( ec >= ef )  || ( emax >= ef ) ) {
                 Cf = 0.;
             }  else if ( emax == 0. ) { // just initiated and closing crack
-                Cf = Ft * ( -c2 / ef - ( exp(-c2) * ( c1 * c1 * c1 + 1. ) ) / ef );
+                Cf = ft * ( -c2 / ef - ( exp(-c2) * ( c1 * c1 * c1 + 1. ) ) / ef );
             } else { // further softening - negative stiffness
-                Cf = Ft * ( ( 3. * c1 * c1 * c1 * ec * ec * exp(-( c2 * ec ) / ef) ) /  ( ef * ef * ef ) - ( c2 * exp(-( c2 * ec ) / ef) * ( c1 * c1 * c1 * ec * ec * ec + ef * ef * ef ) ) / ( ef * ef * ef * ef ) - ( exp(-c2) * ( c1 * c1 * c1 + 1. ) ) / ef );
+                Cf = ft * ( ( 3. * c1 * c1 * c1 * ec * ec * exp(-( c2 * ec ) / ef) ) /  ( ef * ef * ef ) - ( c2 * exp(-( c2 * ec ) / ef) * ( c1 * c1 * c1 * ec * ec * ec + ef * ef * ef ) ) / ( ef * ef * ef * ef ) - ( exp(-c2) * ( c1 * c1 * c1 + 1. ) ) / ef );
             }
         } else if ( softType == ST_UserDefinedCrack ) {
             w = ec * Le;
 
-	    if ( w > soft_w.at(soft_w.giveSize() ) ) {
+            if ( w > soft_w.at(soft_w.giveSize() ) ) {
                 Cf = 0.;
 #ifdef DEBUG
                 OOFEM_WARNING("Crack width is larger than the last user-defined value in the traction-opening law.");
 #endif
             } else if ( emax == 0. ) {
-                Cf = this->Ft * ( soft_function_w.at(2) - soft_function_w.at(1) ) / ( ( soft_w.at(2) - soft_w.at(1) ) / Le );
+                Cf = ft * ( soft_function_w.at(2) - soft_function_w.at(1) ) / ( ( soft_w.at(2) - soft_w.at(1) ) / Le );
             } else { // softening
                 for ( int i = 1; i <= soft_w.giveSize(); i++ ) {
                     if ( ( w - soft_w.at(i) ) < fcm_SMALL_STRAIN ) {
                         if ( i == 1 ) {
-                            Cf =  this->Ft * ( soft_function_w.at(2) - soft_function_w.at(1) ) /  ( ( soft_w.at(2) - soft_w.at(1) ) / Le );
+                            Cf =  ft * ( soft_function_w.at(2) - soft_function_w.at(1) ) /  ( ( soft_w.at(2) - soft_w.at(1) ) / Le );
                             break;
                         } else {
-                            Cf =  this->Ft * ( soft_function_w.at(i) - soft_function_w.at(i - 1) ) /  ( ( soft_w.at(i) - soft_w.at(i - 1) ) / Le );
+                            Cf =  ft * ( soft_function_w.at(i) - soft_function_w.at(i - 1) ) /  ( ( soft_w.at(i) - soft_w.at(i - 1) ) / Le );
                             break;
                         }
                     }
@@ -328,21 +349,22 @@ ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
                 Cf = this->H;
             }
         } else if ( softType == ST_UserDefinedStrain ) {
+		
 		if ( ec > soft_eps.at(soft_eps.giveSize() ) ) {
                 Cf = 0.;
 #ifdef DEBUG
                 OOFEM_WARNING("Crack strain is larger than the last user-defined value in the stress-crack-strain law.");
 #endif
             } else if ( emax == 0. ) {
-                Cf = this->Ft * ( soft_function_eps.at(2) - soft_function_eps.at(1) ) / ( soft_eps.at(2) - soft_eps.at(1) );
+                Cf = ft * ( soft_function_eps.at(2) - soft_function_eps.at(1) ) / ( soft_eps.at(2) - soft_eps.at(1) );
             } else { // softening
                 for ( int i = 1; i <= soft_eps.giveSize(); i++ ) {
                     if ( ( ec - soft_eps.at(i) ) < fcm_SMALL_STRAIN ) {
                         if ( i == 1 ) {
-                            Cf =  this->Ft * ( soft_function_eps.at(2) - soft_function_eps.at(1) ) /  ( soft_eps.at(2) - soft_eps.at(1) );
+                            Cf =  ft * ( soft_function_eps.at(2) - soft_function_eps.at(1) ) /  ( soft_eps.at(2) - soft_eps.at(1) );
                             break;
                         } else {
-                            Cf =  this->Ft * ( soft_function_eps.at(i) - soft_function_eps.at(i - 1) ) /  ( soft_eps.at(i) - soft_eps.at(i - 1) );
+                            Cf =  ft * ( soft_function_eps.at(i) - soft_function_eps.at(i - 1) ) /  ( soft_eps.at(i) - soft_eps.at(i - 1) );
                             break;
                         }
                     }
@@ -356,7 +378,7 @@ ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
             return E * fcm_BIGNUMBER;
         }
 
-        Cf = ConcreteFCM :: giveNormalCrackingStress(gp, emax * Ncr, i); // gets stress
+        Cf = ConcreteFCM :: giveNormalCrackingStress(gp, tStep, emax * Ncr, i); // gets stress
         Cf /= ( emax ); // converted into stiffness
     }
 
@@ -364,8 +386,9 @@ ConcreteFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
     return Cf / Ncr;
 }
 
+
 double
-ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
+ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double ec, int i)
 //
 // returns receivers Normal Stress in crack i  for given cracking strain
 //
@@ -374,11 +397,11 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
 
     double traction;
     double Le, ef, emax, w, E, c1, c2;
-    double Gf = this->giveFractureEnergy(gp);
-    double Ft = this->giveTensileStrength(gp);
+    double Gf = this->giveFractureEnergy(gp, tStep);
+    double ft = this->giveTensileStrength(gp, tStep);
 
     if ( status->giveTempCrackStatus(i) == pscm_CLOSED ) {
-        E = this->computeOverallElasticStiffness();
+      E = this->computeOverallElasticStiffness(gp, tStep);
         return E * ec;
     }
 
@@ -393,68 +416,66 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
     if ( softType == ST_NONE ) {
         OOFEM_ERROR("For unknown reason the tensile strength has been exceeded and cracking has been initiated!");
     } else if ( softType == ST_Exponential ) {
-        ef = Gf / ( Ft * Le );
+        ef = Gf / ( ft * Le );
         if ( ec >= emax ) {
             // further softening
-            traction = Ft * exp(-ec / ef);
+            traction = ft * exp(-ec / ef);
         } else {
             // crack closing
             // or unloading or reloading regime
-            traction = Ft * ec / emax *exp(-emax / ef);
+            traction = ft * ec / emax *exp(-emax / ef);
         }
     } else if ( softType  == ST_Linear ) {
         // fracturing strain at zero traction
-        ef = 2. * Gf / ( Ft * Le );
+        ef = 2. * Gf / ( ft * Le );
 
         if ( ( ec >= ef )  || ( emax >= ef ) ) {
             // fully open crack - no stiffness
             traction = 0.;
         } else if ( ec >= emax ) {
             // further softening
-            traction = Ft - Ft * ec / ef;
+            traction = ft - ft * ec / ef;
         } else if ( ec <= 0. ) {
             traction = 0.;
         } else {
-            traction = Ft * ec * ( ef - emax ) / ( emax * ef );
+            traction = ft * ec * ( ef - emax ) / ( emax * ef );
         }
     } else if ( softType == ST_Hordijk ) {
         c1 = 3.;
         c2 = 6.93;
 
-        ef = 5.14 * Gf / Ft / Le;
+        ef = 5.14 * Gf / ft / Le;
 
         if ( ( ec >= ef )  || ( emax >= ef ) ) {
             // fully open crack - no stiffness
             traction = 0.;
         } else if ( ec >= emax ) {
             // further softening
-            traction = Ft * ( ( 1. + pow( ( c1 * ec / ef ), 3. ) ) * exp(-c2 * ec / ef) - ec / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
+            traction = ft * ( ( 1. + pow( ( c1 * ec / ef ), 3. ) ) * exp(-c2 * ec / ef) - ec / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
         } else if ( ec <= 0. ) {
             traction = 0.;
         } else {
-            traction = Ft * ec / emax * ( ( 1. + pow( ( c1 * emax / ef ), 3. ) ) * exp(-c2 * emax / ef) - emax / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
+            traction = ft * ec / emax * ( ( 1. + pow( ( c1 * emax / ef ), 3. ) ) * exp(-c2 * emax / ef) - emax / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
         }
     } else if ( softType == ST_UserDefinedCrack ) {
         w = ec * Le;
 
 	traction = 0.;
-
-            if ( w > soft_w.at(soft_w.giveSize() ) ) {
-            traction = 0.;
-
+	
+        if ( w > soft_w.at(soft_w.giveSize() ) ) {
+	  traction = 0.;
 #ifdef DEBUG
             OOFEM_WARNING("Crack width is larger than the last user-defined value in the traction-opening law.");
-#endif
-	    
+#endif	    
         } else if ( ec >= emax ) { // softening
             for ( int i = 1; i <= soft_w.giveSize(); i++ ) {
                 if ( ( w - soft_w.at(i) ) < fcm_SMALL_STRAIN ) {
                     if ( i == 1 ) { // eps \approx 0 bound
-                        traction = soft_function_w.at(i) * this->Ft;
+                        traction = soft_function_w.at(i) * ft;
                         break;
                     } else {
                         traction = soft_function_w.at(i - 1) +  ( soft_function_w.at(i) - soft_function_w.at(i - 1) ) / ( soft_w.at(i) - soft_w.at(i - 1) ) * ( w - soft_w.at(i - 1) );
-                        traction *= this->Ft;
+                        traction *= ft;
                         break;
                     }
                 }
@@ -467,11 +488,11 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
             for ( int i = 1; i <= soft_w.giveSize(); i++ ) {
                 if ( ( w - soft_w.at(i) ) < fcm_SMALL_STRAIN ) {
                     if ( i == 1 ) { // eps \approx 0
-                        traction = soft_function_w.at(i) * this->Ft * ec / emax;
+                        traction = soft_function_w.at(i) * ft * ec / emax;
                         break;
                     } else {
                         traction = soft_function_w.at(i - 1) +  ( soft_function_w.at(i) - soft_function_w.at(i - 1) ) / ( soft_w.at(i) - soft_w.at(i - 1) ) * ( w - soft_w.at(i - 1) );
-                        traction *= this->Ft * ec / emax;
+                        traction *= ft * ec / emax;
                         break;
                     }
                 }
@@ -481,29 +502,32 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
         if ( ( ec >= this->eps_f )  || ( emax >= this->eps_f ) ) {
             traction = 0.;
         } else if ( emax == 0. ) {
-            traction = this->Ft;
+            traction = ft;
         } else {
             // unloading or reloading regime
             // emax * Le = crack width
             //      traction = ( this->Ft + emax * Le * this->H ) * ec / emax;
             // written in terms of strain and not crack width
-            traction = ( this->Ft + emax * this->H ) * ec / emax;
+            traction = ( ft + emax * this->H ) * ec / emax;
         }
     } else if ( softType == ST_UserDefinedStrain ) {
-      if ( emax > soft_eps.at(soft_eps.giveSize() ) ) {
-            traction = 0.;
+
+	    traction = 0.;
+	    
+	    if ( emax > soft_eps.at(soft_eps.giveSize() ) ) {
+	      traction = 0.;
 #ifdef DEBUG
-            OOFEM_WARNING("Cracking strain is larger than the last user-defined value in the traction-cracking-strain law.");
+	      OOFEM_WARNING("Cracking strain is larger than the last user-defined value in the traction-cracking-strain law.");
 #endif
-        } else if ( ec >= emax ) { // softening
-            for ( int i = 1; i <= soft_eps.giveSize(); i++ ) {
+	    } else if ( ec >= emax ) { // softening
+	      for ( int i = 1; i <= soft_eps.giveSize(); i++ ) {
                 if ( ( ec - soft_eps.at(i) ) < fcm_SMALL_STRAIN ) {
-                    if ( i == 1 ) { // eps \approx 0 bound
-                        traction = soft_function_eps.at(i) * this->Ft;
-                        break;
-                    } else {
+		  if ( i == 1 ) { // eps \approx 0 bound
+		    traction = soft_function_eps.at(i) * ft;
+		    break;
+		  } else {
                         traction = soft_function_eps.at(i - 1) +  ( soft_function_eps.at(i) - soft_function_eps.at(i - 1) ) / ( soft_eps.at(i) - soft_eps.at(i - 1) ) * ( ec - soft_eps.at(i - 1) );
-                        traction *= this->Ft;
+                        traction *= ft;
                         break;
                     }
                 }
@@ -514,11 +538,11 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
             for ( int i = 1; i <= soft_eps.giveSize(); i++ ) {
                 if ( ( emax - soft_eps.at(i) ) < fcm_SMALL_STRAIN ) {
                     if ( i == 1 ) { // eps \approx 0
-                        traction = soft_function_eps.at(i) * this->Ft * ec / emax;
+                        traction = soft_function_eps.at(i) * ft * ec / emax;
                         break;
                     } else {
                         traction = soft_function_eps.at(i - 1) +  ( soft_function_eps.at(i) - soft_function_eps.at(i - 1) ) / ( soft_eps.at(i) - soft_eps.at(i - 1) ) * ( emax - soft_eps.at(i - 1) );
-                        traction *= this->Ft * ec / emax;
+                        traction *= ft * ec / emax;
                         break;
                     }
                 }
@@ -532,13 +556,13 @@ ConcreteFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
 }
 
 double
-ConcreteFCM :: computeEffectiveShearModulus(GaussPoint *gp, int shearDirection)
+ConcreteFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int shearDirection)
 
 {
     double G, Geff, D2tot, N;
     int crackA, crackB;
 
-    G = this->computeOverallElasticShearModulus();
+    G = this->computeOverallElasticShearModulus(gp, tStep);
 
     if ( this->isIntactForShear(gp, shearDirection) ) {
         Geff = G;
@@ -570,12 +594,12 @@ ConcreteFCM :: computeEffectiveShearModulus(GaussPoint *gp, int shearDirection)
             Geff = G * this->beta / ( N - this->beta * ( N - 1 ) ); // for N = 1... Geff = G * beta
         } else if ( this->shearType == SHR_Const_ShearFactorCoeff ) {
             // contributions from shear terms in: De - De (De + Dcr)^-1 De
-            D2tot = this->computeTotalD2Modulus(gp, shearDirection);
+	  D2tot = this->computeNumerD2Modulus(gp, tStep, shearDirection);
             // number of parallel cracks already taken into account
             Geff = G * D2tot / ( G + D2tot );
         } else if ( this->shearType == SHR_UserDefined_ShearRetFactor ) {
             // contributions from shear terms in: De - De (De + Dcr)^-1 De
-            D2tot = this->computeTotalD2Modulus(gp, shearDirection);
+	  D2tot = this->computeNumerD2Modulus(gp, tStep, shearDirection);
             // number of parallel cracks already taken into account
             Geff = G * D2tot / ( G + D2tot );
         } else {
@@ -589,7 +613,7 @@ ConcreteFCM :: computeEffectiveShearModulus(GaussPoint *gp, int shearDirection)
 
 
 double
-ConcreteFCM :: computeD2ModulusForCrack(GaussPoint *gp, int icrack)
+ConcreteFCM :: computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
 {
     double D2, N, G, E, w, beta_m;
 
@@ -600,24 +624,24 @@ ConcreteFCM :: computeD2ModulusForCrack(GaussPoint *gp, int icrack)
     N = this->giveNumberOfCracksInDirection(gp, icrack);
 
     if ( this->isIntact(gp, icrack) || ( this->shearType == SHR_NONE ) ) {
-        E = this->computeOverallElasticStiffness();
+      E = this->computeOverallElasticStiffness(gp, tStep);
         D2 = E * fcm_BIGNUMBER;
     } else {
         if ( shearType == SHR_Const_ShearRetFactor ) {
-            G = this->computeOverallElasticShearModulus();
+	  G = this->computeOverallElasticShearModulus(gp, tStep);
             D2 = G * this->beta / ( 1. - this->beta );
             D2 /= N;
         } else if ( shearType == SHR_Const_ShearFactorCoeff ) {
             // for the number of parallel cracks is taken care of in "giveCrackingModulus"
             // however, it is essential to reduce the final modulus due to the presence of multiple cracks
-            D2 = this->sf * this->giveCrackingModulus(SecantStiffness, gp, icrack);
+	  D2 = this->sf * ConcreteFCM::giveCrackingModulusInTension(SecantStiffness, gp, tStep, icrack);
             D2 /= N;
         } else if ( this->shearType == SHR_UserDefined_ShearRetFactor ) {
             // for the number of parallel cracks is taken care of in the evaluation of normalcrackopening
             // however, it is essential to reduce the final modulus due to the presence of multiple cracks
 
-            G = this->computeOverallElasticShearModulus();
-            w = max( this->computeNormalCrackOpening(gp, icrack), this->computeMaxNormalCrackOpening(gp, icrack) );
+	  G = this->computeOverallElasticShearModulus(gp, tStep);
+	  w = max( this->computeNormalCrackOpening(gp, icrack), this->computeMaxNormalCrackOpening(gp, tStep, icrack) );
 
             ///  shear retention factor = beta(w)
 
@@ -647,35 +671,73 @@ ConcreteFCM :: computeD2ModulusForCrack(GaussPoint *gp, int icrack)
         }
     }
 
+  
+
     return D2;
 }
 
 
+
+double
+ConcreteFCM :: computeNumerD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
+{
+    double D2, N, E;
+
+    if ( icrack >= 4 ) {
+        OOFEM_ERROR("Unexpected crack number");
+    }
+
+    N = this->giveNumberOfCracksInDirection(gp, icrack);
+
+    if ( this->isIntact(gp, icrack) || ( this->shearType == SHR_NONE ) ) {
+      E = this->computeOverallElasticStiffness(gp, tStep);
+        D2 = E * fcm_BIGNUMBER;
+    } else {
+        if ( shearType == SHR_Const_ShearRetFactor ) {
+	  D2 = ConcreteFCM :: computeD2ModulusForCrack(gp, tStep, icrack);
+        } else if ( shearType == SHR_Const_ShearFactorCoeff ) {
+            // for the number of parallel cracks is taken care of in "giveCrackingModulus"
+            // however, it is essential to reduce the final modulus due to the presence of multiple cracks
+	  D2 = this->sf_numer * ConcreteFCM::giveCrackingModulusInTension(SecantStiffness, gp, tStep, icrack);
+	  D2 /= N;
+        } else if ( this->shearType == SHR_UserDefined_ShearRetFactor ) {
+	  D2 = ConcreteFCM :: computeD2ModulusForCrack(gp, tStep, icrack);
+        } else {
+            D2 = 0;
+            OOFEM_ERROR("Unknown Softening Mode");
+        }
+    }
+
+    return D2;
+}  
+
+  
+
 void
-ConcreteFCM :: checkSnapBack(GaussPoint *gp, int i)
+ConcreteFCM :: checkSnapBack(GaussPoint *gp, TimeStep *tStep, int i)
 {
     ConcreteFCMStatus *status = static_cast< ConcreteFCMStatus * >( this->giveStatus(gp) );
 
-    double E, Gf, Ft, Le;
+    double E, Gf, ft, Le;
     double ef = 0.;
     double slope;
     double efail, c1, c2;
 
     Le = status->giveCharLength(i);
 
-    Gf = this->giveFractureEnergy(gp);
-    Ft = this->giveTensileStrength(gp);
+    Gf = this->giveFractureEnergy(gp, tStep);
+    ft = this->giveTensileStrength(gp, tStep);
 
-    E = this->computeOverallElasticStiffness();
+    E = this->computeOverallElasticStiffness(gp, tStep);
 
     if ( softType == ST_NONE ) {
         OOFEM_ERROR("For unknown reason the tensile strength has been exceeded and cracking has been initiated!");
     } else if ( softType == ST_Exponential ) {
-        ef = Gf / ( Ft * Le );
+        ef = Gf / ( ft * Le );
     } else if ( softType == ST_Linear ) {
-        ef = 2. * Gf / ( Ft * Le );
+        ef = 2. * Gf / ( ft * Le );
     } else if ( softType == ST_Hordijk ) {
-        efail =  5.14 * Gf / Ft / Le;
+        efail =  5.14 * Gf / ft / Le;
         c1 = 3.;
         c2 = 6.93;
         // ef = ft / slope of the softening branch at the peak stress
@@ -704,25 +766,25 @@ ConcreteFCM :: checkSnapBack(GaussPoint *gp, int i)
         OOFEM_ERROR("Unknown Softening Mode");
     }
 
-    if ( ef <= Ft / E ) {
-        OOFEM_ERROR("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f", ef, Ft / E, gp->giveElement()->giveNumber(), Le);
+    if ( ef <= ft / E ) {
+        OOFEM_ERROR("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f", ef, ft / E, gp->giveElement()->giveNumber(), Le);
     }
 }
 
 
 double
-ConcreteFCM :: maxShearStress(GaussPoint *gp, int i) {
+ConcreteFCM :: maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) {
     int dir_1, dir_2;
     double maxTau, crackOpening, wmax, scale;
 
     if ( this->isIntactForShear(gp, i) ) {
-        return Ft * fcm_BIGNUMBER;
+      return this->giveTensileStrength(gp, tStep) * fcm_BIGNUMBER;
     }
 
     if ( this->shearStrengthType == SHS_NONE ) {
-        maxTau = Ft * fcm_BIGNUMBER;
+        maxTau = this->giveTensileStrength(gp, tStep)  * fcm_BIGNUMBER;
     } else if ( this->shearStrengthType == SHS_Const_Ft ) {
-        maxTau = Ft;
+        maxTau = this->giveTensileStrength(gp, tStep);
     } else if ( this->shearStrengthType == SHS_Collins_Interlock ) {
         if ( i == 4 ) { // y-z
             dir_1 = 2;
@@ -742,18 +804,50 @@ ConcreteFCM :: maxShearStress(GaussPoint *gp, int i) {
         crackOpening = max( this->computeNormalCrackOpening(gp, dir_1), this->computeNormalCrackOpening(gp, dir_2) );
 
         // from the entire history
-        wmax = max( this->computeMaxNormalCrackOpening(gp, dir_1), this->computeMaxNormalCrackOpening(gp, dir_2) );
+        wmax = max( this->computeMaxNormalCrackOpening(gp, tStep, dir_1), this->computeMaxNormalCrackOpening(gp, tStep, dir_2) );
 
         crackOpening = max(wmax, crackOpening);
 
         scale = 1000. / lengthScale;
         maxTau = 0.18 * sqrt(this->fc) / ( 0.31 + 24. * crackOpening * scale / ( this->ag * scale + 16. ) );
+
+    } else if ( this->shearStrengthType == SHS_Residual_Ft ) {
+        maxTau = this->computeResidualTensileStrength(gp, tStep);
+
     } else {
         OOFEM_ERROR("Unexpected shearStrengthType");
         maxTau = 0.; // happy compiler
     }
 
     return maxTau;
+}
+
+double
+ConcreteFCM :: computeResidualTensileStrength(GaussPoint *gp, TimeStep *tStep) {
+
+  ConcreteFCMStatus *status = static_cast< ConcreteFCMStatus * >( this->giveStatus(gp) );
+  
+  double sigma;
+  int nCracks;
+  double emax;
+
+  nCracks = status->giveNumberOfTempCracks();
+  
+  sigma = this->giveTensileStrength(gp, tStep);
+  
+  for ( int i = 1; i <= nCracks; i++ ) {
+    
+    emax = status->giveMaxCrackStrain(i);
+    
+    if (emax > 0.) {
+      emax /= this->giveNumberOfCracksInDirection(gp, i);
+      
+      sigma = ConcreteFCM :: giveNormalCrackingStress(gp, tStep, emax, i);
+      sigma = min( sigma, this->giveTensileStrength(gp, tStep) );
+    }
+  }
+
+  return sigma;
 }
 
 
@@ -776,6 +870,21 @@ ConcreteFCM :: give(int aProperty, GaussPoint *gp)
 int
 ConcreteFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
+
+  if ( type == IST_TensileStrength ) {
+    answer.resize(1);
+    answer.at(1) = this->giveTensileStrength(gp, tStep);   
+    return 1.;
+    
+  } else if ( type == IST_ResidualTensileStrength ) {
+
+    answer.resize(1);
+    answer.zero();
+    answer.at(1) = this->computeResidualTensileStrength(gp, tStep);
+    
+    return 1;
+  }
+
     return FCMMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
@@ -796,7 +905,6 @@ ConcreteFCM :: giveStatus(GaussPoint *gp) const
 
     return status;
 }
-
 
 
 

@@ -45,10 +45,10 @@ SimpleCS 2 thick 1.0 width 1.0 material 2
 # MATERIAL
 #
 # autogenous shrinkage only
-EC2CreepMat 1 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge -10. t0 2. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 3 begOfTimeOfInterest 10. endOfTimeOfInterest 1000. castingTime 10.
+EC2CreepMat 1 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge 0. t0 2. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 3 begOfTimeOfInterest 10. endOfTimeOfInterest 1000. castingTime 10.
 #
 # drying shrinkage only
-EC2CreepMat 2 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge -10. t0 2. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 2 begOfTimeOfInterest 10. endOfTimeOfInterest 1000. castingTime 10.
+EC2CreepMat 2 d 0. n 0.2 fcm28 30 stiffnessFactor 1.e6 relMatAge 0. t0 2. timeFactor 1. cemType 2 henv 0.5 h0 100. shType 2 begOfTimeOfInterest 10. endOfTimeOfInterest 1000. castingTime 10.
 #
 #
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 1

@@ -48,6 +48,7 @@
 #define _IFT_ConcreteFCM_ft "ft"
 #define _IFT_ConcreteFCM_beta "beta"
 #define _IFT_ConcreteFCM_sf "sf"
+#define _IFT_ConcreteFCM_sf_numer "sf_numer"
 #define _IFT_ConcreteFCM_fc "fc"
 #define _IFT_ConcreteFCM_ag "ag"
 #define _IFT_ConcreteFCM_lengthScale "lengthscale"
@@ -113,12 +114,14 @@ public:
 protected:
     /// Fracture energy
     double Gf;
-    /// Tensile strenght
+    /// Tensile strength
     double Ft;
     /// shear retention factor
     double beta;
     /// shear factor
     double sf;
+    /// shear factor for numerical purpose
+    double sf_numer;
 
     // 3 parameters for collins aggregate interlock:
     /// Collins' aggregate interlock: compressive strength in MPa
@@ -140,14 +143,20 @@ protected:
     /// strain at failure
     double eps_f;
 
-    double giveTensileStrength(GaussPoint *gp) override { return this->give(ft_strength, gp); }
-    double giveFractureEnergy(GaussPoint *gp) { return this->give(gf_ID, gp); }
-    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i) override;
-    double computeEffectiveShearModulus(GaussPoint *gp, int i) override;
-    double computeD2ModulusForCrack(GaussPoint *gp, int icrack) override;
-    double giveNormalCrackingStress(GaussPoint *gp, double eps_cr, int i) override;
-    double maxShearStress(GaussPoint *gp, int i) override;
-    void checkSnapBack(GaussPoint *gp, int crack) override;
+    double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) override { return this->give(ft_strength, gp); }
+    virtual double giveFractureEnergy(GaussPoint *gp, TimeStep *tStep) { return this->give(gf_ID, gp); }
+    double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) override;
+    virtual double giveCrackingModulusInTension(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i);
+    double computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int i) override;
+    double computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) override;
+    double computeNumerD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) override;
+    double giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double eps_cr, int i) override;
+    double maxShearStress(GaussPoint *gp, TimeStep *tStep, int i) override;
+
+    /// based on the maximum crack opening evaluates the residual strength
+    virtual double computeResidualTensileStrength(GaussPoint *gp, TimeStep *tStep);
+
+    void checkSnapBack(GaussPoint *gp, TimeStep *tStep, int crack) override;
 
     /// type of post-peak behavior in the normal direction to the crack plane
     enum SofteningType { ST_NONE, ST_Exponential, ST_Linear, ST_Hordijk, ST_UserDefinedCrack, ST_LinearHardeningStrain, ST_UserDefinedStrain, ST_Unknown };
@@ -158,7 +167,7 @@ protected:
     ShearRetentionType shearType;
 
     /// defines the maximum value of shear stress
-    enum ShearStrengthType { SHS_NONE, SHS_Const_Ft, SHS_Collins_Interlock, SHS_Unknown };
+    enum ShearStrengthType { SHS_NONE, SHS_Const_Ft, SHS_Collins_Interlock, SHS_Residual_Ft, SHS_Unknown };
     ShearStrengthType shearStrengthType;
 };
 } // end namespace oofem

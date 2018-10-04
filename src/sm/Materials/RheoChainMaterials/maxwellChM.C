@@ -114,11 +114,12 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 
     ///@warning THREAD UNSAFE!
 
-    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+    // the viscoelastic material does not exist yet
+    if  ( ! Material :: isActivated( tStep ) ) {
       OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
     }
 
-    double tPrime = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
+    double tPrime = this->relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
     this->updateEparModuli(tPrime, gp, tStep);
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
@@ -153,7 +154,7 @@ MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
     FloatMatrix B;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
-    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+    if ( ! Material :: isActivated( tStep ) ) {
       OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
     }
 
@@ -210,6 +211,17 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     MaxwellChainMaterialStatus *status =
         static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
 
+    
+    // goes there if the viscoelastic material does not exist yet
+    if (  ! Material :: isActivated( tStep ) )  {
+        help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        help.zero();
+        for ( int mu = 1; mu <= nUnits; mu++ ) {
+            status->letTempHiddenVarsVectorBe(mu, help);
+        }
+        return;
+    }
+    
     this->giveUnitStiffnessMatrix(Binv, gp, tStep);
     help = status->giveTempStrainVector();
     help.subtract( status->giveStrainVector() );
@@ -223,8 +235,9 @@ MaxwellChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     help1.beProductOf(Binv, help);
 
     ///@warning THREAD UNSAFE!
-    double tPrime = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
-    this->updateEparModuli(tPrime, gp, tStep);
+    // redundant two subsequent lines?
+    //    double tPrime = relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
+    //    this->updateEparModuli(tPrime, gp, tStep);
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
         double deltaYmu = tStep->giveTimeIncrement() / timeFactor / this->giveCharTime(mu);

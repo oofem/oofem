@@ -2918,7 +2918,10 @@ maximum temperature attained in the previous history of the material point.
 
 Equation (\ref{eq:mps_viscosity}) differs from the one presented in the original work; it replaces the differential equation for microprestress, which is not used here. The evolution of viscosity can be captured directly, without the need for microprestress. What matters is only the relative humidity and temperature and their rates. Parameters $c_0$ and $k_1$ of the original MPS theory
 are replaced by $\mu_S = c_0 T_0^{p-1} k_1^{p-1} q_4 (p-1)^p$. 
-The initial value of viscosity is defined as $\eta(t_0) = t_0/q_4$, where $t_0$ is age of concrete at the onset drying or when the temperature starts changing.
+The initial value of viscosity is defined as $\eta(t_0) = t_0/q_4$,
+where $t_0$ is age of concrete at the onset drying or when the
+temperature starts changing, in the present implementation it is set
+$relMatAge$ which corresponds to the material age when the material is cast.
 
 %%%%     MODIFIED TIMES %%%%
 As mentioned above, under variable humidity and temperature conditions the physical time $t$ in function $v(t)$ describing evolution of the solidified volume is replaced by the equivalent time $t_e$. In a similar spirit, $t$ is replaced by the solidification time $t_s$ in the equation describing creep of the solidifying constituent, and by the reduced time $t_r$ in equation $\mbox{d} \varepsilon_f / \mbox{d} t_r = \sigma / \eta(t)$ relating the flow strain rate to the stress.
@@ -3327,7 +3330,8 @@ Record Format & \descitem{mps}
 %
 %
 % MPS
-\elemparam{t0}{rn} \elemparam{ksh}{rn} 
+%\elemparam{t0}{rn}
+\elemparam{ksh}{rn} 
 \optelemparam{mus}{rn} \elemparam{k3}{rn} 
 %
 \optelemparam{alphaE}{rn} \optelemparam{alphaR}{rn} \optelemparam{alphaS}{rn}
@@ -3351,13 +3355,15 @@ Record Format & \descitem{mps}
 
 &- \param{mode} optional parameter; if $mode = 0$ (default),  parameters $q1-q4$ are predicted from composition of the concrete mixture (parameters fc, cc, w/c, a/c and stiffnessfactor need to be specified). Otherwise values of parameters $q1-q4$ are expected.\\
 &- \param{CoupledAnalysisType} $0=$ basic creep; $1=$ (default) drying creep, shrinkage, temperature transient creep and creep at elevated temperature; $2=$ drying creep, shrinkage; $3=$ temperature transient creep and creep at elevated temperature; for choice \# 1, 2, 3 the problem must be run as a staggered problem with preceding analysis of humidity and/or temperature distribution; 
-Following parameters must be specified: \param{t0}, \param{mus} or \param{k3} (according to exponent \param{p}), \param{kTm} (compulsory for choice \#3 otherwise optional)\\
+Following parameters must be specified: %\param{t0},
+\param{mus} or \param{k3} (according to exponent \param{p}), \param{kTm} (compulsory for choice \#3 otherwise optional)\\
 %
 &- \param{lambda0} scaling factor equal to 1.0 day in time units of analysis (e.g. 86400 if the analysis runs in seconds)\\
 &- \param{begoftimeofinterest} lower boundary of time interval with good approximation of the compliance function; default value = 0.01 $lambda0$\\  
 &- \param{endoftimeofinterest} upper boundary of time interval with good approximation of the compliance function; default value = 10000. $lambda0$\\  
 &- \param{timefactor} scaling factor, for mps material must be equal to 1.0\\
-&- \param{relMatAge} relative material age\\
+&- \param{relMatAge} relative material age = age at time when the material is
+cast in the structure \\
 %
 \hline
 \end{mmt}
@@ -3379,7 +3385,7 @@ Following parameters must be specified: \param{t0}, \param{mus} or \param{k3} (a
 &- \param{mus} parameter governing to the evolution of viscosity; for exponent $p=2$, $\mu_S = c_0 c_1 q_4$ [Pa$^{-1}$ s$^{-1}$] \\
 &- \param{k3} dimensionless parameter governing to the evolution of viscosity replacing \param{mus} in the special case when $p > 100$ (then $p$ is automatically set to $\infty$ which is equivalent to $p\_tilde = 1$)\\
 &- \param{ksh} parameter relating rate of shrinkage to rate of humidity [-], default value is 0.0, i.e. no shrinkage\\
-&- \param{t0} time of the first temperature or humidity change\\
+%&- \param{t0} time of the first temperature or humidity change\\
 &- \param{alphaE} constant, default value 10.\\
 &- \param{alphaR} constant, default value 0.1\\
 &- \param{alphaS} constant, default value 0.1\\

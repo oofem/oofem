@@ -81,13 +81,13 @@ SimpleCS 4 thick 1.0 material 4
 #
 # MATERIAL
 #
-mps 1 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. mus 5.e-6
+mps 1 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 mus 5.e-6
 #
-mps 2 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. k3 35. p 1000.
+mps 2 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 k3 35. p 1000.
 #
-mps 3 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 t0 7. mus 2.e-10 p -1.5
+mps 3 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0 mus 2.e-10 p -1.5
 #
-mps 4 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0025 t0 7. mus 5.e-6
+mps 4 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 ksh 0.0025 mus 5.e-6
 #
 #
 # BOUNDARY CONDITIONS

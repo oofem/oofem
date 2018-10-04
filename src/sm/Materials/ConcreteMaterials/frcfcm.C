@@ -162,6 +162,10 @@ FRCFCM :: initializeFrom(InputRecord *ir)
         fiberType = FT_SRF;
         break;
 
+    case 3:
+        fiberType = FT_SRF2D;
+        break;		
+
     default:
         fiberType = FT_Unknown;
         OOFEM_WARNING("Fibre type number %d is unknown", type);
@@ -237,6 +241,10 @@ FRCFCM :: initializeFrom(InputRecord *ir)
         this->g = 2. * ( 1. + exp(M_PI * f / 2.) ) / ( 4. + f * f );
     }
 
+    if ( fiberType == FT_SRF2D ) {
+        this->g = ( exp(M_PI * f / 2.) - f ) / ( 1. + f * f );
+    }
+
     double Em;
     IR_GIVE_FIELD(ir, Em, _IFT_IsotropicLinearElasticMaterial_e);
 
@@ -246,7 +254,7 @@ FRCFCM :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, M, _IFT_FRCFCM_M);
 
 
-    if ( ( fiberType == FT_SAF ) || ( fiberType == FT_SRF ) ) {
+    if ( ( fiberType == FT_SAF ) || ( fiberType == FT_SRF ) || ( fiberType == FT_SRF2D ) ) {
         IR_GIVE_FIELD(ir, Lf, _IFT_FRCFCM_Lf);
         // transitional opening at which sigma_b = max (zero derivative) for SRF and SAF
         this->w_star = this->Lf * this->Lf * this->tau_0 / ( ( 1. + this->eta ) * this->Ef * this->Df );
@@ -258,7 +266,6 @@ FRCFCM :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
 
 
 double
@@ -294,7 +301,7 @@ FRCFCM :: computeCrackFibreAngle(GaussPoint *gp, int index)
 
 
 double
-FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
+FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i)
 //
 // returns current cracking modulus according to crackStrain for i-th
 // crackplane
@@ -314,7 +321,7 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
     // it turns out that the concrete area is in the end independent of the angle
     // larger angle causes less fiber to cross the crack but also larger area of the fiber section area (an ellipse)
     // these two effects cancel out and what only matters is the fiber volume Vf
-    Cfc = ConcreteFCM :: giveCrackingModulus(rMode, gp, i);
+    Cfc = ConcreteFCM :: giveCrackingModulus(rMode, gp, tStep, i);
     Cfc *= ( 1. - this->Vf );
 
 
@@ -349,7 +356,7 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
         // for zero or negative strain has been taken care of before
 
         if ( this->smoothen ) {
-            if ( ( w_max < this->dw0 ) || ( w < this->dw0 ) ) {
+            if ( ( w_max <= this->dw0 ) || ( w <= this->dw0 ) ) {
                 return Cfc;
             }
         } else {
@@ -361,7 +368,7 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
 
         if ( ( this->smoothen ) && ( w_max > this->dw0 ) && ( w_max < this->dw1 ) ) {
             if ( w == w_max ) {
-                omega = this->computeTempDamage(gp);
+	      omega = this->computeTempDamage(gp, tStep);
 
                 x = w_max - this->dw0;
                 dw_smooth = this->dw1 - this->dw0;
@@ -391,6 +398,7 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
                     Cff = 3. *C1 *pow(x, 2) + 2. * C2 * x;
                     Cff *= Le;
 
+
                     // reflect fibre orientation wrt crack
                     theta = fabs( this->computeCrackFibreAngle(gp, i) );
                     Cff *= fabs( cos(theta) ) * exp(theta * this->f);
@@ -407,12 +415,35 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
 
                     Cff = 3. *C1 *pow(x, 2) + 2. * C2 * x;
                     Cff *= Le;
+
+                } else if ( fiberType == FT_SRF2D ) { // short random fibers in 2D
+
+		  factor = ( 1. - omega ) * this->g * this->Vf * this->Lf * 2. / ( M_PI * this->Df );
+		  
+		  sig_dw1 = factor * this->tau_0 * ( 2. * sqrt(this->dw1 / this->w_star) - this->dw1 / this->w_star );
+		  Dsig_dw1 = factor * this->tau_0 * ( 1. / ( this->w_star * sqrt(this->dw1 / this->w_star) ) - 1. / this->w_star );
+		  
+		  C1 = Dsig_dw1 / pow(dw_smooth, 2) - ( 2 * sig_dw1 ) / pow(dw_smooth, 3);
+		  C2 = ( 3 * sig_dw1 ) / pow(dw_smooth, 2) - Dsig_dw1 / dw_smooth;
+		  
+		  Cff = 3. *C1 *pow(x, 2) + 2. * C2 * x;
+		  Cff *= Le;
+		  
                 }
             } else { // unlo-relo with smoothing
                 // compute traction for ec == emax
-                double max_traction = this->computeStressInFibersInCracked(gp, emax * Ncr, i);
+	      double max_traction = this->computeStressInFibersInCracked(gp, tStep, emax * Ncr, i);
                 Cff = ( this->M * max_traction * Le / ( w_max - this->dw0 ) ) * pow( ( w - this->dw0 ) / ( w_max - this->dw0 ), ( this->M - 1 ) );
             }
+
+#if DEBUG
+            if ( Cff < 0. ) {
+                OOFEM_WARNING("Negative fiber stress - smooth transition, increase dw1 or decrease dw0");
+                return Cfc;
+            }
+#endif
+
+            Cff = max(0., Cff);
         } else if ( w_max == 0. ) { //zero strain
             w_max = 1.e-10;
 
@@ -429,6 +460,11 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
             } else if ( fiberType == FT_SRF ) { // short random fibers
                 factor = this->g * this->Vf * this->Lf / ( 2. * this->Df );
                 Cff = factor * this->tau_0 * ( Le / ( this->w_star * sqrt(w_max / this->w_star) ) - Le / this->w_star );
+
+            } else if ( fiberType == FT_SRF2D ) { // short random fibers in 2D
+                factor = this->g * this->Vf * this->Lf * 2. / ( M_PI * this->Df );
+                Cff = factor * this->tau_0 * ( Le / ( this->w_star * sqrt(w_max / this->w_star) ) - Le / this->w_star );
+	      		
             } else {
                 OOFEM_ERROR("Unknown fiber type");
             }
@@ -438,10 +474,10 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
                 // reflect fibre orientation wrt crack
                 Cff *= fabs( cos(theta) ) * exp(theta * this->f);
 
-                omega = this->computeTempDamage(gp);
+                omega = this->computeTempDamage(gp, tStep);
                 Cff *= ( 1. - omega );
             } else if ( fiberType == FT_SAF ) { // short aligned fibers
-                omega = this->computeTempDamage(gp);
+	      omega = this->computeTempDamage(gp, tStep);
 
 
                 if ( w_max < this->w_star ) { // debonding + pullout
@@ -460,7 +496,7 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
                     Cff = 0.;
                 }
             } else if ( fiberType == FT_SRF ) { // short random fibers
-                omega = this->computeTempDamage(gp);
+	      omega = this->computeTempDamage(gp, tStep);
                 factor = ( 1. - omega ) * this->g * this->Vf * this->Lf / ( 2. * this->Df );
 
                 if ( w_max < this->w_star ) { // debonding + pullout
@@ -470,25 +506,40 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
                 } else { // fully pulled out
                     Cff = 0.;
                 }
+
+            } else if ( fiberType == FT_SRF2D ) { // short random fibers in 2D
+
+	      omega = this->computeTempDamage(gp, tStep);
+                factor = ( 1. - omega ) * this->g * this->Vf * this->Lf * 2. / ( M_PI * this->Df );
+
+                if ( w_max < this->w_star ) { // debonding + pullout
+                    Cff = factor * this->tau_0 * ( Le / ( this->w_star * sqrt(w_max / this->w_star) ) - Le / this->w_star );
+                } else if ( w_max <= this->Lf / 2. ) { // pullout
+                    Cff = factor * this->computeFiberBond(w_max) * ( 8. * w_max * Le / ( this->Lf * this->Lf ) - 4. * Le / this->Lf );
+                } else { // fully pulled out
+                    Cff = 0.;
+                }
+
+		
             } else {
                 OOFEM_ERROR("Unknown fiber type");
             }
         } else { // unlo-relo
             // compute traction for ec == emax
-            max_traction = this->computeStressInFibersInCracked(gp, emax * Ncr, i);
+	  max_traction = this->computeStressInFibersInCracked(gp, tStep, emax * Ncr, i);
 
             Cff = ( this->M * max_traction * Le / w_max ) * pow( ( w / w_max ), ( this->M - 1 ) );
         }
     } else if ( rMode == SecantStiffness ) {
         if ( this->smoothen ) {
-            if  ( ( w_max < this->dw0 ) || ( w < this->dw0 ) ) { // fibres are not activated
+            if  ( ( w_max <= this->dw0 ) || ( w <= this->dw0 ) ) { // fibres are not activated
                 Cff = 0.;
             } else if ( ec == emax ) { // softening
-                Cff = computeStressInFibersInCracked(gp, emax * Ncr, i); // gets stress
+	      Cff = computeStressInFibersInCracked(gp, tStep, emax * Ncr, i); // gets stress
                 Cff /= ( emax ); // converted into stiffness
             } else { // unlo-relo
                 // compute traction for ec == emax
-                max_traction = this->computeStressInFibersInCracked(gp, emax * Ncr, i);
+	      max_traction = this->computeStressInFibersInCracked(gp, tStep, emax * Ncr, i);
                 Cff =  max_traction * pow( ( ( w - this->dw0 ) / ( w_max - this->dw0 ) ), this->M ) / ec;
             }
         } else {
@@ -498,14 +549,14 @@ FRCFCM :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, int i)
                 w_max = 1.e-10 / Ncr;
                 emax = w_max / Le;
 
-                Cff = computeStressInFibersInCracked(gp, emax * Ncr, i); // gets stress
+                Cff = computeStressInFibersInCracked(gp, tStep, emax * Ncr, i); // gets stress
                 Cff /= ( emax ); // converted into stiffness
             } else if ( ec == emax ) { // softening
-                Cff = computeStressInFibersInCracked(gp, emax * Ncr, i); // gets stress
+	      Cff = computeStressInFibersInCracked(gp, tStep, emax * Ncr, i); // gets stress
                 Cff /= ( emax ); // converted into stiffness
             } else { // unlo-relo
                 // compute traction for ec == emax
-                max_traction = this->computeStressInFibersInCracked(gp, emax * Ncr, i);
+	      max_traction = this->computeStressInFibersInCracked(gp, tStep, emax * Ncr, i);
 
                 Cff =  max_traction * pow( ( w / w_max ), this->M ) / ec;
             }
@@ -536,11 +587,12 @@ FRCFCM :: computeFiberBond(double w)
         tau_s = this->tau_0 * ( 1. + sgn(this->b0) * ( 1. - exp(-fabs(this->b0) * w / this->Df) ) );
     } else if ( fiberShearStrengthType == FSS_Kabele ) { // Kabele
         tau_s = this->tau_0 * ( 1 + this->b1 * ( w / this->Df ) + this->b2 * ( w / this->Df ) * ( w / this->Df ) + this->b3 * ( w / this->Df ) * ( w / this->Df ) * ( w / this->Df ) );
+	tau_s = max(0., tau_s);
     } else if ( fiberShearStrengthType == FSS_Havlasek ) { // Havlasek
         dw = w - this->w_star;
 
-        if ( fiberType == FT_SRF ) {
-            tau_tilde = this->tau_0 / ( ( 1. - this->w_star / this->Lf ) * ( 1. - this->w_star / this->Lf ) );
+        if ( fiberType == FT_SRF || ( fiberType == FT_SRF2D ) ) {
+            tau_tilde = this->tau_0 / ( ( 1. - 2.*this->w_star / this->Lf ) * ( 1. - 2.*this->w_star / this->Lf ) );
         } else { // SAF
             tau_tilde = this->tau_0 * this->Ef * ( 1. + this->eta ) * this->Df / ( this->Ef * ( 1. + this->eta ) * this->Df - 2. * this->Lf * this->tau_0 );
         }
@@ -548,6 +600,8 @@ FRCFCM :: computeFiberBond(double w)
         tau_s = tau_tilde + this->tau_0 * ( this->b1 * ( dw / this->Df ) +
                                             this->b2 * ( dw / this->Df ) * ( dw / this->Df ) +
                                             this->b3 * ( dw / this->Df ) * ( dw / this->Df ) * ( dw / this->Df ) );
+
+	tau_s = max(0., tau_s);
     } else {
         OOFEM_ERROR("Unknown FiberShearStrengthType");
     }
@@ -559,17 +613,17 @@ FRCFCM :: computeFiberBond(double w)
 
 
 double
-FRCFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
+FRCFCM :: giveNormalCrackingStress(GaussPoint *gp, TimeStep *tStep, double ec, int i)
 //
 // returns receivers Normal Stress in crack i  for given cracking strain
 //
 {
     double traction_fc, traction_ff; //normal stress in cracked concrete and fibers
 
-    traction_fc =  ConcreteFCM :: giveNormalCrackingStress(gp, ec, i);
+    traction_fc =  ConcreteFCM :: giveNormalCrackingStress(gp, tStep, ec, i);
     traction_fc *= ( 1. - this->Vf );
 
-    traction_ff = this->computeStressInFibersInCracked(gp, ec, i);
+    traction_ff = this->computeStressInFibersInCracked(gp, tStep, ec, i);
 
 
     return traction_fc + traction_ff;
@@ -577,7 +631,7 @@ FRCFCM :: giveNormalCrackingStress(GaussPoint *gp, double ec, int i)
 
 
 double
-FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, double ec, int i)
+FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, TimeStep *tStep, double ec, int i)
 //
 // returns receivers Normal Stress in crack i  for given cracking strain
 //
@@ -617,7 +671,7 @@ FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, double ec, int i)
 
 
     if ( this->smoothen ) {
-        if ( ( w_max < this->dw0 ) || ( w < this->dw0 ) ) {
+        if ( ( w_max <= this->dw0 ) || ( w <= this->dw0 ) ) {
             return 0.;
         }
     } else {
@@ -656,10 +710,10 @@ FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, double ec, int i)
         traction_ff *= fabs( cos(theta) ) * exp(theta * this->f);
 
         // reflect damage
-        omega = this->computeTempDamage(gp);
+        omega = this->computeTempDamage(gp, tStep);
         traction_ff *= ( 1. - omega );
     } else if ( fiberType == FT_SAF ) { // short aligned fibers
-        omega = this->computeTempDamage(gp);
+      omega = this->computeTempDamage(gp, tStep);
 
         // smooth
         if ( ( this->smoothen ) && ( w_max > this->dw0 ) && ( w_max < this->dw1 ) ) {
@@ -698,7 +752,7 @@ FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, double ec, int i)
             traction_ff = 0.;
         }
     } else if ( fiberType == FT_SRF ) { // short random fibers
-        omega = this->computeTempDamage(gp);
+      omega = this->computeTempDamage(gp, tStep);
         factor = ( 1. - omega ) * this->g * this->Vf * this->Lf / ( 2. * this->Df );
 
         // smooth
@@ -720,10 +774,45 @@ FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, double ec, int i)
         } else { // fully pulled out
             traction_ff = 0.;
         }
+
+    } else if ( fiberType == FT_SRF2D ) { // short random fibers in 2D
+
+        omega = this->computeTempDamage(gp, tStep);
+        factor = ( 1. - omega ) * this->g * this->Vf * this->Lf * 2./ ( M_PI * this->Df );
+
+        // smooth
+        if ( ( this->smoothen ) && ( w_max > this->dw0 ) && ( w_max < this->dw1 ) ) {
+            sig_dw1 = factor * this->tau_0 * ( 2. * sqrt(this->dw1 / this->w_star) - this->dw1 / this->w_star );
+            Dsig_dw1 = factor * this->tau_0 * ( 1. / ( this->w_star * sqrt(this->dw1 / this->w_star) ) - 1. / this->w_star );
+
+            x = w_max - this->dw0;
+            dw_smooth = this->dw1 - this->dw0;
+
+            C1 = Dsig_dw1 / pow(dw_smooth, 2) - ( 2 * sig_dw1 ) / pow(dw_smooth, 3);
+            C2 = ( 3 * sig_dw1 ) / pow(dw_smooth, 2) - Dsig_dw1 / dw_smooth;
+
+            traction_ff = C1 * pow(x, 3) + C2 *pow(x, 2);
+        } else if ( w_max < this->w_star ) { // debonding + pullout
+            traction_ff = factor * this->tau_0 * ( 2. * sqrt(w_max / this->w_star) - w_max / this->w_star );
+        } else if ( w_max <= this->Lf / 2. ) { // pullout
+            traction_ff = factor * this->computeFiberBond(w_max) * ( 1. - 2. * w_max / this->Lf ) * ( 1. - 2. * w_max / this->Lf );
+        } else { // fully pulled out
+            traction_ff = 0.;
+        }
+
+	
     } else {
         OOFEM_ERROR("Unknown fiber type");
     }
 
+#if DEBUG
+    if ( traction_ff < 0. ) {
+        OOFEM_WARNING("Negative fiber stress - smooth transition, increase dw1 or decrease dw0");
+        return 0.;
+    }
+#endif
+
+    traction_ff = max(0., traction_ff);
 
     if ( ec < emax ) { // unloading-reloading
         if ( smoothen ) {
@@ -739,14 +828,14 @@ FRCFCM :: computeStressInFibersInCracked(GaussPoint *gp, double ec, int i)
 
 
 double
-FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, int shearDirection)
+FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int shearDirection)
 {
     double G, Geff;
     double beta_mf;
     double D2_1, D2_2, D2;
     int crackA, crackB;
 
-    G = this->computeOverallElasticShearModulus();
+    G = this->computeOverallElasticShearModulus(gp, tStep);
 
     if ( this->isIntactForShear(gp, shearDirection) ) {
         Geff = G;
@@ -770,15 +859,15 @@ FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, int shearDirection)
 
             if ( ( this->isIntact(gp, crackA) ) || ( this->isIntact(gp, crackB) ) ) {
                 if ( this->isIntact(gp, crackA) ) {
-                    D2 = this->computeD2ModulusForCrack(gp, crackB);
+		  D2 = this->computeD2ModulusForCrack(gp, tStep, crackB);
                 } else {
-                    D2 = this->computeD2ModulusForCrack(gp, crackA);
+		  D2 = this->computeD2ModulusForCrack(gp, tStep, crackA);
                 }
 
                 beta_mf = D2 / ( D2 + G );
             } else {
-                D2_1 = this->computeD2ModulusForCrack(gp, crackA);
-                D2_2 = this->computeD2ModulusForCrack(gp, crackB);
+	      D2_1 = this->computeD2ModulusForCrack(gp, tStep, crackA);
+	      D2_2 = this->computeD2ModulusForCrack(gp, tStep, crackB);
 
                 if ( multipleCrackShear ) {
                     beta_mf = 1. / ( 1. + G * ( 1 / D2_1 + 1 / D2_2 ) );
@@ -797,9 +886,9 @@ FRCFCM :: computeEffectiveShearModulus(GaussPoint *gp, int shearDirection)
 
 
 double
-FRCFCM :: computeD2ModulusForCrack(GaussPoint *gp, int icrack)
+FRCFCM :: computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
 {
-    double cos_theta = 0.5; // to reduce Vf for SRF to one half
+  double cos_theta;
     double E = linearElasticMaterial.giveYoungsModulus();
     FRCFCMStatus *status = static_cast< FRCFCMStatus * >( this->giveStatus(gp) );
     double crackStrain;
@@ -813,12 +902,19 @@ FRCFCM :: computeD2ModulusForCrack(GaussPoint *gp, int icrack)
     } else {
         if ( ( this->fiberType == FT_CAF ) || ( this->fiberType == FT_SAF ) ) {
             cos_theta = fabs( cos( this->computeCrackFibreAngle(gp, icrack) ) );
-        }
+        } else if ( this->fiberType == FT_SRF ) {
+	  cos_theta = 0.5; // to reduce Vf for SRF to one half
+	} else if ( this->fiberType == FT_SRF2D ) {
+	  cos_theta = 2./M_PI; // reduce Vf 
+	} else {
+	  OOFEM_ERROR("Unknown fiber type");
+	}
+		   
 
-        D2m = ConcreteFCM :: computeD2ModulusForCrack(gp, icrack);
+        D2m = ConcreteFCM :: computeD2ModulusForCrack(gp, tStep, icrack);
         D2m *= ( 1. - this->Vf );
 
-        omega = this->computeTempDamage(gp);
+        omega = this->computeTempDamage(gp, tStep);
 
         // fiber shear stiffness is not influenced by the number of parallel cracks
         D2f = ( 1. - omega ) * this->Vf * cos_theta * this->kfib * this->Gfib / crackStrain;
@@ -831,9 +927,9 @@ FRCFCM :: computeD2ModulusForCrack(GaussPoint *gp, int icrack)
 
 // the same function as "computeD2ModulusForCrack", only without current value of fiber damage.
 double
-FRCFCM :: estimateD2ModulusForCrack(GaussPoint *gp, int icrack)
+FRCFCM :: estimateD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack)
 {
-    double cos_theta = 0.5; // to reduce Vf for SRF to one half
+    double cos_theta; 
     double E = linearElasticMaterial.giveYoungsModulus();
     FRCFCMStatus *status = static_cast< FRCFCMStatus * >( this->giveStatus(gp) );
     double crackStrain;
@@ -847,9 +943,15 @@ FRCFCM :: estimateD2ModulusForCrack(GaussPoint *gp, int icrack)
     } else {
         if ( ( this->fiberType == FT_CAF ) || ( this->fiberType == FT_SAF ) ) {
             cos_theta = fabs( cos( this->computeCrackFibreAngle(gp, icrack) ) );
-        }
+	} else if ( this->fiberType == FT_SRF ) {
+	  cos_theta = 0.5; // to reduce Vf for SRF to one half
+	} else if ( this->fiberType == FT_SRF2D ) {
+	  cos_theta = 2./M_PI; // reduce Vf 
+	} else {
+	  OOFEM_ERROR("Unknown fiber type");
+	}
 
-        D2m = ConcreteFCM :: computeD2ModulusForCrack(gp, icrack);
+        D2m = ConcreteFCM :: computeD2ModulusForCrack(gp, tStep, icrack);
         D2m *= ( 1. - this->Vf );
 
         omega = status->giveDamage();
@@ -865,7 +967,7 @@ FRCFCM :: estimateD2ModulusForCrack(GaussPoint *gp, int icrack)
 
 
 double
-FRCFCM :: computeTempDamage(GaussPoint *gp) {
+FRCFCM :: computeTempDamage(GaussPoint *gp, TimeStep *tStep) {
     // we assume that fibre damage is the same for all crack planes
     FRCFCMStatus *status = static_cast< FRCFCMStatus * >( this->giveStatus(gp) );
 
@@ -880,11 +982,11 @@ FRCFCM :: computeTempDamage(GaussPoint *gp) {
     if ( fiberDamageType != FDAM_NONE ) { // fiber damage is allowed
         for ( int i = 1; i <= numberOfActiveCracks; i++ ) {
             if ( !this->isIntact(gp, i) ) {
-                opening =  this->computeMaxNormalCrackOpening(gp, i);
+	      opening =  this->computeMaxNormalCrackOpening(gp, tStep, i);
 
                 //	if (opening > 0.) {
                 if ( opening > this->fibreActivationOpening ) {
-                    slip =  this->computeShearSlipOnCrack(gp, i);
+		  slip =  this->computeShearSlipOnCrack(gp, tStep, i);
                     gammaCrack = max(gammaCrack, slip / opening);
                 }
             } // initiation condition
@@ -912,8 +1014,9 @@ FRCFCM :: computeTempDamage(GaussPoint *gp) {
 }
 
 
+
 double
-FRCFCM :: maxShearStress(GaussPoint *gp, int shearDirection)
+FRCFCM :: maxShearStress(GaussPoint *gp, TimeStep *tStep, int shearDirection)
 {
     double maxTau_m;
     double minTau_f;
@@ -921,7 +1024,7 @@ FRCFCM :: maxShearStress(GaussPoint *gp, int shearDirection)
     double crackStrain;
     double gamma_cr;
     double omega;
-    double cos_theta = 0.5; // to reduce Vf for SRF to one half
+    double cos_theta;
     MaterialMode mMode = gp->giveMaterialMode();
 
     FRCFCMStatus *status = static_cast< FRCFCMStatus * >( this->giveStatus(gp) );
@@ -930,57 +1033,72 @@ FRCFCM :: maxShearStress(GaussPoint *gp, int shearDirection)
     int icrack;
 
     // max shear in matrix
-    maxTau_m =  ConcreteFCM :: maxShearStress(gp, shearDirection);
+    maxTau_m =  ConcreteFCM :: maxShearStress(gp, tStep, shearDirection);
     maxTau_m *= ( 1. - this->Vf );
+
 
     // for now we simply compute the least allowable stress as a product of crack shear stiffness (fiber contribution) * max shear strain
 
-    if ( shearDirection == 4 ) {
-        crackA = 2;
-        crackB = 3;
-    } else if ( shearDirection == 5 ) {
-        crackA = 1;
-        crackB = 3;
-    }  else if ( shearDirection == 6 ) {
-        crackA = 1;
-        crackB = 2;
-    } else {
-        OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
-    }
-
+    omega = this->computeTempDamage(gp, tStep);
     minTau_f = E * fcm_BIGNUMBER;
 
-    if ( mMode == _PlaneStress ) {
+    // TODO - check if behaves reasonably with nonzero damage
+    //    if (omega > 0.) {
+      
+
+      if ( shearDirection == 4 ) {
+        crackA = 2;
+        crackB = 3;
+      } else if ( shearDirection == 5 ) {
+        crackA = 1;
+        crackB = 3;
+      }  else if ( shearDirection == 6 ) {
+        crackA = 1;
+        crackB = 2;
+      } else {
+        OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
+      }
+      
+      
+
+      if ( mMode == _PlaneStress ) {
         gamma_cr = fabs( status->giveTempMaxCrackStrain(3) );
-    } else {
+      } else {
         gamma_cr = fabs( status->giveTempMaxCrackStrain(shearDirection) );
-    }
-
-    for ( int i = 1; i <= 2; i++ ) {
+      }
+      
+      for ( int i = 1; i <= 2; i++ ) {
         if ( i == 1 ) {
-            icrack = crackA;
+	  icrack = crackA;
         } else { // i == 2
-            icrack = crackB;
+	  icrack = crackB;
         }
-
+	
         crackStrain = status->giveTempMaxCrackStrain(icrack);
 
         if ( ( this->isIntact(gp, icrack) ) || ( crackStrain <= 0. ) ) {
-            minTau_f = min(minTau_f, E * fcm_BIGNUMBER);
+	  minTau_f = min(minTau_f, E * fcm_BIGNUMBER);
         } else {
-            if ( ( this->fiberType == FT_CAF ) || ( this->fiberType == FT_SAF ) ) {
-                cos_theta = fabs( cos( this->computeCrackFibreAngle(gp, icrack) ) );
-            }
+	  if ( ( this->fiberType == FT_CAF ) || ( this->fiberType == FT_SAF ) ) {
+	    cos_theta = fabs( cos( this->computeCrackFibreAngle(gp, icrack) ) );
+	  } else if ( this->fiberType == FT_SRF ) {
+	    cos_theta = 0.5; // to reduce Vf for SRF to one half
+	  } else if ( this->fiberType == FT_SRF2D ) {
+	    cos_theta = 2./M_PI; // reduce Vf 
+	  } else {
+	    OOFEM_ERROR("Unknown fiber type");
+	  }
 
-            omega = this->computeTempDamage(gp);
-
-            minTau_f = min(minTau_f, gamma_cr * ( 1. - omega ) * this->Vf * cos_theta * this->kfib * this->Gfib / crackStrain);
+	  //omega = this->computeTempDamage(gp, tStep);
+	  
+	  minTau_f = min(minTau_f, gamma_cr * ( 1. - omega ) * this->Vf * cos_theta * this->kfib * this->Gfib / crackStrain);
         }
-    }
-
+      } // loop over crack directions
+      
+      //} // damage condition
+    
     return maxTau_m + minTau_f;
 }
-
 
 
 // computes crack spacing at saturated state
@@ -996,10 +1114,12 @@ FRCFCM :: computeCrackSpacing() {
     if ( fiberType == FT_CAF ) { // continuous aligned fibers
         x = x_CA;
     } else if ( fiberType == FT_SAF ) { // short aligned fibers
-        x = 0.5 * sqrt(this->Lf * this->Lf - 4. * this->Lf * x_CA);
+        x = 0.5 * (this->Lf - sqrt(this->Lf * this->Lf - 4. * this->Lf * x_CA) );
     } else if ( fiberType == FT_SRF ) { // short random fibers
         lambda = ( 2. / M_PI ) * ( 4. + this->f * this->f ) / ( 1. + exp(M_PI * f / 2.) );
         x = 0.5 * ( this->Lf - sqrt(this->Lf * this->Lf - 2. * M_PI * this->Lf * lambda * x_CA) );
+    } else if ( fiberType == FT_SRF2D ) { // short random fibers in 2D
+        x = 0.5 * ( this->Lf - sqrt(this->Lf * this->Lf - 2. * M_PI * this->Lf * this->g * x_CA) );
     } else {
         OOFEM_ERROR("Unknown fiber type");
     }
@@ -1020,12 +1140,12 @@ FRCFCM :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *
     Em = linearElasticMaterial.giveYoungsModulus();
 
     // matrix is stiffer -> carries higher stress
-    if ( ( this->Ef <= Em ) && ( trialStress > this->giveTensileStrength(gp) ) ) {
+    if ( ( this->Ef <= Em ) && ( trialStress > this->giveTensileStrength(gp, tStep) ) ) {
         return true;
     } else {
         sigma_m = trialStress / ( 1. + this->Vf * ( this->Ef / Em - 1. ) );
 
-        if ( sigma_m > this->giveTensileStrength(gp) ) {
+        if ( sigma_m > this->giveTensileStrength(gp, tStep) ) {
             return true;
         } else {
             return false;
@@ -1034,14 +1154,15 @@ FRCFCM :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *
 }
 
 
+
 double
-FRCFCM :: computeShearStiffnessRedistributionFactor(GaussPoint *gp, int ithCrackPlane, int jthCrackDirection)
+FRCFCM :: computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection)
 {
     double factor_ij, D2_i, D2_j;
 
     // slightly modified version here. The problem is recursive calling of damage & slip evaluation for the FRCFCM material
-    D2_i = this->estimateD2ModulusForCrack(gp, ithCrackPlane);
-    D2_j = this->estimateD2ModulusForCrack(gp, jthCrackDirection);
+    D2_i = this->estimateD2ModulusForCrack(gp, tStep, ithCrackPlane);
+    D2_j = this->estimateD2ModulusForCrack(gp, tStep, jthCrackDirection);
 
     factor_ij = D2_j / ( D2_i + D2_j );
 
@@ -1057,7 +1178,7 @@ FRCFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
     // nominal stress in fibers
     if  ( type == IST_FiberStressLocal ) {
         answer.resize(1);
-        answer.at(1) = this->computeStressInFibersInCracked(gp, status->giveCrackStrain(1), 1);
+        answer.at(1) = this->computeStressInFibersInCracked(gp, tStep, status->giveCrackStrain(1), 1);
         return 1;
     } else if  ( type == IST_DamageScalar ) {
         answer.resize(1);
@@ -1069,10 +1190,12 @@ FRCFCM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
 }
 
 
+
+
+
 // computes overall stiffness of the composite material: the main purpose of this method is to adjust the stiffness given by the linear elastic material which corresponds to the matrix. The same method is used by all fiber types.
 double
-FRCFCM :: computeOverallElasticStiffness(void)
-{
+FRCFCM :: computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) {
     double stiffness = 0.;
 
     double Em = linearElasticMaterial.giveYoungsModulus();
@@ -1083,6 +1206,8 @@ FRCFCM :: computeOverallElasticStiffness(void)
         stiffness = this->Vf * this->Ef + ( 1. - this->Vf ) * Em;
     } else if ( this->fiberType == FT_SRF ) { // short random fibers
         stiffness = this->Vf * this->Ef + ( 1. - this->Vf ) * Em;
+    } else if ( this->fiberType == FT_SRF2D ) { // short random fibers in 2D
+        stiffness = this->Vf * this->Ef + ( 1. - this->Vf ) * Em;	
     } else {
         OOFEM_ERROR("Unknown fiber type");
     }

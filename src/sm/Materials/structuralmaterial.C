@@ -2561,7 +2561,8 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
 
     double alpha = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_StructuralMaterial_talpha);
-    if (alpha > 0.0 && !propertyDictionary.includes(tAlpha)) {
+    if ( !propertyDictionary.includes(tAlpha)) {
+    //    if (alpha > 0.0 && !propertyDictionary.includes(tAlpha)) {
       // put isotropic thermal expansion coeff into dictionary, if provided
       // and not previosly defined
       propertyDictionary.add(tAlpha, alpha);

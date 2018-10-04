@@ -81,13 +81,13 @@ SimpleCS 4 thick 1.0 material 4
 #
 # MATERIAL
 #
-mps 1 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0 t0 6.048e5 mus 5.787037e-11
+mps 1 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0 mus 5.787037e-11
 #
-mps 2 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0 t0 6.048e5 k3 35. p 1000.
+mps 2 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0 k3 35. p 1000.
 #
-mps 3 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0 t0 6.048e5 mus 2.314815e-15 p -1.5
+mps 3 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0 mus 2.314815e-15 p -1.5
 #
-mps 4 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0025 t0 6.048e5 mus 5.787037e-11
+mps 4 d 0. n 0.2 talpha 12.e-6 referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 2 ksh 0.0025 mus 5.787037e-11
 #
 #
 # BOUNDARY CONDITIONS

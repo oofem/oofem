@@ -125,7 +125,7 @@ FRCFCMNL :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
             if ( crackStrain > 0. ) {
                 // get local fiber stress
-                sigma_f_local = this->computeStressInFibersInCracked(gp, crackStrain, iCrack);
+	      sigma_f_local = this->computeStressInFibersInCracked(gp, tStep, crackStrain, iCrack);
                 // set local fiber stress to status
                 status->setTempFiberStressLoc(iCrack, sigma_f_local);
             } else {
