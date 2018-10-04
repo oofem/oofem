@@ -4906,6 +4906,72 @@ Supported modes& \_1dInterface\\
   \label{SimpleInterfaceMat}
 \end{figure}
 
+\subsubsection{Bond-slip model for reinforced concrete - BondCEB}
+
+The complex steel/concrete interaction can be modelled with a bond-slip relation, which describes the bond stress (tangential interface traction), $\tau$, in terms of the relative reinforcement slip (tangential interface jump), $s$. This interface material model is based on the local bond--slip relationship for reinforced concrete under good bond conditions outlined in the the \textit{fib} Model Code for Concrete Structures 2010 \cite{fib:2010}.
+In general, the model is formulated in terms of the interface traction vector \mbf{t} and the interface jump vector \mbf{\delta}.
+In the model, the interface is assumed to have only elastic stiffness $k_\text{n}$ in the normal direction. The normal interface traction is then evaluated elastically from the normal interface jump, i.e. $t_\text{n} =  k_\text{n} \delta_\text{n}$. The tangential traction $t_\text{t} = \tau$ is evaluated from the user-specified function $\tau (s)$, see Figure~\ref{BondCEB}:
+
+\begin{equation}
+\tau (s) = \begin{cases}
+	\tau_\text{max} \left( \dfrac{s}{s_1} \right) ^ \alpha & \text{for } 0 \leq s \leq s_1, \\
+	\tau_\text{max} & \text{for } s_1 < s \leq s_2, \\
+	\tau_\text{max} - \dfrac{\left( \tau_\text{max} - \tau_\text{f} \right) \left(s-s_2 \right)}{\left( s_3 - s_2 \right)} & \text{for } s_2 < s \leq s_3, \\
+	\tau_\text{f} & \text{for } s > s_3.
+	\end{cases}
+\end{equation}
+
+\noindent For an exponent $\alpha$ smaller than 1 (default value 0.4), the initial tangential stiffness of the interface, $k_\text{s}$, is undefined and cannot be used in numerical computations. Therefore, this stiffness needs to be specified manually. Should the provided stiffness be smaller than $k_\text{n} = \dfrac{\tau_\text{max}}{s_1}$, it will be automatically adjusted to this value. Note that only elastic tangent stiffness is supported. Hence, in 2D the tangent stiffness matrix takes the form
+\begin{equation}
+\dfrac{\partial \mbf{t}}{\partial \mbf{\delta}}= \left[ \begin{array}{cc}
+\dfrac{\partial t_\text{n}}{\partial \delta_\text{n}} &
+\dfrac{\partial t_\text{n}}{\partial s} \\
+\dfrac{\partial \tau}{\partial \delta_\text{n}} & \dfrac{\partial \tau}{\partial s}
+\end{array} \right] =
+\left[ \begin{array}{cc}
+k_\text{n} & 0 \\ 0 & k_\text{s}
+\end{array} \right]
+\end{equation}
+Model description and the input parameters are summarized in Tab.~\ref{bondceb_table}.
+
+\begin{figure}[!htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{bondceb_diag.eps}}
+\end{htmlonly}
+%begin{latexonly}
+ \centerline{\includegraphics[width=0.5\textwidth]{bondceb_diag}}
+%end{latexonly}
+  \caption{Bond stress ($\tau$) - reinforcement slip ($s$) diagram for BondCEB model.}
+  \label{BondCEB}
+\end{figure}
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & Bond-slip model for reinforced concrete\\
+\hline
+Record Format & \descitem{bondceb}  \elemparam{}{in}
+\elemparam{kn}{rn}  \elemparam{ks}{rn} \elemparam{s1}{rn} \elemparam{s2}{rn} \elemparam{s3}{rn} \elemparam{taumax}{rn} \optelemparam{tauf}{rn}  \optelemparam{alpha}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{kn} interface elastic normal stiffness\\
+&- \param{ks} interface elastic tangential (shear) stiffness\\
+&- \param{s1} characteristic slip value\\
+&- \param{s2} characteristic slip value\\
+&- \param{s3} characteristic slip value\\
+&- \param{taumax} maximum bond stress\\
+&- \param{tauf} residual bond stress at reinforcement pull-out\\
+&- \param{alpha} bond-slip curve parameter (exponent)\\
+
+Supported modes& \_2dInterface, \_3dInterface\\
+\hline
+\end{mmt}
+\caption{Bond-slip model for reinforced concrete -- summary.}
+\label{bondceb_table}
+%\end{center}
+\end{table}
+
+
 \subsection{Material models for lattice elements}
 
 Lattice elements have to be used with material models describing the constitutive behavior in the form of vector of  tractions and strains determined from displacement jumps smeared out over the element length.
@@ -6087,7 +6153,7 @@ In Rock Under Compression, International Journal of Fracture Mechanics
 \bibitem{Bazant-89-I} Z.P. Ba\v{z}ant, S. Prasannan: Solidification theory for concrete creep. {I}: Formulation. Journal of Engineering Mechanics 115(8), 1691–1703, 1989.
 \bibitem{Bazant-97-I} Z.P. Ba\v{z}ant, A.B. Hauggaard, F. Ulm: Microprestress-solidification theory for concrete creep. {I}: Aging and drying effects. Journal of Engineering Mechanics 123(11), 1188–1194, 1997.
 \bibitem{JirHav14a} M. Jir\'{a}sek, P. Havl\'{a}sek: Microprestress-Solidification Theory of Concrete Creep: Reformulation and Improvement. Cement and Concrete Research 60, 51–62, 2014.
-
+\bibitem{fib:2010} International Federation for Structural Concrete (\textit{fib}): The \textit{fib} Model Code for Concrete Structures 2010.
 
 \end{thebibliography}
 
