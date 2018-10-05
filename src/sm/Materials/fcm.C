@@ -59,6 +59,7 @@ FCMMaterial :: hasMaterialModeCapability(MaterialMode mode)
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
 
+
 void
 FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                     const FloatArray &totalStrain,
@@ -71,18 +72,20 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 {
     // g = global direction
     // l = local (crack) direction
+    // normal = normal components only (in direction of crack planes, "l")
 
     // stress and strain transformation matrices
-    FloatMatrix epsG2L, sigmaL2G;
+    FloatMatrix epsG2L, sigmaL2G, sigmaG2L;
     // stiffness matrices (total, elastic, cracking)
-    FloatMatrix D, De, Dcr;
+    FloatMatrix D, De, Dcr, DeRed;
     FloatMatrix principalDirs;
 
     // STRESSES
-    FloatArray stressIncrement_l, stressVector_g, trialStress_g, trialStress_l, sigmaResid, sigmaElast_l, sigmaCrack_l;
-
+    FloatArray stressIncrement_l, stressVector_g, trialStress_g, trialStress_l, sigmaResid, sigmaElast_l, sigmaCrack_l, sigmaResid_old;
+    FloatArray stressVector_l;
+   
     // STRAINS
-    FloatArray reducedStrain_g, reducedStrain_l, strainIncrement_g, strainIncrement_l, crackStrain, crackStrainIncrement, elasticStrain_l;
+    FloatArray reducedStrain_g, strainIncrement_g, strainIncrement_l, crackStrain, crackStrainIncrement, elasticStrain_l, elasticStrainIncrement_l;     //    FloatArray reducedStrain_l
 
     FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
     MaterialMode mMode = gp->giveMaterialMode();
@@ -91,33 +94,82 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     int nMaxCr = status->giveMaxNumberOfCracks(gp);
 
     double maxErr;
-    int iterLimit;
-    double maxTau;
+    double maxTau = 0.;
+
+    double G;
+
+    double DII;
+
+    double gamma_cr, d_gamma_cr;
+    double tau_el, tau_cr;
+    double d_tau;
+    double d_tau_old = 0.;
+    bool illinoisFlag = false;
+
+    int iterLimitGlobal = 20;
+    int iterLimitGradient = 20;
+    int iterLimitNormal = 100;
+    int iterLimitShear = 100;
+    int indexLimit = 10;
+
+    FloatArray tempNormalCrackStrain, normalCrackStrain;
+    //    FloatArray normalStrainVector_l;
+    FloatArray normalStrainIncrement_l;
+    FloatArray normalStressVector_l;
+    FloatArray normalCrackStrainIncrement;
+    FloatArray normalElasticStrainIncrement_l;
+    FloatArray normalElasticStrain_l;
+
 
     // for the bisection method:
-    int index, indexCount;
-    bool exitWhileCond = false;
-    bool cancelledStrainFlag = false;
+    int index, indexOld, indexCount;
+
+    bool changeIndexFlag = false;
 
     bool plus, minus;
     FloatArray crackStrainPlus, crackStrainMinus, residPlus, residMinus; //local
 
-    index = indexCount = 0;
+    FloatArray helpRF;
 
+    int iterN;
+    
+    plus = false;
+    minus = false;
+
+    sigmaResid_old.resize(nMaxCr);
+    
+    index = indexOld = indexCount = 0;
+
+    
     this->initTempStatus(gp);
+
+    if ( !this->isActivated(tStep) ) {
+        FloatArray zeros;
+        zeros.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        zeros.zero();
+        status->letTempStrainVectorBe(zeros);
+        status->letTempStressVectorBe(zeros);
+        answer = zeros;
+        return;
+    }
 
     // get elastic stiffness matrix
     this->giveStiffnessMatrix(De, ElasticStiffness, gp, tStep);
 
+    // equilibrated global stress
+    stressVector_g = status->giveStressVector();
 
-    // NOW INDEPENDENTLY OF THE HISTORY GET PRINCIPAL STRESSES / STRESSES IN THE CRACK DIRS
 
+    this->giveStressDependentPartOfStrainVector(reducedStrain_g, gp, totalStrain, tStep, VM_Incremental);
+    strainIncrement_g.beDifferenceOf( reducedStrain_g, status->giveStrainVector() );
+
+    trialStress_g.beProductOf(De, strainIncrement_g);
+    trialStress_g.add(stressVector_g);
+  
     // ELASTIC CASE - NO CRACKING SO FAR (in prevs steps)
     if ( nCr == 0 ) {
-        this->giveStressDependentPartOfStrainVector(reducedStrain_g, gp, totalStrain, tStep, VM_Total);
-        trialStress_g.beProductOf(De, reducedStrain_g);
 
-        this->computePrincipalValDir(trialStress_l, principalDirs, trialStress_g, principal_stress);
+      this->computePrincipalValDir(trialStress_l, principalDirs, trialStress_g, principal_stress);
 
         // REMAINS ELASTIC or element cracking is prevented from above
         if ( !this->isStrengthExceeded( principalDirs, gp, tStep, 1, trialStress_l.at(1) ) ) {
@@ -128,11 +180,11 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
             // STARTS CRACKING - 1st crack
         } else {
-            this->initializeCrack(gp, principalDirs, 1);
+	  this->initializeCrack(gp, tStep, principalDirs, 1);
 
             for ( int iCrack = 2; iCrack <= min(nMaxCr, this->nAllowedCracks); iCrack++ ) {
                 if ( this->isStrengthExceeded( principalDirs, gp, tStep, iCrack, trialStress_l.at(iCrack) ) ) { // for "nonlocal model"
-                    this->initializeCrack(gp, principalDirs, iCrack);
+		  this->initializeCrack(gp, tStep, principalDirs, iCrack);
                 }
             }
         }
@@ -141,15 +193,6 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     } else {
         // check other principal directions - if strength is not exceeded, take transformation matrices from previous analysi
         if ( nCr < nMaxCr ) {
-            // equilibrated global stress
-            stressVector_g = status->giveStressVector();
-            // get strain increment
-            this->giveStressDependentPartOfStrainVector(reducedStrain_g, gp, totalStrain, tStep, VM_Incremental);
-            strainIncrement_g.beDifferenceOf( reducedStrain_g, status->giveStrainVector() );
-
-            // stress increment in crack direction
-            trialStress_g.beProductOf(De, strainIncrement_g);
-            trialStress_g.add(stressVector_g);
 
             principalDirs = status->giveCrackDirs();
 
@@ -161,428 +204,724 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
                 if ( !this->checkStrengthCriterion(principalDirs, trialStress_g, gp, tStep, iCrack) ) { // = strength of composite
                     // second and third crack is now initialized
-                    this->initializeCrack(gp, principalDirs, iCrack);
+		  this->initializeCrack(gp, tStep, principalDirs, iCrack);
                 }
             } // end for
         } // end nMaxCr
     } // cracking in previous steps
 
-    sigmaL2G = status->giveL2GStressVectorTransformationMtrx();
+
     epsG2L = status->giveG2LStrainVectorTransformationMtrx();
+    sigmaG2L = status->giveG2LStressVectorTransformationMtrx();
+    sigmaL2G = status->giveL2GStressVectorTransformationMtrx();
 
 
     // PREPARE STRAIN AND STRESS INCREMENT IN CRACK DIRECTIONS
 
-    if ( ( nCr == 0 ) || ( nCr == nMaxCr ) ) { // not to do the same job twice
-        // get strain increment
-        this->giveStressDependentPartOfStrainVector(reducedStrain_g, gp, totalStrain, tStep, VM_Incremental);
-        strainIncrement_g.beDifferenceOf( reducedStrain_g, status->giveStrainVector() );
-    }
-
-
     // strain and strain increment in crack direction
-    strainIncrement_l = strainIncrement_g;
-    strainIncrement_l.rotatedWith(epsG2L, 'n'); // from global to local
-
-    reducedStrain_l = reducedStrain_g;
-    reducedStrain_l.rotatedWith(epsG2L, 'n'); // from global to local
-
+    strainIncrement_l.beProductOf(epsG2L, strainIncrement_g); // from global to local
+    
     // stress increment in crack direction
     stressIncrement_l.beProductOf(De, strainIncrement_l);
 
+    // (equilibrated) stress in crack direction
+
+    stressVector_l.beProductOf(sigmaG2L, status->giveStressVector() );
+    
 
     // SIMILARLY TO RCM2: THE STRESS INCREMENT IN ELASTIC
     // AND CRACKING UNIT MUST BE EQUAL - ITERATE
 
+    // average shear modulus
+    G = computeOverallElasticShearModulus(gp, tStep);
+    
+    DeRed = De;
+    DeRed.resizeWithData(nMaxCr,nMaxCr);
+    
     crackStrain = status->giveCrackStrainVector();
-
-    iterLimit = 20;
-
-    for ( int iter = 1; iter <= iterLimit; iter++ ) {
-        this->giveLocalCrackedStiffnessMatrix(Dcr, TangentStiffness, gp, tStep);
-
-        if ( iter == 1 ) {
-            // residuum
-            sigmaResid = stressIncrement_l;
-        }
-
-        D = De;
-        D.add(Dcr);
-
-        D.solveForRhs(sigmaResid, crackStrainIncrement);
-
-        // update and store cracking strain
-        crackStrain.add(crackStrainIncrement);
-
-        status->setTempCrackStrainVector(crackStrain);
-
-        // update statuses
-        this->updateCrackStatus(gp);
-
-        // compute and compare stress in elastic and cracking unit:
-        // EL
-        elasticStrain_l = reducedStrain_l;
-        elasticStrain_l.subtract(crackStrain);
-        sigmaElast_l.beProductOf(De, elasticStrain_l);
-        // CR
-        this->giveLocalCrackedStiffnessMatrix(Dcr, SecantStiffness, gp, tStep);
-        //   sigmaCrack_l.beProductOf(Dr, crackStrain); // matrix is diagonal
-        sigmaCrack_l.resize( crackStrain.giveSize() );
-        for ( int i = 1; i <= crackStrain.giveSize(); i++ ) {
-            sigmaCrack_l.at(i) = Dcr.at(i, i) * crackStrain.at(i);
-
-            switch ( mMode ) {
-            case  _PlaneStress:
-
-                if ( i == 3 ) {
-                    maxTau = this->maxShearStress(gp, 6);
-
-                    if ( sigmaCrack_l.at(i) > maxTau ) {
-                        sigmaCrack_l.at(i) = maxTau;
-                    }
-                }
-                break;
-
-            case _3dMat:
-
-                if ( i >= 4 ) {
-                    maxTau = this->maxShearStress(gp, i);
-
-                    if ( sigmaCrack_l.at(i) > maxTau ) {
-                        sigmaCrack_l.at(i) = maxTau;
-                    }
-                }
-                break;
-
-            case _PlaneStrain: // check
-
-                if ( i == 4 ) {
-                    maxTau = this->maxShearStress(gp, 6);
-
-                    if ( sigmaCrack_l.at(i) > maxTau ) {
-                        sigmaCrack_l.at(i) = maxTau;
-                    }
-                }
-                break;
-
-            default:
-                OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
-            }
-        }
-
-        // residuum
-        sigmaResid = sigmaElast_l;
-        sigmaResid.subtract(sigmaCrack_l);
-
-
-        maxErr = 0.;
-        for ( int i = 1; i <= sigmaResid.giveSize(); i++ ) {
-            if ( fabs( sigmaResid.at(i) ) > maxErr ) {
-                maxErr = fabs( sigmaResid.at(i) );
-            }
-        }
-
-
-        if  ( maxErr < fcm_TOLERANCE * this->giveTensileStrength(gp) ) {
-            break;
-        }
-    }
-
-
-    // modified iteration method - first gradient and then bisection method
-
-    while ( maxErr > fcm_TOLERANCE * this->giveTensileStrength(gp) ) {
-        for ( int i = 1; i <= sigmaResid.giveSize(); i++ ) {
-            if ( fabs( sigmaResid.at(i) ) == maxErr ) {
-                // found the same index as before -> do not do the same job over, exit while
-                if ( index == i ) {
-                    exitWhileCond = true;
-                    break;
-                } else {
-                    // the crack strain index is not the same as before - clear the following flag
-                    cancelledStrainFlag = false;
-                }
-
-                index = i;
-
-                break;
-            }
-        }
-
-        if ( exitWhileCond ) {
-            break;
-        }
-
-        iterLimit = 100;
-
-        plus = false;
-        minus = false;
-
-        crackStrainPlus.zero();
-        crackStrainMinus.zero();
-        residPlus.zero();
-        residMinus.zero();
-
-        indexCount++;
-
-        if ( indexCount > 10 ) {
-            OOFEM_WARNING("Fixed crack model: Local equilibrium not reached!, max. stress error %f", maxErr);
-            break;
-        }
-
-
-        for ( int iter = 1; iter <= iterLimit; iter++ ) {
-            if ( iter == iterLimit ) {
-                OOFEM_WARNING("Fixed crack model: Local equilibrium not reached!, max. stress error %f", maxErr);
-            }
-
-
-            if ( ( iter == 1 ) && ( indexCount == 1 ) ) {
-                crackStrain.zero();
-                crackStrain.add( status->giveCrackStrainVector() );
-                status->setTempCrackStrainVector(crackStrain);
-                //sigmaResid.zero();
-                sigmaResid = stressIncrement_l;
-                this->updateCrackStatus(gp);
-            }
-
-            // DO THE FOLLOWING SECTION ONLY UNTIL "PLUS" AND "MINUS" CRACK STRAIN IS FOUND
-
-            if ( ( !plus ) || ( !minus ) ) {
-                this->giveLocalCrackedStiffnessMatrix(Dcr, TangentStiffness, gp, tStep);
-
-                D = De;
-                D.add(Dcr);
-
-                D.solveForRhs(sigmaResid, crackStrainIncrement);
-
-                // update and store cracking strain
-                crackStrain.add(crackStrainIncrement);
-
-                status->setTempCrackStrainVector(crackStrain);
-
-                // update statuses
-                this->updateCrackStatus(gp);
-
-                // compute and compare stress in elastic and cracking unit:
-                // EL
-                elasticStrain_l = reducedStrain_l;
-                elasticStrain_l.subtract(crackStrain);
-                sigmaElast_l.beProductOf(De, elasticStrain_l);
-                // CR
-                this->giveLocalCrackedStiffnessMatrix(Dcr, SecantStiffness, gp, tStep);
-                //   sigmaCrack_l.beProductOf(Dr, crackStrain); // matrix is diagonal
-                sigmaCrack_l.resize( crackStrain.giveSize() );
-                for ( int i = 1; i <= crackStrain.giveSize(); i++ ) {
-                    sigmaCrack_l.at(i) = Dcr.at(i, i) * crackStrain.at(i);
-
-                    switch ( mMode ) {
-                    case  _PlaneStress:
-
-                        if ( i == 3 ) {
-                            maxTau = this->maxShearStress(gp, 6);
-
-                            if ( sigmaCrack_l.at(i) > maxTau ) {
-                                sigmaCrack_l.at(i) = maxTau;
-                            }
-                        }
-                        break;
-
-                    case _3dMat:
-
-                        if ( i >= 4 ) {
-                            maxTau = this->maxShearStress(gp, i);
-
-                            if ( sigmaCrack_l.at(i) > maxTau ) {
-                                sigmaCrack_l.at(i) = maxTau;
-                            }
-                        }
-                        break;
-
-                    case _PlaneStrain: // check
-
-                        if ( i == 4 ) {
-                            maxTau = this->maxShearStress(gp, 6);
-
-                            if ( sigmaCrack_l.at(i) > maxTau ) {
-                                sigmaCrack_l.at(i) = maxTau;
-                            }
-                        }
-                        break;
-
-                    default:
-                        OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
-                    }
-                }
-
-                // residuum
-                sigmaResid = sigmaElast_l;
-                sigmaResid.subtract(sigmaCrack_l);
-
-                if ( sigmaResid.at(index) > 0 ) {
-                    if ( !plus ) { // first positive sigma resid
-                        residPlus = sigmaResid;
-                    } else {
-                        if ( sigmaResid.at(index) < residPlus.at(index) ) { // smaller error
-                            residPlus = sigmaResid;
-                        }
-                    }
-
-                    crackStrainPlus = crackStrain;
-                    plus = true;
-                } else { // sigmaResid < 0
-                    if ( !minus ) { // first negative sigma resid
-                        residMinus = sigmaResid;
-                    } else {
-                        if ( sigmaResid.at(index) > residMinus.at(index) ) { // smaller error
-                            residMinus = sigmaResid;
-                        }
-                    }
-
-                    crackStrainMinus = crackStrain;
-                    minus = true;
-                }
-
-
-                maxErr = 0.;
-                for ( int i = 1; i <= sigmaResid.giveSize(); i++ ) {
-                    if ( fabs( sigmaResid.at(i) ) > maxErr ) {
-                        maxErr = fabs( sigmaResid.at(i) );
-                    }
-                }
-
-
-                if  ( fabs( sigmaResid.at(index) ) < fcm_TOLERANCE * this->giveTensileStrength(gp) ) {
-                    break;
-                }
-            } else { // we have "plus" and "minus" cracking and the bisection method can start
-                crackStrain.zero();
-                crackStrain.add(crackStrainMinus);
-                crackStrain.add(crackStrainPlus);
-                crackStrain.times(0.5);
-
-                status->setTempCrackStrainVector(crackStrain);
-                // update statuses - to have correct stiffnesses (unlo-relo vs. softening)
-                this->updateCrackStatus(gp);
-
-
-
-                // compute and compare stress in elastic and cracking unit:
-                // EL
-                elasticStrain_l = reducedStrain_l;
-                elasticStrain_l.subtract(crackStrain);
-                sigmaElast_l.beProductOf(De, elasticStrain_l);
-                // CR
-                this->giveLocalCrackedStiffnessMatrix(Dcr, SecantStiffness, gp, tStep);
-                //   sigmaCrack_l.beProductOf(Dr, crackStrain); // matrix is diagonal
-                sigmaCrack_l.resize( crackStrain.giveSize() );
-                for ( int i = 1; i <= crackStrain.giveSize(); i++ ) {
-                    sigmaCrack_l.at(i) = Dcr.at(i, i) * crackStrain.at(i);
-
-                    switch ( mMode ) {
-                    case  _PlaneStress:
-
-                        if ( i == 3 ) {
-                            maxTau = this->maxShearStress(gp, 6);
-
-                            if ( sigmaCrack_l.at(i) > maxTau ) {
-                                sigmaCrack_l.at(i) = maxTau;
-                            }
-                        }
-                        break;
-
-                    case _3dMat:
-
-                        if ( i >= 4 ) {
-                            maxTau = this->maxShearStress(gp, i);
-
-                            if ( sigmaCrack_l.at(i) > maxTau ) {
-                                sigmaCrack_l.at(i) = maxTau;
-                            }
-                        }
-                        break;
-
-                    case _PlaneStrain: // check
-
-                        if ( i == 4 ) {
-                            maxTau = this->maxShearStress(gp, 6);
-
-                            if ( sigmaCrack_l.at(i) > maxTau ) {
-                                sigmaCrack_l.at(i) = maxTau;
-                            }
-                        }
-                        break;
-
-                    default:
-                        OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
-                    }
-                }
-
-                // residuum
-                sigmaResid = sigmaElast_l;
-                sigmaResid.subtract(sigmaCrack_l);
-
-
-                maxErr = 0.;
-                for ( int i = 1; i <= sigmaResid.giveSize(); i++ ) {
-                    if ( fabs( sigmaResid.at(i) ) > maxErr ) {
-                        maxErr = fabs( sigmaResid.at(i) );
-                    }
-                }
-
-                // condition for the given stress component
-                if  ( fabs( sigmaResid.at(index) ) < fcm_TOLERANCE * this->giveTensileStrength(gp) ) {
-                    break;
-                }
-
-
-                if ( sigmaResid.at(index) > 0 ) {
-                    if ( sigmaResid.at(index) < residPlus.at(index) ) { // smaller error
-                        residPlus = sigmaResid;
-                    }
-
-                    crackStrainPlus = crackStrain;
-                } else { // sigmaResid < 0
-                    if ( sigmaResid.at(index) > residMinus.at(index) ) { // smaller error
-                        residMinus = sigmaResid;
-                    }
-
-                    crackStrainMinus = crackStrain;
-                }
-
-
-                if ( fabs( crackStrainMinus.at(index) - crackStrainPlus.at(index) ) < 1.e-18 ) {
-                    crackStrain.zero();
-                    crackStrain.add(crackStrainMinus);
-                    crackStrain.add(crackStrainPlus);
-                    crackStrain.times(0.5);
-
-                    //	  if ( fabs (crackStrain.at(index) < 1.e-18 ) ) {
-                    crackStrain.at(index) = 0.;
-                    cancelledStrainFlag = true;
-                    //	  }
-
-#if DEBUG
-                    if ( cancelledStrainFlag ) {
-                        OOFEM_WARNING("Fixed crack model: cracking strain component %d set to zero", index);
-                    }
+    
+    tempNormalCrackStrain = status->giveCrackStrainVector();
+    tempNormalCrackStrain.resize(nMaxCr);
+    
+    normalCrackStrain = tempNormalCrackStrain;
+    
+    
+    normalStressVector_l = stressVector_l;
+    normalStressVector_l.resize(nMaxCr);
+    
+    normalStrainIncrement_l = strainIncrement_l;
+    normalStrainIncrement_l.resizeWithValues(nMaxCr);
+    
+    for ( int iterG = 1; iterG <= iterLimitGlobal; iterG++ ) {
+      
+      if ( iterG == 1 ) {
+	// residuum
+	sigmaResid = stressIncrement_l;
+      }
+      
+      for  ( int indexCount = 1; indexCount <= indexLimit; indexCount++ ) {
+
+	if (indexCount > 1 ) {
+	  if ( !changeIndexFlag ) {// same index as before - do not even try to fix it
+	    OOFEM_WARNING("FCM: maximum error on the same component, max. stress error %f, index %d, indexCount %d, element %d\n", maxErr, index, indexCount, gp->giveElement()->giveNumber() );
+	    
+	    break;
+	  }
+	}
+
+	minus = plus = false;
+	illinoisFlag = false;
+	changeIndexFlag = false;
+	iterN = 0;
+	sigmaResid_old.zero();
+	
+
+	do { // find convergence in the crack directions
+	  
+	  iterN++;
+	
+	  if ( (iterN == 1) && (indexCount == 1) ) {
+	    // shrink the total residuum
+	    sigmaResid.resizeWithValues(nMaxCr);  
+	  }
+	
+	  this->giveNormalLocalCrackedStiffnessMatrix(Dcr, TangentStiffness, gp, tStep);
+	  
+	  D = DeRed;
+	  D.add(Dcr);
+	  
+	  D.solveForRhs(sigmaResid, normalCrackStrainIncrement);
+	  
+	  // update and store cracking strain
+	  tempNormalCrackStrain.add(normalCrackStrainIncrement);
+	  status->setTempNormalCrackStrainVector(tempNormalCrackStrain);
+	  
+	  // update statuses
+	  this->updateCrackStatus(gp);
+	  
+	  // compute and compare stress in elastic and cracking unit:
+	  // CR
+	  this->giveNormalLocalCrackedStiffnessMatrix(Dcr, SecantStiffness, gp, tStep);
+	  
+	  sigmaCrack_l.resize( nMaxCr );
+	  for ( int i = 1; i <= nMaxCr; i++ ) {
+	  sigmaCrack_l.at(i) = Dcr.at(i, i) * tempNormalCrackStrain.at(i);
+	  }
+	  
+	  // compute and compare stress in elastic and cracking unit:     
+	  // increment of elastic strain 
+	  // d_eps_el = d_eps - d_eps_cr
+	  // d_eps_cr = eps_cr_n - eps_cr_n-1
+	  normalElasticStrainIncrement_l = normalStrainIncrement_l;
+	  normalElasticStrainIncrement_l.subtract(tempNormalCrackStrain);
+	  normalElasticStrainIncrement_l.add(normalCrackStrain);
+	  
+	  // d_sigma = Del * d_eps_el
+	  sigmaElast_l.beProductOf(DeRed, normalElasticStrainIncrement_l);
+	  
+	  // sigma_n = sigma_n-1 + d_sigma
+	  sigmaElast_l.add(normalStressVector_l);
+	  
+	  // residuum
+	  sigmaResid = sigmaElast_l;
+	  sigmaResid.subtract(sigmaCrack_l);
+	  
+	  maxErr = 0.;
+	  indexOld = index;
+	  
+	  for ( int i = 1; i <= sigmaResid.giveSize(); i++ ) {
+	    if ( fabs( sigmaResid.at(i) ) > maxErr ) {
+	      maxErr = fabs( sigmaResid.at(i) );
+
+	      //	      if (indexCount == 1) {
+		index = i;
+		//	      }
+	    }
+	  }
+
+	  
+
+	  if ( maxErr <= fcm_TOLERANCE * this->giveTensileStrength(gp, tStep) ) {
+	    break; // convergence criteria satisfied
+	  }
+	  
+	  // try only gradient method and do not slow down with the preparation for the bisection method
+	  if ( indexCount == 1 ) {
+	    
+	    if (iterN < iterLimitGradient/2.) {
+	      continue;
+	      
+	    }
+	  }
+	  // identify the biggest error only in the first run of the gradient method
+	  //} else {
+	  
+	  if (index != indexOld) {
+	    minus = plus = false;
+		//	crackStrainPlus.resize(nMaxCr);
+		/*crackStrainPlus.zero();
+		//crackStrainMinus.resize(nMaxCr);
+		crackStrainMinus.zero();
+		//	residPlus.resize(nMaxCr);
+		residPlus.zero();
+		//residMinus.resize(nMaxCr);
+		residMinus.zero();*/
+	  }
+	  
+	
+	
+	  if ( sigmaResid.at(index) > 0 ) {
+	    if ( !plus) { // first positive error
+	      plus = true;
+	      residPlus = sigmaResid;
+	      crackStrainPlus = tempNormalCrackStrain;
+	    } else if ( fabs(sigmaResid.at(index)) < fabs(residPlus.at(index)) ) { // smaller error
+	      residPlus = sigmaResid;
+	      crackStrainPlus = tempNormalCrackStrain;
+	    }
+	    
+	  } else {
+	    if ( !minus) { // first negative error
+	      minus = true;
+	      residMinus = sigmaResid;
+	      crackStrainMinus = tempNormalCrackStrain;
+	    }
+	    
+	    else if ( fabs(sigmaResid.at(index)) < fabs(residMinus.at(index)) ) { // smaller error
+	      residMinus = sigmaResid;
+	      crackStrainMinus = tempNormalCrackStrain;
+	    }
+	  }
+	  
+	
+	  //	  if ( (! plus) || (! minus) ) {
+
+	  if ( ( plus) && ( minus) ) {
+	    if ( ( indexCount == 1 ) && ( iterN < iterLimitGradient ) ) {
+	      continue;
+	    }
+
+	    
+
+	    //( iterN < iterLimitGradient ) || (! plus) || (! minus) ) {
+
+	  } else {
+	    continue;
+	  }
+	  
+	  do { // perform bisection method
+	    
+	    // check if the cracking strain at index is negative and try to fix it
+	    tempNormalCrackStrain.zero();
+	    
+	    if(  (crackStrainMinus.at(index) < 0.) || (crackStrainPlus.at(index) < 0.) ) {
+	      tempNormalCrackStrain.add(crackStrainMinus);
+	      tempNormalCrackStrain.add(crackStrainPlus);
+	      tempNormalCrackStrain.times(0.5);
+	      
+	    } else {
+	      // OOFEM_WARNING("Trying regula-falsi iterations\n");
+		  
+	      // try regula-falsi
+	      // eps_cr_new = (eps_cr_min  * resid_plus - eps_cr_plus * resid_minus) / (resid_plus - resid_minus)
+	      // https://en.wikipedia.org/wiki/False_position_method#The_Regula_Falsi_.28False_Position.29_Method
+
+	      if (illinoisFlag) { // same sign of the error (at least) twice in a row
+
+		if ( sigmaResid.at(index) == residPlus.at(index) ) {  // error is positive
+
+		  tempNormalCrackStrain.add(crackStrainMinus);
+		  tempNormalCrackStrain.times(residPlus.at(index) );
+		  
+		  helpRF = crackStrainPlus;
+		  helpRF.times( 0.5 * residMinus.at(index) );
+		  
+		  tempNormalCrackStrain.subtract(helpRF);
+		  tempNormalCrackStrain.times( 1. / ( residPlus.at(index) - 0.5 * residMinus.at(index) ) );
+
+		} else { // error is negative
+
+		  tempNormalCrackStrain.add(crackStrainMinus);
+		  tempNormalCrackStrain.times( 0.5 * residPlus.at(index) );
+		  
+		  helpRF = crackStrainPlus;
+		  helpRF.times( residMinus.at(index) );
+		  
+		  tempNormalCrackStrain.subtract(helpRF);
+		  tempNormalCrackStrain.times( 1. / ( 0.5 * residPlus.at(index) - residMinus.at(index) ) );
+	  
+		}
+
+	      } else { // different sign of the error (consecutive errors)
+		// perform standard regula-falsi
+		
+		tempNormalCrackStrain.add(crackStrainMinus);
+		tempNormalCrackStrain.times(residPlus.at(index) );
+		
+		helpRF = crackStrainPlus;
+		helpRF.times(residMinus.at(index) );
+		
+		tempNormalCrackStrain.subtract(helpRF);
+		tempNormalCrackStrain.times( 1. / ( residPlus.at(index) - residMinus.at(index) ) );
+	      }
+	    }
+	    
+	    
+	    // too small strain and the crack has not existed before
+	    if ( ( fabs (crackStrainMinus.at(index) ) <= fcm_THRESHOLD_CRACK_STRAIN ) &&
+		 ( fabs (crackStrainPlus.at(index) ) <= fcm_THRESHOLD_CRACK_STRAIN ) &&
+		 ( status->giveCrackStatus(index) == 0 ) ) {
+	      tempNormalCrackStrain.at(index) = 0.;
+	    }
+	    
+	    // replace negative cracking strain by a zero strain
+	    if (tempNormalCrackStrain.at(index) < 0.) {
+	      tempNormalCrackStrain.at(index) = 0.;
+	    }
+	    
+	    status->setTempNormalCrackStrainVector(tempNormalCrackStrain);
+	    // update statuses - to have correct stiffnesses (unlo-relo vs. softening)
+	    this->updateCrackStatus(gp);
+	    
+	    // compute and compare stress in elastic and cracking unit:
+	    // CR
+	    this->giveNormalLocalCrackedStiffnessMatrix(Dcr, SecantStiffness, gp, tStep);
+	    sigmaCrack_l.resize( nMaxCr );
+	    for ( int i = 1; i <= nMaxCr; i++ ) {
+	      sigmaCrack_l.at(i) = Dcr.at(i, i) * tempNormalCrackStrain.at(i);
+	    }
+	    
+	    // increment of elastic strain 
+	    // d_eps_el = d_eps - d_eps_cr
+	    // d_eps_cr = eps_cr_n - eps_cr_n-1
+	    normalElasticStrainIncrement_l = normalStrainIncrement_l;
+	    normalElasticStrainIncrement_l.subtract(tempNormalCrackStrain);
+	    normalElasticStrainIncrement_l.add(normalCrackStrain);
+	    
+	    // d_sigma = Del * d_eps_el
+	    sigmaElast_l.beProductOf(DeRed, normalElasticStrainIncrement_l);
+	    
+	    //	sigma_n = sigma_n-1 + d_sigma
+	    sigmaElast_l.add(normalStressVector_l);
+	    
+	    // residuum
+	    sigmaResid = sigmaElast_l;
+	    sigmaResid.subtract(sigmaCrack_l);
+
+
+	    /*  if ( (status->giveTempCrackStatus(index) == 4) && (tempNormalCrackStrain.at(index) < fcm_SMALL_STRAIN) ) {
+	      sigmaResid.at(index) = 0.;
+	      }*/
+	    
+	    
+	    
+	    // adjust residuum if the crack does not exist
+	    /* if ( status->giveTempCrackStatus(index) == 0 ) {
+	      sigmaResid.at(index) = 0.;
+	      }*/
+	    
+	    // condition for the given stress component
+	    if  ( fabs( sigmaResid.at(index) ) < fcm_TOLERANCE * this->giveTensileStrength(gp, tStep) ) {
+	      changeIndexFlag = true;
+	      break;
+	    }
+	    
+	    
+	    if ( (sigmaResid.at(index) >= 0.) && ( sigmaResid.at(index) < residPlus.at(index) ) ) {
+	      residPlus = sigmaResid;
+	      crackStrainPlus = tempNormalCrackStrain;
+	      
+	    } else if ( (sigmaResid.at(index) <= 0.) && ( fabs(sigmaResid.at(index)) < fabs(residMinus.at(index) ) ) ) {
+
+	      residMinus = sigmaResid;
+	      crackStrainMinus = tempNormalCrackStrain;
+	      
+	    } else { // error is increasing -> change index
+	      changeIndexFlag = true;
+	    }
+
+	    
+	    // cracking strain at index component is close to zero
+	    if ( ( ( fabs( crackStrainMinus.at(index) - crackStrainPlus.at(index) ) < 1.e-16 ) &&
+		 ( max( fabs( crackStrainMinus.at(index) ), fabs( crackStrainPlus.at(index) ) ) < 1.e-14 ) ) ||
+		 ( status->giveTempCrackStatus(index) == pscm_NONE ) ) {
+	      tempNormalCrackStrain.zero();
+	      tempNormalCrackStrain.add(crackStrainMinus);
+	      tempNormalCrackStrain.add(crackStrainPlus);
+	      tempNormalCrackStrain.times(0.5);
+	      
+	      tempNormalCrackStrain.at(index) = 0.;
+
+#if DEBUG		  		    
+	      //	      OOFEM_WARNING("Fixed crack model: cracking strain component %d set to zero", index);
+#endif
+		
+	      
+	      status->setTempNormalCrackStrainVector(tempNormalCrackStrain);
+	      
+	      // update statuses
+	      this->updateCrackStatus(gp);
+	      
+	      // compute and compare stress in elastic and cracking unit:
+	      for ( int i_count = 1; i_count <= 2; i_count++ ) {
+		
+		// EL
+		// increment of elastic strain 
+		// d_eps_el = d_eps - d_eps_cr
+		// d_eps_cr = eps_cr_n - eps_cr_n-1
+		normalElasticStrainIncrement_l = normalStrainIncrement_l;
+		normalElasticStrainIncrement_l.subtract(tempNormalCrackStrain);
+		normalElasticStrainIncrement_l.add(normalCrackStrain);
+		// d_sigma = Del * d_eps_el
+		sigmaElast_l.beProductOf(DeRed, normalElasticStrainIncrement_l);
+		
+		// eliminating stress error at index component
+		tempNormalCrackStrain.at(index) = sigmaElast_l.at(index) / this->giveCrackingModulus(SecantStiffness, gp, tStep, index);
+		status->setTempNormalCrackStrainVector(tempNormalCrackStrain);
+		    
+		// update statuses
+		this->updateCrackStatus(gp);
+	      }
+	      
+	      // stress in cracking unit
+	      this->giveNormalLocalCrackedStiffnessMatrix(Dcr, SecantStiffness, gp, tStep);			  
+	      sigmaCrack_l.resize( nMaxCr );
+	      for ( int i = 1; i <= nMaxCr; i++ ) {
+		sigmaCrack_l.at(i) = Dcr.at(i, i) * tempNormalCrackStrain.at(i);
+	      }
+	      
+	      // reevaluate the residuum 
+	      sigmaResid = sigmaElast_l;
+	      sigmaResid.subtract(sigmaCrack_l);
+	      
+	    }  // end - crack strain is close to zero
+
+	    // evaluate maximum error 
+	    indexOld = index;
+	    
+	    maxErr = 0.;
+	    for ( int i = 1; i <= sigmaResid.giveSize(); i++ ) {
+	      if ( fabs( sigmaResid.at(i) ) > maxErr ) {
+		maxErr = fabs( sigmaResid.at(i) );
+		index = i;
+	      }
+	    }
+
+	    // biggest error on different index
+	    if (indexOld != index) {
+	      changeIndexFlag = true;
+	      illinoisFlag = false;
+
+	    } else { // evaluate
+
+	      if ( sgn(sigmaResid.at(index) ) == sgn(sigmaResid_old.at(index) ) ) {
+		illinoisFlag = true;
+	      } else {
+		illinoisFlag = false;
+	      }
+
+	      sigmaResid_old = sigmaResid;
+	      
+	    }
+
+	
+	    // end loop bisection method
+	  } while ( (!changeIndexFlag) && (iterN <= iterLimitNormal) && ( fabs( sigmaResid.at(index) ) < fcm_TOLERANCE * this->giveTensileStrength(gp, tStep) ) );
+	  
+
+	  // end normal loop
+	} while ( ( !changeIndexFlag ) && ( maxErr > fcm_TOLERANCE * this->giveTensileStrength(gp, tStep) ) && (iterN <= iterLimitNormal) );
+
+	if ( maxErr <= fcm_TOLERANCE * this->giveTensileStrength(gp, tStep) ) {
+	  break; // break index loop
+	}
+
+	if ( indexCount >= indexLimit/2.) {
+	  OOFEM_WARNING("FCM: slowly converging equilibrium in crack direction!, max. stress error %f, index %d, indexCount %d, element %d\n", maxErr, index, indexCount, gp->giveElement()->giveNumber() );
+	}
+
+	if ( indexCount >= indexLimit ) {
+	  OOFEM_WARNING("FCM: slowly converging equilibrium in crack direction!, max. stress error %f, index %d, indexCount %d, element %d\n", maxErr, index, indexCount, gp->giveElement()->giveNumber() );
+	  break;
+	}
+
+	
+      }  // end index loop in normal direction
+      
+      // FIND EQUILIBRIUM FOR SHEAR
+      tau_cr = 0.;
+      DII = 0.;
+      
+
+      double d_gamma_el;
+      
+      for ( int i = nMaxCr+1; i <= crackStrain.giveSize(); i++ ) {
+
+	plus = false;
+	minus = false;
+	    
+	crackStrainPlus.resize(1);
+	crackStrainPlus.zero();
+	crackStrainMinus.resize(1);
+	crackStrainMinus.zero();
+	residPlus.resize(1);
+	residPlus.zero();
+	residMinus.resize(1);
+	residMinus.zero();
+
+	
+	d_tau = G * strainIncrement_l.at(i);
+	gamma_cr = status->giveCrackStrain(i);
+	
+	for ( int iterS = 1; iterS <= iterLimitShear; iterS++ ) {
+	
+	  switch ( mMode ) {
+	  case  _PlaneStress:
+	    
+	    DII = computeTotalD2Modulus(gp, tStep, 6);
+	    break;
+	    
+	  case _PlaneStrain: // check
+	    DII = computeTotalD2Modulus(gp, tStep,  6);
+	    break;
+	    
+	  case _3dMat:
+	    DII = computeTotalD2Modulus(gp, tStep, i);
+	    break;
+	    
+	  default:
+	    OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
+	  }
+
+	  
+	  if ( ( !plus ) || ( !minus ) ) {
+	    
+	    if (iterS == 1) {
+	      d_gamma_cr = ( stressVector_l.at(i) - DII * status->giveCrackStrain(i) + d_tau ) / ( G + DII );
+	    } else {
+	      d_gamma_cr = ( d_tau ) / ( G + DII );
+	    }
+	    
+	    gamma_cr += d_gamma_cr;
+	  } else {
+	    // same sign of the cracking strain
+	    if (sgn( crackStrainMinus.at(1) ) == sgn( crackStrainPlus.at(1) ) ) {
+
+	      if (illinoisFlag) { // same sign of the error (at least) twice in a row
+
+		if (d_tau == residPlus.at(1) ) { // error is positive
+		  		  gamma_cr = ( crackStrainMinus.at(1) * residPlus.at(1) - 0.5 * crackStrainPlus.at(1) * residMinus.at(1) ) / ( residPlus.at(1) - 0.5 * residMinus.at(1) );
+
+		} else {
+		  		  gamma_cr = ( 0.5 * crackStrainMinus.at(1) * residPlus.at(1) - crackStrainPlus.at(1) * residMinus.at(1) ) / ( 0.5 * residPlus.at(1) - residMinus.at(1) );
+		}
+		
+		// different sign of the error (consecutive errors)				
+	      } else {
+		gamma_cr = ( crackStrainMinus.at(1) * residPlus.at(1) -  crackStrainPlus.at(1) * residMinus.at(1) ) / ( residPlus.at(1) - residMinus.at(1) );
+	      }
+	    } else { // different sign of the cracking strain
+	      gamma_cr = ( crackStrainMinus.at(1) + crackStrainPlus.at(1) ) / 2.;
+	    }
+	  }
+	  
+	  
+	  status->setTempCrackStrain(i, gamma_cr);
+	  this->updateCrackStatus(gp);
+	  
+	  switch ( mMode ) {
+	  case  _PlaneStress:
+	    
+	    maxTau = this->maxShearStress(gp, tStep, 6);
+	    tau_cr = computeTotalD2Modulus(gp, tStep, 6) * gamma_cr;
+	    break;
+	    
+	  case _PlaneStrain: // check
+	    
+	    maxTau = this->maxShearStress(gp, tStep, 6);
+	    tau_cr = computeTotalD2Modulus(gp, tStep, 6) * gamma_cr;
+	    break;
+	    
+	  case _3dMat:
+	    
+	    maxTau = this->maxShearStress(gp, tStep, i);
+	    tau_cr = computeTotalD2Modulus(gp, tStep, i) * gamma_cr;
+	    break;
+	    
+	  default:
+	    OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
+	  }
+	  
+	  if( fabs(tau_cr) > maxTau) {
+
+	    if ( ( !plus ) || ( !minus ) ) {
+	    
+	    // d_eps_el = (tau_max - tau_n-1)/G
+	    d_gamma_el = ( sgn(tau_cr)* maxTau - stressVector_l.at(i) ) / G;
+
+	    // eps_cr_n = eps_cr_n-1 + d_eps - d_eps_el
+	    gamma_cr = status->giveCrackStrain(i) + strainIncrement_l.at(i) - d_gamma_el;
+
+	    // maxTau can be dependent on the actual cracking strain
+	    // (such as in the case of FRC)
+
+	    } else {
+	      d_gamma_el =  strainIncrement_l.at(i) - (gamma_cr - status->giveCrackStrain(i) );
+	    }
+
+	    status->setTempCrackStrain(i, gamma_cr);
+	    this->updateCrackStatus(gp);
+
+	    // reevaluate TauMax
+	    switch ( mMode ) {
+	    case  _PlaneStress:
+	      
+	      maxTau = this->maxShearStress(gp, tStep, 6);
+	      break;
+	      
+	    case _PlaneStrain: // check
+	    
+	      maxTau = this->maxShearStress(gp, tStep, 6);
+	      break;
+	      
+	    case _3dMat:
+	      
+	      maxTau = this->maxShearStress(gp, tStep, i);
+	      break;
+	      
+	    default:
+	      OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
+	    }
+
+   	    tau_el =  stressVector_l.at(i) + d_gamma_el * G;
+
+	    tau_cr = min( maxTau, DII * fabs(gamma_cr) );
+	    tau_cr *= sgn(gamma_cr);
+	    
+	  } else { // tau is smaller than tau_max
+
+	    // old shear stress
+	    tau_el = stressVector_l.at(i);
+	    // shear stress increment
+	    tau_el += G * ( strainIncrement_l.at(i) - gamma_cr + status->giveCrackStrain(i) );
+	  }
+	  
+	  // compute residuum = sig_el - sig_cr
+	  d_tau = tau_el - tau_cr;
+
+	  if  ( fabs( d_tau ) < fcm_TOLERANCE * this->giveTensileStrength(gp, tStep) ) {
+	    break;
+	    
+	  } else {
+	    
+	    if (d_tau < 0.) {
+	      minus = true;
+
+	      residMinus.at(1) = d_tau;
+	      crackStrainMinus.at(1) = gamma_cr;
+	      
+	    } else {
+	      plus = true;
+
+	      residPlus.at(1) = d_tau;
+	      crackStrainPlus.at(1) = gamma_cr;
+	    }
+
+	    // compare signs of the error
+	    if (sgn(d_tau_old) == sgn(d_tau) ) { // same sign of the error as before
+	      illinoisFlag = true;
+	      
+	    } else {
+	      illinoisFlag = false;
+	    }
+	    
+	    d_tau_old = d_tau;
+	   
+	  }
+
+#if DEBUG		  		    
+	  if ( iterS > iterLimitShear*0.3) {
+	    OOFEM_WARNING("Fixed crack model: Local equilibrium in shear not converging!, max. stress error %f, index %d, iter %d, element %d\n", fabs(d_tau), i, iterS, gp->giveElement()->giveNumber() );
+	  }
 #endif
 
-                    break;
-                }
-            } // plus-minus condition
-        } // iter looop
-    } // maxErr exceeded
+	  
+	  if ( iterS == iterLimitShear ) {
+	    OOFEM_WARNING("Fixed crack model: Local equilibrium in shear direction(s) not reached!, max. stress error %f, element %d\n", fabs(d_tau), gp->giveElement()->giveNumber() );
+	  }
+	  
+	} // i-th shear component equlibrium loop
+	
+      } // shear components loop
 
+      // compute final stress residuum
+      crackStrain = status->giveTempCrackStrainVector();
+      
+      // el
+      elasticStrainIncrement_l = strainIncrement_l;
+      elasticStrainIncrement_l.subtract(crackStrain);
+      elasticStrainIncrement_l.add(status->giveCrackStrainVector() );
 
-    if ( ( maxErr >= fcm_TOLERANCE * this->giveTensileStrength(gp) ) && ( !cancelledStrainFlag ) ) {
-        OOFEM_WARNING("Fixed crack model: Local equilibrium not reached!, max. stress error %f", maxErr);
-    }
+      sigmaElast_l.beProductOf(De, elasticStrainIncrement_l);
+      sigmaElast_l.add(stressVector_l);
+      
+      this->giveTotalLocalCrackedStiffnessMatrix(Dcr, SecantStiffness, gp, tStep);
 
-    // set the final-equilibrated crack strain and store the correct corresponding statuses
-    status->setTempCrackStrainVector(crackStrain);
-    // update statuses - to have correct stiffnesses
-    this->updateCrackStatus(gp);
+      sigmaCrack_l.resize( crackStrain.giveSize() );
+      
+      for ( int i = 1; i <= crackStrain.giveSize(); i++ ) {
+	sigmaCrack_l.at(i) = Dcr.at(i, i) * crackStrain.at(i);
+
+	if (this->isThisShearComponent(gp, i) ) {
+
+	  switch ( mMode ) {
+	  case  _PlaneStress:
+	    maxTau = this->maxShearStress(gp, tStep, 6);
+	    break;
+	    
+	  case _PlaneStrain:
+	    maxTau = this->maxShearStress(gp, tStep, 6);
+	    break;
+	    
+	  case _3dMat:
+	    maxTau = this->maxShearStress(gp, tStep, i);
+	    break;
+	    
+	  default:
+	    OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
+	  }
+	  
+
+	  if ( fabs( sigmaCrack_l.at(i) ) > maxTau ) {
+	    sigmaCrack_l.at(i) = sgn(sigmaCrack_l.at(i)) * maxTau;
+	  }
+	}
+      }
+
+      // residuum
+      sigmaResid = sigmaElast_l;
+      sigmaResid.subtract(sigmaCrack_l);
+      
+      maxErr = 0.;
+      for ( int i = 1; i <= sigmaResid.giveSize(); i++ ) {
+	if ( fabs( sigmaResid.at(i) ) > maxErr ) {
+	  maxErr = fabs( sigmaResid.at(i) );
+	}
+      }
+
+      if  ( maxErr < fcm_TOLERANCE * this->giveTensileStrength(gp, tStep) ) {
+	break;
+      }
+
+      if ( iterG == iterLimitGlobal ) {
+	OOFEM_WARNING("Fixed crack model: Local equilibrium not reached!, max. stress error %f, element %d\n", maxErr, gp->giveElement()->giveNumber() );
+      }
+
+      if ( iterG > iterLimitGlobal/3 ) {
+	OOFEM_WARNING("Slowly converning (normal vs. shear interaction)!,  iter %d/ iter limit %d,  max. stress error %f, element %d\n", iterG, iterLimitGlobal, maxErr, gp->giveElement()->giveNumber() );
+      }      
+
+    } // global loop
 
 
     // correct non-zeros, statuses, etc...
@@ -625,20 +964,17 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         status->setTempCrackStrain(3, 0.);
     }
 
-
-    // convert from local to global coordinates
-    sigmaElast_l.rotatedWith(sigmaL2G, 'n');
-
-    answer = sigmaElast_l;
+    // convert from local to global coordinates  
+    answer.beProductOf(sigmaL2G, sigmaElast_l);
     status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(sigmaElast_l);
+    status->letTempStressVectorBe(answer);
 
     return;
 }
-
+  
 
 void
-FCMMaterial :: initializeCrack(GaussPoint *gp, FloatMatrix &base, int nCrack)
+FCMMaterial :: initializeCrack(GaussPoint *gp, TimeStep *tStep, FloatMatrix &base, int nCrack)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
@@ -658,7 +994,7 @@ FCMMaterial :: initializeCrack(GaussPoint *gp, FloatMatrix &base, int nCrack)
     Le = this->giveCharacteristicElementLength(gp, crackVector);
     status->setCharLength(nCrack, Le);
 
-    this->checkSnapBack(gp, nCrack);
+    this->checkSnapBack(gp, tStep, nCrack);
 
     status->setTempCrackStatus(nCrack, pscm_JUST_INIT);
     //status->setTempCrackStatus(nCrack, pscm_SOFTENING);
@@ -715,14 +1051,14 @@ FCMMaterial :: isIntact(GaussPoint *gp, int icrack) {
         OOFEM_ERROR("Unexpected crack number");
     }
 
-    if ( ( status->giveTempCrackStatus(icrack) != pscm_NONE ) && ( status->giveTempCrackStatus(icrack) != pscm_CLOSED ) ) {
-        return false;
+    if (  status->giveCrackStatus(icrack) != pscm_NONE ) {
+      return false;
+    } else if ( ( status->giveTempCrackStatus(icrack) != pscm_NONE ) && ( status->giveTempCrackStatus(icrack) != pscm_CLOSED ) ) {
+      return false;
     } else {
-        return true;
+      return true;
     }
 }
-
-
 
 
 bool
@@ -745,16 +1081,56 @@ FCMMaterial :: isIntactForShear(GaussPoint *gp, int i) {
         normal_1 = normal_2 = 0;
     }
 
-    if ( ( status->giveTempCrackStatus(normal_1) != pscm_NONE ) && ( status->giveTempCrackStatus(normal_1) != pscm_CLOSED ) ) {
+    // any crack had existed in previous steps - newly inserted condition
+    if  ( (status->giveCrackStatus(normal_1) != pscm_NONE ) || (status->giveCrackStatus(normal_2) != pscm_NONE ) )  { 
         return false;
-    } else if ( ( status->giveTempCrackStatus(normal_2) != pscm_NONE ) && ( status->giveTempCrackStatus(normal_2) != pscm_CLOSED ) ) {
-        return false;
+
+	//    } else if ( ( status->giveTempCrackStatus(normal_1) != pscm_NONE ) && ( status->giveTempCrackStatus(normal_1) != pscm_CLOSED ) ) {
+	// return false;
+	//    } else if ( ( status->giveTempCrackStatus(normal_2) != pscm_NONE ) && ( status->giveTempCrackStatus(normal_2) != pscm_CLOSED ) ) {
+	// return false;
     } else {
         return true;
     }
 }
 
 
+
+bool
+FCMMaterial :: isThisShearComponent(GaussPoint *gp, int component) {
+
+    MaterialMode mMode = gp->giveMaterialMode();
+
+    switch ( mMode ) {
+
+    case  _PlaneStress:
+      if (component == 3) {
+	return true;
+      }
+      break;
+
+    case  _PlaneStrain:
+      if (component == 4) {
+	return true;
+      }
+      break;
+
+    case  _3dMat:
+
+      if (component >=4 ) {
+	return true;
+      }
+      break;
+
+    default:
+      OOFEM_ERROR("Unsupported material mode");
+    }
+
+    return false;
+}
+
+
+  
 
 double
 FCMMaterial :: computeNormalCrackOpening(GaussPoint *gp, int i) {
@@ -776,7 +1152,7 @@ FCMMaterial :: computeNormalCrackOpening(GaussPoint *gp, int i) {
 
 
 double
-FCMMaterial :: computeMaxNormalCrackOpening(GaussPoint *gp, int i) {
+FCMMaterial :: computeMaxNormalCrackOpening(GaussPoint *gp, TimeStep *tStep, int i) {
     FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
 
     double crackOpening, N;
@@ -795,7 +1171,7 @@ FCMMaterial :: computeMaxNormalCrackOpening(GaussPoint *gp, int i) {
 
 
 double
-FCMMaterial :: computeShearSlipOnCrack(GaussPoint *gp, int icrack) {
+FCMMaterial :: computeShearSlipOnCrack(GaussPoint *gp, TimeStep *tStep, int icrack) {
     MaterialMode mMode = gp->giveMaterialMode();
 
     FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
@@ -849,7 +1225,7 @@ FCMMaterial :: computeShearSlipOnCrack(GaussPoint *gp, int icrack) {
 
             // well this is quite unfortunate. The problem is that the shear slip should be redistributed according to the D2 moduli for the individual crack. In reality this is a big problem for the FRC-FCM problem beacuse it would have led to recursive calling (D2 modulus evaluates damage and damage is computed from shear slip etc.
 
-            factor_ij = this->computeShearStiffnessRedistributionFactor(gp, icrack, dir_j);
+            factor_ij = this->computeShearStiffnessRedistributionFactor(gp, tStep, icrack, dir_j);
         }
 
         slip = factor_ij * fabs(gamma_cr_ij) * status->giveCharLength(icrack) / nCracks;
@@ -881,11 +1257,11 @@ FCMMaterial :: computeShearSlipOnCrack(GaussPoint *gp, int icrack) {
 
         if ( ( status->giveTempCrackStatus(dir_j) != pscm_NONE ) || ( status->giveTempCrackStatus(dir_k) != pscm_NONE ) ) {
             if ( status->giveTempCrackStatus(dir_j) != pscm_NONE ) {
-                factor_ij = this->computeShearStiffnessRedistributionFactor(gp, icrack, dir_j);
+	      factor_ij = this->computeShearStiffnessRedistributionFactor(gp, tStep, icrack, dir_j);
             }
 
             if ( status->giveTempCrackStatus(dir_k) != pscm_NONE ) {
-                factor_ik = this->computeShearStiffnessRedistributionFactor(gp, icrack, dir_k);
+                factor_ik = this->computeShearStiffnessRedistributionFactor(gp, tStep, icrack, dir_k);
             }
         }
 
@@ -903,7 +1279,7 @@ FCMMaterial :: computeShearSlipOnCrack(GaussPoint *gp, int icrack) {
 
 bool
 FCMMaterial :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeStep *tStep, int iCrack, double trialStress) {
-    if ( trialStress > this->giveTensileStrength(gp) ) {
+  if ( trialStress > this->giveTensileStrength(gp, tStep) ) {
         return true;
     } else {
         return false;
@@ -914,12 +1290,12 @@ FCMMaterial :: isStrengthExceeded(const FloatMatrix &base, GaussPoint *gp, TimeS
 
 
 double
-FCMMaterial :: computeShearStiffnessRedistributionFactor(GaussPoint *gp, int ithCrackPlane, int jthCrackDirection) {
+FCMMaterial :: computeShearStiffnessRedistributionFactor(GaussPoint *gp, TimeStep *tStep, int ithCrackPlane, int jthCrackDirection) {
     double factor_ij;
     double D2_i, D2_j;
 
-    D2_i = this->computeD2ModulusForCrack(gp, ithCrackPlane);
-    D2_j = this->computeD2ModulusForCrack(gp, jthCrackDirection);
+    D2_i = this->computeD2ModulusForCrack(gp, tStep, ithCrackPlane);
+    D2_j = this->computeD2ModulusForCrack(gp, tStep, jthCrackDirection);
 
     factor_ij = D2_j / ( D2_i + D2_j );
 
@@ -937,10 +1313,10 @@ FCMMaterial :: checkStrengthCriterion(FloatMatrix &newBase, const FloatArray &gl
 
     sigmaG2L = status->giveG2LStressVectorTransformationMtrx();
 
-    trialStress = globalStress;
-
     // rotate stress to local coordinates
-    trialStress.rotatedWith(sigmaG2L, 'n');
+    //    trialStress = globalStress;
+    //    trialStress.rotatedWith(sigmaG2L, 'n');
+    trialStress.beProductOf(sigmaG2L, globalStress);
 
     if ( status->giveMaxNumberOfCracks(gp) < 3 ) { // plane stress
         // test material strength but keep crack coordinates
@@ -1175,21 +1551,34 @@ FCMMaterial :: updateCrackStatus(GaussPoint *gp)
 
                 // closed previously
             } else if ( crackStrain.at(i) <= 0. ) {
-                status->setTempCrackStatus(i, pscm_CLOSED);
 
-                if ( status->giveMaxCrackStrain(i) == 0. ) { //not existing crack in previous step that wants to close?
-                    status->setTempMaxCrackStrain(i, 0.);
+	      if (status->giveCrackStatus(i) != pscm_NONE ) {
+                status->setTempCrackStatus(i, pscm_CLOSED);
+	      } else {
+                status->setTempCrackStatus(i, pscm_NONE);
+		status->setTempMaxCrackStrain(i, 0.);
+	      }
+
+
+		//                if ( status->giveMaxCrackStrain(i) == 0. ) { //not existing crack in previous step that wants to close?
+
+
+		
+              //      status->setTempMaxCrackStrain(i, 0.);
+
+		    //		    status->setTempCrackStatus(i, pscm_NONE);
+		    
                     //	  status->setTempCrackStatus(i, pscm_NONE);
                     // CLOSED status should have similar behavior and it is safer. The status can be changed within one iteration loop on the local scale
                     // the crack can be changed from CLOSED to NONE during overall updating
                     //	  status->setTempCrackStatus(i, pscm_CLOSED);
-                }
+	      //}
 
                 // unloading--reloading
             } else if ( crackStrain.at(i) < maxCrackStrain.at(i) ) {
                 status->setTempCrackStatus(i, pscm_UNLO_RELO);
             } else {
-                OOFEM_ERROR("Unexpected value of cracking strain");
+	      OOFEM_ERROR("Unexpected value of %d-th cracking strain %f ", i, crackStrain.at(i) );
             }
         }
     }
@@ -1207,7 +1596,7 @@ FCMMaterial :: updateCrackStatus(GaussPoint *gp)
 
 
 void
-FCMMaterial :: giveLocalCrackedStiffnessMatrix(FloatMatrix &answer,
+FCMMaterial :: giveTotalLocalCrackedStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode, GaussPoint *gp,
                                                TimeStep *tStep)
 {
@@ -1224,9 +1613,9 @@ FCMMaterial :: giveLocalCrackedStiffnessMatrix(FloatMatrix &answer,
         j = indx.at(i);
 
         if ( j <= 3 ) {
-            Dcr.at(i, i) = this->giveCrackingModulus(rMode, gp, j);
+	  Dcr.at(i, i) = this->giveCrackingModulus(rMode, gp, tStep, j);
         } else {
-            Dcr.at(i, i) = this->computeTotalD2Modulus(gp, j);
+	  Dcr.at(i, i) = this->computeTotalD2Modulus(gp, tStep, j);
         }
     }
 
@@ -1234,6 +1623,25 @@ FCMMaterial :: giveLocalCrackedStiffnessMatrix(FloatMatrix &answer,
 }
 
 
+  
+void
+FCMMaterial :: giveNormalLocalCrackedStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseMode rMode, GaussPoint *gp,
+                                               TimeStep *tStep)
+{
+
+    FloatMatrix Dcr;
+    FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
+    int nMaxCr = status->giveMaxNumberOfCracks(gp);
+
+    Dcr.resize(nMaxCr, nMaxCr);
+
+    for ( int i = 1; i <= nMaxCr; i++ ) {
+      Dcr.at(i, i) = this->giveCrackingModulus(rMode, gp, tStep, i);
+    }
+
+    answer = Dcr;
+}  
 
 
 
@@ -1248,84 +1656,170 @@ FCMMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 {
     FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
+    //    StructuralMaterial *lMat = static_cast< StructuralMaterial * >( this->giveLinearElasticMaterial() );
 
     MaterialMode mMode = gp->giveMaterialMode();
 
     int numberOfActiveCracks, nMaxCracks;
     double overallElasticStiffness;
+    double G = this->computeOverallElasticShearModulus(gp, tStep);
 
-    FloatMatrix D, De, DeHelp, Dcr, DcrHelp, DcrHelp2, inv, stiffnessL2G;
+    FloatMatrix D, De, C, stiffnessL2G;
+
+    FloatMatrix DeHelp, Dcr, DcrHelp, DcrHelp2;
 
     numberOfActiveCracks = status->giveNumberOfTempCracks();
 
     // ELASTIC MATRIX
-    if ( ( rMode == ElasticStiffness ) || ( numberOfActiveCracks == 0 ) ) {
-        linearElasticMaterial.giveStiffnessMatrix(D, rMode, gp, tStep);
+    linearElasticMaterial.giveStiffnessMatrix(De, rMode, gp, tStep);
+    //    lMat->giveStiffnessMatrix(De, rMode, gp, tStep);
+    
+    overallElasticStiffness = this->computeOverallElasticStiffness(gp, tStep);
+    if ( overallElasticStiffness != ( this->give('E', gp) ) ) {
+      De.times( overallElasticStiffness / ( this->give('E', gp) ) );
+    }
 
-        overallElasticStiffness = this->computeOverallElasticStiffness();
-        if ( overallElasticStiffness != ( this->give('E', gp) ) ) {
-            D.times( overallElasticStiffness / ( this->give('E', gp) ) );
-        }
-
-        answer = D;
+    if ( ( rMode == ElasticStiffness ) || ( numberOfActiveCracks == 0 ) ) {	
+        answer = De;
         return;
     }
 
     // SECANT OR TANGENT MATRIX - first in local direction
     nMaxCracks = status->giveMaxNumberOfCracks(gp);
-    linearElasticMaterial.giveStiffnessMatrix(De, rMode, gp, tStep);
+    De.resizeWithData(nMaxCracks,nMaxCracks);
 
-    overallElasticStiffness = this->computeOverallElasticStiffness();
-    if ( overallElasticStiffness != ( this->give('E', gp) ) ) {
-        De.times( overallElasticStiffness / ( this->give('E', gp) ) );
+
+    double E_crack;
+    
+    if ( rMode == SecantStiffness ) {
+
+      C.beInverseOf(De);
+      
+      for ( int i = 1; i <= numberOfActiveCracks; i++ ) {
+
+	E_crack =  this->giveCrackingModulus(rMode, gp, tStep, i);
+
+	C.at(i, i) += 1. / E_crack;
+
+      }
+	
+
+      D.beInverseOf(C);
+      
+    } else if ( rMode == TangentStiffness ) {
+
+      //    if ( ( rMode == SecantStiffness ) || ( rMode == TangentStiffness ) ) {
+      
+      // shrink to square matrix number of cracks x number of cracks
+      DeHelp = De;
+      DeHelp.resizeWithData(numberOfActiveCracks, numberOfActiveCracks);
+      
+      Dcr.resize(numberOfActiveCracks, numberOfActiveCracks);
+      Dcr.zero();
+      
+      for ( int i = 1; i <= numberOfActiveCracks; i++ ) {
+	if ( status->giveTempCrackStrain(i) > fcm_THRESHOLD_CRACK_STRAIN ) {
+	  Dcr.at(i, i) = this->giveCrackingModulus(rMode, gp, tStep, i);
+	} else {
+	  Dcr.at(i, i) = fcm_BIGNUMBER * overallElasticStiffness;
+	}
+      }
+      
+      Dcr.add(DeHelp);
+      C.beInverseOf(Dcr);
+      C.resizeWithData(nMaxCracks, nMaxCracks);
+      
+      DcrHelp.beProductOf(De, C); // De (De + Dcr)^-1
+      DcrHelp2.beProductOf(DcrHelp, De); // De (De + Dcr)^-1 De
+      
+      D.zero();
+      D.resize(nMaxCracks, nMaxCracks);
+      D.add(De);
+      D.subtract(DcrHelp2); // De - De (De + Dcr)^-1 De
     }
 
-    // extract 1x1 / 2x2 / 3x3 submatrix
-    De.resizeWithData(nMaxCracks, nMaxCracks);
 
-    // shrink to square matrix number of cracks x number of cracks
-    DeHelp = De;
-    DeHelp.resizeWithData(numberOfActiveCracks, numberOfActiveCracks);
-
-    Dcr.resize(numberOfActiveCracks, numberOfActiveCracks);
-    Dcr.zero();
-
-    for ( int i = 1; i <= numberOfActiveCracks; i++ ) {
-        Dcr.at(i, i) = this->giveCrackingModulus(rMode, gp, i);
+    if ( this->normalCoeffNumer > 0. ) {
+      // apply minimum stiffness
+      double nu = this->givePoissonsRatio();
+      
+      for ( int i = 1; i <= nMaxCracks; i++ ) {
+	for ( int j = 1; j <= nMaxCracks; j++ ) {
+	  if (i == j) { // diagonal terms
+	    D.at(i, j) = max( D.at(i,j), this->normalCoeffNumer * overallElasticStiffness );
+	  } else {
+	    D.at(i, j) = max( D.at(i,j), this->normalCoeffNumer * overallElasticStiffness * nu/(1-nu) );
+	  }
+	}
+      }
     }
 
-    Dcr.add(DeHelp);
-    inv.beInverseOf(Dcr);
-    inv.resizeWithData(nMaxCracks, nMaxCracks);
 
 
-    DcrHelp.beProductOf(De, inv); // De (De + Dcr)^-1
-    DcrHelp2.beProductOf(DcrHelp, De); // De (De + Dcr)^-1 De
 
-    D.zero();
-    D.resize(nMaxCracks, nMaxCracks);
-    D.add(De);
-    D.subtract(DcrHelp2); // De - De (De + Dcr)^-1 De
-
-
+    
     // resize add shear moduli on diagonal
     switch ( mMode ) {
     case _PlaneStress:
         D.resizeWithData(3, 3);
-        D.at(3, 3) = this->computeEffectiveShearModulus(gp, 6);
+
+	if ( max( status->giveCrackStrain(1), status->giveCrackStrain(2) ) > fcm_THRESHOLD_CRACK_STRAIN ) { 
+	  D.at(3, 3) = this->computeEffectiveShearModulus(gp, tStep, 6);
+	  D.at(3, 3) = max( D.at(3,3), this->shearCoeffNumer * G );
+	} else {
+	  D.at(3, 3) = G;
+	}
+
+	// debug:
+	/*double help;
+	help = this->shearCoeffNumer * G;
+	if (help > D.at(3, 3) ) {
+	  D.at(3, 3) = help;
+	  }*/
 
         break;
 
     case _3dMat:
         D.resizeWithData(6, 6);
         for ( int i = 4; i <= 6; i++ ) {
-            D.at(i, i) = this->computeEffectiveShearModulus(gp, i);
-        }
+	  if (i == 4) {
+	    if ( max( status->giveCrackStrain(2), status->giveCrackStrain(3) ) > fcm_THRESHOLD_CRACK_STRAIN ) {
+	      D.at(i, i) = this->computeEffectiveShearModulus(gp, tStep, i);
+	      D.at(i, i) = max( D.at(i,i), this->shearCoeffNumer * G );
+	    } else {
+	      D.at(i, i) = G;
+	    }
+	    
+	  } else if ( i == 5 ) {
+	    if ( max( status->giveCrackStrain(1), status->giveCrackStrain(3) ) > fcm_THRESHOLD_CRACK_STRAIN ) {
+	      D.at(i, i) = this->computeEffectiveShearModulus(gp, tStep, i);
+	      D.at(i, i) = max( D.at(i,i), this->shearCoeffNumer * G );
+	    } else {
+	      D.at(i, i) = G;
+	    }
+	    
+	  } else { // i == 6
+	    if ( max( status->giveCrackStrain(1), status->giveCrackStrain(2) ) > fcm_THRESHOLD_CRACK_STRAIN ) {
+	      D.at(i, i) = this->computeEffectiveShearModulus(gp, tStep, i);
+	      D.at(i, i) = max( D.at(i,i), this->shearCoeffNumer * G );
+	      } else {
+	      D.at(i, i) = G;
+	    }
+	  }
+	} // end for
+
         break;
 
     case _PlaneStrain:
         D.resizeWithData(6, 6);
-        D.at(6, 6) = this->computeEffectiveShearModulus(gp, 6);
+
+	if ( max( status->giveCrackStrain(1), status->giveCrackStrain(2) ) > fcm_THRESHOLD_CRACK_STRAIN ) { 
+	  D.at(6, 6) = this->computeEffectiveShearModulus(gp, tStep, 6);
+	  D.at(6, 6) = max( D.at(6,6), this->shearCoeffNumer * G );
+	} else {
+	  D.at(6, 6) = G;
+	}
+
         break;
 
     default:
@@ -1365,14 +1859,14 @@ FCMMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 
 
 double
-FCMMaterial :: computeTotalD2Modulus(GaussPoint *gp, int shearDirection)
+FCMMaterial :: computeTotalD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearDirection)
 {
     double D2 = 0.;
     int crackA, crackB;
     double D2_1, D2_2;
 
     if ( this->isIntactForShear(gp, shearDirection) ) {
-        D2 = this->computeOverallElasticStiffness() * fcm_BIGNUMBER;
+      D2 = this->computeOverallElasticStiffness(gp, tStep) * fcm_BIGNUMBER;
     } else {
         if ( shearDirection == 4 ) {
             crackA = 2;
@@ -1390,13 +1884,85 @@ FCMMaterial :: computeTotalD2Modulus(GaussPoint *gp, int shearDirection)
 
         if ( ( this->isIntact(gp, crackA) ) || ( this->isIntact(gp, crackB) ) ) {
             if ( this->isIntact(gp, crackA) ) {
-                D2 = this->computeD2ModulusForCrack(gp, crackB);
+	      D2 = this->computeD2ModulusForCrack(gp, tStep, crackB);
             } else {
-                D2 = this->computeD2ModulusForCrack(gp, crackA);
+	      D2 = this->computeD2ModulusForCrack(gp, tStep, crackA);
             }
         } else {
-            D2_1 = this->computeD2ModulusForCrack(gp, crackA);
-            D2_2 = this->computeD2ModulusForCrack(gp, crackB);
+	  D2_1 = this->computeD2ModulusForCrack(gp, tStep, crackA);
+	  D2_2 = this->computeD2ModulusForCrack(gp, tStep, crackB);
+
+            if ( multipleCrackShear ) {
+                // serial coupling of stiffnesses 1/D = 1/D1 + 1/D2
+                D2 = D2_1 * D2_2 / ( D2_1 + D2_2 );
+            } else {
+                D2 = min(D2_1, D2_2);
+            }
+        }
+
+	// adjust stiffness according to the maximum allowable stress
+	/*FCMMaterialStatus *status = static_cast< FCMMaterialStatus * >( this->giveStatus(gp) );
+	MaterialMode mMode = gp->giveMaterialMode();
+	double D2_help, gamma_max;
+	  switch ( mMode ) {
+	  case  _PlaneStress:
+	    
+	    gamma_max = status->giveMaxCrackStrain(3);
+	    break;
+	    
+	  case _PlaneStrain: // check
+	    gamma_max = status->giveMaxCrackStrain(3);
+	    break;
+	    
+	  case _3dMat:
+	    gamma_max = status->giveMaxCrackStrain(shearDirection);
+	    break;
+	    
+	  default:
+	    OOFEM_ERROR( "Material mode %s not supported", __MaterialModeToString(mMode) );
+	  }
+	D2_help  = this->maxShearStress(gp, tStep, shearDirection) / gamma_max;
+	D2 = min(D2, D2_help);
+	*/
+    }
+
+    return D2;
+}
+
+
+double
+FCMMaterial :: computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearDirection)
+{
+    double D2 = 0.;
+    int crackA, crackB;
+    double D2_1, D2_2;
+
+    if ( this->isIntactForShear(gp, shearDirection) ) {
+      D2 = this->computeOverallElasticStiffness(gp, tStep) * fcm_BIGNUMBER;
+    } else {
+        if ( shearDirection == 4 ) {
+            crackA = 2;
+            crackB = 3;
+        } else if ( shearDirection == 5 ) {
+            crackA = 1;
+            crackB = 3;
+        }  else if ( shearDirection == 6 ) {
+            crackA = 1;
+            crackB = 2;
+        } else {
+            OOFEM_ERROR("Unexpected value of index i (4, 5, 6 permitted only)");
+            crackA = crackB = 0;
+        }
+
+        if ( ( this->isIntact(gp, crackA) ) || ( this->isIntact(gp, crackB) ) ) {
+            if ( this->isIntact(gp, crackA) ) {
+	      D2 = this->computeNumerD2ModulusForCrack(gp, tStep, crackB);
+            } else {
+	      D2 = this->computeNumerD2ModulusForCrack(gp, tStep, crackA);
+            }
+        } else {
+	  D2_1 = this->computeNumerD2ModulusForCrack(gp, tStep, crackA);
+	  D2_2 = this->computeNumerD2ModulusForCrack(gp, tStep, crackB);
 
             if ( multipleCrackShear ) {
                 // serial coupling of stiffnesses 1/D = 1/D1 + 1/D2
@@ -1409,6 +1975,8 @@ FCMMaterial :: computeTotalD2Modulus(GaussPoint *gp, int shearDirection)
 
     return D2;
 }
+
+  
 
 IRResultType
 FCMMaterial :: initializeFrom(InputRecord *ir)
@@ -1453,6 +2021,10 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
     default: ecsMethod = ECSM_Projection;
     }
 
+    this->shearCoeffNumer = -1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, shearCoeffNumer, _IFT_FCM_shearCoeffNumer);
+    this->normalCoeffNumer = -1. * fcm_BIGNUMBER;
+    IR_GIVE_OPTIONAL_FIELD(ir, normalCoeffNumer, _IFT_FCM_normalCoeffNumer);
 
     return IRRT_OK;
 }
@@ -1660,23 +2232,50 @@ FCMMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
         }
 
         return 1;
-    } else if ( type == IST_CrackStatuses ) {
-        const IntArray &crackStatus = status->giveCrackStatus();
-        answer.resize(3);
-        for ( int i = 1; i <= 3; i++ ) {
-            answer.at(i) = crackStatus.at(i);
-        }
 
+    } else if ( type == IST_CrackStatuses ) {
+        answer.resize(3);
+	answer.zero();
+        for ( int i = 1; i <= status->giveNumberOfCracks(); i++ ) {
+            answer.at(i) = status->giveCrackStatus(i);
+        }
         return 1;
+
+    } else if ( type == IST_CrackStatusesTemp ) {
+        answer.resize(3);
+	answer.zero();
+        for ( int i = 1; i <= status->giveNumberOfTempCracks(); i++ ) {
+            answer.at(i) = status->giveTempCrackStatus(i);
+        }
+        return 1;
+	
     } else if ( type == IST_CrackStrainTensor ) {
-        FloatArray crackStrain = status->giveCrackStrainVector();
+      //        FloatArray crackStrain = status->giveCrackStrainVector();
+        FloatArray crackStrain;
         FloatMatrix epsL2G = status->giveL2GStrainVectorTransformationMtrx();
         // from local to global
-        crackStrain.rotatedWith(epsL2G, 'n');
+	//        crackStrain.rotatedWith(epsL2G, 'n');
+	crackStrain.beProductOf(epsL2G, status->giveCrackStrainVector() );
 
         StructuralMaterial :: giveFullSymVectorForm( answer, crackStrain, gp->giveMaterialMode() );
 
         return 1;
+
+    } else if ( type == IST_CrackSlip ) {
+      answer.resize(1);
+      answer.zero();
+
+      /*      if ( ( mMode == _PlaneStress ) || ( mMode == _PlaneStrain ) ) {
+	answer = this->computeShearSlipOnCrack(gp, tStep, 1);
+	} else {*/
+
+	int nMaxCracks = status->giveNumberOfTempCracks();
+	for ( int i = 1; i <= nMaxCracks; i++ ) {
+	  answer.at(1) = max(answer.at(1), this->computeShearSlipOnCrack(gp, tStep, i) );
+	}
+	//      }
+      return 1;
+
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
@@ -1880,6 +2479,18 @@ FCMMaterialStatus :: giveMaxNumberOfCracks(GaussPoint *gp)
 }
 
 
+void
+FCMMaterialStatus :: setTempNormalCrackStrainVector(FloatArray tempNormalCrackStrain)
+//
+// return number of maximum allowable cracks
+//
+{
+
+  for ( int i = 1; i <= tempNormalCrackStrain.giveSize(); i++ ) {
+    tempCrackStrainVector.at(i) = tempNormalCrackStrain.at(i);
+  }
+
+}
 
 
 void
@@ -1911,7 +2522,8 @@ FCMMaterialStatus :: updateYourself(TimeStep *tStep)
     maxCrackStrains = tempMaxCrackStrains;
     crackStrainVector = tempCrackStrainVector;
 
-    for ( int i = 1; i <= crackStrainVector.giveSize(); i++ ) {
+    //    for ( int i = 1; i <= crackStrainVector.giveSize(); i++ ) {
+    for ( int i = 1; i <= this->nMaxCracks; i++ ) { // loop only in normal directions!
         if ( crackStrainVector.at(i) < 0. ) {
             crackStrainVector.at(i) = 0.;
         }

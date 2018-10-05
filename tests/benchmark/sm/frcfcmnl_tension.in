@@ -1,7 +1,7 @@
 frcfcmnl_tension.out
 tension of one row finite elements with nonuniform width
 #
-NonLinearStatic nsteps 231 rtolf 1e-6 MaxIter 10000 stiffmode 1 controlmode 1 renumber 1 manrmsteps 20 nmodules 1
+NonLinearStatic nsteps 200 rtolf 1e-6 MaxIter 10000 stiffmode 1 controlmode 1 renumber 1 manrmsteps 20 nmodules 1
 #
 errorcheck
 #
@@ -110,7 +110,7 @@ PiecewiseLinFunction 2 t 4 0. 29. 30. 2000.0 f(t) 4 0.1 0.1 0.002 0.0001
 #NODE tStep 120 number 44 dof 1 unknown d value 1.360514e-04
 #NODE tStep 140 number 44 dof 1 unknown d value 1.434162e-04
 #NODE tStep 160 number 44 dof 1 unknown d value 1.515530e-04
-#NODE tStep 180 number 44 dof 1 unknown d value 1.577575e-04
-#NODE tStep 200 number 44 dof 1 unknown d value 1.658578e-04
+#NODE tStep 180 number 44 dof 1 unknown d value 1.577404e-04
+#NODE tStep 200 number 44 dof 1 unknown d value 1.657939e-04
 #%END_CHECK%
 #

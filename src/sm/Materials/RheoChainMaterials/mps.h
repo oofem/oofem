@@ -55,7 +55,8 @@
 #define _IFT_MPSMaterial_q3 "q3"
 #define _IFT_MPSMaterial_q4 "q4"
 #define _IFT_MPSMaterial_lambda0 "lambda0"
-#define _IFT_MPSMaterial_t0 "t0"
+// in input record t0 replaced by relMatAge
+//#define _IFT_MPSMaterial_t0 "t0"
 #define _IFT_MPSMaterial_ksh "ksh"
 //#define _IFT_MPSMaterial_wh "w_h"
 //#define _IFT_MPSMaterial_ncoeff "ncoeff"
@@ -272,6 +273,8 @@ public:
 
     /// Evaluation of the basic creep compliance function - can be used to compute elastic modulus in derived damage material
     double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+
+    double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

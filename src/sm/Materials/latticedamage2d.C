@@ -77,9 +77,11 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
     result = RandomMaterialExtensionInterface :: initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
-    double value = 0.;
+    // done in structural material
+    /*    double value = 0.;
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
     propertyDictionary.add(tAlpha, value);
+    */
 
     IR_GIVE_FIELD(ir, eNormal, _IFT_LatticeDamage2d_eNormal);
 

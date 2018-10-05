@@ -233,6 +233,10 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
     bool mhasg2l = masterNode->computeL2GTransformation(TMG2L, fullDofMask);
 
     xyz.beDifferenceOf(*this->giveCoordinates(), *masterNode->giveCoordinates());
+
+    if (xyz.giveSize() < 3) {
+      xyz.resizeWithValues(3);
+    }
     
     TR.beUnitMatrix();
     TR.at(1,5) =  xyz.at(3);

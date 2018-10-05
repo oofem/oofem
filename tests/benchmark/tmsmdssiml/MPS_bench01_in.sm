@@ -192,7 +192,7 @@ simpleCS 1 material 1 set 1
 # MATERIALS
 #
 # concrete (bricks):
-MPSdamMat   1 d 0.00240324 n 0.2 talpha 0.000010 mode 0 fc 25.000000 cc 280.000000 w/c 0.500000 a/c 7.085714 stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 300. endoftimeofinterest 864.e4 relMatAge 10800.000000 CoupledAnalysisType 3 t0 10800.000000 k3 35. p 1000. kTm 0.5 timeDepFracturing fib_s 0.250000 eps_cas0 0.000070 Ft28 1.8 Gf28 8e-05 isotropic temperInCelsius castingTime 21600.000000 checkSnapBack 1
+MPSdamMat   1 d 0.00240324 n 0.2 talpha 0.000010 mode 0 fc 25.000000 cc 280.000000 w/c 0.500000 a/c 7.085714 stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 300. endoftimeofinterest 864.e4 relMatAge 10800.000000 CoupledAnalysisType 3 k3 35. p 1000. kTm 0.5 timeDepFracturing fib_s 0.250000 eps_cas0 0.000070 Ft28 1.8 Gf28 8e-05 isotropic temperInCelsius castingTime 21600.000000 checkSnapBack 1
 #
 # BOUNDARY CONDITIONS
 #

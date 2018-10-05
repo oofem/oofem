@@ -83,6 +83,12 @@ protected:
      */
     FloatArray shrinkageStrain;
 
+    /** Internal variable with the meaning of the solution time 
+     * essential when giveRealStressVector of the viscoelastic material is called 
+     * more than once in one time step and at one time step.
+     */
+    double currentTime;
+
 #ifdef keep_track_of_strains
     double thermalStrain;
     double tempThermalStrain;
@@ -103,6 +109,11 @@ public:
 
     FloatArray *giveShrinkageStrainVector() { return & shrinkageStrain; }
     void setShrinkageStrainVector(FloatArray src) { shrinkageStrain = std :: move(src); }
+
+    /// Returns current time - see explanation near initTempStatus in giveRealStressVector
+    double giveCurrentTime() { return currentTime; }
+    /// Stores current time
+    void setCurrentTime(double src) { currentTime = src; }    
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -285,9 +296,13 @@ public:
     double giveAlphaOne() const { return this->alphaOne; }
     double giveAlphaTwo() const { return this->alphaTwo; }
 
+    /// Returns Poisson's ratio.
+    double givePoissonsRatio() { return nu; }    
+
     /// Evaluation of the creep compliance function at time t when loading is acting from time t_prime
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) = 0;
 
+    /// Extended meaning: returns true if the material is cast (target time > casting time) or the precasing time mat is defined
     bool isActivated(TimeStep *tStep) override {
         if ( this->preCastingTimeMat > 0 ) {
             return true;
@@ -295,6 +310,10 @@ public:
             return Material :: isActivated(tStep);
         }
     }
+
+    /// By default returns equivalent time in the middle of the time step
+    virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep)
+    { return ( tStep->giveTargetTime() - tStep->giveTimeIncrement()/2 ); }
 
 
 protected:

@@ -160,7 +160,7 @@ public:
      */
     virtual bool isActivated(TimeStep *tStep) {
         if ( tStep ) {
-            return ( tStep->giveIntrinsicTime() >= this->castingTime );
+            return ( tStep->giveTargetTime() >= this->castingTime );
         } else {
             return true;
         }

@@ -926,7 +926,7 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         double tequiv = status->giveEquivalentTime();
         answer.resize(1);
         answer.zero();
-            if (tequiv >= this->castingTime) {
+            if (tequiv >= 0.) {
               answer.at(1) =  this->computeTensileStrength(tequiv);
             }
         return 1;
@@ -944,7 +944,7 @@ MPSDamMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         //StructuralMaterial :: computePrincipalValues(principalStress, effectiveStress, principal_stress);
         StructuralMaterial :: giveIPValue(principalStress, gp, IST_PrincipalStressTensor, tStep);
         double tequiv = status->giveEquivalentTime();
-            if (tequiv >= this->castingTime) {
+            if (tequiv >= 0.) {
                 double ft = this->computeTensileStrength(tequiv);
                 if (ft > 1.e-20 && principalStress.at(1)>1.e-20){
                 answer.at(1) = principalStress.at(1)/ft;

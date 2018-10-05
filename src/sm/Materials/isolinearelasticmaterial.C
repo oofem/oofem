@@ -69,6 +69,7 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
     IR_GIVE_FIELD(ir, a, _IFT_IsotropicLinearElasticMaterial_talpha);
+    //    propertyDictionary.add(tAlpha, a);
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );
     this->initTangents();

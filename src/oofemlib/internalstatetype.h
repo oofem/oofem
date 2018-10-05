@@ -179,7 +179,9 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_MomentTensorTemp, 129) \
     ENUM_ITEM_WITH_VALUE(IST_YieldStrength, 130) \
     ENUM_ITEM_WITH_VALUE(IST_ElasticStrainTensor, 131) \
-    ENUM_ITEM_WITH_VALUE(IST_MoistureContent, 132)
+    ENUM_ITEM_WITH_VALUE(IST_MoistureContent, 132) \
+    ENUM_ITEM_WITH_VALUE(IST_CrackStatusesTemp, 133) \
+    ENUM_ITEM_WITH_VALUE(IST_CrackSlip, 134) 
   
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.

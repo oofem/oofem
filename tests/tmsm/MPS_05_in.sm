@@ -80,13 +80,13 @@ SimpleCS 4 thick 1.0 material 4
 #
 # MATERIAL
 #
-mps 1 d 0. n 0.2 talpha 10.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 t0 7. mus 5.e-6 kTm 0.0202 
+mps 1 d 0. n 0.2 talpha 10.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 mus 5.e-6 kTm 0.0202 
 #
-mps 2 d 0. n 0.2 talpha 10.e-6 referencetemperature 25. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 t0 7. mus 5.e-6 kTm 0.0202 temperInCelsius
+mps 2 d 0. n 0.2 talpha 10.e-6 referencetemperature 25. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 mus 5.e-6 kTm 0.0202 temperInCelsius
 #
-mps 3 d 0. n 0.2 talpha 0.e-6 referencetemperature 298.15 mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 t0 7. mus 5.e-6 kTm 0.0202 
+mps 3 d 0. n 0.2 talpha 0.e-6 referencetemperature 298.15 mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 mus 5.e-6 kTm 0.0202 
 #
-mps 4 d 0. n 0.2 talpha 0.e-6 referencetemperature 25. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 t0 7. mus 5.e-6 kTm 0.0202 temperInCelsius
+mps 4 d 0. n 0.2 talpha 0.e-6 referencetemperature 25. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 3 mus 5.e-6 kTm 0.0202 temperInCelsius
 #
 #
 #

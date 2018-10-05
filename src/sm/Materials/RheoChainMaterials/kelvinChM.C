@@ -122,12 +122,13 @@ KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 
     double sum = 0.0; // return value
 
-    if (  (tStep->giveIntrinsicTime() < this->castingTime)  ) {
+    // the viscoelastic material does not exist yet
+    if  ( ! Material :: isActivated( tStep ) ) {
       OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
     }
 
     ///@warning THREAD UNSAFE!
-    double tPrime = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() );
+    double tPrime = this->relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() );
     this->updateEparModuli(tPrime, gp, tStep);
 
     double deltaT = tStep->giveTimeIncrement();
@@ -165,7 +166,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
 
-    if (  tStep->giveIntrinsicTime() < this->castingTime  ) {
+    if ( ! Material :: isActivated( tStep ) ) {
         OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
     }
 
@@ -214,8 +215,8 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     FloatArray help, deltaEps0, delta_sigma;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
-    //   if ( !this->isActivated(tStep) ) {
-    if (  tStep->giveIntrinsicTime() < this->castingTime ) {
+    // goes there if the viscoelastic material does not exist yet
+    if (  ! Material :: isActivated( tStep ) )  {
         help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         help.zero();
         for ( int mu = 1; mu <= nUnits; mu++ ) {

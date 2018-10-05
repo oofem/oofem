@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+//#include "floatarrayf.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -233,7 +234,12 @@ IntElPoint :: initializeFrom(InputRecord *ir)
         return IRRT_BAD_FORMAT;
     }
 
-    if ( ir->hasField(_IFT_IntElPoint_refnode) ) {
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
+    FloatArray n;
+    IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_IntElPoint_normal);
+    normal = n;
+    
+    /*if ( ir->hasField(_IFT_IntElPoint_refnode) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
         normal = *domain->giveNode(this->referenceNode)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
     } else {
@@ -242,10 +248,12 @@ IntElPoint :: initializeFrom(InputRecord *ir)
         normal = n;
     }
     normal /= norm(normal);
+    */
 
     this->area = 1.0; // Default area ///@todo Make non-optional? /JB
     IR_GIVE_OPTIONAL_FIELD(ir, this->area, _IFT_IntElPoint_area);
 
+    this->computeLocalSlipDir();     
     return IRRT_OK;
 }
 
@@ -291,7 +299,30 @@ IntElPoint :: giveDofManDofIDMask(int inode, IntArray &answer) const
     }
 
 }
-    
+
+
+void
+IntElPoint :: computeLocalSlipDir(void)
+{
+    if ( this->referenceNode ) {
+        // normal
+        normal = *domain->giveNode(this->referenceNode)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+    } else {
+
+      if ( normal.at(1) == 0. && normal.at(2) == 0. && normal.at(3) == 0. ) {
+	// let the element compute the slip direction if the nodes' cooridantes are different
+        normal = *this->giveNode(2)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+	
+	// final check
+	if ( normal.at(1) == 0. && normal.at(2) == 0. && normal.at(3) == 0. ) {
+	  OOFEM_ERROR("Normal is not defined (referenceNode=0,normal=(0,0,0))");
+	}
+      }
+    }
+
+    normal /= norm(normal);
+}
+  
 
 #ifdef __OOFEG
 void IntElPoint :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)

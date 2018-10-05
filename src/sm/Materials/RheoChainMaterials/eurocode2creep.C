@@ -319,7 +319,7 @@ Eurocode2CreepMaterial :: computeEquivalentMaturity(GaussPoint *gp, TimeStep *tS
 
     selem->computeResultingIPTemperatureAt(et, tStep, gp, VM_Total);
 
-    if ( tStep->isTheFirstStep() || ( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() - this->castingTime ) < 0. ) {
+    if ( tStep->isTheFirstStep() ||   ( ! Material :: isActivated( tStep->givePreviousStep() ) ) ) {
         initMaturity = this->relMatAge;
         averageTemperature = et.at(1);
     } else {
@@ -373,7 +373,7 @@ Eurocode2CreepMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 
     double chainStiffness = 0.;
 
-    if ( !this->isActivated(tStep) ) {
+    if ( !Material :: isActivated(tStep) ) {
         return 1.; // stresses are cancelled in giveRealStressVector;
     }
 
@@ -388,7 +388,7 @@ Eurocode2CreepMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 
         sum += 1 / this->EspringVal; // add zeroth unit
 
-        t_halfstep = this->relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() );
+        t_halfstep = this->relMatAge - this->castingTime + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() );
 
         if ( t_halfstep <= 0. ) {
             OOFEM_ERROR("attempt to evaluate material stiffness at negative age");
@@ -586,25 +586,25 @@ Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     FloatArray eps_sh;
 
     // the relative matereial age can be negative to properly reflect the casting time
-    double dryingTimeNow = ( tStep->giveTargetTime() + this->relMatAge - this->t0 ) / timeFactor;
-    double autoShrTimeNow = ( this->relMatAge + tStep->giveTargetTime() ) / this->timeFactor;
+    double dryingTimeNow = ( this->relMatAge - this->castingTime - this->t0 + tStep->giveTargetTime() ) / timeFactor;
+    double autoShrTimeNow = ( this->relMatAge - this->castingTime + tStep->giveTargetTime() ) / this->timeFactor;
 
     if ( mode == VM_Incremental ) {
         double dt = tStep->giveTimeIncrement() / this->timeFactor;
 
         if ( dryingTimeNow > 0. ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_DryingShrinkage ) ) {
-                this->computeIncrementOfDryingShrinkageVector(eps_sh, gp, dryingTimeNow, dryingTimeNow - dt);
+	      this->computeIncrementOfDryingShrinkageVector(eps_sh, gp, dryingTimeNow, max(dryingTimeNow - dt, 0.));
                 answer.add(eps_sh);
             }
         }
 
-        if ( autoShrTimeNow > ( this->castingTime + this->relMatAge ) ) {
+	if ( autoShrTimeNow > 0. ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
-                this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, autoShrTimeNow - dt);
+	      this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, max(autoShrTimeNow - dt, 0.));
                 answer.add(eps_sh);
             }
-        }
+	}
     } else { // total
         if ( dryingTimeNow > 0. ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_DryingShrinkage ) ) {
@@ -613,14 +613,10 @@ Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
             }
         }
 
-        if ( autoShrTimeNow > ( this->castingTime + this->relMatAge ) ) {
+        if ( autoShrTimeNow >  this->relMatAge ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
-                if (this->castingTime > 0.) {
-                    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge+this->castingTime) / this->timeFactor);
-                } else {
-                    this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, (this->relMatAge) / this->timeFactor);
-                }
-                answer.add(eps_sh);
+	      this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, this->relMatAge / this->timeFactor);
+	      answer.add(eps_sh);
             }
         }
     }

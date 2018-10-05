@@ -80,11 +80,11 @@ SimpleCS 3 thick 1.0 material 3
 #
 # MATERIAL
 #
-mps 1 d 0. n 0.2 talpha 0.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 1 ksh 0.0 t0 6.048e5 mus 5.787037e-11
+mps 1 d 0. n 0.2 talpha 0.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 1 ksh 0.0 mus 5.787037e-11
 #
-mps 2 d 0. n 0.2 talpha 0.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 1 ksh 0.0 t0 6.048e5 mus 5.787037e-11 kTm 0.0202
+mps 2 d 0. n 0.2 talpha 0.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 1 ksh 0.0 mus 5.787037e-11 kTm 0.0202
 #
-mps 3 d 0. n 0.2 talpha 0.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 1 ksh 0.0 t0 6.048e5 mus 5.787037e-11 kTm 0.0025 kTc 0.000125
+mps 3 d 0. n 0.2 talpha 0.e-6 referencetemperature 298. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 86400. begoftimeofinterest 8.64e-2 endoftimeofinterest 8.64e8 relMatAge 6.048e5 CoupledAnalysisType 1 ksh 0.0 mus 5.787037e-11 kTm 0.0025 kTc 0.000125
 #
 #
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 1
