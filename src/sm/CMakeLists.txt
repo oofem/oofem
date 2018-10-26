@@ -22,6 +22,7 @@ set (sm_element
     Elements/Bars/truss1d.C 
     Elements/Bars/truss2d.C 
     Elements/Bars/truss3d.C
+    Elements/Bars/truss3dnl.C
     Elements/Bars/qtruss1d.C 
     Elements/Bars/qtruss1dgrad.C
     Elements/Beams/libeam2d.C 
