@@ -74,6 +74,7 @@ Beam3d :: Beam3d(int n, Domain *aDomain) : BeamBaseElement(n, aDomain)
 
     ghostNodes [ 0 ] = ghostNodes [ 1 ] = NULL;
     numberOfCondensedDofs = 0;
+    subsoilMat = 0;
 }
 
 Beam3d :: ~Beam3d()
