@@ -206,7 +206,9 @@ Logger :: writeELogMsg(logLevelType level, const char *_func, const char *_file,
     }
 
     if ( level == LOG_LEVEL_FATAL || level == LOG_LEVEL_ERROR ) {
+#ifndef CEMPY
         print_stacktrace(this->errStream, 10);
+#endif
     }
 }
 
