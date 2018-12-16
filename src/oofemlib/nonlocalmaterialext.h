@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "grid.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 
 #include <list>
 #include <memory>
