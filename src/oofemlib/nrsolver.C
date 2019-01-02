@@ -129,7 +129,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NRSolver_lstype);
     solverType = ( LinSystSolverType ) _val;
-    this->giveLinearSolver()->initializeFrom(ir); // make sure that linear solver is initialized from ir as well
+    this->giveLinearSolver()->initializeFrom(ir); // make sure that linear solver is initialized from it as well
 
     // read relative error tolerances of the solver
     // if rtolv provided set to this tolerance both rtolf and rtold
@@ -333,9 +333,9 @@ NRSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
 
         if(maxInc > maxIncAllowed) {
             if ( engngModel->giveProblemScale() == macroScale ) {
-            	printf("Restricting increment. maxInc: %e\n", maxInc);
+                printf("Restricting increment. maxInc: %e\n", maxInc);
             }
-        	ddX.times(maxIncAllowed/maxInc);
+            ddX.times(maxIncAllowed/maxInc);
         }
 
         /////////////////////////////////////////

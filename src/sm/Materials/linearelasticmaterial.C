@@ -421,6 +421,13 @@ LinearElasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
     if ( type == IST_ElasticStrainTensor ) {
         this->giveStressDependentPartOfStrainVector(answer, gp, status->giveStrainVector(), tStep, VM_Total);
         return 1;
+    } else if ( type == IST_ThermalStrainTensor ) {
+        this->computeStressIndependentStrainVector_3d(answer, gp, tStep, VM_Total);
+        return 1;
+    } else if ( type == IST_CreepStrainTensor ) {
+        answer.resize(6);
+        answer.zero();
+        return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }

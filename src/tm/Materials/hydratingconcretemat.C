@@ -158,7 +158,7 @@ double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeSte
     if ( conductivityType == 0 ) { //given from input file
         conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep);
     } else if ( conductivityType == 1 ) { //compute according to Ruiz, Schindler, Rasmussen. Kim, Chang: Concrete temperature modeling and strength prediction using maturity concepts in the FHWA HIPERPAV software, 7th international conference on concrete pavements, Orlando (FL), USA, 2001
-        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep) * ( 1.0 - 0.33 / 1.33 * ms->giveDoHActual() );
+        conduct = IsotropicHeatTransferMaterial :: give('k', gp, tStep) * ( 1.33 - 0.33* ms->giveDoHActual() );
     } else {
         OOFEM_ERROR("Unknown conductivityType %d\n", conductivityType);
         conduct = 0.;

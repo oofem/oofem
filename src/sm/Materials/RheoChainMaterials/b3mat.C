@@ -54,7 +54,7 @@ B3Material :: initializeFrom(InputRecord *ir)
     // NOTE
     //
     // this material model is unit dependent!
-    // units must be in Mpa, m, MN.
+    // units must be in MPa, m, MN.
     //
     //
     double fc = 0.0, c = 0.0, wc = 0.0, ac = 0.0, alpha1 = 0.0, alpha2 = 0.0;

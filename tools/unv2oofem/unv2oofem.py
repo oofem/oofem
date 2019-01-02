@@ -71,18 +71,18 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             print ("Unknown extension of input file %s" % fileExtension[-1].lower())
             exit(0)
         
-        print ('Parsing mesh file %s' % sys.argv[1], end='')
+        print ('Parsing mesh file %s' % sys.argv[1], end=' ')
         FEM=Parser.parse()
         print ("done")
 
-        print ("Detected node groups:", end='')
+        print ("Detected node groups:", end=' ')
         for i in FEM.nodesets:
-            print (i.name.strip(), end='')
+            print (i.name.strip(), end=' ')
         print ()
 
-        print ("Detected element groups:", end='')
+        print ("Detected element groups:", end=' ')
         for i in FEM.elemsets:
-            print (i.name.strip(), end='')
+            print (i.name.strip(), end=' ')
         print ()
 
         # read oofem ctrl file

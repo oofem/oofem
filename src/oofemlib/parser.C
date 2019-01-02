@@ -192,6 +192,11 @@ double Parser :: prim(bool get) // handle primaries
         double e = agr(true);
         return exp(e);
     }
+    case INT_FUNC:
+    {
+        double e = agr(true);
+        return (int)(e);
+    }
     case HEAVISIDE_FUNC: //Heaviside function
     {
         double time = look("t")->value;
@@ -337,12 +342,14 @@ Parser :: Token_value Parser :: get_token()
                 return curr_tok = ASIN_FUNC;
             } else if ( !strncmp(string_value, "acos", 4) ) {
                 return curr_tok = ACOS_FUNC;
-            } else if ( !strncmp(string_value, "exp", 4) ) {
+            } else if ( !strncmp(string_value, "exp", 3) ) {
                 return curr_tok = EXP_FUNC;
-            } else if ( !strncmp(string_value, "h", 1) ) {
-                return curr_tok = HEAVISIDE_FUNC;
+            } else if ( !strncmp(string_value, "int", 3) ) {
+                return curr_tok = INT_FUNC;
             } else if ( !strncmp(string_value, "h1", 2) ) {
                 return curr_tok = HEAVISIDE_FUNC1;
+            } else if ( !strncmp(string_value, "h", 1) ) {
+                return curr_tok = HEAVISIDE_FUNC;
             } else if ( !strncmp(string_value, "pi", 2) ) {
                 number_value = M_PI;
                 return curr_tok = NUMBER;
