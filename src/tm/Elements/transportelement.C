@@ -1040,7 +1040,7 @@ void
 TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                                                 int iSurf, TimeStep *tStep, ValueModeType mode, int indx)
 {
-    OOFEM_ERROR("STOP");
+    // OOFEM_ERROR("STOP"); 
     if ( !this->testElementExtension(Element_SurfaceLoadSupport) ) {
         OOFEM_ERROR("no surface load support");
     }
