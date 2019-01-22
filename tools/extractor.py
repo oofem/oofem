@@ -195,10 +195,17 @@ def elemKwdToString(kwd):
         return 'strains'
     elif (kwd == '13') : 
         return 'damage'
+    elif (kwd == '39') : 
+        return 'DoH'
     elif (kwd == '98') : 
         return 'jump'
     elif (kwd == '99') : 
         return 'traction'
+    elif (kwd == '135') : 
+        return 'equivalentTime'
+    
+    
+    
     else:
         # keyword is something else -> allow to use the string directly 
         return kwd;
