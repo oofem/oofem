@@ -416,9 +416,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
         this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
         vP_control.beSubArrayOf(vP, P_control);
-        vP_n.at(1) = vP.at(1);
-        double norm = vP_n.computeNorm();
-        if ( vP_control.computeNorm() < 1e-6 * norm ) { ///@todo We need a tolerance here!
+        if ( vP_control.computeNorm() < 1e-6 * vP.at(1) ) { ///@todo We need a tolerance here!
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
             return;
         }
