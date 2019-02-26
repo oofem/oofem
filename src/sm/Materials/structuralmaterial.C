@@ -164,7 +164,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
         reducedvS.beSubArrayOf(vS, stressControl);
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e0 && k >= 5 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
@@ -354,7 +354,7 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray F_control, P_control; // Determines which components are controlled by F and P resp.
-    FloatArray vF, increment_vF, vP, vP_control;
+    FloatArray vF, increment_vF, vP, vP_control, vP_n;
     FloatMatrix tangent, tangent_Pcontrol;
     // Iterate to find full vF.
     StructuralMaterial :: giveVoigtVectorMask(F_control, _PlaneStress);
@@ -376,7 +376,9 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
         this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
         vP_control.beSubArrayOf(vP, P_control);
-        if ( vP_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+        vP_n.beSubArrayOf(vP, F_control);
+        double norm = vP_n.computeNorm();
+        if ( vP_control.computeNorm() < 1e-6 * norm ) { ///@todo We need a tolerance here!
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStress);
             return;
         }
@@ -399,7 +401,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray P_control; // Determines which components are controlled by P resp.
-    FloatArray vF, increment_vF, vP, vP_control;
+    FloatArray vF, increment_vF, vP, vP_control, vP_n(1);
     FloatMatrix tangent, tangent_Pcontrol;
     // Compute the negated the array of control since we need P_control as well;
     P_control.resize(8);
@@ -414,7 +416,9 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
         this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
         vP_control.beSubArrayOf(vP, P_control);
-        if ( vP_control.computeNorm() < 1e-6 ) { ///@todo We need a tolerance here!
+        vP_n.at(1) = vP.at(1);
+        double norm = vP_n.computeNorm();
+        if ( vP_control.computeNorm() < 1e-6 * norm ) { ///@todo We need a tolerance here!
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
             return;
         }
