@@ -90,6 +90,11 @@ set (sm_element
     Elements/trwarp.C
     Elements/PlaneStress/basicelement.C
     Elements/nodalspringelement.C
+    #Mixed pressure elements
+    Elements/MixedPressure/basemixedpressureelement.C
+    Elements/MixedPressure/PlaneStrain/qtrplanestrainp1.C
+    Elements/MixedPressure/PlaneStrain/quad1planestrainp1.C
+
     Elements/structural2delement.C
     Elements/structural3delement.C
     #Elements/phasefieldelement.C
@@ -225,6 +230,8 @@ set (sm_material
     Materials/structmatsettable.C
     Materials/tutorialmaterial.C
     Materials/graddpmaterialextensioninterface.C
+    #Mixed pressure material interface
+    Materials/MixedPressure/mixedpressurematerialextensioninterface.C
     Materials/rcm2.C
     Materials/isodamagemodel.C
     Materials/steelrelaxmat.C
