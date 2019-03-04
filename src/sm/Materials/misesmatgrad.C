@@ -91,7 +91,7 @@ MisesMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, G
         give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -110,7 +110,7 @@ MisesMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, G
         give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -129,7 +129,7 @@ MisesMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, G
         give3dGprime(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -148,7 +148,7 @@ MisesMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, G
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -156,7 +156,7 @@ void
 MisesMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+    OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -548,7 +548,6 @@ MisesMatGradStatus :: initTempStatus()
     tempDamage = damage;
     tempPlasticStrain = plasticStrain;
     tempKappa = kappa;
-    tempLeftCauchyGreen = leftCauchyGreen;
     trialStressD.clear();
 }
 

@@ -81,7 +81,9 @@ enum InterfaceType {
     Beam3dSubsoilElementInterfaceType,
     Beam3dSubsoilMaterialInterfaceType,
 
-    QCMaterialExtensionInterfaceType
+    QCMaterialExtensionInterfaceType,
+
+    MixedPressureMaterialExtensionInterfaceType
 };
 } // end namespace oofem
 #endif // interfacetype_h

@@ -118,13 +118,13 @@ protected:
 
 public:
     /// Voigt index map
-    static std::vector< std::vector<int> > vIindex;
+    static std :: vector< std :: vector< int > >vIindex;
 
     /// Symmetric Voigt index map
-    static std::vector< std::vector<int> > svIndex;
+    static std :: vector< std :: vector< int > >svIndex;
 
-    static int giveSymVI(int ind1, int ind2) { return svIndex[ind1-1][ind2-1]; }
-    static int giveVI(int ind1, int ind2) { return vIindex[ind1-1][ind2-1]; }
+    static int giveSymVI(int ind1, int ind2) { return svIndex [ ind1 - 1 ] [ ind2 - 1 ]; }
+    static int giveVI(int ind1, int ind2) { return vIindex [ ind1 - 1 ] [ ind2 - 1 ]; }
 
     /**
      * Constructor. Creates material with given number, belonging to given domain.
@@ -257,7 +257,7 @@ public:
      */
     virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
-    void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
+    void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp, MaterialMode matMode);
     void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &S, const FloatArray &F, MaterialMode matMode);
 
     /**
@@ -284,7 +284,7 @@ public:
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     virtual void computeStressIndependentStrainVector_3d(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+                                                         GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
     /// Common functions for convenience
     //@{
     /**
@@ -318,7 +318,7 @@ public:
 
     static void applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu);
     static void applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus);
-    
+
     static void applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu);
     static void applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu);
 
@@ -439,7 +439,7 @@ public:
     void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
                                                TimeStep *tStep, ValueModeType mode);
     void giveStressDependentPartOfStrainVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
-                                               TimeStep *tStep, ValueModeType mode);
+                                                  TimeStep *tStep, ValueModeType mode);
 
     int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type) override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
@@ -617,8 +617,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mmode, GaussPoint *gp,
-                                             TimeStep *tStep);
+                                            MatResponseMode mmode, GaussPoint *gp,
+                                            TimeStep *tStep);
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector
@@ -666,8 +666,8 @@ public:
      * @param transpose Determines if we transpose matrix before transforming.
      */
     static void give2DStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                                  bool transpose = false);
-    
+                                                    bool transpose = false);
+
     /**
      * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
      * @param answer Transformation matrix for stress vector.
