@@ -315,7 +315,10 @@ set (sm_unsorted
     mappers/primvarmapper.C
     Contact/cdefnode2node.C
     Contact/celnode2node.C
+    Contact/ActiveBc/node2nodecontact.C
     )
+
+  
 
 set (sm_parallel
     FETISolver/feticommunicator.C
