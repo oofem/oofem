@@ -6,12 +6,13 @@ from abaqus2x import *
 from oofemctrlreader import *
 import time
 import sys
+import json
 from numpy.core.defchararray import splitlines
 
 
 if __name__=='__main__':
     helpmsg=""" 
-Usage: unv2oofem.py unvfile ctrlfile oofemfile
+Usage: unv2oofem.py unvfile ctrlfile oofemfile auxiliaryFile
 
 What it does: read unvfile, create an internal FEM object structure
               in memory and writes the oofem native input file
@@ -55,12 +56,12 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
 """ % (sys.version_info.major, sys.version_info.minor)
     print (welcomeMsg)
     t1 = time.time()
-    if len(sys.argv)==4:
+    if (len(sys.argv)==4):
         unvfile=sys.argv[1]
         ctrlfile=sys.argv[2]
         oofemfile=sys.argv[3]
         of=open(oofemfile,'w')
-         
+        
         # read file in FEM object structure
         fileExtension = unvfile.split('.')
         if (fileExtension[-1].lower()=='unv'): # Salome output file
@@ -91,6 +92,11 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
         CTRL.parse(FEM)
         print ("done")
         # write files in native oofem format
+
+        for sets in FEM.nodesets:
+            if sets.name.startswith('OOFEM-Hanging'):
+                print("Found group of HANGING nodes, assigning them")
+
 
         print ('Writing oofem file %s' % sys.argv[3])
         # write oofem header
@@ -194,12 +200,24 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
 
         #write component record
         of.write('ndofman %d nelem %d ncrosssect %d nmat %d nbc %d nic %d nltf %d nset %d nxfemman %d\n' % (FEM.nnodes, len(elemNotBoundary), CTRL.ncrosssect, CTRL.nmat, CTRL.nbc, CTRL.nic, CTRL.nltf, CTRL.nset, CTRL.nxfemman))
+        
         #write nodes
         for node in FEM.nodes:
             #resolve nodal properties
-            outputLine="node %-5d coords %-2d" % (node.id, len(node.coords))
+            hangNodes = {}
+            for sets in FEM.nodesets:
+                if sets.name.startswith('OOFEM-Hanging'):
+                    for key in sets.items:
+                        hangNodes[key] = ''
+            
+            outputLine="%s %-5d coords %-2d" % ('hangingNode' if node.id in hangNodes else 'node', node.id, len(node.coords))
+            
             for coord in node.coords:
                 outputLine+= "% -8g " % coord
+            
+            if node.id in hangNodes:
+                outputLine+= "dofType %d %s" % (len(node.coords), ' 2 2 ' if len(node.coords) == 2 else ' 2 2 2 ') 
+            
             properties=""
            
             for igroup in node.oofem_groups:
