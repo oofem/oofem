@@ -1,7 +1,7 @@
 test_wp3.out
-"Winkler pasternak model: test of settlement profile, Quadrilateral quadratic elements"
-linearstatic nsteps 1 nmodules 1
-vtkxml tstep_step 1 domain_all  primvars 1 1  vars 3 1 2 4 stype 1
+Winkler pasternak model: test of settlement profile, Quadrilateral quadratic elements
+linearstatic nsteps 1 nmodules 0
+#vtkxml tstep_step 1 domain_all  primvars 1 1  vars 3 1 2 4 stype 1
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 58 nelem 11 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 2
