@@ -49,7 +49,7 @@ REGISTER_Material(MisesMatGrad);
 //gradient regularization of Mises plasticity coupled with isotropic damage
 /////////////////////////////////////////////////////////////////
 
-MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d), GradDpMaterialExtensionInterface(d)
+MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d), GradientDamageMaterialExtensionInterface(d)
 {
     L = 0.;
 }
@@ -77,7 +77,7 @@ MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, 
 
 
 void
-MisesMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -96,7 +96,7 @@ MisesMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, G
 }
 
 void
-MisesMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -115,7 +115,7 @@ MisesMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, G
 }
 
 void
-MisesMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -134,7 +134,7 @@ MisesMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, G
 }
 
 void
-MisesMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveGradientDamageStiffnessMatrix_dd_l(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -153,10 +153,9 @@ MisesMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, G
 }
 
 void
-MisesMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveGradientDamageStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
+    answer.resize(0, 0);
 }
 
 
@@ -453,8 +452,10 @@ MisesMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, Ga
 }
 
 
+
+
 void
-MisesMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
+MisesMatGrad :: giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
 
@@ -487,6 +488,31 @@ MisesMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *t
 }
 
 
+void
+MisesMatGrad :: giveNonlocalInternalForces_N_factor(double &answer, double nlDamageDrivingVariable, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = nlDamageDrivingVariable;
+}
+
+void
+MisesMatGrad :: giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlDamageDrivingVariable_grad, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = nlDamageDrivingVariable_grad;
+    answer.times(internalLength * internalLength);
+}
+
+
+
+
+void
+MisesMatGrad :: computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
+    answer =  status->giveTempCumulativePlasticStrain();
+}
+
+
+
 IRResultType
 MisesMatGrad :: initializeFrom(InputRecord *ir)
 {
@@ -507,7 +533,7 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
 MisesMatGradStatus :: MisesMatGradStatus(GaussPoint *g) :
     MisesMatStatus(g)
 {
-    nonlocalCumulatedStrain = 0;
+    nonlocalDamageDrivingVariable = 0;
 }
 
 

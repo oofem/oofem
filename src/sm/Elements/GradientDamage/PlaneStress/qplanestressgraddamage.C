@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/PlaneStress/qplanestressgrad.h"
+#include "../sm/Elements/GradientDamage/PlaneStress/qplanestressgraddamage.h"
 #include "fei2dquadlin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -43,11 +43,15 @@
 #include "classfactory.h"
 
 namespace oofem {
-REGISTER_Element(QPlaneStressGrad);
+REGISTER_Element(QPlaneStressGradDamage);
 
-FEI2dQuadLin QPlaneStressGrad :: interpolation_lin(1, 2);
+FEI2dQuadLin QPlaneStressGradDamage :: interpolation_lin(1, 2);
+IntArray QPlaneStressGradDamage :: locationArray_u = {1,2, 4,5, 7,8, 10,11, 13,14,15,16,17,18,19,20};
+IntArray QPlaneStressGradDamage :: locationArray_d = {3,6,9,12};
 
-QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n, aDomain), GradDpElement()
+
+  
+QPlaneStressGradDamage :: QPlaneStressGradDamage(int n, Domain *aDomain) : QPlaneStress2d(n, aDomain), GradientDamageElement()
     // Constructor.
 {
     nPrimNodes = 8;
@@ -62,7 +66,7 @@ QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n,
 
 
 void
-QPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
+QPlaneStressGradDamage :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= 4 ) {
         answer = {D_u, D_v, G_0};
@@ -72,34 +76,80 @@ QPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 
+
+  void
+QPlaneStressGradDamage :: giveDofManDofIDMask_u(IntArray &answer) const
+{
+  answer = {D_u, D_v};
+}
+
+
+void
+QPlaneStressGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
+{
+  /*
+  if ( inode <= 4 ) {
+    answer = {G_0};
+  } else {
+    answer = {};
+  }
+  */
+}
+
+  
+
+
 IRResultType
-QPlaneStressGrad :: initializeFrom(InputRecord *ir)
+QPlaneStressGradDamage :: initializeFrom(InputRecord *ir)
 {
     return QPlaneStress2d :: initializeFrom(ir);
 }
 
 
 void
-QPlaneStressGrad :: computeGaussPoints()
+QPlaneStressGradDamage :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
+QPlaneStressGradDamage :: computeNdMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
     this->interpolation_lin.evalN(answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void
-QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QPlaneStressGradDamage :: computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
+
+void
+QPlaneStressGradDamage :: giveLocationArray_u(IntArray &answer)
+{
+  answer = locationArray_u;
+}
+
+  
+void
+QPlaneStressGradDamage :: giveLocationArray_d(IntArray &answer)
+{
+  answer = locationArray_d;
+}
+
+
+void
+QPlaneStressGradDamage :: postInitialize()
+{
+  GradientDamageElement:: postInitialize();
+  QPlaneStress2d :: postInitialize();
+}
+
+  
 }

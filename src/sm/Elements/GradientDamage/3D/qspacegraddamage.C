@@ -32,34 +32,26 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/3D/qtrspacegrad.h"
-#include "sm/Materials/structuralms.h"
-#include "sm/CrossSections/structuralcrosssection.h"
-#include "fei3dtetlin.h"
-#include "node.h"
-#include "material.h"
+#include "../sm/Elements/GradientDamage/3D/qspacegraddamage.h"
+#include "fei3dhexalin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "domain.h"
-#include "cltypes.h"
-#include "mathfem.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
-#include <cstdio>
-
 namespace oofem {
-REGISTER_Element(QTRSpaceGrad);
+REGISTER_Element(QSpaceGradDamage);
 
-FEI3dTetLin QTRSpaceGrad :: interpolation_lin;
+FEI3dHexaLin QSpaceGradDamage :: interpolation_lin;
 
-QTRSpaceGrad :: QTRSpaceGrad(int n, Domain *aDomain) :  QTRSpace(n, aDomain), GradDpElement()
+QSpaceGradDamage :: QSpaceGradDamage(int n, Domain *aDomain) :  QSpace(n, aDomain), GradientDamageElement()
     // Constructor.
 {
-    nPrimNodes = 10;
-    nPrimVars = 3;
+    nPrimNodes = 8;
+    nPrimVars = 2;
     nSecNodes = 4;
     nSecVars = 1;
     totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
@@ -69,15 +61,15 @@ QTRSpaceGrad :: QTRSpaceGrad(int n, Domain *aDomain) :  QTRSpace(n, aDomain), Gr
 
 
 IRResultType
-QTRSpaceGrad :: initializeFrom(InputRecord *ir)
+QSpaceGradDamage :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 4;
+    numberOfGaussPoints = 27;
     return Structural3DElement :: initializeFrom(ir);
 }
 
 
 void
-QTRSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
+QSpaceGradDamage :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= 4 ) {
         answer = {D_u, D_v, D_w, G_0};
@@ -87,23 +79,46 @@ QTRSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 void
-QTRSpaceGrad :: computeGaussPoints()
+QSpaceGradDamage :: giveDofManDofIDMask_u(IntArray &answer) const
+{
+  answer = {D_u, D_v, D_w};
+}
+
+
+void
+QSpaceGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
+{
+
+  /*    if ( inode <= 4 ) {
+      answer = {G_0};
+    } else {
+      answer = {};
+    }
+  */
+}
+
+  
+
+
+void
+QSpaceGradDamage :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 7);
+    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 7) );
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 
 
+
 void
-QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
+QSpaceGradDamage :: computeNdMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    this->interpolation_lin.evalN(answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void
-QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QSpaceGradDamage :: computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );

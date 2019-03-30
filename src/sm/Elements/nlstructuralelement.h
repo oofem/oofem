@@ -232,7 +232,7 @@ protected:
         OOFEM_ERROR("method not implemented for this element");
         return;
     }
-    friend class GradDpElement;
+    friend class GradientDamageElement;
     friend class PhaseFieldElement;
     friend class XfemStructuralElementInterface;
 };

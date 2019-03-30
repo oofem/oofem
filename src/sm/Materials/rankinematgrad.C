@@ -49,7 +49,7 @@ namespace oofem {
 REGISTER_Material(RankineMatGrad);
 
 // constructor
-RankineMatGrad :: RankineMatGrad(int n, Domain *d) : RankineMat(n, d), GradDpMaterialExtensionInterface(d)
+RankineMatGrad :: RankineMatGrad(int n, Domain *d) : RankineMat(n, d), GradientDamageMaterialExtensionInterface(d)
 {
     L = 0.;
     negligible_damage = 0.;
@@ -71,7 +71,7 @@ RankineMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -84,7 +84,7 @@ RankineMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -97,7 +97,7 @@ RankineMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -112,7 +112,7 @@ RankineMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode,
 
 
 void
-RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd_l(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -125,10 +125,9 @@ RankineMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
 }
 
 void
-RankineMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    OOFEM_ERROR("mMode = %d not supported\n", mMode);
+    answer.resize(0, 0);
 }
 
 void
@@ -252,7 +251,35 @@ RankineMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, 
 }
 
 void
-RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
+RankineMatGrad :: giveNonlocalInternalForces_N_factor(double &answer, double nlDamageDrivingVariable, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = nlDamageDrivingVariable;
+}
+
+void
+RankineMatGrad :: giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlDamageDrivingVariable_grad, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = nlDamageDrivingVariable_grad;
+    answer.times(internalLength * internalLength);
+}
+
+
+
+void
+RankineMatGrad :: computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
+    answer =  status->giveTempCumulativePlasticStrain();
+}
+
+
+
+
+
+
+
+void
+RankineMatGrad :: giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
 
@@ -342,7 +369,7 @@ RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
 RankineMatGradStatus :: RankineMatGradStatus(GaussPoint *g) :
     RankineMatStatus(g)
 {
-    nonlocalCumulatedStrain = 0;
+    nonlocalDamageDrivingVariable = 0;
 }
 
 void

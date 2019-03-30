@@ -60,8 +60,8 @@ enum InterfaceType {
     EIPrimaryFieldInterfaceType,
 
     NonlocalMaterialStatusExtensionInterfaceType,
-    GradDpMaterialExtensionInterfaceType,
-    GradDpMaterialStatusExtensionInterfaceType,
+    GradientDamageMaterialExtensionInterfaceType,
+    GradientDamageMaterialStatusExtensionInterfaceType,
 
     NonlocalMaterialExtensionInterfaceType,
     NonlocalMaterialStiffnessInterfaceType,

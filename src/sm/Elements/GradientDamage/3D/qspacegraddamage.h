@@ -32,46 +32,56 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef qspacegrad_h
-#define qspacegrad_h
+#ifndef qspacegraddamage_h
+#define qspacegraddamage_h
 
-#include "sm/Elements/3D/qspace.h"
-#include "sm/Elements/graddpelement.h"
+#include "../sm/Elements/3D/qspace.h"
+#include "../sm/Elements/GradientDamage/graddamageelement.h"
 
-#define _IFT_QSpaceGrad_Name "qspacegrad"
+#define _IFT_QSpaceGradDamage_Name "qspacegraddamage"
 
 namespace oofem {
 class FEI3dHexaLin;
 
 /**
- * Quadratic 3d  20 - node element with quadratic approximation of displacements and linear approximation of gradient
+ * Quadratic 3d  20 - node element with quadratic approximation of displacements and linear approximation of gradient damage driving variable
  *
- * @author Ladislav Svoboda
+ * @author Martin Horak
  */
-class QSpaceGrad : public QSpace, public GradDpElement
+class QSpaceGradDamage : public QSpace, public GradientDamageElement
 {
 protected:
     static FEI3dHexaLin interpolation_lin;
 
 public:
-    QSpaceGrad(int n, Domain * d);
-    virtual ~QSpaceGrad() { }
+    QSpaceGradDamage(int n, Domain * d);
+    virtual ~QSpaceGradDamage() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    void giveDofManDofIDMask_u(IntArray &answer) const;
+    void giveDofManDofIDMask_d(IntArray &answer) const;
 
     // definition & identification
-    const char *giveInputRecordName() const override { return _IFT_QSpaceGrad_Name; }
-    const char *giveClassName() const override { return "QSpaceGrad"; }
-    int computeNumberOfDofs() override { return 68; }
-    MaterialMode giveMaterialMode() override { return _3dMat; }
+    virtual const char *giveInputRecordName() const { return _IFT_QSpaceGradDamage_Name; }
+    virtual const char *giveClassName() const { return "QSpaceGradDamage"; }
+    virtual int computeNumberOfDofs() { return 68; }
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
+
+
+
+
+
+    
 
 protected:
-    void computeGaussPoints() override;
-    void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer) override;
-     void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
-    StructuralElement *giveStructuralElement() override { return this; }
-    NLStructuralElement *giveNLStructuralElement() override { return this; }
+    virtual void computeGaussPoints();
+    virtual void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer);
+    virtual void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual StructuralElement *giveStructuralElement() { return this; }
+    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
+    virtual void giveLocationArray_u(IntArray &answer){;}
+    virtual void giveLocationArray_d(IntArray &answer){;}
 };
 }
 #endif // end namespace oofem
