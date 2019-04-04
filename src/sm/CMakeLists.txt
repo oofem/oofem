@@ -224,8 +224,6 @@ set (sm_material
     Materials/rankinemat.C
     Materials/rankinematgrad.C
     Materials/rankinematnl.C
-    Materials/latticematstatus.C
-    Materials/latticedamage2d.C
     Materials/dustmat.C
     Materials/lsmastermat.C
     Materials/lsmastermatgrad.C
@@ -242,6 +240,10 @@ set (sm_material
     Materials/isodamagemodel.C
     Materials/steelrelaxmat.C
     Materials/fcm.C
+    #Lattice models
+    Materials/latticematstatus.C
+    Materials/latticelinearelastic.C
+    Materials/latticedamage.C
     )
 
 if (USE_PYTHON)

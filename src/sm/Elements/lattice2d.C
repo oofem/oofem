@@ -87,16 +87,16 @@ Lattice2d :: giveCrackWidth()
     return status->giveCrackWidth();
 }
 
-double
-Lattice2d :: giveOldCrackWidth()
-{
-    LatticeMaterialStatus *status;
-
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
-    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-    return status->giveOldCrackWidth();
-}
+// double
+// Lattice2d :: giveOldCrackWidth()
+// {
+//     LatticeMaterialStatus *status;
+//
+//     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+//     GaussPoint *gp = iRule->getIntegrationPoint(0);
+//     status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+//     return status->giveOldCrackWidth();
+// }
 
 
 double

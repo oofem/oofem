@@ -56,7 +56,7 @@ public:
     LatticeStructuralElement(int n, Domain * d);
     virtual ~LatticeStructuralElement();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     /**
      * Returns the cross-sectional area of the lattice element.
@@ -69,6 +69,24 @@ public:
      * @return Element length.
      */
     virtual double giveLength() { return 0; }
+
+    /**
+     * Returns the length associated with bond
+     * @return bond length.
+     */
+    virtual double giveBondLength() { return 0; }
+
+    /**
+     * Returns the length associated with bond
+     * @return bond length.
+     */
+    virtual double giveBondEndLength() { return 0; }
+
+    /**
+     * Returns the length associated with bond
+     * @return bond length.
+     */
+    virtual double giveBondDiameter() { return 0; }
 
     /**
      * Returns the crack flag
@@ -88,10 +106,9 @@ public:
     virtual double giveCrackWidth() { return 0; }
 
     /**
-     * @return Crack width
+     * @return oldCrackWidth
      */
     virtual double giveOldCrackWidth() { return 0; }
-
 
     /**
      * Returns the energy dissipation computed at the GaussPoint of the element.
@@ -100,6 +117,23 @@ public:
      */
     virtual double giveDissipation() { return 0; }
 
+    /**
+     * Returns pressures
+     * @return pressures.
+     */
+    virtual void givePressures(FloatArray &pressures) {return;}
+
+    /**
+     * Returns plastic strains
+     * @return plasticStrains
+     */
+    virtual void givePlasticStrain(FloatArray &plas) {return;}
+
+    /**
+     * Returns plastic strains
+     * @return plasticStrains
+     */
+    virtual void giveOldPlasticStrain(FloatArray &plas) {return;}
 
     /**
      * Usually computes interpolation function, which is not needed for the lattice elements.

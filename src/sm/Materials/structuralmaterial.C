@@ -1219,6 +1219,18 @@ StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
 }
 
 void
+StructuralMaterial :: give1dLatticeStiffMtrx(FloatMatrix &answer,
+                                             MatResponseMode mode,
+                                             GaussPoint *gp,
+                                             TimeStep *tStep)
+//
+// return material stiffness matrix for 1dlattice
+//
+{
+    OOFEM_ERROR("No general implementation provided");
+}
+
+void
 StructuralMaterial :: give2dLatticeStiffMtrx(FloatMatrix &answer,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
