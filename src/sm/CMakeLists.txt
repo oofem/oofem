@@ -72,6 +72,8 @@ set (sm_element
     Elements/lumpedmasselement.C
     Elements/springelement.C
     Elements/lattice2d.C
+    Elements/lattice3d.C
+    Elements/lattice3dboundary.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C

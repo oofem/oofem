@@ -41,6 +41,7 @@
 //@{
 #define _IFT_InterpolatingFuction_Name "interpolatingfunction"
 #define _IFT_InterpolatingFuction_filename "name"
+#define _IFT_InterpolatingFuction_dim "dim"
 //@}
 
 namespace oofem {
@@ -53,6 +54,7 @@ class OOFEM_EXPORT InterpolatingFuction : public Function
 protected:
     FloatArray field;
     IntArray numberReal;
+    int dimension;
 
 public:
     /// Constructor
