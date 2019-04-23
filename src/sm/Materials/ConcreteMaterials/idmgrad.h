@@ -40,7 +40,7 @@
 
 #define _IFT_IsotropicGradientDamageMaterial_Name "idmgrad"
 
-#define _IFT_IsotropicGradientDamageMaterial_internalLengthDependence "ildep"
+#define _IFT_IsotropicGradientDamageMaterial_gradientDamageType "gdtype"
 #define _IFT_IsotropicGradientDamageMaterial_di_rho "di_rho"
 #define _IFT_IsotropicGradientDamageMaterial_di_eta "di_eta"
 
@@ -57,12 +57,14 @@ protected:
      *  used in initializeFrom to resolve internalLenghtDependence. If not, the consistency
      *  between initializeFrom and giveInputRecord methods is lost.
      */
-    enum InternalLengthDependenceType {
-        ILD_None = 0,
-        ILD_Damage_DecreasingInteractions = 1
+    enum GradientDamageFormulationType {
+        GDFT_Standard = 0,
+        GDFT_DecreasingInteractions = 1,
+	GDFT_Eikonal = 2
     };
 
-    InternalLengthDependenceType internalLengthDependenceType;
+
+    GradientDamageFormulationType gradientDamageFormulationType;
 
     double di_rho;
     double di_eta;
@@ -92,9 +94,9 @@ public:
     virtual void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_dd_l(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_dd_dl(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_dd_NN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_dd_BN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
 
@@ -105,6 +107,11 @@ public:
 protected:
     double computeInternalLength(GaussPoint *gp);
     int giveDimension(GaussPoint *gp);
+    
+    double computeEikonalInternalLength_a(GaussPoint *gp);
+    double computeEikonalInternalLength_b(GaussPoint *gp); 
+    double computeEikonalInternalLength_aPrime(GaussPoint *gp);
+    double computeEikonalInternalLength_bPrime(GaussPoint *gp);
 };
 
 

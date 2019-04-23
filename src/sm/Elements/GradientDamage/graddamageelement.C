@@ -506,10 +506,10 @@ GradientDamageElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatRespo
 {
     StructuralElement *elem = this->giveStructuralElement();
     double dV;
-    FloatMatrix Ddd, Ddd_l, Ddd_dl;
+    FloatMatrix Ddd_NN, Ddd_BB, Ddd_BN;
     FloatArray Nd;
     FloatMatrix Bd;
-    FloatMatrix Ddd_l_B;
+    FloatMatrix Ddd;
     StructuralCrossSection *cs = elem->giveStructuralCrossSection();
 
     answer.clear();
@@ -525,29 +525,28 @@ GradientDamageElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatRespo
         this->computeBdMatrixAt(gp, Bd);
         dV = elem->computeVolumeAround(gp);
 
-        gdmat->giveGradientDamageStiffnessMatrix_dd(Ddd, rMode, gp, tStep);
-        gdmat->giveGradientDamageStiffnessMatrix_dd_l(Ddd_l, rMode, gp, tStep);
-        gdmat->giveGradientDamageStiffnessMatrix_dd_dl(Ddd_dl, rMode, gp, tStep);
+        gdmat->giveGradientDamageStiffnessMatrix_dd_NN(Ddd_NN, rMode, gp, tStep);
+        gdmat->giveGradientDamageStiffnessMatrix_dd_BB(Ddd_BB, rMode, gp, tStep);
+        gdmat->giveGradientDamageStiffnessMatrix_dd_BN(Ddd_BN, rMode, gp, tStep);
 
 
 
-        if ( Ddd.giveNumberOfRows() > 0 ) {
-            FloatMatrix DddN;
-            DddN.beProductOf(Ddd, Ndm);
-            answer.plusProductUnsym(Ndm, DddN, dV);
+        if ( Ddd_NN.giveNumberOfRows() > 0 ) {
+	  
+            Ddd.beProductOf(Ddd_NN, Ndm);
+            answer.plusProductUnsym(Ndm, Ddd, dV);
         } else {
             answer.plusProductUnsym(Ndm, Ndm, dV);
         }
 
-        Ddd_l_B.beProductOf(Ddd_l, Bd);
-        answer.plusProductUnsym(Bd, Ddd_l_B, dV);
+        Ddd.beProductOf(Ddd_BB, Bd);
+        answer.plusProductUnsym(Bd, Ddd, dV);
 
 
 
-        if ( Ddd_dl.giveNumberOfRows() > 0 ) {
-            FloatMatrix Ddd_dl_N;
-            Ddd_dl_N.beProductOf(Ddd_dl, Ndm);
-            answer.plusProductUnsym(Bd, Ddd_dl_N, dV);
+        if ( Ddd_BN.giveNumberOfRows() > 0 ) {
+            Ddd.beProductOf(Ddd_BN, Ndm);
+            answer.plusProductUnsym(Bd, Ddd, dV);
         }
     }
 

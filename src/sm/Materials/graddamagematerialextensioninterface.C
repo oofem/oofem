@@ -50,10 +50,17 @@ GradientDamageMaterialExtensionInterface :: GradientDamageMaterialExtensionInter
 }
 
 void
-GradientDamageMaterialExtensionInterface :: giveGradientDamageStiffnessMatrix_dd_dl(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+GradientDamageMaterialExtensionInterface :: giveGradientDamageStiffnessMatrix_dd_NN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.clear();
 }
+
+void
+GradientDamageMaterialExtensionInterface :: giveGradientDamageStiffnessMatrix_dd_BN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    answer.clear();
+}
+  
 
 IRResultType
 GradientDamageMaterialExtensionInterface :: initializeFrom(InputRecord *ir)

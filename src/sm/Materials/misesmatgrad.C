@@ -134,7 +134,7 @@ MisesMatGrad :: giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatRes
 }
 
 void
-MisesMatGrad :: giveGradientDamageStiffnessMatrix_dd_l(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+MisesMatGrad :: giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -152,11 +152,6 @@ MisesMatGrad :: giveGradientDamageStiffnessMatrix_dd_l(FloatMatrix &answer, MatR
     }
 }
 
-void
-MisesMatGrad :: giveGradientDamageStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    answer.resize(0, 0);
-}
 
 
 void

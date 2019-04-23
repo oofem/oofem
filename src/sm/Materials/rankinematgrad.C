@@ -112,7 +112,7 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatR
 
 
 void
-RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd_l(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -124,11 +124,6 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd_l(FloatMatrix &answer, Ma
     }
 }
 
-void
-RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    answer.resize(0, 0);
-}
 
 void
 RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
