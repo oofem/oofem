@@ -40,7 +40,7 @@
 
 #define _IFT_IsotropicGradientDamageMaterial_Name "idmgrad"
 
-#define _IFT_IsotropicGradientDamageMaterial_gradientDamageType "gdtype"
+#define _IFT_IsotropicGradientDamageMaterial_formulationType "formtype"
 #define _IFT_IsotropicGradientDamageMaterial_di_rho "di_rho"
 #define _IFT_IsotropicGradientDamageMaterial_di_eta "di_eta"
 
@@ -60,7 +60,7 @@ protected:
     enum GradientDamageFormulationType {
         GDFT_Standard = 0,
         GDFT_DecreasingInteractions = 1,
-	GDFT_Eikonal = 2
+        GDFT_Eikonal = 2
     };
 
 
@@ -107,9 +107,9 @@ public:
 protected:
     double computeInternalLength(GaussPoint *gp);
     int giveDimension(GaussPoint *gp);
-    
+
     double computeEikonalInternalLength_a(GaussPoint *gp);
-    double computeEikonalInternalLength_b(GaussPoint *gp); 
+    double computeEikonalInternalLength_b(GaussPoint *gp);
     double computeEikonalInternalLength_aPrime(GaussPoint *gp);
     double computeEikonalInternalLength_bPrime(GaussPoint *gp);
 };
