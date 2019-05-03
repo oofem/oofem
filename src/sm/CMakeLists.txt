@@ -11,6 +11,7 @@ set (sm_element
     Elements/3D/qspace.C 
     Elements/3D/q27space.C
     Elements/3D/ltrspace.C 
+    Elements/3D/ltrspaceboundary.C
     Elements/3D/qtrspace.C 
     Elements/3D/lwedge.C 
     Elements/3D/qwedge.C 

@@ -245,13 +245,13 @@ protected:
     /**
      * Export internal variables by smoothing.
      */
-    void exportIntVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int ireg, TimeStep *tStep);
+    virtual void exportIntVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int ireg, TimeStep *tStep);
 
 
     /**
      * Export primary variables.
      */
-    void exportPrimaryVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep);
+    virtual void exportPrimaryVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep);
 
     /**
      * Export external forces.
