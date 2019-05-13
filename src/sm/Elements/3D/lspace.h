@@ -43,6 +43,7 @@
 #include "spatiallocalizer.h"
 
 #define _IFT_LSpace_Name "lspace"
+#define _IFT_LSpace_reducedShearIntegration "reducedshearint"
 
 namespace oofem {
 class FEI3dHexaLin;
@@ -58,21 +59,22 @@ class FEI3dHexaLin;
  * - Calculating its B,D,N matrices and dV.
  */
 class LSpace  : public Structural3DElement, public ZZNodalRecoveryModelInterface,
-public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public HuertaErrorEstimatorInterface
+    public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
+    public SpatialLocalizerInterface,
+    public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI3dHexaLin interpolation;
-
+    bool reducedShearIntegration;
 public:
-    LSpace(int n, Domain * d);
+    LSpace(int n, Domain *d);
     virtual ~LSpace() { }
     FEInterpolation *giveInterpolation() const override;
 
     Interface *giveInterface(InterfaceType it) override;
     int testElementExtension(ElementExtension ext) override
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
+
 
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
@@ -105,7 +107,7 @@ public:
 
 protected:
     int giveNumberOfIPForMassMtrxIntegration() override { return 8; }
-
+    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui) override;
     /**
      * @name Surface load support
      */
