@@ -131,6 +131,10 @@ RankineMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, param3, _IFT_RankineMat_param3);
         IR_GIVE_FIELD(ir, param4, _IFT_RankineMat_param4);
         IR_GIVE_FIELD(ir, param5, _IFT_RankineMat_param5);
+    } else if ( damlaw == 3 ) {
+        IR_GIVE_FIELD(ir, param1, _IFT_RankineMat_param1); // coefficients in damage law
+        IR_GIVE_FIELD(ir, param2, _IFT_RankineMat_param2);
+        IR_GIVE_FIELD(ir, param3, _IFT_RankineMat_param3);
     } else {
         OOFEM_WARNING("Damage law number  %d is unknown", damlaw);
         return IRRT_BAD_FORMAT;
@@ -443,6 +447,8 @@ RankineMat :: computeDamageParam(double tempKappa)
             tempDam = 1.0 - exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) );
         } else if ( damlaw == 2 && tempKappa > ep ) {
             tempDam = 1.0 - param5 *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) ) - ( 1. - param5 ) * exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
+        } else if ( damlaw == 3 ) {
+	  tempDam = 1.0 - (sig0 / (sig0+H0*tempKappa)) * ( (1.-param3)*exp(-param1*tempKappa) + param3*exp(-param2*tempKappa) ); 
         }
     }
 
@@ -460,6 +466,8 @@ RankineMat :: computeDamageParamPrime(double tempKappa)
             tempDam = param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) );
         } else if ( damlaw == 2 && tempKappa >= ep ) {
             tempDam = param5 * param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) ) + ( 1. - param5 ) * param3 * param4 * pow( ( tempKappa - ep ) / ep, param4 - 1 ) / ep *exp( -param3 *pow ( ( tempKappa - ep ) / ep, param4 ) );
+        } else if ( damlaw == 3 ) {
+	  tempDam = (sig0 / (sig0+H0*tempKappa)) * ( (1.-param3)*param1*exp(-param1*tempKappa) + param3*param2*exp(-param2*tempKappa) ) + (sig0*H0 / (sig0+H0*tempKappa)*(sig0+H0*tempKappa)) * ( (1.-param3)*exp(-param1*tempKappa) + param3*exp(-param2*tempKappa) ); 
         }
     }
 

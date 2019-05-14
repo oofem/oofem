@@ -153,6 +153,21 @@ RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     this->computeLocalCumPlasticStrain(cumPlasticStrain, gp, tStep);
     // standard formulation based on averaging of equivalent strain
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);
+    // influence of damage on weight function
+    if ( averType >= 2 && averType <= 6 ) {
+      this->modifyNonlocalWeightFunctionAround(gp);
+    }
+}
+
+double
+RankineMatNl :: giveNonlocalMetricModifierAt(GaussPoint *gp)
+{
+    RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
+    double damage = status->giveTempDamage();
+    if ( damage == 0. ) {
+        damage = status->giveDamage();
+    }
+    return damage;
 }
 
 // returns in "kappa" the value of kappa_hat = m*kappa_nonlocal + (1-m)*kappa_local

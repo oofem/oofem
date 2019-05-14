@@ -38,6 +38,7 @@
 #include "rankinemat.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
+#include "nonlocalmaterialext.h"
 #include "cltypes.h"
 
 #define _IFT_RankineMatNl_Name "rankmatnl"
@@ -110,7 +111,7 @@ public:
      */
     virtual void computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
-    void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
+    //void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
     void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
     {
@@ -168,6 +169,9 @@ public:
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+
+    /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
+    double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
 
     int hasBoundedSupport() override { return 1; }
 
