@@ -45,16 +45,16 @@
 namespace oofem {
 REGISTER_Material(IsotropicLinearElasticMaterial);
 
-IsotropicLinearElasticMaterial::IsotropicLinearElasticMaterial(int n, Domain* d) : 
-    LinearElasticMaterial(n, d)
+IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *d) :
+    LinearElasticMaterial(n, d), MixedPressureMaterialExtensionInterface(d)
 { }
 
 IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *d,
                                                                  double _E, double _nu) :
-    LinearElasticMaterial(n, d),
+    LinearElasticMaterial(n, d), MixedPressureMaterialExtensionInterface(d),
     E(_E),
     nu(_nu),
-    G(E / ( 2.0 * ( 1. + nu ) )),
+    G( E / ( 2.0 * ( 1. + nu ) ) ),
     a(0.)
 {
     this->initTangents();
@@ -82,9 +82,11 @@ void
 IsotropicLinearElasticMaterial :: initTangents()
 {
     double K = E / ( 3.0 * ( 1. - 2. * nu ) );
-    this->tangent = 2*G*I_dev6 + K*I6_I6;
+    this->tangent = 2 * G * I_dev6 + K * I6_I6;
     this->computesSubTangents();
-    this->alpha = {a, a, a, 0., 0., 0.};
+    this->alpha = {
+        a, a, a, 0., 0., 0.
+    };
 }
 
 void
@@ -101,7 +103,7 @@ IsotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 void IsotropicLinearElasticMaterial :: saveContext(DataStream &stream, ContextMode mode)
 {
-    LinearElasticMaterial::saveContext(stream, mode);
+    LinearElasticMaterial :: saveContext(stream, mode);
 
     if ( ( mode & CM_Definition ) ) {
         if ( !stream.write(E) ) {
@@ -119,7 +121,7 @@ void IsotropicLinearElasticMaterial :: saveContext(DataStream &stream, ContextMo
 
 void IsotropicLinearElasticMaterial :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    LinearElasticMaterial::restoreContext(stream, mode);
+    LinearElasticMaterial :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( !stream.read(E) ) {
@@ -206,4 +208,102 @@ IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
     }
 }
 
+
+
+
+
+
+
+
+void
+IsotropicLinearElasticMaterial :: giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                                                          MatResponseMode mode,
+                                                                          GaussPoint *gp,
+                                                                          TimeStep *tStep)
+//
+// forceElasticResponse ignored - always elastic
+//
+{
+    double mu = this->E / 2 / ( 1. + this->nu );
+
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 4. / 3.;
+    answer.at(1, 2) = answer.at(1, 3) = -2. / 3.;
+    answer.at(2, 1) = answer.at(2, 3) = -2. / 3.;
+    answer.at(3, 1) = answer.at(3, 2) = -2. / 3.;
+
+    answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = 1.0;
+
+    answer.times(mu);
+}
+
+
+void
+IsotropicLinearElasticMaterial :: giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix &answer,
+                                                                     MatResponseMode mode,
+                                                                     GaussPoint *gp,
+                                                                     TimeStep *tStep)
+{
+    answer.resize(4, 4);
+
+    double mu = this->E / 2 / ( 1. + this->nu );
+
+    answer.zero();
+    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) =  4. / 3.;
+    answer.at(1, 2) = answer.at(1, 3) = -2. / 3.;
+    answer.at(2, 1) = answer.at(2, 3) = -2. / 3.;
+    answer.at(3, 1) = answer.at(3, 2) = -2. / 3.;
+
+    answer.at(4, 4) = 1.0;
+
+    answer.times(mu);
+}
+
+
+
+void
+IsotropicLinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->giveDeviatoric3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+    answer.at(1) -= pressure;
+    answer.at(2) -= pressure;
+    answer.at(3) -= pressure;
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+
+void
+IsotropicLinearElasticMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep)
+{
+    FloatArray strainVector;
+    FloatMatrix d;
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+
+    this->giveDeviatoricPlaneStrainStiffMtrx(d, TangentStiffness, gp, tStep);
+    answer.beProductOf(d, strainVector);
+    answer.at(1) -= pressure;
+    answer.at(2) -= pressure;
+    answer.at(3) -= pressure;
+
+
+    // update gp
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
 } // end namespace oofem

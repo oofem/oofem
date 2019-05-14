@@ -45,7 +45,7 @@
 namespace oofem {
 REGISTER_Material(TrabBoneGrad3D);
 
-TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d), GradDpMaterialExtensionInterface(d)
+TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d), GradientDamageMaterialExtensionInterface(d)
 {
     L = 0.;
 }
@@ -69,7 +69,7 @@ TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -82,7 +82,7 @@ TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -95,7 +95,7 @@ TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -107,8 +107,9 @@ TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode,
     }
 }
 
+
 void
-TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
@@ -121,10 +122,24 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
 }
 
 void
-TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: giveNonlocalInternalForces_N_factor(double &answer, double nlDamageDrivingVariable, GaussPoint *gp, TimeStep *tStep)
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
+    answer = nlDamageDrivingVariable;
+}
+
+void
+TrabBoneGrad3D :: giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlDamageDrivingVariable_grad, GaussPoint *gp, TimeStep *tStep)
+{
+    answer = nlDamageDrivingVariable_grad;
+    answer.times(internalLength * internalLength);
+}
+
+
+void
+TrabBoneGrad3D :: computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
+    answer =  status->giveTempKappa();
 }
 
 
@@ -281,7 +296,7 @@ TrabBoneGrad3D :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, 
 }
 
 void
-TrabBoneGrad3D :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
+TrabBoneGrad3D :: giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
     TrabBoneGrad3DStatus *status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
 

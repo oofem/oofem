@@ -34,8 +34,8 @@
 
 #ifndef MisesMatGrad_h
 
-#include "sm/Materials/misesmat.h"
-#include "graddpmaterialextensioninterface.h"
+#include "Materials/misesmat.h"
+#include "graddamagematerialextensioninterface.h"
 #include "cltypes.h"
 
 ///@name Input fields for MisesMatGrad
@@ -49,66 +49,68 @@ namespace oofem {
 /**
  * Gradient Mises maaterial status.
  */
-class MisesMatGradStatus : public MisesMatStatus, GradDpMaterialStatusExtensionInterface
+class MisesMatGradStatus : public MisesMatStatus, GradientDamageMaterialStatusExtensionInterface
 {
 protected:
     double localCumPlastStrainForAverage;
 
 public:
-    MisesMatGradStatus(GaussPoint * g);
+    MisesMatGradStatus(GaussPoint *g);
     virtual ~MisesMatGradStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    const char *giveClassName() const override { return "MisesMatGradStatus"; }
+    // definition
+    virtual const char *giveClassName() const { return "MisesMatGradStatus"; }
 
-    void initTempStatus() override;
-    void updateYourself(TimeStep *tStep) override;
+    virtual void initTempStatus();
+    virtual void updateYourself(TimeStep *tStep);
 
-    double giveNonlocalCumulatedStrain() override { return nonlocalCumulatedStrain; }
-    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) override { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
+    virtual double giveNonlocalCumulatedStrain() { return nonlocalDamageDrivingVariable; }
+    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalDamageDrivingVariable = nonlocalCumulatedStrain; }
 };
 
 
 /**
  * Gradient Mises material.
  */
-class MisesMatGrad : public MisesMat, GradDpMaterialExtensionInterface
+class MisesMatGrad : public MisesMat, GradientDamageMaterialExtensionInterface
 {
 protected:
     double L;
     double mParam;
 
 public:
-    MisesMatGrad(int n, Domain * d);
+    MisesMatGrad(int n, Domain *d);
     virtual ~MisesMatGrad();
 
-    const char *giveInputRecordName() const override { return _IFT_MisesMatGrad_Name; }
-    const char *giveClassName() const override { return "MisesMatGrad"; }
+    // definition
+    virtual const char *giveInputRecordName() const { return _IFT_MisesMatGrad_Name; }
+    virtual const char *giveClassName() const { return "MisesMatGrad"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int hasMaterialModeCapability(MaterialMode mode);
 
-    Interface *giveInterface(InterfaceType t) override {
-        if ( t == GradDpMaterialExtensionInterfaceType ) {
-            return static_cast< GradDpMaterialExtensionInterface * >(this);
+    virtual Interface *giveInterface(InterfaceType t) {
+        if ( t == GradientDamageMaterialExtensionInterfaceType ) {
+            return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
-            return nullptr;
+            return NULL;
         }
     }
 
-    void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
+    virtual void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    virtual void givePlaneStrainStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
 
-    void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
+    virtual void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
+
 
     void give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -120,11 +122,17 @@ public:
 
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
+
+    virtual void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep);
+
+    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
+    //    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
 protected:
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MisesMatGradStatus(gp); }
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MisesMatGradStatus(gp); }
 };
 } // end namespace oofem
 #define MisesMatGrad_h

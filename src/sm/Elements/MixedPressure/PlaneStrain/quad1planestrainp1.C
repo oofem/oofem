@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/PlaneStress/qplanestressgrad.h"
-#include "fei2dquadlin.h"
+#include "Elements/MixedPressure/PlaneStrain/quad1planestrainp1.h"
+#include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -42,64 +42,73 @@
 #include "crosssection.h"
 #include "classfactory.h"
 
+
 namespace oofem {
-REGISTER_Element(QPlaneStressGrad);
+REGISTER_Element(Quad1PlaneStrainP1);
 
-FEI2dQuadLin QPlaneStressGrad :: interpolation_lin(1, 2);
 
-QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n, aDomain), GradDpElement()
-    // Constructor.
+Quad1PlaneStrainP1 :: Quad1PlaneStrainP1(int n, Domain *aDomain) : Quad1PlaneStrain(n, aDomain), BaseMixedPressureElement()
 {
-    nPrimNodes = 8;
-    nPrimVars = 2;
-    nSecNodes = 4;
-    nSecVars = 1;
-    totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
-    locSize   = nPrimVars * nPrimNodes;
-    nlSize    = nSecVars * nSecNodes;
-    numberOfGaussPoints = 4;
+    displacementDofsOrdering = {
+        1, 2, 4, 5, 7, 8, 10, 11
+    };
+    pressureDofsOrdering = {
+        3, 6, 9, 12
+    };
 }
+
 
 
 void
-QPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
+Quad1PlaneStrainP1 :: computeVolumetricBmatrixAt(GaussPoint *gp, FloatArray &answer, NLStructuralElement *elem)
 {
-    if ( inode <= 4 ) {
-        answer = {D_u, D_v, G_0};
-    } else {
-        answer = {D_u, D_v};
-    }
-}
-
-
-IRResultType
-QPlaneStressGrad :: initializeFrom(InputRecord *ir)
-{
-    return QPlaneStress2d :: initializeFrom(ir);
-}
-
-
-void
-QPlaneStressGrad :: computeGaussPoints()
-{
-    if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
+    answer.resize(8);
+    FloatMatrix dN;
+    elem->giveInterpolation()->evaldNdx( dN, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    for ( int j = 0, k = 0; j < 4; j++, k += 2 ) {
+        answer(k)     = dN(j, 0);
+        answer(k + 1) = dN(j, 1);
     }
 }
 
 void
-QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
+Quad1PlaneStrainP1 :: computePressureNMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
-    this->interpolation_lin.evalN(answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    NLStructuralElement *elem = this->giveElement();
+    elem->giveInterpolation()->evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+}
+
+
+void
+Quad1PlaneStrainP1 :: giveDofManDofIDMask(int inode, IntArray &answer) const
+{
+    answer = {
+        D_u, D_v, P_f
+    };
+}
+
+
+void
+Quad1PlaneStrainP1 :: giveDofManDofIDMask_u(IntArray &answer)
+{
+    answer = {
+        D_u, D_v
+    };
+}
+
+
+void
+Quad1PlaneStrainP1 :: giveDofManDofIDMask_p(IntArray &answer)
+{
+    answer = {
+        P_f
+    };
 }
 
 void
-QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Quad1PlaneStrainP1 ::  postInitialize()
 {
-    FloatMatrix dnx;
-    this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.beTranspositionOf(dnx);
+    BaseMixedPressureElement :: postInitialize();
+    Quad1PlaneStrain :: postInitialize();
 }
-}
+} // end namespace oofem

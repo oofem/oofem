@@ -32,15 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/Bars/qtruss1dgrad.h"
-#include "fei1dlin.h"
-#include "fei1dquad.h"
+#include "Elements/GradientDamage/PlaneStress/qtrplstrgraddamage.h"
+#include "fei2dtrlin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "sm/CrossSections/structuralcrosssection.h"
+#include "crosssection.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -48,96 +47,87 @@
 #endif
 
 namespace oofem {
-REGISTER_Element(QTruss1dGrad);
+REGISTER_Element(QTrPlaneStressGradDamage);
 
-FEI1dLin QTruss1dGrad :: interpolation_lin(1);
+FEI2dTrLin QTrPlaneStressGradDamage :: interpolation_lin(1, 2);
 
-QTruss1dGrad :: QTruss1dGrad(int n, Domain *aDomain) : QTruss1d(n, aDomain), GradDpElement()
+QTrPlaneStressGradDamage :: QTrPlaneStressGradDamage(int n, Domain *aDomain) : QTrPlaneStress2d(n, aDomain), GradientDamageElement()
     // Constructor.
 {
-    nPrimNodes = 3;
-    nPrimVars = 1;
-    nSecNodes = 2;
+    nPrimNodes = 6;
+    nPrimVars = 2;
+    nSecNodes = 3;
     nSecVars = 1;
     totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
     locSize   = nPrimVars * nPrimNodes;
     nlSize    = nSecVars * nSecNodes;
+    numberOfGaussPoints = 4;
 }
 
 
 void
-QTruss1dGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
+QTrPlaneStressGradDamage :: giveDofManDofIDMask(int inode, IntArray &answer) const
+
 {
-    if ( inode < 3 ) {
-        answer = {D_u, G_0};
+    if ( inode <= 3 ) {
+        answer = {D_u, D_v, G_0};
     } else {
-        answer = {D_u};
+        answer = {D_u, D_v};
     }
 }
 
 
+  void
+QTrPlaneStressGradDamage :: giveDofManDofIDMask_u(IntArray &answer) const
+{
+  answer = {D_u, D_v};
+}
+
+
+void
+QTrPlaneStressGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
+{
+  /*
+  if ( inode <= 3 ) {
+    answer = {G_0};
+  } else {
+    answer = {};
+  }
+  */
+}
+
+
+
+  
+
 IRResultType
-QTruss1dGrad :: initializeFrom(InputRecord *ir)
+QTrPlaneStressGradDamage :: initializeFrom(InputRecord *ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    return QTrPlaneStress2d :: initializeFrom(ir);
 }
 
 
 void
-QTruss1dGrad :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+QTrPlaneStressGradDamage :: computeGaussPoints()
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
+    }
 }
 
-
 void
-QTruss1dGrad :: computeGaussPoints()
-{
-    integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 1);
-    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-}
-
-
-void
-QTruss1dGrad :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-{
-    GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep);
-}
-
-
-void
-QTruss1dGrad :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-{
-    GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
-}
-
-
-void
-QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
+QTrPlaneStressGradDamage :: computeNdMatrixAt(GaussPoint *gp, FloatArray &answer)
 {
     this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
-
 void
-QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QTrPlaneStressGradDamage :: computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
-
-void QTruss1dGrad :: computeField(ValueModeType mode, TimeStep* tStep, const FloatArray& lcoords, FloatArray& answer)
-{
-    FloatArray n, unknown;
-    this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf({D_u}, mode, tStep, unknown);
-    answer.at(1) = n.dotProduct(unknown);
-
-    this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf({G_0}, mode, tStep, unknown);
-    answer.at(2) = n.dotProduct(unknown);
-}
-
 }

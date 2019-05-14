@@ -32,40 +32,43 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef qtrplanestraingrad_h
-#define qtrplanestraingrad_h
+#ifndef qtrplanestraingraddamage_h
+#define qtrplanestraingraddamage_h
 
-#include "sm/Elements/PlaneStrain/qtrplanestrain.h"
-#include "sm/Elements/graddpelement.h"
+#include "../sm/Elements/PlaneStrain/qtrplanestrain.h"
+#include "../sm/Elements/GradientDamage/graddamageelement.h"
 
 namespace oofem {
 class FEI2dTrLin;
 
-class QTrPlaneStrainGrad : public QTrPlaneStrain, public GradDpElement
+class QTrPlaneStrainGradDamage : public QTrPlaneStrain, public GradientDamageElement
 {
 protected:
     static FEI2dTrLin interpolation_lin;
 
 public:
-    QTrPlaneStrainGrad(int n, Domain * d);
-    virtual ~QTrPlaneStrainGrad() { }
+    QTrPlaneStrainGradDamage(int n, Domain * d);
+    virtual ~QTrPlaneStrainGradDamage() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
-    //const char *giveInputRecordName() const override { return _IFT_QtrPlaneStrainGrad_Name; }
-    const char *giveClassName() const override { return "QTrPlaneStrainGrad"; }
+    //virtual const char *giveInputRecordName() const { return _IFT_QtrPlaneStrainGradDamage_Name; }
+    virtual const char *giveClassName() const { return "QTrPlaneStrainGrad"; }
 
 protected:
-     void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
-    void computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer) override;
-    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
-    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    virtual void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeNdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
 
-    int computeNumberOfDofs() override { return 15; }
-    void computeGaussPoints() override;
-    void giveDofManDofIDMask(int inode, IntArray &) const override;
-    StructuralElement *giveStructuralElement() override { return this; }
-    NLStructuralElement *giveNLStructuralElement() override { return this; }
+    virtual int computeNumberOfDofs() { return 15; }
+    virtual void computeGaussPoints();
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    void giveDofManDofIDMask_u(IntArray &answer) const;
+    void giveDofManDofIDMask_d(IntArray &answer) const;
+    
+    virtual StructuralElement *giveStructuralElement() { return this; }
+    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };
 } // end namespace oofem
 #endif // qtrplanestraingrad_h

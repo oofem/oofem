@@ -9,22 +9,17 @@ set (sm_element
     Elements/3D/lspace.C 
     Elements/3D/lspacebb.C
     Elements/3D/qspace.C 
-    Elements/3D/qspacegrad.C
     Elements/3D/q27space.C
     Elements/3D/ltrspace.C 
     Elements/3D/qtrspace.C 
-    Elements/3D/qtrspacegrad.C
     Elements/3D/lwedge.C 
     Elements/3D/qwedge.C 
     Elements/3D/macrolspace.C
-    Elements/3D/qspacegrad.C
-    Elements/3D/qwedgegrad.C
     Elements/Bars/truss1d.C 
     Elements/Bars/truss2d.C 
     Elements/Bars/truss3d.C
     Elements/Bars/truss3dnl.C
     Elements/Bars/qtruss1d.C 
-    Elements/Bars/qtruss1dgrad.C
     Elements/Beams/libeam2d.C 
     Elements/Beams/libeam2dnl.C
     Elements/Beams/libeam3d.C 
@@ -54,9 +49,7 @@ set (sm_element
     Elements/Axisymmetry/l4axisymm.C
     Elements/PlaneStrain/quad1planestrain.C 
     Elements/PlaneStrain/qplanestrain.C 
-    Elements/PlaneStrain/qplanestraingrad.C
     Elements/PlaneStrain/qtrplanestrain.C 
-    Elements/PlaneStrain/qtrplanestraingrad.C
     Elements/PlaneStrain/trplanestrain.C 
     Elements/PlaneStress/planestresselementevaluator.C
     Elements/PlaneStress/trplanrot.C
@@ -68,9 +61,7 @@ set (sm_element
     Elements/PlaneStress/planstrssxfem.C
     Elements/PlaneStress/trplanstrssxfem.C
     Elements/PlaneStress/qtrplanstrssxfem.C
-    Elements/PlaneStress/qtrplstrgrad.C
     Elements/PlaneStress/trplanrot3d.C
-    Elements/PlaneStress/qplanestressgrad.C
     Elements/PlaneStress/trplanestressrotallman.C
     Elements/PlaneStress/basicelement.C
     Elements/PlaneStress/trplanestressrotallman3d.C
@@ -78,7 +69,6 @@ set (sm_element
     Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
-    Elements/graddpelement.C 
     Elements/lumpedmasselement.C
     Elements/springelement.C
     Elements/lattice2d.C
@@ -86,10 +76,31 @@ set (sm_element
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C
     Elements/tria1platesubsoil.C
+    Elements/tria2platesubsoil.C
     Elements/linedistributedspring.C
     Elements/trwarp.C
     Elements/PlaneStress/basicelement.C
     Elements/nodalspringelement.C
+    #Gradient damage elements
+    Elements/GradientDamage/graddamageelement.C 
+    Elements/GradientDamage/Bars/truss1dgraddamage.C
+    Elements/GradientDamage/Bars/qtruss1dgraddamage.C
+    Elements/GradientDamage/PlaneStrain/quad1planestraingraddamage.C 
+    Elements/GradientDamage/PlaneStrain/qplanestraingraddamage.C
+    Elements/GradientDamage/PlaneStrain/qtrplanestraingraddamage.C
+    Elements/GradientDamage/PlaneStress/trplstrgraddamage.C 
+    Elements/GradientDamage/PlaneStress/qtrplstrgraddamage.C
+    Elements/GradientDamage/PlaneStress/planestressgraddamage.C
+    Elements/GradientDamage/PlaneStress/qplanestressgraddamage.C
+    Elements/GradientDamage/3D/qspacegraddamage.C
+    Elements/GradientDamage/3D/qtrspacegraddamage.C
+    Elements/GradientDamage/3D/qspacegraddamage.C
+    Elements/GradientDamage/3D/qwedgegraddamage.C
+    #Mixed pressure elements
+    Elements/MixedPressure/basemixedpressureelement.C
+    Elements/MixedPressure/PlaneStrain/qtrplanestrainp1.C
+    Elements/MixedPressure/PlaneStrain/quad1planestrainp1.C
+
     Elements/structural2delement.C
     Elements/structural3delement.C
     #Elements/phasefieldelement.C
@@ -174,7 +185,7 @@ set (sm_material
     Materials/ConcreteMaterials/concretedpm2.C
     Materials/ConcreteMaterials/idm1.C 
     Materials/ConcreteMaterials/idmnl1.C 
-    Materials/ConcreteMaterials/idmgrad1.C
+    Materials/ConcreteMaterials/idmgrad.C
     Materials/ConcreteMaterials/mazarsmodel.C 
     Materials/ConcreteMaterials/mazarsmodelnl.C
     Materials/ConcreteMaterials/mplasticmaterial2.C
@@ -224,7 +235,9 @@ set (sm_material
     Materials/winklermodel.C
     Materials/structmatsettable.C
     Materials/tutorialmaterial.C
-    Materials/graddpmaterialextensioninterface.C
+    Materials/graddamagematerialextensioninterface.C
+    #Mixed pressure material interface
+    Materials/MixedPressure/mixedpressurematerialextensioninterface.C
     Materials/rcm2.C
     Materials/isodamagemodel.C
     Materials/steelrelaxmat.C
@@ -308,7 +321,10 @@ set (sm_unsorted
     mappers/primvarmapper.C
     Contact/cdefnode2node.C
     Contact/celnode2node.C
+    Contact/ActiveBc/node2nodecontact.C
     )
+
+  
 
 set (sm_parallel
     FETISolver/feticommunicator.C

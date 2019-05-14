@@ -808,7 +808,11 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
 
         double kappa = sqrt( sum / lmat->give('E', gp) );
         answer = stress;
-        answer.times(1. / lmat->give('E', gp) / kappa);
+        if ( kappa != 0 ) {
+            answer.times(1. / lmat->give('E', gp) / kappa);
+        } else {
+            answer.times(0.);
+        }
     } else {
         OOFEM_ERROR("unknown EquivStrainType");
     }
@@ -1356,7 +1360,7 @@ IsotropicDamageMaterial1 :: giveStatus(GaussPoint *gp) const
         status = this->CreateStatus(gp);
 
         if ( status ) {
-            gp->setMaterialStatus( status );
+            gp->setMaterialStatus(status);
             this->_generateStatusVariables(gp);
         }
     }
@@ -1457,8 +1461,7 @@ IsotropicDamageMaterial1 :: MMI_finish(TimeStep *tStep)
 
 IsotropicDamageMaterial1Status :: IsotropicDamageMaterial1Status(GaussPoint *g) :
     IsotropicDamageMaterialStatus(g), RandomMaterialStatusExtensionInterface()
-{
-}
+{}
 
 Interface *
 IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
@@ -1469,5 +1472,4 @@ IsotropicDamageMaterial1Status :: giveInterface(InterfaceType type)
         return NULL;
     }
 }
-
 }     // end namespace oofem

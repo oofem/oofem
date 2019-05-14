@@ -64,7 +64,11 @@ IRResultType HangingNode :: initializeFrom(InputRecord *ir)
 
 int HangingNode :: checkConsistency()
 {
-    Element *e = this->domain->giveElement(this->masterElement);
+    if (this->masterElement !=-1){
+        return true;
+    }
+        
+    Element *e = this->domain->giveGlobalElement(this->masterElement);
     int result = Node :: checkConsistency();
 
 #if 0
@@ -115,7 +119,10 @@ void HangingNode :: postInitialize()
             OOFEM_ERROR("Couldn't find closest element (automatically).");
         }
         this->masterElement = e->giveNumber();
-    } else if ( !( e = this->giveDomain()->giveElement(this->masterElement) ) ) {
+        #  ifdef DEBUG
+        OOFEM_LOG_INFO("Found element %d for hanging node %d\n", e->giveGlobalNumber(), this->giveNumber() );
+        #endif
+    } else if ( !( e = this->giveDomain()->giveGlobalElement(this->masterElement) ) ) {
         OOFEM_ERROR("Requested element %d doesn't exist.", this->masterElement);
     }
     if ( !( fei = e->giveInterpolation() ) ) {

@@ -32,35 +32,28 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/3D/qwedgegrad.h"
-#include "sm/Materials/structuralms.h"
-#include "sm/CrossSections/structuralcrosssection.h"
-#include "fei3dwedgelin.h"
+#include "../sm/Elements/GradientDamage/PlaneStrain/qtrplanestraingraddamage.h"
+#include "fei2dtrlin.h"
 #include "node.h"
-#include "material.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
-#include "floatarray.h"
 #include "intarray.h"
-#include "domain.h"
-#include "cltypes.h"
-#include "mathfem.h"
-#include "classfactory.h"
+#include "crosssection.h"
 
-#include <cstdio>
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
 
 namespace oofem {
-REGISTER_Element(QWedgeGrad);
 
-FEI3dWedgeLin QWedgeGrad :: interpolation_lin;
+FEI2dTrLin QTrPlaneStrainGradDamage :: interpolation_lin(1, 2);
 
-QWedgeGrad :: QWedgeGrad(int n, Domain *aDomain) :  QWedge(n, aDomain), GradDpElement()
-    // Constructor.
+QTrPlaneStrainGradDamage :: QTrPlaneStrainGradDamage(int n, Domain *aDomain) : QTrPlaneStrain(n, aDomain), GradientDamageElement()
 {
-    nPrimNodes = 15;
-    nPrimVars = 3;
-    nSecNodes = 6;
+    nPrimNodes = 6;
+    nPrimVars = 2;
+    nSecNodes = 3;
     nSecVars = 1;
     totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
     locSize   = nPrimVars * nPrimNodes;
@@ -68,50 +61,70 @@ QWedgeGrad :: QWedgeGrad(int n, Domain *aDomain) :  QWedge(n, aDomain), GradDpEl
 }
 
 
-IRResultType
-QWedgeGrad :: initializeFrom(InputRecord *ir)
+void
+QTrPlaneStrainGradDamage :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    numberOfGaussPoints = 9;
-    return Structural3DElement :: initializeFrom(ir);
+    if ( inode <= 3 ) {
+        answer = {D_u, D_v, G_0};
+    } else {
+        answer = {D_u, D_v};
+    }
+}
+
+
+
+void
+QTrPlaneStrainGradDamage :: giveDofManDofIDMask_u(IntArray &answer) const
+{
+  answer = {D_u, D_v};
 }
 
 
 void
-QWedgeGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
-// returns DofId mask array for inode element node.
-// DofId mask array determines the dof ordering requsted from node.
-// DofId mask array contains the DofID constants (defined in cltypes.h)
-// describing physical meaning of particular DOFs.
+QTrPlaneStrainGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
 {
-    if ( inode <= 6 ) {
-        answer = {D_u, D_v, D_w, G_0};
+  /*
+    if ( inode <= 3 ) {
+      answer = {G_0};
     } else {
-        answer = {D_u, D_v, D_w};
+      answer = {};
+    }
+  */
+}
+
+
+  
+
+IRResultType
+QTrPlaneStrainGradDamage :: initializeFrom(InputRecord *ir)
+{
+    numberOfGaussPoints = 4;
+    return QTrPlaneStrain :: initializeFrom(ir);
+}
+
+void
+QTrPlaneStrainGradDamage :: computeGaussPoints()
+{
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-QWedgeGrad :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
+QTrPlaneStrainGradDamage :: computeNdMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 7);
-    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-}
-
-
-void
-QWedgeGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatArray &answer)
-{
-    this->interpolation_lin.evalN( answer, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    FloatArray n;
+    this->interpolation_lin.evalN( n, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beNMatrixOf(n, 1);
 }
 
 void
-QWedgeGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
+QTrPlaneStrainGradDamage :: computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
     this->interpolation_lin.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
-
 }

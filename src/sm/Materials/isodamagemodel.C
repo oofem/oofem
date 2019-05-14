@@ -251,6 +251,31 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     answer.times(1.0 - tempDamage);
+
+    if ( mode == TangentStiffness ) {
+        double damage = status->giveDamage();
+        if ( tempDamage > damage ) {
+            double tempKappa;
+            FloatArray stress, strain, eta;
+            FloatMatrix correctionTerm;
+            stress = status->giveTempStressVector();
+            strain = status->giveTempStrainVector();
+            tempKappa = status->giveTempKappa();
+            // effective stress
+            stress.times( 1. / ( 1 - tempDamage ) );
+            //Computes derivative of the equivalent strain with regards to strain
+            this->computeEta(eta, strain, gp, tStep);
+            //compute derivative of damage function
+            double damagePrime = damageFunctionPrime(tempKappa, gp);
+            // dyadic product of eff stress and eta
+            correctionTerm.beDyadicProductOf(stress, eta);
+            // times minus derivative of damage function
+            correctionTerm.times(-damagePrime);
+            // add to secant stiffness
+            answer.add(correctionTerm);
+        }
+    }
+
     //TODO - correction for tangent mode
 }
 
@@ -295,7 +320,7 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         answer.resize(1);
         answer.at(1) = status->giveLe();
         return 1;
-    } else if (type == IST_CrackWidth) {
+    } else if ( type == IST_CrackWidth ) {
         answer.resize(1);
         FloatArray reducedTotalStrainVector;
         this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, status->giveStrainVector(), tStep, VM_Total);
