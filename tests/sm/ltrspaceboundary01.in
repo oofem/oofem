@@ -1,6 +1,5 @@
 ltrspaceboundary01.out
-3D RVE - periodic boundary conditions with LTRSpaceBoundaryElements, periodicity in x
-#StaticStructural nsteps 1 solverType "calm" stepLength 0.3 Psi 0 hpc 2 126 1 initialguess 1 nmodules 1 lstype 3 smtype 7
+3D RVE - periodic boundary conditions with LTRSpaceBoundaryTruss elements, periodicity in x
 StaticStructural nsteps 1 initialguess 1 nmodules 1 lstype 3 smtype 7
 #vtkxmlperiodic primvars 1 1 vars 3 4 1 12 cellvars 1 46 tstep_all domain_all stype 0
 #vtkxmlperiodic ipvars 3 4 1 12 tstep_all domain_all
@@ -28,24 +27,23 @@ node 63 coords 3 4.791257e-02 0.000000e+00 5.059616e-02
 node 72 coords 3 4.791257e-02 1.000000e-01 5.059616e-02
 node 90 coords 3 0.000000e+00 4.791257e-02 5.059616e-02
 node 99 coords 3 4.463697e-02 4.791257e-02 5.059616e-02
-node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 6 1 2 3 4 5 6 bc 6 2 2 2 2 2 2
-#node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 6 1 2 3 4 5 6 load 1 2
-ltrspaceboundary 14 nodes 5 99 18 54 90 126 crossSect 1 mat 1 location 4 0 0 0 22
-ltrspaceboundary 15 nodes 5 18 99 72 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 9 1 2 3 4 5 6 7 8 9 bc 9 2 2 2 2 2 2 2 2 2
+ltrspaceboundarytruss 14 nodes 5 99 18 54 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+ltrspaceboundarytruss 15 nodes 5 18 99 72 90 126 crossSect 1 mat 1 location 4 0 0 0 22
 ltrspace 16 nodes 4 99 18 72 54 crossSect 1 mat 1
-ltrspaceboundary 18 nodes 5 24 99 9 90 126 crossSect 1 mat 1 location 4 22 0 0 22
-ltrspaceboundary 53 nodes 5 30 99 54 90 126 crossSect 1 mat 1 location 4 22 0 0 22
-ltrspaceboundary 54 nodes 5 18 30 54 90 126 crossSect 1 mat 1 location 4 0 22 0 22
-ltrspaceboundary 55 nodes 5 30 18 8 90 126 crossSect 1 mat 1 location 4 22 0 22 22
+ltrspaceboundarytruss 18 nodes 5 24 99 9 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundarytruss 53 nodes 5 30 99 54 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundarytruss 54 nodes 5 18 30 54 90 126 crossSect 1 mat 1 location 4 0 22 0 22
+ltrspaceboundarytruss 55 nodes 5 30 18 8 90 126 crossSect 1 mat 1 location 4 22 0 22 22
 ltrspace 57 nodes 4 90 99 54 30 crossSect 1 mat 1
 ltrspace 58 nodes 4 18 8 72 54 crossSect 1 mat 1
 ltrspace 59 nodes 4 8 90 54 30 crossSect 1 mat 1
 ltrspace 60 nodes 4 8 99 72 54 crossSect 1 mat 1
 ltrspace 61 nodes 4 8 90 99 54 crossSect 1 mat 1
-ltrspaceboundary 72 nodes 5 45 24 99 9 126 crossSect 1 mat 1 location 4 0 22 0 0
-ltrspaceboundary 73 nodes 5 24 45 99 90 126 crossSect 1 mat 1 location 4 22 0 0 22
-ltrspaceboundary 136 nodes 5 15 30 99 54 126 crossSect 1 mat 1 location 4 0 22 0 0
-ltrspaceboundary 140 nodes 5 30 15 99 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundarytruss 72 nodes 5 45 24 99 9 126 crossSect 1 mat 1 location 4 0 22 0 0
+ltrspaceboundarytruss 73 nodes 5 24 45 99 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundarytruss 136 nodes 5 15 30 99 54 126 crossSect 1 mat 1 location 4 0 22 0 0
+ltrspaceboundarytruss 140 nodes 5 30 15 99 90 126 crossSect 1 mat 1 location 4 22 0 0 22
 ltrspace 176 nodes 4 45 24 90 4 crossSect 1 mat 1
 ltrspace 177 nodes 4 24 45 90 99 crossSect 1 mat 1
 ltrspace 178 nodes 4 39 8 99 72 crossSect 1 mat 1
@@ -54,26 +52,26 @@ ltrspace 180 nodes 4 45 39 99 72 crossSect 1 mat 1
 ltrspace 181 nodes 4 39 45 4 72 crossSect 1 mat 1
 ltrspace 182 nodes 4 45 39 90 99 crossSect 1 mat 1
 ltrspace 183 nodes 4 39 45 90 4 crossSect 1 mat 1
-ltrspaceboundary 253 nodes 5 99 12 72 90 126 crossSect 1 mat 1 location 4 0 0 0 22
-ltrspaceboundary 254 nodes 5 45 12 99 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+ltrspaceboundarytruss 253 nodes 5 99 12 72 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+ltrspaceboundarytruss 254 nodes 5 45 12 99 90 126 crossSect 1 mat 1 location 4 0 0 0 22
 ltrspace 255 nodes 4 12 45 99 72 crossSect 1 mat 1
-ltrspaceboundary 256 nodes 5 12 45 24 90 126 crossSect 1 mat 1 location 4 0 0 22 22
-ltrspaceboundary 257 nodes 5 4 12 24 90 126 crossSect 1 mat 1 location 4 22 0 22 22
+ltrspaceboundarytruss 256 nodes 5 12 45 24 90 126 crossSect 1 mat 1 location 4 0 0 22 22
+ltrspaceboundarytruss 257 nodes 5 4 12 24 90 126 crossSect 1 mat 1 location 4 22 0 22 22
 ltrspace 261 nodes 4 45 12 4 72 crossSect 1 mat 1
-ltrspaceboundary 287 nodes 5 33 24 9 90 126 crossSect 1 mat 1 location 4 22 22 0 22
-ltrspaceboundary 288 nodes 5 1 33 24 9 126 crossSect 1 mat 1 location 4 22 22 22 0
-ltrspaceboundary 290 nodes 5 33 15 30 90 126 crossSect 1 mat 1 location 4 22 0 22 22
-ltrspaceboundary 304 nodes 5 5 33 15 30 126 crossSect 1 mat 1 location 4 22 22 0 22
+ltrspaceboundarytruss 287 nodes 5 33 24 9 90 126 crossSect 1 mat 1 location 4 22 22 0 22
+ltrspaceboundarytruss 288 nodes 5 1 33 24 9 126 crossSect 1 mat 1 location 4 22 22 22 0
+ltrspaceboundarytruss 290 nodes 5 33 15 30 90 126 crossSect 1 mat 1 location 4 22 0 22 22
+ltrspaceboundarytruss 304 nodes 5 5 33 15 30 126 crossSect 1 mat 1 location 4 22 22 0 22
 ltrspace 415 nodes 4 33 24 90 99 crossSect 1 mat 1
 ltrspace 419 nodes 4 90 33 99 30 crossSect 1 mat 1
-ltrspaceboundary 437 nodes 5 12 39 72 90 126 crossSect 1 mat 1 location 4 0 22 0 22
-ltrspaceboundary 438 nodes 5 39 12 4 90 126 crossSect 1 mat 1 location 4 22 0 22 22
-ltrspaceboundary 441 nodes 5 18 39 8 90 126 crossSect 1 mat 1 location 4 0 22 22 22
-ltrspaceboundary 442 nodes 5 39 18 72 90 126 crossSect 1 mat 1 location 4 22 0 0 22
-ltrspaceboundary 453 nodes 5 15 63 99 90 126 crossSect 1 mat 1 location 4 0 0 0 22
-ltrspaceboundary 454 nodes 5 33 63 15 90 126 crossSect 1 mat 1 location 4 22 0 0 22
-ltrspaceboundary 455 nodes 5 99 63 9 90 126 crossSect 1 mat 1 location 4 0 0 0 22
-ltrspaceboundary 456 nodes 5 63 33 9 90 126 crossSect 1 mat 1 location 4 0 22 0 22
+ltrspaceboundarytruss 437 nodes 5 12 39 72 90 126 crossSect 1 mat 1 location 4 0 22 0 22
+ltrspaceboundarytruss 438 nodes 5 39 12 4 90 126 crossSect 1 mat 1 location 4 22 0 22 22
+ltrspaceboundarytruss 441 nodes 5 18 39 8 90 126 crossSect 1 mat 1 location 4 0 22 22 22
+ltrspaceboundarytruss 442 nodes 5 39 18 72 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundarytruss 453 nodes 5 15 63 99 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+ltrspaceboundarytruss 454 nodes 5 33 63 15 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundarytruss 455 nodes 5 99 63 9 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+ltrspaceboundarytruss 456 nodes 5 63 33 9 90 126 crossSect 1 mat 1 location 4 0 22 0 22
 ltrspace 458 nodes 4 33 63 24 99 crossSect 1 mat 1
 ltrspace 462 nodes 4 15 63 5 30 crossSect 1 mat 1
 ltrspace 463 nodes 4 63 33 5 30 crossSect 1 mat 1
@@ -87,10 +85,9 @@ ltrspace 476 nodes 4 63 15 99 54 crossSect 1 mat 1
 ltrspace 537 nodes 4 63 1 24 9 crossSect 1 mat 1
 ltrspace 538 nodes 4 63 1 33 24 crossSect 1 mat 1
 simplecs 1
-isole 1 talpha 0. d 0. e 30.e9 n 0.
+isole 1 talpha 0. d 0. e 30.e9 n 0.2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-#NodalLoad 2 loadTimeFunction 1 Components 6 0. 0. 0. 0. 0. 0. reference
-BoundaryCondition 2 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0.3 0.0 0.0 0.0 0.0 0.0 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0.3 set 1
 ConstantFunction 1 f(t) 1.
 set 1 nodes 1 126
 

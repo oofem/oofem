@@ -141,7 +141,7 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
 
             // Set the connectivity
 
-            if ( strcmp(elem->giveClassName(), "LTRSpaceBoundary") == 0 ) {
+            if ( dynamic_cast<LTRSpaceBoundary*>(elem) ) {
                 cellNodes.resize(4);
                 LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(elem);
                 IntArray loc = boundElem->giveLocation();
@@ -206,7 +206,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
     int extraNodes = 0.;
     for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
         element = domain->giveElement(ie);
-        if ( strcmp(element->giveClassName(), "LTRSpaceBoundary") == 0 ) {
+        if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
             LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(element);
             IntArray loc = boundElem->giveLocation();
             for ( int ielnode = 1; ielnode <= 4; ielnode++ ) {
@@ -249,12 +249,12 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
         regionSingleCells++;
         elemNodes = element->giveNumberOfNodes();
 
-        if ( strcmp(element->giveClassName(), "LTRSpaceBoundary") == 0 ) {
+        if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
             elemNodes = 4;
         }
 
         for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
-            if ( strcmp(element->giveClassName(), "LTRSpaceBoundary") == 0 ) {
+            if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
                 LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(element);
                 IntArray loc = boundElem->giveLocation();
                 FloatArray nodeCoords;
@@ -368,8 +368,11 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
 
     vtkPiece.setNumberOfPrimaryVarsToExport( primaryVarsToExport.giveSize(), mapL2G.giveSize() );
 
-    //Get the macroscopic field (strain, curvatures, rotations etc.)
+    //Get the macroscopic field (deformation gradients, curvatures etc.)
     DofManager *controlNode = d->giveNode( nnodes ); //assuming the control node is last
+    IntArray dofIdArray;
+    controlNode->giveCompleteMasterDofIDArray(dofIdArray);
+
     FloatArray macroField(controlNode->giveNumberOfDofs());
     for ( int j = 1; j <= controlNode->giveNumberOfDofs(); j++ ) {
         macroField.at(j) = controlNode->giveDofWithID(j)->giveUnknown(VM_Total, tStep);
@@ -400,12 +403,27 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                 this->getNodalVariableFromPrimaryField(helpArray, dman, tStep, type, region);
                 //recalculate the image unknown
                 if ( type == DisplacementVector ) {
-                    valueArray.resize(helpArray.giveSize());
-                    valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
-                        unitCellSize.at(3)*switches.at(3)*macroField.at(5) + unitCellSize.at(2)*switches.at(2)*macroField.at(6);
-                    valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2)*switches.at(2)*macroField.at(2) +
-                        unitCellSize.at(3)*switches.at(3)*macroField.at(4);
-                    valueArray.at(3) = helpArray.at(3) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
+                    if ( dofIdArray.giveSize() == 9 ){ //Macroscale: 3D SOLID, LTRSpaceBoundary
+                        valueArray.resize(helpArray.giveSize());
+                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(2) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
+                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(4) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(5) + unitCellSize.at(3)*switches.at(3)*macroField.at(6);
+                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(7) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(8) + unitCellSize.at(3)*switches.at(3)*macroField.at(9);
+                    } else if ( dofIdArray.giveSize() == 1 ) { //Macroscale: TRUSS
+                        valueArray.resize(helpArray.giveSize());
+                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1);
+                        valueArray.at(2) = helpArray.at(2);
+                        valueArray.at(3) = helpArray.at(3);
+                    } else if ( dofIdArray.giveSize() == 6 ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt
+                        valueArray.resize(helpArray.giveSize());
+                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                            unitCellSize.at(3)*switches.at(3)*macroField.at(5) + unitCellSize.at(2)*switches.at(2)*macroField.at(6);
+                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2)*switches.at(2)*macroField.at(2) +
+                            unitCellSize.at(3)*switches.at(3)*macroField.at(4);
+                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
+                    }
                 }
 
                 vtkPiece.setPrimaryVarInNode( i, inode, std :: move(valueArray) );

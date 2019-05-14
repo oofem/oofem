@@ -53,6 +53,7 @@ class FEI3dTetLin;
  * Each node has 3 degrees of freedom. This element is used for 3D RVE analyses with Periodic Boundary Conditions.
  * At least one node is located at the image boundary.
  * These nodes are replaced with a periodic mirror nodes and a control node is used to impose the macroscopic (average) strain.
+ * MACROSCOPIC INPUT: DEFORMATION GRADIENT TENSOR (3D, 9 COMPONENTS: Hxx Hxy Hxz Hyx Hyy Hyz Hzx Hzy Hzz)
  *
  * @author: Adam Sciegaj
  */
@@ -83,7 +84,7 @@ public:
 
     Interface *giveInterface(InterfaceType it) override;
 
-    int computeNumberOfDofs() override { return 18; };
+    int computeNumberOfDofs() override { return 21; };
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     const IntArray giveLocation() { return location; };
     void recalculateCoordinates(int nodeNumber, FloatArray &coords);

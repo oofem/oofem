@@ -117,7 +117,7 @@ void
 LTRSpaceBoundary :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if (inode == 5) {
-        answer = { D_u, D_v, D_w, R_u, R_v, R_w };
+        answer = { D_u, D_v, D_w, R_u, R_v, R_w, V_u, V_v, V_w };
     } else {
         answer = { D_u, D_v, D_w};
     }
@@ -313,39 +313,16 @@ LTRSpaceBoundary :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void
 LTRSpaceBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray u, dispVec, unitCellSize, switches;
-    FloatMatrix B;
+    FloatArray u, dispVec;
+    FloatMatrix B, T;
     this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
     }
 
-    //recalculate the displacements
-    double a, b, c;
-    a=this->giveNode(5)->giveCoordinate(1);
-    b=this->giveNode(5)->giveCoordinate(2);
-    c=this->giveNode(5)->giveCoordinate(3);
-
-    //recalculate the coordinates
-    switches.resize(12);
-    for ( int i = 1; i <= 4; i++) {
-        IntArray s;
-        if (location.at(i) != 0) {
-            this->giveSwitches(s, this->location.at(i));
-            switches.at(3*i-2)=s.at(1);
-            switches.at(3*i-1)=s.at(2);
-            switches.at(3*i)=s.at(3);
-        }
-    }
-
-    dispVec.resize(12);
-
-    for (int i = 1; i <= 4; i++) {
-        dispVec.at(3*i-2)=u.at(3*i-2) + a*switches.at(3*i-2)*u.at(13) + c*switches.at(3*i)*u.at(17) + b*switches.at(3*i-1)*u.at(18);
-        dispVec.at(3*i-1)=u.at(3*i-1) + b*switches.at(3*i-1)*u.at(14) + c*switches.at(3*i)*u.at(16);
-        dispVec.at(3*i)=u.at(3*i) + c*switches.at(3*i)*u.at(15);
-    }
+    this->computeTransformationMatrix(T, tStep);
+    dispVec.beProductOf(T,u);
 
     this->computeBmatrixAt(gp, B);
     answer.beProductOf(B,dispVec);
@@ -425,60 +402,44 @@ LTRSpaceBoundary :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *t
     this->giveSwitches(switches3, this->location.at(3));
     this->giveSwitches(switches4, this->location.at(4));
 
-    FloatMatrix k21_node1, k22_node1, k21_node2, k22_node2, k21_node3, k22_node3, k21_node4, k22_node4;
-    k21_node1.resize(3,3);
-    k22_node1.resize(3,3);
-    k21_node2.resize(3,3);
-    k22_node2.resize(3,3);
-    k21_node3.resize(3,3);
-    k22_node3.resize(3,3);
-    k21_node4.resize(3,3);
-    k22_node4.resize(3,3);
+    FloatMatrix k1, k2, k3, k4;
+    k1.resize(3,9);
+    k2.resize(3,9);
+    k3.resize(3,9);
+    k4.resize(3,9);
 
-    k21_node1.at(1,1)=unitCellSize.at(1)*switches1.at(1);
-    k21_node1.at(2,2)=unitCellSize.at(2)*switches1.at(2);
-    k21_node1.at(3,3)=unitCellSize.at(3)*switches1.at(3);
+    for ( int i = 1; i <= 3; i++ ) {
+        k1.at(i, 3*i-2) = unitCellSize.at(1)*switches1.at(1);
+        k1.at(i, 3*i-1) = unitCellSize.at(2)*switches1.at(2);
+        k1.at(i, 3*i) = unitCellSize.at(3)*switches1.at(3);
+    }
 
-    k22_node1.at(1,2)=unitCellSize.at(3)*switches1.at(3);
-    k22_node1.at(1,3)=unitCellSize.at(2)*switches1.at(2);
-    k22_node1.at(2,1)=unitCellSize.at(3)*switches1.at(3);
+    for ( int i = 1; i <= 3; i++ ) {
+        k2.at(i, 3*i-2) = unitCellSize.at(1)*switches2.at(1);
+        k2.at(i, 3*i-1) = unitCellSize.at(2)*switches2.at(2);
+        k2.at(i, 3*i) = unitCellSize.at(3)*switches2.at(3);
+    }
 
-    k21_node2.at(1,1)=unitCellSize.at(1)*switches2.at(1);
-    k21_node2.at(2,2)=unitCellSize.at(2)*switches2.at(2);
-    k21_node2.at(3,3)=unitCellSize.at(3)*switches2.at(3);
+    for ( int i = 1; i <= 3; i++ ) {
+        k3.at(i, 3*i-2) = unitCellSize.at(1)*switches3.at(1);
+        k3.at(i, 3*i-1) = unitCellSize.at(2)*switches3.at(2);
+        k3.at(i, 3*i) = unitCellSize.at(3)*switches3.at(3);
+    }
 
-    k22_node2.at(1,2)=unitCellSize.at(3)*switches2.at(3);
-    k22_node2.at(1,3)=unitCellSize.at(2)*switches2.at(2);
-    k22_node2.at(2,1)=unitCellSize.at(3)*switches2.at(3);
-
-    k21_node3.at(1,1)=unitCellSize.at(1)*switches3.at(1);
-    k21_node3.at(2,2)=unitCellSize.at(2)*switches3.at(2);
-    k21_node3.at(3,3)=unitCellSize.at(3)*switches3.at(3);
-
-    k22_node3.at(1,2)=unitCellSize.at(3)*switches3.at(3);
-    k22_node3.at(1,3)=unitCellSize.at(2)*switches3.at(2);
-    k22_node3.at(2,1)=unitCellSize.at(3)*switches3.at(3);
-
-    k21_node4.at(1,1)=unitCellSize.at(1)*switches4.at(1);
-    k21_node4.at(2,2)=unitCellSize.at(2)*switches4.at(2);
-    k21_node4.at(3,3)=unitCellSize.at(3)*switches4.at(3);
-
-    k22_node4.at(1,2)=unitCellSize.at(3)*switches4.at(3);
-    k22_node4.at(1,3)=unitCellSize.at(2)*switches4.at(2);
-    k22_node4.at(2,1)=unitCellSize.at(3)*switches4.at(3);
+    for ( int i = 1; i <= 3; i++ ) {
+        k4.at(i, 3*i-2) = unitCellSize.at(1)*switches4.at(1);
+        k4.at(i, 3*i-1) = unitCellSize.at(2)*switches4.at(2);
+        k4.at(i, 3*i) = unitCellSize.at(3)*switches4.at(3);
+    }
 
     answer.resize(12,12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,18);
+    answer.resizeWithData(12,21);
 
-    answer.assemble(k21_node1, {1,2,3}, {13,14,15});
-    answer.assemble(k22_node1, {1,2,3}, {16,17,18});
-    answer.assemble(k21_node2, {4,5,6}, {13,14,15});
-    answer.assemble(k22_node2, {4,5,6}, {16,17,18});
-    answer.assemble(k21_node3, {7,8,9}, {13,14,15});
-    answer.assemble(k22_node3, {7,8,9}, {16,17,18});
-    answer.assemble(k21_node4, {10,11,12}, {13,14,15});
-    answer.assemble(k22_node4, {10,11,12}, {16,17,18});
+    answer.assemble(k1, {1,2,3}, {13,14,15,16,17,18,19,20,21});
+    answer.assemble(k2, {4,5,6}, {13,14,15,16,17,18,19,20,21});
+    answer.assemble(k3, {7,8,9}, {13,14,15,16,17,18,19,20,21});
+    answer.assemble(k4, {10,11,12}, {13,14,15,16,17,18,19,20,21});
 }
 
 void
