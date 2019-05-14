@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/3D/ltrspaceboundarytruss.h"
+#include "sm/Elements/3D/ltrspaceboundarymembrane.h"
 #include "sm/CrossSections/structuralcrosssection.h"
 #include "node.h"
 #include "material.h"
@@ -48,24 +48,24 @@
 
 
 namespace oofem {
-REGISTER_Element(LTRSpaceBoundaryTruss);
+REGISTER_Element(LTRSpaceBoundaryMembrane);
 
-LTRSpaceBoundaryTruss :: LTRSpaceBoundaryTruss(int n, Domain *aDomain) :
+LTRSpaceBoundaryMembrane :: LTRSpaceBoundaryMembrane(int n, Domain *aDomain) :
     LTRSpaceBoundary(n, aDomain)
 {
 }
 
 IRResultType
-LTRSpaceBoundaryTruss :: initializeFrom(InputRecord *ir)
+LTRSpaceBoundaryMembrane :: initializeFrom(InputRecord *ir)
 {
     return LTRSpaceBoundary :: initializeFrom(ir);
 }
 
 void
-LTRSpaceBoundaryTruss :: giveDofManDofIDMask(int inode, IntArray &answer) const
+LTRSpaceBoundaryMembrane :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if (inode == 5) {
-        answer = { D_u };
+        answer = { D_u, D_v, R_u, R_v };
     } else {
         answer = { D_u, D_v, D_w };
     }
@@ -73,9 +73,12 @@ LTRSpaceBoundaryTruss :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 void
-LTRSpaceBoundaryTruss :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep)
+LTRSpaceBoundaryMembrane :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    double unitCellSize = this->giveNode(5)->giveCoordinate(1);
+    FloatArray unitCellSize;
+    unitCellSize.resize(2);
+    unitCellSize.at(1)=this->giveNode(5)->giveCoordinate(1);
+    unitCellSize.at(2)=this->giveNode(5)->giveCoordinate(2);
 
     IntArray switches1, switches2, switches3, switches4;
     this->giveSwitches(switches1, this->location.at(1));
@@ -83,19 +86,37 @@ LTRSpaceBoundaryTruss :: computeTransformationMatrix(FloatMatrix &answer, TimeSt
     this->giveSwitches(switches3, this->location.at(3));
     this->giveSwitches(switches4, this->location.at(4));
 
-    FloatMatrix k;
-    k.resize(12,1);
+    FloatMatrix k1, k2, k3, k4;
+    k1.resize(3,4); k2.resize(3,4); k3.resize(3,4); k4.resize(3,4);
 
-    k.at(1,1) = unitCellSize*switches1.at(1);
-    k.at(4,1) = unitCellSize*switches2.at(1);
-    k.at(7,1) = unitCellSize*switches3.at(1);
-    k.at(10,1) = unitCellSize*switches4.at(1);
+    k1.at(1,1) = unitCellSize.at(1)*switches1.at(1);
+    k1.at(1,2) = unitCellSize.at(2)*switches1.at(2);
+    k1.at(2,3) = unitCellSize.at(1)*switches1.at(1);
+    k1.at(2,4) = unitCellSize.at(2)*switches1.at(2);
+
+    k2.at(1,1) = unitCellSize.at(1)*switches2.at(1);
+    k2.at(1,2) = unitCellSize.at(2)*switches2.at(2);
+    k2.at(2,3) = unitCellSize.at(1)*switches2.at(1);
+    k2.at(2,4) = unitCellSize.at(2)*switches2.at(2);
+
+    k3.at(1,1) = unitCellSize.at(1)*switches3.at(1);
+    k3.at(1,2) = unitCellSize.at(2)*switches3.at(2);
+    k3.at(2,3) = unitCellSize.at(1)*switches3.at(1);
+    k3.at(2,4) = unitCellSize.at(2)*switches3.at(2);
+
+    k4.at(1,1) = unitCellSize.at(1)*switches4.at(1),
+    k4.at(1,2) = unitCellSize.at(2)*switches4.at(2);
+    k4.at(2,3) = unitCellSize.at(1)*switches4.at(1);
+    k4.at(2,4) = unitCellSize.at(2)*switches4.at(2);
 
     answer.resize(12,12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,13);
+    answer.resizeWithData(12,16);
 
-    answer.assemble(k, {1,2,3,4,5,6,7,8,9,10,11,12}, {13});
+    answer.assemble(k1, {1,2,3}, {13,14,15,16});
+    answer.assemble(k2, {4,5,6}, {13,14,15,16});
+    answer.assemble(k3, {7,8,9}, {13,14,15,16});
+    answer.assemble(k4, {10,11,12}, {13,14,15,16});
 }
 
 } // end namespace oofem

@@ -119,7 +119,7 @@ LTRSpaceBoundary :: giveDofManDofIDMask(int inode, IntArray &answer) const
     if (inode == 5) {
         answer = { D_u, D_v, D_w, R_u, R_v, R_w, V_u, V_v, V_w };
     } else {
-        answer = { D_u, D_v, D_w};
+        answer = { D_u, D_v, D_w };
     }
 }
 
@@ -403,10 +403,7 @@ LTRSpaceBoundary :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *t
     this->giveSwitches(switches4, this->location.at(4));
 
     FloatMatrix k1, k2, k3, k4;
-    k1.resize(3,9);
-    k2.resize(3,9);
-    k3.resize(3,9);
-    k4.resize(3,9);
+    k1.resize(3,9); k2.resize(3,9); k3.resize(3,9); k4.resize(3,9);
 
     for ( int i = 1; i <= 3; i++ ) {
         k1.at(i, 3*i-2) = unitCellSize.at(1)*switches1.at(1);

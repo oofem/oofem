@@ -375,7 +375,7 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
 
     FloatArray macroField(controlNode->giveNumberOfDofs());
     for ( int j = 1; j <= controlNode->giveNumberOfDofs(); j++ ) {
-        macroField.at(j) = controlNode->giveDofWithID(j)->giveUnknown(VM_Total, tStep);
+        macroField.at(j) = controlNode->giveDofWithID(dofIdArray.at(j))->giveUnknown(VM_Total, tStep);
     }
 
     //Get unit cell size
@@ -415,6 +415,13 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                         valueArray.resize(helpArray.giveSize());
                         valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1);
                         valueArray.at(2) = helpArray.at(2);
+                        valueArray.at(3) = helpArray.at(3);
+                    } else if ( dofIdArray.giveSize() == 4 ) { //Macroscale: 2D MEMBRANE, LTRSpaceBoundaryMembrane
+                        valueArray.resize(helpArray.giveSize());
+                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(2);
+                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(3) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(4);
                         valueArray.at(3) = helpArray.at(3);
                     } else if ( dofIdArray.giveSize() == 6 ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt
                         valueArray.resize(helpArray.giveSize());

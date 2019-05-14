@@ -67,7 +67,7 @@ LTRSpaceBoundaryVoigt :: giveDofManDofIDMask(int inode, IntArray &answer) const
     if (inode == 5) {
         answer = { D_u, D_v, D_w, R_u, R_v, R_w };
     } else {
-        answer = { D_u, D_v, D_w};
+        answer = { D_u, D_v, D_w };
     }
 }
 
@@ -88,14 +88,8 @@ LTRSpaceBoundaryVoigt :: computeTransformationMatrix(FloatMatrix &answer, TimeSt
     this->giveSwitches(switches4, this->location.at(4));
 
     FloatMatrix k21_node1, k22_node1, k21_node2, k22_node2, k21_node3, k22_node3, k21_node4, k22_node4;
-    k21_node1.resize(3,3);
-    k22_node1.resize(3,3);
-    k21_node2.resize(3,3);
-    k22_node2.resize(3,3);
-    k21_node3.resize(3,3);
-    k22_node3.resize(3,3);
-    k21_node4.resize(3,3);
-    k22_node4.resize(3,3);
+    k21_node1.resize(3,3); k22_node1.resize(3,3); k21_node2.resize(3,3); k22_node2.resize(3,3);
+    k21_node3.resize(3,3); k22_node3.resize(3,3); k21_node4.resize(3,3); k22_node4.resize(3,3);
 
     k21_node1.at(1,1)=unitCellSize.at(1)*switches1.at(1);
     k21_node1.at(2,2)=unitCellSize.at(2)*switches1.at(2);
