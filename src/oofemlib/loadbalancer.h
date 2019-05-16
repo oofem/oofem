@@ -125,6 +125,9 @@ public:
 
     LoadBalancer(Domain * d);
     virtual ~LoadBalancer() { }
+#ifdef _MSC_VER
+    LoadBalancer(LoadBalancer&& src) {domain = src.domain;}
+#endif
 
 
 
@@ -179,7 +182,7 @@ protected:
         LoadBalancer *lb;
 public:
         WorkTransferPlugin(LoadBalancer * _lb);
-        virtual ~WorkTransferPlugin();
+        virtual ~WorkTransferPlugin() {}
 
         /**
          *  initializes receiver; should be called before any work transfer.

@@ -823,7 +823,7 @@ Quasicontinuum :: stiffnessAssignment(std :: vector< FloatMatrix > &individualSt
         double totalLength = distance(*qn1->giveCoordinates(), *qn2->giveCoordinates());
         lengths.times(1 / totalLength); // it is better to use relative lengths
         double sumLength = lengths.sum();
-        if ( sumLength < 0.9999 or sumLength > 1.0001 ) {
+        if ( (sumLength < 0.9999) || (sumLength > 1.0001) ) {
             return false;
         }
 
