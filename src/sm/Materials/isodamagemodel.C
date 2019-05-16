@@ -333,7 +333,11 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
     } else if ( type == IST_CrackVector ) {
         status->giveCrackVector(answer);
         return 1;
-
+    } else if ( type == IST_CumPlasticStrain ) {
+      if ( permStrain )
+	answer.at(1) = evaluatePermanentStrain(status->giveKappa(), status->giveDamage());
+        return 1;
+	
 #ifdef keep_track_of_dissipated_energy
     } else if ( type == IST_StressWorkDensity ) {
         answer.resize(1);
