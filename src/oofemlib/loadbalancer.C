@@ -44,17 +44,19 @@
 #include "floatarray.h"
 #include "intarray.h"
 
+#ifdef __PARALLEL_MODE
 #include "processcomm.h"
 #include "datastream.h"
 #include "communicator.h"
 #include "domaintransactionmanager.h"
 #include "nonlocalmatwtp.h"
+#endif
 
 namespace oofem {
   //#define __VERBOSE_PARALLEL
   //#define LoadBalancer_debug_print
 
-#ifdef __PARALLEL_MODE
+#ifndef __PARALLEL_MODE
 
 LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 {
