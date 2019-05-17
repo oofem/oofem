@@ -423,6 +423,24 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                         valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(3) +
                             unitCellSize.at(2)*switches.at(2)*macroField.at(4);
                         valueArray.at(3) = helpArray.at(3);
+                    } else if ( dofIdArray.giveSize() == 3 ) { //Macroscale: 2D BEAM, LTRSpaceBoundaryBeam
+                        valueArray.resize(helpArray.giveSize());
+                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) -
+                            dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(3);
+                        valueArray.at(2) = helpArray.at(2);
+                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(2);
+                    } else if ( dofIdArray.giveSize() == 10 ) { //Macroscale: 2D PLATE, LTRSpaceBoundaryPlate
+                        valueArray.resize(helpArray.giveSize());
+                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(2) -
+                            dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(7) -
+                            dman->giveCoordinate(3)*unitCellSize.at(2)*switches.at(2)*macroField.at(9);
+                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(3) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(4) -
+                            dman->giveCoordinate(3)*unitCellSize.at(2)*switches.at(2)*macroField.at(8) -
+                            dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(10);;
+                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(5) +
+                            unitCellSize.at(2)*switches.at(2)*macroField.at(6);
                     } else if ( dofIdArray.giveSize() == 6 ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt
                         valueArray.resize(helpArray.giveSize());
                         valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
@@ -430,6 +448,8 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                         valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2)*switches.at(2)*macroField.at(2) +
                             unitCellSize.at(3)*switches.at(3)*macroField.at(4);
                         valueArray.at(3) = helpArray.at(3) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
+                    } else {
+                        OOFEM_ERROR("Unknown element type\n");
                     }
                 }
 

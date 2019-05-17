@@ -14,6 +14,8 @@ set (sm_element
     Elements/3D/ltrspaceboundary.C
     Elements/3D/ltrspaceboundarytruss.C
     Elements/3D/ltrspaceboundarymembrane.C
+    Elements/3D/ltrspaceboundarybeam.C
+    Elements/3D/ltrspaceboundaryplate.C
     Elements/3D/ltrspaceboundaryvoigt.C
     Elements/3D/qtrspace.C 
     Elements/3D/lwedge.C 
