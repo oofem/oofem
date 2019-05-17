@@ -596,11 +596,5 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
  */
 
 
-
-LoadBalancer :: WorkTransferPlugin :: WorkTransferPlugin(LoadBalancer *_lb) {
-    lb = _lb;
-}
-LoadBalancer :: WorkTransferPlugin :: ~WorkTransferPlugin() { }
-
 #endif // end __PARALLEL_MODE
 } // end namespace oofem

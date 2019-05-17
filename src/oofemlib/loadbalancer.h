@@ -181,7 +181,7 @@ public:
 protected:
         LoadBalancer *lb;
 public:
-        WorkTransferPlugin(LoadBalancer * _lb);
+        WorkTransferPlugin(LoadBalancer * _lb) {lb = _lb;}
         virtual ~WorkTransferPlugin() {}
 
         /**
