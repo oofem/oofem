@@ -46,6 +46,7 @@
 #define _IFT_RankineMatGrad_L "l"
 #define _IFT_RankineMatGrad_m "m"
 #define _IFT_RankineMatGrad_negligibleDamage "negligible_damage"
+#define _IFT_RankineMatGrad_formulationType "formtype"
 //@}
 
 namespace oofem {
@@ -55,10 +56,19 @@ namespace oofem {
 class RankineMatGradStatus : public RankineMatStatus, public GradientDamageMaterialStatusExtensionInterface
 {
 protected:
+
+    /**  Type characterizing the dependence of the internal lenght on variable of the state
+     *  Note that the assigned numbers to enum values have to correspond to values
+     *  used in initializeFrom to resolve internalLenghtDependence. If not, the consistency
+     *  between initializeFrom and giveInputRecord methods is lost.
+     */
+
+
     double kappa_nl;
     double kappa_hat;
 
 public:
+
     RankineMatGradStatus(GaussPoint *g);
     virtual ~RankineMatGradStatus() { }
 
@@ -89,6 +99,14 @@ protected:
     double mParam;
     double negligible_damage;
 
+    enum GradientDamageFormulationType {
+        GDFT_Standard = 0,
+        GDFT_Eikonal = 2
+    };
+
+    GradientDamageFormulationType gradientDamageFormulationType;
+
+
 public:
     RankineMatGrad(int n, Domain *d);
     virtual ~RankineMatGrad() { }
@@ -111,7 +129,11 @@ public:
     virtual void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_du_NB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_du_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_dd_NN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveGradientDamageStiffnessMatrix_dd_BN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -135,6 +157,14 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
 protected:
+    double computeInternalLength(GaussPoint *gp);
+    int giveDimension(GaussPoint *gp);
+
+    double computeEikonalInternalLength_a(GaussPoint *gp);
+    double computeEikonalInternalLength_b(GaussPoint *gp);
+    double computeEikonalInternalLength_aPrime(GaussPoint *gp);
+    double computeEikonalInternalLength_bPrime(GaussPoint *gp);
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatGradStatus(gp); }
 };
 } // end namespace oofem

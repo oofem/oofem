@@ -134,6 +134,23 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_uu(FloatMat
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     answer.times(1.0 - tempDamage);
+
+
+    /*
+     * FloatArray strainP, stressP, oldStrain, oldStress;
+     * oldStress = status->giveTempStressVector();
+     * oldStrain = status->giveTempStrainVector();
+     * strainP = oldStrain;
+     * double pert = 1.e-6 * strainP.at(1);
+     * strainP.at(1) += pert;
+     * double lddv;
+     * double mddv = status->giveTempNonlocalDamageDrivingVariable();
+     * this->giveRealStressVectorGradientDamage(stressP, lddv, gp, strainP, mddv, tStep);
+     * FloatMatrix stiff;
+     * stiff.resize(1,1);
+     * stiff.at(1,1) = (stressP.at(1) - oldStress.at(1))/pert;
+     * this->giveRealStressVectorGradientDamage(stressP, lddv, gp, oldStrain, mddv, tStep);
+     */
 }
 
 
@@ -145,8 +162,8 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_ud(FloatMat
     IsotropicGradientDamageMaterialStatus *status = static_cast< IsotropicGradientDamageMaterialStatus * >( this->giveStatus(gp) );
     FloatArray stress =  status->giveTempStressVector();
     if ( mode == TangentStiffness ) {
-        double tempKappa =  status->giveTempKappa();
-        double gPrime =  this->damageFunctionPrime(tempKappa, gp);
+        double nonlocalDamageDrivingVariable =  status->giveTempNonlocalDamageDrivingVariable();
+        double gPrime =  this->damageFunctionPrime(nonlocalDamageDrivingVariable, gp);
         double tempDamage = status->giveTempDamage();
         if ( tempDamage < 1. ) {
             stress.times( 1. / ( 1 - tempDamage ) );
@@ -156,6 +173,21 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_ud(FloatMat
         answer.initFromVector(stress, false);
         if ( tempDamage > status->giveDamage() ) {
             answer.times(-gPrime);
+            /*
+             * double lddv;
+             * FloatArray strainP, stressP, oldStrain, oldStress;
+             * oldStress = status->giveTempStressVector();
+             * oldStrain = status->giveTempStrainVector();
+             * double mddv = status->giveTempNonlocalDamageDrivingVariable();
+             * double pert = 1.e-6 * mddv;
+             * strainP = oldStrain;
+             * double mddvp = mddv + pert;
+             * this->giveRealStressVectorGradientDamage(stressP, lddv, gp, strainP, mddvp, tStep);
+             * FloatMatrix stiff;
+             * stiff.resize(1,1);
+             * stiff.at(1,1) = (stressP.at(1) -oldStress.at(1))/pert;
+             * this->giveRealStressVectorGradientDamage(stressP, lddv, gp, oldStrain, mddv, tStep);
+             */
         } else {
             answer.times(0.);
         }
@@ -177,17 +209,38 @@ IsotropicGradientDamageMaterial :: giveGradientDamageStiffnessMatrix_du(FloatMat
     StructuralMaterial :: giveReducedSymVectorForm( reducedStrain, totalStrain, gp->giveMaterialMode() );
     this->computeEta(eta, reducedStrain, gp, tStep);
     answer.initFromVector(eta, false);
-    answer.times(-1.);
+    if ( mode == TangentStiffness ) {
+        double tempDamage = status->giveTempDamage();
+        if ( tempDamage > status->giveDamage() ) {
+            answer.times(-1.);
+            /*
+             * FloatArray strainP, stressP, oldStrain, oldStress;
+             * oldStress = status->giveTempStressVector();
+             * oldStrain = status->giveTempStrainVector();
+             * double mddv = status->giveTempNonlocalDamageDrivingVariable();
+             * double lddv = status->giveTempLocalDamageDrivingVariable();
+             * double lddvp;
+             * strainP = oldStrain;
+             * double pert = 1.e-6 * strainP.at(1);
+             * strainP.at(1) += pert;
+             * this->giveRealStressVectorGradientDamage(stressP, lddvp, gp, strainP, mddv, tStep);
+             * FloatMatrix stiff;
+             * stiff.resize(1,1);
+             * stiff.at(1,1) = (lddvp - lddv) / pert;
+             * this->giveRealStressVectorGradientDamage(stressP, lddv, gp, oldStrain, mddv, tStep);
+             */
 
-    if ( gradientDamageFormulationType == GDFT_Eikonal ) {
-        double iA = this->computeEikonalInternalLength_a(gp);
-        if ( iA != 0 ) {
-            answer.times(1. / iA);
+
+            if ( gradientDamageFormulationType == GDFT_Eikonal ) {
+                double iA = this->computeEikonalInternalLength_a(gp);
+                if ( iA != 0 ) {
+                    answer.times(1. / iA);
+                } else {
+                    answer.times(0);
+                }
+            }
         }
-    }
-
-    if ( mode != TangentStiffness ) {
-        // zero block for now
+    } else {
         answer.times(0);
     }
 }
@@ -450,6 +503,7 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(stress);
     status->setTempLocalDamageDrivingVariable(localDamageDrivingVariable);
+    status->setTempNonlocalDamageDrivingVariable(nonlocalDamageDrivingVariable);
     status->setTempKappa(tempKappa);
     status->setTempDamage(damage);
 #ifdef keep_track_of_dissipated_energy

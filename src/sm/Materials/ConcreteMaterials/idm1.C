@@ -648,7 +648,6 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
             if ( i <= dim ) {
                 if ( principalStrains.at(i) > 0.0 ) {
                     n.beColumnOf(N, i);
-
                     Eta.plusDyadSymmUpper( n, principalStrains.at(i) );
                 }
             }
@@ -1063,7 +1062,8 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
     case ST_Exponential:
     {
         if ( kappa > e0 ) {
-            return ( e0 / ( kappa * kappa ) ) * exp( -( kappa - e0 ) / ( ef - e0 )  + e0 / ( kappa * ( ef - e0 ) ) ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
+            //	  return ( e0 / ( kappa * kappa ) ) * exp( -( kappa - e0 ) / ( ef - e0 )  + e0 / ( kappa * ( ef - e0 ) ) ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
+            return ( e0 / ( ef - e0 ) / kappa +  e0 / ( kappa * kappa ) )  * exp( -( kappa - e0 ) / ( ef - e0 ) );
         } else {
             return 0.0;
         }
