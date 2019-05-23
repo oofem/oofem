@@ -37,6 +37,7 @@
 
 #include "sm/Elements/structuralelement.h"
 #include "sm/CrossSections/fiberedcs.h"
+#include "nodalaveragingrecoverymodel.h"
 
 ///@name Input fields for LIBeam3d
 //@{
@@ -49,7 +50,7 @@ namespace oofem {
  * This class implements a 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration.
  */
-class LIBeam3d : public StructuralElement, public FiberedCrossSectionInterface
+class LIBeam3d : public StructuralElement, public FiberedCrossSectionInterface, public NodalAveragingRecoveryModelInterface
 {
 private:
     double length;
@@ -76,9 +77,15 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
+    bool isCast(TimeStep *tStep) override {return true;}
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+
     // Fibered cross section support functions
     void FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &answer, const FloatArray &masterGpStrain,
                                                                  GaussPoint *slaveGp, TimeStep *tStep) override;
+
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                            InternalStateType type, TimeStep *tStep) override;
 
     Interface *giveInterface(InterfaceType it) override;
 

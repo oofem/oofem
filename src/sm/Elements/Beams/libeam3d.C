@@ -434,11 +434,21 @@ LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &
     answer.at(3) = masterGpStrain.at(3);
 }
 
+void
+LIBeam3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                              InternalStateType type, TimeStep *tStep)
+{
+    GaussPoint* gp = integrationRulesArray[0]->getIntegrationPoint(0);
+    this->giveIPValue(answer, gp, type, tStep);
+}
+
 Interface *
 LIBeam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
         return static_cast< FiberedCrossSectionInterface * >(this);
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     return NULL;
