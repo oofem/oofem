@@ -213,9 +213,14 @@ IntElPoint :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 double
 IntElPoint :: computeAreaAround(GaussPoint *gp)
 {
+    if ( (this->giveCrossSection()->hasProperty(CS_Thickness)) ) {
+        double thickness = this->giveCrossSection()->give(CS_Thickness, gp);
+        return thickness*this->length;
+    } else {
     // The modeled area/extension around the connected nodes. 
     // Compare with the cs area of a bar. ///@todo replace with cs-property? /JB
     return this->area;
+    }
 }
 
 
@@ -252,6 +257,9 @@ IntElPoint :: initializeFrom(InputRecord *ir)
 
     this->area = 1.0; // Default area ///@todo Make non-optional? /JB
     IR_GIVE_OPTIONAL_FIELD(ir, this->area, _IFT_IntElPoint_area);
+
+    this->length = 1.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->length, _IFT_IntElPoint_length);
 
     this->computeLocalSlipDir();     
     return IRRT_OK;
