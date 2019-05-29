@@ -382,6 +382,27 @@ LIBeam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tS
     answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
+Node* LIBeam3d :: giveReferenceNode(int refNode)
+//
+// returns pointer to the reference node in the general case that
+// the global number of reference node is not equal to its consecutive number
+// in the domain
+//
+{
+    int nnodes = this->giveDomain()->giveNumberOfDofManagers();
+
+    for ( int i = 1; i <= nnodes; i++ ) {
+        Node* referenceNode = this->giveDomain()->giveNode(i);
+        int globalNumber = referenceNode->giveGlobalNumber();
+        if ( globalNumber == refNode ) {
+            return referenceNode;
+        }
+    }
+
+    OOFEM_ERROR("Could not find the reference node. Check numbering.");
+    return nullptr;
+}
+
 int
 LIBeam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
@@ -397,7 +418,7 @@ LIBeam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     answer.zero();
     nodeA  = this->giveNode(1);
     nodeB  = this->giveNode(2);
-    refNode = this->giveDomain()->giveNode(this->referenceNode);
+    refNode = this->giveReferenceNode(referenceNode);
 
     for ( int i = 1; i <= 3; i++ ) {
         lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;

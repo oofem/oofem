@@ -38,6 +38,7 @@
 #include "sm/Elements/structuralelement.h"
 #include "sm/CrossSections/fiberedcs.h"
 #include "nodalaveragingrecoverymodel.h"
+#include "node.h"
 
 ///@name Input fields for LIBeam3d
 //@{
@@ -74,6 +75,7 @@ public:
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     double computeVolumeAround(GaussPoint *gp) override;
     int giveLocalCoordinateSystem(FloatMatrix &answer) override;
+    Node* giveReferenceNode(int refNode);
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
