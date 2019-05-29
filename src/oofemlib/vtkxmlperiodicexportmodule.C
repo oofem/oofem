@@ -47,6 +47,7 @@
 #include "dof.h"
 #include "../sm/Elements/lattice3dboundary.h"
 #include "../sm/Elements/3D/ltrspaceboundary.h"
+#include "../sm/Elements/Beams/libeam3dboundary.h"
 
 
 
@@ -95,15 +96,15 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
     if ( numNodes > 0 && numRegionEl > 0 ) {
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
-        for ( int inode = 1; inode <= numNodes; inode++ ) {
-            if ( mapL2G.at(inode) <= nnodes ) { //DofManagers in domain (input file)
+        for ( int inode = 1; inode <= numNodes ; inode++ ) {
+            if ( mapL2G.at(inode) <= nnodes && mapL2G.at(inode) != 0 ) { //DofManagers in domain (input file)
                 coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
                 vtkPiece.setNodeCoords(inode, * coords);
-            } else if ( mapL2G.at(inode) > nnodes && mapL2G.at(inode) <= numNodes ) { //extra image nodes
+            } else if ( mapL2G.at(inode) > nnodes && mapL2G.at(inode) <= numNodes && mapL2G.at(inode) != 0 ) { //extra image nodes
                 FloatArray helpArray(3);
-                helpArray.at(1)=uniqueNodeTable.at(inode,1);
-                helpArray.at(2)=uniqueNodeTable.at(inode,2);
-                helpArray.at(3)=uniqueNodeTable.at(inode,3);
+                helpArray.at(1)=uniqueNodeTable.at(mapL2G.at(inode), 1);
+                helpArray.at(2)=uniqueNodeTable.at(mapL2G.at(inode), 2);
+                helpArray.at(3)=uniqueNodeTable.at(mapL2G.at(inode), 3);
                 vtkPiece.setNodeCoords(inode, helpArray);
             } else {
                 FloatArray helpArray(3);
@@ -146,6 +147,18 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
                 LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(elem);
                 IntArray loc = boundElem->giveLocation();
                 for ( int ielnode = 1; ielnode <= 4; ielnode++ ) {
+                    if ( loc.at(ielnode) != 0 ) {
+                        helpCounter++;
+                        cellNodes.at(ielnode) = regionToUniqueMap.at(nnodes + helpCounter);
+                    } else {
+                        cellNodes.at(ielnode) = boundElem->giveNode(ielnode)->giveNumber();
+                    }
+                }
+            } else if ( dynamic_cast<LIBeam3dBoundary*>(elem) ) {
+                cellNodes.resize(2);
+                LIBeam3dBoundary *boundElem = static_cast<LIBeam3dBoundary*>(elem);
+                IntArray loc = boundElem->giveLocation();
+                for ( int ielnode = 1; ielnode <= 2; ielnode++ ) {
                     if ( loc.at(ielnode) != 0 ) {
                         helpCounter++;
                         cellNodes.at(ielnode) = regionToUniqueMap.at(nnodes + helpCounter);
@@ -214,6 +227,14 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                     extraNodes++;
                 }
             }
+        } else if ( dynamic_cast<LIBeam3dBoundary*>(element) ) {
+            LIBeam3dBoundary *boundElem = static_cast<LIBeam3dBoundary*>(element);
+            IntArray loc = boundElem->giveLocation();
+            for ( int ielnode = 1; ielnode <= 2; ielnode++ ) {
+                if ( loc.at(ielnode) != 0 ) {
+                    extraNodes++;
+                }
+            }
         }
     }
 
@@ -251,6 +272,8 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
 
         if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
             elemNodes = 4;
+        } else if ( dynamic_cast<LIBeam3dBoundary*>(element) ) {
+            elemNodes = 2;
         }
 
         for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
@@ -308,6 +331,53 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                         */
                         regionG2LNodalNumbers.at(node) = 1;
                         regionDofMans++;
+                    }
+                }
+            } else if ( dynamic_cast<LIBeam3dBoundary*>(element) ) { //beam elements - only unique nodes
+                LIBeam3dBoundary *boundElem = static_cast<LIBeam3dBoundary*>(element);
+                IntArray loc = boundElem->giveLocation();
+                FloatArray nodeCoords;
+                if ( loc.at(elementNode) != 0 ) { //boundary element with mirrored node
+                    totalNodes++;
+                    regionDofMans++;
+                    regionG2LNodalNumbers.at(nnodes + totalNodes) = 1;
+                    node = element->giveNode(elementNode)->giveNumber();
+                    if ( regionG2LNodalNumbers.at(node) == 0 ) { // assign new number
+                        /* mark for assignment. This is done later, as it allows to preserve
+                        * natural node numbering.
+                        */
+
+                        regionG2LNodalNumbers.at(node) = 1;
+                        regionDofMans++;
+                    }
+                    if ( regionG2LNodalNumbers.at(nnodes) == 0  ) {
+                        regionG2LNodalNumbers.at(nnodes) = 1;
+                        regionDofMans++;
+                    }
+
+                    periodicMap.at(nnodes + totalNodes) = node;
+                    locationMap.at(nnodes + totalNodes) = loc.at(elementNode);
+
+                    boundElem->recalculateCoordinates(elementNode, nodeCoords);
+
+                    //get only the unique nodes
+                    int repeatFlag = 0;
+                    for ( int j = nnodes + 1 ; j <= nnodes + uniqueNodes; j++ ) {
+                        double dx = fabs(uniqueNodeTable.at(j,1) - nodeCoords.at(1));
+                        double dy = fabs(uniqueNodeTable.at(j,2) - nodeCoords.at(2));
+                        double dz = fabs(uniqueNodeTable.at(j,3) - nodeCoords.at(3));
+                        if ( dx < 1e-9 && dy < 1e-9 && dz < 1e-9 ) {//node already present
+                            repeatFlag++;
+                            regionToUniqueMap.at(nnodes + totalNodes) = j;
+                        }
+                    }
+
+                    if (repeatFlag == 0 ) {//new unique node
+                            uniqueNodes++;
+                            uniqueNodeTable.at(nnodes + uniqueNodes, 1) = nodeCoords.at(1);
+                            uniqueNodeTable.at(nnodes + uniqueNodes, 2) = nodeCoords.at(2);
+                            uniqueNodeTable.at(nnodes + uniqueNodes, 3) = nodeCoords.at(3);
+                            regionToUniqueMap.at(nnodes + totalNodes) = nnodes + uniqueNodes;
                     }
                 }
             } else   { //regular element
@@ -386,71 +456,78 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
 
         for ( int inode = 1; inode <= mapL2G.giveSize(); inode++ ) {
-            if ( inode <= nnodes) { //no special treatment for master nodes
+            if ( inode <= nnodes && mapL2G.at(inode) <= nnodes && mapL2G.at(inode) != 0 ) { //no special treatment for master nodes
                 DofManager *dman = d->giveNode( mapL2G.at(inode) );
 
                 this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
                 vtkPiece.setPrimaryVarInNode( i, inode, std :: move(valueArray) );
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
-                int pos = regionToUniqueMap.findFirstIndexOf(inode);
-                DofManager *dman = d->giveNode( periodicMap.at(pos) );
-                IntArray switches;
-                giveSwitches(switches, locationMap.at(pos));
+                int pos = 0;
+                if ( mapL2G.at(inode) != 0 ) {
+                    pos = regionToUniqueMap.findFirstIndexOf(mapL2G.at(inode));
+                }
+                if ( pos ) {
+                    DofManager *dman = d->giveNode( periodicMap.at(pos) );
+                    IntArray switches;
+                    giveSwitches(switches, locationMap.at(pos));
 
-                //get the master unknown
-                FloatArray helpArray;
-                this->getNodalVariableFromPrimaryField(helpArray, dman, tStep, type, region);
-                //recalculate the image unknown
-                if ( type == DisplacementVector ) {
-                    if ( dofIdArray.giveSize() == 9 ){ //Macroscale: 3D SOLID, LTRSpaceBoundary
-                        valueArray.resize(helpArray.giveSize());
-                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(2) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
-                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(4) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(5) + unitCellSize.at(3)*switches.at(3)*macroField.at(6);
-                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(7) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(8) + unitCellSize.at(3)*switches.at(3)*macroField.at(9);
-                    } else if ( dofIdArray.giveSize() == 1 ) { //Macroscale: TRUSS
-                        valueArray.resize(helpArray.giveSize());
-                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1);
-                        valueArray.at(2) = helpArray.at(2);
-                        valueArray.at(3) = helpArray.at(3);
-                    } else if ( dofIdArray.giveSize() == 4 ) { //Macroscale: 2D MEMBRANE, LTRSpaceBoundaryMembrane
-                        valueArray.resize(helpArray.giveSize());
-                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(2);
-                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(3) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(4);
-                        valueArray.at(3) = helpArray.at(3);
-                    } else if ( dofIdArray.giveSize() == 3 ) { //Macroscale: 2D BEAM, LTRSpaceBoundaryBeam
-                        valueArray.resize(helpArray.giveSize());
-                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) -
-                            dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(3);
-                        valueArray.at(2) = helpArray.at(2);
-                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(2);
-                    } else if ( dofIdArray.giveSize() == 10 ) { //Macroscale: 2D PLATE, LTRSpaceBoundaryPlate
-                        valueArray.resize(helpArray.giveSize());
-                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(2) -
-                            dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(7) -
-                            dman->giveCoordinate(3)*unitCellSize.at(2)*switches.at(2)*macroField.at(9);
-                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(3) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(4) -
-                            dman->giveCoordinate(3)*unitCellSize.at(2)*switches.at(2)*macroField.at(8) -
-                            dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(10);;
-                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(5) +
-                            unitCellSize.at(2)*switches.at(2)*macroField.at(6);
-                    } else if ( dofIdArray.giveSize() == 6 ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt
-                        valueArray.resize(helpArray.giveSize());
-                        valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
-                            unitCellSize.at(3)*switches.at(3)*macroField.at(5) + unitCellSize.at(2)*switches.at(2)*macroField.at(6);
-                        valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2)*switches.at(2)*macroField.at(2) +
-                            unitCellSize.at(3)*switches.at(3)*macroField.at(4);
-                        valueArray.at(3) = helpArray.at(3) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
-                    } else {
-                        OOFEM_ERROR("Unknown element type\n");
+                    //get the master unknown
+                    FloatArray helpArray;
+                    this->getNodalVariableFromPrimaryField(helpArray, dman, tStep, type, region);
+                    //recalculate the image unknown
+                    if ( type == DisplacementVector ) {
+                        if ( dofIdArray.giveSize() == 9 ){ //Macroscale: 3D SOLID, LTRSpaceBoundary
+                            valueArray.resize(helpArray.giveSize());
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(2) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(4) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(5) + unitCellSize.at(3)*switches.at(3)*macroField.at(6);
+                            valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(7) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(8) + unitCellSize.at(3)*switches.at(3)*macroField.at(9);
+                        } else if ( dofIdArray.giveSize() == 1 ) { //Macroscale: TRUSS
+                            valueArray.resize(helpArray.giveSize());
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1);
+                            valueArray.at(2) = helpArray.at(2);
+                            valueArray.at(3) = helpArray.at(3);
+                        } else if ( dofIdArray.giveSize() == 4 ) { //Macroscale: 2D MEMBRANE, LTRSpaceBoundaryMembrane
+                            valueArray.resize(helpArray.giveSize());
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(2);
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(3) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(4);
+                            valueArray.at(3) = helpArray.at(3);
+                        } else if ( dofIdArray.giveSize() == 3 ) { //Macroscale: 2D BEAM, LTRSpaceBoundaryBeam
+                            valueArray.resize(helpArray.giveSize());
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) -
+                                dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(3);
+                            valueArray.at(2) = helpArray.at(2);
+                            valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(2);
+                        } else if ( dofIdArray.giveSize() == 10 ) { //Macroscale: 2D PLATE, LTRSpaceBoundaryPlate
+                            valueArray.resize(helpArray.giveSize());
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(2) -
+                                dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(7) -
+                                dman->giveCoordinate(3)*unitCellSize.at(2)*switches.at(2)*macroField.at(9);
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1)*switches.at(1)*macroField.at(3) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(4) -
+                                dman->giveCoordinate(3)*unitCellSize.at(2)*switches.at(2)*macroField.at(8) -
+                                dman->giveCoordinate(3)*unitCellSize.at(1)*switches.at(1)*macroField.at(10);;
+                            valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1)*switches.at(1)*macroField.at(5) +
+                                unitCellSize.at(2)*switches.at(2)*macroField.at(6);
+                        } else if ( dofIdArray.giveSize() == 6 ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt
+                            valueArray.resize(helpArray.giveSize());
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1)*switches.at(1)*macroField.at(1) +
+                                unitCellSize.at(3)*switches.at(3)*macroField.at(5) + unitCellSize.at(2)*switches.at(2)*macroField.at(6);
+                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2)*switches.at(2)*macroField.at(2) +
+                                unitCellSize.at(3)*switches.at(3)*macroField.at(4);
+                            valueArray.at(3) = helpArray.at(3) + unitCellSize.at(3)*switches.at(3)*macroField.at(3);
+                        } else {
+                            OOFEM_ERROR("Unknown element type\n");
+                        }
                     }
+                } else {
+                    valueArray.resize(3);
                 }
 
                 vtkPiece.setPrimaryVarInNode( i, inode, std :: move(valueArray) );
@@ -475,16 +552,33 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L
         isType = ( InternalStateType ) internalVarsToExport.at(field);
 
         for ( int nodeNum = 1; nodeNum <= mapL2G.giveSize(); nodeNum++ ) {
-            if ( nodeNum <= nnodes) { //no special treatment for master nodes
+            if ( nodeNum <= nnodes && mapL2G.at(nodeNum) <= nnodes ) { //no special treatment for master nodes
                 Node *node = d->giveNode( mapL2G.at(nodeNum) );
                 this->getNodalVariableFromIS(answer, node, tStep, isType, region);
                 vtkPiece.setInternalVarInNode(field, nodeNum, answer);
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
-                int pos = regionToUniqueMap.findFirstIndexOf(nodeNum);
-                Node *node = d->giveNode( periodicMap.at(pos) );
-                this->getNodalVariableFromIS(answer, node, tStep, isType, region);
-                vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                int pos = 0;
+                if ( mapL2G.at(nodeNum) != 0) {
+                    pos = regionToUniqueMap.findFirstIndexOf(mapL2G.at(nodeNum));
+                }
+
+                if ( pos ) {
+                    Node *node = d->giveNode( periodicMap.at(pos) );
+                    this->getNodalVariableFromIS(answer, node, tStep, isType, region);
+                    vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                } else { //fill with zeroes
+                    InternalStateValueType valType = giveInternalStateValueType(isType);
+                    int ncomponents = giveInternalStateTypeSize(valType);
+                    answer.resize(ncomponents);
+
+                    if ( isType == IST_BeamForceMomentTensor ) {
+                        answer.resize(6);
+                    }
+
+                    answer.zero();
+                    vtkPiece.setInternalVarInNode(field, nodeNum, answer);
+                }
             }
         }
     }

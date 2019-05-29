@@ -2129,6 +2129,9 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 nc = 1;
             } else if ( vtype == ISVT_VECTOR ) {
                 nc = 3;
+                if ( isttype == IST_BeamForceMomentTensor ) { //AS: to make the hack work
+                    nc = 6;
+                }
             } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                 nc = 9;
             } else {
