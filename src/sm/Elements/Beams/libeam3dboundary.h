@@ -50,10 +50,13 @@ namespace oofem {
 /**
  * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
+ * MACROSCOPIC INPUT: DEFORMATION GRADIENT TENSOR (3D, 9 COMPONENTS: Hxx Hxy Hxz Hyx Hyy Hyz Hzx Hzy Hzz)
+ *
+ * @author: Adam Sciegaj
  */
 class LIBeam3dBoundary : public LIBeam3d
 {
-private:
+protected:
     double length;
     int referenceNode;
     IntArray location;
@@ -88,4 +91,4 @@ protected:
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 };
 } // end namespace oofem
-#endif // libeam3d_h
+#endif // libeam3dboundary_h

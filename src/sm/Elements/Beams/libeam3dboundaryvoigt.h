@@ -32,42 +32,42 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef ltrspaceboundarymembrane_h
-#define ltrspaceboundarymembrane_h
+#ifndef libeam3dboundaryvoigt_h
+#define libeam3dboundaryvoigt_h
 
-#include "sm/Elements/3D/ltrspaceboundary.h"
+#include "sm/Elements/Beams/libeam3dboundary.h"
 
-#define _IFT_LTRSpaceBoundaryMembrane_Name "ltrspaceboundarymembrane"
-#define _IFT_LTRSpaceBoundaryMembrane_Location "location"
+///@name Input fields for LIBeam3dBoundaryVoigt
+//@{
+#define _IFT_LIBeam3dBoundaryVoigt_Name "libeam3dboundaryvoigt"
+//@}
 
 namespace oofem {
-class FEI3dTetLin;
-
 /**
- * This class implements a linear tetrahedral four-node finite element.
- * Each node has 3 degrees of freedom. This element is used for 3D RVE analyses with Periodic Boundary Conditions.
- * At least one node is located at the image boundary.
- * These nodes are replaced with a periodic mirror nodes and a control node is used to impose the macroscopic (average) strain.
- * MACROSCOPIC INPUT: DEFORMATION TENSOR (2D, 4 COMPONENTS: Hxx Hxy Hyx Hyy)
+ * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
+ * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
+ * MACROSCOPIC INPUT: STRAIN TENSOR (3D, 6 COMPONENTS, VOIGT NOTATION: exx eyy ezz gyz gxz gxy)
  *
  * @author: Adam Sciegaj
  */
-class LTRSpaceBoundaryMembrane : public LTRSpaceBoundary
+class LIBeam3dBoundaryVoigt : public LIBeam3dBoundary
 {
-protected:
-    void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep) override;
-
 public:
-    LTRSpaceBoundaryMembrane(int n, Domain * d);
-    virtual ~LTRSpaceBoundaryMembrane() { }
+    LIBeam3dBoundaryVoigt(int n, Domain * d);
+    virtual ~LIBeam3dBoundaryVoigt() { }
 
-    int computeNumberOfDofs() override { return 16; };
+    IRResultType initializeFrom(InputRecord *ir) override;
+
+    int computeNumberOfDofs() override { return 18; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     // definition & identification
-    IRResultType initializeFrom(InputRecord *ir) override;
-    const char *giveInputRecordName() const override { return _IFT_LTRSpaceBoundaryMembrane_Name; }
-    const char *giveClassName() const override { return "LTRSpaceBoundaryMembrane"; }
+    const char *giveInputRecordName() const override { return _IFT_LIBeam3dBoundaryVoigt_Name; }
+    const char *giveClassName() const override { return "LIBeam3dBoundaryVoigt"; }
+
+protected:
+    void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+
 };
 } // end namespace oofem
-#endif // LTRSpaceBoundaryMembrane_h
+#endif // libeam3dboundaryvoigt_h

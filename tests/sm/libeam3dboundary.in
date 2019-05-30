@@ -27,7 +27,7 @@ libeam3d 5 nodes 2 5 6 refnode 10 crossSect 1
 libeam3d 6 nodes 2 6 7 refnode 10 crossSect 1
 libeam3d 7 nodes 2 7 8 refnode 10 crossSect 1
 libeam3dboundary 8 nodes 3 8 5 11 refnode 10 crossSect 1 location 2 0 22
-Set 1 elementranges { (1 4) }
+Set 1 elementranges { (1 8) }
 Set 2 nodes 1 11
 Set 3 nodes 2 1 5
 FiberedCS 1 fibermaterials 1 1 thicks 1 17.72455923e-3 widths 1 17.72455923e-3 thick 17.72455923e-3 width 17.72455923e-3 fiberycentrecoords 1 8.862279616e-3 fiberzcentrecoords 1 8.862279616e-3
