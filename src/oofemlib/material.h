@@ -50,6 +50,7 @@
 //@{
 #define _IFT_Material_density "d"
 #define _IFT_Material_castingtime "castingtime"
+#define _IFT_Material_preCastingTimeMat "precastingtimemat"
 //@}
 
 namespace oofem {
@@ -111,6 +112,10 @@ protected:
      * material model
      */
     double castingTime;
+    
+    /// Material existing before casting time - optional parameter, zero by default
+    int preCastingTimeMat;
+    
 
 public:
     /**

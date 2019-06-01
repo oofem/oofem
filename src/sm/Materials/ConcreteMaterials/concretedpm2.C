@@ -521,7 +521,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     isotropicFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, isotropicFlag, _IFT_ConcreteDPM2_isoflag);
 
-    double value;
+    
     // elastic parameters
     IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e)
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
@@ -529,6 +529,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     propertyDictionary.add('n', nu);
 
     // done in strucutral material
+    //double value;
     //IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
     //propertyDictionary.add(tAlpha, value);
 

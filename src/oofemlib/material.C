@@ -102,6 +102,9 @@ Material :: initializeFrom(InputRecord *ir)
 
     this->castingTime = -1.e10;
     IR_GIVE_OPTIONAL_FIELD(ir, castingTime, _IFT_Material_castingtime);
+    
+    this->preCastingTimeMat = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, preCastingTimeMat, _IFT_Material_preCastingTimeMat);
 
     return IRRT_OK;
 }

@@ -58,7 +58,6 @@
 #define _IFT_RheoChainMaterial_endoftimeofinterest "endoftimeofinterest"
 #define _IFT_RheoChainMaterial_timefactor "timefactor"
 #define _IFT_RheoChainMaterial_talpha "talpha"
-#define _IFT_RheoChainMaterial_preCastingTimeMat "precastingtimemat"
 //@}
 
 namespace oofem {
@@ -176,11 +175,6 @@ protected:
      *  e.g. 86400 if the simulation works with seconds as the time units)
      */
     double timeFactor;
-
-    /// Stiffness at time less than casting time - optional parameter, negative by default
-    //double zeroStiffness;
-
-    int preCastingTimeMat;
 
 public:
     RheoChainMaterial(int n, Domain *d);

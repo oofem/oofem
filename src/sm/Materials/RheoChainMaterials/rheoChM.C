@@ -52,7 +52,6 @@ RheoChainMaterial :: RheoChainMaterial(int n, Domain *d) : StructuralMaterial(n,
     relMatAge = 0.0;
     linearElasticMaterial = NULL;
     EparValTime = -1.0;
-    preCastingTimeMat = 0;
 }
 
 
@@ -623,9 +622,6 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     
     this->talpha = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, talpha, _IFT_RheoChainMaterial_talpha);
-
-    // "slave" material for time < castingTime
-    IR_GIVE_OPTIONAL_FIELD(ir, preCastingTimeMat, _IFT_RheoChainMaterial_preCastingTimeMat);
 
     if ( ir->hasField(_IFT_RheoChainMaterial_lattice) ) {
         lattice = true;

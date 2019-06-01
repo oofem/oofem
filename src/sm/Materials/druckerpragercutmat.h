@@ -104,6 +104,8 @@ public:
     virtual ~DruckerPragerCutMat();
 
     int hasMaterialModeCapability(MaterialMode mode) override;
+    
+    int hasCastingTimeSupport() override { return 1; }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
