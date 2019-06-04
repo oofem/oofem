@@ -552,7 +552,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L
         isType = ( InternalStateType ) internalVarsToExport.at(field);
 
         for ( int nodeNum = 1; nodeNum <= mapL2G.giveSize(); nodeNum++ ) {
-            if ( nodeNum <= nnodes && mapL2G.at(nodeNum) <= nnodes ) { //no special treatment for master nodes
+            if ( nodeNum <= nnodes && mapL2G.at(nodeNum) <= nnodes && mapL2G.at(nodeNum) != 0 ) { //no special treatment for master nodes
                 Node *node = d->giveNode( mapL2G.at(nodeNum) );
                 this->getNodalVariableFromIS(answer, node, tStep, isType, region);
                 vtkPiece.setInternalVarInNode(field, nodeNum, answer);
