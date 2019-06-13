@@ -218,7 +218,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
 
     int extraNodes = 0.;
     for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
-        element = domain->giveElement(ie);
+        element = domain->giveElement(elements.at(ie));
         if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
             LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(element);
             IntArray loc = boundElem->giveLocation();
