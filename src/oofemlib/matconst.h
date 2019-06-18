@@ -95,5 +95,9 @@ namespace oofem {
 #define AVERAGING_TYPE 901
 #define exponent_ID 902
 #define rf_ID 903
+
+/* lattice parameters */
+#define eNormal_ID 1101
+
 } // end namespace oofem
 #endif // matconst_h

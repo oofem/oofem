@@ -397,7 +397,10 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         answer = status->giveStrainVector();
         return 1;
     }
-    return CrossSection :: giveIPValue(answer, gp, type, tStep);
+//     return CrossSection :: giveIPValue(answer, gp, type, tStep);
+    ///@todo so far this only works for elements where each layer has its own integration rule
+    int layer = gp->giveIntegrationRule()->giveNumber();
+    return this->giveDomain()->giveMaterial( fiberMaterials.at(layer) )->giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -437,7 +440,7 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
 
     area = fiberThicks.dotProduct(fiberWidths);
 
-    return IRRT_OK;
+    return CrossSection :: initializeFrom(ir);
 }
 
 void FiberedCrossSection :: createMaterialStatus(GaussPoint &iGP)

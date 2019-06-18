@@ -175,6 +175,7 @@ set (core_export
     errorcheckingexportmodule.C
     vtkexportmodule.C
     vtkxmlexportmodule.C
+    vtkxmlperiodicexportmodule.C
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C

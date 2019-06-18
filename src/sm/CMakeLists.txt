@@ -11,6 +11,12 @@ set (sm_element
     Elements/3D/qspace.C 
     Elements/3D/q27space.C
     Elements/3D/ltrspace.C 
+    Elements/3D/ltrspaceboundary.C
+    Elements/3D/ltrspaceboundarytruss.C
+    Elements/3D/ltrspaceboundarymembrane.C
+    Elements/3D/ltrspaceboundarybeam.C
+    Elements/3D/ltrspaceboundaryplate.C
+    Elements/3D/ltrspaceboundaryvoigt.C
     Elements/3D/qtrspace.C 
     Elements/3D/lwedge.C 
     Elements/3D/qwedge.C 
@@ -29,6 +35,12 @@ set (sm_element
     Elements/Beams/beambaseelement.C
     Elements/Beams/beam2d.C 
     Elements/Beams/beam3d.C
+    Elements/Beams/libeam3dboundary.C
+    Elements/Beams/libeam3dboundarytruss.C
+    Elements/Beams/libeam3dboundarymembrane.C
+    Elements/Beams/libeam3dboundarybeam.C
+    Elements/Beams/libeam3dboundaryplate.C
+    Elements/Beams/libeam3dboundaryvoigt.C
     Elements/Plates/cct.C
     Elements/Plates/dkt.C 
     Elements/Plates/qdkt.C
@@ -72,6 +84,8 @@ set (sm_element
     Elements/lumpedmasselement.C
     Elements/springelement.C
     Elements/lattice2d.C
+    Elements/lattice3d.C
+    Elements/lattice3dboundary.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C
@@ -224,8 +238,6 @@ set (sm_material
     Materials/rankinemat.C
     Materials/rankinematgrad.C
     Materials/rankinematnl.C
-    Materials/latticematstatus.C
-    Materials/latticedamage2d.C
     Materials/dustmat.C
     Materials/lsmastermat.C
     Materials/lsmastermatgrad.C
@@ -242,6 +254,10 @@ set (sm_material
     Materials/isodamagemodel.C
     Materials/steelrelaxmat.C
     Materials/fcm.C
+    #Lattice models
+    Materials/latticematstatus.C
+    Materials/latticelinearelastic.C
+    Materials/latticedamage.C
     )
 
 if (USE_PYTHON)

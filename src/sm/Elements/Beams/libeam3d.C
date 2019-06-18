@@ -382,6 +382,27 @@ LIBeam3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tS
     answer.times( this->giveCrossSection()->give(CS_Area, lc, this) );
 }
 
+Node* LIBeam3d :: giveReferenceNode(int refNode)
+//
+// returns pointer to the reference node in the general case that
+// the global number of reference node is not equal to its consecutive number
+// in the domain
+//
+{
+    int nnodes = this->giveDomain()->giveNumberOfDofManagers();
+
+    for ( int i = 1; i <= nnodes; i++ ) {
+        Node* referenceNode = this->giveDomain()->giveNode(i);
+        int globalNumber = referenceNode->giveGlobalNumber();
+        if ( globalNumber == refNode ) {
+            return referenceNode;
+        }
+    }
+
+    OOFEM_ERROR("Could not find the reference node. Check numbering.");
+    return nullptr;
+}
+
 int
 LIBeam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
@@ -397,7 +418,7 @@ LIBeam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     answer.zero();
     nodeA  = this->giveNode(1);
     nodeB  = this->giveNode(2);
-    refNode = this->giveDomain()->giveNode(this->referenceNode);
+    refNode = this->giveReferenceNode(referenceNode);
 
     for ( int i = 1; i <= 3; i++ ) {
         lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
@@ -434,11 +455,21 @@ LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &
     answer.at(3) = masterGpStrain.at(3);
 }
 
+void
+LIBeam3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                              InternalStateType type, TimeStep *tStep)
+{
+    GaussPoint* gp = integrationRulesArray[0]->getIntegrationPoint(0);
+    this->giveIPValue(answer, gp, type, tStep);
+}
+
 Interface *
 LIBeam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
         return static_cast< FiberedCrossSectionInterface * >(this);
+    } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     return NULL;
