@@ -474,6 +474,30 @@ LTRSpaceBoundary :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
     return Element :: giveIPValue(answer, gp, type, tStep);
 }
 
+double
+LTRSpaceBoundary :: giveLengthInDir(const FloatArray &normalToCrackPlane)
+{
+    double maxDis, minDis;
+    int nnode = giveNumberOfNodes() - 1; //don't take control node
+
+    FloatArray coords(3);
+    recalculateCoordinates(1, coords);
+    minDis = maxDis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
+
+    for ( int i = 2; i <= nnode; i++ ) {
+        FloatArray coords(3);
+        recalculateCoordinates(i, coords);
+        double dis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
+        if ( dis > maxDis ) {
+            maxDis = dis;
+        } else if ( dis < minDis ) {
+            minDis = dis;
+        }
+    }
+
+    return maxDis - minDis;
+}
+
 void
 LTRSpaceBoundary :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)

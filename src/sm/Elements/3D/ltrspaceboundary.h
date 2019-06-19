@@ -75,6 +75,7 @@ protected:
     double computeVolumeAround(GaussPoint * gp) override;
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
+    double giveLengthInDir(const FloatArray &normalToCrackPlane) override;
 
 public:
     LTRSpaceBoundary(int n, Domain * d);
