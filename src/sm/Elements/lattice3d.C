@@ -705,7 +705,7 @@ Lattice3d :: saveContext(DataStream &stream, ContextMode mode)
 void
 Lattice3d :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    LatticeStructuralElement :: saveContext(stream, mode);
+    LatticeStructuralElement :: restoreContext(stream, mode);
 
     contextIOResultType iores;
 
