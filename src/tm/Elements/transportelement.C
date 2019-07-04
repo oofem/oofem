@@ -75,6 +75,19 @@ TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
 TransportElement :: ~TransportElement()
 { }
 
+IRResultType
+TransportElement :: initializeFrom(InputRecord *ir)
+{
+    IRResultType result;                          // Required by IR_GIVE_FIELD macro
+
+
+    result = Element::initializeFrom(ir);
+    this->vofFunction = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, vofFunction, _IFT_TransportElement_vof_function);
+
+    return result;
+}
+
 
 void
 TransportElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
@@ -1418,6 +1431,15 @@ TransportElement :: giveMaterial()
     return static_cast< TransportCrossSection* >( this->giveCrossSection() )->giveMaterial();
 }
 
+double
+TransportElement::computeVof(TimeStep *tStep)
+{
+    if (this->vofFunction) {
+        return this->giveDomain()->giveFunction(this->vofFunction)->evaluateAtTime(tStep->giveTargetTime());
+    } else {
+        return 1.0;
+    }
+}
 
 #ifdef __OOFEG
 int
