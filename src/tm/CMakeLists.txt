@@ -56,6 +56,7 @@ set (tm_material
     Materials/nonlinearmassmat.C
     Materials/rvestokesflow.C
     Materials/transportmaterial.C
+    Materials/twophasemat.C
     )
 
 set (tm
