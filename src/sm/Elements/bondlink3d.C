@@ -34,7 +34,7 @@
 
 #include "domain.h"
 #include "../sm/Elements/bondlink3d.h"
-#include "../sm/Materials/latticematstatus.h"
+#include "../sm/Materials/structuralms.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -43,7 +43,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "../sm/Elements/latticestructuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
@@ -57,7 +57,7 @@
 namespace oofem {
 REGISTER_Element(BondLink3d);
 
-BondLink3d :: BondLink3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
+BondLink3d :: BondLink3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
     numberOfDofMans     = 2;
     geometryFlag = 0;
@@ -257,7 +257,7 @@ BondLink3d :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
-    LatticeStructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->bondLength, _IFT_BondLink3d_length);
     
@@ -368,18 +368,16 @@ BondLink3d :: computeGeometryProperties()
   void
   BondLink3d :: saveContext(DataStream &stream, ContextMode mode)
   {
-    LatticeStructuralElement :: saveContext(stream, mode);
+    StructuralElement :: saveContext(stream, mode);
     
-    contextIOResultType iores;
-  
-}
+  }
   
 
   void
   BondLink3d :: restoreContext(DataStream &stream, ContextMode mode)
 {
   
-  LatticeStructuralElement :: restoreContext(stream, mode);
+  StructuralElement :: restoreContext(stream, mode);
   
   contextIOResultType iores;
   

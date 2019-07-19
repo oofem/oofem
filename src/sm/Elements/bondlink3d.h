@@ -35,7 +35,7 @@
 #ifndef bondlink3d_h
  #define bondlink3d_h
 
- #include "latticestructuralelement.h"
+ #include "structuralelement.h"
 
 ///@name Input fields for BondLink3d
 //@{
@@ -57,7 +57,7 @@ namespace oofem {
  * @TODO: Should not be derived from lattice structural element 
 */
 
-class BondLink3d : public LatticeStructuralElement
+class BondLink3d : public StructuralElement
 {
 protected:
   double bondLength;
@@ -87,13 +87,13 @@ public:
      */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    virtual double giveBondLength() override;
+    virtual double giveBondLength();
     
-    virtual double giveBondDiameter() override;
+    virtual double giveBondDiameter();
 
-    virtual double giveBondEndLength() override;
+    virtual double giveBondEndLength();
     
-    virtual int computeNumberOfDofs() { return 12; }
+    virtual int computeNumberOfDofs() { return 9; }
 
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
