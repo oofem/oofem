@@ -87,6 +87,7 @@ set (sm_element
     Elements/lattice3d.C
     Elements/lattice3dboundary.C
     Elements/latticelink3d.C
+    Elements/bondlink3d.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C
@@ -259,6 +260,7 @@ set (sm_material
     Materials/latticematstatus.C
     Materials/latticelinearelastic.C
     Materials/latticedamage.C
+    Materials/linkslip.C
     )
 
 if (USE_PYTHON)
