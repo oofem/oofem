@@ -178,7 +178,7 @@ void BondLink3d :: computeGaussPoints()
 {
     integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
-    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _3dLattice);
+    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _3dMat);
 }
 
 
@@ -244,9 +244,12 @@ BondLink3d :: giveBondDiameter()
 void
 BondLink3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {
-        D_u, D_v, D_w, R_u, R_v, R_w
-    };
+  if(inode==1){
+    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
+  }
+  else{
+    answer = { D_u, D_v, D_w};
+  }
 }
 
 IRResultType

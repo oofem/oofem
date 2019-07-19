@@ -55,10 +55,14 @@ namespace oofem {
 
 
 
-class LinkSlipStatus : public LatticeMaterialStatus
+class LinkSlipStatus : public StructuralMaterialStatus
 {
 protected:
 
+  double plasticStrain;
+  
+  double tempPlasticStrain;
+  
 
 
 public:
@@ -67,9 +71,11 @@ public:
     LinkSlipStatus(GaussPoint *g);
     /// Destructor
     ~LinkSlipStatus() {}
-
-    void  letTempPlasticStrainBe(const FloatArray &v)
-    { tempPlasticStrain = v; }
+    
+    double  giveTempPlasticStrain(){ return this->tempPlasticStrain; }
+    double  givePlasticStrain(){ return this->plasticStrain; }
+    void  letTempPlasticStrainBe(const double &v)
+    { this->tempPlasticStrain = v; }
 
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -89,7 +95,7 @@ public:
 /**
  * This class implements a slip model for concrete for lattice elements.
  */
-class LinkSlip : public LatticeLinearElastic
+class LinkSlip : public LinearElasticMaterial
     //
 {
 protected:
@@ -119,7 +125,7 @@ protected:
 public:
 
     /// Constructor
-    LinkSlip(int n, Domain *d) : LatticeLinearElastic(n, d) { };
+    LinkSlip(int n, Domain *d) : LinearElasticMaterial(n, d) { };
 
 
     LinkSlip(int n, Domain *d, double eNormalMean, double alphaOne, double alphaTwo);
@@ -140,13 +146,11 @@ public:
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
 
-    virtual void give3dStiffMtrx(FloatMatrix &answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 				 MatResponseMode rmode,
 				 GaussPoint *gp,
 				 TimeStep *atTime);
 
-    double computeDeltaDissipation(GaussPoint *gp,
-				   TimeStep *atTime);
     
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
@@ -155,9 +159,6 @@ public:
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
-
-    virtual void giveRandomParameters(FloatArray &param);
-
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
