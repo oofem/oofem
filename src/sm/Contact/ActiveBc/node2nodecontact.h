@@ -70,39 +70,36 @@ class OOFEM_EXPORT Node2NodePenaltyContact : public ActiveBoundaryCondition
 protected:
     bool useTangent; ///< Determines if tangent should be used.
     double penalty;
-    int slaveSet;
-    int masterSet;
+    IntArray slaveSet;
+    IntArray masterSet;
 public:
 
     /// Constructor.
-    Node2NodePenaltyContact(int n, Domain * d) : ActiveBoundaryCondition(n, d) { }
+    Node2NodePenaltyContact(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
     /// Destructor.
-    virtual ~Node2NodePenaltyContact(){};
+    virtual ~Node2NodePenaltyContact() {};
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
 
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
+                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
 
-   
+
     virtual const char *giveClassName() const { return "Node2NodePenaltyContact"; }
     virtual const char *giveInputRecordName() const { return _IFT_Node2NodePenaltyContact_Name; }
-      
-   
-    void computeTangentFromContact(FloatMatrix &answer, Node* masterNode, Node *slaveNode, TimeStep *tStep);
-    void computeGap(double &answer,  Node* masterNode, Node *slaveNode, TimeStep *tStep);
-   
-    void computeNormalMatrixAt(FloatArray &answer,  Node* masterNode, Node *slaveNode, TimeStep *TimeStep);
 
-    
-    void computeInternalForcesFromContact(FloatArray &answer,  Node* masterNode, Node *slaveNode, TimeStep *tStep);
-    
 
+    void computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
+    void computeGap(double &answer,  Node *masterNode, Node *slaveNode, TimeStep *tStep);
+
+    void computeNormalMatrixAt(FloatArray &answer,  Node *masterNode, Node *slaveNode, TimeStep *TimeStep);
+
+
+    void computeExternalForcesFromContact(FloatArray &answer,  Node *masterNode, Node *slaveNode, TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // node2nodecontact_h
