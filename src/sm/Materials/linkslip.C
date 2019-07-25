@@ -115,7 +115,7 @@ namespace oofem {
   
 
   void
-  LinkSlip :: giveRealStressVector(FloatArray &answer,
+  LinkSlip :: giveRealStressVector_3d(FloatArray &answer,
 				   GaussPoint *gp,
 				   const FloatArray &totalStrain,
 				   TimeStep *atTime)
@@ -133,9 +133,7 @@ namespace oofem {
     FloatMatrix stiffnessMatrix;
     this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
 
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
-
-    answer.resize(rsize);
+    answer.resize(3);
     answer.zero();
 
     /*First component is the slip one for which the stress should be limited using plasiticity (frictional slip between fibre and matrix). The other components are kept elastic. */
@@ -150,7 +148,7 @@ namespace oofem {
     }
 
     //Compute the final stress components
-    for ( int i = 2; i <= rsize; i++ ) { // only diagonal terms matter
+    for ( int i = 2; i <= 3; i++ ) { // only diagonal terms matter
       answer.at(i) =  stiffnessMatrix.at(i, i) * totalStrain.at(i);
     }
 
@@ -229,7 +227,21 @@ namespace oofem {
   void
   LinkSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep)
   {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    MaterialStatus :: printOutputAt(file, tStep);
+
+    
+    fprintf(file, "  slip ");
+    for ( auto &var : strainVector ) {
+        fprintf( file, " %.4e", var );
+    }
+
+    fprintf(file, "\n              stress");
+    for ( auto &var : stressVector ) {
+        fprintf( file, " %.4e", var );
+    }
+    fprintf(file, "\n");
+
+    
     fprintf(file, "plasticStrain %.8e\n", this->plasticStrain);
     return;
   }
@@ -237,7 +249,6 @@ namespace oofem {
   double
   LinkSlip :: give(int aProperty, GaussPoint *gp)
   {
-    double answer;
     if ( aProperty == eNormal_ID ) {
       return 1.;
     } else {
@@ -254,7 +265,6 @@ namespace oofem {
   // no temp variables stored
   //
   {
-    contextIOResultType iores;
     // save parent class status
   
     StructuralMaterialStatus :: saveContext(stream, mode);
@@ -275,8 +285,6 @@ namespace oofem {
   // restores full information stored in stream to this Status
   //
   {
-    contextIOResultType iores;
-    
     StructuralMaterialStatus :: restoreContext(stream, mode);
     
     // read raw data
@@ -309,7 +317,9 @@ namespace oofem {
 			  TimeStep *atTime)
   {
   
-    return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
-  
+    // return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
+    return Material :: giveIPValue(answer, gp, type, atTime);
+
+    
   }
 }

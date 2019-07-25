@@ -168,7 +168,7 @@ BondLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     double area = this->computeVolumeAround(gp)/this->giveLength();
     answer.times(area);        
 
-    printf("end of stiffness matrix\n");
+    //    printf("end of stiffness matrix\n");
     
     return;
 }
@@ -265,8 +265,12 @@ BondLink3d :: initializeFrom(InputRecord *ir)
     
     IR_GIVE_FIELD(ir, this->directionVector, _IFT_BondLink3d_dirvector);
 
-    IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_BondLink3d_l_end);
+    IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_BondLink3d_length_end);
 
+    if(this->bondEndLength < this->bondLength){
+      this->bondLength = this->bondEndLength;
+    }
+    
     return IRRT_OK;
 }
 
@@ -356,6 +360,9 @@ BondLink3d :: computeGeometryProperties()
 
     this->rigid.beProductOf(localCoordinateSystem,rigidGlobal);
 
+    //    printf("rigid\n");
+    //    rigid.printYourself();
+    
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
       this->globalCentroid.at(i) = nodeA->giveCoordinate(i);;

@@ -157,7 +157,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

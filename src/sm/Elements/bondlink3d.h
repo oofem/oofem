@@ -43,7 +43,7 @@
  #define _IFT_BondLink3d_length "length"
  #define _IFT_BondLink3d_diameter "diameter"
  #define _IFT_BondLink3d_dirvector "dirvector"
- #define _IFT_BondLink3d_l_end "l_end"
+ #define _IFT_BondLink3d_length_end "length_end"
 //@}
 
 namespace oofem {
