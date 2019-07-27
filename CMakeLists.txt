@@ -99,6 +99,7 @@ option (USE_T3D "Enable T3D support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
 option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
 option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
+option (USE_PYBIND11_BINDIGS "Enable Python Pybind11 bindings" OFF)
 option (USE_HDF5 "HDF5 support" OFF)
 
 if (USE_PARALLEL)
@@ -493,6 +494,13 @@ if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     endif ()
 endif ()
 
+if (USE_PYBIND11_BINDIGS)
+    #build pybind11 bindings
+    find_package(pybind11 REQUIRED CONFIG)
+    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python2/oofem.cpp ${PYBIND11_HEADERS})
+    target_link_libraries(oofempy PRIVATE liboofem)
+
+endif()
 
 #######################################################################
 ######################## Configuration ################################
