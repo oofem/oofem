@@ -36,6 +36,11 @@
 namespace py = pybind11;
 
 #include "floatarray.h"
+#include "floatmatrix.h"
+#include "classfactory.h"
+#include "domain.h"
+#include "engngm.h"
+#include "element.h"
 
 
 PYBIND11_MODULE(oofempy, m) {
@@ -55,6 +60,38 @@ PYBIND11_MODULE(oofempy, m) {
             return s[i];
         })
         ;
-      
+
+     py::class_<oofem::FloatMatrix>(m, "FloatMatrix")
+        .def(py::init<>())
+        .def(py::init<int,int>())
+        .def("printYourself", (void (oofem::FloatMatrix::*)() const) &oofem::FloatMatrix::printYourself, "Prints receiver")
+        .def("printYourself", (void (oofem::FloatMatrix::*)(const std::string &) const) &oofem::FloatMatrix::printYourself, "Prints receiver")
+        .def("pY", &oofem::FloatMatrix::pY)
+        .def("__setitem__", [](oofem::FloatMatrix &s, py::tuple indx, double v) {
+            s(((py::handle)(indx[0])).cast<int>(), ((py::handle)(indx[1])).cast<int>()) = v;
+        })
+        .def("__getitem__", [](const oofem::FloatMatrix &s, py::tuple indx) {
+            if (((py::handle)(indx[0])).cast<int>() >= s.giveNumberOfRows()) throw py::index_error();
+            if (((py::handle)(indx[1])).cast<int>() >= s.giveNumberOfColumns()) throw py::index_error();
+            return s(((py::handle)(indx[0])).cast<int>(), ((py::handle)(indx[1])).cast<int>());
+        })
+        ;
+    
+    py::class_<oofem::EngngModel>(m, "EngngModel")
+        .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
+        ;
+
+    py::class_<oofem::Domain>(m, "Domain")
+    ;
+
+    py::class_<oofem::Element>(m, "Element")
+    ;
+
+    py::class_<oofem::ClassFactory>(m, "ClassFactory")
+        .def("createElement", &oofem::ClassFactory::createElement)
+        .def("createEngngModel", &oofem::ClassFactory::createEngngModel)
+        ;
+
+    m.def("getClassFactory", &oofem::GiveClassFactory, py::return_value_policy::reference);
 
 }
