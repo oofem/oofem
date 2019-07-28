@@ -38,10 +38,12 @@ namespace py = pybind11;
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "classfactory.h"
+#include "timestep.h"
 #include "domain.h"
 #include "engngm.h"
 #include "element.h"
-
+#include "field.h"
+#include "util.h"
 
 PYBIND11_MODULE(oofempy, m) {
     m.doc() = "oofem python bindings module"; // optional module docstring
@@ -77,8 +79,34 @@ PYBIND11_MODULE(oofempy, m) {
         })
         ;
     
+py::class_<oofem::TimeStep>(m, "TimeStep")
+    .def("giveNumber", &oofem::TimeStep::giveNumber)
+    .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
+    .def("giveIntrinsicTime", &oofem::TimeStep::giveIntrinsicTime)
+    .def("giveTimeIncrement", &oofem::TimeStep::giveTimeIncrement)
+    .def("setTimeIncrement", &oofem::TimeStep::setTimeIncrement)
+    .def("setTime", &oofem::TimeStep::setTime)
+    .def("setTargetTime", &oofem::TimeStep::setTargetTime)
+    .def("setIntrinsicTime", &oofem::TimeStep::setIntrinsicTime)
+    .def("isNotTheLastStep", &oofem::TimeStep::isNotTheLastStep)
+    .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
+    .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
+    ;
+
     py::class_<oofem::EngngModel>(m, "EngngModel")
         .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
+        .def("setDomain", &oofem::EngngModel::setDomain, py::keep_alive<1, 3>())
+        .def("giveNimberOfDomains", &oofem::EngngModel::giveNumberOfDomains)
+        .def("terminateAnalysis", &oofem::EngngModel::terminateAnalysis)
+        .def("solveYourself", &oofem::EngngModel::solveYourself)
+        .def("solveYourselfAt", &oofem::EngngModel::solveYourselfAt)
+        .def("terminate",&oofem::EngngModel::terminate)
+        .def("giveField", &oofem::EngngModel::giveField)
+        .def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference)
+        .def("givePreviousStep", &oofem::EngngModel::givePreviousStep, py::return_value_policy::reference)
+        .def("giveNextStep", &oofem::EngngModel::giveNextStep, py::return_value_policy::reference)
+        .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
+        //.def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
@@ -93,5 +121,18 @@ PYBIND11_MODULE(oofempy, m) {
         ;
 
     m.def("getClassFactory", &oofem::GiveClassFactory, py::return_value_policy::reference);
+    //m.def("InstanciateProblem", &oofem::InstanciateProblem);
+
+    py::enum_<oofem::FieldType>(m, "FieldType")
+        .value("FT_Unknown", oofem::FieldType::FT_Unknown) 
+        .value("FT_Velocity", oofem::FieldType::FT_Velocity)
+        .value("FT_Displacements", oofem::FieldType::FT_Displacements)
+        .value("FT_VelocityPressure", oofem::FieldType::FT_VelocityPressure)
+        .value("FT_Pressure", oofem::FieldType::FT_Pressure)
+        .value("FT_Temperature", oofem::FieldType::FT_Temperature)
+        .value("FT_HumidityConcentration", oofem::FieldType::FT_HumidityConcentration)
+        .value("FT_TransportProblemUnknowns", oofem::FieldType::FT_TransportProblemUnknowns)
+        .value("FT_TemperatureAmbient", oofem::FieldType::FT_TemperatureAmbient)
+    ;
 
 }
