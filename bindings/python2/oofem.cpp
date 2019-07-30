@@ -37,13 +37,23 @@ namespace py = pybind11;
 
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "classfactory.h"
+#include "intarray.h"
+
+#include "femcmpnn.h"
 #include "timestep.h"
 #include "domain.h"
 #include "engngm.h"
+#include "dof.h"
+#include "dofmanager.h"
 #include "element.h"
 #include "field.h"
 #include "util.h"
+#include "datareader.h"
+#include "oofemtxtdatareader.h"
+#include "valuemodetype.h"
+#include "dofiditem.h"
+#include "classfactory.h"
+
 
 PYBIND11_MODULE(oofempy, m) {
     m.doc() = "oofem python bindings module"; // optional module docstring
@@ -79,6 +89,28 @@ PYBIND11_MODULE(oofempy, m) {
         })
         ;
     
+    py::class_<oofem::IntArray>(m, "IntArray")
+    ;
+
+    py::class_<oofem::DataReader>(m, "DataReader")
+    ;
+
+    py::class_<oofem::OOFEMTXTDataReader, oofem::DataReader>(m, "OOFEMTXTDataReader")
+        .def(py::init<std::string>())
+    ;
+
+    py::class_<oofem::FEMComponent>(m, "FEMComponent")
+        .def("giveClassName", &oofem::FEMComponent::giveClassName)
+        .def("giveInputRecordName", &oofem::FEMComponent::giveInputRecordName)
+        .def("giveDomain", &oofem::FEMComponent::giveDomain, py::return_value_policy::reference)
+        .def("setDomain", &oofem::FEMComponent::setDomain)
+        .def("giveNumber", &oofem::FEMComponent::giveNumber)
+        .def("setNumber", &oofem::FEMComponent::setNumber)
+        .def("checkConsistency", &oofem::FEMComponent::checkConsistency)
+        .def("printYourself", &oofem::FEMComponent::printYourself)
+        ;
+
+
 py::class_<oofem::TimeStep>(m, "TimeStep")
     .def("giveNumber", &oofem::TimeStep::giveNumber)
     .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
@@ -106,13 +138,33 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("givePreviousStep", &oofem::EngngModel::givePreviousStep, py::return_value_policy::reference)
         .def("giveNextStep", &oofem::EngngModel::giveNextStep, py::return_value_policy::reference)
         .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
-        //.def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
+        .def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
     ;
 
-    py::class_<oofem::Element>(m, "Element")
+    py::class_<oofem::Dof>(m, "Dof")
+        .def("giveDofManNumber", &oofem::Dof::giveDofManNumber)
+        .def("giveDofManager", &oofem::Dof::giveDofManager, py::return_value_policy::reference)
+        .def("giveDofManGlobalNumber", &oofem::Dof::giveDofManGlobalNumber)
+        .def("giveUnknown", (double (oofem::Dof::*)(oofem::ValueModeType, oofem::TimeStep*)) &oofem::Dof::giveUnknown)
+        .def("giveDofID", &oofem::Dof::giveDofID)
+        .def("printYourself", &oofem::Dof::printYourself)
+    ;
+
+    py::class_<oofem::DofManager, oofem::FEMComponent>(m, "DofManager")
+        .def("giveDofWithID", &oofem::DofManager::giveDofWithID, py::return_value_policy::reference)
+        .def("giveNumberOfDofs", &oofem::DofManager::giveNumberOfDofs)
+        .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
+        .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
+        .def("giveCoordinates", &oofem::DofManager::giveCoordinates, py::return_value_policy::reference)
+        .def("appendDof", &oofem::DofManager::appendDof, py::keep_alive<1, 2>())
+        .def("removeDof", &oofem::DofManager::removeDof)
+        .def("hasDofID", &oofem::DofManager::hasDofID)
+    ;
+
+    py::class_<oofem::Element, oofem::FEMComponent>(m, "Element")
     ;
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
@@ -121,7 +173,8 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         ;
 
     m.def("getClassFactory", &oofem::GiveClassFactory, py::return_value_policy::reference);
-    //m.def("InstanciateProblem", &oofem::InstanciateProblem);
+    m.def("InstanciateProblem", &oofem::InstanciateProblem);
+    //std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *master = 0, bool parallelFlag = false);
 
     py::enum_<oofem::FieldType>(m, "FieldType")
         .value("FT_Unknown", oofem::FieldType::FT_Unknown) 
@@ -133,6 +186,58 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .value("FT_HumidityConcentration", oofem::FieldType::FT_HumidityConcentration)
         .value("FT_TransportProblemUnknowns", oofem::FieldType::FT_TransportProblemUnknowns)
         .value("FT_TemperatureAmbient", oofem::FieldType::FT_TemperatureAmbient)
+    ;
+
+    py::enum_<oofem::ValueModeType>(m, "ValueModeType")
+        .value("VM_Unknown", oofem::ValueModeType::VM_Unknown)
+        .value("VM_Total", oofem::ValueModeType::VM_Total)
+        .value("VM_Velocity", oofem::ValueModeType::VM_Velocity)
+        .value("VM_Acceleration", oofem::ValueModeType::VM_Acceleration)
+        .value("VM_Incremental", oofem::ValueModeType::VM_Incremental)
+        .value("VM_RhsTotal", oofem::ValueModeType::VM_RhsTotal)
+        .value("VM_RhsIncremental", oofem::ValueModeType::VM_RhsIncremental)
+        .value("VM_RhsInitial", oofem::ValueModeType::VM_RhsInitial)
+        .value("VM_Intermediate", oofem::ValueModeType::VM_Intermediate)
+        .value("VM_TotalIntrinsic", oofem::ValueModeType::VM_TotalIntrinsic)
+    ;
+
+    py::enum_<oofem::DofIDItem>(m, "DofIDItem")
+      .value("Undef", oofem::DofIDItem::Undef)
+      .value("D_u", oofem::DofIDItem::D_u)
+      .value("D_v", oofem::DofIDItem::D_v)
+      .value("D_w", oofem::DofIDItem::D_w)
+      .value("R_u", oofem::DofIDItem::R_u)
+      .value("R_v", oofem::DofIDItem::R_v)
+      .value("R_w", oofem::DofIDItem::R_w)
+      .value("V_u", oofem::DofIDItem::V_u)
+      .value("V_v", oofem::DofIDItem::V_v)
+      .value("V_w", oofem::DofIDItem::V_w)
+      .value("T_f", oofem::DofIDItem::T_f)
+      .value("P_f", oofem::DofIDItem::P_f)
+      .value("G_0", oofem::DofIDItem::G_0)
+      .value("G_1", oofem::DofIDItem::G_1)
+      .value("C_1", oofem::DofIDItem::C_1)
+      .value("W_u", oofem::DofIDItem::W_u)
+      .value("W_v", oofem::DofIDItem::W_v)
+      .value("W_w", oofem::DofIDItem::W_w)
+      .value("Gamma", oofem::DofIDItem::Gamma)
+      .value("D_u_edge_const", oofem::DofIDItem::D_u_edge_const)
+      .value("D_u_edge_lin", oofem::DofIDItem::D_u_edge_lin)
+      .value("D_v_edge_const", oofem::DofIDItem::D_v_edge_const)
+      .value("D_v_edge_lin", oofem::DofIDItem::D_v_edge_lin)
+      .value("Warp_PsiTheta", oofem::DofIDItem::Warp_PsiTheta)
+      .value("Warp_Theta", oofem::DofIDItem::Warp_Theta)
+      .value("LMP_u", oofem::DofIDItem::LMP_u)
+      .value("LMP_v", oofem::DofIDItem::LMP_v)
+      .value("LMP_w", oofem::DofIDItem::LMP_w)
+      .value("Trac_u", oofem::DofIDItem::Trac_u)
+      .value("Trac_v", oofem::DofIDItem::Trac_v)
+      .value("Trac_w", oofem::DofIDItem::Trac_w)
+      ;
+
+    py::enum_<oofem::problemMode>(m, "problemMode")
+        .value("processor", oofem::problemMode::_processor)
+        .value("postProcessor", oofem::problemMode::_postProcessor)
     ;
 
 }
