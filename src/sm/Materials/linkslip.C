@@ -133,7 +133,7 @@ namespace oofem {
     FloatMatrix stiffnessMatrix;
     this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
 
-    answer.resize(3);
+    answer.resize(6);
     answer.zero();
 
     /*First component is the slip one for which the stress should be limited using plasiticity (frictional slip between fibre and matrix). The other components are kept elastic. */
@@ -148,7 +148,7 @@ namespace oofem {
     }
 
     //Compute the final stress components
-    for ( int i = 2; i <= 3; i++ ) { // only diagonal terms matter
+    for ( int i = 2; i <= 6; i++ ) { // only diagonal terms matter
       answer.at(i) =  stiffnessMatrix.at(i, i) * totalStrain.at(i);
     }
 
@@ -173,16 +173,16 @@ namespace oofem {
   {
  
     /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(3, 3);
+    answer.resize(6, 6);
     answer.zero();
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray tempStrain(6);
-    tempStrain = status->giveTempStrainVector();
-    
     answer.at(1, 1) = 1.;
     answer.at(2, 2) = this->alphaOne; // shear
     answer.at(3, 3) = this->alphaOne; // shear
+    answer.at(4, 4) = this->alphaOne; // shear
+    answer.at(5, 5) = this->alphaOne; // shear
+    answer.at(6, 6) = this->alphaOne; // shear
+    
     
     answer.times(this->eNormalMean);
 
@@ -218,7 +218,7 @@ namespace oofem {
   {
     double alpha = this->give(tAlpha, gp);
   
-    answer.resize(3);
+    answer.resize(6);
     answer.zero();
 
     answer.at(1) = alpha;

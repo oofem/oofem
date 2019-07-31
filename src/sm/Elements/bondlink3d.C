@@ -87,7 +87,7 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     //Assemble Bmatrix based on three rigid arm components
     //first node: beam, second node: lattice
     //rigid.at(1) (tangential), rigid.at(2) (lateral), rigid.at(3) (lateral)
-    answer.resize(3, 9);
+    answer.resize(6, 9);
     answer.zero();
 
     //Normal displacement jump in x-direction
@@ -102,7 +102,8 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     //first node
     answer.at(2, 2) = -1.;
     answer.at(2, 4) = this->rigid.at(3);
-    answer.at(2, 3) = -this->rigid.at(1);
+    answer.at(2, 6) = -this->rigid.at(1);
+    
     //Second node
     answer.at(2, 8) = 1.;
 
@@ -114,6 +115,12 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     //Second node
     answer.at(3, 9) =  1.;
 
+    answer.at(4,4) = 1.;
+
+    answer.at(5,5) = 1.;
+
+    answer.at(6,6) = 1.;
+          
     return;
 }
 
@@ -303,7 +310,7 @@ BondLink3d :: computeGeometryProperties()
     nodeB  = this->giveNode(2);
 
     
-    //Calculate components of distance from reinforcement node to lattice node.    
+    //Calculate components of distance from continuum node to lattice node.    
     for ( int i = 0; i < 3; i++ ) {
         coordsA.at(i + 1) =  nodeA->giveCoordinate(i + 1);
         coordsB.at(i + 1) =  nodeB->giveCoordinate(i + 1);
@@ -372,6 +379,7 @@ BondLink3d :: computeGeometryProperties()
     
     return;
 }
+  
   void
   BondLink3d :: saveContext(DataStream &stream, ContextMode mode)
   {
@@ -396,7 +404,7 @@ BondLink3d :: giveInternalForcesVector(FloatArray &answer,
 					  TimeStep *tStep, int useUpdatedGpRecord)
 {
   FloatMatrix b, bt;
-  FloatArray u, stress(3), slip(3);
+  FloatArray u, stress(6), slip(6);
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
     this->computeVectorOf(VM_Total, tStep, u);
@@ -417,7 +425,7 @@ BondLink3d :: giveInternalForcesVector(FloatArray &answer,
             stress = matStat->giveStressVector();
         } else {
             if ( !this->isActivated(tStep) ) {
-                slip.resize(3);
+                slip.resize(6);
                 slip.zero();
             }
             slip.beProductOf(b, u);

@@ -98,6 +98,16 @@ LIBeam3dBoundaryPlate :: computeTransformationMatrix(FloatMatrix &answer, TimeSt
     k1.at(1,9) = -(this->giveNode(1)->giveCoordinate(3))*unitCellSize.at(2)*switches1.at(2);
     k1.at(2,10) = -(this->giveNode(1)->giveCoordinate(3))*unitCellSize.at(1)*switches1.at(1);
 
+    //Peter: Add the rules for rotational DOFs (around) x- and y-axes
+    //rotation around x-axis
+    // k1.at(4,6) = switches1.at(2);
+    k1.at(4,8) = unitCellSize.at(2)*switches1.at(2);
+    k1.at(4,10) = unitCellSize.at(1)*switches1.at(1);
+    //rotation around y-axis
+    k1.at(5,7) = unitCellSize.at(1)*switches1.at(1);
+    k1.at(5,9) = unitCellSize.at(2)*switches1.at(2);
+    
+    
     k2.at(1,1) = unitCellSize.at(1)*switches2.at(1);
     k2.at(1,2) = unitCellSize.at(2)*switches2.at(2);
     k2.at(2,3) = unitCellSize.at(1)*switches2.at(1);
@@ -108,7 +118,16 @@ LIBeam3dBoundaryPlate :: computeTransformationMatrix(FloatMatrix &answer, TimeSt
     k2.at(2,8) = -(this->giveNode(2)->giveCoordinate(3))*unitCellSize.at(2)*switches2.at(2);
     k2.at(1,9) = -(this->giveNode(2)->giveCoordinate(3))*unitCellSize.at(2)*switches2.at(2);
     k2.at(2,10) = -(this->giveNode(2)->giveCoordinate(3))*unitCellSize.at(1)*switches2.at(1);
+    //Peter: Add the rules for rotational DOFs (around) x- and y-axes
+    //rotation around x-axis
+    k2.at(4,8) = unitCellSize.at(2)*switches2.at(2);
+    k2.at(4,10) = unitCellSize.at(1)*switches2.at(1);
+    //rotation around y-axis
+    k2.at(5,7) = unitCellSize.at(1)*switches2.at(1);
+    k2.at(5,9) = unitCellSize.at(2)*switches2.at(2);
 
+
+    
     answer.resize(12,12);
     answer.beUnitMatrix();
     answer.resizeWithData(12,22);
