@@ -115,12 +115,10 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     //Second node
     answer.at(3, 9) =  1.;
 
-    answer.at(4,4) = 1.;
-
-    answer.at(5,5) = 1.;
-
-    answer.at(6,6) = 1.;
-          
+    //Rotation around axis
+    //Only contribution from first node
+    answer.at(4,4)  = 1.;
+    
     return;
 }
 
@@ -175,7 +173,6 @@ BondLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     double area = this->computeVolumeAround(gp)/this->giveLength();
     answer.times(area);        
 
-    //    printf("end of stiffness matrix\n");
     
     return;
 }
@@ -367,8 +364,6 @@ BondLink3d :: computeGeometryProperties()
 
     this->rigid.beProductOf(localCoordinateSystem,rigidGlobal);
 
-    //    printf("rigid\n");
-    //    rigid.printYourself();
     
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
