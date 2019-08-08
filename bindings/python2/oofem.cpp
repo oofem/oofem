@@ -33,7 +33,10 @@
  */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/operators.h>
 namespace py = pybind11;
+
+#include <string>
 
 #include "floatarray.h"
 #include "floatmatrix.h"
@@ -46,6 +49,11 @@ namespace py = pybind11;
 #include "dof.h"
 #include "dofmanager.h"
 #include "element.h"
+#include "generalboundarycondition.h"
+#include "initialcondition.h"
+#include "function.h"
+#include "material.h"
+#include "crosssection.h"
 #include "field.h"
 #include "util.h"
 #include "datareader.h"
@@ -90,6 +98,45 @@ PYBIND11_MODULE(oofempy, m) {
         ;
     
     py::class_<oofem::IntArray>(m, "IntArray")
+        .def(py::init<int>(), py::arg("n")=0)
+        .def(py::init<const oofem::IntArray&>())
+        .def("resize", &oofem::IntArray::resize)
+        .def("clear", &oofem::IntArray::clear)
+        .def("preallocate", &oofem::IntArray::preallocate)
+        .def("followedBy", (void (oofem::IntArray::*)(int , int)) &oofem::IntArray::followedBy, "Appends number to receiver")
+        .def("followedBy", (void (oofem::IntArray::*)(const oofem::IntArray& , int)) &oofem::IntArray::followedBy, "Appends array to receiver")
+        .def("isEmpty", &oofem::IntArray::isEmpty)
+        .def("containsOnlyZeroes", &oofem::IntArray::containsOnlyZeroes)
+        .def("containsSorted", &oofem::IntArray::containsSorted)
+        .def("insertSorted", &oofem::IntArray::insertSorted)
+        .def("eraseSorted", &oofem::IntArray::eraseSorted)
+        .def("findFirstIndexOf", &oofem::IntArray::findFirstIndexOf, "Finds index of first occurrence of given value in array")
+        .def("contains", &oofem::IntArray::contains)
+        .def("sort", &oofem::IntArray::sort)
+        .def("zero", &oofem::IntArray::zero)
+        .def("pY", &oofem::IntArray::pY)
+        .def("__repr__",
+            [](const oofem::IntArray &s) {
+                std::string a = "<oofempy.IntArray: {";
+                for ( int i = 0; i < s.giveSize(); ++i ) {
+                    if ( i > 40 ) {
+                        a.append("...");
+                        break;
+                    } else {
+                        a.append(std::to_string(s[i]));
+                        a.append(", ");
+                    }
+                }
+                a.append("}>");
+                return a;
+            })
+        .def("__setitem__", [](oofem::IntArray &s, size_t i, int v) {
+            s[i] = v;
+        })
+        .def("__getitem__", [](const oofem::IntArray &s, size_t i) {
+            if (i >= (size_t) s.giveSize()) throw py::index_error();
+            return s[i];
+        })
     ;
 
     py::class_<oofem::DataReader>(m, "DataReader")
@@ -111,19 +158,19 @@ PYBIND11_MODULE(oofempy, m) {
         ;
 
 
-py::class_<oofem::TimeStep>(m, "TimeStep")
-    .def("giveNumber", &oofem::TimeStep::giveNumber)
-    .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
-    .def("giveIntrinsicTime", &oofem::TimeStep::giveIntrinsicTime)
-    .def("giveTimeIncrement", &oofem::TimeStep::giveTimeIncrement)
-    .def("setTimeIncrement", &oofem::TimeStep::setTimeIncrement)
-    .def("setTime", &oofem::TimeStep::setTime)
-    .def("setTargetTime", &oofem::TimeStep::setTargetTime)
-    .def("setIntrinsicTime", &oofem::TimeStep::setIntrinsicTime)
-    .def("isNotTheLastStep", &oofem::TimeStep::isNotTheLastStep)
-    .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
-    .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
-    ;
+    py::class_<oofem::TimeStep>(m, "TimeStep")
+        .def("giveNumber", &oofem::TimeStep::giveNumber)
+        .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
+        .def("giveIntrinsicTime", &oofem::TimeStep::giveIntrinsicTime)
+        .def("giveTimeIncrement", &oofem::TimeStep::giveTimeIncrement)
+        .def("setTimeIncrement", &oofem::TimeStep::setTimeIncrement)
+        .def("setTime", &oofem::TimeStep::setTime)
+        .def("setTargetTime", &oofem::TimeStep::setTargetTime)
+        .def("setIntrinsicTime", &oofem::TimeStep::setIntrinsicTime)
+        .def("isNotTheLastStep", &oofem::TimeStep::isNotTheLastStep)
+        .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
+        .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
+        ;
 
     py::class_<oofem::EngngModel>(m, "EngngModel")
         .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
@@ -142,6 +189,15 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
+        .def(py::init<int, int, oofem::EngngModel*>())
+        .def("giveNumber", &oofem::Domain::giveNumber)
+        .def("setNumber", &oofem::Domain::setNumber)
+        .def("giveElement", &oofem::Domain::giveElement, py::return_value_policy::reference)
+        .def("giveBc", &oofem::Domain::giveBc, py::return_value_policy::reference)
+        .def("giveIc", &oofem::Domain::giveIc, py::return_value_policy::reference)
+        .def("giveFunction", &oofem::Domain::giveFunction, py::return_value_policy::reference)
+        .def("giveMaterial", &oofem::Domain::giveMaterial, py::return_value_policy::reference)
+        .def("giveCrossSection", &oofem::Domain::giveCrossSection, py::return_value_policy::reference)
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -166,6 +222,24 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
 
     py::class_<oofem::Element, oofem::FEMComponent>(m, "Element")
     ;
+
+    py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
+    ;
+
+    py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
+    ;
+
+    py::class_<oofem::Function, oofem::FEMComponent>(m, "Function")
+    ;
+
+    py::class_<oofem::Material, oofem::FEMComponent>(m, "Material")
+    ;
+
+    py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
+    ;
+
+
+  
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
