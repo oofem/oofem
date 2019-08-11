@@ -98,6 +98,11 @@ namespace oofem {
     alphaOne = 1000.;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LinkSlip_alphaOne); // Macro
 
+    //Ratio of lateral to axial stiffness
+    alphaTwo = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LinkSlip_alphaTwo); // Macro
+
+    
     //Parameter which limits the stress in slip direction.
     IR_GIVE_FIELD(ir, tauZero, _IFT_LinkSlip_tauZero); // Macro
     
@@ -179,9 +184,9 @@ namespace oofem {
     answer.at(1, 1) = 1.;
     answer.at(2, 2) = this->alphaOne; // shear
     answer.at(3, 3) = this->alphaOne; // shear
-    answer.at(4, 4) = this->alphaOne; // shear
-    answer.at(5, 5) = this->alphaOne; // shear
-    answer.at(6, 6) = this->alphaOne; // shear
+    answer.at(4, 4) = this->alphaTwo; // shear
+    answer.at(5, 5) = this->alphaTwo; // shear
+    answer.at(6, 6) = this->alphaTwo; // shear
     
     
     answer.times(this->eNormalMean);

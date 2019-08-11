@@ -92,32 +92,30 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
 
     //Normal displacement jump in x-direction
     //First node
-    answer.at(1, 1) = -1.;
+    answer.at(1, 1) = 1.;
     answer.at(1, 5) = -this->rigid.at(3);
     answer.at(1, 6) = this->rigid.at(2);
     //Second node
-    answer.at(1, 7) = 1.;
+    answer.at(1, 7) = -1.;
 
     //Shear displacement jump in y-plane
     //first node
-    answer.at(2, 2) = -1.;
+    answer.at(2, 2) = 1.;
     answer.at(2, 4) = this->rigid.at(3);
     answer.at(2, 6) = -this->rigid.at(1);
     
     //Second node
-    answer.at(2, 8) = 1.;
+    answer.at(2, 8) = -1.;
 
     //Shear displacement jump in z-plane
     //first node
-    answer.at(3, 3) = -1.;
+    answer.at(3, 3) = 1.;
     answer.at(3, 4) = -this->rigid.at(2);
     answer.at(3, 5) = this->rigid.at(1);
     //Second node
-    answer.at(3, 9) =  1.;
+    answer.at(3, 9) = -1.;
 
-    //Rotation around axis
-    //Only contribution from first node
-    answer.at(4,4)  = 1.;
+    answer.at(4,4) = 1.;
     
     return;
 }
@@ -317,7 +315,7 @@ BondLink3d :: computeGeometryProperties()
 
     //Calculate normal vector
     for ( int i = 0; i < 3; i++ ) {
-        rigidGlobal.at(i + 1) = coordsB.at(i + 1) - coordsA.at(i + 1);
+        rigidGlobal.at(i + 1) = coordsA.at(i + 1) - coordsB.at(i + 1);
     }
        
     //Construct an initial temporary local coordinate system
@@ -367,7 +365,7 @@ BondLink3d :: computeGeometryProperties()
     
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
-      this->globalCentroid.at(i) = nodeA->giveCoordinate(i);;
+      this->globalCentroid.at(i) = nodeB->giveCoordinate(i);;
     }
     
     this->geometryFlag = 1;

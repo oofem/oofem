@@ -376,7 +376,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
     }
     if ( !( status & NM_Success ) ) {
-        OOFEM_ERROR("No success in solving problem");
+      OOFEM_WARNING("No success in solving problem at step %d", tStep->giveNumber());
     }
 }
 
