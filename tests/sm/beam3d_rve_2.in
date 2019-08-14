@@ -1,4 +1,4 @@
-test2.out
+beam3d_rve_2.out
 Beam element test
 StaticStructural nsteps 1 nmodules 1 initialguess 1 lstype 0 smtype 1 stiffmode 1 rtolv 1.e-3 maxiter 10000
 vtkxmlperiodic tstep_all primvars 1 1 vars 2 4 1 stype 0 regionsets 1 1
