@@ -321,7 +321,8 @@ set (sm_unsorted
     mappers/primvarmapper.C
     Contact/cdefnode2node.C
     Contact/celnode2node.C
-    Contact/ActiveBc/node2nodecontact.C
+    Contact/ActiveBc/node2nodepenaltycontact.C
+    Contact/ActiveBc/node2nodelagrangianmultipliercontact.C
     )
 
   
