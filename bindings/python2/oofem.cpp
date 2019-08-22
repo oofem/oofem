@@ -33,8 +33,16 @@
  */
 
 #include <pybind11/pybind11.h>
+<<<<<<< HEAD
 namespace py = pybind11;
 
+=======
+#include <pybind11/operators.h>
+namespace py = pybind11;
+
+#include <string>
+
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
@@ -46,13 +54,35 @@ namespace py = pybind11;
 #include "dof.h"
 #include "dofmanager.h"
 #include "element.h"
+<<<<<<< HEAD
+=======
+#include "generalboundarycondition.h"
+#include "initialcondition.h"
+#include "function.h"
+#include "material.h"
+#include "crosssection.h"
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
 #include "field.h"
 #include "util.h"
 #include "datareader.h"
 #include "oofemtxtdatareader.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
+<<<<<<< HEAD
 #include "classfactory.h"
+=======
+#include "chartype.h"
+#include "elementgeometrytype.h"
+#include "internalstatetype.h"
+
+#include "integrationrule.h"
+#include "gausspoint.h"
+#include "inputrecord.h"
+#include "dynamicinputrecord.h"
+
+#include "classfactory.h"
+#include "unknownnumberingscheme.h"
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
 
 
 PYBIND11_MODULE(oofempy, m) {
@@ -90,6 +120,48 @@ PYBIND11_MODULE(oofempy, m) {
         ;
     
     py::class_<oofem::IntArray>(m, "IntArray")
+<<<<<<< HEAD
+=======
+        .def(py::init<int>(), py::arg("n")=0)
+        .def(py::init<const oofem::IntArray&>())
+        .def("resize", &oofem::IntArray::resize)
+        .def("clear", &oofem::IntArray::clear)
+        .def("preallocate", &oofem::IntArray::preallocate)
+        .def("followedBy", (void (oofem::IntArray::*)(int , int)) &oofem::IntArray::followedBy, "Appends number to receiver")
+        .def("followedBy", (void (oofem::IntArray::*)(const oofem::IntArray& , int)) &oofem::IntArray::followedBy, "Appends array to receiver")
+        .def("isEmpty", &oofem::IntArray::isEmpty)
+        .def("containsOnlyZeroes", &oofem::IntArray::containsOnlyZeroes)
+        .def("containsSorted", &oofem::IntArray::containsSorted)
+        .def("insertSorted", &oofem::IntArray::insertSorted)
+        .def("eraseSorted", &oofem::IntArray::eraseSorted)
+        .def("findFirstIndexOf", &oofem::IntArray::findFirstIndexOf, "Finds index of first occurrence of given value in array")
+        .def("contains", &oofem::IntArray::contains)
+        .def("sort", &oofem::IntArray::sort)
+        .def("zero", &oofem::IntArray::zero)
+        .def("pY", &oofem::IntArray::pY)
+        .def("__repr__",
+            [](const oofem::IntArray &s) {
+                std::string a = "<oofempy.IntArray: {";
+                for ( int i = 0; i < s.giveSize(); ++i ) {
+                    if ( i > 40 ) {
+                        a.append("...");
+                        break;
+                    } else {
+                        a.append(std::to_string(s[i]));
+                        a.append(", ");
+                    }
+                }
+                a.append("}>");
+                return a;
+            })
+        .def("__setitem__", [](oofem::IntArray &s, size_t i, int v) {
+            s[i] = v;
+        })
+        .def("__getitem__", [](const oofem::IntArray &s, size_t i) {
+            if (i >= (size_t) s.giveSize()) throw py::index_error();
+            return s[i];
+        })
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
     ;
 
     py::class_<oofem::DataReader>(m, "DataReader")
@@ -99,6 +171,30 @@ PYBIND11_MODULE(oofempy, m) {
         .def(py::init<std::string>())
     ;
 
+<<<<<<< HEAD
+=======
+    py::class_<oofem::InputRecord>(m, "InputRecord")
+    ;
+
+    typedef const char *InputFieldType;
+    py::class_<oofem::DynamicInputRecord, oofem::InputRecord>(m, "DynamicInputRecord")
+        .def(py::init<std::string, int>(), py::arg("answer") = "", py::arg("value")=0)
+        .def("finish", &oofem::DynamicInputRecord::finish, py::arg("wrn")=true)
+        .def("setRecordKeywordField", &oofem::DynamicInputRecord::setRecordKeywordField)
+        .def("setRecordKeywordNumber", &oofem::DynamicInputRecord::setRecordKeywordNumber)
+        .def("setField", (void (oofem::DynamicInputRecord::*)(int, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(double, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(bool, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(std::string, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(oofem::FloatArray, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(oofem::FloatMatrix, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(oofem::FloatMatrix, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(oofem::IntArray, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(std::vector<std::string>, InputFieldType)) &oofem::DynamicInputRecord::setField) 
+        .def("setField", (void (oofem::DynamicInputRecord::*)(InputFieldType)) &oofem::DynamicInputRecord::setField) 
+    ;
+
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
     py::class_<oofem::FEMComponent>(m, "FEMComponent")
         .def("giveClassName", &oofem::FEMComponent::giveClassName)
         .def("giveInputRecordName", &oofem::FEMComponent::giveInputRecordName)
@@ -111,6 +207,7 @@ PYBIND11_MODULE(oofempy, m) {
         ;
 
 
+<<<<<<< HEAD
 py::class_<oofem::TimeStep>(m, "TimeStep")
     .def("giveNumber", &oofem::TimeStep::giveNumber)
     .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
@@ -124,6 +221,21 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
     .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
     .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
     ;
+=======
+    py::class_<oofem::TimeStep>(m, "TimeStep")
+        .def("giveNumber", &oofem::TimeStep::giveNumber)
+        .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
+        .def("giveIntrinsicTime", &oofem::TimeStep::giveIntrinsicTime)
+        .def("giveTimeIncrement", &oofem::TimeStep::giveTimeIncrement)
+        .def("setTimeIncrement", &oofem::TimeStep::setTimeIncrement)
+        .def("setTime", &oofem::TimeStep::setTime)
+        .def("setTargetTime", &oofem::TimeStep::setTargetTime)
+        .def("setIntrinsicTime", &oofem::TimeStep::setIntrinsicTime)
+        .def("isNotTheLastStep", &oofem::TimeStep::isNotTheLastStep)
+        .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
+        .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
+        ;
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
 
     py::class_<oofem::EngngModel>(m, "EngngModel")
         .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
@@ -142,6 +254,18 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
+<<<<<<< HEAD
+=======
+        .def(py::init<int, int, oofem::EngngModel*>())
+        .def("giveNumber", &oofem::Domain::giveNumber)
+        .def("setNumber", &oofem::Domain::setNumber)
+        .def("giveElement", &oofem::Domain::giveElement, py::return_value_policy::reference)
+        .def("giveBc", &oofem::Domain::giveBc, py::return_value_policy::reference)
+        .def("giveIc", &oofem::Domain::giveIc, py::return_value_policy::reference)
+        .def("giveFunction", &oofem::Domain::giveFunction, py::return_value_policy::reference)
+        .def("giveMaterial", &oofem::Domain::giveMaterial, py::return_value_policy::reference)
+        .def("giveCrossSection", &oofem::Domain::giveCrossSection, py::return_value_policy::reference)
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -158,6 +282,10 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveNumberOfDofs", &oofem::DofManager::giveNumberOfDofs)
         .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
         .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
+<<<<<<< HEAD
+=======
+        .def("hasCoordinates", &oofem::DofManager::hasCoordinates)
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
         .def("giveCoordinates", &oofem::DofManager::giveCoordinates, py::return_value_policy::reference)
         .def("appendDof", &oofem::DofManager::appendDof, py::keep_alive<1, 2>())
         .def("removeDof", &oofem::DofManager::removeDof)
@@ -165,8 +293,65 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
     ;
 
     py::class_<oofem::Element, oofem::FEMComponent>(m, "Element")
+<<<<<<< HEAD
     ;
 
+=======
+        .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *dofIds) const) &oofem::Element::giveLocationArray)
+        .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *) const) &oofem::Element::giveLocationArray)
+        .def("giveCharacteristicMatrix", &oofem::Element::giveCharacteristicMatrix)
+        .def("giveCharacteristicVector", &oofem::Element::giveCharacteristicVector)
+        .def("giveCharacteristicValue", &oofem::Element::giveCharacteristicValue)
+        .def("computeVectorOf", (void (oofem::Element::*)(oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &)) &oofem::Element::computeVectorOf)
+        .def("computeVectorOf", (void (oofem::Element::*)(const oofem::IntArray &, oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &, bool)) &oofem::Element::computeVectorOf)
+        .def("computeVectorOfPrescribed", (void (oofem::Element::*)(oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &)) &oofem::Element::computeVectorOfPrescribed)
+        .def("computeVectorOfPrescribed", (void (oofem::Element::*)(const oofem::IntArray &, oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray & )) &oofem::Element::computeVectorOfPrescribed)
+        .def("giveDofManagerNumber", &oofem::Element::giveDofManagerNumber)
+        .def("giveDofManArray", &oofem::Element::giveDofManArray, py::return_value_policy::reference)
+        .def("giveDofManager", &oofem::Element::giveDofManager, py::return_value_policy::reference)
+        .def("giveMaterial", &oofem::Element::giveMaterial, py::return_value_policy::reference)
+        .def("giveCrossSection", &oofem::Element::giveCrossSection, py::return_value_policy::reference)
+        .def("giveMaterialNumber", &oofem::Element::giveMaterialNumber)
+        .def("giveNumberOfDofManagers", &oofem::Element::giveNumberOfDofManagers)
+        .def("giveNumberOfNodes", &oofem::Element::giveNumberOfNodes)
+        .def("giveRegionNumber", &oofem::Element::giveRegionNumber)
+        .def("updateYourself", &oofem::Element::updateYourself)
+        .def("isActivated", &oofem::Element::isActivated)
+        .def("isCast", &oofem::Element::isCast)
+        .def("giveGeometryType", &oofem::Element::giveGeometryType)
+        .def("giveIntegrationRule", &oofem::Element::giveIntegrationRule, py::return_value_policy::reference)
+        .def("giveDefaultIntegrationRulePtr", &oofem::Element::giveDefaultIntegrationRulePtr, py::return_value_policy::reference)
+        .def("giveIPValue", &oofem::Element::giveIPValue)
+        .def("giveLabel", &oofem::Element::giveLabel)
+        .def("initializeFrom", &oofem::Element::initializeFrom)
+    ;
+
+    py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
+    ;
+
+    py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
+    ;
+
+    py::class_<oofem::Function, oofem::FEMComponent>(m, "Function")
+    ;
+
+    py::class_<oofem::Material, oofem::FEMComponent>(m, "Material")
+    ;
+
+    py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
+    ;
+
+    py::class_<oofem::UnknownNumberingScheme>(m, "UnknownNumberingScheme")
+    ;
+
+    py::class_<oofem::IntegrationRule>(m, "IntegrationRule")
+    ;
+    py::class_<oofem::GaussPoint>(m, "GaussPoint")
+    ;
+
+  
+
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
         .def("createEngngModel", &oofem::ClassFactory::createEngngModel)
@@ -240,4 +425,199 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .value("postProcessor", oofem::problemMode::_postProcessor)
     ;
 
+<<<<<<< HEAD
+=======
+    py::enum_<oofem::CharType>(m, "CharType")
+      .value("UnknownCharType", oofem::CharType::UnknownCharType)
+      .value("StiffnessMatrix", oofem::CharType::StiffnessMatrix)
+      .value("TangentStiffnessMatrix", oofem::CharType::TangentStiffnessMatrix)
+      .value("SecantStiffnessMatrix", oofem::CharType::SecantStiffnessMatrix)
+      .value("ElasticStiffnessMatrix", oofem::CharType::ElasticStiffnessMatrix)
+      .value("MassMatrix", oofem::CharType::MassMatrix)
+      .value("LumpedMassMatrix", oofem::CharType::LumpedMassMatrix)
+      .value("ConductivityMatrix", oofem::CharType::ConductivityMatrix)
+      .value("CapacityMatrix", oofem::CharType::CapacityMatrix)
+      .value("InitialStressMatrix", oofem::CharType::InitialStressMatrix)
+      .value("ExternalForcesVector", oofem::CharType::ExternalForcesVector)
+      .value("InternalForcesVector", oofem::CharType::InternalForcesVector)
+      .value("LastEquilibratedInternalForcesVector", oofem::CharType::LastEquilibratedInternalForcesVector)
+      .value("InertiaForcesVector", oofem::CharType::InertiaForcesVector)
+      .value("AuxVelocityLhs", oofem::CharType::AuxVelocityLhs)
+      .value("VelocityLhs", oofem::CharType::VelocityLhs)
+      .value("PressureGradientMatrix", oofem::CharType::PressureGradientMatrix)
+      .value("DivergenceMatrix", oofem::CharType::DivergenceMatrix)
+      .value("VelocityLaplacianMatrix", oofem::CharType::VelocityLaplacianMatrix)
+      .value("PressureLaplacianMatrix", oofem::CharType::PressureLaplacianMatrix)
+      .value("StabilizationMassMatrix", oofem::CharType::StabilizationMassMatrix)
+      .value("PressureGradientVector", oofem::CharType::PressureGradientVector)
+      .value("MassVelocityVector", oofem::CharType::MassVelocityVector)
+      .value("MassAuxVelocityVector", oofem::CharType::MassAuxVelocityVector)
+      .value("LaplacePressureVector", oofem::CharType::LaplacePressureVector)
+      .value("LaplaceVelocityVector", oofem::CharType::LaplaceVelocityVector)
+      .value("DivergenceAuxVelocityVector", oofem::CharType::DivergenceAuxVelocityVector)
+      .value("DivergenceVelocityVector", oofem::CharType::DivergenceVelocityVector)
+      ;
+
+    py::enum_<oofem::Element_Geometry_Type>(m, "Element_Geometry_Type")
+      .value("EGT_point", oofem::Element_Geometry_Type::EGT_point)
+      .value("EGT_line_1", oofem::Element_Geometry_Type::EGT_line_1)
+      .value("EGT_line_2", oofem::Element_Geometry_Type::EGT_line_2)
+      .value("EGT_triangle_1", oofem::Element_Geometry_Type::EGT_triangle_1)
+      .value("EGT_triangle_2", oofem::Element_Geometry_Type::EGT_triangle_2)
+      .value("EGT_quad_1", oofem::Element_Geometry_Type::EGT_quad_1)
+      .value("EGT_quad_1_interface", oofem::Element_Geometry_Type::EGT_quad_1_interface)
+      .value("EGT_quad_21_interface", oofem::Element_Geometry_Type::EGT_quad_21_interface)
+      .value("EGT_quad_2", oofem::Element_Geometry_Type::EGT_quad_2)
+      .value("EGT_quad9_2", oofem::Element_Geometry_Type::EGT_quad9_2)
+      .value("EGT_tetra_1", oofem::Element_Geometry_Type::EGT_tetra_1)
+      .value("EGT_tetra_2", oofem::Element_Geometry_Type::EGT_tetra_2)
+      .value("EGT_hexa_1", oofem::Element_Geometry_Type::EGT_hexa_1)
+      .value("EGT_hexa_2", oofem::Element_Geometry_Type::EGT_hexa_2)
+      .value("EGT_hexa_27", oofem::Element_Geometry_Type::EGT_hexa_27)
+      .value("EGT_wedge_1", oofem::Element_Geometry_Type::EGT_wedge_1)
+      .value("EGT_wedge_2", oofem::Element_Geometry_Type::EGT_wedge_2)
+      .value("EGT_Composite", oofem::Element_Geometry_Type::EGT_Composite)
+      .value("EGT_unknown", oofem::Element_Geometry_Type::EGT_unknown)
+      ;
+
+    py::enum_<oofem::InternalStateType>(m, "InternalStateType")
+      .value("IST_Undefined", oofem::InternalStateType::IST_Undefined)
+      .value("IST_StressTensor", oofem::InternalStateType::IST_StressTensor)
+      .value("IST_PrincipalStressTensor", oofem::InternalStateType::IST_PrincipalStressTensor)
+      .value("IST_PrincipalStressTempTensor", oofem::InternalStateType::IST_PrincipalStressTempTensor)
+      .value("IST_StrainTensor", oofem::InternalStateType::IST_StrainTensor)
+      .value("IST_PrincipalStrainTensor", oofem::InternalStateType::IST_PrincipalStrainTensor)
+      .value("IST_PrincipalStrainTempTensor", oofem::InternalStateType::IST_PrincipalStrainTempTensor)
+      .value("IST_BeamForceMomentTensor", oofem::InternalStateType::IST_BeamForceMomentTensor)
+      .value("IST_BeamStrainCurvatureTensor", oofem::InternalStateType::IST_BeamStrainCurvatureTensor)
+      .value("IST_ShellMomentTensor", oofem::InternalStateType::IST_ShellMomentTensor)
+      .value("IST_ShellForceTensor", oofem::InternalStateType::IST_ShellForceTensor)
+      .value("IST_CurvatureTensor", oofem::InternalStateType::IST_CurvatureTensor)
+      .value("IST_DisplacementVector", oofem::InternalStateType::IST_DisplacementVector)
+      .value("IST_DamageTensor", oofem::InternalStateType::IST_DamageTensor)
+      .value("IST_DamageInvTensor", oofem::InternalStateType::IST_DamageInvTensor)
+      .value("IST_PrincipalDamageTensor", oofem::InternalStateType::IST_PrincipalDamageTensor)
+      .value("IST_PrincipalDamageTempTensor", oofem::InternalStateType::IST_PrincipalDamageTempTensor)
+      .value("IST_CrackState", oofem::InternalStateType::IST_CrackState)
+      .value("IST_StressTensorTemp", oofem::InternalStateType::IST_StressTensorTemp)
+      .value("IST_StrainTensorTemp", oofem::InternalStateType::IST_StrainTensorTemp)
+      .value("IST_ShellForceTensorTemp", oofem::InternalStateType::IST_ShellForceTensorTemp)
+      .value("IST_ShellMomentTensorTemp", oofem::InternalStateType::IST_ShellMomentTensorTemp)
+      .value("IST_CurvatureTensorTemp", oofem::InternalStateType::IST_CurvatureTensorTemp)
+      .value("IST_DisplacementVectorTemp", oofem::InternalStateType::IST_DisplacementVectorTemp)
+      .value("IST_DamageTensorTemp", oofem::InternalStateType::IST_DamageTensorTemp)
+      .value("IST_DamageInvTensorTemp", oofem::InternalStateType::IST_DamageInvTensorTemp)
+      .value("IST_CrackStateTemp", oofem::InternalStateType::IST_CrackStateTemp)
+      .value("IST_PlasticStrainTensor", oofem::InternalStateType::IST_PlasticStrainTensor)
+      .value("IST_PrincipalPlasticStrainTensor", oofem::InternalStateType::IST_PrincipalPlasticStrainTensor)
+      .value("IST_CylindricalStressTensor", oofem::InternalStateType::IST_CylindricalStressTensor)
+      .value("IST_CylindricalStrainTensor", oofem::InternalStateType::IST_CylindricalStrainTensor)
+      .value("IST_MaxEquivalentStrainLevel", oofem::InternalStateType::IST_MaxEquivalentStrainLevel)
+      .value("IST_ErrorIndicatorLevel", oofem::InternalStateType::IST_ErrorIndicatorLevel)
+      .value("IST_InternalStressError", oofem::InternalStateType::IST_InternalStressError)
+      .value("IST_PrimaryUnknownError", oofem::InternalStateType::IST_PrimaryUnknownError)
+      .value("IST_RelMeshDensity", oofem::InternalStateType::IST_RelMeshDensity)
+      .value("IST_MicroplaneDamageValues", oofem::InternalStateType::IST_MicroplaneDamageValues)
+      .value("IST_Temperature", oofem::InternalStateType::IST_Temperature)
+      .value("IST_MassConcentration_1", oofem::InternalStateType::IST_MassConcentration_1)
+      .value("IST_HydrationDegree", oofem::InternalStateType::IST_HydrationDegree)
+      .value("IST_Humidity", oofem::InternalStateType::IST_Humidity)
+      .value("IST_Velocity", oofem::InternalStateType::IST_Velocity)
+      .value("IST_Pressure", oofem::InternalStateType::IST_Pressure)
+      .value("IST_VOFFraction", oofem::InternalStateType::IST_VOFFraction)
+      .value("IST_Density", oofem::InternalStateType::IST_Density)
+      .value("IST_MaterialInterfaceVal", oofem::InternalStateType::IST_MaterialInterfaceVal)
+      .value("IST_MaterialNumber", oofem::InternalStateType::IST_MaterialNumber)
+      .value("IST_ElementNumber", oofem::InternalStateType::IST_ElementNumber)
+      .value("IST_BoneVolumeFraction", oofem::InternalStateType::IST_BoneVolumeFraction)
+      .value("IST_PlasStrainEnerDens", oofem::InternalStateType::IST_PlasStrainEnerDens)
+      .value("IST_ElasStrainEnerDens", oofem::InternalStateType::IST_ElasStrainEnerDens)
+      .value("IST_TotalStrainEnerDens", oofem::InternalStateType::IST_TotalStrainEnerDens)
+      .value("IST_DamageScalar", oofem::InternalStateType::IST_DamageScalar)
+      .value("IST_MaterialOrientation_x", oofem::InternalStateType::IST_MaterialOrientation_x)
+      .value("IST_MaterialOrientation_y", oofem::InternalStateType::IST_MaterialOrientation_y)
+      .value("IST_MaterialOrientation_z", oofem::InternalStateType::IST_MaterialOrientation_z)
+      .value("IST_TemperatureFlow", oofem::InternalStateType::IST_TemperatureFlow)
+      .value("IST_MassConcentrationFlow_1", oofem::InternalStateType::IST_MassConcentrationFlow_1)
+      .value("IST_HumidityFlow", oofem::InternalStateType::IST_HumidityFlow)
+      .value("IST_CrackStatuses", oofem::InternalStateType::IST_CrackStatuses)
+      .value("IST_CrackedFlag", oofem::InternalStateType::IST_CrackedFlag)
+      .value("IST_CrackDirs", oofem::InternalStateType::IST_CrackDirs)
+      .value("IST_CumPlasticStrain", oofem::InternalStateType::IST_CumPlasticStrain)
+      .value("IST_CumPlasticStrain_2", oofem::InternalStateType::IST_CumPlasticStrain_2)
+      .value("IST_StressWorkDensity", oofem::InternalStateType::IST_StressWorkDensity)
+      .value("IST_DissWorkDensity", oofem::InternalStateType::IST_DissWorkDensity)
+      .value("IST_FreeEnergyDensity", oofem::InternalStateType::IST_FreeEnergyDensity)
+      .value("IST_ThermalConductivityIsotropic", oofem::InternalStateType::IST_ThermalConductivityIsotropic)
+      .value("IST_HeatCapacity", oofem::InternalStateType::IST_HeatCapacity)
+      .value("IST_AverageTemperature", oofem::InternalStateType::IST_AverageTemperature)
+      .value("IST_YoungModulusVirginPaste", oofem::InternalStateType::IST_YoungModulusVirginPaste)
+      .value("IST_PoissonRatioVirginPaste", oofem::InternalStateType::IST_PoissonRatioVirginPaste)
+      .value("IST_YoungModulusConcrete", oofem::InternalStateType::IST_YoungModulusConcrete)
+      .value("IST_PoissonRatioConcrete", oofem::InternalStateType::IST_PoissonRatioConcrete)
+      .value("IST_VolumetricPlasticStrain", oofem::InternalStateType::IST_VolumetricPlasticStrain)
+      .value("IST_DeviatoricStrain", oofem::InternalStateType::IST_DeviatoricStrain)
+      .value("IST_DeviatoricStress", oofem::InternalStateType::IST_DeviatoricStress)
+      .value("IST_Viscosity", oofem::InternalStateType::IST_Viscosity)
+      .value("IST_CharacteristicLength", oofem::InternalStateType::IST_CharacteristicLength)
+      .value("IST_DeviatoricStrainMeasure", oofem::InternalStateType::IST_DeviatoricStrainMeasure)
+      .value("IST_DeviatoricStressMeasure", oofem::InternalStateType::IST_DeviatoricStressMeasure)
+      .value("IST_vonMisesStress", oofem::InternalStateType::IST_vonMisesStress)
+      .value("IST_CrackVector", oofem::InternalStateType::IST_CrackVector)
+      .value("IST_PressureGradient", oofem::InternalStateType::IST_PressureGradient)
+      .value("IST_DissWork", oofem::InternalStateType::IST_DissWork)
+      .value("IST_DeltaDissWork", oofem::InternalStateType::IST_DeltaDissWork)
+      .value("IST_StressCapPos", oofem::InternalStateType::IST_StressCapPos)
+      .value("IST_TangentNorm", oofem::InternalStateType::IST_TangentNorm)
+      .value("IST_Tangent", oofem::InternalStateType::IST_Tangent)
+      .value("IST_DirectorField", oofem::InternalStateType::IST_DirectorField)
+      .value("IST_CrackWidth", oofem::InternalStateType::IST_CrackWidth)
+      .value("IST_DeformationGradientTensor", oofem::InternalStateType::IST_DeformationGradientTensor)
+      .value("IST_FirstPKStressTensor", oofem::InternalStateType::IST_FirstPKStressTensor)
+      .value("IST_XFEMEnrichment", oofem::InternalStateType::IST_XFEMEnrichment)
+      .value("IST_XFEMNumIntersecPoints", oofem::InternalStateType::IST_XFEMNumIntersecPoints)
+      .value("IST_XFEMLevelSetPhi", oofem::InternalStateType::IST_XFEMLevelSetPhi)
+      .value("IST_Maturity", oofem::InternalStateType::IST_Maturity)
+      .value("IST_CauchyStressTensor", oofem::InternalStateType::IST_CauchyStressTensor)
+      .value("IST_InterfaceJump", oofem::InternalStateType::IST_InterfaceJump)
+      .value("IST_InterfaceTraction", oofem::InternalStateType::IST_InterfaceTraction)
+      .value("IST_InterfaceFirstPKTraction", oofem::InternalStateType::IST_InterfaceFirstPKTraction)
+      .value("IST_StressTensor_Reduced", oofem::InternalStateType::IST_StressTensor_Reduced)
+      .value("IST_StrainTensor_Reduced", oofem::InternalStateType::IST_StrainTensor_Reduced)
+      .value("IST_CrossSectionNumber", oofem::InternalStateType::IST_CrossSectionNumber)
+      .value("IST_ShellStrainTensor", oofem::InternalStateType::IST_ShellStrainTensor)
+      .value("IST_AbaqusStateVector", oofem::InternalStateType::IST_AbaqusStateVector)
+      .value("IST_AutogenousShrinkageTensor", oofem::InternalStateType::IST_AutogenousShrinkageTensor)
+      .value("IST_DryingShrinkageTensor", oofem::InternalStateType::IST_DryingShrinkageTensor)
+      .value("IST_TotalShrinkageTensor", oofem::InternalStateType::IST_TotalShrinkageTensor)
+      .value("IST_ThermalStrainTensor", oofem::InternalStateType::IST_ThermalStrainTensor)
+      .value("IST_CreepStrainTensor", oofem::InternalStateType::IST_CreepStrainTensor)
+      .value("IST_TensileStrength", oofem::InternalStateType::IST_TensileStrength)
+      .value("IST_ResidualTensileStrength", oofem::InternalStateType::IST_ResidualTensileStrength)
+      .value("IST_LocalEquivalentStrain", oofem::InternalStateType::IST_LocalEquivalentStrain)
+      .value("IST_CrackIndex", oofem::InternalStateType::IST_CrackIndex)
+      .value("IST_EigenStrainTensor", oofem::InternalStateType::IST_EigenStrainTensor)
+      .value("IST_CrackStrainTensor", oofem::InternalStateType::IST_CrackStrainTensor)
+      .value("IST_2ndCrackWidth", oofem::InternalStateType::IST_2ndCrackWidth)
+      .value("IST_2ndCrackVector", oofem::InternalStateType::IST_2ndCrackVector)
+      .value("IST_3rdCrackWidth", oofem::InternalStateType::IST_3rdCrackWidth)
+      .value("IST_3rdCrackVector", oofem::InternalStateType::IST_3rdCrackVector)
+      .value("IST_FiberStressLocal", oofem::InternalStateType::IST_FiberStressLocal)
+      .value("IST_FiberStressNL", oofem::InternalStateType::IST_FiberStressNL)
+      .value("IST_EnergyMassCapacity", oofem::InternalStateType::IST_EnergyMassCapacity)
+      .value("IST_PrincStressVector1", oofem::InternalStateType::IST_PrincStressVector1)
+      .value("IST_PrincStressVector2", oofem::InternalStateType::IST_PrincStressVector2)
+      .value("IST_PrincStressVector3", oofem::InternalStateType::IST_PrincStressVector3)
+      .value("IST_InterfaceNormal", oofem::InternalStateType::IST_InterfaceNormal)
+      .value("IST_MomentTensor", oofem::InternalStateType::IST_MomentTensor)
+      .value("IST_MomentTensorTemp", oofem::InternalStateType::IST_MomentTensorTemp)
+      .value("IST_YieldStrength", oofem::InternalStateType::IST_YieldStrength)
+      .value("IST_ElasticStrainTensor", oofem::InternalStateType::IST_ElasticStrainTensor)
+      .value("IST_MoistureContent", oofem::InternalStateType::IST_MoistureContent)
+      .value("IST_CrackStatusesTemp", oofem::InternalStateType::IST_CrackStatusesTemp)
+      .value("IST_CrackSlip", oofem::InternalStateType::IST_CrackSlip)
+      .value("IST_EquivalentTime", oofem::InternalStateType::IST_EquivalentTime)
+      .value("IST_IncrementCreepModulus", oofem::InternalStateType::IST_IncrementCreepModulus)
+      ;
+>>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
 }

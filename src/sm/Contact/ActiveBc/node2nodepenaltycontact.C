@@ -33,7 +33,7 @@
  */
 
 
-#include "sm/Contact/ActiveBc/node2nodecontact.h"
+#include "sm/Contact/ActiveBc/node2nodepenaltycontact.h"
 #include "set.h"
 #include "domain.h"
 #include "node.h"
@@ -83,8 +83,8 @@ Node2NodePenaltyContact :: assemble(SparseMtrx &answer, TimeStep *tStep,
     }
 
     for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
-        Node *masterNode = this->giveDomain()->giveNode( masterSet.at(pos) );
-        Node *slaveNode = this->giveDomain()->giveNode( slaveSet.at(pos) );
+        Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos) );
+        Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos) );
 
         masterNode->giveLocationArray(dofIdArray, loc, r_s);
         slaveNode->giveLocationArray(dofIdArray, c_loc, c_s);
@@ -117,8 +117,8 @@ Node2NodePenaltyContact :: assembleVector(FloatArray &answer, TimeStep *tStep,
     }
 
     for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
-        Node *masterNode = this->giveDomain()->giveNode( masterSet.at(pos) );
-        Node *slaveNode = this->giveDomain()->giveNode( slaveSet.at(pos) );
+        Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos) );
+        Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos) );
 
         masterNode->giveLocationArray(dofIdArray, loc, s);
         slaveNode->giveLocationArray(dofIdArray, c_loc, s);
@@ -127,6 +127,42 @@ Node2NodePenaltyContact :: assembleVector(FloatArray &answer, TimeStep *tStep,
         answer.assemble(fext, loc);
     }
 }
+
+
+
+
+
+
+void
+Node2NodePenaltyContact :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+{
+    IntArray r_loc, c_loc;
+    rows.resize(masterSet.giveSize() );
+    cols.resize(masterSet.giveSize() );
+    IntArray dofIdArray = {
+        D_u, D_v
+    };
+
+    for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
+        Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos) );
+        Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos) );
+
+        masterNode->giveLocationArray(dofIdArray, r_loc, r_s);
+        slaveNode->giveLocationArray(dofIdArray, c_loc, c_s);
+
+        // column block
+        rows [ pos - 1 ] = r_loc;
+        cols [ pos - 1 ] = c_loc;
+    }
+}
+
+
+
+
+
+
+
+
 
 void
 Node2NodePenaltyContact :: computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
@@ -151,9 +187,9 @@ Node2NodePenaltyContact :: computeGap(double &answer, Node *masterNode, Node *sl
     FloatArray normal = xs - xm;
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
-        OOFEM_ERROR( "Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
-                     masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
-    } else   {
+        OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
+                    masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
+    } else {
         normal.times(1.0 / norm);
     }
 
@@ -175,9 +211,9 @@ Node2NodePenaltyContact :: computeNormalMatrixAt(FloatArray &answer, Node *maste
     FloatArray normal = xs - xm;
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
-        OOFEM_ERROR( "Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
-                     masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
-    } else   {
+        OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
+                    masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
+    } else {
         normal.times(1.0 / norm);
     }
     // The normal is not updated for node2node which is for small deformations only
@@ -197,7 +233,7 @@ Node2NodePenaltyContact :: computeExternalForcesFromContact(FloatArray &answer, 
     this->computeNormalMatrixAt(answer, masterNode, slaveNode, tStep);
     if ( gap < 0.0 ) {
         answer.times(penalty * gap);
-    } else   {
+    } else {
         answer.times(0);
     }
 }

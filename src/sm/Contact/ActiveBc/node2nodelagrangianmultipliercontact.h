@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef node2nodecontact_h
-#define node2nodecontact_h
+#ifndef node2nodelagrangianmultipliercontact_h
+#define node2nodelagrangianmultipliercontact_h
 
 
 #include "activebc.h"
@@ -41,12 +41,11 @@
 
 ///@name Input fields for _IFT_ContactElement
 //@{
-#define _IFT_Node2NodePenaltyContact_Name "n2npenaltycontact"
-#define _IFT_Node2NodePenaltyContact_penalty "penalty"
-#define _IFT_Node2NodePenaltyContact_useTangent "usetangent"
+#define _IFT_Node2NodeLagrangianMultiplierContact_Name "n2nlagrangianmultipliercontact"
+#define _IFT_Node2NodeLagrangianMultiplierContact_useTangent "usetangent"
 
-#define _IFT_Node2NodePenaltyContact_masterSet "masterset"
-#define _IFT_Node2NodePenaltyContact_slaveSet "slaveset"
+#define _IFT_Node2NodeLagrangianMultiplierContact_masterSet "masterset"
+#define _IFT_Node2NodeLagrangianMultiplierContact_slaveSet "slaveset"
 
 
 
@@ -65,19 +64,20 @@ class IntegrationRule;
 class ContactElement;
 class Node;
 
-class OOFEM_EXPORT Node2NodePenaltyContact : public ActiveBoundaryCondition
+class OOFEM_EXPORT Node2NodeLagrangianMultiplierContact : public ActiveBoundaryCondition
 {
 protected:
     bool useTangent; ///< Determines if tangent should be used.
-    double penalty;
     IntArray slaveSet;
     IntArray masterSet;
+    std :: vector< std :: unique_ptr< DofManager > >lmdm;
 public:
 
     /// Constructor.
-    Node2NodePenaltyContact(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
+    Node2NodeLagrangianMultiplierContact(int n, Domain *d);
+    //: ActiveBoundaryCondition(n, d) { }
     /// Destructor.
-    virtual ~Node2NodePenaltyContact() {};
+    virtual ~Node2NodeLagrangianMultiplierContact() {};
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -89,17 +89,24 @@ public:
                                 const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
 
 
-    virtual const char *giveClassName() const { return "Node2NodePenaltyContact"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Node2NodePenaltyContact_Name; }
+    virtual const char *giveClassName() const { return "Node2NodeLagrangianMultiplierContact"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Node2NodeLagrangianMultiplierContact_Name; }
+
+    int giveNumberOfInternalDofManagers() override { return masterSet.giveSize(); }
+    DofManager *giveInternalDofManager(int i) override { return this->lmdm.at(i - 1).get(); }
 
 
-    void computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
+
+    double computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
     void computeGap(double &answer,  Node *masterNode, Node *slaveNode, TimeStep *tStep);
 
     void computeNormalMatrixAt(FloatArray &answer,  Node *masterNode, Node *slaveNode, TimeStep *TimeStep);
 
 
     void computeExternalForcesFromContact(FloatArray &answer,  Node *masterNode, Node *slaveNode, TimeStep *tStep);
+
+    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
+    void giveLagrangianMultiplierLocationArray(const UnknownNumberingScheme &r_s, std :: vector< IntArray > &answer);
 };
 } // end namespace oofem
 #endif // node2nodecontact_h
