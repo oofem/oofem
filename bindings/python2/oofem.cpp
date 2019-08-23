@@ -72,13 +72,26 @@ namespace py = pybind11;
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 
+#include <iostream>
+#include <string>
+#include <cctype>
+
 
 PYBIND11_MODULE(oofempy, m) {
     m.doc() = "oofem python bindings module"; // optional module docstring
 
-    
+   
+
     py::class_<oofem::FloatArray>(m, "FloatArray")
         .def(py::init<int>(), py::arg("n")=0)
+        .def(py::init([](py::sequence s){
+            oofem::FloatArray* ans = new oofem::FloatArray((int) py::len(s));
+            for (unsigned int i=0; i<py::len(s); i++) {
+                (*ans)[i]=s[i].cast<double>();
+            }
+            return ans;
+        }
+        ))
         .def("printYourself", (void (oofem::FloatArray::*)() const) &oofem::FloatArray::printYourself, "Prints receiver")
         .def("printYourself", (void (oofem::FloatArray::*)(const std::string &) const) &oofem::FloatArray::printYourself, "Prints receiver")
         .def("pY", &oofem::FloatArray::pY)
@@ -90,6 +103,7 @@ PYBIND11_MODULE(oofempy, m) {
             return s[i];
         })
         ;
+     py::implicitly_convertible<py::sequence, oofem::FloatArray>();
 
      py::class_<oofem::FloatMatrix>(m, "FloatMatrix")
         .def(py::init<>())
@@ -110,6 +124,14 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::IntArray>(m, "IntArray")
         .def(py::init<int>(), py::arg("n")=0)
         .def(py::init<const oofem::IntArray&>())
+        .def(py::init([](py::sequence s){
+            oofem::IntArray* ans = new oofem::IntArray((int) py::len(s));
+            for (unsigned int i=0; i<py::len(s); i++) {
+                (*ans)[i]=s[i].cast<int>();
+            }
+            return ans;
+        }
+        ))
         .def("resize", &oofem::IntArray::resize)
         .def("clear", &oofem::IntArray::clear)
         .def("preallocate", &oofem::IntArray::preallocate)
@@ -148,6 +170,8 @@ PYBIND11_MODULE(oofempy, m) {
             return s[i];
         })
     ;
+    py::implicitly_convertible<py::sequence, oofem::IntArray>();
+
 
     py::class_<oofem::DataReader>(m, "DataReader")
     ;
@@ -572,4 +596,7 @@ PYBIND11_MODULE(oofempy, m) {
       .value("IST_EquivalentTime", oofem::InternalStateType::IST_EquivalentTime)
       .value("IST_IncrementCreepModulus", oofem::InternalStateType::IST_IncrementCreepModulus)
       ;
+
+    m.def("test", [] (oofem::FloatArray& a) {a.pY();});
+
 }
