@@ -73,8 +73,9 @@ namespace py = pybind11;
 #include "unknownnumberingscheme.h"
 
 #include <iostream>
-#include <string>
-#include <cctype>
+
+
+#include "oofemutil.h"
 
 
 PYBIND11_MODULE(oofempy, m) {
@@ -200,6 +201,14 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setField", (void (oofem::DynamicInputRecord::*)(std::vector<std::string>, InputFieldType)) &oofem::DynamicInputRecord::setField) 
         .def("setField", (void (oofem::DynamicInputRecord::*)(InputFieldType)) &oofem::DynamicInputRecord::setField) 
     ;
+
+    py::class_<oofem::OOFEMTXTInputRecord, oofem::InputRecord>(m, "OOFEMTXTInputRecord")
+        .def(py::init<>())
+        .def(py::init<int, std::string>())
+        .def("finish", &oofem::OOFEMTXTInputRecord::finish, py::arg("wrn")=true)
+        .def("setRecordString", &oofem::OOFEMTXTInputRecord::setRecordString)
+    ;
+
 
     py::class_<oofem::FEMComponent>(m, "FEMComponent")
         .def("giveClassName", &oofem::FEMComponent::giveClassName)
@@ -404,6 +413,36 @@ PYBIND11_MODULE(oofempy, m) {
         .value("postProcessor", oofem::problemMode::_postProcessor)
     ;
 
+    py::enum_<oofem::domainType>(m, "domainType")
+        .value("_unknownMode", oofem::domainType::_unknownMode)
+        .value("_2dPlaneStressMode", oofem::domainType::_2dPlaneStressMode)
+        .value("_PlaneStrainMode", oofem::domainType::_PlaneStrainMode)
+        .value("_2dPlaneStressRotMode", oofem::domainType::_2dPlaneStressRotMode)
+        .value("_3dMode", oofem::domainType::_3dMode)
+        .value("_3dAxisymmMode", oofem::domainType::_3dAxisymmMode)
+        .value("_2dMindlinPlateMode", oofem::domainType::_2dMindlinPlateMode)
+        .value("_3dDegeneratedShellMode", oofem::domainType::_3dDegeneratedShellMode)
+        .value("_3dShellMode", oofem::domainType::_3dShellMode)
+        .value("_2dTrussMode", oofem::domainType::_2dTrussMode)
+        .value("_1dTrussMode", oofem::domainType::_1dTrussMode)
+        .value("_2dBeamMode", oofem::domainType::_2dBeamMode)
+        .value("_HeatTransferMode", oofem::domainType::_HeatTransferMode)
+        .value("_Mass1TransferMode", oofem::domainType::_Mass1TransferMode)
+        .value("_HeatMass1Mode", oofem::domainType::_HeatMass1Mode)
+        .value("_2dIncompressibleFlow", oofem::domainType::_2dIncompressibleFlow)
+        .value("_3dIncompressibleFlow", oofem::domainType::_3dIncompressibleFlow)
+        .value("_2dLatticeMode", oofem::domainType::_2dLatticeMode)
+        .value("_2dLatticeMassTransportMode", oofem::domainType::_2dLatticeMassTransportMode)
+        .value("_3dLatticeMode", oofem::domainType::_3dLatticeMode)
+        .value("_3dLatticeMassTransportMode", oofem::domainType::_3dLatticeMassTransportMode)
+        .value("_2dLatticeHeatTransferMode", oofem::domainType::_2dLatticeHeatTransferMode)
+        .value("_3dLatticeHeatTransferMode", oofem::domainType::_3dLatticeHeatTransferMode)
+        .value("_3dDirShellMode", oofem::domainType::_3dDirShellMode)
+        .value("_WarpingMode", oofem::domainType::_WarpingMode)
+    ;
+
+
+
     py::enum_<oofem::CharType>(m, "CharType")
       .value("UnknownCharType", oofem::CharType::UnknownCharType)
       .value("StiffnessMatrix", oofem::CharType::StiffnessMatrix)
@@ -597,6 +636,18 @@ PYBIND11_MODULE(oofempy, m) {
       .value("IST_IncrementCreepModulus", oofem::InternalStateType::IST_IncrementCreepModulus)
       ;
 
-    m.def("test", [] (oofem::FloatArray& a) {a.pY();});
+
+    m.def("linearStatic", &linearStatic, py::return_value_policy::move);
+    m.def("domain", &domain, py::return_value_policy::move);
+    m.def("beam2d", &beam2d, py::return_value_policy::move);
+    m.def("node", &node, py::return_value_policy::move);
+    m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
+    m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);
+    m.def("nodalLoad", &nodalLoad, py::return_value_policy::move);
+    m.def("structTemperatureLoad", &structTemperatureLoad, py::return_value_policy::move);
+    m.def("isoLE", &isoLE, py::return_value_policy::move);
+    m.def("simpleCS", &simpleCS, py::return_value_policy::move);
+    m.def("peakFunction", &peakFunction, py::return_value_policy::move);
+    
 
 }
