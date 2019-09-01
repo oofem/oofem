@@ -61,12 +61,12 @@ B3Material :: initializeFrom(InputRecord *ir)
 
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_B3Material_mode);
+    IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0); // age when drying begins (in days)
+    IR_GIVE_FIELD(ir, fc, _IFT_B3Material_fc); // 28-day standard mean cylinder compression strength in MPa //needed for E28
     if ( mode == 0 ) { // default, determine raw params q1,..,q5 from composition
-        IR_GIVE_FIELD(ir, fc, _IFT_B3Material_fc); // 28-day standard cylinder compression strength in MPa
         IR_GIVE_FIELD(ir, c, _IFT_B3Material_cc); // cement content of concrete  in kg m^-3.
         IR_GIVE_FIELD(ir, wc, _IFT_B3Material_wc); // ratio (by weight) of water to cementitious material
         IR_GIVE_FIELD(ir, ac, _IFT_B3Material_ac); // ratio (by weight) of aggregate to cement
-        IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0); // age when drying begins (in days)
     } else { // read raw Basic creep parameters
         IR_GIVE_FIELD(ir, q1, _IFT_B3Material_q1);
         IR_GIVE_FIELD(ir, q2, _IFT_B3Material_q2);
@@ -177,10 +177,10 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
         q5 = 7.57e5 * ( 1. / fc ) * pow(EpsSinf, -0.6);
 
-        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf\n",
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1 %lf q2 %lf q3 %lf q4 %lf q5 %lf kt %lf EpsSinf %lf\n",
                 this->number, q1, q2, q3, q4, q5, kt, EpsSinf);
     } else {
-        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf\n",
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1 %lf q2 %lf q3 %lf q4 %lf\n",
                 this->number, q1, q2, q3, q4);
     }
 }
@@ -290,8 +290,13 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
 
     // size dependence
     TauSh = kt * pow(ks * 2.0 * vs, 2.);
-    // time curve
-    St  = tanh( pow( ( time - t0 ) / TauSh, 1. / 2. ) );
+    // time curve, check if before t0
+    if (time > t0) {
+        St = tanh( pow( ( time - t0 ) / TauSh, 1. / 2. ) );
+    } else {
+        St = 0.;
+    }
+    
     // humidity dependence
     if ( hum <= 0.98 ) {
         kh = 1. - pow(hum, 3);
