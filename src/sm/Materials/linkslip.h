@@ -42,13 +42,16 @@
 //@{
 #define _IFT_LinkSlip_Name "linkslip"
 #define _IFT_LinkSlip_talpha "talpha"
-#define _IFT_LinkSlip_eNormal "e"
-#define _IFT_LinkSlip_alphaOne "a1"
-#define _IFT_LinkSlip_alphaTwo "a2"
-#define _IFT_LinkSlip_tauZero "t0"
-#define _IFT_LinkSlip_localrandomtype "randomtype"
-#define _IFT_LinkSlip_coefficientOfVariation "cov"
-#define _IFT_LinkSlip_calpha "calpha"
+#define _IFT_LinkSlip_kn "kn"
+#define _IFT_LinkSlip_a1 "a1"
+#define _IFT_LinkSlip_a2 "a2"
+#define _IFT_LinkSlip_type "type"
+#define _IFT_LinkSlip_t0 "t0"
+#define _IFT_LinkSlip_s1 "s1"
+#define _IFT_LinkSlip_s2 "s2"
+#define _IFT_LinkSlip_s3 "s3"
+#define _IFT_LinkSlip_tf "tf"
+#define _IFT_LinkSlip_alpha "alpha"
 //@}
 
 namespace oofem {
@@ -62,8 +65,10 @@ protected:
   double plasticStrain;
   
   double tempPlasticStrain;
-  
 
+  double kappa;
+
+  double tempKappa;
 
 public:
 
@@ -73,9 +78,16 @@ public:
     ~LinkSlipStatus() {}
     
     double  giveTempPlasticStrain(){ return this->tempPlasticStrain; }
+
     double  givePlasticStrain(){ return this->plasticStrain; }
+
+    double  giveKappa(){ return this->kappa; }
+
     void  letTempPlasticStrainBe(const double &v)
     { this->tempPlasticStrain = v; }
+
+    void  letTempKappaBe(const double &v)
+    { this->tempKappa = v; }
 
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -85,12 +97,10 @@ public:
 
     virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
 
-    contextIOResultType    saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void saveContext(DataStream &stream, ContextMode mode);
 
-    contextIOResultType    restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    void restoreContext(DataStream &stream, ContextMode mode);
 };
-
-
 
 /**
  * This class implements a slip model for concrete for lattice elements.
@@ -101,34 +111,23 @@ class LinkSlip : public LinearElasticMaterial
 protected:
 
     ///Normal modulus
-    double eNormalMean;
+    double kNormal;
 
     ///Ratio of shear and normal modulus
     double alphaOne;
 
-    ///Ratio of torsion and normal modulus
-    double alphaTwo;
-
+    int type;
+    
     ///Strength for slip component
-    double tauZero;
-      
-    /// coefficient variation of the Gaussian distribution
-    double coefficientOfVariation;
+    double tauMax,tauFinal;
+    
+    double s1,s2,s3;
 
-    /// flag which chooses between no distribution (0) and Gaussian distribution (1)
-    double localRandomType;
-
-    double cAlpha;
-
-    double tAlphaMean;
+    double alpha;
 
 public:
 
-    /// Constructor
-    LinkSlip(int n, Domain *d) : LinearElasticMaterial(n, d) { };
-
-
-    LinkSlip(int n, Domain *d, double eNormalMean, double alphaOne, double alphaTwo);
+    LinkSlip(int n, Domain *d);
 
     /// Destructor
     virtual ~LinkSlip();
@@ -144,7 +143,8 @@ public:
 
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
-
+    
+    double evaluateBondStress(const double kappa) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 				 MatResponseMode rmode,
@@ -161,10 +161,6 @@ public:
                                       const FloatArray &, TimeStep *);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-
-    virtual double  give(int aProperty, GaussPoint *gp);
-
 
 
 protected:

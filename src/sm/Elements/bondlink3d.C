@@ -85,9 +85,9 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     }
 
     //Assemble Bmatrix based on three rigid arm components
-    //first node: beam, second node: lattice
+    //first node: beam, second node: solid
     //rigid.at(1) (tangential), rigid.at(2) (lateral), rigid.at(3) (lateral)
-    answer.resize(6, 9);
+    answer.resize(3, 9);
     answer.zero();
 
     //Normal displacement jump in x-direction
@@ -115,8 +115,6 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     //Second node
     answer.at(3, 9) = -1.;
 
-    answer.at(4,4) = 1.;
-    
     return;
 }
 
