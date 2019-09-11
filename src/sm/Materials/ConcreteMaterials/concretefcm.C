@@ -854,6 +854,8 @@ ConcreteFCM :: computeResidualTensileStrength(GaussPoint *gp, TimeStep *tStep) {
 double
 ConcreteFCM :: give(int aProperty, GaussPoint *gp)
 {
+    this->giveStatus(gp);
+    
     double answer;
     if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
         return answer;
