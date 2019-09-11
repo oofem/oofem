@@ -219,6 +219,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setNumber", &oofem::FEMComponent::setNumber)
         .def("checkConsistency", &oofem::FEMComponent::checkConsistency)
         .def("printYourself", &oofem::FEMComponent::printYourself)
+        .def_property_readonly("number", &oofem::FEMComponent::giveNumber)
+
         ;
 
 
@@ -250,6 +252,11 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNextStep", &oofem::EngngModel::giveNextStep, py::return_value_policy::reference)
         .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
         .def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
+        .def("checkProblemConsistency", &oofem::EngngModel::checkProblemConsistency)
+        .def("init", &oofem::EngngModel::init)
+        .def("postInitialize", &oofem::EngngModel::postInitialize)
+        .def("setRenumberFlag", &oofem::EngngModel::setRenumberFlag)
+        
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
@@ -262,6 +269,23 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveFunction", &oofem::Domain::giveFunction, py::return_value_policy::reference)
         .def("giveMaterial", &oofem::Domain::giveMaterial, py::return_value_policy::reference)
         .def("giveCrossSection", &oofem::Domain::giveCrossSection, py::return_value_policy::reference)
+        .def("resizeDofManagers", &oofem::Domain::resizeDofManagers)
+        .def("setDofManager", &oofem::Domain::py_setDofManager, py::keep_alive<0, 2>())
+        .def("resizeElements", &oofem::Domain::resizeElements)
+        .def("setElement", &oofem::Domain::py_setElement, py::keep_alive<0, 2>())
+        .def("resizeMaterials", &oofem::Domain::resizeMaterials)
+        .def("setMaterial", &oofem::Domain::py_setMaterial, py::keep_alive<0, 2>())
+        .def("resizeCrossSectionModels", &oofem::Domain::resizeCrossSectionModels)
+        .def("setCrossSection", &oofem::Domain::py_setCrossSection, py::keep_alive<0, 2>())
+        .def("resizeBoundaryConditions", &oofem::Domain::resizeBoundaryConditions)
+        .def("setBoundaryCondition", &oofem::Domain::py_setBoundaryCondition, py::keep_alive<0, 2>())
+        .def("resizeInitialConditions", &oofem::Domain::resizeInitialConditions)
+        .def("setInitialCondition", &oofem::Domain::py_setInitialCondition, py::keep_alive<0, 2>())
+        .def("resizeFunctions", &oofem::Domain::resizeFunctions)
+        .def("setFunction", &oofem::Domain::py_setFunction, py::keep_alive<0, 2>())
+        .def("resizeSets", &oofem::Domain::resizeSets)
+        .def("setSet", &oofem::Domain::py_setSet, py::keep_alive<0, 2>())
+        
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -313,6 +337,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveIPValue", &oofem::Element::giveIPValue)
         .def("giveLabel", &oofem::Element::giveLabel)
         .def("initializeFrom", &oofem::Element::initializeFrom)
+
     ;
 
     py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
