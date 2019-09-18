@@ -2,6 +2,7 @@ interface3d.out
 patch test of interface 3d elements
 LinearStatic nsteps 1 nmodules 1
 errorcheck
+#vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 16 nelem 14 ncrosssect 2 nmat 2 nbc 4 nic 0 nltf 1 nset 6

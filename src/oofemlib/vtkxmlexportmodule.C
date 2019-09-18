@@ -270,7 +270,9 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_quad9_2 ) ||
-        ( elemGT == EGT_wedge_1 ) ) {} else if ( elemGT == EGT_hexa_27 ) {
+        ( elemGT == EGT_wedge_1 ) ) {  
+            
+    } else if ( elemGT == EGT_hexa_27 ) {
         nodeMapping = {
             5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18, 23, 25, 26, 24, 22, 21, 27
         };
@@ -287,9 +289,6 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
             1, 2, 4, 3
         };
     } else if ( elemGT == EGT_quad_21_interface ) {
-//        nodeMapping = {
-//            1, 2, 5, 4, 3, 6
-//        };
         nodeMapping = {
             1, 2, 5, 4, 3, 6
         };

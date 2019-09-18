@@ -34,7 +34,7 @@ class UNVParser:
 
     def mapping(self):
         """Returns mapping for .unv elements"""
-    #   Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
+        #Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
     
         # TODO: Use a linked list where each oofem element is linked to the type of element and use the linked list when mapping occurs. In that way, we only need to specify each type of element (descritization) once.
     
@@ -78,6 +78,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1hmt", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1mt", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Interface2dlin", [0,1,3,2], [[0,1],[],[3,2],[]], []))
         oofem_elemProp.append(oofem_elementProperties("QPlaneStress2D", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("Quad2plateSubsoil", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("LSpace", [4,7,6,5,0,3,2,1], [[4,7],[7,6],[6,5],[5,4],[4,0],[7,3],[6,2],[5,1],[0,3],[3,2],[2,0],[1,0]], [[4,7,6,5],[0,3,2,1],[4,0,3,7],[7,3,2,6],[6,2,1,5],[5,1,0,4]]))#checked
