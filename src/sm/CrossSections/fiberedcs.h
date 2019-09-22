@@ -202,6 +202,8 @@ public:
     { OOFEM_ERROR("not implemented"); }
     void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("not implemented"); }
+    
+    Material *giveMaterial(IntegrationPoint *ip) override;
 };
 
 /**

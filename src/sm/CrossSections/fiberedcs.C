@@ -602,4 +602,24 @@ FiberedCrossSection :: checkConsistency()
     }
     return result;
 }
+
+Material *
+FiberedCrossSection :: giveMaterial(IntegrationPoint *ip)
+{
+    ///@todo We should keep track in integration point (integration rule) what material from layer is assigned. Otherwise difficulties due to different elements and IP numbering.
+    if ( ip->giveIntegrationRule()->giveIntegrationDomain() == _Cube ||
+        ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge
+    ) {
+        return domain->giveMaterial( fiberMaterials.at(1) );
+        //return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
+    }
+    
+    if (ip->hasSlaveGaussPoint()) {
+        return domain->giveMaterial( fiberMaterials.at(1) );//virtual master, has no material assigned in input file
+    } else {
+        return domain->giveMaterial( fiberMaterials.at(1) );//virtual master, has no material assigned in input file
+        //OOFEM_ERROR("Not implemented.")
+    }
+    return nullptr;
+}
 } // end namespace oofem
