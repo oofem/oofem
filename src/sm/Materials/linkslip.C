@@ -179,43 +179,41 @@ namespace oofem {
   {
     LinkSlipStatus *status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
 
-    //strain has the meanig of slip. Stress is force
+    //For axial (first) component, strain has the meanig of slip. Stress is traction.
     
-    FloatArray strainVector;
+    FloatArray stress,strain;
+    stress = status->giveStressVector();
+    strain = status->giveStrainVector();
 
-    double tempPlasticStrain = status->givePlasticStrain();
-    double tempKappa = status->giveKappa();
-
+    //evaluate tempKappa (no elastic strain in axial direction)
+    double tempKappa = status->giveKappa() + fabs(totalStrain.at(1)-strain.at(1));
+  
     FloatMatrix stiffnessMatrix;
     this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
 
     answer.resize(3);
     answer.zero();
 
-    /*First component is the slip one for which the stress should be limited using plasiticity (frictional slip between fibre and matrix). The other components are kept elastic. */
-    answer.at(1) = (totalStrain.at(1)-tempPlasticStrain)*stiffnessMatrix.at(1, 1);
+    //trial stress in axial direction
+    answer.at(1) = stress.at(1) + (totalStrain.at(1)-strain.at(1))*stiffnessMatrix.at(1,1);
     
     
     double f = fabs(answer.at(1)) - evaluateBondStress(tempKappa);
 
     if(f>0){//plastic response.
       //Reduced stress by increasing plastic strain.
-      tempPlasticStrain = tempPlasticStrain + sgn(answer.at(1))*f/stiffnessMatrix.at(1, 1);
-      tempKappa = tempKappa + f/stiffnessMatrix.at(1,1);
-      answer.at(1) = (totalStrain.at(1)-tempPlasticStrain)*stiffnessMatrix.at(1, 1);
+      answer.at(1) = evaluateBondStress(tempKappa);;
     }
 
-    //Compute the final stress components
+    //Compute the lateral stress components
     for ( int i = 2; i <= 3; i++ ) { // only diagonal terms matter
       answer.at(i) =  stiffnessMatrix.at(i, i) * totalStrain.at(i);
     }
 
     //Set temp values in status needed for dissipation
     status->letTempKappaBe(tempKappa);
-    status->letTempPlasticStrainBe(tempPlasticStrain);
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
-
     return;
   }
 
@@ -292,7 +290,7 @@ namespace oofem {
     }
     fprintf(file, "\n");
     
-    fprintf(file, "plasticStrain %.8e, kappa %.8e\n", this->plasticStrain, this->kappa);
+    fprintf(file, "kappa %.8e\n", this->kappa);
     return;
   }
   
