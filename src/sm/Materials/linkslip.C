@@ -358,7 +358,20 @@ namespace oofem {
 			  InternalStateType type,
 			  TimeStep *atTime)
   {
-    // return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
-    return Material :: giveIPValue(answer, gp, type, atTime);
+    LinkSlipStatus *status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
+    if ( type == IST_InterfaceJump ) {
+        answer.resize(3);
+        answer.zero();
+        answer = status->giveStrainVector();
+        return 1;
+    } else if ( type == IST_InterfaceTraction ) {
+        answer.resize(3);
+        answer.zero();
+        answer = status->giveStressVector();
+        return 1;
+    } else {
+        return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
+    }
+//     return Material :: giveIPValue(answer, gp, type, atTime);
   }
 }
