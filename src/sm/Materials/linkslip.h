@@ -62,10 +62,6 @@ class LinkSlipStatus : public StructuralMaterialStatus
 {
 protected:
 
-  double plasticStrain=0;
-  
-  double tempPlasticStrain=0;
-
   double kappa=0;
 
   double tempKappa=0;
@@ -77,14 +73,7 @@ public:
     /// Destructor
     ~LinkSlipStatus() {}
     
-    double  giveTempPlasticStrain(){ return this->tempPlasticStrain; }
-
-    double  givePlasticStrain(){ return this->plasticStrain; }
-
     double  giveKappa(){ return this->kappa; }
-
-    void  letTempPlasticStrainBe(const double &v)
-    { this->tempPlasticStrain = v; }
 
     void  letTempKappaBe(const double &v)
     { this->tempKappa = v; }

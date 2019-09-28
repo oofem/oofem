@@ -253,7 +253,7 @@ namespace oofem {
   //
   {
     StructuralMaterialStatus :: initTempStatus();
-    this->tempPlasticStrain = this->plasticStrain;
+    this->tempKappa = this->kappa;
   }
   
 
@@ -306,11 +306,6 @@ namespace oofem {
     StructuralMaterialStatus :: saveContext(stream, mode);
   
     // write a raw data
-    if ( !stream.write(plasticStrain) ) {
-      THROW_CIOERR(CIO_IOERR);
-    }
-
-    // write a raw data
     if ( !stream.write(kappa) ) {
       THROW_CIOERR(CIO_IOERR);
     }
@@ -325,11 +320,6 @@ namespace oofem {
   //
   {
     StructuralMaterialStatus :: restoreContext(stream, mode);
-    
-    // read raw data
-    if ( !stream.read(plasticStrain) ) {
-      THROW_CIOERR(CIO_IOERR);
-    }
   
     // read raw data
     if ( !stream.read(kappa) ) {
@@ -347,7 +337,6 @@ namespace oofem {
   //
   {
     StructuralMaterialStatus :: updateYourself(atTime);
-    this->plasticStrain = this->tempPlasticStrain;
     this->kappa = this->tempKappa;
   }
 
