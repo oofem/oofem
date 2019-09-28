@@ -129,12 +129,12 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 }
 
 void
-Quad1PlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Quad1PlaneStrain ::computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer)
 // Returns the [5x8] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 {
     FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, ncoords, FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 8);
     answer.zero();

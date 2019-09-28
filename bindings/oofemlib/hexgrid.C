@@ -6,14 +6,14 @@
 #include "timer.h"
 
 // Optional (only need the input fields defines)
-#include "tm/stationarytransportproblem.h"
+#include "tm/EngineeringModels/stationarytransportproblem.h"
 #include "nrsolver.h"
 #include "tm/simpletransportcrosssection.h"
-#include "tm/isoheatmat.h"
-#include "tm/brick1_ht.h"
-#include "tm/transportgradientdirichlet.h"
-#include "tm/transportgradientneumann.h"
-#include "tm/transportgradientperiodic.h"
+#include "tm/Materials/isoheatmat.h"
+#include "tm/Elements/brick1_ht.h"
+#include "tm/BoundaryCondition/transportgradientdirichlet.h"
+#include "tm/BoundaryCondition/transportgradientneumann.h"
+#include "tm/BoundaryCondition/transportgradientperiodic.h"
 #include "modulemanager.h"
 #include "exportmodule.h"
 #include "vtkxmlexportmodule.h"
@@ -24,9 +24,9 @@
 #include "boundarycondition.h"
 #include "set.h"
 
-#include "tm/transportgradientneumann.h"
-#include "tm/transportgradientdirichlet.h"
-#include "tm/transportgradientperiodic.h"
+//#include "tm/BoundaryConditions/transportgradientneumann.h"
+//#include "tm/BoundaryConditions/transportgradientdirichlet.h"
+//#include "tm/BoundaryConditions/transportgradientperiodic.h"
 
 #include <random>
 #include <fstream>

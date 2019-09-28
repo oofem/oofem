@@ -81,14 +81,14 @@ Structural3DElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 
 
 void
-Structural3DElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+Structural3DElement ::computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer)
 // Returns the [ 9 x (nno * 3) ] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx
 {
     FEInterpolation *interp = this->giveInterpolation();
     FloatMatrix dNdx;
-    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdx( dNdx, ncoords, FEIElementGeometryWrapper(this) );
 
     answer.resize(9, dNdx.giveNumberOfRows() * 3);
     answer.zero();

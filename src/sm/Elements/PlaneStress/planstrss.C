@@ -107,7 +107,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 
 
 void
-PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+PlaneStress2d :: computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer)
 //
 // Returns the [4x8] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
@@ -115,7 +115,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, gp->giveNaturalCoordinates(), *this->giveCellGeometryWrapper() );
+    this->interpolation.evaldNdx( dnx, ncoords, *this->giveCellGeometryWrapper() );
 
     answer.resize(4, 8);
 

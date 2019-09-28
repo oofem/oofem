@@ -78,7 +78,7 @@
 #include "fracturemanager.h"
 #include "contact/contactmanager.h"
 #include "contact/contactdefinition.h"
-
+#include "../src/sm/Contact/ContactSegment/contactsegment.h"
 
 namespace oofem {
 ClassFactory &GiveClassFactory()
@@ -232,6 +232,18 @@ std::unique_ptr<CrossSection> ClassFactory :: createCrossSection(const char *nam
 bool ClassFactory :: registerCrossSection( const char *name, std::unique_ptr<CrossSection> ( *creator )( int, Domain * ) )
 {
     return cf_store(csList, name, creator);
+}
+
+
+std::unique_ptr<ContactSegment> ClassFactory :: createContactSegment(const char *name, int number, Domain *domain)
+{
+    return cf_create<ContactSegment>(contactSegmentList, name, number, domain);
+}
+
+
+bool ClassFactory :: registerContactSegment( const char *name, std::unique_ptr<ContactSegment> ( *creator )( int, Domain * ) )
+{
+    return cf_store(contactSegmentList, name, creator);
 }
 
 std::unique_ptr<Material> ClassFactory :: createMaterial(const char *name, int number, Domain *domain)
@@ -442,6 +454,10 @@ bool ClassFactory :: registerContactDefinition( const char *name, std::unique_pt
 {
     return cf_store(contactDefList, name, creator);
 }
+
+
+
+
 
 std::unique_ptr<SparseGeneralEigenValueSystemNM> ClassFactory :: createGeneralizedEigenValueSolver(GenEigvalSolverType name, Domain *domain, EngngModel *emodel)
 {

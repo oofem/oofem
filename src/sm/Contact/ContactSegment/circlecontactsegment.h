@@ -32,46 +32,42 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef dsssolver_h
-#define dsssolver_h
 
-#include "oofemcfg.h"
-#include "sparselinsystemnm.h"
-#include "sparsemtrx.h"
 
-#define _IFT_DSSSolver_Name "dss"
+#pragma once
+#include "contactsegment.h"
+#include "node.h"
+#include "inputrecord.h"
+#include "Elements/structuralelement.h"
+#include "set.h"
+#include "functioncontactsegment.h"
+#include "classfactory.h"
+
+#define _IFT_CircleContactSegment_Name "circlecontactsegment"
+ //#define _IFT_FunctionContactSegment_function "function"
+#define _IFT_CircleContactSegment_centerpoint "centerpoint"
+#define _IFT_CircleContactSegment_radius "radius"
 
 namespace oofem {
-class Domain;
-class EngngModel;
-class FloatMatrix;
-class FloatArray;
+    class CircleContactSegment : public FunctionContactSegment
+    {
+    public:
+        CircleContactSegment(int n, Domain *aDomain) : FunctionContactSegment(n, aDomain) { ; }
+        ~CircleContactSegment() {};
 
-/**
- * Implements the solution of linear system of equation in the form Ax=b using direct factorization method.
- * Can work with any sparse matrix implementation. However, the sparse matrix implementation have to support
- * its factorization (canBeFactorized method).
- */
-class /*OOFEM_EXPORT*/ DSSSolver : public SparseLinearSystemNM
-{
-public:
-    /**
-     * Constructor.
-     * Creates new instance of DSS solver belonging to domain d and Engngmodel m.
-     * @param d Domain which solver belongs to.
-     * @param m Engineering model which solver belongs to.
-     */
-    DSSSolver(Domain *d, EngngModel *m);
-    /// Destructor.
-    virtual ~DSSSolver();
+        IRResultType initializeFrom(InputRecord * ir) override;
 
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+        const char *giveClassName() const override { return "Circlecontactsegment"; }
+        const char *giveInputRecordName() const override { return _IFT_CircleContactSegment_Name; }
 
-    const char *giveClassName() const override { return "DSSSolver"; }
-    LinSystSolverType giveLinSystSolverType() const override { return ST_DSS; }
-    SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return symmetric ? SMT_DSS_sym_LDL : SMT_DSS_unsym_LU; } ///@todo Check
-};
-} // end namespace oofem
+    private:
+        double radius;
+        FloatArray centerPoint;
 
-#endif // dsssolver_h
+    protected:
 
+        void computeContactPoint(FloatArray& answer, FloatArray& normal, const FloatArray& nodeCoords) override;
+
+    };
+
+}

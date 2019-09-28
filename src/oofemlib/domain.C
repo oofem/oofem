@@ -70,6 +70,7 @@
 #include "xfem/propagationlaw.h"
 #include "contact/contactmanager.h"
 #include "bctracker.h"
+#include "../src/sm/Contact/ContactSegment/contactsegment.h"
 
 #include "boundarycondition.h"
 #include "activebc.h"
@@ -133,6 +134,7 @@ Domain :: clear()
     crossSectionList.clear();
     nonlocalBarrierList.clear();
     setList.clear();
+    contactSegmentList.clear();
     xfemManager = nullptr;
     contactManager = nullptr;
     if ( connectivityTable ) {
@@ -439,6 +441,21 @@ Domain :: giveEngngModel()
     return engineeringModel;
 }
 
+
+ContactSegment *
+Domain :: giveContactSegment(int n)
+{
+#ifdef DEBUG
+    if ( n < 1 || n > (int)contactSegmentList.size() ) {
+        OOFEM_ERROR("undefined contact segment (%d)", n);
+    }
+#endif
+    return this->contactSegmentList[n-1].get();
+}
+
+
+
+
 void Domain :: resizeDofManagers(int _newSize) { dofManagerList.resize(_newSize); }
 void Domain :: resizeElements(int _newSize) { elementList.resize(_newSize); }
 void Domain :: resizeCrossSectionModels(int _newSize) { crossSectionList.resize(_newSize); }
@@ -448,6 +465,7 @@ void Domain :: resizeBoundaryConditions(int _newSize) { bcList.resize(_newSize);
 void Domain :: resizeInitialConditions(int _newSize) { icList.resize(_newSize); }
 void Domain :: resizeFunctions(int _newSize) { functionList.resize(_newSize); }
 void Domain :: resizeSets(int _newSize) { setList.resize(_newSize); }
+void Domain :: resizeContactSegments(int _newSize) { contactSegmentList.resize(_newSize); }
 
 void Domain :: py_setDofManager(int i, DofManager *obj) { dofManagerList[i-1].reset(obj); mDofManPlaceInArray[obj->giveGlobalNumber()] = i;}
 void Domain :: py_setElement(int i, Element *obj) { elementList[i-1].reset(obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
@@ -467,6 +485,8 @@ void Domain :: setNonlocalBarrier(int i, std::unique_ptr<NonlocalBarrier> obj) {
 void Domain :: setBoundaryCondition(int i, std::unique_ptr<GeneralBoundaryCondition> obj) { bcList[i-1] = std::move(obj); }
 void Domain :: setInitialCondition(int i, std::unique_ptr<InitialCondition> obj) { icList[i-1] = std::move(obj); }
 void Domain :: setFunction(int i, std::unique_ptr<Function> obj) { functionList[i-1] = std::move(obj); }
+void Domain :: setContactSegment(int i, std::unique_ptr<ContactSegment> obj) { contactSegmentList[i-1] = std::move(obj); }
+
 void Domain :: setSet(int i, std::unique_ptr<Set> obj) { setList[i-1] = std::move(obj); }
 void Domain :: setXfemManager(std::unique_ptr<XfemManager> obj) { xfemManager = std::move(obj); }
 
@@ -480,7 +500,7 @@ Domain :: instanciateYourself(DataReader &dr)
 
     int num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier = 0, nset = 0;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier = 0, nset = 0, ncontactseg = 0;
     bool nxfemman = false;
     bool ncontactman = false;
     bool nfracman = false;
@@ -523,6 +543,7 @@ Domain :: instanciateYourself(DataReader &dr)
     IR_GIVE_FIELD(ir, nic, _IFT_Domain_nic);
     IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nfunct);
     IR_GIVE_OPTIONAL_FIELD(ir, nset, _IFT_Domain_nset);
+    IR_GIVE_OPTIONAL_FIELD(ir, ncontactseg, _IFT_Domain_ncontactsegments);
     IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
     IR_GIVE_OPTIONAL_FIELD(ir, ncontactman, _IFT_Domain_ncontactman);
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
@@ -646,6 +667,40 @@ Domain :: instanciateYourself(DataReader &dr)
     VERBOSE_PRINT0("Instanciated elements ", nelem);
 #  endif
 
+
+    // read contact segments
+    contactSegmentList.clear();
+    contactSegmentList.resize(ncontactseg);
+    for ( int i = 1; i <= ncontactseg; i++ ) {
+        ir = dr.giveInputRecord(DataReader :: IR_contactSegmentRec, i);
+        // read type of element
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+
+        std :: unique_ptr< ContactSegment >segment( classFactory.createContactSegment(name.c_str(), num, this) );
+        if ( !segment ) {
+            OOFEM_ERROR("Couldn't create contact segment: %s", name.c_str());
+        }
+
+        segment->initializeFrom(ir);
+
+	// check number
+	if ( num < 1 || num > ncontactseg ) {
+	  OOFEM_ERROR("Invalid contact segment number (num=%d)", num);
+	}
+	
+	if ( !contactSegmentList[num - 1] ) {
+	  contactSegmentList[num - 1] = std :: move(segment);
+	} else {
+	  OOFEM_ERROR("Contact segmenet entry already exist (num=%d)", num);
+	}
+	
+	ir->finish();
+	
+    }
+
+
+
+    
     // read cross sections
     crossSectionList.clear();
     crossSectionList.resize(ncrossSections);
@@ -998,6 +1053,13 @@ Domain :: postInitialize()
     for ( auto &bc: bcList ) {
         bc->postInitialize();
     }
+
+    for ( auto &cs: contactSegmentList ) {
+        cs->postInitialize();
+    }
+	
+
+    
 }
 
 

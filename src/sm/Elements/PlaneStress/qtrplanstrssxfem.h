@@ -75,7 +75,7 @@ public:
     void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                           int lowerIndx = 1, int upperIndx = ALL_STRAINS) override;
-    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeBHmatrixAt(const FloatArray& ncoords, FloatMatrix &answer) override;
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep) override;

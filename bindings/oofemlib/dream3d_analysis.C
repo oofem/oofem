@@ -6,14 +6,14 @@
 #include "timer.h"
 
 // Optional (only need the input fields defines)
-#include "tm/stationarytransportproblem.h"
+#include "tm/EngineeringModels/stationarytransportproblem.h"
 #include "nrsolver.h"
 #include "tm/simpletransportcrosssection.h"
-#include "tm/isoheatmat.h"
-#include "tm/brick1_ht.h"
-#include "tm/transportgradientdirichlet.h"
-#include "tm/transportgradientneumann.h"
-#include "tm/transportgradientperiodic.h"
+#include "tm/Materials/isoheatmat.h"
+#include "tm/Elements/brick1_ht.h"
+#include "tm/BoundaryCondition/transportgradientdirichlet.h"
+#include "tm/BoundaryCondition/transportgradientneumann.h"
+#include "tm/BoundaryCondition/transportgradientperiodic.h"
 #include "modulemanager.h"
 #include "exportmodule.h"
 #include "vtkxmlexportmodule.h"
@@ -24,21 +24,20 @@
 #include "boundarycondition.h"
 #include "set.h"
 
-#include "tm/transportgradientneumann.h"
-#include "tm/transportgradientdirichlet.h"
-#include "tm/transportgradientperiodic.h"
+//#include "tm/transportgradientneumann.h"
+//#include "tm/transportgradientdirichlet.h"
+//#include "tm/transportgradientperiodic.h"
 
 #include <random>
 #include <fstream>
 
-#include <H5Cpp.h>
-
+//#include <H5Cpp.h>
 #ifdef __PETSC_MODULE
 #include <petsc.h>
 #endif
 
 using namespace oofem;
-using namespace H5;
+//using namespace H5;
 
 
 class OOFEM_EXPORT BasicInputRecord : public InputRecord
@@ -129,7 +128,7 @@ inline int nC(int nX, int nY, int nZ, const IntArray &n)
 {
     return nX + nY*n[0] + nZ*n[1]*n[0];
 }
-
+/*
 FloatArray read_float_dataset(const DataSet &d)
 {
     auto dspace = d.getSpace();
@@ -152,10 +151,10 @@ IntArray read_int_dataset(const DataSet &d)
     d.read(x.givePointer(), PredType::NATIVE_INT, dspace);
     return x;
 }
-
+*/
 
 int main(int argc, char *argv[])
-{
+{/*
 #ifdef __PARALLEL_MODE
  #ifdef __USE_MPI
     int rank;
@@ -585,5 +584,5 @@ int main(int argc, char *argv[])
 #endif
 #ifdef __USE_MPI
     MPI_Finalize();
-#endif
+#endif*/
 }

@@ -66,6 +66,7 @@
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
 #define _IFT_Domain_ncontactman "ncontactman" /// [in,optional] Specifies if there is a contact manager.
+#define _IFT_Domain_ncontactsegments "ncontactseg"
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
 #define _IFT_Domain_nfracman "nfracman" /// [in,optional] Specifies if there is a fracture manager.
 #define _IFT_Domain_axisymmetric "axisymm" /// [optional] Specifies if the problem is axisymmetric.
@@ -94,6 +95,7 @@ class XfemManager;
 class TopologyDescription;
 class DataReader;
 class Set;
+class ContactSegment;
 class FractureManager;
 class oofegGraphicContext;
 class ProcessCommunicator;
@@ -131,6 +133,9 @@ private:
     std :: vector< std :: unique_ptr< Function > > functionList;
     /// Set list.
     std :: vector< std :: unique_ptr< Set > > setList;
+    /// Set list.
+    std :: vector< std :: unique_ptr< ContactSegment > > contactSegmentList;
+
     /// Nonlocal barrier list.
     std :: vector< std :: unique_ptr< NonlocalBarrier > > nonlocalBarrierList;
 
@@ -301,6 +306,15 @@ public:
      */
     const IntArray &giveElementsWithMaterialNum(int iMaterialNum) const;
     /**
+     * Service for accessing particular domain contact segment
+     * Generates error if no such contact segment is defined.
+     * @param n Pointer to n-th contact segment is returned.
+     */
+    ContactSegment *giveContactSegment(int n);
+    std :: vector< std :: unique_ptr< ContactSegment > > &giveContactSegment() { return this->contactSegmentList; }
+
+    
+    /**
      * Returns engineering model to which receiver is associated.
      */
     EngngModel *giveEngngModel();
@@ -448,6 +462,9 @@ public:
     int giveNumberOfNonlocalBarriers() const { return (int)nonlocalBarrierList.size(); }
     /// Returns number of sets
     int giveNumberOfSets() const { return (int)setList.size(); }
+    /// Returns number of contact segments
+    int giveNumberOfContactSegments() const { return (int)contactSegmentList.size(); }
+
 
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
@@ -475,6 +492,9 @@ public:
     void resizeFunctions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize sets.
     void resizeSets(int _newSize);
+    /// Resizes the internal data structure to accommodate space for _newSize sets.
+    void resizeContactSegments(int _newSize);
+
 
     ///@note Needed for some of the boost-python bindings. NOTE: This takes ownership of the pointers, so it's actually completely unsafe.
     //@{
@@ -507,6 +527,8 @@ public:
     void setFunction(int i, std::unique_ptr<Function> obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setSet(int i, std::unique_ptr<Set> obj);
+    /// Sets i-th component. The component will be further managed and maintained by domain object.
+    void setContactSegment(int i, std::unique_ptr<ContactSegment> obj);
 
     /// Temporary function, sets xfemManager.
     void setXfemManager(std::unique_ptr<XfemManager> ipXfemManager);

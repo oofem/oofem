@@ -32,46 +32,31 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef dsssolver_h
-#define dsssolver_h
 
-#include "oofemcfg.h"
-#include "sparselinsystemnm.h"
-#include "sparsemtrx.h"
 
-#define _IFT_DSSSolver_Name "dss"
+#pragma once
+#include "functioncontactsegment.h"
+#include "floatarray.h"
+
+#define NRFunctionContact_Maxiter 40
+#define NRFunctionContact_Tolerance 1.e-6
 
 namespace oofem {
-class Domain;
-class EngngModel;
-class FloatMatrix;
-class FloatArray;
+    //virtual class implementing Newton-Rhapson iteration for analytical function contact segments
+    //children need only implement the function, derivative and double derivative functions
+    class NRFunctionContactSegment2D : public FunctionContactSegment
+    {
+    public:
+        NRFunctionContactSegment2D(int n, Domain *aDomain) : FunctionContactSegment(n, aDomain) { ; }
+        ~NRFunctionContactSegment2D() {};
 
-/**
- * Implements the solution of linear system of equation in the form Ax=b using direct factorization method.
- * Can work with any sparse matrix implementation. However, the sparse matrix implementation have to support
- * its factorization (canBeFactorized method).
- */
-class /*OOFEM_EXPORT*/ DSSSolver : public SparseLinearSystemNM
-{
-public:
-    /**
-     * Constructor.
-     * Creates new instance of DSS solver belonging to domain d and Engngmodel m.
-     * @param d Domain which solver belongs to.
-     * @param m Engineering model which solver belongs to.
-     */
-    DSSSolver(Domain *d, EngngModel *m);
-    /// Destructor.
-    virtual ~DSSSolver();
+    protected:
 
-    NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
+        virtual void computeContactPoint(FloatArray& answer, FloatArray& normal, const FloatArray& nodeCoords) override;
 
-    const char *giveClassName() const override { return "DSSSolver"; }
-    LinSystSolverType giveLinSystSolverType() const override { return ST_DSS; }
-    SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return symmetric ? SMT_DSS_sym_LDL : SMT_DSS_unsym_LU; } ///@todo Check
-};
-} // end namespace oofem
+        virtual double functionValue(const double x) const = 0;
+        virtual double derivativeValue(const double x) const = 0;
+        virtual double doubleDerivativeValue(const double x) const = 0;
+    };
 
-#endif // dsssolver_h
-
+}

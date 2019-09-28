@@ -35,10 +35,64 @@
 #include "feinterpol.h"
 #include "element.h"
 #include "gaussintegrationrule.h"
+#include "timestep.h"
 
 namespace oofem {
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
 
+
+
+FEIElementDeformedGeometryWrapper :: FEIElementDeformedGeometryWrapper(const Element * elem) : FEICellGeometry() {
+  this->elem = elem;
+  this->alpha = 1;
+  this->tStep = NULL;
+}
+
+  FEIElementDeformedGeometryWrapper :: FEIElementDeformedGeometryWrapper(const Element * elem, TimeStep *tStep) : FEICellGeometry() {
+  this->elem = elem;
+  this->alpha = 1;
+  this->tStep = tStep;
+}
+  
+
+  
+int 
+FEIElementDeformedGeometryWrapper :: giveNumberOfVertices() const 
+{ 
+  return elem->giveNumberOfNodes(); 
+}
+
+
+const FloatArray&
+FEIElementDeformedGeometryWrapper :: giveVertexCoordinates(int i) const
+{
+  
+  if(tStep == NULL) {
+    return (elem->giveNode(i)->giveNodeCoordinates());
+  }
+  
+  
+  FloatArray u;
+  if(tStep != NULL) {
+    actualCoords = elem->giveNode(i)->giveNodeCoordinates();
+    //if(tStep->giveSubStepNumber() > 0) {
+    elem->giveNode(i)->giveUnknownVector(u, {D_u, D_v, D_w}, VM_Total, tStep);
+    u.times(alpha);
+    actualCoords.add(u);
+    //}
+  } else {
+    actualCoords = elem->giveNode(i)->giveNodeCoordinates();
+  }
+  
+  return actualCoords;
+    
+  
+}
+
+
+
+  
+  
 double
 FEInterpolation :: giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {

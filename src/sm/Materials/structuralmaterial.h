@@ -217,10 +217,12 @@ public:
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     /// Default implementation relies on giveFirstPKStressVector_3d
     virtual void giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
-    /// Default implementation relies on giveFirstPKStressVector_3d
+    /// Default implementation relies on giveFirstPKStressVector_StressControl
     virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
-    /// Default implementation relies on giveFirstPKStressVector_3d
+    /// Default implementation relies on giveFirstPKStressVector_StressControl
     virtual void giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
+    virtual void giveFirstPKStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, const IntArray &F_control, TimeStep *tStep);
     //@}
 
     /**
@@ -701,6 +703,10 @@ public:
     friend class StructuralCrossSection;
     friend class SimpleCrossSection;
     friend class LayeredCrossSection;
+
+    static void compute_2order_tensor_cross_product(FloatMatrix &answer, const FloatArray &a, const FloatArray &b);
+    static void compute_tensor_cross_product_tensor(FloatMatrix &answer, const FloatArray &a);
+
 };
 } // end namespace oofem
 #endif // structuralmaterial_h

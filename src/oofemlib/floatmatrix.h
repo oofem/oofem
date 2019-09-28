@@ -595,6 +595,8 @@ public:
      */
     void changeComponentOrder();
 
+    void beLeviCivitaTensor();
+
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream &stream) const;
     contextIOResultType restoreYourself(DataStream &stream);
