@@ -62,13 +62,13 @@ class LinkSlipStatus : public StructuralMaterialStatus
 {
 protected:
 
-  double plasticStrain;
+  double plasticStrain=0;
   
-  double tempPlasticStrain;
+  double tempPlasticStrain=0;
 
-  double kappa;
+  double kappa=0;
 
-  double tempKappa;
+  double tempKappa=0;
 
 public:
 
