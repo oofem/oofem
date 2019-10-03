@@ -103,6 +103,36 @@ PYBIND11_MODULE(oofempy, m) {
             if (i >= (size_t) s.giveSize()) throw py::index_error();
             return s[i];
         })
+        .def("__repr__",
+            [](const oofem::FloatArray &s) {
+                std::string a = "<oofempy.FloatArray: {";
+                for ( int i = 0; i < s.giveSize(); ++i ) {
+                    if ( i > 40 ) {
+                        a.append("...");
+                        break;
+                    } else {
+                        a.append(std::to_string(s[i]));
+                        a.append(", ");
+                    }
+                }
+                a.append("}>");
+                return a;
+        })
+        .def("assemble", &oofem::FloatArray::assemble)
+        .def("distance", (double (oofem::FloatArray::*)(const oofem::FloatArray &) const) &oofem::FloatArray::distance)
+        .def("normalize", &oofem::FloatArray::normalize)
+        .def("computeNorm", &oofem::FloatArray::computeNorm)
+        .def("product", &oofem::FloatArray::product)
+        .def("zero", &oofem::FloatArray::zero)
+
+        // expose FloatArray operators
+        .def(py::self + py::self)
+        .def(py::self - py::self)
+        .def(py::self * float())
+        .def(float() * py::self)
+        .def(py::self += py::self)
+        .def(py::self -= py::self)
+        .def(py::self *= float())
         ;
      py::implicitly_convertible<py::sequence, oofem::FloatArray>();
 
@@ -120,6 +150,53 @@ PYBIND11_MODULE(oofempy, m) {
             if (((py::handle)(indx[1])).cast<int>() >= s.giveNumberOfColumns()) throw py::index_error();
             return s(((py::handle)(indx[0])).cast<int>(), ((py::handle)(indx[1])).cast<int>());
         })
+        .def("__repr__",
+            [](const oofem::FloatArray &s) {
+                std::string a = "<oofempy.FloatArray: {";
+                for ( int i = 0; i < s.giveSize(); ++i ) {
+                    if ( i > 40 ) {
+                        a.append("...");
+                        break;
+                    } else {
+                        a.append(std::to_string(s[i]));
+                        a.append(", ");
+                    }
+                }
+                a.append("}>");
+                return a;
+            })
+        .def("resize", &oofem::FloatMatrix::resize)
+        .def("isSquare", &oofem::FloatMatrix::isSquare)
+        .def("assemble", (void (oofem::FloatMatrix::*)(const FloatMatrix &, const IntArray &)) &oofem::FloatMatrix::assemble, "Assembles the contribution to the receiver")
+        .def("assemble", (void (oofem::FloatMatrix::*)(const FloatMatrix &, const IntArray &, const IntArray&)) &oofem::FloatMatrix::assemble, "Assembles the contribution to the receiver")
+        .def("computeFrobeniusNorm", &oofem::FloatMatrix::computeFrobeniusNorm)
+        .def("computeNorm", &oofem::FloatMatrix::computeNorm)
+        .def("beDiagonal", &oofem::FloatMatrix::beDiagonal)
+        .def("giveTrace", &oofem::FloatMatrix::giveTrace)
+        .def("giveDeterminant", &oofem::FloatMatrix::giveDeterminant)
+        .def("zero", &oofem::FloatMatrix::zero)
+        .def("beUnitMatrix", &oofem::FloatMatrix::beUnitMatrix)
+        .def("beTranspositionOf", &oofem::FloatMatrix::beTranspositionOf)
+        .def("beProductOf", &oofem::FloatMatrix::beProductOf)
+        .def("addProductOf", &oofem::FloatMatrix::addProductOf)
+        .def("addTProductOf", &oofem::FloatMatrix::addTProductOf)
+        .def("beTProductOf", &oofem::FloatMatrix::beTProductOf)
+        .def("beProductTOf", &oofem::FloatMatrix::beProductTOf)
+        .def("beDyadicProductOf", &oofem::FloatMatrix::beDyadicProductOf)
+        .def("beInverseOf", &oofem::FloatMatrix::beInverseOf)
+        .def("solveForRhs", (bool (oofem::FloatMatrix::*)(const FloatArray &, FloatArray &, bool)) &oofem::FloatMatrix::solveForRhs)
+        .def("solveForRhs", (void (oofem::FloatMatrix::*)(const FloatMatrix &, FloatMatrix &, bool)) &oofem::FloatMatrix::solveForRhs)
+        .def("plusProductSymmUpper", &oofem::FloatMatrix::plusProductSymmUpper)
+        .def("plusDyadSymmUpper", &oofem::FloatMatrix::plusDyadSymmUpper)
+        .def("plusProductUnsym", &oofem::FloatMatrix::plusProductUnsym)
+        .def("plusDyadUnsym", &oofem::FloatMatrix::plusDyadUnsym)
+        // expose FloatArray operators
+        .def(py::self + py::self)
+        .def(py::self - py::self)
+        .def(py::self * py::self)
+        .def(py::self * FloatArray())
+        .def(py::self += py::self)
+        .def(py::self -= py::self)        
         ;
     
     py::class_<oofem::IntArray>(m, "IntArray")
@@ -256,7 +333,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("init", &oofem::EngngModel::init)
         .def("postInitialize", &oofem::EngngModel::postInitialize)
         .def("setRenumberFlag", &oofem::EngngModel::setRenumberFlag)
-        
+
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
@@ -346,7 +423,64 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
     ;
 
-    py::class_<oofem::Function, oofem::FEMComponent>(m, "Function")
+    /* 
+        Function class 
+    */        
+
+    /* Trampoline classes allowing to define custom derived types from within Python */
+    class PyFunction : public oofem::Function {
+        // inherit the constructor
+        using oofem::Function::Function;
+        // trampoline (need one for each virtual method)
+        double evaluateAtTime(double t) override {
+            PYBIND11_OVERLOAD (
+                double, // return type
+                oofem::Function, // parent class
+                evaluateAtTime, // name of method in c++ (must match python name)
+                t // argument(s)
+            );
+        }
+        double evaluateVelocityAtTime(double t) override {
+            PYBIND11_OVERLOAD_PURE(
+                double,
+                oofem::Function,
+                evaluateVelocityAtTime,
+                t
+            )
+        }
+        double evaluateAccelerationAtTime(double t) {
+            PYBIND11_OVERLOAD_PURE(
+                double,
+                oofem::Function,
+                evaluateAccelerationAtTime,
+                t
+            )
+        }
+        const char* giveClassName() const {
+           PYBIND11_OVERLOAD_PURE(
+                const char*,
+                oofem::Function,
+                giveClassName,
+            ) 
+        }
+        const char* giveInputRecordName() const {
+           PYBIND11_OVERLOAD_PURE(
+                const char*,
+                oofem::Function,
+                giveInputRecordName,
+            ) 
+        }
+         
+
+    };
+
+    py::class_<oofem::Function, oofem::FEMComponent, PyFunction>(m, "Function")
+    .def(py::init<int, oofem::Domain*>())
+    .def("evaluate", (double (oofem::Function::*)(TimeStep *, ValueModeType)) &oofem::Function::evaluate)
+    //abstract services
+    .def ("evaluateAtTime", &oofem::Function::evaluateAtTime)
+    .def ("evaluateVelocityAtTime", &oofem::Function::evaluateVelocityAtTime)
+    .def ("evaluateAccelerationAtTime", &oofem::Function::evaluateVelocityAtTime)
     ;
 
     py::class_<oofem::Material, oofem::FEMComponent>(m, "Material")
@@ -664,6 +798,7 @@ PYBIND11_MODULE(oofempy, m) {
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
     m.def("domain", &domain, py::return_value_policy::move);
+    m.def("truss1d", &truss1d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
@@ -674,5 +809,4 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
     
-
-}
+ }

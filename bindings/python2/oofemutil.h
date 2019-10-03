@@ -216,6 +216,7 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
 
 // specific elements
 py::object beam2d(py::args args, py::kwargs &kw) { return createElementOfType("beam2d",args,kw); }
+py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("truss1d",args,kw); }
 
 /*****************************************************
 * DofManager
