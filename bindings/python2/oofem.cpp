@@ -33,10 +33,6 @@
  */
 
 #include <pybind11/pybind11.h>
-<<<<<<< HEAD
-namespace py = pybind11;
-
-=======
 #include <pybind11/operators.h>
 namespace py = pybind11;
 
@@ -54,23 +50,22 @@ namespace py = pybind11;
 #include "dof.h"
 #include "dofmanager.h"
 #include "element.h"
-<<<<<<< HEAD
-=======
+
 #include "generalboundarycondition.h"
 #include "initialcondition.h"
 #include "function.h"
 #include "material.h"
 #include "crosssection.h"
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+
 #include "field.h"
 #include "util.h"
 #include "datareader.h"
 #include "oofemtxtdatareader.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
-<<<<<<< HEAD
+
 #include "classfactory.h"
-=======
+
 #include "chartype.h"
 #include "elementgeometrytype.h"
 #include "internalstatetype.h"
@@ -82,15 +77,29 @@ namespace py = pybind11;
 
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+
+
+#include <iostream>
+
+
+#include "oofemutil.h"
 
 
 PYBIND11_MODULE(oofempy, m) {
     m.doc() = "oofem python bindings module"; // optional module docstring
 
-    
+   
+
     py::class_<oofem::FloatArray>(m, "FloatArray")
         .def(py::init<int>(), py::arg("n")=0)
+        .def(py::init([](py::sequence s){
+            oofem::FloatArray* ans = new oofem::FloatArray((int) py::len(s));
+            for (unsigned int i=0; i<py::len(s); i++) {
+                (*ans)[i]=s[i].cast<double>();
+            }
+            return ans;
+        }
+        ))
         .def("printYourself", (void (oofem::FloatArray::*)() const) &oofem::FloatArray::printYourself, "Prints receiver")
         .def("printYourself", (void (oofem::FloatArray::*)(const std::string &) const) &oofem::FloatArray::printYourself, "Prints receiver")
         .def("pY", &oofem::FloatArray::pY)
@@ -101,7 +110,38 @@ PYBIND11_MODULE(oofempy, m) {
             if (i >= (size_t) s.giveSize()) throw py::index_error();
             return s[i];
         })
+        .def("__repr__",
+            [](const oofem::FloatArray &s) {
+                std::string a = "<oofempy.FloatArray: {";
+                for ( int i = 0; i < s.giveSize(); ++i ) {
+                    if ( i > 40 ) {
+                        a.append("...");
+                        break;
+                    } else {
+                        a.append(std::to_string(s[i]));
+                        a.append(", ");
+                    }
+                }
+                a.append("}>");
+                return a;
+        })
+        .def("assemble", &oofem::FloatArray::assemble)
+        .def("distance", (double (oofem::FloatArray::*)(const oofem::FloatArray &) const) &oofem::FloatArray::distance)
+        .def("normalize", &oofem::FloatArray::normalize)
+        .def("computeNorm", &oofem::FloatArray::computeNorm)
+        .def("product", &oofem::FloatArray::product)
+        .def("zero", &oofem::FloatArray::zero)
+
+        // expose FloatArray operators
+        .def(py::self + py::self)
+        .def(py::self - py::self)
+        .def(py::self * float())
+        .def(float() * py::self)
+        .def(py::self += py::self)
+        .def(py::self -= py::self)
+        .def(py::self *= float())
         ;
+     py::implicitly_convertible<py::sequence, oofem::FloatArray>();
 
      py::class_<oofem::FloatMatrix>(m, "FloatMatrix")
         .def(py::init<>())
@@ -117,13 +157,67 @@ PYBIND11_MODULE(oofempy, m) {
             if (((py::handle)(indx[1])).cast<int>() >= s.giveNumberOfColumns()) throw py::index_error();
             return s(((py::handle)(indx[0])).cast<int>(), ((py::handle)(indx[1])).cast<int>());
         })
+        .def("__repr__",
+            [](const oofem::FloatArray &s) {
+                std::string a = "<oofempy.FloatArray: {";
+                for ( int i = 0; i < s.giveSize(); ++i ) {
+                    if ( i > 40 ) {
+                        a.append("...");
+                        break;
+                    } else {
+                        a.append(std::to_string(s[i]));
+                        a.append(", ");
+                    }
+                }
+                a.append("}>");
+                return a;
+            })
+        .def("resize", &oofem::FloatMatrix::resize)
+        .def("isSquare", &oofem::FloatMatrix::isSquare)
+        .def("assemble", (void (oofem::FloatMatrix::*)(const FloatMatrix &, const IntArray &)) &oofem::FloatMatrix::assemble, "Assembles the contribution to the receiver")
+        .def("assemble", (void (oofem::FloatMatrix::*)(const FloatMatrix &, const IntArray &, const IntArray&)) &oofem::FloatMatrix::assemble, "Assembles the contribution to the receiver")
+        .def("computeFrobeniusNorm", &oofem::FloatMatrix::computeFrobeniusNorm)
+        .def("computeNorm", &oofem::FloatMatrix::computeNorm)
+        .def("beDiagonal", &oofem::FloatMatrix::beDiagonal)
+        .def("giveTrace", &oofem::FloatMatrix::giveTrace)
+        .def("giveDeterminant", &oofem::FloatMatrix::giveDeterminant)
+        .def("zero", &oofem::FloatMatrix::zero)
+        .def("beUnitMatrix", &oofem::FloatMatrix::beUnitMatrix)
+        .def("beTranspositionOf", &oofem::FloatMatrix::beTranspositionOf)
+        .def("beProductOf", &oofem::FloatMatrix::beProductOf)
+        .def("addProductOf", &oofem::FloatMatrix::addProductOf)
+        .def("addTProductOf", &oofem::FloatMatrix::addTProductOf)
+        .def("beTProductOf", &oofem::FloatMatrix::beTProductOf)
+        .def("beProductTOf", &oofem::FloatMatrix::beProductTOf)
+        .def("beDyadicProductOf", &oofem::FloatMatrix::beDyadicProductOf)
+        .def("beInverseOf", &oofem::FloatMatrix::beInverseOf)
+        .def("solveForRhs", (bool (oofem::FloatMatrix::*)(const FloatArray &, FloatArray &, bool)) &oofem::FloatMatrix::solveForRhs)
+        .def("solveForRhs", (void (oofem::FloatMatrix::*)(const FloatMatrix &, FloatMatrix &, bool)) &oofem::FloatMatrix::solveForRhs)
+        .def("plusProductSymmUpper", &oofem::FloatMatrix::plusProductSymmUpper)
+        .def("plusDyadSymmUpper", &oofem::FloatMatrix::plusDyadSymmUpper)
+        .def("plusProductUnsym", &oofem::FloatMatrix::plusProductUnsym)
+        .def("plusDyadUnsym", &oofem::FloatMatrix::plusDyadUnsym)
+        // expose FloatArray operators
+        .def(py::self + py::self)
+        .def(py::self - py::self)
+        .def(py::self * py::self)
+        .def(py::self * FloatArray())
+        .def(py::self += py::self)
+        .def(py::self -= py::self)        
         ;
     
     py::class_<oofem::IntArray>(m, "IntArray")
-<<<<<<< HEAD
-=======
+
         .def(py::init<int>(), py::arg("n")=0)
         .def(py::init<const oofem::IntArray&>())
+        .def(py::init([](py::sequence s){
+            oofem::IntArray* ans = new oofem::IntArray((int) py::len(s));
+            for (unsigned int i=0; i<py::len(s); i++) {
+                (*ans)[i]=s[i].cast<int>();
+            }
+            return ans;
+        }
+        ))
         .def("resize", &oofem::IntArray::resize)
         .def("clear", &oofem::IntArray::clear)
         .def("preallocate", &oofem::IntArray::preallocate)
@@ -161,8 +255,10 @@ PYBIND11_MODULE(oofempy, m) {
             if (i >= (size_t) s.giveSize()) throw py::index_error();
             return s[i];
         })
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+
     ;
+    py::implicitly_convertible<py::sequence, oofem::IntArray>();
+
 
     py::class_<oofem::DataReader>(m, "DataReader")
     ;
@@ -171,8 +267,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def(py::init<std::string>())
     ;
 
-<<<<<<< HEAD
-=======
+
     py::class_<oofem::InputRecord>(m, "InputRecord")
     ;
 
@@ -194,7 +289,14 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setField", (void (oofem::DynamicInputRecord::*)(InputFieldType)) &oofem::DynamicInputRecord::setField) 
     ;
 
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+    py::class_<oofem::OOFEMTXTInputRecord, oofem::InputRecord>(m, "OOFEMTXTInputRecord")
+        .def(py::init<>())
+        .def(py::init<int, std::string>())
+        .def("finish", &oofem::OOFEMTXTInputRecord::finish, py::arg("wrn")=true)
+        .def("setRecordString", &oofem::OOFEMTXTInputRecord::setRecordString)
+    ;
+
+
     py::class_<oofem::FEMComponent>(m, "FEMComponent")
         .def("giveClassName", &oofem::FEMComponent::giveClassName)
         .def("giveInputRecordName", &oofem::FEMComponent::giveInputRecordName)
@@ -204,24 +306,12 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setNumber", &oofem::FEMComponent::setNumber)
         .def("checkConsistency", &oofem::FEMComponent::checkConsistency)
         .def("printYourself", &oofem::FEMComponent::printYourself)
+        .def_property_readonly("number", &oofem::FEMComponent::giveNumber)
+
         ;
 
 
-<<<<<<< HEAD
-py::class_<oofem::TimeStep>(m, "TimeStep")
-    .def("giveNumber", &oofem::TimeStep::giveNumber)
-    .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
-    .def("giveIntrinsicTime", &oofem::TimeStep::giveIntrinsicTime)
-    .def("giveTimeIncrement", &oofem::TimeStep::giveTimeIncrement)
-    .def("setTimeIncrement", &oofem::TimeStep::setTimeIncrement)
-    .def("setTime", &oofem::TimeStep::setTime)
-    .def("setTargetTime", &oofem::TimeStep::setTargetTime)
-    .def("setIntrinsicTime", &oofem::TimeStep::setIntrinsicTime)
-    .def("isNotTheLastStep", &oofem::TimeStep::isNotTheLastStep)
-    .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
-    .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
-    ;
-=======
+
     py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveNumber", &oofem::TimeStep::giveNumber)
         .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
@@ -235,7 +325,7 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
         .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
         ;
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+
 
     py::class_<oofem::EngngModel>(m, "EngngModel")
         .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
@@ -251,11 +341,15 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveNextStep", &oofem::EngngModel::giveNextStep, py::return_value_policy::reference)
         .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
         .def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
+        .def("checkProblemConsistency", &oofem::EngngModel::checkProblemConsistency)
+        .def("init", &oofem::EngngModel::init)
+        .def("postInitialize", &oofem::EngngModel::postInitialize)
+        .def("setRenumberFlag", &oofem::EngngModel::setRenumberFlag)
+
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
-<<<<<<< HEAD
-=======
+
         .def(py::init<int, int, oofem::EngngModel*>())
         .def("giveNumber", &oofem::Domain::giveNumber)
         .def("setNumber", &oofem::Domain::setNumber)
@@ -265,7 +359,23 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveFunction", &oofem::Domain::giveFunction, py::return_value_policy::reference)
         .def("giveMaterial", &oofem::Domain::giveMaterial, py::return_value_policy::reference)
         .def("giveCrossSection", &oofem::Domain::giveCrossSection, py::return_value_policy::reference)
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+        .def("resizeDofManagers", &oofem::Domain::resizeDofManagers)
+        .def("setDofManager", &oofem::Domain::py_setDofManager, py::keep_alive<0, 2>())
+        .def("resizeElements", &oofem::Domain::resizeElements)
+        .def("setElement", &oofem::Domain::py_setElement, py::keep_alive<0, 2>())
+        .def("resizeMaterials", &oofem::Domain::resizeMaterials)
+        .def("setMaterial", &oofem::Domain::py_setMaterial, py::keep_alive<0, 2>())
+        .def("resizeCrossSectionModels", &oofem::Domain::resizeCrossSectionModels)
+        .def("setCrossSection", &oofem::Domain::py_setCrossSection, py::keep_alive<0, 2>())
+        .def("resizeBoundaryConditions", &oofem::Domain::resizeBoundaryConditions)
+        .def("setBoundaryCondition", &oofem::Domain::py_setBoundaryCondition, py::keep_alive<0, 2>())
+        .def("resizeInitialConditions", &oofem::Domain::resizeInitialConditions)
+        .def("setInitialCondition", &oofem::Domain::py_setInitialCondition, py::keep_alive<0, 2>())
+        .def("resizeFunctions", &oofem::Domain::resizeFunctions)
+        .def("setFunction", &oofem::Domain::py_setFunction, py::keep_alive<0, 2>())
+        .def("resizeSets", &oofem::Domain::resizeSets)
+        .def("setSet", &oofem::Domain::py_setSet, py::keep_alive<0, 2>())
+        
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -282,10 +392,9 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveNumberOfDofs", &oofem::DofManager::giveNumberOfDofs)
         .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
         .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
-<<<<<<< HEAD
-=======
+
         .def("hasCoordinates", &oofem::DofManager::hasCoordinates)
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+
         .def("giveCoordinates", &oofem::DofManager::giveCoordinates, py::return_value_policy::reference)
         .def("appendDof", &oofem::DofManager::appendDof, py::keep_alive<1, 2>())
         .def("removeDof", &oofem::DofManager::removeDof)
@@ -293,10 +402,7 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
     ;
 
     py::class_<oofem::Element, oofem::FEMComponent>(m, "Element")
-<<<<<<< HEAD
-    ;
 
-=======
         .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *dofIds) const) &oofem::Element::giveLocationArray)
         .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *) const) &oofem::Element::giveLocationArray)
         .def("giveCharacteristicMatrix", &oofem::Element::giveCharacteristicMatrix)
@@ -324,6 +430,7 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveIPValue", &oofem::Element::giveIPValue)
         .def("giveLabel", &oofem::Element::giveLabel)
         .def("initializeFrom", &oofem::Element::initializeFrom)
+
     ;
 
     py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
@@ -332,7 +439,64 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
     py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
     ;
 
-    py::class_<oofem::Function, oofem::FEMComponent>(m, "Function")
+    /* 
+        Function class 
+    */        
+
+    /* Trampoline classes allowing to define custom derived types from within Python */
+    class PyFunction : public oofem::Function {
+        // inherit the constructor
+        using oofem::Function::Function;
+        // trampoline (need one for each virtual method)
+        double evaluateAtTime(double t) override {
+            PYBIND11_OVERLOAD (
+                double, // return type
+                oofem::Function, // parent class
+                evaluateAtTime, // name of method in c++ (must match python name)
+                t // argument(s)
+            );
+        }
+        double evaluateVelocityAtTime(double t) override {
+            PYBIND11_OVERLOAD_PURE(
+                double,
+                oofem::Function,
+                evaluateVelocityAtTime,
+                t
+            )
+        }
+        double evaluateAccelerationAtTime(double t) {
+            PYBIND11_OVERLOAD_PURE(
+                double,
+                oofem::Function,
+                evaluateAccelerationAtTime,
+                t
+            )
+        }
+        const char* giveClassName() const {
+           PYBIND11_OVERLOAD_PURE(
+                const char*,
+                oofem::Function,
+                giveClassName,
+            ) 
+        }
+        const char* giveInputRecordName() const {
+           PYBIND11_OVERLOAD_PURE(
+                const char*,
+                oofem::Function,
+                giveInputRecordName,
+            ) 
+        }
+         
+
+    };
+
+    py::class_<oofem::Function, oofem::FEMComponent, PyFunction>(m, "Function")
+    .def(py::init<int, oofem::Domain*>())
+    .def("evaluate", (double (oofem::Function::*)(TimeStep *, ValueModeType)) &oofem::Function::evaluate)
+    //abstract services
+    .def ("evaluateAtTime", &oofem::Function::evaluateAtTime)
+    .def ("evaluateVelocityAtTime", &oofem::Function::evaluateVelocityAtTime)
+    .def ("evaluateAccelerationAtTime", &oofem::Function::evaluateVelocityAtTime)
     ;
 
     py::class_<oofem::Material, oofem::FEMComponent>(m, "Material")
@@ -349,9 +513,7 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
     ;
 
-  
-
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
+ 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
         .def("createEngngModel", &oofem::ClassFactory::createEngngModel)
@@ -425,8 +587,36 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
         .value("postProcessor", oofem::problemMode::_postProcessor)
     ;
 
-<<<<<<< HEAD
-=======
+    py::enum_<oofem::domainType>(m, "domainType")
+        .value("_unknownMode", oofem::domainType::_unknownMode)
+        .value("_2dPlaneStressMode", oofem::domainType::_2dPlaneStressMode)
+        .value("_PlaneStrainMode", oofem::domainType::_PlaneStrainMode)
+        .value("_2dPlaneStressRotMode", oofem::domainType::_2dPlaneStressRotMode)
+        .value("_3dMode", oofem::domainType::_3dMode)
+        .value("_3dAxisymmMode", oofem::domainType::_3dAxisymmMode)
+        .value("_2dMindlinPlateMode", oofem::domainType::_2dMindlinPlateMode)
+        .value("_3dDegeneratedShellMode", oofem::domainType::_3dDegeneratedShellMode)
+        .value("_3dShellMode", oofem::domainType::_3dShellMode)
+        .value("_2dTrussMode", oofem::domainType::_2dTrussMode)
+        .value("_1dTrussMode", oofem::domainType::_1dTrussMode)
+        .value("_2dBeamMode", oofem::domainType::_2dBeamMode)
+        .value("_HeatTransferMode", oofem::domainType::_HeatTransferMode)
+        .value("_Mass1TransferMode", oofem::domainType::_Mass1TransferMode)
+        .value("_HeatMass1Mode", oofem::domainType::_HeatMass1Mode)
+        .value("_2dIncompressibleFlow", oofem::domainType::_2dIncompressibleFlow)
+        .value("_3dIncompressibleFlow", oofem::domainType::_3dIncompressibleFlow)
+        .value("_2dLatticeMode", oofem::domainType::_2dLatticeMode)
+        .value("_2dLatticeMassTransportMode", oofem::domainType::_2dLatticeMassTransportMode)
+        .value("_3dLatticeMode", oofem::domainType::_3dLatticeMode)
+        .value("_3dLatticeMassTransportMode", oofem::domainType::_3dLatticeMassTransportMode)
+        .value("_2dLatticeHeatTransferMode", oofem::domainType::_2dLatticeHeatTransferMode)
+        .value("_3dLatticeHeatTransferMode", oofem::domainType::_3dLatticeHeatTransferMode)
+        .value("_3dDirShellMode", oofem::domainType::_3dDirShellMode)
+        .value("_WarpingMode", oofem::domainType::_WarpingMode)
+    ;
+
+
+
     py::enum_<oofem::CharType>(m, "CharType")
       .value("UnknownCharType", oofem::CharType::UnknownCharType)
       .value("StiffnessMatrix", oofem::CharType::StiffnessMatrix)
@@ -619,5 +809,19 @@ py::class_<oofem::TimeStep>(m, "TimeStep")
       .value("IST_EquivalentTime", oofem::InternalStateType::IST_EquivalentTime)
       .value("IST_IncrementCreepModulus", oofem::InternalStateType::IST_IncrementCreepModulus)
       ;
->>>>>>> 65ba64f3a5a8fc1cee45776a452d9f04f1001932
-}
+
+
+    m.def("linearStatic", &linearStatic, py::return_value_policy::move);
+    m.def("domain", &domain, py::return_value_policy::move);
+    m.def("truss1d", &truss1d, py::return_value_policy::move);
+    m.def("beam2d", &beam2d, py::return_value_policy::move);
+    m.def("node", &node, py::return_value_policy::move);
+    m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
+    m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);
+    m.def("nodalLoad", &nodalLoad, py::return_value_policy::move);
+    m.def("structTemperatureLoad", &structTemperatureLoad, py::return_value_policy::move);
+    m.def("isoLE", &isoLE, py::return_value_policy::move);
+    m.def("simpleCS", &simpleCS, py::return_value_policy::move);
+    m.def("peakFunction", &peakFunction, py::return_value_policy::move);
+    
+ }
