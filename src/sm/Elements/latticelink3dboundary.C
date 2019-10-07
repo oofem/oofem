@@ -33,7 +33,7 @@
  */
 
 #include "domain.h"
-#include "lattice3dboundary.h"
+#include "../sm/Elements/latticelink3dboundary.h"
 #include "../sm/Materials/latticematstatus.h"
 #include "node.h"
 #include "material.h"
@@ -43,7 +43,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "latticestructuralelement.h"
+#include "../sm/Elements/latticestructuralelement.h"
 #include "classfactory.h"
 #include "../sm/Materials/structuralmaterial.h"
 #include "contextioerr.h"
@@ -55,137 +55,23 @@
 #endif
 
 namespace oofem {
-REGISTER_Element(Lattice3dBoundary);
+REGISTER_Element(LatticeLink3dBoundary);
 
-Lattice3dBoundary :: Lattice3dBoundary(int n, Domain *aDomain) : Lattice3d(n, aDomain)
+LatticeLink3dBoundary :: LatticeLink3dBoundary(int n, Domain *aDomain) : LatticeLink3d(n, aDomain)
 {
     numberOfDofMans = 3;
     geometryFlag = 0;
 }
 
-Lattice3dBoundary :: ~Lattice3dBoundary()
+LatticeLink3dBoundary :: ~LatticeLink3dBoundary()
 {}
 
 
 void
-Lattice3dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
-// Returns the strain matrix of the receiver.
-{
-    if ( geometryFlag == 0 ) {
-        computeGeometryProperties();
-    }
-
-    //Assemble Bmatrix (used to compute strains and rotations}
-    answer.resize(6, 12);
-    answer.zero();
-
-    //Normal displacement jump in x-direction
-    //First node
-    answer.at(1, 1) = -1.;
-    answer.at(1, 2) = 0.;
-    answer.at(1, 3) = 0.;
-    answer.at(1, 4) = 0.;
-    answer.at(1, 5) = -this->eccT;
-    answer.at(1, 6) = this->eccS;
-    //Second node
-    answer.at(1, 7) = 1.;
-    answer.at(1, 8) = 0.;
-    answer.at(1, 9) = 0.;
-    answer.at(1, 10) = 0.;
-    answer.at(1, 11) = this->eccT;
-    answer.at(1, 12) = -this->eccS;
-
-    //Shear displacement jump in y-plane
-    //first node
-    answer.at(2, 1) = 0.;
-    answer.at(2, 2) = -1.;
-    answer.at(2, 3) =  0.;
-    answer.at(2, 4) = this->eccT;
-    answer.at(2, 5) = 0;
-    answer.at(2, 6) = -this->length / 2.;
-    //Second node
-    answer.at(2, 7) = 0.;
-    answer.at(2, 8) = 1.;
-    answer.at(2, 9) =  0.;
-    answer.at(2, 10) = -this->eccT;
-    answer.at(2, 11) = 0;
-    answer.at(2, 12) = -this->length / 2.;
-
-    //Shear displacement jump in z-plane
-    //first node
-    answer.at(3, 1) = 0.;
-    answer.at(3, 2) = 0.;
-    answer.at(3, 3) = -1.;
-    answer.at(3, 4) = -this->eccS;
-    answer.at(3, 5) = this->length / 2.;
-    answer.at(3, 6) = 0.;
-    //Second node
-    answer.at(3, 7) = 0.;
-    answer.at(3, 8) = 0.;
-    answer.at(3, 9) =  1.;
-    answer.at(3, 10) = this->eccS;
-    answer.at(3, 11) = this->length / 2.;
-    answer.at(3, 12) = 0.;
-
-    //Rotation around x-axis
-    //First node
-    answer.at(4, 1) = 0.;
-    answer.at(4, 2) = 0;
-    answer.at(4, 3) = 0.;
-    answer.at(4, 4) = -sqrt(Ip / this->area);
-    answer.at(4, 5) = 0.;
-    answer.at(4, 6) = 0.;
-    //Second node
-    answer.at(4, 7) = 0.;
-    answer.at(4, 8) = 0.;
-    answer.at(4, 9) = 0.;
-    answer.at(4, 10) = sqrt(Ip / this->area);
-    answer.at(4, 11) = 0.;
-    answer.at(4, 12) = 0.;
-
-    //Rotation around y-axis
-    //First node
-    answer.at(5, 1) = 0.;
-    answer.at(5, 2) = 0.;
-    answer.at(5, 3) = 0.;
-    answer.at(5, 4) = 0.;
-    answer.at(5, 5) = -sqrt(I1 / this->area);
-    answer.at(5, 6) = 0.;
-    //Second node
-    answer.at(5, 7) = 0.;
-    answer.at(5, 8) = 0.;
-    answer.at(5, 9) =  0.;
-    answer.at(5, 10) = 0.;
-    answer.at(5, 11) = sqrt(I1 / this->area);
-    answer.at(5, 12) = 0.;
-
-    //Rotation around z-axis
-    //First node
-    answer.at(6, 1) = 0.;
-    answer.at(6, 2) = 0.;
-    answer.at(6, 3) = 0.;
-    answer.at(6, 4) = 0.;
-    answer.at(6, 5) = 0.;
-    answer.at(6, 6) = -sqrt(I2 / this->area);
-    //Second node
-    answer.at(6, 7) = 0.;
-    answer.at(6, 8) = 0.;
-    answer.at(6, 9) =  0.;
-    answer.at(6, 10) = 0.;
-    answer.at(6, 11) = 0.;
-    answer.at(6, 12) = sqrt(I2 / this->area);
-
-    answer.times(1. / this->length);
-
-    return;
-}
-
-void
-Lattice3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
+LatticeLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                             TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
-    //    double dV;
     FloatMatrix d, bi, bj, dbj, dij, bjt;
     FloatMatrix t(12, 18), tt;
     FloatMatrix answerTemp(12, 12), answerHelp, ttk(18, 12);
@@ -200,13 +86,9 @@ Lattice3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
         computeGeometryProperties();
     }
 
-    double volume = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    for ( int i = 1; i <= 6; i++ ) {
-        d.at(i, i) *= volume;
-    }
 
     dbj.beProductOf(d, bj);
     bjt.beTranspositionOf(bj);
@@ -288,20 +170,8 @@ Lattice3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     return;
 }
 
-
-
-double
-Lattice3dBoundary :: computeVolumeAround(GaussPoint *aGaussPoint)
-{
-    if ( geometryFlag == 0 ) {
-        computeGeometryProperties();
-    }
-
-    return this->area * this->length;
-}
-
 void
-Lattice3dBoundary :: giveVTKCoordinates(int nodeNumber, FloatArray &coords) {
+LatticeLink3dBoundary :: giveVTKCoordinates(int nodeNumber, FloatArray &coords) {
     coords.resize(3);
     coords.zero();
     Node *node;
@@ -335,7 +205,7 @@ Lattice3dBoundary :: giveVTKCoordinates(int nodeNumber, FloatArray &coords) {
 }
 
 void
-Lattice3dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+LatticeLink3dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 // Computes the vector containing the strains at the Gauss point gp of
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
@@ -398,7 +268,7 @@ Lattice3dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 }
 
 bool
-Lattice3dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
+LatticeLink3dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     FloatMatrix lcs;
     int i, j;
@@ -426,7 +296,7 @@ Lattice3dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
 }
 
 int
-Lattice3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
+LatticeLink3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
 {
     if ( geometryFlag == 0 ) {
         computeGeometryProperties();
@@ -440,7 +310,7 @@ Lattice3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
 
 
 void
-Lattice3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
+LatticeLink3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {
         D_u, D_v, D_w, R_u, R_v, R_w
@@ -448,13 +318,13 @@ Lattice3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 IRResultType
-Lattice3dBoundary :: initializeFrom(InputRecord *ir)
+LatticeLink3dBoundary :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    Lattice3d :: initializeFrom(ir);
+    LatticeLink3d :: initializeFrom(ir);
 
     location.resize(2);
-    IR_GIVE_FIELD(ir, location, _IFT_Lattice3dBoundary_location); // Macro
+    IR_GIVE_FIELD(ir, location, _IFT_LatticeLink3dBoundary_location); // Macro
 
     return IRRT_OK;
 }
@@ -462,13 +332,12 @@ Lattice3dBoundary :: initializeFrom(InputRecord *ir)
 
 
 void
-Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+LatticeLink3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     Material *mat = this->giveMaterial();
 
     FloatMatrix b, bt, A, R, GNT;
     FloatArray bs, TotalStressVector, u, strain;
-    double dV;
 
     this->computeVectorOf(VM_Total, tStep, u);
 
@@ -495,9 +364,7 @@ Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 
     this->computeStressVector(TotalStressVector, strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
-    dV  = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     bs.beProductOf(bt, TotalStressVector);
-    bs.times(dV);
 
     for ( int m = 1; m <= 12; m++ ) {
         answer.at(m) = bs.at(m);
@@ -538,9 +405,8 @@ Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     return;
 }
 
-
 void
-Lattice3dBoundary :: giveSwitches(IntArray &answer, int location) {
+LatticeLink3dBoundary :: giveSwitches(IntArray &answer, int location) {
     int counter = 1;
     for ( int x = -1; x <  2; x++ ) {
         for ( int y = -1; y <  2; y++ ) {
@@ -561,7 +427,7 @@ Lattice3dBoundary :: giveSwitches(IntArray &answer, int location) {
 
 
 void
-Lattice3dBoundary :: computeGeometryProperties()
+LatticeLink3dBoundary :: computeGeometryProperties()
 {
     Node *nodeA, *nodeB;
 
@@ -593,31 +459,64 @@ Lattice3dBoundary :: computeGeometryProperties()
         coordsB.at(i + 1) =  nodeB->giveCoordinate(i + 1) + projectionComponentNodeTwo.at(i + 1) * specimenDimension.at(i + 1);
     }
 
-    //Calculate normal vector
-    FloatArray s(3), t(3);
-    this->midPoint.resize(3);
+    //From here on the normal functions should be valid
+
+    FloatArray rigidGlobal(3);
 
     //Calculate normal vector
-    this->normal.resize(3);
     for ( int i = 0; i < 3; i++ ) {
-        this->normal.at(i + 1) = coordsB.at(i + 1) - coordsA.at(i + 1);
+        rigidGlobal.at(i + 1) = coordsB.at(i + 1) - coordsA.at(i + 1);
+    }
+       
+    //Construct an initial temporary local coordinate system
+    FloatArray normal(3), s(3), t(3);
+
+    //Calculate normal vector
+    normal = this->directionVector;
+    normal.normalize();
+
+    //Construct two perpendicular axis so that n is normal to the plane which they create
+    //Check, if one of the components of the normal-direction is zero
+    if ( normal.at(1) == 0 ) {
+        s.at(1) = 0.;
+        s.at(2) = normal.at(3);
+        s.at(3) = -normal.at(2);
+    } else if ( normal.at(2) == 0 ) {
+        s.at(1) = normal.at(3);
+        s.at(2) = 0.;
+        s.at(3) = -normal.at(1);
+    } else {
+        s.at(1) = normal.at(2);
+        s.at(2) = -normal.at(1);
+        s.at(3) = 0.;
     }
 
-    this->length  = sqrt( pow(this->normal.at(1), 2.) + pow(this->normal.at(2), 2.) + pow(this->normal.at(3), 2.) );
+    s.normalize();
 
-    for ( int i = 0; i < 3; i++ ) {
-        this->normal.at(i + 1) /= length;
+    t.beVectorProductOf(normal, s);
+    t.normalize();
+
+    //Set up rotation matrix
+    FloatMatrix lcs(3, 3);
+
+    this->localCoordinateSystem.resize(3,3);
+    this->localCoordinateSystem.zero();
+    
+    for ( int i = 1; i <= 3; i++ ) {
+        this->localCoordinateSystem.at(1, i) = normal.at(i);
+        this->localCoordinateSystem.at(2, i) = s.at(i);
+        this->localCoordinateSystem.at(3, i) = t.at(i);
     }
 
-    // Compute midpoint
-    this->midPoint.resize(3);
-    for ( int i = 0; i < 3; i++ ) {
-        this->midPoint.at(i + 1) = 0.5 * ( coordsB.at(i + 1) + coordsA.at(i + 1) );
+    // Rotate rigidarm vector into local coordinate system
+
+    this->rigid.beProductOf(localCoordinateSystem,rigidGlobal);
+
+    this->globalCentroid.resize(3);
+    for ( int i = 1; i <= 3; i++ ) {
+      this->globalCentroid.at(i) = coordsA.at(i);
     }
 
-    computeCrossSectionProperties();
-
-    //Set geometry flag to 1 so that this is done only once
     this->geometryFlag = 1;
 
     return;
@@ -625,27 +524,28 @@ Lattice3dBoundary :: computeGeometryProperties()
 
 
 void
-Lattice3dBoundary :: saveContext(DataStream &stream, ContextMode mode)
+LatticeLink3dBoundary :: saveContext(DataStream &stream, ContextMode mode)
 {
-    Lattice3d :: saveContext(stream, mode);
+ LatticeLink3d :: saveContext(stream, mode);
+ 
+ contextIOResultType iores;
 
-    contextIOResultType iores;
-
-    if ( ( mode & CM_Definition ) ) {
-        if ( ( iores = location.storeYourself(stream) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-    }
+ if ( ( mode & CM_Definition ) ) {
+   if ( ( iores = location.storeYourself(stream) ) != CIO_OK ) {
+     THROW_CIOERR(iores);
+   }
+ }
+ 
 }
 
 
 
 void
-Lattice3dBoundary :: restoreContext(DataStream &stream, ContextMode mode)
+LatticeLink3dBoundary :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    Lattice3d :: restoreContext(stream, mode);
-
     contextIOResultType iores;
+
+    LatticeLink3d :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
         if ( ( iores = this->location.restoreYourself(stream) ) != CIO_OK ) {
@@ -659,13 +559,12 @@ Lattice3dBoundary :: restoreContext(DataStream &stream, ContextMode mode)
 #ifdef __OOFEG
 
 void
-Lattice3dBoundary :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
+LatticeLink3dBoundary :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 {
     OGC_PlotModeType mode = gc.giveIntVarPlotMode();
 
     if ( mode == OGC_rawGeometry ) {
         this->drawRawGeometry(gc, tStep);
-        this->drawRawCrossSections(gc, tStep);
     } else if ( mode == OGC_deformedGeometry ) {
         this->drawDeformedGeometry(gc, tStep, DisplacementVector);
     } else if ( mode == OGC_elemSpecial ) {
@@ -678,7 +577,7 @@ Lattice3dBoundary :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 
 
 
-void Lattice3dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void LatticeLink3dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -724,51 +623,7 @@ void Lattice3dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tSt
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-
-void
-Lattice3dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep)
-{
-    GraphicObj *go;
-
-    //  if (!go) { // create new one
-    //Create as many points as we have polygon vertices
-    numberOfPolygonVertices = this->polygonCoords.giveSize() / 3.;
-    WCRec p [ numberOfPolygonVertices ]; /* poin */
-
-    if ( !gc.testElementGraphicActivity(this) ) {
-        return;
-    }
-
-    EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    //  EASValsSetColor(gc.getNodeColor());
-    EASValsSetLayer(OOFEG_RAW_CROSSSECTION_LAYER);
-
-    for ( int i = 0; i < numberOfPolygonVertices; i++ ) {
-        p [ i ].x = ( FPNum ) polygonCoords(3 * i);
-        p [ i ].y = ( FPNum ) polygonCoords(3 * i + 1);
-        p [ i ].z = ( FPNum ) polygonCoords(3 * i + 2);
-    }
-
-
-    WCRec pTemp [ 2 ]; /* points */
-    for ( int i = 0; i < numberOfPolygonVertices; i++ ) {
-        if ( i < numberOfPolygonVertices - 1 ) {
-            pTemp [ 0 ] = p [ i ];
-            pTemp [ 1 ] = p [ i + 1 ];
-        } else {
-            pTemp [ 0 ] = p [ i ];
-            pTemp [ 1 ] = p [ 0 ];
-        }
-
-        go = CreateLine3D(pTemp);
-        EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
-        EGAttachObject(go, ( EObjectP ) this);
-        EMAddGraphicsToModel(ESIModel(), go);
-    }
-}
-
-
-void Lattice3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void LatticeLink3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
