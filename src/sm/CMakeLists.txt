@@ -84,6 +84,7 @@ set (sm_element
     Elements/lumpedmasselement.C
     Elements/springelement.C
     Elements/lattice2d.C
+    Elements/lattice2dboundary.C
     Elements/lattice3d.C
     Elements/lattice3dboundary.C
     Elements/latticelink3d.C
@@ -265,6 +266,8 @@ set (sm_material
     Materials/latticelinearelastic.C
     Materials/latticedamage.C
     Materials/linkslip.C
+    Materials/latticeviscoelastic.C
+    Materials/latticedamageviscoelastic.C	
     )
 
 if (USE_PYTHON)
