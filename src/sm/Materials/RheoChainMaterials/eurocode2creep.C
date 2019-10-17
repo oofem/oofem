@@ -231,7 +231,7 @@ Eurocode2CreepMaterial :: computeCreepParams(int cemType, double henv)
 
 
 double
-Eurocode2CreepMaterial :: computeConcreteStrengthAtAge(double age)
+Eurocode2CreepMaterial :: computeConcreteStrengthAtAge(double age) const
 {
     double beta = exp( this->s * ( 1. - sqrt( 28. / ( age / this->timeFactor ) ) ) );
 
@@ -239,7 +239,7 @@ Eurocode2CreepMaterial :: computeConcreteStrengthAtAge(double age)
 }
 
 double
-Eurocode2CreepMaterial :: computeMeanElasticModulusAtAge(double age)
+Eurocode2CreepMaterial :: computeMeanElasticModulusAtAge(double age) const
 {
     double fcm_at_age;
     double Ecm_at_age;
@@ -251,62 +251,46 @@ Eurocode2CreepMaterial :: computeMeanElasticModulusAtAge(double age)
 }
 
 double
-Eurocode2CreepMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
+Eurocode2CreepMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const
 // compute the value of the creep function of concrete
 // corresponding to the given load duration (in days)
 // t-t_prime = duration of loading
 
 {
-    double J;     //return value
-
-
     // elastic modulus isn not temperature adjusted too
-    J = 1. / this->computeMeanElasticModulusAtAge(t_prime);
-
-    J += this->computeCreepCoefficient(t, t_prime, gp, tStep) / ( 1.05 * this->Ecm28 );
-
+    double J = 1. / this->computeMeanElasticModulusAtAge(t_prime) + 
+               this->computeCreepCoefficient(t, t_prime, gp, tStep) / ( 1.05 * this->Ecm28 );
     return J;
 }
 
 
 double
-Eurocode2CreepMaterial :: computeCreepCoefficient(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
+Eurocode2CreepMaterial :: computeCreepCoefficient(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const
 // compute the value of the creep coefficient
 // corresponding to the given load duration (in days)
 // t-t_prime = duration of loading
 
 {
-    double phi;     //return value
-
-    double beta_t0, beta_c;
-    double t_prime_equiv;
-
-    if ( temperatureDependent ) {
-        t_prime_equiv = this->computeEquivalentAge(gp, tStep);
-    } else {
-        t_prime_equiv = t_prime;
-    }
+    double t_prime_equiv = temperatureDependent ? this->computeEquivalentAge(gp, tStep) : t_prime;
 
     // B.5
-    beta_t0 = 1. / ( 0.1 + pow(t_prime_equiv / this->timeFactor, 0.2) );
+    double beta_t0 = 1. / ( 0.1 + pow(t_prime_equiv / this->timeFactor, 0.2) );
 
     // B.7
-    beta_c = pow( ( ( t - t_prime ) / ( this->beta_H * this->timeFactor + t - t_prime ) ), 0.3 );
+    double beta_c = pow( ( ( t - t_prime ) / ( this->beta_H * this->timeFactor + t - t_prime ) ), 0.3 );
 
     // t-t'_prime should not be temperature-adjusted (so says the EC)
 
     // B.1 + B.2
-    phi = this->phi_RH * this->beta_fcm * beta_t0 * beta_c;
-
-
-    return phi;
+    return this->phi_RH * this->beta_fcm * beta_t0 * beta_c;
 }
 
 
 
 // implements B.10
 double
-Eurocode2CreepMaterial :: computeEquivalentMaturity(GaussPoint *gp, TimeStep *tStep) {
+Eurocode2CreepMaterial :: computeEquivalentMaturity(GaussPoint *gp, TimeStep *tStep) const
+{
     Eurocode2CreepMaterialStatus *status = static_cast< Eurocode2CreepMaterialStatus * >( this->giveStatus(gp) );
 
     FloatArray et;
@@ -319,7 +303,7 @@ Eurocode2CreepMaterial :: computeEquivalentMaturity(GaussPoint *gp, TimeStep *tS
 
     selem->computeResultingIPTemperatureAt(et, tStep, gp, VM_Total);
 
-    if ( tStep->isTheFirstStep() ||   ( ! Material :: isActivated( tStep->givePreviousStep() ) ) ) {
+    if ( tStep->isTheFirstStep() || ( ! Material :: isActivated( tStep->givePreviousStep() ) ) ) {
         initMaturity = this->relMatAge;
         averageTemperature = et.at(1);
     } else {
@@ -342,17 +326,12 @@ Eurocode2CreepMaterial :: computeEquivalentMaturity(GaussPoint *gp, TimeStep *tS
 
 // implements B.9
 double
-Eurocode2CreepMaterial :: computeEquivalentAge(GaussPoint *gp, TimeStep *tStep)
+Eurocode2CreepMaterial :: computeEquivalentAge(GaussPoint *gp, TimeStep *tStep) const
 {
-    double maturity;
-    double age;
+    double maturity = this->computeEquivalentMaturity(gp, tStep);
 
-    maturity = this->computeEquivalentMaturity(gp, tStep);
-
-    age = maturity * pow( ( 9. / ( 2. + pow(maturity, 1.2) ) + 1. ), this->alpha_T_cement );
-    age = max(age, 0.5);
-
-    return age;
+    double age = maturity * pow( ( 9. / ( 2. + pow(maturity, 1.2) ) + 1. ), this->alpha_T_cement );
+    return max(age, 0.5);
 }
 
 
@@ -473,7 +452,7 @@ Eurocode2CreepMaterial :: computeCharTimes()
 
 
 double
-Eurocode2CreepMaterial :: computeRetardationTimeCorrection(int mu)
+Eurocode2CreepMaterial :: computeRetardationTimeCorrection(int mu) const
 {
     return 1. + 0.555 * exp( -4. * pow( ( this->tau1 * pow( 10., double( mu - 1 ) ) / ( this->beta_H * this->timeFactor ) ), 2. ) );
 
@@ -483,33 +462,28 @@ Eurocode2CreepMaterial :: computeRetardationTimeCorrection(int mu)
 
 
 double
-Eurocode2CreepMaterial :: evaluateSpectrumAt(double tau)
+Eurocode2CreepMaterial :: evaluateSpectrumAt(double tau) const
 {
     // second-order approximation of the retardation spectrum
-    double L;
-
     double t = 2 * tau;
     double n = 0.3; // exponent in the model
 
-    double f, df, ddf; // function "t/(beta+t)" and its derivatives
-    double ddPhi; // second derivative of (f(t))^n
+    // function "t/(beta+t)" and its derivatives
+    double f = t / ( this->beta_H * this->timeFactor + t );
 
-    f = t / ( this->beta_H * this->timeFactor + t );
+    double df = this->beta_H * this->timeFactor / ( ( this->beta_H * this->timeFactor + t ) * ( this->beta_H * this->timeFactor + t ) );
 
-    df = this->beta_H * this->timeFactor / ( ( this->beta_H * this->timeFactor + t ) * ( this->beta_H * this->timeFactor + t ) );
+    double ddf = -2. * this->beta_H * this->timeFactor / ( ( this->beta_H * this->timeFactor + t ) * ( this->beta_H * this->timeFactor + t ) * ( this->beta_H * this->timeFactor + t ) );
 
-    ddf = -2. * this->beta_H * this->timeFactor / ( ( this->beta_H * this->timeFactor + t ) * ( this->beta_H * this->timeFactor + t ) * ( this->beta_H * this->timeFactor + t ) );
+    // second derivative of (f(t))^n
+    double ddPhi = n * ( n - 1. ) * pow( f, ( n - 2. ) ) * df * df + n *pow( f, ( n - 1. ) ) * ddf;
 
-    ddPhi = n * ( n - 1. ) * pow( f, ( n - 2. ) ) * df * df + n *pow( f, ( n - 1. ) ) * ddf;
-
-    L = -4. * tau * tau * ddPhi;
-
-    return L;
+    return -4. * tau * tau * ddPhi;
 }
 
 
-void
-Eurocode2CreepMaterial :: computeCharCoefficients(FloatArray &answer, double atTime, GaussPoint *gp, TimeStep *tStep)
+FloatArray
+Eurocode2CreepMaterial :: computeCharCoefficients(double atTime, GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * If retardationSpectrumApproximation == true then analysis of continuous retardation spectrum is used for
@@ -519,16 +493,9 @@ Eurocode2CreepMaterial :: computeCharCoefficients(FloatArray &answer, double atT
     if ( retardationSpectrumApproximation ) {
         // all moduli must be multiplied by g(t') / c - see equation (46) in Jirasek's retardation spectrum paper
 
-        double coefficient;
-        double equivalentAge;
+        const double equivalentAge = temperatureDependent ? this->computeEquivalentAge(gp, tStep) : atTime;
 
-        if ( temperatureDependent ) {
-            equivalentAge = this->computeEquivalentAge(gp, tStep);
-        } else {
-            equivalentAge = atTime;
-        }
-
-        coefficient = 1.05 * this->Ecm28 * ( 0.1 + pow(equivalentAge / this->timeFactor, 0.2) ) / ( this->phi_RH * this->beta_fcm );
+        const double coefficient = 1.05 * this->Ecm28 * ( 0.1 + pow(equivalentAge / this->timeFactor, 0.2) ) / ( this->phi_RH * this->beta_fcm );
 
 
         // evaluate stiffness of the zero-th unit of the Kelvin chain
@@ -536,7 +503,7 @@ Eurocode2CreepMaterial :: computeCharCoefficients(FloatArray &answer, double atT
         // this is done employing Simpson's rule. the begOfTimeOfInterest cannot exceed 0.1 day
         // E0 = EspringVal = int( L, 0, tau1/sqrt(10) )
 
-        double tau0 = this->tau1 / sqrt(10.0); // upper bound of the integral
+        const double tau0 = this->tau1 / sqrt(10.0); // upper bound of the integral
 
         this->EspringVal = 1. / ( ( log(10.) / 3. ) * (
                                       this->evaluateSpectrumAt(tau0 * 1.e-8) + 4. * this->evaluateSpectrumAt(tau0 * 1.e-7) +
@@ -548,20 +515,18 @@ Eurocode2CreepMaterial :: computeCharCoefficients(FloatArray &answer, double atT
         this->EspringVal *= coefficient;
 
         // process remaining units
-        answer.resize(nUnits);
-        answer.zero();
-
-        double tauMu;
+        FloatArray answer(nUnits);
 
         for ( int mu = 1; mu <= this->nUnits; mu++ ) {
-            tauMu = this->tau1 * pow( 10., double( mu - 1 ) );
+            double tauMu = this->tau1 * pow( 10., double( mu - 1 ) );
 
             answer.at(mu) =  2. / ( log(10.) * ( this->evaluateSpectrumAt( tauMu * pow(10., -sqrt(3.) / 6.) ) + this->evaluateSpectrumAt( tauMu * pow(10., sqrt(3.) / 6.) ) ) );
         }
 
         answer.times(coefficient);
+        return answer;
     } else {   // moduli computed using the least-squares method
-        KelvinChainMaterial :: computeCharCoefficients(answer, atTime, gp, tStep);
+        return KelvinChainMaterial :: computeCharCoefficients(atTime, gp, tStep);
     }
 }
 

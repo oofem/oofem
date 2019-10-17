@@ -309,12 +309,11 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
 void
 MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
-    
-  if (this->E < 0.) {   // initialize dummy elastic modulus E
-    this->E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28., gp, tStep);
-  }
+    if (this->E < 0.) {   // initialize dummy elastic modulus E
+        this->E = 1. / MPSMaterial :: computeCreepFunction(28.01, 28., gp, tStep);
+    }
 
-  MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+    MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
 
     MaterialMode mode = gp->giveMaterialMode();
 

@@ -90,9 +90,9 @@ public:
     void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 0; }
+    bool hasIncrementalShrinkageFormulation() const override { return false; }
 
-    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 

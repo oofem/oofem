@@ -101,7 +101,7 @@ protected:
     double w_h;    ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
     double n;      ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
     double a;      ///< Constant (obtained from experiments) A [Pedersen, 1990]
-    double EspringVal; ///< elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
+    mutable double EspringVal; ///< elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
     /**
      * If 0, analysis of retardation spectrum is used for evaluation of Kelvin units moduli (default).
      * If 1, least-squares method is used for evaluation of Kelvin units moduli.
@@ -136,10 +136,10 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 1; }
+    bool hasIncrementalShrinkageFormulation() const override { return true; }
 
     void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -157,10 +157,10 @@ protected:
     double inverse_sorption_isotherm(double w);
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
-    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Update of partial moduli of individual chain units
-    void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     void computeCharTimes() override;
 

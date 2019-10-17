@@ -128,17 +128,10 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
     return 0;
 }
 
-int
-Material :: hasCastingTimeSupport()
-//
-// returns whether receiver fully supports casting time
-//
+bool
+Material :: hasCastingTimeSupport() const
 {
-    if ( this->castingTime > 0. ) {
-        return 0; // casting time is user-defined. By default the casting time is not supported.
-    } else {
-        return 1; // do not check anything - casting time has not been user-defined
-    }
+    return this->castingTime >= 0.;
 }
 
 

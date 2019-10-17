@@ -91,7 +91,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 0; }
+    bool hasIncrementalShrinkageFormulation() const override { return false; }
     /**
      * This function computes the moduli of individual Maxwell units
      * such that the corresponding Dirichlet series gives the best
@@ -106,7 +106,7 @@ protected:
      * @param[out] answer Array with coefficients
      * @param tStep Age of material when load is applied ???
      */
-    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
     LinearElasticMaterial *giveLinearElasticMaterial();

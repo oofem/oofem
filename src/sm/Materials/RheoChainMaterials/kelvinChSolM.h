@@ -88,10 +88,10 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the creep compliance function - function useless here
-    double computeCreepFunction(double ofAge, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double ofAge, double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 0; }
+    bool hasIncrementalShrinkageFormulation() const override { return false; }
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 

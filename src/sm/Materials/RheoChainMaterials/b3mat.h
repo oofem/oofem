@@ -106,10 +106,10 @@ public:
     const char *giveInputRecordName() const override { return _IFT_B3Material_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 1; }
+    bool hasIncrementalShrinkageFormulation() const override { return true; }
 
     virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     /// Free shrinkage at material point, requires staggered analysis.

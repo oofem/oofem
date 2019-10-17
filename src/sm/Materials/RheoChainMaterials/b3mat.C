@@ -187,46 +187,45 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
 
 double
-B3Material :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
+B3Material :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const
 {
     // computes the value of creep function at time t
     // when load is acting from time t_prime
     // t-t_prime = duration of loading
 
-    double Qf, Z, r, Q, C0, TauSh, St1, St2, H1, H2, Cd;
-    double n, m;
-
-    m = 0.5;
-    n = 0.1;
+    double m = 0.5;
+    double n = 0.1;
 
     // basic creep
 
-    Qf = 1. / ( 0.086 * pow(t_prime, 2. / 9.) + 1.21 * pow(t_prime, 4. / 9.) );
-    Z  = pow(t_prime, -m) * log( 1. + pow(t - t_prime, n) );
-    r  = 1.7 * pow(t_prime, 0.12) + 8.0;
-    Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
+    double Qf = 1. / ( 0.086 * pow(t_prime, 2. / 9.) + 1.21 * pow(t_prime, 4. / 9.) );
+    double Z  = pow(t_prime, -m) * log( 1. + pow(t - t_prime, n) );
+    double r  = 1.7 * pow(t_prime, 0.12) + 8.0;
+    double Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow ( t - t_prime, n ) ) + q4 *log(t / t_prime);
+    double C0 = q2 * Q + q3 *log( 1. + pow ( t - t_prime, n ) ) + q4 *log(t / t_prime);
 
-
+    double Cd;
     if ( this->shMode == B3_AverageShrinkage ) {
         // Aditional creep due to drying
 
-        TauSh = kt * pow(ks * 2.0 * vs, 2.);
+        double TauSh = kt * pow(ks * 2.0 * vs, 2.);
+        double St1;
         if ( ( t - t0 ) >= 0 ) {
             St1  = tanh( pow( ( t - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St1 = 0.0;
         }
 
+        double St2;
         if ( ( t_prime - t0 ) >= 0 ) {
             St2  = tanh( pow( ( t_prime - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St2 = 0.0;
         }
 
-        H1  = 1. - ( 1. - hum ) * St1;
-        H2  = 1. - ( 1. - hum ) * St2;
+        double H1  = 1. - ( 1. - hum ) * St1;
+        double H2  = 1. - ( 1. - hum ) * St2;
         Cd = q5 * pow( ( exp(-8.0 * H1) - exp(-8.0 * H2) ), 0.5 );
     } else {
         Cd = 0.0;

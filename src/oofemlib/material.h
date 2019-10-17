@@ -158,12 +158,12 @@ public:
     /**
      * @return Casting time of the receiver.
      */
-    double giveCastingTime() { return this->castingTime; }
+    double giveCastingTime() const { return this->castingTime; }
     /**
      * @param tStep Time step to check activity for.
      * @return True if material is activated for given solution step.
      */
-    virtual bool isActivated(TimeStep *tStep) {
+    virtual bool isActivated(TimeStep *tStep) const {
         if ( tStep ) {
             return ( tStep->giveTargetTime() >= this->castingTime );
         } else {
@@ -183,7 +183,7 @@ public:
      * Tests if material supports casting time
      * @return Nonzero if supported, zero otherwise.
      */
-    virtual int hasCastingTimeSupport();
+    virtual bool hasCastingTimeSupport() const;
 
     ///@name Access functions for internal states. Usually overloaded by new material models.
     //@{

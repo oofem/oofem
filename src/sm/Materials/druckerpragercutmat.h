@@ -105,7 +105,7 @@ public:
 
     int hasMaterialModeCapability(MaterialMode mode) override;
     
-    int hasCastingTimeSupport() override { return 1; }
+    bool hasCastingTimeSupport() const override { return true; }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

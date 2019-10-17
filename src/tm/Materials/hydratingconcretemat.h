@@ -75,9 +75,9 @@ public:
     HydratingConcreteMat(int n, Domain * d);
     virtual ~HydratingConcreteMat();
 
-    virtual int hasInternalSource() override { return 1; }
-    virtual int hasCastingTimeSupport() override { return 1; }
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    int hasInternalSource() override { return 1; }
+    bool hasCastingTimeSupport() const override { return true; }
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
