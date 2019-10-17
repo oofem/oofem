@@ -267,7 +267,9 @@ set (sm_material
     Materials/latticedamage.C
     Materials/linkslip.C
     Materials/latticeviscoelastic.C
-    Materials/latticedamageviscoelastic.C	
+    Materials/latticedamageviscoelastic.C
+    Materials/latticebondplasticity.C
+    Materials/latticeplasticitydamage.C	
     )
 
 if (USE_PYTHON)
