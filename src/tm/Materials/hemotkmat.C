@@ -358,70 +358,56 @@ HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
 }
 
 
-
-
 double
-HeMoTKMaterial :: perm_ww(double w, double t)
+HeMoTKMaterial :: perm_ww(double w, double t) const
 {
     // Function calculates permability water content-water content (k_ww)
     // phi ... relative humidity
     // delta_gw ... water vapor permeability
     // dphi_dw ... differentiation of relative with respect to water content
     // p_gws ... saturation water vapor pressure
-    double k_ww, phi, delta_gw, dphi_dw, p_gws;
+    double phi = inverse_sorption_isotherm(w);
+    double delta_gw = give_delta_gw(phi);
+    double dphi_dw = give_dphi_dw(w);
+    double p_gws = give_p_gws(t);
 
-    phi = inverse_sorption_isotherm(w);
-    delta_gw = give_delta_gw(phi);
-    dphi_dw = give_dphi_dw(w);
-    p_gws = give_p_gws(t);
-
-    k_ww = delta_gw * p_gws * dphi_dw;
-
-    return ( k_ww );
+    return delta_gw * p_gws * dphi_dw;
 }
 
+
 double
-HeMoTKMaterial :: perm_wt(double w, double t)
+HeMoTKMaterial :: perm_wt(double w, double t) const
 {
     // Function calculates permability water content-temperature (k_wt)
     // delta_gw ... water vapor permeability
     // d_pgw_d_t ... differentiation of water vapor presssure with respect to temperature
-    double k_wt, phi, delta_gw, dpgw_dt;
+    double phi = inverse_sorption_isotherm(w);
+    double delta_gw = give_delta_gw(phi);
+    double dpgw_dt = give_dpgw_dt(t, phi);
 
-    phi = inverse_sorption_isotherm(w);
-    delta_gw = give_delta_gw(phi);
-    dpgw_dt = give_dpgw_dt(t, phi);
-
-    k_wt = delta_gw * dpgw_dt;
-
-    return ( k_wt );
+    return delta_gw * dpgw_dt;
 }
 
 
 double
-HeMoTKMaterial :: give_delta_gw(double phi)
+HeMoTKMaterial :: give_delta_gw(double phi) const
 // Function calculates the water vapor permeability delta_gw. Relative humidity (phi) is from range 0.2 - 0.98 !!!
 // delta_gw ... by Z. P. Bazant and L. J. Najjar (1972), Nonlinear water diffusion in nonsaturated concrete,
 //              MATERIAUX ET CONSTRUCTIONS, Vol. 5, No. 25, pp. 3 -20.
 // phi ... relative humidity
 // a_0, nn, phi_c, delta_wet ... constants obtained from experiments
 {
-    double delta_gw;
-
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
         OOFEM_ERROR("Relative humidity is out of range");
     }
 
     // water vapor permeability
-    delta_gw = delta_wet * ( a_0 + ( 1.0 - a_0 ) / ( 1.0 + pow( ( 1.0 - phi ) / ( 1.0 - phi_c ), nn ) ) );
-
-    return ( delta_gw );
+    return delta_wet * ( a_0 + ( 1.0 - a_0 ) / ( 1.0 + pow( ( 1.0 - phi ) / ( 1.0 - phi_c ), nn ) ) );
 }
 
 
-
 double
-HeMoTKMaterial :: sorption_isotherm(double phi)
+HeMoTKMaterial :: sorption_isotherm(double phi) const
 // Function calculates water content in medium from relative humidity.  Relative humidity (phi) is from range 0.2 - 0.98 !!!
 // sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
 //                      PhD-thesis, Technical University of Denmark, Lingby.
@@ -429,22 +415,17 @@ HeMoTKMaterial :: sorption_isotherm(double phi)
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-    double w;
-
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
         OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
     }
 
     // water content
-    w = w_h * pow( ( 1.0 - log(phi) / a ), ( -1.0 / n ) );
-
-    return ( w );
+    return w_h * pow( ( 1.0 - log(phi) / a ), ( -1.0 / n ) );
 }
 
 
-
 double
-HeMoTKMaterial :: inverse_sorption_isotherm(double w)
+HeMoTKMaterial :: inverse_sorption_isotherm(double w) const
 // Function calculates relative humidity from water content (inverse relation form sorption isotherm).
 // Relative humidity (phi) is from range 0.2 - 0.98 !!!
 // sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
@@ -453,22 +434,19 @@ HeMoTKMaterial :: inverse_sorption_isotherm(double w)
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-    double phi;
-
     // relative humidity
-    phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
+    double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
         OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
     }
 
-    return ( phi );
+    return phi;
 }
 
 
-
 double
-HeMoTKMaterial :: give_dphi_dw(double w)
+HeMoTKMaterial :: give_dphi_dw(double w) const
 // Function calculates differentiation of relative humidity with respect to water content (inverse relation form sorption isotherm).
 // Relative humidity (phi) is from range 0.2 - 0.98 !!!
 // sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
@@ -477,116 +455,85 @@ HeMoTKMaterial :: give_dphi_dw(double w)
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-    double dphi_dw;
-
     // diferentiation of realative humidity with respect to water content
-    dphi_dw = exp( a * ( 1.0 - pow( ( w_h / w ), n ) ) ) * a * n * pow(w_h, n) * pow( w, ( -1.0 - n ) );
-
-    return ( dphi_dw );
+    return exp( a * ( 1.0 - pow( ( w_h / w ), n ) ) ) * a * n * pow(w_h, n) * pow( w, ( -1.0 - n ) );
 }
 
+
 double
-HeMoTKMaterial :: give_dpgw_dt(double t, double phi)
+HeMoTKMaterial :: give_dpgw_dt(double t, double phi) const
 // Function calculates differentiation of water vapor pressure with respect to temperature
 // saturation water vapor pressure by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
 //                                 PhD-thesis, Technical University of Denmark, Lingby.
 // t ... temperature [K]
 // phi ... relative humidity
 {
-    double dp_gw_dt, dp_gws_dt;
-
     //differentiation of saturation water vapor pressure (analytical expression) with respect to temperature
-    dp_gws_dt = exp( 23.5771 - 4042.9 / ( t - 37.58 ) ) * 4042.9 / ( t - 37.58 ) / ( t - 37.58 );
+    double dp_gws_dt = exp( 23.5771 - 4042.9 / ( t - 37.58 ) ) * 4042.9 / ( t - 37.58 ) / ( t - 37.58 );
 
-    dp_gw_dt = phi * dp_gws_dt;
+    double dp_gw_dt = phi * dp_gws_dt;
 
-    return ( dp_gw_dt );
+    return dp_gw_dt;
 }
 
 
 double
-HeMoTKMaterial :: give_p_gws(double t)
+HeMoTKMaterial :: give_p_gws(double t) const
 // Function calculates saturation water vapor pressure
 // saturation water vapor pressure by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
 //                                 PhD-thesis, Technical University of Denmark, Lingby.
 // t ... temperature [K]
 // phi ... relative humidity
 {
-    double p_gws;
-
     //saturation water vapor pressure ... analytical expression
-    p_gws = exp( 23.5771 - 4042.9 / ( t - 37.58 ) );
-
-    return ( p_gws );
+    return exp( 23.5771 - 4042.9 / ( t - 37.58 ) );
 }
 
 double
-HeMoTKMaterial :: get_latent(double w, double t)
+HeMoTKMaterial :: get_latent(double w, double t) const
 {
     // Function calculates latent heat of evaporation
-
-    double l;
-
-    l = latent; //zatim!!!!
-
-    return ( l );
+    return latent; //zatim!!!!
 }
 
 double
-HeMoTKMaterial :: get_b(double w, double t)
+HeMoTKMaterial :: get_b(double w, double t) const
 {
     // Function calculates coefficient b
     // sat ... degree of saturation
 
-    double b, sat, phi, dphi_dw;
+    double phi = inverse_sorption_isotherm(w);
+    double dphi_dw = give_dphi_dw(w);
+    double sat = get_sat(w, t);
 
-    phi = inverse_sorption_isotherm(w);
-    dphi_dw = give_dphi_dw(w);
-    sat = get_sat(w, t);
-
-    b = por * rho_gws * ( phi + ( 1 - sat ) * dphi_dw );
-
-    return ( b );
+    return por * rho_gws * ( phi + ( 1 - sat ) * dphi_dw );
 }
 
 
 double
-HeMoTKMaterial :: get_sat(double w, double t)
+HeMoTKMaterial :: get_sat(double w, double t) const
 {
     // Function calculates degree of saturation
     // sat ... degree of saturation
-
-    double sat;
-
-    sat = 1.0; //zatim!!!!
-
-    return ( sat );
+    return 1.0; //zatim!!!!
 }
 
+
 double
-HeMoTKMaterial :: get_ceff(double w, double t)
+HeMoTKMaterial :: get_ceff(double w, double t) const
 {
     // Function calculates effective thermal capacity
-
-    double ceff;
-
-    ceff = c * rho; //zatim!!!!
-
-    return ( ceff );
+    return c * rho; //zatim!!!!
 }
 
 
 double
-HeMoTKMaterial :: get_chi(double w, double t)
+HeMoTKMaterial :: get_chi(double w, double t) const
 {
     // Function calculates effective thermal conductivity
-
-    double chi;
-
-    chi = chi_eff; //zatim!!!!
-
-    return ( chi );
+    return chi_eff; //zatim!!!!
 }
+
 
 bool
 HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)

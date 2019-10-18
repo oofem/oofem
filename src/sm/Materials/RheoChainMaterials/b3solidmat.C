@@ -290,7 +290,7 @@ B3SolidMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tSt
      * Since the elastic moduli are constant in time it is necessary to update them only once
      * on the beginning of the computation
      */
-    if (this->EparVal.isEmpty()) {
+    if ( this->EparVal.isEmpty() ) {
         RheoChainMaterial :: updateEparModuli(tPrime, gp, tStep);
     }
 }
@@ -583,7 +583,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 
 double
-B3SolidMaterial :: inverse_sorption_isotherm(double w)
+B3SolidMaterial :: inverse_sorption_isotherm(double w) const
 // Function calculates relative humidity from water content (inverse relation form sorption isotherm).
 // Relative humidity (phi) is from range 0.2 - 0.98 !!!
 // sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
@@ -592,10 +592,8 @@ B3SolidMaterial :: inverse_sorption_isotherm(double w)
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-    double phi;
-
     // relative humidity
-    phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
+    double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     /*
      * if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
@@ -714,7 +712,6 @@ double
 B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humidity at given TimeStep
 {
     double humidity = 0.;
-    int err, wflag = 0;
 
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
@@ -723,6 +720,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
+    int err;
         gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
@@ -730,10 +728,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
         // convert water mass to relative humidity
         humidity = this->inverse_sorption_isotherm( et2.at(1) );
-        wflag = 1;
-    }
-
-    if ( wflag == 0 ) {
+    } else {
         OOFEM_ERROR("external fields not found");
     }
 

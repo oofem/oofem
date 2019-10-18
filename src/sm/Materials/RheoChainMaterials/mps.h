@@ -312,7 +312,7 @@ protected:
     /// Evaluation of the autogenousShrinkageStrainVector according to Bazant's B4 model. In the model the evolution depends on temperature adjusted age, here on equivalent age (additional humidity influence)
     void computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    //double inverse_sorption_isotherm(double w);
+    //double inverse_sorption_isotherm(double w) const;
 
     /// Gives value of humidity at given GP and timestep
     /// option = 0 ... beginning of the time step

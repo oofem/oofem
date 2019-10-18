@@ -1310,8 +1310,9 @@ MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, Gaus
 }
 
 
-// double
-// MPSMaterial :: inverse_sorption_isotherm(double w)
+#if 0
+double
+MPSMaterial :: inverse_sorption_isotherm const
 // Function calculates relative humidity from water content (inverse relation form sorption isotherm).
 // Relative humidity (phi) is from range 0.2 - 0.98 !!!
 // sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
@@ -1319,18 +1320,19 @@ MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, Gaus
 // w (kg/kg) ... water content
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
-//{
-// relative humidity
-//   double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
-//
-//   /*if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-//     * OOFEM_ERROR("Relative humidity h = %e (w=%e) is out of range", phi, w);
-//     * }*/
-//   //if ( phi < 0.20 ){ phi = 0.2;}
-//    //if ( phi > 0.98 ){ phi = 0.98;}
-//
-//   return phi;
-//}
+{
+   //relative humidity
+   double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
+
+   /*if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
+     * OOFEM_ERROR("Relative humidity h = %e (w=%e) is out of range", phi, w);
+     * }*/
+   //if ( phi < 0.20 ){ phi = 0.2;}
+    //if ( phi > 0.98 ){ phi = 0.98;}
+
+   return phi;
+}
+#endif
 
 double
 MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option) const

@@ -117,9 +117,9 @@ public:
     const char *giveInputRecordName() const override { return _IFT_HeMoTKMaterial_Name; }
     const char *giveClassName() const override { return "HeMoTKMaterial"; }
 
-    double sorption_isotherm(double phi);
-    double inverse_sorption_isotherm(double w);
-    double give_dphi_dw(double w);
+    double sorption_isotherm(double phi) const;
+    double inverse_sorption_isotherm(double w) const;
+    double give_dphi_dw(double w) const;
 
 protected:
     void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -133,18 +133,18 @@ protected:
      */
     double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
 
-    double get_latent(double w, double t);
-    double get_ceff(double w, double t);
-    double get_chi(double w, double t);
+    double get_latent(double w, double t) const;
+    double get_ceff(double w, double t) const;
+    double get_chi(double w, double t) const;
 
-    double perm_wt(double w, double t);
-    double perm_ww(double w, double t);
-    double give_delta_gw(double phi);
-    double give_dpgw_dt(double t, double phi);
+    double perm_wt(double w, double t) const;
+    double perm_ww(double w, double t) const;
+    double give_delta_gw(double phi) const;
+    double give_dpgw_dt(double t, double phi) const;
 
-    double get_b(double w, double t);
-    double get_sat(double w, double t);
-    double give_p_gws(double t);
+    double get_b(double w, double t) const;
+    double get_sat(double w, double t) const;
+    double give_p_gws(double t) const;
 };
 } // end namespace oofem
 #endif // hemotkmat_h

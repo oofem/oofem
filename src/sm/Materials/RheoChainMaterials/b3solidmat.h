@@ -154,7 +154,7 @@ protected:
     /// Evaluation of the flow term viscosity.
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
-    double inverse_sorption_isotherm(double w);
+    double inverse_sorption_isotherm(double w) const;
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
     FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;

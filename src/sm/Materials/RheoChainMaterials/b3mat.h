@@ -123,7 +123,7 @@ protected:
      * PhD-thesis, Technical University of Denmark, Lingby.
      * @param w Water content (kg/kg).
      */
-    double inverse_sorption_isotherm(double w);
+    double inverse_sorption_isotherm(double w) const;
 };
 } // end namespace oofem
 #endif // b3mat_h
