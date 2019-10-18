@@ -69,12 +69,12 @@ LatticeLink3d :: ~LatticeLink3d()
 double
 LatticeLink3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
-  //Returns artifical volume (bond area times bond length) so that general parts of post processing work
-  double myPi = 3.14159;
-  return pow(this->bondLength,2.)*this->bondDiameter*myPi;
+    //Returns artifical volume (bond area times bond length) so that general parts of post processing work
+    double myPi = 3.14159;
+    return pow(this->bondLength, 2.) * this->bondDiameter * myPi;
 }
 
-  
+
 void
 LatticeLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
@@ -147,12 +147,12 @@ LatticeLink3d :: giveGPCoordinates(FloatArray &coords)
 
 void
 LatticeLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                    TimeStep *tStep)
+                                        TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
     FloatMatrix d, b, bt, db;
     FloatArray u, strain;
-    
+
     // This function can be quite costly to do inside the loops when one has many slave dofs.
     this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
@@ -164,20 +164,20 @@ LatticeLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
     answer.clear();
 
 
-    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0); 
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     this->computeBmatrixAt(gp, b);
     bt.beTranspositionOf(b);
-    
+
     if ( !this->isActivated(tStep) ) {
-      strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-      strain.zero();
+        strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
+        strain.zero();
     }
     strain.beProductOf(b, u);
-    
-    
+
+
     answer.resize(12, 12);
     answer.zero();
- 
+
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
 
@@ -185,27 +185,9 @@ LatticeLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
     answer.beProductOf(bt, db);
 
     //Introduce integration of bond strength
-    double area = this->computeVolumeAround(gp)/this->giveLength();
+    double area = this->computeVolumeAround(gp) / this->giveLength();
     answer.times(area);
-    
 
-    // //add influence of pull-out. Needs more work
-    // double bondFactor = 0;
-    // if(bondEndLength-fabs(strain.at(1)) >=bondLength){
-    //   bondFactor = 1.;    
-    // }
-    // else if(bondEndLength-fabs(strain.at(1)) <bondLength && bondEndLength-fabs(strain.at(1)) >0){
-    //   bondFactor = (bondEndLength-fabs(strain.at(1)))/bondLength;
-    // }
-    // else{
-    //   bondFactor = 0.;
-    // }
-
-    // printf("bondFactor = %e\n", bondFactor);
-    
-    // answer.times(bondFactor);	
-    
-    
     return;
 }
 
@@ -213,7 +195,7 @@ void LatticeLink3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+    integrationRulesArray [ 0 ].reset(new GaussIntegrationRule(1, this, 1, 3) );
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _3dLattice);
 }
 
@@ -274,8 +256,8 @@ LatticeLink3d :: giveBondDiameter()
     return this->bondDiameter;
 }
 
-  
-  
+
+
 
 void
 LatticeLink3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
@@ -293,9 +275,9 @@ LatticeLink3d :: initializeFrom(InputRecord *ir)
     LatticeStructuralElement :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->bondLength, _IFT_LatticeLink3d_length);
-    
+
     IR_GIVE_FIELD(ir, this->bondDiameter, _IFT_LatticeLink3d_diameter);
-    
+
     IR_GIVE_FIELD(ir, this->directionVector, _IFT_LatticeLink3d_dirvector);
 
     IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_LatticeLink3d_l_end);
@@ -332,7 +314,7 @@ LatticeLink3d :: computeGeometryProperties()
     nodeB  = this->giveNode(2);
 
     //Calculate components of distance from reinforcement node to lattice node.
-    
+
     for ( int i = 0; i < 3; i++ ) {
         coordsA.at(i + 1) =  nodeA->giveCoordinate(i + 1);
         coordsB.at(i + 1) =  nodeB->giveCoordinate(i + 1);
@@ -344,7 +326,7 @@ LatticeLink3d :: computeGeometryProperties()
     for ( int i = 0; i < 3; i++ ) {
         rigidGlobal.at(i + 1) = coordsB.at(i + 1) - coordsA.at(i + 1);
     }
-       
+
     //Construct an initial temporary local coordinate system
     FloatArray normal(3), s(3), t(3);
 
@@ -376,9 +358,9 @@ LatticeLink3d :: computeGeometryProperties()
     //Set up rotation matrix
     FloatMatrix lcs(3, 3);
 
-    this->localCoordinateSystem.resize(3,3);
+    this->localCoordinateSystem.resize(3, 3);
     this->localCoordinateSystem.zero();
-    
+
     for ( int i = 1; i <= 3; i++ ) {
         this->localCoordinateSystem.at(1, i) = normal.at(i);
         this->localCoordinateSystem.at(2, i) = s.at(i);
@@ -386,40 +368,38 @@ LatticeLink3d :: computeGeometryProperties()
     }
 
     // Rotate rigidarm vector into local coordinate system
-
-    this->rigid.beProductOf(localCoordinateSystem,rigidGlobal);
+    this->rigid.beProductOf(localCoordinateSystem, rigidGlobal);
 
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
-      this->globalCentroid.at(i) = nodeA->giveCoordinate(i);;
+        this->globalCentroid.at(i) = nodeA->giveCoordinate(i);
+        ;
     }
-    
+
     this->geometryFlag = 1;
-    
+
     return;
 }
-  void
-  LatticeLink3d :: saveContext(DataStream &stream, ContextMode mode)
-  {
-    LatticeStructuralElement :: saveContext(stream, mode);  
-}
-  
-
-  void
-  LatticeLink3d :: restoreContext(DataStream &stream, ContextMode mode)
+void
+LatticeLink3d :: saveContext(DataStream &stream, ContextMode mode)
 {
-  
-  LatticeStructuralElement :: restoreContext(stream, mode);
-    
+    LatticeStructuralElement :: saveContext(stream, mode);
+}
+
+
+void
+LatticeLink3d :: restoreContext(DataStream &stream, ContextMode mode)
+{
+    LatticeStructuralElement :: restoreContext(stream, mode);
 }
 
 
 void
 LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
-					  TimeStep *tStep, int useUpdatedGpRecord)
+                                          TimeStep *tStep, int useUpdatedGpRecord)
 {
-  FloatMatrix b, bt;
-  FloatArray u, stress(6), strain(6);
+    FloatMatrix b, bt;
+    FloatArray u, stress(6), strain(6);
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
     this->computeVectorOf(VM_Total, tStep, u);
@@ -431,16 +411,16 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( GaussPoint *gp: * this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
-	bt.beTranspositionOf(b);
-	
+        bt.beTranspositionOf(b);
+
         if ( useUpdatedGpRecord == 1 ) {
             stress = matStat->giveStressVector();
         } else {
             if ( !this->isActivated(tStep) ) {
-                strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+                strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
                 strain.zero();
             }
             strain.beProductOf(b, u);
@@ -455,8 +435,8 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
 
         // now every gauss point has real stress vector
         // compute nodal representation of internal forces using f = B^T*Sigma dV
-	//	double dV = this->computeVolumeAround(gp);
-	//		double dV = 1.;
+        //	double dV = this->computeVolumeAround(gp);
+        //		double dV = 1.;
         if ( stress.giveSize() == 6 ) {
             // It may happen that e.g. plane strain is computed
             // using the default 3D implementation. If so,
@@ -464,19 +444,19 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
             // (Note that no reduction will take place if
             //  the simulation is actually 3D.)
             FloatArray stressTemp;
-            StructuralMaterial :: giveReducedSymVectorForm( stressTemp, stress, gp->giveMaterialMode() );
-	    
+            StructuralMaterial :: giveReducedSymVectorForm(stressTemp, stress, gp->giveMaterialMode() );
+
             answer.beProductOf(bt, stressTemp);
-        } else   {
+        } else {
             answer.beProductOf(bt, stress);
         }
 
-	//Introduce integration of bond strength
-	double area = this->computeVolumeAround(gp)/this->giveLength();
-	answer.times(area);	
+        //Introduce integration of bond strength
+        double area = this->computeVolumeAround(gp) / this->giveLength();
+        answer.times(area);
     }
-    
-    
+
+
     // if inactive update state, but no contribution to global system
     if ( !this->isActivated(tStep) ) {
         answer.zero();
@@ -488,7 +468,7 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
 double
 LatticeLink3d :: giveLength()
 {
-  //returns the bond length, not the length between the two nodes
+    //returns the bond length, not the length between the two nodes
     return this->bondLength;
 }
 
@@ -504,8 +484,8 @@ LatticeLink3d :: computeStressVector(FloatArray &answer, const FloatArray &strai
     this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }
 
- 
-  
+
+
 #ifdef __OOFEG
 
 void
@@ -540,7 +520,7 @@ void LatticeLink3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
@@ -569,7 +549,7 @@ void LatticeLink3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tS
     WCRec p [ 2 ]; /* points */
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);

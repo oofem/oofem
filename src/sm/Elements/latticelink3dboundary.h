@@ -33,14 +33,14 @@
  */
 
 #ifndef latticelink3dboundary_h
- #define latticelink3dboundary_h
+#define latticelink3dboundary_h
 
- #include "latticelink3d.h"
+#include "latticelink3d.h"
 
 ///@name Input fields for Latticelink3dboundary
 //@{
- #define _IFT_LatticeLink3dBoundary_Name "latticelink3dboundary"
- #define _IFT_LatticeLink3dBoundary_location "location"
+#define _IFT_LatticeLink3dBoundary_Name "latticelink3dboundary"
+#define _IFT_LatticeLink3dBoundary_location "location"
 //@}
 
 namespace oofem {
@@ -76,11 +76,11 @@ public:
 
     void giveVTKCoordinates(int nodeNumber, FloatArray &coords);
 
- #ifdef __OOFEG
+#ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
     virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep * tStep, UnknownType);
- #endif
+    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+#endif
 
 protected:
     virtual bool computeGtoLRotationMatrix(FloatMatrix &);
@@ -89,7 +89,5 @@ protected:
     void giveSwitches(IntArray &answer, int location);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
 };
-
-
 } // end namespace oofem
 #endif

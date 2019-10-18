@@ -69,7 +69,7 @@ LatticeLink3dBoundary :: ~LatticeLink3dBoundary()
 
 void
 LatticeLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                            TimeStep *tStep)
+                                                TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
     FloatMatrix d, bi, bj, dbj, dij, bjt;
@@ -79,8 +79,6 @@ LatticeLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponse
     answerTemp.zero();
     answerHelp.zero();
     t.zero();
-
-
 
     if ( geometryFlag == 0 ) {
         computeGeometryProperties();
@@ -94,10 +92,10 @@ LatticeLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponse
     bjt.beTranspositionOf(bj);
     answerTemp.beProductOf(bjt, dbj);
 
-    answer.resize( computeNumberOfDofs(), computeNumberOfDofs() );
+    answer.resize(computeNumberOfDofs(), computeNumberOfDofs() );
     answer.zero();
 
-    answerHelp.resize( computeNumberOfDofs(), computeNumberOfDofs() );
+    answerHelp.resize(computeNumberOfDofs(), computeNumberOfDofs() );
     answerHelp.zero();
 
     for ( int m = 1; m <= 12; m++ ) {
@@ -126,13 +124,13 @@ LatticeLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponse
     IntArray projectionComponentNodeOne(3);
     projectionComponentNodeOne.zero();
     if ( location.at(1) != 0 ) {
-        giveSwitches( projectionComponentNodeOne, location.at(1) );
+        giveSwitches(projectionComponentNodeOne, location.at(1) );
     }
 
     IntArray projectionComponentNodeTwo(3);
     projectionComponentNodeTwo.zero();
     if ( location.at(2) != 0 ) {
-        giveSwitches( projectionComponentNodeTwo, location.at(2) );
+        giveSwitches(projectionComponentNodeTwo, location.at(2) );
     }
 
     for ( int k = 1; k <= 12; k++ ) {
@@ -187,12 +185,12 @@ LatticeLink3dBoundary :: giveVTKCoordinates(int nodeNumber, FloatArray &coords) 
     if ( nodeNumber == 1 ) {
         node  = this->giveNode(1);
         if ( location.at(1) != 0 ) {
-            giveSwitches( projectionComponent, location.at(1) );
+            giveSwitches(projectionComponent, location.at(1) );
         }
     } else if ( nodeNumber == 2 ) {
         node  = this->giveNode(2);
         if ( location.at(2) != 0 ) {
-            giveSwitches( projectionComponent, location.at(2) );
+            giveSwitches(projectionComponent, location.at(2) );
         }
     } else {
         OOFEM_ERROR("wrong element used in the vtk module");
@@ -229,14 +227,14 @@ LatticeLink3dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp,
     IntArray projectionComponentNodeOne(3);
     projectionComponentNodeOne.zero();
     if ( location.at(1) != 0 ) {
-        giveSwitches( projectionComponentNodeOne, location.at(1) );
+        giveSwitches(projectionComponentNodeOne, location.at(1) );
     }
 
     IntArray projectionComponentNodeTwo(3);
     projectionComponentNodeTwo.zero();
 
     if ( location.at(2) != 0 ) {
-        giveSwitches( projectionComponentNodeTwo, location.at(2) );
+        giveSwitches(projectionComponentNodeTwo, location.at(2) );
     }
 
     FloatMatrix rotationMatrix;
@@ -308,7 +306,6 @@ LatticeLink3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
 }
 
 
-
 void
 LatticeLink3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
@@ -353,11 +350,11 @@ LatticeLink3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *
 
     bt.beTranspositionOf(b);
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus( integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
+        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
                             ->giveStressVector();
     } else
     if ( !this->isActivated(tStep) ) {
-        strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );
+        strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );
         strain.zero();
     }
     this->computeStrainVector(strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
@@ -377,14 +374,14 @@ LatticeLink3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *
     IntArray projectionComponentNodeOne(3);
     projectionComponentNodeOne.zero();
     if ( location.at(1) != 0 ) {
-        giveSwitches( projectionComponentNodeOne, location.at(1) );
+        giveSwitches(projectionComponentNodeOne, location.at(1) );
     }
 
     IntArray projectionComponentNodeTwo(3);
     projectionComponentNodeTwo.zero();
 
     if ( location.at(2) != 0 ) {
-        giveSwitches( projectionComponentNodeTwo, location.at(2) );
+        giveSwitches(projectionComponentNodeTwo, location.at(2) );
     }
 
     //Normal stresses
@@ -425,7 +422,6 @@ LatticeLink3dBoundary :: giveSwitches(IntArray &answer, int location) {
     return;
 }
 
-
 void
 LatticeLink3dBoundary :: computeGeometryProperties()
 {
@@ -445,13 +441,13 @@ LatticeLink3dBoundary :: computeGeometryProperties()
     IntArray projectionComponentNodeOne(3);
     projectionComponentNodeOne.zero();
     if ( location.at(1) != 0 ) {
-        giveSwitches( projectionComponentNodeOne, location.at(1) );
+        giveSwitches(projectionComponentNodeOne, location.at(1) );
     }
 
     IntArray projectionComponentNodeTwo(3);
     projectionComponentNodeTwo.zero();
     if ( location.at(2) != 0 ) {
-        giveSwitches( projectionComponentNodeTwo, location.at(2) );
+        giveSwitches(projectionComponentNodeTwo, location.at(2) );
     }
 
     for ( int i = 0; i < 3; i++ ) {
@@ -467,7 +463,7 @@ LatticeLink3dBoundary :: computeGeometryProperties()
     for ( int i = 0; i < 3; i++ ) {
         rigidGlobal.at(i + 1) = coordsB.at(i + 1) - coordsA.at(i + 1);
     }
-       
+
     //Construct an initial temporary local coordinate system
     FloatArray normal(3), s(3), t(3);
 
@@ -499,9 +495,9 @@ LatticeLink3dBoundary :: computeGeometryProperties()
     //Set up rotation matrix
     FloatMatrix lcs(3, 3);
 
-    this->localCoordinateSystem.resize(3,3);
+    this->localCoordinateSystem.resize(3, 3);
     this->localCoordinateSystem.zero();
-    
+
     for ( int i = 1; i <= 3; i++ ) {
         this->localCoordinateSystem.at(1, i) = normal.at(i);
         this->localCoordinateSystem.at(2, i) = s.at(i);
@@ -510,11 +506,11 @@ LatticeLink3dBoundary :: computeGeometryProperties()
 
     // Rotate rigidarm vector into local coordinate system
 
-    this->rigid.beProductOf(localCoordinateSystem,rigidGlobal);
+    this->rigid.beProductOf(localCoordinateSystem, rigidGlobal);
 
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
-      this->globalCentroid.at(i) = coordsA.at(i);
+        this->globalCentroid.at(i) = coordsA.at(i);
     }
 
     this->geometryFlag = 1;
@@ -526,16 +522,15 @@ LatticeLink3dBoundary :: computeGeometryProperties()
 void
 LatticeLink3dBoundary :: saveContext(DataStream &stream, ContextMode mode)
 {
- LatticeLink3d :: saveContext(stream, mode);
- 
- contextIOResultType iores;
+    LatticeLink3d :: saveContext(stream, mode);
 
- if ( ( mode & CM_Definition ) ) {
-   if ( ( iores = location.storeYourself(stream) ) != CIO_OK ) {
-     THROW_CIOERR(iores);
-   }
- }
- 
+    contextIOResultType iores;
+
+    if ( ( mode & CM_Definition ) ) {
+        if ( ( iores = location.storeYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
 }
 
 
@@ -587,7 +582,7 @@ void LatticeLink3dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep 
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getActiveCrackColor() );
+    EASValsSetColor(gc.getActiveCrackColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
 
@@ -600,14 +595,14 @@ void LatticeLink3dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep 
     IntArray projectionComponentNodeOne(3);
     projectionComponentNodeOne.zero();
     if ( location.at(1) != 0 ) {
-        giveSwitches( projectionComponentNodeOne, location.at(1) );
+        giveSwitches(projectionComponentNodeOne, location.at(1) );
     }
 
     IntArray projectionComponentNodeTwo(3);
     projectionComponentNodeTwo.zero();
 
     if ( location.at(2) != 0 ) {
-        giveSwitches( projectionComponentNodeTwo, location.at(2) );
+        giveSwitches(projectionComponentNodeTwo, location.at(2) );
     }
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1) + projectionComponentNodeOne.at(1) * specimenDimension.at(1);
@@ -636,7 +631,7 @@ void LatticeLink3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, Time
     WCRec p [ 2 ]; /* points */
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
     FloatArray specimenDimension(3);
@@ -671,13 +666,13 @@ void LatticeLink3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, Time
     IntArray projectionComponentNodeOne(3);
     projectionComponentNodeOne.zero();
     if ( location.at(1) != 0 ) {
-        giveSwitches( projectionComponentNodeOne, location.at(1) );
+        giveSwitches(projectionComponentNodeOne, location.at(1) );
     }
 
     IntArray projectionComponentNodeTwo(3);
     projectionComponentNodeTwo.zero();
     if ( location.at(2) != 0 ) {
-        giveSwitches( projectionComponentNodeTwo, location.at(2) );
+        giveSwitches(projectionComponentNodeTwo, location.at(2) );
     }
 
 

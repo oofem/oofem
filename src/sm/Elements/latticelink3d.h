@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -33,17 +33,17 @@
  */
 
 #ifndef latticelink3d_h
- #define latticelink3d_h
+#define latticelink3d_h
 
- #include "latticestructuralelement.h"
+#include "latticestructuralelement.h"
 
 ///@name Input fields for LatticeLink3d
 //@{
- #define _IFT_LatticeLink3d_Name "latticelink3d"
- #define _IFT_LatticeLink3d_length "length"
- #define _IFT_LatticeLink3d_diameter "diameter"
- #define _IFT_LatticeLink3d_dirvector "dirvector"
- #define _IFT_LatticeLink3d_l_end "l_end"
+#define _IFT_LatticeLink3d_Name "latticelink3d"
+#define _IFT_LatticeLink3d_length "length"
+#define _IFT_LatticeLink3d_diameter "diameter"
+#define _IFT_LatticeLink3d_dirvector "dirvector"
+#define _IFT_LatticeLink3d_l_end "l_end"
 //@}
 
 namespace oofem {
@@ -54,64 +54,59 @@ namespace oofem {
 class LatticeLink3d : public LatticeStructuralElement
 {
 protected:
-  double bondLength;
-  
-  FloatMatrix localCoordinateSystem;
-  double bondDiameter;
-  FloatArray directionVector;
-  int geometryFlag;
-  double bondEndLength;
-  FloatArray rigid;
-  FloatArray globalCentroid;
-  
+    double bondLength;
+
+    FloatMatrix localCoordinateSystem;
+    double bondDiameter;
+    FloatArray directionVector;
+    int geometryFlag;
+    double bondEndLength;
+    FloatArray rigid;
+    FloatArray globalCentroid;
+
 public:
     LatticeLink3d(int n, Domain *);
     virtual ~LatticeLink3d();
 
     double computeVolumeAround(GaussPoint *aGaussPoint) override;
-    
+
     double giveLength() override;
-    
+
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
-    /**
-     * This function is different from the standard computeGlobalCordinates
-     * function as it returns the global coordinates of the gausspoint
-     * independent to the value of the lcoords.
-     */
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override; 
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
     virtual double giveBondLength() override;
-    
+
     virtual double giveBondDiameter() override;
 
     virtual double giveBondEndLength() override;
-    
+
     virtual int computeNumberOfDofs() override { return 12; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const  override;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const override;
 
     virtual void giveGPCoordinates(FloatArray &coords);
 
     virtual void computeGeometryProperties();
-    
+
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
-    
+
     virtual const char *giveInputRecordName() const override { return _IFT_LatticeLink3d_Name; }
     virtual const char *giveClassName()  const override { return "LatticeLink3d"; }
     virtual IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual Element_Geometry_Type giveGeometryType() const  override { return EGT_line_1; } 
+    virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
- #ifdef __OOFEG
+#ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
     virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep * tStep, UnknownType);
- #endif
+    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+#endif
 
 
 protected:
@@ -121,7 +116,7 @@ protected:
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    
+
     /**
      * This computes the geometrical properties of the element. It is called only once.
      */
@@ -129,10 +124,6 @@ protected:
 
     virtual void computeGaussPoints() override;
     virtual integrationDomain  giveIntegrationDomain() const override { return _Line; }
-
 };
-
-
-
 } // end namespace oofem
 #endif

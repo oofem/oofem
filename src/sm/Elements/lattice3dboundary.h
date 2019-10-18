@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -33,14 +33,14 @@
  */
 
 #ifndef lattice3dboundary_h
- #define lattice3dboundary_h
+#define lattice3dboundary_h
 
- #include "lattice3d.h"
+#include "lattice3d.h"
 
-///@name Input fields for Lattice2d
+///@name Input fields for Lattice3d
 //@{
- #define _IFT_Lattice3dBoundary_Name "lattice3dboundary"
- #define _IFT_Lattice3dBoundary_location "location"
+#define _IFT_Lattice3dBoundary_Name "lattice3dboundary"
+#define _IFT_Lattice3dBoundary_location "location"
 //@}
 
 namespace oofem {
@@ -80,12 +80,12 @@ public:
 
     void giveVTKCoordinates(int nodeNumber, FloatArray &coords);
 
- #ifdef __OOFEG
+#ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
     virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
     virtual void drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep * tStep, UnknownType);
- #endif
+    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+#endif
 
 protected:
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
@@ -95,7 +95,5 @@ protected:
     void giveSwitches(IntArray &answer, int location);
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) override;
 };
-
-
 } // end namespace oofem
 #endif
