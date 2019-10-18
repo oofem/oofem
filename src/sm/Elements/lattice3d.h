@@ -148,7 +148,7 @@ protected:
     void computePropertiesOfCrossSection();
 
     void computeGaussPoints() override;
-    virtual integrationDomain  giveIntegrationDomain() { return _Line; }
+    virtual integrationDomain  giveIntegrationDomain() const override { return _Line; }
 };
 } // end namespace oofem
 #endif
