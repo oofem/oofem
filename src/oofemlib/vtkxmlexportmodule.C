@@ -395,12 +395,14 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             }
         } // end loop over composite elements
 
+#ifndef __VTK_MODULE
         if (anyPieceNonEmpty == 0) {
           // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
           fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
           fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
           fprintf(this->fileStream, "</Piece>\n");
         }
+#endif
 
         
     } else {     // if (particleExportFlag)
@@ -498,8 +500,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
  #endif
 
     writer->SetFileName( fname.c_str() );
-    writer->SetInput(this->fileStream); // VTK 4
-    //writer->SetInputData(this->fileStream); // VTK 6
+    //writer->SetInput(this->fileStream); // VTK 4
+    writer->SetInputData(this->fileStream); // VTK 6
 
     // Optional - set the mode. The default is binary.
     //writer->SetDataModeToBinary();
@@ -1699,7 +1701,7 @@ VTKXMLExportModule :: writeExternalForces(VTKPiece &vtkPiece)
         // Header
 #ifdef __VTK_MODULE
         vtkSmartPointer< vtkDoubleArray >varArray = vtkSmartPointer< vtkDoubleArray > :: New();
-        varArray->SetName(name);
+        varArray->SetName(name.c_str());
         varArray->SetNumberOfComponents(ncomponents);
         varArray->SetNumberOfTuples(numNodes);
 

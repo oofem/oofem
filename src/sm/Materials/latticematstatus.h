@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -60,10 +60,10 @@ protected:
     /// Non-equilibrated normal stress
     double tempNormalStress;
 
-    /// Reduced strain ??? exact meaning = temperature free ???
+    /// Reduced strain, which is temperature free
     FloatArray reducedStrain;
 
-    /// Non-equilibrated reduced strain ??? exact meaning = temperature free ??
+    /// Non-equilibrated reduced strain, which is temperature free
     FloatArray tempReducedStrain;
 
     /// dissipation
@@ -152,14 +152,14 @@ public:
     ///Sets the temp_crack_width
     void setTempCrackWidth(double val) { tempCrackWidth = val; }
 
-    virtual FloatArray& givePlasticStrain()
-    {return this->plasticStrain;}
+    virtual FloatArray &givePlasticStrain()
+    { return this->plasticStrain; }
 
-    virtual FloatArray& giveTempPlasticStrain()
-    {return this->tempPlasticStrain;}
+    virtual FloatArray &giveTempPlasticStrain()
+    { return this->tempPlasticStrain; }
 
-    virtual FloatArray& giveOldPlasticStrain()
-    {return this->oldPlasticStrain;}
+    virtual FloatArray &giveOldPlasticStrain()
+    { return this->oldPlasticStrain; }
 
 
     /**

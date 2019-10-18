@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -117,7 +117,6 @@ public:
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
 
 
-    /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
 
@@ -125,7 +124,7 @@ public:
 
     void initTempStatus() override;
 
-    void updateYourself(TimeStep *) override; // update after new equilibrium state reached
+    void updateYourself(TimeStep *) override;
 
     ///Set random e0
     void setE0(double val) { e0 = val; }
@@ -141,7 +140,7 @@ public:
 
 
 /**
- * This class implements a local random isotropic damage model for concrete in tension for 3D lattice elements.
+ * This class implements a local random damage model for quasi-brittle materials for lattice (1D, 2D and 3D) elements.
  */
 class LatticeDamage : public LatticeLinearElastic
 
@@ -160,7 +159,7 @@ protected:
      **/
     int softeningType;
 
-    /// determines the softening -> corresponds to crack opening (not strain) when tension stress vanishes
+    /// determines the softening -> corresponds to crack opening when tension stress vanishes
     double wf, wfOne;
 
     double ultimateFactor;
@@ -196,14 +195,14 @@ public:
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
 
     void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
     void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
 
     int hasMaterialModeCapability(MaterialMode mode) override;
@@ -216,7 +215,7 @@ public:
     virtual void computeDamageParam(double &omega, double kappa, GaussPoint *gp);
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *) override;
+                              const FloatArray &, TimeStep *) override;
 
     ///Compute increment of dissipation for post-processing reasons
     double computeDeltaDissipation2d(double omega, FloatArray &reducedStrain, GaussPoint *gp, TimeStep *atTime);
@@ -231,11 +230,10 @@ public:
 protected:
 
     int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *atTime) override;
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *atTime) override;
 };
 } // end namespace oofem
-
 
 #endif

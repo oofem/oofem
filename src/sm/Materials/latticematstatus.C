@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -39,9 +39,9 @@
 #include "gausspoint.h"
 
 namespace oofem {
-  LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedStrain(), tempReducedStrain(), plasticStrain(), tempPlasticStrain(),oldPlasticStrain()
+LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedStrain(), tempReducedStrain(), plasticStrain(), tempPlasticStrain(), oldPlasticStrain()
 {
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
+    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
     plasticStrain.resize(rsize);
     plasticStrain.zero();
     tempPlasticStrain.resize(rsize);
@@ -120,7 +120,7 @@ LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf(file, "reduced strains ");
         int rSize = reducedStrain.giveSize();
         for ( int k = 1; k <= rSize; k++ ) {
-            fprintf( file, "% .4e ", reducedStrain.at(k) );
+            fprintf(file, "% .4e ", reducedStrain.at(k) );
         }
     }
 }
@@ -171,7 +171,6 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
     if ( !stream.write(crackFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 }
 
 void
@@ -207,6 +206,7 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     if ( !stream.read(crackFlag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+}
 
 }
 } // end namespace oofem

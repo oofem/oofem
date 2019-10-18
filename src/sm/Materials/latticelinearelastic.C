@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -48,9 +48,9 @@
 #include "classfactory.h"
 
 namespace oofem {
-  REGISTER_Material(LatticeLinearElastic);
+REGISTER_Material(LatticeLinearElastic);
 
-/// constructor which creates a dummy material without a status and without random extension interface
+// constructor which creates a dummy material without a status and without random extension interface
 LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double a1, double a2) : LinearElasticMaterial(n, d)
 
 {
@@ -74,7 +74,7 @@ LatticeLinearElastic :: hasMaterialModeCapability(MaterialMode mode)
 // returns whether receiver supports given mode
 //
 {
-  if ( ( mode == _2dLattice ) || ( mode == _3dLattice ) || ( mode == _1dLattice ) ) {
+    if ( ( mode == _2dLattice ) || ( mode == _3dLattice ) || ( mode == _1dLattice ) ) {
         return 1;
     }
 
@@ -145,7 +145,7 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
         status = this->CreateStatus(gp);
 
         if ( status != NULL ) {
-            gp->setMaterialStatus( status );
+            gp->setMaterialStatus(status);
             this->_generateStatusVariables(gp);
         }
     }
@@ -173,7 +173,7 @@ LatticeLinearElastic :: giveRealStressVector(FloatArray &answer,
     FloatMatrix stiffnessMatrix;
     this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
 
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
+    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
 
 
     answer.resize(rsize);
@@ -186,7 +186,6 @@ LatticeLinearElastic :: giveRealStressVector(FloatArray &answer,
     FloatArray pressures;
     if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
         static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
-
     }
 
     double waterPressure = 0.;
@@ -298,24 +297,20 @@ double
 LatticeLinearElastic :: give(int aProperty, GaussPoint *gp)
 {
     double answer;
-    if ( static_cast< LatticeMaterialStatus* >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
+    if ( static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems
             answer = 0.1;
         } else if ( answer > 10 ) {
             answer = 10;
         }
         return answer;
-    }
-    else if ( aProperty == eNormal_ID ) {
+    } else if ( aProperty == eNormal_ID )   {
         return 1.;
-    }
-    else if ( aProperty == 'E'){
-      return this->eNormalMean;
-    }
-    else if ( aProperty == 'n'){
-      return this->nu;
-    }
-    else {
+    } else if ( aProperty == 'E' )    {
+        return this->eNormalMean;
+    } else if ( aProperty == 'n' )    {
+        return this->nu;
+    } else   {
         return LinearElasticMaterial :: give(aProperty, gp);
     }
 }
@@ -327,65 +322,60 @@ LatticeLinearElastic :: giveIPValue(FloatArray &answer,
                                     InternalStateType type,
                                     TimeStep *atTime)
 {
-  LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
-  if ( type == IST_CharacteristicLength ) {
-    answer.resize(1);
-    answer.zero();
-    answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
-    return 1;
-  } else if ( type == IST_DeltaDissWork ) {
-    answer.resize(1);
-    answer.zero();
-    answer.at(1) = status->giveDeltaDissipation();
-    return 1;
-  } else if ( type == IST_CrackWidth ) {
-    answer.resize(1);
-    answer.zero();
-    answer.at(1) = status->giveCrackWidth();
-    return 1;
-  } else if ( type == IST_DissWork ) {
-    answer.resize(1);
-    answer.zero();
-    answer.at(1) = status->giveDissipation();
-    return 1;
-  }  else if ( type == IST_CrackStatuses ) {
-    answer.resize(1);
-    answer.zero();
-    answer.at(1) = status->giveCrackFlag();
-    return 1;
-  }
-  else {
-    return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
-  }
+    if ( type == IST_CharacteristicLength ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
+        return 1;
+    } else if ( type == IST_DeltaDissWork ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveDeltaDissipation();
+        return 1;
+    } else if ( type == IST_CrackWidth ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveCrackWidth();
+        return 1;
+    } else if ( type == IST_DissWork ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveDissipation();
+        return 1;
+    }  else if ( type == IST_CrackStatuses ) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveCrackFlag();
+        return 1;
+    } else   {
+        return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
+    }
 }
 
 
 //Status
 
 LatticeLinearElasticMaterialStatus :: LatticeLinearElasticMaterialStatus(GaussPoint *g) : LatticeMaterialStatus(g)
-{
-}
+{}
 
 
 
 void
 LatticeLinearElasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
+    FloatArray forces;
 
-  FloatArray forces;
-
-  if(strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3d") == 0){
-    static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces,tStep,0);
-    fprintf(file, "LatticeBeam forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12));
-  }
-  else if(strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3dBoundary") == 0){
-    static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces,tStep,0);
-    fprintf(file, "LatticeBeam3dBounday forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12));
-  }
-  else{
-    LatticeMaterialStatus :: printOutputAt(file, tStep);
-  }
-  return;
+    if ( strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3d") == 0 ) {
+        static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces, tStep, 0);
+        fprintf( file, "LatticeBeam forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
+    } else if ( strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3dBoundary") == 0 )      {
+        static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces, tStep, 0);
+        fprintf( file, "LatticeBeam3dBounday forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
+    } else   {
+        LatticeMaterialStatus :: printOutputAt(file, tStep);
+    }
+    return;
 }
 }

@@ -183,7 +183,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_CrackStatusesTemp, 133) \
     ENUM_ITEM_WITH_VALUE(IST_CrackSlip, 134) \
     ENUM_ITEM_WITH_VALUE(IST_EquivalentTime, 135)\
-    ENUM_ITEM_WITH_VALUE(IST_IncrementCreepModulus, 136) \
+    ENUM_ITEM_WITH_VALUE(IST_IncrementCreepModulus, 136)\
     ENUM_ITEM_WITH_VALUE(IST_NormalStress, 137)
   
 /**

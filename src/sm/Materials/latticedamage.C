@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -195,7 +195,8 @@ LatticeDamage :: computeDamageParam(double &omega, double tempKappa, GaussPoint 
         } else {
             omega = 0.;
         }
-    } else if ( softeningType == 3 ) {      //exponential softening
+    } else if ( softeningType == 3 ) {
+        //exponential softening
         //  iteration to achieve objectivity
         //   we are finding state, where elastic stress is equal to
         //   stress from crack-opening relation (wf = wf characterizes the carc opening diagram)
@@ -208,8 +209,8 @@ LatticeDamage :: computeDamageParam(double &omega, double tempKappa, GaussPoint 
             do {
                 nite++;
                 help = le * omega * tempKappa / this->wf;
-                R = ( 1. - omega ) * eNormal * tempKappa - Ft *exp(-help);
-                Lhs = eNormal * tempKappa - Ft *exp(-help) * le * tempKappa / this->wf;
+                R = ( 1. - omega ) * eNormal * tempKappa - Ft * exp(-help);
+                Lhs = eNormal * tempKappa - Ft * exp(-help) * le * tempKappa / this->wf;
                 omega += R / Lhs;
                 if ( nite > 40 ) {
                     OOFEM_ERROR("computeDamageParam: algorithm not converging");
@@ -221,7 +222,7 @@ LatticeDamage :: computeDamageParam(double &omega, double tempKappa, GaussPoint 
             }
         }
     } else {
-        OOFEM_ERROR("Unknown softening type");
+        OOFEM_ERROR("computeDamageParam: unknown softening type");
     }
 }
 
@@ -351,7 +352,6 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
         answer.at(1) += waterPressure;
     }
 
-
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation;
 
@@ -363,9 +363,6 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
     }
 
     tempDissipation += tempDeltaDissipation;
-
-
-
 
     //Set all temp values
     status->setTempDissipation(tempDissipation);
@@ -667,7 +664,7 @@ double
 LatticeDamage :: give(int aProperty, GaussPoint *gp)
 {
     double answer;
-    if ( static_cast< LatticeDamageStatus* >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
+    if ( static_cast< LatticeDamageStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems
             answer = 0.1;
         } else if ( answer > 10 ) {
@@ -725,8 +722,7 @@ LatticeDamage :: giveIPValue(FloatArray &answer,
         answer.zero();
         answer.at(1) = status->giveNormalStress();
         return 1;
-    }
-    else if ( type == IST_CharacteristicLength ) {
+    } else if ( type == IST_CharacteristicLength ) {
         answer.resize(1);
         answer.zero();
         answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
@@ -810,7 +806,6 @@ LatticeDamageStatus :: saveContext(DataStream &stream, ContextMode mode)
     if ( !stream.write(biot) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 }
 
 void
@@ -841,6 +836,5 @@ LatticeDamageStatus :: restoreContext(DataStream &stream, ContextMode mode)
     if ( !stream.read(biot) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 }
 }     // end namespace oofem

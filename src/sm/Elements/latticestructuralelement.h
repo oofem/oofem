@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -53,7 +53,7 @@ namespace oofem {
 class LatticeStructuralElement : public StructuralElement
 {
 public:
-    LatticeStructuralElement(int n, Domain * d);
+    LatticeStructuralElement(int n, Domain *d);
     virtual ~LatticeStructuralElement();
 
     virtual IRResultType initializeFrom(InputRecord *ir) override;
@@ -121,19 +121,19 @@ public:
      * Returns pressures
      * @return pressures.
      */
-    virtual void givePressures(FloatArray &pressures) {return;}
+    virtual void givePressures(FloatArray &pressures) { return; }
 
     /**
      * Returns plastic strains
      * @return plasticStrains
      */
-    virtual void givePlasticStrain(FloatArray &plas) {return;}
+    virtual void givePlasticStrain(FloatArray &plas) { return; }
 
     /**
      * Returns plastic strains
      * @return plasticStrains
      */
-    virtual void giveOldPlasticStrain(FloatArray &plas) {return;}
+    virtual void giveOldPlasticStrain(FloatArray &plas) { return; }
 
     /**
      * Usually computes interpolation function, which is not needed for the lattice elements.

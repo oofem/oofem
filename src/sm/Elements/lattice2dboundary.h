@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -38,18 +38,24 @@
 
 #include "../sm/Elements/lattice2d.h"
 
-///@name Input fields for Lattice2d
+///@name Input fields for Lattice2dboundary
 //@{
 #define _IFT_Lattice2dBoundary_Name "latticeboundary2d"
 #define _IFT_Lattice2dBoundary_location "location"
-#define TOL 1.e-8
 //@}
+
+#define TOL 1.e-8
 
 namespace oofem {
 class Lattice2dBoundary : public Lattice2d
 {
     /*
-     *   This class implements a 2-dimensional lattice element
+     *   This class implements a 2-dimensional lattice element for the
+     *   boundaries of periodic cells. The theory for this element is
+     *   described in the "P. Grassl and M. Jirásek. "Meso-scale approach
+     *   to modelling the fracture process zone of concrete subjected to
+     *   uniaxial tension". International Journal of Solids and Structures.
+     *   Volume 47, Issues 7-8, pp. 957-968, 2010"
      */
 protected:
     int location;
@@ -59,7 +65,7 @@ public:
     ~Lattice2dBoundary();                                 // destructor
 
     virtual void giveInternalForcesVector(FloatArray &answer,
-                                           TimeStep *, int useUpdatedGpRecord = 0) override;
+                                          TimeStep *, int useUpdatedGpRecord = 0) override;
 
     int giveLocation() { return this->location; }
 
@@ -76,13 +82,13 @@ public:
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
-    
+
 #ifdef __OOFEG
-    void          drawYourself(oofegGraphicContext &context,TimeStep *tStep);
-    void          drawRawGeometry(oofegGraphicContext &,TimeStep *tStep);
-    void          drawRawCrossSections(oofegGraphicContext &,TimeStep *tStep);
+    void          drawYourself(oofegGraphicContext &context, TimeStep *tStep);
+    void          drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
+    void          drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
     void drawDeformedGeometry(oofegGraphicContext &,  TimeStep *tStep, UnknownType);
-    void drawSpecial(oofegGraphicContext &gc,TimeStep *tStep);
+    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
     virtual void giveCrossSectionCoordinates(FloatArray &coords);
 #endif
 
@@ -90,7 +96,7 @@ public:
 protected:
     void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
     virtual bool           computeGtoLRotationMatrix(FloatMatrix &) override;
-    
+
     void  computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) override;
@@ -98,7 +104,6 @@ protected:
     virtual double        giveLength() override;
     double        givePitch();
     void giveSwitches(FloatArray &answer);
-
 };
 } // end namespace oofem
 

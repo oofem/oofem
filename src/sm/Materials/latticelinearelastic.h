@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -57,7 +57,7 @@
 
 namespace oofem {
 /**
- * This class implements a local random isotropic damage model for concrete in tension for lattice elements.
+ * This class implements a local random linear elastic model for lattice elements.
  */
 class LatticeLinearElastic : public LinearElasticMaterial, public RandomMaterialExtensionInterface
     //
@@ -99,8 +99,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    //  virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
-
+  
     void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep) override;
 
 
@@ -108,19 +107,19 @@ public:
 
 
     void give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
     void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
     void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
     int hasMaterialModeCapability(MaterialMode mode) override;
 
@@ -128,7 +127,7 @@ public:
     Interface *giveInterface(InterfaceType) override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *) override;
+                              const FloatArray &, TimeStep *) override;
 
     void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) override { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
 
@@ -146,9 +145,9 @@ public:
 protected:
 
     int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *atTime) override;
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *atTime) override;
 };
 
 
@@ -166,7 +165,6 @@ public:
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
     const char *giveClassName() const { return "LatticeLinearElasticMaterialStatus"; }
-
 };
 } // end namespace oofem
 

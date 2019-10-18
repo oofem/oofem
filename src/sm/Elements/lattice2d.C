@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -87,16 +87,6 @@ Lattice2d :: giveCrackWidth()
     return status->giveCrackWidth();
 }
 
-// double
-// Lattice2d :: giveOldCrackWidth()
-// {
-//     LatticeMaterialStatus *status;
-//
-//     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-//     GaussPoint *gp = iRule->getIntegrationPoint(0);
-//     status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-//     return status->giveOldCrackWidth();
-// }
 
 
 double

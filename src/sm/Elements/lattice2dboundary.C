@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -50,7 +50,7 @@
 #include "../sm/Materials/structuralmaterial.h"
 
 #ifdef __OOFEG
-#include "oofeggraphiccontext.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
@@ -124,12 +124,12 @@ Lattice2dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
 
     answer.at(3, 1) = 0.;
     answer.at(3, 2) = 0.;
-    answer.at(3, 3) = -this->width/sqrt(12.);
+    answer.at(3, 3) = -this->width / sqrt(12.);
 
     answer.at(3, 4) = 0.;
     answer.at(3, 5) = 0.;
-    answer.at(3, 6) = this->width/sqrt(12.);
-   
+    answer.at(3, 6) = this->width / sqrt(12.);
+
 
     answer.times(1. / length);
 
@@ -150,10 +150,10 @@ Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    dV = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );    
+    dV = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     dbj.beProductOf(d, bj);
     answerTemp.plusProductUnsym(bj, dbj, dV);
-	
+
     answer.resize( computeNumberOfDofs(), computeNumberOfDofs() );
     answer.zero();
 
@@ -163,7 +163,7 @@ Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
         }
     }
 
-    
+
     //Rotate to global system
     FloatMatrix R;
     if ( this->giveRotationMatrix(R) ) {
@@ -236,7 +236,7 @@ Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 }
 
 void
-Lattice2dBoundary :: computeStrainVector (FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
+Lattice2dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN)
 // Computes the vector containing the strains at the Gauss point gp of
 // the receiver, at time step stepN. The nature of these strains depends
 // on the element's type.
@@ -317,8 +317,7 @@ Lattice2dBoundary :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 void
 Lattice2dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const {
-  answer = {D_u, D_v, R_w};
-
+    answer = { D_u, D_v, R_w };
 }
 
 
@@ -411,34 +410,34 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 
     answer.resize(9);
     answer.zero();
-    
+
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), b);
-    
+
     bt.beTranspositionOf(b);
-        // TotalStressVector = gp->giveStressVector() ;
-        if ( useUpdatedGpRecord == 1 ) {
-            TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0)) )
-                                ->giveStressVector();
-        } else
-        if ( !this->isActivated(tStep) ) {
-            strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );
-            strain.zero();
-        }
-        this->computeStrainVector(strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    // TotalStressVector = gp->giveStressVector() ;
+    if ( useUpdatedGpRecord == 1 ) {
+        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
+                            ->giveStressVector();
+    } else
+    if ( !this->isActivated(tStep) ) {
+        strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );
+        strain.zero();
+    }
+    this->computeStrainVector(strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
-        //    strain.beProductOf(b, u);
+    //    strain.beProductOf(b, u);
 
-        this->computeStressVector(TotalStressVector, strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-	//
-        // compute nodal representation of internal forces using f = B^T*Sigma dV
-        //
-        dV  = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0));
-        bs.beProductOf(bt, TotalStressVector);
-        bs.times(dV);
+    this->computeStressVector(TotalStressVector, strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
+    //
+    // compute nodal representation of internal forces using f = B^T*Sigma dV
+    //
+    dV  = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    bs.beProductOf(bt, TotalStressVector);
+    bs.times(dV);
 
-        for ( int m = 1; m <= 6; m++ ) {
-            answer.at(m) = bs.at(m);
-        }
+    for ( int m = 1; m <= 6; m++ ) {
+        answer.at(m) = bs.at(m);
+    }
 
     //Rotate to global system
 
@@ -470,25 +469,25 @@ Lattice2dBoundary :: giveSwitches(FloatArray &answer) {
     if ( location == 1 ) {
         answer(0) = 1;
         answer(1) = 0;
-    } else if ( location == 2 )      {
+    } else if ( location == 2 ) {
         answer(0) = 1;
         answer(1) = 1;
-    } else if ( location == 3 )      {
+    } else if ( location == 3 ) {
         answer(0) = 0;
         answer(1) = 1;
-    } else if ( location == 4 )      {
+    } else if ( location == 4 ) {
         answer(0) = -1;
         answer(1) = 1;
-    } else if ( location == 5 )      {
+    } else if ( location == 5 ) {
         answer(0) = -1;
         answer(1) = 0;
-    } else if ( location == 6 )      {
+    } else if ( location == 6 ) {
         answer(0) = -1;
         answer(1) = -1;
-    } else if ( location == 7 )      {
+    } else if ( location == 7 ) {
         answer(0) = 0;
         answer(1) = -1;
-    } else if ( location == 8 )      {
+    } else if ( location == 8 ) {
         answer(0) = 1;
         answer(1) = -1;
     }
@@ -498,33 +497,26 @@ Lattice2dBoundary :: giveSwitches(FloatArray &answer) {
 
 void Lattice2dBoundary :: saveContext(DataStream &stream, ContextMode mode)
 {
+    Lattice2d :: saveContext(stream, mode);
 
-  Lattice2d :: saveContext(stream, mode);
-  
 
     if ( ( mode & CM_Definition ) ) {
-
         if ( !stream.write(location) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-
     }
-
 }
 
 
 void
 Lattice2dBoundary :: restoreContext(DataStream &stream, ContextMode mode)
 {
+    Lattice2d :: restoreContext(stream, mode);
 
-  Lattice2d :: restoreContext(stream, mode);
-  
-  if ( mode & CM_Definition ) {
-
-      if ( !stream.read(location) ) {
-	THROW_CIOERR(CIO_IOERR);
-      }
- 
+    if ( mode & CM_Definition ) {
+        if ( !stream.read(location) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
     }
 }
 
@@ -537,12 +529,12 @@ Lattice2dBoundary :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
     OGC_PlotModeType mode = gc.giveIntVarPlotMode();
 
     if ( mode == OGC_rawGeometry ) {
-      this->drawRawGeometry(gc,tStep);
-      this->drawRawCrossSections(gc,tStep);
-    } else if ( mode == OGC_deformedGeometry )    {
-      this->drawDeformedGeometry(gc, tStep,DisplacementVector);
-    } else if ( mode == OGC_elemSpecial )  {
-      this->drawSpecial(gc,tStep);
+        this->drawRawGeometry(gc, tStep);
+        this->drawRawCrossSections(gc, tStep);
+    } else if ( mode == OGC_deformedGeometry ) {
+        this->drawDeformedGeometry(gc, tStep, DisplacementVector);
+    } else if ( mode == OGC_elemSpecial ) {
+        this->drawSpecial(gc, tStep);
     } else {
         OOFEM_ERROR("unsupported mode");
     }
@@ -598,7 +590,7 @@ void Lattice2dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep
     if ( normalDirection.at(2) == 0. ) {
         shearDirection.at(1) = 0.;
         shearDirection.at(2) = 1.;
-    } else   {
+    } else {
         shearDirection.at(1) = 1.0;
         shearDirection.at(2) =
             -normalDirection.at(1) / normalDirection.at(2);
@@ -711,12 +703,12 @@ void Lattice2dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
     dispTwo.at(1) = dispTwo.at(1) + projectionComponent.at(1) * dispThree.at(1);
     dispTwo.at(2) = dispTwo.at(2) + projectionComponent.at(2) * dispThree.at(2) + projectionComponent.at(1) * dispThree.at(3);
 
-    p [ 0 ].x = ( FPNum ) x1 + defScale *dispOne.at(1);
-    p [ 0 ].y = ( FPNum ) y1 + defScale *dispOne.at(2);
+    p [ 0 ].x = ( FPNum ) x1 + defScale * dispOne.at(1);
+    p [ 0 ].y = ( FPNum ) y1 + defScale * dispOne.at(2);
     p [ 0 ].z = 0.;
 
-    p [ 1 ].x = ( FPNum ) x2 + defScale *dispTwo.at(1);
-    p [ 1 ].y = ( FPNum ) y2 + defScale *dispTwo.at(2);
+    p [ 1 ].x = ( FPNum ) x2 + defScale * dispTwo.at(1);
+    p [ 1 ].y = ( FPNum ) y2 + defScale * dispTwo.at(2);
     p [ 1 ].z = 0.;
 
     go = CreateLine3D(p);
@@ -777,7 +769,7 @@ Lattice2dBoundary :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             if ( normalDirection.at(2) == 0. ) {
                 shearDirection.at(1) = 0.;
                 shearDirection.at(2) = 1.;
-            } else   {
+            } else {
                 shearDirection.at(1) = 1.0;
                 shearDirection.at(2) =
                     -normalDirection.at(1) / normalDirection.at(2);
@@ -796,7 +788,7 @@ Lattice2dBoundary :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
             if ( ( crackStatuses(0) == 1. ) ) {
                 EASValsSetColor( gc.getActiveCrackColor() );
-            } else if ( crackStatuses(0) == 2. )     {
+            } else if ( crackStatuses(0) == 2. ) {
                 EASValsSetColor( gc.getCrackPatternColor() );
             }
             tr = CreateLine3D(l);
@@ -839,7 +831,7 @@ Lattice2dBoundary :: giveCrossSectionCoordinates(FloatArray &coords)
     if ( normalDirection.at(2) == 0. ) {
         shearDirection.at(1) = 0.;
         shearDirection.at(2) = 1.;
-    } else   {
+    } else {
         shearDirection.at(1) = 1.0;
         shearDirection.at(2) =
             -normalDirection.at(1) / normalDirection.at(2);
