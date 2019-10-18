@@ -559,17 +559,17 @@ Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
 
         if ( dryingTimeNow > 0. ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_DryingShrinkage ) ) {
-	      this->computeIncrementOfDryingShrinkageVector(eps_sh, gp, dryingTimeNow, max(dryingTimeNow - dt, 0.));
+                this->computeIncrementOfDryingShrinkageVector(eps_sh, gp, dryingTimeNow, max(dryingTimeNow - dt, 0.));
                 answer.add(eps_sh);
             }
         }
 
-	if ( autoShrTimeNow > 0. ) {
+        if ( autoShrTimeNow > 0. ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
-	      this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, max(autoShrTimeNow - dt, 0.));
+                this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, max(autoShrTimeNow - dt, 0.));
                 answer.add(eps_sh);
             }
-	}
+        }
     } else { // total
         if ( dryingTimeNow > 0. ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_DryingShrinkage ) ) {
@@ -580,8 +580,8 @@ Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
 
         if ( autoShrTimeNow >  this->relMatAge ) {
             if ( ( this->shType == EC2_TotalShrinkage ) || ( this->shType == EC2_AutogenousShrinkage ) ) {
-	      this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, this->relMatAge / this->timeFactor);
-	      answer.add(eps_sh);
+                this->computeIncrementOfAutogenousShrinkageVector(eps_sh, gp, autoShrTimeNow, this->relMatAge / this->timeFactor);
+                answer.add(eps_sh);
             }
         }
     }
@@ -595,7 +595,6 @@ void
 Eurocode2CreepMaterial :: computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen)
 {
     int size;
-    FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
 
     if ( ( mode == _3dShell ) || ( mode ==  _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) ) {
@@ -604,19 +603,14 @@ Eurocode2CreepMaterial :: computeIncrementOfDryingShrinkageVector(FloatArray &an
         size = 6;
     }
 
-    fullAnswer.resize(size);
-    fullAnswer.zero();
+    FloatArray fullAnswer(size);
 
     if ( tNow > tThen ) {
-        double dEpsSh;
-
         // B.10
-        double beta_ds_now, beta_ds_then;
+        double beta_ds_now = tNow / ( tNow + 0.04 * pow(this->h0, 3. / 2.) );
+        double beta_ds_then = tThen / ( tThen + 0.04 * pow(this->h0, 3. / 2.) );
 
-        beta_ds_now = tNow / ( tNow + 0.04 * pow(this->h0, 3. / 2.) );
-        beta_ds_then = tThen / ( tThen + 0.04 * pow(this->h0, 3. / 2.) );
-
-        dEpsSh = ( beta_ds_now - beta_ds_then ) * this->kh * this->eps_cd_0;
+        double dEpsSh = ( beta_ds_now - beta_ds_then ) * this->kh * this->eps_cd_0;
 
         fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = dEpsSh;
     }
@@ -629,7 +623,6 @@ void
 Eurocode2CreepMaterial :: computeIncrementOfAutogenousShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen)
 {
     int size;
-    FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
 
     if ( ( mode == _3dShell ) || ( mode ==  _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) ) {
@@ -638,20 +631,14 @@ Eurocode2CreepMaterial :: computeIncrementOfAutogenousShrinkageVector(FloatArray
         size = 6;
     }
 
-    fullAnswer.resize(size);
-    fullAnswer.zero();
-
+    FloatArray fullAnswer(size);
 
     if ( tNow > tThen ) {
-        double dEpsAu;
-
         // B.13
-        double beta_as_now, beta_as_then;
+        double beta_as_now = 1. - exp( -0.2 * sqrt(tNow) );
+        double beta_as_then = 1. - exp( -0.2 * sqrt(tThen) );
 
-        beta_as_now = 1. - exp( -0.2 * sqrt(tNow) );
-        beta_as_then = 1. - exp( -0.2 * sqrt(tThen) );
-
-        dEpsAu = ( beta_as_now - beta_as_then ) * this->eps_ca_infty;
+        double dEpsAu = ( beta_as_now - beta_as_then ) * this->eps_ca_infty;
 
         fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = dEpsAu;
     }

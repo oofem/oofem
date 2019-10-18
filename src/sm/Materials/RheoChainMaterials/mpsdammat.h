@@ -110,31 +110,31 @@ public:
     virtual const FloatArray &giveTempViscoelasticStressVector() const { return tempEffectiveStressVector; }
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level.
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated damage level.
-    double giveDamage() { return damage; }
+    double giveDamage() const { return damage; }
     /// Returns the temp. damage level.
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
     /// Returns characteristic length stored in receiver.
-    double giveCharLength() { return charLength; }
+    double giveCharLength() const { return charLength; }
     /// Sets characteristic length to given value.
     void setCharLength(double length) { charLength = length; }
     /// Returns crack vector stored in receiver. This is useful for plotting cracks as a vector field (paraview etc.).
-    void giveCrackVector(FloatArray &answer);
+    void giveCrackVector(FloatArray &answer) const;
     /// Sets crack vector to given value. This is useful for plotting cracks as a vector field (paraview etc.).
     void setCrackVector(FloatArray cv) { crackVector = cv; }
 
     void sete0(double e0) { var_e0 = e0; }
     void setgf(double gf) { var_gf = gf; }
-    double givee0() { return var_e0; }
-    double givegf() { return var_gf; }
+    double givee0() const { return var_e0; }
+    double givegf() const { return var_gf; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
     void initTempStatus() override;
@@ -146,7 +146,6 @@ public:
     void setResidualTensileStrength(double src) { residTensileStrength = src; }
     double giveResidualTensileStrength(void) { return residTensileStrength; }
 #endif
-
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -242,8 +241,8 @@ public:
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    double givee0(GaussPoint *gp);
-    double givegf(GaussPoint *gp);
+    double givee0(GaussPoint *gp) const;
+    double givegf(GaussPoint *gp) const;
 
     /**
      * Abstract service allowing to perform some initialization, when damage first appear.
@@ -259,29 +258,29 @@ public:
 
     /**
      * Computes the value of damage omega, based on given value of equivalent strain.
-     * @param[out] omega Contains result.
      * @param kappa Equivalent strain measure.
      * @param strain Total strain in full form.
      * @param gp Integration point.
+     * @return Damage.
      */
-    void computeDamage(double &omega, double kappa, GaussPoint *gp);
+    double computeDamage(double kappa, GaussPoint *gp) const;
 
     /**
      * computes the value of damage parameter omega,
      * based on a given value of equivalent strain,
      * using iterations to achieve objectivity,
      * based on the crack band concept (effective element size used)
-     * @param[out] omega Contains the resulting damage.
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
+     * @return Damage.
      */
-    void computeDamageForCohesiveCrack(double &omega, double kappa, GaussPoint *gp);
+    double computeDamageForCohesiveCrack(double kappa, GaussPoint *gp) const;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 
-    virtual double computeTensileStrength(double equivalentTime);
-    virtual double computeFractureEnergy(double equivalentTime);
+    virtual double computeTensileStrength(double equivalentTime) const;
+    virtual double computeFractureEnergy(double equivalentTime) const;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,

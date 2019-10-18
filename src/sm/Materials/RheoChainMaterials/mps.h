@@ -288,16 +288,16 @@ protected:
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
-    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) override;
+    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) const override;
 
-    double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu) override;
-    double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) override;
+    double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const override;
+    double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const override;
 
     /// Evaluation of the flow term viscosity
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
     /// Returns initial value of the flow term viscosity
-    double giveInitViscosity(TimeStep *tStep);
+    double giveInitViscosity(TimeStep *tStep) const;
 
     void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 

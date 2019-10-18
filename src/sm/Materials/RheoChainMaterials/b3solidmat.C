@@ -700,55 +700,49 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int op
 
 
 double
-B3SolidMaterial :: giveInitMicroPrestress()
+B3SolidMaterial :: giveInitMicroPrestress() const
 {
-    double S0;
-    S0 = 1 / ( c0 * tS0 );
-    return S0;
+    return 1 / ( c0 * tS0 );
 }
 
 
 double
-B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humidity at given TimeStep
+B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) const //computes humidity at given TimeStep
 {
-    double humidity = 0.;
-
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
     FieldPtr tf;
-    FloatArray gcoords, et2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-    int err;
+        FloatArray gcoords, et2;
+        int err;
         gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         // convert water mass to relative humidity
-        humidity = this->inverse_sorption_isotherm( et2.at(1) );
+        return this->inverse_sorption_isotherm( et2.at(1) );
     } else {
         OOFEM_ERROR("external fields not found");
+        return 0.;
     }
 
-    return humidity;
 }
 
 
 double
 B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //computes humidity increment at given TimeStep
 {
-    double humIncrement = 0.;
-    int err, wflag = 0;
-
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
     FieldPtr tf;
-    FloatArray gcoords, et2, ei2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
+        FloatArray gcoords, et2, ei2;
+        int err;
         gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
@@ -759,15 +753,11 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
         }
 
         // convert water mass to relative humidity
-        humIncrement = this->inverse_sorption_isotherm( et2.at(1) ) - this->inverse_sorption_isotherm( et2.at(1) - ei2.at(1) );
-        wflag = 1;
-    }
-
-    if ( wflag == 0 ) {
+        return this->inverse_sorption_isotherm( et2.at(1) ) - this->inverse_sorption_isotherm( et2.at(1) - ei2.at(1) );
+    } else {
         OOFEM_ERROR("external fields not found");
+        return 0.;
     }
-
-    return humIncrement;
 }
 
 

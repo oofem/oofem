@@ -391,12 +391,12 @@ RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 // takes into account the form of the load vector assumed by engngModel (Incremental or Total Load form)
 //
 {
-    FloatArray e0;
 
     // strain due to temperature changes and shrinkage
     this->computeTrueStressIndependentStrainVector(answer, gp, tStep, mode);
     // strain due to creep
     if ( Material :: isActivated(tStep) ) {
+        FloatArray e0;
         this->giveEigenStrainVector(e0, gp, tStep, mode);
         if ( e0.giveSize() ) {
             answer.add(e0);

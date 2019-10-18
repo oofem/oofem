@@ -178,10 +178,10 @@ protected:
     double computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option);
 
     /// Computes initial value of the MicroPrestress
-    double giveInitMicroPrestress(void);
+    double giveInitMicroPrestress() const;
 
     /// Computes relative humidity at given time step and GP
-    double giveHumidity(GaussPoint *gp, TimeStep *tStep);
+    double giveHumidity(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Computes relative humidity increment at given time step and GP
     double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep);
