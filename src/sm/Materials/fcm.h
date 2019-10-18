@@ -203,7 +203,7 @@ public:
     FCMMaterial(int n, Domain *d);
     virtual ~FCMMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveClassName() const override { return "FCMMaterial"; }
 

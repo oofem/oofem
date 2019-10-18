@@ -63,8 +63,8 @@ std :: vector< std :: vector< int > >StructuralMaterial :: svIndex = {
 StructuralMaterial :: StructuralMaterial(int n, Domain *d) : Material(n, d) { }
 
 
-int
-StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

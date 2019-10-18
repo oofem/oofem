@@ -86,10 +86,10 @@ public:
         if ( t == GradientDamageMaterialExtensionInterfaceType ) {
             return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
-            return NULL;
+            return nullptr;
         }
     }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual bool hasMaterialModeCapability(MaterialMode mode) const;
 
     virtual void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

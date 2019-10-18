@@ -184,7 +184,7 @@ public:
     RCM2Material(int n, Domain * d);
     virtual ~RCM2Material();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveClassName() const override { return "RCM2Material"; }
 

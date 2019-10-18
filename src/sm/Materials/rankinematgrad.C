@@ -88,8 +88,8 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
 }
 /////////////////////////////////////////////////////////////////////////////
 
-int
-RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode)
+bool
+RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _PlaneStress;
 }

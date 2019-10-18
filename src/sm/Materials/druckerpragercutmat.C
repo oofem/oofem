@@ -69,9 +69,8 @@ DruckerPragerCutMat :: DruckerPragerCutMat(int n, Domain *d) : MPlasticMaterial2
 DruckerPragerCutMat :: ~DruckerPragerCutMat()
 { }
 
-// specifies whether a given material mode is supported by this model
-int
-DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode)
+bool
+DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStrain;
 }

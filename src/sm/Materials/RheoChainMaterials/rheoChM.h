@@ -216,7 +216,7 @@ public:
     virtual FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const = 0;
 
     // identification and auxiliary functions
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     bool hasCastingTimeSupport() const override { return true; }
 

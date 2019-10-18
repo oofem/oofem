@@ -150,7 +150,7 @@ public:
     double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

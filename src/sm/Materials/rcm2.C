@@ -63,8 +63,8 @@ RCM2Material :: ~RCM2Material()
     //delete linearElasticMaterial;
 }
 
-int
-RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+RCM2Material :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

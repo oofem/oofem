@@ -337,7 +337,7 @@ public:
                                     GaussPoint *gp,
                                     TimeStep *tStep);
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 

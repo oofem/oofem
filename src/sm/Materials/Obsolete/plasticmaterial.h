@@ -125,7 +125,7 @@ public:
     virtual ~PlasticMaterial();
 
     // identification and auxiliary functions
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "PlasticMaterial"; }
 
     /// Returns reference to undamaged (bulk) material.

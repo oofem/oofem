@@ -54,7 +54,7 @@ public:
     DummyMaterial(int n, Domain * d) : Material(n, d) { }
     virtual ~DummyMaterial() { }
 
-    int hasMaterialModeCapability(MaterialMode mode) override { return 0; }
+    bool hasMaterialModeCapability(MaterialMode mode) const override { return false; }
 
     const char *giveClassName() const override { return "DummyMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_DummyMaterial_Name; }

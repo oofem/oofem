@@ -50,11 +50,8 @@ FCMMaterial :: FCMMaterial(int n, Domain *d) : StructuralMaterial(n, d),
 
 FCMMaterial :: ~FCMMaterial() {}
 
-int
-FCMMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+FCMMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }

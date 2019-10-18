@@ -77,11 +77,8 @@ MDM :: CreateStatus(GaussPoint *gp) const
 }
 
 
-int
-MDM :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+MDM :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }

@@ -63,8 +63,8 @@ SteelRelaxMat :: ~SteelRelaxMat()
 {}
 
 
-int
-SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode)
+bool
+SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether the receiver supports the given mode
 //

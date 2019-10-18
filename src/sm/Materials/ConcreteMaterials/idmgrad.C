@@ -101,8 +101,8 @@ IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
 
 
 
-int
-IsotropicGradientDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+IsotropicGradientDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _1dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _3dMat;
 }

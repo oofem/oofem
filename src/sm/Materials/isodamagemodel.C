@@ -61,11 +61,8 @@ IsotropicDamageMaterial :: ~IsotropicDamageMaterial()
     delete linearElasticMaterial;
 }
 
-int
-IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
 }

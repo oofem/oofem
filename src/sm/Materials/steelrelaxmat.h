@@ -158,7 +158,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
 

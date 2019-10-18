@@ -106,7 +106,7 @@ public:
     virtual ~Masonry02();
 
     IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_Masonry02_Name; }
     const char *giveClassName() const override { return "Masonry02"; }

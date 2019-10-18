@@ -47,8 +47,8 @@ TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d
 { }
 
 
-int
-TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _1dMat;
 }

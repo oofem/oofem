@@ -119,13 +119,13 @@ Material :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-int
-Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+Material :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
 {
-    return 0;
+    return false;
 }
 
 bool

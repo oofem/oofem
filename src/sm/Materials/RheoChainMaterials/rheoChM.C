@@ -63,11 +63,8 @@ RheoChainMaterial :: ~RheoChainMaterial()
 }
 
 
-int
-RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether the receiver supports the given mode
-//
+bool
+RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress ||
            mode == _PlaneStrain || mode == _1dMat ||

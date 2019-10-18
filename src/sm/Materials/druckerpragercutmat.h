@@ -103,7 +103,7 @@ public:
     DruckerPragerCutMat(int n, Domain * d);
     virtual ~DruckerPragerCutMat();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     
     bool hasCastingTimeSupport() const override { return true; }
 

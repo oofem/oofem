@@ -97,7 +97,7 @@ public:
 
     double give(int aProperty, GaussPoint *gp) override;
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
     const char *giveInputRecordName() const override { return _IFT_HeMoBazNajMaterial_Name; }

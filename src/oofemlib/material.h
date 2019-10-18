@@ -177,7 +177,7 @@ public:
      * @param mode Required material mode.
      * @return Nonzero if supported, zero otherwise.
      */
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual bool hasMaterialModeCapability(MaterialMode mode) const;
 
     /**
      * Tests if material supports casting time

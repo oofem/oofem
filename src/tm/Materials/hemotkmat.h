@@ -110,7 +110,7 @@ public:
 
     double give(int aProperty, GaussPoint *gp) override;
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     // identification

@@ -192,7 +192,7 @@ public:
     MPlasticMaterial2(int n, Domain * d);
     virtual ~MPlasticMaterial2();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "MPlasticMaterial2"; }
 
     /// Returns reference to undamaged (bulk) material

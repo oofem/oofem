@@ -230,7 +230,7 @@ public:
     MPSDamMaterial(int n, Domain *d);
     virtual ~MPSDamMaterial() { }
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_MPSDamMaterial_Name; }
     const char *giveClassName() const override { return "MPSDamMaterial"; }

@@ -111,8 +111,8 @@ WinklerPasternakMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-int
-WinklerPasternakMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+WinklerPasternakMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

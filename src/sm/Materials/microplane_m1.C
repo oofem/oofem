@@ -417,8 +417,8 @@ M1Material :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
-M1Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+M1Material :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _PlaneStress;
 }

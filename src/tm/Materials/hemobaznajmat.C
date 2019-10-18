@@ -42,14 +42,10 @@ namespace oofem {
 
 REGISTER_Material( HeMoBazNajMaterial );
 
-int
-HeMoBazNajMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+HeMoBazNajMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( ( mode == _2dHeMo ) || ( mode == _3dHeMo ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _2dHeMo || mode == _3dHeMo;
 }
 
 

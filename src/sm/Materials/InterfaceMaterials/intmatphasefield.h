@@ -83,7 +83,7 @@ protected:
 public:
     IntMatPhaseField(int n, Domain * d);
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "IntMatPhaseField"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatPhaseField_Name; }
 

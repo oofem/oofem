@@ -42,8 +42,8 @@
 #include "contextioerr.h"
 
 namespace oofem {
-int
-PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

@@ -206,7 +206,7 @@ public:
     /// Destructor
     virtual ~AnisotropicDamageMaterial() {}
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveClassName() const override { return "AnisotropicDamageMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_AnisotropicDamageMaterial_Name; }

@@ -187,7 +187,7 @@ public:
     /// Destructor
     virtual ~IsotropicDamageMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "IsotropicDamageMaterial"; }
 
     /// Returns reference to undamaged (bulk) material

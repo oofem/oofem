@@ -138,7 +138,7 @@ public:
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    int hasMaterialModeCapability(MaterialMode) override;
+    bool hasMaterialModeCapability(MaterialMode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_TrabBoneMaterial_Name; }
     const char *giveClassName() const override { return "TrabBoneMaterial"; }

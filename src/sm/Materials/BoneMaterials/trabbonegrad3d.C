@@ -53,8 +53,8 @@ TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d), GradientD
 TrabBoneGrad3D :: ~TrabBoneGrad3D()
 { }
 
-int
-TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
+bool
+TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat;
 }

@@ -152,7 +152,7 @@ public:
                                  FloatArray *stressVector3d,
                                  FloatArray *PlasticStrainVector3d) { }
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "PerfectlyPlasticMaterial"; }
     IRResultType initializeFrom(InputRecord *ir) override;
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }

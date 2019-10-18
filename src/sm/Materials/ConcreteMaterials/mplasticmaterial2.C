@@ -69,8 +69,8 @@ MPlasticMaterial2 :: ~MPlasticMaterial2()
 }
 
 
-int
-MPlasticMaterial2 :: hasMaterialModeCapability(MaterialMode mode)
+bool
+MPlasticMaterial2 :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

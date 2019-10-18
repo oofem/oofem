@@ -219,11 +219,8 @@ MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
 }
 
 
-int
-MPSDamMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+MPSDamMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
 }

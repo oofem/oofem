@@ -59,8 +59,8 @@ LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d),
 LatticeDamage2d :: ~LatticeDamage2d()
 { }
 
-int
-LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode)
+bool
+LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _2dLattice;
 }

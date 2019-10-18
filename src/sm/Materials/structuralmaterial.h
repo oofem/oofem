@@ -135,7 +135,7 @@ public:
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "StructuralMaterial"; }
 
     IRResultType initializeFrom(InputRecord *ir) override;

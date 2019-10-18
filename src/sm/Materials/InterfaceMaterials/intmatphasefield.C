@@ -50,15 +50,11 @@ REGISTER_Material(IntMatPhaseField);
 IntMatPhaseField::IntMatPhaseField(int n, Domain *d) : StructuralInterfaceMaterialPhF(n, d) {}
 
 
-int
-IntMatPhaseField :: hasMaterialModeCapability(MaterialMode mode)
+bool
+IntMatPhaseField :: hasMaterialModeCapability(MaterialMode mode) const
 {
     // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return mode == _3dInterface;
 }
 
 FloatArrayF<3>
