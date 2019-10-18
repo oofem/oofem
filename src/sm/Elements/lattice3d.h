@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -75,11 +75,6 @@ public:
 
     int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
-    /**
-     * This function is different from the standard computeGlobalCorrdinates
-     * function as it returns the global coordinates of the gausspoint
-     * independent to the value of the lcoords.
-     */
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
     double giveLength() override;
@@ -132,12 +127,12 @@ public:
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
- #ifdef __OOFEG
+#ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
     virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
     void drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep * tStep, UnknownType);
- #endif
+    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+#endif
 
 
 protected:
@@ -148,14 +143,12 @@ protected:
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
     /**
-     * This computes the geometrical properties of the element. It is called only once.
+     * This computes the geometrical properties of the element once.
      */
     void computePropertiesOfCrossSection();
 
     void computeGaussPoints() override;
     virtual integrationDomain  giveIntegrationDomain() { return _Line; }
 };
-
-
 } // end namespace oofem
 #endif

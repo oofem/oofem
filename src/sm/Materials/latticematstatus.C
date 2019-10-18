@@ -208,5 +208,4 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     }
 }
 
-}
 } // end namespace oofem

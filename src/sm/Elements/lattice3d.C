@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -59,7 +59,7 @@ REGISTER_Element(Lattice3d);
 
 Lattice3d :: Lattice3d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
 {
-    numberOfDofMans     = 2;
+    numberOfDofMans = 2;
     geometryFlag = 0;
     this->eccS = 0.;
     this->eccT = 0.;
@@ -228,21 +228,21 @@ Lattice3d :: giveCrackWidth()
 }
 
 void
-Lattice3d :: givePlasticStrain(FloatArray& plasticStrain)
+Lattice3d :: givePlasticStrain(FloatArray &plasticStrain)
 {
-  GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
-  LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
-  plasticStrain = status->givePlasticStrain();
-  return;
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
+    plasticStrain = status->givePlasticStrain();
+    return;
 }
 
 void
-Lattice3d :: giveOldPlasticStrain(FloatArray& plasticStrain)
+Lattice3d :: giveOldPlasticStrain(FloatArray &plasticStrain)
 {
-  GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
-  LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
-  plasticStrain = status->giveOldPlasticStrain();
-  return;
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
+    plasticStrain = status->giveOldPlasticStrain();
+    return;
 }
 
 void
@@ -269,7 +269,7 @@ Lattice3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
-    double volume = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0));
+    double volume = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     for ( int i = 1; i <= 6; i++ ) {
         d.at(i, i) *= volume;
@@ -286,7 +286,7 @@ void Lattice3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+    integrationRulesArray [ 0 ].reset(new GaussIntegrationRule(1, this, 1, 3) );
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _3dLattice);
 }
 
@@ -433,7 +433,7 @@ Lattice3d :: computeGeometryProperties()
         this->normal.at(i + 1) = coordsB.at(i + 1) - coordsA.at(i + 1);
     }
 
-    this->length  = sqrt( pow(normal.at(1), 2.) + pow(normal.at(2), 2.) + pow(normal.at(3), 2.) );
+    this->length  = sqrt(pow(normal.at(1), 2.) + pow(normal.at(2), 2.) + pow(normal.at(3), 2.) );
 
     // Compute midpoint
     this->midPoint.resize(3);
@@ -560,7 +560,7 @@ Lattice3d :: computeCrossSectionProperties() {
         }
     }
 
-    centroid.times( 1. / ( 6. * this->area ) );
+    centroid.times(1. / ( 6. * this->area ) );
 
     centroid.at(1) = lpc.at(1); //The first component of all lpcs should be the same
 
@@ -605,7 +605,7 @@ Lattice3d :: computeCrossSectionProperties() {
     double sum = fabs(Ixx + Iyy);
     double pi = 3.14159265;
     if ( ( fabs(Ixx - Iyy) / sum > 1.e-6 ) && fabs(Ixy) / sum > 1.e-6 ) {
-        angleChange = 0.5 * atan( -2 * Ixy / ( Ixx - Iyy ) );
+        angleChange = 0.5 * atan(-2 * Ixy / ( Ixx - Iyy ) );
     } else if ( ( fabs(Ixx - Iyy) / sum < 1.e-6 ) && fabs(Ixy) / sum > 1.e-6 ) {
         angleChange = pi / 4.;
     }
@@ -616,8 +616,8 @@ Lattice3d :: computeCrossSectionProperties() {
 
     //Moment of inertias saved in the element
 
-    this->I1 = ( Ixx + Iyy ) / 2. + sqrt( pow( ( Ixx - Iyy ) / 2., 2. ) + pow(Ixy, 2.) );
-    this->I2 = ( Ixx + Iyy ) / 2. - sqrt( pow( ( Ixx - Iyy ) / 2., 2. ) + pow(Ixy, 2.) );
+    this->I1 = ( Ixx + Iyy ) / 2. + sqrt(pow( ( Ixx - Iyy ) / 2., 2.) + pow(Ixy, 2.) );
+    this->I2 = ( Ixx + Iyy ) / 2. - sqrt(pow( ( Ixx - Iyy ) / 2., 2.) + pow(Ixy, 2.) );
 
     this->Ip = I1 + I2;
 
@@ -659,7 +659,7 @@ Lattice3d :: computeCrossSectionProperties() {
         }
     }
 
-    centroid.times( 1. / ( 6. * this->area ) );
+    centroid.times(1. / ( 6. * this->area ) );
 
     centroid.at(1) = lpc.at(1); //The first component of all lpcs should be the same
 
@@ -760,7 +760,7 @@ void Lattice3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
@@ -833,7 +833,7 @@ void Lattice3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep,
     WCRec p [ 2 ]; /* points */
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);

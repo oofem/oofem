@@ -586,18 +586,6 @@ public:
                                         TimeStep *tStep);
 
     /**
-     * Method for computing 1d lattice stiffness matrix of receiver.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep) {};
-
-
-    /**
      * Method for computing 2d lattice stiffness matrix of receiver.
      * @param answer Stiffness matrix.
      * @param mmode Material response mode.
