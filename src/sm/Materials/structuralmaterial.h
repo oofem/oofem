@@ -189,6 +189,7 @@ public:
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual void giveRealStressVector_Lattice1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) {};
     virtual void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation is not provided
@@ -572,6 +573,18 @@ public:
     virtual void giveFiberStiffMtrx(FloatMatrix &answer,
                                     MatResponseMode mmode, GaussPoint *gp,
                                     TimeStep *tStep);
+
+
+    /**
+     * Method for computing 1d lattice stiffness matrix of receiver.
+     * @param answer Stiffness matrix.
+     * @param mmode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void give1dLatticeStiffMtrx(FloatMatrix &answer,
+                                        MatResponseMode mmode, GaussPoint *gp,
+                                        TimeStep *tStep) {};
 
 
     /**

@@ -72,6 +72,7 @@ set (sm_element
     Elements/lumpedmasselement.C
     Elements/springelement.C
     Elements/lattice2d.C
+    Elements/lattice2dboundary.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C
@@ -225,7 +226,8 @@ set (sm_material
     Materials/rankinematgrad.C
     Materials/rankinematnl.C
     Materials/latticematstatus.C
-    Materials/latticedamage2d.C
+    Materials/latticelinearelastic.C
+    Materials/latticedamage.C
     Materials/dustmat.C
     Materials/lsmastermat.C
     Materials/lsmastermatgrad.C

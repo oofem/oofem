@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -90,7 +90,7 @@ public:
     int giveCrackFlag() override;
 
     double giveCrackWidth() override;
-    double giveOldCrackWidth() override;
+    //double giveOldCrackWidth() override;
 
     double giveDissipation() override;
     double giveDeltaDissipation() override;
