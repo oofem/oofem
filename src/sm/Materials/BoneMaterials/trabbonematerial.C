@@ -289,10 +289,6 @@ TrabBoneMaterialStatus :: TrabBoneMaterialStatus(GaussPoint *g) : StructuralMate
 }
 
 
-TrabBoneMaterialStatus :: ~TrabBoneMaterialStatus()
-{ }
-
-
 double
 TrabBoneMaterialStatus :: giveAlpha()
 {

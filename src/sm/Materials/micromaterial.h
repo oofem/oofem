@@ -64,8 +64,6 @@ class MicroMaterialStatus : public StructuralMaterialStatus
 public:
     /// Constructor
     MicroMaterialStatus(GaussPoint * gp);
-    /// Destructor
-    virtual ~MicroMaterialStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

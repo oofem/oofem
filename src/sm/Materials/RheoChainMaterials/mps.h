@@ -125,7 +125,6 @@ protected:
 
 public:
     MPSMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~MPSMaterialStatus() { }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

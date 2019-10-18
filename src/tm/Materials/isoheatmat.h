@@ -98,7 +98,6 @@ class IsotropicHeatTransferMaterialStatus : public TransportMaterialStatus
 {
 public:
     IsotropicHeatTransferMaterialStatus(GaussPoint * g);
-    virtual ~IsotropicHeatTransferMaterialStatus();
     void updateYourself(TimeStep *tStep) override;
 };
 

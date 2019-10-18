@@ -69,7 +69,6 @@ protected:
 
 public:
     Eurocode2CreepMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~Eurocode2CreepMaterialStatus() { }
 
     void updateYourself(TimeStep *tStep) override;
 

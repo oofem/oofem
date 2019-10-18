@@ -2366,21 +2366,15 @@ FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
 }
 
 
-FCMMaterialStatus :: ~FCMMaterialStatus()
-{ }
-
-
-
 void
 FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->giveNumberOfCracks() > 0 ) {
-        for ( i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
+        for ( int i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
             switch ( crackStatuses.at(i) ) {
             case pscm_NONE:
                 strcpy(s, "NONE");

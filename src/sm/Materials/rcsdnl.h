@@ -64,7 +64,6 @@ protected:
 
 public:
     RCSDNLMaterialStatus(GaussPoint *gp);
-    virtual ~RCSDNLMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

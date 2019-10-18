@@ -480,10 +480,6 @@ RCSDMaterialStatus :: RCSDMaterialStatus(GaussPoint *g) :
 }
 
 
-RCSDMaterialStatus :: ~RCSDMaterialStatus()
-{ }
-
-
 void
 RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

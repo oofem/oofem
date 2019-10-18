@@ -114,7 +114,6 @@ protected:
 
 public:
     LargeStrainMasterMaterialStatus(GaussPoint *g, Domain *d, int s);
-    virtual ~LargeStrainMasterMaterialStatus();
 
     const FloatMatrix &givePmatrix() { return Pmatrix; }
     const FloatMatrix &giveTLmatrix() { return TLmatrix; }

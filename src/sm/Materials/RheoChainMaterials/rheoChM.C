@@ -724,9 +724,6 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(GaussPoint *g, int nunits) :
 }
 
 
-RheoChainMaterialStatus :: ~RheoChainMaterialStatus() { }
-
-
 void
 RheoChainMaterialStatus :: letTempHiddenVarsVectorBe(int i, FloatArray &valueArray)
 {

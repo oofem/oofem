@@ -423,10 +423,6 @@ LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(GaussPoint *g
 }
 
 
-LargeStrainMasterMaterialStatus :: ~LargeStrainMasterMaterialStatus()
-{ }
-
-
 void
 LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

@@ -182,10 +182,6 @@ MazarsNLMaterialStatus :: MazarsNLMaterialStatus(GaussPoint *g) :
 }
 
 
-MazarsNLMaterialStatus :: ~MazarsNLMaterialStatus()
-{ }
-
-
 void
 MazarsNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

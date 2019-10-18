@@ -62,7 +62,6 @@ protected:
 
 public:
     M1MaterialStatus(GaussPoint *g);
-    virtual ~M1MaterialStatus();
 
     const char *giveClassName() const override { return "M1MaterialStatus"; }
     void letTempNormalMplaneStressesBe(FloatArray sigmaN) { tempSigN =  std :: move(sigmaN); }
@@ -148,7 +147,6 @@ protected:
 
 public:
     M1MaterialStatus(GaussPoint *g);
-    virtual ~M1MaterialStatus();
 
     // definition
     const char *giveClassName() const override { return "M1MaterialStatus"; }

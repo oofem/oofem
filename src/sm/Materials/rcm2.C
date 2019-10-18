@@ -997,11 +997,6 @@ RCM2MaterialStatus :: RCM2MaterialStatus(GaussPoint *g) :
 }
 
 
-RCM2MaterialStatus :: ~RCM2MaterialStatus()
-{ }
-
-
-
 int
 RCM2MaterialStatus :: isCrackActive(int i) const
 //

@@ -70,7 +70,6 @@ protected:
 public:
 
     RCSDEMaterialStatus(GaussPoint * g);
-    virtual ~RCSDEMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

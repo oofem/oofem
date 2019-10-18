@@ -44,7 +44,7 @@ REGISTER_Material(HeMoKunzelMaterial);
 bool
 HeMoKunzelMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    return mode == _2dHeMo || mode == _3dHeMo;z
+    return mode == _2dHeMo || mode == _3dHeMo;
 }
 
 

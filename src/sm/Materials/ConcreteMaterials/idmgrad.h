@@ -125,12 +125,11 @@ class IsotropicGradientDamageMaterialStatus : public IsotropicDamageMaterial1Sta
 {
 public:
     IsotropicGradientDamageMaterialStatus(GaussPoint *g);
-    virtual ~IsotropicGradientDamageMaterialStatus();
 
-    virtual const char *giveClassName() const { return "IsotropicGradientDamageMaterialStatus"; }
+    const char *giveClassName() const override { return "IsotropicGradientDamageMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *) override;
 };
 } // end namespace oofem
 #endif // idmgrad_h

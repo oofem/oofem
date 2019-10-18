@@ -63,8 +63,6 @@ protected:
 public:
     RVEStokesFlowMaterialStatus(int n, int rank, GaussPoint * g, const std :: string &inputfile);
 
-    virtual ~RVEStokesFlowMaterialStatus();
-
     void setTimeStep(TimeStep *tStep);
 
     void initTempStatus() override;

@@ -73,8 +73,6 @@ protected:
 public:
     ///Constructor
     LatticeTransportMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~LatticeTransportMaterialStatus() { }
 
     void printOutputAt(FILE *, TimeStep *) override;
 

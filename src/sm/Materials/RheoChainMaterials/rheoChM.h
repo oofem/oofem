@@ -95,7 +95,6 @@ protected:
 
 public:
     RheoChainMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~RheoChainMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

@@ -90,8 +90,6 @@ protected:
 public:
     /// Constructor. Creates new StructuralMaterialStatus with IntegrationPoint g.
     StructuralMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~StructuralMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

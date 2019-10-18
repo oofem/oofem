@@ -67,8 +67,6 @@ protected:
 public:
     /// Constructor.
     IDNLMaterialStatus(GaussPoint *g);
-    /// Destructor.
-    virtual ~IDNLMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

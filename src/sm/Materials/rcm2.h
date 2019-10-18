@@ -102,7 +102,6 @@ protected:
 
 public:
     RCM2MaterialStatus(GaussPoint * g);
-    virtual ~RCM2MaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

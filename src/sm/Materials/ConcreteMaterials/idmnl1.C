@@ -844,10 +844,6 @@ IDNLMaterialStatus :: IDNLMaterialStatus(GaussPoint *g) :
 }
 
 
-IDNLMaterialStatus :: ~IDNLMaterialStatus()
-{ }
-
-
 void
 IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

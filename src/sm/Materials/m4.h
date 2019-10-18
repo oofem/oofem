@@ -65,7 +65,6 @@ protected:
 
 public:
     M4MaterialStatus(GaussPoint *g, int nplanes);
-    virtual ~M4MaterialStatus();
 
     const char *giveClassName() const override { return "M4MaterialStatus"; }
 

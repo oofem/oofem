@@ -66,7 +66,6 @@ REGISTER_Material(MicroMaterial);
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
 MicroMaterialStatus :: MicroMaterialStatus(GaussPoint *gp) : StructuralMaterialStatus(gp) { }
 
-MicroMaterialStatus :: ~MicroMaterialStatus() { }
 
 void MicroMaterialStatus :: initTempStatus()
 {

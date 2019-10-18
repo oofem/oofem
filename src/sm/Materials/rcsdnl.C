@@ -446,10 +446,6 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(GaussPoint *g) :
 }
 
 
-RCSDNLMaterialStatus :: ~RCSDNLMaterialStatus()
-{ }
-
-
 void
 RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

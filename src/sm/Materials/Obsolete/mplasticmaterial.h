@@ -86,7 +86,6 @@ protected:
 
 public:
     MPlasticMaterialStatus(GaussPoint * g, int statusSize);
-    virtual ~MPlasticMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

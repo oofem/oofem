@@ -82,8 +82,6 @@ public:
      * @param inputfile The input file describing the micro problem.
      */
     FE2FluidMaterialStatus(int n, int rank, GaussPoint * gp, const std :: string & inputfile);
-    /// Destructor
-    virtual ~FE2FluidMaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
     MixedGradientPressureBC *giveBC() { return this->bc; }

@@ -67,8 +67,6 @@ protected:
 public:
     NonlinearFluidMaterialStatus(GaussPoint * g);
 
-    virtual ~NonlinearFluidMaterialStatus() { }
-
     void initTempStatus() override;
 
     void updateYourself(TimeStep *tStep) override;

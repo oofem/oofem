@@ -59,8 +59,6 @@ protected:
 public:
     /// Constructor
     MazarsNLMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~MazarsNLMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

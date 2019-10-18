@@ -69,7 +69,6 @@ protected:
 
 public:
     PerfectlyPlasticMaterialStatus(GaussPoint * g);
-    virtual ~PerfectlyPlasticMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

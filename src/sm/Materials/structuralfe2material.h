@@ -69,7 +69,6 @@ protected:
 
 public:
     StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile);
-    virtual ~StructuralFE2MaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
     PrescribedGradientHomogenization *giveBC();// { return this->bc; }

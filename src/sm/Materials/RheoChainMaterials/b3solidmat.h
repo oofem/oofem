@@ -63,7 +63,6 @@ protected:
 
 public:
     B3SolidMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~B3SolidMaterialStatus() { }
 
     void updateYourself(TimeStep *tStep) override;
 

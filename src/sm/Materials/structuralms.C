@@ -67,9 +67,6 @@ StructuralMaterialStatus :: StructuralMaterialStatus(GaussPoint *g) :
 }
 
 
-StructuralMaterialStatus :: ~StructuralMaterialStatus() { }
-
-
 void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {

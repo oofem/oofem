@@ -710,10 +710,6 @@ PlasticMaterialStatus :: PlasticMaterialStatus(GaussPoint *g, int statusSize) :
 }
 
 
-PlasticMaterialStatus :: ~PlasticMaterialStatus()
-{ }
-
-
 void
 PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

@@ -68,8 +68,6 @@ protected:
 public:
     /// Constructor.
     MazarsMaterialStatus(GaussPoint * g);
-    /// Destructor.
-    virtual ~MazarsMaterialStatus() { }
 
     /// Returns characteristic length stored in receiver.
     double giveLec() { return lec; }

@@ -55,7 +55,6 @@ class HydratingTransportMaterialStatus : public TransportMaterialStatus, public 
 {
 public:
     HydratingTransportMaterialStatus(GaussPoint * g) : TransportMaterialStatus(g), HydrationModelStatusInterface() { }
-    virtual ~HydratingTransportMaterialStatus() { }
 
     Interface *giveInterface(InterfaceType t) override;
     const char *giveClassName() const override { return "HydratingTransportMaterialStatus"; }

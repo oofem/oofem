@@ -1256,11 +1256,6 @@ Concrete2MaterialStatus :: Concrete2MaterialStatus(GaussPoint *g) :
 }
 
 
-
-Concrete2MaterialStatus :: ~Concrete2MaterialStatus()
-{ }
-
-
 void
 Concrete2MaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {

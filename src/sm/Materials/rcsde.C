@@ -463,10 +463,6 @@ RCSDEMaterialStatus :: RCSDEMaterialStatus(GaussPoint *g) :
 }
 
 
-RCSDEMaterialStatus :: ~RCSDEMaterialStatus()
-{ }
-
-
 void
 RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

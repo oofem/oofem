@@ -220,9 +220,6 @@ M1MaterialStatus :: M1MaterialStatus(GaussPoint *g) :
 {}
 
 
-M1MaterialStatus :: ~M1MaterialStatus()
-{ }
-
 void
 M1MaterialStatus :: initTempStatus()
 {

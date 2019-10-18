@@ -100,8 +100,6 @@ protected:
 public:
     /// Constructor
     TwoFluidMaterialStatus(GaussPoint * g, const std::array<Material*, 2> &slaveMaterial);
-    /// Destructor
-    virtual ~TwoFluidMaterialStatus() { }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

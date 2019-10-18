@@ -61,8 +61,6 @@ DustMaterialStatus :: DustMaterialStatus(GaussPoint *gp, double q0) :
     q = q0;
 }
 
-DustMaterialStatus :: ~DustMaterialStatus()
-{ }
 
 void
 DustMaterialStatus :: initTempStatus()

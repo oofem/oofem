@@ -82,10 +82,6 @@ RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, int rank, Gaus
     OOFEM_LOG_INFO("************************** Microproblem at %p instanciated \n", rve.get());
 }
 
-RVEStokesFlowMaterialStatus :: ~RVEStokesFlowMaterialStatus()
-{
-}
-
 
 void RVEStokesFlowMaterialStatus :: setTimeStep(TimeStep *tStep)
 {

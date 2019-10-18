@@ -102,7 +102,6 @@ protected:
 
 public:
     MPSDamMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~MPSDamMaterialStatus() { }
 
     const FloatArray &giveViscoelasticStressVector() const override { return effectiveStressVector; }
     /// Assigns tempStressVector to given vector v.

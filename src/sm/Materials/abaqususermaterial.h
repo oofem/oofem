@@ -178,8 +178,6 @@ protected:
 public:
     /// Constructor.
     AbaqusUserMaterialStatus(GaussPoint * gp, int numState);
-    /// Destructor.
-    virtual ~AbaqusUserMaterialStatus() { }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

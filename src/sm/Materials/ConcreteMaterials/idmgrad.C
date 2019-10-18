@@ -525,12 +525,6 @@ IsotropicGradientDamageMaterialStatus :: IsotropicGradientDamageMaterialStatus(G
 { }
 
 
-IsotropicGradientDamageMaterialStatus :: ~IsotropicGradientDamageMaterialStatus()
-{ }
-
-
-
-
 void
 IsotropicGradientDamageMaterialStatus :: initTempStatus()
 //

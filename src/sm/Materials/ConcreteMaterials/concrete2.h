@@ -104,7 +104,7 @@ protected:
 
 public:
     Concrete2MaterialStatus(GaussPoint * g);
-    virtual ~Concrete2MaterialStatus();
+
     void printOutputAt(FILE *file, TimeStep *tStep) override
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
 

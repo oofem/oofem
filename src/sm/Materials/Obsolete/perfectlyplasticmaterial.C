@@ -706,10 +706,6 @@ PerfectlyPlasticMaterialStatus :: PerfectlyPlasticMaterialStatus(GaussPoint *g) 
 }
 
 
-PerfectlyPlasticMaterialStatus :: ~PerfectlyPlasticMaterialStatus()
-{ }
-
-
 void
 PerfectlyPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {

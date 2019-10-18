@@ -101,9 +101,6 @@ public:
     /// Constructor
     DustMaterialStatus(GaussPoint * gp, double q0);
 
-    /// Destructor
-    virtual ~DustMaterialStatus();
-
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;

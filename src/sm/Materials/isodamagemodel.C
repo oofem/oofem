@@ -331,10 +331,9 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         status->giveCrackVector(answer);
         return 1;
     } else if ( type == IST_CumPlasticStrain ) {
-      if ( permStrain )
-	answer.at(1) = evaluatePermanentStrain(status->giveKappa(), status->giveDamage());
+        if ( permStrain )
+            answer.at(1) = evaluatePermanentStrain(status->giveKappa(), status->giveDamage());
         return 1;
-	
 #ifdef keep_track_of_dissipated_energy
     } else if ( type == IST_StressWorkDensity ) {
         answer.resize(1);
@@ -420,10 +419,6 @@ IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(GaussPoint *g) : 
     dissWork = tempDissWork = 0.0;
 #endif
 }
-
-
-IsotropicDamageMaterialStatus :: ~IsotropicDamageMaterialStatus()
-{ }
 
 
 void

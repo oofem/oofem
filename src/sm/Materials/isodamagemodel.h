@@ -95,8 +95,6 @@ protected:
 public:
     /// Constructor
     IsotropicDamageMaterialStatus(GaussPoint *g);
-    /// Destructor
-    virtual ~IsotropicDamageMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

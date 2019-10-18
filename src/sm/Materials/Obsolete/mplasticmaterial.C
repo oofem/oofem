@@ -1366,10 +1366,6 @@ MPlasticMaterialStatus :: MPlasticMaterialStatus(GaussPoint *g, int statusSize) 
 }
 
 
-MPlasticMaterialStatus :: ~MPlasticMaterialStatus()
-{ }
-
-
 void
 MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {

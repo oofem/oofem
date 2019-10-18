@@ -67,8 +67,6 @@ protected:
 public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     TransportMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~TransportMaterialStatus() { }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

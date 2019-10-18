@@ -75,7 +75,6 @@ protected:
 
 public:
     TrabBoneMaterialStatus(GaussPoint * g);
-    virtual ~TrabBoneMaterialStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

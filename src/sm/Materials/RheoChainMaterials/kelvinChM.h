@@ -45,7 +45,6 @@ class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
     KelvinChainMaterialStatus(GaussPoint * g, int nunits);
-    virtual ~KelvinChainMaterialStatus() { }
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 

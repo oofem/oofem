@@ -195,10 +195,6 @@ IsotropicHeatTransferMaterialStatus :: IsotropicHeatTransferMaterialStatus(Gauss
 }
 
 
-IsotropicHeatTransferMaterialStatus :: ~IsotropicHeatTransferMaterialStatus()
-{
-}
-
 void
 IsotropicHeatTransferMaterialStatus :: updateYourself(TimeStep *tStep)
 {
