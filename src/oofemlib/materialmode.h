@@ -80,7 +80,6 @@ namespace oofem {
     ENUM_ITEM(_1dLattice) \
     ENUM_ITEM(_2dLattice)			\
     ENUM_ITEM(_3dLattice) \
-    ENUM_ITEM(_1dLattice) \
     ENUM_ITEM(_2dMTLattice) \
     ENUM_ITEM(_3dMTLattice) \
     ENUM_ITEM(_Warping) \
