@@ -315,7 +315,7 @@ HydrationModel :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, T
 }
 
 double
-HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 // Transport status needs to be obtained from master status, it's better to pass as a parameter
 // to enable usage from structural material
 {

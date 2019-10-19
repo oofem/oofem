@@ -79,7 +79,7 @@ public:
                                    GaussPoint *gp,
                                    TimeStep *tStep) const override;
 
-    virtual double  giveMaturityT0() { return maturityT0; }
+    virtual double giveMaturityT0() const { return maturityT0; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

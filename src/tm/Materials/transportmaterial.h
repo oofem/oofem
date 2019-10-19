@@ -90,20 +90,20 @@ public:
     void setTempFlux(FloatArray w);
 
     /// Return last gradient.
-    const FloatArray &giveGradient() { return gradient; }
+    const FloatArray &giveGradient() const { return gradient; }
     /// Return last field.
-    const FloatArray &giveField() { return field; }
+    const FloatArray &giveField() const { return field; }
     /// Returns last flux.
-    const FloatArray &giveFlux() { return flux; }
+    const FloatArray &giveFlux() const { return flux; }
 
     /// Return last gradient.
-    const FloatArray &giveTempGradient() { return temp_gradient; }
+    const FloatArray &giveTempGradient() const { return temp_gradient; }
     /// Return last field.
-    const FloatArray &giveTempField() { return temp_field; }
+    const FloatArray &giveTempField() const { return temp_field; }
     /// Returns last flux.
-    const FloatArray &giveTempFlux() { return temp_flux; }
+    const FloatArray &giveTempFlux() const { return temp_flux; }
     /// Returns maturity.
-    double giveMaturity() { return maturity; }
+    double giveMaturity() const { return maturity; }
 };
 
 

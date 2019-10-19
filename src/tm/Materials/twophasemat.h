@@ -72,7 +72,7 @@ public:
                                    GaussPoint *gp,
                                    TimeStep *tStep) const override;
 
-    //virtual double giveMaturityT0() { return maturityT0; }
+    //virtual double giveMaturityT0() const { return maturityT0; }
 protected:
     TransportMaterial *giveMaterial(int i) const;
     double giveVof (GaussPoint* gp, TimeStep* tStep) const;

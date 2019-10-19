@@ -77,15 +77,15 @@ public:
     void printOutputAt(FILE *, TimeStep *) override;
 
     /// Returns pressure
-    double givePressure() { return field.at(1); }
+    double givePressure() const { return field.at(1); }
 
-    double giveOldPressure() { return oldPressure; }
+    double giveOldPressure() const { return oldPressure; }
 
     /// Sets the mass
     void setMass(double input) { this->mass = input; }
 
     /// Returns mass
-    double giveMass() { return this->mass; }
+    double giveMass() const { return this->mass; }
 
     void updateYourself(TimeStep *tStep) override;
 
