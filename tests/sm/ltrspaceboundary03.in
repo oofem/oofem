@@ -1,6 +1,6 @@
 ltrspaceboundary03.out
 3D RVE - periodic boundary conditions with LTRSpaceBoundaryVoigt elements, periodicity in x y z
-StaticStructural nsteps 1 solverType "calm" stepLength 0.3 Psi 0 hpc 2 126 1 initialguess 1 nmodules 1 lstype 3 smtype 7
+StaticStructural nsteps 1 solverType "calm" stepLength 0.3 Psi 0 hpc 2 126 1 initialguess 1 nmodules 1
 #StaticStructural nsteps 1 initialguess 1 nmodules 1 lstype 3 smtype 7
 #vtkxmlperiodic primvars 1 1 vars 3 4 1 12 cellvars 1 46 tstep_all domain_all stype 0
 #vtkxmlperiodic ipvars 3 4 1 12 tstep_all domain_all

@@ -1,6 +1,6 @@
 ltrspaceboundary04.out
 3D RVE - periodic boundary conditions with LTRSpaceBoundary elements, periodicity in x y z
-StaticStructural nsteps 1 initialguess 1 nmodules 1 lstype 3 smtype 7
+StaticStructural nsteps 1 initialguess 1 nmodules 1
 #vtkxmlperiodic primvars 1 1 vars 3 4 1 12 cellvars 1 46 tstep_all domain_all stype 0
 #vtkxmlperiodic ipvars 3 4 1 12 tstep_all domain_all
 #gpexportmodule vars 3 4 1 12 tstep_all domain_all
