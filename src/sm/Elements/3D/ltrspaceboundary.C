@@ -73,9 +73,9 @@ Interface *
 LTRSpaceBoundary :: giveInterface(InterfaceType interface)
 {
     if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >(this);
+        return static_cast< SpatialLocalizerInterface * >( this );
     }
 
     return NULL;
@@ -99,14 +99,14 @@ LTRSpaceBoundary :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
 
     answer.clear();
     for ( int i = 1; i <= 4; i++ ) {
-        if ( location.at(i) != 0) { //recalculate vertex coordinates
+        if ( location.at(i) != 0 ) { //recalculate vertex coordinates
             IntArray switches;
             FloatArray vertexCoords;
             recalculateCoordinates(i, vertexCoords);
 
-            answer.add( n.at(i), vertexCoords );
+            answer.add(n.at(i), vertexCoords);
         } else {
-            answer.add( n.at(i), cellgeo.giveVertexCoordinates(i) );
+            answer.add(n.at(i), cellgeo.giveVertexCoordinates(i) );
         }
     }
 
@@ -116,7 +116,7 @@ LTRSpaceBoundary :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
 void
 LTRSpaceBoundary :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if (inode == 5) {
+    if ( inode == 5 ) {
         answer = { D_u, D_v, D_w, R_u, R_v, R_w, V_u, V_v, V_w };
     } else {
         answer = { D_u, D_v, D_w };
@@ -155,13 +155,22 @@ LTRSpaceBoundary :: computeVolumeAround(GaussPoint *gp)
     recalculateCoordinates(3, v3);
     recalculateCoordinates(4, v4);
 
-    x1 = v1.at(1); x2 = v2.at(1); x3 = v3.at(1); x4 = v4.at(1);
-    y1 = v1.at(2); y2 = v2.at(2); y3 = v3.at(2); y4 = v4.at(2);
-    z1 = v1.at(3); z2 = v2.at(3); z3 = v3.at(3); z4 = v4.at(3);
+    x1 = v1.at(1);
+    x2 = v2.at(1);
+    x3 = v3.at(1);
+    x4 = v4.at(1);
+    y1 = v1.at(2);
+    y2 = v2.at(2);
+    y3 = v3.at(2);
+    y4 = v4.at(2);
+    z1 = v1.at(3);
+    z2 = v2.at(3);
+    z3 = v3.at(3);
+    z4 = v4.at(3);
 
     detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
-            ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
-            ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
+             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
+             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
     if ( detJ <= 0.0 ) {
         OOFEM_ERROR("negative volume");
@@ -185,19 +194,28 @@ LTRSpaceBoundary :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
     recalculateCoordinates(3, v3);
     recalculateCoordinates(4, v4);
 
-    x1 = v1.at(1); x2 = v2.at(1); x3 = v3.at(1); x4 = v4.at(1);
-    y1 = v1.at(2); y2 = v2.at(2); y3 = v3.at(2); y4 = v4.at(2);
-    z1 = v1.at(3); z2 = v2.at(3); z3 = v3.at(3); z4 = v4.at(3);
+    x1 = v1.at(1);
+    x2 = v2.at(1);
+    x3 = v3.at(1);
+    x4 = v4.at(1);
+    y1 = v1.at(2);
+    y2 = v2.at(2);
+    y3 = v3.at(2);
+    y4 = v4.at(2);
+    z1 = v1.at(3);
+    z2 = v2.at(3);
+    z3 = v3.at(3);
+    z4 = v4.at(3);
 
     detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
-            ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
-            ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
+             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
+             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
     if ( detJ <= 0.0 ) {
         OOFEM_ERROR("negative volume");
     }
 
-    dNdx.resize(4,3);
+    dNdx.resize(4, 3);
     dNdx.at(1, 1) = -( ( y3 - y2 ) * ( z4 - z2 ) - ( y4 - y2 ) * ( z3 - z2 ) );
     dNdx.at(2, 1) = ( y4 - y3 ) * ( z1 - z3 ) - ( y1 - y3 ) * ( z4 - z3 );
     dNdx.at(3, 1) = -( ( y1 - y4 ) * ( z2 - z4 ) - ( y2 - y4 ) * ( z1 - z4 ) );
@@ -231,7 +249,6 @@ LTRSpaceBoundary :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 void
 LTRSpaceBoundary :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-
     FloatArray u;
     this->computeVectorOf({ D_u, D_v, D_w }, VM_Total, tStep, u); // solution vector
     if ( initialDisplacements ) {
@@ -265,19 +282,28 @@ LTRSpaceBoundary :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     recalculateCoordinates(3, v3);
     recalculateCoordinates(4, v4);
 
-    x1 = v1.at(1); x2 = v2.at(1); x3 = v3.at(1); x4 = v4.at(1);
-    y1 = v1.at(2); y2 = v2.at(2); y3 = v3.at(2); y4 = v4.at(2);
-    z1 = v1.at(3); z2 = v2.at(3); z3 = v3.at(3); z4 = v4.at(3);
+    x1 = v1.at(1);
+    x2 = v2.at(1);
+    x3 = v3.at(1);
+    x4 = v4.at(1);
+    y1 = v1.at(2);
+    y2 = v2.at(2);
+    y3 = v3.at(2);
+    y4 = v4.at(2);
+    z1 = v1.at(3);
+    z2 = v2.at(3);
+    z3 = v3.at(3);
+    z4 = v4.at(3);
 
     detJ = ( ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) +
-            ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
-            ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
+             ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) +
+             ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 ) );
 
     if ( detJ <= 0.0 ) {
         OOFEM_ERROR("negative volume");
     }
 
-    dNdx.resize(4,3);
+    dNdx.resize(4, 3);
     dNdx.at(1, 1) = -( ( y3 - y2 ) * ( z4 - z2 ) - ( y4 - y2 ) * ( z3 - z2 ) );
     dNdx.at(2, 1) = ( y4 - y3 ) * ( z1 - z3 ) - ( y1 - y3 ) * ( z4 - z3 );
     dNdx.at(3, 1) = -( ( y1 - y4 ) * ( z2 - z4 ) - ( y2 - y4 ) * ( z1 - z4 ) );
@@ -322,10 +348,10 @@ LTRSpaceBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Time
     }
 
     this->computeTransformationMatrix(T, tStep);
-    dispVec.beProductOf(T,u);
+    dispVec.beProductOf(T, u);
 
     this->computeBmatrixAt(gp, B);
-    answer.beProductOf(B,dispVec);
+    answer.beProductOf(B, dispVec);
 }
 
 void
@@ -338,7 +364,7 @@ LTRSpaceBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     answer.clear();
     fintsub.resize(12);
 
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
         // Engineering (small strain) stress
@@ -348,7 +374,7 @@ LTRSpaceBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
                 vStress = matStat->giveStressVector();
             } else {
                 if ( !this->isActivated(tStep) ) {
-                    vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+                    vStrain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
                     vStrain.zero();
                 }
                 this->computeStrainVector(vStrain, gp, tStep);
@@ -361,7 +387,7 @@ LTRSpaceBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
 
         if ( vStress.giveSize() == 6 ) {
             FloatArray stressTemp;
-            StructuralMaterial :: giveReducedSymVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
+            StructuralMaterial :: giveReducedSymVectorForm(stressTemp, vStress, gp->giveMaterialMode() );
             fintsub.plusProduct(B, stressTemp, dV);
         } else {
             fintsub.plusProduct(B, vStress, dV);
@@ -371,14 +397,14 @@ LTRSpaceBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     this->computeTransformationMatrix(T, tStep);
     Tt.beTranspositionOf(T);
 
-    answer.beProductOf(Tt,fintsub);
+    answer.beProductOf(Tt, fintsub);
 }
 
 void
 LTRSpaceBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     FloatMatrix Korig, T, Tt, TtK;
-    NLStructuralElement :: computeStiffnessMatrix(Korig,rMode,tStep);
+    NLStructuralElement :: computeStiffnessMatrix(Korig, rMode, tStep);
 
     this->computeTransformationMatrix(T, tStep);
     Tt.beTranspositionOf(T);
@@ -392,51 +418,54 @@ LTRSpaceBoundary :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *t
 {
     FloatArray unitCellSize;
     unitCellSize.resize(3);
-    unitCellSize.at(1)=this->giveNode(5)->giveCoordinate(1);
-    unitCellSize.at(2)=this->giveNode(5)->giveCoordinate(2);
-    unitCellSize.at(3)=this->giveNode(5)->giveCoordinate(3);
+    unitCellSize.at(1) = this->giveNode(5)->giveCoordinate(1);
+    unitCellSize.at(2) = this->giveNode(5)->giveCoordinate(2);
+    unitCellSize.at(3) = this->giveNode(5)->giveCoordinate(3);
 
     IntArray switches1, switches2, switches3, switches4;
-    this->giveSwitches(switches1, this->location.at(1));
-    this->giveSwitches(switches2, this->location.at(2));
-    this->giveSwitches(switches3, this->location.at(3));
-    this->giveSwitches(switches4, this->location.at(4));
+    this->giveSwitches( switches1, this->location.at(1) );
+    this->giveSwitches( switches2, this->location.at(2) );
+    this->giveSwitches( switches3, this->location.at(3) );
+    this->giveSwitches( switches4, this->location.at(4) );
 
     FloatMatrix k1, k2, k3, k4;
-    k1.resize(3,9); k2.resize(3,9); k3.resize(3,9); k4.resize(3,9);
+    k1.resize(3, 9);
+    k2.resize(3, 9);
+    k3.resize(3, 9);
+    k4.resize(3, 9);
 
     for ( int i = 1; i <= 3; i++ ) {
-        k1.at(i, 3*i-2) = unitCellSize.at(1)*switches1.at(1);
-        k1.at(i, 3*i-1) = unitCellSize.at(2)*switches1.at(2);
-        k1.at(i, 3*i) = unitCellSize.at(3)*switches1.at(3);
+        k1.at(i, 3 * i - 2) = unitCellSize.at(1) * switches1.at(1);
+        k1.at(i, 3 * i - 1) = unitCellSize.at(2) * switches1.at(2);
+        k1.at(i, 3 * i) = unitCellSize.at(3) * switches1.at(3);
     }
 
     for ( int i = 1; i <= 3; i++ ) {
-        k2.at(i, 3*i-2) = unitCellSize.at(1)*switches2.at(1);
-        k2.at(i, 3*i-1) = unitCellSize.at(2)*switches2.at(2);
-        k2.at(i, 3*i) = unitCellSize.at(3)*switches2.at(3);
+        k2.at(i, 3 * i - 2) = unitCellSize.at(1) * switches2.at(1);
+        k2.at(i, 3 * i - 1) = unitCellSize.at(2) * switches2.at(2);
+        k2.at(i, 3 * i) = unitCellSize.at(3) * switches2.at(3);
     }
 
     for ( int i = 1; i <= 3; i++ ) {
-        k3.at(i, 3*i-2) = unitCellSize.at(1)*switches3.at(1);
-        k3.at(i, 3*i-1) = unitCellSize.at(2)*switches3.at(2);
-        k3.at(i, 3*i) = unitCellSize.at(3)*switches3.at(3);
+        k3.at(i, 3 * i - 2) = unitCellSize.at(1) * switches3.at(1);
+        k3.at(i, 3 * i - 1) = unitCellSize.at(2) * switches3.at(2);
+        k3.at(i, 3 * i) = unitCellSize.at(3) * switches3.at(3);
     }
 
     for ( int i = 1; i <= 3; i++ ) {
-        k4.at(i, 3*i-2) = unitCellSize.at(1)*switches4.at(1);
-        k4.at(i, 3*i-1) = unitCellSize.at(2)*switches4.at(2);
-        k4.at(i, 3*i) = unitCellSize.at(3)*switches4.at(3);
+        k4.at(i, 3 * i - 2) = unitCellSize.at(1) * switches4.at(1);
+        k4.at(i, 3 * i - 1) = unitCellSize.at(2) * switches4.at(2);
+        k4.at(i, 3 * i) = unitCellSize.at(3) * switches4.at(3);
     }
 
-    answer.resize(12,12);
+    answer.resize(12, 12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,21);
+    answer.resizeWithData(12, 21);
 
-    answer.assemble(k1, {1,2,3}, {13,14,15,16,17,18,19,20,21});
-    answer.assemble(k2, {4,5,6}, {13,14,15,16,17,18,19,20,21});
-    answer.assemble(k3, {7,8,9}, {13,14,15,16,17,18,19,20,21});
-    answer.assemble(k4, {10,11,12}, {13,14,15,16,17,18,19,20,21});
+    answer.assemble(k1, { 1, 2, 3 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
+    answer.assemble(k2, { 4, 5, 6 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
+    answer.assemble(k3, { 7, 8, 9 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
+    answer.assemble(k4, { 10, 11, 12 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
 }
 
 void
@@ -444,17 +473,17 @@ LTRSpaceBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords)
 {
     FloatArray unitCellSize;
     unitCellSize.resize(3);
-    unitCellSize.at(1)=this->giveNode(5)->giveCoordinate(1);
-    unitCellSize.at(2)=this->giveNode(5)->giveCoordinate(2);
-    unitCellSize.at(3)=this->giveNode(5)->giveCoordinate(3);
+    unitCellSize.at(1) = this->giveNode(5)->giveCoordinate(1);
+    unitCellSize.at(2) = this->giveNode(5)->giveCoordinate(2);
+    unitCellSize.at(3) = this->giveNode(5)->giveCoordinate(3);
 
     IntArray switches;
-    this->giveSwitches(switches, this->location.at(nodeNumber));
+    this->giveSwitches( switches, this->location.at(nodeNumber) );
 
     coords.resize(3);
-    coords.at(1) = this->giveNode(nodeNumber)->giveCoordinate(1) + switches.at(1)*unitCellSize.at(1);
-    coords.at(2) = this->giveNode(nodeNumber)->giveCoordinate(2) + switches.at(2)*unitCellSize.at(2);
-    coords.at(3) = this->giveNode(nodeNumber)->giveCoordinate(3) + switches.at(3)*unitCellSize.at(3);
+    coords.at(1) = this->giveNode(nodeNumber)->giveCoordinate(1) + switches.at(1) * unitCellSize.at(1);
+    coords.at(2) = this->giveNode(nodeNumber)->giveCoordinate(2) + switches.at(2) * unitCellSize.at(2);
+    coords.at(3) = this->giveNode(nodeNumber)->giveCoordinate(3) + switches.at(3) * unitCellSize.at(3);
 
     return;
 }
@@ -482,12 +511,12 @@ LTRSpaceBoundary :: giveLengthInDir(const FloatArray &normalToCrackPlane)
 
     FloatArray coords(3);
     recalculateCoordinates(1, coords);
-    minDis = maxDis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
+    minDis = maxDis = normalToCrackPlane.dotProduct(coords, coords.giveSize() );
 
     for ( int i = 2; i <= nnode; i++ ) {
         FloatArray coords(3);
         recalculateCoordinates(i, coords);
-        double dis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
+        double dis = normalToCrackPlane.dotProduct(coords, coords.giveSize() );
         if ( dis > maxDis ) {
             maxDis = dis;
         } else if ( dis < minDis ) {
@@ -500,7 +529,7 @@ LTRSpaceBoundary :: giveLengthInDir(const FloatArray &normalToCrackPlane)
 
 void
 LTRSpaceBoundary :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
-                                                       InternalStateType type, TimeStep *tStep)
+                                                               InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
 
@@ -512,5 +541,4 @@ LTRSpaceBoundary :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     giveIPValue(answer, gp, type, tStep);
 }
-
 } // end namespace oofem

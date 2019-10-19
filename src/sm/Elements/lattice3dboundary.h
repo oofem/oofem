@@ -57,8 +57,8 @@ public:
     Lattice3dBoundary(int n, Domain *);
     virtual ~Lattice3dBoundary();
 
-    void recalculateCoordinates(int nodeNumber, FloatArray &coords);
-    const IntArray giveLocation() { return this->location; }
+    void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
+    const IntArray giveLocation() override { return this->location; }
 
     int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 

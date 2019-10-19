@@ -58,7 +58,7 @@ class FEI3dTetLin;
  * @author: Adam Sciegaj
  */
 class LTRSpaceBoundary : public Structural3DElement, public NodalAveragingRecoveryModelInterface,
-public SpatialLocalizerInterface
+    public SpatialLocalizerInterface
 {
 protected:
     static FEI3dTetLin interpolation;
@@ -72,13 +72,13 @@ protected:
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
-    double computeVolumeAround(GaussPoint * gp) override;
+    double computeVolumeAround(GaussPoint *gp) override;
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     double giveLengthInDir(const FloatArray &normalToCrackPlane) override;
 
 public:
-    LTRSpaceBoundary(int n, Domain * d);
+    LTRSpaceBoundary(int n, Domain *d);
     virtual ~LTRSpaceBoundary() { }
 
     FEInterpolation *giveInterpolation() const override;
@@ -87,8 +87,8 @@ public:
 
     int computeNumberOfDofs() override { return 21; };
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
-    const IntArray giveLocation() { return location; };
-    void recalculateCoordinates(int nodeNumber, FloatArray &coords);
+    const IntArray giveLocation() override { return location; };
+    void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
 
     // definition & identification
     IRResultType initializeFrom(InputRecord *ir) override;
@@ -97,7 +97,6 @@ public:
 
     void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                     InternalStateType type, TimeStep *tStep) override;
-
 };
 } // end namespace oofem
 #endif // LTRSpaceBoundary_h

@@ -46,13 +46,12 @@
 
 namespace oofem {
 /**
- * Represents VTK (Visualization Toolkit) export module. It uses VTK (.vtu) file format, Unstructured grid dataset.
- * The export of data is done on Region By Region basis, possibly taking care about possible nonsmooth character of
- * some internal variables at region boundaries.
- * Each region is usually exported as a single piece. When region contains composite cells, these are assumed to be
- * exported in individual subsequent pieces after the default one for the particular region.
-
-
+ *
+ *
+ * Represents VTK (Visualization Toolkit) export module for periodic cells. It uses VTK (.vtu) file format
+ * It extends vtkxmlexportmodule by introducing methods to deal with boundary elements.
+ * @author: Ignatios Athanasiadis, Adam Sciegaj, Peter Grassl
+ *
  */
 class OOFEM_EXPORT VTKXMLPeriodicExportModule : public VTKXMLExportModule
 {
@@ -62,7 +61,7 @@ protected:
     IntArray locationMap;
     IntArray elementNodePeriodicMap;
     int elemNodes;
-    
+
     void giveSwitches(IntArray &answer, int location);
 
 public:
@@ -78,9 +77,9 @@ public:
     void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region) override;
 
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                        int &regionDofMans,
-                                        int &totalcells,
-                                        Domain *domain, TimeStep *tStep, int reg) override;
+                                int &regionDofMans,
+                                int &totalcells,
+                                Domain *domain, TimeStep *tStep, int reg) override;
 
     void exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;
     void exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;

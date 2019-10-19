@@ -74,8 +74,8 @@ public:
     bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    void recalculateCoordinates(int nodeNumber, FloatArray &coords);
-    const IntArray giveLocation() { return location; };
+    void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
+    const IntArray giveLocation() override { return location; };
 
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LIBeam3dBoundary_Name; }

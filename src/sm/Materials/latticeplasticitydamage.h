@@ -108,14 +108,8 @@ public:
     double giveTempKappaDTwo() { return tempKappaDTwo; }
     //double giveTempKappaDThree() { return tempKappaDThree; }
 
-    void  giveTempPlasticStrain(FloatArray &answer) const
-    { answer = tempPlasticStrain; }
-
     void  giveTempElasticStrain(FloatArray &answer) const
     { answer = tempElasticStrain; }
-
-    void  givePlasticStrain(FloatArray &answer) const
-    { answer = plasticStrain; }
 
     void  giveElasticStrain(FloatArray &answer) const
     { answer = elasticStrain; }
@@ -243,7 +237,7 @@ public:
                                         GaussPoint *gp,
                                         TimeStep *atTime);
 
-    
+
     virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode rmode,
                                         GaussPoint *gp,
@@ -296,7 +290,7 @@ public:
     void performPlasticityReturn(FloatArray &stress,
                                  GaussPoint *gp,
                                  const FloatArray &totalStrain,
-				 TimeStep *tStep);
+                                 TimeStep *tStep);
 
     void performDamageEvaluation(GaussPoint *gp,
                                  FloatArray &reducedStrain);
