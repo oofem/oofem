@@ -45,18 +45,22 @@
 #include "classfactory.h"
 #include "crosssection.h"
 #include "dof.h"
+
+#ifdef __SM_MODULE
 #include "../sm/Elements/lattice3dboundary.h"
+#include "../sm/Elements/latticelink3dboundary.h"
 #include "../sm/Elements/3D/ltrspaceboundary.h"
 #include "../sm/Elements/Beams/libeam3dboundary.h"
-
-
-
+#endif
 
 namespace oofem {
 REGISTER_ExportModule(VTKXMLPeriodicExportModule)
 
 VTKXMLPeriodicExportModule :: VTKXMLPeriodicExportModule(int n, EngngModel *e) : VTKXMLExportModule(n, e)
-{}
+{
+  //Find out the element type and elemNodes
+  
+}
 
 
 VTKXMLPeriodicExportModule :: ~VTKXMLPeriodicExportModule()
@@ -71,11 +75,11 @@ VTKXMLPeriodicExportModule :: initializeFrom(InputRecord *ir)
 }
 
 
-
 void
 VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region)
 {
-    // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
+
+  // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
@@ -144,29 +148,28 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
 
             if ( dynamic_cast<LTRSpaceBoundary*>(elem) ) {
                 cellNodes.resize(4);
-                LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(elem);
-                IntArray loc = boundElem->giveLocation();
+                IntArray loc = elem->giveLocation();
                 for ( int ielnode = 1; ielnode <= 4; ielnode++ ) {
                     if ( loc.at(ielnode) != 0 ) {
                         helpCounter++;
                         cellNodes.at(ielnode) = regionToUniqueMap.at(nnodes + helpCounter);
                     } else {
-                        cellNodes.at(ielnode) = boundElem->giveNode(ielnode)->giveNumber();
+                        cellNodes.at(ielnode) = elem->giveNode(ielnode)->giveNumber();
                     }
                 }
-            } else if ( dynamic_cast<LIBeam3dBoundary*>(elem) ) {
-                cellNodes.resize(2);
-                LIBeam3dBoundary *boundElem = static_cast<LIBeam3dBoundary*>(elem);
-                IntArray loc = boundElem->giveLocation();
+            } else if ( dynamic_cast<LIBeam3dBoundary*>(elem) || dynamic_cast<Lattice3dBoundary*>(elem) || dynamic_cast<LatticeLink3dBoundary*>(elem) ){
+	      cellNodes.resize(2);
+	      IntArray loc = elem->giveLocation();
                 for ( int ielnode = 1; ielnode <= 2; ielnode++ ) {
-                    if ( loc.at(ielnode) != 0 ) {
+		  if ( loc.at(ielnode) != 0 ) {
                         helpCounter++;
                         cellNodes.at(ielnode) = regionToUniqueMap.at(nnodes + helpCounter);
                     } else {
-                        cellNodes.at(ielnode) = boundElem->giveNode(ielnode)->giveNumber();
+                        cellNodes.at(ielnode) = elem->giveNode(ielnode)->giveNumber();
                     }
                 }
-            } else {
+            }
+	    else {//Standard case
                 this->giveElementCell(cellNodes, elem);
             }
 
@@ -205,8 +208,8 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                                                       int &regionSingleCells,
                                                       Domain *domain, TimeStep *tStep, int reg)
 {
-    int nnodes = domain->giveNumberOfDofManagers();
-    int elemNodes;
+  printf("in initRegionNodeNumbering\n");
+  int nnodes = domain->giveNumberOfDofManagers();
     int elementNode, node;
     int currOffset = 1;
     Element *element;
@@ -220,19 +223,17 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
     for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
         element = domain->giveElement(elements.at(ie));
         if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
-            LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(element);
-            IntArray loc = boundElem->giveLocation();
-            for ( int ielnode = 1; ielnode <= 4; ielnode++ ) {
-                if ( loc.at(ielnode) != 0 ) {
-                    extraNodes++;
-                }
-            }
-        } else if ( dynamic_cast<LIBeam3dBoundary*>(element) ) {
-            LIBeam3dBoundary *boundElem = static_cast<LIBeam3dBoundary*>(element);
-            IntArray loc = boundElem->giveLocation();
+	  IntArray loc = element->giveLocation();
+	  for ( int ielnode = 1; ielnode <= 4; ielnode++ ) {
+	    if ( loc.at(ielnode) != 0 ) {
+	      extraNodes++;
+	    }
+	  }
+        } else if ( dynamic_cast<LIBeam3dBoundary*>(element) || dynamic_cast<Lattice3dBoundary*>(element) || dynamic_cast<LatticeLink3dBoundary*>(element) ) {
+            IntArray loc = element->giveLocation();
             for ( int ielnode = 1; ielnode <= 2; ielnode++ ) {
                 if ( loc.at(ielnode) != 0 ) {
-                    extraNodes++;
+		  extraNodes++;
                 }
             }
         }
@@ -272,14 +273,13 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
 
         if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
             elemNodes = 4;
-        } else if ( dynamic_cast<LIBeam3dBoundary*>(element) ) {
-            elemNodes = 2;
-        }
+        } else if ( dynamic_cast<LIBeam3dBoundary*>(element) || dynamic_cast<Lattice3dBoundary*>(element) || dynamic_cast<LatticeLink3dBoundary*>(element) ) {
+	    elemNodes = 2;
+	}
 
         for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
             if ( dynamic_cast<LTRSpaceBoundary*>(element) ) {
-                LTRSpaceBoundary *boundElem = static_cast<LTRSpaceBoundary*>(element);
-                IntArray loc = boundElem->giveLocation();
+	      IntArray loc = element->giveLocation();
                 FloatArray nodeCoords;
                 if ( loc.at(elementNode) != 0 ) { //boundary element with mirrored node
                     totalNodes++;
@@ -302,7 +302,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                     periodicMap.at(nnodes + totalNodes) = node;
                     locationMap.at(nnodes + totalNodes) = loc.at(elementNode);
 
-                    boundElem->recalculateCoordinates(elementNode, nodeCoords);
+                    element->recalculateCoordinates(elementNode, nodeCoords);
 
                     //get only the unique nodes
                     int repeatFlag = 0;
@@ -333,9 +333,9 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                         regionDofMans++;
                     }
                 }
-            } else if ( dynamic_cast<LIBeam3dBoundary*>(element) ) { //beam elements - only unique nodes
-                LIBeam3dBoundary *boundElem = static_cast<LIBeam3dBoundary*>(element);
-                IntArray loc = boundElem->giveLocation();
+            } else if ( dynamic_cast<LIBeam3dBoundary*>(element) || dynamic_cast<Lattice3dBoundary*>(element) || dynamic_cast<LatticeLink3dBoundary*>(element) ) { //beam elements - only unique nodes
+
+                IntArray loc = element->giveLocation();
                 FloatArray nodeCoords;
                 if ( loc.at(elementNode) != 0 ) { //boundary element with mirrored node
                     totalNodes++;
@@ -358,7 +358,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                     periodicMap.at(nnodes + totalNodes) = node;
                     locationMap.at(nnodes + totalNodes) = loc.at(elementNode);
 
-                    boundElem->recalculateCoordinates(elementNode, nodeCoords);
+                    element->recalculateCoordinates(elementNode, nodeCoords);
 
                     //get only the unique nodes
                     int repeatFlag = 0;
@@ -380,7 +380,8 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                             regionToUniqueMap.at(nnodes + totalNodes) = nnodes + uniqueNodes;
                     }
                 }
-            } else   { //regular element
+            }
+	    else   { //regular element
                 node = element->giveNode(elementNode)->giveNumber();
                 if ( regionG2LNodalNumbers.at(node) == 0 ) { // assign new number
                     /* mark for assignment. This is done later, as it allows to preserve
@@ -409,28 +410,15 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
 
 void
 VTKXMLPeriodicExportModule :: giveSwitches(IntArray &answer, int location) {
-    answer.resize(3);
-    int counter = 1;
-    for ( int x = -1; x <  2; x++ ) {
-        for ( int y = -1; y <  2; y++ ) {
-            for ( int z = -1; z <  2; z++ ) {
-                if ( !( z == 0 && y == 0 && x == 0 ) ) {
-                    if ( counter == location ) {
-                        answer(0) = x;
-                        answer(1) = y;
-                        answer(2) = z;
-                    }
-                    counter++;
-                }
-            }
-        }
-    }
-    return;
+  
+  return;
 }
 
 void
 VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
 {
+    printf("in exportPrimaryVars\n");
+  
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
     FloatArray valueArray;
@@ -534,11 +522,14 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
             }
         }
     }
+    printf("end of exportPrimaryVars\n");
 }
 
 void
 VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
 {
+      printf("in exportIntVars\n");
+  
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
     InternalStateType isType;

@@ -58,8 +58,8 @@ class Lattice2dBoundary : public Lattice2d
      *   Volume 47, Issues 7-8, pp. 957-968, 2010"
      */
 protected:
-    int location;
-
+  int location;
+  
 public:
     Lattice2dBoundary(int, Domain *);                     // constructor
     ~Lattice2dBoundary();                                 // destructor
@@ -67,7 +67,7 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer,
                                           TimeStep *, int useUpdatedGpRecord = 0) override;
 
-    int giveLocation() { return this->location; }
+    const IntArray giveLocation() override;
 
     virtual int            computeNumberOfDofs() override { return 9; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const override;

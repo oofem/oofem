@@ -169,7 +169,7 @@ LatticeLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponse
 }
 
 void
-LatticeLink3dBoundary :: giveVTKCoordinates(int nodeNumber, FloatArray &coords) {
+LatticeLink3dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords) {
     coords.resize(3);
     coords.zero();
     Node *node;

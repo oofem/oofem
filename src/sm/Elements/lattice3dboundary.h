@@ -57,6 +57,8 @@ public:
     Lattice3dBoundary(int n, Domain *);
     virtual ~Lattice3dBoundary();
 
+    void recalculateCoordinates(int nodeNumber, FloatArray &coords);
+    const IntArray giveLocation() { return this->location; }
 
     int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
@@ -78,7 +80,7 @@ public:
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    void giveVTKCoordinates(int nodeNumber, FloatArray &coords);
+
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
@@ -88,11 +90,11 @@ public:
 #endif
 
 protected:
+    void giveSwitches(IntArray &answer, int location);
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
     bool computeGtoLRotationMatrix(FloatMatrix &) override;
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
-    void giveSwitches(IntArray &answer, int location);
     void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) override;
 };
 } // end namespace oofem

@@ -136,7 +136,16 @@ Lattice2dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
     return;
 }
 
+  const IntArray
+  Lattice2dBoundary :: giveLocation()
+  {
+    IntArray tempLocation(2);
+    tempLocation.at(1) = 0;
+    tempLocation.at(2) = this->location;
+  }
+    
 
+  
 void
 Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,                                      TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
@@ -174,7 +183,6 @@ Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     FloatArray projectionComponent(2);
     giveSwitches(projectionComponent);
-
 
     answer.at(1, 7) = projectionComponent.at(1) * answer.at(1, 4);
     answer.at(1, 8) = projectionComponent.at(2) * answer.at(1, 5);
@@ -464,30 +472,29 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 
 void
 Lattice2dBoundary :: giveSwitches(FloatArray &answer) {
-    int location = this->giveLocation();
 
-    if ( location == 1 ) {
+    if ( this->location == 1 ) {
         answer(0) = 1;
         answer(1) = 0;
-    } else if ( location == 2 ) {
+    } else if ( this->location == 2 ) {
         answer(0) = 1;
         answer(1) = 1;
-    } else if ( location == 3 ) {
+    } else if ( this->location == 3 ) {
         answer(0) = 0;
         answer(1) = 1;
-    } else if ( location == 4 ) {
+    } else if ( this->location == 4 ) {
         answer(0) = -1;
         answer(1) = 1;
-    } else if ( location == 5 ) {
+    } else if ( this->location == 5 ) {
         answer(0) = -1;
         answer(1) = 0;
-    } else if ( location == 6 ) {
+    } else if ( this->location == 6 ) {
         answer(0) = -1;
         answer(1) = -1;
-    } else if ( location == 7 ) {
+    } else if ( this->location == 7 ) {
         answer(0) = 0;
         answer(1) = -1;
-    } else if ( location == 8 ) {
+    } else if ( this->location == 8 ) {
         answer(0) = 1;
         answer(1) = -1;
     }

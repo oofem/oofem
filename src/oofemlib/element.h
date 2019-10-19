@@ -1147,6 +1147,9 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
+    virtual const IntArray giveLocation() {return NULL;}
+    virtual void recalculateCoordinates(int nodeNumber, FloatArray &coords){;}
+    
 protected:
     /**
      * Initializes the array of integration rules member variable.

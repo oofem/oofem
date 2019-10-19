@@ -74,7 +74,8 @@ public:
 
     void restoreContext(DataStream &stream, ContextMode mode);
 
-    void giveVTKCoordinates(int nodeNumber, FloatArray &coords);
+    const IntArray giveLocation() { return location; };
+    void recalculateCoordinates(int nodeNumber, FloatArray &coords);
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &context, TimeStep *tStep);

@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -51,6 +51,8 @@ namespace oofem {
  * some internal variables at region boundaries.
  * Each region is usually exported as a single piece. When region contains composite cells, these are assumed to be
  * exported in individual subsequent pieces after the default one for the particular region.
+
+
  */
 class OOFEM_EXPORT VTKXMLPeriodicExportModule : public VTKXMLExportModule
 {
@@ -59,7 +61,8 @@ protected:
     IntArray periodicMap, regionToUniqueMap;
     IntArray locationMap;
     IntArray elementNodePeriodicMap;
-
+    int elemNodes;
+    
     void giveSwitches(IntArray &answer, int location);
 
 public:

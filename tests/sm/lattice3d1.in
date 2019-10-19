@@ -1,6 +1,7 @@
 lattice3d1.out
 3d lattice model for periodic cell
-StaticStructural nsteps 1 rtolv 1.e-10 nmodules 1
+StaticStructural nsteps 1 rtolv 1.e-10 nmodules 2
+vtkxmlperiodic tstep_all primvars 1 1 stype 0
 errorcheck
 domain 3dLattice
 OutputManager tstep_all dofman_all element_all

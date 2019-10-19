@@ -301,7 +301,7 @@ Lattice3dBoundary :: computeVolumeAround(GaussPoint *aGaussPoint)
 }
 
 void
-Lattice3dBoundary :: giveVTKCoordinates(int nodeNumber, FloatArray &coords) {
+Lattice3dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords) {
     coords.resize(3);
     coords.zero();
     Node *node;
@@ -453,7 +453,7 @@ Lattice3dBoundary :: initializeFrom(InputRecord *ir)
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     Lattice3d :: initializeFrom(ir);
 
-    location.resize(2);
+    this->location.resize(2);
     IR_GIVE_FIELD(ir, location, _IFT_Lattice3dBoundary_location); // Macro
 
     return IRRT_OK;
@@ -824,7 +824,6 @@ void Lattice3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
     if ( location.at(2) != 0 ) {
         giveSwitches(projectionComponentNodeTwo, location.at(2) );
     }
-
 
     //Modify dispOne and dispTwo
     dispOne.at(1) = dispOne.at(1) + projectionComponentNodeOne.at(1) * dispThree.at(1) + projectionComponentNodeOne.at(2) * dispThree.at(4) + projectionComponentNodeOne.at(3) * dispThree.at(5);
