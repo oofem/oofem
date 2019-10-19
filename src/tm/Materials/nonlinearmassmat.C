@@ -94,7 +94,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 NonlinearMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 {
     return 0.;
 }

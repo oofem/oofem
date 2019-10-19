@@ -139,13 +139,13 @@ HeMoBazNajMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 HeMoBazNajMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime)
+                                          TimeStep *atTime) const
 {
     return this->computeCapacityCoeff(mode, gp, atTime);
 }
 
 
-void HeMoBazNajMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+void HeMoBazNajMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
     MaterialMode mmode = gp->giveMaterialMode();
     switch ( mmode ) {
@@ -164,20 +164,19 @@ void HeMoBazNajMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatRespo
 
 
 void
-HeMoBazNajMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
+HeMoBazNajMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const
 {
-    double k = 0.0, h = 0.0, t = 0.0;
     TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     
-    FloatArray s;
-    s = status->giveTempField();
+    const auto &s = status->giveTempField();
     if ( s.isEmpty() ) {
         OOFEM_ERROR("undefined state vector");
     }
-    h = s.at(2);
-    t = s.at(1);
+    double h = s.at(2);
+    double t = s.at(1);
 
 
+    double k = 0.0;
     if ( mode == Conductivity_ww ) {
         k = perm_mm(h, t);
     } else if ( mode == Conductivity_wh ) {
@@ -195,19 +194,18 @@ HeMoBazNajMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode 
 }
 
 void
-HeMoBazNajMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
+HeMoBazNajMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const
 {
-    double k = 0.0, h = 0.0, t = 0.0;
     TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray s;
-    s = status->giveTempField();
+    const auto &s = status->giveTempField();
     if ( s.isEmpty() ) {
         OOFEM_ERROR("undefined state vector");
     }
-    h = s.at(2);
-    t = s.at(1);
+    double h = s.at(2);
+    double t = s.at(1);
     
+    double k = 0.0;
     if ( mode == Conductivity_ww ) {
         k = perm_mm(h, t);
     } else if ( mode == Conductivity_wh ) {
@@ -228,19 +226,18 @@ HeMoBazNajMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode 
 }
 
 void
-HeMoBazNajMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
+HeMoBazNajMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const
 {
-    double k = 0.0, h = 0.0, t = 0.0;
     TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray s;
-    s = status->giveTempField();
+    const auto &s = status->giveTempField();
     if ( s.isEmpty() ) {
         OOFEM_ERROR("undefined state vector");
     }
-    h = s.at(2);
-    t = s.at(1);
+    double h = s.at(2);
+    double t = s.at(1);
 
+    double k = 0.0;
     if ( mode == Conductivity_ww ) {
         k = perm_mm(h, t);
     } else if ( mode == Conductivity_wh ) {
@@ -266,7 +263,7 @@ HeMoBazNajMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode 
 }
 
 
-double HeMoBazNajMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+double HeMoBazNajMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
     if ( mode == Capacity_ww ) {
       return this->moistureCapacity;
@@ -289,25 +286,25 @@ double HeMoBazNajMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoi
 
 
 double
-HeMoBazNajMaterial :: perm_mm(double h, double T)
+HeMoBazNajMaterial :: perm_mm(double h, double T) const
 {
     return ( C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - h ) / ( 1. - hC ), n ) ) ) );
 }
 
 double
-HeMoBazNajMaterial :: perm_mh(double h, double T)
+HeMoBazNajMaterial :: perm_mh(double h, double T) const
 {
     return (0.);
 }
 
 double
-HeMoBazNajMaterial :: perm_hm(double h, double T)
+HeMoBazNajMaterial :: perm_hm(double h, double T) const
 {
     return (0.);
 }
 
 double
-HeMoBazNajMaterial :: perm_hh(double h, double T)
+HeMoBazNajMaterial :: perm_hh(double h, double T) const
 {
   return this->heatConductivity;
 }

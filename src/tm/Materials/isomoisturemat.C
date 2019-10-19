@@ -96,7 +96,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
 double
 IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                              GaussPoint *gp,
-                                                             TimeStep *tStep)
+                                                             TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return this->giveMoistureCapacity(gp, tStep);

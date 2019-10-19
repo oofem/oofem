@@ -138,13 +138,13 @@ HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 HeMoTKMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *tStep)
+                                          TimeStep *tStep) const
 {
     return this->computeCapacityCoeff(mode, gp, tStep);
 }
 
 
-void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     MaterialMode mmode = gp->giveMaterialMode();
     switch ( mmode ) {
@@ -163,28 +163,26 @@ void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseM
 
 
 void
-HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep)
+HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const
 //  function creates conductivity matrix of the
 //  isotropic heat material for 1D problems
 //
 //  d - conductivity matrix of the material
 //  25.9.2001
 {
-    double k = 0.0, w = 0.0, t = 0.0;
     TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray s;
-
 
     //  w = Tm->ip[ipp].av[0];
     //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempField();
+    const auto &s = status->giveTempField();
     if ( s.isEmpty() ) {
         OOFEM_ERROR("undefined state vector");
     }
 
-    w = s.at(2);
-    t = s.at(1);
+    double w = s.at(2);
+    double t = s.at(1);
 
+    double k = 0.0;
     if ( mode == Conductivity_ww ) {
         k = perm_ww(w, t);
     } else if ( mode == Conductivity_wh ) {
@@ -202,28 +200,24 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 }
 
 void
-HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep)
+HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const
 //  function creates conductivity matrix of the
 //  isotropic heat material for 2D problems
 //
 //  d - conductivity matrix of the material
 //  25.9.2001
 {
-    double k = 0.0, w = 0.0, t = 0.0;
     TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray s;
 
-
-    //  w = Tm->ip[ipp].av[0];
-    //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempField();
+    const auto &s = status->giveTempField();
     if ( s.isEmpty() ) {
         OOFEM_ERROR("undefined state vector");
     }
 
-    w = s.at(2);
-    t = s.at(1);
+    double w = s.at(2);
+    double t = s.at(1);
 
+    double k = 0.0;
     if ( mode == Conductivity_ww ) {
         k = perm_ww(w, t);
     } else if ( mode == Conductivity_wh ) {
@@ -244,7 +238,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 }
 
 void
-HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep)
+HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const
 //  function creates conductivity matrix of the
 //  isotropic heat material for 3D problems
 //
@@ -291,7 +285,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
 }
 
 
-double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( mode == Capacity_ww ) {
         return 1.0 * rho;
@@ -299,29 +293,25 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
         return 0.0;
     } else if ( mode == Capacity_hw ) {
         TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-        FloatArray s;
-        double w, t;
 
-        s = status->giveTempField();
+        const auto &s = status->giveTempField();
         if ( s.isEmpty() ) {
             OOFEM_ERROR("undefined state vector");
         }
 
-        w = s.at(2);
-        t = s.at(1);
+        double w = s.at(2);
+        double t = s.at(1);
         return get_b(w, t) * get_latent(w, t);
     } else if ( mode == Capacity_hh ) {
         TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-        FloatArray s;
-        double w, t;
 
-        s = status->giveTempField();
+        const auto &s = status->giveTempField();
         if ( s.isEmpty() ) {
             OOFEM_ERROR("undefined state vector");
         }
 
-        w = s.at(2);
-        t = s.at(1);
+        double w = s.at(2);
+        double t = s.at(1);
         return get_ceff(w, t);
     } else {
         OOFEM_ERROR("Unknown MatResponseMode");

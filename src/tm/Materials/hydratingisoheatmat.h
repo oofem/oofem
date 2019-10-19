@@ -88,7 +88,7 @@ public:
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
     void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;

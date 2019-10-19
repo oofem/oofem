@@ -73,7 +73,6 @@ class HydratingConcreteMat : public IsotropicHeatTransferMaterial
 {
 public:
     HydratingConcreteMat(int n, Domain * d);
-    virtual ~HydratingConcreteMat();
 
     bool hasInternalSource() const override { return true; }
     bool hasCastingTimeSupport() const override { return true; }
@@ -81,7 +80,7 @@ public:
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "HydratingConcreteMat"; }
 
@@ -89,9 +88,9 @@ public:
 
     // post-processing
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
-    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) override;
-    virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep);
-    virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep);
+    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const override;
+    virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep) const;
+    virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep) const;
     /// Type of hydration model, e.g. exponential curve, Cervera's model.
     int hydrationModelType;
     double maxModelIntegrationTime;
@@ -139,9 +138,8 @@ class HydratingConcreteMatStatus : public TransportMaterialStatus
 {
 public:
     HydratingConcreteMatStatus(GaussPoint * g);
-    virtual ~HydratingConcreteMatStatus();
     /// Returns actual degree of hydration at last known equilibrium.
-    double giveDoHActual();
+    double giveDoHActual() const;
     void updateYourself(TimeStep *tStep) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
     double power;

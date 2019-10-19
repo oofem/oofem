@@ -70,7 +70,7 @@ public:
 
      double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     //virtual double  giveMaturityT0() { return maturityT0; }
     protected:

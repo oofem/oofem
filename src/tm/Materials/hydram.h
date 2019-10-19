@@ -123,7 +123,6 @@ protected:
 
 public:
     HydrationModelStatus(GaussPoint * g);
-    virtual ~HydrationModelStatus() { }
 
     /// Returns the temp hydration degree.
     double giveTempHydrationDegree() const { return tempHydrationDegree; }

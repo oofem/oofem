@@ -201,7 +201,7 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
 }
 
 double
-HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     double answer = 0;
 

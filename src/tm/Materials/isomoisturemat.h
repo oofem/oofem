@@ -59,7 +59,7 @@ public:
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     virtual double givePermeability(GaussPoint *gp, TimeStep *tStep) const = 0;
     virtual double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const = 0;

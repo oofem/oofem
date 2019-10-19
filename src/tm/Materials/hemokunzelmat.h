@@ -112,7 +112,7 @@ public:
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *atTime) override;
+                                   TimeStep *atTime) const override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
@@ -145,7 +145,7 @@ protected:
     void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
     void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
 
-    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
+    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const;
 
     double perm_mm(double h, double T) const;
     double perm_mh(double h, double T) const;

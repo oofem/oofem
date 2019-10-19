@@ -71,7 +71,7 @@ public:
 
     void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_AnisotropicMassTransferMaterial_Name; }
     const char *giveClassName() const override { return "AnisotropicMassTransferMaterial"; }

@@ -96,7 +96,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 double
-AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
 

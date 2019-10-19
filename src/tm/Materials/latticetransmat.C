@@ -132,7 +132,7 @@ LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp) const
 double
 LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                     GaussPoint *gp,
-                                                    TimeStep *tStep)
+                                                    TimeStep *tStep) const
 {
     LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
     double suction = status->giveTempField().at(1);
@@ -152,13 +152,11 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
 double
 LatticeTransportMaterial :: computeConductivity(double suction,
                                                 GaussPoint *gp,
-                                                TimeStep *tStep)
+                                                TimeStep *tStep) const
 {
     LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
 
-    matMode = gp->giveMaterialMode();
-
-    this->density = this->give('d', gp);
+    double density = this->give('d', gp);
 
     double relativePermeability = 0.;
     double conductivity = 0.;
@@ -181,7 +179,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     }
 
     //Calculate mass for postprocessing
-    double mass = ( saturation * ( this->thetaS - this->thetaR ) + this->thetaR ) * this->density;
+    double mass = ( saturation * ( this->thetaS - this->thetaR ) + this->thetaR ) * density;
 
     status->setMass(mass);
 
@@ -242,17 +240,17 @@ LatticeTransportMaterial :: computeConductivity(double suction,
   
     conductivity += crackContribution;
     
-    return this->density * conductivity;
+    return density * conductivity;
 }
 
 
 
 double
-LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
+LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp) const
 {
     double cap = 0.;
 
-    this->density = this->give('d', gp);
+    double density = this->give('d', gp);
 
     if ( conType == 0 ) {
         cap = this->capacity;
@@ -267,7 +265,7 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
         }
     }
 
-    return this->density * cap;
+    return density * cap;
 }
 
 

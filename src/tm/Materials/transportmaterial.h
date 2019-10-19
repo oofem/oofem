@@ -160,7 +160,7 @@ public:
      */
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep) = 0;
+                                           TimeStep *tStep) const = 0;
 
     /**
      * Updates internal state of material according to new state vector.

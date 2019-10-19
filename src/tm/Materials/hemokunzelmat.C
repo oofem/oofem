@@ -201,7 +201,7 @@ HeMoKunzelMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 HeMoKunzelMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *atTime)
+                                              TimeStep *atTime) const
 {
     return this->computeCapacityCoeff(mode, gp, atTime);
 }
@@ -332,7 +332,7 @@ HeMoKunzelMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode 
 
 
 double
-HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
     //     if  (gp->giveElement()->giveNumber() == 4)
     //       double bzzz = 20;

@@ -132,14 +132,15 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 }
 
 double
-IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) {
+IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const
+{
     return give('k', gp, tStep);
 }
 
 double
 IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );

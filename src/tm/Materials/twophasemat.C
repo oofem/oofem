@@ -97,7 +97,7 @@ TwoPhaseMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 TwoPhaseMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 {
     double vof = this->giveVof(gp, tStep);
     return (1.0 - vof) * 

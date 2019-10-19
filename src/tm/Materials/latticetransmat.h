@@ -115,9 +115,6 @@ protected:
     ///Porosity of porous material
     double porosity;
 
-    ///Density of fluid
-    double density;
-
     ///Type of conductivity and capcity laws.
     int conType;
 
@@ -143,8 +140,6 @@ protected:
     ///suction air entry value
     double suctionAirEntry;
 
-    /// Material mode for convenient access.
-    MaterialMode matMode;
 
 public:
     LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
@@ -160,7 +155,7 @@ public:
 
     double  giveCharacteristicValue(MatResponseMode mode,
                                     GaussPoint *gp,
-                                    TimeStep *tStep) override;
+                                    TimeStep *tStep) const override;
 
     /**
      * Computes the conductivity.
@@ -168,14 +163,14 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    double computeConductivity(double suction, GaussPoint *gp, TimeStep *tStep);
+    double computeConductivity(double suction, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Computes the capacity.
      * @param suction Capillary stress
      * @param gp Integration point.
      */
-    double computeCapacity(double suction, GaussPoint *gp);
+    double computeCapacity(double suction, GaussPoint *gp) const;
 
     /**
      * Computes the mass.
@@ -183,7 +178,7 @@ public:
      * @param gp Integration point.
      */
 
-    double computeMass(FloatArray &stateVector, GaussPoint *gp);
+    double computeMass(FloatArray &stateVector, GaussPoint *gp) const;
 
     const char *giveInputRecordName() const override { return _IFT_LatticeTransportMaterial_Name; }
     const char *giveClassName() const override { return "LatticeTransportMaterial"; }

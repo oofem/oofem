@@ -73,11 +73,11 @@ public:
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
 
-    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     virtual double  giveMaturityT0() { return maturityT0; }
 

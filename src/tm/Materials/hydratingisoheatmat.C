@@ -178,7 +178,7 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
 }
 
 double
-HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( rmode == Capacity ) {
         if ( castAt && ( tStep->giveTargetTime() < castAt ) ) {

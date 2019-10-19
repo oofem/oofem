@@ -50,12 +50,6 @@ HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTr
 }
 
 
-HydratingConcreteMat :: ~HydratingConcreteMat()
-{
-    // destructor
-}
-
-
 IRResultType
 HydratingConcreteMat :: initializeFrom(InputRecord *ir)
 {
@@ -132,7 +126,7 @@ HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint 
 
 
 double
-HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return ( giveConcreteCapacity(gp, tStep) * giveConcreteDensity(gp, tStep) );
@@ -150,7 +144,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
 }
 
 
-double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep)
+double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const
 {
     HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     double conduct;
@@ -175,7 +169,7 @@ double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeSte
 }
 
 //normally it returns J/kg/K of concrete
-double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep)
+double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep) const
 {
     double capacityConcrete;
 
@@ -200,7 +194,7 @@ double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tS
 }
 
 
-double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep)
+double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep) const
 {
     double concreteBulkDensity;
 
@@ -264,11 +258,6 @@ HydratingConcreteMatStatus :: HydratingConcreteMatStatus(GaussPoint *g) : Transp
     equivalentTime = 0.;
 }
 
-
-HydratingConcreteMatStatus :: ~HydratingConcreteMatStatus()
-{
-    //destructor
-}
 
 //linear solver (NonStationaryTransportProblem) IntrinsicTime = TargetTime
 //nonlinear solver (NLTransientTransportProblem) IntrinsicTime depends on alpha
@@ -360,7 +349,7 @@ double HydratingConcreteMat :: affinity25(double DoH) const
     return result;
 }
 
-double HydratingConcreteMatStatus :: giveDoHActual()
+double HydratingConcreteMatStatus :: giveDoHActual() const
 {
     return degreeOfHydration;
 }

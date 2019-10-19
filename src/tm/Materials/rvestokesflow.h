@@ -115,7 +115,7 @@ public:
 
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
     void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
-    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override { return 0.0; }
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { return 0.0; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

@@ -100,7 +100,7 @@ public:
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
@@ -120,12 +120,12 @@ public:
     double give_dphi_dw(double w) const;
 
 protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
+    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
+    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const;
+    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const;
+    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const;
 
-    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Returns positive value of humidity, use VM_Velocity for previous (equilibrated) value
      */
