@@ -1147,7 +1147,7 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-    virtual const IntArray giveLocation() {return NULL;}
+    virtual const IntArray giveLocation() {IntArray answer(0); return answer;}
     virtual void recalculateCoordinates(int nodeNumber, FloatArray &coords){;}
     
 protected:

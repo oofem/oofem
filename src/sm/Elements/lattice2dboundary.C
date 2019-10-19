@@ -142,8 +142,33 @@ Lattice2dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
     IntArray tempLocation(2);
     tempLocation.at(1) = 0;
     tempLocation.at(2) = this->location;
+    return tempLocation;
   }
     
+void
+Lattice2dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords) {
+    coords.resize(3);
+    coords.zero();
+    Node *node;
+
+    FloatArray specimenDimension(3);
+    specimenDimension.at(1) =  this->giveNode(3)->giveCoordinate(1);
+    specimenDimension.at(2) =  this->giveNode(3)->giveCoordinate(2);
+    specimenDimension.at(3) =  this->giveNode(3)->giveCoordinate(3);
+
+    FloatArray projectionComponent(3);
+    projectionComponent.zero();
+
+    node  = this->giveNode(2);
+    if ( location != 0 ) {
+      giveSwitches( projectionComponent);
+    }
+
+    for ( int i = 0; i < 3; i++ ) {
+        coords.at(i + 1) =  node->giveCoordinate(i + 1) + projectionComponent.at(i + 1) * specimenDimension.at(i + 1);
+    }
+    return;
+}
 
   
 void

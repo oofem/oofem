@@ -103,6 +103,7 @@ protected:
 
     virtual double        giveLength() override;
     double        givePitch();
+    void recalculateCoordinates(int nodeNumber, FloatArray &coords);
     void giveSwitches(FloatArray &answer);
 };
 } // end namespace oofem
