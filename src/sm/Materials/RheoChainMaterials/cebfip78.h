@@ -65,7 +65,6 @@ protected:
 
 public:
     CebFip78Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
-    virtual ~CebFip78Material() { }
 
     const char *giveClassName() const override { return "CebFip78Material"; }
     const char *giveInputRecordName() const override { return _IFT_CebFip78Material_Name; }

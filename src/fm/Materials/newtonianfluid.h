@@ -65,8 +65,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     NewtonianFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
-    /// Destructor.
-    virtual ~NewtonianFluidMaterial() { }
 
     double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
 

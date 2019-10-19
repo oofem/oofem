@@ -45,9 +45,6 @@ namespace oofem {
 Material :: Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(), castingTime(-1.) { }
 
 
-Material :: ~Material()
-{}
-
 
 double
 Material :: give(int aProperty, GaussPoint *gp)
@@ -131,7 +128,7 @@ Material :: hasMaterialModeCapability(MaterialMode mode) const
 bool
 Material :: hasCastingTimeSupport() const
 {
-    return this->castingTime >= 0.;
+    return this->castingTime <= 0.;
 }
 
 

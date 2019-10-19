@@ -102,8 +102,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     HeMoKunzelMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
-    /// Destructor.
-    virtual ~HeMoKunzelMaterial() { }
 
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 

@@ -40,8 +40,6 @@
 namespace oofem {
 REGISTER_Material(SimpleVitrificationMaterial);
 
-SimpleVitrificationMaterial :: ~SimpleVitrificationMaterial() { }
-
 
 IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
 {

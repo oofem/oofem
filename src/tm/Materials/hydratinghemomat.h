@@ -58,7 +58,6 @@ protected:
 
 public:
     HydratingHeMoMaterial(int n, Domain * d) : HeMoTKMaterial(n, d), HydrationModelInterface() { }
-    virtual ~HydratingHeMoMaterial() { }
 
     void setMixture(MixtureType mix);
 

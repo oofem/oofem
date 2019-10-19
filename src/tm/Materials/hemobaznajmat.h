@@ -77,8 +77,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     HeMoBazNajMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
-    /// Destructor.
-    virtual ~HeMoBazNajMaterial() { }
 
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 

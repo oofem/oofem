@@ -125,7 +125,7 @@ public:
      */
     Material(int n, Domain *d);
     /// Destructor.
-    virtual ~Material();
+    virtual ~Material() = default;
 
     /**
      * Returns true if stiffness matrix of receiver is symmetric

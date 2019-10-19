@@ -65,7 +65,6 @@ protected:
 
 public:
     IsotropicHeatTransferMaterial(int n, Domain * d);
-    virtual ~IsotropicHeatTransferMaterial();
 
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 

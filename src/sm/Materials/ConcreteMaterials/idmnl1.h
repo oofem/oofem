@@ -108,8 +108,6 @@ class IDNLMaterial : public IsotropicDamageMaterial1, public StructuralNonlocalM
 public:
     /// Constructor
     IDNLMaterial(int n, Domain *d);
-    /// Destructor
-    virtual ~IDNLMaterial();
 
     const char *giveClassName() const override { return "IDNLMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_IDNLMaterial_Name; }

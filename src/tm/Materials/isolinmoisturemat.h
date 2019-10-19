@@ -59,7 +59,6 @@ protected:
 
 public:
     IsotropicLinMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
-    virtual ~IsotropicLinMoistureTransferMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
     double givePermeability(GaussPoint *gp, TimeStep *tStep) override;

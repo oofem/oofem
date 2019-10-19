@@ -49,20 +49,11 @@ namespace oofem {
 REGISTER_Material(MazarsMaterial);
 
 MazarsMaterial :: MazarsMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d)
-    //
-    // constructor
-    //
 {
     // force the loading / unloading control according to max. reached damage level
     llcriteria = idm_damageLevelCR;
 }
 
-
-MazarsMaterial :: ~MazarsMaterial()
-//
-// destructor
-//
-{ }
 
 IRResultType
 MazarsMaterial :: initializeFrom(InputRecord *ir)

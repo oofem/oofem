@@ -64,7 +64,6 @@ protected:
 
 public:
     AnisotropicMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~AnisotropicMassTransferMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

@@ -46,10 +46,6 @@ TwoPhaseMaterial :: TwoPhaseMaterial(int n, Domain *d) : TransportMaterial(n, d)
 {
 }
 
-TwoPhaseMaterial :: ~TwoPhaseMaterial() {
-    // destructor
-}
-
 
 IRResultType
 TwoPhaseMaterial :: initializeFrom(InputRecord *ir)

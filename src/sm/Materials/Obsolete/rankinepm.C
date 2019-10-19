@@ -51,9 +51,6 @@ RankinePlasticMaterial :: RankinePlasticMaterial(int n, Domain *d) : MPlasticMat
     this->rmType = mpm_CuttingPlane;
 }
 
-RankinePlasticMaterial :: ~RankinePlasticMaterial()
-{ }
-
 
 IRResultType
 RankinePlasticMaterial :: initializeFrom(InputRecord *ir)

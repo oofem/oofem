@@ -45,8 +45,6 @@ REGISTER_Material(WinklerMaterial);
 WinklerMaterial:: WinklerMaterial (int n, Domain* d): StructuralMaterial(n, d) 
 { }
 
-WinklerMaterial::~WinklerMaterial()
-{ }
 
 IRResultType
 WinklerMaterial :: initializeFrom(InputRecord *ir)

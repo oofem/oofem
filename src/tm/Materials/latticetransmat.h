@@ -148,7 +148,6 @@ protected:
 
 public:
     LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~LatticeTransportMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

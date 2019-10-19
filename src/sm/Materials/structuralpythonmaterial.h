@@ -83,8 +83,6 @@ private:
 public:
     /// Constructor.
     StructuralPythonMaterial(int n, Domain * d);
-    /// Destructor.
-    virtual ~StructuralPythonMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

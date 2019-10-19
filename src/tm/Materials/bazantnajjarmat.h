@@ -71,7 +71,6 @@ protected:
 
 public:
     BazantNajjarMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
-    virtual ~BazantNajjarMoistureTransferMaterial() { }
 
     /// evaluates permeability according to Bazant - Najjar function for diffusivity
     double givePermeability(GaussPoint *gp, TimeStep *tStep) override;

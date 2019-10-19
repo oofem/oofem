@@ -227,7 +227,6 @@ protected:
 
 public:
     MPSDamMaterial(int n, Domain *d);
-    virtual ~MPSDamMaterial() { }
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 

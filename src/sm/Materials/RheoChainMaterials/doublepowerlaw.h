@@ -61,7 +61,6 @@ protected:
 
 public:
     DoublePowerLawMaterial(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
-    virtual ~DoublePowerLawMaterial() { }
 
     const char *giveClassName() const override { return "DoublePowerLawMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_DoublePowerLawMaterial_Name; }

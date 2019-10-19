@@ -100,8 +100,6 @@ public:
      * @param nu Poisson ratio.
      */
     IsotropicLinearElasticMaterial(int n, Domain *d, double E, double nu);
-    /// Destructor.
-    virtual ~IsotropicLinearElasticMaterial() { }
 
     const char *giveClassName() const override { return "IsotropicLinearElasticMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_IsotropicLinearElasticMaterial_Name; }

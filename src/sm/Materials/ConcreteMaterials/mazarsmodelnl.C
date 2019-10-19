@@ -53,19 +53,13 @@ MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), S
 }
 
 
-MazarsNLMaterial :: ~MazarsNLMaterial()
-//
-// destructor
-//
-{ }
-
 Interface *
 MazarsNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
         return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

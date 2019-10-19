@@ -54,10 +54,6 @@ LargeStrainMasterMaterial :: LargeStrainMasterMaterial(int n, Domain *d) : Struc
     slaveMat = 0;
 }
 
-// destructor
-LargeStrainMasterMaterial :: ~LargeStrainMasterMaterial()
-{ }
-
 // reads the model parameters from the input file
 IRResultType
 LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)

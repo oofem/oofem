@@ -200,7 +200,6 @@ protected:
 
 public:
     FCMMaterial(int n, Domain *d);
-    virtual ~FCMMaterial();
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 

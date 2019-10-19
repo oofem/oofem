@@ -79,8 +79,6 @@ protected:
 public:
     /// Constructor.
     LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
-    /// Destructor.
-    virtual ~LinearElasticMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

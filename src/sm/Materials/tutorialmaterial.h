@@ -66,7 +66,6 @@ protected:
 
 public:
     TutorialMaterial(int n, Domain * d);
-    virtual ~TutorialMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &ir) override;

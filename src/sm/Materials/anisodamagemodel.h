@@ -201,8 +201,6 @@ protected:
 public:
     /// Constructor
     AnisotropicDamageMaterial(int n, Domain *d);
-    /// Destructor
-    virtual ~AnisotropicDamageMaterial() {}
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 

@@ -52,7 +52,6 @@ class OOFEM_EXPORT DummyMaterial : public Material
 {
 public:
     DummyMaterial(int n, Domain * d) : Material(n, d) { }
-    virtual ~DummyMaterial() { }
 
     bool hasMaterialModeCapability(MaterialMode mode) const override { return false; }
 

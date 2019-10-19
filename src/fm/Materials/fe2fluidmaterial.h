@@ -140,8 +140,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     FE2FluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
-    /// Destructor.
-    virtual ~FE2FluidMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

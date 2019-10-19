@@ -98,8 +98,6 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     M1Material(int n, Domain *d);
-    /// Destructor.
-    virtual ~M1Material() { }
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -188,8 +186,6 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     M1Material(int n, Domain *d);
-    /// Destructor.
-    virtual ~M1Material() { }
 
     void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
                                           const FloatArray &reducedStrain, TimeStep *tStep) override;

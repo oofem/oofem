@@ -114,7 +114,6 @@ public:
     OrthotropicLinearElasticMaterial(int n, Domain * d) : LinearElasticMaterial(n, d),
         cs_type(unknownCS)
     { }
-    virtual ~OrthotropicLinearElasticMaterial() { }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 

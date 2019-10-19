@@ -48,7 +48,6 @@ FCMMaterial :: FCMMaterial(int n, Domain *d) : StructuralMaterial(n, d),
     ecsMethod(ECSM_Unknown)
 {}
 
-FCMMaterial :: ~FCMMaterial() {}
 
 bool
 FCMMaterial :: hasMaterialModeCapability(MaterialMode mode) const

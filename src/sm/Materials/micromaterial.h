@@ -88,8 +88,6 @@ class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 public:
     /// Constructor
     MicroMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MicroMaterial() {}
 
     std :: string inputFileNameMicro;
 

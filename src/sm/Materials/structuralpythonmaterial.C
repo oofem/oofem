@@ -46,10 +46,6 @@ StructuralPythonMaterial :: StructuralPythonMaterial(int n, Domain *d) :
     StructuralMaterial(n, d)
 {}
 
-StructuralPythonMaterial :: ~StructuralPythonMaterial()
-{
-///    if ( mpModule ) Py_DECREF(mpModule);
-}
 
 IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 {

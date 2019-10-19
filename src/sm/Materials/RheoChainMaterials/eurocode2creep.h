@@ -173,7 +173,6 @@ public:
     Eurocode2CreepMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {
         shType = EC2_NoShrinkage;
     }
-    virtual ~Eurocode2CreepMaterial() { }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;

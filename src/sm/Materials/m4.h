@@ -105,8 +105,6 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     M4Material(int n, Domain *d);
-    /// Destructor.
-    virtual ~M4Material() { }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 

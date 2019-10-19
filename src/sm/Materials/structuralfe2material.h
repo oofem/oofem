@@ -126,7 +126,6 @@ protected:
 
 public:
     StructuralFE2Material(int n, Domain * d);
-    virtual ~StructuralFE2Material();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

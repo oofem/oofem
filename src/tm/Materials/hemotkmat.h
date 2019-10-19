@@ -90,8 +90,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     HeMoTKMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    /// Destructor.
-    virtual ~HeMoTKMaterial() { }
 
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 

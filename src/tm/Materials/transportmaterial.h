@@ -123,8 +123,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     TransportMaterial(int n, Domain * d) : Material(n, d) { }
-    /// Destructor.
-    virtual ~TransportMaterial() { }
 
     /**
      * Returns the flux for the field and its gradient.

@@ -66,7 +66,6 @@ protected:
 
 public:
     NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~NonlinearMassTransferMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

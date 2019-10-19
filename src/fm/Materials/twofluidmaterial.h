@@ -67,8 +67,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     TwoFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
-    /// Destructor.
-    virtual ~TwoFluidMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

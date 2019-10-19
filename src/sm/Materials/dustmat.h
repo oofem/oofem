@@ -446,8 +446,6 @@ protected:
 public:
     /// Constructor
     DustMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~DustMaterial() {}
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

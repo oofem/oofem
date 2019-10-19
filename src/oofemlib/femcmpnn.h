@@ -90,7 +90,7 @@ public:
      */
     FEMComponent(int n, Domain * d) : number(n), domain(d) { }
     /// Virtual destructor.
-    virtual ~FEMComponent() { }
+    virtual ~FEMComponent() = default;
 
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const = 0;

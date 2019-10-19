@@ -59,7 +59,6 @@ protected:
  
 public:
     TwoPhaseMaterial(int n, Domain * d);
-    virtual ~TwoPhaseMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;

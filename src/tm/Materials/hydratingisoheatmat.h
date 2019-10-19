@@ -78,7 +78,6 @@ protected:
 
 public:
     HydratingIsoHeatMaterial(int n, Domain * d) : IsotropicHeatTransferMaterial(n, d), HydrationModelInterface() { }
-    virtual ~HydratingIsoHeatMaterial() { }
 
     void setMixture(MixtureType mix);
 

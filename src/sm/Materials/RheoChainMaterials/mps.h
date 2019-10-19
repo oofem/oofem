@@ -256,7 +256,6 @@ protected:
 
 public:
     MPSMaterial(int n, Domain *d) : KelvinChainSolidMaterial(n, d) { }
-    virtual ~MPSMaterial() { }
 
     const char *giveInputRecordName() const override { return _IFT_MPSMaterial_Name; }
     const char *giveClassName() const override { return "MPSMaterial"; }

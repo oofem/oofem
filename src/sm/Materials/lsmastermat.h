@@ -73,7 +73,6 @@ protected:
 
 public:
     LargeStrainMasterMaterial(int n, Domain *d);
-    virtual ~LargeStrainMasterMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

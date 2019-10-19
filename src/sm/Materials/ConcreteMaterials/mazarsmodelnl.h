@@ -103,8 +103,6 @@ protected:
 public:
     /// Constructor
     MazarsNLMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MazarsNLMaterial();
 
     const char *giveClassName() const override { return "MazarsNLMaterial"; }
 

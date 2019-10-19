@@ -66,9 +66,6 @@ StructuralFE2Material :: StructuralFE2Material(int n, Domain *d) : StructuralMat
 useNumTangent(true)
 {}
 
-StructuralFE2Material :: ~StructuralFE2Material()
-{}
-
 
 IRResultType
 StructuralFE2Material :: initializeFrom(InputRecord *ir)

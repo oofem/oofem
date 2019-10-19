@@ -51,17 +51,8 @@ namespace oofem {
 REGISTER_Material(IsotropicGradientDamageMaterial);
 
 IsotropicGradientDamageMaterial :: IsotropicGradientDamageMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), GradientDamageMaterialExtensionInterface(d)
-    //
-    // constructor
-    //
 {}
 
-
-IsotropicGradientDamageMaterial :: ~IsotropicGradientDamageMaterial()
-//
-// destructor
-//
-{ }
 
 IRResultType
 IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)

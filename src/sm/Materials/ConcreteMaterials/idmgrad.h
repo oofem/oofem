@@ -73,8 +73,6 @@ protected:
 public:
     /// Constructor
     IsotropicGradientDamageMaterial(int n, Domain *d);
-    /// Destructor
-    virtual ~IsotropicGradientDamageMaterial();
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
     // identification and auxiliary functions

@@ -48,9 +48,6 @@ IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d)
     maturityT0 = 0.;
 }
 
-IsotropicHeatTransferMaterial :: ~IsotropicHeatTransferMaterial() {
-    // destructor
-}
 
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)

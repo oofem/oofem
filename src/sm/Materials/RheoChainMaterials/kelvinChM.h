@@ -67,7 +67,6 @@ class KelvinChainMaterial : public RheoChainMaterial
 {
 public:
     KelvinChainMaterial(int n, Domain * d);
-    virtual ~KelvinChainMaterial() { }
 
     // identification and auxiliary functions
     const char *giveClassName() const override { return "KelvinChainMaterial"; }

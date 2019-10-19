@@ -68,7 +68,6 @@ class KelvinChainSolidMaterial : public RheoChainMaterial
 {
 public:
     KelvinChainSolidMaterial(int n, Domain * d);
-    virtual ~KelvinChainSolidMaterial() { }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
     void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);

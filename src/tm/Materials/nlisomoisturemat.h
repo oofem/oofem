@@ -154,7 +154,6 @@ protected:
 
 public:
     NlIsoMoistureMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
-    virtual ~NlIsoMoistureMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

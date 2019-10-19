@@ -107,8 +107,6 @@ protected:
 public:
     /// Constructor
     MazarsMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MazarsMaterial();
 
     const char *giveInputRecordName() const override { return _IFT_MazarsMaterial_Name; }
     const char *giveClassName() const override { return "MazarsMaterial"; }

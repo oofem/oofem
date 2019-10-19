@@ -103,8 +103,6 @@ protected:
 public:
     NonlinearFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
 
-    virtual ~NonlinearFluidMaterial() { }
-
     FloatArrayF<6> computeDeviatoricStress3D(const FloatArrayF<6> &eps, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatMatrixF<6,6> computeTangent3D(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;

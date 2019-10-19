@@ -48,7 +48,6 @@ class IsotropicMoistureTransferMaterial : public TransportMaterial
 {
 public:
     IsotropicMoistureTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~IsotropicMoistureTransferMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
