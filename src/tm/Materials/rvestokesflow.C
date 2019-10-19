@@ -130,10 +130,6 @@ IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEStokesFlow_fileName);
 
-    SupressRVEoutput = 0;
-
-    IR_GIVE_OPTIONAL_FIELD(ir, SupressRVEoutput, _IFT_RVEStokesFlow_supressoutput);
-
     return IRRT_OK;
 }
 
@@ -174,11 +170,8 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 }
 
 void
-RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
-
-    this->suppressStdout();
-
     OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u\n", 
                     gp->giveElement()->giveGlobalNumber(), gp->giveNumber());
 
@@ -202,16 +195,12 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
     status->oldTangent = true;
 
     OOFEM_LOG_DEBUG("****** Exit giveFluxVector **************************************** \n");
-
-    this->enableStdout();
 }
 
 
 void
-RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
+RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) const
 {
-    this->suppressStdout();
-
     OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix **********************\n");
 
     RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
@@ -226,8 +215,6 @@ RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, 
     }
 
     OOFEM_LOG_DEBUG("****** Exit giveDeviatoricStiffnessMatrix **************************************** \n");
-
-    this->enableStdout();
 }
 
 MaterialStatus *
@@ -238,27 +225,6 @@ RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
         rank = this->domain->giveEngngModel()->giveRank();
     }
     return new RVEStokesFlowMaterialStatus(n++, rank, gp, this->rveFilename);
-}
-
-void
-RVEStokesFlow :: suppressStdout()
-{
-    //    if (SupressRVEoutput) {
-    //        fgetpos(stdout, &stdoutPos);
-    //        stdoutFID=dup(fileno(stdout));
-    //        freopen(this->rveLogFilename.c_str(), "a", stdout);
-    //    }
-}
-
-void RVEStokesFlow :: enableStdout()
-{
-    //    if (SupressRVEoutput) {
-    //        fflush(stdout);
-    //        dup2(stdoutFID, fileno(stdout));
-    //        close (stdoutFID);
-    //        clearerr(stdout);
-    //        fsetpos(stdout, &stdoutPos);        /* for C9X */
-    //    }
 }
 
 }

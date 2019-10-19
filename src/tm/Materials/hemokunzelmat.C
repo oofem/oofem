@@ -147,7 +147,7 @@ HeMoKunzelMaterial :: give(int aProperty, GaussPoint *gp) const
 
 
 void
-HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
@@ -185,7 +185,7 @@ void
 HeMoKunzelMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                MatResponseMode mode,
                                                GaussPoint *gp,
-                                               TimeStep *atTime)
+                                               TimeStep *atTime) const
 {
     /*
      * returns constitutive matrix of receiver

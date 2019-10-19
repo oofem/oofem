@@ -63,7 +63,7 @@ TwoPhaseMaterial :: initializeFrom(InputRecord *ir)
 
 
 void
-TwoPhaseMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+TwoPhaseMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     double vof = this->giveVof(gp, tStep);
@@ -81,7 +81,7 @@ void
 TwoPhaseMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                              MatResponseMode mode,
                                              GaussPoint *gp,
-                                             TimeStep *tStep)
+                                             TimeStep *tStep) const
 {
     FloatMatrix v1;
     double vof = this->giveVof(gp, tStep);

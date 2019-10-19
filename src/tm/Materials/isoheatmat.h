@@ -66,12 +66,12 @@ protected:
 public:
     IsotropicHeatTransferMaterial(int n, Domain * d);
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
-                                  TimeStep *tStep) override;
+                                  TimeStep *tStep) const override;
 
     virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const;
 

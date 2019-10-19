@@ -45,7 +45,6 @@
 #define _IFT_RVEStokesFlow_Name "rvestokesflow"
 #define _IFT_RVEStokesFlow_fileName "file"
 #define _IFT_RVEStokesFlow_bctype "bctype"
-#define _IFT_RVEStokesFlow_supressoutput "supressoutput"
 
 namespace oofem {
 /**
@@ -101,11 +100,6 @@ private:
     std :: string rveFilename;
     std :: string rveLogFilename;
 
-    int SupressRVEoutput;
-
-    void suppressStdout();
-    void enableStdout();
-
 public:
     RVEStokesFlow(int n, Domain * d);
 
@@ -113,8 +107,8 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
-    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
     double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { return 0.0; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

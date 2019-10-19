@@ -86,7 +86,7 @@ HeMoTKMaterial :: give(int aProperty, GaussPoint *gp) const
 
 
 void
-HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
@@ -122,7 +122,7 @@ void
 HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                            MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep)
+                                           TimeStep *tStep) const
 {
     /*
      * returns constitutive matrix of receiver

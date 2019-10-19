@@ -134,7 +134,7 @@ public:
      * @param field The value of the field itself.
      * @param tStep Active time step.
      */
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) = 0;
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const = 0;
 
     /**
      * Computes characteristic matrix of receiver in given integration point.
@@ -148,7 +148,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *tStep) = 0;
+                                          TimeStep *tStep) const = 0;
 
     /**
      * Computes the characteristic value of receiver in given integration point, respecting its history.

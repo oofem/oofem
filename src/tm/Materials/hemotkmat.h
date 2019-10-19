@@ -91,12 +91,12 @@ public:
      */
     HeMoTKMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
-                                  TimeStep *tStep) override;
+                                  TimeStep *tStep) const override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
