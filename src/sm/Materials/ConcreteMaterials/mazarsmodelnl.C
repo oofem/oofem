@@ -177,7 +177,7 @@ MazarsNLMaterialStatus :: MazarsNLMaterialStatus(GaussPoint *g) :
 
 
 void
-MazarsNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MazarsNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

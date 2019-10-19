@@ -281,7 +281,7 @@ MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(GaussPoint *g, int nuni
 
 
 void
-MaxwellChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MaxwellChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     RheoChainMaterialStatus :: printOutputAt(file, tStep);
 }

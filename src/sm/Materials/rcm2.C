@@ -1016,15 +1016,14 @@ RCM2MaterialStatus :: isCrackActive(int i) const
 }
 
 void
-RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->giveTempAlreadyCrack() ) {
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             switch ( crackStatuses.at(i) ) {
             case pscm_NONE:
                 strcpy(s, "NONE");

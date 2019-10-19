@@ -135,7 +135,7 @@ public:
     double givee0() const { return var_e0; }
     double givegf() const { return var_gf; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 

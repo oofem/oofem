@@ -464,7 +464,7 @@ RCSDEMaterialStatus :: RCSDEMaterialStatus(GaussPoint *g) :
 
 
 void
-RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     char s [ 11 ];
 

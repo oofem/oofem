@@ -242,17 +242,16 @@ protected:
 
 public:
     RankineMatStatus(GaussPoint * g);
-    virtual ~RankineMatStatus();
 
     const FloatArray & givePlasticStrain() const { return plasticStrain; }
 
-    double giveDamage() { return damage; }
-    double giveTempDamage() { return tempDamage; }
+    double giveDamage() const { return damage; }
+    double giveTempDamage() const { return tempDamage; }
 
-    double giveCumulativePlasticStrain() { return kappa; }
-    double giveTempCumulativePlasticStrain() { return tempKappa; }
+    double giveCumulativePlasticStrain() const { return kappa; }
+    double giveTempCumulativePlasticStrain() const { return tempKappa; }
 
-    double giveDKappa(int i)
+    double giveDKappa(int i) const
     {
         if ( i == 1 ) {
             return dKappa1;
@@ -286,7 +285,7 @@ public:
 
     const FloatArray &givePlasDef() { return plasticStrain; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

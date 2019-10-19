@@ -481,7 +481,7 @@ RCSDMaterialStatus :: RCSDMaterialStatus(GaussPoint *g) :
 
 
 void
-RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     char s [ 11 ];
 

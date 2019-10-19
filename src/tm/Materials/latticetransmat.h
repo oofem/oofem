@@ -74,7 +74,7 @@ public:
     ///Constructor
     LatticeTransportMaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *, TimeStep *) override;
+    void printOutputAt(FILE *, TimeStep *) const override;
 
     /// Returns pressure
     double givePressure() const { return field.at(1); }

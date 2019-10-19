@@ -65,7 +65,7 @@ protected:
 public:
     RCSDNLMaterialStatus(GaussPoint *gp);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const FloatArray &giveNonlocalStrainVector() { return nonlocalStrainVector; }
     const FloatArray &giveTempNonlocalStrainVector() { return tempNonlocalStrainVector; }

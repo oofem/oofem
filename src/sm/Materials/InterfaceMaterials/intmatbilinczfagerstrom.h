@@ -95,7 +95,7 @@ public:
     /// Constructor
     IntMatBilinearCZFagerstromStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "IntMatBilinearCZFagerstromStatus"; }
 

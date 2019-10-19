@@ -96,7 +96,7 @@ protected:
 public:
     RheoChainMaterialStatus(GaussPoint *g, int nunits);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     virtual const FloatArray &giveViscoelasticStressVector() const { return stressVector; }
 

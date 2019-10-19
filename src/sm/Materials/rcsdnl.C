@@ -447,7 +447,7 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(GaussPoint *g) :
 
 
 void
-RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FloatArray helpVec;
 

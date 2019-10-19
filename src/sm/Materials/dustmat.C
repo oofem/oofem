@@ -83,7 +83,7 @@ DustMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 void
-DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // Call the corresponding function of the parent class to print variables defined there.
     StructuralMaterialStatus :: printOutputAt(file, tStep);

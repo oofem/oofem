@@ -70,7 +70,7 @@ protected:
 public:
     PerfectlyPlasticMaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     int setTempYieldFlag(int i) { return temp_yield_flag = i; }
     int giveTempYieldFlag() { return temp_yield_flag; }

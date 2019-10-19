@@ -357,7 +357,7 @@ TrabBoneMaterialStatus :: giveTempIncPlasStrainVector()
 
 
 void
-TrabBoneMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBoneMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

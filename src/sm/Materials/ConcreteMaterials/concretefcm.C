@@ -920,13 +920,9 @@ ConcreteFCMStatus :: ConcreteFCMStatus(GaussPoint *gp) :
 {}
 
 
-ConcreteFCMStatus :: ~ConcreteFCMStatus()
-{ }
-
-
 
 void
-ConcreteFCMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteFCMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FCMMaterialStatus :: printOutputAt(file, tStep);
 }

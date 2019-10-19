@@ -114,7 +114,7 @@ MPSDamMaterialStatus :: giveCrackVector(FloatArray &answer) const
 
 
 void
-MPSDamMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MPSDamMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MPSMaterialStatus :: printOutputAt(file, tStep);
 

@@ -294,7 +294,7 @@ KelvinChainMaterialStatus :: KelvinChainMaterialStatus(GaussPoint *g, int nunits
     RheoChainMaterialStatus(g, nunits) { }
 
 void
-KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     RheoChainMaterialStatus :: printOutputAt(file, tStep);
 }

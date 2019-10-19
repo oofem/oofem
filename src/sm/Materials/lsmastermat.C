@@ -420,7 +420,7 @@ LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(GaussPoint *g
 
 
 void
-LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);

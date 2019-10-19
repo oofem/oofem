@@ -2366,7 +2366,7 @@ FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
 
 
 void
-FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     char s [ 11 ];
 

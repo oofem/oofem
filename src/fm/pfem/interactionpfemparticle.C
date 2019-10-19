@@ -130,7 +130,7 @@ InteractionPFEMParticle::giveCoupledVelocities(FloatArray &answer, TimeStep *ste
 }
 
 void
-InteractionPFEMParticle :: printOutputAt(FILE *stream, TimeStep *stepN)
+InteractionPFEMParticle :: printOutputAt(FILE *stream, TimeStep *stepN) const
 {
     PFEMParticle :: printOutputAt(stream, stepN);
 }

@@ -103,7 +103,7 @@ protected:
 public:
     RCM2MaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const FloatArray &getPrincipalStrainVector() const { return principalStrain; }
     const FloatArray &getPrincipalStressVector() const { return principalStress; }

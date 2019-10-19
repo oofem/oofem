@@ -836,7 +836,7 @@ IDNLMaterialStatus :: IDNLMaterialStatus(GaussPoint *g) :
 
 
 void
-IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

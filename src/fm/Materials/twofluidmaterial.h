@@ -99,7 +99,7 @@ public:
     /// Constructor
     TwoFluidMaterialStatus(GaussPoint * g, const std::array<Material*, 2> &slaveMaterial);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

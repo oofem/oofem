@@ -72,7 +72,7 @@ public:
     /// Destructor
     virtual ~CompoDamageMatStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
 

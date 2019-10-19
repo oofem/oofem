@@ -175,7 +175,7 @@ ConcreteDPM2Status :: updateYourself(TimeStep *tStep)
 }
 
 void
-ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // Call corresponding function of the parent class to print
     StructuralMaterialStatus :: printOutputAt(file, tStep);

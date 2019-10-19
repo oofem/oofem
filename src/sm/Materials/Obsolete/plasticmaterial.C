@@ -711,7 +711,7 @@ PlasticMaterialStatus :: PlasticMaterialStatus(GaussPoint *g, int statusSize) :
 
 
 void
-PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

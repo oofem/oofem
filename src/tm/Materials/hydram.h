@@ -134,7 +134,7 @@ public:
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
@@ -292,7 +292,7 @@ public:
     /// Updates the equilibrium variables to temporary values.
     void updateYourself(TimeStep *tStep);
     /// Outputs the status variables
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const;
 };
 
 class HydrationModelInterface : public Interface

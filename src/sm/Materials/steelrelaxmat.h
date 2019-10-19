@@ -188,16 +188,15 @@ protected:
 
 public:
     SteelRelaxMatStatus(GaussPoint *g);
-    virtual ~SteelRelaxMatStatus();
 
     void setTempRelaxIntVariable(double src) { tempRelaxIntVariable = src; }
-    double giveTempRelaxIntVariable(void) { return tempRelaxIntVariable; }
-    double giveRelaxIntVariable(void) { return relaxIntVariable; }
+    double giveTempRelaxIntVariable() const { return tempRelaxIntVariable; }
+    double giveRelaxIntVariable() const { return relaxIntVariable; }
 
     void setPrestress(double src) { prestress = src; }
-    double givePrestress(void) { return prestress; }
+    double givePrestress() const { return prestress; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
 

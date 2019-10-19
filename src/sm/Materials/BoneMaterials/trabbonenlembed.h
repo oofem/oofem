@@ -61,9 +61,8 @@ protected:
 
 public:
     TrabBoneNLEmbedStatus(GaussPoint * g);
-    virtual ~TrabBoneNLEmbedStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Gives the local cumulative plastic strain.
     double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }

@@ -623,11 +623,9 @@ MisesMatStatus :: MisesMatStatus(GaussPoint *g) :
     tempEffStress.resize(6);
 }
 
-MisesMatStatus :: ~MisesMatStatus()
-{ }
 
 void
-MisesMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MisesMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 

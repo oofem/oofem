@@ -105,7 +105,7 @@ public:
     double givePressure() { return this->pressure; }
     void letPressureBe(double val) { this->pressure = val; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

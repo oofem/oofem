@@ -244,7 +244,7 @@ HydratingIsoHeatMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-HydratingTransportMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+HydratingTransportMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     fprintf(file, " status ");
     HydrationModelStatusInterface :: printOutputAt(file, tStep);

@@ -105,7 +105,7 @@ protected:
 public:
     Concrete2MaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override
+    void printOutputAt(FILE *file, TimeStep *tStep) const override
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
 
     const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }

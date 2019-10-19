@@ -114,15 +114,15 @@ protected:
 public:
     LargeStrainMasterMaterialStatus(GaussPoint *g, Domain *d, int s);
 
-    const FloatMatrix &givePmatrix() { return Pmatrix; }
-    const FloatMatrix &giveTLmatrix() { return TLmatrix; }
-    const FloatMatrix &giveTransformationMatrix() { return transformationMatrix; }
+    const FloatMatrix &givePmatrix() const { return Pmatrix; }
+    const FloatMatrix &giveTLmatrix() const { return TLmatrix; }
+    const FloatMatrix &giveTransformationMatrix() const { return transformationMatrix; }
 
     void setPmatrix(const FloatMatrix &values) { Pmatrix = values; }
     void setTLmatrix(const FloatMatrix &values) { TLmatrix = values; }
     void setTransformationMatrix(const FloatMatrix &values) { transformationMatrix = values; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void initTempStatus() override;
     void updateYourself(TimeStep *) override;
 

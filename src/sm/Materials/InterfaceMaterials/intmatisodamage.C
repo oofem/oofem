@@ -287,7 +287,7 @@ IntMatIsoDamageStatus :: IntMatIsoDamageStatus(GaussPoint *g) : StructuralInterf
 {}
 
 void
-IntMatIsoDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IntMatIsoDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

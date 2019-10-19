@@ -90,7 +90,7 @@ public:
      */
     MaterialStatus(GaussPoint * g) : IntegrationPointStatus(g) { }
     /// Print receiver's output to given stream.
-    void printOutputAt(FILE *file, TimeStep *tStep) override { }
+    void printOutputAt(FILE *file, TimeStep *tStep) const override { }
 
     /**
      * Initializes the temporary internal variables, describing the current state according to

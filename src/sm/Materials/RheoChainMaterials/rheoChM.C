@@ -737,7 +737,7 @@ RheoChainMaterialStatus :: letTempHiddenVarsVectorBe(int i, FloatArray &valueArr
 }
 
 void
-RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // printing of hidden variables
 

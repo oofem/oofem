@@ -180,7 +180,7 @@ TwoFluidMaterialStatus :: TwoFluidMaterialStatus(GaussPoint *gp, const std::arra
 
 
 void
-TwoFluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TwoFluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     for ( auto &gp : slaveGps ) gp.giveMaterialStatus()->printOutputAt(file, tStep);
 }

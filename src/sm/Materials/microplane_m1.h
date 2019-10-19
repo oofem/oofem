@@ -73,7 +73,7 @@ public:
     const FloatArray &giveTempNormalMplanePlasticStrains() { return tempEpspN; }
     const IntArray &givePlasticStateIndicators() { return plasticState; }
     void initTempStatus() override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void updateYourself(TimeStep *tStep) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;

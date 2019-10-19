@@ -76,7 +76,7 @@ protected:
 public:
     TrabBoneMaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     double giveAlpha();
     double giveTempAlpha();

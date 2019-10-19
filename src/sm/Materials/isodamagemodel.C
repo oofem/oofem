@@ -422,7 +422,7 @@ IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(GaussPoint *g) : 
 
 
 void
-IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

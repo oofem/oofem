@@ -77,7 +77,7 @@ void MicroMaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 }
 
-void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 { }
 
 void MicroMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)

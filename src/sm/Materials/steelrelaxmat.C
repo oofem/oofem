@@ -474,11 +474,9 @@ SteelRelaxMatStatus :: SteelRelaxMatStatus(GaussPoint *g) : StructuralMaterialSt
     prestress = 0.;
 }
 
-SteelRelaxMatStatus :: ~SteelRelaxMatStatus()
-{ }
 
 void
-SteelRelaxMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+SteelRelaxMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 

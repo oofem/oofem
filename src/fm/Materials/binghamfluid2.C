@@ -324,7 +324,7 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(GaussPoint *g) :
 {}
 
 void
-BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tStep)
+BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tStep) const
 {
     fprintf(File, " strains ");
     for ( double e: deviatoricStrainRateVector ) {

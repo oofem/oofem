@@ -63,7 +63,7 @@ public:
         HydrationModelStatusInterface :: updateYourself(tStep);
         TransportMaterialStatus :: updateYourself(tStep);
     }
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 };
 
 /**

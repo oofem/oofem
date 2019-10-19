@@ -739,7 +739,7 @@ PerfectlyPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode
 
 
 void
-PerfectlyPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+PerfectlyPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { yield_flag %d}\n", yield_flag);

@@ -141,7 +141,7 @@ public:
     /// Returns actual degree of hydration at last known equilibrium.
     double giveDoHActual() const;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     double power;
     double lastEvalTime;
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;

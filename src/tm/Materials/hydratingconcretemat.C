@@ -371,7 +371,7 @@ HydratingConcreteMatStatus :: updateYourself(TimeStep *tStep)
 
 
 void
-HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     TransportMaterialStatus :: printOutputAt(file, tStep);

@@ -68,7 +68,7 @@ public:
     /// Constructor.
     IDNLMaterialStatus(GaussPoint *g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the local  equivalent strain to be averaged.
     double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }

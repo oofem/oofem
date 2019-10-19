@@ -227,7 +227,7 @@ M1MaterialStatus :: initTempStatus()
 }
 
 void
-M1MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+M1MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { sigN ");

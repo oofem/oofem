@@ -107,7 +107,6 @@ protected:
 
 public:
     MDMStatus(GaussPoint * g, int nsd, int nmplanes);
-    virtual ~MDMStatus();
 
     void setTempDamageTensorEigenVals(FloatArray src) { tempDamageTensorEigenValues = std :: move(src); }
     void setTempDamageTensorEigenVec(FloatMatrix src) { tempDamageTensorEigenVectors = std :: move(src); }
@@ -131,7 +130,7 @@ public:
 
     const char *giveClassName() const override { return "MDMStatus"; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

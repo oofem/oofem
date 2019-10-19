@@ -82,7 +82,7 @@ public:
 
     void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
 
-    virtual void printOutputAt(FILE *stream, TimeStep *stepN);
+    virtual void printOutputAt(FILE *stream, TimeStep *stepN) const;
 
     virtual const char *giveClassName() const { return "InteractionPFEMParticle"; }
     virtual const char *giveInputRecordName() const { return _IFT_InteractionPFEMParticle_Name; }

@@ -87,7 +87,7 @@ protected:
 public:
     MPlasticMaterialStatus(GaussPoint * g, int statusSize);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

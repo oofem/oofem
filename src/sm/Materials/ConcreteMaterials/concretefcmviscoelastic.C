@@ -49,10 +49,6 @@ ConcreteFCMViscoElastic :: ConcreteFCMViscoElastic(int n, Domain *d) : ConcreteF
   viscoMat = 0;
 }
 
-ConcreteFCMViscoElastic :: ~ConcreteFCMViscoElastic()
-{}
-
-
   
 IRResultType
 ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
@@ -435,16 +431,13 @@ ConcreteFCMViscoElasticStatus :: ConcreteFCMViscoElasticStatus(GaussPoint *gp) :
 }
 
 
-ConcreteFCMViscoElasticStatus :: ~ConcreteFCMViscoElasticStatus()
-{ }
-
 void
-ConcreteFCMViscoElasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteFCMViscoElasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     ConcreteFCMStatus :: printOutputAt(file, tStep);
 
     fprintf( file, "\nOutput for slave viscoelastic material\n");
-    this->giveSlaveGaussPointVisco()->giveMaterialStatus()->printOutputAt(file, tStep);
+    this->slaveGpVisco->giveMaterialStatus()->printOutputAt(file, tStep);
     fprintf( file, "\n");
 }
 

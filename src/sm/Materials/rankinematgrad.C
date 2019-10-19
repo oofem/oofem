@@ -698,7 +698,7 @@ RankineMatGradStatus :: RankineMatGradStatus(GaussPoint *g) :
 }
 
 void
-RankineMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RankineMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 

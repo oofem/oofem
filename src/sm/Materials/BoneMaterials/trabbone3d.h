@@ -112,9 +112,7 @@ protected:
 public:
     TrabBone3DStatus(GaussPoint *g);
 
-    virtual ~TrabBone3DStatus();
-
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     double giveKappa();
     double giveTempKappa();

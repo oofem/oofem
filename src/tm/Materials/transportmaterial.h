@@ -68,7 +68,7 @@ public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     TransportMaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

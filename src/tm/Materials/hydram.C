@@ -42,7 +42,7 @@ HydrationModelStatus :: HydrationModelStatus(GaussPoint *g) : MaterialStatus(g)
 }
 
 void
-HydrationModelStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+HydrationModelStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     fprintf(file, " ksi %.5f", hydrationDegree);
 }
@@ -576,7 +576,7 @@ HydrationModelStatusInterface :: updateYourself(TimeStep *tStep)
 }
 
 void
-HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep)
+HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     if ( hydrationModelStatus ) {
         hydrationModelStatus->printOutputAt(file, tStep);

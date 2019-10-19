@@ -2086,7 +2086,7 @@ AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(GaussPoint *g
 }
 
 void
-AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _PlaneStress ) { // special treatment of the out-of-plane strain

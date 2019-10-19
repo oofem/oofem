@@ -723,15 +723,9 @@ RankineMatStatus :: RankineMatStatus(GaussPoint *g) :
 }
 
 
-RankineMatStatus :: ~RankineMatStatus()
-{ }
-
-
 void
-RankineMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RankineMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    //int i, n;
-
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "status { ");

@@ -732,7 +732,7 @@ LatticeDamage2dStatus :: initTempStatus()
 }
 
 void
-LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

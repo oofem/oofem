@@ -143,11 +143,8 @@ protected:
     int updateFlag;
 
 public:
-
     /// Constructor
     LatticeDamage2dStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~LatticeDamage2dStatus() { }
 
     /// Returns the last equilibrated scalar measure of the largest strain level
     double giveKappa() { return kappa; }
@@ -179,9 +176,9 @@ public:
 
 
     /// Returns the last equilibrated damage level
-    double giveDamage() { return damage; }
+    double giveDamage() const { return damage; }
     /// Returns the temp. damage level
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
@@ -197,10 +194,10 @@ public:
     void letTempReducedStrainBe(FloatArray v) { tempReducedStrain = std :: move(v); }
 
     /// Prints the receiver state to given stream
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns characteristic length stored in receiver
-    double giveLe() { return le; }
+    double giveLe() const { return le; }
 
     /// Sets characteristic length to given value
     void setLe(double ls) { le = ls; }

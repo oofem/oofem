@@ -70,9 +70,8 @@ class ConcreteFCMStatus : public FCMMaterialStatus, public RandomMaterialStatusE
 {
 public:
     ConcreteFCMStatus(GaussPoint *g);
-    virtual ~ConcreteFCMStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "ConcreteFCMStatus"; }
 

@@ -70,9 +70,8 @@ protected:
 public:
 
     RankineMatGradStatus(GaussPoint *g);
-    virtual ~RankineMatGradStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     // definition
     const char *giveClassName() const override { return "RankineMatGradStatus"; }

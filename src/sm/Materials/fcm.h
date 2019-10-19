@@ -97,7 +97,7 @@ protected:
 public:
     FCMMaterialStatus(GaussPoint *g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     /// returns number of cracks from the previous time step (equilibrated value)
     virtual int giveNumberOfCracks() const;
     /// returns temporary number of cracks

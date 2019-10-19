@@ -134,11 +134,11 @@ public:
     /// Returns i-th natural element coordinate of receiver
     double giveNaturalCoordinate(int i) const { return naturalCoordinates.at(i); }
     /// Returns coordinate array of receiver.
-    const FloatArray &giveNaturalCoordinates() { return naturalCoordinates; }
+    const FloatArray &giveNaturalCoordinates() const { return naturalCoordinates; }
     void setNaturalCoordinates(const FloatArray &c) { naturalCoordinates = c; }
 
     /// Returns local sub-patch coordinates of the receiver
-    const FloatArray &giveSubPatchCoordinates()
+    const FloatArray &giveSubPatchCoordinates() const
     {
         if ( subPatchCoordinates ) {
             return *subPatchCoordinates;
@@ -201,7 +201,8 @@ public:
      * Returns reference to associated material status (NULL if not defined).
      */
     IntegrationPointStatus *giveMaterialStatus() { return this->materialStatus.get(); }
-
+    const IntegrationPointStatus *giveMaterialStatus() const { return this->materialStatus.get(); }
+    
     /**
      * Sets Material status managed by receiver.
      * @param ptr Pointer to new status of receiver.

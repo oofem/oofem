@@ -2086,7 +2086,7 @@ MPlasticMaterial2Status :: ~MPlasticMaterial2Status()
 { }
 
 void
-MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep)
+MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

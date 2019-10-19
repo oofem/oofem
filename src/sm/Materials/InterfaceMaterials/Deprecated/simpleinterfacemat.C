@@ -156,7 +156,7 @@ SimpleInterfaceMaterialStatus :: SimpleInterfaceMaterialStatus(GaussPoint *g) : 
 
 
 void
-SimpleInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+SimpleInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

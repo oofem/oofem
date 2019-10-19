@@ -88,12 +88,10 @@ protected:
 public:
     /// Constructor
     DruckerPragerPlasticitySMStatus(GaussPoint * gp);
-    /// Destructor
-    virtual ~DruckerPragerPlasticitySMStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
