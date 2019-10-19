@@ -181,7 +181,7 @@ protected:
 public:
     TrabBone3D(int n, Domain *d);
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
     double evaluateCurrentYieldStress(const double kappa);
     double evaluateCurrentPlasticModulus(const double kappa);
     double evaluateCurrentViscousStress(const double deltaKappa, TimeStep *tStep);

@@ -207,7 +207,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,

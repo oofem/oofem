@@ -223,7 +223,7 @@ public:
      * @param gp Integration point,
      * @return Property value.
      */
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
      * @param[out] kappa Return parameter, containing the corresponding equivalent strain.

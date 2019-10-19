@@ -131,7 +131,7 @@ public:
      * Returns true if stiffness matrix of receiver is symmetric
      * Default implementation returns true.
      */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return true; }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const { return true; }
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
      * by unique int id. Integration point also passed to allow for materials with spatially
@@ -140,14 +140,14 @@ public:
      * @param gp Integration point,
      * @return Property value.
      */
-    virtual double give(int aProperty, GaussPoint *gp);
+    virtual double give(int aProperty, GaussPoint *gp) const;
     /**
      * Returns true if 'aProperty' exists on material.
      * @param aProperty ID of property requested.
      * @param gp Integration point.
      * @return True if 'aProperty' exists.
      */
-    virtual bool hasProperty(int aProperty, GaussPoint *gp);
+    virtual bool hasProperty(int aProperty, GaussPoint *gp) const;
     /**
      * Modify 'aProperty', which already exists on material. Intended for evolving material properties.
      * @param aProperty ID of a property requested.

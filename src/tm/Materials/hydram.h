@@ -126,9 +126,9 @@ public:
     virtual ~HydrationModelStatus() { }
 
     /// Returns the temp hydration degree.
-    double giveTempHydrationDegree() { return tempHydrationDegree; }
+    double giveTempHydrationDegree() const { return tempHydrationDegree; }
     /// Returns the non-temp hydration degree. Used for step restart and postprocessing.
-    double giveHydrationDegree() { return hydrationDegree; }
+    double giveHydrationDegree() const { return hydrationDegree; }
     void setHydrationDegree(double v) { hydrationDegree = v; }
     void setTempHydrationDegree(double v) { tempHydrationDegree = v; }
 

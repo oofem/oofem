@@ -166,7 +166,7 @@ public:
      * Returns true if stiffness matrix of receiver is symmetric.
      * Default implementation returns true.
      */
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode,

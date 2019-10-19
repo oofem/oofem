@@ -316,7 +316,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     void  giveStiffnessMatrix(FloatMatrix &answer,
                               MatResponseMode mode,
@@ -362,7 +362,7 @@ public:
 
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,

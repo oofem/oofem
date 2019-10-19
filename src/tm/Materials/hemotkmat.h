@@ -102,11 +102,11 @@ public:
                                    GaussPoint *gp,
                                    TimeStep *tStep) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
@@ -129,7 +129,7 @@ protected:
     /**
      * Returns positive value of humidity, use VM_Velocity for previous (equilibrated) value
      */
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 
     double get_latent(double w, double t) const;
     double get_ceff(double w, double t) const;

@@ -2027,7 +2027,7 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-FCMMaterial :: give(int aProperty, GaussPoint *gp)
+FCMMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return linearElasticMaterial.give(aProperty, gp);
 }

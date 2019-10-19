@@ -852,7 +852,7 @@ ConcreteFCM :: computeResidualTensileStrength(GaussPoint *gp, TimeStep *tStep) {
 
 
 double
-ConcreteFCM :: give(int aProperty, GaussPoint *gp)
+ConcreteFCM :: give(int aProperty, GaussPoint *gp) const
 {
     this->giveStatus(gp);
     

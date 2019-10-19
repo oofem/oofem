@@ -117,7 +117,7 @@ LatticeTransportMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, c
 
 
 double
-LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp)
+LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == 'k' ) {
         return permeability;

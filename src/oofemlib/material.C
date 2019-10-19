@@ -47,7 +47,7 @@ Material :: Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(
 
 
 double
-Material :: give(int aProperty, GaussPoint *gp)
+Material :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 // tStep allows time dependent behavior to be taken into account
@@ -65,7 +65,7 @@ Material :: give(int aProperty, GaussPoint *gp)
 
 
 bool
-Material :: hasProperty(int aProperty, GaussPoint *gp)
+Material :: hasProperty(int aProperty, GaussPoint *gp) const
 // Returns true if the aProperty is defined on a material
 {
     return propertyDictionary.includes(aProperty);

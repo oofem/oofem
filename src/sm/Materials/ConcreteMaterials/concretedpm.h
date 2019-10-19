@@ -724,7 +724,7 @@ public:
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type) override;
 

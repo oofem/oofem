@@ -230,7 +230,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 }
 
 double
-NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
+NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const
 {
     double humidity = this->giveHumidity(gp, VM_Total);
 
@@ -270,7 +270,7 @@ NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
 }
 
 double
-NlIsoMoistureMaterial :: giveMoistureContent(double humidity)
+NlIsoMoistureMaterial :: giveMoistureContent(double humidity) const
 {
     if ( this->Isotherm == linear ) {
         return moistureCapacity*humidity;
@@ -284,16 +284,16 @@ NlIsoMoistureMaterial :: giveMoistureContent(double humidity)
         }
 
     } else if ( this->Isotherm == Ricken ) {
-      return  wf - log(1.-humidity)/dd ;
+        return  wf - log(1.-humidity)/dd ;
 
     } else if ( this->Isotherm == Kuenzel ) {
-      return wf * (b-1.) * humidity / (b-humidity);
+        return wf * (b-1.) * humidity / (b-humidity);
 
     } else if ( this->Isotherm == Hansen ) {
-      return rhodry*uh * pow( (1.-log(humidity)/A), (-1./nn) ) ;
+        return rhodry*uh * pow( (1.-log(humidity)/A), (-1./nn) ) ;
 
     } else if ( this->Isotherm == BSB ) {
-      return rhodry*c*k*Vm*humidity/( (1.-k*humidity) * (c-1.)*k*humidity );
+        return rhodry*c*k*Vm*humidity/( (1.-k*humidity) * (c-1.)*k*humidity );
 
     } else if ( this->Isotherm == bilinear ) {
 
@@ -315,7 +315,7 @@ NlIsoMoistureMaterial :: giveMoistureContent(double humidity)
 }
 
 double
-NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
+NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep) const
 {
     double permeability = 0.;
     double humidity = this->giveHumidity(gp, VM_Total);
@@ -352,7 +352,7 @@ NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
 
 
 double
-NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity)
+NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity) const
 {
     double Dw = 0.;
 
@@ -389,7 +389,7 @@ NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity)
 
 
 double
-NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
+NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
 {
     const FloatArray &tempState = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) )->giveTempField();
     if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
@@ -400,13 +400,10 @@ NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
     }
 }
 
-int
-NlIsoMoistureMaterial :: hasInternalSource()
+bool
+NlIsoMoistureMaterial :: hasInternalSource() const
 {
-    if (this->wn !=0.){
-        return 1;
-    }
-return 0;
+    return this->wn !=0.;
 }
 
 void

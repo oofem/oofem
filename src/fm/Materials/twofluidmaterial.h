@@ -75,7 +75,7 @@ public:
     FloatMatrixF<6,6> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     const char *giveClassName() const override { return "TwoFluidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_TwoFluidMaterial_Name; }

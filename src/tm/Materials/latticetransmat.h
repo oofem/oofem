@@ -188,7 +188,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticeTransportMaterial_Name; }
     const char *giveClassName() const override { return "LatticeTransportMaterial"; }
 
-    double give(int, GaussPoint *gp) override;
+    double give(int, GaussPoint *gp) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };

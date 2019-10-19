@@ -113,7 +113,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     const char *giveInputRecordName() const override { return _IFT_MisesMat_Name; }
     const char *giveClassName() const override { return "MisesMat"; }

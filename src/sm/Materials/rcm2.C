@@ -804,7 +804,7 @@ RCM2Material :: initializeFrom(InputRecord *ir)
 }
 
 double
-RCM2Material :: give(int aProperty, GaussPoint *gp)
+RCM2Material :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {

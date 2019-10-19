@@ -160,7 +160,7 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     const char *giveInputRecordName() const override { return _IFT_SteelRelaxMat_Name; }
     const char *giveClassName() const override { return "SteelRelaxMat"; }

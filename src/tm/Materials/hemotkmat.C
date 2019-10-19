@@ -75,7 +75,7 @@ HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-HeMoTKMaterial :: give(int aProperty, GaussPoint *gp)
+HeMoTKMaterial :: give(int aProperty, GaussPoint *gp) const
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -332,7 +332,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 
 
 double
-HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
+HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     const FloatArray &tempState = ms->giveTempField();
@@ -532,7 +532,7 @@ HeMoTKMaterial :: get_chi(double w, double t) const
 
 
 bool
-HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
+HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
 {
     if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
         return false;

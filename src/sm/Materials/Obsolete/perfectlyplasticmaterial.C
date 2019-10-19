@@ -642,7 +642,7 @@ PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
+PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {

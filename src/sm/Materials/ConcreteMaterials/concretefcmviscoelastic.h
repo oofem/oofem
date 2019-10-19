@@ -106,7 +106,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ConcreteFCMViscoElasticStatus(gp); }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) override;

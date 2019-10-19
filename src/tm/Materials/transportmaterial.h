@@ -173,7 +173,7 @@ public:
     /**
      * Returns nonzero if receiver generates internal source of state variable(s), zero otherwise.
      */
-    virtual int hasInternalSource() { return 0; }
+    virtual bool hasInternalSource() const { return false; }
     /**
      * Computes the internal source vector of receiver.
      * @param val Contains response.
@@ -186,7 +186,7 @@ public:
     /**
      * Returns positive value of humidity if implemented and enabled in derived material, -1 otherwise.
      */
-    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) { return -1.0; }
+    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) const { return -1.0; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

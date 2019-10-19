@@ -161,7 +161,7 @@ public:
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return ( a == 0. ); }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return ( a == 0. ); }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

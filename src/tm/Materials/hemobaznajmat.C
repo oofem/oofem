@@ -70,7 +70,7 @@ HeMoBazNajMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-HeMoBazNajMaterial :: give(int aProperty, GaussPoint *gp)
+HeMoBazNajMaterial :: give(int aProperty, GaussPoint *gp) const
 //
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
@@ -313,7 +313,7 @@ HeMoBazNajMaterial :: perm_hh(double h, double T)
 }
 
 bool
-HeMoBazNajMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
+HeMoBazNajMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
 {
     if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
         return true;

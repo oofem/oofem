@@ -119,15 +119,10 @@ HydratingHeMoMaterial :: setMixture(MixtureType mix)
     }
 }
 
-int
-HydratingHeMoMaterial :: hasInternalSource()
-// return true if hydration heat source is present
+bool
+HydratingHeMoMaterial :: hasInternalSource() const
 {
-    if ( hydrationHeat ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return hydrationHeat;
 }
 
 void

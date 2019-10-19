@@ -134,7 +134,7 @@ BinghamFluidMaterial2 :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
 
 
 double
-BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp)
+BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == Viscosity ) {
         return mu_0;

@@ -108,7 +108,7 @@ public:
     FloatMatrixF<6,6> computeTangent3D(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
-    double give(int aProperty, GaussPoint *) override;
+    double give(int aProperty, GaussPoint *) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

@@ -87,7 +87,7 @@ TwoFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) cons
 
 
 double
-TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
+TwoFluidMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     TwoFluidMaterialStatus *status = static_cast< TwoFluidMaterialStatus * >( this->giveStatus(gp) );
     double vof = this->giveTempVOF(gp);

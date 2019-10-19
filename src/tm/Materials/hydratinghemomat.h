@@ -61,7 +61,7 @@ public:
 
     void setMixture(MixtureType mix);
 
-    int hasInternalSource() override;
+    bool hasInternalSource() const override;
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
     void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep) override;
 

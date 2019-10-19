@@ -264,7 +264,7 @@ RCSDMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-RCSDMaterial :: give(int aProperty, GaussPoint *gp)
+RCSDMaterial :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {

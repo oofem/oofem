@@ -373,7 +373,7 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
     answer.at(3) = this->tempDillatCoeff;
 }
 
-double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp)
+double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return linearElasticMaterial->give(aProperty, gp);
 }

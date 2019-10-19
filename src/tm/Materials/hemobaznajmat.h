@@ -89,11 +89,11 @@ public:
                                    GaussPoint *gp,
                                    TimeStep *atTime) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;

@@ -98,7 +98,7 @@ ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
   
 
 double
-ConcreteFCMViscoElastic :: give(int aProperty, GaussPoint *gp)
+ConcreteFCMViscoElastic :: give(int aProperty, GaussPoint *gp) const
 {
   return ConcreteFCM :: give(aProperty, gp);
 }

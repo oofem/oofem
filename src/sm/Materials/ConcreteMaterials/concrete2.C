@@ -86,7 +86,7 @@ Concrete2 :: initializeFrom(InputRecord *ir)
 
 
 double
-Concrete2 :: give(int aProperty, GaussPoint *gp)
+Concrete2 :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {

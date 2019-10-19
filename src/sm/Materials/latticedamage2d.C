@@ -643,7 +643,7 @@ LatticeDamage2d :: giveThermalDilatationVector(FloatArray &answer,
 
 
 double
-LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
+LatticeDamage2d :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
     if ( static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {

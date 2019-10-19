@@ -73,16 +73,16 @@ public:
     BazantNajjarMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
 
     /// evaluates permeability according to Bazant - Najjar function for diffusivity
-    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) const override;
     /// evaluates slope of the sorption isotherm
-    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_BazantNajjarMoistureTransferMaterial_Name; }
     const char *giveClassName() const override { return "BazantNajjarMoistureTransferMaterial"; }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 };
 } // end namespace oofem
 #endif // bazantnajjarmat_h

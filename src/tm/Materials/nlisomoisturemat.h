@@ -158,17 +158,17 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
 
     /// evaluates slope of the sorption isotherm
-    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
-    double giveMoistureContent(double humidity) override;
-    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
-    double computeCapTranspCoeff(double humidity);
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const override;
+    double giveMoistureContent(double humidity) const override;
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) const override;
+    double computeCapTranspCoeff(double humidity) const;
 
     const char *giveInputRecordName() const override { return _IFT_NlIsoMoistureMaterial_Name; }
     const char *giveClassName() const override { return "NlIsoMoistureMaterial"; }
 
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 
-    int hasInternalSource() override;
+    bool hasInternalSource() const override;
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 };
 } // end namespace oofem

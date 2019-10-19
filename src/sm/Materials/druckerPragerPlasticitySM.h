@@ -330,7 +330,7 @@ public:
                     InternalStateType type,
                     TimeStep *tStep) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
     {

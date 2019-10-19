@@ -114,11 +114,11 @@ public:
                                    GaussPoint *gp,
                                    TimeStep *atTime) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
@@ -126,31 +126,31 @@ public:
     const char *giveClassName() const override { return "HeMoKunzelMaterial"; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 
     /// returns water content (in kg/m^3)
-    double giveMoistureContent(double h);
+    double giveMoistureContent(double h) const;
 
     /// computes derivative of the moisture storage function (sorption isotherm) with respect to relative humidity
-    double giveMoistureContentDerivative(double h);
+    double giveMoistureContentDerivative(double h) const;
 
-    double computeWaterVaporPerm(double T);
-    double computeSatVaporPressure(double T);
-    double computeSatVaporPressureDerivative(double T);
-    double computeDw(double h);
+    double computeWaterVaporPerm(double T) const;
+    double computeSatVaporPressure(double T) const;
+    double computeSatVaporPressureDerivative(double T) const;
+    double computeDw(double h) const;
 
 protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
+    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const;
+    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
+    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
+    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
 
     double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
 
-    double perm_mm(double h, double T);
-    double perm_mh(double h, double T);
-    double perm_hm(double h, double T);
-    double perm_hh(double h, double T);
+    double perm_mm(double h, double T) const;
+    double perm_mh(double h, double T) const;
+    double perm_hm(double h, double T) const;
+    double perm_hh(double h, double T) const;
 
 };
 } // end namespace oofem

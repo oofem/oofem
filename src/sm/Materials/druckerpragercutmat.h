@@ -111,7 +111,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     const char *giveClassName() const override { return "DruckerPragerCutMat"; }
     const char *giveInputRecordName() const override { return _IFT_DruckerPragerCutMat_Name; }

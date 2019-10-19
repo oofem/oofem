@@ -87,7 +87,7 @@ RandomMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &ir)
 
 
 bool
-RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value)
+RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value) const
 {
     RandomMaterialStatusExtensionInterface *interface = dynamic_cast< RandomMaterialStatusExtensionInterface * >
                                                         ( gp->giveMaterialStatus()->giveInterface(RandomMaterialStatusExtensionInterfaceType) );

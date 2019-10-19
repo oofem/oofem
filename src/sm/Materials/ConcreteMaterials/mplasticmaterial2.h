@@ -198,7 +198,7 @@ public:
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
     {
