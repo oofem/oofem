@@ -77,7 +77,7 @@ public:
 
     bool hasInternalSource() const override { return true; }
     bool hasCastingTimeSupport() const override { return true; }
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
@@ -120,10 +120,10 @@ public:
     double DoH1, P1;
 
 protected:
-    double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode);
-    double scaleTemperature(GaussPoint *gp);
+    double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode) const;
+    double scaleTemperature(GaussPoint *gp) const;
     /// Return affinity scaled to 25C.
-    double affinity25(double alpha);
+    double affinity25(double alpha) const;
 
     /// Use different methods to evaluate material conductivity, capacity, or density
     int conductivityType, capacityType, densityType;

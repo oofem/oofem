@@ -63,7 +63,7 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 }
 
 double
-IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep)
+IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
@@ -198,7 +198,7 @@ IsotropicHeatTransferMaterialStatus :: updateYourself(TimeStep *tStep)
     TransportMaterialStatus :: updateYourself(tStep);
 }
 
-double IsotropicHeatTransferMaterial :: giveTemperature(GaussPoint *gp)
+double IsotropicHeatTransferMaterial :: giveTemperature(GaussPoint *gp) const
 {
     IsotropicHeatTransferMaterialStatus *ms = static_cast< IsotropicHeatTransferMaterialStatus * >( this->giveStatus(gp) );
     if ( ms->giveTempField().isEmpty() ) return 0;

@@ -177,24 +177,24 @@ protected:
     // auxiliary values to enable external root finding method without passing them as parameters in each call
     //!!! possible problem for parallel computation, performance???
     double auxksi, auxdt, auxT, auxh;
-    double localResidual(double dks); // G(dksi) 4.12
+    double localResidual(double dks) const; // G(dksi) 4.12
 
     // Auxiliary functions - root finding
     ///
-    double regulafindroot();
-    double bintreefindroot();
-    double mixedfindroot();
+    double regulafindroot() const;
+    double bintreefindroot() const;
+    double mixedfindroot() const;
 
     // === Material functions ===
     /// Returns the normalized chemical affinity A~(ksi) [1/s].
-    double affinity(double ksi);
+    double affinity(double ksi) const;
     /// Returns the derivation of chemical affinity dA~/dksi(ksi).
-    double dAdksi(double ksi);
-    double dksidT(double ksi, double T, double h, double dt);
-    double dksidh(double ksi, double T, double h, double dt);
+    double dAdksi(double ksi) const;
+    double dksidT(double ksi, double T, double h, double dt) const;
+    double dksidh(double ksi, double T, double h, double dt) const;
 
     /// Computes and returns the derivatives of the material-generated Internal Source with respect to the tm state vector.
-    double computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode);
+    double computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode) const;
     /**
      * Computes and returns hydration degree increment for given ksi, T [K], dt [s].
      * Called by updateInternalState(val, gp, tStep)
@@ -234,7 +234,7 @@ public:
      * @param mode value mode VM_Incremental or VM_Total
      * @return hydration degree or increment in given gp
      */
-    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
 
     // how to determine whether hydration degree is uptodate?
     // - in tm, this can be ensured by calling computeHydrationDegreeIncrement when updateInternalState is used
@@ -261,7 +261,7 @@ public:
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
     /// Returns generated heat for given gp [kJ/m3], eventually water consumption
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     // } end new 5.1.2004
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
     virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep);
@@ -347,7 +347,7 @@ public:
      * @param mode Value mode VM_Incremental or VM_Total.
      * @return Hydration degree or increment in given gp.
      */
-    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
 };
 } // end namespace oofem
 #endif // hydram_h

@@ -169,7 +169,7 @@ public:
     double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 
     bool hasInternalSource() const override;
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 };
 } // end namespace oofem
 #endif // nlisomoisturemat_h

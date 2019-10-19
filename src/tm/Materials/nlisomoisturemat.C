@@ -407,7 +407,7 @@ NlIsoMoistureMaterial :: hasInternalSource() const
 }
 
 void
-NlIsoMoistureMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+NlIsoMoistureMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     val.resize(1);
     if (( mode == VM_Total) || (mode == VM_TotalIntrinsic)) {

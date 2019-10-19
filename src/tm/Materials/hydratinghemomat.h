@@ -62,7 +62,7 @@ public:
     void setMixture(MixtureType mix);
 
     bool hasInternalSource() const override;
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
     void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep) override;
 
     double giveCharacteristicValue(MatResponseMode mode,

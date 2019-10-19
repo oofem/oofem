@@ -181,7 +181,7 @@ public:
      * @param tStep Solution step.
      * @param mode Determines response mode.
      */
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
     { val.clear(); }
     /**
      * Returns positive value of humidity if implemented and enabled in derived material, -1 otherwise.

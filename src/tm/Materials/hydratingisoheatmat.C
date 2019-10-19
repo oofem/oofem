@@ -114,7 +114,7 @@ HydratingIsoHeatMaterial :: hasInternalSource() const
 }
 
 void
-HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 // returns in val the hydration heat computed by the hydration model for given hydration degree increment
 // current hydration model returns heat in (k)J/m3.
 // maybe??? element expects J/kg -> would have to divide by density here

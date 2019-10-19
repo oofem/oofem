@@ -88,9 +88,9 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
+    double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-    double giveTemperature(GaussPoint *gp);
+    double giveTemperature(GaussPoint *gp) const;
 };
 
 class IsotropicHeatTransferMaterialStatus : public TransportMaterialStatus
