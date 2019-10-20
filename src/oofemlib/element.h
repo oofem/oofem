@@ -1149,7 +1149,6 @@ public:
 
     virtual const IntArray giveLocation() {IntArray answer(0); return answer;}
     virtual void recalculateCoordinates(int nodeNumber, FloatArray &coords){;}
-    virtual void giveSwitches(IntArray &answer, int location){;}
 
  protected:
     /**
