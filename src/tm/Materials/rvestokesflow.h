@@ -103,8 +103,6 @@ private:
 public:
     RVEStokesFlow(int n, Domain * d);
 
-    virtual ~RVEStokesFlow() { }
-
     IRResultType initializeFrom(InputRecord *ir) override;
 
     void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;

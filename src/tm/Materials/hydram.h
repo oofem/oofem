@@ -117,9 +117,9 @@ class HydrationModelStatus : public MaterialStatus
 {
 protected:
     // hydration degree at beginning of current time step
-    double hydrationDegree;
+    double hydrationDegree = 0.;
     // hydration degree at end of current time step (or during equilibrium iteration)
-    double tempHydrationDegree;
+    double tempHydrationDegree = 0.;
 
 public:
     HydrationModelStatus(GaussPoint * g);
@@ -154,23 +154,23 @@ protected:
     /// Used concrete mixture
     MixtureType mixture;
     /// Time step lenghts at zero and complete hydration
-    double hydrationStartMaxStep, hydrationEndMaxStep;
+    double hydrationStartMaxStep = 0., hydrationEndMaxStep = 0.;
     //!!! initial hydration degree - set in initialize From, but not used
-    double initialHydrationDegree;
+    double initialHydrationDegree = 0.;
     /// time scale - used for time input in other units than seconds
-    double timeScale;
+    double timeScale = 0.;
 
     // === Material parameters ===
-    double aa, ///< Normalized chemical affinity regression function coefficients.
-           ba,
-           ca,
-           da,
+    double aa = 0., ///< Normalized chemical affinity regression function coefficients.
+           ba = 0.,
+           ca = 0.,
+           da = 0.,
 
-           e0, ///< ksi_0.
-           ear, ///< Activation term [K].
-           le, ///< Latent heat [kJ/m3].
-           cv, ///< Input cement content kg/m3 for evaluation of total water consumption.
-           we; ///< Total water consumption for hydration [kg/m3].
+           e0 = 0., ///< ksi_0.
+           ear = 0., ///< Activation term [K].
+           le = 0., ///< Latent heat [kJ/m3].
+           cv = 0., ///< Input cement content kg/m3 for evaluation of total water consumption.
+           we = 0.; ///< Total water consumption for hydration [kg/m3].
 
     // === Hydration degree increment evaluation ===
     // auxiliary values to enable external root finding method without passing them as parameters in each call
@@ -207,9 +207,6 @@ public:
     HydrationModel();
     /// Constructor setting the mixture type and root-finding method
     HydrationModel(MixtureType mix, FindRootMethod usefr);
-    /// Destructor
-    virtual ~HydrationModel() { }
-
 
     // === Hydration model services ===
 
@@ -278,11 +275,10 @@ class HydrationModelStatusInterface : public Interface
 protected:
     /// Reference to associated hydration model status
     std :: unique_ptr< HydrationModelStatus > hydrationModelStatus;
+
 public:
     /// Constructor. Nulls the hydrationModelStatus pointer.
     HydrationModelStatusInterface() {}
-    /// Destructor. Deletes the associated hydration model status.
-    virtual ~HydrationModelStatusInterface() {}
 
     /// Returns the associated hydration model status.
     HydrationModelStatus *giveHydrationModelStatus() { return hydrationModelStatus.get(); }
@@ -302,15 +298,13 @@ protected:
     /// Reference to the associated hydrationModel instance
     std :: unique_ptr< HydrationModel > hydrationModel;
     /// Material cast time - start of hydration
-    double castAt;
+    double castAt = 0.;
     /// Constant hydration degree for analysis without hydration model
-    double constantHydrationDegree;
+    double constantHydrationDegree = 0.;
 
 public:
     /// Returns the associated hydration model.
     HydrationModel *giveHydrationModel() { return hydrationModel.get(); }
-    /// Destructor. Deletes the associated hydration model.
-    virtual ~HydrationModelInterface() {}
     /**
      * Creates and initializes the hydration model according to object description stored in input record.
      * The parent class instanciateFrom method is not called here.

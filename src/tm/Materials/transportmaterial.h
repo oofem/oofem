@@ -62,10 +62,9 @@ protected:
     FloatArray flux; ///< Vector containing the last equilibrated flux. The physical meaning corresponds to energy flux, mass flow, etc.
 
     /// A scalar containing maturity (integration of temperature over time)
-    double maturity;
+    double maturity = 0.;
 
 public:
-    /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     TransportMaterialStatus(GaussPoint * g);
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;

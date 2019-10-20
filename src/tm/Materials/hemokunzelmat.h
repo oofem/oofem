@@ -67,7 +67,6 @@ namespace oofem {
 class HeMoKunzelMaterial : public TransportMaterial
 {
 protected:
-
     enum isothermType { Hansen, Kunzeliso } Isotherm;
 
     enum permeabilityType { Multilin_h, Multilin_wV, Kunzelperm } Permeability;
@@ -77,23 +76,23 @@ protected:
     FloatArray perm_wV;
     FloatArray perm_DwwV;
 
-    double A;            ///< water absorption coefficient [kg m^-2 s^-0.5]
+    double A = 0.;            ///< water absorption coefficient [kg m^-2 s^-0.5]
 
-    double iso_wh;       ///< Parameter of Hansen's/Kunzel's isotherm - max. adsorbed water content [kg/m^3]
-    double iso_n;        ///< Parameter of Hansen's isotherm - exponent
-    double iso_a;        ///< Parameter of Hansen's isotherm
-    double iso_b;        ///< Parameter of Kunzel's isotherm
+    double iso_wh = 0.;       ///< Parameter of Hansen's/Kunzel's isotherm - max. adsorbed water content [kg/m^3]
+    double iso_n = 0.;        ///< Parameter of Hansen's isotherm - exponent
+    double iso_a = 0.;        ///< Parameter of Hansen's isotherm
+    double iso_b = 0.;        ///< Parameter of Kunzel's isotherm
 
-    double mu;           ///< water vapor diffusion resistance [-]
-    double PL;           ///< ambient atmospheric pressure [Pa]
+    double mu = 0.;           ///< water vapor diffusion resistance [-]
+    double PL = 0.;           ///< ambient atmospheric pressure [Pa]
 
-    double lambda0;      ///< thermal conductivity [W m^-1 K^-1]
-    double b;            ///< thermal conductivity supplement [-]
-    double rho;          ///< bulk density of dry building material [kg m^-3]
-    double rhoH2O;       ///< water density [kg m^-3]
-    double cs;           ///< specific heat capacity of the building material [J kg^-1 K^-1]
-    double cw;           ///< specific heat capacity of liquid water [J kg^-1 K^-1]
-    double hv;           ///< latent heat of phase change/evaporation enthalpy of pure water [J/kg]
+    double lambda0 = 0.;      ///< thermal conductivity [W m^-1 K^-1]
+    double b = 0.;            ///< thermal conductivity supplement [-]
+    double rho = 0.;          ///< bulk density of dry building material [kg m^-3]
+    double rhoH2O = 0.;       ///< water density [kg m^-3]
+    double cs = 0.;           ///< specific heat capacity of the building material [J kg^-1 K^-1]
+    double cw = 0.;           ///< specific heat capacity of liquid water [J kg^-1 K^-1]
+    double hv = 0.;           ///< latent heat of phase change/evaporation enthalpy of pure water [J/kg]
 
 public:
     /**

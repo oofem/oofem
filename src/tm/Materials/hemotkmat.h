@@ -66,22 +66,22 @@ namespace oofem {
 class HeMoTKMaterial : public TransportMaterial
 {
 protected:
-    double a_0;       ///< Constant (obtained from experiments) [Bazant and Najjar, 1972]
-    double nn;        ///< Constant-exponent (obtained from experiments) [Bazant and Najjar, 1972]
-    double phi_c;     ///< Constant-relative humidity  (obtained from experiments) [Bazant and Najjar, 1972]
-    double delta_wet; ///< Constant-water vapor permeability (obtained from experiments) [Bazant and Najjar, 1972]
+    double a_0 = 0.;       ///< Constant (obtained from experiments) [Bazant and Najjar, 1972]
+    double nn = 0.;        ///< Constant-exponent (obtained from experiments) [Bazant and Najjar, 1972]
+    double phi_c = 0.;     ///< Constant-relative humidity  (obtained from experiments) [Bazant and Najjar, 1972]
+    double delta_wet = 0.; ///< Constant-water vapor permeability (obtained from experiments) [Bazant and Najjar, 1972]
 
-    double w_h;       ///< Constant water content (obtained from experiments) [Pedersen, 1990]
-    double n;         ///< Constant-exponent (obtained from experiments) [Pedersen, 1990]
-    double a;         ///< Constant (obtained from experiments) [Pedersen, 1990]
+    double w_h = 0.;       ///< Constant water content (obtained from experiments) [Pedersen, 1990]
+    double n = 0.;         ///< Constant-exponent (obtained from experiments) [Pedersen, 1990]
+    double a = 0.;         ///< Constant (obtained from experiments) [Pedersen, 1990]
 
-    double latent;    ///< Latent heat of evaporation.
-    double c;         ///< Thermal capacity.
-    double rho;       ///< Volume density.
-    double chi_eff;   ///< Effective thermal conductivity.
+    double latent = 0.;    ///< Latent heat of evaporation.
+    double c = 0.;         ///< Thermal capacity.
+    double rho = 0.;       ///< Volume density.
+    double chi_eff = 0.;   ///< Effective thermal conductivity.
 
-    double por;       ///< Porosity.
-    double rho_gws;   ///< Saturation volume density.
+    double por = 0.;       ///< Porosity.
+    double rho_gws = 0.;   ///< Saturation volume density.
 
 public:
     /**

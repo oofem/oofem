@@ -91,32 +91,33 @@ public:
     double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const override;
     virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep) const;
     virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep) const;
+
     /// Type of hydration model, e.g. exponential curve, Cervera's model.
-    int hydrationModelType;
-    double maxModelIntegrationTime;
+    int hydrationModelType = 0;
+    double maxModelIntegrationTime = 0.;
     /// Minimum number of integration steps for hydration model within a given timeStep.
-    double minModelTimeStepIntegrations;
+    double minModelTimeStepIntegrations = 0.;
     /// Potential heat of hydration, for ordinary Portland cement approximately 500 J/g.
-    double Qpot;
+    double Qpot = 0.;
     /// Mass of cement in kg per 1m3 of concrete.
-    double massCement;
+    double massCement = 0.;
     /// Activation energy of concrete (default 38400 J/mol/K).
-    double activationEnergy;
+    double activationEnergy = 0.;
     /// Reference temperature for hydration model.
-    double referenceTemperature;
+    double referenceTemperature = 0.;
     /**
      * Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard:
      * Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 2005.
      */
-    double tau, beta;
+    double tau = 0., beta = 0.;
 
     /**
      * Parameters for affinity hydration model inspired by Cervera et al.
      * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
      */
-    double B1, B2, eta, DoHInf;
+    double B1 = 0., B2 = 0., eta = 0., DoHInf = 0.;
     ///Optional extension to slag-rich, high-blended cements
-    double DoH1, P1;
+    double DoH1 = 0., P1 = 0.;
 
 protected:
     double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode) const;
@@ -142,9 +143,10 @@ public:
     double giveDoHActual() const;
     void updateYourself(TimeStep *tStep) override;
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
-    double power;
-    double lastEvalTime;
-    double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
+
+    double power = 0.;
+    double lastEvalTime = -1.e20;
+    double lastEquivalentTime = 0., equivalentTime = 0., degreeOfHydration = 0., lastDegreeOfHydration = 0.;
 };
 } // end namespace oofem
 #endif // hydratingconcretemat_h

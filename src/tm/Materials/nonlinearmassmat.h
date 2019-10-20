@@ -60,9 +60,9 @@ class NonlinearMassTransferMaterial : public TransportMaterial
 {
 protected:
     /// Indicates the level of nonlinearity in the model
-    double C;
+    double C = 0.;
     /// Indicates the level of nonlinearity in the model
-    double alpha;
+    double alpha = 0.;
 
 public:
     NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }

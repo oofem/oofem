@@ -54,7 +54,7 @@ namespace oofem {
 class HydratingHeMoMaterial : public HeMoTKMaterial, public HydrationModelInterface
 {
 protected:
-    int hydration, hydrationHeat, hydrationLHS, teplotaOut;
+    bool hydration = false, hydrationHeat = false, hydrationLHS = false, teplotaOut = false;
 
 public:
     HydratingHeMoMaterial(int n, Domain * d) : HeMoTKMaterial(n, d), HydrationModelInterface() { }

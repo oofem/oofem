@@ -109,8 +109,6 @@ HeMoKunzelMaterial :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("initializeFrom: permeabilityType must be equal to 0, 1 or 2");
     }
 
-
-
     IR_GIVE_FIELD(ir, mu, _IFT_HeMoKunzelMaterial_mu);
 
     PL = 101325.;
@@ -137,10 +135,6 @@ HeMoKunzelMaterial :: initializeFrom(InputRecord *ir)
 
 double
 HeMoKunzelMaterial :: give(int aProperty, GaussPoint *gp) const
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
-//
 {
     return Material :: give(aProperty, gp);
 }

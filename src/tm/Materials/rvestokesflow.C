@@ -121,8 +121,10 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream &stream, ContextMode mo
     TransportMaterialStatus :: restoreContext(stream, mode);
 }
 
+
 RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : TransportMaterial(n, d)
 { }
+
 
 IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {

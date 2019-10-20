@@ -64,10 +64,9 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
     conType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->conType, _IFT_LatticeTransportMaterial_contype);
     this->capacity = 0;
-    if(conType == 0){
+    if ( conType == 0 ) {
       IR_GIVE_OPTIONAL_FIELD(ir, this->capacity, _IFT_LatticeTransportMaterial_c);  
-    }
-    else if ( conType == 1 ) {
+    } else if ( conType == 1 ) {
         IR_GIVE_FIELD(ir, this->paramM, _IFT_LatticeTransportMaterial_m);
 
         IR_GIVE_FIELD(ir, this->paramA, _IFT_LatticeTransportMaterial_a);
@@ -90,8 +89,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         } else {
             thetaM = ( thetaS - thetaR ) * pow(1. + pow( suctionAirEntry / paramA, 1. / ( 1. - paramM ) ), paramM) + thetaR;
         }
-    } //end of contype condition
-    else if ( conType != 0 && conType != 1 ) {
+    } else if ( conType != 0 && conType != 1 ) {
         OOFEM_ERROR("unknown conType mode");
     }
 
@@ -188,13 +186,9 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
 
     //add crack contribution;
-   
     //Read in crack lengths
-    
     FloatArray crackLengths;
-    
     static_cast< LatticeTransportElement * >( gp->giveElement())->giveCrackLengths(crackLengths);
-    
     FloatArray crackWidths;
     crackWidths.resize(crackLengths.giveSize());   
 
@@ -206,7 +200,6 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
         if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
             IntArray couplingNumbers;
-            
             static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
             for (int i = 1; i <= crackLengths.giveSize(); i++) {
                 if ( couplingNumbers.at(i) != 0 ) {
@@ -218,12 +211,10 @@ LatticeTransportMaterial :: computeConductivity(double suction,
         }
     }
 #endif
-    
     //Read in crack widths from transport element
     if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
         static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackWidths(crackWidths);
     }
-    
     //Use crack width and apply cubic law
     double crackContribution = 0.;
 
@@ -237,12 +228,9 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     }
 
     crackContribution *=  this->crackTortuosity * relativePermeability/ (12. * this->viscosity );
-  
     conductivity += crackContribution;
-    
     return density * conductivity;
 }
-
 
 
 double

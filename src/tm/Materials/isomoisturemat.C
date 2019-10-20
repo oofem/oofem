@@ -64,8 +64,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
      * returns constitutive (conductivity) matrix of receiver
      */
 
-    double permeability;
-    permeability = this->givePermeability(gp, tStep);
+    double permeability = this->givePermeability(gp, tStep);
 
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {

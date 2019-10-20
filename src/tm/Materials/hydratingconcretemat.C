@@ -41,13 +41,7 @@
 namespace oofem {
 REGISTER_Material(HydratingConcreteMat);
 
-HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
-{
-    // constructor
-    maxModelIntegrationTime = 0.;
-    minModelTimeStepIntegrations = 0;
-    P1 = 0.;
-}
+HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d) { }
 
 
 IRResultType
@@ -117,7 +111,7 @@ void
 HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     val.resize(1);
-    if (( mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
+    if ( mode == VM_Total || mode == VM_TotalIntrinsic ) {
         val.at(1) = this->GivePower(tStep, gp, mode);
     } else {
         OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );
@@ -247,16 +241,7 @@ HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 }
 
 
-HydratingConcreteMatStatus :: HydratingConcreteMatStatus(GaussPoint *g) : TransportMaterialStatus(g)
-{
-    //constructor
-    power = 0.;
-    lastEvalTime = -1.e20; //start from begining (set to -1.e6 s)
-    degreeOfHydration = 0.;
-    lastDegreeOfHydration = 0.;
-    lastEquivalentTime = 0.;
-    equivalentTime = 0.;
-}
+HydratingConcreteMatStatus :: HydratingConcreteMatStatus(GaussPoint *g) : TransportMaterialStatus(g) { }
 
 
 //linear solver (NonStationaryTransportProblem) IntrinsicTime = TargetTime

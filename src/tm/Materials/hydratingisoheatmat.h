@@ -74,7 +74,7 @@ public:
 class HydratingIsoHeatMaterial : public IsotropicHeatTransferMaterial, public HydrationModelInterface
 {
 protected:
-    int hydration, hydrationHeat, hydrationLHS;
+    bool hydration = false, hydrationHeat = false, hydrationLHS = false;
 
 public:
     HydratingIsoHeatMaterial(int n, Domain * d) : IsotropicHeatTransferMaterial(n, d), HydrationModelInterface() { }

@@ -56,19 +56,19 @@ class HeMoBazNajMaterial : public TransportMaterial
 {
 protected:
     /// sorption isotherm derivative [kg/m^3]
-    double moistureCapacity;
+    double moistureCapacity = 0.;
 
     /// maximal permeability [kg/ m s]
-    double C1;
+    double C1 = 0.;
     /// exponent in nonlinear permeability function [-]
-    double n;
+    double n = 0.;
     /// fraction minimal/maximal permeability [-]
-    double alpha0;
+    double alpha0 = 0.;
     /// nonlinear threshold [-]
-    double hC;
+    double hC = 0.;
 
-    double heatConductivity; ///< Conductivity (k in input file).
-    double heatCapacity;     ///< Capacity (c in input file).
+    double heatConductivity = 0.; ///< Conductivity (k in input file).
+    double heatCapacity = 0.;     ///< Capacity (c in input file).
 
 public:
     /**

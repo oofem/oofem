@@ -67,8 +67,8 @@ class LatticeTransportMaterialStatus : public TransportMaterialStatus
 {
 protected:
     /// Liquid mass in element
-    double mass;
-    double oldPressure;
+    double mass = 0.;
+    double oldPressure = 0.;
 
 public:
     ///Constructor
@@ -100,45 +100,47 @@ public:
 class LatticeTransportMaterial : public TransportMaterial
 {
 protected:
-    ///Viscosity of fluid
-    double viscosity;
+    /// Viscosity of fluid
+    double viscosity = 0.;
 
-    ///Parameter of van Genuchten law
-    double paramM;
+    /// Parameter of van Genuchten law
+    double paramM = 0.;
 
-    ///Parameter of van Genuchten law
-    double paramA;
+    /// Parameter of van Genuchten law
+    double paramA = 0.;
 
-    ///Intrinsic permeability of porous material
-    double permeability;
+    /// Intrinsic permeability of porous material
+    double permeability = 0.;
 
-    ///Porosity of porous material
-    double porosity;
+    /// Porosity of porous material
+    double porosity = 0.;
 
-    ///Type of conductivity and capcity laws.
-    int conType;
+    /// Density of fluid
+    double density = 0.;
 
-    ///Type of conductivity and capcity laws.
-    int capacity;
+    /// Type of conductivity and capcity laws.
+    int conType = 0.;
 
-    ///Relative saturated water content
-    double thetaS;
+    /// Type of conductivity and capcity laws.
+    int capacity = 0.;
 
-    ///Residual water content
-    double thetaR;
+    /// Relative saturated water content
+    double thetaS = 0.;
 
-    ///modified water content
-    double thetaM;
+    /// Residual water content
+    double thetaR = 0.;
 
-    ///crack tortuosity
-    double crackTortuosity;
+    /// Modified water content
+    double thetaM = 0.;
 
-    ///crack limit
-    double crackLimit;
+    /// Crack tortuosity
+    double crackTortuosity = 0.;
 
+    /// Crack limit
+    double crackLimit = 0.;
 
-    ///suction air entry value
-    double suctionAirEntry;
+    /// Suction air entry value
+    double suctionAirEntry = 0.;
 
 
 public:

@@ -76,10 +76,6 @@ HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 
 double
 HeMoTKMaterial :: give(int aProperty, GaussPoint *gp) const
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
-//
 {
     return Material :: give(aProperty, gp);
 }
@@ -127,7 +123,7 @@ HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     /*
      * returns constitutive matrix of receiver
      */
-    if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
+    if ( mode == Conductivity_ww || mode == Conductivity_hh || mode == Conductivity_hw || mode == Conductivity_wh ) {
         this->computeConductivityMtrx(answer, mode, gp, tStep);
     } else {
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
@@ -360,7 +356,6 @@ HeMoTKMaterial :: perm_ww(double w, double t) const
     return delta_gw * p_gws * dphi_dw;
 }
 
-
 double
 HeMoTKMaterial :: perm_wt(double w, double t) const
 {
@@ -383,7 +378,7 @@ HeMoTKMaterial :: give_delta_gw(double phi) const
 // phi ... relative humidity
 // a_0, nn, phi_c, delta_wet ... constants obtained from experiments
 {
-    if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
+    if ( phi < 0.2 || phi > 0.98 ) {
         OOFEM_ERROR("Relative humidity is out of range");
     }
 
@@ -401,7 +396,7 @@ HeMoTKMaterial :: sorption_isotherm(double phi) const
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-    if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
+    if ( phi < 0.2 || phi > 0.98 ) {
         OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
     }
 
@@ -423,7 +418,7 @@ HeMoTKMaterial :: inverse_sorption_isotherm(double w) const
     // relative humidity
     double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
-    if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
+    if ( phi < 0.2 || phi > 0.98 ) {
         OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
     }
 
@@ -445,7 +440,6 @@ HeMoTKMaterial :: give_dphi_dw(double w) const
     return exp( a * ( 1.0 - pow( ( w_h / w ), n ) ) ) * a * n * pow(w_h, n) * pow( w, ( -1.0 - n ) );
 }
 
-
 double
 HeMoTKMaterial :: give_dpgw_dt(double t, double phi) const
 // Function calculates differentiation of water vapor pressure with respect to temperature
@@ -456,9 +450,7 @@ HeMoTKMaterial :: give_dpgw_dt(double t, double phi) const
 {
     //differentiation of saturation water vapor pressure (analytical expression) with respect to temperature
     double dp_gws_dt = exp( 23.5771 - 4042.9 / ( t - 37.58 ) ) * 4042.9 / ( t - 37.58 ) / ( t - 37.58 );
-
     double dp_gw_dt = phi * dp_gws_dt;
-
     return dp_gw_dt;
 }
 
@@ -487,7 +479,6 @@ HeMoTKMaterial :: get_b(double w, double t) const
 {
     // Function calculates coefficient b
     // sat ... degree of saturation
-
     double phi = inverse_sorption_isotherm(w);
     double dphi_dw = give_dphi_dw(w);
     double sat = get_sat(w, t);
@@ -504,7 +495,6 @@ HeMoTKMaterial :: get_sat(double w, double t) const
     return 1.0; //zatim!!!!
 }
 
-
 double
 HeMoTKMaterial :: get_ceff(double w, double t) const
 {
@@ -520,11 +510,10 @@ HeMoTKMaterial :: get_chi(double w, double t) const
     return chi_eff; //zatim!!!!
 }
 
-
 bool
 HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
 {
-    if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
+    if ( mode == Conductivity_ww || mode == Conductivity_hh || mode == Conductivity_hw || mode == Conductivity_wh ) {
         return false;
     } else {
         OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );

@@ -61,7 +61,7 @@ protected:
     ScalarFunction conductivity; ///< Conductivity (k in input file).
     ScalarFunction capacity;     ///< Capacity (c in input file).
     ScalarFunction density;      ///< Density (td in input file).
-    double maturityT0;           ///< Baseline for maturity mathod
+    double maturityT0 = 0.;           ///< Baseline for maturity mathod
 
 public:
     IsotropicHeatTransferMaterial(int n, Domain * d);

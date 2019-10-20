@@ -63,7 +63,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 
     this->Permeability = ( permeabilityType ) type;
 
-    if (Permeability == KunzelPerm) {
+    if ( Permeability == KunzelPerm ) {
         IR_GIVE_FIELD ( ir, type, _IFT_NlIsoMoistureMaterial_capillarytransporttype );
         this->CapillaryTransport = ( capillaryTransportType ) type;
         if ( type >= 3 ) {
@@ -220,11 +220,10 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
     } else {
         OOFEM_ERROR("unknown permeability type");
     }
-    
-    wn=0.;
+
+    wn = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, wn, _IFT_NlIsoMoistureMaterial_wn);
     IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_NlIsoMoistureMaterial_alpha);
-    
 
     return IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 }
@@ -274,10 +273,9 @@ NlIsoMoistureMaterial :: giveMoistureContent(double humidity) const
 {
     if ( this->Isotherm == linear ) {
         return moistureCapacity*humidity;
-     
     } else if ( this->Isotherm == multilinear ) {
         double tol = 1.e-10;
-        for (int i = 1; i <= iso_h.giveSize(); i++) {
+        for ( int i = 1; i <= iso_h.giveSize(); i++ ) {
             if ( ( humidity - iso_h.at(i) ) < tol ) {
                 return  iso_wh.at(i-1) +  (iso_wh.at(i)-iso_wh.at(i-1))/(iso_h.at(i)-iso_h.at(i-1)) * (humidity-iso_h.at(i-1)) ;
             }
@@ -403,14 +401,14 @@ NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
 bool
 NlIsoMoistureMaterial :: hasInternalSource() const
 {
-    return this->wn !=0.;
+    return this->wn != 0.;
 }
 
 void
 NlIsoMoistureMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     val.resize(1);
-    if (( mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
+    if ( mode == VM_Total || mode == VM_TotalIntrinsic ) {
         val.at(1) = -wn*(this->alpha.eval( {{ "t", tStep->giveTargetTime() }}, this->giveDomain() ) - this->alpha.eval( {{ "t", tStep->giveTargetTime()-tStep->giveTimeIncrement()}} , this->giveDomain() ) ) / tStep->giveTimeIncrement();
     } else {
         OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );
