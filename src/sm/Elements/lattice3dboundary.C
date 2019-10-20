@@ -442,6 +442,9 @@ Lattice3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
 void
 Lattice3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
+  /*These are the DOFs of the first two nodes. The third node contains the macroscopic 
+    strain in Voigt notation (exx, eyy, ezz, gyz, gxz gxy). However, currently these DOF 
+    types do not exist yet in dofiditem.h*/
     answer = {
         D_u, D_v, D_w, R_u, R_v, R_w
     };
@@ -770,6 +773,8 @@ Lattice3dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tSt
 
 void Lattice3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
+  //That seems to be wrong. The strain field should be ordered exx, eyy, ezz, gyz, gzx, gyx
+  //Therefore, the x displacement should include 5th and 6th strain components.
     GraphicObj *go;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -826,13 +831,14 @@ void Lattice3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
     }
 
     //Modify dispOne and dispTwo
-    dispOne.at(1) = dispOne.at(1) + projectionComponentNodeOne.at(1) * dispThree.at(1) + projectionComponentNodeOne.at(2) * dispThree.at(4) + projectionComponentNodeOne.at(3) * dispThree.at(5);
-    dispOne.at(2) = dispOne.at(2) + projectionComponentNodeOne.at(2) * dispThree.at(2) + projectionComponentNodeOne.at(3) * dispThree.at(6);
+    //Seems to be wrong. Should be 
+    dispOne.at(1) = dispOne.at(1) + projectionComponentNodeOne.at(1) * dispThree.at(1) + projectionComponentNodeOne.at(3) * dispThree.at(5) + projectionComponentNodeOne.at(2) * dispThree.at(6);
+    dispOne.at(2) = dispOne.at(2) + projectionComponentNodeOne.at(2) * dispThree.at(2) + projectionComponentNodeOne.at(3) * dispThree.at(4);
     dispOne.at(3) = dispOne.at(3) + projectionComponentNodeOne.at(3) * dispThree.at(3);
 
 
-    dispTwo.at(1) = dispTwo.at(1) + projectionComponentNodeTwo.at(1) * dispThree.at(1) + projectionComponentNodeTwo.at(2) * dispThree.at(4) + projectionComponentNodeTwo.at(3) * dispThree.at(5);
-    dispTwo.at(2) = dispTwo.at(2) + projectionComponentNodeTwo.at(2) * dispThree.at(2) + projectionComponentNodeTwo.at(3) * dispThree.at(6);
+    dispTwo.at(1) = dispTwo.at(1) + projectionComponentNodeTwo.at(1) * dispThree.at(1) + projectionComponentNodeTwo.at(3) * dispThree.at(5) + projectionComponentNodeTwo.at(2) * dispThree.at(6);
+    dispTwo.at(2) = dispTwo.at(2) + projectionComponentNodeTwo.at(2) * dispThree.at(2) + projectionComponentNodeTwo.at(3) * dispThree.at(4);
     dispTwo.at(3) = dispTwo.at(3) + projectionComponentNodeTwo.at(3) * dispThree.at(3);
 
     double x1, y1, z1, x2, y2, z2;

@@ -58,8 +58,8 @@ class Lattice2dBoundary : public Lattice2d
      *   Volume 47, Issues 7-8, pp. 957-968, 2010"
      */
 protected:
-  int location;
-  
+    int location;
+
 public:
     Lattice2dBoundary(int, Domain *);                     // constructor
     ~Lattice2dBoundary();                                 // destructor
@@ -103,7 +103,7 @@ protected:
 
     virtual double        giveLength() override;
     double        givePitch();
-    void recalculateCoordinates(int nodeNumber, FloatArray &coords);
+    void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
     void giveSwitches(FloatArray &answer);
 };
 } // end namespace oofem

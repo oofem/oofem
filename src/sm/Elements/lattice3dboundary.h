@@ -46,6 +46,12 @@
 namespace oofem {
 /**
  * This class implements a 3-dimensional lattice element for the boundaries of a periodic cell.
+ * Each node has 6 degrees of freedom (3 translation and 3 rotations).
+ * At least one node is located at the image boundary or outside the specimen. 
+ * These nodes are replaced with the corresponding image nodes and a control node is used to impose the macroscopic (average) strain.
+ * MACROSCOPIC INPUT: STRAIN TENSOR (3D, 6 COMPONENTS, VOIG NOTATION: exx eyy ezz gyz gxz gxy)
+ *
+ * @author: Peter Grassl, Ignatios Athanasiadis 
  */
 
 class Lattice3dBoundary : public Lattice3d

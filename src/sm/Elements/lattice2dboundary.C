@@ -136,15 +136,35 @@ Lattice2dBoundary :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answ
     return;
 }
 
-  const IntArray
-  Lattice2dBoundary :: giveLocation()
-  {
+const IntArray
+Lattice2dBoundary :: giveLocation()
+{
+    //Map 2D locations to 3D system
+    int newLocation = 0;
+    if ( this->location == 1 ) {
+        newLocation = 22;
+    } else if ( this->location == 2 )      {
+        newLocation = 25;
+    } else if ( this->location == 3 )      {
+        newLocation = 16;
+    } else if ( this->location == 4 )      {
+        newLocation = 8;
+    } else if ( this->location == 5 )      {
+        newLocation = 5;
+    } else if ( this->location == 6 )     {
+        newLocation = 2;
+    } else if ( this->location == 7 )     {
+        newLocation = 11;
+    } else if ( this->location == 8 )     {
+        newLocation = 19;
+    }
+
     IntArray tempLocation(2);
     tempLocation.at(1) = 0;
-    tempLocation.at(2) = this->location;
+    tempLocation.at(2) = newLocation;
     return tempLocation;
-  }
-    
+}
+
 void
 Lattice2dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords) {
     coords.resize(3);
@@ -161,7 +181,7 @@ Lattice2dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords) 
 
     node  = this->giveNode(2);
     if ( location != 0 ) {
-      giveSwitches( projectionComponent);
+        giveSwitches(projectionComponent);
     }
 
     for ( int i = 0; i < 3; i++ ) {
@@ -170,7 +190,7 @@ Lattice2dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords) 
     return;
 }
 
-  
+
 void
 Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,                                      TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
@@ -184,11 +204,11 @@ Lattice2dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    dV = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    dV = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     dbj.beProductOf(d, bj);
     answerTemp.plusProductUnsym(bj, dbj, dV);
 
-    answer.resize( computeNumberOfDofs(), computeNumberOfDofs() );
+    answer.resize(computeNumberOfDofs(), computeNumberOfDofs() );
     answer.zero();
 
     for ( int m = 1; m <= 6; m++ ) {
@@ -320,7 +340,7 @@ Lattice2dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
     answer.resize(9, 9);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
+    sine           = sin(this->givePitch() );
     cosine         = cos(pitch);
     answer.at(1, 1) =  cosine;
     answer.at(1, 2) =  sine;
@@ -394,7 +414,6 @@ double Lattice2dBoundary :: givePitch()
     FloatArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
-
     if ( pitch == 10. ) {            // 10. : dummy initialization value
         nodeA  = this->giveNode(1);
         nodeB  = this->giveNode(2);
@@ -449,11 +468,11 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     bt.beTranspositionOf(b);
     // TotalStressVector = gp->giveStressVector() ;
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
+        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus( integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
                             ->giveStressVector();
     } else
     if ( !this->isActivated(tStep) ) {
-        strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );
+        strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );
         strain.zero();
     }
     this->computeStrainVector(strain, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
@@ -464,7 +483,7 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     //
     // compute nodal representation of internal forces using f = B^T*Sigma dV
     //
-    dV  = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    dV  = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     bs.beProductOf(bt, TotalStressVector);
     bs.times(dV);
 
@@ -497,7 +516,6 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
 
 void
 Lattice2dBoundary :: giveSwitches(FloatArray &answer) {
-
     if ( this->location == 1 ) {
         answer(0) = 1;
         answer(1) = 0;
@@ -523,6 +541,7 @@ Lattice2dBoundary :: giveSwitches(FloatArray &answer) {
         answer(0) = 1;
         answer(1) = -1;
     }
+
     return;
 }
 
@@ -584,7 +603,7 @@ void Lattice2dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getCrossSectionColor() );
+    EASValsSetColor(gc.getCrossSectionColor() );
     EASValsSetLayer(OOFEG_RAW_CROSSSECTION_LAYER);
 
     //The cs definition is not needed anymore
@@ -592,7 +611,7 @@ void Lattice2dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep
     FloatArray gpCoords;
     giveGpCoordinates(gpCoords);
 
-    FloatArray projectionComponent(2);
+    IntArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
     FloatArray specimenDimension(2);
@@ -655,10 +674,10 @@ void Lattice2dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tSt
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
-    FloatArray projectionComponent(2);
+    IntArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
 
@@ -695,11 +714,11 @@ void Lattice2dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
 
-    FloatArray projectionComponent(2);
+    IntArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
     //specimen dimension
@@ -778,7 +797,7 @@ Lattice2dBoundary :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             specimenDimension.at(2) =  this->giveNode(3)->giveCoordinate(2);
 
 
-            FloatArray projectionComponent(2);
+            IntArray projectionComponent(2);
             giveSwitches(projectionComponent);
 
 
@@ -819,9 +838,9 @@ Lattice2dBoundary :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
             EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
             if ( ( crackStatuses(0) == 1. ) ) {
-                EASValsSetColor( gc.getActiveCrackColor() );
+                EASValsSetColor(gc.getActiveCrackColor() );
             } else if ( crackStatuses(0) == 2. ) {
-                EASValsSetColor( gc.getCrackPatternColor() );
+                EASValsSetColor(gc.getCrackPatternColor() );
             }
             tr = CreateLine3D(l);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
@@ -835,7 +854,7 @@ Lattice2dBoundary :: giveCrossSectionCoordinates(FloatArray &coords)
 {
     FloatArray gpCoords;
     this->giveGpCoordinates(gpCoords);
-    FloatArray projectionComponent(2);
+    IntArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
     FloatArray specimenDimension(2);

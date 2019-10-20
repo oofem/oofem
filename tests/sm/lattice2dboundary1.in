@@ -1,7 +1,7 @@
 lattice2dboundary1.out
 2D lattice boundary model
 NonLinearStatic nmsteps 1 nsteps 1 contextOutputStep 1 nmodules 1
-nsteps 1 controllmode 1 rtolv 1.e-3 stiffMode 1 maxiter 200 ddm 2 2 1 ddv 1 1.e-3 ddltf 2
+nsteps 2 controllmode 1 rtolv 1.e-3 stiffMode 1 maxiter 200 ddm 2 2 1 ddv 1 1.e-3 ddltf 2
 vtkxmlperiodic tstep_all primvars 1 1 stype 0
 domain 2dlattice 
 OutputManager tstep_all dofman_all 
@@ -12,8 +12,8 @@ node 2 coords 2 1.0 1.0 bc 3 0 0 1
 latticeboundary2D 1 nodes 3 1 1 2 crossSect 1 mat 1 thick 1.0 width 0.5 gpCoords 2 1. 1. location 2
 simplecs 1 
 #
-latticedamage 1 d 0. talpha 0. e 30.e9 e0 110.e+6 stype 1 wf 60.e-6 a1 0.6 randomtype 1 cov 0.2
+latticedamage 1 d 0. talpha 0. e 1. e0 1.e20 stype 1 wf 60.e-6 a1 0.6 randomtype 1 cov 0.2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 3 0. -1. 0.
 ConstantFunction 1 f(t) 1.
-PiecewiseLinFunction 2 nPoints 2 t 2 -1. 500. f(t) 2 0. 1.
+PiecewiseLinFunction 2 nPoints 2 t 2 0. 1. f(t) 2 0. 1.
