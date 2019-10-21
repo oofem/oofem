@@ -652,6 +652,8 @@ public:
 
     /// @return Number of dofmanagers of receiver.
     virtual int giveNumberOfDofManagers() const { return numberOfDofMans; }
+    /// Sets number of element dof managers
+    void setNumberOfDofManagers(int i) {this->numberOfDofMans = i;}
     /**
      * Returns number of nodes of receiver.
      * Default implementation returns number of dofmanagers of element

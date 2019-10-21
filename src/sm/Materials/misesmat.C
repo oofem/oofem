@@ -298,7 +298,7 @@ MisesMat :: performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArray
     double xi =  1. / 6. * a1 + 0.5 * a2 + 2. * a3;
     //Yield function
     double yieldValue = 0.5 * xi - 1. / 3. * sigmaY * sigmaY;
-    double dGamma = 0;
+    // double dGamma ; // not used
     // Check for plastic admissibility
     if ( yieldValue / sigmaY > yieldTol ) {
         // Plastic step: Apply return mapping - use Newton-Raphson algorithm
@@ -333,7 +333,7 @@ MisesMat :: performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArray
             }
         }
         // update accumulated plastic strain
-        dGamma = dKappa;
+        // dGamma = dKappa;
         kappa += sqrt(2. * xi / 3.) * dKappa;
         // update stress components:   sigma := A sigma^trial
         double As1 = 3. * ( 1. - nu ) / ( 3 * ( 1 - nu ) + E * dKappa );
