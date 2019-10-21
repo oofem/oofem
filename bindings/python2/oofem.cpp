@@ -49,12 +49,20 @@ namespace py = pybind11;
 #include "dof.h"
 #include "dofmanager.h"
 #include "element.h"
+#include "Elements/structuralelement.h"
+
 #include "generalboundarycondition.h"
 #include "initialcondition.h"
 #include "function.h"
 #include "material.h"
+#include "integrationpointstatus.h"
+#include "matstatus.h"
+#include "Materials/structuralmaterial.h"
+#include "Materials/structuralms.h"
+
 #include "crosssection.h"
 #include "field.h"
+#include "feinterpol.h"
 #include "util.h"
 #include "datareader.h"
 #include "oofemtxtdatareader.h"
@@ -68,6 +76,7 @@ namespace py = pybind11;
 #include "gausspoint.h"
 #include "inputrecord.h"
 #include "dynamicinputrecord.h"
+#include "irresulttype.h"
 
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
@@ -77,6 +86,375 @@ namespace py = pybind11;
 
 #include "oofemutil.h"
 
+//test
+void test (oofem::Element& e) {
+    oofem::IntArray a = {1,2,3};
+
+    e.giveDofManDofIDMask (1, a);
+    fprintf (stderr, "test:");
+    a.printYourself();
+}
+
+/* 
+    Trampoline classes
+*/
+template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
+        // inherit the constructor
+        using ElementBase::ElementBase;
+        // trampoline (need one for each virtual method)
+        int giveNumberOfDofs() override {
+            PYBIND11_OVERLOAD (int, ElementBase, giveNumberOfDofs,);
+        }   
+        int computeNumberOfDofs() override {
+            PYBIND11_OVERLOAD (int, ElementBase, computeNumberOfDofs,);
+        }   
+ 
+        int giveNumberOfInternalDofManagers() const override {
+            PYBIND11_OVERLOAD (int, ElementBase, giveNumberOfInternalDofManagers,);
+        }   
+        oofem::DofManager *giveInternalDofManager(int i) const override {
+            PYBIND11_OVERLOAD (oofem::DofManager*, ElementBase, giveInternalDofManager,i);
+        }   
+        void giveCharacteristicMatrix(oofem::FloatMatrix &answer, oofem::CharType type, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD (void, ElementBase, giveCharacteristicMatrix,std::ref(answer),type, tStep);
+        }
+        void giveCharacteristicVector(oofem::FloatArray &answer, oofem::CharType type, oofem::ValueModeType mode, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD (void, ElementBase, giveCharacteristicVector,std::ref(answer), type, mode, tStep);
+        }
+        double giveCharacteristicValue(oofem::CharType type, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD (double, ElementBase, giveCharacteristicValue, type, tStep);
+        }
+        bool computeGtoLRotationMatrix(oofem::FloatMatrix &answer) override {
+            PYBIND11_OVERLOAD (bool, ElementBase, computeGtoLRotationMatrix,std::ref(answer));
+        }
+        void giveDofManDofIDMask(int inode, oofem::IntArray &answer) const override {
+            PYBIND11_OVERLOAD (void, ElementBase, giveDofManDofIDMask, inode, std::ref(answer));
+        }
+
+        void giveInternalDofManDofIDMask(int inode, oofem::IntArray &answer) const override {
+            PYBIND11_OVERLOAD (void, ElementBase, giveInternalDofManDofIDMask,inode, std::ref(answer));
+        }
+        double computeVolumeAround(oofem::GaussPoint *gp) override {
+            PYBIND11_OVERLOAD (double, ElementBase, computeVolumeAround, gp);
+        }
+        oofem::FEInterpolation *giveInterpolation() const override {
+            PYBIND11_OVERLOAD (oofem::FEInterpolation*, ElementBase, giveInterpolation,);
+        }
+        void printOutputAt(FILE *file, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD (void, ElementBase, printOutputAt, file, tStep);
+        }
+        oofem::MaterialMode giveMaterialMode() override {
+            PYBIND11_OVERLOAD (oofem::MaterialMode, ElementBase, giveMaterialMode,);
+        }
+        const char *giveClassName() const override {
+            PYBIND11_OVERLOAD_PURE (const char*, ElementBase, giveClassName,);
+        }
+        const char *giveInputRecordName() const override {
+            PYBIND11_OVERLOAD_PURE (const char*, ElementBase, giveInputRecordName,);
+        }
+    };
+
+    template <class StructuralElementBase = oofem::StructuralElement> class PyStructuralElement : public PyElement<StructuralElementBase> {
+        // inherit the constructor
+        using PyElement<StructuralElementBase>::PyElement;
+        // trampoline (need one for each virtual method)
+        void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override {
+            PYBIND11_OVERLOAD (void, StructuralElementBase, computeMassMatrix, std::ref(answer), tStep);
+        }
+        void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override {
+            PYBIND11_OVERLOAD (void, StructuralElementBase, computeStiffnessMatrix, std::ref(answer), rMode, tStep);
+        }
+        void computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep) override {
+            PYBIND11_OVERLOAD (void, StructuralElementBase, computeInitialStressMatrix, std::ref(answer), tStep);
+        }
+        void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override {
+            PYBIND11_OVERLOAD_PURE (void, StructuralElementBase, computeStressVector, std::ref(answer), std::ref(strain), gp, tStep);
+        }
+        void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) override {
+            PYBIND11_OVERLOAD_PURE (void, StructuralElementBase, computeBmatrixAt, gp, std::ref(answer), lowerIndx, upperIndx);
+        }
+        void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override {
+            PYBIND11_OVERLOAD (void, StructuralElementBase, computeNmatrixAt, iLocCoord, std::ref(answer));
+        }
+        void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp,TimeStep *tStep) override {
+            PYBIND11_OVERLOAD_PURE (void, StructuralElementBase, computeConstitutiveMatrixAt, std::ref(answer), rMode, gp, tStep);
+        }
+      void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override {
+        PYBIND11_OVERLOAD (void, StructuralElementBase, giveInternalForcesVector, std::ref(answer), tStep, useUpdatedGpRecord);
+      }
+    };
+
+
+    template <class IntegrationPointStatusBase = oofem::IntegrationPointStatus> class PyIntegrationPointStatus : public IntegrationPointStatusBase {
+        // inherit the constructor
+        using IntegrationPointStatusBase::IntegrationPointStatusBase;
+        // trampoline (need one for each virtual method)
+        const char *giveClassName() const override {
+            PYBIND11_OVERLOAD_PURE (const char*, IntegrationPointStatusBase, giveClassName,);
+        } 
+    };
+
+    template <class MaterialStatusBase = oofem::MaterialStatus> class PyMaterialStatus : public PyIntegrationPointStatus<MaterialStatusBase> {
+        // inherit the constructor
+        using PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus;
+        // trampoline (need one for each virtual method)
+        void printOutputAt(FILE *file, TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD (void, MaterialStatusBase, printOutputAt, file, tStep);
+        }
+        void initTempStatus() override {
+            PYBIND11_OVERLOAD (void, MaterialStatusBase, initTempStatus, );
+        }
+        void updateYourself(TimeStep *tStep) override { 
+            PYBIND11_OVERLOAD (void, MaterialStatusBase, updateYourself, tStep);
+        }
+        bool giveMaterialProperty(int propID, double &value) override {
+          PYBIND11_OVERLOAD (bool, MaterialStatusBase, giveMaterialProperty, propID, std::ref(value));
+        }
+        void setMaterialProperty(int propID, double value) override {
+            PYBIND11_OVERLOAD (void, MaterialStatusBase, setMaterialProperty, propID, value);
+        }
+
+    };
+
+    template <class StructuralMaterialStatusBase = oofem::StructuralMaterialStatus> class PyStructuralMaterialStatus : public PyMaterialStatus<StructuralMaterialStatusBase> {
+        // inherit the constructor
+        using PyMaterialStatus<StructuralMaterialStatusBase>::PyMaterialStatus;
+    };
+
+
+    template <class MaterialBase = oofem::Material> class PyMaterial : public MaterialBase {
+        // inherit the constructor
+        using MaterialBase::MaterialBase;
+        // trampoline (need one for each virtual method)
+        bool isCharacteristicMtrxSymmetric(oofem::MatResponseMode rMode) const override {
+            PYBIND11_OVERLOAD(bool, MaterialBase, isCharacteristicMtrxSymmetric, rMode); 
+        }
+        double give(int aProperty, oofem::GaussPoint *gp) const override {
+            PYBIND11_OVERLOAD(bool, MaterialBase, give, aProperty, gp); 
+        }
+        bool hasProperty(int aProperty, oofem::GaussPoint *gp) const override {
+            PYBIND11_OVERLOAD(bool, MaterialBase, hasProperty, aProperty, gp); 
+        }
+        void modifyProperty(int aProperty, double value, oofem::GaussPoint *gp) override {
+            PYBIND11_OVERLOAD(void, MaterialBase, modifyProperty, aProperty, value, gp); 
+        }
+        bool hasMaterialModeCapability(oofem::MaterialMode mode) const override   {
+            PYBIND11_OVERLOAD(bool, MaterialBase, hasMaterialModeCapability, mode); 
+        }
+        bool hasCastingTimeSupport() const override {
+            PYBIND11_OVERLOAD(bool, MaterialBase, hasCastingTimeSupport, ); 
+        }
+        int setIPValue(const oofem::FloatArray &value, oofem::GaussPoint *gp, oofem::InternalStateType type) override {
+            PYBIND11_OVERLOAD(int, MaterialBase, setIPValue, std::ref(value), gp, type); 
+        }
+        int giveIPValue(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::InternalStateType type, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(int, MaterialBase, giveIPValue, std::ref(answer), gp, type, tStep); 
+        }
+        oofem::IRResultType initializeFrom(oofem::InputRecord *ir) override {
+            PYBIND11_OVERLOAD(oofem::IRResultType, MaterialBase, initializeFrom, ir); 
+        }
+        //virtual void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+        //virtual void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+        int checkConsistency() override {
+            PYBIND11_OVERLOAD(int, MaterialBase, checkConsistency, ); 
+        }
+        void restoreConsistency(oofem::GaussPoint *gp) override {
+            PYBIND11_OVERLOAD(void, MaterialBase, restoreConsistency, gp); 
+        }
+        int initMaterial(oofem::Element *element) override {
+            PYBIND11_OVERLOAD(int, MaterialBase, initMaterial, element); 
+        }
+      /*
+        /// Exposing the following won't work (opeened issue https://github.com/pybind/pybind11/issues/1962)
+        /// However, giveStatus can be overriden and can create and set status properly. See test4.py.
+        std::unique_ptr<oofem::IntegrationPointStatus> CreateStatus(oofem::GaussPoint *gp) const override {
+        PYBIND11_OVERLOAD(std::unique_ptr<oofem::IntegrationPointStatus>, MaterialBase, CreateStatus, gp); 
+        }
+      */
+
+      oofem::MaterialStatus* giveStatus (oofem::GaussPoint* gp) const override {
+        PYBIND11_OVERLOAD(oofem::MaterialStatus*, MaterialBase, giveStatus, gp);
+      }
+        void initTempStatus(oofem::GaussPoint *gp) override {
+            PYBIND11_OVERLOAD(void, MaterialBase, initTempStatus, gp); 
+        }
+        const char *giveClassName() const override {
+            PYBIND11_OVERLOAD_PURE (const char*, MaterialBase, giveClassName,);
+        }
+        const char *giveInputRecordName() const override {
+            PYBIND11_OVERLOAD_PURE (const char*, MaterialBase, giveInputRecordName,);
+        }
+        
+
+    };
+
+    template <class StructuralMaterialBase = oofem::StructuralMaterial> class PyStructuralMaterial : public PyMaterial<StructuralMaterialBase> {
+        // inherit the constructor
+        using PyMaterial<StructuralMaterial>::PyMaterial;
+        // trampoline (need one for each virtual method)
+        bool hasMaterialModeCapability(oofem::MaterialMode mode) const override {
+            PYBIND11_OVERLOAD(bool, StructuralMaterialBase, hasMaterialModeCapability, mode); 
+        }
+        const char *giveClassName() const override {
+            PYBIND11_OVERLOAD(const char*, StructuralMaterialBase, giveClassName, ); 
+        }
+        oofem::IRResultType initializeFrom(oofem::InputRecord *ir) override {
+            PYBIND11_OVERLOAD(oofem::IRResultType, StructuralMaterialBase, initializeFrom, ir); 
+        }
+        void giveInputRecord(oofem::DynamicInputRecord &input) override {
+           PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveInputRecord, input); 
+        }
+        void giveStiffnessMatrix(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveStiffnessMatrix, std::ref(answer), mode, gp, tStep); 
+        }
+        void giveRealStressVector (oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedStrain, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector, std::ref(answer), gp, reducedStrain, tStep); 
+        }
+        void giveRealStressVector_3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_3d, std::ref(answer), gp, reducedE, tStep); 
+        }
+        /// Default implementation relies on giveRealStressVector_3d
+        void giveRealStressVector_PlaneStrain(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_PlaneStrain, std::ref(answer), gp, reducedE, tStep); 
+        }
+        /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
+        void giveRealStressVector_StressControl(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, const oofem::IntArray &strainControl, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_StressControl, std::ref(answer), gp, reducedE, strainControl, tStep); 
+        }
+        void giveRealStressVector_ShellStressControl(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, const oofem::IntArray &strainControl, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_ShellStressControl, std::ref(answer), gp, reducedE, strainControl, tStep); 
+        }    
+        /// Default implementation relies on giveRealStressVector_StressControl
+        void giveRealStressVector_PlaneStress(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_PlaneStress, std::ref(answer), gp, reducedE, tStep); 
+        }
+        /// Default implementation relies on giveRealStressVector_StressControl
+        void giveRealStressVector_1d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_1d, std::ref(answer), gp, reducedE, tStep); 
+        }
+        /// Default implementation relies on giveRealStressVector_StressControl
+        void giveRealStressVector_Warping(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Warping, std::ref(answer), gp, reducedE, tStep); 
+        }
+        /// Default implementation relies on giveRealStressVector_StressControl
+        void giveRealStressVector_2dBeamLayer(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_2dBeamLayer, std::ref(answer), gp, reducedE, tStep); 
+        }
+        /// Default implementation relies on giveRealStressVector_StressControl
+        void giveRealStressVector_PlateLayer(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_PlateLayer, std::ref(answer), gp, reducedE, tStep); 
+        }
+        /// Default implementation relies on giveRealStressVector_StressControl
+        void giveRealStressVector_Fiber(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Fiber, std::ref(answer), gp, reducedE, tStep); 
+        }
+        void giveRealStressVector_Lattice2d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Lattice2d, std::ref(answer), gp, reducedE, tStep); 
+        }
+        void giveRealStressVector_Lattice3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Lattice3d, std::ref(answer), gp, reducedE, tStep); 
+        }
+        void giveRealStressVector_2dPlateSubSoil(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_2dPlateSubSoil, std::ref(answer), gp, reducedE, tStep); 
+        }
+        void giveRealStressVector_3dBeamSubSoil(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_3dBeamSubSoil, std::ref(answer), gp, reducedE, tStep); 
+        }
+        void giveFirstPKStressVector_3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveFirstPKStressVector_3d, std::ref(answer), gp, reducedF, tStep); 
+        }
+        /// Default implementation relies on giveFirstPKStressVector_3d
+        void giveFirstPKStressVector_PlaneStrain(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveFirstPKStressVector_PlaneStrain, std::ref(answer), gp, reducedF, tStep); 
+        }
+        /// Default implementation relies on giveFirstPKStressVector_3d
+        void giveFirstPKStressVector_PlaneStress(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveFirstPKStressVector_PlaneStress, std::ref(answer), gp, reducedF, tStep); 
+        }
+        /// Default implementation relies on giveFirstPKStressVector_3d
+        void giveFirstPKStressVector_1d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveFirstPKStressVector_1d, std::ref(answer), gp, reducedF, tStep); 
+        }
+
+        void giveCauchyStressVector_3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveCauchyStressVector_3d, std::ref(answer), gp, reducedF, tStep); 
+        }
+        void giveCauchyStressVector_PlaneStrain(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveCauchyStressVector_PlaneStrain, std::ref(answer), gp, reducedF, tStep);   
+        }
+        void giveCauchyStressVector_PlaneStress(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveCauchyStressVector_PlaneStress, std::ref(answer), gp, reducedF, tStep);   
+        }
+        void giveCauchyStressVector_1d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedF, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveCauchyStressVector_1d, std::ref(answer), gp, reducedF, tStep);   
+        }
+
+        void giveThermalDilatationVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveThermalDilatationVector, std::ref(answer), gp, tStep);   
+        }
+        void computeStressIndependentStrainVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, computeStressIndependentStrainVector, std::ref(answer), gp, tStep, mode);   
+        }
+        void computeStressIndependentStrainVector_3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, computeStressIndependentStrainVector_3d, std::ref(answer), gp, tStep, mode);   
+        }
+
+        void give3dMaterialStiffnessMatrix(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give3dMaterialStiffnessMatrix, std::ref(answer), mode, gp, tStep);   
+        }
+        void give3dMaterialStiffnessMatrix_dPdF(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give3dMaterialStiffnessMatrix_dPdF, std::ref(answer), mode, gp, tStep);   
+        }
+        void give3dMaterialStiffnessMatrix_dCde(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give3dMaterialStiffnessMatrix_dCde, std::ref(answer), mode, gp, tStep);   
+        }
+
+        void givePlaneStressStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStressStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+        void givePlaneStressStiffMtrx_dPdF(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStressStiffMtrx_dPdF, std::ref(answer), mmode, gp, tStep);   
+        }
+        void givePlaneStressStiffMtrx_dCde(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStressStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);   
+        }
+
+        void givePlaneStrainStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStrainStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+        void givePlaneStrainStiffMtrx_dPdF(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStrainStiffMtrx_dPdF, std::ref(answer), mmode, gp, tStep);   
+        }
+        void givePlaneStrainStiffMtrx_dCde(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStrainStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);   
+        }
+
+        void give1dStressStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give1dStressStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+        void give1dStressStiffMtrx_dPdF(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give1dStressStiffMtrx_dPdF, std::ref(answer), mmode, gp, tStep);   
+        }
+        void give1dStressStiffMtrx_dCde(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give1dStressStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);   
+        }
+
+        void give2dBeamLayerStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give2dBeamLayerStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+        void give2dLatticeStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give2dLatticeStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+        void give3dLatticeStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give3dLatticeStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+        void give2dPlateSubSoilStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give2dPlateSubSoilStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+        void give3dBeamSubSoilStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give3dBeamSubSoilStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        }
+     };
 
 PYBIND11_MODULE(oofempy, m) {
     m.doc() = "oofem python bindings module"; // optional module docstring
@@ -118,12 +496,14 @@ PYBIND11_MODULE(oofempy, m) {
                 a.append("}>");
                 return a;
         })
+        .def("resize", &oofem::FloatArray::resize)
         .def("assemble", &oofem::FloatArray::assemble)
         .def("distance", (double (oofem::FloatArray::*)(const oofem::FloatArray &) const) &oofem::FloatArray::distance)
         .def("normalize", &oofem::FloatArray::normalize)
         .def("computeNorm", &oofem::FloatArray::computeNorm)
         .def("product", &oofem::FloatArray::product)
         .def("zero", &oofem::FloatArray::zero)
+        .def("beProductOf", &oofem::FloatArray::beProductOf)
 
         // expose FloatArray operators
         .def(py::self + py::self)
@@ -386,12 +766,17 @@ PYBIND11_MODULE(oofempy, m) {
         .def("hasDofID", &oofem::DofManager::hasDofID)
     ;
 
-    py::class_<oofem::Element, oofem::FEMComponent>(m, "Element")
+    /* 
+        Element
+    */
+    
+    py::class_<oofem::Element, oofem::FEMComponent, PyElement<>>(m, "Element")
+        .def(py::init<int, oofem::Domain*>())
         .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *dofIds) const) &oofem::Element::giveLocationArray)
         .def("giveLocationArray", (void (oofem::Element::*)(oofem::IntArray &, const oofem::IntArray &, const oofem::UnknownNumberingScheme &, oofem::IntArray *) const) &oofem::Element::giveLocationArray)
-        .def("giveCharacteristicMatrix", &oofem::Element::giveCharacteristicMatrix)
-        .def("giveCharacteristicVector", &oofem::Element::giveCharacteristicVector)
-        .def("giveCharacteristicValue", &oofem::Element::giveCharacteristicValue)
+        //.def("giveCharacteristicMatrix", &oofem::Element::giveCharacteristicMatrix)
+        //.def("giveCharacteristicVector", &oofem::Element::giveCharacteristicVector)
+        //.def("giveCharacteristicValue", &oofem::Element::giveCharacteristicValue)
         .def("computeVectorOf", (void (oofem::Element::*)(oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &)) &oofem::Element::computeVectorOf)
         .def("computeVectorOf", (void (oofem::Element::*)(const oofem::IntArray &, oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &, bool)) &oofem::Element::computeVectorOf)
         .def("computeVectorOfPrescribed", (void (oofem::Element::*)(oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &)) &oofem::Element::computeVectorOfPrescribed)
@@ -414,8 +799,17 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveIPValue", &oofem::Element::giveIPValue)
         .def("giveLabel", &oofem::Element::giveLabel)
         .def("initializeFrom", &oofem::Element::initializeFrom)
+        .def("setDofManagers", &oofem::Element::setDofManagers)
+        .def("setNumberOfDofManagers", &oofem::Element::setNumberOfDofManagers)
+        .def("giveDofManDofIDMask", &oofem::Element::giveDofManDofIDMask)
 
     ;
+
+    py::class_<oofem::StructuralElement, oofem::Element, PyStructuralElement<>>(m, "StructuralElement")    
+        .def(py::init<int, oofem::Domain*>())
+        .def("giveDofManDofIDMask", &oofem::StructuralElement::giveDofManDofIDMask)
+    ;
+
 
     py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
     ;
@@ -483,7 +877,31 @@ PYBIND11_MODULE(oofempy, m) {
     .def ("evaluateAccelerationAtTime", &oofem::Function::evaluateVelocityAtTime)
     ;
 
+    py::class_<oofem::IntegrationPointStatus, PyIntegrationPointStatus<>>(m, "IntegrationPointStatus")
+      .def(py::init<oofem::GaussPoint*>())
+        .def("giveClassName", &oofem::IntegrationPointStatus::giveClassName)
+    ;
+    py::class_<oofem::MaterialStatus, oofem::IntegrationPointStatus, PyMaterialStatus<>>(m, "MaterialStatus")
+        .def(py::init<oofem::GaussPoint *>()) 
+    ;
+
+    py::class_<oofem::StructuralMaterialStatus, oofem::MaterialStatus, PyStructuralMaterialStatus<>>(m, "StructuralMaterialStatus")    
+        .def(py::init<oofem::GaussPoint *>()) 
+        .def("giveStrainVector", &oofem::StructuralMaterialStatus::giveStrainVector)
+        .def("giveStressVector", &oofem::StructuralMaterialStatus::giveStressVector)
+        .def("letTempStressVectorBe", &oofem::StructuralMaterialStatus::letTempStressVectorBe)
+        .def("letTempStrainVectorBe", &oofem::StructuralMaterialStatus::letTempStrainVectorBe)
+    ;
+
     py::class_<oofem::Material, oofem::FEMComponent>(m, "Material")
+        .def("giveStatus", &oofem::Material::giveStatus, py::return_value_policy::reference)
+        .def("CreateStatus", &oofem::Material::CreateStatus, py::return_value_policy::reference)
+    ;
+
+    py::class_<oofem::StructuralMaterial, oofem::Material, PyStructuralMaterial<>>(m, "StructuralMaterial")    
+        .def(py::init<int, oofem::Domain*>())
+        .def("giveStatus", &oofem::StructuralMaterial::giveStatus, py::return_value_policy::reference)
+        .def("CreateStatus", &oofem::StructuralMaterial::CreateStatus, py::return_value_policy::reference)
     ;
 
     py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
@@ -493,8 +911,12 @@ PYBIND11_MODULE(oofempy, m) {
     ;
 
     py::class_<oofem::IntegrationRule>(m, "IntegrationRule")
+        .def("giveNumberOfIntegrationPoints", &oofem::IntegrationRule::giveNumberOfIntegrationPoints)
+        .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint)
     ;
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
+      .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)() const) &oofem::GaussPoint::giveMaterialStatus, py::return_value_policy::reference)
+      .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
   
@@ -795,6 +1217,34 @@ PYBIND11_MODULE(oofempy, m) {
       .value("IST_IncrementCreepModulus", oofem::InternalStateType::IST_IncrementCreepModulus)
       ;
 
+    py::enum_<oofem::IRResultType>(m, "IRResultType")
+      .value("IRRT_OK", oofem::IRResultType::IRRT_OK)
+      .value("IRRT_NOTFOUND", oofem::IRResultType::IRRT_NOTFOUND)
+      .value("IRRT_BAD_FORMAT", oofem::IRResultType::IRRT_BAD_FORMAT)
+    ;
+
+
+    py::enum_<oofem::MatResponseMode>(m, "MatResponseMode")
+        .value("TangentStiffness", oofem::MatResponseMode::TangentStiffness)
+        .value("SecantStiffness", oofem::MatResponseMode::SecantStiffness)
+        .value("ElasticStiffness", oofem::MatResponseMode::ElasticStiffness)
+        .value("Conductivity", oofem::MatResponseMode::Conductivity)
+        .value("Conductivity_ww", oofem::MatResponseMode::Conductivity_ww)
+        .value("Conductivity_hh", oofem::MatResponseMode::Conductivity_hh)
+        .value("Conductivity_hw", oofem::MatResponseMode::Conductivity_hw)
+        .value("Conductivity_wh", oofem::MatResponseMode::Conductivity_wh)
+        .value("Capacity", oofem::MatResponseMode::Capacity)
+        .value("Capacity_ww", oofem::MatResponseMode::Capacity_ww)
+        .value("Capacity_hh", oofem::MatResponseMode::Capacity_hh)
+        .value("Capacity_hw", oofem::MatResponseMode::Capacity_hw)
+        .value("Capacity_wh", oofem::MatResponseMode::Capacity_wh)
+        .value("IntSource", oofem::MatResponseMode::IntSource)
+        .value("IntSource_ww", oofem::MatResponseMode::IntSource_ww)
+        .value("IntSource_hh", oofem::MatResponseMode::IntSource_hh)
+        .value("IntSource_hw", oofem::MatResponseMode::IntSource_hw)
+        .value("IntSource_wh", oofem::MatResponseMode::IntSource_wh)
+    ;
+
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
     m.def("domain", &domain, py::return_value_policy::move);
@@ -808,5 +1258,6 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("isoLE", &isoLE, py::return_value_policy::move);
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
-    
+
+    m.def("test", &test);    
  }
