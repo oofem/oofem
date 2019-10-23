@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -46,7 +46,7 @@ namespace oofem {
 /**
  * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
- * MACROSCOPIC INPUT: DEFORMATION TENSOR (2D, 4 COMPONENTS: Hxx Hxy Hyx Hyy)
+ * MACROSCOPIC INPUT: DEFORMATION TENSOR (2D, 4 COMPONENTS: Exx Exy Eyx Eyy)
  *
  * @author: Adam Sciegaj
  */

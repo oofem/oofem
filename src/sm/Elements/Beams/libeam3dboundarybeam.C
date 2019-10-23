@@ -65,7 +65,7 @@ void
 LIBeam3dBoundaryBeam :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if (inode == 3) {
-        answer = {D_u, V_u, T_f};
+        answer = {E_xx, E_zx, K_xx};
     } else {
         answer = {D_u, D_v, D_w, R_u, R_v, R_w};
     }

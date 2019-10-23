@@ -48,7 +48,7 @@ class FEI3dTetLin;
  * Each node has 3 degrees of freedom. This element is used for 3D RVE analyses with Periodic Boundary Conditions.
  * At least one node is located at the image boundary.
  * These nodes are replaced with a periodic mirror nodes and a control node is used to impose the macroscopic (average) strain.
- * MACROSCOPIC INPUT: AXIAL STRAIN (1D, 1 COMPONENT)
+ * MACROSCOPIC INPUT: Exx (1D, 1 COMPONENT)
  *
  * @author: Adam Sciegaj
  */

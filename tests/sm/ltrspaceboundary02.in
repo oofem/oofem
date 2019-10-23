@@ -21,7 +21,7 @@ node 54 coords 3 4.791257e-02 5.177834e-02 1.000000e-01
 node 63 coords 3 4.791257e-02 0.000000e+00 5.059616e-02
 node 90 coords 3 0.000000e+00 4.791257e-02 5.059616e-02
 node 99 coords 3 4.463697e-02 4.791257e-02 5.059616e-02
-node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 4 1 2 4 5 bc 4 2 2 2 2
+node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 4 31 38 39 32 bc 4 2 2 2 2
 ltrspaceboundarymembrane 14 nodes 5 99 15 54 90 126 crossSect 1 mat 1 location 4 0 16 0 22
 ltrspaceboundarymembrane 15 nodes 5 15 99 63 90 126 crossSect 1 mat 1 location 4 16 0 16 22
 ltrspaceboundarymembrane 16 nodes 5 99 15 63 54 126 crossSect 1 mat 1 location 4 0 16 16 0
@@ -81,13 +81,13 @@ ltrspace 538 nodes 4 63 1 33 24 crossSect 1 mat 1
 simplecs 1
 isole 1 talpha 0. d 0. e 30.e9 n 0.2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-BoundaryCondition 2 loadTimeFunction 1 dofs 4 1 2 4 5 values 4 0.3 0.2 0.6 -0.5 set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 4 31 38 39 32 values 4 0.3 0.2 0.6 -0.5 set 1
 ConstantFunction 1 f(t) 1.
 set 1 nodes 1 126
 
 #%BEGIN_CHECK% tolerance 1e-3
-#REACTION tStep 1 number 126 dof 1 value 6.2500e+06
-#REACTION tStep 1 number 126 dof 2 value 1.0000e+07
-#REACTION tStep 1 number 126 dof 5 value -1.3750e+07
+#REACTION tStep 1 number 126 dof 31 value 6.2500e+06
+#REACTION tStep 1 number 126 dof 38 value 1.0000e+07
+#REACTION tStep 1 number 126 dof 32 value -1.3750e+07
 ##TIME
 #%END_CHECK%

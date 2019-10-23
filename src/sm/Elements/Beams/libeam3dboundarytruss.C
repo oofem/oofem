@@ -65,7 +65,7 @@ void
 LIBeam3dBoundaryTruss :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if (inode == 3) {
-        answer = {D_u};
+        answer = {E_xx};
     } else {
         answer = {D_u, D_v, D_w, R_u, R_v, R_w};
     }

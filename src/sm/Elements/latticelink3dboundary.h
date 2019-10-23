@@ -45,7 +45,13 @@
 
 namespace oofem {
 /**
- * This class implements a 3-dimensional lattice link element for the boundaries of a periodic cell, where one of the nodes that the link elements connect lies either on or outside the boundary */
+ * This class implements a 3-dimensional lattice link element for the boundaries of a periodic cell.
+ * The first two nodes have each 6 degrees of freedom (3 translation and 3 rotations).
+ * One of the nodes  lies either on the boundary or outside the specimen. 
+ * This node is replaced with the corresponding image node. The control node (node 3) is used to impose the macroscopic (average) strain.
+ * MACROSCOPIC INPUT for the control node: STRAIN TENSOR (3D, 6 COMPONENTS, VOIGT NOTATION: Exx Eyy Ezz Gyz Gxz Gxy)
+ * @author: Peter Grassl
+*/
 
 class LatticeLink3dBoundary : public LatticeLink3d
 {

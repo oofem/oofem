@@ -1,7 +1,7 @@
 lattice2dboundary1.out
 2D lattice boundary model
 NonLinearStatic nmsteps 1 nsteps 1 contextOutputStep 1 nmodules 1
-nsteps 2 controllmode 1 rtolv 1.e-3 stiffMode 1 maxiter 200 ddm 2 2 1 ddv 1 1.e-3 ddltf 2
+nsteps 2 controllmode 1 rtolv 1.e-3 stiffMode 1 maxiter 200 ddm 2 2 31 ddv 1 1.e-3 ddltf 2
 vtkxmlperiodic tstep_all primvars 1 1 stype 0
 domain 2dlattice 
 OutputManager tstep_all dofman_all 

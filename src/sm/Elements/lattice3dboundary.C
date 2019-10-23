@@ -442,12 +442,12 @@ Lattice3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
 void
 Lattice3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-  /*These are the DOFs of the first two nodes. The third node contains the macroscopic 
-    strain in Voigt notation (exx, eyy, ezz, gyz, gxz gxy). However, currently these DOF 
-    types do not exist yet in dofiditem.h*/
-    answer = {
-        D_u, D_v, D_w, R_u, R_v, R_w
-    };
+  if ( inode == 3 ) {
+    answer = { E_xx, E_yy, E_zz, G_yz, G_xz, G_xy };
+  }
+  else {
+    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
+  }
 }
 
 IRResultType

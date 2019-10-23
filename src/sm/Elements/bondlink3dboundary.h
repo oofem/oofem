@@ -49,9 +49,10 @@ namespace oofem {
  * The main idea is to use the rotation of the beam element and the rigid arm from the beam node to the continuum element node
  * to compute the displacement jump along the rebar element (and two components, which are perpendicular to each other and lie 
  * in a plane for which the direction along the rebar is normal to.
- * This element differs from the lattice link element, for which both the beam and the lattice nodes have rotational DOFs and 
- * therefore the lattice node's rotations can be used to compute the displacement jump at the beam element location.  
- * @TODO: Should not be derived from lattice structural element 
+ * At least one node is located at the image boundary.
+ * These nodes are replaced with a periodic mirror nodes and a control node is used to impose the macroscopic (average) strain.
+ * MACROSCOPIC INPUT: DEFORMATION GRADIENT TENSOR (3D, 9 COMPONENTS: Exx Exy Exz Eyx Eyy Eyz Ezx Ezy Ezz)
+ * 
 */
 
 class BondLink3dBoundary : public BondLink3d
@@ -65,7 +66,7 @@ public:
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
-    virtual int computeNumberOfDofs() { return 15; }
+    virtual int computeNumberOfDofs() { return 18; }
 
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 

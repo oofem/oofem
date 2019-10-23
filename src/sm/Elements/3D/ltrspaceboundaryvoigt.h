@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -48,7 +48,7 @@ class FEI3dTetLin;
  * Each node has 3 degrees of freedom. This element is used for 3D RVE analyses with Periodic Boundary Conditions.
  * At least one node is located at the image boundary.
  * These nodes are replaced with a periodic mirror nodes and a control node is used to impose the macroscopic (average) strain.
- * MACROSCOPIC INPUT: STRAIN TENSOR (3D, 6 COMPONENTS, VOIGT NOTATION: exx eyy ezz gyz gxz gxy)
+ * MACROSCOPIC INPUT: STRAIN TENSOR (3D, 6 COMPONENTS, VOIGT NOTATION: Exx Eyy Ezz Gyz Gxz Gxy)
  *
  * @author: Adam Sciegaj
  */

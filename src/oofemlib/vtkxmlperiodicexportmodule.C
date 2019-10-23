@@ -512,7 +512,7 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
 			  //Debug: We need to change this. If we use 2D elements then 3, something different.
 			  //We can do this by looking at the IDs of Dofs? If it is 1,2,6 it is a 2d beam element. If it
 			  //is 2d then this is the old approach. We know the control DOF ID Array. So, we can solve this already?
-			  if(dofIdArray.at(1) == 1 && dofIdArray.at(2) == 2 && dofIdArray.at(3) == 6){//Old 2d approach
+			  if(dofIdArray.at(1) == E_xx && dofIdArray.at(2) == E_yy && dofIdArray.at(3) == G_xy){//Old 2d approach
 			    valueArray.resize( helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
                             valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3);

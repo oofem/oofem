@@ -188,8 +188,11 @@ BondLink3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
   if(inode==1){
     answer = { D_u, D_v, D_w, R_u, R_v, R_w };
   }
-  else{
+  else if(inode==2){
     answer = { D_u, D_v, D_w};
+  }
+  else if(inode==3){
+    answer = { E_xx, E_xy, E_xz, E_yx, E_yy, E_yz, E_zx, E_zy, E_zz };
   }
 }
 

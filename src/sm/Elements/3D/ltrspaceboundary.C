@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -117,7 +117,7 @@ void
 LTRSpaceBoundary :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode == 5 ) {
-        answer = { D_u, D_v, D_w, R_u, R_v, R_w, V_u, V_v, V_w };
+        answer = { E_xx, E_xy, E_xz, E_yx, E_yy, E_yz, E_zx, E_zy, E_zz };
     } else {
         answer = { D_u, D_v, D_w };
     }

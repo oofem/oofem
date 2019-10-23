@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -65,7 +65,7 @@ void
 LIBeam3dBoundaryMembrane :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if (inode == 3) {
-        answer = {D_u, D_v, R_u, R_v};
+        answer = {E_xx, E_xy, E_yx, E_yy};
     } else {
         answer = {D_u, D_v, D_w, R_u, R_v, R_w};
     }

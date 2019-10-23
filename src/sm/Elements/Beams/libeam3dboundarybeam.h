@@ -46,10 +46,10 @@ namespace oofem {
 /**
  * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
- * MACROSCOPIC INPUT: DEFORMATIONS AND CURVATURE (BEAM, 3 COMPONENTS: Hxx Hzx Gxx)
- * Hxx = du/dx - axial strain
- * Hzx = dw/dx - slope
- * Gxx = d^2(w)/dx^2 (Euler-Bernoulli) or d(phi)/dx (Timoshenko) - curvature
+ * MACROSCOPIC INPUT: DEFORMATIONS AND CURVATURE (BEAM, 3 COMPONENTS: Exx Ezx Kxx)
+ * Exx = du/dx - axial strain
+ * Ezx = dw/dx - slope
+ * Kxx = d^2(w)/dx^2 (Euler-Bernoulli) or d(phi)/dx (Timoshenko) - curvature
  *
  * @author: Adam Sciegaj
  */

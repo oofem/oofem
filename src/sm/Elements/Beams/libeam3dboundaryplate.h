@@ -46,13 +46,13 @@ namespace oofem {
 /**
  * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
- * MACROSCOPIC INPUT: DEFORMATIONS AND CURVATURES (PLATE, 10 COMPONENTS: Hxx Hxy Hyx Hyy Hzx Hzy Gxx Gyy Gxy Gyx)
- * Hxx = du/dx, Hxy = du/dy, Hyx = dv/dx, Hyy = dv/dy (in-plane strains)
- * Hzx = dw/dx, Hzy = dw/dy (slopes)
- * Gxx = d^2(w)/dx^2 (Kirchhoff) or d(phi_x)/dx (Mindlin)  curvature
- * Gyy = d^2(w)/dy^2 (Kirchhoff) or d(phi_y)/dy (Mindlin)  curvature
- * Gxy = d^2(w)/dxdy (Kirchhoff) or d(phi_x)/dy (Mindlin)  curvature
- * Gyx = d^2(w)/dxdy (Kirchhoff) or d(phi_y)/dx (Mindlin)  curvature
+ * MACROSCOPIC INPUT: DEFORMATIONS AND CURVATURES (PLATE, 10 COMPONENTS: Exx Exy Eyx Eyy Ezx Ezy Kxx Kyy Kxy Kyx)
+ * Exx = du/dx, Exy = du/dy, Eyx = dv/dx, Eyy = dv/dy (in-plane strains)
+ * Ezx = dw/dx, Ezy = dw/dy (slopes)
+ * Kxx = d^2(w)/dx^2 (Kirchhoff) or d(phi_x)/dx (Mindlin)  curvature
+ * Kyy = d^2(w)/dy^2 (Kirchhoff) or d(phi_y)/dy (Mindlin)  curvature
+ * Kxy = d^2(w)/dxdy (Kirchhoff) or d(phi_x)/dy (Mindlin)  curvature
+ * Kyx = d^2(w)/dxdy (Kirchhoff) or d(phi_y)/dx (Mindlin)  curvature
  *
  * @author: Adam Sciegaj
  */

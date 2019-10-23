@@ -1,11 +1,6 @@
 ltrspaceboundary03.out
 3D RVE - periodic boundary conditions with LTRSpaceBoundaryVoigt elements, periodicity in x y z
-StaticStructural nsteps 1 solverType "calm" stepLength 0.3 Psi 0 hpc 2 126 1 initialguess 1 nmodules 1
-#StaticStructural nsteps 1 initialguess 1 nmodules 1 lstype 3 smtype 7
-#vtkxmlperiodic primvars 1 1 vars 3 4 1 12 cellvars 1 46 tstep_all domain_all stype 0
-#vtkxmlperiodic ipvars 3 4 1 12 tstep_all domain_all
-#gpexportmodule vars 3 4 1 12 tstep_all domain_all
-#matlab tstep_all mesh data specials reactionforces integrationpoints internalvars 3 4 1 12
+StaticStructural nsteps 1 solverType "calm" stepLength 0.3 Psi 0 hpc 2 126 31 initialguess 1 nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
@@ -18,8 +13,7 @@ node 45 coords 3 4.791257e-02 5.177834e-02 0.000000e+00
 node 63 coords 3 4.791257e-02 0.000000e+00 5.059616e-02
 node 90 coords 3 0.000000e+00 4.791257e-02 5.059616e-02
 node 99 coords 3 4.463697e-02 4.791257e-02 5.059616e-02
-#node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 6 1 2 3 4 5 6 bc 6 2 2 2 2 2 2
-node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 6 1 2 3 4 5 6 load 1 2
+node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 6 31 32 33 40 41 42 load 1 2
 ltrspaceboundaryvoigt 14 nodes 5 99 9 45 90 126 crossSect 1 mat 1 location 4 0 17 14 22
 ltrspaceboundaryvoigt 15 nodes 5 9 99 63 90 126 crossSect 1 mat 1 location 4 17 0 16 22
 ltrspaceboundaryvoigt 16 nodes 5 99 9 63 45 126 crossSect 1 mat 1 location 4 0 17 16 14
@@ -79,16 +73,9 @@ ltrspace 538 nodes 4 63 1 33 24 crossSect 1 mat 1
 simplecs 1
 isole 1 talpha 0. d 0. e 30.e9 n 0.2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
-#BoundaryCondition 2 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0.3 -0.5 0.0 0.0 0.0 0.8 set 1
 NodalLoad 2 loadTimeFunction 1 Components 6 1 -2.428585877 -0.285714 0. 0. 1.714285812 reference
 ConstantFunction 1 f(t) 1.
 set 1 nodes 1 126
-
 #%BEGIN_CHECK% tolerance 1e-3
 #LOADLEVEL tStep 1 value 5.8333226238e+06
-##REACTION tStep 1 number 126 dof 1 value 5.8333333333333e+06
-##REACTION tStep 1 number 126 dof 2 value -1.4166666666667e+07
-##REACTION tStep 1 number 126 dof 3 value -1.6666666666667e+06
-##REACTION tStep 1 number 126 dof 6 value 1.0e+07
-##TIME
 #%END_CHECK%

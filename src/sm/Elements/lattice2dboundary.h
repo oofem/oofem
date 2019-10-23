@@ -56,6 +56,10 @@ class Lattice2dBoundary : public Lattice2d
      *   to modelling the fracture process zone of concrete subjected to
      *   uniaxial tension". International Journal of Solids and Structures.
      *   Volume 47, Issues 7-8, pp. 957-968, 2010"
+     *   The unknowns of the control node are Exx, Eyy and Gxy.
+     *   Exx = axial strain x-direction
+     *   Eyy = axial strain y-direction
+     *   Gxy = 2Exy (assuming symmetry)
      */
 protected:
     int location;

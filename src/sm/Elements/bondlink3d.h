@@ -134,7 +134,7 @@ protected:
     void computePropertiesOfCrossSection();
 
     virtual void computeGaussPoints() override;
-    virtual integrationDomain  giveIntegrationDomain() { return _Line; }
+    virtual integrationDomain  giveIntegrationDomain() const { return _Line; }
 
 };
 

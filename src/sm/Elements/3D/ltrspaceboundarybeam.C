@@ -65,7 +65,7 @@ void
 LTRSpaceBoundaryBeam :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if (inode == 5) {
-        answer = { D_u, V_u, T_f };
+        answer = { E_xx, E_zx, K_xx };
     } else {
         answer = { D_u, D_v, D_w };
     }

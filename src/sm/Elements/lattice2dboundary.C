@@ -370,7 +370,13 @@ Lattice2dBoundary :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 void
 Lattice2dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const {
+
+  if ( inode == 3 ) {
+    answer = { E_xx, E_yy, G_xy };
+  } else{
     answer = { D_u, D_v, R_w };
+  }
+  
 }
 
 
