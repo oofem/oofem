@@ -68,7 +68,7 @@ public:
     /// Constructor
     BondCEBMaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the last equilibrated cumulative slip.
     double giveKappa() const { return kappa; }

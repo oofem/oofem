@@ -45,8 +45,6 @@ REGISTER_Material(WinklerPasternakMaterial);
 WinklerPasternakMaterial:: WinklerPasternakMaterial (int n, Domain* d): StructuralMaterial(n, d) 
 { }
 
-WinklerPasternakMaterial::~WinklerPasternakMaterial()
-{ }
 
 IRResultType
 WinklerPasternakMaterial :: initializeFrom(InputRecord *ir)
@@ -111,8 +109,8 @@ WinklerPasternakMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-int
-WinklerPasternakMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+WinklerPasternakMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

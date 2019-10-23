@@ -588,7 +588,7 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 { }
 
 
-void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     int maxComponents = 0;
     StructuralMaterialStatus :: printOutputAt(file, tStep);

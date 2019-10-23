@@ -133,7 +133,7 @@ FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(GaussPoint *g) :
 { }
 
 void
-FluidDynamicMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+FluidDynamicMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     fprintf(file, "\n deviatoric stresses");
     for ( double e: deviatoricStressVector ) {

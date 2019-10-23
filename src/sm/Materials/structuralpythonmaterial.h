@@ -41,12 +41,6 @@ namespace bp=boost::python;
 #include "sm/Materials/structuralmaterial.h"
 #include "sm/Materials/structuralms.h"
 
-#if 0
-#ifndef PyObject_HEAD
-struct _object;
-typedef _object PyObject;
-#endif
-#endif
 
 ///@name Input fields for StructuralPythonMaterial
 //@{
@@ -83,23 +77,12 @@ private:
     bp::object smallDef, smallDefTangent;
     // callables for large deformations
     bp::object largeDef, largeDefTangent;
-#if 0
-    /// Compiled function for small deformations
-    PyObject *smallDef;
-    PyObject *smallDefTangent;
-
-    /// Compiled function for large deformations
-    PyObject *largeDef;
-    PyObject *largeDefTangent;
-#endif
 
     /// Numerical pertubation for numerical tangents
     double pert;
 public:
     /// Constructor.
     StructuralPythonMaterial(int n, Domain * d);
-    /// Destructor.
-    virtual ~StructuralPythonMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
@@ -134,16 +117,10 @@ class StructuralPythonMaterialStatus : public StructuralMaterialStatus
 protected:
     /// Internal state variables
     bp::dict stateDict, tempStateDict;
-#if 0
-    PyObject *stateDict;
-    PyObject *tempStateDict;
-#endif
 
 public:
     /// Constructor.
     StructuralPythonMaterialStatus(GaussPoint * gp);
-    /// Destructor.
-    virtual ~StructuralPythonMaterialStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

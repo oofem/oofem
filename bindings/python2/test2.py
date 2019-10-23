@@ -1,4 +1,5 @@
 import oofempy
+import util
 
 # engngModel
 problem = oofempy.linearStatic(nSteps=3, outFile="test2.out")
@@ -44,23 +45,7 @@ e5 = oofempy.beam2d(5, domain, nodes=(n6,2),  mat=1,   crossSect=1,  DofsToConde
 elems = (e1, e2, e3, e4, e5)
 
 # add eveything to domain (resize container first to save some time, but it is not necessary 0 see ltfs)
-domain.resizeDofManagers(len(nodes))
-for n in nodes:
-   domain.setDofManager(n.number, n)
-domain.resizeElements(len(elems))
-for e in elems:
-   domain.setElement(e.number, e)
-domain.resizeMaterials(1)
-domain.setMaterial(1, mat)
-domain.resizeCrossSectionModels(1)
-domain.setCrossSection(1, cs)
-domain.resizeBoundaryConditions(len(bcs))
-for bc in bcs:
-   domain.setBoundaryCondition(bc.number, bc)
-domain.resizeFunctions(len(ltfs))
-for ltf in ltfs:
-   domain.setFunction(ltf.number, ltf)
-
+util.setupDomain(domain, nodes, elems, (mat,), (cs,), bcs, ltfs, ())
 
 print("\nSolving problem")
 problem.checkProblemConsistency()

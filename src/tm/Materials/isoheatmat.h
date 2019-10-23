@@ -61,26 +61,25 @@ protected:
     ScalarFunction conductivity; ///< Conductivity (k in input file).
     ScalarFunction capacity;     ///< Capacity (c in input file).
     ScalarFunction density;      ///< Density (td in input file).
-    double maturityT0;           ///< Baseline for maturity mathod
+    double maturityT0 = 0.;           ///< Baseline for maturity mathod
 
 public:
     IsotropicHeatTransferMaterial(int n, Domain * d);
-    virtual ~IsotropicHeatTransferMaterial();
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
-                                  TimeStep *tStep) override;
+                                  TimeStep *tStep) const override;
 
-    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
-    virtual double  giveMaturityT0() { return maturityT0; }
+    virtual double giveMaturityT0() const { return maturityT0; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -89,16 +88,15 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
+    double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-    double giveTemperature(GaussPoint *gp);
+    double giveTemperature(GaussPoint *gp) const;
 };
 
 class IsotropicHeatTransferMaterialStatus : public TransportMaterialStatus
 {
 public:
     IsotropicHeatTransferMaterialStatus(GaussPoint * g);
-    virtual ~IsotropicHeatTransferMaterialStatus();
     void updateYourself(TimeStep *tStep) override;
 };
 

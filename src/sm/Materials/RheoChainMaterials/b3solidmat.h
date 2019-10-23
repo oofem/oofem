@@ -63,7 +63,6 @@ protected:
 
 public:
     B3SolidMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~B3SolidMaterialStatus() { }
 
     void updateYourself(TimeStep *tStep) override;
 
@@ -101,7 +100,7 @@ protected:
     double w_h;    ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
     double n;      ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
     double a;      ///< Constant (obtained from experiments) A [Pedersen, 1990]
-    double EspringVal; ///< elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
+    mutable double EspringVal; ///< elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
     /**
      * If 0, analysis of retardation spectrum is used for evaluation of Kelvin units moduli (default).
      * If 1, least-squares method is used for evaluation of Kelvin units moduli.
@@ -122,7 +121,6 @@ public:
     B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {
         shMode = B3_NoShrinkage;
     }
-    virtual ~B3SolidMaterial() { }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -136,10 +134,10 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the compliance function of the non-aging solidifying constituent.
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 1; }
+    bool hasIncrementalShrinkageFormulation() const override { return true; }
 
     void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -154,13 +152,13 @@ protected:
     /// Evaluation of the flow term viscosity.
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
-    double inverse_sorption_isotherm(double w);
+    double inverse_sorption_isotherm(double w) const;
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain.
-    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Update of partial moduli of individual chain units
-    void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     void computeCharTimes() override;
 
@@ -178,10 +176,10 @@ protected:
     double computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option);
 
     /// Computes initial value of the MicroPrestress
-    double giveInitMicroPrestress(void);
+    double giveInitMicroPrestress() const;
 
     /// Computes relative humidity at given time step and GP
-    double giveHumidity(GaussPoint *gp, TimeStep *tStep);
+    double giveHumidity(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Computes relative humidity increment at given time step and GP
     double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep);

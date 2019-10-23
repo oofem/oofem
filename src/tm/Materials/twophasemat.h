@@ -59,22 +59,21 @@ protected:
  
 public:
     TwoPhaseMaterial(int n, Domain * d);
-    virtual ~TwoPhaseMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,
-                                  TimeStep *tStep) override;
+                                  TimeStep *tStep) const override;
 
      double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
-    //virtual double  giveMaturityT0() { return maturityT0; }
-    protected:
+    //virtual double giveMaturityT0() const { return maturityT0; }
+protected:
     TransportMaterial *giveMaterial(int i) const;
     double giveVof (GaussPoint* gp, TimeStep* tStep) const;
     const char *giveClassName() const override { return "TwoPhaseMaterial"; }

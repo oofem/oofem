@@ -409,7 +409,7 @@ IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(GaussPoint 
 
 
 void
-IntMatBilinearCZFagerstromStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IntMatBilinearCZFagerstromStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     ///@todo Martin: check need of this
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);

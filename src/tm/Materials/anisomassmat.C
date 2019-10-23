@@ -65,7 +65,7 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 
 
 void
-AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
@@ -79,7 +79,7 @@ AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint
 
 
 void
-AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
@@ -96,7 +96,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 
 double
-AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
 

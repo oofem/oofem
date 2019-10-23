@@ -100,8 +100,6 @@ public:
      * @param nu Poisson ratio.
      */
     IsotropicLinearElasticMaterial(int n, Domain *d, double E, double nu);
-    /// Destructor.
-    virtual ~IsotropicLinearElasticMaterial() { }
 
     const char *giveClassName() const override { return "IsotropicLinearElasticMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_IsotropicLinearElasticMaterial_Name; }
@@ -121,7 +119,7 @@ public:
     void initTangents();
     FloatMatrixF< 3, 3 >foo() { return this->tangentPlaneStress; }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     /// Returns Young's modulus.
     double giveYoungsModulus() { return E; }

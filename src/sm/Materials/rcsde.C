@@ -268,7 +268,7 @@ RCSDEMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-RCSDEMaterial :: give(int aProperty, GaussPoint *gp)
+RCSDEMaterial :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -463,12 +463,8 @@ RCSDEMaterialStatus :: RCSDEMaterialStatus(GaussPoint *g) :
 }
 
 
-RCSDEMaterialStatus :: ~RCSDEMaterialStatus()
-{ }
-
-
 void
-RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     char s [ 11 ];
 

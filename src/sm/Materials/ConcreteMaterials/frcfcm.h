@@ -81,16 +81,15 @@ protected:
 
 public:
     FRCFCMStatus(GaussPoint *g);
-    virtual ~FRCFCMStatus();
 
     /// Returns the last equilibrated damage level.
-    double giveDamage() { return damage; }
+    double giveDamage() const { return damage; }
     /// Returns the temporary damage level.
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "FRCFCMStatus"; }
 

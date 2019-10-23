@@ -188,7 +188,7 @@ CebFipSlip90MaterialStatus :: CebFipSlip90MaterialStatus(GaussPoint *g) : Struct
 
 
 void
-CebFipSlip90MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+CebFipSlip90MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

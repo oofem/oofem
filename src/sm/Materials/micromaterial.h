@@ -64,12 +64,10 @@ class MicroMaterialStatus : public StructuralMaterialStatus
 public:
     /// Constructor
     MicroMaterialStatus(GaussPoint * gp);
-    /// Destructor
-    virtual ~MicroMaterialStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "MicroMaterialStatus"; }
 
@@ -90,8 +88,6 @@ class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 public:
     /// Constructor
     MicroMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MicroMaterial() {}
 
     std :: string inputFileNameMicro;
 

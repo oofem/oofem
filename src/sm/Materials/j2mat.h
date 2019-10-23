@@ -71,7 +71,7 @@ public:
 
     int giveSizeOfFullHardeningVarsVector() override;
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const override;
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

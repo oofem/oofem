@@ -57,27 +57,22 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
      * Note: time -1 refers to the previous time.
      */
 
-    int mu;
-    double v;
-    double lambdaMu, Emu;
-    double sum = 0.0;
-
-    if (   ! Material :: isActivated( tStep )   ) {
-      OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
+    if ( ! Material :: isActivated( tStep ) ) {
+        OOFEM_ERROR("Attempted to evaluate E modulus at time lower than casting time");
     }
 
     if ( this->EparVal.isEmpty() ) {
-      this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
+        this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
     }
 
-
-    for ( mu = 1; mu <= nUnits; mu++ ) {
-        lambdaMu = this->computeLambdaMu(gp, tStep, mu);
-        Emu = this->giveEparModulus(mu);
+    double sum = 0.0;
+    for ( int mu = 1; mu <= nUnits; mu++ ) {
+        double lambdaMu = this->computeLambdaMu(gp, tStep, mu);
+        double Emu = this->giveEparModulus(mu);
         sum += ( 1 - lambdaMu ) / Emu;
     }
 
-    v = this->computeSolidifiedVolume(gp, tStep);
+    double v = this->computeSolidifiedVolume(gp, tStep);
     return sum / v;
 }
 
@@ -88,40 +83,33 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
 //
 {
-    int mu;
-    double betaMu;
-    double v;
-    FloatArray *sigmaVMu = NULL, reducedAnswer, help;
-    FloatMatrix C;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
-    if (  ! Material :: isActivated( tStep ) )  {
-      OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
+    if ( ! Material :: isActivated( tStep ) ) {
+        OOFEM_ERROR("Attempted to evaluate creep strain for time lower than casting time");
     }
 
     if ( this->EparVal.isEmpty() ) {
-      this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
+        this->updateEparModuli(0., gp, tStep); // stiffnesses are time independent (evaluated at time t = 0.)
     }
 
-
     if ( mode == VM_Incremental ) {
-        for ( mu = 1; mu <= nUnits; mu++ ) {
-            betaMu = this->computeBetaMu(gp, tStep, mu);
-            sigmaVMu =  & status->giveHiddenVarsVector(mu); // JB
+        FloatArray *sigmaVMu = nullptr, reducedAnswer;
+        for ( int mu = 1; mu <= nUnits; mu++ ) {
+            double betaMu = this->computeBetaMu(gp, tStep, mu);
+            sigmaVMu = & status->giveHiddenVarsVector(mu); // JB
 
             if ( sigmaVMu->isNotEmpty() ) {
-                help.zero();
-                help.add(* sigmaVMu);
-                help.times( ( 1.0 - betaMu ) / this->giveEparModulus(mu) );
-                reducedAnswer.add(help);
+                reducedAnswer.add(( 1.0 - betaMu ) / this->giveEparModulus(mu), * sigmaVMu);
             }
         }
 
         if ( sigmaVMu->isNotEmpty() ) {
-            help = reducedAnswer;
+            FloatMatrix C;
+            FloatArray help = reducedAnswer;
             this->giveUnitComplianceMatrix(C, gp, tStep);
             reducedAnswer.beProductOf(C, help);
-            v = this->computeSolidifiedVolume(gp, tStep);
+            double v = this->computeSolidifiedVolume(gp, tStep);
             reducedAnswer.times(1. / v);
         }
 
@@ -133,43 +121,31 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
 }
 
 double
-KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu)
+KelvinChainSolidMaterial :: computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const
 {
-    double betaMu;
-    double deltaT;
-    double tauMu;
-
-    deltaT = tStep->giveTimeIncrement();
-    tauMu = this->giveCharTime(Mu);
+    double deltaT = tStep->giveTimeIncrement();
+    double tauMu = this->giveCharTime(Mu);
 
     if ( deltaT / tauMu > 30 ) {
-        betaMu = 0;
+        return 0;
     } else {
-        betaMu = exp(-( deltaT ) / tauMu);
+        return exp(-( deltaT ) / tauMu);
     }
-
-    return betaMu;
 }
 
 double
-KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu)
+KelvinChainSolidMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const
 {
-    double lambdaMu;
-    double deltaT;
-    double tauMu;
-
-    deltaT = tStep->giveTimeIncrement();
-    tauMu = this->giveCharTime(Mu);
+    double deltaT = tStep->giveTimeIncrement();
+    double tauMu = this->giveCharTime(Mu);
 
     if ( deltaT / tauMu < 1.e-5 ) {
-        lambdaMu = 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( pow(deltaT / tauMu, 2) ) - 1 / 24 * ( pow(deltaT / tauMu, 3) );
+        return 1 - 0.5 * ( deltaT / tauMu ) + 1 / 6 * ( pow(deltaT / tauMu, 2) ) - 1 / 24 * ( pow(deltaT / tauMu, 3) );
     } else if ( deltaT / tauMu > 30 ) {
-        lambdaMu = tauMu / deltaT;
+        return tauMu / deltaT;
     } else {
-        lambdaMu = ( 1.0 -  exp(-( deltaT ) / tauMu) ) * tauMu / deltaT;
+        return ( 1.0 -  exp(-( deltaT ) / tauMu) ) * tauMu / deltaT;
     }
-
-    return lambdaMu;
 }
 
 
@@ -190,9 +166,6 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
      * Updates hidden variables used to effectively trace the load history
      */
 
-    double betaMu;
-    double lambdaMu;
-
     FloatArray help, SigmaVMu, deltaEps0, deltaSigma;
     FloatMatrix D;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
@@ -201,12 +174,12 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     //    if (  ! this->isActivated( tStep ) )  {
     // goes there if the viscoelastic material does not exist yet
     if (  ! Material :: isActivated( tStep ) )  {
-      help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-      help.zero();
-      for ( int mu = 1; mu <= nUnits; mu++ ) {
-	status->letTempHiddenVarsVectorBe(mu, help);
-      }
-      return;
+        help.resize(StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+        help.zero();
+        for ( int mu = 1; mu <= nUnits; mu++ ) {
+            status->letTempHiddenVarsVectorBe(mu, help);
+        }
+        return;
     }
     
     help = status->giveTempStrainVector(); // gives updated strain vector (at the end of time-step)
@@ -225,8 +198,8 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     deltaSigma.beProductOf(D, help);
 
     for ( int mu = 1; mu <= nUnits; mu++ ) {
-        betaMu = this->computeBetaMu(gp, tStep, mu);
-        lambdaMu = this->computeLambdaMu(gp, tStep, mu);
+        double betaMu = this->computeBetaMu(gp, tStep, mu);
+        double lambdaMu = this->computeLambdaMu(gp, tStep, mu);
 
         help = deltaSigma;
         help.times(lambdaMu);
@@ -261,7 +234,7 @@ KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
 
 // useless here
 double
-KelvinChainSolidMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
+KelvinChainSolidMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
     return 0.;
@@ -274,7 +247,7 @@ KelvinChainSolidMaterialStatus :: KelvinChainSolidMaterialStatus(GaussPoint *g, 
     RheoChainMaterialStatus(g, nunits) { }
 
 void
-KelvinChainSolidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+KelvinChainSolidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     RheoChainMaterialStatus :: printOutputAt(file, tStep);
 }

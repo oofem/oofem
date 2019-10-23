@@ -103,7 +103,7 @@ CemhydMat :: ~CemhydMat()
 
 //returns hydration power [W/m3 of concrete]
 void
-CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     double averageTemperature;
     CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );

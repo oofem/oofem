@@ -67,27 +67,25 @@ class LatticeTransportMaterialStatus : public TransportMaterialStatus
 {
 protected:
     /// Liquid mass in element
-    double mass;
-    double oldPressure;
+    double mass = 0.;
+    double oldPressure = 0.;
 
 public:
     ///Constructor
     LatticeTransportMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~LatticeTransportMaterialStatus() { }
 
-    void printOutputAt(FILE *, TimeStep *) override;
+    void printOutputAt(FILE *, TimeStep *) const override;
 
     /// Returns pressure
-    double givePressure() { return field.at(1); }
+    double givePressure() const { return field.at(1); }
 
-    double giveOldPressure() { return oldPressure; }
+    double giveOldPressure() const { return oldPressure; }
 
     /// Sets the mass
     void setMass(double input) { this->mass = input; }
 
     /// Returns mass
-    double giveMass() { return this->mass; }
+    double giveMass() const { return this->mass; }
 
     void updateYourself(TimeStep *tStep) override;
 
@@ -102,68 +100,64 @@ public:
 class LatticeTransportMaterial : public TransportMaterial
 {
 protected:
-    ///Viscosity of fluid
-    double viscosity;
+    /// Viscosity of fluid
+    double viscosity = 0.;
 
-    ///Parameter of van Genuchten law
-    double paramM;
+    /// Parameter of van Genuchten law
+    double paramM = 0.;
 
-    ///Parameter of van Genuchten law
-    double paramA;
+    /// Parameter of van Genuchten law
+    double paramA = 0.;
 
-    ///Intrinsic permeability of porous material
-    double permeability;
+    /// Intrinsic permeability of porous material
+    double permeability = 0.;
 
-    ///Porosity of porous material
-    double porosity;
+    /// Porosity of porous material
+    double porosity = 0.;
 
-    ///Density of fluid
-    double density;
+    /// Density of fluid
+    double density = 0.;
 
-    ///Type of conductivity and capcity laws.
-    int conType;
+    /// Type of conductivity and capcity laws.
+    int conType = 0.;
 
-    ///Type of conductivity and capcity laws.
-    int capacity;
+    /// Type of conductivity and capcity laws.
+    int capacity = 0.;
 
-    ///Relative saturated water content
-    double thetaS;
+    /// Relative saturated water content
+    double thetaS = 0.;
 
-    ///Residual water content
-    double thetaR;
+    /// Residual water content
+    double thetaR = 0.;
 
-    ///modified water content
-    double thetaM;
+    /// Modified water content
+    double thetaM = 0.;
 
-    ///crack tortuosity
-    double crackTortuosity;
+    /// Crack tortuosity
+    double crackTortuosity = 0.;
 
-    ///crack limit
-    double crackLimit;
+    /// Crack limit
+    double crackLimit = 0.;
 
+    /// Suction air entry value
+    double suctionAirEntry = 0.;
 
-    ///suction air entry value
-    double suctionAirEntry;
-
-    /// Material mode for convenient access.
-    MaterialMode matMode;
 
 public:
     LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~LatticeTransportMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
 
     void  giveCharacteristicMatrix(FloatMatrix &answer,
                                    MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override { }
+                                   TimeStep *tStep) const override { }
 
     double  giveCharacteristicValue(MatResponseMode mode,
                                     GaussPoint *gp,
-                                    TimeStep *tStep) override;
+                                    TimeStep *tStep) const override;
 
     /**
      * Computes the conductivity.
@@ -171,14 +165,14 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    double computeConductivity(double suction, GaussPoint *gp, TimeStep *tStep);
+    double computeConductivity(double suction, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Computes the capacity.
      * @param suction Capillary stress
      * @param gp Integration point.
      */
-    double computeCapacity(double suction, GaussPoint *gp);
+    double computeCapacity(double suction, GaussPoint *gp) const;
 
     /**
      * Computes the mass.
@@ -186,12 +180,12 @@ public:
      * @param gp Integration point.
      */
 
-    double computeMass(FloatArray &stateVector, GaussPoint *gp);
+    double computeMass(FloatArray &stateVector, GaussPoint *gp) const;
 
     const char *giveInputRecordName() const override { return _IFT_LatticeTransportMaterial_Name; }
     const char *giveClassName() const override { return "LatticeTransportMaterial"; }
 
-    double give(int, GaussPoint *gp) override;
+    double give(int, GaussPoint *gp) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 };

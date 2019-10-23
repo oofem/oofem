@@ -69,10 +69,10 @@ RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
 
 
 // specifies whether a given material mode is supported by this model
-int
-RankineMat :: hasMaterialModeCapability(MaterialMode mode)
+bool
+RankineMat :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    return ( ( mode == _PlaneStress ) || ( mode == _1dMat ) );
+    return mode == _PlaneStress || mode == _1dMat;
 }
 
 
@@ -723,15 +723,9 @@ RankineMatStatus :: RankineMatStatus(GaussPoint *g) :
 }
 
 
-RankineMatStatus :: ~RankineMatStatus()
-{ }
-
-
 void
-RankineMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RankineMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    //int i, n;
-
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "status { ");

@@ -45,7 +45,6 @@
 #define _IFT_RVEStokesFlow_Name "rvestokesflow"
 #define _IFT_RVEStokesFlow_fileName "file"
 #define _IFT_RVEStokesFlow_bctype "bctype"
-#define _IFT_RVEStokesFlow_supressoutput "supressoutput"
 
 namespace oofem {
 /**
@@ -62,8 +61,6 @@ protected:
 
 public:
     RVEStokesFlowMaterialStatus(int n, int rank, GaussPoint * g, const std :: string &inputfile);
-
-    virtual ~RVEStokesFlowMaterialStatus();
 
     void setTimeStep(TimeStep *tStep);
 
@@ -103,21 +100,14 @@ private:
     std :: string rveFilename;
     std :: string rveLogFilename;
 
-    int SupressRVEoutput;
-
-    void suppressStdout();
-    void enableStdout();
-
 public:
     RVEStokesFlow(int n, Domain * d);
 
-    virtual ~RVEStokesFlow() { }
-
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
-    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
-    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override { return 0.0; }
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { return 0.0; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

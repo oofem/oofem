@@ -95,10 +95,8 @@ protected:
 public:
     /// Constructor
     IsotropicDamageMaterialStatus(GaussPoint *g);
-    /// Destructor
-    virtual ~IsotropicDamageMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -187,7 +185,7 @@ public:
     /// Destructor
     virtual ~IsotropicDamageMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "IsotropicDamageMaterial"; }
 
     /// Returns reference to undamaged (bulk) material
@@ -225,7 +223,7 @@ public:
      * @param gp Integration point,
      * @return Property value.
      */
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
      * @param[out] kappa Return parameter, containing the corresponding equivalent strain.

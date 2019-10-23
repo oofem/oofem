@@ -111,7 +111,7 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
 }
 
 void
-LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 

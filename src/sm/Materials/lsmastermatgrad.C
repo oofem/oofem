@@ -59,8 +59,8 @@ LargeStrainMasterMaterialGrad :: ~LargeStrainMasterMaterialGrad()
 { }
 
 // specifies whether a given material mode is supported by this model
-int
-LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode)
+bool
+LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat;
 }

@@ -64,15 +64,14 @@ protected:
 
 public:
     AnisotropicMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~AnisotropicMassTransferMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_AnisotropicMassTransferMaterial_Name; }
     const char *giveClassName() const override { return "AnisotropicMassTransferMaterial"; }

@@ -67,9 +67,8 @@ protected:
 
 public:
     TrabBoneEmbedStatus(GaussPoint * g);
-    virtual ~TrabBoneEmbedStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     double giveTempTSED();
 

@@ -102,9 +102,8 @@ protected:
 
 public:
     RCM2MaterialStatus(GaussPoint * g);
-    virtual ~RCM2MaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const FloatArray &getPrincipalStrainVector() const { return principalStrain; }
     const FloatArray &getPrincipalStressVector() const { return principalStress; }
@@ -184,13 +183,13 @@ public:
     RCM2Material(int n, Domain * d);
     virtual ~RCM2Material();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveClassName() const override { return "RCM2Material"; }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 

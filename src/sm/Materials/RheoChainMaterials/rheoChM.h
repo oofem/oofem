@@ -95,9 +95,8 @@ protected:
 
 public:
     RheoChainMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~RheoChainMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     virtual const FloatArray &giveViscoelasticStressVector() const { return stressVector; }
 
@@ -153,7 +152,7 @@ protected:
     /// Parameters for the lattice model
     double alphaOne, alphaTwo;
     /// Time for which the partial moduli of individual units have been evaluated.
-    double EparValTime;
+    mutable double EparValTime;
 
     /// Time from which the model should give a good approximation. Optional field. Default value is 0.1 [day].
     double begOfTimeOfInterest; // local one or taken from e-model
@@ -162,10 +161,10 @@ protected:
     /// Associated linearElasticMaterial, with E = 1.
     LinearElasticMaterial *linearElasticMaterial;
     /// Partial moduli of individual units.
-    FloatArray EparVal;
+    mutable FloatArray EparVal;
     //FloatArray relaxationTimes;
     /// Characteristic times of individual units (relaxation or retardation times).
-    FloatArray charTimes;
+    mutable FloatArray charTimes;
     /// Times at which the errors are evaluated if the least-square method is used.
     FloatArray discreteTimeScale;
 
@@ -213,12 +212,12 @@ public:
      * }*/
 
     /// Evaluation of the moduli of individual units.
-    virtual void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const = 0;
 
     // identification and auxiliary functions
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    int hasCastingTimeSupport() override { return 1; }
+    bool hasCastingTimeSupport() const override { return true; }
 
     const char *giveClassName() const override { return "RheoChainMaterial"; }
     IRResultType initializeFrom(InputRecord *ir) override;
@@ -291,13 +290,13 @@ public:
     double giveAlphaTwo() const { return this->alphaTwo; }
 
     /// Returns Poisson's ratio.
-    double givePoissonsRatio() { return nu; }    
+    double givePoissonsRatio() const { return nu; }    
 
     /// Evaluation of the creep compliance function at time t when loading is acting from time t_prime
-    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const = 0;
 
     /// Extended meaning: returns true if the material is cast (target time > casting time) or the precasing time mat is defined
-    bool isActivated(TimeStep *tStep) override {
+    bool isActivated(TimeStep *tStep) const override {
         if ( this->preCastingTimeMat > 0 ) {
             return true;
         } else {
@@ -306,7 +305,7 @@ public:
     }
 
     /// By default returns equivalent time in the middle of the time step
-    virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep)
+    virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const
     { return ( tStep->giveTargetTime() - tStep->giveTimeIncrement()/2 ); }
 
 
@@ -315,20 +314,20 @@ protected:
      * If only incremental shrinkage strain formulation is provided, then total shrinkage strain must be tracked
      * in status in order to be able to compute total value.
      */
-    virtual int hasIncrementalShrinkageFormulation() { return 0; }
+    virtual bool hasIncrementalShrinkageFormulation() const { return false; }
 
     /**
      * Generates discrete times starting from time "from" to time "to"
      * uniformly distributed in log time scale.
      * The time interval (to-from) is divided to nsteps intervals.
      * We return times starting from ("from" + first increment)
-     * @param answer Resulting array of discrete times.
      * @param from Starting time
      * @param to End time
      * @param nsteps Number of discrete steps.
+     * @return Resulting array of discrete times.
      */
-    static void generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps);
-    const FloatArray &giveDiscreteTimes();
+    static FloatArray generateLogTimeScale(double from, double to, int nsteps);
+    const FloatArray &giveDiscreteTimes() const;
 
     /**
      * Evaluation of the relaxation function at given times.
@@ -345,7 +344,7 @@ protected:
      * @param tSteps At which times the relaxation function will be evaluated.
      * @warning tSteps should be uniformly distributed in log time scale and relatively dense (100 intervals) in order to achieve a reasonable accuracy.
      */
-    void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &tSteps, double t0, double tr, GaussPoint *gp, TimeStep *tSte);
+    void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &tSteps, double t0, double tr, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of elastic compliance matrix for unit Young's modulus.
     void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
@@ -353,10 +352,10 @@ protected:
     void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
 
     /// Update of partial moduli of individual chain units
-    virtual void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep);
+    virtual void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Access to partial modulus of a given unit
-    double giveEparModulus(int iChain);
+    double giveEparModulus(int iChain) const;
 
     /// Evaluation of characteristic times
     virtual void computeCharTimes();
@@ -365,7 +364,7 @@ protected:
     double giveCharTime(int) const;
 
     /// Exponent to be used with the char time of a given unit, usually = 1.0
-    virtual double giveCharTimeExponent(int i) { return 1.0; }
+    virtual double giveCharTimeExponent(int i) const { return 1.0; }
 
     /// Access to the underlying linear elastic material with unit Young's modulus
     LinearElasticMaterial *giveLinearElasticMaterial();
@@ -375,7 +374,6 @@ protected:
 
     /**
      * Computes, for the given integration point,
-     * the strain vector induced by stress-independent
      * internal processes in the material.
      * Takes into account only temperature and shrinkage-induced strains.
      * @param answer Returned strain vector.

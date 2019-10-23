@@ -803,25 +803,20 @@ FRCFCMNLStatus :: FRCFCMNLStatus(GaussPoint *gp) :
 }
 
 
-FRCFCMNLStatus :: ~FRCFCMNLStatus()
-{}
-
-
-
 void
-FRCFCMNLStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+FRCFCMNLStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FRCFCMStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "maxFiberStressLocal: {");
-    for ( int i = 1; i <= this->giveMaxNumberOfCracks(gp); i++ ) {
-        fprintf( file, " %f", this->giveFiberStressLoc(i) );
+    for ( double s: fiberStressLoc ) {
+        fprintf( file, " %f", s );
     }
     fprintf(file, "}\n");
 
     fprintf(file, "maxFiberStressNL: {");
-    for ( int i = 1; i <= this->giveMaxNumberOfCracks(gp); i++ ) {
-        fprintf( file, " %f", this->giveFiberStressNL(i) );
+    for ( double s: fiberStressLoc ) {
+        fprintf( file, " %f", s );
     }
     fprintf(file, "}\n");
 }

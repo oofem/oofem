@@ -458,12 +458,8 @@ MisesMatNlStatus :: MisesMatNlStatus(GaussPoint *g) :
 }
 
 
-MisesMatNlStatus :: ~MisesMatNlStatus()
-{ }
-
-
 void
-MisesMatNlStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MisesMatNlStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

@@ -65,8 +65,8 @@ MPlasticMaterial :: ~MPlasticMaterial()
 }
 
 
-int
-MPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+MPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
@@ -1366,12 +1366,8 @@ MPlasticMaterialStatus :: MPlasticMaterialStatus(GaussPoint *g, int statusSize) 
 }
 
 
-MPlasticMaterialStatus :: ~MPlasticMaterialStatus()
-{ }
-
-
 void
-MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

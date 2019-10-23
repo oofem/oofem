@@ -56,7 +56,7 @@ void
 NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                           MatResponseMode mode,
                                                           GaussPoint *gp,
-                                                          TimeStep *tStep)
+                                                          TimeStep *tStep) const
 {
     MaterialMode mMode = gp->giveMaterialMode();
     TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
@@ -94,13 +94,13 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 NonlinearMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 {
     return 0.;
 }
 
 void
-NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 

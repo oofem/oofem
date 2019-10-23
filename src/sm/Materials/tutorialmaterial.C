@@ -47,8 +47,6 @@ REGISTER_Material(TutorialMaterial);
 TutorialMaterial :: TutorialMaterial(int n, Domain *d) : StructuralMaterial(n, d), D(n, d)
 {}
 
-TutorialMaterial :: ~TutorialMaterial()
-{}
 
 IRResultType
 TutorialMaterial :: initializeFrom(InputRecord *ir)

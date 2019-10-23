@@ -178,8 +178,6 @@ protected:
 public:
     /// Constructor.
     AbaqusUserMaterialStatus(GaussPoint * gp, int numState);
-    /// Destructor.
-    virtual ~AbaqusUserMaterialStatus() { }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -196,7 +194,7 @@ public:
         hasTangentFlag = true;
     }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "AbaqusUserMaterialStatus"; }
 };

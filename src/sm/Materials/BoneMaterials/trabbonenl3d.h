@@ -60,9 +60,8 @@ protected:
 
 public:
     TrabBoneNL3DStatus(GaussPoint * g);
-    virtual ~TrabBoneNL3DStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
     const FloatArray *giveLTangentContrib();

@@ -350,7 +350,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, int rank, GaussPoint *gp, const 
     return true;
 }
 
-void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FluidDynamicMaterialStatus :: printOutputAt(file, tStep);
 }

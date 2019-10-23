@@ -76,7 +76,6 @@ protected:
 
 public:
     MooneyRivlinMaterial(int n, Domain *d);
-    virtual ~MooneyRivlinMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

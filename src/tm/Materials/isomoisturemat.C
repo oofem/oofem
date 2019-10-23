@@ -44,7 +44,7 @@ IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 }
 
 void
-IsotropicMoistureTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+IsotropicMoistureTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
@@ -58,14 +58,13 @@ void
 IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                               MatResponseMode mode,
                                                               GaussPoint *gp,
-                                                              TimeStep *tStep)
+                                                              TimeStep *tStep) const
 {
     /*
      * returns constitutive (conductivity) matrix of receiver
      */
 
-    double permeability;
-    permeability = this->givePermeability(gp, tStep);
+    double permeability = this->givePermeability(gp, tStep);
 
     MaterialMode mMode = gp->giveMaterialMode();
     switch  ( mMode ) {
@@ -96,7 +95,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
 double
 IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                              GaussPoint *gp,
-                                                             TimeStep *tStep)
+                                                             TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return this->giveMoistureCapacity(gp, tStep);

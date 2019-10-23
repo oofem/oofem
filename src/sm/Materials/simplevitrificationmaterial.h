@@ -74,8 +74,6 @@ private:
 public:
     /// Constructor.
     SimpleVitrificationMaterial(int n, Domain * d) : StructuralMaterial(n, d) { }
-    /// Destructor.
-    virtual ~SimpleVitrificationMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

@@ -80,7 +80,7 @@ NonlinearFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep
 
 
 double
-NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp)
+NonlinearFluidMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == Viscosity ) {
         return viscosity;

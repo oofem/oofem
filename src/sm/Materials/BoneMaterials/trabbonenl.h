@@ -59,11 +59,10 @@ protected:
 
 public:
     TrabBoneNLStatus(GaussPoint * g);
-    virtual ~TrabBoneNLStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
+    double giveLocalCumPlastStrainForAverage() const { return localCumPlastStrainForAverage; }
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "TrabBoneNLStatus"; }

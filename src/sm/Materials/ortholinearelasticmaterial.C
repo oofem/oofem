@@ -262,7 +262,7 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 double
-OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
+OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == NYzx ) {
         return this->give(NYxz, gp) * this->give(Ez, gp) / this->give(Ex, gp);

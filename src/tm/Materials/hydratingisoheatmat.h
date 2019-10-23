@@ -55,7 +55,6 @@ class HydratingTransportMaterialStatus : public TransportMaterialStatus, public 
 {
 public:
     HydratingTransportMaterialStatus(GaussPoint * g) : TransportMaterialStatus(g), HydrationModelStatusInterface() { }
-    virtual ~HydratingTransportMaterialStatus() { }
 
     Interface *giveInterface(InterfaceType t) override;
     const char *giveClassName() const override { return "HydratingTransportMaterialStatus"; }
@@ -64,7 +63,7 @@ public:
         HydrationModelStatusInterface :: updateYourself(tStep);
         TransportMaterialStatus :: updateYourself(tStep);
     }
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 };
 
 /**
@@ -75,22 +74,21 @@ public:
 class HydratingIsoHeatMaterial : public IsotropicHeatTransferMaterial, public HydrationModelInterface
 {
 protected:
-    int hydration, hydrationHeat, hydrationLHS;
+    bool hydration = false, hydrationHeat = false, hydrationLHS = false;
 
 public:
     HydratingIsoHeatMaterial(int n, Domain * d) : IsotropicHeatTransferMaterial(n, d), HydrationModelInterface() { }
-    virtual ~HydratingIsoHeatMaterial() { }
 
     void setMixture(MixtureType mix);
 
     /// Return true if hydration heat source is present.
-    int hasInternalSource() override;
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    bool hasInternalSource() const override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
     void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep) override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
     void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;

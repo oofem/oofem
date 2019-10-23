@@ -100,8 +100,8 @@ public:
     const char *giveInputRecordName() const override { return _IFT_CemhydMat_Name; }
     const char *giveClassName() const override { return "CemhydMat"; }
 
-    int hasInternalSource() override { return 1; }
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    bool hasInternalSource() const override { return true; }
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
     /// Returns cycle number at the closest cycle after the target time
     virtual int giveCycleNumber(GaussPoint *gp);
     /// Returns time of the CEMHYD3D at the first cycle after the target time

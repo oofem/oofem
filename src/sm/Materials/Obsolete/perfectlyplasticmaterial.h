@@ -69,9 +69,8 @@ protected:
 
 public:
     PerfectlyPlasticMaterialStatus(GaussPoint * g);
-    virtual ~PerfectlyPlasticMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     int setTempYieldFlag(int i) { return temp_yield_flag = i; }
     int giveTempYieldFlag() { return temp_yield_flag; }
@@ -152,12 +151,12 @@ public:
                                  FloatArray *stressVector3d,
                                  FloatArray *PlasticStrainVector3d) { }
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "PerfectlyPlasticMaterial"; }
     IRResultType initializeFrom(InputRecord *ir) override;
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,

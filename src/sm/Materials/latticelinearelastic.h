@@ -103,7 +103,7 @@ public:
     void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep) override;
 
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
 
     void give1dLatticeStiffMtrx(FloatMatrix &answer,
@@ -121,7 +121,7 @@ public:
                                 GaussPoint *gp,
                                 TimeStep *atTime) override;
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    int hasMaterialModeCapability(MaterialMode mode);
 
 
     Interface *giveInterface(InterfaceType) override;
@@ -140,7 +140,7 @@ public:
 
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
-    double  give(int aProperty, GaussPoint *gp) override;
+    double  give(int aProperty, GaussPoint *gp);
 
 protected:
 

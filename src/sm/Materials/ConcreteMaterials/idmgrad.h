@@ -73,8 +73,6 @@ protected:
 public:
     /// Constructor
     IsotropicGradientDamageMaterial(int n, Domain *d);
-    /// Destructor
-    virtual ~IsotropicGradientDamageMaterial();
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
     // identification and auxiliary functions
@@ -86,10 +84,10 @@ public:
         if ( t == GradientDamageMaterialExtensionInterfaceType ) {
             return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
-            return NULL;
+            return nullptr;
         }
     }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual bool hasMaterialModeCapability(MaterialMode mode) const;
 
     virtual void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -125,12 +123,11 @@ class IsotropicGradientDamageMaterialStatus : public IsotropicDamageMaterial1Sta
 {
 public:
     IsotropicGradientDamageMaterialStatus(GaussPoint *g);
-    virtual ~IsotropicGradientDamageMaterialStatus();
 
-    virtual const char *giveClassName() const { return "IsotropicGradientDamageMaterialStatus"; }
+    const char *giveClassName() const override { return "IsotropicGradientDamageMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *) override;
 };
 } // end namespace oofem
 #endif // idmgrad_h

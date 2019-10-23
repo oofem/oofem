@@ -653,7 +653,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
     stateVector = tempStateVector;
 }
 
-void AbaqusUserMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
+void AbaqusUserMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(File, tStep);
 

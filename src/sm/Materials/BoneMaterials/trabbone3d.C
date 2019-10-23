@@ -1136,11 +1136,6 @@ TrabBone3DStatus :: TrabBone3DStatus(GaussPoint *g) : StructuralMaterialStatus(g
 }
 
 
-
-TrabBone3DStatus :: ~TrabBone3DStatus()
-{ }
-
-
 double
 TrabBone3DStatus :: giveKappa()
 {
@@ -1221,7 +1216,7 @@ TrabBone3DStatus :: giveSSaTensor() const
 
 
 void
-TrabBone3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBone3DStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

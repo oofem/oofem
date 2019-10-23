@@ -272,8 +272,8 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
         sum = 1. / KelvinChainMaterial :: giveEModulus(gp, tStep);
         // add compliance of non-aging spring
         sum += 1. / EspringVal;
-	// convert to stiffness
-	chainStiffness = 1. / sum;
+        // convert to stiffness
+        chainStiffness = 1. / sum;
 
     } else {   //least-squares method used
         chainStiffness = KelvinChainMaterial :: giveEModulus(gp, tStep);
@@ -284,15 +284,15 @@ B3SolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 
 
 void
-B3SolidMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep)
+B3SolidMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * Since the elastic moduli are constant in time it is necessary to update them only once
      * on the beginning of the computation
      */
-  if (this->EparVal.isEmpty()) {
-    RheoChainMaterial :: updateEparModuli(tPrime, gp, tStep);
-  }
+    if ( this->EparVal.isEmpty() ) {
+        RheoChainMaterial :: updateEparModuli(tPrime, gp, tStep);
+    }
 }
 
 void
@@ -342,8 +342,8 @@ B3SolidMaterial :: computeCharTimes()
 }
 
 
-void
-B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep)
+FloatArray
+B3SolidMaterial :: computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * If EmoduliMode == 0 then analysis of continuous retardation spectrum is used for
@@ -351,51 +351,43 @@ B3SolidMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, Ga
      * Else least-squares method is used
      */
     if ( this->EmoduliMode == 0 ) {
-      
-	int mu;
-	double tau0, tauMu;
+        // constant "n" is assumed to be equal to 0.1 (typical value)
 
-      // constant "n" is assumed to be equal to 0.1 (typical value)
-
-      // modulus of elasticity of the first unit of Kelvin chain.
-      // (aging elastic spring with retardation time = 0)
-      double lambda0ToPowN = pow(lambda0, 0.1);
-      tau0 = pow(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
-      EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0 ) );
+        // modulus of elasticity of the first unit of Kelvin chain.
+        // (aging elastic spring with retardation time = 0)
+        double lambda0ToPowN = pow(lambda0, 0.1);
+        double tau0 = pow(2 * this->giveCharTime(1) / sqrt(10.0), 0.1);
+        this->EspringVal = 1. / ( q2 * log(1.0 + tau0 / lambda0ToPowN) - q2 * tau0 / ( 10.0 * lambda0ToPowN + 10.0 * tau0 ) );
+        
+        // evaluation of moduli of elasticity for the remaining units
+        // (Solidifying kelvin units with retardation times tauMu)
+        FloatArray answer(nUnits);
+        for ( int mu = 1; mu <= this->nUnits; mu++ ) {
+            double tauMu = pow(2 * this->giveCharTime(mu), 0.1);
+            answer.at(mu) = 10. * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN ) );
+            this->charTimes.at(mu) *= 1.35;
+        }
       
-      // evaluation of moduli of elasticity for the remaining units
-      // (Solidifying kelvin units with retardation times tauMu)
-      answer.resize(nUnits);
-      answer.zero();
-      for ( mu = 1; mu <= this->nUnits; mu++ ) {
-	tauMu = pow(2 * this->giveCharTime(mu), 0.1);
-        answer.at(mu) = 10. * pow(1 + tauMu / lambda0ToPowN, 2) / ( log(10.0) * q2 * ( tauMu / lambda0ToPowN ) * ( 0.9 + tauMu / lambda0ToPowN ) );
-        this->charTimes.at(mu) *= 1.35;
-      }
-      
-      answer.at(nUnits) /= 1.2;   // modulus of the last unit is reduced
+        answer.at(nUnits) /= 1.2;   // modulus of the last unit is reduced
+        return answer;
 
     } else {   // moduli computed using the least-squares method
     
-      KelvinChainMaterial :: computeCharCoefficients(answer, tPrime, gp, tStep);
+        return KelvinChainMaterial :: computeCharCoefficients(tPrime, gp, tStep);
    
     }
 }
 
 double
-B3SolidMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
+B3SolidMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const
 // compute the value of the creep function of the non-aging solidifying constituent
 // corresponding to the given load duration (in days)
 // t-t_prime = duration of loading
 
 {
-    double Phi;     //return value
     //double lambda0 = 1.0;     // standard value [day]
     double n = 0.1;     // standard value
-    
-     Phi = q2 * log( 1 + pow( (t-t_prime) / lambda0, n) );
-
-    return Phi;
+    return q2 * log( 1 + pow( (t-t_prime) / lambda0, n) );
 }
 
 
@@ -567,11 +559,11 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
         v = computeSolidifiedVolume(tStep);
         eta = this->computeFlowTermViscosity(gp, tStep);         //evaluated too in the middle of the time-step
 
-	//        sigma = status->giveStressVector();         //stress vector at the beginning of time-step
-	sigma = status->giveViscoelasticStressVector();         //stress vector at the beginning of time-step
+        //        sigma = status->giveStressVector();         //stress vector at the beginning of time-step
+        sigma = status->giveViscoelasticStressVector();         //stress vector at the beginning of time-step
         this->giveUnitComplianceMatrix(C, gp, tStep);
         reducedAnswer.resize( C.giveNumberOfRows() );
-	reducedAnswer.zero();
+        reducedAnswer.zero();
 
         reducedAnswer.beProductOf(C, sigma);
         reducedAnswer.times( tStep->giveTimeIncrement() / ( timeFactor * eta ) );
@@ -591,7 +583,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
 
 
 double
-B3SolidMaterial :: inverse_sorption_isotherm(double w)
+B3SolidMaterial :: inverse_sorption_isotherm(double w) const
 // Function calculates relative humidity from water content (inverse relation form sorption isotherm).
 // Relative humidity (phi) is from range 0.2 - 0.98 !!!
 // sorption isotherm by C. R. Pedersen (1990), Combined heat and moisture transfer in building constructions,
@@ -600,10 +592,8 @@ B3SolidMaterial :: inverse_sorption_isotherm(double w)
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-    double phi;
-
     // relative humidity
-    phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
+    double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     /*
      * if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
@@ -710,58 +700,49 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int op
 
 
 double
-B3SolidMaterial :: giveInitMicroPrestress()
+B3SolidMaterial :: giveInitMicroPrestress() const
 {
-    double S0;
-    S0 = 1 / ( c0 * tS0 );
-    return S0;
+    return 1 / ( c0 * tS0 );
 }
 
 
 double
-B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humidity at given TimeStep
+B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) const //computes humidity at given TimeStep
 {
-    double humidity = 0.;
-    int err, wflag = 0;
-
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
     FieldPtr tf;
-    FloatArray gcoords, et2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
+        FloatArray gcoords, et2;
+        int err;
         gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         // convert water mass to relative humidity
-        humidity = this->inverse_sorption_isotherm( et2.at(1) );
-        wflag = 1;
-    }
-
-    if ( wflag == 0 ) {
+        return this->inverse_sorption_isotherm( et2.at(1) );
+    } else {
         OOFEM_ERROR("external fields not found");
+        return 0.;
     }
 
-    return humidity;
 }
 
 
 double
 B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //computes humidity increment at given TimeStep
 {
-    double humIncrement = 0.;
-    int err, wflag = 0;
-
     /* ask for humidity from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
     FieldPtr tf;
-    FloatArray gcoords, et2, ei2;
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
+        FloatArray gcoords, et2, ei2;
+        int err;
         gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
@@ -772,15 +753,11 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
         }
 
         // convert water mass to relative humidity
-        humIncrement = this->inverse_sorption_isotherm( et2.at(1) ) - this->inverse_sorption_isotherm( et2.at(1) - ei2.at(1) );
-        wflag = 1;
-    }
-
-    if ( wflag == 0 ) {
+        return this->inverse_sorption_isotherm( et2.at(1) ) - this->inverse_sorption_isotherm( et2.at(1) - ei2.at(1) );
+    } else {
         OOFEM_ERROR("external fields not found");
+        return 0.;
     }
-
-    return humIncrement;
 }
 
 

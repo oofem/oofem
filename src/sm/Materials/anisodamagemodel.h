@@ -99,10 +99,8 @@ protected:
 public:
     /// Constructor
     AnisotropicDamageMaterialStatus(GaussPoint *g);
-    /// Destructor
-    virtual ~AnisotropicDamageMaterialStatus() {}
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() { return kappa; }
@@ -203,10 +201,8 @@ protected:
 public:
     /// Constructor
     AnisotropicDamageMaterial(int n, Domain *d);
-    /// Destructor
-    virtual ~AnisotropicDamageMaterial() {}
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveClassName() const override { return "AnisotropicDamageMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_AnisotropicDamageMaterial_Name; }

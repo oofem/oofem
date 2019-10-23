@@ -258,6 +258,16 @@ FloatArrayF<N> operator - ( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
 }
 
 template<int N>
+FloatArrayF<N> operator - ( const FloatArrayF<N> & x )
+{
+    FloatArrayF<N> out;
+    for ( int i = 0; i < N; ++i ) {
+        out[i] = - x[i];
+    }
+    return out;
+}
+
+template<int N>
 FloatArrayF<N> &operator += ( FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
     for ( int i = 0; i < N; ++i ) {

@@ -101,12 +101,9 @@ public:
     /// Constructor
     DustMaterialStatus(GaussPoint * gp, double q0);
 
-    /// Destructor
-    virtual ~DustMaterialStatus();
-
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -449,8 +446,6 @@ protected:
 public:
     /// Constructor
     DustMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~DustMaterial() {}
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
@@ -467,7 +462,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
     {

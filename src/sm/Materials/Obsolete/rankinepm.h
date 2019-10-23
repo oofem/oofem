@@ -58,7 +58,6 @@ protected:
 
 public:
     RankinePlasticMaterial(int n, Domain * d);
-    virtual ~RankinePlasticMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

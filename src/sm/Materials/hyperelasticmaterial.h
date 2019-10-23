@@ -58,7 +58,6 @@ protected:
 
 public:
     HyperElasticMaterial(int n, Domain * d);
-    virtual ~HyperElasticMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

@@ -42,15 +42,8 @@
 namespace oofem {
 REGISTER_Material(IsotropicHeatTransferMaterial);
 
-IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d)
-{
-    // constructor
-    maturityT0 = 0.;
-}
+IsotropicHeatTransferMaterial :: IsotropicHeatTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
 
-IsotropicHeatTransferMaterial :: ~IsotropicHeatTransferMaterial() {
-    // destructor
-}
 
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
@@ -66,7 +59,7 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 }
 
 double
-IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep)
+IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep) const
 //
 // Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
 //
@@ -86,7 +79,7 @@ IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *t
 
 
 void
-IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
@@ -104,7 +97,7 @@ void
 IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
                                                           MatResponseMode mode,
                                                           GaussPoint *gp,
-                                                          TimeStep *tStep)
+                                                          TimeStep *tStep) const
 {
     /*
      * returns constitutive (conductivity) matrix of receiver
@@ -135,14 +128,15 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 }
 
 double
-IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) {
+IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const
+{
     return give('k', gp, tStep);
 }
 
 double
 IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return ( this->give('c', gp, tStep) * this->give('d', gp, tStep) );
@@ -195,17 +189,13 @@ IsotropicHeatTransferMaterialStatus :: IsotropicHeatTransferMaterialStatus(Gauss
 }
 
 
-IsotropicHeatTransferMaterialStatus :: ~IsotropicHeatTransferMaterialStatus()
-{
-}
-
 void
 IsotropicHeatTransferMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     TransportMaterialStatus :: updateYourself(tStep);
 }
 
-double IsotropicHeatTransferMaterial :: giveTemperature(GaussPoint *gp)
+double IsotropicHeatTransferMaterial :: giveTemperature(GaussPoint *gp) const
 {
     IsotropicHeatTransferMaterialStatus *ms = static_cast< IsotropicHeatTransferMaterialStatus * >( this->giveStatus(gp) );
     if ( ms->giveTempField().isEmpty() ) return 0;

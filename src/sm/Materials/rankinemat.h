@@ -150,7 +150,7 @@ public:
     double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
@@ -161,7 +161,7 @@ public:
     /// Returns a reference to the basic elastic material.
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return ( a == 0. ); }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return ( a == 0. ); }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -242,17 +242,16 @@ protected:
 
 public:
     RankineMatStatus(GaussPoint * g);
-    virtual ~RankineMatStatus();
 
     const FloatArray & givePlasticStrain() const { return plasticStrain; }
 
-    double giveDamage() { return damage; }
-    double giveTempDamage() { return tempDamage; }
+    double giveDamage() const { return damage; }
+    double giveTempDamage() const { return tempDamage; }
 
-    double giveCumulativePlasticStrain() { return kappa; }
-    double giveTempCumulativePlasticStrain() { return tempKappa; }
+    double giveCumulativePlasticStrain() const { return kappa; }
+    double giveTempCumulativePlasticStrain() const { return tempKappa; }
 
-    double giveDKappa(int i)
+    double giveDKappa(int i) const
     {
         if ( i == 1 ) {
             return dKappa1;
@@ -286,7 +285,7 @@ public:
 
     const FloatArray &givePlasDef() { return plasticStrain; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

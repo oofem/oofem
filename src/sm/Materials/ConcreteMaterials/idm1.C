@@ -1311,7 +1311,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
 }
 
 double
-IsotropicDamageMaterial1 :: give(int aProperty, GaussPoint *gp)
+IsotropicDamageMaterial1 :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
     if ( static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {

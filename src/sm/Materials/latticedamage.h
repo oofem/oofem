@@ -117,7 +117,7 @@ public:
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
 
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep);
 
 
     const char *giveClassName() const override { return "LatticeDamageStatus"; }
@@ -192,7 +192,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
     void give2dLatticeStiffMtrx(FloatMatrix &answer,
                                 MatResponseMode rmode,
@@ -205,7 +205,7 @@ public:
                                 TimeStep *atTime) override;
 
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    int hasMaterialModeCapability(MaterialMode mode);
 
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
@@ -224,7 +224,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp);
 
 
 protected:

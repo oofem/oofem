@@ -63,11 +63,8 @@ RheoChainMaterial :: ~RheoChainMaterial()
 }
 
 
-int
-RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether the receiver supports the given mode
-//
+bool
+RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress ||
            mode == _PlaneStrain || mode == _1dMat ||
@@ -103,8 +100,8 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
     // initialized in subsequent iterations of the same time step
 
     if ( status->giveCurrentTime() != tStep->giveTargetTime() ) {
-      status->setCurrentTime( tStep->giveTargetTime() ); 
-      this->initTempStatus(gp);
+        status->setCurrentTime( tStep->giveTargetTime() ); 
+        this->initTempStatus(gp);
     }
     
     if ( !this->isActivated(tStep) ) {
@@ -169,11 +166,11 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 
     if ( Material :: isActivated( tStep ) ) {
       // update the shrinkage strain if needed
-      if ( this->hasIncrementalShrinkageFormulation() ) {
-        FloatArray shv;
-        this->giveShrinkageStrainVector(shv, gp, tStep, VM_Total);
-        status->setShrinkageStrainVector(shv);
-      }
+        if ( this->hasIncrementalShrinkageFormulation() ) {
+            FloatArray shv;
+            this->giveShrinkageStrainVector(shv, gp, tStep, VM_Total);
+            status->setShrinkageStrainVector(shv);
+        }
     }
 
     answer = stressVector;
@@ -208,28 +205,24 @@ void
 RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
                                                        const FloatArray &tSteps,
                                                        double t0, double tr, 
-                                                       GaussPoint *gp, TimeStep *tStep)
+                                                       GaussPoint *gp, TimeStep *tStep) const
 {
-    int size, nsteps, si;
-    double taui, tauk, Jtrt0, totalDeltaSigma;
-    double sig0;
-    double sum;
-
-    size = tSteps.giveSize();
-    nsteps = size;
+    int size = tSteps.giveSize();
+    int nsteps = size;
     FloatArray deltaSigma(size);
     answer.resize(size);
     answer.zero();
 
-    Jtrt0 = this->computeCreepFunction(t0 + tSteps.at(1), t0, gp, tStep);
-    sig0  = 1. / Jtrt0;
+    double Jtrt0 = this->computeCreepFunction(t0 + tSteps.at(1), t0, gp, tStep);
+    double sig0  = 1. / Jtrt0;
     answer.at(1) = sig0;
-    si = 2;
+    int si = 2;
 
-    totalDeltaSigma = 0.;
+    double totalDeltaSigma = 0.;
     for ( int k = si; k <= nsteps; k++ ) {
-        sum = 0.;
+        double sum = 0.;
         for ( int i = si; i <= k - 1; i++ ) {
+            double taui;
             if ( i == 1 ) {
                 // ??? it seems that tr plays no role because si=2 and the case
                 // i=1 or k=1 can never occur
@@ -241,6 +234,7 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
             sum += deltaSigma.at(i) * this->computeCreepFunction(t0 + tSteps.at(k), taui, gp, tStep);
         }
 
+        double tauk;
         if ( k == 1 ) {
             // ??? it seems that tr plays no role because si=2 and the case
             // i=1 or k=1 can never occur
@@ -258,21 +252,20 @@ RheoChainMaterial :: computeDiscreteRelaxationFunction(FloatArray &answer,
 }
 
 
-void
-RheoChainMaterial :: generateLogTimeScale(FloatArray &answer, double from, double to, int nsteps)
+FloatArray
+RheoChainMaterial :: generateLogTimeScale(double from, double to, int nsteps)
 {
-    answer.resize(nsteps);
-    answer.zero();
-
+    FloatArray answer(nsteps);
     double help = log(to / from) / nsteps;
     for ( int i = 1; i <= nsteps; i++ ) {
         answer.at(i) = exp(i * help) * from;
     }
+    return answer;
 }
 
 
 const FloatArray &
-RheoChainMaterial :: giveDiscreteTimes()
+RheoChainMaterial :: giveDiscreteTimes() const
 {
     return discreteTimeScale;
 }
@@ -315,7 +308,7 @@ RheoChainMaterial :: giveUnitComplianceMatrix(FloatMatrix &answer,
 
 
 double
-RheoChainMaterial :: giveEparModulus(int iChain)
+RheoChainMaterial :: giveEparModulus(int iChain) const
 {
     /* returns the modulus of unit number iChain,
      * previously computed by updateEparModuli() function
@@ -325,7 +318,7 @@ RheoChainMaterial :: giveEparModulus(int iChain)
 
 
 void
-RheoChainMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep)
+RheoChainMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * Computes moduli of individual units in the chain that provide
@@ -344,13 +337,9 @@ RheoChainMaterial :: updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *t
      *
      */
     // compute new values and store them in a temporary array for further use
-    if ( fabs(tPrime - EparValTime) > TIME_DIFF ) {
-        if ( tPrime < 0 ) {
-            this->computeCharCoefficients(EparVal, 1.e-3, gp, tStep);
-        } else {
-            this->computeCharCoefficients(EparVal, tPrime, gp, tStep);
-        }
-        EparValTime = tPrime;
+    if ( fabs(tPrime - this->EparValTime) > TIME_DIFF ) {
+        this->EparVal = this->computeCharCoefficients(tPrime < 0 ? 1.e-3 : tPrime, gp, tStep);
+        this->EparValTime = tPrime;
     }
 }
 
@@ -364,10 +353,10 @@ RheoChainMaterial :: computeTrueStressIndependentStrainVector(FloatArray &answer
 //  will also contain the effect of creep)
 //
 {
-  if ( ! Material :: isActivated(tStep) ) {
-    answer.zero();
-    return;
-  }
+    if ( ! Material :: isActivated(tStep) ) {
+        answer.zero();
+        return;
+    }
   
     FloatArray e0;
 
@@ -399,12 +388,12 @@ RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 // takes into account the form of the load vector assumed by engngModel (Incremental or Total Load form)
 //
 {
-    FloatArray e0;
 
     // strain due to temperature changes and shrinkage
     this->computeTrueStressIndependentStrainVector(answer, gp, tStep, mode);
     // strain due to creep
     if ( Material :: isActivated(tStep) ) {
+        FloatArray e0;
         this->giveEigenStrainVector(e0, gp, tStep, mode);
         if ( e0.giveSize() ) {
             answer.add(e0);
@@ -450,7 +439,7 @@ RheoChainMaterial :: computeCharTimes()
         this->begOfTimeOfInterest = 0.1;         //default value
     }
 
-    Tau1  = begOfTimeOfInterest;
+    Tau1 = begOfTimeOfInterest;
 
     if ( Tau1 <= 0 ) {
         OOFEM_ERROR("begOfTimeOfInterest must be a positive number");
@@ -646,7 +635,7 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
 
     // sets up discrete times
     double endTime = this->giveEndOfTimeOfInterest();
-    this->generateLogTimeScale(discreteTimeScale, this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1);
+    this->discreteTimeScale = this->generateLogTimeScale(this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1);
 
     ///@warning Stiffness is time dependant, so the variable changes with time.
     //ph !!! why was it put here?
@@ -735,9 +724,6 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(GaussPoint *g, int nunits) :
 }
 
 
-RheoChainMaterialStatus :: ~RheoChainMaterialStatus() { }
-
-
 void
 RheoChainMaterialStatus :: letTempHiddenVarsVectorBe(int i, FloatArray &valueArray)
 {
@@ -751,7 +737,7 @@ RheoChainMaterialStatus :: letTempHiddenVarsVectorBe(int i, FloatArray &valueArr
 }
 
 void
-RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RheoChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // printing of hidden variables
 

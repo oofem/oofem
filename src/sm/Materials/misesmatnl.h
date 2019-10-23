@@ -61,9 +61,8 @@ protected:
 
 public:
     MisesMatNlStatus(GaussPoint * g);
-    virtual ~MisesMatNlStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     // STATE VARIABLE
     // declare state variable access and modification methods

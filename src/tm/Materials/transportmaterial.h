@@ -62,15 +62,12 @@ protected:
     FloatArray flux; ///< Vector containing the last equilibrated flux. The physical meaning corresponds to energy flux, mass flow, etc.
 
     /// A scalar containing maturity (integration of temperature over time)
-    double maturity;
+    double maturity = 0.;
 
 public:
-    /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
     TransportMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~TransportMaterialStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -92,20 +89,20 @@ public:
     void setTempFlux(FloatArray w);
 
     /// Return last gradient.
-    const FloatArray &giveGradient() { return gradient; }
+    const FloatArray &giveGradient() const { return gradient; }
     /// Return last field.
-    const FloatArray &giveField() { return field; }
+    const FloatArray &giveField() const { return field; }
     /// Returns last flux.
-    const FloatArray &giveFlux() { return flux; }
+    const FloatArray &giveFlux() const { return flux; }
 
     /// Return last gradient.
-    const FloatArray &giveTempGradient() { return temp_gradient; }
+    const FloatArray &giveTempGradient() const { return temp_gradient; }
     /// Return last field.
-    const FloatArray &giveTempField() { return temp_field; }
+    const FloatArray &giveTempField() const { return temp_field; }
     /// Returns last flux.
-    const FloatArray &giveTempFlux() { return temp_flux; }
+    const FloatArray &giveTempFlux() const { return temp_flux; }
     /// Returns maturity.
-    double giveMaturity() { return maturity; }
+    double giveMaturity() const { return maturity; }
 };
 
 
@@ -125,8 +122,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     TransportMaterial(int n, Domain * d) : Material(n, d) { }
-    /// Destructor.
-    virtual ~TransportMaterial() { }
 
     /**
      * Returns the flux for the field and its gradient.
@@ -138,7 +133,7 @@ public:
      * @param field The value of the field itself.
      * @param tStep Active time step.
      */
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) = 0;
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const = 0;
 
     /**
      * Computes characteristic matrix of receiver in given integration point.
@@ -152,7 +147,7 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *tStep) = 0;
+                                          TimeStep *tStep) const = 0;
 
     /**
      * Computes the characteristic value of receiver in given integration point, respecting its history.
@@ -164,7 +159,7 @@ public:
      */
     virtual double giveCharacteristicValue(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep) = 0;
+                                           TimeStep *tStep) const = 0;
 
     /**
      * Updates internal state of material according to new state vector.
@@ -177,7 +172,7 @@ public:
     /**
      * Returns nonzero if receiver generates internal source of state variable(s), zero otherwise.
      */
-    virtual int hasInternalSource() { return 0; }
+    virtual bool hasInternalSource() const { return false; }
     /**
      * Computes the internal source vector of receiver.
      * @param val Contains response.
@@ -185,12 +180,12 @@ public:
      * @param tStep Solution step.
      * @param mode Determines response mode.
      */
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
     { val.clear(); }
     /**
      * Returns positive value of humidity if implemented and enabled in derived material, -1 otherwise.
      */
-    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) { return -1.0; }
+    virtual double giveHumidity(GaussPoint *gp, ValueModeType mode) const { return -1.0; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

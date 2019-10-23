@@ -193,17 +193,16 @@ TrabBoneNLEmbed :: computeWeightFunction(const FloatArray &src, const FloatArray
     return 0.0;
 }
 
+
 TrabBoneNLEmbedStatus :: TrabBoneNLEmbedStatus(GaussPoint *g) :
     TrabBoneEmbedStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localCumPlastStrainForAverage = 0.0;
 }
 
-TrabBoneNLEmbedStatus :: ~TrabBoneNLEmbedStatus()
-{ }
 
 void
-TrabBoneNLEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBoneNLEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");

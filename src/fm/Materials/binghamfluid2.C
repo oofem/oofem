@@ -134,7 +134,7 @@ BinghamFluidMaterial2 :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep)
 
 
 double
-BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp)
+BinghamFluidMaterial2 :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == Viscosity ) {
         return mu_0;
@@ -324,7 +324,7 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(GaussPoint *g) :
 {}
 
 void
-BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tStep)
+BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tStep) const
 {
     fprintf(File, " strains ");
     for ( double e: deviatoricStrainRateVector ) {

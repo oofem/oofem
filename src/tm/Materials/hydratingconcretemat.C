@@ -41,19 +41,7 @@
 namespace oofem {
 REGISTER_Material(HydratingConcreteMat);
 
-HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
-{
-    // constructor
-    maxModelIntegrationTime = 0.;
-    minModelTimeStepIntegrations = 0;
-    P1 = 0.;
-}
-
-
-HydratingConcreteMat :: ~HydratingConcreteMat()
-{
-    // destructor
-}
+HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d) { }
 
 
 IRResultType
@@ -120,10 +108,10 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
 
 // returns hydration power [W/m3 of concrete]
 void
-HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     val.resize(1);
-    if (( mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
+    if ( mode == VM_Total || mode == VM_TotalIntrinsic ) {
         val.at(1) = this->GivePower(tStep, gp, mode);
     } else {
         OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );
@@ -132,7 +120,7 @@ HydratingConcreteMat :: computeInternalSourceVector(FloatArray &val, GaussPoint 
 
 
 double
-HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return ( giveConcreteCapacity(gp, tStep) * giveConcreteDensity(gp, tStep) );
@@ -150,7 +138,7 @@ HydratingConcreteMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint
 }
 
 
-double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep)
+double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const
 {
     HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     double conduct;
@@ -175,7 +163,7 @@ double HydratingConcreteMat :: giveIsotropicConductivity(GaussPoint *gp, TimeSte
 }
 
 //normally it returns J/kg/K of concrete
-double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep)
+double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep) const
 {
     double capacityConcrete;
 
@@ -200,7 +188,7 @@ double HydratingConcreteMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tS
 }
 
 
-double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep)
+double HydratingConcreteMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep) const
 {
     double concreteBulkDensity;
 
@@ -253,26 +241,12 @@ HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 }
 
 
-HydratingConcreteMatStatus :: HydratingConcreteMatStatus(GaussPoint *g) : TransportMaterialStatus(g)
-{
-    //constructor
-    power = 0.;
-    lastEvalTime = -1.e20; //start from begining (set to -1.e6 s)
-    degreeOfHydration = 0.;
-    lastDegreeOfHydration = 0.;
-    lastEquivalentTime = 0.;
-    equivalentTime = 0.;
-}
+HydratingConcreteMatStatus :: HydratingConcreteMatStatus(GaussPoint *g) : TransportMaterialStatus(g) { }
 
-
-HydratingConcreteMatStatus :: ~HydratingConcreteMatStatus()
-{
-    //destructor
-}
 
 //linear solver (NonStationaryTransportProblem) IntrinsicTime = TargetTime
 //nonlinear solver (NLTransientTransportProblem) IntrinsicTime depends on alpha
-double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode)
+double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode) const
 {
     HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     double castingTime = this->giveCastingTime();
@@ -340,13 +314,13 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
 }
 
 
-double HydratingConcreteMat :: scaleTemperature(GaussPoint *gp)
+double HydratingConcreteMat :: scaleTemperature(GaussPoint *gp) const
 {
     HydratingConcreteMatStatus *ms = static_cast< HydratingConcreteMatStatus * >( this->giveStatus(gp) );
     return exp( this->activationEnergy / 8.314 * ( 1. / ( 273.15 + this->referenceTemperature ) - 1. / ( 273.15 + ms->giveTempField().at(1) ) ) );
 }
 
-double HydratingConcreteMat :: affinity25(double DoH)
+double HydratingConcreteMat :: affinity25(double DoH) const
 {
     double result =  this->B1 * ( this->B2 / this->DoHInf + DoH ) * ( this->DoHInf - DoH ) * exp(-this->eta * DoH / this->DoHInf);
     if ( result < 0. ) { //numerical instabilities
@@ -360,7 +334,7 @@ double HydratingConcreteMat :: affinity25(double DoH)
     return result;
 }
 
-double HydratingConcreteMatStatus :: giveDoHActual()
+double HydratingConcreteMatStatus :: giveDoHActual() const
 {
     return degreeOfHydration;
 }
@@ -382,7 +356,7 @@ HydratingConcreteMatStatus :: updateYourself(TimeStep *tStep)
 
 
 void
-HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+HydratingConcreteMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     HydratingConcreteMat *mat = static_cast< HydratingConcreteMat * >( this->gp->giveMaterial() );
     TransportMaterialStatus :: printOutputAt(file, tStep);

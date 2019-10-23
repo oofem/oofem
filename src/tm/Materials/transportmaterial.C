@@ -69,7 +69,7 @@ TransportMaterialStatus :: TransportMaterialStatus(GaussPoint *g) :
     MaterialStatus(g), temp_field(), temp_gradient(), temp_flux(), field(), gradient(), flux(), maturity(0.)
 { }
 
-void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
+void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) const
 // Print the state variable and the flow vector on the data file.
 {
     FloatArray flowVec;

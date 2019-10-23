@@ -469,7 +469,7 @@ IntMatBilinearCZJanssonStatus :: IntMatBilinearCZJanssonStatus(GaussPoint *g) : 
 
 
 void
-IntMatBilinearCZJanssonStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IntMatBilinearCZJanssonStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     ///@todo Martin: check need of this
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);

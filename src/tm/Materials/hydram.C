@@ -35,14 +35,10 @@
 
 namespace oofem {
 // ======= class HydrationModelStatus implementation =======
-HydrationModelStatus :: HydrationModelStatus(GaussPoint *g) : MaterialStatus(g)
-{
-    hydrationDegree = 0;
-    tempHydrationDegree = 0;
-}
+HydrationModelStatus :: HydrationModelStatus(GaussPoint *g) : MaterialStatus(g) { }
 
 void
-HydrationModelStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+HydrationModelStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     fprintf(file, " ksi %.5f", hydrationDegree);
 }
@@ -94,14 +90,13 @@ HydrationModelStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
 // ======= class HydrationModel implementation =======
 // default constructor - Lafarge mixture
-HydrationModel :: HydrationModel() : Material(0, NULL)
+HydrationModel :: HydrationModel() : Material(0, nullptr)
 {
     setMixture(mtLafarge);
     useFindRoot = frMixed;
 }
 
-// constructor
-HydrationModel :: HydrationModel(MixtureType mix, FindRootMethod usefr) : Material(0, NULL)
+HydrationModel :: HydrationModel(MixtureType mix, FindRootMethod usefr) : Material(0, nullptr)
 {
     setMixture(mix);
     if ( ( usefr ) && ( usefr <= frMixed ) ) {
@@ -195,7 +190,7 @@ HydrationModel :: setMixture(MixtureType mix)
         e0 = 0.10; // ksi_0
     }
     // Skanska C60/75 mixture
-    else if ( ( mix == mtC60 ) || ( mix == mtC100 ) ) { // used for C100 too
+    else if ( mix == mtC60 || mix == mtC100 ) { // used for C100 too
         aa = 8.5;
         ba = 5.0;
         ca = 300;
@@ -217,42 +212,39 @@ HydrationModel :: setMixture(MixtureType mix)
 
 // === Material functions ===
 double
-HydrationModel :: affinity(double ksi)
+HydrationModel :: affinity(double ksi) const
 // Returns the normalized chemical affinity A~(ksi) [1/s]
 {
     if ( ksi < e0 ) {
         ksi = e0;
     }
 
-    return ( aa * ( 1 - exp(-ba * ksi) ) / ( 1 + ca * pow(ksi, da) ) );
+    return aa * ( 1 - exp(-ba * ksi) ) / ( 1 + ca * pow(ksi, da) );
 }
 
 double
-HydrationModel :: dAdksi(double ksi)
+HydrationModel :: dAdksi(double ksi) const
 // Returns the derivation of chemical affinity dA~/dksi(ksi)
 {
-    double ksinad, enaksi;
-
     if ( ksi < e0 ) {
-        return ( 0 );
+        return 0;
     }
 
-    ksinad = pow(ksi, da);
-    enaksi = exp(-ba * ksi);
+    double ksinad = pow(ksi, da);
+    double enaksi = exp(-ba * ksi);
 
-    return ( aa * ( ca * da * ksinad * ( enaksi - 1 ) / ksi + ba * enaksi * ( ca * ksinad + 1 ) ) /
-            pow(1 + ca * ksinad, 2) );
+    return aa * ( ca * da * ksinad * ( enaksi - 1 ) / ksi + ba * enaksi * ( ca * ksinad + 1 ) ) / pow(1 + ca * ksinad, 2);
 }
 
 double
-HydrationModel :: localResidual(double dks) // G(dksi) 4.12
+HydrationModel :: localResidual(double dks) const // G(dksi) 4.12
 // !!! uses auxiliary ksi, dt, T in hydration model instance
 {
-    return ( dks - auxdt * affinity(auxksi + dks) * exp(-ear / auxT) * ( 1. + auxh * auxh ) / 2. );
+    return dks - auxdt * affinity(auxksi + dks) * exp(-ear / auxT) * ( 1. + auxh * auxh ) / 2.;
 }
 
 double
-HydrationModel :: dksidT(double ksi, double T, double h, double dt)
+HydrationModel :: dksidT(double ksi, double T, double h, double dt) const
 /*
  * !!! should use state vector to enable adding state variables, but is OK on the level of dIntSource/dState
  * G = dksi - dt * aff(ksi) * exp(-ear/T) * (1+h^2)/2 = 0
@@ -262,24 +254,20 @@ HydrationModel :: dksidT(double ksi, double T, double h, double dt)
  * dh/dT, dh/dksi uz nejde, od toho je iterace ksi(h,T)
  */
 {
-    double aux;
-    aux = dt * exp(-ear / T) * ( 1 + h * h ) / 2;
-    return ( aux * affinity(ksi) * ear / ( T * T ) ) /
-           ( 1 - aux * dAdksi(ksi) );
+    double aux = dt * exp(-ear / T) * ( 1 + h * h ) / 2;
+    return ( aux * affinity(ksi) * ear / ( T * T ) ) / ( 1 - aux * dAdksi(ksi) );
 }
 
 double
-HydrationModel :: dksidh(double ksi, double T, double h, double dt)
+HydrationModel :: dksidh(double ksi, double T, double h, double dt) const
 /*
  * G = dks - dt * aff(ksi) * exp(-ear/T) * (1+h^2)/2 = 0
  * dksi/dh = - dG/dh / dG/dksi
  *       = - -dt*aff(ksi) *exp(-ear/T) * h  /  (1 - dt*daff/dksi * exp(-ear/T) * (1+h^2)/2)
  */
 {
-    double aux;
-    aux = dt * exp(-ear / T);
-    return ( aux * affinity(ksi) * h ) /
-           ( 1 - aux * dAdksi(ksi) * ( 1 + h * h ) / 2 );
+    double aux = dt * exp(-ear / T);
+    return ( aux * affinity(ksi) * h ) / ( 1 - aux * dAdksi(ksi) * ( 1 + h * h ) / 2 );
 }
 
 MaterialStatus *
@@ -290,7 +278,7 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
  */
 {
     HydrationModelStatusInterface *hmi = static_cast< HydrationModelStatusInterface * >( this->giveStatus(gp)->giveInterface(HydrationModelStatusInterfaceType) );
-    HydrationModelStatus *status = NULL;
+    HydrationModelStatus *status = nullptr;
     if ( hmi ) {
         status = hmi->giveHydrationModelStatus();
         if ( !status ) {
@@ -305,7 +293,7 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
 }
 
 void
-HydrationModel :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydrationModel :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 /*
  * Returns the hydration heat generated in gp during time step tStep.
  * Can be overriden to return also water consumption as second component of the internal source vector.
@@ -319,7 +307,7 @@ HydrationModel :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, T
 }
 
 double
-HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 // Transport status needs to be obtained from master status, it's better to pass as a parameter
 // to enable usage from structural material
 {
@@ -374,11 +362,11 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
         result = 0.;
     }
 
-    return ( result );
+    return result;
 }
 
 double
-HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode)
+HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode) const
 /*
  * Computes and returns the derivatives of the material-generated Internal Source with respect to the tm state vector.
  * Used in IntSourceLHS matrix for quadratic convergency of global iteration.
@@ -392,12 +380,11 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
  */
 {
     // prepare ksi, T, h, dt
-    double ksi, T, h, dt;
-    ksi = giveHydrationDegree(gp, tStep, VM_Total);
-    T = vec(0);
-    h = vec(1);
+    double ksi = giveHydrationDegree(gp, tStep, VM_Total);
+    double T = vec(0);
+    double h = vec(1);
     // !!! timeScale
-    dt = tStep->giveTimeIncrement() * timeScale;
+    double dt = tStep->giveTimeIncrement() * timeScale;
 
     if ( ksi < 1.0 ) {
         switch ( rmode ) {
@@ -420,7 +407,7 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
 // === public services ===
 
 double
-HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydrationModel :: giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 // returns the hydration degree in integration point gp
 {
     HydrationModelStatus *status = static_cast< HydrationModelStatus * >( giveStatus(gp) );
@@ -440,7 +427,7 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
  *  caller should ensure that this is called only when state vector is changed
  */
 {
-    double ksi, dksi, T = 0., h = 1.;
+    double dksi, T = 0., h = 1.;
     // get hydration model status associated with integration point
     HydrationModelStatus *status = static_cast< HydrationModelStatus * >( giveStatus(gp) );
 
@@ -455,7 +442,7 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
         OOFEM_ERROR("undefined state vector.");
     }
 
-    ksi = status->giveHydrationDegree();
+    double ksi = status->giveHydrationDegree();
     if ( !ksi && initialHydrationDegree ) {
         ksi = initialHydrationDegree;
         status->setHydrationDegree(ksi);
@@ -474,12 +461,12 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
 
 // === Auxiliary functions === (root finding)
 double
-HydrationModel :: regulafindroot()
+HydrationModel :: regulafindroot() const
 {
-    double x0, y0, yl, xl = 0., xr = 1.;
+    double x0, y0, xl = 0., xr = 1.;
 
     do {
-        yl = localResidual(xl);
+        double yl = localResidual(xl);
         x0 = yl * ( xl - xr ) / ( localResidual(xr) - yl ) + xl;
         y0 = localResidual(x0);
         if ( y0 < 0 ) {
@@ -493,11 +480,11 @@ HydrationModel :: regulafindroot()
 #endif
     } while ( fabs(y0) > ROOT_PRECISION_DKSI );
 
-    return ( x0 );
+    return x0;
 }
 
 double
-HydrationModel :: bintreefindroot()
+HydrationModel :: bintreefindroot() const
 {
     double xl = 0., xr = 1., x0, y0;
 
@@ -515,23 +502,23 @@ HydrationModel :: bintreefindroot()
 #endif
     } while ( fabs(y0) > ROOT_PRECISION_DKSI );
 
-    return ( x0 );
+    return x0;
 }
 
 
 
 double
-HydrationModel :: mixedfindroot()
+HydrationModel :: mixedfindroot() const
 {
-    double x0 = 0., y0, yl, xl = 0., xr = 1.;
-    int jcount, done = 0;
+    double x0 = 0., y0, xl = 0., xr = 1.;
+    bool done = false;
 
     do {
-        for ( jcount = 0; ( jcount < BINARY_TREE_STEPS ); jcount++ ) {
+        for ( int jcount = 0; ( jcount < BINARY_TREE_STEPS ); jcount++ ) {
             x0 = ( xl + xr ) / 2;
             y0 = localResidual(x0);
             if ( fabs(y0) < ROOT_PRECISION_DKSI ) {
-                done = 1;
+                done = true;
                 break;
             }
 
@@ -543,14 +530,13 @@ HydrationModel :: mixedfindroot()
         }
 
         if ( !done ) {
-            yl = localResidual(xl);
+            double yl = localResidual(xl);
             x0 = yl * ( xl - xr ) / ( localResidual(xr) - yl ) + xl;
             y0 = localResidual(x0);
 
             if ( fabs(y0) < ROOT_PRECISION_DKSI ) {
                 break;
-            } else
-            if ( y0 < 0 ) {
+            } else if ( y0 < 0 ) {
                 xl = x0;
             } else {
                 xr = x0;
@@ -562,7 +548,7 @@ HydrationModel :: mixedfindroot()
         }
     } while ( !done );
 
-    return ( x0 );
+    return x0;
 }
 
 MaterialStatus *
@@ -581,7 +567,7 @@ HydrationModelStatusInterface :: updateYourself(TimeStep *tStep)
 }
 
 void
-HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep)
+HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     if ( hydrationModelStatus ) {
         hydrationModelStatus->printOutputAt(file, tStep);
@@ -652,7 +638,7 @@ HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint
 }
 
 double
-HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydrationModelInterface :: giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     if ( hydrationModel ) {
         return hydrationModel->giveHydrationDegree(gp, tStep, mode);

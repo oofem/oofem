@@ -65,13 +65,12 @@ protected:
 
 public:
     CebFip78Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { }
-    virtual ~CebFip78Material() { }
 
     const char *giveClassName() const override { return "CebFip78Material"; }
     const char *giveInputRecordName() const override { return _IFT_CebFip78Material_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 };
 } // end namespace oofem
 #endif // cebfip78_h

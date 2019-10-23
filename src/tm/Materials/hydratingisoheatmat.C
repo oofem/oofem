@@ -107,19 +107,14 @@ HydratingIsoHeatMaterial :: setMixture(MixtureType mix)
     }
 }
 
-int
-HydratingIsoHeatMaterial :: hasInternalSource()
-// return true if hydration heat source is present
+bool
+HydratingIsoHeatMaterial :: hasInternalSource() const
 {
-    if ( hydrationHeat ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return hydrationHeat;
 }
 
 void
-HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydratingIsoHeatMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 // returns in val the hydration heat computed by the hydration model for given hydration degree increment
 // current hydration model returns heat in (k)J/m3.
 // maybe??? element expects J/kg -> would have to divide by density here
@@ -183,33 +178,28 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
 }
 
 double
-HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
-    double answer = 0;
-    FloatArray vec;
-
     if ( rmode == Capacity ) {
         if ( castAt && ( tStep->giveTargetTime() < castAt ) ) {
-            answer = this->give('c', gp, tStep) * this->give('d', gp, tStep) / 1000;                            // Zero capacity before cast
+            return this->give('c', gp, tStep) * this->give('d', gp, tStep) / 1000;                            // Zero capacity before cast
         } else {
-            answer = this->give('c', gp, tStep) * this->give('d', gp, tStep);
+            return this->give('c', gp, tStep) * this->give('d', gp, tStep);
         }
     } else if ( !hydrationLHS ) {
-        answer = 0;
+        return 0;
     } else if ( hydrationModel ) { //!!! better via HydrationModelInterface
-        vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
+        FloatArray vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
         if ( vec.giveSize() < 2 ) {
             vec.resize(2);
             vec.at(2) = 1.; // saturated if undefined
         }
 
-        answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep)
-        / tStep->giveTimeIncrement();
+        return hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep) / tStep->giveTimeIncrement();
     } else {
         OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
+        return 0.;
     }
-
-    return answer;
 }
 
 void
@@ -254,7 +244,7 @@ HydratingIsoHeatMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-HydratingTransportMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+HydratingTransportMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     fprintf(file, " status ");
     HydrationModelStatusInterface :: printOutputAt(file, tStep);
@@ -268,7 +258,7 @@ HydratingTransportMaterialStatus :: giveInterface(InterfaceType type)
     if ( type == HydrationModelStatusInterfaceType ) {
         return static_cast< HydrationModelStatusInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 } // end namespace oofem

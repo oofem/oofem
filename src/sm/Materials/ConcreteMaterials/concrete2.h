@@ -104,8 +104,8 @@ protected:
 
 public:
     Concrete2MaterialStatus(GaussPoint * g);
-    virtual ~Concrete2MaterialStatus();
-    void printOutputAt(FILE *file, TimeStep *tStep) override
+
+    void printOutputAt(FILE *file, TimeStep *tStep) const override
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
 
     const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }
@@ -188,7 +188,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    double give(int, GaussPoint *gp) override;
+    double give(int, GaussPoint *gp) const override;
 
     const char *giveClassName() const override { return "Concrete2"; }
     const char *giveInputRecordName() const override { return _IFT_Concrete2_Name; }

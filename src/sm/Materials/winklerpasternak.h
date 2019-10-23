@@ -72,10 +72,8 @@ public:
      * @param d Domain to which new material will belong.
      */
     WinklerPasternakMaterial(int n, Domain * d);
-    /// Destructor.
-    virtual ~WinklerPasternakMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "WinklerPasternakMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_WinklerPasternakMaterial_Name; }
 

@@ -119,19 +119,14 @@ HydratingHeMoMaterial :: setMixture(MixtureType mix)
     }
 }
 
-int
-HydratingHeMoMaterial :: hasInternalSource()
-// return true if hydration heat source is present
+bool
+HydratingHeMoMaterial :: hasInternalSource() const
 {
-    if ( hydrationHeat ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return hydrationHeat;
 }
 
 void
-HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 // returns in val the hydration heat computed by the hydration model for given hydration degree increment
 // current hydration model returns heat in (k)J/m3.
 // maybe??? element expects J/kg -> would have to divide by density here
@@ -206,7 +201,7 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
 }
 
 double
-HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     double answer = 0;
 
