@@ -720,6 +720,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def(py::init<int, int, oofem::EngngModel*>())
         .def("giveNumber", &oofem::Domain::giveNumber)
         .def("setNumber", &oofem::Domain::setNumber)
+        .def("giveDofManager", &oofem::Domain::giveDofManager, py::return_value_policy::reference)
         .def("giveElement", &oofem::Domain::giveElement, py::return_value_policy::reference)
         .def("giveBc", &oofem::Domain::giveBc, py::return_value_policy::reference)
         .def("giveIc", &oofem::Domain::giveIc, py::return_value_policy::reference)
