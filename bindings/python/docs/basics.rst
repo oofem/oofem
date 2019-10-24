@@ -30,7 +30,7 @@ Configure oofem target to build python bindings
 .. code-block:: bash
 
    cd oofem.build
-   cmake path_to_oofem_git_repository -D USE_PYBIND11_BINDIGS=ON
+   cmake path_to_oofem_git_repository -D USE_PYTHON_BINDINGS=ON
    make
    
 Building the above project will produce a binary module file that can be imported to Python.
