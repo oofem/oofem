@@ -97,9 +97,9 @@ option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 option (USE_T3D "Enable T3D support" OFF)
 #option (USE_BOOST "Enable Boost" OFF)
-option (USE_PYTHON_BINDINGS "Enable Python bidings (OOFEM usable from Python). Implies USE_PYTHON." OFF)
+option (USE_BOOSTPYTHON_BINDINGS "Deprecated. Enable Python bidings (OOFEM usable from Python). Use USE_BOOSTPYTHON_BINDINGS instead. Implies USE_PYTHON." OFF)
 option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
-option (USE_PYBIND11_BINDIGS "Enable Python Pybind11 bindings" OFF)
+option (USE_PYTHON_BINDINGS "Enable Python Pybind11 bindings" OFF)
 option (USE_HDF5 "HDF5 support" OFF)
 
 if (USE_PARALLEL)
@@ -471,7 +471,7 @@ if (USE_SPOOLES)
     list (APPEND MODULE_LIST "SPOOLES")
 endif ()
 
-if (USE_PYTHON_BINDINGS OR USE_PYTHON)
+if (USE_BOOSTPYTHON_BINDINGS OR USE_PYTHON)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
     #set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
     #Print if set up manually
@@ -485,7 +485,7 @@ if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     list (APPEND MODULE_LIST "Python")
     add_definitions(-D__PYTHON_MODULE)
 
-    if (USE_PYTHON_BINDINGS)
+    if (USE_BOOSTPYTHON_BINDINGS)
         # require boost_python also for python stuff by itself
         find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
         include_directories (${Boost_INCLUDE_DIRS})
@@ -494,12 +494,23 @@ if (USE_PYTHON_BINDINGS OR USE_PYTHON)
     endif ()
 endif ()
 
-if (USE_PYBIND11_BINDIGS)
+if (USE_PYTHON_BINDINGS)
     #build pybind11 bindings
+    find_package(PythonInterp 3.0 REQUIRED)
     find_package(pybind11 REQUIRED CONFIG)
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python2/oofem.cpp ${PYBIND11_HEADERS})
     target_link_libraries(oofempy PRIVATE liboofem)
 
+    # Make sure pytest is found or produce a fatal error
+    if(NOT PYTEST_FOUND)
+        execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import pytest; print(pytest.__version__)"
+                        RESULT_VARIABLE pytest_not_found OUTPUT_VARIABLE pytest_version ERROR_QUIET)
+        if(pytest_not_found)
+            message(FATAL_ERROR "Running the tests requires pytest. Please install it manually"
+                    " (try: ${PYTHON_EXECUTABLE} -m pip install pytest)")
+        endif()
+        set(PYBIND11_PYTEST_FOUND TRUE CACHE INTERNAL "")
+    endif()
 endif()
 
 #######################################################################
@@ -543,8 +554,8 @@ if (USE_FM)
     add_subdirectory ("${oofem_SOURCE_DIR}/src/fm")
 endif ()
 set (oofempy)
-if (USE_PYTHON_BINDINGS)
-    set (oofempy ${oofem_SOURCE_DIR}/bindings/python/oofemlib.cpp)
+if (USE_BOOSTPYTHON_BINDINGS)
+    set (oofempy ${oofem_SOURCE_DIR}/bindings/Deprecated/python/oofemlib.cpp)
 endif ()
 
 # Main targets
@@ -820,6 +831,12 @@ else ()
     add_custom_target (partests   COMMAND ${CMAKE_CTEST_COMMAND} "-R" "^partest")
     add_custom_target (benchmarks COMMAND ${CMAKE_CTEST_COMMAND} "-j${N}" "-R" "^benchmark")
 endif ()
+
+######################## Tests of Python bindings ########################################
+if (USE_PYTHON_BINDINGS)
+    #add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python2 COMMAND ${PYTHON_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python2)
+    #set_tests_properties("test_python_pybind11_bindings" PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}")
+endif()
 
 
 #######################################################################
