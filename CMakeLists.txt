@@ -498,7 +498,7 @@ if (USE_PYTHON_BINDINGS)
     #build pybind11 bindings
     find_package(PythonInterp 3.0 REQUIRED)
     find_package(pybind11 REQUIRED CONFIG)
-    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python2/oofem.cpp ${PYBIND11_HEADERS})
+    pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
     target_link_libraries(oofempy PRIVATE liboofem)
 
     # Make sure pytest is found or produce a fatal error
@@ -834,7 +834,7 @@ endif ()
 
 ######################## Tests of Python bindings ########################################
 if (USE_PYTHON_BINDINGS)
-    add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python2 COMMAND ${PYTHON_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python2)
+    add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python COMMAND ${PYTHON_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python)
     set_tests_properties("test_python_pybind11_bindings" PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}")
 endif()
 
