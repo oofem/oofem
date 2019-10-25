@@ -511,6 +511,7 @@ if (USE_PYTHON_BINDINGS)
         endif()
         set(PYBIND11_PYTEST_FOUND TRUE CACHE INTERNAL "")
     endif()
+    set (USE_SHARED_LIB ON)
 endif()
 
 #######################################################################
