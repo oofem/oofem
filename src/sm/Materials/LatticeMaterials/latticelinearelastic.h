@@ -35,7 +35,7 @@
 #ifndef latticelinearelastic_h
 #define latticelinearelastic_h
 
-#include "linearelasticmaterial.h"
+#include "../linearelasticmaterial.h"
 #include "cltypes.h"
 #include "randommaterialext.h"
 #include "strainvector.h"

@@ -36,7 +36,7 @@
 #define latticematstatus_h
 
 
-#include "structuralms.h"
+#include "../structuralms.h"
 #include "randommaterialext.h"
 
 namespace oofem {

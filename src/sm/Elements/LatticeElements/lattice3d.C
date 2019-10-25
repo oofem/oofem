@@ -34,7 +34,7 @@
 
 #include "domain.h"
 #include "lattice3d.h"
-#include "../sm/Materials/latticematstatus.h"
+#include "../sm/Materials/LatticeMaterials/latticematstatus.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"

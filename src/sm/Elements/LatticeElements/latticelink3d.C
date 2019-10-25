@@ -33,8 +33,8 @@
  */
 
 #include "domain.h"
-#include "../sm/Elements/latticelink3d.h"
-#include "../sm/Materials/latticematstatus.h"
+#include "../sm/Elements/LatticeElements/latticelink3d.h"
+#include "../sm/Materials/LatticeMaterials/latticematstatus.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -43,7 +43,7 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "../sm/Elements/latticestructuralelement.h"
+#include "../sm/Elements/LatticeElements/latticestructuralelement.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"

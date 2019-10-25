@@ -80,15 +80,15 @@ set (sm_element
     Elements/PlaneStress/linquad3d_planestress.C
     Elements/AbaqusUserElement.C
     Elements/htselement.C
-    Elements/latticestructuralelement.C
     Elements/lumpedmasselement.C
     Elements/springelement.C
-    Elements/lattice2d.C
-    Elements/lattice2dboundary.C
-    Elements/lattice3d.C
-    Elements/lattice3dboundary.C
-    Elements/latticelink3d.C
-    Elements/latticelink3dboundary.C
+    Elements/LatticeElements/latticestructuralelement.C
+    Elements/LatticeElements/lattice2d.C
+    Elements/LatticeElements/lattice2dboundary.C
+    Elements/LatticeElements/lattice3d.C
+    Elements/LatticeElements/lattice3dboundary.C
+    Elements/LatticeElements/latticelink3d.C
+    Elements/LatticeElements/latticelink3dboundary.C
     Elements/bondlink3d.C
     Elements/bondlink3dboundary.C
 #    Elements/bondlink3dboundarybeam.C	
@@ -263,15 +263,14 @@ set (sm_material
     Materials/steelrelaxmat.C
     Materials/fcm.C
     #Lattice models
-    Materials/latticematstatus.C
-    Materials/latticelinearelastic.C
-    Materials/latticedamage.C
-    Materials/linkslip.C
-    Materials/latticeviscoelastic.C
-    Materials/latticedamageviscoelastic.C
-    Materials/latticebondplasticity.C
-    Materials/latticeplasticitydamage.C
-    Materials/latticeslip.C
+    Materials/LatticeMaterials/latticematstatus.C
+    Materials/LatticeMaterials/latticelinearelastic.C
+    Materials/LatticeMaterials/latticedamage.C
+    Materials/LatticeMaterials/latticeviscoelastic.C
+    Materials/LatticeMaterials/latticedamageviscoelastic.C
+    Materials/LatticeMaterials/latticebondplasticity.C
+    Materials/LatticeMaterials/latticeplasticitydamage.C
+    Materials/LatticeMaterials/latticeslip.C
     )
 
 if (USE_PYTHON)
@@ -297,6 +296,7 @@ set (sm_interface_materials
     Materials/InterfaceMaterials/Deprecated/simpleinterfacemat.C
     Materials/InterfaceMaterials/masonry02.C
     Materials/InterfaceMaterials/mat_cebfip90.C
+    Materials/InterfaceMaterials/linkslip.C
     )
 
 set (sm_error

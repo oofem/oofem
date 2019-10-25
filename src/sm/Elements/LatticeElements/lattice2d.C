@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/lattice2d.h"
-#include "sm/Materials/latticematstatus.h"
-#include "sm/Elements/latticestructuralelement.h"
+#include "sm/Elements/LatticeElements/lattice2d.h"
+#include "sm/Materials/LatticeMaterials/latticematstatus.h"
+#include "sm/Elements/LatticeElements/latticestructuralelement.h"
 #include "sm/CrossSections/structuralcrosssection.h"
 #include "domain.h"
 #include "node.h"

@@ -47,9 +47,9 @@
 #include "dof.h"
 
 #ifdef __SM_MODULE
- #include "../sm/Elements/lattice2dboundary.h"
- #include "../sm/Elements/lattice3dboundary.h"
- #include "../sm/Elements/latticelink3dboundary.h"
+ #include "../sm/Elements/LatticeElements/lattice2dboundary.h"
+ #include "../sm/Elements/LatticeElements/lattice3dboundary.h"
+ #include "../sm/Elements/LatticeElements/latticelink3dboundary.h"
  #include "../sm/Elements/3D/ltrspaceboundary.h"
  #include "../sm/Elements/Beams/libeam3dboundary.h"
 #endif

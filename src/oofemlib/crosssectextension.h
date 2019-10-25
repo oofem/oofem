@@ -41,6 +41,7 @@ enum CrossSectExtension {
     CS_StructuralCapability, ///< Structural capability.
     CS_StructuralInterfaceCapability, ///< Structural interface capability.
     CS_HeatCapability, ///< Heat capability.
+    CS_LatticeStructuralCapability, ///< Structural lattice capability.
 };
 } // end namespace oofem
 #endif // crosssectextension_h

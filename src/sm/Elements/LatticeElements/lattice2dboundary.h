@@ -36,7 +36,7 @@
 #ifndef lattice2dboundary_h
 #define lattice2dboundary_h
 
-#include "../sm/Elements/lattice2d.h"
+#include "../sm/Elements/LatticeElements/lattice2d.h"
 
 ///@name Input fields for Lattice2dboundary
 //@{
