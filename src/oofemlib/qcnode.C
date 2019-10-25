@@ -68,7 +68,7 @@ IRResultType qcNode :: initializeFrom(InputRecord *ir)
     this->masterRegion = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, _IFT_qcNode_masterRegion);
 
-
+#ifdef __SM_MODULE
     QClinearStatic *em = dynamic_cast< QClinearStatic * >( this->giveDomain()->giveEngngModel() );
     if ( em ) {
         if ( em->giveQcApproachNumber() == 0 ) {
@@ -84,7 +84,9 @@ IRResultType qcNode :: initializeFrom(InputRecord *ir)
     } else {
         OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
     }
-
+#else
+    OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
+#endif
 
     return IRRT_OK;
 }
@@ -224,18 +226,25 @@ qcNode :: initializeAsRepnode()
      */
 
     // if node is in fullsolved domain
+  
+#ifdef __SM_MODULE
     QClinearStatic *em = dynamic_cast<  QClinearStatic * >( this->giveDomain()->giveEngngModel() );
-#ifdef DEBUG
     if ( !em ) {
         OOFEM_ERROR("qcNode is used in unsupported Engineering Models");
     }
-#endif
+    
     if ( em->nodeInFullSolvedDomainTest(this) ) {
         return true;
     }
 
     //else
     return false;
+
+#else
+    OOFEM_ERROR("qcNode is used in unsupported Engineering Models");
+    return false;
+#endif
+
 }
 
 void qcNode :: setAsRepnode()

@@ -46,6 +46,8 @@
 #include <cstring>
 #include <sstream>
 
+#ifdef __FM_MODULE
+
 namespace oofem {
 REGISTER_Material(RVEStokesFlow);
 
@@ -230,3 +232,4 @@ RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 }
 
 }
+#endif // ifdef __FM_MODULE

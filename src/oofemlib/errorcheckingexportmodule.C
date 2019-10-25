@@ -252,12 +252,17 @@ BeamElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     if (ist == BET_localEndDisplacement) {
         element->computeVectorOf(VM_Total, tStep, val);
     } else if (ist ==  BET_localEndForces) {
+#ifdef __SM_MODULE 
         if(Beam2d* b = dynamic_cast<Beam2d*>(element)) b->giveEndForcesVector(val, tStep);
         else if(Beam3d* b = dynamic_cast<Beam3d*>(element)) b->giveEndForcesVector(val, tStep);
         else {
             OOFEM_WARNING("Element %d has no beam interface.", number);
             return false;
         }
+#else
+        OOFEM_WARNING("Element %d has no beam interface.", number);
+        return false;
+#endif
     }
 
     if ( component > val.giveSize() || component < 1 ) {
