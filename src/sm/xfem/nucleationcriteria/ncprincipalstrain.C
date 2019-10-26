@@ -243,7 +243,7 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 	}
 
 
-	return std::move( eiList );
+	return eiList;
 }
 
 

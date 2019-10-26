@@ -172,6 +172,6 @@ std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode,
 
     problem->instanciateYourself( dr, emodelir.get(), dataOutputFileName.c_str(), desc.c_str() );
 
-    return std::move(problem);
+    return problem;
 }
 } // end namespace oofem

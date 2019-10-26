@@ -50,7 +50,7 @@ std::unique_ptr<DynamicInputRecord> CreateNodeIR(int i, InputFieldType nodeType,
 {
     auto result = std::make_unique<DynamicInputRecord>(nodeType, i);
     result->setField(std :: move(coord), _IFT_Node_coords);
-    return std::move(result);
+    return result;
 }
 
 std::unique_ptr<DynamicInputRecord> CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs)
@@ -60,12 +60,12 @@ std::unique_ptr<DynamicInputRecord> CreateElementIR(int i, InputFieldType elemen
     if ( cs != 0 ) {
         result->setField(cs, _IFT_Element_crosssect);
     }
-    return std::move(result);
+    return result;
 }
 
 
 DynamicInputRecord :: DynamicInputRecord(std :: string keyword, int value) : InputRecord(),
-    recordKeyword(keyword), ///@todo std::move here
+    recordKeyword(std::move(keyword)),
     recordNumber(value),
     emptyRecord(),
     intRecord(),
