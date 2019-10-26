@@ -32,15 +32,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef bondlink3dboundary_h
- #define bondlink3dboundary_h
+#ifndef bondlink3d_h
+ #define bondlink3d_h
 
- #include "bondlink3d.h"
+ #include "../structuralelement.h"
 
 ///@name Input fields for BondLink3d
 //@{
- #define _IFT_BondLink3dBoundary_Name "bondlink3dboundary"
- #define _IFT_LatticeLink3dBoundary_location "location"
+ #define _IFT_BondLink3d_Name "bondlink3d"
+ #define _IFT_BondLink3d_length "length"
+ #define _IFT_BondLink3d_diameter "diameter"
+ #define _IFT_BondLink3d_dirvector "dirvector"
+ #define _IFT_BondLink3d_length_end "length_end"
 //@}
 
 namespace oofem {
@@ -49,33 +52,59 @@ namespace oofem {
  * The main idea is to use the rotation of the beam element and the rigid arm from the beam node to the continuum element node
  * to compute the displacement jump along the rebar element (and two components, which are perpendicular to each other and lie 
  * in a plane for which the direction along the rebar is normal to.
- * At least one node is located at the image boundary.
- * These nodes are replaced with a periodic mirror nodes and a control node is used to impose the macroscopic (average) strain.
- * MACROSCOPIC INPUT: DEFORMATION GRADIENT TENSOR (3D, 9 COMPONENTS: Exx Exy Exz Eyx Eyy Eyz Ezx Ezy Ezz)
- * 
+ * This element differs from the lattice link element, for which both the beam and the lattice nodes have rotational DOFs and 
+ * therefore the lattice node's rotations can be used to compute the displacement jump at the beam element location.  
+ * @TODO: Should not be derived from lattice structural element 
 */
 
-class BondLink3dBoundary : public BondLink3d
+class BondLink3d : public StructuralElement
 {
 protected:
-  IntArray location;
+  double bondLength;
+  
+  FloatMatrix localCoordinateSystem;
+  double bondDiameter;
+  FloatArray directionVector;
+  int geometryFlag;
+  double bondEndLength;
+  FloatArray rigid;
+  FloatArray globalCentroid;
   
 public:
-    BondLink3dBoundary(int n, Domain *);
-    virtual ~BondLink3dBoundary();
+    BondLink3d(int n, Domain *);
+    virtual ~BondLink3d();
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
+    double computeVolumeAround(GaussPoint *aGaussPoint) override;
+    
+    double giveLength();
+    
+    virtual int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
-    virtual int computeNumberOfDofs() { return 18; }
+    /**
+     * This function is different from the standard computeGlobalCordinates
+     * function as it returns the global coordinates of the gausspoint
+     * independent to the value of the lcoords.
+     */
+    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
+    virtual double giveBondLength();
+    
+    virtual double giveBondDiameter();
+
+    virtual double giveBondEndLength();
+    
+    virtual int computeNumberOfDofs() override { return 9; }
+
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const override;
+
+    virtual void giveGPCoordinates(FloatArray &coords);
 
     virtual void computeGeometryProperties();
     
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
     
-    virtual const char *giveInputRecordName() const { return _IFT_BondLink3dBoundary_Name; }
-    virtual const char *giveClassName()  const override { return "BondLink3dBoundary"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_BondLink3d_Name; }
+    virtual const char *giveClassName()  const override { return "BondLink3d"; }
     virtual IRResultType initializeFrom(InputRecord *ir) override;
 
     virtual Element_Geometry_Type giveGeometryType() const  override { return EGT_line_1; } 
@@ -92,24 +121,24 @@ public:
 
 
 protected:
+    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
     virtual bool computeGtoLRotationMatrix(FloatMatrix &) override;
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep);
-    void giveSwitches(IntArray &answer, int location);
     
     /**
      * This computes the geometrical properties of the element. It is called only once.
      */
     void computePropertiesOfCrossSection();
 
-    virtual integrationDomain  giveIntegrationDomain() { return _Line; }
+    virtual void computeGaussPoints() override;
+    virtual integrationDomain  giveIntegrationDomain() const override { return _Line; }
 
 };
 
 
 
 } // end namespace oofem
-#endif //bondlink3dboundary_h
+#endif

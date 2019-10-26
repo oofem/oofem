@@ -38,7 +38,7 @@
 
 #include "latticelinearelastic.h"
 #include "latticematstatus.h"
-#include "RheoChainMaterials/rheoChM.h"
+#include "../RheoChainMaterials/rheoChM.h"
 
 ///@name Input fields for LatticeDamage
 //@{

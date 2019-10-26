@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Materials/latticestructuralmaterial.h"
+#include "sm/Materials/LatticeMaterials/latticestructuralmaterial.h"
 #include "domain.h"
 #include "verbose.h"
 #include "sm/Materials/structuralms.h"
@@ -62,14 +62,20 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 
 
 void
-LatticeStructuralMaterial :: giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+LatticeStructuralMaterial :: giveLatticeStress1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("1dLattice mode not supported");
+}
+
+void
+LatticeStructuralMaterial :: giveLatticeStress2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     OOFEM_ERROR("2dLattice mode not supported");
 }
 
-void
-LatticeStructuralMaterial :: giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
-{
+  void
+  LatticeStructuralMaterial :: giveLatticeStress3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+  {
     OOFEM_ERROR("3dLattice mode not supported");
 }
 

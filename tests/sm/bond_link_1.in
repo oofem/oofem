@@ -47,7 +47,7 @@ bondlink3d 14 nodes 2 3 15 length 0.1 diameter 1.e-02 dirvector 3 1.000000e+00 0
 FiberedCS 1 fibermaterials 16 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 thicks 16 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 widths 16 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 fiberycentrecoords 16 0.0045 0.0015 -0.0015 -0.0045 0.00375 0.0015 -0.0015 -0.00375 0.0045 0.0015 -0.0015 -0.0045 0.00375 0.0015 -0.0015 -0.00375 fiberzcentrecoords 16 -0.0015 -0.0015 -0.0015 -0.0015 -0.00375 -0.0045 -0.0045 -0.00375 0.0015 0.0015 0.0015 0.0015 0.00375 0.0045 0.0045 0.00375 thick 0.012 width 0.012 set 1
 SimpleCS 2 material 2 set 3
 isole 1 d 0. e 2e11 n 0.3 talpha 0.
-linkslip 2 talpha 0. d 0. kn 30.e9 a1 1000 t0 1.e20
+linkslip 2 kn 30.e9 kl 30.e12 t0 1.e20
 BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0. 0. 0. set 4
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0.001 set 2
 PiecewiseLinFunction 1 nPoints 2 t 2 0. 1. f(t) 2 0. 1.

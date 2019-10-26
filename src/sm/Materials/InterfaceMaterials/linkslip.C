@@ -33,14 +33,14 @@
  */
 
 #include "linkslip.h"
-#include "linearelasticmaterial.h"
+//#include "linearelasticmaterial.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "CrossSections/structuralcrosssection.h"
+//#include "CrossSections/structuralcrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
-#include "Elements/latticestructuralelement.h"
+#include "Elements/structuralelement.h"
 #include "datastream.h"
 #include "staggeredproblem.h"
 #include "contextioerr.h"
@@ -57,7 +57,7 @@ namespace oofem {
   REGISTER_Material(LinkSlip);
 
   /// constructor which creates a dummy material without a status and without random extension interface
-  LinkSlip :: LinkSlip(int n, Domain *d) : LinearElasticMaterial(n, d)
+  LinkSlip :: LinkSlip(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
   {
   }
 
@@ -85,14 +85,11 @@ namespace oofem {
   {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    LinearElasticMaterial :: initializeFrom(ir);
-
     //axial stiffness
     IR_GIVE_FIELD(ir, kNormal, _IFT_LinkSlip_kn); // Macro
 
     //Ratio of lateral to axial stiffness
-    alphaOne = 1000.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LinkSlip_a1); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, kLateral, _IFT_LinkSlip_kl); // Macro
 
     //Two models available
     //0 default. Linear elastic-perfect plastic
@@ -120,7 +117,7 @@ namespace oofem {
       }
     }
     
-    return IRRT_OK;
+    return StructuralInterfaceMaterial :: initializeFrom(ir);;
   }
 
 
@@ -172,7 +169,7 @@ namespace oofem {
 
 
   void
-  LinkSlip :: giveRealStressVector_3d(FloatArray &answer,
+  LinkSlip :: giveTraction3d(FloatArray &answer,
 				   GaussPoint *gp,
 				   const FloatArray &totalStrain,
 				   TimeStep *atTime)
@@ -182,20 +179,17 @@ namespace oofem {
     //For axial (first) component, strain has the meanig of slip. Stress is traction.
     
     FloatArray stress,strain;
-    stress = status->giveStressVector();
-    strain = status->giveStrainVector();
+    stress = status->giveTraction();
+    strain = status->giveJump();
 
     //evaluate tempKappa (no elastic strain in axial direction)
     double tempKappa = status->giveKappa() + fabs(totalStrain.at(1)-strain.at(1));
   
-    FloatMatrix stiffnessMatrix;
-    this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
-
     answer.resize(3);
     answer.zero();
 
     //trial stress in axial direction
-    answer.at(1) = stress.at(1) + (totalStrain.at(1)-strain.at(1))*stiffnessMatrix.at(1,1);
+    answer.at(1) = stress.at(1) + (totalStrain.at(1)-strain.at(1))*this->kNormal;
     
     
     double f = fabs(answer.at(1)) - evaluateBondStress(tempKappa);
@@ -207,13 +201,14 @@ namespace oofem {
 
     //Compute the lateral stress components
     for ( int i = 2; i <= 3; i++ ) { // only diagonal terms matter
-      answer.at(i) =  stiffnessMatrix.at(i, i) * totalStrain.at(i);
+      answer.at(i) =  this->kLateral * totalStrain.at(i);
     }
 
     //Set temp values in status needed for dissipation
     status->letTempKappaBe(tempKappa);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempJumpBe(totalStrain);
+    status->letTempTractionBe(answer);
+
     return;
   }
 
@@ -226,20 +221,19 @@ namespace oofem {
 
 
   void
-  LinkSlip :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
+  LinkSlip :: give3dStiffnessMatrix(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
   {
  
     /* Returns elastic moduli in reduced stress-strain space*/
     answer.resize(3, 3);
     answer.zero();
 
-    answer.at(1, 1) = 1.;
-    answer.at(2, 2) = this->alphaOne; // shear
-    answer.at(3, 3) = this->alphaOne; // shear    
-    answer.times(this->kNormal);    
+    answer.at(1, 1) = this->kNormal;
+    answer.at(2, 2) = this->kLateral; // shear
+    answer.at(3, 3) = this->kLateral; // shear    
   }
 
-  LinkSlipStatus :: LinkSlipStatus(GaussPoint *g) :  StructuralMaterialStatus(g)
+  LinkSlipStatus :: LinkSlipStatus(GaussPoint *g) :  StructuralInterfaceMaterialStatus(g)
   {
 
   }
@@ -252,7 +246,7 @@ namespace oofem {
   // builds new crackMap
   //
   {
-    StructuralMaterialStatus :: initTempStatus();
+    StructuralInterfaceMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
   }
   
@@ -275,17 +269,16 @@ namespace oofem {
   }
 
   void
-  LinkSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+  LinkSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
   {
-    MaterialStatus :: printOutputAt(file, tStep);
-
+    StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
         fprintf(file, "  jump ");
-    for ( auto &val : this->strainVector ) {
+    for ( auto &val : this->jump ) {
         fprintf(file, " %.4e", val );
     }
 
     fprintf(file, "\n              traction ");
-    for ( auto &val : this->stressVector ) {
+    for ( auto &val : this->traction ) {
         fprintf(file, " %.4e", val );
     }
     fprintf(file, "\n");
@@ -303,7 +296,7 @@ namespace oofem {
   {
     // save parent class status
   
-    StructuralMaterialStatus :: saveContext(stream, mode);
+    StructuralInterfaceMaterialStatus :: saveContext(stream, mode);
   
     // write a raw data
     if ( !stream.write(kappa) ) {
@@ -319,7 +312,7 @@ namespace oofem {
   // restores full information stored in stream to this Status
   //
   {
-    StructuralMaterialStatus :: restoreContext(stream, mode);
+    StructuralInterfaceMaterialStatus :: restoreContext(stream, mode);
   
     // read raw data
     if ( !stream.read(kappa) ) {
@@ -336,7 +329,7 @@ namespace oofem {
   // temporary variables are having values corresponding to newly reached equilibrium.
   //
   {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    StructuralInterfaceMaterialStatus :: updateYourself(atTime);
     this->kappa = this->tempKappa;
   }
 
@@ -351,15 +344,15 @@ namespace oofem {
     if ( type == IST_InterfaceJump ) {
         answer.resize(3);
         answer.zero();
-        answer = status->giveStrainVector();
+        answer = status->giveJump();
         return 1;
     } else if ( type == IST_InterfaceTraction ) {
         answer.resize(3);
         answer.zero();
-        answer = status->giveStressVector();
+        answer = status->giveTraction();
         return 1;
     } else {
-        return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
+        return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 //     return Material :: giveIPValue(answer, gp, type, atTime);
   }

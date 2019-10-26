@@ -95,20 +95,20 @@ public:
     //@{
     // Pass all calls to the material
 
-    double giveLatticeStress_1d(double strain, GaussPoint *gp, TimeStep *tStep) const
+    void giveLatticeStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
     {
-        return this->giveLatticeMaterial()->giveLatticeStress1d(strain, gp, tStep);
+      this->giveLatticeMaterial()->giveLatticeStress1d(answer, gp, reducedStrain, tStep);
     }
 
-    FloatArrayF<2> giveLatticeStress_2d(const FloatArrayF<2> &strain, GaussPoint *gp, TimeStep *tStep) const
+    void giveLatticeStress_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
     {
-        return this->giveLatticeMaterial()->giveLatticeStress2d(jump, gp, tStep);
+      this->giveLatticeMaterial()->giveLatticeStress2d(answer, gp, reducedStrain, tStep);
     }
 
     
-    FloatArrayF<3> giveLatticeStress_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+    void giveLatticeStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
     {
-        return this->giveLatticeMaterial()->giveLatticeStress3d(strain, gp, tStep);
+      this->giveLatticeMaterial()->giveLatticeStress3d(answer, gp, reducedStrain, tStep);
     }
 
     

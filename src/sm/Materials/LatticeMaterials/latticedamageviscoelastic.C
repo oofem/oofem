@@ -36,7 +36,7 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "Elements/latticestructuralelement.h"
+#include "Elements/LatticeElements/latticestructuralelement.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"

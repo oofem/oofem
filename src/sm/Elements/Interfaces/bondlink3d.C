@@ -33,7 +33,7 @@
  */
 
 #include "domain.h"
-#include "../sm/Elements/bondlink3d.h"
+#include "../sm/Elements/Interfaces/bondlink3d.h"
 #include "../sm/Materials/structuralms.h"
 #include "node.h"
 #include "material.h"

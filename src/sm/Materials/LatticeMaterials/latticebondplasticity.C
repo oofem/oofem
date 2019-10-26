@@ -39,9 +39,9 @@
 #include "engngm.h"
 #include "mathfem.h"
 #include <math.h>
-#include "structuralms.h"
+#include "latticematstatus.h"
 #include "intarray.h"
-#include "Elements/latticestructuralelement.h"
+#include "Elements/LatticeElements/latticestructuralelement.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"

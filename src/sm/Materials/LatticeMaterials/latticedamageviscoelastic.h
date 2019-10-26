@@ -37,7 +37,7 @@
 #define latticedamageviscoelastic_h
 
 #include "latticedamage.h"
-#include "RheoChainMaterials/rheoChM.h"
+#include "../RheoChainMaterials/rheoChM.h"
 
 ///@name Input fields for LatticeDamage
 //@{

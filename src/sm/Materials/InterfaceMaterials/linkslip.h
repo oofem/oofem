@@ -35,16 +35,15 @@
 #ifndef linkslip_h
 #define linkslip_h
 
-#include "latticelinearelastic.h"
-#include "latticematstatus.h"
+#include "structuralinterfacematerial.h"
+#include "structuralinterfacematerialstatus.h"
 
 ///@name Input fields for LatticeSlip
 //@{
 #define _IFT_LinkSlip_Name "linkslip"
 #define _IFT_LinkSlip_talpha "talpha"
 #define _IFT_LinkSlip_kn "kn"
-#define _IFT_LinkSlip_a1 "a1"
-#define _IFT_LinkSlip_a2 "a2"
+#define _IFT_LinkSlip_kl "kl"
 #define _IFT_LinkSlip_type "type"
 #define _IFT_LinkSlip_t0 "t0"
 #define _IFT_LinkSlip_s1 "s1"
@@ -58,7 +57,7 @@ namespace oofem {
 
 
 
-class LinkSlipStatus : public StructuralMaterialStatus
+class LinkSlipStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
@@ -78,10 +77,10 @@ public:
     void  letTempKappaBe(const double &v)
     { this->tempKappa = v; }
 
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void   printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    const char *giveClassName() const { return "LinkSlipStatus"; }
-
+    const char *giveClassName() const override { return "LinkSlipStatus"; }
+    
     virtual void initTempStatus();
 
     virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
@@ -94,7 +93,7 @@ public:
 /**
  * This class implements a slip model for concrete for lattice elements.
  */
-class LinkSlip : public LinearElasticMaterial
+class LinkSlip : public StructuralInterfaceMaterial
     //
 {
 protected:
@@ -102,8 +101,8 @@ protected:
     ///Normal modulus
     double kNormal;
 
-    ///Ratio of shear and normal modulus
-    double alphaOne;
+    ///Lateral modulus
+    double kLateral;
 
     int type;
     
@@ -121,6 +120,8 @@ public:
     /// Destructor
     virtual ~LinkSlip();
 
+    virtual bool hasAnalyticalTangentStiffness() const override { return true; }
+    
     virtual const char *giveInputRecordName() const { return _IFT_LinkSlip_Name; }
     virtual const char *giveClassName() const { return "LinkSlip"; }
 
@@ -135,7 +136,7 @@ public:
     
     double evaluateBondStress(const double kappa) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+    virtual void give3dStiffnessMatrix(FloatMatrix &answer,
 				 MatResponseMode rmode,
 				 GaussPoint *gp,
 				 TimeStep *atTime);
@@ -146,7 +147,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *,
+    virtual void giveTraction3d(FloatArray &answer, GaussPoint *,
                                       const FloatArray &, TimeStep *);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

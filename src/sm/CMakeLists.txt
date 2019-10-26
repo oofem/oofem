@@ -89,10 +89,6 @@ set (sm_element
     Elements/LatticeElements/lattice3dboundary.C
     Elements/LatticeElements/latticelink3d.C
     Elements/LatticeElements/latticelink3dboundary.C
-    Elements/bondlink3d.C
-    Elements/bondlink3dboundary.C
-#    Elements/bondlink3dboundarybeam.C	
-#    Elements/bondlink3dboundaryplate.C		
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C
@@ -137,11 +133,15 @@ set (sm_interface_elements
     Elements/Interfaces/intelline2.C
     Elements/Interfaces/intelline2intpen.C
     Elements/Interfaces/intelsurftr1.C
+    Elements/Interfaces/bondlink3d.C
+    Elements/Interfaces/bondlink3dboundary.C
+        #    Elements/bondlink3dboundarybeam.C	
+#   	 Elements/bondlink3dboundaryplate.C		
     Elements/Interfaces/Deprecated/interfaceelement1d.C
     Elements/Interfaces/Deprecated/interfaceelem2dlin.C
     Elements/Interfaces/Deprecated/interfaceelem2dquad.C
     Elements/Interfaces/Deprecated/interfaceelem3dtrlin.C
-    )
+)
 
 set (sm_boundary_conditions
     Deprecated/prescribedgenstrainshell7.C
@@ -264,6 +264,7 @@ set (sm_material
     Materials/fcm.C
     #Lattice models
     Materials/LatticeMaterials/latticematstatus.C
+    Materials/LatticeMaterials/latticestructuralmaterial.C	
     Materials/LatticeMaterials/latticelinearelastic.C
     Materials/LatticeMaterials/latticedamage.C
     Materials/LatticeMaterials/latticeviscoelastic.C

@@ -40,7 +40,7 @@
 #include "CrossSections/structuralcrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
-#include "Elements/latticestructuralelement.h"
+#include "Elements/LatticeElements/latticestructuralelement.h"
 #include "datastream.h"
 #include "staggeredproblem.h"
 #include "contextioerr.h"
