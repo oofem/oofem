@@ -363,7 +363,8 @@ void XfemManager :: propagateFronts(bool &oAnyFronHasPropagated)
 
 void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
 {
-    oAnyFronHasPropagated = false;
+#ifdef __SM_MODULE
+  oAnyFronHasPropagated = false;
         
     // Loop over EI:s and collect cross sections which have delaminaion EI:s
     IntArray CSnumbers;
@@ -388,7 +389,7 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
     for ( auto &ei: enrichmentItemList ) {
 
         bool eiHasPropagated = false;
-        
+
         if ( Delamination *dei =  dynamic_cast< Delamination * >( ei.get() ) ) {         
             
             if ( !failureChecked ) {
@@ -415,13 +416,17 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
         } else {
             OOFEM_ERROR(" XfemManager :: initiateFronts not implemented for other than Delamination.")
         }
-
         if(eiHasPropagated) {
             oAnyFronHasPropagated = true;
         }
     }
-
     updateNodeEnrichmentItemMap();
+
+#else
+    OOFEM_ERROR(" XfemManager :: initiateFronts not implemented for other than Delamination.")
+#endif
+
+
 }
 
 bool XfemManager :: hasPropagatingFronts()

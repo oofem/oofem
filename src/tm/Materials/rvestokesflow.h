@@ -35,6 +35,8 @@
 #ifndef rvestokesflow_h
 #define rvestokesflow_h
 
+#ifdef __FM_MODULE
+
 #include "floatarrayf.h"
 #include "floatmatrixf.h"
 #include "transportmaterial.h"
@@ -119,4 +121,5 @@ public:
 };
 }
 
+#endif // ifdef __FM_MODULE
 #endif // rvestokesflow_h
