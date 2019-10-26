@@ -58,11 +58,7 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 
     dvalue = -2.;
     IR_GIVE_OPTIONAL_FIELD(ir, dvalue, _IFT_HydratingIsoHeatMaterial_hydration);
-    if ( dvalue >= 0. ) {
-        hydration = 1;
-    } else {
-        hydration = 0;
-    }
+    hydration = dvalue >= 0.;
 
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60
@@ -76,19 +72,19 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
         printf("\nHydratingHeatMat %d: using mixture %d.\n", giveNumber(), value);
 
         if ( ir->hasField(_IFT_HydratingIsoHeatMaterial_noHeat) ) {
-            hydrationHeat = 0;
+            hydrationHeat = false;
             printf( "HydratingHeatMat %d: hydration heat neglected.\n", giveNumber() );
         } else {
-            hydrationHeat = 1;
+            hydrationHeat = true;
         }
 
         if ( hydrationHeat ) {
             // include hydration internal source in LHS?
             if ( ir->hasField(_IFT_HydratingIsoHeatMaterial_noLHS) ) {
-                hydrationLHS = 0;
+                hydrationLHS = false;
                 printf( "HydratingHeatMat %d: hydration heat not included in LHS.\n", giveNumber() );
             } else {
-                hydrationLHS = 1;
+                hydrationLHS = true;
             }
         }
     }
@@ -141,9 +137,9 @@ void
 HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray aux;
     if ( ms ) {
-        ms->letTempStateVectorBe(vec);
+        ms->setTempField(vec[0]);
+
         if ( hydration ) {
             /* OBSOLETE
              * FloatArray s = ms->giveStateVector ();
@@ -159,8 +155,9 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
             HydrationModelInterface :: updateInternalState(vec, gp, tStep);
 
             // additional file output !!!
-            if ( ( gp->giveNumber() == 1 ) && giveStatus(gp) ) {
+            if ( gp->giveNumber() == 1 && giveStatus(gp) ) {
                 FILE *vyst = fopen("teplota.out", "a");
+                FloatArray aux;
                 computeInternalSourceVector(aux, gp, tStep, VM_Incremental);
                 if ( aux.isEmpty() ) {
                     aux.resize(1);
@@ -189,13 +186,11 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
     } else if ( !hydrationLHS ) {
         return 0;
     } else if ( hydrationModel ) { //!!! better via HydrationModelInterface
-        FloatArray vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
-        if ( vec.giveSize() < 2 ) {
-            vec.resize(2);
-            vec.at(2) = 1.; // saturated if undefined
-        }
+        auto status = static_cast< HeMoTransportMaterialStatus * >( giveStatus(gp) );
+        double t = status->giveTempTemperature();
+        double h = status->giveTempHumidity(); // TODO CHECK
 
-        return hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep) / tStep->giveTimeIncrement();
+        return hydrationModel->giveCharacteristicValue(t, h, rmode, gp, tStep) / tStep->giveTimeIncrement();
     } else {
         OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
         return 0.;

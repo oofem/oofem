@@ -78,16 +78,10 @@ public:
      */
     HeMoBazNajMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
+    std::pair<FloatArrayF<3>, FloatArrayF<3>> computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *atTime) const override;
-
-    double giveCharacteristicValue(MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *atTime) const override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
@@ -96,18 +90,15 @@ public:
     double give(int aProperty, GaussPoint *gp) const override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
-    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     const char *giveInputRecordName() const override { return _IFT_HeMoBazNajMaterial_Name; }
     const char *giveClassName() const override { return "HeMoBazNajMaterial"; }
 
-protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const;
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new HeMoTransportMaterialStatus(gp); }
 
-    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const;
+protected:
+    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
     double perm_mm(double h, double T) const;
     double perm_mh(double h, double T) const;

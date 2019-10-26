@@ -307,23 +307,17 @@ HydrationModel :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, T
 }
 
 double
-HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
+HydrationModel :: giveCharacteristicValue(double T, double h, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 // Transport status needs to be obtained from master status, it's better to pass as a parameter
 // to enable usage from structural material
 {
-    double answer = 0;
-
-    if ( ( rmode == IntSource ) || ( rmode == IntSource_hh ) || ( rmode == IntSource_ww ) || ( rmode == IntSource_wh ) || ( rmode == IntSource_hw ) ) {
-        if ( vec.isEmpty() ) {
-            OOFEM_ERROR("undefined state vector.");
-        }
-
-        answer = computeIntSource(vec, gp, tStep, rmode);
+    if ( rmode == IntSource || rmode == IntSource_hh || rmode == IntSource_ww || rmode == IntSource_wh || rmode == IntSource_hw ) {
+        return computeIntSource(T, h, gp, tStep, rmode);
     } else {
         OOFEM_ERROR("wrong MatResponseMode.");
     }
 
-    return answer;
+    return 0.;
 }
 
 double
@@ -366,7 +360,7 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
 }
 
 double
-HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode) const
+HydrationModel :: computeIntSource(double T, double h, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode) const
 /*
  * Computes and returns the derivatives of the material-generated Internal Source with respect to the tm state vector.
  * Used in IntSourceLHS matrix for quadratic convergency of global iteration.
@@ -381,8 +375,6 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
 {
     // prepare ksi, T, h, dt
     double ksi = giveHydrationDegree(gp, tStep, VM_Total);
-    double T = vec(0);
-    double h = vec(1);
     // !!! timeScale
     double dt = tStep->giveTimeIncrement() * timeScale;
 
@@ -463,10 +455,10 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
 double
 HydrationModel :: regulafindroot() const
 {
-    double x0, y0, xl = 0., xr = 1.;
+    double x0, y0, yl, xl = 0., xr = 1.;
 
     do {
-        double yl = localResidual(xl);
+        yl = localResidual(xl);
         x0 = yl * ( xl - xr ) / ( localResidual(xr) - yl ) + xl;
         y0 = localResidual(x0);
         if ( y0 < 0 ) {

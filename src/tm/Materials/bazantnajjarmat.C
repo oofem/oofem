@@ -33,7 +33,6 @@
  */
 
 #include "tm/Materials/bazantnajjarmat.h"
-#include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -74,10 +73,10 @@ BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeSte
 double
 BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
 {
-    const FloatArray &tempState = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
-    if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
-         OOFEM_WARNING("Relative humidity %.5f is out of range 0.0 - 1.0", tempState.at(1) );
+    auto field = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
+    if ( ( field > 1.0 ) || ( field < 0.0 ) ) {
+         OOFEM_WARNING("Relative humidity %.5f is out of range 0.0 - 1.0", field );
     }
-    return tempState.at(1);
+    return field;
 }
 } // end namespace oofem

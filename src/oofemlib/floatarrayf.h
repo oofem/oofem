@@ -40,6 +40,7 @@
 #include "contextmode.h"
 #include "datastream.h"
 #include "error.h"
+#include "floatarray.h"
 
 #include <array>
 #include <initializer_list>

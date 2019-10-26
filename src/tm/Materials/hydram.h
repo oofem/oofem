@@ -193,7 +193,7 @@ protected:
     double dksidh(double ksi, double T, double h, double dt) const;
 
     /// Computes and returns the derivatives of the material-generated Internal Source with respect to the tm state vector.
-    double computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode) const;
+    double computeIntSource(double T, double h, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode) const;
     /**
      * Computes and returns hydration degree increment for given ksi, T [K], dt [s].
      * Called by updateInternalState(val, gp, tStep)
@@ -260,7 +260,7 @@ public:
     void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     // } end new 5.1.2004
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
-    virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual double giveCharacteristicValue(double T, double h, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const;
     // --- identification and auxiliary functions ---
     const char *giveInputRecordName() const override { return _IFT_HydrationModel_Name; }
     const char *giveClassName() const override { return "HydrationModel"; }
