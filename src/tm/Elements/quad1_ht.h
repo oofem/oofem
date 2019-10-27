@@ -56,7 +56,6 @@ protected:
 
 public:
     Quad1_ht(int n, Domain * d);
-    virtual ~Quad1_ht();
 
     FEInterpolation *giveInterpolation() const override;
     double computeVolumeAround(GaussPoint *gp) override;

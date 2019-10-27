@@ -72,14 +72,10 @@ TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
 }
 
 
-TransportElement :: ~TransportElement()
-{ }
-
 IRResultType
 TransportElement :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
-
 
     result = Element::initializeFrom(ir);
     this->vofFunction = 0;
@@ -1434,7 +1430,7 @@ TransportElement :: giveMaterial()
 double
 TransportElement::computeVof(TimeStep *tStep)
 {
-    if (this->vofFunction) {
+    if ( this->vofFunction ) {
         return this->giveDomain()->giveFunction(this->vofFunction)->evaluateAtTime(tStep->giveTargetTime());
     } else {
         return 1.0;

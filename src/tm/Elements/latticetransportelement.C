@@ -39,16 +39,12 @@ namespace oofem {
 LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, ElementMode em) : TransportElement(n, aDomain, em)
 { }
 
-LatticeTransportElement :: ~LatticeTransportElement()
-{ }
-
 
 IRResultType
 LatticeTransportElement :: initializeFrom(InputRecord *ir)
 {
     return TransportElement :: initializeFrom(ir);
 }
-
 
 
 } // end namespace oofem
