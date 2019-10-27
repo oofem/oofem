@@ -54,19 +54,10 @@
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
 
-TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *master) : EngngModel(i, master),
-    alpha(0.5),
-    dtFunction(0),
-    prescribedTimes(),
-    initT(0.),
-    deltaT(1.),
-    keepTangent(false),
-    lumped(false)
+TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *master) : EngngModel(i, master)
 {
     ndomains = 1;
 }
-
-TransientTransportProblem :: ~TransientTransportProblem() {}
 
 
 NumericalMethod *TransientTransportProblem :: giveNumericalMethod(MetaStep *mStep)
