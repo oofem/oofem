@@ -69,11 +69,7 @@ TransportGradientNeumann :: TransportGradientNeumann(int n, Domain *d) :
     }
 }
 
-TransportGradientNeumann :: ~TransportGradientNeumann()
-{
-}
-
-
+// 
 IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro

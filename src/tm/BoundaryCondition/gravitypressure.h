@@ -62,11 +62,10 @@ namespace oofem {
 class GravityPressure : public BodyLoad
 {
 protected:
-    double zeroLevel;
+    double zeroLevel = 0.;
     FloatArray normalVector;
 
 public:
-    /// Constructor
     GravityPressure(int i, Domain * d) : BodyLoad(i, d) { }
 
     bcGeomType giveBCGeoType() const override { return GravityPressureBGT; }
