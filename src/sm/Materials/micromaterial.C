@@ -66,7 +66,6 @@ REGISTER_Material(MicroMaterial);
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
 MicroMaterialStatus :: MicroMaterialStatus(GaussPoint *gp) : StructuralMaterialStatus(gp) { }
 
-MicroMaterialStatus :: ~MicroMaterialStatus() { }
 
 void MicroMaterialStatus :: initTempStatus()
 {
@@ -78,7 +77,7 @@ void MicroMaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 }
 
-void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 { }
 
 void MicroMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)

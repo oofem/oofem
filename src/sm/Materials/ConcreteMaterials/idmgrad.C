@@ -51,17 +51,8 @@ namespace oofem {
 REGISTER_Material(IsotropicGradientDamageMaterial);
 
 IsotropicGradientDamageMaterial :: IsotropicGradientDamageMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), GradientDamageMaterialExtensionInterface(d)
-    //
-    // constructor
-    //
 {}
 
-
-IsotropicGradientDamageMaterial :: ~IsotropicGradientDamageMaterial()
-//
-// destructor
-//
-{ }
 
 IRResultType
 IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
@@ -101,8 +92,8 @@ IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
 
 
 
-int
-IsotropicGradientDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+IsotropicGradientDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _1dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _3dMat;
 }
@@ -523,12 +514,6 @@ IsotropicGradientDamageMaterial :: CreateStatus(GaussPoint *gp) const
 
 IsotropicGradientDamageMaterialStatus :: IsotropicGradientDamageMaterialStatus(GaussPoint *g) : IsotropicDamageMaterial1Status(g)
 { }
-
-
-IsotropicGradientDamageMaterialStatus :: ~IsotropicGradientDamageMaterialStatus()
-{ }
-
-
 
 
 void

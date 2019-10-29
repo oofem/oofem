@@ -69,17 +69,16 @@ protected:
   
 public:
     ConcreteFCMViscoElasticStatus(GaussPoint *g);
-    virtual ~ConcreteFCMViscoElasticStatus();
 
-    double giveFractureEnergy() { return var_gf; }
+    double giveFractureEnergy() const { return var_gf; }
     void setFractureEnergy(double new_Gf) { var_gf = new_Gf; }
 
-    double giveTensileStrength() { return var_ft; }
+    double giveTensileStrength() const { return var_ft; }
     void setTensileStrength(double new_ft) { var_ft = new_ft; }
 
     GaussPoint *giveSlaveGaussPointVisco() { return this->slaveGpVisco.get(); }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "ConcreteFCMViscoElasticStatus"; }
 
@@ -98,7 +97,6 @@ class ConcreteFCMViscoElastic : public ConcreteFCM
 {
 public:
     ConcreteFCMViscoElastic(int n, Domain *d);
-    virtual ~ConcreteFCMViscoElastic();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     const char *giveClassName() const override { return "ConcreteFCMViscoElastic"; }
@@ -106,7 +104,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ConcreteFCMViscoElasticStatus(gp); }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) override;

@@ -410,12 +410,8 @@ TrabBoneNL3DStatus :: TrabBoneNL3DStatus(GaussPoint *g) :
 }
 
 
-TrabBoneNL3DStatus :: ~TrabBoneNL3DStatus()
-{ }
-
-
 void
-TrabBoneNL3DStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBoneNL3DStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");

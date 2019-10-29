@@ -228,10 +228,6 @@ TrabBoneEmbedStatus :: TrabBoneEmbedStatus(GaussPoint *g) : StructuralMaterialSt
 }
 
 
-TrabBoneEmbedStatus :: ~TrabBoneEmbedStatus()
-{ }
-
-
 double
 TrabBoneEmbedStatus :: giveTempTSED()
 {
@@ -240,7 +236,7 @@ TrabBoneEmbedStatus :: giveTempTSED()
 
 
 void
-TrabBoneEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBoneEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

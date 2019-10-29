@@ -46,8 +46,8 @@ class KelvinChainSolidMaterialStatus : public RheoChainMaterialStatus
 {
 public:
     KelvinChainSolidMaterialStatus(GaussPoint * g, int nunits);
-    virtual ~KelvinChainSolidMaterialStatus() { }
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -68,7 +68,6 @@ class KelvinChainSolidMaterial : public RheoChainMaterial
 {
 public:
     KelvinChainSolidMaterial(int n, Domain * d);
-    virtual ~KelvinChainSolidMaterial() { }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
     void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
@@ -88,19 +87,19 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// Evaluation of the creep compliance function - function useless here
-    double computeCreepFunction(double ofAge, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double ofAge, double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 0; }
+    bool hasIncrementalShrinkageFormulation() const override { return false; }
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
     /// Evaluation of the relative volume of the solidified material
-    virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) const = 0;
 
     /// factors for exponential algorithm
-    virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
-    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu);
+    virtual double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const;
+    virtual double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const;
 };
 } // end namespace oofem
 #endif // kelvinchsol_h

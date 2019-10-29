@@ -58,17 +58,8 @@ namespace oofem {
 REGISTER_Material(IDNLMaterial);
 
 IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
-    //
-    // constructor
-    //
 {}
 
-
-IDNLMaterial :: ~IDNLMaterial()
-//
-// destructor
-//
-{ }
 
 void
 IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
@@ -844,12 +835,8 @@ IDNLMaterialStatus :: IDNLMaterialStatus(GaussPoint *g) :
 }
 
 
-IDNLMaterialStatus :: ~IDNLMaterialStatus()
-{ }
-
-
 void
-IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

@@ -63,7 +63,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 
     this->Permeability = ( permeabilityType ) type;
 
-    if (Permeability == KunzelPerm) {
+    if ( Permeability == KunzelPerm ) {
         IR_GIVE_FIELD ( ir, type, _IFT_NlIsoMoistureMaterial_capillarytransporttype );
         this->CapillaryTransport = ( capillaryTransportType ) type;
         if ( type >= 3 ) {
@@ -220,17 +220,16 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
     } else {
         OOFEM_ERROR("unknown permeability type");
     }
-    
-    wn=0.;
+
+    wn = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, wn, _IFT_NlIsoMoistureMaterial_wn);
     IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_NlIsoMoistureMaterial_alpha);
-    
 
     return IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 }
 
 double
-NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
+NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const
 {
     double humidity = this->giveHumidity(gp, VM_Total);
 
@@ -270,30 +269,29 @@ NlIsoMoistureMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
 }
 
 double
-NlIsoMoistureMaterial :: giveMoistureContent(double humidity)
+NlIsoMoistureMaterial :: giveMoistureContent(double humidity) const
 {
     if ( this->Isotherm == linear ) {
         return moistureCapacity*humidity;
-     
     } else if ( this->Isotherm == multilinear ) {
         double tol = 1.e-10;
-        for (int i = 1; i <= iso_h.giveSize(); i++) {
+        for ( int i = 1; i <= iso_h.giveSize(); i++ ) {
             if ( ( humidity - iso_h.at(i) ) < tol ) {
                 return  iso_wh.at(i-1) +  (iso_wh.at(i)-iso_wh.at(i-1))/(iso_h.at(i)-iso_h.at(i-1)) * (humidity-iso_h.at(i-1)) ;
             }
         }
 
     } else if ( this->Isotherm == Ricken ) {
-      return  wf - log(1.-humidity)/dd ;
+        return  wf - log(1.-humidity)/dd;
 
     } else if ( this->Isotherm == Kuenzel ) {
-      return wf * (b-1.) * humidity / (b-humidity);
+        return wf * (b-1.) * humidity / (b-humidity);
 
     } else if ( this->Isotherm == Hansen ) {
-      return rhodry*uh * pow( (1.-log(humidity)/A), (-1./nn) ) ;
+        return rhodry*uh * pow( (1.-log(humidity)/A), (-1./nn) );
 
     } else if ( this->Isotherm == BSB ) {
-      return rhodry*c*k*Vm*humidity/( (1.-k*humidity) * (c-1.)*k*humidity );
+        return rhodry*c*k*Vm*humidity/( (1.-k*humidity) * (c-1.)*k*humidity );
 
     } else if ( this->Isotherm == bilinear ) {
 
@@ -315,44 +313,41 @@ NlIsoMoistureMaterial :: giveMoistureContent(double humidity)
 }
 
 double
-NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
+NlIsoMoistureMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep) const
 {
-    double permeability = 0.;
     double humidity = this->giveHumidity(gp, VM_Total);
 
     if ( this->Permeability == multilin ) {
         double tol = 1.e-10;
         for ( int i = 1; i <= perm_h.giveSize(); i++ ) {
             if ( ( humidity - perm_h.at(i) ) < tol ) {
-                permeability = perm_ch.at(i - 1) + ( perm_ch.at(i) - perm_ch.at(i - 1) ) * ( humidity - perm_h.at(i - 1) ) / ( perm_h.at(i) - perm_h.at(i - 1) );
-                break;
+                return perm_ch.at(i - 1) + ( perm_ch.at(i) - perm_ch.at(i - 1) ) * ( humidity - perm_h.at(i - 1) ) / ( perm_h.at(i) - perm_h.at(i - 1) );
             }
         }
     } else if ( this->Permeability == Bazant ) {
-        permeability = C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
+        return C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
     } else if ( this->Permeability == Xi ) {
         double power = pow( 10., gammah * ( humidity - 1. ) );
-        permeability = alphah + betah * ( 1. - pow(2., -power) );
-    } else if (this->Permeability == KunzelPerm) {
+        return alphah + betah * ( 1. - pow(2., -power) );
+    } else if ( this->Permeability == KunzelPerm ) {
 
-        double dw_dh; //[kg/m^3]
-        double Dw; // capillary transport coefficient [m^2/s]
+        // [kg/m^3]
+        double dw_dh = this->giveMoistureCapacity(gp, tStep);
+        // capillary transport coefficient [m^2/s]
+        double Dw = this->computeCapTranspCoeff(humidity);
 
-        dw_dh = this->giveMoistureCapacity(gp, tStep);
-        Dw = this->computeCapTranspCoeff(humidity);
-
-        permeability = Dw * dw_dh + deltap * p_sat;
+        return Dw * dw_dh + deltap * p_sat;
 
     } else {
         OOFEM_ERROR("unknown permeability type");
     }
 
-    return permeability;
+    return 0.;
 }
 
 
 double
-NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity)
+NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity) const
 {
     double Dw = 0.;
 
@@ -376,8 +371,7 @@ NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity)
         }
 
     } else if ( this->CapillaryTransport == KunzelCT ){
-        double w;
-        w = this->giveMoistureContent(humidity);
+        double w = this->giveMoistureContent(humidity);
         Dw = 3.8 * (Abs/wf)*(Abs/wf) * pow(1000., w/wf -1.);
 
     } else {
@@ -389,31 +383,28 @@ NlIsoMoistureMaterial :: computeCapTranspCoeff(double humidity)
 
 
 double
-NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
+NlIsoMoistureMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
 {
-    const FloatArray &tempState = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) )->giveTempField();
-    if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
-        OOFEM_ERROR("Relative humidity %.3f is out of range", tempState.at(1) );
+    auto tempState = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) )->giveTempField();
+    if ( tempState > 1.0 || tempState < 0.0 ) {
+        OOFEM_ERROR("Relative humidity %.3f is out of range", tempState );
         return 0.0;
     } else {
-        return tempState.at(1);
+        return tempState;
     }
 }
 
-int
-NlIsoMoistureMaterial :: hasInternalSource()
+bool
+NlIsoMoistureMaterial :: hasInternalSource() const
 {
-    if (this->wn !=0.){
-        return 1;
-    }
-return 0;
+    return this->wn != 0.;
 }
 
 void
-NlIsoMoistureMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+NlIsoMoistureMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     val.resize(1);
-    if (( mode == VM_Total) || (mode == VM_TotalIntrinsic)) {
+    if ( mode == VM_Total || mode == VM_TotalIntrinsic ) {
         val.at(1) = -wn*(this->alpha.eval( {{ "t", tStep->giveTargetTime() }}, this->giveDomain() ) - this->alpha.eval( {{ "t", tStep->giveTargetTime()-tStep->giveTimeIncrement()}} , this->giveDomain() ) ) / tStep->giveTimeIncrement();
     } else {
         OOFEM_ERROR("Undefined mode %s\n", __ValueModeTypeToString(mode) );

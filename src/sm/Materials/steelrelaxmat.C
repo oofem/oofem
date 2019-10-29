@@ -63,8 +63,8 @@ SteelRelaxMat :: ~SteelRelaxMat()
 {}
 
 
-int
-SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode)
+bool
+SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether the receiver supports the given mode
 //
@@ -474,11 +474,9 @@ SteelRelaxMatStatus :: SteelRelaxMatStatus(GaussPoint *g) : StructuralMaterialSt
     prestress = 0.;
 }
 
-SteelRelaxMatStatus :: ~SteelRelaxMatStatus()
-{ }
 
 void
-SteelRelaxMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+SteelRelaxMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 

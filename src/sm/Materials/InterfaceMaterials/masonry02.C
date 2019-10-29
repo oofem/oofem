@@ -59,8 +59,8 @@ Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 Masonry02 :: ~Masonry02()
 { }
 
-int
-Masonry02 :: hasMaterialModeCapability(MaterialMode mode)
+bool
+Masonry02 :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

@@ -36,8 +36,8 @@
 #define twophasemat_h
 
 #include "tm/Materials/transportmaterial.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "scalarfunction.h"
 
 ///@name Input fields for IsotropicHeatTransferMaterial
@@ -58,23 +58,19 @@ protected:
     IntArray slaveMaterial; 
  
 public:
-    TwoPhaseMaterial(int n, Domain * d);
-    virtual ~TwoPhaseMaterial();
+    TwoPhaseMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
      double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
-    //virtual double  giveMaturityT0() { return maturityT0; }
-    protected:
+    //virtual double giveMaturityT0() const { return maturityT0; }
+protected:
     TransportMaterial *giveMaterial(int i) const;
     double giveVof (GaussPoint* gp, TimeStep* tStep) const;
     const char *giveClassName() const override { return "TwoPhaseMaterial"; }

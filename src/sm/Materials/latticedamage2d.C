@@ -59,8 +59,8 @@ LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d),
 LatticeDamage2d :: ~LatticeDamage2d()
 { }
 
-int
-LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode)
+bool
+LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _2dLattice;
 }
@@ -643,7 +643,7 @@ LatticeDamage2d :: giveThermalDilatationVector(FloatArray &answer,
 
 
 double
-LatticeDamage2d :: give(int aProperty, GaussPoint *gp)
+LatticeDamage2d :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
     if ( static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
@@ -732,7 +732,7 @@ LatticeDamage2dStatus :: initTempStatus()
 }
 
 void
-LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

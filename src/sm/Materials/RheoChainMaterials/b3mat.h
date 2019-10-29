@@ -98,7 +98,6 @@ public:
     B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) {
         shMode = B3_NoShrinkage;
     }
-    virtual ~B3Material() { }
 
     void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
@@ -106,10 +105,10 @@ public:
     const char *giveInputRecordName() const override { return _IFT_B3Material_Name; }
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 1; }
+    bool hasIncrementalShrinkageFormulation() const override { return true; }
 
     virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     /// Free shrinkage at material point, requires staggered analysis.
@@ -123,7 +122,7 @@ protected:
      * PhD-thesis, Technical University of Denmark, Lingby.
      * @param w Water content (kg/kg).
      */
-    double inverse_sorption_isotherm(double w);
+    double inverse_sorption_isotherm(double w) const;
 };
 } // end namespace oofem
 #endif // b3mat_h

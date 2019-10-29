@@ -852,7 +852,7 @@ ConcreteFCM :: computeResidualTensileStrength(GaussPoint *gp, TimeStep *tStep) {
 
 
 double
-ConcreteFCM :: give(int aProperty, GaussPoint *gp)
+ConcreteFCM :: give(int aProperty, GaussPoint *gp) const
 {
     this->giveStatus(gp);
     
@@ -920,13 +920,9 @@ ConcreteFCMStatus :: ConcreteFCMStatus(GaussPoint *gp) :
 {}
 
 
-ConcreteFCMStatus :: ~ConcreteFCMStatus()
-{ }
-
-
 
 void
-ConcreteFCMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteFCMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FCMMaterialStatus :: printOutputAt(file, tStep);
 }

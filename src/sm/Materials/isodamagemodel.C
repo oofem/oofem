@@ -61,11 +61,8 @@ IsotropicDamageMaterial :: ~IsotropicDamageMaterial()
     delete linearElasticMaterial;
 }
 
-int
-IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
 }
@@ -334,10 +331,10 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         status->giveCrackVector(answer);
         return 1;
     } else if ( type == IST_CumPlasticStrain ) {
-      if ( permStrain )
-	answer.at(1) = evaluatePermanentStrain(status->giveKappa(), status->giveDamage());
+        if ( permStrain ) {
+            answer.at(1) = evaluatePermanentStrain(status->giveKappa(), status->giveDamage());
+        }
         return 1;
-	
 #ifdef keep_track_of_dissipated_energy
     } else if ( type == IST_StressWorkDensity ) {
         answer.resize(1);
@@ -377,7 +374,7 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
     answer.at(3) = this->tempDillatCoeff;
 }
 
-double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp)
+double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return linearElasticMaterial->give(aProperty, gp);
 }
@@ -425,12 +422,8 @@ IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(GaussPoint *g) : 
 }
 
 
-IsotropicDamageMaterialStatus :: ~IsotropicDamageMaterialStatus()
-{ }
-
-
 void
-IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

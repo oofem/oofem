@@ -42,15 +42,6 @@
 namespace oofem {
 REGISTER_Material(TwoPhaseMaterial);
 
-TwoPhaseMaterial :: TwoPhaseMaterial(int n, Domain *d) : TransportMaterial(n, d)
-{
-}
-
-TwoPhaseMaterial :: ~TwoPhaseMaterial() {
-    // destructor
-}
-
-
 IRResultType
 TwoPhaseMaterial :: initializeFrom(InputRecord *ir)
 {
@@ -66,46 +57,40 @@ TwoPhaseMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-void
-TwoPhaseMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+FloatArrayF<3>
+TwoPhaseMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    ms->setTempField(field);
+    ms->setTempGradient(grad);
+
     double vof = this->giveVof(gp, tStep);
-    FloatArray v0, v1; 
-    this->giveMaterial(0)->giveFluxVector(v0, gp, grad, field, tStep);
-    this->giveMaterial(1)->giveFluxVector(v1, gp, grad, field, tStep);
-
-    answer = (1.0 - vof) * v0 + vof * v1;
-
+    auto v0 = this->giveMaterial(0)->computeFlux3D(grad, field, gp, tStep);
+    auto v1 = this->giveMaterial(1)->computeFlux3D(grad, field, gp, tStep);
+    auto answer = (1.0 - vof) * v0 + vof * v1;
     ms->setTempFlux(answer);
+    return answer;
 }
 
 
-void
-TwoPhaseMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *tStep)
+FloatMatrixF<3,3>
+TwoPhaseMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix v1;
     double vof = this->giveVof(gp, tStep);
-
-    this->giveMaterial(0)->giveCharacteristicMatrix(answer, mode, gp, tStep);
-    this->giveMaterial(1)->giveCharacteristicMatrix(v1, mode, gp, tStep);
-
-    answer.times(1.0 - vof);
-    v1.times(vof);
-    answer.add(v1);
+    auto v0 = this->giveMaterial(0)->computeTangent3D(mode, gp, tStep);
+    auto v1 = this->giveMaterial(1)->computeTangent3D(mode, gp, tStep);
+    return (1.0 - vof) * v0 + vof * v1;
 }
 
 double
 TwoPhaseMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 {
     double vof = this->giveVof(gp, tStep);
-    return (1.0 - vof) * 
-    this->giveMaterial(0)->giveCharacteristicValue(mode, gp, tStep) + vof * this->giveMaterial(1)->giveCharacteristicValue(mode, gp, tStep);
+    auto v0 = this->giveMaterial(0)->giveCharacteristicValue(mode, gp, tStep);
+    auto v1 = this->giveMaterial(1)->giveCharacteristicValue(mode, gp, tStep);
+    return (1.0 - vof) * v0 + vof * v1;
 }
 
 TransportMaterial *

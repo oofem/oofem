@@ -48,13 +48,9 @@ FCMMaterial :: FCMMaterial(int n, Domain *d) : StructuralMaterial(n, d),
     ecsMethod(ECSM_Unknown)
 {}
 
-FCMMaterial :: ~FCMMaterial() {}
 
-int
-FCMMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+FCMMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
@@ -2031,7 +2027,7 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-FCMMaterial :: give(int aProperty, GaussPoint *gp)
+FCMMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return linearElasticMaterial.give(aProperty, gp);
 }
@@ -2369,21 +2365,15 @@ FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
 }
 
 
-FCMMaterialStatus :: ~FCMMaterialStatus()
-{ }
-
-
-
 void
-FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->giveNumberOfCracks() > 0 ) {
-        for ( i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
+        for ( int i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
             switch ( crackStatuses.at(i) ) {
             case pscm_NONE:
                 strcpy(s, "NONE");

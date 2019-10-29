@@ -52,10 +52,8 @@ class LatticeMaterialStatus : public StructuralMaterialStatus
 {
 public:
     LatticeMaterialStatus(GaussPoint * g);
-    /// Destructor.
-    virtual ~LatticeMaterialStatus() { }
 
-    void printOutputAt(FILE *, TimeStep *) override { }
+    void printOutputAt(FILE *, TimeStep *) const override { }
 
     void initTempStatus() override { }
 

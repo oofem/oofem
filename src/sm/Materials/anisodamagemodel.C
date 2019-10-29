@@ -62,11 +62,8 @@ AnisotropicDamageMaterial :: AnisotropicDamageMaterial(int n, Domain *d) : Struc
 {}
 
 
-int
-AnisotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports the given mode
-//
+bool
+AnisotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress;
     //return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
@@ -2089,7 +2086,7 @@ AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(GaussPoint *g
 }
 
 void
-AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _PlaneStress ) { // special treatment of the out-of-plane strain

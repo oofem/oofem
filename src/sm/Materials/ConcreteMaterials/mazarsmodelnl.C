@@ -53,19 +53,13 @@ MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), S
 }
 
 
-MazarsNLMaterial :: ~MazarsNLMaterial()
-//
-// destructor
-//
-{ }
-
 Interface *
 MazarsNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
         return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -182,12 +176,8 @@ MazarsNLMaterialStatus :: MazarsNLMaterialStatus(GaussPoint *g) :
 }
 
 
-MazarsNLMaterialStatus :: ~MazarsNLMaterialStatus()
-{ }
-
-
 void
-MazarsNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MazarsNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

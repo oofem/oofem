@@ -113,7 +113,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     const char *giveInputRecordName() const override { return _IFT_MisesMat_Name; }
     const char *giveClassName() const override { return "MisesMat"; }
@@ -184,26 +184,23 @@ protected:
     double tempDamage;
 
 
-
-
 public:
     MisesMatStatus(GaussPoint *g);
-    virtual ~MisesMatStatus();
 
-    const FloatArray &givePlasticStrain() { return plasticStrain; }
+    const FloatArray &givePlasticStrain() const { return plasticStrain; }
 
-    const FloatArray &giveTrialStressDev() { return trialStressD; }
+    const FloatArray &giveTrialStressDev() const { return trialStressD; }
 
-    double giveTrialStressVol() { return trialStressV; }
+    double giveTrialStressVol() const { return trialStressV; }
 
-    double giveDamage() { return damage; }
-    double giveTempDamage() { return tempDamage; }
+    double giveDamage() const { return damage; }
+    double giveTempDamage() const { return tempDamage; }
 
-    double giveCumulativePlasticStrain() { return kappa; }
-    double giveTempCumulativePlasticStrain() { return tempKappa; }
+    double giveCumulativePlasticStrain() const { return kappa; }
+    double giveTempCumulativePlasticStrain() const { return tempKappa; }
 
-    const FloatArray &giveTempEffectiveStress() { return tempEffStress; }
-    const FloatArray &giveEffectiveStress() { return effStress; }
+    const FloatArray &giveTempEffectiveStress() const { return tempEffStress; }
+    const FloatArray &giveEffectiveStress() const { return effStress; }
 
     void letTempPlasticStrainBe(const FloatArray &values) { tempPlasticStrain = values; }
     const FloatArray &getTempPlasticStrain() const { return tempPlasticStrain; }
@@ -226,7 +223,7 @@ public:
 
     const FloatArray &givePlasDef() { return plasticStrain; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
 

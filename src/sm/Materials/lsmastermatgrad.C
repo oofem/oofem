@@ -59,8 +59,8 @@ LargeStrainMasterMaterialGrad :: ~LargeStrainMasterMaterialGrad()
 { }
 
 // specifies whether a given material mode is supported by this model
-int
-LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode)
+bool
+LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat;
 }
@@ -187,7 +187,7 @@ LargeStrainMasterMaterialGrad :: giveNonlocalInternalForces_B_factor(FloatArray 
 void
 LargeStrainMasterMaterialGrad :: computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
+    // LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     // @todo: solve this
     //  answer = status->giveTempKappa();w
     answer = 1;

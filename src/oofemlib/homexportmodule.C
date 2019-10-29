@@ -108,8 +108,10 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
     if (reactions) {
        ///@todo need reaction forces from engngm model, not separately from sm/tm modules as it is implemented now
+      /*
        TransientTransportProblem *TTP = dynamic_cast< TransientTransportProblem * >(emodel);
        FieldPtr fld = TTP->giveField(FT_HumidityConcentration, tStep);
+      */
     
     }
         

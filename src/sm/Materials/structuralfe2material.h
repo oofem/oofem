@@ -69,7 +69,6 @@ protected:
 
 public:
     StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile);
-    virtual ~StructuralFE2MaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
     PrescribedGradientHomogenization *giveBC();// { return this->bc; }
@@ -127,13 +126,12 @@ protected:
 
 public:
     StructuralFE2Material(int n, Domain * d);
-    virtual ~StructuralFE2Material();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveInputRecordName() const override { return _IFT_StructuralFE2Material_Name; }
     const char *giveClassName() const override { return "StructuralFE2Material"; }
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;

@@ -45,9 +45,8 @@ class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
     KelvinChainMaterialStatus(GaussPoint * g, int nunits);
-    virtual ~KelvinChainMaterialStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -68,7 +67,6 @@ class KelvinChainMaterial : public RheoChainMaterial
 {
 public:
     KelvinChainMaterial(int n, Domain * d);
-    virtual ~KelvinChainMaterial() { }
 
     // identification and auxiliary functions
     const char *giveClassName() const override { return "KelvinChainMaterial"; }
@@ -90,9 +88,9 @@ public:
     void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 0; }
+    bool hasIncrementalShrinkageFormulation() const override { return false; }
 
-    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 

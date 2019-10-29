@@ -1228,13 +1228,8 @@ FRCFCMStatus :: FRCFCMStatus(GaussPoint *gp) :
 { }
 
 
-FRCFCMStatus :: ~FRCFCMStatus()
-{ }
-
-
-
 void
-FRCFCMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+FRCFCMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     ConcreteFCMStatus :: printOutputAt(file, tStep);
 

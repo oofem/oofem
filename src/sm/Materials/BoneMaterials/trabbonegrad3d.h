@@ -92,7 +92,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneGrad3D_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual bool hasMaterialModeCapability(MaterialMode mode) const;
     virtual Interface *giveInterface(InterfaceType t) {
         if ( t == GradientDamageMaterialExtensionInterfaceType ) {
             return static_cast< GradientDamageMaterialExtensionInterface * >( this );

@@ -86,9 +86,8 @@ protected:
 
 public:
     MPlasticMaterialStatus(GaussPoint * g, int statusSize);
-    virtual ~MPlasticMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -157,7 +156,7 @@ public:
     virtual ~MPlasticMaterial();
 
     // identification and auxiliary functions
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "MPlasticMaterial"; }
 
     /// Returns reference to undamaged (bulk) material.
@@ -167,7 +166,7 @@ public:
      * Returns true if stiffness matrix of receiver is symmetric.
      * Default implementation returns true.
      */
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode,

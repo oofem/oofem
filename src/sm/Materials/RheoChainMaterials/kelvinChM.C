@@ -44,8 +44,8 @@ namespace oofem {
 KelvinChainMaterial :: KelvinChainMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
 { }
 
-void
-KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep )
+FloatArray
+KelvinChainMaterial :: computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function computes the moduli of individual Kelvin units
@@ -101,12 +101,14 @@ KelvinChainMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime
     }
 
     // solve the linear system
+    FloatArray answer;
     A.solveForRhs(rhs, answer);
 
     // convert compliances into moduli
     for ( int i = 1; i <= this->nUnits; i++ ) {
         answer.at(i) = 1. / answer.at(i);
     }
+    return answer;
 }
 
 double
@@ -292,7 +294,7 @@ KelvinChainMaterialStatus :: KelvinChainMaterialStatus(GaussPoint *g, int nunits
     RheoChainMaterialStatus(g, nunits) { }
 
 void
-KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+KelvinChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     RheoChainMaterialStatus :: printOutputAt(file, tStep);
 }

@@ -103,15 +103,15 @@ public:
     DruckerPragerCutMat(int n, Domain * d);
     virtual ~DruckerPragerCutMat();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     
-    int hasCastingTimeSupport() override { return 1; }
+    bool hasCastingTimeSupport() const override { return true; }
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     const char *giveClassName() const override { return "DruckerPragerCutMat"; }
     const char *giveInputRecordName() const override { return _IFT_DruckerPragerCutMat_Name; }

@@ -117,25 +117,24 @@ class HydrationModelStatus : public MaterialStatus
 {
 protected:
     // hydration degree at beginning of current time step
-    double hydrationDegree;
+    double hydrationDegree = 0.;
     // hydration degree at end of current time step (or during equilibrium iteration)
-    double tempHydrationDegree;
+    double tempHydrationDegree = 0.;
 
 public:
     HydrationModelStatus(GaussPoint * g);
-    virtual ~HydrationModelStatus() { }
 
     /// Returns the temp hydration degree.
-    double giveTempHydrationDegree() { return tempHydrationDegree; }
+    double giveTempHydrationDegree() const { return tempHydrationDegree; }
     /// Returns the non-temp hydration degree. Used for step restart and postprocessing.
-    double giveHydrationDegree() { return hydrationDegree; }
+    double giveHydrationDegree() const { return hydrationDegree; }
     void setHydrationDegree(double v) { hydrationDegree = v; }
     void setTempHydrationDegree(double v) { tempHydrationDegree = v; }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
@@ -155,46 +154,46 @@ protected:
     /// Used concrete mixture
     MixtureType mixture;
     /// Time step lenghts at zero and complete hydration
-    double hydrationStartMaxStep, hydrationEndMaxStep;
+    double hydrationStartMaxStep = 0., hydrationEndMaxStep = 0.;
     //!!! initial hydration degree - set in initialize From, but not used
-    double initialHydrationDegree;
+    double initialHydrationDegree = 0.;
     /// time scale - used for time input in other units than seconds
-    double timeScale;
+    double timeScale = 0.;
 
     // === Material parameters ===
-    double aa, ///< Normalized chemical affinity regression function coefficients.
-           ba,
-           ca,
-           da,
+    double aa = 0., ///< Normalized chemical affinity regression function coefficients.
+           ba = 0.,
+           ca = 0.,
+           da = 0.,
 
-           e0, ///< ksi_0.
-           ear, ///< Activation term [K].
-           le, ///< Latent heat [kJ/m3].
-           cv, ///< Input cement content kg/m3 for evaluation of total water consumption.
-           we; ///< Total water consumption for hydration [kg/m3].
+           e0 = 0., ///< ksi_0.
+           ear = 0., ///< Activation term [K].
+           le = 0., ///< Latent heat [kJ/m3].
+           cv = 0., ///< Input cement content kg/m3 for evaluation of total water consumption.
+           we = 0.; ///< Total water consumption for hydration [kg/m3].
 
     // === Hydration degree increment evaluation ===
     // auxiliary values to enable external root finding method without passing them as parameters in each call
     //!!! possible problem for parallel computation, performance???
     double auxksi, auxdt, auxT, auxh;
-    double localResidual(double dks); // G(dksi) 4.12
+    double localResidual(double dks) const; // G(dksi) 4.12
 
     // Auxiliary functions - root finding
     ///
-    double regulafindroot();
-    double bintreefindroot();
-    double mixedfindroot();
+    double regulafindroot() const;
+    double bintreefindroot() const;
+    double mixedfindroot() const;
 
     // === Material functions ===
     /// Returns the normalized chemical affinity A~(ksi) [1/s].
-    double affinity(double ksi);
+    double affinity(double ksi) const;
     /// Returns the derivation of chemical affinity dA~/dksi(ksi).
-    double dAdksi(double ksi);
-    double dksidT(double ksi, double T, double h, double dt);
-    double dksidh(double ksi, double T, double h, double dt);
+    double dAdksi(double ksi) const;
+    double dksidT(double ksi, double T, double h, double dt) const;
+    double dksidh(double ksi, double T, double h, double dt) const;
 
     /// Computes and returns the derivatives of the material-generated Internal Source with respect to the tm state vector.
-    double computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode);
+    double computeIntSource(double T, double h, GaussPoint *gp, TimeStep *tStep, MatResponseMode rmode) const;
     /**
      * Computes and returns hydration degree increment for given ksi, T [K], dt [s].
      * Called by updateInternalState(val, gp, tStep)
@@ -208,9 +207,6 @@ public:
     HydrationModel();
     /// Constructor setting the mixture type and root-finding method
     HydrationModel(MixtureType mix, FindRootMethod usefr);
-    /// Destructor
-    virtual ~HydrationModel() { }
-
 
     // === Hydration model services ===
 
@@ -234,7 +230,7 @@ public:
      * @param mode value mode VM_Incremental or VM_Total
      * @return hydration degree or increment in given gp
      */
-    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
 
     // how to determine whether hydration degree is uptodate?
     // - in tm, this can be ensured by calling computeHydrationDegreeIncrement when updateInternalState is used
@@ -261,10 +257,10 @@ public:
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
     /// Returns generated heat for given gp [kJ/m3], eventually water consumption
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     // } end new 5.1.2004
     /// Returns coefficients for LHS contribution from internal sources (dHeat/dT, dWaterSource/dw) for given temp state vector.
-    virtual double giveCharacteristicValue(const FloatArray &vec, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep);
+    virtual double giveCharacteristicValue(double T, double h, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const;
     // --- identification and auxiliary functions ---
     const char *giveInputRecordName() const override { return _IFT_HydrationModel_Name; }
     const char *giveClassName() const override { return "HydrationModel"; }
@@ -279,11 +275,10 @@ class HydrationModelStatusInterface : public Interface
 protected:
     /// Reference to associated hydration model status
     std :: unique_ptr< HydrationModelStatus > hydrationModelStatus;
+
 public:
     /// Constructor. Nulls the hydrationModelStatus pointer.
     HydrationModelStatusInterface() {}
-    /// Destructor. Deletes the associated hydration model status.
-    virtual ~HydrationModelStatusInterface() {}
 
     /// Returns the associated hydration model status.
     HydrationModelStatus *giveHydrationModelStatus() { return hydrationModelStatus.get(); }
@@ -293,7 +288,7 @@ public:
     /// Updates the equilibrium variables to temporary values.
     void updateYourself(TimeStep *tStep);
     /// Outputs the status variables
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const;
 };
 
 class HydrationModelInterface : public Interface
@@ -303,15 +298,13 @@ protected:
     /// Reference to the associated hydrationModel instance
     std :: unique_ptr< HydrationModel > hydrationModel;
     /// Material cast time - start of hydration
-    double castAt;
+    double castAt = 0.;
     /// Constant hydration degree for analysis without hydration model
-    double constantHydrationDegree;
+    double constantHydrationDegree = 0.;
 
 public:
     /// Returns the associated hydration model.
     HydrationModel *giveHydrationModel() { return hydrationModel.get(); }
-    /// Destructor. Deletes the associated hydration model.
-    virtual ~HydrationModelInterface() {}
     /**
      * Creates and initializes the hydration model according to object description stored in input record.
      * The parent class instanciateFrom method is not called here.
@@ -347,7 +340,7 @@ public:
      * @param mode Value mode VM_Incremental or VM_Total.
      * @return Hydration degree or increment in given gp.
      */
-    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    double giveHydrationDegree(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
 };
 } // end namespace oofem
 #endif // hydram_h

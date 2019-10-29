@@ -61,17 +61,13 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
 
     dvalue = -2.;
     IR_GIVE_OPTIONAL_FIELD(ir, dvalue, _IFT_HydratingHeMoMaterial_hydration);
-    if ( dvalue >= 0. ) {
-        hydration = 1;
-    } else {
-        hydration = 0;
-    }
+    hydration = dvalue >= 0.;
 
     /* if (ir->hasField("tout")) {
-     * teplotaOut = 1;
+     * teplotaOut = true;
      * printf("HydratingHeMoMat %d: additional teplota.out output selected.\n", giveNumber());
      * } else */
-    teplotaOut = 0;
+    teplotaOut = false;
 
     if ( hydration ) {
         // mixture type: 1 - mtLafarge, 2 - mtHuber, 3 - mtC60
@@ -85,19 +81,19 @@ HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
         printf("\nHydratingHeMoMat %d: using mixture %d.\n", giveNumber(), value);
 
         if ( ir->hasField(_IFT_HydratingHeMoMaterial_noHeat) ) {
-            hydrationHeat = 0;
+            hydrationHeat = false;
             printf( "HydratingHeMoMat %d: hydration heat neglected.\n", giveNumber() );
         } else {
-            hydrationHeat = 1;
+            hydrationHeat = true;
         }
 
         if ( hydrationHeat ) {
             // include hydration internal source in LHS?
             if ( ir->hasField(_IFT_HydratingHeMoMaterial_noLHS) ) {
-                hydrationLHS = 0;
+                hydrationLHS = false;
                 printf( "HydratingHeMoMat %d: hydration heat not included in LHS.\n", giveNumber() );
             } else {
-                hydrationLHS = 1;
+                hydrationLHS = true;
             }
         }
     } else {
@@ -119,19 +115,14 @@ HydratingHeMoMaterial :: setMixture(MixtureType mix)
     }
 }
 
-int
-HydratingHeMoMaterial :: hasInternalSource()
-// return true if hydration heat source is present
+bool
+HydratingHeMoMaterial :: hasInternalSource() const
 {
-    if ( hydrationHeat ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return hydrationHeat;
 }
 
 void
-HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 // returns in val the hydration heat computed by the hydration model for given hydration degree increment
 // current hydration model returns heat in (k)J/m3.
 // maybe??? element expects J/kg -> would have to divide by density here
@@ -157,10 +148,10 @@ HydratingHeMoMaterial :: computeInternalSourceVector(FloatArray &val, GaussPoint
 void
 HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray aux;
+    auto ms = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
     if ( ms ) {
-        ms->letTempStateVectorBe(vec);
+        ms->setTempTemperature(vec[0]);
+        ms->setTempHumidity(vec[1]);
         if ( hydration ) {
             /* OBSOLETE
              * FloatArray s = ms->giveStateVector ();
@@ -189,6 +180,7 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
             // additional file output !!!
             if ( teplotaOut && ( gp->giveNumber() == 1 ) && giveStatus(gp) ) {
                 FILE *vyst = fopen("teplota.out", "a");
+                FloatArray aux;
                 computeInternalSourceVector(aux, gp, tStep, VM_Incremental);
                 if ( aux.isEmpty() ) {
                     aux.resize(1);
@@ -206,32 +198,27 @@ HydratingHeMoMaterial :: updateInternalState(const FloatArray &vec, GaussPoint *
 }
 
 double
-HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     double answer = 0;
 
-    if ( ( rmode >= Capacity_ww ) && ( rmode <= Capacity_wh ) ) { // standard HeMoTK values
+    if ( rmode >= Capacity_ww && rmode <= Capacity_wh ) { // standard HeMoTK values
         answer = HeMoTKMaterial :: giveCharacteristicValue(rmode, gp, tStep);
         if ( castAt && ( tStep->giveTargetTime() < castAt ) ) {
             answer *= PRECAST_CAPACITY_COEFF;                                  // ~Zero capacity before cast
         }
-    } else if ( ( rmode >= IntSource_ww ) && ( rmode <= IntSource_wh ) ) {         // Internal source values
+    } else if ( rmode >= IntSource_ww && rmode <= IntSource_wh ) {         // Internal source values
         if ( !hydrationLHS ) {
             answer = 0;
         } else if ( hydrationModel ) {  //!!! better via HydrationModelInterface
-            FloatArray vec = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
+            auto status = static_cast< HeMoTransportMaterialStatus * >( giveStatus(gp) );
 
-            if ( vec.giveSize() < 2 ) {
-                vec.resize(2);
-                vec.at(2) = 1.0; // saturated if undefined
-            } else {
-                vec.at(2) = inverse_sorption_isotherm( vec.at(2) ); // compute relative humidity
-            }
-
-            answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep)
-            / tStep->giveTimeIncrement();
-            if ( ( rmode == IntSource_ww ) || ( rmode == IntSource_hw ) ) {
-                answer *= give_dphi_dw( vec.at(2) );
+            double t = status->giveTempTemperature();
+            double h = status->giveTempHumidity();
+            h = inverse_sorption_isotherm( h ); // compute relative humidity
+            answer = hydrationModel->giveCharacteristicValue(t, h, rmode, gp, tStep) / tStep->giveTimeIncrement();
+            if ( rmode == IntSource_ww || rmode == IntSource_hw ) {
+                answer *= give_dphi_dw( h );
             }
         }
     } else {

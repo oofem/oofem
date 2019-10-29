@@ -45,12 +45,9 @@ namespace oofem {
 Material :: Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(), castingTime(-1.) { }
 
 
-Material :: ~Material()
-{}
-
 
 double
-Material :: give(int aProperty, GaussPoint *gp)
+Material :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 // tStep allows time dependent behavior to be taken into account
@@ -68,7 +65,7 @@ Material :: give(int aProperty, GaussPoint *gp)
 
 
 bool
-Material :: hasProperty(int aProperty, GaussPoint *gp)
+Material :: hasProperty(int aProperty, GaussPoint *gp) const
 // Returns true if the aProperty is defined on a material
 {
     return propertyDictionary.includes(aProperty);
@@ -119,26 +116,19 @@ Material :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-int
-Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+Material :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
 {
-    return 0;
+    return false;
 }
 
-int
-Material :: hasCastingTimeSupport()
-//
-// returns whether receiver fully supports casting time
-//
+bool
+Material :: hasCastingTimeSupport() const
 {
-    if ( this->castingTime > 0. ) {
-        return 0; // casting time is user-defined. By default the casting time is not supported.
-    } else {
-        return 1; // do not check anything - casting time has not been user-defined
-    }
+    return this->castingTime <= 0.;
 }
 
 

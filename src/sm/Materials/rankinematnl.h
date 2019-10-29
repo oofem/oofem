@@ -59,12 +59,11 @@ protected:
 
 public:
     RankineMatNlStatus(GaussPoint * g);
-    virtual ~RankineMatNlStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveLocalCumPlasticStrainForAverage() { return localCumPlasticStrainForAverage; }
-    const FloatArray *giveLTangentContrib();
+    double giveLocalCumPlasticStrainForAverage() const { return localCumPlasticStrainForAverage; }
+    const FloatArray *giveLTangentContrib() const;
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "RankineMatNlStatus"; }
@@ -75,8 +74,8 @@ public:
 
     void setKappa_nl(double kap) { kappa_nl = kap; }
     void setKappa_hat(double kap) { kappa_hat = kap; }
-    double giveKappa_nl() { return kappa_nl; }
-    double giveKappa_hat() { return kappa_hat; }
+    double giveKappa_nl() const { return kappa_nl; }
+    double giveKappa_hat() const { return kappa_hat; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;

@@ -61,41 +61,39 @@ public:
     enum __rcsdModeType { rcMode, sdMode };
 
 protected:
-
     double maxEquivStrain, tempMaxEquivStrain;
     double damageCoeff, tempDamageCoeff;
     FloatMatrix Ds0;
     double transitionEps, epsF2;
     __rcsdModeType rcsdMode, tempRcsdMode;
+
 public:
-
     RCSDEMaterialStatus(GaussPoint * g);
-    virtual ~RCSDEMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveTempMaxEquivStrain() { return tempMaxEquivStrain; }
+    double giveTempMaxEquivStrain() const { return tempMaxEquivStrain; }
     void   setTempMaxEquivStrain(double val) { tempMaxEquivStrain = val; }
     //  double giveDamageStiffCoeff () {return damageStiffCoeff;}
     //  void   setDamageStiffCoeff (double val) {damageStiffCoeff = val;}
-    double giveTempDamageCoeff() { return tempDamageCoeff; }
+    double giveTempDamageCoeff() const { return tempDamageCoeff; }
     void   setTempDamageCoeff(double val) { tempDamageCoeff = val; }
     const FloatMatrix *giveDs0Matrix() { return & Ds0; }
     void   setDs0Matrix(FloatMatrix &mtrx) { Ds0 = mtrx; }
 
-    double giveTransitionEpsCoeff() { return transitionEps; }
+    double giveTransitionEpsCoeff() const { return transitionEps; }
     void   setTransitionEpsCoeff(double val) { transitionEps = val; }
-    double giveEpsF2Coeff() { return epsF2; }
+    double giveEpsF2Coeff() const { return epsF2; }
     void   setEpsF2Coeff(double val) { epsF2 = val; }
 
-    __rcsdModeType giveTempMode() { return tempRcsdMode; }
+    __rcsdModeType giveTempMode() const { return tempRcsdMode; }
     void setTempMode(__rcsdModeType mode) { tempRcsdMode = mode; }
 
     // query for non-tem variables (usefull for postprocessing)
-    double giveMaxEquivStrain() { return maxEquivStrain; }
-    double giveDamageCoeff() { return damageCoeff; }
+    double giveMaxEquivStrain() const { return maxEquivStrain; }
+    double giveDamageCoeff() const { return damageCoeff; }
 
-    __rcsdModeType giveMode() { return rcsdMode; }
+    __rcsdModeType giveMode() const { return rcsdMode; }
 
     const char *giveClassName() const override { return "RCSDEMaterialStatus"; }
 
@@ -128,7 +126,7 @@ public:
 
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &, TimeStep *) override;
 

@@ -53,13 +53,13 @@ IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
 
 double
-IsotropicLinMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
+IsotropicLinMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const
 {
     return this->moistureCapacity;
 }
 
 double
-IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
+IsotropicLinMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep) const
 {
     return this->permeability;
 }

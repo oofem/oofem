@@ -64,11 +64,8 @@ PlasticMaterial :: ~PlasticMaterial()
 }
 
 
-int
-PlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+PlasticMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat ||
            mode == _1dMat ||
@@ -713,12 +710,8 @@ PlasticMaterialStatus :: PlasticMaterialStatus(GaussPoint *g, int statusSize) :
 }
 
 
-PlasticMaterialStatus :: ~PlasticMaterialStatus()
-{ }
-
-
 void
-PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+PlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

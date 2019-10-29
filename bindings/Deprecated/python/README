@@ -1,0 +1,52 @@
+/*
+
+                   *****    *****   ******  ******  ***   ***
+                 **   **  **   **  **      **      ** *** **
+                **   **  **   **  ****    ****    **  *  **
+               **   **  **   **  **      **      **     **
+              **   **  **   **  **      **      **     **
+              *****    *****   **      ******  **     **
+
+               OOFEM : Object Oriented Finite Element Code
+
+                 Copyright (C) 1993 - 2013   Borek Patzak
+
+         Czech Technical University, Faculty of Civil Engineering,
+          Department of Mechanics, 166 29 Prague, Czech Republic
+                www.oofem.org    e-mail: info@oofem.org
+     
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+This directory contains sources to generate OOFEM bindings to Python programming language.
+Currently, Python version 3.x is supported, small changes are required for old Python 2.x.
+The boost.python library is required to be installed.
+
+To compile oofem python module, set "USE_PYTHON_BINDINGS" to "ON" when configuring 
+oofem target using cmake. Also, if needed, set corresponding -DPYTHON_EXECUTABLE
+-DPYTHON_INCLUDE_DIR and -DPYTHON_LIBRARY. This is useful when more Python versions are available.
+
+
+For testing the bindings, the liboofem.so file must be somewhere where python looks for
+modules. This can be done e.g. by symlinking to the .so in the build directory by 
+running something like
+
+    ln -s /usr/local/lib/python2.7/dist-packages/liboofem.so /home/user/oofem-build/liboofem.so
+
+This will make sure the module is always up-to-date with the build tree. Running
+``python test3.py`` in the bindings/python directory will run a simple test which
+runs an oofem simulation (heat transfer) and then iterates over DoFs and reads out
+some temperature values.

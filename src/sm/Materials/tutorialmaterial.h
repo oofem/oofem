@@ -66,13 +66,12 @@ protected:
 
 public:
     TutorialMaterial(int n, Domain * d);
-    virtual ~TutorialMaterial();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_TutorialMaterial_Name; }
     const char *giveClassName() const override { return "TutorialMaterial"; }
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -107,7 +106,6 @@ protected:
 
 public:
     TutorialMaterialStatus(GaussPoint * g);
-    virtual ~TutorialMaterialStatus() {}
 
     const FloatArray &givePlasticStrain() { return plasticStrain; }
 

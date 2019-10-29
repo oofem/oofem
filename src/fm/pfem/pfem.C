@@ -54,6 +54,7 @@
 #include "load.h"
 #include "pfemparticle.h"
 #include "octreelocalizert.h" //changed from "octreelocalizer.h"
+#include "octreelocalizertutil.h" 
 #include "spatiallocalizer.h"
 #include "classfactory.h"
 #include "mathfem.h"

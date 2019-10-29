@@ -77,11 +77,6 @@ TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : Activ
 }
 
 
-TransportGradientPeriodic :: ~TransportGradientPeriodic()
-{
-}
-
-
 int TransportGradientPeriodic :: giveNumberOfInternalDofManagers()
 {
     return 1;

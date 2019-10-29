@@ -141,7 +141,7 @@ void IsotropicLinearElasticMaterial :: restoreContext(DataStream &stream, Contex
 
 
 double
-IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
+IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( ( aProperty == NYxy ) || ( aProperty == NYxz ) || ( aProperty == NYyz ) ) {
         return nu;

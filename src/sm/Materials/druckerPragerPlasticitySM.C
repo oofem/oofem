@@ -64,9 +64,6 @@ DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(GaussPoint *g
     volumetricPlasticStrain = tempVolumetricPlasticStrain = 0.;
 }
 
-DruckerPragerPlasticitySMStatus :: ~DruckerPragerPlasticitySMStatus()
-{ }
-
 void
 DruckerPragerPlasticitySMStatus :: initTempStatus()
 {
@@ -93,7 +90,7 @@ DruckerPragerPlasticitySMStatus :: updateYourself(TimeStep *tStep)
 }
 
 void
-DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // Call corresponding function of the parent class to print variables defined there.
     StructuralMaterialStatus :: printOutputAt(file, tStep);

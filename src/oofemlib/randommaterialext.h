@@ -117,7 +117,7 @@ public:
      * Returns the property in associated status of given integration point if defined.
      * @returns true if property available, false otherwise
      */
-    bool give(int key, GaussPoint *gp, double &value);
+    bool give(int key, GaussPoint *gp, double &value) const;
 
 protected:
 

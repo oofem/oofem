@@ -89,10 +89,8 @@ public:
      * @param g Associated integration point.
      */
     MaterialStatus(GaussPoint * g) : IntegrationPointStatus(g) { }
-    /// Destructor.
-    virtual ~MaterialStatus() { }
     /// Print receiver's output to given stream.
-    void printOutputAt(FILE *file, TimeStep *tStep) override { }
+    void printOutputAt(FILE *file, TimeStep *tStep) const override { }
 
     /**
      * Initializes the temporary internal variables, describing the current state according to

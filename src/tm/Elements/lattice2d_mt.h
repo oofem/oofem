@@ -59,23 +59,21 @@ namespace oofem {
 class Lattice2d_mt : public LatticeTransportElement
 {
 protected:
-    double area;
-    double length;
+    double area = -1.;
+    double length = 0.;
 
-    int couplingFlag;
+    int couplingFlag = 0;
     IntArray couplingNumbers;
     FloatArray crackWidths;
     FloatArray crackLengths;
 
-    double dimension, width, thickness;
+    double dimension = 0., width = 0., thickness = 0.;
     FloatArray gpCoords;
 
-    double crackWidth;
+    double crackWidth = 0.;
 
 public:
-    // constructor
     Lattice2d_mt(int, Domain *, ElementMode em = HeatTransferEM);
-    virtual ~Lattice2d_mt();
 
     /** Computes the contribution to balance equation(s) due to internal sources */
     void computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *, ValueModeType mode) override;

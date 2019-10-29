@@ -608,6 +608,22 @@ public:
     double __getitem__(boost :: python :: api :: object t);
     void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
 #endif
-};
+
+
+}; // class FloatMatrix
+
+//@name operators
+//@{
+/// Vector multiplication by scalar
+FloatMatrix &operator *= ( FloatMatrix & x, const double & a ); 
+FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
+FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
+FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
+FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
+FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
+FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
+
+//@}
+
 } // end namespace oofem
 #endif // flotmtrx_h

@@ -179,7 +179,7 @@ BondCEBMaterialStatus :: BondCEBMaterialStatus(GaussPoint *g) : StructuralInterf
 
 
 void
-BondCEBMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+BondCEBMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

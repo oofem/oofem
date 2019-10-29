@@ -83,15 +83,14 @@ class HydratingConcreteMat : public IsotropicHeatTransferMaterial
 {
 public:
     HydratingConcreteMat(int n, Domain * d);
-    virtual ~HydratingConcreteMat();
 
-    virtual int hasInternalSource() override { return 1; }
-    virtual int hasCastingTimeSupport() override { return 1; }
-    virtual void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    bool hasInternalSource() const override { return true; }
+    bool hasCastingTimeSupport() const override { return true; }
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "HydratingConcreteMat"; }
 
@@ -99,34 +98,36 @@ public:
 
     // post-processing
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
-    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) override;
-    virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep);
-    virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep);
+    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const override;
+    virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep) const;
+    virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep) const;
+
     /// Type of hydration model, e.g. exponential curve, Cervera's model.
-    int hydrationModelType;
-    double maxModelIntegrationTime;
+    int hydrationModelType = 0;
+    double maxModelIntegrationTime = 0.;
     /// Minimum number of integration steps for hydration model within a given timeStep.
-    double minModelTimeStepIntegrations;
+    double minModelTimeStepIntegrations = 0.;
     /// Potential heat of hydration, for ordinary Portland cement approximately 500 J/g.
-    double Qpot;
+    double Qpot = 0.;
     /// Mass of cement in kg per 1m3 of concrete.
-    double massCement;
+    double massCement = 0.;
     /// Activation energy of concrete (default 38400 J/mol/K).
-    double activationEnergy;
+    double activationEnergy = 0.;
     /// Reference temperature for hydration model.
-    double referenceTemperature;
+    double referenceTemperature = 0.;
     /**
      * Parameters for exponential affinity hydration model summarized in A.K. Schindler and K.J. Folliard:
      * Heat of Hydration Models for Cementitious Materials, ACI Materials Journal, 2005.
      */
-    double tau, beta;
+    double tau = 0., beta = 0.;
 
     /**
      * Parameters for affinity hydration model inspired by Cervera et al.
      * Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999.
      */
-    double B1, B2, eta, DoHInf;
+    double B1 = 0., B2 = 0., eta = 0., DoHInf = 0.;
     ///Optional extension to slag-rich, high-blended cements
+<<<<<<< HEAD
     double DoH1, P1;
     /**
      * Parameters for hydration model Saeed Rahimi-Aghdam, Zdeněk P. Bažant, Gianluca Cusatis: Extended Microprestress-Solidification Theory (XMPS) for Long-Term Creep and Diffusion Size Effect in Concrete at Variable Environment, JEM-ASCE, 2019. Appendix A.
@@ -160,12 +161,15 @@ public:
     
     
     
+=======
+    double DoH1 = 0., P1 = 0.;
+>>>>>>> 50c98b73a13cba491c7b2608802285ae0c4bfa67
 
 protected:
-    double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode);
-    double scaleTemperature(GaussPoint *gp);
+    double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode) const;
+    double scaleTemperature(GaussPoint *gp) const;
     /// Return affinity scaled to 25C.
-    double affinity25(double alpha);
+    double affinity25(double alpha) const;
 
     /// Use different methods to evaluate material conductivity, capacity, or density
     int conductivityType, capacityType, densityType;
@@ -181,20 +185,19 @@ class HydratingConcreteMatStatus : public TransportMaterialStatus
 {
 public:
     HydratingConcreteMatStatus(GaussPoint * g);
-    virtual ~HydratingConcreteMatStatus();
     /// Returns actual degree of hydration at last known equilibrium.
-    double giveDoHActual();
+    double giveDoHActual() const;
     void updateYourself(TimeStep *tStep) override;
     void printOutputAt(FILE *file, TimeStep *tStep) override;
-    double power;
-    double lastEvalTime;
-    double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
+    double power = 0.;
+    double lastEvalTime = -1.e20;
+    double lastEquivalentTime = 0., equivalentTime = 0., degreeOfHydration = 0., lastDegreeOfHydration = 0.;
     /// Radius of the equivalent contact-free C-S-H shells
-    double zShell, lastZShell;
+    double zShell = 0., lastZShell = 0.;
     // Radius of cement particle
-    double aCement, lastACement;
+    double aCement = 0., lastACement = 0.;
     // Volume fractions of cement, gel, CH;
-    double VCem, lastVCem, VGel, lastVGel, VCH, lastVCH;
+    double VCem = 0., lastVCem = 0., VGel = 0., lastVGel = 0., VCH = 0., lastVCH = 0.;
 };
 } // end namespace oofem
 #endif // hydratingconcretemat_h

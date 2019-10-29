@@ -58,7 +58,6 @@ protected:
 
 public:
     Wedge_ht(int, Domain *);
-    virtual ~Wedge_ht() { }
 
     double computeVolumeAround(GaussPoint *gp) override;
     FEInterpolation *giveInterpolation() const override;

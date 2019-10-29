@@ -58,7 +58,6 @@ protected:
 
 public:
     QBrick1_ht(int n, Domain * d);
-    virtual ~QBrick1_ht();
 
     double computeVolumeAround(GaussPoint *gp) override;
     FEInterpolation *giveInterpolation() const override;

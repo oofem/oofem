@@ -88,8 +88,8 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
 }
 /////////////////////////////////////////////////////////////////////////////
 
-int
-RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode)
+bool
+RankineMatGrad :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _PlaneStress;
 }
@@ -698,7 +698,7 @@ RankineMatGradStatus :: RankineMatGradStatus(GaussPoint *g) :
 }
 
 void
-RankineMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RankineMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
 

@@ -67,8 +67,6 @@ public:
      * @param d Domain to which new material will belong.
      */
     TwoFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
-    /// Destructor.
-    virtual ~TwoFluidMaterial() { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
@@ -77,7 +75,7 @@ public:
     FloatMatrixF<6,6> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     const char *giveClassName() const override { return "TwoFluidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_TwoFluidMaterial_Name; }
@@ -100,10 +98,8 @@ protected:
 public:
     /// Constructor
     TwoFluidMaterialStatus(GaussPoint * g, const std::array<Material*, 2> &slaveMaterial);
-    /// Destructor
-    virtual ~TwoFluidMaterialStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

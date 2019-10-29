@@ -112,9 +112,7 @@ protected:
 public:
     TrabBone3DStatus(GaussPoint *g);
 
-    virtual ~TrabBone3DStatus();
-
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     double giveKappa();
     double giveTempKappa();
@@ -181,7 +179,7 @@ protected:
 public:
     TrabBone3D(int n, Domain *d);
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
     double evaluateCurrentYieldStress(const double kappa);
     double evaluateCurrentPlasticModulus(const double kappa);
     double evaluateCurrentViscousStress(const double deltaKappa, TimeStep *tStep);

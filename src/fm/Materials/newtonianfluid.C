@@ -70,7 +70,7 @@ NewtonianFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep
 
 
 double
-NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
+NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == Viscosity ) {
         return viscosity;

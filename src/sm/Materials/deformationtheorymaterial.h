@@ -46,7 +46,6 @@ class DeformationTheoryMaterial : public StructuralMaterial
 {
 public:
     DeformationTheoryMaterial(int n, Domain * d) : StructuralMaterial(n, d) { }
-    virtual ~DeformationTheoryMaterial()  { }
 
     const char *giveClassName() const override { return "DeformationTheoryMaterial"; }
 };

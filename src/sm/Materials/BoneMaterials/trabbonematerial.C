@@ -47,8 +47,8 @@ TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d
 { }
 
 
-int
-TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _1dMat;
 }
@@ -289,10 +289,6 @@ TrabBoneMaterialStatus :: TrabBoneMaterialStatus(GaussPoint *g) : StructuralMate
 }
 
 
-TrabBoneMaterialStatus :: ~TrabBoneMaterialStatus()
-{ }
-
-
 double
 TrabBoneMaterialStatus :: giveAlpha()
 {
@@ -361,7 +357,7 @@ TrabBoneMaterialStatus :: giveTempIncPlasStrainVector()
 
 
 void
-TrabBoneMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBoneMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

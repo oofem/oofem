@@ -266,39 +266,15 @@ TrabBoneNL :: computeWeightFunction(const FloatArray &src, const FloatArray &coo
 /////////////////////////////////////////////////////////////////
 
 
-/////////////////////////////////////////////////////////////////
-// BEGIN: CONSTRUCTOR
-// init state variables
-
 TrabBoneNLStatus :: TrabBoneNLStatus(GaussPoint *g) :
     TrabBoneMaterialStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
     localCumPlastStrainForAverage = 0.0;
 }
 
-//
-// END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
-
-TrabBoneNLStatus :: ~TrabBoneNLStatus()
-{ }
-
-//
-// END: DESTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: PRINTOUT
-//
 
 void
-TrabBoneNLStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBoneNLStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");
@@ -312,11 +288,6 @@ TrabBoneNLStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, " dam  %.4e", dam);
     fprintf(file, "}\n");
 }
-
-//
-// END: PRINTOUT
-/////////////////////////////////////////////////////////////////
-
 
 /////////////////////////////////////////////////////////////////
 // BEGIN: INITIALIZE TEMP VARIABLE (UPDATED DURING ITERATIONS)

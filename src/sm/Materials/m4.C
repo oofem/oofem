@@ -274,9 +274,6 @@ M4MaterialStatus :: M4MaterialStatus(GaussPoint *g, int nplanes) :
 { }
 
 
-M4MaterialStatus :: ~M4MaterialStatus()
-{ }
-
 void
 M4MaterialStatus :: initTempStatus()
 {

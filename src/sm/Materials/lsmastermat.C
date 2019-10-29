@@ -54,10 +54,6 @@ LargeStrainMasterMaterial :: LargeStrainMasterMaterial(int n, Domain *d) : Struc
     slaveMat = 0;
 }
 
-// destructor
-LargeStrainMasterMaterial :: ~LargeStrainMasterMaterial()
-{ }
-
 // reads the model parameters from the input file
 IRResultType
 LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
@@ -423,12 +419,8 @@ LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(GaussPoint *g
 }
 
 
-LargeStrainMasterMaterialStatus :: ~LargeStrainMasterMaterialStatus()
-{ }
-
-
 void
-LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);

@@ -86,7 +86,7 @@ Concrete2 :: initializeFrom(InputRecord *ir)
 
 
 double
-Concrete2 :: give(int aProperty, GaussPoint *gp)
+Concrete2 :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -1254,11 +1254,6 @@ Concrete2MaterialStatus :: Concrete2MaterialStatus(GaussPoint *g) :
     SCCM = EPM = E0PM = SRF = SEZ = 0.0;
     SCTM = -1.0;     // init status if SCTM < 0.;
 }
-
-
-
-Concrete2MaterialStatus :: ~Concrete2MaterialStatus()
-{ }
 
 
 void

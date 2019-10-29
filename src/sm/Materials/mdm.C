@@ -77,11 +77,8 @@ MDM :: CreateStatus(GaussPoint *gp) const
 }
 
 
-int
-MDM :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+MDM :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
@@ -1379,8 +1376,6 @@ MDMStatus :: MDMStatus(GaussPoint *g, int nsd, int nmplanes) : StructuralMateria
 }
 
 
-MDMStatus :: ~MDMStatus() { }
-
 void
 MDMStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
@@ -1451,7 +1446,7 @@ MDMStatus :: initTempStatus()
 }
 
 void
-MDMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MDMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
@@ -1487,7 +1482,7 @@ MDMStatus :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
         return this;
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 } // end namespace oofem

@@ -35,8 +35,10 @@
 #ifndef rvestokesflow_h
 #define rvestokesflow_h
 
-#include "floatarray.h"
-#include "floatmatrix.h"
+#ifdef __FM_MODULE
+
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "transportmaterial.h"
 #include "stokesflowvelocityhomogenization.h"
 
@@ -45,7 +47,6 @@
 #define _IFT_RVEStokesFlow_Name "rvestokesflow"
 #define _IFT_RVEStokesFlow_fileName "file"
 #define _IFT_RVEStokesFlow_bctype "bctype"
-#define _IFT_RVEStokesFlow_supressoutput "supressoutput"
 
 namespace oofem {
 /**
@@ -57,13 +58,11 @@ namespace oofem {
 class RVEStokesFlowMaterialStatus : public TransportMaterialStatus
 {
 protected:
-    FloatMatrix temp_TangentMatrix, tangentMatrix;
+    FloatMatrixF<3,3> temp_TangentMatrix, tangentMatrix;
     std :: unique_ptr< StokesFlowVelocityHomogenization > rve;
 
 public:
     RVEStokesFlowMaterialStatus(int n, int rank, GaussPoint * g, const std :: string &inputfile);
-
-    virtual ~RVEStokesFlowMaterialStatus();
 
     void setTimeStep(TimeStep *tStep);
 
@@ -74,9 +73,9 @@ public:
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    const FloatMatrix &giveTangentMatrix() { return tangentMatrix; }
-    const FloatMatrix &giveTempTangentMatrix() { return temp_TangentMatrix; }
-    void letTempTangentMatrixBe(const FloatMatrix &K) { temp_TangentMatrix = K; }
+    const FloatMatrixF<3,3> &giveTangentMatrix() const { return tangentMatrix; }
+    const FloatMatrixF<3,3> &giveTempTangentMatrix() const { return temp_TangentMatrix; }
+    void letTempTangentMatrixBe(const FloatMatrixF<3,3> &K) { temp_TangentMatrix = K; }
 
     StokesFlowVelocityHomogenization *giveRVE() { return rve.get(); }
 
@@ -103,21 +102,15 @@ private:
     std :: string rveFilename;
     std :: string rveLogFilename;
 
-    int SupressRVEoutput;
-
-    void suppressStdout();
-    void enableStdout();
-
 public:
     RVEStokesFlow(int n, Domain * d);
 
-    virtual ~RVEStokesFlow() { }
-
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
-    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
-    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override { return 0.0; }
+    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { return 0.0; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -128,4 +121,5 @@ public:
 };
 }
 
+#endif // ifdef __FM_MODULE
 #endif // rvestokesflow_h

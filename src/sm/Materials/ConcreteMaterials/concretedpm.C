@@ -112,7 +112,7 @@ ConcreteDPMStatus :: updateYourself(TimeStep *tStep)
 }
 
 void
-ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // Call corresponding function of the parent class to print
     // variables defined there.

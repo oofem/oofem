@@ -87,19 +87,7 @@ void IntSourceLHSAssembler :: matrixFromElement(FloatMatrix &answer, Element &el
 }
 
 
-NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
-{
-    ndomains = 1;
-    lumpedCapacityStab = 0;
-    initT = 0.;
-    deltaT = 0.;
-    dtFunction = 0;
-    internalVarUpdateStamp = 0;
-    changingProblemSize = false;
-    solverType = ST_Direct;
-}
-
-NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
+NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = nullptr) : StationaryTransportProblem(i, _master)
 {
 }
 

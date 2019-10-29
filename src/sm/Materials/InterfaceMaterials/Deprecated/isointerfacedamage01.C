@@ -222,7 +222,7 @@ IsoInterfaceDamageMaterialStatus :: IsoInterfaceDamageMaterialStatus(GaussPoint 
 
 
 void
-IsoInterfaceDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IsoInterfaceDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

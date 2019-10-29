@@ -333,9 +333,9 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
 protected:
     /**

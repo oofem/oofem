@@ -76,10 +76,8 @@ public:
      * @param d Domain to which new material will belong.
      */
     WinklerMaterial(int n, Domain * d);
-    /// Destructor.
-    virtual ~WinklerMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "WinklerMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_WinklerMaterial_Name; }
 

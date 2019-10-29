@@ -67,10 +67,8 @@ protected:
 public:
     /// Constructor.
     IDNLMaterialStatus(GaussPoint *g);
-    /// Destructor.
-    virtual ~IDNLMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the local  equivalent strain to be averaged.
     double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }
@@ -110,8 +108,6 @@ class IDNLMaterial : public IsotropicDamageMaterial1, public StructuralNonlocalM
 public:
     /// Constructor
     IDNLMaterial(int n, Domain *d);
-    /// Destructor
-    virtual ~IDNLMaterial();
 
     const char *giveClassName() const override { return "IDNLMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_IDNLMaterial_Name; }

@@ -85,12 +85,13 @@ public:
      * @return Reference to value of pair with given key
      */
     double &at(int aKey);
+    double at(int aKey) const;
     /**
      * Checks if dictionary includes given key
      * @param aKey Dictionary key.
      * @return True if receiver contains pair with given key, otherwise false.
      */
-    bool includes(int aKey);
+    bool includes(int aKey) const;
     /// Prints the receiver on screen.
     void printYourself();
     /// Formats itself as string.

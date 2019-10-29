@@ -49,7 +49,7 @@
 #include "fei3dtetlin.h"
 #include "fei3dhexalin.h"
 
-#include "pfem/octreelocalizert.h"
+#include "octreelocalizert.h"
 #include "error.h"
 
 namespace oofem {

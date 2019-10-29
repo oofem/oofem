@@ -216,7 +216,7 @@ PFEMElement :: updateInternalState(TimeStep *stepN)
 }
 
 void
-PFEMElement :: printOutputAt(FILE *file, TimeStep *tStep)
+PFEMElement :: printOutputAt(FILE *file, TimeStep *tStep) const
 // Performs end-of-step operations.
 {
 #ifdef __PARALLEL_MODE

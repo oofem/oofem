@@ -66,7 +66,7 @@ class Function;
 class TransientTransportProblem : public EngngModel
 {
 protected:
-    SparseMtrxType sparseMtrxType;
+    SparseMtrxType sparseMtrxType = SMT_Skyline;
     std :: unique_ptr< DofDistributedPrimaryField > field;
 
     std :: unique_ptr< SparseMtrx > effectiveMatrix;
@@ -78,22 +78,19 @@ protected:
     /// Numerical method used to solve the problem
     std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
 
-    double alpha;
-    int dtFunction;
+    double alpha = 0.5;
+    int dtFunction = 0;
     FloatArray prescribedTimes;
     /// Initial time from which the computation runs. Default is zero.
-    double initT;
-    double deltaT;
-    bool keepTangent, hasTangent;
-    bool lumped;
+    double initT = 0.;
+    double deltaT = 1.;
+    bool keepTangent = false, hasTangent = false;
+    bool lumped = false;
 
     IntArray exportFields;
 
 public:
-    /// Constructor.
     TransientTransportProblem(int i, EngngModel *master=nullptr);
-    /// Destructor.
-    virtual ~TransientTransportProblem();
 
     void solveYourselfAt(TimeStep *tStep) override;
     void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;

@@ -60,7 +60,7 @@ public:
     IntMatBilinearCZElasticStatus(GaussPoint * g);
 
     double giveDamage() const override { return 0.0; } // no damage in this model
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "IntMatBilinearCZElasticStatus"; }
 

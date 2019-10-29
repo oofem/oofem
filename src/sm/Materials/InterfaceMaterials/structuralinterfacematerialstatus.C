@@ -50,7 +50,7 @@ StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(GaussPoin
 }
 
 
-void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void StructuralInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus :: printOutputAt(file, tStep);
 

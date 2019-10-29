@@ -34,6 +34,7 @@
 
 #include "tm/Materials/anisomassmat.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "gausspoint.h"
 #include "classfactory.h"
 
@@ -47,56 +48,46 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
-    ///@todo Why hardcode this for 2d ? Just take the whole matrix as the input instead and not worry about it.
-#if 0
-    IR_GIVE_FIELD(ir, k, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
-#else
-    FloatArray temp;
-    IR_GIVE_FIELD(ir, temp, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
-    k.resize(2, 2);
-    k.at(1, 1) = temp.at(1);
-    k.at(1, 2) = temp.at(2);
-    k.at(2, 1) = temp.at(3);
-    k.at(2, 2) = temp.at(4);
-#endif
-
-    return Material :: initializeFrom(ir);
+    FloatArray c;
+    IR_GIVE_FIELD(ir, c, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
+    if ( c.giveSize() == 4 ) {
+        k = {
+            c[0], c[1], 0.,
+            c[2], c[3], 0.,
+            0., 0., 0.,
+        };
+    } else if ( c.giveSize() == 9 ) {
+        k = {
+            c[0], c[1], c[2],
+            c[3], c[4], c[5],
+            c[6], c[7], c[8],
+        };
+    }
+    return TransportMaterial :: initializeFrom(ir);
 }
 
 
-void
-AnisotropicMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+FloatArrayF<3>
+AnisotropicMassTransferMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    answer.beProductOf(k, grad);
-    answer.negated();
-
+    auto answer = - dot(k, grad);
     ms->setTempField(field);
     ms->setTempGradient(grad);
     ms->setTempFlux(answer);
+    return answer;
 }
 
 
-void
-AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+AnisotropicMassTransferMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch  ( mMode ) {
-    case _1dHeat:
-    case _2dHeat:
-    case _3dHeat:
-        answer = k;
-        return;
-
-    default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    return k;
 }
 
 
 double
-AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
 

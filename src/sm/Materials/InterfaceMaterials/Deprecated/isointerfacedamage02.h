@@ -72,7 +72,7 @@ public:
     /// Constructor
     IsoInterfaceDamageMaterialStatus_2(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() const { return kappa; }

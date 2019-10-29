@@ -48,19 +48,14 @@ namespace oofem {
 REGISTER_Element(TrAxisym1_ht);
 
 TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
-    // Constructor.
 { }
 
-TrAxisym1_ht :: ~TrAxisym1_ht()
-// Destructor
-{ }
 
 double
 TrAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
 {
-    double determinant, weight;
-    determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    weight = gp->giveWeight();
+    double determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double weight = gp->giveWeight();
     return determinant *weight *this->computeRadiusAt(gp); ///@todo What about 2*pi ?
 }
 
@@ -74,11 +69,9 @@ double
 TrAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray gcoords;
-    double determinant, radius;
-
-    determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     this->interp.edgeLocal2global( gcoords, iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    radius = gcoords.at(1);
+    double radius = gcoords.at(1);
     return determinant *radius *gp->giveWeight();
 }
 

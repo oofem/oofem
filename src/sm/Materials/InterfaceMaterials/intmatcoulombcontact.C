@@ -140,7 +140,7 @@ IntMatCoulombContactStatus :: IntMatCoulombContactStatus(GaussPoint *g) : Struct
 
 
 void
-IntMatCoulombContactStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IntMatCoulombContactStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus::printOutputAt( file, tStep );
     fprintf(file, "status { ");

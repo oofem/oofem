@@ -64,10 +64,9 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
     conType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->conType, _IFT_LatticeTransportMaterial_contype);
     this->capacity = 0;
-    if(conType == 0){
+    if ( conType == 0 ) {
       IR_GIVE_OPTIONAL_FIELD(ir, this->capacity, _IFT_LatticeTransportMaterial_c);  
-    }
-    else if ( conType == 1 ) {
+    } else if ( conType == 1 ) {
         IR_GIVE_FIELD(ir, this->paramM, _IFT_LatticeTransportMaterial_m);
 
         IR_GIVE_FIELD(ir, this->paramA, _IFT_LatticeTransportMaterial_a);
@@ -90,8 +89,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         } else {
             thetaM = ( thetaS - thetaR ) * pow(1. + pow( suctionAirEntry / paramA, 1. / ( 1. - paramM ) ), paramM) + thetaR;
         }
-    } //end of contype condition
-    else if ( conType != 0 && conType != 1 ) {
+    } else if ( conType != 0 && conType != 1 ) {
         OOFEM_ERROR("unknown conType mode");
     }
 
@@ -105,19 +103,22 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-void
-LatticeTransportMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+FloatArrayF<3>
+LatticeTransportMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
-    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    status->setTempGradient(grad);
     status->setTempField(field);
-    double suction = field.at(1);
-    double c = this->computeConductivity(suction, gp, tStep);
-    answer.beScaled(-c, grad);
+
+    double c = this->computeConductivity(field, gp, tStep);
+    auto flux = -c * grad;
+    status->setTempFlux(flux);
+    return flux;
 }
 
 
 double
-LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp)
+LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == 'k' ) {
         return permeability;
@@ -132,10 +133,10 @@ LatticeTransportMaterial :: give(int aProperty, GaussPoint *gp)
 double
 LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                     GaussPoint *gp,
-                                                    TimeStep *tStep)
+                                                    TimeStep *tStep) const
 {
-    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
-    double suction = status->giveTempField().at(1);
+    auto status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    double suction = status->giveTempField();
 
     if ( mode == Capacity ) {
         return computeCapacity(suction, gp);
@@ -152,13 +153,11 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
 double
 LatticeTransportMaterial :: computeConductivity(double suction,
                                                 GaussPoint *gp,
-                                                TimeStep *tStep)
+                                                TimeStep *tStep) const
 {
-    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
 
-    matMode = gp->giveMaterialMode();
-
-    this->density = this->give('d', gp);
+    double density = this->give('d', gp);
 
     double relativePermeability = 0.;
     double conductivity = 0.;
@@ -181,7 +180,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     }
 
     //Calculate mass for postprocessing
-    double mass = ( saturation * ( this->thetaS - this->thetaR ) + this->thetaR ) * this->density;
+    double mass = ( saturation * ( this->thetaS - this->thetaR ) + this->thetaR ) * density;
 
     status->setMass(mass);
 
@@ -190,13 +189,9 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
 
     //add crack contribution;
-   
     //Read in crack lengths
-    
     FloatArray crackLengths;
-    
     static_cast< LatticeTransportElement * >( gp->giveElement())->giveCrackLengths(crackLengths);
-    
     FloatArray crackWidths;
     crackWidths.resize(crackLengths.giveSize());   
 
@@ -208,7 +203,6 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
         if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
             IntArray couplingNumbers;
-            
             static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
             for (int i = 1; i <= crackLengths.giveSize(); i++) {
                 if ( couplingNumbers.at(i) != 0 ) {
@@ -220,12 +214,10 @@ LatticeTransportMaterial :: computeConductivity(double suction,
         }
     }
 #endif
-    
     //Read in crack widths from transport element
     if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
         static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackWidths(crackWidths);
     }
-    
     //Use crack width and apply cubic law
     double crackContribution = 0.;
 
@@ -239,20 +231,17 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     }
 
     crackContribution *=  this->crackTortuosity * relativePermeability/ (12. * this->viscosity );
-  
     conductivity += crackContribution;
-    
-    return this->density * conductivity;
+    return density * conductivity;
 }
 
 
-
 double
-LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
+LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp) const
 {
     double cap = 0.;
 
-    this->density = this->give('d', gp);
+    double density = this->give('d', gp);
 
     if ( conType == 0 ) {
         cap = this->capacity;
@@ -267,7 +256,7 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
         }
     }
 
-    return this->density * cap;
+    return density * cap;
 }
 
 
@@ -279,16 +268,11 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
+LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) const
 {
     MaterialStatus :: printOutputAt(File, tStep);
 
-    fprintf(File, "  state");
-
-    for ( auto &val : field ) {
-        fprintf( File, " %.4e", val );
-    }
-
+    fprintf(File, "  state %.4e", field);
     fprintf(File, "  mass %.8e", mass);
     fprintf(File, "\n");
 }
@@ -304,7 +288,7 @@ void
 LatticeTransportMaterialStatus :: initTempStatus()
 {
     TransportMaterialStatus :: initTempStatus();
-    oldPressure = field.at(1);
+    oldPressure = field;
 }
 
 
