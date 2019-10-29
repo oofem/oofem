@@ -61,6 +61,16 @@
 #define _IFT_HydratingConcreteMat_DoH1 "doh1"
 #define _IFT_HydratingConcreteMat_P1 "p1"
 #define _IFT_HydratingConcreteMat_qpot "qpot"
+#define _IFT_HydratingConcreteMat_wc "w/c"
+#define _IFT_HydratingConcreteMat_ac "a/c"
+#define _IFT_HydratingConcreteMat_rhoCem "rhocem"
+#define _IFT_HydratingConcreteMat_rhoAgg "rhoagg"
+#define _IFT_HydratingConcreteMat_Blaine "blaine"
+#define _IFT_HydratingConcreteMat_alphaSet0 "alphaset0"
+#define _IFT_HydratingConcreteMat_timeSet "timeset"
+#define _IFT_HydratingConcreteMat_alphaCrit0 "alphacrit0"
+#define _IFT_HydratingConcreteMat_B0 "b0"
+
 //@}
 
 namespace oofem {
@@ -118,6 +128,38 @@ public:
     double B1, B2, eta, DoHInf;
     ///Optional extension to slag-rich, high-blended cements
     double DoH1, P1;
+    /**
+     * Parameters for hydration model Saeed Rahimi-Aghdam, Zdeněk P. Bažant, Gianluca Cusatis: Extended Microprestress-Solidification Theory (XMPS) for Long-Term Creep and Diffusion Size Effect in Concrete at Variable Environment, JEM-ASCE, 2019. Appendix A.
+     */
+    ///Water/cement ratio and aggregate/cement ratio  
+    double wc, ac;
+    ///Density of cement and aggregates (weighted average from fine and coarse aggregates
+    double rhoCem, rhoAgg;
+    ///Initial volume fraction of cement and water
+    double Vc0, Vw0;
+    ///Volume fractions at setting time
+    double VCemSet, VCHSet, VGelSet;
+    ///Average cement particle radius (m)
+    double a0;
+    ///Number of cement particles in a unit volume
+    double ng;
+    ///Degree of hydration for setting time
+    double alphaSet;
+    ///Time at setting
+    double timeSet;
+    ///Radius of cement particle at setting time
+    double aSet;
+    ///Radius of gel barrier at setting time
+    double zSet;
+    ///Degree of hydration at which the gel barrier will be completed
+    double alphaCrit;
+    ///Basic diffusivity (about 1.1e-11 m2/day for Portland cements)
+    double B0;
+    
+    
+    
+    
+    
 
 protected:
     double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode);
@@ -147,6 +189,12 @@ public:
     double power;
     double lastEvalTime;
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
+    /// Radius of the equivalent contact-free C-S-H shells
+    double zShell, lastZShell;
+    // Radius of cement particle
+    double aCement, lastACement;
+    // Volume fractions of cement, gel, CH;
+    double VCem, lastVCem, VGel, lastVGel, VCH, lastVCH;
 };
 } // end namespace oofem
 #endif // hydratingconcretemat_h
