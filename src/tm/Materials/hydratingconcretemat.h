@@ -127,8 +127,8 @@ public:
      */
     double B1 = 0., B2 = 0., eta = 0., DoHInf = 0.;
     ///Optional extension to slag-rich, high-blended cements
-<<<<<<< HEAD
-    double DoH1, P1;
+
+    double DoH1 = 0., P1=0.;
     /**
      * Parameters for hydration model Saeed Rahimi-Aghdam, Zdeněk P. Bažant, Gianluca Cusatis: Extended Microprestress-Solidification Theory (XMPS) for Long-Term Creep and Diffusion Size Effect in Concrete at Variable Environment, JEM-ASCE, 2019. Appendix A.
      */
@@ -157,13 +157,6 @@ public:
     ///Basic diffusivity (about 1.1e-11 m2/day for Portland cements)
     double B0;
     
-    
-    
-    
-    
-=======
-    double DoH1 = 0., P1 = 0.;
->>>>>>> 50c98b73a13cba491c7b2608802285ae0c4bfa67
 
 protected:
     double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode) const;
@@ -188,7 +181,7 @@ public:
     /// Returns actual degree of hydration at last known equilibrium.
     double giveDoHActual() const;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     double power = 0.;
     double lastEvalTime = -1.e20;
     double lastEquivalentTime = 0., equivalentTime = 0., degreeOfHydration = 0., lastDegreeOfHydration = 0.;

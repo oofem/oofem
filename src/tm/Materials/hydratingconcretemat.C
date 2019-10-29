@@ -41,12 +41,7 @@
 namespace oofem {
 REGISTER_Material(HydratingConcreteMat);
 
-HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
-{ }
-
-HydratingConcreteMat :: ~HydratingConcreteMat()
-{ }
-
+HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d){ }
 
 IRResultType
 HydratingConcreteMat :: initializeFrom(InputRecord *ir)
@@ -78,7 +73,6 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, eta, _IFT_HydratingConcreteMat_eta);
         IR_GIVE_FIELD(ir, DoHInf, _IFT_HydratingConcreteMat_DoHInf);
         IR_GIVE_OPTIONAL_FIELD(ir, DoH1, _IFT_HydratingConcreteMat_DoH1);
-        P1 = 0.;
         IR_GIVE_OPTIONAL_FIELD(ir, P1, _IFT_HydratingConcreteMat_P1);
     } else if ( hydrationModelType == 3 ) { //Saeed Rahimi-Aghdam, Zdeněk P. Bažant, Gianluca Cusatis: Extended Microprestress-Solidification Theory (XMPS) for Long-Term Creep and Diffusion Size Effect in Concrete at Variable Environment, JEM-ASCE, 2019. Appendix A.
         referenceTemperature = 20.;//according to the authors
@@ -287,7 +281,6 @@ HydratingConcreteMat :: CreateStatus(GaussPoint *gp) const
 }
 
 
-<<<<<<< HEAD
 HydratingConcreteMatStatus :: HydratingConcreteMatStatus(GaussPoint *g) : TransportMaterialStatus(g) { }
 
 
@@ -396,7 +389,7 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
                 if ( ms->degreeOfHydration > 0.75*alphaCrit ) {
                     double beta =  ms->degreeOfHydration - 0.75*alphaCrit + 0.75*alphaCrit*0.30/(alphaCrit/2.); 
                     double p = pow(beta/0.30, 1.8);
-                    f4 = p * exp(-p);//likely mistake in the original article
+                    f4 = p * exp(-p);//error in the original article?
                 } else {
                     double gamma = pow(ms->degreeOfHydration/(alphaCrit/2.), 1.8);
                     f4 = gamma * exp (-gamma);
@@ -428,7 +421,7 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
                 ms->degreeOfHydration -= 3./(4.*M_PI*a0*a0*a0*ng)*dVCem;
                 
 //                 if (ms->degreeOfHydration > alphaCrit) {
-                ms->zShell += (dVGel+dVCem)/(4.*M_PI*ng*zShellWedge*zShellWedge);//missing ng in article
+                ms->zShell += (dVGel+dVCem)/(4.*M_PI*ng*zShellWedge*zShellWedge);//error in article, missing ng?
 //                 }
                 //ToDo relative humidity decrement, saturation degree
             }
