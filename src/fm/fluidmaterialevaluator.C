@@ -51,8 +51,6 @@ FluidMaterialEvaluator :: FluidMaterialEvaluator(int i, EngngModel *_master) : E
     this->ndomains = 1;
 }
 
-FluidMaterialEvaluator :: ~FluidMaterialEvaluator()
-{ }
 
 IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
 {

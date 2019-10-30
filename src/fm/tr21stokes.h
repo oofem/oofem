@@ -71,7 +71,6 @@ protected:
 
 public:
     Tr21Stokes(int n, Domain * d);
-    virtual ~Tr21Stokes();
 
     double computeVolumeAround(GaussPoint *gp) override;
 

@@ -209,16 +209,7 @@ void SUPGTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element &el,
 
 SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master), accelerationVector()
 {
-    initFlag = 1;
     ndomains = 1;
-    consistentMassFlag = 0;
-    equationScalingFlag = false;
-    lscale = uscale = dscale = 1.0;
-}
-
-
-SUPG :: ~SUPG()
-{
 }
 
 

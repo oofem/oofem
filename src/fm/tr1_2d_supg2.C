@@ -75,10 +75,6 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     numberOfDofMans  = 3;
 }
 
-TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
-{
-}
-
 
 void
 TR1_2D_SUPG2 :: computeNVector(FloatArray &answer, GaussPoint *gp)

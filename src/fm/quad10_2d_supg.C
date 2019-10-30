@@ -70,9 +70,6 @@ Quad10_2D_SUPG :: Quad10_2D_SUPG(int n, Domain *aDomain) :
     numberOfDofMans = 4;
 }
 
-Quad10_2D_SUPG :: ~Quad10_2D_SUPG()
-{ }
-
 FEInterpolation *
 Quad10_2D_SUPG :: giveInterpolation() const
 {

@@ -70,14 +70,9 @@ REGISTER_Element(TR1_2D_SUPG2_AXI);
 
 TR1_2D_SUPG2_AXI :: TR1_2D_SUPG2_AXI(int n, Domain *aDomain) :
     TR1_2D_SUPG(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 3;
 }
-
-TR1_2D_SUPG2_AXI :: ~TR1_2D_SUPG2_AXI()
-// Destructor
-{ }
 
 
 IRResultType

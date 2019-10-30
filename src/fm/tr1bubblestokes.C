@@ -73,10 +73,6 @@ Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomai
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_v) );
 }
 
-Tr1BubbleStokes :: ~Tr1BubbleStokes()
-{
-}
-
 void Tr1BubbleStokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {

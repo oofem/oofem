@@ -51,9 +51,6 @@ CBSElement :: CBSElement(int n, Domain *aDomain) :
 { }
 
 
-CBSElement :: ~CBSElement()
-{ }
-
 IRResultType
 CBSElement :: initializeFrom(InputRecord *ir)
 {

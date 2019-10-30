@@ -55,7 +55,6 @@ class FMElement : public Element
 {
 public:
     FMElement(int n, Domain * aDomain);
-    virtual ~FMElement();
 
     /**
      * Updates the stabilization coefficients used for CBS and SUPG algorithms.

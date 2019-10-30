@@ -53,13 +53,9 @@
 
 namespace oofem {
 SUPGElement :: SUPGElement(int n, Domain *aDomain) :
-    FMElement(n, aDomain), t_supg(0), t_pspg(0), t_lsic(0)
+    FMElement(n, aDomain)
 { }
 
-
-SUPGElement :: ~SUPGElement()
-// Destructor.
-{ }
 
 IRResultType
 SUPGElement :: initializeFrom(InputRecord *ir)

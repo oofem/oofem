@@ -55,9 +55,9 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
     this->ndomains = 1;
 }
 
-StokesFlow :: ~StokesFlow()
-{
-}
+
+StokesFlow :: ~StokesFlow() { }
+
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 {

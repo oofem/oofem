@@ -78,11 +78,10 @@ protected:
     //double a[3];
     double b [ 3 ];
     double c [ 3 ];
-    double area;
+    double area = 0.;
 
 public:
     TR1_2D_CBS(int n, Domain * aDomain);
-    virtual ~TR1_2D_CBS();
 
     FEInterpolation *giveInterpolation() const override;
 

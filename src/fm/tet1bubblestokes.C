@@ -74,10 +74,6 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_w) );
 }
 
-Tet1BubbleStokes :: ~Tet1BubbleStokes()
-{
-}
-
 void Tet1BubbleStokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {

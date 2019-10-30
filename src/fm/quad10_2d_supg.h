@@ -63,7 +63,6 @@ protected:
 
 public:
     Quad10_2D_SUPG(int n, Domain * d);
-    virtual ~Quad10_2D_SUPG();
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;

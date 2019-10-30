@@ -76,9 +76,6 @@ TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
     numberOfDofMans  = 3;
 }
 
-TR1_2D_SUPG :: ~TR1_2D_SUPG()
-{ }
-
 int
 TR1_2D_SUPG :: computeNumberOfDofs()
 {

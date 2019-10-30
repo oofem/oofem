@@ -43,8 +43,6 @@ REGISTER_CrossSection(FluidCrossSection);
 
 FluidCrossSection :: FluidCrossSection(int n, Domain *d) : CrossSection(n, d), matNumber(0) { }
 
-FluidCrossSection :: ~FluidCrossSection() { }
-
 
 IRResultType
 FluidCrossSection :: initializeFrom(InputRecord *ir)

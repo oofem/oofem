@@ -63,7 +63,6 @@ protected:
 
 public:
     CBSElement(int n, Domain * aDomain);
-    virtual ~CBSElement();
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

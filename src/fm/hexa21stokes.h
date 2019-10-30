@@ -69,7 +69,6 @@ protected:
 
 public:
     Hexa21Stokes(int n, Domain * d);
-    virtual ~Hexa21Stokes();
 
     void computeGaussPoints() override;
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;

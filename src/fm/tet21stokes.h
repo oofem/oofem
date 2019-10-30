@@ -71,7 +71,6 @@ protected:
 
 public:
     Tet21Stokes(int n, Domain * d);
-    virtual ~Tet21Stokes();
 
     void computeGaussPoints() override;
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
