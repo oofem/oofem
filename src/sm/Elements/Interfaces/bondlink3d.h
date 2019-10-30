@@ -77,6 +77,8 @@ public:
     double computeVolumeAround(GaussPoint *aGaussPoint) override;
     
     double giveLength();
+
+    MaterialMode giveMaterialMode() override { return _3dInterface; }
     
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
@@ -100,9 +102,10 @@ public:
     virtual void giveGPCoordinates(FloatArray &coords);
 
     virtual void computeGeometryProperties();
-    
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
-    
+
+    void giveInternalForcesVector(FloatArray &answer,
+				  TimeStep *tStep, int useUpdatedGpRecord);
+
     virtual const char *giveInputRecordName() const override { return _IFT_BondLink3d_Name; }
     virtual const char *giveClassName()  const override { return "BondLink3d"; }
     virtual IRResultType initializeFrom(InputRecord *ir) override;

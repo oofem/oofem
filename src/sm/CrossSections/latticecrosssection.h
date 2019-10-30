@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef LatticeCrossSection_h
-#define LatticeCrossSection_h
+#ifndef latticecrosssection_h
+#define latticecrosssection_h
 
 #include "sm/Materials/LatticeMaterials/latticestructuralmaterial.h"
 #include "crosssection.h"
@@ -41,7 +41,7 @@
 
 ///@name Input fields for LatticeCrossSection
 //@{
-#define _IFT_LatticeCrossSection_Name "interfacecs"
+#define _IFT_LatticeCrossSection_Name "latticecs"
 #define _IFT_LatticeCrossSection_Material "material"
 #define _IFT_LatticeCrossSection_thickness "thickness"
 //@}
@@ -54,9 +54,9 @@ class FloatMatrix;
 typedef GaussPoint IntegrationPoint;
 
 /**
- * Base class for all structural interface cross section models.
- * Keeps track of the interface material, the geometric thickness (for 2d elements)
- * and possibly (in the future) the integration rule (Gauss, Lobatto etc)
+ * Base class for all structural lattice cross section models.
+ * Keeps track of the lattice material, the geometric thickness (for 2d elements)
+ *
  */
 class LatticeCrossSection : public CrossSection
 {
@@ -95,26 +95,17 @@ public:
     //@{
     // Pass all calls to the material
 
-    void giveLatticeStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
-    {
-      this->giveLatticeMaterial()->giveLatticeStress1d(answer, gp, reducedStrain, tStep);
-    }
-
-    void giveLatticeStress_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
-    {
-      this->giveLatticeMaterial()->giveLatticeStress2d(answer, gp, reducedStrain, tStep);
-    }
-
+    double giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep) const;
     
-    void giveLatticeStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) const
-    {
-      this->giveLatticeMaterial()->giveLatticeStress3d(answer, gp, reducedStrain, tStep);
-    }
-
+    FloatArrayF<3> giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const;
+    
+    FloatArrayF<6> giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const;
     
     FloatMatrixF<1,1> give1dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
-    FloatMatrixF<2,2> give2dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
-    FloatMatrixF<3,3> give3dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+
+    FloatMatrixF<3,3> give2dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+
+    FloatMatrixF<6,6> give3dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
     //@}
 
     LatticeStructuralMaterial *giveLatticeMaterial() const;
@@ -135,6 +126,9 @@ public:
     const char *giveClassName() const override { return "LatticeCrossSection"; }
     const char *giveInputRecordName() const override { return _IFT_LatticeCrossSection_Name; }
 
+    //    void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+
+    
     CrossSectExtension crossSectionType;
 private:
     int materialNum;

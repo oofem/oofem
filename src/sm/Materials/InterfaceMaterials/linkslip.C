@@ -36,7 +36,9 @@
 //#include "linearelasticmaterial.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 //#include "CrossSections/structuralcrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
@@ -68,16 +70,6 @@ namespace oofem {
   // destructor
   //
   {}
-
-  int
-  LinkSlip :: hasMaterialModeCapability(MaterialMode mode)
-  {
-    if ( mode == _3dMat ) {
-      return 1;
-    }
-
-    return 0;
-  }
 
 
   IRResultType
@@ -167,49 +159,44 @@ namespace oofem {
   }
 
 
-
-  void
-  LinkSlip :: giveTraction3d(FloatArray &answer,
-				   GaussPoint *gp,
-				   const FloatArray &totalStrain,
-				   TimeStep *atTime)
-  {
+FloatArrayF<3>
+LinkSlip :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
+{
     LinkSlipStatus *status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
 
     //For axial (first) component, strain has the meanig of slip. Stress is traction.
     
-    FloatArray stress,strain;
-    stress = status->giveTraction();
-    strain = status->giveJump();
+    FloatArray oldTraction,oldJump;
+    oldTraction = status->giveTraction();
+    oldJump = status->giveJump();
 
     //evaluate tempKappa (no elastic strain in axial direction)
-    double tempKappa = status->giveKappa() + fabs(totalStrain.at(1)-strain.at(1));
-  
-    answer.resize(3);
-    answer.zero();
+    double tempKappa = status->giveKappa() + fabs(jump.at(1)-oldJump.at(1));
+
+    FloatArrayF<3> traction;
 
     //trial stress in axial direction
-    answer.at(1) = stress.at(1) + (totalStrain.at(1)-strain.at(1))*this->kNormal;
+    traction.at(1) = oldTraction.at(1) + (jump.at(1)-oldJump.at(1))*this->kNormal;
     
     
-    double f = fabs(answer.at(1)) - evaluateBondStress(tempKappa);
+    double f = fabs(traction.at(1)) - evaluateBondStress(tempKappa);
 
     if(f>0){//plastic response.
       //Reduced stress by increasing plastic strain.
-      answer.at(1) = evaluateBondStress(tempKappa);;
+      traction.at(1) = evaluateBondStress(tempKappa);;
     }
 
     //Compute the lateral stress components
     for ( int i = 2; i <= 3; i++ ) { // only diagonal terms matter
-      answer.at(i) =  this->kLateral * totalStrain.at(i);
+      traction.at(i) =  this->kLateral * jump.at(i);
     }
 
     //Set temp values in status needed for dissipation
     status->letTempKappaBe(tempKappa);
-    status->letTempJumpBe(totalStrain);
-    status->letTempTractionBe(answer);
+    status->letTempJumpBe(jump);
+    status->letTempTractionBe(traction);
 
-    return;
+    return traction;
   }
 
   Interface *
@@ -218,19 +205,19 @@ namespace oofem {
     return NULL;
   }
 
-
-
-  void
-  LinkSlip :: give3dStiffnessMatrix(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
+FloatMatrixF<3,3>
+LinkSlip :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
   {
  
     /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(3, 3);
-    answer.zero();
+    FloatMatrixF<3,3> answer;
 
     answer.at(1, 1) = this->kNormal;
     answer.at(2, 2) = this->kLateral; // shear
     answer.at(3, 3) = this->kLateral; // shear    
+
+    return answer;
+    
   }
 
   LinkSlipStatus :: LinkSlipStatus(GaussPoint *g) :  StructuralInterfaceMaterialStatus(g)

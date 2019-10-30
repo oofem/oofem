@@ -78,47 +78,22 @@ public:
      * @param d Domain to which new material will belong.
      */
     LatticeStructuralMaterial(int n, Domain *d);
-
+    
+    virtual bool hasAnalyticalTangentStiffness() const {return true;}
+    
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "LatticeStructuralMaterial"; }
 
-    virtual void giveLatticeStress1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    virtual void giveLatticeStress2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    virtual void giveLatticeStress3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual double giveLatticeStress1d(const double strain, GaussPoint *gp, TimeStep *tStep);
+    
+    virtual FloatArrayF<3> giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep);
+    
+    virtual FloatArrayF<6> giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep);
 
-    /**
-     * Method for computing 2d lattice stiffness matrix of receiver.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep);
+    virtual FloatMatrixF<1,1> give1dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<6,6> give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 
-    /**
-     * Method for computing 2d lattice stiffness matrix of receiver.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep);
-
-
-    /**
-     * Method for computing 3d lattice stiffness matrix of receiver.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep) override;
 
 };
 } // end namespace oofem

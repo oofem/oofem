@@ -155,6 +155,7 @@ set (sm_crosssection
     CrossSections/structuralinterfacecrosssection.C
     CrossSections/variablecrosssection.C
     CrossSections/warpingcrosssection.C
+    CrossSections/latticecrosssection.C
     )
 
 set (sm_emodel

@@ -35,7 +35,7 @@
 #ifndef latticelinearelastic_h
 #define latticelinearelastic_h
 
-#include "../linearelasticmaterial.h"
+#include "latticestructuralmaterial.h"
 #include "cltypes.h"
 #include "randommaterialext.h"
 #include "strainvector.h"
@@ -59,7 +59,7 @@ namespace oofem {
 /**
  * This class implements a local random linear elastic model for lattice elements.
  */
-class LatticeLinearElastic : public LinearElasticMaterial, public RandomMaterialExtensionInterface
+class LatticeLinearElastic : public LatticeStructuralMaterial, public RandomMaterialExtensionInterface
     //
 {
 protected:
@@ -86,7 +86,7 @@ protected:
 public:
 
     /// Constructor
-    LatticeLinearElastic(int n, Domain *d) : LinearElasticMaterial(n, d), RandomMaterialExtensionInterface() { };
+    LatticeLinearElastic(int n, Domain *d) : LatticeStructuralMaterial(n, d), RandomMaterialExtensionInterface() { };
 
 
     LatticeLinearElastic(int n, Domain *d, double eNormalMean, double alphaOne, double alphaTwo);
@@ -105,42 +105,30 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
+    
+    virtual FloatArrayF<3> giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) override;
+    
+    virtual FloatArrayF<6> giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    void give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
+    virtual FloatMatrixF<1,1> give1dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    
+    virtual FloatMatrixF<3,3> give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    
+    virtual FloatMatrixF<6,6> give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
-    void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
+    
     int hasMaterialModeCapability(MaterialMode mode);
 
 
     Interface *giveInterface(InterfaceType) override;
 
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
-
-    void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) override { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
-
-    void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) override { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
-
     virtual void giveRandomParameters(FloatArray &param);
-
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
-    double  give(int aProperty, GaussPoint *gp);
+    double  give(int aProperty, GaussPoint *gp) const;
 
 protected:
 

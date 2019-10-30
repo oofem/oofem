@@ -34,10 +34,12 @@
 
 #include "latticelinearelastic.h"
 #include "latticematstatus.h"
-#include "../isolinearelasticmaterial.h"
+#include "latticestructuralmaterial.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "CrossSections/structuralcrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
@@ -51,7 +53,7 @@ namespace oofem {
 REGISTER_Material(LatticeLinearElastic);
 
 // constructor which creates a dummy material without a status and without random extension interface
-LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double a1, double a2) : LinearElasticMaterial(n, d)
+LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double a1, double a2) : LatticeStructuralMaterial(n, d)
 
 {
     eNormalMean = e0;
@@ -87,7 +89,7 @@ LatticeLinearElastic :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
-    LinearElasticMaterial :: initializeFrom(ir);
+    LatticeStructuralMaterial :: initializeFrom(ir);
     RandomMaterialExtensionInterface :: initializeFrom(ir);
 
     //Young's modulus of the material that the network element is made of
@@ -154,32 +156,31 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
 }
 
 
+ FloatArrayF<3>
+ LatticeLinearElastic :: giveLatticeStress2d(const FloatArrayF<3> &strain,
+					     GaussPoint *gp,
+					     TimeStep *tStep)
+ {
+   FloatArray answer;
+   answer.resize(3);
+   answer.zero();
 
-void
-LatticeLinearElastic :: giveRealStressVector(FloatArray &answer,
-                                             GaussPoint *gp,
-                                             const FloatArray &totalStrain,
-                                             TimeStep *atTime)
-{
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray strainVector;
+    FloatArray reducedStrain;
 
     this->initTempStatus(gp);
 
     // subtract stress independent part
-    this->giveStressDependentPartOfStrainVector(strainVector, gp, totalStrain, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
 
     FloatMatrix stiffnessMatrix;
-    this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
+    stiffnessMatrix.resize(3,3);
+    stiffnessMatrix.zero();
+    stiffnessMatrix = this->give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
-
-
-    answer.resize(rsize);
-    answer.zero();
-    for ( int i = 1; i <= rsize; i++ ) { // only diagonal terms matter
-        answer.at(i) = stiffnessMatrix.at(i, i) * strainVector.at(i);
+    for ( int i = 1; i <= 3; i++ ) { // only diagonal terms matter
+        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i);
     }
 
     //Read in fluid pressures from structural element if this is not a slave problem
@@ -196,12 +197,63 @@ LatticeLinearElastic :: giveRealStressVector(FloatArray &answer,
     answer.at(1) += waterPressure;
 
     //Set all temp values
-    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
+   
+    return answer;
 
-    return;
-}
+ }
 
+
+ FloatArrayF<6>
+ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF<6> &strain,
+					     GaussPoint *gp,
+					     TimeStep *tStep)
+ {
+   FloatArray answer;
+   answer.resize(6);
+   answer.zero();
+
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+
+    FloatArray reducedStrain;
+
+    this->initTempStatus(gp);
+
+    // subtract stress independent part
+    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
+
+    FloatMatrix stiffnessMatrix;
+    stiffnessMatrix.resize(6,6);
+    stiffnessMatrix.zero();
+    stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+
+    for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
+        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i);
+    }
+
+    //Read in fluid pressures from structural element if this is not a slave problem
+    FloatArray pressures;
+    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
+        static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
+    }
+
+    double waterPressure = 0.;
+    for ( int i = 0; i < pressures.giveSize(); i++ ) {
+        waterPressure += 1. / pressures.giveSize() * pressures.at(i + 1);
+    }
+
+    answer.at(1) += waterPressure;
+
+    //Set all temp values
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(answer);
+   
+    return answer;
+
+ }
+
+  
 void LatticeLinearElastic :: giveRandomParameters(FloatArray &param)
 {
     param.resize(3);
@@ -224,40 +276,45 @@ LatticeLinearElastic :: giveInterface(InterfaceType type)
     return NULL;
 }
 
-
-void
-LatticeLinearElastic :: give1dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
+FloatMatrixF<1,1>
+LatticeLinearElastic :: give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(1, 1);
-    answer.zero();
+  FloatMatrix answer;
+  answer.resize(1,1);
+  answer.zero();
+  
+  //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
+  //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
 
-    answer.at(1, 1) = 1.;
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
+    return answer;
+}
+
+FloatMatrixF<3,3>
+LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+{
+  /* Returns elastic moduli in reduced stress-strain space*/
+  FloatMatrix answer;
+  answer.resize(3,3);
+  answer.zero();
+  
+  answer.at(1, 1) = 1.;
+  answer.at(2, 2) = this->alphaOne; // shear
+  answer.at(3, 3) = this->alphaTwo; // torsion
+  
+  answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
+  
+  return answer;
 }
 
 
-void
-LatticeLinearElastic :: give2dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
+FloatMatrixF<6,6>
+LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
     /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(3, 3);
-    answer.zero();
-
-    answer.at(1, 1) = 1.;
-    answer.at(2, 2) = this->alphaOne; // shear
-    answer.at(3, 3) = this->alphaTwo; // torsion
-
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-}
-
-
-void
-LatticeLinearElastic :: give3dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
-{
-    /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(6, 6);
-    answer.zero();
+  FloatMatrix answer;
+  answer.resize(6, 6);
+  answer.zero();
 
     answer.at(1, 1) = 1.;
     answer.at(2, 2) = this->alphaOne; // shear
@@ -267,6 +324,8 @@ LatticeLinearElastic :: give3dLatticeStiffMtrx(FloatMatrix &answer, MatResponseM
     answer.at(6, 6) = this->alphaTwo; // torsion
 
     answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
+
+    return answer;
 }
 
 
@@ -294,7 +353,7 @@ LatticeLinearElastic :: giveThermalDilatationVector(FloatArray &answer,
 
 
 double
-LatticeLinearElastic :: give(int aProperty, GaussPoint *gp)
+LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
     if ( static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
@@ -311,7 +370,7 @@ LatticeLinearElastic :: give(int aProperty, GaussPoint *gp)
     } else if ( aProperty == 'n' )    {
         return this->nu;
     } else   {
-        return LinearElasticMaterial :: give(aProperty, gp);
+        return LatticeStructuralMaterial :: give(aProperty, gp);
     }
 }
 
@@ -350,7 +409,7 @@ LatticeLinearElastic :: giveIPValue(FloatArray &answer,
         answer.at(1) = status->giveCrackFlag();
         return 1;
     } else   {
-        return LinearElasticMaterial :: giveIPValue(answer, gp, type, atTime);
+        return LatticeStructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
 

@@ -136,19 +136,12 @@ public:
     
     double evaluateBondStress(const double kappa) const;
 
-    virtual void give3dStiffnessMatrix(FloatMatrix &answer,
-				 MatResponseMode rmode,
-				 GaussPoint *gp,
-				 TimeStep *atTime);
-
+    FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
+	
+    FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
     
-    virtual int hasMaterialModeCapability(MaterialMode mode);
-
-
     virtual Interface *giveInterface(InterfaceType);
-
-    virtual void giveTraction3d(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
+                                  
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 

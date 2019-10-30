@@ -35,15 +35,17 @@
 #include "sm/Elements/LatticeElements/lattice2d.h"
 #include "sm/Materials/LatticeMaterials/latticematstatus.h"
 #include "sm/Elements/LatticeElements/latticestructuralelement.h"
-#include "sm/CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/latticecrosssection.h"
 #include "domain.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "intarray.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "mathfem.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -158,15 +160,13 @@ Lattice2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 void
 Lattice2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
-    //this->giveStructuralCrossSection()->give2dLatticeStiffMtrx(answer, rMode, gp, tStep);
+  answer = static_cast< LatticeCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix(rMode, gp, tStep);
 }
 
 void
 Lattice2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
-    //this->giveStructuralCrossSection()->giveLatticeStress(answer, rMode, gp, tStep);
+  answer = static_cast< LatticeCrossSection* >(this->giveCrossSection())->giveLatticeStress2d(strain, gp, tStep);
 }
 
 void

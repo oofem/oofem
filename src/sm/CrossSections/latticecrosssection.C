@@ -32,17 +32,19 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/CrossSections/latticestructuralcrosssection.h"
+#include "latticecrosssection.h"
 #include "sm/Materials/LatticeMaterials/latticematstatus.h"
 #include "sm/Materials/LatticeMaterials/latticestructuralmaterial.h"
 #include "gausspoint.h"
 #include "element.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 
 namespace oofem {
 REGISTER_CrossSection(LatticeCrossSection);
 
-StructuralInterfaceMaterial *
+LatticeStructuralMaterial *
 LatticeCrossSection :: giveLatticeMaterial() const
 {
     return static_cast< LatticeStructuralMaterial * >( this->giveDomain()->giveMaterial(this->materialNum) );
@@ -51,9 +53,9 @@ LatticeCrossSection :: giveLatticeMaterial() const
 int
 LatticeCrossSection :: checkConsistency()
 {
-    // Checks if the given cross section material is a 'StructuralInterfaceMaterial'
+    // Checks if the given cross section material is a 'LatticeStructuralMaterial'
     Material *mat = this->giveDomain()->giveMaterial(this->materialNum);
-    if ( !dynamic_cast< StructuralInterfaceMaterial * >(mat) ) {
+    if ( !dynamic_cast< LatticeStructuralMaterial * >(mat) ) {
         OOFEM_WARNING("material %s is not a structural interface material", mat->giveClassName() );
         return 0;
     }
@@ -78,22 +80,57 @@ LatticeCrossSection :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
-void
-LatticeStructuralCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-{
-  LatticeMaterial *mat = dynamic_cast< LatticeMaterial * >( this->giveMaterial(gp) );
-  if ( mode == _3dLattice ) {
-    mat->give3dLatticeStiffnessMatrix(answer, rMode, gp, tStep);
-  } else if ( mode == _2dLattice ) {
-    mat->give2dLatticeStiffMtrx(answer, rMode, gp, tStep);
-  } else if ( mode == _1dLattice ) {
-    mat->give1dLatticeStiffMtrx(answer, rMode, gp, tStep);
-  }  else {
-    mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
+  double LatticeCrossSection :: giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep) const
+  {
+    return this->giveLatticeMaterial()->giveLatticeStress1d(strain, gp, tStep);
   }
+
+  FloatArrayF<3> LatticeCrossSection :: giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const
+  {
+    return this->giveLatticeMaterial()->giveLatticeStress2d(strain, gp, tStep);
+  }
+
+  FloatArrayF<6> LatticeCrossSection :: giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
+  {
+    return this->giveLatticeMaterial()->giveLatticeStress3d(strain, gp, tStep);
+  }
+
+  
+  
+FloatMatrixF<1,1>
+LatticeCrossSection :: give1dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+{
+    LatticeStructuralMaterial *mat = this->giveLatticeMaterial();
+    if ( mat->hasAnalyticalTangentStiffness() ) {
+      return mat->give1dLatticeStiffnessMatrix(rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR("not implemented");
+    }
 }
 
+FloatMatrixF<3,3>
+LatticeCrossSection :: give2dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+{
+    LatticeStructuralMaterial *mat = this->giveLatticeMaterial();
+    if ( mat->hasAnalyticalTangentStiffness() ) {
+      return mat->give2dLatticeStiffnessMatrix(rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR("not implemented");
+    }
+}
+
+FloatMatrixF<6,6>
+LatticeCrossSection :: give3dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
+{
+    LatticeStructuralMaterial *mat = this->giveLatticeMaterial();
+    if ( mat->hasAnalyticalTangentStiffness() ) {
+      return mat->give3dLatticeStiffnessMatrix(rMode, gp, tStep);
+    } else {
+        OOFEM_ERROR("not implemented");
+    }
+}
+
+  
 int
 LatticeCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
 {
@@ -102,7 +139,7 @@ LatticeCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalS
         answer.at(1) = this->giveNumber();
         return 1;
     }
-    return this->giveInterfaceMaterial()->giveIPValue(answer, ip, type, tStep);
+    return this->giveLatticeMaterial()->giveIPValue(answer, ip, type, tStep);
 }
 
 
@@ -119,19 +156,19 @@ Material *LatticeCrossSection :: giveMaterial(IntegrationPoint *ip)
 int
 LatticeCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
-    return this->giveInterfaceMaterial()->packUnknowns(buff, tStep, gp);
+    return this->giveLatticeMaterial()->packUnknowns(buff, tStep, gp);
 }
 
 int
 LatticeCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
-    return this->giveInterfaceMaterial()->unpackAndUpdateUnknowns(buff, tStep, gp);
+    return this->giveLatticeMaterial()->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
 LatticeCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
-    return this->giveInterfaceMaterial()->estimatePackSize(buff, gp);
+    return this->giveLatticeMaterial()->estimatePackSize(buff, gp);
 }
 
 } // end namespace oofem

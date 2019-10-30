@@ -35,7 +35,9 @@
 #include "latticedamage.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "CrossSections/latticecrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
@@ -234,20 +236,81 @@ LatticeDamage :: CreateStatus(GaussPoint *gp) const
     return new LatticeDamageStatus(gp);
 }
 
-
-
-void
-LatticeDamage :: giveRealStressVector(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &totalStrain,
-                                      TimeStep *atTime)
+FloatMatrixF<3,3>
+LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
+// return material stiffness matrix for 2dlattice
 //
 {
-    LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+  FloatMatrix answer;
+  answer.resize(3,3);
+  answer.zero();
+  
+   answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix( mode, gp, tStep);
+
+    if ( mode == ElasticStiffness ) {
+        return answer;
+    } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
+        LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+        double omega = status->giveTempDamage();
+
+        if ( omega > 0.99999 ) {
+            omega = 0.99999;
+        }
+
+        answer.times(1. - omega);
+
+        return answer;
+    } else {
+        OOFEM_ERROR("Unsupported stiffness mode\n");
+    }
+    //Should never reach this point
+    return answer;
+}
+
+FloatMatrixF<6,6>
+LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+//
+// return material stiffness matrix for 2dlattice
+//
+{
+  FloatMatrix answer;
+  answer.resize(6,6);
+  answer.zero();
+
+  answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(mode, gp, tStep);
+  
+    if ( mode == ElasticStiffness ) {
+        return answer;
+    } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
+        LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+        double omega = status->giveTempDamage();
+
+        if ( omega > 0.99999 ) {
+            omega = 0.99999;
+        }
+
+        answer.times(1. - omega);
+
+        return answer;
+    } else {
+        OOFEM_ERROR("Unsupported stiffness mode\n");
+    }
+
+    //Should never reach this point
+    return answer;
+  
+}
+
+  FloatArrayF<3>
+  LatticeDamage :: giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep)
+{
+
+  FloatArray answer;
+  answer.resize(3);
+  answer.zero();
+  
+  LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
@@ -261,10 +324,10 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
     FloatArray testStrainOld( status->giveStrainVector() );
 
     // substract stress independent part
-    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, atTime, VM_Total);
+    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
 
     // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedStrain, gp, atTime);
+    this->computeEquivalentStrain(equivStrain, reducedStrain, gp, tStep);
 
     // compute value of loading function if strainLevel crit apply
     f = equivStrain - status->giveKappa();
@@ -292,14 +355,131 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
 
 
     FloatMatrix stiffnessMatrix;
-    this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
+    stiffnessMatrix.resize(3,3);
+    stiffnessMatrix.zero();
+    
+    stiffnessMatrix = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    
+    for ( int i = 1; i <= 3; i++ ) { // only diagonal terms matter
+        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
+    }
 
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
+
+    //Compute crack width
+    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
 
 
-    answer.resize(rsize);
-    answer.zero();
-    for ( int i = 1; i <= rsize; i++ ) { // only diagonal terms matter
+    double crackWidth;    
+    crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
+
+
+    
+    
+    double waterPressure = 0.;
+    
+    IntArray coupledModels;
+    
+        //Calculate the the bio coefficient;
+    double biot = 0.;
+    if ( this->biotType == 0 ) {
+      biot = this->biotCoefficient;
+        } else if ( this->biotType == 1 ) {
+      biot = computeBiot(omega, tempKappa, length);
+        } else {
+      OOFEM_ERROR("Unknown biot type\n");
+    }
+
+    answer.at(1) = answer.at(1) + biot * waterPressure;
+    
+    status->setBiotCoefficientInStatus(biot);
+    
+
+    double tempDissipation = status->giveDissipation();
+    double tempDeltaDissipation;
+    
+    tempDeltaDissipation = computeDeltaDissipation2d(omega, reducedStrain, gp, tStep);
+
+    tempDissipation += tempDeltaDissipation;
+    
+    //Set all temp values
+    status->setTempDissipation(tempDissipation);
+    status->setTempDeltaDissipation(tempDeltaDissipation);
+
+    status->setTempEquivalentStrain(equivStrain);
+    status->letTempStrainVectorBe(strain);
+    status->letTempReducedStrainBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+    status->setTempKappa(tempKappa);
+    status->setTempDamage(omega);
+
+    status->setTempNormalStress( answer.at(1) );
+    status->setTempCrackWidth(crackWidth);
+
+    return answer;
+    
+}
+
+
+//Continue here
+  FloatArrayF<6>
+  LatticeDamage :: giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep)
+  {
+    
+  FloatArray answer;
+  answer.resize(6);
+  answer.zero();
+  
+  LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+
+    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
+
+    status->setE0(e0);
+    FloatArray reducedStrain, reducedStrainOld;
+
+    double f, equivStrain, tempKappa, omega = 0.;
+
+    this->initTempStatus(gp);
+
+    FloatArray testStrainOld( status->giveStrainVector() );
+
+    // substract stress independent part
+    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
+
+    // compute equivalent strain
+    this->computeEquivalentStrain(equivStrain, reducedStrain, gp, tStep);
+
+    // compute value of loading function if strainLevel crit apply
+    f = equivStrain - status->giveKappa();
+
+    if ( f <= 0.0 ) {
+        // damage does not grow
+        tempKappa = status->giveKappa();
+        omega = status->giveDamage();
+        if ( status->giveCrackFlag() != 0 ) {
+            status->setTempCrackFlag(2);
+        } else {
+            status->setTempCrackFlag(0);
+        }
+    } else {
+        // damage grows
+        tempKappa = equivStrain;
+
+        // evaluate damage parameter
+
+        this->computeDamageParam(omega, tempKappa, gp);
+        if ( omega > 0 ) {
+            status->setTempCrackFlag(1);
+        }
+    }
+
+
+    FloatMatrix stiffnessMatrix;
+    stiffnessMatrix.resize(6,6);
+    stiffnessMatrix.zero();
+    
+    stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+
+    for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
         answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
     }
 
@@ -310,34 +490,13 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
 
 
     double crackWidth;
-    if ( gp->giveMaterialMode() == _2dLattice ) {
-        crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
-    } else {
-        crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
-    }
-
+    crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
+  
+    
 
     // todo - resolve and unify !!!
 
     double waterPressure = 0.;
-
-    if ( gp->giveMaterialMode() == _2dLattice ) {
-        IntArray coupledModels;
-
-        //Calculate the the bio coefficient;
-        double biot = 0.;
-        if ( this->biotType == 0 ) {
-            biot = this->biotCoefficient;
-        } else if ( this->biotType == 1 ) {
-            biot = computeBiot(omega, tempKappa, length);
-        } else {
-            OOFEM_ERROR("Unknown biot type\n");
-        }
-
-        answer.at(1) = answer.at(1) + biot * waterPressure;
-
-        status->setBiotCoefficientInStatus(biot);
-    } else { //3d_lattice
         //Read in fluid pressures from structural element if this is not a slave problem
         FloatArray pressures;
         if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
@@ -350,17 +509,13 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
         }
 
         answer.at(1) += waterPressure;
-    }
+
 
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation;
 
 
-    if ( gp->giveMaterialMode() == _2dLattice ) {
-        tempDeltaDissipation = computeDeltaDissipation2d(omega, reducedStrain, gp, atTime);
-    } else {
-        tempDeltaDissipation = computeDeltaDissipation3d(omega, reducedStrain, gp, atTime);
-    }
+    tempDeltaDissipation = computeDeltaDissipation3d(omega, reducedStrain, gp, tStep);
 
     tempDissipation += tempDeltaDissipation;
 
@@ -369,7 +524,7 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
     status->setTempDeltaDissipation(tempDeltaDissipation);
 
     status->setTempEquivalentStrain(equivStrain);
-    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStrainVectorBe(strain);
     status->letTempReducedStrainBe(reducedStrain);
     status->letTempStressVectorBe(answer);
     status->setTempKappa(tempKappa);
@@ -378,10 +533,10 @@ LatticeDamage :: giveRealStressVector(FloatArray &answer,
     status->setTempNormalStress( answer.at(1) );
     status->setTempCrackWidth(crackWidth);
 
-    return;
-}
+    return answer;
 
-
+    
+  }
 
 double
 LatticeDamage :: computeBiot(double omega,
@@ -613,55 +768,8 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
 }
 
 
-void
-LatticeDamage :: give2dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
-{
-    LatticeLinearElastic :: give2dLatticeStiffMtrx(answer, rmode, gp, atTime);
-
-    if ( rmode == ElasticStiffness ) {
-        return;
-    } else if ( ( rmode == SecantStiffness ) || ( rmode == TangentStiffness ) ) {
-        LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-        double omega = status->giveTempDamage();
-
-        if ( omega > 0.99999 ) {
-            omega = 0.99999;
-        }
-
-        answer.times(1. - omega);
-
-        return;
-    } else {
-        OOFEM_ERROR("Unsupported stiffness mode\n");
-    }
-}
-
-void
-LatticeDamage :: give3dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
-{
-    LatticeLinearElastic :: give3dLatticeStiffMtrx(answer, rmode, gp, atTime);
-
-    if ( rmode == ElasticStiffness ) {
-        return;
-    } else if ( ( rmode == SecantStiffness ) || ( rmode == TangentStiffness ) ) {
-        LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-        double omega = status->giveTempDamage();
-
-        if ( omega > 0.99999 ) {
-            omega = 0.99999;
-        }
-
-        answer.times(1. - omega);
-
-        return;
-    } else {
-        OOFEM_ERROR("Unsupported stiffness mode\n");
-    }
-}
-
-
 double
-LatticeDamage :: give(int aProperty, GaussPoint *gp)
+LatticeDamage :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
     if ( static_cast< LatticeDamageStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {

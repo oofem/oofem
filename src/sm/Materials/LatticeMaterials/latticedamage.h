@@ -122,7 +122,7 @@ public:
 
     const char *giveClassName() const override { return "LatticeDamageStatus"; }
 
-    void initTempStatus() override;
+    void initTempStatus();
 
     void updateYourself(TimeStep *) override;
 
@@ -190,19 +190,20 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticeDamage_Name; }
     const char *giveClassName() const override { return "LatticeDamage"; }
 
+    virtual bool hasAnalyticalTangentStiffness() const {return true;}
+    
     IRResultType initializeFrom(InputRecord *ir) override;
 
+    virtual FloatArrayF<3> giveLatticeStress2d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) override;
+
+    virtual FloatArrayF<6> giveLatticeStress3d(const FloatArrayF<6> &jump, GaussPoint *gp, TimeStep *tStep) override;
+ 
+    virtual FloatMatrixF<3,3> give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+
+    virtual FloatMatrixF<6,6> give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-    void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
-    void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
 
 
     int hasMaterialModeCapability(MaterialMode mode);
@@ -213,10 +214,6 @@ public:
     virtual double computeBiot(double omega, double kappa, double le);
 
     virtual void computeDamageParam(double &omega, double kappa, GaussPoint *gp);
-
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
-
     ///Compute increment of dissipation for post-processing reasons
     double computeDeltaDissipation2d(double omega, FloatArray &reducedStrain, GaussPoint *gp, TimeStep *atTime);
 
@@ -224,7 +221,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    double give(int aProperty, GaussPoint *gp);
+    double give(int aProperty, GaussPoint *gp) const;
 
 
 protected:

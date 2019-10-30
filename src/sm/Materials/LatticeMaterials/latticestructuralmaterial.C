@@ -41,6 +41,8 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "fieldmanager.h"
@@ -61,29 +63,26 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-void
-LatticeStructuralMaterial :: giveLatticeStress1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+double
+LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("1dLattice mode not supported");
 }
 
-void
-LatticeStructuralMaterial :: giveLatticeStress2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+  FloatArrayF<3>
+  LatticeStructuralMaterial :: giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("2dLattice mode not supported");
 }
 
-  void
-  LatticeStructuralMaterial :: giveLatticeStress3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+  FloatArrayF<6>
+  LatticeStructuralMaterial :: giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep)
   {
     OOFEM_ERROR("3dLattice mode not supported");
-}
+  }
 
-void
-LatticeStructuralMaterial :: give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *tStep)
+FloatMatrixF<1,1>
+LatticeStructuralMaterial :: give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 1dlattice
 //
@@ -91,11 +90,8 @@ LatticeStructuralMaterial :: give1dLatticeStiffMtrx(FloatMatrix &answer,
     OOFEM_ERROR("No general implementation provided");
 }
 
-void
-LatticeStructuralMaterial :: give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *tStep)
+FloatMatrixF<3,3>
+LatticeStructuralMaterial :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 2dlattice
 //
@@ -103,11 +99,8 @@ LatticeStructuralMaterial :: give2dLatticeStiffMtrx(FloatMatrix &answer,
     OOFEM_ERROR("No general implementation provided");
 }
 
-void
-LatticeStructuralMaterial :: give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mode,
-                                             GaussPoint *gp,
-                                             TimeStep *tStep)
+FloatMatrixF<6,6>
+LatticeStructuralMaterial :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 2dlattice
 //
