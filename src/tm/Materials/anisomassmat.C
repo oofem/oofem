@@ -48,21 +48,13 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
-    FloatArray c;
+    FloatMatrix c;
     IR_GIVE_FIELD(ir, c, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
-    if ( c.giveSize() == 4 ) {
-        k = {
-            c[0], c[1], 0.,
-            c[2], c[3], 0.,
-            0., 0., 0.,
-        };
-    } else if ( c.giveSize() == 9 ) {
-        k = {
-            c[0], c[1], c[2],
-            c[3], c[4], c[5],
-            c[6], c[7], c[8],
-        };
+    if ( c.giveNumberOfColumns() != 3 && c.giveNumberOfRows() != 3 ) {
+        OOFEM_WARNING("AnisotropicMassTransferMaterial::initializeFrom - c must be a 3x3");
+        return IRRT_BAD_FORMAT;
     }
+    k = c;
     return TransportMaterial :: initializeFrom(ir);
 }
 
@@ -70,7 +62,7 @@ AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 FloatArrayF<3>
 AnisotropicMassTransferMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     auto answer = - dot(k, grad);
     ms->setTempField(field);
     ms->setTempGradient(grad);
