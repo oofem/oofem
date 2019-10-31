@@ -48,7 +48,6 @@ class OOFEM_EXPORT NURBSInterpolation : public BSplineInterpolation
 {
 public:
     NURBSInterpolation(int nsd) : BSplineInterpolation(nsd) { }
-    virtual ~NURBSInterpolation() {}
 
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

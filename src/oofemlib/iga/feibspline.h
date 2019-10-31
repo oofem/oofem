@@ -83,7 +83,6 @@ public:
     BSplineInterpolation(int nsd) : FEInterpolation(0),
         nsd(nsd)
     {}
-    virtual ~BSplineInterpolation() {}
 
     integrationDomain giveIntegrationDomain() const override {
         if ( nsd == 3 ) {

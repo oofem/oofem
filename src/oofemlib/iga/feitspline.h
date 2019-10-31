@@ -70,7 +70,6 @@ protected:
     FloatArray openLocalKnotVector;
 public:
     TSplineInterpolation(int nsd) : BSplineInterpolation(nsd) { }
-    virtual ~TSplineInterpolation() {}
 
     IRResultType initializeFrom(InputRecord *ir) override;
     void setNumberOfControlPoints(int num) { this->totalNumberOfControlPoints = num; }
