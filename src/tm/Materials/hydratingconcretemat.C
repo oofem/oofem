@@ -41,8 +41,7 @@
 namespace oofem {
 REGISTER_Material(HydratingConcreteMat);
 
-HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d) { }
-
+HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d){ }
 
 IRResultType
 HydratingConcreteMat :: initializeFrom(InputRecord *ir)
@@ -53,12 +52,13 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
     result = IsotropicHeatTransferMaterial :: initializeFrom(ir);
     if ( result != IRRT_OK ) return result;
 
-    referenceTemperature = 25.;
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_HydratingConcreteMat_referenceTemperature);
+    activationEnergy = 38400; //J/mol/K
+    referenceTemperature = 25.;//C
+    IR_GIVE_OPTIONAL_FIELD(ir, activationEnergy, _IFT_HydratingConcreteMat_activationEnergy);
 
     IR_GIVE_FIELD(ir, hydrationModelType, _IFT_HydratingConcreteMat_hydrationModelType);
 
-    /*hydrationModelType==1:exponential hydration model, summarized in A.K. Schindler and K.J. Folliard: Heat of Hydration Models for Cementitious
+    /*hydrationModelType==1: exponential hydration model, summarized in A.K. Schindler and K.J. Folliard: Heat of Hydration Models for Cementitious
      *  Materials, ACI Materials Journal, 2005
      * hydrationModelType==2: affinity hydration model inspired by Miguel Cervera and Javier Oliver and Tomas Prato:Thermo-chemo-mechanical model
      *  for concrete. I: Hydration and aging, Journal of Engineering Mechanics ASCE, 125(9), 1018-1027, 1999
@@ -74,8 +74,49 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, DoHInf, _IFT_HydratingConcreteMat_DoHInf);
         IR_GIVE_OPTIONAL_FIELD(ir, DoH1, _IFT_HydratingConcreteMat_DoH1);
         IR_GIVE_OPTIONAL_FIELD(ir, P1, _IFT_HydratingConcreteMat_P1);
+    } else if ( hydrationModelType == 3 ) { //Saeed Rahimi-Aghdam, Zdeněk P. Bažant, Gianluca Cusatis: Extended Microprestress-Solidification Theory (XMPS) for Long-Term Creep and Diffusion Size Effect in Concrete at Variable Environment, JEM-ASCE, 2019. Appendix A.
+        referenceTemperature = 20.;//according to the authors
+        IR_GIVE_FIELD(ir, wc, _IFT_HydratingConcreteMat_wc);
+        IR_GIVE_FIELD(ir, ac, _IFT_HydratingConcreteMat_ac);
+        rhoCem = 3150.; //kg/m3
+        IR_GIVE_OPTIONAL_FIELD(ir, rhoCem, _IFT_HydratingConcreteMat_rhoCem);
+        rhoAgg = 1600.; //kg/m3
+        IR_GIVE_OPTIONAL_FIELD(ir, rhoAgg, _IFT_HydratingConcreteMat_rhoAgg);
+        Vc0 = rhoAgg*1000./(rhoAgg*1000.+rhoCem*1000.*ac+rhoCem*rhoAgg*wc);
+        Vw0 = rhoAgg*rhoCem*wc/(rhoAgg*1000.+rhoCem*1000.*ac+rhoCem*rhoAgg*wc);
+        
+        double Blaine=350.;//m2/kg
+        IR_GIVE_OPTIONAL_FIELD(ir, Blaine, _IFT_HydratingConcreteMat_Blaine);
+        this->a0 = 6.5e-6*350/Blaine;
+        this->ng = Vc0/(4./3*M_PI*a0*a0*a0);
+        
+        double alphaSet0 = 0.05;
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaSet0, _IFT_HydratingConcreteMat_alphaSet0);
+        
+        timeSet = 3*3600; //s
+        IR_GIVE_OPTIONAL_FIELD(ir, timeSet, _IFT_HydratingConcreteMat_timeSet);
+        
+        
+        double alphaCrit0 = 0.36;
+        IR_GIVE_OPTIONAL_FIELD(ir, alphaCrit0, _IFT_HydratingConcreteMat_alphaCrit0);
+        
+        this->B0 = 1.1e-11/3600./24.; //m2/s
+        IR_GIVE_OPTIONAL_FIELD(ir, this->B0, _IFT_HydratingConcreteMat_B0);
+        
+        double f1 = 6.5e-6/a0;
+        double f2 = 1+2.5*(wc-0.3);
+        double f3 = exp( this->activationEnergy / 8.314 * ( 1. / ( 273.15 + 20. ) - 1. / ( 273.15 + this->referenceTemperature ) ) );
+        alphaCrit = alphaCrit0 * f1 * f2 * f3;
+        if (alphaCrit>0.65) { alphaCrit = 0.65; }
+        alphaSet = alphaSet0 * alphaCrit / alphaCrit0;
+        
+        VCemSet = (1-alphaSet)*Vc0;
+        VCHSet = 0.59*alphaSet*Vc0; //CH vol. per unit vol. of cement 
+        VGelSet = 1.52*alphaSet*Vc0; //Gel vol. per unit vol. of cement 
+        this->aSet = pow( VCemSet/(4./3.*M_PI*ng), 1./3.);
+        this->zSet = pow( (VCemSet+VGelSet)/(4./3.*M_PI*ng), 1./3.);
     } else {
-        OOFEM_WARNING("Unknown hdyration model type %d", hydrationModelType);
+        OOFEM_WARNING("Unknown hydration model type %d", hydrationModelType);
         return IRRT_BAD_FORMAT;
     }
 
@@ -88,8 +129,9 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
 
     minModelTimeStepIntegrations = 30.;
     IR_GIVE_OPTIONAL_FIELD(ir, minModelTimeStepIntegrations, _IFT_HydratingConcreteMat_minModelTimeStepIntegrations);
-
-
+    
+    IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_HydratingConcreteMat_referenceTemperature);
+    
     conductivityType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, conductivityType, _IFT_HydratingConcreteMat_conductivitytype);
     capacityType = 0;
@@ -97,8 +139,6 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
     densityType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, densityType, _IFT_HydratingConcreteMat_densitytype);
 
-    activationEnergy = 38400; //J/mol/K
-    IR_GIVE_OPTIONAL_FIELD(ir, activationEnergy, _IFT_HydratingConcreteMat_activationEnergy);
 
     reinforcementDegree = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_HydratingConcreteMat_reinforcementDegree);
@@ -274,32 +314,121 @@ double HydratingConcreteMat :: GivePower(TimeStep *tStep, GaussPoint *gp, ValueM
             //printf("%f %f %f %f\n", equivalentTime, this->lastEquivalentTime, evalTime, lastEvalTime);
         }
     } else if ( this->hydrationModelType == 2 ) { //affinity hydration model inspired by Miguel Cervera et al.
-        //determine timeStep for integration
+        //determine dTime for integration
         double alphaTrialOld, alphaTrialNew = 0.0;
         double time = ms->lastEvalTime;
-        double timeStep = ( evalTime - time ) / this->minModelTimeStepIntegrations;
-        if ( timeStep > this->maxModelIntegrationTime ) {
-            timeStep = this->maxModelIntegrationTime;
+        double dTime = ( evalTime - time ) / this->minModelTimeStepIntegrations;
+        if ( dTime > this->maxModelIntegrationTime ) {
+            dTime = this->maxModelIntegrationTime;
         }
         ms->degreeOfHydration = ms->lastDegreeOfHydration;
         //integration loop through hydration model at a given TimeStep
         while ( time < evalTime ) {
-            if ( time + timeStep > evalTime ) {
-                timeStep = evalTime - time;
+            if ( time + dTime > evalTime ) {
+                dTime = evalTime - time;
             } else {
-                time += timeStep;
+                time += dTime;
             }
             //printf("%f %f %f %f\n", time, affinity, scaleTemperature(), degreeOfHydration);
-            alphaTrialOld = ms->degreeOfHydration + scaleTemperature(gp) * affinity25(ms->degreeOfHydration) * timeStep; //predictor
+            alphaTrialOld = ms->degreeOfHydration + scaleTemperature(gp) * affinity25(ms->degreeOfHydration) * dTime; //predictor
             //http://en.wikipedia.org/wiki/Predictor%E2%80%93corrector_method
             //corrector - integration through trapezoidal rule
             //3 loops normally suffices
             for ( int i = 0; i < 4; i++ ) {
-                alphaTrialNew = ms->degreeOfHydration + scaleTemperature(gp) * timeStep / 2. * ( affinity25(ms->degreeOfHydration) + affinity25(alphaTrialOld) );
+                alphaTrialNew = ms->degreeOfHydration + scaleTemperature(gp) * dTime / 2. * ( affinity25(ms->degreeOfHydration) + affinity25(alphaTrialOld) );
                 alphaTrialOld = alphaTrialNew;
             }
             ms->degreeOfHydration = alphaTrialNew;
         }
+    
+    } else if ( this->hydrationModelType == 3 ) { //Rahimi-Aghdam's model  
+        double RH=0.99;//ToDo - relative humidity in pore checking from registered fields
+        double hStar = 0.88;
+        double cf = 0.;
+        double nh = 8.;
+        
+        double time = ms->lastEvalTime;
+        double dTime = ( evalTime - time ) / this->minModelTimeStepIntegrations;
+        
+        if ( dTime > this->maxModelIntegrationTime ) {
+            dTime = this->maxModelIntegrationTime;
+        }
+        
+        ms->degreeOfHydration = ms->lastDegreeOfHydration;
+        ms->zShell = ms->lastZShell;
+        ms->aCement = ms->lastACement;
+        ms->VCem = ms->lastVCem;
+        ms->VGel = ms->lastVGel;
+        ms->VCH = ms->lastVCH;
+    
+        while ( time < evalTime ) {
+            if ( time + dTime > evalTime ) {
+                dTime = evalTime - time;
+            } else {
+                time += dTime;
+            }
+        
+            if ( ms->degreeOfHydration < alphaSet ){//treat first dormant period
+                //assume constant rate    
+                ms->degreeOfHydration += scaleTemperature(gp) * (alphaSet/timeSet ) * dTime;
+                ms->VCem = (1.-ms->degreeOfHydration)*Vc0;
+                ms->VCH = VCHSet * ms->degreeOfHydration/alphaSet;
+                ms->VGel = VGelSet * ms->degreeOfHydration/alphaSet;
+            } else {
+                double f0, f4;
+                
+                if (ms->zShell==0.){//setting time
+                    ms->zShell = this->zSet;
+                    ms->aCement = this->aSet;
+                    ms->VCem=VCemSet;
+                    ms->VGel=VGelSet;
+                    ms->VCH=VCHSet;
+                }
+                
+                f0 = cf + (1.-cf)/(1. + pow((1.-RH)/(1.-hStar) , nh) );
+                if ( ms->degreeOfHydration > 0.75*alphaCrit ) {
+                    double beta =  ms->degreeOfHydration - 0.75*alphaCrit + 0.75*alphaCrit*0.30/(alphaCrit/2.); 
+                    double p = pow(beta/0.30, 1.8);
+                    f4 = p * exp(-p);//error in the original article?
+                } else {
+                    double gamma = pow(ms->degreeOfHydration/(alphaCrit/2.), 1.8);
+                    f4 = gamma * exp (-gamma);
+                }
+                
+                double Beff = B0 * f0 * f4;
+                // radius of the equivalent contact-free C-S-H shells
+                double zShellWedge = ms->zShell / (1.+pow((ms->zShell-this->a0)/(this->a0/6.4),5.));
+                double alphaU = 0.46 + 0.95*pow(wc-0.17,0.6);
+                alphaU = min(alphaU,1.0);
+//                 double hc= 0.77 + 0.22*pow(wc-0.17,0.5) + 0.15*(alphaU/ms->degreeOfHydration-1.);
+//                 hc = min(hc,0.99); //wrong numbers
+                double hc=0.78;
+                
+                double Qt1 = 4*M_PI*ms->aCement*ms->zShell*Beff*(RH-hc)/(ms->zShell - ms->aCement) * zShellWedge*zShellWedge / (ms->zShell*ms->zShell);
+                
+                double xsi_gc=1.21, xsi_CHc=0.59, xsi_wc=(1.21+1.13)/2.;//assuming half
+                double xsi_cw=1/xsi_wc;
+                double xsi_gw=xsi_gc*xsi_cw;
+                double xsi_CHw = xsi_CHc*xsi_cw;
+                
+                double dVCem = -ng*Qt1*xsi_cw * dTime;
+                ms->VCem += dVCem;
+                double dVGel = ng*Qt1*xsi_gw * dTime;
+                ms->VGel += dVGel;
+                ms->VCH += ng*Qt1*xsi_CHw * dTime;
+                
+                ms->aCement += 1./(4.*M_PI*a0*a0*ng)*dVCem;
+                ms->degreeOfHydration -= 3./(4.*M_PI*a0*a0*a0*ng)*dVCem;
+                
+//                 if (ms->degreeOfHydration > alphaCrit) {
+                ms->zShell += (dVGel+dVCem)/(4.*M_PI*ng*zShellWedge*zShellWedge);//error in article, missing ng?
+//                 }
+                //ToDo relative humidity decrement, saturation degree
+            }
+        }
+        
+        
+        
     } else {
         OOFEM_ERROR("Unknown hydration model type %d", this->hydrationModelType);
     }
@@ -345,6 +474,12 @@ HydratingConcreteMatStatus :: updateYourself(TimeStep *tStep)
     this->lastEvalTime = tStep->giveIntrinsicTime(); //where heat power was evaluated in the last equilibrium
     this->lastEquivalentTime = this->equivalentTime;
     this->lastDegreeOfHydration = this->degreeOfHydration;
+    this->lastZShell = this->zShell;
+    this->lastACement = this->aCement;
+    this->lastVCem = this->VCem;
+    this->lastVGel = this->VGel;
+    this->lastVCH = this->VCH; 
+    
     //average from last and current temperatures, in C*hour
     if ( !tStep->isIcApply() && mat->giveCastingTime() < tStep->giveIntrinsicTime() ) {
         this->maturity += ( ( this->giveField() + this->giveTempField() ) / 2. - mat->giveMaturityT0() ) * tStep->giveTimeIncrement() / 3600.;
