@@ -55,7 +55,7 @@ class LatticeViscoelasticStatus : public LatticeMaterialStatus
 
 {
 protected:
-  std :: unique_ptr< GaussPoint >slaveGpVisco;
+    std :: unique_ptr< GaussPoint >slaveGpVisco;
 
 public:
 
@@ -80,7 +80,7 @@ public:
     virtual void restoreContext(DataStream &stream, ContextMode mode);
 
     GaussPoint *giveSlaveGaussPointVisco() { return this->slaveGpVisco.get(); }
-    
+
     MaterialStatus *giveViscoelasticMatStatus();
 };
 

@@ -309,13 +309,11 @@ LatticeLink3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
 void
 LatticeLink3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-  if ( inode == 3 ) {
-    answer = { E_xx, E_yy, E_zz, G_yz, G_xz, G_xy };
-  }
-  else {
-    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
-  }
-
+    if ( inode == 3 ) {
+        answer = { E_xx, E_yy, E_zz, G_yz, G_xz, G_xy };
+    } else   {
+        answer = { D_u, D_v, D_w, R_u, R_v, R_w };
+    }
 }
 
 IRResultType

@@ -123,17 +123,17 @@ LatticeDamage :: computeEquivalentStrain(double &tempEquivStrain, const FloatArr
     double shearNorm;
 
     paramA = 0.5 * ( e0 + ec * e0 );
-    paramB = ( coh * e0 ) / sqrt( 1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
+    paramB = ( coh * e0 ) / sqrt(1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
     paramC = 0.5 * ( this->ec * e0 - e0 );
 
 
     if ( gp->giveMaterialMode() == _2dLattice ) {
         shearNorm = strain.at(2);
     } else {
-        shearNorm = sqrt( pow(strain.at(2), 2.) + pow(strain.at(3), 2.) );
+        shearNorm = sqrt(pow(strain.at(2), 2.) + pow(strain.at(3), 2.) );
     }
 
-    tempEquivStrain =  sqrt( pow(this->alphaOne * shearNorm / paramB, 2.) + pow( ( strain.at(1) + paramC ) / paramA, 2. ) ) * paramA - paramC;
+    tempEquivStrain =  sqrt(pow(this->alphaOne * shearNorm / paramB, 2.) + pow( ( strain.at(1) + paramC ) / paramA, 2. ) ) * paramA - paramC;
 
     return;
 }
@@ -236,17 +236,17 @@ LatticeDamage :: CreateStatus(GaussPoint *gp) const
     return new LatticeDamageStatus(gp);
 }
 
-FloatMatrixF<3,3>
+FloatMatrixF< 3, 3 >
 LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 2dlattice
 //
 {
-  FloatMatrix answer;
-  answer.resize(3,3);
-  answer.zero();
-  
-   answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix( mode, gp, tStep);
+    FloatMatrix answer;
+    answer.resize(3, 3);
+    answer.zero();
+
+    answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(mode, gp, tStep);
 
     if ( mode == ElasticStiffness ) {
         return answer;
@@ -268,18 +268,15 @@ LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
     return answer;
 }
 
-FloatMatrixF<6,6>
+FloatMatrixF< 6, 6 >
 LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
-//
-// return material stiffness matrix for 2dlattice
-//
 {
-  FloatMatrix answer;
-  answer.resize(6,6);
-  answer.zero();
+    FloatMatrix answer;
+    answer.resize(6, 6);
+    answer.zero();
 
-  answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(mode, gp, tStep);
-  
+    answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(mode, gp, tStep);
+
     if ( mode == ElasticStiffness ) {
         return answer;
     } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
@@ -299,18 +296,16 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 
     //Should never reach this point
     return answer;
-  
 }
 
-  FloatArrayF<3>
-  LatticeDamage :: giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF< 3 >
+LatticeDamage :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep)
 {
+    FloatArray answer;
+    answer.resize(3);
+    answer.zero();
 
-  FloatArray answer;
-  answer.resize(3);
-  answer.zero();
-  
-  LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+    LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
@@ -321,7 +316,7 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 
     this->initTempStatus(gp);
 
-    FloatArray testStrainOld( status->giveStrainVector() );
+    FloatArray testStrainOld(status->giveStrainVector() );
 
     // substract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
@@ -355,11 +350,11 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 
 
     FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(3,3);
+    stiffnessMatrix.resize(3, 3);
     stiffnessMatrix.zero();
-    
+
     stiffnessMatrix = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-    
+
     for ( int i = 1; i <= 3; i++ ) { // only diagonal terms matter
         answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
     }
@@ -369,38 +364,38 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
 
 
-    double crackWidth;    
-    crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
+    double crackWidth;
+    crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
 
 
-    
-    
+
+
     double waterPressure = 0.;
-    
+
     IntArray coupledModels;
-    
-        //Calculate the the bio coefficient;
+
+    //Calculate the the bio coefficient;
     double biot = 0.;
     if ( this->biotType == 0 ) {
-      biot = this->biotCoefficient;
-        } else if ( this->biotType == 1 ) {
-      biot = computeBiot(omega, tempKappa, length);
-        } else {
-      OOFEM_ERROR("Unknown biot type\n");
+        biot = this->biotCoefficient;
+    } else if ( this->biotType == 1 ) {
+        biot = computeBiot(omega, tempKappa, length);
+    } else {
+        OOFEM_ERROR("Unknown biot type\n");
     }
 
     answer.at(1) = answer.at(1) + biot * waterPressure;
-    
+
     status->setBiotCoefficientInStatus(biot);
-    
+
 
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation;
-    
+
     tempDeltaDissipation = computeDeltaDissipation2d(omega, reducedStrain, gp, tStep);
 
     tempDissipation += tempDeltaDissipation;
-    
+
     //Set all temp values
     status->setTempDissipation(tempDissipation);
     status->setTempDeltaDissipation(tempDeltaDissipation);
@@ -412,24 +407,22 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
 
-    status->setTempNormalStress( answer.at(1) );
+    status->setTempNormalStress(answer.at(1) );
     status->setTempCrackWidth(crackWidth);
 
     return answer;
-    
 }
 
 
-//Continue here
-  FloatArrayF<6>
-  LatticeDamage :: giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep)
-  {
-    
-  FloatArray answer;
-  answer.resize(6);
-  answer.zero();
-  
-  LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+
+FloatArrayF< 6 >
+LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatArray answer;
+    answer.resize(6);
+    answer.zero();
+
+    LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
@@ -440,7 +433,7 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 
     this->initTempStatus(gp);
 
-    FloatArray testStrainOld( status->giveStrainVector() );
+    FloatArray testStrainOld(status->giveStrainVector() );
 
     // substract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
@@ -474,9 +467,9 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 
 
     FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(6,6);
+    stiffnessMatrix.resize(6, 6);
     stiffnessMatrix.zero();
-    
+
     stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
@@ -490,25 +483,25 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 
 
     double crackWidth;
-    crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
-  
-    
+    crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
+
+
 
     // todo - resolve and unify !!!
 
     double waterPressure = 0.;
-        //Read in fluid pressures from structural element if this is not a slave problem
-        FloatArray pressures;
-        if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
-            static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
-        }
+    //Read in fluid pressures from structural element if this is not a slave problem
+    FloatArray pressures;
+    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
+        static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
+    }
 
-        waterPressure = 0.;
-        for ( int i = 0; i < pressures.giveSize(); i++ ) {
-            waterPressure += 1. / pressures.giveSize() * pressures.at(i + 1);
-        }
+    waterPressure = 0.;
+    for ( int i = 0; i < pressures.giveSize(); i++ ) {
+        waterPressure += 1. / pressures.giveSize() * pressures.at(i + 1);
+    }
 
-        answer.at(1) += waterPressure;
+    answer.at(1) += waterPressure;
 
 
     double tempDissipation = status->giveDissipation();
@@ -530,13 +523,11 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
 
-    status->setTempNormalStress( answer.at(1) );
+    status->setTempNormalStress(answer.at(1) );
     status->setTempCrackWidth(crackWidth);
 
     return answer;
-
-    
-  }
+}
 
 double
 LatticeDamage :: computeBiot(double omega,
@@ -586,7 +577,7 @@ LatticeDamage :: computeDeltaDissipation2d(double omega,
     FloatArray crackOpeningOld(3);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld( status->giveStressVector() );
+    FloatArray stressOld(status->giveStressVector() );
     FloatArray intermediateStrain(3);
 
     double tempDeltaDissipation = 0.;
@@ -686,7 +677,7 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
     FloatArray crackOpeningOld(6);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld( status->giveStressVector() );
+    FloatArray stressOld(status->giveStressVector() );
     FloatArray intermediateStrain(6);
 
     double tempDeltaDissipation = 0.;

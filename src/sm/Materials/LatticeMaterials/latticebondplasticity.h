@@ -114,7 +114,7 @@ protected:
     enum LatticeBondPlasticity_SurfaceType { ST_Vertex, ST_Shear, ST_Compression };
     LatticeBondPlasticity_SurfaceType surfaceType;
 
-    enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic};
+    enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic };
     LatticeBondPlasticity_ReturnResult returnResult;
 
     double initialYieldStress;
@@ -149,7 +149,7 @@ protected:
 
     //parameter in hardening law
     double ef;
-    
+
 public:
 
     /// Constructor
@@ -161,7 +161,7 @@ public:
     const char *giveClassName() const { return "LatticeBondPlasticity"; }
 
     double computeHardening(double kappa);
-    
+
     double computeDHardeningDKappa(double kappa);
 
     double computeParamA(const double kappa);
@@ -170,7 +170,7 @@ public:
     double computeShift(const double kappa);
     double computeDShiftDKappa(const double kappa);
 
-      
+
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }

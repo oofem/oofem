@@ -49,7 +49,6 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-
 LatticeStructuralMaterial :: LatticeStructuralMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
 
 
@@ -69,19 +68,19 @@ LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, 
     OOFEM_ERROR("1dLattice mode not supported");
 }
 
-  FloatArrayF<3>
-  LatticeStructuralMaterial :: giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF< 3 >
+LatticeStructuralMaterial :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("2dLattice mode not supported");
 }
 
-  FloatArrayF<6>
-  LatticeStructuralMaterial :: giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep)
-  {
+FloatArrayF< 6 >
+LatticeStructuralMaterial :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep)
+{
     OOFEM_ERROR("3dLattice mode not supported");
-  }
+}
 
-FloatMatrixF<1,1>
+FloatMatrixF< 1, 1 >
 LatticeStructuralMaterial :: give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 1dlattice
@@ -90,7 +89,7 @@ LatticeStructuralMaterial :: give1dLatticeStiffnessMatrix(MatResponseMode mode, 
     OOFEM_ERROR("No general implementation provided");
 }
 
-FloatMatrixF<3,3>
+FloatMatrixF< 3, 3 >
 LatticeStructuralMaterial :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 2dlattice
@@ -99,7 +98,7 @@ LatticeStructuralMaterial :: give2dLatticeStiffnessMatrix(MatResponseMode mode, 
     OOFEM_ERROR("No general implementation provided");
 }
 
-FloatMatrixF<6,6>
+FloatMatrixF< 6, 6 >
 LatticeStructuralMaterial :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 //
 // return material stiffness matrix for 2dlattice
@@ -107,6 +106,4 @@ LatticeStructuralMaterial :: give3dLatticeStiffnessMatrix(MatResponseMode mode, 
 {
     OOFEM_ERROR("No general implementation provided");
 }
-
-
 } // end namespace oofem

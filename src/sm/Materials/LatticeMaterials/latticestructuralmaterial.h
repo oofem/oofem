@@ -78,23 +78,21 @@ public:
      * @param d Domain to which new material will belong.
      */
     LatticeStructuralMaterial(int n, Domain *d);
-    
-    virtual bool hasAnalyticalTangentStiffness() const {return true;}
-    
+
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "LatticeStructuralMaterial"; }
 
     virtual double giveLatticeStress1d(const double strain, GaussPoint *gp, TimeStep *tStep);
-    
-    virtual FloatArrayF<3> giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep);
-    
-    virtual FloatArrayF<6> giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep);
 
-    virtual FloatMatrixF<1,1> give1dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<3,3> give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<6,6> give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep);
 
+    virtual FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep);
 
+    virtual FloatMatrixF< 1, 1 >give1dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 };
 } // end namespace oofem
 #endif // latticestructuralmaterial_h

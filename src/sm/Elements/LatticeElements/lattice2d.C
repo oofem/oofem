@@ -160,13 +160,13 @@ Lattice2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 void
 Lattice2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-  answer = static_cast< LatticeCrossSection* >(this->giveCrossSection())->give2dStiffnessMatrix(rMode, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give2dStiffnessMatrix(rMode, gp, tStep);
 }
 
 void
 Lattice2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-  answer = static_cast< LatticeCrossSection* >(this->giveCrossSection())->giveLatticeStress2d(strain, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress2d(strain, gp, tStep);
 }
 
 void
@@ -180,7 +180,7 @@ Lattice2d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     answer.zero();
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
-    dV = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    dV = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     dbj.beProductOf(d, bj);
     answer.plusProductUnsym(bj, dbj, dV);
 }
@@ -192,7 +192,7 @@ void Lattice2d :: computeGaussPoints()
     // the gauss point is used only when methods from crosssection and/or material
     // classes are requested
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 3);
+    integrationRulesArray [ 0 ] = std :: make_unique< GaussIntegrationRule >(1, this, 1, 3);
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dLattice);
 }
 
@@ -204,7 +204,7 @@ Lattice2d :: computeGtoLRotationMatrix(FloatMatrix &answer)
     answer.resize(6, 6);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
+    sine           = sin(this->givePitch() );
     cosine         = cos(pitch);
     answer.at(1, 1) =  cosine;
     answer.at(1, 2) =  sine;
@@ -328,7 +328,7 @@ Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     answer.resize(3, 3);
     answer.zero();
 
-    sine           = sin( this->givePitch() );
+    sine           = sin(this->givePitch() );
     cosine         = cos(pitch);
 
     answer.at(1, 1) = cosine;
@@ -390,7 +390,6 @@ void Lattice2d :: saveContext(DataStream &stream, ContextMode mode)
     LatticeStructuralElement :: saveContext(stream, mode);
 
     if ( ( mode & CM_Definition ) ) {
-
         if ( !stream.write(width) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -420,7 +419,6 @@ void Lattice2d :: restoreContext(DataStream &stream, ContextMode mode)
     LatticeStructuralElement :: restoreContext(stream, mode);
 
     if ( mode & CM_Definition ) {
-
         if ( !stream.read(width) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -478,7 +476,7 @@ Lattice2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
@@ -507,7 +505,7 @@ Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkn
 
     WCRec p [ 2 ]; /* poin */
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
@@ -554,13 +552,13 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
             EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
             if ( ( crackStatuses(0) == 1. ) ) {
-                EASValsSetColor( gc.getActiveCrackColor() );
+                EASValsSetColor(gc.getActiveCrackColor() );
             } else if ( crackStatuses(0) == 2. ) {
-                EASValsSetColor( gc.getCrackPatternColor() );
+                EASValsSetColor(gc.getCrackPatternColor() );
             } else if ( crackStatuses(0) == 3. ) {
-                EASValsSetColor( gc.getActiveCrackColor() );
+                EASValsSetColor(gc.getActiveCrackColor() );
             } else if ( crackStatuses(0) == 4. ) {
-                EASValsSetColor( gc.getActiveCrackColor() );
+                EASValsSetColor(gc.getActiveCrackColor() );
             }
 
 
@@ -584,7 +582,7 @@ Lattice2d :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getCrossSectionColor() );
+    EASValsSetColor(gc.getCrossSectionColor() );
     EASValsSetLayer(OOFEG_RAW_CROSSSECTION_LAYER);
 
     FloatArray coords;

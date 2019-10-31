@@ -66,7 +66,7 @@ public:
      * @param n Cross section number.
      * @param d Domain to which new cross section will belong.
      */
-    LatticeCrossSection(int n, Domain * d) : CrossSection(n, d)
+    LatticeCrossSection(int n, Domain *d) : CrossSection(n, d)
     {
         materialNum = 0;
         crossSectionType = CS_LatticeStructuralCapability;
@@ -96,16 +96,16 @@ public:
     // Pass all calls to the material
 
     double giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep) const;
-    
-    FloatArrayF<3> giveLatticeStress2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const;
-    
-    FloatArrayF<6> giveLatticeStress3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const;
-    
-    FloatMatrixF<1,1> give1dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
 
-    FloatMatrixF<3,3> give2dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+    FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const;
 
-    FloatMatrixF<6,6> give3dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep ) const;
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const;
+
+    FloatMatrixF< 1, 1 >give1dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+
+    FloatMatrixF< 3, 3 >give2dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
+
+    FloatMatrixF< 6, 6 >give3dStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
     //@}
 
     LatticeStructuralMaterial *giveLatticeMaterial() const;
@@ -128,7 +128,7 @@ public:
 
     //    void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    
+
     CrossSectExtension crossSectionType;
 private:
     int materialNum;

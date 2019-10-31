@@ -10,7 +10,7 @@ node 1 coords 2 0.5 0.5 bc 3 1 1 1
 node 2 coords 2 1.0 1.0 dofidmask 3 31 32 42 bc 3 0 0 1
 #
 latticeboundary2D 1 nodes 3 1 1 2 crossSect 1 mat 1 thick 1.0 width 0.5 gpCoords 2 1. 1. location 2
-simplecs 1 
+latticecs 1 material 1
 #
 latticedamage 1 d 0. talpha 0. e 1. e0 1.e20 stype 1 wf 60.e-6 a1 0.6 randomtype 1 cov 0.2
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0

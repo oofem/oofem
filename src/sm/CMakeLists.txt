@@ -273,6 +273,7 @@ set (sm_material
     Materials/LatticeMaterials/latticebondplasticity.C
     Materials/LatticeMaterials/latticeplasticitydamage.C
     Materials/LatticeMaterials/latticeslip.C
+    Materials/LatticeMaterials/latticeplasticitydamageviscoelastic.C
     )
 
 if (USE_PYTHON)

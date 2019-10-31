@@ -109,7 +109,7 @@ public:
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep *tStep, UnknownType) override;
     void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep) override;
     void giveCrossSectionCoordinates(FloatArray &coords) override;

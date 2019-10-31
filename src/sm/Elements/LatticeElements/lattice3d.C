@@ -40,14 +40,16 @@
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "intarray.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "mathfem.h"
 #include "latticestructuralelement.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
-#include "sm/CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/latticecrosssection.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -248,13 +250,13 @@ Lattice3d :: giveOldPlasticStrain(FloatArray &plasticStrain)
 void
 Lattice3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix(rMode, gp, tStep);
 }
 
 void
 Lattice3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress3d(strain, gp, tStep);
 }
 
 void
@@ -269,7 +271,7 @@ Lattice3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     this->computeBmatrixAt(integrationRulesArray [ 0 ]->getIntegrationPoint(0), bj);
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
-    double volume = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    double volume = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
     for ( int i = 1; i <= 6; i++ ) {
         d.at(i, i) *= volume;
@@ -359,9 +361,8 @@ Lattice3d :: computeVolumeAround(GaussPoint *aGaussPoint)
     return this->area * this->length;
 }
 
-
 void
-Lattice3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
+Lattice3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {
         D_u, D_v, D_w, R_u, R_v, R_w
@@ -616,8 +617,8 @@ Lattice3d :: computeCrossSectionProperties() {
 
     //Moment of inertias saved in the element
 
-    this->I1 = ( Ixx + Iyy ) / 2. + sqrt(pow( ( Ixx - Iyy ) / 2., 2.) + pow(Ixy, 2.) );
-    this->I2 = ( Ixx + Iyy ) / 2. - sqrt(pow( ( Ixx - Iyy ) / 2., 2.) + pow(Ixy, 2.) );
+    this->I1 = ( Ixx + Iyy ) / 2. + sqrt(pow( ( Ixx - Iyy ) / 2., 2. ) + pow(Ixy, 2.) );
+    this->I2 = ( Ixx + Iyy ) / 2. - sqrt(pow( ( Ixx - Iyy ) / 2., 2. ) + pow(Ixy, 2.) );
 
     this->Ip = I1 + I2;
 

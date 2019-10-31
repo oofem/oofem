@@ -87,7 +87,7 @@ LatticeDamageViscoelastic :: initializeFrom(InputRecord *ir)
     // override elastic modulus by the one given by the compliance function
     // provided values of the strain at peak stress must be changed
 
-    double E28 = 1. / rChM->computeCreepFunction(28.01, 28.,NULL,NULL); // modulus of elasticity evaluated at 28 days, duration of loading 15 min
+    double E28 = 1. / rChM->computeCreepFunction(28.01, 28., NULL, NULL); // modulus of elasticity evaluated at 28 days, duration of loading 15 min
     this->e0Mean *= ( this->eNormalMean / E28 ); // transform strain at peak stress accordingly
     this->eNormalMean = E28; // swap elastic modulus/stiffness
 
@@ -161,7 +161,7 @@ LatticeDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
         LatticeLinearElastic :: give3dLatticeStiffMtrx(elasticStiffnessMatrix, ElasticStiffness, gp, tStep);
     }
 
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
+    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
 
     quasiElasticStrain.resize(rsize);
     quasiElasticStrain.zero();
@@ -218,9 +218,9 @@ LatticeDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
 
     // crack width is only approximate!!!
     if ( gp->giveMaterialMode() == _2dLattice ) {
-        crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
+        crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
     } else {
-        crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
+        crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
     }
 
 
@@ -235,7 +235,7 @@ LatticeDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
 
-    status->setTempNormalStress( answer.at(1) );
+    status->setTempNormalStress(answer.at(1) );
     status->setTempCrackWidth(crackWidth);
 
 
@@ -250,7 +250,7 @@ LatticeDamageViscoelastic :: giveViscoelasticMaterial() {
     RheoChainMaterial *rChMat;
     mat = domain->giveMaterial(slaveMat);
 
-    rChMat = dynamic_cast< RheoChainMaterial * >(mat);
+    rChMat = dynamic_cast< RheoChainMaterial * >( mat );
 
     return rChMat;
 }
@@ -310,7 +310,7 @@ LatticeDamageViscoelastic :: giveIPValue(FloatArray &answer,
 LatticeDamageViscoelasticStatus :: LatticeDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s) :
     LatticeDamageStatus(g), slaveMat(s)
 {
-    viscoelasticGP = new GaussPoint( g->giveIntegrationRule(), g->giveNumber(), g->giveNaturalCoordinates(), g->giveWeight(), g->giveMaterialMode() );
+    viscoelasticGP = new GaussPoint(g->giveIntegrationRule(), g->giveNumber(), g->giveNaturalCoordinates(), g->giveWeight(), g->giveMaterialMode() );
 }
 
 void
@@ -342,6 +342,7 @@ LatticeDamageViscoelasticStatus :: giveViscoelasticMatStatus() {
     RheoChainMaterial *rChMat;
     GaussPoint *rChGP;
 
+    // @todo: Don't now how to fix this!
     //    mat = domain->giveMaterial(slaveMat);
     //    rChMat = dynamic_cast< RheoChainMaterial * >(mat);
 
@@ -374,12 +375,10 @@ LatticeDamageViscoelasticStatus :: saveContext(DataStream &stream, ContextMode m
 // no temp variables stored
 //
 {
-
     // save parent class status
-  LatticeDamageStatus :: saveContext(stream, mode);
+    LatticeDamageStatus :: saveContext(stream, mode);
 
-  this->giveViscoelasticMatStatus()->saveContext(stream, mode);
-  
+    this->giveViscoelasticMatStatus()->saveContext(stream, mode);
 }
 
 void
@@ -389,9 +388,8 @@ LatticeDamageViscoelasticStatus :: restoreContext(DataStream &stream, ContextMod
 //
 {
     // read parent class status
-  LatticeDamageStatus :: restoreContext(stream, mode);
+    LatticeDamageStatus :: restoreContext(stream, mode);
 
-  this->giveViscoelasticMatStatus()->restoreContext(stream, mode);
+    this->giveViscoelasticMatStatus()->restoreContext(stream, mode);
 }
-  
 }     // end namespace oofem

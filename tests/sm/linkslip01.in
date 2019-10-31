@@ -35,10 +35,10 @@ Set 5 nodes 2 1 4
 Set 6 nodes 1 14
 SimpleCS 1 material 1 set 1
 SimpleCS 2 area 3.1416e-4 material 2 set 2
-SimpleCS 3 material 3 set 3
+interfacecs 3 material 3 set 3
 IsoLE 1 d 1.0 E 3.36e10 n 0.2 tAlpha 1.0
 IsoLE 2 d 1.0 E 2e11 n 0.3 tAlpha 1.0
-linkslip 3 talpha 0. d 0. kn 6.135e10 a1 1000 type 2 alpha 0.4 s1 1.e-3 s2 2e-3 s3 6.5e-3 t0 1.541e7 tf 6.164e6
+linkslip 3 kn 6.135e10 kl 6.135e13 type 2 alpha 0.4 s1 1.e-3 s2 2e-3 s3 6.5e-3 t0 1.541e7 tf 6.164e6
 BoundaryCondition 1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0 0 0 set 4
 BoundaryCondition 2 loadTimeFunction 1 dofs 2 2 3 values 2 0 0 set 5
 BoundaryCondition 3 loadTimeFunction 1 dofs 3 4 5 6 values 3 0 0 0 set 2

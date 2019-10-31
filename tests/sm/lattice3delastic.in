@@ -7,7 +7,7 @@ ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 2
 node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 6 1 1 1 1 1 1
 node 2 coords 3 0.00100000e+00 0.000000e+00 0.000000e+00 bc 6 0 0 0 0 0 0
 lattice3D 1 nodes 2 1 2 crossSect 1 mat 1 polycoords 12 0.0005 -0.0005 -0.0005   0.0005 0.0005 -0.0005   0.0005 0.0005 0.0005   0.0005 -0.0005 0.0005
-simplecs 1
+latticecs 1 material 1
 latticelinearelastic 1 d 0 talpha 0. e 40.e9 a1 1. a2 1.
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 ConstantFunction 1 f(t) 1.

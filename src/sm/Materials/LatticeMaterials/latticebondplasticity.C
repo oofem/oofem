@@ -73,16 +73,16 @@ LatticeBondPlasticity :: hasMaterialModeCapability(MaterialMode mode)
 double
 LatticeBondPlasticity :: computeHardening(double kappa)
 {
-  return exp(pow(kappa/this->ef,2.));
+    return exp(pow(kappa / this->ef, 2.) );
 }
 
 double
 LatticeBondPlasticity :: computeDHardeningDKappa(double kappa)
 {
-  return 2.*kappa/(pow(this->ef,2.))*exp(pow(kappa/this->ef,2.));
+    return 2. * kappa / ( pow(this->ef, 2.) ) * exp(pow(kappa / this->ef, 2.) );
 }
 
-  
+
 IRResultType
 LatticeBondPlasticity :: initializeFrom(InputRecord *ir)
 {
@@ -107,12 +107,12 @@ LatticeBondPlasticity :: initializeFrom(InputRecord *ir)
     this->frictionAngleTwo = this->frictionAngleOne;
     //    IR_GIVE_OPTIONAL_FIELD(ir, this->frictionAngleTwo, _IFT_LatticeBondPlasticity_angle2);
 
-    this->flowAngle = this->frictionAngleOne; 
+    this->flowAngle = this->frictionAngleOne;
     //    IR_GIVE_OPTIONAL_FIELD(ir, this->flowAngle, _IFT_LatticeBondPlasticity_flow);
 
-    
+
     this->ef = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->ef, _IFT_LatticeBondPlasticity_ef);   
+    IR_GIVE_OPTIONAL_FIELD(ir, this->ef, _IFT_LatticeBondPlasticity_ef);
 
     return IRRT_OK;
 }
@@ -124,64 +124,62 @@ LatticeBondPlasticity :: CreateStatus(GaussPoint *gp) const
     return answer;
 }
 
-double 
-LatticeBondPlasticity::computeShift(const double kappa)
+double
+LatticeBondPlasticity :: computeShift(const double kappa)
 {
-  double hardening = computeHardening(kappa);  
-  
-  double paramA = computeParamA(kappa);
+    double hardening = computeHardening(kappa);
 
-  double shift = this->fc*hardening - paramA;
+    double paramA = computeParamA(kappa);
 
-  return shift;
+    double shift = this->fc * hardening - paramA;
+
+    return shift;
 }
 
-
-double 
-LatticeBondPlasticity::computeParamA(const double kappa)
-{ 
-
-  double hardening = computeHardening(kappa);  
-  
-  double paramA = this->frictionAngleTwo*this->frictionAngleOne*this->fc*hardening/
-    (this->frictionAngleTwo*this->frictionAngleOne+
-     sqrt(1.+pow(this->frictionAngleTwo,2.)*pow(this->frictionAngleOne,2.)));
-  
-  return paramA;
-}  
-
-
-
-double 
-LatticeBondPlasticity::computeDShiftDKappa(const double kappa)
-{ 
-  double dHardeningDKappa = computeDHardeningDKappa(kappa);
-  
-  double dParamADKappa = computeDParamADKappa(kappa);
-  
-  double dShiftDKappa = this->fc*dHardeningDKappa - dParamADKappa;
-
-  return dShiftDKappa;
-}
-  
 
 double
-LatticeBondPlasticity::computeDParamADKappa(const double kappa)
-{ 
+LatticeBondPlasticity :: computeParamA(const double kappa)
+{
+    double hardening = computeHardening(kappa);
 
-  double dHardeningDKappa = computeDHardeningDKappa(kappa);
-  
-  double A2 = this->frictionAngleTwo*this->frictionAngleOne+sqrt(1.+pow(this->frictionAngleTwo,2.)*pow(this->frictionAngleOne,2.));
-    
-  double dA1DKappa = this->frictionAngleTwo*this->frictionAngleOne*this->fc*dHardeningDKappa;
- 
-  double dParamADKappa = dA1DKappa/A2;
-  
-  return dParamADKappa;
+    double paramA = this->frictionAngleTwo * this->frictionAngleOne * this->fc * hardening /
+                    ( this->frictionAngleTwo * this->frictionAngleOne +
+                      sqrt(1. + pow(this->frictionAngleTwo, 2.) * pow(this->frictionAngleOne, 2.) ) );
+
+    return paramA;
 }
 
 
-  
+
+double
+LatticeBondPlasticity :: computeDShiftDKappa(const double kappa)
+{
+    double dHardeningDKappa = computeDHardeningDKappa(kappa);
+
+    double dParamADKappa = computeDParamADKappa(kappa);
+
+    double dShiftDKappa = this->fc * dHardeningDKappa - dParamADKappa;
+
+    return dShiftDKappa;
+}
+
+
+double
+LatticeBondPlasticity :: computeDParamADKappa(const double kappa)
+{
+    double dHardeningDKappa = computeDHardeningDKappa(kappa);
+
+    double A2 = this->frictionAngleTwo * this->frictionAngleOne + sqrt(1. + pow(this->frictionAngleTwo, 2.) * pow(this->frictionAngleOne, 2.) );
+
+    double dA1DKappa = this->frictionAngleTwo * this->frictionAngleOne * this->fc * dHardeningDKappa;
+
+    double dParamADKappa = dA1DKappa / A2;
+
+    return dParamADKappa;
+}
+
+
+
 void
 LatticeBondPlasticity :: giveReducedStrain(FloatArray &answer,
                                            GaussPoint *gp,
@@ -246,16 +244,16 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
         transitionFlag = 1;
         yieldValue = computeYieldValue(stress, tempKappa, 1, gp);
     }
-    
+
     // introduce subincrementation flag
     int subIncrementFlag = 0;
     double subIncrementCounter = 1;
-    
+
     /* Compute yield value*/
     double error = 0.;
     if ( transitionFlag == 0 ) {
         error = yieldValue / fc;
-    } else   {
+    } else {
         error = yieldValue / pow(fc, 2.);
     }
 
@@ -263,7 +261,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
         if ( checkForVertexCase(stress, gp) ) {
             performVertexReturn(stress, gp);
             surfaceType = ST_Vertex;
-        } else   {
+        } else {
             subIncrementFlag = 0;
             convergedStrain = oldStrain;
             tempStrain = strain;
@@ -279,15 +277,15 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
 
                 tempKappa = performRegularReturn(stress, yieldValue, transitionFlag, gp);
 
-                if ( returnResult == RR_NotConverged) {
+                if ( returnResult == RR_NotConverged ) {
                     subIncrementFlag = 1;
-		    
-		    
-		    subIncrementCounter *= 2;
-		    if(subIncrementCounter >= numberOfSubIncrements){
-		      OOFEM_ERROR("Subincrementation = %e did not help. Stop here with numberOfSubIncrements = %d.\n", subIncrementCounter, numberOfSubIncrements);
-		    }
-		    
+
+
+                    subIncrementCounter *= 2;
+                    if ( subIncrementCounter >= numberOfSubIncrements ) {
+                        OOFEM_ERROR("Subincrementation = %e did not help. Stop here with numberOfSubIncrements = %d.\n", subIncrementCounter, numberOfSubIncrements);
+                    }
+
                     deltaStrain.times(0.5);
                     tempStrain = convergedStrain;
                     tempStrain.add(deltaStrain);
@@ -300,45 +298,39 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
 
                     status->setTempKappaP(tempKappa);
 
-		    subIncrementCounter -= 1;
-		    
-                    convergedStrain = tempStrain;
-                    deltaStrain = convergedStrain;
-                    deltaStrain.times(-1.);
-                    deltaStrain.add(strain);
-		    deltaStrainIncrement = deltaStrain;
-		    deltaStrainIncrement.times(1./subIncrementCounter);
-		    tempStrain = convergedStrain;
-		    tempStrain.add(deltaStrainIncrement);
-		    if(subIncrementCounter >1){
-		      subIncrementFlag = 1;
-		    }
-		    else{
-		      subIncrementFlag = 0;
-		    }
-                    returnResult = RR_NotConverged;
-		
-		} else if ( returnResult == RR_Elastic && subIncrementFlag == 1 ) {
-		    
-                    convergedStrain = tempStrain;
-                    deltaStrain = convergedStrain;
-                    deltaStrain.times(-1.);
-                    deltaStrain.add(strain);
-		    deltaStrainIncrement = deltaStrain;
-		    deltaStrainIncrement.times(1./subIncrementCounter);
-		    tempStrain = convergedStrain;
-		    tempStrain.add(deltaStrainIncrement);
-		    if(subIncrementCounter >1){
-		      subIncrementFlag = 1;
-		    }
-		    else{
-		      subIncrementFlag = 0;
-		    }
-                    returnResult = RR_NotConverged;
+                    subIncrementCounter -= 1;
 
-                }
-		else if(returnResult == RR_Converged && subIncrementFlag == 0) {
-		  status->setTempKappaP(tempKappa);
+                    convergedStrain = tempStrain;
+                    deltaStrain = convergedStrain;
+                    deltaStrain.times(-1.);
+                    deltaStrain.add(strain);
+                    deltaStrainIncrement = deltaStrain;
+                    deltaStrainIncrement.times(1. / subIncrementCounter);
+                    tempStrain = convergedStrain;
+                    tempStrain.add(deltaStrainIncrement);
+                    if ( subIncrementCounter > 1 ) {
+                        subIncrementFlag = 1;
+                    } else   {
+                        subIncrementFlag = 0;
+                    }
+                    returnResult = RR_NotConverged;
+                } else if ( returnResult == RR_Elastic && subIncrementFlag == 1 ) {
+                    convergedStrain = tempStrain;
+                    deltaStrain = convergedStrain;
+                    deltaStrain.times(-1.);
+                    deltaStrain.add(strain);
+                    deltaStrainIncrement = deltaStrain;
+                    deltaStrainIncrement.times(1. / subIncrementCounter);
+                    tempStrain = convergedStrain;
+                    tempStrain.add(deltaStrainIncrement);
+                    if ( subIncrementCounter > 1 ) {
+                        subIncrementFlag = 1;
+                    } else   {
+                        subIncrementFlag = 0;
+                    }
+                    returnResult = RR_NotConverged;
+                } else if ( returnResult == RR_Converged && subIncrementFlag == 0 )      {
+                    status->setTempKappaP(tempKappa);
                 }
             }
         }
@@ -388,7 +380,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
     tempStress = trialStress;
 
     double trialShearStressNorm;
-    trialShearStressNorm = sqrt( pow(trialStress.at(2), 2.) + pow(trialStress.at(3), 2.) );
+    trialShearStressNorm = sqrt(pow(trialStress.at(2), 2.) + pow(trialStress.at(3), 2.) );
 
     double tempShearStressNorm = trialShearStressNorm;
 
@@ -396,7 +388,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
     tempPlasticStrain = plasticStrain;
 
     double thetaTrial;
-    thetaTrial = atan2( stress.at(3), stress.at(2) );
+    thetaTrial = atan2(stress.at(3), stress.at(2) );
 
     // Do the same for kappa
     double kappa = status->giveTempKappaP();
@@ -416,16 +408,16 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
     residuals.at(4) = yieldValue;
 
     if ( transitionFlag == 0 ) {
-      residualsNorm.at(4) = residuals.at(4) / this->fc;
-    } else   {
-      residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
+        residualsNorm.at(4) = residuals.at(4) / this->fc;
+    } else {
+        residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
     }
 
-    if(residualsNorm.at(4) <yieldTol){//regular return not needed
-      returnResult = RR_Elastic;
-      return kappa;
+    if ( residualsNorm.at(4) < yieldTol ) {//regular return not needed
+        returnResult = RR_Elastic;
+        return kappa;
     }
-    
+
     normOfResiduals = residualsNorm.computeNorm();
     //    normOfResiduals  = 1.; //just to get into the loop
 
@@ -441,12 +433,12 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
         residualsNorm.at(3) = residuals.at(3);
         if ( transitionFlag == 0 ) {
             residualsNorm.at(4) = residuals.at(4) / this->fc;
-        } else   {
+        } else {
             residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
         }
 
         normOfResiduals = residualsNorm.computeNorm();
-	
+
         if ( isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return kappa;
@@ -501,18 +493,17 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
             residuals.at(2) = tempShearStressNorm - trialShearStressNorm + this->alphaOne * this->eNormalMean * deltaLambda * mVector.at(2);
             residuals.at(3) = -tempKappa + kappa + deltaLambda * mVector.at(3);
             residuals.at(4) = computeYieldValue(tempStress, tempKappa, transitionFlag, gp);
-        } else   {
+        } else {
             //Check transition
             double transition = computeTransition(tempKappa, gp);
             if ( transitionFlag == 0 ) {
                 //Check if the stress is on the correct side
                 if ( tempStress.at(1) < transition - yieldTol ) {
-		  
-		  transitionFlag = 1;
+                    transitionFlag = 1;
                     tempKappa = kappa;
                     deltaLambda = 0.;
                     tempStress = trialStress;
-                    tempShearStressNorm = sqrt( pow(trialStress.at(2), 2.) + pow(trialStress.at(3), 2.) );
+                    tempShearStressNorm = sqrt(pow(trialStress.at(2), 2.) + pow(trialStress.at(3), 2.) );
 
                     unknowns.at(1) = trialStress.at(1);
                     unknowns.at(2) = trialShearStressNorm;
@@ -525,15 +516,15 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
 
                     tempPlasticStrain = plasticStrain;
                     iterationCount = 0;
-                } else   {//Accept the stress return
+                } else {  //Accept the stress return
                     this->surfaceType = ST_Shear;
                     returnResult = RR_Converged;
                 }
-            } else if ( transitionFlag == 1 )      {
+            } else if ( transitionFlag == 1 ) {
                 if ( tempStress.at(1) > transition + yieldTol ) {
                     returnResult = RR_NotConverged;
-		    return kappa;
-                } else   {//accept stress return
+                    return kappa;
+                } else {  //accept stress return
                     this->surfaceType = ST_Compression;
                     returnResult = RR_Converged;
                 }
@@ -599,15 +590,15 @@ LatticeBondPlasticity :: computeYieldValue(const FloatArray &stress,
                                            GaussPoint *gp)
 {
     double yieldValue = 0;
-    
+
     double shift = computeShift(kappa);
     double paramA = computeParamA(kappa);
 
-    double shearNorm = sqrt( pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
+    double shearNorm = sqrt(pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
 
     if ( transitionFlag == 0 ) {//friction
         yieldValue = shearNorm + this->frictionAngleOne * stress.at(1);
-    } else   {
+    } else {
         yieldValue = pow(shearNorm, 2.) + pow(stress.at(1) + shift, 2.) / pow(this->frictionAngleTwo, 2.) - pow(paramA, 2.) / pow(this->frictionAngleTwo, 2.);
     }
 
@@ -619,15 +610,14 @@ LatticeBondPlasticity :: computeYieldValue(const FloatArray &stress,
 
 double
 LatticeBondPlasticity :: computeTransition(const double kappa,
-					   GaussPoint *gp)
+                                           GaussPoint *gp)
 {
-  
-  double paramA = computeParamA(kappa);
+    double paramA = computeParamA(kappa);
 
-  double transition = - paramA / ( this->frictionAngleTwo * this->frictionAngleOne *
-				  sqrt( 1. + pow(this->frictionAngleTwo, 2.) *
-					pow(this->frictionAngleOne, 2.) ) );
-  return transition;
+    double transition = -paramA / ( this->frictionAngleTwo * this->frictionAngleOne *
+                                    sqrt(1. + pow(this->frictionAngleTwo, 2.) *
+                                         pow(this->frictionAngleOne, 2.) ) );
+    return transition;
 }
 
 
@@ -639,8 +629,7 @@ LatticeBondPlasticity :: computeFVector(FloatArray &answer,
                                         const int transitionFlag,
                                         GaussPoint *gp)
 {
-
-  double shearNorm = sqrt( pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
+    double shearNorm = sqrt(pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
 
     double paramA = computeParamA(kappa);
     double shift = computeShift(kappa);
@@ -652,11 +641,11 @@ LatticeBondPlasticity :: computeFVector(FloatArray &answer,
         answer.at(1) = this->frictionAngleOne;
         answer.at(2) = 1.;
         answer.at(3) = 0.;
-    } else   {//cap ellipse
-      answer.at(1) = 2. * ( stress.at(1) + shift ) / pow(this->frictionAngleTwo, 2.);
-      answer.at(2) = 2. * shearNorm;
-      answer.at(3) = 2.*(stress.at(1)+shift)/pow(this->frictionAngleTwo,2.)*dShiftDKappa - 
-      2.*paramA/pow(this->frictionAngleTwo,2.)*dParamADKappa;
+    } else {  //cap ellipse
+        answer.at(1) = 2. * ( stress.at(1) + shift ) / pow(this->frictionAngleTwo, 2.);
+        answer.at(2) = 2. * shearNorm;
+        answer.at(3) = 2. * ( stress.at(1) + shift ) / pow(this->frictionAngleTwo, 2.) * dShiftDKappa -
+                       2. * paramA / pow(this->frictionAngleTwo, 2.) * dParamADKappa;
     }
 
     return;
@@ -669,25 +658,23 @@ LatticeBondPlasticity :: computeMVector(FloatArray &answer,
                                         const int transitionFlag,
                                         GaussPoint *gp)
 {
-
-    double shearNorm = sqrt( pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
+    double shearNorm = sqrt(pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
 
     double shift = computeShift(kappa);
-    
+
     if ( transitionFlag == 0 ) {
         answer.at(1) = this->flowAngle;
         answer.at(2) = 1.;
-	//No hardening for the Mohr-Coulomb
+        //No hardening for the Mohr-Coulomb
         answer.at(3) = 0.;
-    } else   {
+    } else {
         answer.at(1) = 2. * ( stress.at(1) + shift ) / pow(this->frictionAngleTwo, 2.);
-        answer.at(2) = 2. * shearNorm;	
-	if(stress.at(1) < -shift-yieldTol){
-	  answer.at(3) = sqrt( pow(answer.at(1), 2.));
-	}
-	else{
-	  answer.at(3) = 0;
-	}
+        answer.at(2) = 2. * shearNorm;
+        if ( stress.at(1) < -shift - yieldTol ) {
+            answer.at(3) = sqrt(pow(answer.at(1), 2.) );
+        } else   {
+            answer.at(3) = 0;
+        }
     }
 
     return;
@@ -709,11 +696,11 @@ LatticeBondPlasticity :: computeDMMatrix(FloatMatrix &answer,
 
     if ( transitionFlag == 0 ) {
         answer.zero();
-    } else   {//cap ellipse
-            //Derivatives of dGDSig
+    } else {  //cap ellipse
+              //Derivatives of dGDSig
         answer.at(1, 1) = 2. / pow(this->frictionAngleTwo, 2.);
         answer.at(1, 2) = 0.;
-        answer.at(1, 3) = 2.*dShiftDKappa/pow(this->frictionAngleTwo,2.);
+        answer.at(1, 3) = 2. * dShiftDKappa / pow(this->frictionAngleTwo, 2.);
 
         //Derivatives of dGDTau
         answer.at(2, 1) = 0.;
@@ -721,14 +708,13 @@ LatticeBondPlasticity :: computeDMMatrix(FloatMatrix &answer,
         answer.at(2, 3) = 0;
 
         //Derivates of evolution law
-	if(stress.at(1) < -shift-yieldTol){
-	  answer.at(3, 1) = 1. / mVector.at(3) * mVector.at(1) * answer.at(1, 1);
-	  answer.at(3, 2) = 0.;
-	  answer.at(3, 3) = 1. / mVector.at(3) * ( mVector.at(1) * answer.at(1, 3) );
-	}
-	else{
-	  answer.at(3,1) = answer.at(3,2) = answer.at(3, 3) = 0.;
-	}
+        if ( stress.at(1) < -shift - yieldTol ) {
+            answer.at(3, 1) = 1. / mVector.at(3) * mVector.at(1) * answer.at(1, 1);
+            answer.at(3, 2) = 0.;
+            answer.at(3, 3) = 1. / mVector.at(3) * ( mVector.at(1) * answer.at(1, 3) );
+        } else   {
+            answer.at(3, 1) = answer.at(3, 2) = answer.at(3, 3) = 0.;
+        }
     }
 
     return;
@@ -763,18 +749,18 @@ bool
 LatticeBondPlasticity :: checkForVertexCase(FloatArray &stress,
                                             GaussPoint *gp)
 {
-    double shearNorm = sqrt( pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
+    double shearNorm = sqrt(pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
 
     double ratio = 0.;
 
     if ( shearNorm / this->eNormalMean > 1.e-30 ) {
         ratio = this->alphaOne * stress.at(1) / shearNorm;
-    } else   {
+    } else {
         ratio = 5. * this->flowAngle;//set to arbitrary value which is greater than flowAngle
     }
     if ( stress.at(1) > 0 && this->flowAngle < ratio ) {
         return true;
-    } else   {
+    } else {
         return false;
     }
 }
@@ -786,7 +772,7 @@ LatticeBondPlasticity :: performVertexReturn(FloatArray &stress,
 {
     LatticeBondPlasticityStatus *status = ( LatticeBondPlasticityStatus * ) ( giveStatus(gp) );
 
-    double shearStressNorm = sqrt( pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
+    double shearStressNorm = sqrt(pow(stress.at(2), 2.) + pow(stress.at(3), 2.) );
     //Update kappa
     double kappa = status->giveKappaP();
     double deltaKappa = pow(stress.at(1) / this->eNormalMean, 2.) + pow(shearStressNorm / ( this->alphaOne * this->eNormalMean ), 2.);
@@ -925,7 +911,7 @@ LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "status { ");
     fprintf(file, "plasticStrains ");
     for ( int k = 1; k <= plasticStrain.giveSize(); k++ ) {
-        fprintf( file, "% .8e ", plasticStrain.at(k) );
+        fprintf(file, "% .8e ", plasticStrain.at(k) );
     }
 
     fprintf(file, "\n \t");
@@ -956,7 +942,6 @@ LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
     if ( !stream.write(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 }
 
 
@@ -975,6 +960,5 @@ LatticeBondPlasticityStatus :: restoreContext(DataStream &stream, ContextMode mo
     if ( !stream.read(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
-
 }
 }     // end namespace oofem

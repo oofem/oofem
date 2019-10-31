@@ -42,15 +42,15 @@
 namespace oofem {
 REGISTER_Material(LatticeViscoelastic);
 
-  LatticeViscoelastic :: LatticeViscoelastic(int n, Domain *d) : LatticeLinearElastic(n, d)
-  {
+LatticeViscoelastic :: LatticeViscoelastic(int n, Domain *d) : LatticeLinearElastic(n, d)
+{
     slaveMat = 0;
-  }
-  
+}
 
-  LatticeViscoelastic :: ~LatticeViscoelastic()
+
+LatticeViscoelastic :: ~LatticeViscoelastic()
 //
-  // destructor
+// destructor
 //
 {}
 
@@ -153,7 +153,7 @@ LatticeViscoelastic :: giveViscoelasticMaterial() {
     RheoChainMaterial *rChMat;
     mat = domain->giveMaterial(slaveMat);
 
-    rChMat = dynamic_cast< RheoChainMaterial * >(mat);
+    rChMat = dynamic_cast< RheoChainMaterial * >( mat );
 
     return rChMat;
 }
@@ -181,8 +181,8 @@ LatticeViscoelastic :: give2dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMo
     answer.times(Eincr / this->eNormalMean);
 }
 
-  void
-  LatticeViscoelastic :: give3dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+void
+LatticeViscoelastic :: give3dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
 {
     /* Returns elastic moduli in reduced stress-strain space*/
 
@@ -193,16 +193,16 @@ LatticeViscoelastic :: give2dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMo
 
     slaveGp = status->giveSlaveGaussPointVisco();
     rChMat = giveViscoelasticMaterial();
-    
+
     LatticeLinearElastic :: give3dLatticeStiffMtrx(answer, rmode, gp, tStep);
 
     Eincr = rChMat->giveEModulus(slaveGp, tStep);
 
     answer.times(Eincr / this->eNormalMean);
 }
-  
-  int
-  LatticeViscoelastic :: giveIPValue(FloatArray &answer,
+
+int
+LatticeViscoelastic :: giveIPValue(FloatArray &answer,
                                    GaussPoint *gp,
                                    InternalStateType type,
                                    TimeStep *tStep)
@@ -212,11 +212,9 @@ LatticeViscoelastic :: give2dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMo
 
 
 LatticeViscoelasticStatus :: LatticeViscoelasticStatus(GaussPoint *g) :
-  LatticeMaterialStatus(g),
-  slaveGpVisco( new GaussPoint( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
-{
-  
-}
+    LatticeMaterialStatus(g),
+    slaveGpVisco(new GaussPoint(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
+{}
 
 void
 LatticeViscoelasticStatus :: initTempStatus()
@@ -228,8 +226,8 @@ LatticeViscoelasticStatus :: initTempStatus()
     LatticeMaterialStatus :: initTempStatus();
 }
 
-  void
-  LatticeViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void
+LatticeViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     MaterialStatus *mS = this->giveViscoelasticMatStatus();
 
@@ -241,8 +239,8 @@ LatticeViscoelasticStatus :: initTempStatus()
     fprintf(file, "\n");
 }
 
-  MaterialStatus *
-  LatticeViscoelasticStatus :: giveViscoelasticMatStatus() {
+MaterialStatus *
+LatticeViscoelasticStatus :: giveViscoelasticMatStatus() {
     Material *mat;
     RheoChainMaterial *rChMat;
     GaussPoint *rChGP;
@@ -257,9 +255,9 @@ LatticeViscoelasticStatus :: initTempStatus()
     return mS;
 }
 
-  
-  void
-  LatticeViscoelasticStatus :: updateYourself(TimeStep *tStep)
+
+void
+LatticeViscoelasticStatus :: updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
@@ -268,12 +266,12 @@ LatticeViscoelasticStatus :: initTempStatus()
 {
     MaterialStatus *mS = this->giveViscoelasticMatStatus();
     mS->updateYourself(tStep);
-    
+
     LatticeMaterialStatus :: updateYourself(tStep);
 }
 
-  void
-  LatticeViscoelasticStatus :: saveContext(DataStream &stream, ContextMode mode)
+void
+LatticeViscoelasticStatus :: saveContext(DataStream &stream, ContextMode mode)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -281,20 +279,18 @@ LatticeViscoelasticStatus :: initTempStatus()
 {
     // save parent class status
     LatticeMaterialStatus :: saveContext(stream, mode);
-    
+
     this->giveViscoelasticMatStatus()->saveContext(stream, mode);
-    
 }
-  
+
 void
 LatticeViscoelasticStatus :: restoreContext(DataStream &stream, ContextMode mode)
 //
 // restores full information stored in stream to this Status
 //
 {
+    LatticeMaterialStatus :: restoreContext(stream, mode);
 
-  LatticeMaterialStatus :: restoreContext(stream, mode);
-  
-  this->giveViscoelasticMatStatus()->restoreContext(stream, mode);
+    this->giveViscoelasticMatStatus()->restoreContext(stream, mode);
 }
 }     // end namespace oofem

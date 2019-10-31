@@ -11,7 +11,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -33,25 +33,25 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef latticedamageviscoelastic_h
-#define latticedamageviscoelastic_h
+#ifndef latticeplasticitydamageviscoelastic_h
+#define latticeplasticitydamageviscoelastic_h
 
-#include "latticedamage.h"
+#include "latticeplasticitydamage.h"
 #include "../RheoChainMaterials/rheoChM.h"
 
-///@name Input fields for LatticeDamage
+///@name Input fields for LatticePlasticityDamageViscoelastic
 //@{
-#define _IFT_LatticeDamageViscoelastic_Name "latticedamageviscoelastic"
-#define _IFT_LatticeDamageViscoelastic_slaveMat "slavemat"
+#define _IFT_LatticePlasticityDamageViscoelastic_Name "latticeplasticitydamageviscoelastic"
+#define _IFT_LatticePlasticityDamageViscoelastic_slaveMat "slavemat"
 
 //@}
 
 namespace oofem {
 /**
- * This class implements associated Material Status to LatticeDamageViscoelastic.
- * @author: Petr Havlasek
+ * This class implements associated Material Status to LatticePlasticityDamageViscoelastic.
+ * @author: Petr Havalasek
  */
-class LatticeDamageViscoelasticStatus : public LatticeDamageStatus
+class LatticePlasticityDamageViscoelasticStatus : public LatticePlasticityDamageStatus
 
 {
 protected:
@@ -62,15 +62,15 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
+    LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
     /// Destructor
-    ~LatticeDamageViscoelasticStatus() {}
+    ~LatticePlasticityDamageViscoelasticStatus() {}
 
     /// Prints the receiver state to given stream
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
 
-    const char *giveClassName() const { return "LatticeDamageViscoelasticStatus"; }
+    const char *giveClassName() const { return "LatticePlasticityDamageViscoelasticStatus"; }
 
     virtual void initTempStatus();
 
@@ -87,11 +87,14 @@ public:
 };
 
 
+
+
+
 /**
  * This class implements a local viscoelastic model for concrete in tension for 3D lattice elements.
  * @author: Petr Havlasek
  */
-class LatticeDamageViscoelastic : public LatticeDamage
+class LatticePlasticityDamageViscoelastic : public LatticePlasticityDamage
 
 {
 protected:
@@ -102,13 +105,13 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamageViscoelastic(int n, Domain *d);
+    LatticePlasticityDamageViscoelastic(int n, Domain *d);
 
     /// Destructor
-    virtual ~LatticeDamageViscoelastic();
+    virtual ~LatticePlasticityDamageViscoelastic();
 
-    virtual const char *giveInputRecordName() const { return _IFT_LatticeDamageViscoelastic_Name; }
-    virtual const char *giveClassName() const { return "LatticeDamageViscoelastic"; }
+    virtual const char *giveInputRecordName() const { return _IFT_LatticePlasticityDamageViscoelastic_Name; }
+    virtual const char *giveClassName() const { return "LatticePlasticityDamageViscoelastic"; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -136,6 +139,8 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     RheoChainMaterial *giveViscoelasticMaterial();
+
+    virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
 protected:
 

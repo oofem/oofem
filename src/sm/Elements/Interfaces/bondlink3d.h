@@ -54,7 +54,8 @@ namespace oofem {
  * in a plane for which the direction along the rebar is normal to.
  * This element differs from the lattice link element, for which both the beam and the lattice nodes have rotational DOFs and 
  * therefore the lattice node's rotations can be used to compute the displacement jump at the beam element location.  
- * @TODO: Should not be derived from lattice structural element 
+ *
+ * @author: Peter Grassl
 */
 
 class BondLink3d : public StructuralElement

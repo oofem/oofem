@@ -60,14 +60,11 @@
 namespace oofem {
 /**
  * This class implements associated Material Status to LatticePlasticityDamage.
+ * @author: Peter Grassl
  */
 class LatticePlasticityDamageStatus : public LatticeMaterialStatus
 {
 protected:
-
-    FloatArray plasticStrain;
-
-    FloatArray tempPlasticStrain;
 
     FloatArray elasticStrain;
 
@@ -231,18 +228,7 @@ public:
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
-
-    virtual void give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime);
-
-
-    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime);
-
+    virtual FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
@@ -281,11 +267,10 @@ public:
     int computeInverseOfJacobian(FloatMatrix &answer,
                                  const FloatMatrix &src);
 
+
     virtual void computeDamageParam(double &omega, double kappaOne, double kappaTwo, GaussPoint *gp);
 
-
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
+    virtual FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
     void performPlasticityReturn(FloatArray &stress,
                                  GaussPoint *gp,

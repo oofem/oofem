@@ -55,6 +55,15 @@
 
 namespace oofem {
 
+ /**
+ * This class implements a constitutive model for a bond link for connecting beam (frame) and continuum elements in unstructured meshes.
+ * The main idea is to use the rotation of the beam element and the rigid arm from the beam node to the continuum element node
+ * to compute the displacement jump along the rebar element (and two components, which are perpendicular to each other and lie 
+ * in a plane for which the direction along the rebar is normal to.
+ * This constitutive model differs from the standard bond model, because only the first component of the jump is used to determine the bond stress.  
+ *
+ * @author: Peter Grassl
+*/
 
 
 class LinkSlipStatus : public StructuralInterfaceMaterialStatus

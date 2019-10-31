@@ -135,11 +135,11 @@ LatticeSlip :: giveRealStressVector(FloatArray &answer,
     /*First component is the slip one for which the stress should be limited using plasiticity (frictional slip between fibre and matrix). The other components are kept elastic. */
     answer.at(1) = ( totalStrain.at(1) - tempPlasticStrain.at(1) ) * stiffnessMatrix.at(1, 1);
 
-    double f = fabs( answer.at(1) ) - tauZero;
+    double f = fabs(answer.at(1) ) - tauZero;
 
     if ( f > 0 ) {//plastic response.
         //Reduced stress by increasing plastic strain.
-        tempPlasticStrain.at(1) = tempPlasticStrain.at(1) + sgn( answer.at(1) ) * f / stiffnessMatrix.at(1, 1);
+        tempPlasticStrain.at(1) = tempPlasticStrain.at(1) + sgn(answer.at(1) ) * f / stiffnessMatrix.at(1, 1);
         answer.at(1) = ( totalStrain.at(1) - tempPlasticStrain.at(1) ) * stiffnessMatrix.at(1, 1);
 
         status->setTempCrackFlag(1);
@@ -396,7 +396,7 @@ LatticeSlip :: giveIPValue(FloatArray &answer,
         answer.zero();
         answer.at(1) = status->giveDeltaDissipation();
         return 1;
-    } else if ( type == IST_CharacteristicLength )   {
+    } else if ( type == IST_CharacteristicLength ) {
         answer.resize(1);
         answer.zero();
         answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();

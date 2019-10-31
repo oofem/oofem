@@ -190,18 +190,18 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticeDamage_Name; }
     const char *giveClassName() const override { return "LatticeDamage"; }
 
-    virtual bool hasAnalyticalTangentStiffness() const {return true;}
-    
+    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+
     IRResultType initializeFrom(InputRecord *ir) override;
 
-    virtual FloatArrayF<3> giveLatticeStress2d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) override;
+    virtual FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual FloatArrayF<6> giveLatticeStress3d(const FloatArrayF<6> &jump, GaussPoint *gp, TimeStep *tStep) override;
- 
-    virtual FloatMatrixF<3,3> give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    virtual FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual FloatMatrixF<6,6> give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
-    
+    virtual FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+
+    virtual FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
 

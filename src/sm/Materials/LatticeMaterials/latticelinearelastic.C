@@ -156,14 +156,14 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
 }
 
 
- FloatArrayF<3>
- LatticeLinearElastic :: giveLatticeStress2d(const FloatArrayF<3> &strain,
-					     GaussPoint *gp,
-					     TimeStep *tStep)
- {
-   FloatArray answer;
-   answer.resize(3);
-   answer.zero();
+FloatArrayF< 3 >
+LatticeLinearElastic :: giveLatticeStress2d(const FloatArrayF< 3 > &strain,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep)
+{
+    FloatArray answer;
+    answer.resize(3);
+    answer.zero();
 
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
@@ -175,7 +175,7 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
 
     FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(3,3);
+    stiffnessMatrix.resize(3, 3);
     stiffnessMatrix.zero();
     stiffnessMatrix = this->give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
@@ -199,20 +199,19 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
     //Set all temp values
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
-   
+
     return answer;
+}
 
- }
 
-
- FloatArrayF<6>
- LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF<6> &strain,
-					     GaussPoint *gp,
-					     TimeStep *tStep)
- {
-   FloatArray answer;
-   answer.resize(6);
-   answer.zero();
+FloatArrayF< 6 >
+LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep)
+{
+    FloatArray answer;
+    answer.resize(6);
+    answer.zero();
 
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
@@ -224,7 +223,7 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
 
     FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(6,6);
+    stiffnessMatrix.resize(6, 6);
     stiffnessMatrix.zero();
     stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
@@ -248,12 +247,11 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
     //Set all temp values
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
-   
+
     return answer;
+}
 
- }
 
-  
 void LatticeLinearElastic :: giveRandomParameters(FloatArray &param)
 {
     param.resize(3);
@@ -276,45 +274,45 @@ LatticeLinearElastic :: giveInterface(InterfaceType type)
     return NULL;
 }
 
-FloatMatrixF<1,1>
+FloatMatrixF< 1, 1 >
 LatticeLinearElastic :: give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     /* Returns elastic moduli in reduced stress-strain space*/
-  FloatMatrix answer;
-  answer.resize(1,1);
-  answer.zero();
-  
-  //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
-  //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
+    FloatMatrix answer;
+    answer.resize(1, 1);
+    answer.zero();
+
+    //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
+    //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
 
     return answer;
 }
 
-FloatMatrixF<3,3>
+FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-  /* Returns elastic moduli in reduced stress-strain space*/
-  FloatMatrix answer;
-  answer.resize(3,3);
-  answer.zero();
-  
-  answer.at(1, 1) = 1.;
-  answer.at(2, 2) = this->alphaOne; // shear
-  answer.at(3, 3) = this->alphaTwo; // torsion
-  
-  answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-  
-  return answer;
+    /* Returns elastic moduli in reduced stress-strain space*/
+    FloatMatrix answer;
+    answer.resize(3, 3);
+    answer.zero();
+
+    answer.at(1, 1) = 1.;
+    answer.at(2, 2) = this->alphaOne; // shear
+    answer.at(3, 3) = this->alphaTwo; // torsion
+
+    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
+
+    return answer;
 }
 
 
-FloatMatrixF<6,6>
+FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
     /* Returns elastic moduli in reduced stress-strain space*/
-  FloatMatrix answer;
-  answer.resize(6, 6);
-  answer.zero();
+    FloatMatrix answer;
+    answer.resize(6, 6);
+    answer.zero();
 
     answer.at(1, 1) = 1.;
     answer.at(2, 2) = this->alphaOne; // shear
@@ -363,13 +361,13 @@ LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
             answer = 10;
         }
         return answer;
-    } else if ( aProperty == eNormal_ID )   {
+    } else if ( aProperty == eNormal_ID ) {
         return 1.;
-    } else if ( aProperty == 'E' )    {
+    } else if ( aProperty == 'E' ) {
         return this->eNormalMean;
-    } else if ( aProperty == 'n' )    {
+    } else if ( aProperty == 'n' ) {
         return this->nu;
-    } else   {
+    } else {
         return LatticeStructuralMaterial :: give(aProperty, gp);
     }
 }
@@ -408,7 +406,7 @@ LatticeLinearElastic :: giveIPValue(FloatArray &answer,
         answer.zero();
         answer.at(1) = status->giveCrackFlag();
         return 1;
-    } else   {
+    } else {
         return LatticeStructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
@@ -428,11 +426,11 @@ LatticeLinearElasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
     if ( strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3d") == 0 ) {
         static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces, tStep, 0);
-        fprintf( file, "LatticeBeam forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
-    } else if ( strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3dBoundary") == 0 )      {
+        fprintf(file, "LatticeBeam forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
+    } else if ( strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3dBoundary") == 0 ) {
         static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces, tStep, 0);
-        fprintf( file, "LatticeBeam3dBounday forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
-    } else   {
+        fprintf(file, "LatticeBeam3dBounday forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
+    } else {
         LatticeMaterialStatus :: printOutputAt(file, tStep);
     }
     return;

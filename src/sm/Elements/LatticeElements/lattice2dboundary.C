@@ -143,19 +143,19 @@ Lattice2dBoundary :: giveLocation()
     int newLocation = 0;
     if ( this->location == 1 ) {
         newLocation = 22;
-    } else if ( this->location == 2 )      {
+    } else if ( this->location == 2 ) {
         newLocation = 25;
-    } else if ( this->location == 3 )      {
+    } else if ( this->location == 3 ) {
         newLocation = 16;
-    } else if ( this->location == 4 )      {
+    } else if ( this->location == 4 ) {
         newLocation = 8;
-    } else if ( this->location == 5 )      {
+    } else if ( this->location == 5 ) {
         newLocation = 5;
-    } else if ( this->location == 6 )     {
+    } else if ( this->location == 6 ) {
         newLocation = 2;
-    } else if ( this->location == 7 )     {
+    } else if ( this->location == 7 ) {
         newLocation = 11;
-    } else if ( this->location == 8 )     {
+    } else if ( this->location == 8 ) {
         newLocation = 19;
     }
 
@@ -370,13 +370,11 @@ Lattice2dBoundary :: computeVolumeAround(GaussPoint *aGaussPoint)
 
 void
 Lattice2dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const {
-
-  if ( inode == 3 ) {
-    answer = { E_xx, E_yy, G_xy };
-  } else{
-    answer = { D_u, D_v, R_w };
-  }
-  
+    if ( inode == 3 ) {
+        answer = { E_xx, E_yy, G_xy };
+    } else {
+        answer = { D_u, D_v, R_w };
+    }
 }
 
 
@@ -474,7 +472,7 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     bt.beTranspositionOf(b);
     // TotalStressVector = gp->giveStressVector() ;
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus( integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
+        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
                             ->giveStressVector();
     } else
     if ( !this->isActivated(tStep) ) {
@@ -489,7 +487,7 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     //
     // compute nodal representation of internal forces using f = B^T*Sigma dV
     //
-    dV  = this->computeVolumeAround( integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
+    dV  = this->computeVolumeAround(integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     bs.beProductOf(bt, TotalStressVector);
     bs.times(dV);
 
