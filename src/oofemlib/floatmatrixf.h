@@ -500,8 +500,7 @@ inline FloatMatrixF<3,3> local_cs(const FloatArrayF<3> &normal)
     double npn = dot(tangent, normal);
     tangent += -npn * normal;
     tangent /= norm(tangent);
-    FloatArrayF<3> bigent;
-    cross(tangent, normal);
+    auto bigent = cross(tangent, normal);
 
     FloatMatrixF<3,3> out;
     out(0, 0) = normal[0];

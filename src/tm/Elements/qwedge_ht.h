@@ -62,7 +62,6 @@ protected:
 
 public:
     QWedge_ht(int, Domain *);
-    virtual ~QWedge_ht() { }
 
     double computeVolumeAround(GaussPoint *gp) override;
     FEInterpolation *giveInterpolation() const override;

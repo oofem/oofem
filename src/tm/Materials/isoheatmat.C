@@ -60,9 +60,6 @@ IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 
 double
 IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *tStep) const
-//
-// Returns the value of the property aProperty (e.g. 'k' the conductivity of the receiver).
-//
 {
     if ( aProperty == 'k' ) { //thermal conductivity [W/m/K]   
         return conductivity.eval( { { "te", giveTemperature(gp) }, { "t", tStep->giveIntrinsicTime() } }, this->giveDomain(), gp, giveTemperature(gp) );
@@ -78,54 +75,28 @@ IsotropicHeatTransferMaterial :: give(int aProperty, GaussPoint *gp, TimeStep *t
 }
 
 
-void
-IsotropicHeatTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
+FloatArrayF<3>
+IsotropicHeatTransferMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
     ms->setTempField(field);
     ms->setTempGradient(grad);
 
     ///@todo Shouldn't the conductivity typically depend on the primary field and/or its gradient?
-    answer.beScaled(-this->giveIsotropicConductivity(gp, tStep), grad);
-
+    auto answer = -this->giveIsotropicConductivity(gp, tStep) * grad;
     ms->setTempFlux(answer);
+    return answer;
 }
 
 
-void
-IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                          MatResponseMode mode,
-                                                          GaussPoint *gp,
-                                                          TimeStep *tStep) const
+FloatMatrixF<3,3>
+IsotropicHeatTransferMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    /*
-     * returns constitutive (conductivity) matrix of receiver
-     */
-    MaterialMode mMode = gp->giveMaterialMode();
     double cond = this->giveIsotropicConductivity(gp, tStep);
-
-    switch  ( mMode ) {
-    case _1dHeat:
-        answer.resize(1, 1);
-        answer.at(1, 1) = cond;
-    case _2dHeat:
-        answer.resize(2, 2);
-        answer.at(1, 1) = cond;
-        answer.at(2, 2) = cond;
-        return;
-
-    case _3dHeat:
-        answer.resize(3, 3);
-        answer.at(1, 1) = cond;
-        answer.at(2, 2) = cond;
-        answer.at(3, 3) = cond;
-        return;
-
-    default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    return cond * eye<3>();
 }
+
 
 double
 IsotropicHeatTransferMaterial :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const
@@ -177,29 +148,10 @@ IsotropicHeatTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp,
     return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
 }
 
-
-MaterialStatus *
-IsotropicHeatTransferMaterial :: CreateStatus(GaussPoint *gp) const
-{
-    return new IsotropicHeatTransferMaterialStatus(gp);
-}
-
-IsotropicHeatTransferMaterialStatus :: IsotropicHeatTransferMaterialStatus(GaussPoint *g) : TransportMaterialStatus(g)
-{
-}
-
-
-void
-IsotropicHeatTransferMaterialStatus :: updateYourself(TimeStep *tStep)
-{
-    TransportMaterialStatus :: updateYourself(tStep);
-}
-
 double IsotropicHeatTransferMaterial :: giveTemperature(GaussPoint *gp) const
 {
-    IsotropicHeatTransferMaterialStatus *ms = static_cast< IsotropicHeatTransferMaterialStatus * >( this->giveStatus(gp) );
-    if ( ms->giveTempField().isEmpty() ) return 0;
-    return ms->giveTempField().at(1);
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    return ms->giveTempField();
 }
 
 } // end namespace oofem

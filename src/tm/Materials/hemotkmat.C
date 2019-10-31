@@ -33,7 +33,7 @@
  */
 
 #include "tm/Materials/hemotkmat.h"
-#include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -81,53 +81,47 @@ HeMoTKMaterial :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-void
-HeMoTKMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
+std::pair<FloatArrayF<3>, FloatArrayF<3>>
+HeMoTKMaterial :: computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double w, GaussPoint *gp, TimeStep *tStep) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-    double w = field.at(2);
-    double t = field.at(1);
+    auto ans_w = perm_ww(w, t) * grad_w + perm_wt(w, t) * grad_t;
+    auto ans_t = perm_ww(w, t) * get_latent(w, t) * grad_w + (get_chi(w, t) + get_latent(w, t) * perm_wt(w, t)) * grad_t;
 
-    FloatArray ans_w, ans_t;
-    FloatArray grad_w, grad_t;
-    int size = grad.giveSize() / 2;
-    for ( int i = 1; i <= size; ++i ) {
-        grad_w.at(i) = grad.at(i);
-    }
-    for ( int i = size + 1; i <= size * 2; ++i ) {
-        grad_t.at(i) = grad.at(i);
-    }
-    ans_w.beScaled(perm_ww(w, t), grad_w);
-    ans_w.beScaled(perm_wt(w, t), grad_t);
-    ans_t.beScaled(perm_ww(w, t) * get_latent(w, t), grad_w);
-    ans_t.beScaled(get_chi(w, t) + get_latent(w, t) * perm_wt(w, t), grad_t);
+    ms->setTempTemperature(t);
+    ms->setTempTemperatureGradient(grad_t);
+    ms->setTempHeatFlux(ans_t);
 
-    answer.resize(size * 2);
-    answer.zero();
-    answer.addSubVector(ans_w, 1);
-    answer.addSubVector(ans_t, size + 1);
+    ms->setTempHumidity(w);
+    ms->setTempHumidityGradient(grad_w);
+    ms->setTempHumidityFlux(ans_w);
 
-    ms->setTempField(field);
-    ms->setTempGradient(grad);
-    ms->setTempFlux(answer);
+    return {ans_t, ans_w};
 }
 
-
-void
-HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep) const
+FloatMatrixF<3,3>
+HeMoTKMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    /*
-     * returns constitutive matrix of receiver
-     */
-    if ( mode == Conductivity_ww || mode == Conductivity_hh || mode == Conductivity_hw || mode == Conductivity_wh ) {
-        this->computeConductivityMtrx(answer, mode, gp, tStep);
+    auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
+
+    double t = status->giveTempTemperature();
+    double w = status->giveTempHumidity();
+
+    double k = 0.0;
+    if ( mode == Conductivity_ww ) {
+        k = perm_ww(w, t);
+    } else if ( mode == Conductivity_wh ) {
+        k = perm_wt(w, t);
+    } else if ( mode == Conductivity_hw ) {
+        k = perm_ww(w, t) * get_latent(w, t);
+    } else if ( mode == Conductivity_hh ) {
+        k = get_chi(w, t) + get_latent(w, t) * perm_wt(w, t);
     } else {
-        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("Unknown MatResponseMode");
     }
+
+    return k * eye<3>();
 }
 
 
@@ -140,147 +134,6 @@ HeMoTKMaterial :: giveCharacteristicValue(MatResponseMode mode,
 }
 
 
-void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
-{
-    MaterialMode mmode = gp->giveMaterialMode();
-    switch ( mmode ) {
-    case _2dHeMo:
-        this->matcond2d(answer, gp, mode, tStep);
-        return;
-
-    case _3dHeMo:
-        this->matcond3d(answer, gp, mode, tStep);
-        return;
-
-    default:
-        OOFEM_ERROR("Unsupported MaterialMode");
-    }
-}
-
-
-void
-HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const
-//  function creates conductivity matrix of the
-//  isotropic heat material for 1D problems
-//
-//  d - conductivity matrix of the material
-//  25.9.2001
-{
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    //  w = Tm->ip[ipp].av[0];
-    //  t = Tm->ip[ipp].av[1];
-    const auto &s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
-    }
-
-    double w = s.at(2);
-    double t = s.at(1);
-
-    double k = 0.0;
-    if ( mode == Conductivity_ww ) {
-        k = perm_ww(w, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_wt(w, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_ww(w, t) * get_latent(w, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = get_chi(w, t) + get_latent(w, t) * perm_wt(w, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(1, 1);
-    d.at(1, 1) = k;
-}
-
-void
-HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const
-//  function creates conductivity matrix of the
-//  isotropic heat material for 2D problems
-//
-//  d - conductivity matrix of the material
-//  25.9.2001
-{
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    const auto &s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
-    }
-
-    double w = s.at(2);
-    double t = s.at(1);
-
-    double k = 0.0;
-    if ( mode == Conductivity_ww ) {
-        k = perm_ww(w, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_wt(w, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_ww(w, t) * get_latent(w, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = get_chi(w, t) + get_latent(w, t) * perm_wt(w, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(2, 2);
-    d.at(1, 1) = k;
-    d.at(1, 2) = 0.0;
-    d.at(2, 1) = 0.0;
-    d.at(2, 2) = k;
-}
-
-void
-HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep) const
-//  function creates conductivity matrix of the
-//  isotropic heat material for 3D problems
-//
-//  d - conductivity matrix of the material
-//  25.9.2001
-{
-    double k = 0.0, w = 0.0, t = 0.0;
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray s;
-
-
-    //  w = Tm->ip[ipp].av[0];
-    //  t = Tm->ip[ipp].av[1];
-    s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
-    }
-
-    w = s.at(2);
-    t = s.at(1);
-
-    if ( mode == Conductivity_ww ) {
-        k = perm_ww(w, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_wt(w, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_ww(w, t) * get_latent(w, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = get_chi(w, t) + get_latent(w, t) * perm_wt(w, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(3, 3);
-    d.at(1, 1) = k;
-    d.at(1, 2) = 0.0;
-    d.at(1, 3) = 0.0;
-    d.at(2, 1) = 0.0;
-    d.at(2, 2) = k;
-    d.at(2, 3) = 0.0;
-    d.at(3, 1) = 0.0;
-    d.at(3, 2) = 0.0;
-    d.at(3, 3) = k;
-}
-
-
 double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( mode == Capacity_ww ) {
@@ -288,26 +141,16 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
     } else if ( mode == Capacity_wh ) {
         return 0.0;
     } else if ( mode == Capacity_hw ) {
-        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+        auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-        const auto &s = status->giveTempField();
-        if ( s.isEmpty() ) {
-            OOFEM_ERROR("undefined state vector");
-        }
-
-        double w = s.at(2);
-        double t = s.at(1);
+        double t = status->giveTempTemperature();
+        double w = status->giveTempHumidity();
         return get_b(w, t) * get_latent(w, t);
     } else if ( mode == Capacity_hh ) {
-        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+        auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-        const auto &s = status->giveTempField();
-        if ( s.isEmpty() ) {
-            OOFEM_ERROR("undefined state vector");
-        }
-
-        double w = s.at(2);
-        double t = s.at(1);
+        double t = status->giveTempTemperature();
+        double w = status->giveTempHumidity();
         return get_ceff(w, t);
     } else {
         OOFEM_ERROR("Unknown MatResponseMode");
@@ -320,20 +163,17 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 double
 HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray &tempState = ms->giveTempField();
-    if ( tempState.giveSize() < 2 ) {
-        OOFEM_ERROR("undefined moisture status!");
-    }
+    auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-    const FloatArray &state = ms->giveField();
+    double w = status->giveHumidity();
+    double tempw = status->giveTempHumidity();
 
     if ( mode == VM_Total ) {
-        return inverse_sorption_isotherm( tempState.at(2) );
+        return inverse_sorption_isotherm( tempw );
     } else if ( mode == VM_Incremental ) {
-        return inverse_sorption_isotherm( tempState.at(2) ) - inverse_sorption_isotherm( state.at(2) );
+        return inverse_sorption_isotherm( tempw ) - inverse_sorption_isotherm( w );
     } else if ( mode == VM_Velocity ) { // VM_Previous
-        return inverse_sorption_isotherm( state.at(2) );
+        return inverse_sorption_isotherm( w );
     }
 
     return 1.;

@@ -47,7 +47,6 @@ class TrAxisym1_ht : public Tr1_ht
 {
 public:
     TrAxisym1_ht(int n, Domain * d);
-    virtual ~TrAxisym1_ht();
 
     double computeVolumeAround(GaussPoint *gp) override;
     const char *giveInputRecordName() const override { return _IFT_TrAxisym1_ht_Name; }

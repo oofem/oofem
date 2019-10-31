@@ -50,7 +50,6 @@ class LatticeTransportElement : public TransportElement
 {
 public:
     LatticeTransportElement(int, Domain *, ElementMode);
-    virtual ~LatticeTransportElement();
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

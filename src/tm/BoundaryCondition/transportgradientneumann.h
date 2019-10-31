@@ -62,7 +62,6 @@ class OOFEM_EXPORT TransportGradientNeumann : public ActiveBoundaryCondition //,
 {
 public:
     TransportGradientNeumann(int n, Domain *d);
-    virtual ~TransportGradientNeumann();
 
     int giveNumberOfInternalDofManagers() override { return 1; }
     DofManager *giveInternalDofManager(int i) override;

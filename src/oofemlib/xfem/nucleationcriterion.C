@@ -55,7 +55,7 @@ std::vector<std::unique_ptr<EnrichmentItem>> NucleationCriterion::nucleateEnrich
     OOFEM_ERROR("Not implemented.")
 
     std::vector<std::unique_ptr<EnrichmentItem>> eiList;
-    return std::move( eiList );
+    return eiList;
 }
 
 IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) 

@@ -103,14 +103,17 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 }
 
 
-void
-LatticeTransportMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
+FloatArrayF<3>
+LatticeTransportMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
-    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    status->setTempGradient(grad);
     status->setTempField(field);
-    double suction = field.at(1);
-    double c = this->computeConductivity(suction, gp, tStep);
-    answer.beScaled(-c, grad);
+
+    double c = this->computeConductivity(field, gp, tStep);
+    auto flux = -c * grad;
+    status->setTempFlux(flux);
+    return flux;
 }
 
 
@@ -132,8 +135,8 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                     GaussPoint *gp,
                                                     TimeStep *tStep) const
 {
-    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
-    double suction = status->giveTempField().at(1);
+    auto status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    double suction = status->giveTempField();
 
     if ( mode == Capacity ) {
         return computeCapacity(suction, gp);
@@ -152,7 +155,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
                                                 GaussPoint *gp,
                                                 TimeStep *tStep) const
 {
-    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
 
     double density = this->give('d', gp);
 
@@ -269,12 +272,7 @@ LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) con
 {
     MaterialStatus :: printOutputAt(File, tStep);
 
-    fprintf(File, "  state");
-
-    for ( auto &val : field ) {
-        fprintf( File, " %.4e", val );
-    }
-
+    fprintf(File, "  state %.4e", field);
     fprintf(File, "  mass %.8e", mass);
     fprintf(File, "\n");
 }
@@ -290,7 +288,7 @@ void
 LatticeTransportMaterialStatus :: initTempStatus()
 {
     TransportMaterialStatus :: initTempStatus();
-    oldPressure = field.at(1);
+    oldPressure = field;
 }
 
 

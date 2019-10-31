@@ -39,6 +39,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "scalarfunction.h"
+#include "floatmatrixf.h"
 
 ///@name Input fields for IsotropicHeatTransferMaterial
 //@{
@@ -66,12 +67,8 @@ protected:
 public:
     IsotropicHeatTransferMaterial(int n, Domain * d);
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
-
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) const override;
+    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const;
 
@@ -89,15 +86,7 @@ public:
     IRResultType initializeFrom(InputRecord *ir) override;
 
     double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
     double giveTemperature(GaussPoint *gp) const;
-};
-
-class IsotropicHeatTransferMaterialStatus : public TransportMaterialStatus
-{
-public:
-    IsotropicHeatTransferMaterialStatus(GaussPoint * g);
-    void updateYourself(TimeStep *tStep) override;
 };
 
 } // end namespace oofem

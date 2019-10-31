@@ -47,14 +47,8 @@
 namespace oofem {
 REGISTER_EngngModel(NLTransientTransportProblem);
 
-NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master)
+NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = nullptr) : NonStationaryTransportProblem(i, _master)
 {
-    //constructor
-}
-
-NLTransientTransportProblem :: ~NLTransientTransportProblem()
-{
-    //destructor
 }
 
 IRResultType

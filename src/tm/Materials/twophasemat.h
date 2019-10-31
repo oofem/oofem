@@ -36,8 +36,8 @@
 #define twophasemat_h
 
 #include "tm/Materials/transportmaterial.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "scalarfunction.h"
 
 ///@name Input fields for IsotropicHeatTransferMaterial
@@ -58,15 +58,12 @@ protected:
     IntArray slaveMaterial; 
  
 public:
-    TwoPhaseMaterial(int n, Domain * d);
+    TwoPhaseMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
 
     IRResultType initializeFrom(InputRecord *ir) override;
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) const override;
+    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
      double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,

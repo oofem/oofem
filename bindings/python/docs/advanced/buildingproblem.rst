@@ -97,4 +97,4 @@ After setting up the problem we can solve it.
     Real time consumed: 000h:00m:00s
     User time consumed: 000h:00m:00s
 
-The more elaborated example can be found in test2.py (https://github.com/oofem/oofem/blob/master/bindings/python2/test2.py).
+The more elaborated example can be found in test_2.py (https://github.com/oofem/oofem/blob/master/bindings/python/test_2.py).

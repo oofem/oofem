@@ -61,17 +61,14 @@ class NLTransientTransportProblem : public NonStationaryTransportProblem
 protected:
     enum nlttp_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
-    double rtol;
-    int nsmax;
-    nlttp_ModeType NR_Mode;
-    int MANRMSteps;
-    int currentIterations;
+    double rtol = 0.;
+    int nsmax = 0;
+    nlttp_ModeType NR_Mode = nrsolverModifiedNRM;
+    int MANRMSteps = 0;
+    int currentIterations = 0;
 
 public:
-    /// Constructor.
     NLTransientTransportProblem(int i, EngngModel * _master);
-    /// Destructor.
-    virtual ~NLTransientTransportProblem();
 
     TimeStep* giveNextStep() override;
     void solveYourselfAt(TimeStep *tStep) override;

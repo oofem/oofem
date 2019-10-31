@@ -55,7 +55,6 @@ protected:
 
 public:
     Tr1Darcy(int, Domain *);
-    virtual ~Tr1Darcy();
 
     IRResultType initializeFrom(InputRecord *ir) override;
 

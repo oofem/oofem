@@ -102,16 +102,9 @@ public:
      */
     HeMoKunzelMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const override;
-
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *atTime) const override;
-
-    double giveCharacteristicValue(MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *atTime) const override;
+    std::pair<FloatArrayF<3>, FloatArrayF<3>> computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
@@ -125,7 +118,6 @@ public:
     const char *giveClassName() const override { return "HeMoKunzelMaterial"; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 
     /// returns water content (in kg/m^3)
     double giveMoistureContent(double h) const;
@@ -138,12 +130,9 @@ public:
     double computeSatVaporPressureDerivative(double T) const;
     double computeDw(double h) const;
 
-protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const;
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new HeMoTransportMaterialStatus(gp); }
 
+protected:
     double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const;
 
     double perm_mm(double h, double T) const;

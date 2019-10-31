@@ -57,7 +57,6 @@ protected:
 
 public:
     Tr1_ht(int n, Domain * d);
-    virtual ~Tr1_ht() {}
 
     double computeVolumeAround(GaussPoint *gp) override;
 

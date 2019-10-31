@@ -58,7 +58,6 @@ protected:
 
 public:
     Brick1_ht(int n, Domain * d);
-    virtual ~Brick1_ht();
 
     double computeVolumeAround(GaussPoint *gp) override;
     FEInterpolation *giveInterpolation() const override;

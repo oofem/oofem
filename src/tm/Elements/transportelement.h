@@ -60,11 +60,10 @@ protected:
     /// Stefan–Boltzmann constant W/m2/K4
     static const double stefanBoltzmann;
     /// Fuction determining the relative volume of reference material in element
-    int vofFunction;
+    int vofFunction = 0;
 
 public:
     TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
-    virtual ~TransportElement();
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;

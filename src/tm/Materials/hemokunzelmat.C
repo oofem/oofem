@@ -33,7 +33,7 @@
  */
 
 #include "tm/Materials/hemokunzelmat.h"
-#include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -140,164 +140,34 @@ HeMoKunzelMaterial :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-void
-HeMoKunzelMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
+std::pair<FloatArrayF<3>, FloatArrayF<3>>
+HeMoKunzelMaterial :: computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-    ms->setTempField(field);
-    ms->setTempGradient(grad);
+    ms->setTempTemperature(t);
+    ms->setTempHumidity(h);
 
-    double h = field.at(2);
-    double t = field.at(1);
+    ms->setTempTemperatureGradient(grad_t);
+    ms->setTempHumidityGradient(grad_w);
 
-    int size = grad.giveSize() / 2;
-    FloatArray ans_h, ans_m;
-    FloatArray grad_h(size), grad_m(size);
-    for ( int i = 1; i <= size; ++i ) {
-        grad_h.at(i) = grad.at(i);
-    }
-    for ( int i = 1; i <= 2; ++i ) {
-        grad_m.at(i) = grad.at(i+size);
-    }
+    auto ans_t = -perm_hm(h, t) * grad_w - perm_hh(h, t) * grad_t;
+    auto ans_w = -perm_mm(h, t) * grad_w - perm_mh(h, t) * grad_t;
+    
+    ms->setTempHeatFlux(ans_t);
+    ms->setTempHumidityFlux(ans_w);
 
-    ans_m.add(-perm_mm(h, t), grad_m);
-    ans_m.add(-perm_mh(h, t), grad_h);
-    ans_h.add(-perm_hm(h, t), grad_m);
-    ans_h.add(-perm_hh(h, t), grad_h);
-
-    answer.resize(size * 2);
-    answer.zero();
-    answer.addSubVector(ans_h, 1);
-    answer.addSubVector(ans_m, size + 1);
-
-    ms->setTempFlux(answer);
+    return {ans_t, ans_w};
 }
 
 
-void
-HeMoKunzelMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *atTime) const
+FloatMatrixF<3,3>
+HeMoKunzelMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    /*
-     * returns constitutive matrix of receiver
-     */
-    if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
-        this->computeConductivityMtrx(answer, mode, gp, atTime);
-    } else {
-        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MatResponseModeToString(mode) );
-    }
-}
+    auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-
-double
-HeMoKunzelMaterial :: giveCharacteristicValue(MatResponseMode mode,
-                                              GaussPoint *gp,
-                                              TimeStep *atTime) const
-{
-    return this->computeCapacityCoeff(mode, gp, atTime);
-}
-
-
-void
-HeMoKunzelMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
-{
-    MaterialMode mmode = gp->giveMaterialMode();
-    switch ( mmode ) {
-    case _2dHeMo:
-        this->matcond2d(answer, gp, mode, atTime);
-        return;
-
-    case _3dHeMo:
-        this->matcond3d(answer, gp, mode, atTime);
-        return;
-
-    default:
-        OOFEM_ERROR("Unsupported MaterialMode");
-    }
-}
-
-
-void
-HeMoKunzelMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const
-{
-    double k = 0.0, h = 0.0, t = 0.0;
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    const auto &s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond1d: undefined state vector");
-    }
-
-    h = s.at(2);
-    t = s.at(1);
-
-    if ( mode == Conductivity_ww ) {
-        k = perm_mm(h, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_mh(h, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_hm(h, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = perm_hh(h, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(1, 1);
-    d.at(1, 1) = k;
-}
-
-void
-HeMoKunzelMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const
-{
-    double k = 0.0, h = 0.0, t = 0.0;
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    const auto &s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond2d: undefined state vector");
-    }
-
-    h = s.at(2);
-    t = s.at(1);
-
-    //     if  (gp->giveElement()->giveNumber() == 4)
-    //       double bzzz = 20;
-
-    if ( mode == Conductivity_ww ) {
-        k = perm_mm(h, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_mh(h, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_hm(h, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = perm_hh(h, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(2, 2);
-    d.at(1, 1) = k;
-    d.at(1, 2) = 0.0;
-    d.at(2, 1) = 0.0;
-    d.at(2, 2) = k;
-}
-
-void
-HeMoKunzelMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime) const
-{
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    const auto &s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("matcond3d: undefined state vector");
-    }
-
-    double h = s.at(2);
-    double t = s.at(1);
+    double t = status->giveTempTemperature();
+    double h = status->giveTempHumidity();
 
     double k = 0.0;
     if ( mode == Conductivity_ww ) {
@@ -312,57 +182,43 @@ HeMoKunzelMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode 
         OOFEM_ERROR("Unknown MatResponseMode");
     }
 
-    d.resize(3, 3);
-    d.at(1, 1) = k;
-    d.at(1, 2) = 0.0;
-    d.at(1, 3) = 0.0;
-    d.at(2, 1) = 0.0;
-    d.at(2, 2) = k;
-    d.at(2, 3) = 0.0;
-    d.at(3, 1) = 0.0;
-    d.at(3, 2) = 0.0;
-    d.at(3, 3) = k;
+    return k * eye<3>();
 }
 
 
 double
-HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
+HeMoKunzelMaterial :: giveCharacteristicValue(MatResponseMode mode,
+                                              GaussPoint *gp,
+                                              TimeStep *tStep) const
+{
+    return this->computeCapacityCoeff(mode, gp, tStep);
+}
+
+
+double HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     //     if  (gp->giveElement()->giveNumber() == 4)
     //       double bzzz = 20;
 
-
     if ( mode == Capacity_ww ) {
-        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+        auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-        //       s = status->giveTempStateVector();
-        const auto &s = status->giveTempField();
-        if ( s.isEmpty() ) {
-            OOFEM_ERROR("computeCapacityCoeff: undefined state vector");
-        }
-
-        double h = s.at(2);
+        double h = status->giveTempHumidity();
         return this->giveMoistureContentDerivative(h);
     } else if ( mode == Capacity_wh ) {
         return 0.0;
     } else if ( mode == Capacity_hw ) {
         return 0.0;
     } else if ( mode == Capacity_hh ) {
-        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-        //s = status->giveTempStateVector();
-        const auto &s = status->giveTempField();
-        if ( s.isEmpty() ) {
-            OOFEM_ERROR("computeCapacityCoeff: undefined state vector");
-        }
-
-        double h = s.at(2);
-
+        auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
+ 
+        double h = status->giveTempHumidity();
         double w = this->giveMoistureContent(h);
 
-        double dHs_dT = cs * give('d', NULL);
+        double dHs_dT = cs * give('d', nullptr);
         double dHw_dT = cw * w;
 
-        return ( dHs_dT + dHw_dT );
+        return dHs_dT + dHw_dT;
 
         // CONSTANT	return 1.7e6;
     } else {
@@ -376,7 +232,7 @@ HeMoKunzelMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp,
 double
 HeMoKunzelMaterial :: giveMoistureContent(double h) const
 {
-    if ( ( h < 0.0 ) || ( h > 1.00 ) ) {
+    if ( h < 0.0 || h > 1.00 ) {
         OOFEM_ERROR("HeMoKunzelMaterial :: giveMoistureContent : Relative humidity %.3f is out of range", h);
     }
 
@@ -393,7 +249,7 @@ HeMoKunzelMaterial :: giveMoistureContent(double h) const
 double
 HeMoKunzelMaterial :: giveMoistureContentDerivative(double h) const
 {
-    if ( ( h < 0.0 ) || ( h > 1.00 ) ) {
+    if ( h < 0.0 || h > 1.00 ) {
         OOFEM_ERROR("HeMoKunzelMaterial :: giveMoistureContentDerivative : Relative humidity %.3f is out of range", h);
     }
 
@@ -411,7 +267,7 @@ HeMoKunzelMaterial :: giveMoistureContentDerivative(double h) const
 double
 HeMoKunzelMaterial :: computeWaterVaporPerm(double T) const
 {
-    /// vapor diffusion coefficient in air [kg m^-1 s^-1 Pa^-1]
+    // vapor diffusion coefficient in air [kg m^-1 s^-1 Pa^-1]
     double delta = 2.0 * 1.e-7 * pow(T, 0.81) / PL;
     return delta / mu;
 }
@@ -454,14 +310,11 @@ HeMoKunzelMaterial :: computeSatVaporPressureDerivative(double T) const
 double
 HeMoKunzelMaterial :: computeDw(double h) const
 {
-    double Dw = 0.;
-
     if ( this->Permeability == Multilin_h ) {
         double tol = 1.e-10;
         for ( int i = 1; i <= perm_h.giveSize(); i++ ) {
             if ( ( h - perm_h.at(i) ) < tol ) {
-                Dw = perm_Dwh.at(i - 1) + ( perm_Dwh.at(i) - perm_Dwh.at(i - 1) ) * ( h - perm_h.at(i - 1) ) / ( perm_h.at(i) - perm_h.at(i - 1) );
-                break;
+                return perm_Dwh.at(i - 1) + ( perm_Dwh.at(i) - perm_Dwh.at(i - 1) ) * ( h - perm_h.at(i - 1) ) / ( perm_h.at(i) - perm_h.at(i - 1) );
             }
         }
     } else if ( this->Permeability == Multilin_wV ) {
@@ -469,18 +322,18 @@ HeMoKunzelMaterial :: computeDw(double h) const
         double tol = 1.e-10;
         for ( int i = 1; i <= perm_wV.giveSize(); i++ ) {
             if ( ( wV - perm_wV.at(i) ) < tol ) {
-                Dw = perm_DwwV.at(i - 1) + ( perm_DwwV.at(i) - perm_DwwV.at(i - 1) ) * ( wV - perm_wV.at(i - 1) ) / ( perm_wV.at(i) - perm_wV.at(i - 1) );
-                break;
+                return perm_DwwV.at(i - 1) + ( perm_DwwV.at(i) - perm_DwwV.at(i - 1) ) * ( wV - perm_wV.at(i - 1) ) / ( perm_wV.at(i) - perm_wV.at(i - 1) );
             }
         }
     } else if ( this->Permeability == Kunzelperm ) {
-        double w = this->giveMoistureContent(h);
-        Dw = 3.8 * ( A / iso_wh ) * ( A / iso_wh ) * pow(1000., w / iso_wh - 1.);
+        double w;
+        w = this->giveMoistureContent(h);
+        return 3.8 * ( A / iso_wh ) * ( A / iso_wh ) * pow(1000., w / iso_wh - 1.);
     } else {
         OOFEM_ERROR("initializeFrom: permeabilityType must be equal to 0, 1 or 2");
     }
 
-    return Dw;
+    return 0.;
 }
 
 
@@ -522,7 +375,6 @@ HeMoKunzelMaterial :: perm_hm(double h, double T) const
     // Function calculates permability temperature-relative humidity (k_hm)
     double deltap = this->computeWaterVaporPerm(T);
     double p_sat = this->computeSatVaporPressure(T);
-
     return hv * deltap * p_sat;
 }
 
@@ -532,7 +384,7 @@ HeMoKunzelMaterial :: perm_hh(double h, double T) const
     // Function calculates permability water temperature-temperature (k_hh)
 
     double w = this->giveMoistureContent(h);
-    double lambda = lambda0 * ( 1. + b * w / give('d', NULL) );
+    double lambda = lambda0 * ( 1. + b * w / give('d', nullptr) );
     double deltap = this->computeWaterVaporPerm(T);
     double dpsat_dT = computeSatVaporPressureDerivative(T);
 
@@ -542,7 +394,7 @@ HeMoKunzelMaterial :: perm_hh(double h, double T) const
 bool
 HeMoKunzelMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
 {
-    if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
+    if ( mode == Conductivity_ww || mode == Conductivity_hh || mode == Conductivity_hw || mode == Conductivity_wh ) {
         return false;
     } else {
         OOFEM_ERROR( "isCharacteristicMtrxSymmetric : unknown mode (%s)", __MatResponseModeToString(mode) );
@@ -552,44 +404,21 @@ HeMoKunzelMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
 }
 
 int
-HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime)
+HeMoKunzelMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 // IST_Humidity overriden to use inverse_sorption_isotherm
 {
+    double humidity = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) )->giveHumidity();
     if ( type == IST_Humidity ) {
         answer.resize(1);
-        answer.at(1) = giveHumidity(gp, VM_Velocity); // VM_Previous = equilibrated value of humidity
+        answer.at(1) = humidity;
         return 1;
     } else if ( type == IST_MoistureContent ) {
-        double humidity = giveHumidity(gp, VM_Velocity);
         answer.resize(1);
         answer.at(1) = giveMoistureContent(humidity);
         return 1;
     } else {
-        return TransportMaterial :: giveIPValue(answer, gp, type, atTime);
+        return TransportMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
-double
-HeMoKunzelMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
-{
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray &tempState = ms->giveTempField();
-    if ( tempState.giveSize() < 2 ) {
-        OOFEM_ERROR("Undefined moisture status");
-    }
-
-    const FloatArray &state = ms->giveField();
-
-    if ( mode == VM_Total ) {
-        return tempState.at(2);
-    } else if ( mode == VM_Incremental ) {
-        return tempState.at(2) - state.at(2);
-    } else if ( mode == VM_Velocity ) { // VM_Previous
-        return state.at(2);
-    } else {
-        OOFEM_ERROR("Undefined moisture mode");
-    }
-
-    return 1.;
-}
 } // end namespace oofem

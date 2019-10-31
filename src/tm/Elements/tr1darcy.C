@@ -35,6 +35,8 @@
 
 #include "tm/Elements/tr1darcy.h"
 #include "fei2dtrlin.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -46,6 +48,8 @@
 #include "crosssection.h"
 #include "classfactory.h"
 
+#include "iostream"
+
 namespace oofem {
 REGISTER_Element(Tr1Darcy);
 
@@ -55,9 +59,6 @@ Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
 {
     numberOfDofMans = 3;
 }
-
-Tr1Darcy :: ~Tr1Darcy()
-{ }
 
 IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 {
@@ -82,27 +83,22 @@ void Tr1Darcy :: computeGaussPoints()
 
 void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep)
 {
-    /*
-     * Return Ke = integrate(B^T K B)
-     */
+    auto mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    FloatMatrix B, BT, K, KB;
+    FloatMatrixF<3,3> Ke;
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
+        // auto [detJ, B] = evaldNdx(lcoords, FEIElementGeometryWrapper(this));
+        auto x = this->interpolation_lin.evaldNdx(FEIElementGeometryWrapper(this));
+        auto detJ = x.first;
+        auto B = x.second;
 
-    TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
-
-    answer.clear();
-
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
-        ///@todo Should we make it return the transpose instead?
-        double detJ = fabs( this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) ) );
-
-        mat->giveCharacteristicMatrix(K, mode, gp, tStep);
-
-        B.beTranspositionOf(BT);
-        KB.beProductOf(K, B);
-        answer.plusProductUnsym( B, KB, detJ * gp->giveWeight() ); // Symmetric part is just a single value, not worth it.
+        auto D = mat->computeTangent2D(mode, gp, tStep);
+        Ke += detJ * gp->giveWeight() * Tdot(B, dot(D, B));
+        std::cout << "D = " << D << std::endl;
+        std::cout << "B = " << B << std::endl;
     }
+    std::cout << "Ke = " << Ke << std::endl;
+    answer = Ke;
 }
 
 void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep)
@@ -118,32 +114,37 @@ void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
 
 void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    FloatArray w, a, gradP, P(1), n;
-    FloatMatrix B, BT;
+    auto mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
+    FloatArray a_tmp;
+    this->computeVectorOf(VM_Total, tStep, a_tmp);
+    FloatArrayF<3> a = a_tmp;
 
-    this->computeVectorOf(VM_Total, tStep, a);
+    FloatArrayF<3> fe;
+    for ( auto &gp: *integrationRulesArray [ 0 ] ) {
+        const FloatArrayF<2> lcoords = gp->giveNaturalCoordinates();
 
-    answer.resize(3);
-    answer.zero();
+        // auto [detJ, B] = evaldNdx(lcoords, FEIElementGeometryWrapper(this));
+        auto x = this->interpolation_lin.evaldNdx(FEIElementGeometryWrapper(this));
+        auto detJ = x.first;
+        auto B = x.second;
+        auto n = this->interpolation_lin.evalN(lcoords);
 
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        auto p = dot(n, a);
+        auto gradp = dot(B, a);
+        auto w = mat->computeFlux2D(gradp, p, gp, tStep);
 
-        double detJ = fabs( this->interpolation_lin.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
-        this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-        B.beTranspositionOf(BT);
-        P.at(1) = n.dotProduct(a); // Evaluates the field at this point.
-
-        gradP.beProductOf(B, a);
-
-        mat->giveFluxVector(w, gp, gradP, P, tStep);
-
-        answer.plusProduct(B, w, -gp->giveWeight() * detJ);
+        fe += -gp->giveWeight() * detJ * Tdot(B, w);
+        std::cout << "f_B = " << B << std::endl;
+        std::cout << "n = " << B << std::endl;
+        std::cout << "p = " << p << std::endl;
+        std::cout << "grad = " << gradp << std::endl;
+        std::cout << "w = " << p << std::endl;
     }
+    std::cout << "fe = " << fe << std::endl;
+    answer = fe;
 }
+
 
 void Tr1Darcy :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
@@ -155,17 +156,12 @@ void Tr1Darcy :: computeExternalForcesVector(FloatArray &answer, TimeStep *tStep
     answer.zero();
 
     // Compute characteristic vector for Neumann boundary conditions.
-    int load_number, load_id;
-    Load *load;
-    bcGeomType ltype;
-
     int nLoads = boundaryLoadArray.giveSize() / 2;
-
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition ....
-        load_number = boundaryLoadArray.at(2 * i - 1);
-        load_id = boundaryLoadArray.at(2 * i);
-        load = domain->giveLoad(load_number);
-        ltype = load->giveBCGeoType();
+        int load_number = boundaryLoadArray.at(2 * i - 1);
+        int load_id = boundaryLoadArray.at(2 * i);
+        auto load = domain->giveLoad(load_number);
+        auto ltype = load->giveBCGeoType();
 
         if ( ltype == EdgeLoadBGT ) {
             this->computeEdgeBCSubVectorAt(vec, load, load_id, tStep, mode, 0);
@@ -188,21 +184,18 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) {                 // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad;
-        boundaryLoad = static_cast< BoundaryLoad * >(load);
+        auto boundaryLoad = static_cast< BoundaryLoad * >(load);
 
         int numberOfEdgeIPs;
         numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        FloatArray N, loadValue, reducedAnswer;
-        reducedAnswer.resize(3);
-        reducedAnswer.zero();
+        FloatArray N, loadValue, reducedAnswer(3);
         IntArray mask;
 
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
-        for ( GaussPoint *gp: iRule ) {
+        for ( auto &gp: iRule ) {
             const FloatArray &lcoords = gp->giveNaturalCoordinates();
             this->interpolation_lin.edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
@@ -238,9 +231,6 @@ double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep)
 {
-    /*
-     * Compute characteristic matrix for this element. The only option is the stiffness matrix...
-     */
     if ( mtrx == ConductivityMatrix || mtrx == TangentStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, TangentStiffness, tStep);
     } else {
@@ -257,10 +247,9 @@ void
 Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
 {
-    CrossSection *cs = this->giveCrossSection();
     ///@todo Write support function for getting the closest gp given local c.s. and use that here
-    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    cs->giveIPValue(answer, gp, type, tStep);
+    auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    this->giveCrossSection()->giveIPValue(answer, gp, type, tStep);
 }
 
 Interface *
@@ -270,7 +259,7 @@ Tr1Darcy :: giveInterface(InterfaceType interface)
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 int

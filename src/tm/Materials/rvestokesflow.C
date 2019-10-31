@@ -46,6 +46,8 @@
 #include <cstring>
 #include <sstream>
 
+#ifdef __FM_MODULE
+
 namespace oofem {
 REGISTER_Material(RVEStokesFlow);
 
@@ -139,29 +141,24 @@ IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 int
 RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    RVEStokesFlowMaterialStatus *thisMaterialStatus;
-    thisMaterialStatus = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
     answer.clear();
 
     switch ( type ) {
     case IST_Velocity:
-        answer.copySubVector(thisMaterialStatus->giveFlux(), 1);
+        answer = status->giveFlux();
         return 1;
     case IST_PressureGradient:
-        answer.copySubVector(thisMaterialStatus->giveGradient(), 1);
+        answer = status->giveGradient();
         return 1;
     case IST_TangentNorm:
         answer.resize(1);
-        answer.at(1) = thisMaterialStatus->giveTangentMatrix().computeFrobeniusNorm();
+        answer.at(1) = frobeniusNorm(status->giveTangentMatrix());
         return 1;
     case IST_Tangent:
     {
-        const FloatMatrix &temp = thisMaterialStatus->giveTangentMatrix();
-        answer.resize(4);
-        answer.at(1) = temp.at(1, 1);
-        answer.at(2) = temp.at(1, 2);
-        answer.at(3) = temp.at(2, 1);
-        answer.at(4) = temp.at(2, 2);
+        const auto &temp = status->giveTangentMatrix();
+        answer = {temp(0,0), temp(0,1), temp(0,2), temp(1,0), temp(1,1), temp(1,2), temp(2,0), temp(2,1), temp(2,2)};
         return 1;
     }
     default:
@@ -171,53 +168,59 @@ RVEStokesFlow :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
     return 0;
 }
 
-void
-RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const
+
+FloatArrayF<3>
+RVEStokesFlow :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u\n", 
                     gp->giveElement()->giveGlobalNumber(), gp->giveNumber());
 
-    RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
-    StokesFlowVelocityHomogenization *rveE = status->giveRVE();
+    auto status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
+    auto rveE = status->giveRVE();
 
-    OOFEM_LOG_DEBUG( "Solve RVE problem for macroscale pressure gradient gradP=[%f, %f, %f]\n ",
-                     grad.at(1), grad.at(2), grad.giveSize() == 3 ? grad.at(3) : 0. );
+    OOFEM_LOG_DEBUG( "Solve RVE problem for macroscale pressure gradient gradP=[%f, %f, %f]\n ", grad[0], grad[1], grad[2] );
 
     // Compute seepage velocity
     rveE->applyPressureGradient(grad);
     status->setTimeStep(tStep);
     rveE->solveYourselfAt(rveE->giveCurrentStep());
+    FloatArray answer;
     rveE->computeSeepage(answer, tStep);
+    answer.resizeWithValues(3);
 
     OOFEM_LOG_DEBUG( "Pressure gradient gradP=[%f %f] yields velocity vector [%f %f]\n", grad.at(1), grad.at(2), answer.at(1), answer.at(2) );
-
 
     status->setTempGradient(grad);
     status->setTempFlux(answer);
     status->oldTangent = true;
 
     OOFEM_LOG_DEBUG("****** Exit giveFluxVector **************************************** \n");
+    return answer;
 }
 
 
-void
-RVEStokesFlow :: giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) const
+FloatMatrixF<3,3>
+RVEStokesFlow :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_LOG_DEBUG("\n****** Enter giveDeviatoricStiffnessMatrix **********************\n");
 
-    RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
 
     if ( status->oldTangent ) {
         // Compute tangent
+        FloatMatrix answer;
         status->giveRVE()->computeTangent(answer, tStep);
+        answer.resizeWithData(3, 3);
         status->letTempTangentMatrixBe(answer);
         status->oldTangent = false;
+        return answer;
     } else {
-        answer = status->giveTempTangentMatrix();
+        return status->giveTempTangentMatrix();
     }
 
     OOFEM_LOG_DEBUG("****** Exit giveDeviatoricStiffnessMatrix **************************************** \n");
 }
+
 
 MaterialStatus *
 RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
@@ -230,3 +233,4 @@ RVEStokesFlow :: CreateStatus(GaussPoint *gp) const
 }
 
 }
+#endif // ifdef __FM_MODULE

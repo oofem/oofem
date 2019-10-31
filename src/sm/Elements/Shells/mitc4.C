@@ -1089,13 +1089,13 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
             auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
             double thickness = this->giveCrossSection()->give(CS_Thickness, gp->giveGlobalCoordinates(), this, false);
             double J = thickness / 2.0;
-            double z, w;
+            double z;
             if (  type == IST_ShellMomentTensor ) {
                 z = gp->giveNaturalCoordinates().at(3) * ( thickness / 2 );
-            } else if (  type == IST_ShellForceTensor ) {
+            } else /*if (  type == IST_ShellForceTensor )*/ {
                 z = 1;
             }
-            w = gp->giveWeight() * J * z;
+            double w = gp->giveWeight() * J * z;
 
             FloatArray localStress, localStrain;
             this->computeStrainVector(localStrain, gp, tStep);

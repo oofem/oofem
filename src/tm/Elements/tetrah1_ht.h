@@ -55,7 +55,6 @@ protected:
 
 public:
     Tetrah1_ht(int n, Domain * d);
-    virtual ~Tetrah1_ht();
 
     FEInterpolation *giveInterpolation() const override;
 

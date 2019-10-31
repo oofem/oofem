@@ -37,6 +37,7 @@
 
 #include "material.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "floatmatrix.h"
 #include "matconst.h"
 #include "matstatus.h"
@@ -53,16 +54,15 @@ namespace oofem {
 class TransportMaterialStatus : public MaterialStatus
 {
 protected:
-    FloatArray temp_field; ///< Vector containing the last used field.
-    FloatArray temp_gradient; ///< Vector containing the last used gradient.
-    FloatArray temp_flux; ///< Vector containing the last computed flux.
+    double field = 0.; ///< General field (temperature, concentration, etc.).
+    FloatArrayF<3> gradient; ///< General gradient.
+    FloatArrayF<3> flux; ///< General flux (energy flux, mass flow, etc.)
 
-    FloatArray field; ///< Vector containing the last equilibrated field. The physical meaning corresponds to temperature, concentration etc.
-    FloatArray gradient; ///< Vector containing the last equilibrated gradient. It is the spatial gradient of the field.
-    FloatArray flux; ///< Vector containing the last equilibrated flux. The physical meaning corresponds to energy flux, mass flow, etc.
+    double temp_field = 0.; ///< Temp. Primary field.
+    FloatArrayF<3> temp_gradient; ///< Temp. Gradient
+    FloatArrayF<3> temp_flux; ///< Vector containing the last computed flux.
 
-    /// A scalar containing maturity (integration of temperature over time)
-    double maturity = 0.;
+    double maturity = 0.; ///< A scalar containing maturity (integration of temperature over time)
 
 public:
     TransportMaterialStatus(GaussPoint * g);
@@ -75,34 +75,109 @@ public:
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    ///@todo REMOVE THESE:
-    /// Assigns temporary state vector from a given vector v.
-    void letTempStateVectorBe(FloatArray v) { temp_field = std :: move(v); }
+    const char *giveClassName() const override { return "TransportMaterialStatus"; }
+
+    /// Set gradient.
+    void setTempGradient(const FloatArrayF<3> &newGradient) { temp_gradient = newGradient; }
+    /// Set field.
+    void setTempField(double newField) { temp_field = newField; }
+    /// Set flux.
+    void setTempFlux(const FloatArrayF<3> &newFlux) { temp_flux = newFlux; }
+
+    /// Return last gradient.
+    const FloatArrayF<3> &giveGradient() const { return gradient; }
+    /// Return last field.
+    double giveField() const { return field; }
+    /// Returns last flux.
+    const FloatArrayF<3> &giveFlux() const { return flux; }
+
+    /// Return last gradient.
+    const FloatArrayF<3> &giveTempGradient() const { return temp_gradient; }
+    /// Return last field.
+    double giveTempField() const { return temp_field; }
+    /// Returns last flux.
+    const FloatArrayF<3> &giveTempFlux() const { return temp_flux; }
+    /// Returns maturity.
+    double giveMaturity() const { return maturity; }
+};
+
+/**
+ * The temperature is stored im the general "field" value, and this adds the additional humidity field.
+ */
+class HeMoTransportMaterialStatus : public MaterialStatus
+{
+protected:
+    double temperature = 0.; ///< Temperature.
+    FloatArrayF<3> t_gradient; ///< Temperature gradient.
+    FloatArrayF<3> t_flux; ///< Heat flux.
+
+    double humidity = 0.; ///< Humidity.
+    FloatArrayF<3> h_gradient; ///< Humidity gradient.
+    FloatArrayF<3> h_flux; ///< Humidity flux.
+
+    double temp_temperature = 0.; ///< Temp temperature.
+    FloatArrayF<3> temp_t_gradient; ///< Temp temperature gradient.
+    FloatArrayF<3> temp_t_flux; ///< Temp heat flux.
+
+    double temp_humidity = 0.; ///< Temp humidity.
+    FloatArrayF<3> temp_h_gradient; ///< Temp humidity gradient.
+    FloatArrayF<3> temp_h_flux; ///< Temp humidity flux.
+
+public:
+    HeMoTransportMaterialStatus(GaussPoint * g);
+
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
+
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
+
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     const char *giveClassName() const override { return "TransportMaterialStatus"; }
 
     /// Set gradient.
-    void setTempGradient(FloatArray grad);
+    void setTempTemperatureGradient(const FloatArrayF<3> &newGradient) { temp_t_gradient = newGradient; }
     /// Set field.
-    void setTempField(FloatArray newField);
+    void setTempTemperature(double newField) { temp_temperature = newField; }
     /// Set flux.
-    void setTempFlux(FloatArray w);
+    void setTempHeatFlux(const FloatArrayF<3> &newFlux) { temp_t_flux = newFlux; }
 
     /// Return last gradient.
-    const FloatArray &giveGradient() const { return gradient; }
+    const FloatArrayF<3> &giveTemperatureGradient() const { return t_gradient; }
     /// Return last field.
-    const FloatArray &giveField() const { return field; }
+    double giveTemperature() const { return temperature; }
     /// Returns last flux.
-    const FloatArray &giveFlux() const { return flux; }
+    const FloatArrayF<3> &giveHeatFlux() const { return t_flux; }
 
     /// Return last gradient.
-    const FloatArray &giveTempGradient() const { return temp_gradient; }
+    const FloatArrayF<3> &giveTempTemperatureGradient() const { return temp_t_gradient; }
     /// Return last field.
-    const FloatArray &giveTempField() const { return temp_field; }
+    double giveTempTemperature() const { return temp_temperature; }
     /// Returns last flux.
-    const FloatArray &giveTempFlux() const { return temp_flux; }
-    /// Returns maturity.
-    double giveMaturity() const { return maturity; }
+    const FloatArrayF<3> &giveTempHeatFlux() const { return temp_t_flux; }
+    
+
+    /// Set gradient.
+    void setTempHumidityGradient(const FloatArrayF<3> &newGradient) { temp_h_gradient = newGradient; }
+    /// Set field.
+    void setTempHumidity(double newField) { temp_humidity = newField; }
+    /// Set flux.
+    void setTempHumidityFlux(const FloatArrayF<3> &newFlux) { temp_h_flux = newFlux; }
+
+    /// Return last gradient.
+    const FloatArrayF<3> &giveHumidityGradient() const { return h_gradient; }
+    /// Return last field.
+    double giveHumidity() const { return humidity; }
+    /// Returns last flux.
+    const FloatArrayF<3> &giveHumidityFlux() const { return h_flux; }
+
+    /// Return last gradient.
+    const FloatArrayF<3> &giveTempHumidityGradient() const { return temp_h_gradient; }
+    /// Return last field.
+    double giveTempHumidity() const { return temp_humidity; }
+    /// Returns last flux.
+    const FloatArrayF<3> &giveTempHumidityFlux() const { return temp_h_flux; }
 };
 
 
@@ -133,7 +208,19 @@ public:
      * @param field The value of the field itself.
      * @param tStep Active time step.
      */
-    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const = 0;
+    virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) const;
+    virtual FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const;
+    FloatArrayF<2> computeFlux2D(const FloatArrayF<2> &grad, double field, GaussPoint *gp, TimeStep *tStep) const;
+    FloatArrayF<1> computeFlux1D(const FloatArrayF<1> &grad, double field, GaussPoint *gp, TimeStep *tStep) const;
+
+    // HeMo:
+    virtual std::pair<FloatArrayF<3>, FloatArrayF<3>> computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const;
+    std::pair<FloatArrayF<2>, FloatArrayF<2>> computeHeMoFlux2D(const FloatArrayF<2> &grad_t, const FloatArrayF<2> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const;
+    std::pair<FloatArrayF<1>, FloatArrayF<1>> computeHeMoFlux1D(const FloatArrayF<1> &grad_t, const FloatArrayF<1> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const;
+
+    //virtual FloatMatrixF<3,3> computeHeMoTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
+    //virtual FloatMatrixF<2,2> computeHeMoTangent2D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
+    //virtual FloatMatrixF<1,1> computeHeMoTangent1D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Computes characteristic matrix of receiver in given integration point.
@@ -147,7 +234,11 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer,
                                           MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *tStep) const = 0;
+                                          TimeStep *tStep) const;
+
+    virtual FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    FloatMatrixF<2,2> computeTangent2D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF<1,1> computeTangent1D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Computes the characteristic value of receiver in given integration point, respecting its history.

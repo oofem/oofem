@@ -218,15 +218,14 @@ tet21ghostsolid :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseM
 void
 tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
+#ifdef __FM_MODULE
 #if USENUMTAN == 1
     computeNumericStiffnessMatrix(answer, rMode, tStep);
     return;
 
 #endif
 
-#ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-#endif
 
     FloatMatrix afDu, afDw, bfuDu, bfuDp, bfpDu, bfpDw, cfwDu;
     FloatMatrix Kf, G, Kx, Ed, EdB, dNx;
@@ -280,13 +279,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             dNv.at(k * 3 + 3) = dNx.at(k + 1, 3);
         }
 
-#ifdef __FM_MODULE
         gp->setMaterialMode(_3dFlow);
         Ed = fluidMaterial->computeTangent3D(TangentStiffness, gp, tStep);
         gp->setMaterialMode(_3dMat);
-#else
-        OOFEM_ERROR("Fluid module missing\n");
-#endif
 
         if ( nlGeometry == 0 ) {
             FloatMatrix B;
@@ -595,6 +590,11 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
         }
     }
 #endif
+#else // ifdef __FM_MODULE
+        OOFEM_ERROR("Fluid module missing\n");
+#endif// ifdef __FM_MODULE
+
+
     // *******************
     //computeNumericStiffnessMatrix(answer, rMode, tStep);
 }

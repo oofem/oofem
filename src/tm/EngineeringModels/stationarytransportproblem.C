@@ -50,7 +50,7 @@
 namespace oofem {
 REGISTER_EngngModel(StationaryTransportProblem);
 
-StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = nullptr) : EngngModel(i, _master),
     nMethod(nullptr)
 {
     ndomains = 1;

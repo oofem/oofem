@@ -46,6 +46,7 @@
 #include "contextioresulttype.h"
 #include "timer.h"
 #include "octreelocalizert.h"
+#include "octreelocalizertutil.h"
 #include "intarray.h"
 #include "edge2d.h"
 
