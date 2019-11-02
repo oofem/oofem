@@ -60,8 +60,6 @@ qcNode :: qcNode(int n, Domain *aDomain) : Node(n, aDomain)
 
 IRResultType qcNode :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     Node :: initializeFrom(ir);
     this->masterElement = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_qcNode_masterElement);

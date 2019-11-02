@@ -47,8 +47,6 @@ FluidCrossSection :: FluidCrossSection(int n, Domain *d) : CrossSection(n, d), m
 IRResultType
 FluidCrossSection :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->matNumber, _IFT_FluidCrossSection_material);
 
     return CrossSection :: initializeFrom(ir);

@@ -60,8 +60,6 @@ SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
 IRResultType
 SUPGElement2 :: initializeFrom(InputRecord *ir)
 {
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
-
     return SUPGElement :: initializeFrom(ir);
 }
 

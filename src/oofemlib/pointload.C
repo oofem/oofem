@@ -56,8 +56,6 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArra
 IRResultType
 PointLoad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int dummy;
     IR_GIVE_FIELD(ir, dummy, "ndofs");
     IR_GIVE_FIELD(ir, coords, _IFT_PointLoad_coords);

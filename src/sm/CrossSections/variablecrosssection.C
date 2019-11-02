@@ -51,12 +51,7 @@ REGISTER_CrossSection(VariableCrossSection);
 
 IRResultType
 VariableCrossSection :: initializeFrom(InputRecord *ir)
-//
-// instanciates receiver from input record
-//
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thicknessExpr, _IFT_SimpleCrossSection_thick);
     }

@@ -53,8 +53,6 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 
 IRResultType HangingNode :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     this->masterElement = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_HangingNode_masterElement);
     this->masterRegion = 0;

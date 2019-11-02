@@ -83,8 +83,6 @@ EnrichmentItem :: ~EnrichmentItem()
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     mEnrFrontIndex = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mEnrFrontIndex, _IFT_EnrichmentItem_front);
 

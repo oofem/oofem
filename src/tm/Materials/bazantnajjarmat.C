@@ -43,8 +43,6 @@ REGISTER_Material(BazantNajjarMoistureTransferMaterial);
 IRResultType
 BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, C1, _IFT_BazantNajjarMoistureTransferMaterial_c1);
     IR_GIVE_FIELD(ir, n, _IFT_BazantNajjarMoistureTransferMaterial_n);
     IR_GIVE_FIELD(ir, alpha0, _IFT_BazantNajjarMoistureTransferMaterial_alpha0);

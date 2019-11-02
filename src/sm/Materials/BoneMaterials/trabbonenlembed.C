@@ -147,17 +147,8 @@ TrabBoneNLEmbed :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
-
-    result = TrabBoneEmbed :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    TrabBoneEmbed :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, R, _IFT_TrabBoneNLEmbed_r);
     if ( R < 0.0 ) {

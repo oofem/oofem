@@ -78,7 +78,7 @@ TR1_2D_SUPG2_AXI :: TR1_2D_SUPG2_AXI(int n, Domain *aDomain) :
 IRResultType
 TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;               // Required by IR_GIVE_FIELD macro
+    SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
@@ -96,10 +96,6 @@ TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], _IFT_Tr1SUPG2_mat1);
     this->material = this->mat [ 0 ];
 
-    result = SUPGElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
     this->initGeometry();
     return IRRT_OK;
 }

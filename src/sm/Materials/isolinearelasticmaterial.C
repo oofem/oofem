@@ -64,8 +64,6 @@ IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *
 IRResultType
 IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
     IR_GIVE_FIELD(ir, a, _IFT_IsotropicLinearElasticMaterial_talpha);

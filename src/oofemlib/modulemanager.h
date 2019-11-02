@@ -93,18 +93,13 @@ public:
      */
     virtual int instanciateYourself(DataReader &dr, InputRecord *ir)
     {
-        IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
         std :: string name;
 
         // read modules
         moduleList.reserve(numberOfModules);
         for ( int i = 0; i < numberOfModules; i++ ) {
             InputRecord *mir = dr.giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
-            result = mir->giveRecordKeywordField(name);
-            if ( result != IRRT_OK ) {
-                IR_IOERR("", mir, result);
-            }
+            mir->giveRecordKeywordField(name);
 
             // read type of module
             std :: unique_ptr< M > module = this->CreateModule(name.c_str(), i, emodel);

@@ -351,17 +351,8 @@ TrabBoneNL3D :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNL3D :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
-
-    result = TrabBone3D :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    TrabBone3D :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, R, _IFT_TrabBoneNL3D_r);
     if ( R < 0.0 ) {

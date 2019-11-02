@@ -57,19 +57,12 @@ class ScalarFunction;
 typedef const char *InputFieldType;
 
 /**
- * Macro simplifying the error reporting.
- */
-#define IR_IOERR(__keyword, __ir, __result) \
-    __ir->report_error(this->giveClassName(), __func__, __keyword, __result, __FILE__, __LINE__);
-
-/**
  * Macro facilitating the use of input record reading methods.
  * uses the given input record (__ir parameter) and reads the compulsory
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_FIELD(__ir, __value, __id) result = __ir->giveField(__value, __id); \
-    if ( result != IRRT_OK ) { IR_IOERR(__id, __ir, result); }
+#define IR_GIVE_FIELD(__ir, __value, __id) __ir->giveField(__value, __id);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -77,8 +70,7 @@ typedef const char *InputFieldType;
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id) result = __ir->giveOptionalField(__value, __id); \
-    if ( result != IRRT_OK ) { IR_IOERR(__id, __ir, result); }
+#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id) __ir->giveOptionalField(__value, __id);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -86,8 +78,7 @@ typedef const char *InputFieldType;
  * and its number (__value param). Includes also the error reporting.
  */
 #define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value) \
-    result = __ir->giveRecordKeywordField(__name, __value); \
-    if ( result != IRRT_OK ) { IR_IOERR("RecordIDField", __ir, result); }
+    __ir->giveRecordKeywordField(__name, __value);
 
 
 
@@ -103,14 +94,8 @@ typedef const char *InputFieldType;
 class OOFEM_EXPORT InputRecord
 {
 public:
-    /// Constructor. Creates an empty input record.
-    InputRecord();
-    /// Copy constructor
-    InputRecord(const InputRecord &);
     /// Destructor
-    virtual ~InputRecord() { }
-    /// Assignment operator.
-    InputRecord &operator = ( const InputRecord & );
+    virtual ~InputRecord() = default;
 
     /** Creates a newly allocated copy of the receiver */
     virtual std::unique_ptr<InputRecord> clone() = 0;
@@ -187,14 +172,8 @@ public:
     /// Returns true if record contains field identified by idString keyword.
     virtual bool hasField(InputFieldType id) = 0;
 
-    /// Returns error string corresponding to given value of IRResultType type.
-    const char *strerror(IRResultType);
     /// Print input record.
     virtual void printYourself() = 0;
-
-    /// Prints the error message.
-    virtual void report_error(const char *_class, const char *proc, InputFieldType id,
-                              IRResultType result, const char *file, int line) = 0;
 
     /// Terminates the current record session and if the flag is true, warning is printed for unscanned tokens.
     virtual void finish(bool wrn = true) = 0;
@@ -231,6 +210,18 @@ public:
     BadFormatInputException(const InputRecord &ir, std::string keyword, int number);
     const char* what() const noexcept override;
 };
+
+
+class ValueInputException : public InputException
+{
+protected:
+    std::string msg;
+
+public:
+    ValueInputException(const InputRecord &ir, std::string keyword, const std::string &reason);
+    const char* what() const noexcept override;
+};
+
 
 } // end namespace oofem
 #endif // inputrecord_h

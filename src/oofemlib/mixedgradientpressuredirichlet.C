@@ -441,8 +441,6 @@ bool MixedGradientPressureDirichlet :: isDevDof(Dof *dof)
 
 IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     this->centerCoord.resize( domain->giveNumberOfSpatialDimensions() );
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_MixedGradientPressure_centerCoords)

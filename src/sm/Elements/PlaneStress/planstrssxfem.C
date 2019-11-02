@@ -298,15 +298,9 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 IRResultType
 PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
-    result = PlaneStress2d :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = XfemStructuralElementInterface :: initializeCZFrom(ir);
-    return result;
+    PlaneStress2d :: initializeFrom(ir);
+    XfemStructuralElementInterface :: initializeCZFrom(ir);
+    return IRRT_OK;
 }
 
 MaterialMode PlaneStress2dXfem :: giveMaterialMode()

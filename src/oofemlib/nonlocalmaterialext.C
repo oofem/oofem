@@ -739,8 +739,6 @@ NonlocalMaterialExtensionInterface :: evaluateSupportRadius()
 IRResultType
 NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     if ( ir->hasField(_IFT_NonlocalMaterialExtensionInterface_regionmap) ) {
         IR_GIVE_FIELD(ir, regionMap, _IFT_NonlocalMaterialExtensionInterface_regionmap);
         if ( regionMap.giveSize() != this->giveDomain()->giveNumberOfRegions() ) {

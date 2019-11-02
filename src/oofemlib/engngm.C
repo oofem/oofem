@@ -212,34 +212,38 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const cha
 
     simulationDescription = std::string(desc);
 
-    // instanciate receiver
-    this->initializeFrom(ir);
-    exportModuleManager.initializeFrom(ir);
-    initModuleManager.initializeFrom(ir);
+    try {
+        // instanciate receiver
+        this->initializeFrom(ir);
+        exportModuleManager.initializeFrom(ir);
+        initModuleManager.initializeFrom(ir);
 
-    if ( this->nMetaSteps == 0 ) {
-        inputReaderFinish = false;
-        this->instanciateDefaultMetaStep(ir);
-    } else {
-        this->instanciateMetaSteps(dr);
-    }
+        if ( this->nMetaSteps == 0 ) {
+            inputReaderFinish = false;
+            this->instanciateDefaultMetaStep(ir);
+        } else {
+            this->instanciateMetaSteps(dr);
+        }
 
-    // instanciate initialization module manager
-    initModuleManager.instanciateYourself(dr, ir);
-    // instanciate export module manager
-    exportModuleManager.instanciateYourself(dr, ir);
-    this->instanciateDomains(dr);
+        // instanciate initialization module manager
+        initModuleManager.instanciateYourself(dr, ir);
+        // instanciate export module manager
+        exportModuleManager.instanciateYourself(dr, ir);
+        this->instanciateDomains(dr);
 
-    exportModuleManager.initialize();
+        exportModuleManager.initialize();
 
-    // Milan ??????????????????
-    //GPImportModule* gim = new GPImportModule(this);
-    //gim -> getInput();
-    // Milan ??????????????????
+        // Milan ??????????????????
+        //GPImportModule* gim = new GPImportModule(this);
+        //gim -> getInput();
+        // Milan ??????????????????
 
-    // check emodel input record if no default metastep, since all has been read
-    if ( inputReaderFinish ) {
-        ir->finish();
+        // check emodel input record if no default metastep, since all has been read
+        if ( inputReaderFinish ) {
+            ir->finish();
+        }
+    } catch ( InputException &e ) {
+        OOFEM_ERROR("Error initializing from user input: %s\n", e.what());
     }
 
     return 1;
@@ -249,8 +253,6 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const cha
 IRResultType
 EngngModel :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
     if ( numberOfSteps <= 0 ) {
         OOFEM_ERROR("nsteps not specified, bad format");

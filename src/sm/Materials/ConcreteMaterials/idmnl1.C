@@ -372,17 +372,8 @@ IDNLMaterial :: giveInterface(InterfaceType type)
 IRResultType
 IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
+    IsotropicDamageMaterial1 :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
     return IRRT_OK;
 }
 

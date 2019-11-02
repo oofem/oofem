@@ -86,8 +86,6 @@ QClinearStatic :: ~QClinearStatic()
 IRResultType
 QClinearStatic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     LinearStatic :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, qcApproach, _IFT_QuasiContinuum_approach);
@@ -293,8 +291,6 @@ void QClinearStatic :: solveYourselfAt(TimeStep *tStep)
 IRResultType
 QClinearStatic :: initializeFullSolvedDomain(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainNodes, _IFT_FullSolvedDomain_nodes);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainElements, _IFT_FullSolvedDomain_elements);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainRadius, _IFT_FullSolvedDomain_radius);

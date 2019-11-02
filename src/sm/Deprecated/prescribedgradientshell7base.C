@@ -279,8 +279,6 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
 
 IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGenStrainShell7_gradient);
 
     this->centerCoord.resize( this->gradient.giveNumberOfColumns() );

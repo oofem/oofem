@@ -58,8 +58,6 @@ LargeStrainMasterMaterial :: LargeStrainMasterMaterial(int n, Domain *d) : Struc
 IRResultType
 LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, slaveMat, _IFT_LargeStrainMasterMaterial_slaveMat); // number of slave material
     IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_LargeStrainMasterMaterial_m); // type of Set-Hill strain tensor
 

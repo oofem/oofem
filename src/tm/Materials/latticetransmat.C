@@ -49,8 +49,6 @@ REGISTER_Material(LatticeTransportMaterial);
 IRResultType
 LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->viscosity, _IFT_LatticeTransportMaterial_vis);
 
     IR_GIVE_FIELD(ir, this->permeability, _IFT_LatticeTransportMaterial_k);

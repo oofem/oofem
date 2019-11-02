@@ -963,8 +963,6 @@ TrabBone3D :: constructFabricTransformationMatrix(FloatMatrix &answer)
 IRResultType
 TrabBone3D :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // Mandatory parameters
     IR_GIVE_FIELD(ir, eps0, _IFT_TrabBone3D_eps0);
     IR_GIVE_FIELD(ir, nu0, _IFT_TrabBone3D_nu0);

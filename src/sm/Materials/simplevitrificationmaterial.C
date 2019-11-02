@@ -43,8 +43,6 @@ REGISTER_Material(SimpleVitrificationMaterial);
 
 IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, this->vitrTime, _IFT_SimpleVitrificationMaterial_vitrificationTime);
 
     IR_GIVE_FIELD(ir, this->E, _IFT_SimpleVitrificationMaterial_E);

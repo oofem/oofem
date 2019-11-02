@@ -58,7 +58,6 @@ public:
     IRResultType giveField(std :: list< Range > &answer, InputFieldType id) override { return IRRT_NOTFOUND; }
     IRResultType giveField(ScalarFunction &function, InputFieldType id) override { return IRRT_NOTFOUND; }
     void printYourself() override {}
-    void report_error(const char *_class, const char *proc, InputFieldType id, IRResultType result, const char *file, int line) override {}
     void finish(bool wrn = true) override {}
 };
 
@@ -75,8 +74,9 @@ public:
     IRResultType giveRecordKeywordField(std :: string &answer, int &value) override { answer = "node"; value = recordNumber; return IRRT_OK; }
     IRResultType giveRecordKeywordField(std :: string &answer) override { answer = "node"; return IRRT_OK; }
     IRResultType giveField(FloatArray &answer, InputFieldType id) override {
-        if (std::string(id) == _IFT_Node_coords) { answer = coords; return IRRT_OK; }
-        return IRRT_NOTFOUND;
+        if (std::string(id) == _IFT_Node_coords) answer = coords;
+        else throw MissingKeywordInputException(this*, id, recordNumber);
+        return IRRT_OK;
     }
 
     bool hasField(InputFieldType id) override { return std::string(id) == _IFT_Node_coords; }
@@ -96,8 +96,9 @@ public:
     IRResultType giveRecordKeywordField(std :: string &answer, int &value) override { answer = _IFT_Brick1_ht_Name; value = recordNumber; return IRRT_OK; }
     IRResultType giveRecordKeywordField(std :: string &answer) override { answer = _IFT_Brick1_ht_Name; return IRRT_OK; }
     IRResultType giveField(IntArray &answer, InputFieldType id) override { 
-        if (std::string(id) == _IFT_Element_nodes) { answer = enodes; return IRRT_OK; }
-        return IRRT_NOTFOUND;
+        if (std::string(id) == _IFT_Element_nodes) answer = enodes;
+        else throw MissingKeywordInputException(this*, id, recordNumber);
+        return IRRT_OK;
     }
 
     bool hasField(InputFieldType id) override { return std::string(id) == _IFT_Element_nodes; }
@@ -111,13 +112,15 @@ public:
     virtual ~DeactivatedElementInputRecord() {}
 
     virtual IRResultType giveField(IntArray &answer, InputFieldType id) {
-        if (std::string(id) == _IFT_Element_nodes) { answer = enodes; return IRRT_OK; }
-        return IRRT_NOTFOUND;
+        if (std::string(id) == _IFT_Element_nodes) answer = enodes;
+        else throw MissingKeywordInputException(this*, id, recordNumber);
+        return IRRT_OK;
     }
     virtual IRResultType giveField(int &answer, InputFieldType id) { 
-        if (std::string(id) == _IFT_Element_activityTimeFunction) { answer = 2; return IRRT_OK; }
-        else if (std::string(id) == _IFT_Element_nip) { answer = 0; return IRRT_OK; }
-        return IRRT_NOTFOUND;
+        if (std::string(id) == _IFT_Element_activityTimeFunction) answer = 2;
+        else if (std::string(id) == _IFT_Element_nip) answer = 0;
+        else throw MissingKeywordInputException(this*, id, recordNumber);
+        return IRRT_OK;
     }
     virtual bool hasField(InputFieldType id) { return std::string(id) == _IFT_Element_activityTimeFunction || 
         std::string(id) == _IFT_Element_nip || std::string(id) == _IFT_Element_nodes; }

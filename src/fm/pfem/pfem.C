@@ -215,8 +215,6 @@ PFEM :: forceEquationNumbering(int id)
 IRResultType
 PFEM :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
-
     EngngModel :: initializeFrom(ir);
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);

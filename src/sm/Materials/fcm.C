@@ -1977,17 +1977,8 @@ FCMMaterial :: computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearD
 IRResultType
 FCMMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     this->nAllowedCracks = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, nAllowedCracks, _IFT_FCM_nAllowedCracks);

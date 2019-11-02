@@ -339,8 +339,6 @@ TrabBoneGrad3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep 
 IRResultType
 TrabBoneGrad3D :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, L, _IFT_TrabBoneGrad3D_L);
     if ( L < 0.0 ) {
         L = 0.0;

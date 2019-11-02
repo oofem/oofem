@@ -78,13 +78,7 @@ SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode) const
 IRResultType
 SteelRelaxMat :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->E, _IFT_SteelRelaxMat_E); // Young's modulus
 

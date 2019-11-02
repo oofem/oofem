@@ -176,7 +176,6 @@ Steel1 :: GiveLCPlasticStrainGradient(GaussPoint *gp,
 IRResultType
 Steel1 :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
     IR_GIVE_FIELD(ir, value, _IFT_Steel1_ry);

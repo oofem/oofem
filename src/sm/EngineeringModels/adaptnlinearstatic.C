@@ -88,7 +88,6 @@ AdaptiveNonLinearStatic :: ~AdaptiveNonLinearStatic()
 IRResultType
 AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     int _val;
 
     int meshPackageId = 0;
@@ -101,14 +100,14 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag);
     preMappingLoadBalancingFlag = _val > 0;
 
-    result = NonLinearStatic :: initializeFrom(ir);
+    NonLinearStatic :: initializeFrom(ir);
 
     // check if error estimator initioalized
     if (this->defaultErrEstimator == NULL) {
       OOFEM_ERROR ("AdaptiveNonLinearStatic :: initializeFrom: Error estimator not defined [eetype missing]");
     }
 
-    return result;
+    return IRRT_OK;
 }
 
 void
@@ -762,8 +761,6 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                                                      AdaptiveNonLinearStatic *sourceProblem, int domainIndx,
                                                      TimeStep *tStep)
 {
-    IRResultType result;                           // Required by IR_GIVE_FIELD macro
-
     int mStepNum = tStep->giveMetaStepNumber();
     int hasfixed, mode;
     InputRecord *ir;
@@ -873,8 +870,6 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  *                           AdaptiveNonLinearStatic* sourceProblem, int domainIndx,
  *                           TimeStep* tStep)
  * {
- * IRResultType result;                              // Required by IR_GIVE_FIELD macro
- *
  * int mStepNum = tStep->giveMetaStepNumber() ;
  * int mode;
  * InputRecord* ir;

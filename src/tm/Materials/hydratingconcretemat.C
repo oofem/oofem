@@ -47,11 +47,8 @@ HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTr
 IRResultType
 HydratingConcreteMat :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     // set conductivity k and capacity c
-    result = IsotropicHeatTransferMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    IsotropicHeatTransferMaterial :: initializeFrom(ir);
 
     referenceTemperature = 25.;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_HydratingConcreteMat_referenceTemperature);
@@ -75,8 +72,7 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, DoH1, _IFT_HydratingConcreteMat_DoH1);
         IR_GIVE_OPTIONAL_FIELD(ir, P1, _IFT_HydratingConcreteMat_P1);
     } else {
-        OOFEM_WARNING("Unknown hdyration model type %d", hydrationModelType);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_HydratingConcreteMat_hydrationModelType, "Unknown hdyration model");
     }
 
     IR_GIVE_FIELD(ir, Qpot, _IFT_HydratingConcreteMat_qpot); // [1/s]

@@ -739,7 +739,6 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
 IRResultType
 GradDpElement :: initializeFrom(InputRecord *ir)
 {
-    //IRResultType result;                // Required by IR_GIVE_FIELD macro
     //nlGeo = 0;
 
     return IRRT_OK;

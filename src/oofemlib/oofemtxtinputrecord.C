@@ -48,10 +48,10 @@
 #include <sstream>
 
 namespace oofem {
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), record()
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : tokenizer(), record()
 { }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer(),
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : tokenizer(),
     record(src.record), lineNumber(src.lineNumber)
 {
     tokenizer.tokenizeLine( this->record );
@@ -62,7 +62,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
     }
 }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(int linenumber, std :: string source) : InputRecord(), tokenizer(),
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(int linenumber, std :: string source) : tokenizer(),
     record(std :: move(source)), lineNumber(linenumber)
 {
     tokenizer.tokenizeLine( this->record );
@@ -106,15 +106,14 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
         answer = std :: string( tokenizer.giveToken(1) );
         setReadFlag(1);
         auto ptr = scanInteger(tokenizer.giveToken(2), value);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, "RecordID", lineNumber);
         }
         setReadFlag(2);
-
-        return IRRT_OK;
     } else {
-        return IRRT_BAD_FORMAT;
+        throw BadFormatInputException(*this, "RecordID", lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
@@ -123,11 +122,10 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer)
     if ( tokenizer.giveNumberOfTokens() > 0 ) {
         answer = std :: string( tokenizer.giveToken(1) );
         setReadFlag(1);
-
-        return IRRT_OK;
     } else {
-        return IRRT_BAD_FORMAT;
+        throw BadFormatInputException(*this, "RecordID", lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
@@ -136,16 +134,16 @@ OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType id)
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         auto ptr = scanInteger(tokenizer.giveToken(indx + 1), answer);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
         setReadFlag(indx + 1);
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
@@ -154,36 +152,36 @@ OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         auto ptr = scanDouble(tokenizer.giveToken(indx + 1), answer);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
         setReadFlag(indx + 1);
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
 {
-    int val;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
+        int val;
         auto ptr = scanInteger(tokenizer.giveToken(indx + 1), val);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
         setReadFlag(indx + 1);
         answer = val != 0;
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
@@ -192,7 +190,7 @@ OOFEMTXTInputRecord :: giveField(std :: string &answer, InputFieldType id)
     int indx = 0;
     if ( id ) {
         if ( ( indx = this->giveKeywordIndx(id) ) == 0 ) {
-            return IRRT_NOTFOUND;
+            throw MissingKeywordInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
@@ -205,118 +203,119 @@ OOFEMTXTInputRecord :: giveField(std :: string &answer, InputFieldType id)
     if ( _token ) {
         answer = std :: string( tokenizer.giveToken(indx) );
         setReadFlag(indx);
-        return IRRT_OK;
     } else {
         answer = "";
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
 {
-    int value, size;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
+        int size;
         setReadFlag(indx);
         auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
-        if ( ptr == NULL || *ptr != 0) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         answer.resize(size);
         setReadFlag(indx);
 
         for ( int i = 1; i <= size; i++ ) {
+            int value;
             ptr = scanInteger(tokenizer.giveToken(indx + i), value);
-            if ( ptr == NULL || *ptr != 0 ) {
-                return IRRT_BAD_FORMAT;
+            if ( ptr == nullptr || *ptr != 0 ) {
+                throw BadFormatInputException(*this, id, lineNumber);
             }
 
             answer.at(i) = value;
             setReadFlag(indx + i);
         }
 
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 {
-    double value;
-    int size;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
+        int size;
         setReadFlag(indx);
         auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         answer.resize(size);
         setReadFlag(indx);
 
         for ( int i = 1; i <= size; i++ ) {
+            double value;
             auto ptr = scanDouble(tokenizer.giveToken(indx + i), value);
-            if ( ptr == NULL || *ptr != 0 ) {
-                return IRRT_BAD_FORMAT;
+            if ( ptr == nullptr || *ptr != 0 ) {
+                throw BadFormatInputException(*this, id, lineNumber);
             }
 
             answer.at(i) = value;
             setReadFlag(indx + i);
         }
 
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 {
-    int nrows, ncols;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
+        int nrows, ncols;
         setReadFlag(indx);
 
         auto ptr = scanInteger(tokenizer.giveToken(++indx), nrows);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
         ptr = scanInteger(tokenizer.giveToken(++indx), ncols);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
 
         if ( readMatrix(tokenizer.giveToken(++indx), nrows, ncols, answer) == 0 ) {
-            return IRRT_BAD_FORMAT;
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
 {
-    int size;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
+        int size;
         setReadFlag(indx);
         auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
         answer.reserve(size);
         setReadFlag(indx);
@@ -325,60 +324,57 @@ OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFi
             setReadFlag(indx + i);
         }
 
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 {
-    double value;
-    int size;
-    char key;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
+        int size;
         auto ptr = scanInteger(tokenizer.giveToken(++indx), size);
-        if ( ptr == NULL || *ptr != 0 ) {
-            return IRRT_BAD_FORMAT;
+        if ( ptr == nullptr || *ptr != 0 ) {
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
 
         answer.clear();
         for ( int i = 1; i <= size; i++ ) {
-            key = ( tokenizer.giveToken(++indx) ) [ 0 ];
+            char key = ( tokenizer.giveToken(++indx) ) [ 0 ];
+            double value;
             setReadFlag(indx);
             auto ptr = scanDouble(tokenizer.giveToken(++indx), value);
-            if ( ptr == NULL || *ptr != 0 ) {
-                return IRRT_BAD_FORMAT;
+            if ( ptr == nullptr || *ptr != 0 ) {
+                throw BadFormatInputException(*this, id, lineNumber);
             }
 
             setReadFlag(indx);
             answer.add(key, value);
         }
-
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
 {
-    int li, hi;
-    const char *rec;
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
+        int li, hi;
         setReadFlag(indx);
-        rec = tokenizer.giveToken(++indx);
+        const char *rec = tokenizer.giveToken(++indx);
         if ( * rec != '{' ) {
             OOFEM_WARNING("missing left '{'");
             list.clear();
-            return IRRT_BAD_FORMAT;
+            throw BadFormatInputException(*this, id, lineNumber);
         }
 
         setReadFlag(indx);
@@ -398,13 +394,12 @@ OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
         if ( * rec != '}' ) {
             OOFEM_WARNING("missing end '}'");
             list.clear();
-            return IRRT_BAD_FORMAT;
+            throw BadFormatInputException(*this, id, lineNumber);
         }
-
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 IRResultType
@@ -420,8 +415,8 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
             // reference to function
             int refVal;
             auto ptr = scanInteger(rec + 1, refVal);
-            if ( ptr == NULL || *ptr != 0 ) {
-                return IRRT_BAD_FORMAT;
+            if ( ptr == nullptr || *ptr != 0 ) {
+                throw BadFormatInputException(*this, id, lineNumber);
             }
             setReadFlag(indx);
             answer.setReference(refVal);
@@ -437,18 +432,17 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
         } else {
             double val;
             auto ptr = scanDouble(tokenizer.giveToken(indx), val);
-            if ( ptr == NULL || *ptr != 0 ) {
-                return IRRT_BAD_FORMAT;
+            if ( ptr == nullptr || *ptr != 0 ) {
+                throw BadFormatInputException(*this, id, lineNumber);
             }
 
             setReadFlag(indx);
             answer.setValue(val);
         }
-
-        return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, lineNumber);
     }
+    return IRRT_OK;
 }
 
 bool
@@ -477,9 +471,9 @@ OOFEMTXTInputRecord :: scanInteger(const char *source, int &value)
     //
     char *endptr;
 
-    if ( source == NULL ) {
+    if ( source == nullptr ) {
         value = 0;
-        return NULL;
+        return nullptr;
     }
 
     value = strtol(source, & endptr, 10);
@@ -494,9 +488,9 @@ OOFEMTXTInputRecord :: scanDouble(const char *source, double &value)
     //
     char *endptr;
 
-    if ( source == NULL ) {
+    if ( source == nullptr ) {
         value = 0;
-        return NULL;
+        return nullptr;
     }
 
     value = strtod(source, & endptr);
@@ -664,6 +658,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
 }
 
 
+/*
 void
 OOFEMTXTInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
                                     IRResultType result, const char *file, int line)
@@ -673,4 +668,5 @@ OOFEMTXTInputRecord :: report_error(const char *_class, const char *proc, InputF
                               lineNumber, strerror(result), id, _class, proc, this->giveRecordAsString().c_str());
     OOFEM_EXIT(1); ///@todo We should never directly exit when dealing with user input.
 }
+*/
 } // end namespace oofem

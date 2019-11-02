@@ -88,8 +88,6 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
 IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, _IFT_IncrementalLinearStatic_prescribedtimes);
     if ( discreteTimes.giveSize() > 0 ) {
         numberOfSteps = discreteTimes.giveSize();

@@ -79,12 +79,7 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, double time)
 IRResultType
 BoundaryCondition :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = GeneralBoundaryCondition :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
     if ( ir->hasField(_IFT_BoundaryCondition_values) ) {
         IR_GIVE_FIELD(ir, values, _IFT_BoundaryCondition_values);

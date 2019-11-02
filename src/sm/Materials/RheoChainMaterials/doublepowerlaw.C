@@ -42,8 +42,6 @@ REGISTER_Material(DoublePowerLawMaterial);
 IRResultType
 DoublePowerLawMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, E28, _IFT_DoublePowerLawMaterial_e28);
     IR_GIVE_FIELD(ir, fi1, _IFT_DoublePowerLawMaterial_fi1);
     IR_GIVE_FIELD(ir, m, _IFT_DoublePowerLawMaterial_m);

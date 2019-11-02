@@ -57,20 +57,15 @@
 namespace oofem {
 PFEMElement :: PFEMElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 { }
 
 
 PFEMElement :: ~PFEMElement()
-// Destructor.
 { }
 
 IRResultType
 PFEMElement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
-
     FMElement :: initializeFrom(ir);
 
     this->computeGaussPoints();

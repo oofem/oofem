@@ -314,8 +314,6 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, 
 IRResultType
 IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZFagerstrom_kn);
     this->knc = kn0;                        // Defaults to the same stiffness in compression and tension
     IR_GIVE_OPTIONAL_FIELD(ir, this->knc, _IFT_IntMatBilinearCZFagerstrom_knc);
@@ -334,26 +332,19 @@ IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, gamma, _IFT_IntMatBilinearCZFagerstrom_gamma);
 
-    result = StructuralInterfaceMaterial ::initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralInterfaceMaterial ::initializeFrom(ir);
 
     // check validity of the material paramters
     if ( this->kn0 < 0.0 ) {
-        OOFEM_WARNING("Stiffness kn0 is negative (%.2e)", this->kn0);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_kn, "must be positive");
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_WARNING("Stiffness ks0 is negative (%.2e)", this->ks0);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_ks, "must be positive");
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_g2c, "must be positive");
     } else if ( this->GIIc < 0.0 ) {
-        OOFEM_WARNING("GIIc is negative (%.2e)", this->GIIc);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_g2c, "must be positive");
     } else if ( this->gamma < 0.0  ) { 
-        OOFEM_WARNING("gamma (%.2e) is below zero which is unphysical",
-            this->gamma);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_gamma, "must be positive");
     }
     return IRRT_OK;
 }

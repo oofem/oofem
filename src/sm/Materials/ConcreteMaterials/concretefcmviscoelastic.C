@@ -53,12 +53,7 @@ ConcreteFCMViscoElastic :: ConcreteFCMViscoElastic(int n, Domain *d) : ConcreteF
 IRResultType
 ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = ConcreteFCM :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    ConcreteFCM :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, viscoMat, _IFT_ConcreteFCMViscoElastic_viscoMat);
 

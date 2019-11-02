@@ -50,8 +50,6 @@ GeometryGenerator :: ~GeometryGenerator()
 IRResultType
 GeometryGenerator :: initializeParticleGenerator(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, maxNumOfParticles, _IFT_GeometryGenerator_numOfParticles);
     IR_GIVE_FIELD(ir, maxNumOfIterations, _IFT_GeometryGenerator_numOfIterations);
     IR_GIVE_FIELD(ir, maxNumOfItOnePar, _IFT_GeometryGenerator_numOfItOnePar);
@@ -170,7 +168,6 @@ GeometryGenerator :: loadParticles()
 IRResultType
 GeometryGenerator :: initializeLinkGenerator(InputRecord *ir)
 {
-    //IRResultType result;                // Required by IR_GIVE_FIELD macro
     return IRRT_OK;
 
 }

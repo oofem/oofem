@@ -45,10 +45,7 @@ REGISTER_Material(B3Material);
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MaxwellChainMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MaxwellChainMaterial :: initializeFrom(ir);
 
     //
     // NOTE

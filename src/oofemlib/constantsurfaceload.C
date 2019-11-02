@@ -52,7 +52,6 @@ ConstantSurfaceLoad :: initializeFrom(InputRecord *ir)
 {
     SurfaceLoad :: initializeFrom(ir);
 
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     IR_GIVE_OPTIONAL_FIELD(ir, this->loadOffset, _IFT_ConstantSurfaceLoad_LoadOffset);
     return IRRT_OK;
 }

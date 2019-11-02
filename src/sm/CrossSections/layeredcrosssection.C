@@ -848,16 +848,38 @@ LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArr
 IRResultType
 LayeredCrossSection :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = CrossSection :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    CrossSection :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, numberOfLayers, _IFT_LayeredCrossSection_nlayers);
+    if ( numberOfLayers <= 0 ) {
+        throw ValueInputException(*ir, _IFT_LayeredCrossSection_nlayers, "numberOfLayers <= 0 is not allowed");
+    }
+
+
     IR_GIVE_FIELD(ir, layerMaterials, _IFT_LayeredCrossSection_layermaterials);
+    if ( numberOfLayers != layerMaterials.giveSize() ) {  
+        if ( layerMaterials.giveSize() == 1 ) {
+            OOFEM_WARNING("Assuming same material in all layers");
+            double temp = layerMaterials.at(1);
+            layerMaterials.resize(numberOfLayers); layerMaterials.zero();
+            layerMaterials.add(temp);
+        } else {
+            throw ValueInputException(*ir, _IFT_LayeredCrossSection_layermaterials, "numberOfLayers does not equal given number of materials. ");
+        }
+    }
+
     IR_GIVE_FIELD(ir, layerThicks, _IFT_LayeredCrossSection_thicks);
+    if ( numberOfLayers != layerThicks.giveSize() ) {  
+        if ( layerThicks.giveSize() == 1 ) {
+            OOFEM_WARNING("Assuming same thickness in all layers");
+            double temp = layerThicks.at(1);
+            layerThicks.resize(numberOfLayers); layerThicks.zero();
+            layerThicks.add(temp);
+        } else {
+            throw ValueInputException(*ir, _IFT_LayeredCrossSection_thicks, "numberOfLayers does not equal given number of thicknesses. ");
+        }
+    }
+
     layerWidths.resize(numberOfLayers);
     layerWidths.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, layerWidths, _IFT_LayeredCrossSection_widths);
@@ -866,37 +888,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, layerRots, _IFT_LayeredCrossSection_layerRotations);
 
     if ( numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) ) || numberOfLayers != layerThicks.giveSize() || numberOfLayers != layerMaterials.giveSize()
-        OOFEM_WARNING("numberOfLayers does not equal given number of layer rotations. ");
-        return IRRT_BAD_FORMAT;
-    }
-
-    if ( numberOfLayers != layerThicks.giveSize() ) {  
-        if ( layerThicks.giveSize() == 1 ) {
-            OOFEM_WARNING("Assuming same thickness in all layers");
-            double temp = layerThicks.at(1);
-            layerThicks.resize(numberOfLayers); layerThicks.zero();
-            layerThicks.add(temp);
-        } else {
-            OOFEM_WARNING("numberOfLayers does not equal given number of thicknesses. ");
-            return IRRT_BAD_FORMAT;
-        }
-    }
-
-    if ( numberOfLayers != layerMaterials.giveSize() ) {  
-        if ( layerMaterials.giveSize() == 1 ) {
-            OOFEM_WARNING("Assuming same material in all layers");
-            double temp = layerMaterials.at(1);
-            layerMaterials.resize(numberOfLayers); layerMaterials.zero();
-            layerMaterials.add(temp);
-        } else {
-            OOFEM_WARNING("numberOfLayers does not equal given number of materials. ");
-            return IRRT_BAD_FORMAT;
-        }
-    }
-
-    if ( numberOfLayers <= 0 ) {
-        OOFEM_WARNING("numberOfLayers<= 0 is not allowed");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_LayeredCrossSection_layerRotations, "numberOfLayers does not equal given number of layer rotations. ");
     }
 
     // Interface materials // add check if correct numbers

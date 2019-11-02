@@ -107,8 +107,6 @@ double PeriodicPiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 IRResultType
 PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     period = -1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, period, _IFT_PeriodicPiecewiseLinFunction_period);
     addTF = 0;

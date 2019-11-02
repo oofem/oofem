@@ -43,8 +43,6 @@ REGISTER_Material(CebFip78Material);
 IRResultType
 CebFip78Material :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, E28, _IFT_CebFip78Material_e28);
     IR_GIVE_FIELD(ir, fibf, _IFT_CebFip78Material_fibf);
     IR_GIVE_FIELD(ir, kap_a_per_area, _IFT_CebFip78Material_kap_a_per_area);

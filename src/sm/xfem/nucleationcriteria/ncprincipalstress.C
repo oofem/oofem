@@ -287,10 +287,8 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 }
 
 
-IRResultType NCPrincipalStress::initializeFrom(InputRecord *ir) {
-
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
+IRResultType NCPrincipalStress::initializeFrom(InputRecord *ir)
+{
     IR_GIVE_FIELD(ir, mStressThreshold, _IFT_NCPrincipalStress_StressThreshold);
 //    printf("mStressThreshold: %e\n", mStressThreshold);
 

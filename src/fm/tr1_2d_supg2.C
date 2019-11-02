@@ -98,13 +98,7 @@ TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 IRResultType
 TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;               // Required by IR_GIVE_FIELD macro
-
-    result = SUPGElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
+    SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);

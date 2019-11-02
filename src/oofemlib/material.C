@@ -86,8 +86,6 @@ Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
 IRResultType
 Material :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     double value;
 
 #  ifdef VERBOSE

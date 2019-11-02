@@ -89,11 +89,7 @@ Truss1dGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
 IRResultType
 Truss1dGradDamage :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-    result = GradientDamageElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-      return result;
-    }
+    GradientDamageElement :: initializeFrom(ir);
     return StructuralElement :: initializeFrom(ir);
 }
 

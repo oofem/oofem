@@ -72,11 +72,9 @@ AbaqusUserMaterial :: ~AbaqusUserMaterial()
 
 IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
     std :: string umatname;
 
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->numState, _IFT_AbaqusUserMaterial_numState);
     IR_GIVE_FIELD(ir, this->properties, _IFT_AbaqusUserMaterial_properties);

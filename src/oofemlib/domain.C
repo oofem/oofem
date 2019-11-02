@@ -476,8 +476,6 @@ int
 Domain :: instanciateYourself(DataReader &dr)
 // Creates all objects mentioned in the data file.
 {
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
-
     int num;
     std :: string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier = 0, nset = 0;

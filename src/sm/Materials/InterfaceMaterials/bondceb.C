@@ -133,8 +133,6 @@ BondCEBMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 IRResultType
 BondCEBMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // mandatory parameters
     IR_GIVE_FIELD(ir, kn, _IFT_BondCEBMaterial_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_BondCEBMaterial_ks);

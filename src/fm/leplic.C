@@ -634,8 +634,6 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
 IRResultType
 LEPlic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     orig_reference_fluid_volume = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, orig_reference_fluid_volume, _IFT_LEPLIC_refVol);
     return IRRT_OK;

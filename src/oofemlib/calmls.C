@@ -673,8 +673,6 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 IRResultType
 CylindricalALM :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     double oldPsi =  Psi; // default from constructor
     double initialStepLength, forcedInitialStepLength;
     int hpcMode;
@@ -724,8 +722,9 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         numberOfRequiredIterations = 1000;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
-    if ( result == IRRT_OK ) {
+    try {
+        IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
+    } catch ( InputException & ) {
         if ( minIterations > 3 && minIterations < 1000 ) {
             numberOfRequiredIterations = minIterations;
         }

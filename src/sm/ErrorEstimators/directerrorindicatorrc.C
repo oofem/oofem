@@ -238,8 +238,6 @@ DirectErrorIndicatorRC :: giveRequiredDofManDensity(int num, TimeStep *tStep, in
 IRResultType
 DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, minIndicatorLimit, _IFT_DirectErrorIndicatorRC_minlim);
     IR_GIVE_FIELD(ir, maxIndicatorLimit, _IFT_DirectErrorIndicatorRC_maxlim);
     IR_GIVE_FIELD(ir, minIndicatorDensity, _IFT_DirectErrorIndicatorRC_mindens);

@@ -46,8 +46,6 @@ InitModuleManager :: ~InitModuleManager()
 IRResultType
 InitModuleManager :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     this->numberOfModules = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, "ninitmodules"); ///@todo This is named differently from _IFT_ModuleManager_nmodules . Should we change or keep it?
     return IRRT_OK;

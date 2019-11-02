@@ -59,17 +59,8 @@ MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d),
 IRResultType
 MisesMat :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir); // takes care of elastic constants
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir); // takes care of elastic constants
 
     G = linearElasticMaterial.giveShearModulus();
     K = linearElasticMaterial.giveBulkModulus();

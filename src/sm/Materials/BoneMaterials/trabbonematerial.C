@@ -246,8 +246,6 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 IRResultType
 TrabBoneMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // Read material properties here
 
     IR_GIVE_FIELD(ir, E0, _IFT_TrabBoneMaterial_E0);

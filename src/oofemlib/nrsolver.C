@@ -101,8 +101,6 @@ NRSolver :: ~NRSolver()
 IRResultType
 NRSolver :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // Choosing a big "enough" number. (Alternative: Force input of maxinter)
     nsmax = ( int ) 1e8;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_NRSolver_maxiter);

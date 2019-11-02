@@ -65,16 +65,11 @@ IRResultType NucleationCriterion::initializeFrom(InputRecord *ir)
 
 int NucleationCriterion::instanciateYourself(DataReader &dr)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     // Instantiate enrichment function
     InputRecord *mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, 1);
-    result = mir->giveRecordKeywordField(name);
-
-    if ( result != IRRT_OK ) {
-        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
-    }
+    mir->giveRecordKeywordField(name);
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, mpDomain );
     if ( mpEnrichmentFunc ) {

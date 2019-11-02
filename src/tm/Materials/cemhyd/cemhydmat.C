@@ -404,11 +404,9 @@ void CemhydMat :: averageTemperature()
 
 IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     castingTime = 0.;
 
-    result = IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
-    if ( result != IRRT_OK ) return result;
+    IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
 
     conductivityType = 0;
     capacityType = 0;

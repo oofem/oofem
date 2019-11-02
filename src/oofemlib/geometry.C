@@ -357,8 +357,6 @@ void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
 
 IRResultType Line :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     mVertices.resize(2);
     IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Line_start);
     IR_GIVE_FIELD(ir, mVertices [ 1 ], _IFT_Line_end);
@@ -676,8 +674,6 @@ void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iAr
 
 IRResultType Circle :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     mVertices.resize(1);
     IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Circle_center);
     IR_GIVE_FIELD(ir, radius, _IFT_Circle_radius);
@@ -1254,9 +1250,6 @@ void PolygonLine :: giveTangent(FloatArray &oTangent, const double &iArcPosition
 
 IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
-
     FloatArray points;
     IR_GIVE_FIELD(ir, points, _IFT_PolygonLine_points);
 
@@ -1795,7 +1788,6 @@ void PolygonLine :: cropPolygon(const double &iArcPosStart, const double &iArcPo
 
 IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     IntArray idList;
 
     IR_GIVE_FIELD(ir, idList, _IFT_PointSwarm_nodeID); // Macro

@@ -49,7 +49,6 @@ ShellCrack :: ShellCrack(int n, XfemManager *xm, Domain *aDomain) : Crack(n, xm,
 
 IRResultType ShellCrack :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     this->xiBottom = 0.0;
     this->xiTop = 0.0;
     IR_GIVE_FIELD(ir, this->xiBottom, _IFT_ShellCrack_xiBottom);

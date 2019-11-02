@@ -68,7 +68,6 @@ NodeErrorCheckingRule :: NodeErrorCheckingRule(const std :: string &line, double
   ErrorCheckingRule(tol)
 {
 /*
-  IRResultType result;
   char unknown;
   std :: string  kwd;
   OOFEMTXTInputRecord rec (0, line), *ptr = &rec;
@@ -426,8 +425,6 @@ ErrorCheckingExportModule :: ErrorCheckingExportModule(int n, EngngModel *e) : E
 IRResultType
 ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     allPassed = true;
     this->errorCheckingRules.clear();
 
@@ -443,8 +440,7 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     // Reads all the rules;
     std :: ifstream inputStream(this->filename);
     if ( !inputStream ) {
-        OOFEM_WARNING("Couldn't open file '%s'\n", this->filename.c_str());
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_ErrorCheckingExportModule_filename, "Couldn't open file");
     }
     double tol = 0.;
     if ( this->scanToErrorChecks(inputStream,  tol) ) {

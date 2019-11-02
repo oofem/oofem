@@ -49,15 +49,14 @@ StructuralPythonMaterial :: StructuralPythonMaterial(int n, Domain *d) :
 
 IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->moduleName, _IFT_StructuralPythonMaterial_moduleName);
 
-    module=bp::import(moduleName.c_str());
-    if(!module){ OOFEM_WARNING("Module %s not importable.",moduleName.c_str()); return IRRT_BAD_FORMAT; }
+    module = bp::import(moduleName.c_str());
+    if ( !module ) {
+        throw ValueInputException(*ir, _IFT_StructuralPythonMaterial_moduleName, "Module not importable.");
+    }
     // lambda for finding function and checking that it is callable
     // returns true (OK) if the function was not found, or was found and it callable
     // returns false (not OK) if the function was found but is not callable
@@ -69,10 +68,14 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
         return true;
     };
     // try to find all necessary functions; false means the function is not callable, in which case warning was already printed above
-    if(!(tryDef("computeStress",smallDef) && tryDef("computePK1Stress",largeDef) && tryDef("computeStressTangent",smallDefTangent) && tryDef("computePK1StressTangent",largeDefTangent))){ return IRRT_BAD_FORMAT; }
-    if(!smallDefTangent && !!smallDef){ OOFEM_WARNING("Using numerical tangent for small deformations."); }
-    if(!largeDefTangent && !!largeDef){ OOFEM_WARNING("Using numerical tangent for large deformations."); }
-    if(!smallDef && !largeDef){ OOFEM_WARNING("No functions for small/large deformations found."); return IRRT_BAD_FORMAT; }
+    if ( !(tryDef("computeStress",smallDef) && tryDef("computePK1Stress",largeDef) && tryDef("computeStressTangent",smallDefTangent) && tryDef("computePK1StressTangent",largeDefTangent))) {
+        throw ValueInputException(*ir, _IFT_StructuralPythonMaterial_moduleName, "missing functions");
+    }
+    if ( !smallDefTangent && !!smallDef ){ OOFEM_WARNING("Using numerical tangent for small deformations."); }
+    if ( !largeDefTangent && !!largeDef ){ OOFEM_WARNING("Using numerical tangent for large deformations."); }
+    if ( !smallDef && !largeDef ) {
+        throw ValueInputException(*ir, _IFT_StructuralPythonMaterial_moduleName, "No functions for small/large deformations found.");
+    }
 
     pert = 1e-12;
 

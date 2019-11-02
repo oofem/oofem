@@ -80,8 +80,6 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
 IRResultType
 UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, size, _IFT_UserDefinedTemperatureField_size);
     if ( size > 3 ) {
         size = 3;

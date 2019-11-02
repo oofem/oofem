@@ -71,13 +71,8 @@ Masonry02 :: hasMaterialModeCapability(MaterialMode mode) const
 IRResultType
 Masonry02 :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MPlasticMaterial2 :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MPlasticMaterial2 :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, ft0, _IFT_Masonry02_ft0);
     IR_GIVE_FIELD(ir, gfI, _IFT_Masonry02_gfi);

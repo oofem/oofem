@@ -42,8 +42,6 @@ namespace oofem {
 IRResultType
 LinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     preCastStiffnessReduction = 0.99999999;
     IR_GIVE_OPTIONAL_FIELD(ir, preCastStiffnessReduction, _IFT_LinearElasticMaterial_preCastStiffRed);
 

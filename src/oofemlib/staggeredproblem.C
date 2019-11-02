@@ -131,24 +131,16 @@ StaggeredProblem :: instanciateSlaveProblems()
 IRResultType
 StaggeredProblem :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
     if ( numberOfSteps <= 0 ) {
-        OOFEM_ERROR("nsteps not specified, bad format");
+        throw ValueInputException(*ir, _IFT_EngngModel_nsteps, "nsteps must be > 0");
     }
     if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
-        result = EngngModel :: initializeFrom(ir);
-        if ( result != IRRT_OK ) {
-            return result;
-        }
+        EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
         dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
-        result = EngngModel :: initializeFrom(ir);
-        if ( result != IRRT_OK ) {
-            return result;
-        }
+        EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         dtFunction = 0;
     } else if ( ir->hasField(_IFT_StaggeredProblem_dtf) ) {
@@ -174,8 +166,7 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
-        OOFEM_WARNING("stepMultiplier must be > 0");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_StaggeredProblem_stepmultiplier, "stepMultiplier must be > 0");
     }
 
     //    timeLag = 0.;
@@ -211,7 +202,7 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     } else {
 
         if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+            throw ValueInputException(*ir, "None", "can't open output file: " + this->dataOutputFileName);
         }
 
         fprintf(outputStream, "%s", PRG_HEADER);
@@ -234,8 +225,6 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 void
 StaggeredProblem :: updateAttributes(MetaStep *mStep)
 {
-    IRResultType result;                  // Required by IR_GIVE_FIELD macro
-
     InputRecord *ir = mStep->giveAttributesRecord();
 
     EngngModel :: updateAttributes(mStep);

@@ -401,8 +401,6 @@ bool TransportGradientPeriodic :: isGradDof(Dof *dof)
 
 IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, this->mGradient, _IFT_TransportGradientPeriodic_gradient)
     this->mCenterCoord = {0., 0., 0.};
     IR_GIVE_OPTIONAL_FIELD(ir, this->mCenterCoord, _IFT_TransportGradientPeriodic_centerCoords)

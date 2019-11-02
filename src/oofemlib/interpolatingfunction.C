@@ -144,15 +144,13 @@ IRResultType
 InterpolatingFuction :: initializeFrom(InputRecord *ir)
 {
     std :: string name;
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, name, _IFT_InterpolatingFuction_filename);
 
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        OOFEM_WARNING("Unable to open file %s", name.c_str());
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_InterpolatingFuction_filename, "Unable to open file: " + name);
     }
 
     double deltaX, deltaY;

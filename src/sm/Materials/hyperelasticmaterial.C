@@ -146,8 +146,6 @@ HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 HyperElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, K, _IFT_HyperElasticMaterial_k);
     IR_GIVE_FIELD(ir, G, _IFT_HyperElasticMaterial_g);
 

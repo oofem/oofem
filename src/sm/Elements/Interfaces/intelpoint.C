@@ -222,16 +222,10 @@ IntElPoint :: computeAreaAround(GaussPoint *gp)
 IRResultType
 IntElPoint :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;  // Required by IR_GIVE_FIELD macro
-
-    result = StructuralInterfaceElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralInterfaceElement :: initializeFrom(ir);
 
     if ( ir->hasField(_IFT_IntElPoint_refnode) && ir->hasField(_IFT_IntElPoint_normal) ) {
-        OOFEM_WARNING("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_IntElPoint_refnode, "Ambiguous input: 'refnode' and 'normal' cannot both be specified");
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);

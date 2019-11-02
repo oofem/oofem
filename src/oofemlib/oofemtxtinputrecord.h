@@ -69,8 +69,6 @@ public:
     OOFEMTXTInputRecord(int linenumber, std :: string source);
     /// Copy constructor.
     OOFEMTXTInputRecord(const OOFEMTXTInputRecord &);
-    /// Destructor.
-    virtual ~OOFEMTXTInputRecord() { }
     /// Assignment operator.
     OOFEMTXTInputRecord &operator = ( const OOFEMTXTInputRecord & );
 
@@ -102,8 +100,6 @@ public:
     bool hasField(InputFieldType id) override;
     void printYourself() override;
 
-    void report_error(const char *_class, const char *proc, InputFieldType id,
-                      IRResultType result, const char *file, int line) override;
     void setLineNumber(int lineNumber) { this->lineNumber = lineNumber; }
 
 protected:

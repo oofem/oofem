@@ -190,10 +190,7 @@ M4Material :: giveRealMicroplaneStressVector(GaussPoint *gp, int mnumber,
 IRResultType
 M4Material :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MicroplaneMaterial_Bazant :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MicroplaneMaterial_Bazant :: initializeFrom(ir);
 
     c1 = 6.20e-1;
     c2 = 2.76;

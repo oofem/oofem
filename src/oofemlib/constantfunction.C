@@ -44,8 +44,6 @@ REGISTER_Function(ConstantFunction);
 IRResultType
 ConstantFunction :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, value, _IFT_ConstantFunction_f);
 
     return Function :: initializeFrom(ir);

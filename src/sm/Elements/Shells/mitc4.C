@@ -382,8 +382,6 @@ MITC4Shell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 IRResultType
 MITC4Shell :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsXY, _IFT_Element_nip);
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsZ, _IFT_MITC4Shell_nipZ);
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);

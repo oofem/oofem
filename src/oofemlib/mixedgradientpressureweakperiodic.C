@@ -92,9 +92,6 @@ DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 
 IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
-
     IR_GIVE_FIELD(ir, this->order, _IFT_MixedGradientPressureWeakPeriodic_order);
     if ( this->order < 0 ) {
         OOFEM_ERROR("order must be at least 0");

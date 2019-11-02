@@ -637,8 +637,6 @@ Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 IRResultType
 Element :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                          // Required by IR_GIVE_FIELD macro
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif

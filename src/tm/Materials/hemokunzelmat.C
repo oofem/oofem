@@ -51,8 +51,6 @@ HeMoKunzelMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 IRResultType
 HeMoKunzelMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int type = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_HeMoKunzelMaterial_iso_type);
     this->Isotherm = ( isothermType ) type;

@@ -134,8 +134,6 @@ NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 CBS :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;

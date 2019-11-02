@@ -284,14 +284,11 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
 IRResultType
 Truss2d :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
-
     cs_mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        OOFEM_WARNING("Unsupported value of cs_mode");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_Truss2d_cs, "Unsupported mode");
     }
 
     return NLStructuralElement :: initializeFrom(ir);

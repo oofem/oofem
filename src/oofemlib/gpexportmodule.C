@@ -57,8 +57,6 @@ GPExportModule :: ~GPExportModule()
 IRResultType
 GPExportModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, vartypes, _IFT_GPExportModule_vartypes);
     IR_GIVE_OPTIONAL_FIELD(ir, ncoords, _IFT_GPExportModule_ncoords);
     return ExportModule :: initializeFrom(ir);

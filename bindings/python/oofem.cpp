@@ -1223,7 +1223,11 @@ PYBIND11_MODULE(oofempy, m) {
       .value("IRRT_NOTFOUND", oofem::IRResultType::IRRT_NOTFOUND)
       .value("IRRT_BAD_FORMAT", oofem::IRResultType::IRRT_BAD_FORMAT)
     ;
-
+    
+    py::register_exception<oofem::InputException>(m, "ValueError");
+    py::register_exception<oofem::MissingInputException>(m, "ValueError");
+    py::register_exception<oofem::BadFormatInputException>(m, "ValueError");
+    py::register_exception<oofem::ValueException>(m, "ValueError");
 
     py::enum_<oofem::MatResponseMode>(m, "MatResponseMode")
         .value("TangentStiffness", oofem::MatResponseMode::TangentStiffness)

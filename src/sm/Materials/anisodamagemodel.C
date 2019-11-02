@@ -2010,8 +2010,6 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Int
 IRResultType
 AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     linearElasticMaterial.initializeFrom(ir);
     E = linearElasticMaterial.giveYoungsModulus();
     nu = linearElasticMaterial.givePoissonsRatio();

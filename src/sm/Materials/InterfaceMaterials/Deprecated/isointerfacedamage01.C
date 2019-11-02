@@ -159,8 +159,6 @@ IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, In
 IRResultType
 IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, kn, _IFT_IsoInterfaceDamageMaterial_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_IsoInterfaceDamageMaterial_ks);
 

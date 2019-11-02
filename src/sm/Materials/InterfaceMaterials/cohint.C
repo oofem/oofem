@@ -119,8 +119,6 @@ CohesiveInterfaceMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, Ga
 IRResultType
 CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     // elastic parameters
     IR_GIVE_FIELD(ir, kn, _IFT_CohesiveInterfaceMaterial_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_CohesiveInterfaceMaterial_ks);

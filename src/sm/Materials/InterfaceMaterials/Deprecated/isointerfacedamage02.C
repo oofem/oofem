@@ -167,7 +167,6 @@ IsoInterfaceDamageMaterial_2 :: giveIPValue(FloatArray &answer, GaussPoint *gp, 
 IRResultType
 IsoInterfaceDamageMaterial_2 :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     std :: ifstream is;
     int nbrOfLinesToRead;
 

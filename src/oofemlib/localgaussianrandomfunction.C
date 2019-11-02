@@ -76,8 +76,6 @@ LocalGaussianRandomFunction :: evaluateAccelerationAtTime(double t)
 IRResultType
 LocalGaussianRandomFunction :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomFunction_mean);
     IR_GIVE_FIELD(ir, variance, _IFT_LocalGaussianRandomFunction_variance);
     randomInteger = ( long ) ( -time(NULL) );

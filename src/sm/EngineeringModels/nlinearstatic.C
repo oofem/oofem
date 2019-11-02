@@ -93,8 +93,6 @@ NonLinearStatic :: ~NonLinearStatic()
 
 NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 {
-    IRResultType result;                     // Required by IR_GIVE_FIELD macro
-
     if ( mStep == NULL ) {
         OOFEM_ERROR("undefined meta step");
     }
@@ -135,8 +133,6 @@ NumericalMethod *NonLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 void
 NonLinearStatic :: updateAttributes(MetaStep *mStep)
 {
-    IRResultType result;                  // Required by IR_GIVE_FIELD macro
-
     MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
     InputRecord *ir = mStep1->giveAttributesRecord();
 
@@ -190,12 +186,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
 IRResultType
 NonLinearStatic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = LinearStatic :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    LinearStatic :: initializeFrom(ir);
 
     nonlocalStiffnessFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);

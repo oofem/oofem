@@ -44,8 +44,6 @@ REGISTER_BoundaryCondition(NodalLoad);
 IRResultType
 NodalLoad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int value = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_NodalLoad_cstype);
     coordSystemType = ( CoordSystType ) value;

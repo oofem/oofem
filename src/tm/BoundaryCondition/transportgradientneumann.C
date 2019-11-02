@@ -69,11 +69,9 @@ TransportGradientNeumann :: TransportGradientNeumann(int n, Domain *d) :
     }
 }
 
-// 
+
 IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, mGradient, _IFT_TransportGradientNeumann_gradient);
 
     IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientNeumann_surfSets);

@@ -44,8 +44,6 @@ CompRow_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Precon
 IRResultType
 CompRow_ILUPreconditioner :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     this->drop_tol = 1.e-8;
     IR_GIVE_OPTIONAL_FIELD(ir, this->drop_tol, _IFT_CompRow_ILUPrecond_droptol);
 

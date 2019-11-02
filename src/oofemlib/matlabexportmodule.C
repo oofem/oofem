@@ -94,8 +94,6 @@ MatlabExportModule :: ~MatlabExportModule()
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     ExportModule :: initializeFrom(ir);
 
     exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);

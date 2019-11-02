@@ -49,7 +49,6 @@ REGISTER_BoundaryCondition(Node2NodePenaltyContact);
 IRResultType
 Node2NodePenaltyContact :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
     IR_GIVE_FIELD(ir, this->penalty, _IFT_Node2NodePenaltyContact_penalty);
     this->useTangent = ir->hasField(_IFT_Node2NodePenaltyContact_useTangent);
 

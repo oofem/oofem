@@ -43,8 +43,6 @@ REGISTER_CrossSection(WarpingCrossSection);
 IRResultType
 WarpingCrossSection :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int value;
     IR_GIVE_FIELD(ir, value, _IFT_WarpingCrossSection_WarpingNodeNumber);
     this->WarpingNodeNumber = value;

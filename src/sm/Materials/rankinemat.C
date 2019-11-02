@@ -80,13 +80,8 @@ RankineMat :: hasMaterialModeCapability(MaterialMode mode) const
 IRResultType
 RankineMat :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
-    result = linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
 
     E = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveYoungsModulus();
     nu = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->givePoissonsRatio();
@@ -109,8 +104,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         ep = ep - sig0 / E; // user input is strain at peak stress sig0 and is converted to plastic strain at peak stress sig0
         md = 1. / log(50. * E * ep / sig0); // exponent used on the 1st plasticity branch
     } else {
-        OOFEM_WARNING("Plasticity hardening type number  %d is unknown", plasthardtype);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_RankineMat_plasthardtype, "Plasticity hardening type is unknown");
     }
 
     yieldtol = 1.e-10;
@@ -136,16 +130,14 @@ RankineMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, param2, _IFT_RankineMat_param2);
         IR_GIVE_FIELD(ir, param3, _IFT_RankineMat_param3);
     } else {
-        OOFEM_WARNING("Damage law number  %d is unknown", damlaw);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_RankineMat_damlaw, "Damage law is unknown");
     }
 
     double gf = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, gf, _IFT_RankineMat_gf); // dissipated energy per unit VOLUME
 
     if ( ( a != 0. ) && ( gf != 0 ) ) {
-        OOFEM_WARNING("parameters a and gf cannot be prescribed simultaneously");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_RankineMat_gf, "parameters a and gf cannot be prescribed simultaneously");
     }
 
     if ( gf > 0. ) {

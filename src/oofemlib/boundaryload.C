@@ -93,12 +93,7 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatA
 IRResultType
 BoundaryLoad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = Load :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    Load :: initializeFrom(ir);
 
     int dummy;
     IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");

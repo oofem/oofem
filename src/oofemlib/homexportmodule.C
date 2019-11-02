@@ -51,7 +51,6 @@ HOMExportModule :: ~HOMExportModule() { }
 IRResultType
 HOMExportModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     IR_GIVE_OPTIONAL_FIELD(ir, this->ists, _IFT_HOMExportModule_ISTs);
     this->reactions = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->reactions, _IFT_HOMExportModule_reactions);

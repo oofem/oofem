@@ -597,11 +597,7 @@ RheoChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 RheoChainMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
+    StructuralMaterial :: initializeFrom(ir);
 
     // if the casting time is not defined, we set it to zero such that it concides
     // with the beginning of the computational time

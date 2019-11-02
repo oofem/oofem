@@ -69,10 +69,7 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
 IRResultType
 StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = EngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    EngngModel :: initializeFrom(ir);
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);

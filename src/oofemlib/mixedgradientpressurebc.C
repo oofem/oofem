@@ -60,8 +60,6 @@ double MixedGradientPressureBC :: domainSize()
 
 IRResultType MixedGradientPressureBC :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     FloatArray devGradient;
     double pressure;
 

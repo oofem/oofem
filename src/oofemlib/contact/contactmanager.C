@@ -55,9 +55,6 @@ ContactManager :: ~ContactManager()
 IRResultType
 ContactManager :: initializeFrom(InputRecord *ir)
 {
-
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-    
     this->numberOfContactDefinitions = 0;
     IR_GIVE_FIELD(ir, this->numberOfContactDefinitions, _IFT_ContactManager_NumberOfContactDefinitions);
   
@@ -66,7 +63,7 @@ ContactManager :: initializeFrom(InputRecord *ir)
 #if 0
     for ( int i = 1; i <= numberOfContactDefinitions; i++ ) {
         std::string name;
-        result = ir->giveRecordKeywordField(name);
+        ir->giveRecordKeywordField(name);
         this->contactDefinitionList[i-1] = new ContactDefinition(this);
         this->contactDefinitionList[i-1] = classFactory.createContactDefinition( name.c_str(), this );
     }

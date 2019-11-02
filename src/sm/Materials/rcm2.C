@@ -795,8 +795,6 @@ RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCr
 IRResultType
 RCM2Material :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, Gf, _IFT_RCM2Material_gf);
     IR_GIVE_FIELD(ir, Ft, _IFT_RCM2Material_ft);
 

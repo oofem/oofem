@@ -45,8 +45,6 @@ namespace oofem {
 
 IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     BSplineInterpolation :: initializeFrom(ir);
 
     IntArray localIndexKnotVector_tmp;
@@ -71,8 +69,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
         localIndexKnotVector_tmp.clear();
         IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
-            OOFEM_WARNING("invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "invalid size of knot vector");
         }
 
         int pos = 0;
@@ -89,9 +86,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             int indexKnotVal = indexKnotVec [ 0 ];
             for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
-                    OOFEM_WARNING("local index knot vector %s of control point %d is not monotonic",
-                                 IFT_localIndexKnotVector [ n ], i + 1);
-                    return IRRT_BAD_FORMAT;
+                    throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "local index knot vector is not monotonic");
                 }
 
                 /* this is only for the case when TSpline = NURBS
@@ -104,16 +99,12 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
             // check for nondegeneracy of local index knot vector
             if ( indexKnotVal == indexKnotVec [ 0 ] ) {
-                OOFEM_WARNING("local index knot vector %s of control point %d is degenerated",
-                             IFT_localIndexKnotVector [ n ], i + 1);
-                return IRRT_BAD_FORMAT;
+                throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "local index knot vector is degenerated");
             }
 
             // check for range of local index knot vector
             if ( indexKnotVec [ 0 ] <= 0 || indexKnotVal > knotValues [ n ].giveSize() ) {
-                OOFEM_WARNING("local index knot vector %s of control point %d out of range",
-                             IFT_localIndexKnotVector [ n ], i + 1);
-                return IRRT_BAD_FORMAT;
+                throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "local index knot vector out of range");
             }
         }
     }

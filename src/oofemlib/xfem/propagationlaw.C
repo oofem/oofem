@@ -65,8 +65,6 @@ void PLDoNothing :: giveInputRecord(DynamicInputRecord &input)
 
 IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mAngle, _IFT_PLCrackPrescribedDir_Dir);
     IR_GIVE_FIELD(ir, mIncrementLength, _IFT_PLCrackPrescribedDir_IncLength);
 
@@ -118,8 +116,6 @@ bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront
 
 IRResultType PLnodeRadius :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mRadius, _IFT_PLnodeRadius_Radius);
 
     //printf("In PLnodeRadius :: initializeFrom: mRadius: %e \n", mRadius);

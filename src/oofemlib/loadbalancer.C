@@ -80,8 +80,6 @@ LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 IRResultType
 LoadBalancer :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     IntArray wtp;
     IR_GIVE_OPTIONAL_FIELD(ir, wtp, _IFT_LoadBalancer_wtp);
 
@@ -551,7 +549,6 @@ LoadBalancer :: printStatistics() const
 IRResultType
 LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     int nproc = emodel->giveNumberOfProcesses();
     int nodeWeightMode = 0;
 

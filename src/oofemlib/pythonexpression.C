@@ -58,8 +58,6 @@ PythonExpression :: ~PythonExpression()
 IRResultType
 PythonExpression :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, this->fExpression, _IFT_PythonExpression_f);
     IR_GIVE_OPTIONAL_FIELD(ir, this->dfdtExpression, _IFT_PythonExpression_dfdt);
     IR_GIVE_OPTIONAL_FIELD(ir, this->d2fdt2Expression, _IFT_PythonExpression_d2fdt2);

@@ -67,8 +67,6 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 IRResultType
 LumpedMassElement :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, dofs, _IFT_LumpedMassElement_dofs);
     IR_GIVE_FIELD(ir, components, _IFT_LumpedMassElement_components);
 

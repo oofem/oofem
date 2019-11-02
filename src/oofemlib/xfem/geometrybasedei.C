@@ -70,16 +70,11 @@ GeometryBasedEI :: ~GeometryBasedEI()
 
 int GeometryBasedEI :: instanciateYourself(DataReader &dr)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     // Instantiate enrichment function
     InputRecord *mir = dr.giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
-    result = mir->giveRecordKeywordField(name);
-
-    if ( result != IRRT_OK ) {
-        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
-    }
+    mir->giveRecordKeywordField(name);
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
     if ( mpEnrichmentFunc ) {
@@ -91,7 +86,7 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
 
     // Instantiate geometry
     mir = dr.giveInputRecord(DataReader :: IR_geoRec, 1);
-    result = mir->giveRecordKeywordField(name);
+    mir->giveRecordKeywordField(name);
     mpBasicGeometry = classFactory.createGeometry( name.c_str() );
     if ( !mpBasicGeometry ) {
         OOFEM_ERROR( "unknown geometry domain (%s)", name.c_str() );
@@ -107,7 +102,7 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
         std :: string enrFrontNameStart, enrFrontNameEnd;
 
         InputRecord *enrFrontStartIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        result = enrFrontStartIr->giveRecordKeywordField(enrFrontNameStart);
+        enrFrontStartIr->giveRecordKeywordField(enrFrontNameStart);
 
         mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
         if ( mpEnrichmentFrontStart ) {
@@ -117,7 +112,7 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
         }
 
         InputRecord *enrFrontEndIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        result = enrFrontEndIr->giveRecordKeywordField(enrFrontNameEnd);
+        enrFrontEndIr->giveRecordKeywordField(enrFrontNameEnd);
 
         mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
         if ( mpEnrichmentFrontEnd ) {
@@ -135,7 +130,7 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
         std :: string propLawName;
 
         InputRecord *propLawir = dr.giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
-        result = propLawir->giveRecordKeywordField(propLawName);
+        propLawir->giveRecordKeywordField(propLawName);
 
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
         if ( mpPropagationLaw != NULL ) {

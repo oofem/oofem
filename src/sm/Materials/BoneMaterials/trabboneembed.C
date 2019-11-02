@@ -162,8 +162,6 @@ TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0,
 IRResultType
 TrabBoneEmbed :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // Read material properties here
 
     IR_GIVE_FIELD(ir, eps0, _IFT_TrabBoneEmbed_eps0);

@@ -61,7 +61,6 @@ StokesFlow :: ~StokesFlow() { }
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
     int val;
 
     val = ( int ) SMT_PetscMtrx;

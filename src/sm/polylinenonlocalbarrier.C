@@ -183,8 +183,6 @@ PolylineNonlocalBarrier :: giveDistancePointLine(const FloatArray &coordsA, cons
 IRResultType
 PolylineNonlocalBarrier :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, vertexNodes, _IFT_PolylineNonlocalBarrier_vertexnodes);
 
     // default: polyline in xy plane

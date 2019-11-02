@@ -58,7 +58,6 @@ MazarsMaterial :: MazarsMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n,
 IRResultType
 MazarsMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     int ver;
 
     // Note: IsotropicDamageMaterial1 :: initializeFrom is not activated
@@ -68,12 +67,9 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
 
     this->equivStrainType = EST_Mazars;
 
-    result = IsotropicDamageMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = RandomMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    IsotropicDamageMaterial :: initializeFrom(ir);
+    RandomMaterialExtensionInterface :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
     // E and nu are made available for direct access
     IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
@@ -85,8 +81,7 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
     } else if ( ver == 0 ) {
         this->modelVersion = maz_original;
     } else {
-        OOFEM_WARNING("unknown version");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_MazarsMaterial_version, "unknown version");
     }
 
     IR_GIVE_FIELD(ir, this->e0, _IFT_MazarsMaterial_e0);

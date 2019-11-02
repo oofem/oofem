@@ -108,10 +108,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 IRResultType
 NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    result = EngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    EngngModel :: initializeFrom(ir);
 
     if ( ir->hasField(_IFT_NonStationaryTransportProblem_initt) ) {
         IR_GIVE_FIELD(ir, initT, _IFT_NonStationaryTransportProblem_initt);
@@ -124,8 +121,7 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
-        OOFEM_WARNING("Time step not defined");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, "none", "Time step not defined");
     }
 
     IR_GIVE_FIELD(ir, alpha, _IFT_NonStationaryTransportProblem_alpha);
@@ -151,7 +147,6 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
-
 
     return IRRT_OK;
 }

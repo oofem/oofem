@@ -65,8 +65,6 @@ PLPrincipalStrain::~PLPrincipalStrain() {
 
 IRResultType PLPrincipalStrain :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mRadius,                          _IFT_PLPrincipalStrain_Radius);
     IR_GIVE_FIELD(ir, mIncrementLength,         _IFT_PLPrincipalStrain_IncLength);
     IR_GIVE_FIELD(ir, mStrainThreshold, _IFT_PLPrincipalStrain_StrainThreshold);

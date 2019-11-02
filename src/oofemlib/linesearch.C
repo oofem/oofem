@@ -246,8 +246,6 @@ LineSearchNM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
 IRResultType
 LineSearchNM :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     /* default values set in constructor
      * ls_tolerance = 0.80;
      * amplifFactor = 2.5;

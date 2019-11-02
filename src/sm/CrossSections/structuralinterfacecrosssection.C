@@ -64,8 +64,6 @@ StructuralInterfaceCrossSection :: checkConsistency()
 IRResultType
 StructuralInterfaceCrossSection :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     CrossSection :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->materialNum, _IFT_StructuralInterfaceCrossSection_Material);
 

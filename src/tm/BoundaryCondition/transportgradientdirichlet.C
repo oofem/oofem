@@ -70,7 +70,6 @@ REGISTER_BoundaryCondition(TransportGradientDirichlet);
 
 IRResultType TransportGradientDirichlet :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;           // Required by IR_GIVE_FIELD macro
     IR_GIVE_FIELD(ir, mGradient, _IFT_TransportGradientDirichlet_gradient);
 
     mCenterCoord.resize(3);

@@ -119,12 +119,8 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
 IRResultType
 MazarsNLMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MazarsMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MazarsMaterial :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, R, _IFT_MazarsNLMaterial_r);
     if ( R < 0.0 ) {

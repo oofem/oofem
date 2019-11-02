@@ -353,8 +353,6 @@ Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Lattice2d :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_Lattice2d_thick);
 
     IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_Lattice2d_width);

@@ -64,8 +64,6 @@ QuasicontinuumVTKXMLExportModule :: ~QuasicontinuumVTKXMLExportModule()
 IRResultType
 QuasicontinuumVTKXMLExportModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     deactivatedElementsExportFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, deactivatedElementsExportFlag, _IFT_QuasicontinuumVTKXMLExportModule_ExportDeactivatedElements); // Macro
 

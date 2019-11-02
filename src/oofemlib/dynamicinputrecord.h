@@ -127,9 +127,6 @@ public:
     void setField(InputFieldType id);
     /// Removes given field from record.
     void unsetField(InputFieldType id);
-
-    void report_error(const char *_class, const char *proc, InputFieldType id,
-                      IRResultType result, const char *file, int line) override;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h

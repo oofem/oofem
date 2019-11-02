@@ -72,8 +72,6 @@ SolutionbasedShapeFunction :: SolutionbasedShapeFunction(int n, Domain *d) : Act
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     // Load problem file
     this->filename = "";
     IR_GIVE_OPTIONAL_FIELD(ir, this->filename, _IFT_SolutionbasedShapeFunction_ShapeFunctionFile);

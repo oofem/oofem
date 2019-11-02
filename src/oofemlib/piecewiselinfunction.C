@@ -121,8 +121,6 @@ double PiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 IRResultType
 PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // Optional means, read data from external file (useful for very large sets of data)
     if ( ir->hasField(_IFT_PiecewiseLinFunction_dataFile) ) {
         std :: list< double >t, ft;

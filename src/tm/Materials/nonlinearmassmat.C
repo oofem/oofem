@@ -45,8 +45,6 @@ REGISTER_Material(NonlinearMassTransferMaterial);
 IRResultType
 NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, C, _IFT_NonlinearMassTransferMaterial_c);
     IR_GIVE_FIELD(ir, alpha, _IFT_NonlinearMassTransferMaterial_alpha);
 

@@ -47,8 +47,6 @@ REGISTER_Material(Eurocode2CreepMaterial);
 IRResultType
 Eurocode2CreepMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, fcm28, _IFT_Eurocode2CreepMaterial_fcm28);
 
     /* scaling factor transforming PREDICTED stiffness Ecm

@@ -45,8 +45,6 @@ REGISTER_Material(AnisotropicLinearElasticMaterial);
 IRResultType
 AnisotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // read the stiffness coefficients arranged by rows from the diagonal to the right (21 values)
     FloatArray stiffness;
     IR_GIVE_FIELD(ir, stiffness, _IFT_AnisotropicLinearElasticMaterial_stiff);

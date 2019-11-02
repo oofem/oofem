@@ -49,8 +49,6 @@ WinklerPasternakMaterial:: WinklerPasternakMaterial (int n, Domain* d): Structur
 IRResultType
 WinklerPasternakMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, c1, _IFT_WinklerPasternakMaterial_C1);
     if (ir->hasField(_IFT_WinklerPasternakMaterial_C2)) {
       // isotropic case

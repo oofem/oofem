@@ -124,8 +124,6 @@ SimpleInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
 IRResultType
 SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     frictCoeff = 0.;
     stiffCoeff = 0.;
     normalClearance = 0.;

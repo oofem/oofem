@@ -325,8 +325,6 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(const IntArray &dofIDArray) cons
 IRResultType
 DofManager :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     delete dofidmask;
     dofidmask = NULL;
     delete dofTypemap;

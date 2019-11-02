@@ -110,8 +110,6 @@ IntMatCoulombContact :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPo
 IRResultType
 IntMatCoulombContact :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     frictCoeff = 0.;
     stiffCoeff = 0.;
     normalClearance = 0.;

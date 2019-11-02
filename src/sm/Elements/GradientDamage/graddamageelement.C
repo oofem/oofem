@@ -603,12 +603,11 @@ GradientDamageElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatRespo
 IRResultType
 GradientDamageElement :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     //nlGeo = 0;
     penalty = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, penalty, _IFT_GradientDamageElement_penalty);
 
-    return result;
+    return IRRT_OK;
 }
 
 void

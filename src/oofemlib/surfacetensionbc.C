@@ -58,8 +58,6 @@ REGISTER_BoundaryCondition(SurfaceTensionBoundaryCondition);
 
 IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, this->gamma, _IFT_SurfaceTensionBoundaryCondition_gamma);
 
     this->useTangent = ir->hasField(_IFT_SurfaceTensionBoundaryCondition_useTangent);

@@ -172,8 +172,6 @@ MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 IRResultType
 MPSMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     double fc, c, wc, ac;
 
     /* scaling factor transforming PREDICTED stiffnesses q1, q2, q3 and q4 to desired
@@ -182,22 +180,18 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     this->stiffnessFactor = 1.e6;
     IR_GIVE_OPTIONAL_FIELD(ir, stiffnessFactor, _IFT_MPSMaterial_stiffnessfactor);
 
-    result = KelvinChainSolidMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    KelvinChainSolidMaterial :: initializeFrom(ir);
 
     // checking timefactor - for MPS material must be equal to 1. (in seconds)
     double tf;
     IR_GIVE_FIELD(ir, tf, _IFT_RheoChainMaterial_timefactor);
     if ( tf != 1. ) {
-        OOFEM_WARNING("for MPS material timefactor must be equal to 1.");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_RheoChainMaterial_timefactor, "for MPS material timefactor must be equal to 1.");
     }
 
     // initialize exponent p or p_tilde of the governing equation
     if ( ir->hasField(_IFT_MPSMaterial_p_tilde) &&  ir->hasField(_IFT_MPSMaterial_p) ) {
-        OOFEM_ERROR("for MPS p and p_tilde cannot be defined at the same time");
+        throw ValueInputException(*ir, _IFT_MPSMaterial_p_tilde, "for MPS p and p_tilde cannot be defined at the same time");
     }
 
     double p_tilde = 2.;
@@ -212,8 +206,6 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_MPSMaterial_mode);
-
-
 
     if ( mode == 0 ) { // default - estimate model parameters q1,..,q4 from composition
         IR_GIVE_FIELD(ir, fc, _IFT_MPSMaterial_fc); // 28-day standard cylinder compression strength [MPa]
@@ -234,8 +226,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     int type = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_MPSMaterial_coupledanalysistype);
     if ( type >= 4 ) {
-        OOFEM_WARNING("CoupledAnalysisType must be equal to 0, 1, 2 or 3");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_MPSMaterial_coupledanalysistype, "must be 0, 1, 2 or 3");
     }
 
     this->CoupledAnalysis = ( coupledAnalysisType ) type;
@@ -374,7 +365,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
             b4_r_ea = -0.75;
             b4_r_ew = -3.5;
         } else {
-            OOFEM_ERROR("Unknown cement type (b4_cem_type)");
+            throw ValueInputException(*ir, _IFT_MPSMaterial_B4_cem_type, "Unknown cement type");
         }
 
 
@@ -406,7 +397,8 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     }
 
     if ( ( eps_cas0 != 0. ) && ( b4_eps_au_infty != 0. ) ) {
-        OOFEM_ERROR("autogenous shrinkage cannot be described according to fib and B4 simultaneously");
+        throw ValueInputException(*ir, _IFT_MPSMaterial_B4_eps_au_infty,
+                                  "autogenous shrinkage cannot be described according to fib and B4 simultaneously");
     }
 
     return IRRT_OK;

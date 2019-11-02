@@ -412,8 +412,6 @@ MMALeastSquareProjection :: giveNumberOfUnknownPolynomialCoefficients(MMALeastSq
 IRResultType
 MMALeastSquareProjection :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     this->stateFilter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->stateFilter, _IFT_MMALeastSquareProjection_statefilter);
 

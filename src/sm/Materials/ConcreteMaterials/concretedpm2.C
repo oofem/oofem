@@ -503,19 +503,9 @@ ConcreteDPM2 :: ~ConcreteDPM2() { }
 IRResultType
 ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 {
-    // Required by IR_GIVE_FIELD macro
-    IRResultType result;
-
     // call the corresponding service for the linear elastic material
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     //isotropic flag
     isotropicFlag = 0;
@@ -573,8 +563,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 2 ) {
-        OOFEM_WARNING("softening type not implemented");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_ConcreteDPM2_softeningType, "softening type not implemented");
     }
 
     IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);

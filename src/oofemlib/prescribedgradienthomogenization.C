@@ -44,8 +44,6 @@ namespace oofem {
 
 IRResultType PrescribedGradientHomogenization :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, mGradient, _IFT_PrescribedGradientHomogenization_gradient);
 
     mCenterCoord.resize( mGradient.giveNumberOfColumns() );

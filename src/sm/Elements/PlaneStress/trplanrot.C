@@ -560,13 +560,8 @@ TrPlaneStrRot :: GiveDerivativeVY(const FloatArray &lCoords)
 IRResultType
 TrPlaneStrRot :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     numberOfGaussPoints = 4;
-    result = TrPlaneStress2d :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    TrPlaneStress2d :: initializeFrom(ir);
 
     numberOfRotGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, _IFT_TrPlaneStrRot_niprot);

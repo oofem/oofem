@@ -44,8 +44,6 @@ REGISTER_BoundaryCondition(GravityPressure);
 IRResultType
 GravityPressure :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     normalVector.resize(3);
     normalVector.zero();
     normalVector.at(3) = -1.;

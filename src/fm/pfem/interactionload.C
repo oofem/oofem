@@ -48,10 +48,7 @@ REGISTER_BoundaryCondition(InteractionLoad);
 IRResultType
 InteractionLoad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, coupledParticles, _IFT_InteractionLoad_CoupledParticles);
-
 
     return LinearEdgeLoad :: initializeFrom(ir);
 }

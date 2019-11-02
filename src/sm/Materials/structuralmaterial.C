@@ -2563,8 +2563,6 @@ StructuralMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint
 IRResultType
 StructuralMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     referenceTemperature = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
 

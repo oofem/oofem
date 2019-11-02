@@ -128,8 +128,6 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, double time)
 IRResultType
 RotatingBoundary :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, axis, _IFT_RotatingBoundary_axis);
     axis.normalize();
 

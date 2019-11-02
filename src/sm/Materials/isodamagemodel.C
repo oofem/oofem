@@ -382,8 +382,6 @@ double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp) const
 IRResultType
 IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     //Set limit on the maximum isotropic damage parameter if needed
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IsotropicDamageMaterial_maxOmega);
     maxOmega = min(maxOmega, 0.999999);

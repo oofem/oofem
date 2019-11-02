@@ -88,18 +88,13 @@ Node :: giveCoordinate(int i)
 IRResultType Node :: initializeFrom(InputRecord *ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int size;
 
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    result = DofManager :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    DofManager :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 

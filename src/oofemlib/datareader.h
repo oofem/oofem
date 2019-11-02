@@ -94,9 +94,6 @@ public:
     std :: string giveOutputFileName() { return this->outputFileName; }
     /// Gives the problem description
     std :: string giveDescription() { return this->description; }
-
-    /// Prints the error message.
-    void report_error(const char *_class, const char *proc, const char *kwd, IRResultType result, const char *file, int line);
 };
 } // end namespace oofem
 #endif // datareader_h

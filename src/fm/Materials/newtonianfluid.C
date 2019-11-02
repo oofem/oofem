@@ -46,8 +46,6 @@ REGISTER_Material(NewtonianFluidMaterial);
 IRResultType
 NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, viscosity, _IFT_NewtonianFluidMaterial_mu);
 
     return FluidDynamicMaterial :: initializeFrom(ir);

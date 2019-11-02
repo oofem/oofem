@@ -51,8 +51,6 @@ HeMoTKMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 IRResultType
 HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, a_0, _IFT_HeMoTKMaterial_a_0);
     IR_GIVE_FIELD(ir, nn, _IFT_HeMoTKMaterial_nn);
     IR_GIVE_FIELD(ir, phi_c, _IFT_HeMoTKMaterial_phi_c);

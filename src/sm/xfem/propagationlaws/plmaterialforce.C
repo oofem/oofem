@@ -38,8 +38,6 @@ PLMaterialForce :: ~PLMaterialForce()
 
 IRResultType PLMaterialForce :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mRadius,                          _IFT_PLMaterialForce_Radius);
     IR_GIVE_FIELD(ir, mIncrementLength,                 _IFT_PLMaterialForce_IncLength);
     IR_GIVE_OPTIONAL_FIELD(ir, mCrackPropThreshold,     _IFT_PLMaterialForce_CrackPropThreshold);

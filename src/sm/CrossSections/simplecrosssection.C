@@ -466,11 +466,7 @@ SimpleCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatRespon
 
 IRResultType
 SimpleCrossSection :: initializeFrom(InputRecord *ir)
-//
-// instanciates receiver from input record
-//
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
     double thick = 0.0;

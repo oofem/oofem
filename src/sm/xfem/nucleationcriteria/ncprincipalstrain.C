@@ -247,10 +247,8 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 }
 
 
-IRResultType NCPrincipalStrain::initializeFrom(InputRecord *ir) {
-
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
+IRResultType NCPrincipalStrain::initializeFrom(InputRecord *ir)
+{
     IR_GIVE_FIELD(ir, mStrainThreshold, _IFT_NCPrincipalStrain_StrainThreshold);
     printf("mStrainThreshold: %e\n", mStrainThreshold);
 

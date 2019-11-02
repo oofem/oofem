@@ -79,8 +79,6 @@ InitialCondition :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, initialValueDictionary, _IFT_InitialCondition_conditions);
 
     int val = 0;

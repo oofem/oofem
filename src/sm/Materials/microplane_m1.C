@@ -51,8 +51,6 @@ M1Material :: initializeFrom(InputRecord *ir)
 {
     MicroplaneMaterial :: initializeFrom(ir);
 
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     if ( nu != 0.25 ) {
         OOFEM_WARNING("Poisson ratio of microplane model M1 must be set to 0.25");
     }
@@ -376,10 +374,7 @@ M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMod
 IRResultType
 M1Material :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E, _IFT_M1Material_e);
     EN = 1.5 * E;

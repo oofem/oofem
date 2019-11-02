@@ -76,7 +76,6 @@ public:
     {
         GeneralBoundaryCondition :: initializeFrom(ir);
 
-        IRResultType result;
         IntArray tempA, tempB, tempC;
         IR_GIVE_OPTIONAL_FIELD(ir, tempB, _IFT_ActiveBoundaryCondition_elementSides);
         for ( int i = 0; i < tempB.giveSize() / 2; ++i ) {

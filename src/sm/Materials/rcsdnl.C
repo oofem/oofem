@@ -349,14 +349,9 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 IRResultType
 RCSDNLMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     //RCSDEMaterial::instanciateFrom (ir);
-    result = this->giveLinearElasticMaterial()->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;    
-
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    this->giveLinearElasticMaterial()->initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, Ft, _IFT_RCSDNLMaterial_ft);
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDNLMaterial_sdtransitioncoeff);
@@ -381,8 +376,7 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        OOFEM_WARNING("cannot determine Gf and ef from input data");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, "none", "cannot determine Gf and ef from input data");
     }
 
     return IRRT_OK;

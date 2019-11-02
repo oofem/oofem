@@ -132,10 +132,7 @@ MicroplaneMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 IRResultType
 MicroplaneMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
 
     // elastic constants
     IR_GIVE_FIELD(ir, E, _IFT_MicroplaneMaterial_e);

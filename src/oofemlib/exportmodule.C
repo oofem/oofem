@@ -57,8 +57,6 @@ ExportModule :: ~ExportModule()
 IRResultType
 ExportModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     tstep_all_out_flag = ir->hasField(_IFT_ExportModule_tstepall);
 
     tstep_step_out = 0;

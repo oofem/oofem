@@ -53,7 +53,6 @@ IntMatIsoDamageTable :: IntMatIsoDamageTable(int n, Domain *d) : IntMatIsoDamage
 IRResultType
 IntMatIsoDamageTable :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     std :: ifstream is;
     int nbrOfLinesToRead;
 

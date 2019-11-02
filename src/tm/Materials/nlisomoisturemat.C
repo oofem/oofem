@@ -43,14 +43,11 @@ REGISTER_Material(NlIsoMoistureMaterial);
 IRResultType
 NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     int type = 0;
     IR_GIVE_FIELD(ir, type, _IFT_NlIsoMoistureMaterial_isothermtype);
 
     if ( type >= 7 ) {
-        OOFEM_WARNING("isothermType must be equal to 0, 1, 2 ... 6");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_isothermtype, "must be equal to 0, 1, 2 ... 6");
     }
 
     this->Isotherm = ( isothermType ) type;
@@ -58,7 +55,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD ( ir, type, _IFT_NlIsoMoistureMaterial_permeabilitytype );
 
     if ( type >= 4 ) {
-        OOFEM_ERROR ( "permeabilityType must be equal to 0, 1, 2, 3" );
+        throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_permeabilitytype, "must be equal to 0, 1, 2, 3" );
     }
 
     this->Permeability = ( permeabilityType ) type;
@@ -67,7 +64,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD ( ir, type, _IFT_NlIsoMoistureMaterial_capillarytransporttype );
         this->CapillaryTransport = ( capillaryTransportType ) type;
         if ( type >= 3 ) {
-            OOFEM_ERROR ( "capillaryTransportType must be equal to 0, 1, 2" );
+            throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_capillarytransporttype, "must be equal to 0, 1, 2" );
         }
     }
 
@@ -78,14 +75,12 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, iso_wh, _IFT_NlIsoMoistureMaterial_iso_wh);
 
         if ( iso_h.giveSize() != iso_wh.giveSize() ) {
-            OOFEM_WARNING("the size of 'iso_h' and 'iso_w(h)' must be the same");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_iso_h, "the size of 'iso_h' and 'iso_w(h)' must be the same");
         }
 
         for ( int i = 1; i < iso_h.giveSize(); i++ ) {
             if ( ( iso_h.at(i) < 0. ) || ( iso_h.at(i) > 1. ) ) {
-                OOFEM_WARNING("iso_h must be in the range <0; 1>");
-                return IRRT_BAD_FORMAT;
+                throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_iso_h, "iso_h must be in the range <0; 1>");
             }
         }
     } else if ( this->Isotherm == Ricken ) { // reference mentioned in Kuenzel isotherm = type 2
@@ -119,7 +114,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         this->c1 = (moistureCapacity*(2*dx)+capa2*(2*dx)+2*wa-2*wb)/(8*dx*dx*dx);
         this->c2 = (-3*c1*(2*dx)*(2*dx)-moistureCapacity+capa2)/(2*(2*dx));
     } else {
-        OOFEM_ERROR("unknown isotherm type");
+        throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_isothermtype, "unknown isotherm type");
     }
 
     if ( this->Permeability == multilin ) {
@@ -127,14 +122,12 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, perm_ch, _IFT_NlIsoMoistureMaterial_perm_ch);
 
         if ( perm_h.giveSize() != perm_ch.giveSize() ) {
-            OOFEM_WARNING("the size of 'perm_h' and 'perm_c(h)' must be the same");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_perm_ch, "the size of 'perm_h' and 'perm_c(h)' must be the same");
         }
 
         for ( int i = 1; i < perm_h.giveSize(); i++ ) {
             if ( ( perm_h.at(i) < 0. ) || ( perm_h.at(i) > 1. ) ) {
-                OOFEM_WARNING("perm_h must be in the range <0; 1>");
-                return IRRT_BAD_FORMAT;
+                throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_perm_h, "must be in the range <0; 1>");
             }
         }
     } else if ( this->Permeability == Bazant ) {
@@ -184,11 +177,11 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD ( ir, capPerm_Dwh, _IFT_NlIsoMoistureMaterial_capperm_dwh );
 
             if ( ! ( capPerm_h.giveSize() == capPerm_Dwh.giveSize() ) )
-                OOFEM_ERROR ( "size of 'capPerm_h' and 'capPerm_dw(h)' must be the same" );
+                throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_capperm_dwh, "size of 'capPerm_h' and 'capPerm_dw(h)' must be the same" );
 
             for ( int i = 1; i < capPerm_h.giveSize(); i++ ) {
                 if ( ( capPerm_h.at ( i ) < 0. ) || ( capPerm_h.at ( i ) > 1. ) )
-                    OOFEM_ERROR ( "capPerm_h must be in the range <0; 1>" );
+                    throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_capperm_h, "must be in the range <0; 1>" );
             }
 
         } else if (this->CapillaryTransport == Multilin_wV) {
@@ -200,11 +193,11 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD ( ir, capPerm_DwwV, _IFT_NlIsoMoistureMaterial_capperm_dwwv );
 
             if ( ! ( capPerm_wV.giveSize() == capPerm_DwwV.giveSize() ) )
-                OOFEM_ERROR ( "size of 'capPerm_wV' and 'capPerm_Dw(wV)' must be the same" );
+                throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_capperm_dwwv, "size of 'capPerm_wV' and 'capPerm_Dw(wV)' must be the same" );
 
             for ( int i = 1; i < capPerm_wV.giveSize(); i++ ) {
                 if ( ( capPerm_wV.at ( i ) < 0. ) || ( capPerm_wV.at ( i ) > 1. ) )
-                    OOFEM_ERROR ( "capPerm_wv must be in the range <0; 1>" );
+                    throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_capperm_wv, "must be in the range <0; 1>" );
             }
 
         } else { // according to Kunzel
@@ -218,7 +211,7 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord *ir)
         }
 
     } else {
-        OOFEM_ERROR("unknown permeability type");
+        throw ValueInputException(*ir, _IFT_NlIsoMoistureMaterial_permeabilitytype, "unknown permeability type");
     }
 
     wn = 0.;

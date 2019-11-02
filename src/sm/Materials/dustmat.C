@@ -148,15 +148,10 @@ DustMaterial :: DustMaterial(int n, Domain *d) : StructuralMaterial(n, d),
 IRResultType
 DustMaterial :: initializeFrom(InputRecord *ir)
 {
-    // Required by IR_GIVE_FIELD macro
-    IRResultType result;
     // call the corresponding service of structural material
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
+    StructuralMaterial :: initializeFrom(ir);
     // call the corresponding service for the linear elastic material
-    result = this->LEMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    this->LEMaterial.initializeFrom(ir);
 
     // instanciate the variables defined in DustMaterial
     ft = 3e6;
@@ -187,38 +182,31 @@ DustMaterial :: initializeFrom(InputRecord *ir)
 
     // check parameters admissibility
     if ( ft < 0 ) {
-        OOFEM_WARNING("parameter 'ft' must be positive");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_DustMaterial_ft, "must be positive");
     }
 
     if ( x0 < 0 ) {
-        OOFEM_WARNING("parameter 'x0' must be positive");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_DustMaterial_x0, "must be positive");
     }
 
     if ( rEll < 0 ) {
-        OOFEM_WARNING("parameter 'rEll' must be positive");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_DustMaterial_rEll, "must be positive");
     }
 
     if ( theta < 0 ) {
-        OOFEM_WARNING("parameter 'theta' must be positive");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_DustMaterial_theta, "must be positive");
     }
 
     if ( beta < 0 ) {
-        OOFEM_WARNING("parameter 'beta' must be positive");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_DustMaterial_beta, "must be positive");
     }
 
     if ( lambda < 0 ) {
-        OOFEM_WARNING("parameter 'lambda' must be positive");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_DustMaterial_lambda, "must be positive");
     }
 
     if ( alpha < lambda ) {
-        OOFEM_WARNING("parameter 'alpha' must be greater than parameter 'lambda'");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_DustMaterial_alpha, "must be greater than lambda");
     }
 
     x0 = -x0; // compressive strength is negative, although on input it is a positive number

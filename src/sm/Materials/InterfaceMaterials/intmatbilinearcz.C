@@ -273,8 +273,6 @@ FloatArrayF<3> IntMatBilinearCZ :: computeTraction(const FloatArrayF<3> &iTTrial
 
 IRResultType IntMatBilinearCZ :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, mPenaltyStiffness, _IFT_IntMatBilinearCZ_PenaltyStiffness);
 
     IR_GIVE_FIELD(ir, mGIc, _IFT_IntMatBilinearCZ_g1c);
@@ -289,8 +287,8 @@ IRResultType IntMatBilinearCZ :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mGamma, _IFT_IntMatBilinearCZ_gamma);
 
     if( ir->hasField(_IFT_IntMatBilinearCZ_semiexplicit) ) {
-    	mSemiExplicit = true;
-    	printf("In IntMatBilinearCZ::initializeFrom: Semi-explicit time integration activated.\n");
+        mSemiExplicit = true;
+        printf("In IntMatBilinearCZ::initializeFrom: Semi-explicit time integration activated.\n");
     }
 
     return StructuralInterfaceMaterial :: initializeFrom(ir);

@@ -227,12 +227,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 SUPG :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = FluidModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    FluidModel :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, rtolv, _IFT_SUPG_rtolv);
     atolv = 1.e-15;

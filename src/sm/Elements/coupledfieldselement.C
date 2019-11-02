@@ -189,7 +189,6 @@ CoupledFieldsElement :: computeStiffnessMatrixGen(FloatMatrix &answer, MatRespon
 IRResultType
 CoupledFieldsElement :: initializeFrom(InputRecord *ir)
 {
-    //IRResultType result;                // Required by IR_GIVE_FIELD macro
     //nlGeo = 0;
 
     return IRRT_OK;

@@ -53,8 +53,6 @@ REGISTER_BoundaryCondition(PrescribedMean);
 IRResultType
 PrescribedMean :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, c, _IFT_PrescribedMean_Mean);

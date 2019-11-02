@@ -58,7 +58,6 @@ CompoDamageMat :: ~CompoDamageMat()
 IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 {
     double value;
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //define transversely othotropic material stiffness parameters
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_exx);

@@ -53,8 +53,6 @@ NeumannMomentLoad :: initializeFrom(InputRecord *ir)
 {
     BoundaryLoad :: initializeFrom(ir);
 
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, g, _IFT_NeumannMomentLoad_Gradient);
     p = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, p, _IFT_NeumannMomentLoad_Constant);
@@ -62,7 +60,7 @@ NeumannMomentLoad :: initializeFrom(InputRecord *ir)
 
     xbar.resize(0);
 
-    return result;
+    return IRRT_OK;
 }
 
 void

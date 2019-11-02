@@ -157,8 +157,6 @@ SpringElement :: computeNumberOfGlobalDofs()
 IRResultType
 SpringElement :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int _mode;
     IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
     IR_GIVE_FIELD(ir, springConstant, _IFT_SpringElement_springConstant);

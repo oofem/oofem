@@ -52,8 +52,6 @@ HeMoBazNajMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 IRResultType
 HeMoBazNajMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, C1, _IFT_HeMoBazNajMaterial_c1);
     IR_GIVE_FIELD(ir, n, _IFT_HeMoBazNajMaterial_n);
     IR_GIVE_FIELD(ir, alpha0, _IFT_HeMoBazNajMaterial_alpha0);

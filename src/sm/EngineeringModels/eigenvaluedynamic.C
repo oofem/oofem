@@ -79,7 +79,6 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 EigenValueDynamic :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     //EngngModel::instanciateFrom (ir);
 
     IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, _IFT_EigenValueDynamic_nroot);

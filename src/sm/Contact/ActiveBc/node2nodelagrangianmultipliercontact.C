@@ -54,7 +54,6 @@ Node2NodeLagrangianMultiplierContact :: Node2NodeLagrangianMultiplierContact(int
 IRResultType
 Node2NodeLagrangianMultiplierContact :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
     this->useTangent = ir->hasField(_IFT_Node2NodeLagrangianMultiplierContact_useTangent);
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_Node2NodeLagrangianMultiplierContact_masterSet);
     IR_GIVE_FIELD(ir, this->slaveSet, _IFT_Node2NodeLagrangianMultiplierContact_slaveSet);

@@ -135,10 +135,7 @@ void AdaptiveLinearStatic :: restoreContext(DataStream &stream, ContextMode mode
 
 IRResultType
 AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
-// input from inputString
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, _IFT_AdaptiveLinearStatic_meshpackage);
 

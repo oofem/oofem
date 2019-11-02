@@ -54,8 +54,6 @@ CBSElement :: CBSElement(int n, Domain *aDomain) :
 IRResultType
 CBSElement :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_CBSElement_bcodes);

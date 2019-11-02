@@ -50,8 +50,6 @@ InitModule :: ~InitModule()
 IRResultType
 InitModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     std :: string initFileName;
     IR_GIVE_FIELD(ir, initFileName, _IFT_InitModule_initfilename);
     if ( ( initStream = fopen(initFileName.c_str(), "r") ) == NULL ) {

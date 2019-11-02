@@ -75,7 +75,6 @@ VTKExportModule :: ~VTKExportModule() { }
 IRResultType
 VTKExportModule :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     int val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKExportModule_cellvars);

@@ -49,8 +49,6 @@ WinklerMaterial:: WinklerMaterial (int n, Domain* d): StructuralMaterial(n, d)
 IRResultType
 WinklerMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, c1, _IFT_WinklerMaterial_C1);
     globalFromulation = true;
     int var=1;

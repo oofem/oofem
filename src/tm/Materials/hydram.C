@@ -109,7 +109,6 @@ HydrationModel :: HydrationModel(MixtureType mix, FindRootMethod usefr) : Materi
 IRResultType
 HydrationModel :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
     double value;
 
     //hydration>0  ->  initial hydration degree
@@ -118,8 +117,7 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     if ( initialHydrationDegree >= 0. ) {
         OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
-        OOFEM_WARNING("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_HydrationModel_hydration, "must be between 0 and 1");
     }
 
     if ( ir->hasField(_IFT_HydrationModel_c60mix) ) {
@@ -571,7 +569,6 @@ HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep) cons
 IRResultType
 HydrationModelInterface :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     double value;
 
     // !!! should use separate field, e.g. hydramname #hydramnumber
@@ -583,8 +580,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         hydrationModel = std::make_unique<HydrationModel>();
         if ( !hydrationModel ) {
-            OOFEM_WARNING("Could not create HydrationModel instance.");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(*ir, _IFT_HydrationModelInterface_hydration, "Could not create HydrationModel instance.");
         }
 
         hydrationModel->initializeFrom(ir);
@@ -594,8 +590,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         constantHydrationDegree = -value;
         OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        OOFEM_WARNING("Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_HydrationModelInterface_hydration, "must be between 0 and 1");
     }
 
     // Material cast time - start of hydration

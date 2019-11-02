@@ -229,8 +229,6 @@ MPSDamMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 IRResultType
 MPSDamMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     MPSMaterial :: initializeFrom(ir);
 
     this->isotropic = false;

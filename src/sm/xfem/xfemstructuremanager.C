@@ -62,7 +62,6 @@ XfemStructureManager :: ~XfemStructureManager()
 
 IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     int splitCracks = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, splitCracks, _IFT_XfemStructureManager_splitCracks);
     if ( splitCracks == 1 ) {

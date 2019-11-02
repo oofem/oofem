@@ -404,8 +404,6 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
 IRResultType
 FiberedCrossSection :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
 #  endif
@@ -426,13 +424,11 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
          num != fiberWidths.giveSize()    ||
          num != fiberYcoords.giveSize()   ||
          num != fiberZcoords.giveSize() ) {
-        OOFEM_WARNING("Array size mismatch ");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_FiberedCrossSection_fibermaterials, "Array size mismatch ");
     }
 
     if ( num <= 0 ) {
-        OOFEM_WARNING("number of fibers == 0 is not allowed");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_FiberedCrossSection_fibermaterials, "number of fibers == 0 is not allowed");
     }
 
     area = fiberThicks.dotProduct(fiberWidths);

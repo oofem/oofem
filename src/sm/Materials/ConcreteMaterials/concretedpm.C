@@ -301,19 +301,9 @@ ConcreteDPM :: ~ConcreteDPM()
 IRResultType
 ConcreteDPM :: initializeFrom(InputRecord *ir)
 {
-    // Required by IR_GIVE_FIELD macro
-    IRResultType result;
-
     // call the corresponding service for the linear elastic material
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     double value;
     // elastic parameters

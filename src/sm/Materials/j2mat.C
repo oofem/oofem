@@ -60,14 +60,10 @@ J2Mat :: ~J2Mat()
 IRResultType
 J2Mat :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 
-    result = MPlasticMaterial2 :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MPlasticMaterial2 :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, _IFT_J2Mat_ry);
     k = value / sqrt(3.0);

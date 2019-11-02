@@ -546,8 +546,6 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Beam3d :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     referenceNode = 0;
     referenceAngle = 0;
     this->zaxis.clear();
@@ -561,16 +559,14 @@ Beam3d :: initializeFrom(InputRecord *ir)
     } else if ( ir->hasField(_IFT_Beam3d_refangle) ) {
         IR_GIVE_FIELD(ir, referenceAngle, _IFT_Beam3d_refangle);
     } else {
-        OOFEM_WARNING("y-axis, reference node or angle not set");
-        return IRRT_NOTFOUND;
+        throw ValueInputException(*ir, _IFT_Beam3d_zaxis, "axis, reference node, or angle not set");
     }
 
     if ( ir->hasField(_IFT_Beam3d_dofstocondense) ) {
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam3d_dofstocondense);
         if ( val.giveSize() >= 12 ) {
-            OOFEM_WARNING("wrong input data for condensed dofs");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(*ir, _IFT_Beam3d_dofstocondense, "wrong input data for condensed dofs");
         }
 
         //dofsToCondense = new IntArray(val);

@@ -211,8 +211,6 @@ IntMatPhaseField :: compute_gBis(double d) const
 IRResultType
 IntMatPhaseField :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->k, _IFT_IntMatPhaseField_kn);
     IR_GIVE_FIELD(ir, this->Gc, _IFT_IntMatPhaseField_gc);
 

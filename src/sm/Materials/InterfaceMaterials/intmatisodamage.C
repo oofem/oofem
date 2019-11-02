@@ -232,8 +232,6 @@ IntMatIsoDamage :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 IRResultType
 IntMatIsoDamage :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, kn, _IFT_IntMatIsoDamage_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_IntMatIsoDamage_ks);
 

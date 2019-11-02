@@ -1471,8 +1471,6 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 IRResultType
 XfemStructuralElementInterface :: initializeCZFrom(InputRecord *ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     int material = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, material, _IFT_XfemElementInterface_CohesiveZoneMaterial);
     mCZMaterialNum = material;

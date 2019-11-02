@@ -225,10 +225,7 @@ RankineMatNl :: giveInterface(InterfaceType type)
 IRResultType
 RankineMatNl :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     return RankineMat :: initializeFrom(ir);
 }

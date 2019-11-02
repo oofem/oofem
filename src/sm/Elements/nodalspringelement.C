@@ -107,8 +107,6 @@ NodalSpringElement :: computeNumberOfGlobalDofs()
 IRResultType
 NodalSpringElement :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, dofMask, _IFT_NodalSpringElement_dofmask);
     IR_GIVE_FIELD(ir, springConstants, _IFT_NodalSpringElement_springConstants);
 

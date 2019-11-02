@@ -101,12 +101,7 @@ StaticStructural :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
 IRResultType
 StaticStructural :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralEngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralEngngModel :: initializeFrom(ir);
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
@@ -163,8 +158,6 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 void
 StaticStructural :: updateAttributes(MetaStep *mStep)
 {
-    IRResultType result;                  // Required by IR_GIVE_FIELD macro
-
     MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
     InputRecord *ir = mStep1->giveAttributesRecord();
 

@@ -122,8 +122,6 @@ CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 IRResultType
 CebFipSlip90Material :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, tmax, _IFT_CebFipSlip90Material_tmax);
     IR_GIVE_FIELD(ir, tres, _IFT_CebFipSlip90Material_tres);
 

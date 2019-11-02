@@ -50,8 +50,6 @@
 namespace oofem {
 IRResultType Set :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     IntArray inputNodes;
     std :: list< Range >inputNodeRanges;
     if ( ir->hasField(_IFT_Set_allNodes) ) { // generate a list with all the node numbers

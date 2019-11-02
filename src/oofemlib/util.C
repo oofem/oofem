@@ -141,7 +141,6 @@ void print_stacktrace(FILE *out, int skip, unsigned int max_frames)
 
 std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
-    IRResultType result;                       // Required by IR_GIVE_FIELD macro
     std :: string problemName, dataOutputFileName, desc;
 
     dataOutputFileName = dr.giveOutputFileName();
@@ -152,10 +151,7 @@ std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode,
      * through the whole e-model instanciation
      */
     auto emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1)->clone();
-    result = emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
-    if ( result != IRRT_OK ) {
-        emodelir->report_error("", __func__, "", result, __FILE__, __LINE__);
-    }
+    emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
 
     auto problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
     if ( !problem ) {

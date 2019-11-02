@@ -54,8 +54,6 @@ FluidMaterialEvaluator :: FluidMaterialEvaluator(int i, EngngModel *_master) : E
 
 IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;
-
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->deltaT, _IFT_FluidMaterialEvaluator_deltat);
     IR_GIVE_FIELD(ir, this->numberOfSteps, _IFT_FluidMaterialEvaluator_numberOfTimeSteps);

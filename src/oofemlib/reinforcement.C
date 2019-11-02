@@ -42,8 +42,6 @@ REGISTER_BoundaryCondition(Reinforcement);
 IRResultType
 Reinforcement :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating load ",number)
 #  endif

@@ -51,17 +51,11 @@ REGISTER_Material(OrthotropicLinearElasticMaterial);
 IRResultType
 OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     double value;
     int size;
     FloatArray triplets;
 
-
-    result = LinearElasticMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    LinearElasticMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ex);
     propertyDictionary.add(Ex, value);

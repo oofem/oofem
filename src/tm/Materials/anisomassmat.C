@@ -46,13 +46,10 @@ REGISTER_Material(AnisotropicMassTransferMaterial);
 IRResultType
 AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                          // Required by IR_GIVE_FIELD macro
-
     FloatMatrix c;
     IR_GIVE_FIELD(ir, c, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
     if ( c.giveNumberOfColumns() != 3 && c.giveNumberOfRows() != 3 ) {
-        OOFEM_WARNING("AnisotropicMassTransferMaterial::initializeFrom - c must be a 3x3");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(*ir, _IFT_AnisotropicMassTransferMaterial_c, "c must be a 3x3");
     }
     k = c;
     return TransportMaterial :: initializeFrom(ir);

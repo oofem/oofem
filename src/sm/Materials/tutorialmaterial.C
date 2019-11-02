@@ -51,10 +51,7 @@ TutorialMaterial :: TutorialMaterial(int n, Domain *d) : StructuralMaterial(n, d
 IRResultType
 TutorialMaterial :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    result = D.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    D.initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->sig0, _IFT_TutorialMaterial_yieldstress);
 

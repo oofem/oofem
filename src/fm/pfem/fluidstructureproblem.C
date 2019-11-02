@@ -73,12 +73,7 @@ FluidStructureProblem :: ~FluidStructureProblem()
 IRResultType
 FluidStructureProblem :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StaggeredProblem :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StaggeredProblem :: initializeFrom(ir);
 
     maxiter = 50;
     IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_FluidStructureProblem_maxiter);
