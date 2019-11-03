@@ -66,6 +66,7 @@ set (INTEL_MKL_PARDISO_DIR CACHE PATH "Manual mkl pardiso directory (sparse dire
 #pardiso-project.org
 set (PARDISO_ORG_DIR CACHE PATH "Manual pardiso-project.org directory (sparse direct solver)")
 #set (BOOST_DIR CACHE PATH "Manual Boost directory")
+set (PYBIND_DIR CACHE PATH "Manual pybind11 directory")
 
 #######################################################################
 ######################## Options ######################################
@@ -501,6 +502,10 @@ if (USE_PYTHON_BINDINGS)
     #build pybind11 bindings
     find_package(PythonInterp 3.0 REQUIRED)
     find_package(pybind11 REQUIRED CONFIG)
+    if (PYBIND_DIR)
+        message(STATUS "PYBIND_DIR = ${PYBIND_DIR}")
+        include_directories (${PYBIND_DIR})#Need also to manually set it up since it can be anywhere
+    endif ()
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
     target_link_libraries(oofempy PRIVATE liboofem)
 
