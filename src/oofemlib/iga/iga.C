@@ -48,7 +48,7 @@
 
 
 namespace oofem {
-IRResultType IGAElement :: initializeFrom(InputRecord *ir)
+void IGAElement :: initializeFrom(InputRecord &ir)
 {
     int indx = 0;
     numberOfGaussPoints = 1;
@@ -57,10 +57,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    Element :: initializeFrom(ir); // read nodes , material, cross section
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     this->giveInterpolation()->initializeFrom(ir); // read geometry
@@ -166,7 +163,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        throw ValueInputException(*ir, "Domain", "unsupported number of spatial dimensions");
+        throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
     }
     
 #ifdef __PARALLEL_MODE
@@ -178,9 +175,6 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     }
     IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, _IFT_IGAElement_KnotSpanParallelMode);
 #endif
-
-
-    return IRRT_OK;
 }
 
 
@@ -205,24 +199,19 @@ IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
 
 // integration elements are setup in the same way as for IGAElement for now HUHU
 
-IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
+void IGATSplineElement :: initializeFrom(InputRecord &ir)
 {
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
 
     int indx = 0, numberOfGaussPoints = 1;
 
-    IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    Element :: initializeFrom(ir); // read nodes , material, cross section
+
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     // set number of control points before initialization HUHU HAHA
     interpol->setNumberOfControlPoints(this->numberOfDofMans);
-    result = this->giveInterpolation()->initializeFrom(ir); // read geometry
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    this->giveInterpolation()->initializeFrom(ir); // read geometry
 
 
     // generate individual IntegrationElements; one for each nonzero knot span
@@ -268,10 +257,8 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        throw ValueInputException(*ir, "Domain", "unsupported number of spatial dimensions");
+        throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
     }
-
-    return IRRT_OK;
 }
 
 

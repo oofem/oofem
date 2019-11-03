@@ -845,14 +845,14 @@ LayeredCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArr
 }
 
 
-IRResultType
-LayeredCrossSection :: initializeFrom(InputRecord *ir)
+void
+LayeredCrossSection :: initializeFrom(InputRecord &ir)
 {
     CrossSection :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, numberOfLayers, _IFT_LayeredCrossSection_nlayers);
     if ( numberOfLayers <= 0 ) {
-        throw ValueInputException(*ir, _IFT_LayeredCrossSection_nlayers, "numberOfLayers <= 0 is not allowed");
+        throw ValueInputException(ir, _IFT_LayeredCrossSection_nlayers, "numberOfLayers <= 0 is not allowed");
     }
 
 
@@ -864,7 +864,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
             layerMaterials.resize(numberOfLayers); layerMaterials.zero();
             layerMaterials.add(temp);
         } else {
-            throw ValueInputException(*ir, _IFT_LayeredCrossSection_layermaterials, "numberOfLayers does not equal given number of materials. ");
+            throw ValueInputException(ir, _IFT_LayeredCrossSection_layermaterials, "numberOfLayers does not equal given number of materials. ");
         }
     }
 
@@ -876,7 +876,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
             layerThicks.resize(numberOfLayers); layerThicks.zero();
             layerThicks.add(temp);
         } else {
-            throw ValueInputException(*ir, _IFT_LayeredCrossSection_thicks, "numberOfLayers does not equal given number of thicknesses. ");
+            throw ValueInputException(ir, _IFT_LayeredCrossSection_thicks, "numberOfLayers does not equal given number of thicknesses. ");
         }
     }
 
@@ -888,7 +888,7 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, layerRots, _IFT_LayeredCrossSection_layerRotations);
 
     if ( numberOfLayers != layerRots.giveSize() ) {  //|| ( numberOfLayers != layerWidths.giveSize() ) ) || numberOfLayers != layerThicks.giveSize() || numberOfLayers != layerMaterials.giveSize()
-        throw ValueInputException(*ir, _IFT_LayeredCrossSection_layerRotations, "numberOfLayers does not equal given number of layer rotations. ");
+        throw ValueInputException(ir, _IFT_LayeredCrossSection_layerRotations, "numberOfLayers does not equal given number of layer rotations. ");
     }
 
     // Interface materials // add check if correct numbers
@@ -905,8 +905,6 @@ LayeredCrossSection :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, midSurfaceZcoordFromBottom, _IFT_LayeredCrossSection_midsurf);
 
     this->setupLayerMidPlanes();
-
-    return IRRT_OK;
 }
 
 void LayeredCrossSection :: giveInputRecord(DynamicInputRecord &input)

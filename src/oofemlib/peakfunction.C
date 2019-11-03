@@ -52,12 +52,12 @@ PeakFunction :: evaluateAtTime(double time)
     }
 }
 
-IRResultType
-PeakFunction :: initializeFrom(InputRecord *ir)
+void
+PeakFunction :: initializeFrom(InputRecord &ir)
 {
+    Function :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, t, _IFT_PeakFunction_t);
     IR_GIVE_FIELD(ir, value, _IFT_PeakFunction_ft);
-
-    return Function :: initializeFrom(ir);
 }
 } // end namespace oofem

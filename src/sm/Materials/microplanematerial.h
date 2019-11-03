@@ -160,7 +160,7 @@ public:
                                        GaussPoint *gp,
                                        TimeStep *tStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 };
 } // end namespace oofem

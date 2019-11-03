@@ -111,7 +111,7 @@ public:
      * The density of material is read into property dictionary (keyword 'd')
      * Intended to be called from material initializeFrom service.
      */
-    IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir);
     void giveInputRecord(DynamicInputRecord &ir);
     /**
      * Returns the property in associated status of given integration point if defined.

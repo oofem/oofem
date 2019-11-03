@@ -117,7 +117,7 @@ public:
     /// Sets up the communication maps
     void setUpCommunicationMaps();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // identification
     const char *giveClassName() const override { return "FETISolver"; }

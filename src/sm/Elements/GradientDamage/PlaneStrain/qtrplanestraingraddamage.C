@@ -95,11 +95,11 @@ QTrPlaneStrainGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
 
   
 
-IRResultType
-QTrPlaneStrainGradDamage :: initializeFrom(InputRecord *ir)
+void
+QTrPlaneStrainGradDamage :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    return QTrPlaneStrain :: initializeFrom(ir);
+    QTrPlaneStrain :: initializeFrom(ir);
 }
 
 void

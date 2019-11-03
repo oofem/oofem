@@ -61,11 +61,11 @@ Q27Space :: Q27Space(int n, Domain *aDomain) : Structural3DElement(n, aDomain), 
 }
 
 
-IRResultType
-Q27Space :: initializeFrom(InputRecord *ir)
+void
+Q27Space :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 27;
-    return Structural3DElement :: initializeFrom(ir);
+    Structural3DElement :: initializeFrom(ir);
 }
 
 

@@ -191,8 +191,8 @@ DruckerPragerPlasticitySM :: DruckerPragerPlasticitySM(int n, Domain *d) :
 }
 
 
-IRResultType
-DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
+void
+DruckerPragerPlasticitySM :: initializeFrom(InputRecord &ir)
 {
     // call the corresponding service of structural material
     StructuralMaterial :: initializeFrom(ir);
@@ -223,7 +223,7 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, limitYieldStress, _IFT_DruckerPragerPlasticitySM_lys);
         break;
     default:
-        throw ValueInputException(*ir, _IFT_DruckerPragerPlasticitySM_ht,
+        throw ValueInputException(ir, _IFT_DruckerPragerPlasticitySM_ht,
                                   "must be 1 (linear hardening/softening) or 2 (exponential hardening/softening)");
     }
 
@@ -231,8 +231,6 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_DruckerPragerPlasticitySM_yieldtol);
     newtonIter = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_DruckerPragerPlasticitySM_newtoniter);
-
-    return IRRT_OK;
 }
 
 void

@@ -83,7 +83,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_TrPlanestressRotAllman_Name; }
     const char *giveClassName() const override { return "TrPlanestressRotAllman"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _PlaneStress; }
     integrationDomain giveIntegrationDomain() const override { return _Triangle; }
     /** Computes the stiffness matrix of receiver. Overloaded to add stabilization of zero-energy mode (equal rotations) */

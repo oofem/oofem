@@ -75,8 +75,8 @@ TR1_2D_SUPG2_AXI :: TR1_2D_SUPG2_AXI(int n, Domain *aDomain) :
 }
 
 
-IRResultType
-TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord &ir)
 {
     SUPGElement :: initializeFrom(ir);
 
@@ -97,7 +97,6 @@ TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
     this->material = this->mat [ 0 ];
 
     this->initGeometry();
-    return IRRT_OK;
 }
 
 

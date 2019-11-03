@@ -39,13 +39,13 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-IRResultType
-LinearElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+LinearElasticMaterial :: initializeFrom(InputRecord &ir)
 {
+    StructuralMaterial :: initializeFrom(ir);
+
     preCastStiffnessReduction = 0.99999999;
     IR_GIVE_OPTIONAL_FIELD(ir, preCastStiffnessReduction, _IFT_LinearElasticMaterial_preCastStiffRed);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

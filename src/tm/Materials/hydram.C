@@ -106,8 +106,8 @@ HydrationModel :: HydrationModel(MixtureType mix, FindRootMethod usefr) : Materi
     }
 }
 
-IRResultType
-HydrationModel :: initializeFrom(InputRecord *ir)
+void
+HydrationModel :: initializeFrom(InputRecord &ir)
 {
     double value;
 
@@ -117,10 +117,10 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     if ( initialHydrationDegree >= 0. ) {
         OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
-        throw ValueInputException(*ir, _IFT_HydrationModel_hydration, "must be between 0 and 1");
+        throw ValueInputException(ir, _IFT_HydrationModel_hydration, "must be between 0 and 1");
     }
 
-    if ( ir->hasField(_IFT_HydrationModel_c60mix) ) {
+    if ( ir.hasField(_IFT_HydrationModel_c60mix) ) {
         OOFEM_LOG_INFO("HydrationModel: Model parameters for Skanska C60/75 mixture.");
         setMixture(mtC60);
     }
@@ -159,8 +159,6 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     if ( cv || ( value >= 0 ) ) {
         OOFEM_LOG_INFO("HydrationModel: Water consumption for hydration set to %.0f kg/m3", we);
     }
-
-    return IRRT_OK;
 }
 
 void
@@ -566,8 +564,8 @@ HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep) cons
 
 // ======= HydrationModelInterface implementation =======
 
-IRResultType
-HydrationModelInterface :: initializeFrom(InputRecord *ir)
+void
+HydrationModelInterface :: initializeFrom(InputRecord &ir)
 {
     double value;
 
@@ -580,7 +578,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         hydrationModel = std::make_unique<HydrationModel>();
         if ( !hydrationModel ) {
-            throw ValueInputException(*ir, _IFT_HydrationModelInterface_hydration, "Could not create HydrationModel instance.");
+            throw ValueInputException(ir, _IFT_HydrationModelInterface_hydration, "Could not create HydrationModel instance.");
         }
 
         hydrationModel->initializeFrom(ir);
@@ -590,7 +588,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         constantHydrationDegree = -value;
         OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        throw ValueInputException(*ir, _IFT_HydrationModelInterface_hydration, "must be between 0 and 1");
+        throw ValueInputException(ir, _IFT_HydrationModelInterface_hydration, "must be between 0 and 1");
     }
 
     // Material cast time - start of hydration
@@ -600,8 +598,6 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     if ( castAt >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: Hydration starts at time %.2g.", castAt);
     }
-
-    return IRRT_OK;
 }
 
 void

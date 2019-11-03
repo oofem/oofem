@@ -135,7 +135,7 @@ public:
     void translate(const FloatArray &iTrans);
 
     /// Initializes the Geometry from the InputRecord.
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
     virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("not implemented"); }
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
@@ -206,7 +206,7 @@ public:
     double computeInclinationAngle();
     void computeTransformationMatrix(FloatMatrix &answer);
     void transformIntoPolar(FloatArray *point, FloatArray &answer);
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bool isPointInside(FloatArray *point);
     bool intersects(Element *element) override;
     bool isOutside(BasicGeometry *bg) override;
@@ -272,7 +272,7 @@ public:
 
     void giveTangent(FloatArray &oTangent, const double &iArcPosition) const override { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "Circle"; }
     bool intersects(Element *element) override;
     void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) override;
@@ -309,7 +309,7 @@ public:
     void giveNormal(FloatArray &oNormal, const double &iArcPosition) const;
     void giveTangent(FloatArray &oTangent, const double &iArcPosition) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "PolygonLine"; }
 
@@ -372,7 +372,7 @@ public:
     { OOFEM_ERROR("not implemented"); }
 
     /// Computes the normal distance to the surface not to the center.
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 #if 0
     double computeDistanceTo(FloatArray &point) override;
     const char *giveClassName() const override { return "Circle"; }

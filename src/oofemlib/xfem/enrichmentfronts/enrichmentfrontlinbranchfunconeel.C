@@ -138,9 +138,8 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
-IRResultType EnrFrontLinearBranchFuncOneEl :: initializeFrom(InputRecord *ir)
+void EnrFrontLinearBranchFuncOneEl :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 
 void EnrFrontLinearBranchFuncOneEl :: giveInputRecord(DynamicInputRecord &input)

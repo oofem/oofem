@@ -153,7 +153,7 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "PerfectlyPlasticMaterial"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
     double give(int aProperty, GaussPoint *gp) const override;

@@ -219,13 +219,13 @@ IntElPoint :: computeAreaAround(GaussPoint *gp)
 }
 
 
-IRResultType
-IntElPoint :: initializeFrom(InputRecord *ir)
+void
+IntElPoint :: initializeFrom(InputRecord &ir)
 {
     StructuralInterfaceElement :: initializeFrom(ir);
 
-    if ( ir->hasField(_IFT_IntElPoint_refnode) && ir->hasField(_IFT_IntElPoint_normal) ) {
-        throw ValueInputException(*ir, _IFT_IntElPoint_refnode, "Ambiguous input: 'refnode' and 'normal' cannot both be specified");
+    if ( ir.hasField(_IFT_IntElPoint_refnode) &&ir.hasField(_IFT_IntElPoint_normal) ) {
+        throw ValueInputException(ir, _IFT_IntElPoint_refnode, "Ambiguous input: 'refnode' and 'normal' cannot both be specified");
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
@@ -233,7 +233,7 @@ IntElPoint :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_IntElPoint_normal);
     normal = n;
     
-    /*if ( ir->hasField(_IFT_IntElPoint_refnode) ) {
+    /*if ( ir.hasField(_IFT_IntElPoint_refnode) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
         normal = *domain->giveNode(this->referenceNode)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
     } else {
@@ -248,7 +248,6 @@ IntElPoint :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->area, _IFT_IntElPoint_area);
 
     this->computeLocalSlipDir();     
-    return IRRT_OK;
 }
 
 

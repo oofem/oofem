@@ -500,8 +500,8 @@ ConcreteDPM2 :: ConcreteDPM2(int n, Domain *d) :
 
 ConcreteDPM2 :: ~ConcreteDPM2() { }
 
-IRResultType
-ConcreteDPM2 :: initializeFrom(InputRecord *ir)
+void
+ConcreteDPM2 :: initializeFrom(InputRecord &ir)
 {
     // call the corresponding service for the linear elastic material
     StructuralMaterial :: initializeFrom(ir);
@@ -563,7 +563,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 2 ) {
-        throw ValueInputException(*ir, _IFT_ConcreteDPM2_softeningType, "softening type not implemented");
+        throw ValueInputException(ir, _IFT_ConcreteDPM2_softeningType, "softening type not implemented");
     }
 
     IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);
@@ -606,8 +606,6 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fcZero, _IFT_ConcreteDPM2_fcZero);
         IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, _IFT_ConcreteDPM2_timeFactor);
     }
-
-    return IRRT_OK;
 }
 
 

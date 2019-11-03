@@ -57,8 +57,8 @@ J2Mat :: J2Mat(int n, Domain *d) : MPlasticMaterial2(n, d)
 J2Mat :: ~J2Mat()
 { }
 
-IRResultType
-J2Mat :: initializeFrom(InputRecord *ir)
+void
+J2Mat :: initializeFrom(InputRecord &ir)
 {
     double value;
 
@@ -89,9 +89,6 @@ J2Mat :: initializeFrom(InputRecord *ir)
     } else {
         this->rmType = mpm_CuttingPlane;
     }
-
-
-    return IRRT_OK;
 }
 
 

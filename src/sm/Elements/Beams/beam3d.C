@@ -543,30 +543,32 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 }
 
 
-IRResultType
-Beam3d :: initializeFrom(InputRecord *ir)
+void
+Beam3d :: initializeFrom(InputRecord &ir)
 {
+    BeamBaseElement :: initializeFrom(ir);
+
     referenceNode = 0;
     referenceAngle = 0;
     this->zaxis.clear();
-    if ( ir->hasField(_IFT_Beam3d_zaxis) ) {
+    if ( ir.hasField(_IFT_Beam3d_zaxis) ) {
         IR_GIVE_FIELD(ir, this->zaxis, _IFT_Beam3d_zaxis);
-    } else if ( ir->hasField(_IFT_Beam3d_refnode) ) {
+    } else if ( ir.hasField(_IFT_Beam3d_refnode) ) {
         IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
         if ( referenceNode == 0 ) {
             OOFEM_WARNING("wrong reference node specified. Using default orientation.");
         }
-    } else if ( ir->hasField(_IFT_Beam3d_refangle) ) {
+    } else if ( ir.hasField(_IFT_Beam3d_refangle) ) {
         IR_GIVE_FIELD(ir, referenceAngle, _IFT_Beam3d_refangle);
     } else {
-        throw ValueInputException(*ir, _IFT_Beam3d_zaxis, "axis, reference node, or angle not set");
+        throw ValueInputException(ir, _IFT_Beam3d_zaxis, "axis, reference node, or angle not set");
     }
 
-    if ( ir->hasField(_IFT_Beam3d_dofstocondense) ) {
+    if ( ir.hasField(_IFT_Beam3d_dofstocondense) ) {
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam3d_dofstocondense);
         if ( val.giveSize() >= 12 ) {
-            throw ValueInputException(*ir, _IFT_Beam3d_dofstocondense, "wrong input data for condensed dofs");
+            throw ValueInputException(ir, _IFT_Beam3d_dofstocondense, "wrong input data for condensed dofs");
         }
 
         //dofsToCondense = new IntArray(val);
@@ -593,8 +595,6 @@ Beam3d :: initializeFrom(InputRecord *ir)
 
     this->subsoilMat = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->subsoilMat, _IFT_Beam3d_subsoilmat);
-
-    return BeamBaseElement :: initializeFrom(ir);
 }
 
 

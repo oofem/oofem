@@ -296,21 +296,19 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 }
 #endif
 
-IRResultType
-TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
+void
+TrPlaneStress2dXFEM :: initializeFrom(InputRecord &ir)
 {
     TrPlaneStress2d :: initializeFrom(ir);
     XfemStructuralElementInterface :: initializeCZFrom(ir);
 
-    if ( ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeff) ) {
-        ir->giveOptionalField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
+    if ( ir.hasField(_IFT_TrPlaneStress2dXFEM_RegCoeff) ) {
+        ir.giveOptionalField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
     }
 
-    if ( ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeffTol) ) {
-        ir->giveOptionalField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
+    if ( ir.hasField(_IFT_TrPlaneStress2dXFEM_RegCoeffTol) ) {
+        ir.giveOptionalField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
     }
-
-    return IRRT_OK;
 }
 
 MaterialMode TrPlaneStress2dXFEM :: giveMaterialMode()

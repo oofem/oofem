@@ -186,7 +186,7 @@ EngngModel :: Instanciate_init()
 }
 
 
-int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
+int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *dataOutputFileName, const char *desc)
 {
     referenceFileName = dr.giveReferenceName();
 
@@ -240,7 +240,7 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const cha
 
         // check emodel input record if no default metastep, since all has been read
         if ( inputReaderFinish ) {
-            ir->finish();
+            ir.finish();
         }
     } catch ( InputException &e ) {
         OOFEM_ERROR("Error initializing from user input: %s\n", e.what());
@@ -250,8 +250,8 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord *ir, const cha
 }
 
 
-IRResultType
-EngngModel :: initializeFrom(InputRecord *ir)
+void
+EngngModel :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
     if ( numberOfSteps <= 0 ) {
@@ -296,10 +296,10 @@ EngngModel :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+    suppressOutput = ir.hasField(_IFT_EngngModel_suppressOutput);
 
-    if(suppressOutput) {
-//    	printf("Suppressing output.\n");
+    if ( suppressOutput ) {
+        //printf("Suppressing output.\n");
     }
     else {
 
@@ -317,8 +317,6 @@ EngngModel :: initializeFrom(InputRecord *ir)
         }
 #endif
     }
-
-    return IRRT_OK;
 }
 
 
@@ -339,8 +337,6 @@ EngngModel :: instanciateDomains(DataReader &dr)
 int
 EngngModel :: instanciateMetaSteps(DataReader &dr)
 {
-    int result = 1;
-
     // create meta steps
     metaStepList.clear();
     metaStepList.reserve(nMetaSteps);
@@ -351,17 +347,17 @@ EngngModel :: instanciateMetaSteps(DataReader &dr)
 
     // read problem domains
     for ( int i = 1; i <= this->nMetaSteps; i++ ) {
-        InputRecord *ir = dr.giveInputRecord(DataReader :: IR_mstepRec, i);
-        result &= metaStepList[i-1].initializeFrom(ir);
+        auto &ir = dr.giveInputRecord(DataReader :: IR_mstepRec, i);
+        metaStepList[i-1].initializeFrom(ir);
     }
 
     this->numberOfSteps = metaStepList.size();
-    return result;
+    return 1;
 }
 
 
 int
-EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
+EngngModel :: instanciateDefaultMetaStep(InputRecord &ir)
 {
     if ( numberOfSteps == 0 ) {
         OOFEM_ERROR("nsteps cannot be zero");
@@ -371,7 +367,7 @@ EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
     this->nMetaSteps = 1;
     metaStepList.clear();
     //MetaStep *mstep = new MetaStep(1, this, numberOfSteps, *ir);
-    metaStepList.emplace_back(1, this, numberOfSteps, *ir);
+    metaStepList.emplace_back(1, this, numberOfSteps, ir);
 
     return 1;
 }
@@ -572,14 +568,14 @@ EngngModel :: initMetaStepAttributes(MetaStep *mStep)
     // update attributes
     this->updateAttributes(mStep); // virtual function
     // finish data acquiring
-    mStep->giveAttributesRecord()->finish();
+    mStep->giveAttributesRecord().finish();
 }
 
 void
 EngngModel :: updateAttributes(MetaStep *mStep)
 {
     MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
-    InputRecord *ir = mStep1->giveAttributesRecord();
+    auto &ir = mStep1->giveAttributesRecord();
 
     if ( this->giveNumericalMethod(mStep1) ) {
         this->giveNumericalMethod(mStep1)->initializeFrom(ir);

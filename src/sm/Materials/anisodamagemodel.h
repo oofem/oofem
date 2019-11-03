@@ -263,7 +263,7 @@ public:
      */
     void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp, const FloatArray &totalStrain, double equivStrain, TimeStep *atTime);
 

@@ -766,8 +766,8 @@ MDM :: giveThermalDilatationVector(FloatArray &answer,
 }
 
 
-IRResultType
-MDM :: initializeFrom(InputRecord *ir)
+void
+MDM :: initializeFrom(InputRecord &ir)
 //
 // initializes according to string
 //
@@ -782,26 +782,26 @@ MDM :: initializeFrom(InputRecord *ir)
             R = 0.0;
         }
 
-        if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        if ( ir.hasField(_IFT_MDM_efp) && ir.hasField(_IFT_MDM_ep) ) {
             // read raw_params if available
             IR_GIVE_FIELD(ir, this->mdm_Efp, _IFT_MDM_efp);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
-        } else if ( ( ir->hasField(_IFT_MDM_gf) ) && ( ir->hasField(_IFT_MDM_ft) ) ) {
+        } else if ( ir.hasField(_IFT_MDM_gf) && ir.hasField(_IFT_MDM_ft) ) {
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->Ft, _IFT_MDM_ft);
         } else {
-            throw ValueInputException(*ir, _IFT_MDM_nonloc, "unknown set of parameters");
+            throw ValueInputException(ir, _IFT_MDM_nonloc, "unknown set of parameters");
         }
     } else { // local case
-        if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        if ( ir.hasField(_IFT_MDM_efp) && ir.hasField(_IFT_MDM_ep) ) {
             // read raw_params if available
             IR_GIVE_FIELD(ir, this->mdm_Efp, _IFT_MDM_efp);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
-        } else if ( ( ir->hasField(_IFT_MDM_gf) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        } else if ( ir.hasField(_IFT_MDM_gf) && ir.hasField(_IFT_MDM_ep) ) {
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
         } else {
-            throw ValueInputException(*ir, _IFT_MDM_nonloc, "unknown set of parameters");
+            throw ValueInputException(ir, _IFT_MDM_nonloc, "unknown set of parameters");
         }
     }
 
@@ -844,8 +844,6 @@ MDM :: initializeFrom(InputRecord *ir)
     mapper.initializeFrom(ir);
 #endif
     mapper2.initializeFrom(ir);
-
-    return IRRT_OK;
 }
 
 

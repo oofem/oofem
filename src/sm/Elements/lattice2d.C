@@ -350,9 +350,11 @@ Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     return 1;
 }
 
-IRResultType
-Lattice2d :: initializeFrom(InputRecord *ir)
+void
+Lattice2d :: initializeFrom(InputRecord &ir)
 {
+    LatticeStructuralElement :: initializeFrom(ir);
+
     IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_Lattice2d_thick);
 
     IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_Lattice2d_width);
@@ -367,9 +369,6 @@ Lattice2d :: initializeFrom(InputRecord *ir)
     if ( couplingFlag == 1 ) {
         IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers.at(1), _IFT_Lattice2d_couplingnumber);
     }
-
-    // first call parent
-    return LatticeStructuralElement :: initializeFrom(ir);
 }
 
 

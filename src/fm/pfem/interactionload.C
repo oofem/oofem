@@ -45,12 +45,12 @@
 namespace oofem {
 REGISTER_BoundaryCondition(InteractionLoad);
 
-IRResultType
-InteractionLoad :: initializeFrom(InputRecord *ir)
+void
+InteractionLoad :: initializeFrom(InputRecord &ir)
 {
-    IR_GIVE_FIELD(ir, coupledParticles, _IFT_InteractionLoad_CoupledParticles);
+    LinearEdgeLoad :: initializeFrom(ir);
 
-    return LinearEdgeLoad :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, coupledParticles, _IFT_InteractionLoad_CoupledParticles);
 }
 
 

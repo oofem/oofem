@@ -42,15 +42,13 @@
 namespace oofem {
 REGISTER_Material(TwoPhaseMaterial);
 
-IRResultType
-TwoPhaseMaterial :: initializeFrom(InputRecord *ir)
+void
+TwoPhaseMaterial :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoPhaseMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        throw ValueInputException(*ir, _IFT_TwoPhaseMaterial_mat, "must have two values");
+        throw ValueInputException(ir, _IFT_TwoPhaseMaterial_mat, "must have two values");
     }
-
-    return IRRT_OK;
 }
 
 

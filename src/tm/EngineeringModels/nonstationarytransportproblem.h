@@ -150,7 +150,7 @@ public:
     TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     int checkConsistency() override;
 
     // identification

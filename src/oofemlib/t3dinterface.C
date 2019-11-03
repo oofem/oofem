@@ -483,7 +483,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
-        crossSection->initializeFrom(&ir);
+        crossSection->initializeFrom(ir);
         ( * dNew )->setCrossSection(i, std::move(crossSection));
     }
 
@@ -496,7 +496,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto mat = classFactory.createMaterial(name.c_str(), i, * dNew);
-        mat->initializeFrom(&ir);
+        mat->initializeFrom(ir);
         ( * dNew )->setMaterial(i, std::move(mat));
     }
 
@@ -509,7 +509,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
-        barrier->initializeFrom(&ir);
+        barrier->initializeFrom(ir);
         ( * dNew )->setNonlocalBarrier(i, std::move(barrier));
     }
 
@@ -522,7 +522,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
-        bc->initializeFrom(&ir);
+        bc->initializeFrom(ir);
         ( * dNew )->setBoundaryCondition(i, std::move(bc));
     }
 
@@ -535,7 +535,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto ic = std::make_unique<InitialCondition>(i, *dNew);
-        ic->initializeFrom(&ir);
+        ic->initializeFrom(ir);
         ( * dNew )->setInitialCondition(i, std::move(ic));
     }
 
@@ -552,7 +552,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         
         //ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
         auto ltf = classFactory.createFunction(name.c_str(), i, * dNew);
-        ltf->initializeFrom(&ir);
+        ltf->initializeFrom(ir);
         //( * dNew )->setLoadTimeFunction(i, ltf);
         ( * dNew )->setFunction(i, std::move(ltf));
     }

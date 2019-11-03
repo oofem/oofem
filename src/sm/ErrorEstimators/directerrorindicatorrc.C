@@ -235,8 +235,8 @@ DirectErrorIndicatorRC :: giveRequiredDofManDensity(int num, TimeStep *tStep, in
 }
 
 
-IRResultType
-DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
+void
+DirectErrorIndicatorRC :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, minIndicatorLimit, _IFT_DirectErrorIndicatorRC_minlim);
     IR_GIVE_FIELD(ir, maxIndicatorLimit, _IFT_DirectErrorIndicatorRC_maxlim);
@@ -253,7 +253,6 @@ DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
     communicator = new NodeCommunicator(emodel, commBuff, emodel->giveRank(),
                                         emodel->giveNumberOfProcesses());
 #endif
-    return IRRT_OK;
 }
 
 RemeshingStrategy

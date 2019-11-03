@@ -132,7 +132,7 @@ public:
     virtual bool hasAnalyticalTangentStiffness() const = 0;
 
     // identification and auxiliary functions
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     virtual FloatArray giveInterfaceStrength() { return {0}; }

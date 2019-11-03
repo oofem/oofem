@@ -106,8 +106,8 @@ Axisymm3d :: giveArea()
 }
 
 
-IRResultType
-Axisymm3d :: initializeFrom(InputRecord *ir)
+void
+Axisymm3d :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
     StructuralElement :: initializeFrom(ir);
@@ -117,8 +117,6 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
            ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 1;
     }
-
-    return IRRT_OK;
 }
 
 

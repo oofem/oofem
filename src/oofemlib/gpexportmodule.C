@@ -54,12 +54,12 @@ GPExportModule :: ~GPExportModule()
 { }
 
 
-IRResultType
-GPExportModule :: initializeFrom(InputRecord *ir)
+void
+GPExportModule :: initializeFrom(InputRecord &ir)
 {
+    ExportModule :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, vartypes, _IFT_GPExportModule_vartypes);
     IR_GIVE_OPTIONAL_FIELD(ir, ncoords, _IFT_GPExportModule_ncoords);
-    return ExportModule :: initializeFrom(ir);
 }
 
 

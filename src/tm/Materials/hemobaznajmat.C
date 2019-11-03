@@ -49,9 +49,11 @@ HeMoBazNajMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-IRResultType
-HeMoBazNajMaterial :: initializeFrom(InputRecord *ir)
+void
+HeMoBazNajMaterial :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, C1, _IFT_HeMoBazNajMaterial_c1);
     IR_GIVE_FIELD(ir, n, _IFT_HeMoBazNajMaterial_n);
     IR_GIVE_FIELD(ir, alpha0, _IFT_HeMoBazNajMaterial_alpha0);
@@ -62,8 +64,6 @@ HeMoBazNajMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, heatConductivity, _IFT_HeMoBazNajMaterial_k);
     IR_GIVE_FIELD(ir, heatCapacity, _IFT_HeMoBazNajMaterial_c);
-
-     return Material :: initializeFrom(ir);
 }
 
 

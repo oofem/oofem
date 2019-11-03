@@ -40,9 +40,11 @@
 namespace oofem {
 REGISTER_Material(BazantNajjarMoistureTransferMaterial);
 
-IRResultType
-BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord &ir)
 {
+    IsotropicMoistureTransferMaterial :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, C1, _IFT_BazantNajjarMoistureTransferMaterial_c1);
     IR_GIVE_FIELD(ir, n, _IFT_BazantNajjarMoistureTransferMaterial_n);
     IR_GIVE_FIELD(ir, alpha0, _IFT_BazantNajjarMoistureTransferMaterial_alpha0);
@@ -50,8 +52,6 @@ BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
     this->moistureCapacity = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, moistureCapacity, _IFT_BazantNajjarMoistureTransferMaterial_capa);
-
-    return IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 }
 
 

@@ -63,7 +63,7 @@ PLPrincipalStrain::~PLPrincipalStrain() {
 
 }
 
-IRResultType PLPrincipalStrain :: initializeFrom(InputRecord *ir)
+void PLPrincipalStrain :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, mRadius,                          _IFT_PLPrincipalStrain_Radius);
     IR_GIVE_FIELD(ir, mIncrementLength,         _IFT_PLPrincipalStrain_IncLength);
@@ -74,8 +74,6 @@ IRResultType PLPrincipalStrain :: initializeFrom(InputRecord *ir)
     if ( useRadialBasisFunc == 1 ) {
         mUseRadialBasisFunc = true;
     }
-
-    return IRRT_OK;
 }
 
 void PLPrincipalStrain :: giveInputRecord(DynamicInputRecord &input)

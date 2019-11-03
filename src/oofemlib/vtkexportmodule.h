@@ -93,7 +93,7 @@ public:
     /// Destructor
     virtual ~VTKExportModule();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
     void initialize() override;

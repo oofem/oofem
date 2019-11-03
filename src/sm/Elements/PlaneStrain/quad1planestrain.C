@@ -148,14 +148,11 @@ Quad1PlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 }
 
 
-IRResultType
-Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
+void
+Quad1PlaneStrain :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = PlaneStrainElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    PlaneStrainElement :: initializeFrom(ir);
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
             ( numberOfGaussPoints == 1 ) ||
@@ -163,8 +160,6 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
             ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
-
-    return IRRT_OK;
 }
 
 

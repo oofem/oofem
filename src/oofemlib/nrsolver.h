@@ -174,7 +174,7 @@ public:
                     int &nite, TimeStep *) override;
     void printState(FILE *outputStream) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "NRSolver"; }
     virtual const char *giveInputRecordName() const { return _IFT_NRSolver_Name; }
 

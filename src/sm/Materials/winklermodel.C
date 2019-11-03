@@ -46,16 +46,16 @@ WinklerMaterial:: WinklerMaterial (int n, Domain* d): StructuralMaterial(n, d)
 { }
 
 
-IRResultType
-WinklerMaterial :: initializeFrom(InputRecord *ir)
+void
+WinklerMaterial :: initializeFrom(InputRecord &ir)
 {
+    StructuralMaterial :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, c1, _IFT_WinklerMaterial_C1);
     globalFromulation = true;
     int var=1;
     IR_GIVE_OPTIONAL_FIELD(ir, var,  _IFT_WinklerMaterial_globalFlag);
     globalFromulation=var;
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

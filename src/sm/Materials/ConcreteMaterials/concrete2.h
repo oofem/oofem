@@ -192,7 +192,7 @@ public:
 
     const char *giveClassName() const override { return "Concrete2"; }
     const char *giveInputRecordName() const override { return _IFT_Concrete2_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 protected:
     void dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,

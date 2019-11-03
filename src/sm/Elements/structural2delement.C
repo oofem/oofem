@@ -55,16 +55,11 @@ Structural2DElement :: ~Structural2DElement()
 }
 
 
-IRResultType
-Structural2DElement :: initializeFrom(InputRecord *ir)
+void
+Structural2DElement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    matRotation = ir->hasField(_IFT_Structural2DElement_materialCoordinateSystem); //|| this->elemLocalCS.isNotEmpty();
-    return IRRT_OK;
+    NLStructuralElement :: initializeFrom(ir);
+    matRotation = ir.hasField(_IFT_Structural2DElement_materialCoordinateSystem); //|| this->elemLocalCS.isNotEmpty();
 }
 
 

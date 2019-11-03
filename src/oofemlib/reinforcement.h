@@ -79,7 +79,7 @@ public:
     bcValType giveBCValType() const override { return ReinforceBVT; }
     bcGeomType giveBCGeoType() const override { return BodyLoadBGT; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "Reinforcement"; }
     const char *giveInputRecordName() const override { return _IFT_Reinforcement_Name; }
 

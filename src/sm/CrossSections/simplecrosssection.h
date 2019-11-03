@@ -140,7 +140,7 @@ public:
      * - 'beamshearcoeff' Beam shear coefficient
      * @param ir Record to read off.
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void createMaterialStatus(GaussPoint &iGP) override;

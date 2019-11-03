@@ -60,10 +60,10 @@ Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
     numberOfDofMans = 3;
 }
 
-IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
+void Tr1Darcy :: initializeFrom(InputRecord &ir)
 {
     this->numberOfGaussPoints = 1;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 FEInterpolation *

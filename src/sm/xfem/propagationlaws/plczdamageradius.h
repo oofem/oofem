@@ -66,7 +66,7 @@ public:
     const char *giveClassName() const override { return "PLCZdamageRadius"; }
     const char *giveInputRecordName() const override { return _IFT_PLCZdamageRadius_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bool hasPropagation() const override { return mIncrementRadius > 0.; } ///@todo Could this be done smarter? / Mikael

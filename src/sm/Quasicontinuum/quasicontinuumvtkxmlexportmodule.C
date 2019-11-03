@@ -61,13 +61,13 @@ QuasicontinuumVTKXMLExportModule :: ~QuasicontinuumVTKXMLExportModule()
 {}
 
 
-IRResultType
-QuasicontinuumVTKXMLExportModule :: initializeFrom(InputRecord *ir)
+void
+QuasicontinuumVTKXMLExportModule :: initializeFrom(InputRecord &ir)
 {
+    VTKXMLExportModule :: initializeFrom(ir);
+
     deactivatedElementsExportFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, deactivatedElementsExportFlag, _IFT_QuasicontinuumVTKXMLExportModule_ExportDeactivatedElements); // Macro
-
-    return VTKXMLExportModule :: initializeFrom(ir);
 }
 
 

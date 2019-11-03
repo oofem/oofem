@@ -70,8 +70,8 @@ FluidStructureProblem :: ~FluidStructureProblem()
 {}
 
 
-IRResultType
-FluidStructureProblem :: initializeFrom(InputRecord *ir)
+void
+FluidStructureProblem :: initializeFrom(InputRecord &ir)
 {
     StaggeredProblem :: initializeFrom(ir);
 
@@ -83,8 +83,6 @@ FluidStructureProblem :: initializeFrom(InputRecord *ir)
 
     rtolp = 1.e-3;
     IR_GIVE_OPTIONAL_FIELD(ir, rtolp, _IFT_FluidStructureProblem_rtolp);
-
-    return IRRT_OK;
 }
 
 void

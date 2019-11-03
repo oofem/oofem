@@ -60,7 +60,7 @@ public:
     HTSelement(int n, Domain * d);
     virtual ~HTSelement() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_HTSelement_Name; }
     const char *giveClassName() const override { return "HTSelement"; }

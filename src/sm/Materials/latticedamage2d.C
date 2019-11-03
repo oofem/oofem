@@ -66,8 +66,8 @@ LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-IRResultType
-LatticeDamage2d :: initializeFrom(InputRecord *ir)
+void
+LatticeDamage2d :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
     RandomMaterialExtensionInterface :: initializeFrom(ir);
@@ -120,7 +120,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         e0OneMean = 0.3 * e0Mean;
         IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage2d_e0OneMean);
     } else {
-        throw ValueInputException(*ir, _IFT_LatticeDamage2d_softeningType, "Unknown softening type");
+        throw ValueInputException(ir, _IFT_LatticeDamage2d_softeningType, "Unknown softening type");
     }
 
     this->biotCoefficient = 0.;
@@ -128,8 +128,6 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 
     this->biotType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage2d_btype);
-
-    return IRRT_OK;
 }
 
 void

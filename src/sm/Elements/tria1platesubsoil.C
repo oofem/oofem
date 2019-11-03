@@ -129,11 +129,11 @@ Tria1PlateSubSoil :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespons
 }
 
 
-IRResultType
-Tria1PlateSubSoil :: initializeFrom(InputRecord *ir)
+void
+Tria1PlateSubSoil :: initializeFrom(InputRecord &ir)
 {
     this->numberOfGaussPoints = 1;
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

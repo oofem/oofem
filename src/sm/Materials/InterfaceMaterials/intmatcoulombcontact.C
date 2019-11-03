@@ -107,9 +107,11 @@ IntMatCoulombContact :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPo
 }
 
 
-IRResultType
-IntMatCoulombContact :: initializeFrom(InputRecord *ir)
+void
+IntMatCoulombContact :: initializeFrom(InputRecord &ir)
 {
+    StructuralInterfaceMaterial :: initializeFrom( ir );
+
     frictCoeff = 0.;
     stiffCoeff = 0.;
     normalClearance = 0.;
@@ -117,8 +119,6 @@ IntMatCoulombContact :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_IntMatCoulombContact_frictCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_IntMatCoulombContact_stiffCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_IntMatCoulombContact_normalClearance);
-
-    return StructuralInterfaceMaterial :: initializeFrom( ir );
 }
 
 

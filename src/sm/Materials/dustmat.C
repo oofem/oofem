@@ -145,8 +145,8 @@ DustMaterial :: DustMaterial(int n, Domain *d) : StructuralMaterial(n, d),
 }
 
 
-IRResultType
-DustMaterial :: initializeFrom(InputRecord *ir)
+void
+DustMaterial :: initializeFrom(InputRecord &ir)
 {
     // call the corresponding service of structural material
     StructuralMaterial :: initializeFrom(ir);
@@ -182,31 +182,31 @@ DustMaterial :: initializeFrom(InputRecord *ir)
 
     // check parameters admissibility
     if ( ft < 0 ) {
-        throw ValueInputException(*ir, _IFT_DustMaterial_ft, "must be positive");
+        throw ValueInputException(ir, _IFT_DustMaterial_ft, "must be positive");
     }
 
     if ( x0 < 0 ) {
-        throw ValueInputException(*ir, _IFT_DustMaterial_x0, "must be positive");
+        throw ValueInputException(ir, _IFT_DustMaterial_x0, "must be positive");
     }
 
     if ( rEll < 0 ) {
-        throw ValueInputException(*ir, _IFT_DustMaterial_rEll, "must be positive");
+        throw ValueInputException(ir, _IFT_DustMaterial_rEll, "must be positive");
     }
 
     if ( theta < 0 ) {
-        throw ValueInputException(*ir, _IFT_DustMaterial_theta, "must be positive");
+        throw ValueInputException(ir, _IFT_DustMaterial_theta, "must be positive");
     }
 
     if ( beta < 0 ) {
-        throw ValueInputException(*ir, _IFT_DustMaterial_beta, "must be positive");
+        throw ValueInputException(ir, _IFT_DustMaterial_beta, "must be positive");
     }
 
     if ( lambda < 0 ) {
-        throw ValueInputException(*ir, _IFT_DustMaterial_lambda, "must be positive");
+        throw ValueInputException(ir, _IFT_DustMaterial_lambda, "must be positive");
     }
 
     if ( alpha < lambda ) {
-        throw ValueInputException(*ir, _IFT_DustMaterial_alpha, "must be greater than lambda");
+        throw ValueInputException(ir, _IFT_DustMaterial_alpha, "must be greater than lambda");
     }
 
     x0 = -x0; // compressive strength is negative, although on input it is a positive number
@@ -216,8 +216,6 @@ DustMaterial :: initializeFrom(InputRecord *ir)
 
     q0 = x0;
     solveQ0(q0);
-
-    return IRRT_OK;
 }
 
 void

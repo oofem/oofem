@@ -74,29 +74,33 @@ int Delamination :: instanciateYourself(DataReader &dr)
     std :: string name;
 
     // Instantiate enrichment function
-    InputRecord *mir = dr.giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
-    mir->giveRecordKeywordField(name);
+    {
+        auto &mir = dr.giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
+        mir.giveRecordKeywordField(name);
 
-    mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
-    if ( mpEnrichmentFunc ) {
-        mpEnrichmentFunc->initializeFrom(mir);
-    } else {
-        OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
+        mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
+        if ( mpEnrichmentFunc ) {
+            mpEnrichmentFunc->initializeFrom(mir);
+        } else {
+            OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
+        }
     }
 
 
     // Instantiate enrichment domain
-    mir = dr.giveInputRecord(DataReader :: IR_geoRec, 1);
-    mir->giveRecordKeywordField(name);
+    {
+        auto &mir = dr.giveInputRecord(DataReader :: IR_geoRec, 1);
+        mir.giveRecordKeywordField(name);
 
-    IntArray idList;
-    IR_GIVE_FIELD(mir, idList, _IFT_ListBasedEI_list);
-    for ( int i = 1; i <= idList.giveSize(); i++ ) {
-        this->dofManList.push_back( idList.at(i) );
+        IntArray idList;
+        IR_GIVE_FIELD(mir, idList, _IFT_ListBasedEI_list);
+        for ( int i = 1; i <= idList.giveSize(); i++ ) {
+            this->dofManList.push_back( idList.at(i) );
+        }
+
+        std :: sort( dofManList.begin(), this->dofManList.end() );
+        //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
     }
-
-    std :: sort( dofManList.begin(), this->dofManList.end() );
-    //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
 
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
@@ -105,8 +109,8 @@ int Delamination :: instanciateYourself(DataReader &dr)
     } else {
         std :: string enrFrontNameStart, enrFrontNameEnd;
 
-        InputRecord *enrFrontStartIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        enrFrontStartIr->giveRecordKeywordField(enrFrontNameStart);
+        auto &enrFrontStartIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        enrFrontStartIr.giveRecordKeywordField(enrFrontNameStart);
 
         mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
         if ( mpEnrichmentFrontStart ) {
@@ -116,8 +120,8 @@ int Delamination :: instanciateYourself(DataReader &dr)
             OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameStart.c_str() );
         }
 
-        InputRecord *enrFrontEndIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        enrFrontEndIr->giveRecordKeywordField(enrFrontNameEnd);
+        auto &enrFrontEndIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        enrFrontEndIr.giveRecordKeywordField(enrFrontNameEnd);
 
         mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
         if ( mpEnrichmentFrontEnd ) {
@@ -135,8 +139,8 @@ int Delamination :: instanciateYourself(DataReader &dr)
     } else {
         std :: string propLawName;
 
-        InputRecord *propLawir = dr.giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
-        propLawir->giveRecordKeywordField(propLawName);
+        auto &propLawir = dr.giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
+        propLawir.giveRecordKeywordField(propLawName);
 
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
         if ( mpPropagationLaw ) {
@@ -342,14 +346,14 @@ void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const 
 }
 
 
-IRResultType Delamination :: initializeFrom(InputRecord *ir)
+void Delamination :: initializeFrom(InputRecord &ir)
 {
     EnrichmentItem :: initializeFrom(ir);
 
     // Compute the delamination xi-coord
     IR_GIVE_FIELD(ir, this->interfaceNum, _IFT_Delamination_interfacenum); // interface number from the bottom
     IR_GIVE_FIELD(ir, this->crossSectionNum, _IFT_Delamination_csnum);
-    if ( ir->hasField(_IFT_Delamination_averageStresses) ) {
+    if ( ir.hasField(_IFT_Delamination_averageStresses) ) {
         this->recoverStresses = false;
         //printf("averageStresses");
     }
@@ -363,26 +367,26 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     for (int iCS : this->crossSectionNum) {
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(iCS) );
         if ( !layeredCS ) {
-            throw ValueInputException(*ir, _IFT_Delamination_csnum, "Delamination EI requires a valid layered cross section number input");
+            throw ValueInputException(ir, _IFT_Delamination_csnum, "Delamination EI requires a valid layered cross section number input");
         } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
-            throw ValueInputException(*ir, _IFT_Delamination_interfacenum, "Size must be 1 or 2");
+            throw ValueInputException(ir, _IFT_Delamination_interfacenum, "Size must be 1 or 2");
         }
 
         // check that interface numbers are valid
         //interfaceNum.printYourself("interface num");
         for ( int i = 1; i <= this->interfaceNum.giveSize(); i++ ) {
             if ( this->interfaceNum.at(i) < 1 || this->interfaceNum.at(i) >= layeredCS->giveNumberOfLayers() ) {
-                throw ValueInputException(*ir, _IFT_Delamination_interfacenum, "Cross section does not contain the interface number");
+                throw ValueInputException(ir, _IFT_Delamination_interfacenum, "Cross section does not contain the interface number");
             }
         }
         
         
         if (checkCS) {
             if ( layeredCS->give(CS_Thickness, FloatArray(), nullptr, false) != totalThickness ) {
-                throw ValueInputException(*ir, _IFT_Delamination_csnum, "Delamination cross section have different totalThickness");
+                throw ValueInputException(ir, _IFT_Delamination_csnum, "Delamination cross section have different totalThickness");
             }
             if ( layeredCS->giveNumberOfLayers() != numberOfLayers ) {
-                throw ValueInputException(*ir, _IFT_Delamination_csnum, "Delamination cross section have different number of layers");
+                throw ValueInputException(ir, _IFT_Delamination_csnum, "Delamination cross section have different number of layers");
             }
             
         } else 
@@ -392,7 +396,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
             double layerThickness = layeredCS->giveLayerThickness(i);
             if (checkCS) {
                 if ( layerThickness != layerThicknesses.at(i) ) {
-                    throw ValueInputException(*ir, _IFT_Delamination_csnum, "Delamination cross section have different layer thicknesses");
+                    throw ValueInputException(ir, _IFT_Delamination_csnum, "Delamination cross section have different layer thicknesses");
                 }
                 layerThicknesses.at(i) = layerThickness;
             } else {
@@ -410,7 +414,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
         if ( this->interfaceNum.giveSize() == 2 ) {
             if ( this->interfaceNum.at(1) >= this->interfaceNum.at(2) ) {
-                throw ValueInputException(*ir, _IFT_Delamination_interfacenum, "second intercfacenum must be greater than the first one");
+                throw ValueInputException(ir, _IFT_Delamination_interfacenum, "second intercfacenum must be greater than the first one");
             }
             this->xiTop = -1.0;
             for ( int i = 1; i <= this->interfaceNum.at(2); i++ ) {
@@ -425,16 +429,16 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     // old csnum (int version). NB: this was a bug since element nodes that where not part of the cross section could be enriched. 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if ( !layeredCS ) {
-        throw ValueInputException(*ir, _IFT_Delamination_csnum, "Delamination EI requires a valid layered cross section number input");
+        throw ValueInputException(ir, _IFT_Delamination_csnum, "Delamination EI requires a valid layered cross section number input");
     } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
-        throw ValueInputException(*ir, _IFT_Delamination_interfacenum, "size must be 1 or 2");
+        throw ValueInputException(ir, _IFT_Delamination_interfacenum, "size must be 1 or 2");
     }
 
     // check that interface numbers are valid
     //interfaceNum.printYourself("interface num");
     for ( int i = 1; i <= this->interfaceNum.giveSize(); i++ ) {
         if ( this->interfaceNum.at(i) < 1 || this->interfaceNum.at(i) >= layeredCS->giveNumberOfLayers() ) {
-            throw ValueInputException(*ir, _IFT_Delamination_interfacenum, "Cross section does not contain the interface number");
+            throw ValueInputException(ir, _IFT_Delamination_interfacenum, "Cross section does not contain the interface number");
         }
     }
 
@@ -448,7 +452,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     if ( this->interfaceNum.giveSize() == 2 ) {
         if ( this->interfaceNum.at(1) >= this->interfaceNum.at(2) ) {
-            throw ValueInputException(*ir, "second intercfacenum must be greater than the first one");
+            throw ValueInputException(ir, "second intercfacenum must be greater than the first one");
         }
         for ( int i = 1; i <= this->interfaceNum.at(2); i++ ) {
             this->xiTop += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
@@ -465,15 +469,13 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     
     IR_GIVE_OPTIONAL_FIELD(ir, this->initiationFactor, _IFT_Delamination_initiationFactor);
     if ( this->initiationFactor <= 0 ) {
-        throw ValueInputException(*ir, _IFT_Delamination_initiationFactor, "must be positive");
+        throw ValueInputException(ir, _IFT_Delamination_initiationFactor, "must be positive");
     }
     
     IR_GIVE_OPTIONAL_FIELD(ir, this->initiationRadius, _IFT_Delamination_initiationRadius);
     if ( this->initiationRadius < 0 ) {
-        throw ValueInputException(*ir, _IFT_Delamination_initiationRadius, "must be positive");
+        throw ValueInputException(ir, _IFT_Delamination_initiationRadius, "must be positive");
     }
-
-    return IRRT_OK;
 }
 
 

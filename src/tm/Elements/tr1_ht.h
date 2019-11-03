@@ -65,7 +65,7 @@ public:
     const char *giveClassName() const override { return "Tr1_htElement"; }
 
     int computeNumberOfDofs() override { return ( emode == HeatMass1TransferEM ) ? 6 : 3; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _2dHeat; }
     double giveThicknessAt(const FloatArray &gcoords) override;
 

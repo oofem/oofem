@@ -60,7 +60,7 @@ public:
     virtual ~IntElLine2() { }
     FEInterpolation *giveInterpolation() const override;
     int computeNumberOfDofs() override { return 12; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElLine2_Name; }

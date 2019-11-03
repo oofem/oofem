@@ -96,12 +96,10 @@ Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeTy
 }
 
 
-IRResultType
-Load :: initializeFrom(InputRecord *ir)
+void
+Load :: initializeFrom(InputRecord &ir)
 {
-#  ifdef VERBOSE
-    // VERBOSE_PRINT1 ("Instanciating load ",number)
-#  endif
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, componentArray, _IFT_Load_components);
 
@@ -110,7 +108,7 @@ Load :: initializeFrom(InputRecord *ir)
     dofExcludeMask.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, dofExcludeMask, _IFT_Load_dofexcludemask);
     if ( dofExcludeMask.giveSize() != size ) {
-        throw ValueInputException(*ir, _IFT_Load_dofexcludemask, "dofExcludeMask and componentArray size mismatch");
+        throw ValueInputException(ir, _IFT_Load_dofexcludemask, "dofExcludeMask and componentArray size mismatch");
     } else {
         for ( int i = 1; i <= size; i++ ) {
             if ( dofExcludeMask.at(i) ) {
@@ -119,9 +117,7 @@ Load :: initializeFrom(InputRecord *ir)
         }
     }
 
-    this->reference = ir->hasField(_IFT_Load_reference);
-
-    return GeneralBoundaryCondition :: initializeFrom(ir);
+    this->reference = ir.hasField(_IFT_Load_reference);
 }
 
 

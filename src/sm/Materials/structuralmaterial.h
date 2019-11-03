@@ -136,7 +136,7 @@ public:
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "StructuralMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     /**

@@ -288,8 +288,8 @@ MisesMatNl :: giveInterface(InterfaceType type)
 }
 
 
-IRResultType
-MisesMatNl :: initializeFrom(InputRecord *ir)
+void
+MisesMatNl :: initializeFrom(InputRecord &ir)
 {
     MisesMat :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
@@ -311,8 +311,6 @@ MisesMatNl :: initializeFrom(InputRecord *ir)
     if ( averType >= 2 && averType <= 5 ) {
         IR_GIVE_OPTIONAL_FIELD(ir, Rf, _IFT_MisesMatNl_rf);
     }
-
-    return IRRT_OK;
 }
 
 

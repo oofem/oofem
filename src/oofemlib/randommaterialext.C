@@ -59,8 +59,8 @@ RandomMaterialStatusExtensionInterface :: _setProperty(int key, double value)
 }
 
 
-IRResultType
-RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
+void
+RandomMaterialExtensionInterface :: initializeFrom(InputRecord &ir)
 {
     randVariables.clear();
     randomVariableGenerators.clear();
@@ -68,10 +68,8 @@ RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, _IFT_RandomMaterialExt_randGen);
 
     if ( randVariables.giveSize() != randomVariableGenerators.giveSize() ) {
-        throw ValueInputException(*ir, _IFT_RandomMaterialExt_randVariables, "Incompatible size of randvars and randdist attrs");
+        throw ValueInputException(ir, _IFT_RandomMaterialExt_randVariables, "Incompatible size of randvars and randdist attrs");
     }
-
-    return IRRT_OK;
 }
 
 

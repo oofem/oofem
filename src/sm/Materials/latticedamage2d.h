@@ -311,7 +311,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticeDamage2d_Name; }
     const char *giveClassName() const override { return "LatticeDamage2d"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 

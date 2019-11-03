@@ -219,21 +219,19 @@ QTrPlaneStress2dXFEM :: giveGeometryType() const
     }
 }
 
-IRResultType
-QTrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
+void
+QTrPlaneStress2dXFEM :: initializeFrom(InputRecord &ir)
 {
     QTrPlaneStress2d :: initializeFrom(ir);
     XfemStructuralElementInterface :: initializeCZFrom(ir);
 
-    if ( ir->hasField(_IFT_QTrPlaneStress2dXFEM_RegCoeff) ) {
-        ir->giveOptionalField(mRegCoeff, _IFT_QTrPlaneStress2dXFEM_RegCoeff);
+    if ( ir.hasField(_IFT_QTrPlaneStress2dXFEM_RegCoeff) ) {
+        ir.giveOptionalField(mRegCoeff, _IFT_QTrPlaneStress2dXFEM_RegCoeff);
     }
 
-    if ( ir->hasField(_IFT_QTrPlaneStress2dXFEM_RegCoeffTol) ) {
-        ir->giveOptionalField(mRegCoeffTol, _IFT_QTrPlaneStress2dXFEM_RegCoeffTol);
+    if ( ir.hasField(_IFT_QTrPlaneStress2dXFEM_RegCoeffTol) ) {
+        ir.giveOptionalField(mRegCoeffTol, _IFT_QTrPlaneStress2dXFEM_RegCoeffTol);
     }
-
-    return IRRT_OK;
 }
 
 MaterialMode QTrPlaneStress2dXFEM :: giveMaterialMode()

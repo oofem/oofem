@@ -95,8 +95,8 @@ TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
     answer = {V_u, V_v, P_f};
 }
 
-IRResultType
-TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_SUPG2 :: initializeFrom(InputRecord &ir)
 {
     SUPGElement :: initializeFrom(ir);
 
@@ -115,8 +115,6 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 0 ], _IFT_Tr1SUPG2_mat0);
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], _IFT_Tr1SUPG2_mat1);
     this->material = this->mat [ 0 ];
-
-    return IRRT_OK;
 }
 
 

@@ -91,8 +91,8 @@ TR1_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 FEInterpolation *
 TR1_2D_SUPG :: giveInterpolation() const { return & interp; }
 
-IRResultType
-TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_SUPG :: initializeFrom(InputRecord &ir)
 {
     SUPGElement :: initializeFrom(ir);
 
@@ -109,7 +109,6 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
 
 
     this->initGeometry();
-    return IRRT_OK;
 }
 
 

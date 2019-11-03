@@ -46,9 +46,11 @@
 namespace oofem {
 REGISTER_Material(LatticeTransportMaterial);
 
-IRResultType
-LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
+void
+LatticeTransportMaterial :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, this->viscosity, _IFT_LatticeTransportMaterial_vis);
 
     IR_GIVE_FIELD(ir, this->permeability, _IFT_LatticeTransportMaterial_k);
@@ -96,8 +98,6 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 
     crackLimit = -1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->crackLimit, _IFT_LatticeTransportMaterial_clim);
-
-    return Material :: initializeFrom(ir);
 }
 
 

@@ -119,7 +119,7 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_OrthotropicLinearElasticMaterial_Name; }
     const char *giveClassName() const override { return "OrthotropicLinearElasticMaterial"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     double give(int aProperty, GaussPoint *gp) const override;
 

@@ -45,18 +45,18 @@ SimpleTransportCrossSection :: SimpleTransportCrossSection(int n, Domain *d) : T
 SimpleTransportCrossSection :: ~SimpleTransportCrossSection() { }
 
 
-IRResultType
-SimpleTransportCrossSection :: initializeFrom(InputRecord *ir)
+void
+SimpleTransportCrossSection :: initializeFrom(InputRecord &ir)
 {
+    TransportCrossSection :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, this->matNumber, _IFT_SimpleTransportCrossSection_material);
     this->propertyDictionary.clear();
-    if ( ir->hasField(_IFT_SimpleTransportCrossSection_thickness) ) {
+    if ( ir.hasField(_IFT_SimpleTransportCrossSection_thickness) ) {
         double thickness;
         IR_GIVE_FIELD(ir, thickness, _IFT_SimpleTransportCrossSection_thickness);
         this->propertyDictionary.add(CS_Thickness, thickness);
     }
-
-    return TransportCrossSection :: initializeFrom(ir);
 }
 
 

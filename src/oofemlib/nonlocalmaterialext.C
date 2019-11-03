@@ -736,10 +736,10 @@ NonlocalMaterialExtensionInterface :: evaluateSupportRadius()
 }
 
 
-IRResultType
-NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
+void
+NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord &ir)
 {
-    if ( ir->hasField(_IFT_NonlocalMaterialExtensionInterface_regionmap) ) {
+    if ( ir.hasField(_IFT_NonlocalMaterialExtensionInterface_regionmap) ) {
         IR_GIVE_FIELD(ir, regionMap, _IFT_NonlocalMaterialExtensionInterface_regionmap);
         if ( regionMap.giveSize() != this->giveDomain()->giveNumberOfRegions() ) {
             OOFEM_ERROR("regionMap size mismatch");
@@ -845,8 +845,6 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
         centDiff = 2; // default value
         IR_GIVE_OPTIONAL_FIELD(ir, centDiff, _IFT_NonlocalMaterialExtensionInterface_centdiff);
     }
-
-    return IRRT_OK;
 }
 
 

@@ -153,7 +153,7 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
         irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
         //irEl.setField( ncrosssect, _IFT_Element_crosssect);
         //irEl.setField( nmat, _IFT_Element_mat);
-        elem->initializeFrom(& irEl);
+        elem->initializeFrom(irEl);
         elem->setGlobalNumber(elemNumber);
         d->setElement(elemNumber, std::move(elem));
     }
@@ -170,7 +170,7 @@ Quasicontinuum :: addCrosssectionToInterpolationElements(Domain *d)
     DynamicInputRecord irCS;
     irCS.setField(1.0, _IFT_SimpleCrossSection_thick);
     irCS.setField(1.0, _IFT_SimpleCrossSection_width);
-    crossSection->initializeFrom(& irCS);
+    crossSection->initializeFrom(irCS);
     d->setCrossSection(ncrosssect, std::move(crossSection));
 
     for ( int i = 1; i <= interpolationElementNumbers.giveSize(); i++ ) {
@@ -193,7 +193,7 @@ Quasicontinuum :: applyApproach1(Domain *d)
     irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_n);
     irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha);
     irMat.setField(0.0, _IFT_Material_density);
-    mat->initializeFrom(& irMat);
+    mat->initializeFrom(irMat);
     d->setMaterial(nmat, std::move(mat));
 
 
@@ -359,7 +359,7 @@ Quasicontinuum :: applyApproach2(Domain *d, int homMtrxType, double volumeOfInte
     } else {
         OOFEM_ERROR("Invalid homMtrxType");
     }
-    mat->initializeFrom(& irMat);
+    mat->initializeFrom(irMat);
     d->setMaterial(nmat, std::move(mat));
 
 
@@ -549,7 +549,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
             irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha);
             irMat.setField(0.0, _IFT_Material_density);
 
-            mat->initializeFrom(& irMat);
+            mat->initializeFrom(irMat);
             d->setMaterial(nmat, std::move(mat));
         }
 
@@ -582,7 +582,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
             irMat.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
             irMat.setField(0.0, _IFT_Material_density);
 
-            mat->initializeFrom(& irMat);
+            mat->initializeFrom(irMat);
             d->setMaterial(nmat, std::move(mat));
         }
     } else {

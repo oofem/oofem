@@ -129,7 +129,7 @@ public:
 
     const char *giveClassName() const override { return "B3SolidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_B3SolidMaterial_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

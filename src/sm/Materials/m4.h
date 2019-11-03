@@ -121,7 +121,7 @@ public:
 
     void updateVolumetricStressTo(GaussPoint *gp, int mnumber, double sigv) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_M4Material_Name; }
     const char *giveClassName() const override { return "M4Material"; }
 

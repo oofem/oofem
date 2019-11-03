@@ -48,9 +48,11 @@ HeMoTKMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-IRResultType
-HeMoTKMaterial :: initializeFrom(InputRecord *ir)
+void
+HeMoTKMaterial :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, a_0, _IFT_HeMoTKMaterial_a_0);
     IR_GIVE_FIELD(ir, nn, _IFT_HeMoTKMaterial_nn);
     IR_GIVE_FIELD(ir, phi_c, _IFT_HeMoTKMaterial_phi_c);
@@ -67,8 +69,6 @@ HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, por, _IFT_HeMoTKMaterial_por);
     IR_GIVE_FIELD(ir, rho_gws, _IFT_HeMoTKMaterial_rho_gws);
-
-    return Material :: initializeFrom(ir);
 }
 
 

@@ -83,7 +83,7 @@ public:
     /// Destructor.
     virtual ~HangingNode(void) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void postInitialize() override;
     int checkConsistency() override;
     bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }

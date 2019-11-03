@@ -78,8 +78,8 @@ NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 }
 
 
-IRResultType
-NlDEIDynamic :: initializeFrom(InputRecord *ir)
+void
+NlDEIDynamic :: initializeFrom(InputRecord &ir)
 {
     StructuralEngngModel :: initializeFrom(ir);
 
@@ -98,15 +98,13 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
     communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                         this->giveNumberOfProcesses());
 
-    if ( ir->hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
+    if ( ir.hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
         nonlocalExt = 1;
         nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
                                                      this->giveNumberOfProcesses());
     }
 
 #endif
-
-    return IRRT_OK;
 }
 
 

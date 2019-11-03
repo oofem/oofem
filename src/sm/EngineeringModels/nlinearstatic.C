@@ -134,7 +134,7 @@ void
 NonLinearStatic :: updateAttributes(MetaStep *mStep)
 {
     MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
-    InputRecord *ir = mStep1->giveAttributesRecord();
+    auto &ir = mStep1->giveAttributesRecord();
 
     LinearStatic :: updateAttributes(mStep1);
 
@@ -176,15 +176,15 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_refloadmode);
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
-    mstepCumulateLoadLevelFlag = ir->hasField(_IFT_NonLinearStatic_keepll);
+    mstepCumulateLoadLevelFlag = ir.hasField(_IFT_NonLinearStatic_keepll);
 
     // called just to mark field as recognized, used later
-    ir->hasField(_IFT_NonLinearStatic_donotfixload);
+   ir.hasField(_IFT_NonLinearStatic_donotfixload);
 }
 
 
-IRResultType
-NonLinearStatic :: initializeFrom(InputRecord *ir)
+void
+NonLinearStatic :: initializeFrom(InputRecord &ir)
 {
     LinearStatic :: initializeFrom(ir);
 
@@ -192,7 +192,7 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 
     updateElasticStiffnessFlag = false;
-    if ( ir->hasField(_IFT_NonLinearStatic_updateElasticStiffnessFlag) ) {
+    if ( ir.hasField(_IFT_NonLinearStatic_updateElasticStiffnessFlag) ) {
         updateElasticStiffnessFlag = true;
     }
 
@@ -203,15 +203,13 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
         communicator = new NodeCommunicator( this, commBuff, this->giveRank(),
                                              this->giveNumberOfProcesses() );
 
-        if ( ir->hasField(_IFT_NonLinearStatic_nonlocalext) ) {
+        if ( ir.hasField(_IFT_NonLinearStatic_nonlocalext) ) {
             nonlocalExt = 1;
             nonlocCommunicator = new ElementCommunicator( this, commBuff, this->giveRank(),
                                                           this->giveNumberOfProcesses() );
         }
     }
 #endif
-
-    return IRRT_OK;
 }
 
 
@@ -360,9 +358,9 @@ NonLinearStatic :: updateLoadVectors(TimeStep *tStep)
     bool isLastMetaStep = ( tStep->giveNumber() == mstep->giveLastStepNumber() );
 
     if ( controlMode == nls_indirectControl ) {
-        //if ((tStep->giveNumber() == mstep->giveLastStepNumber()) && ir->hasField("fixload")) {
+        //if ((tStep->giveNumber() == mstep->giveLastStepNumber()) &&ir.hasField("fixload")) {
         if ( isLastMetaStep ) {
-            if ( !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
+            if ( !mstep->giveAttributesRecord().hasField(_IFT_NonLinearStatic_donotfixload) ) {
                 OOFEM_LOG_INFO("Fixed load level\n");
 
                 //update initialLoadVector
@@ -395,7 +393,7 @@ NonLinearStatic :: updateLoadVectors(TimeStep *tStep)
 
 
     // if (isLastMetaStep) {
-    if ( isLastMetaStep && !mstep->giveAttributesRecord()->hasField(_IFT_NonLinearStatic_donotfixload) ) {
+    if ( isLastMetaStep && !mstep->giveAttributesRecord().hasField(_IFT_NonLinearStatic_donotfixload) ) {
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Reseting load level\n");
 #endif

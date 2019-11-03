@@ -52,7 +52,7 @@ FluidMaterialEvaluator :: FluidMaterialEvaluator(int i, EngngModel *_master) : E
 }
 
 
-IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
+void FluidMaterialEvaluator :: initializeFrom(InputRecord &ir)
 {
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->deltaT, _IFT_FluidMaterialEvaluator_deltat);
@@ -74,8 +74,6 @@ IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
             eControl.followedBy(i);
         }
     }
-
-    return IRRT_OK;
 }
 
 

@@ -146,7 +146,7 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
 }
 
 
-IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCWeak :: initializeFrom(InputRecord &ir)
 {
     ActiveBoundaryCondition :: initializeFrom(ir);
     PrescribedGradientHomogenization :: initializeFrom(ir);
@@ -192,8 +192,6 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     if ( mMirrorFunction == 0 ) {
         mPeriodicityNormal = {0.0, 1.0};
     }
-
-    return IRRT_OK;
 }
 
 

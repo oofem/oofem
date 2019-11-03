@@ -43,10 +43,10 @@ CompCol_ILUPreconditioner ::
 CompCol_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Preconditioner(A, attributes)
 { }
 
-IRResultType
-CompCol_ILUPreconditioner :: initializeFrom(InputRecord *ir)
+void
+CompCol_ILUPreconditioner :: initializeFrom(InputRecord &ir)
 {
-    return Preconditioner :: initializeFrom(ir);
+    Preconditioner :: initializeFrom(ir);
 }
 
 

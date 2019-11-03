@@ -345,8 +345,8 @@ LIBeam3dNL :: computeGaussPoints()
 }
 
 
-IRResultType
-LIBeam3dNL :: initializeFrom(InputRecord *ir)
+void
+LIBeam3dNL :: initializeFrom(InputRecord &ir)
 {
     // first call parent
     NLStructuralElement :: initializeFrom(ir);
@@ -371,8 +371,6 @@ LIBeam3dNL :: initializeFrom(InputRecord *ir)
     FloatMatrix lcs;
     this->giveLocalCoordinateSystem(lcs);
     this->tc.beTranspositionOf(lcs);
-
-    return IRRT_OK;
 }
 
 

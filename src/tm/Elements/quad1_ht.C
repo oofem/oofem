@@ -86,11 +86,11 @@ Quad1_ht :: computeGaussPoints()
 }
 
 
-IRResultType
-Quad1_ht :: initializeFrom(InputRecord *ir)
+void
+Quad1_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 

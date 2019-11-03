@@ -50,8 +50,8 @@ OutputExportModule :: OutputExportModule(int n, EngngModel *e) : ExportModule(n,
 {
 }
 
-IRResultType
-OutputExportModule :: initializeFrom(InputRecord *ir)
+void
+OutputExportModule :: initializeFrom(InputRecord &ir)
 {
     nodeSets.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, nodeSets, _IFT_OutputExportModule_nodeSets);
@@ -65,8 +65,6 @@ OutputExportModule :: initializeFrom(InputRecord *ir)
     fprintf(file, "%s", PRG_HEADER);
     fprintf(file, "\nStarting analysis on: %s\n", ctime(& emodel->giveStartTime()) );
     fprintf(file, "%s\n", emodel->giveDescription().c_str());
-
-    return IRRT_OK;
 }
 
 FILE *

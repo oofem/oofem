@@ -43,7 +43,7 @@ namespace oofem {
 #define OPTIMIZED_VERSION_A4dot4
 
 
-IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
+void TSplineInterpolation :: initializeFrom(InputRecord &ir)
 {
     BSplineInterpolation :: initializeFrom(ir);
 
@@ -69,7 +69,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
         localIndexKnotVector_tmp.clear();
         IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
-            throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "invalid size of knot vector");
+            throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "invalid size of knot vector");
         }
 
         int pos = 0;
@@ -86,7 +86,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             int indexKnotVal = indexKnotVec [ 0 ];
             for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
-                    throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "local index knot vector is not monotonic");
+                    throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "local index knot vector is not monotonic");
                 }
 
                 /* this is only for the case when TSpline = NURBS
@@ -99,17 +99,15 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
             // check for nondegeneracy of local index knot vector
             if ( indexKnotVal == indexKnotVec [ 0 ] ) {
-                throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "local index knot vector is degenerated");
+                throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "local index knot vector is degenerated");
             }
 
             // check for range of local index knot vector
             if ( indexKnotVec [ 0 ] <= 0 || indexKnotVal > knotValues [ n ].giveSize() ) {
-                throw ValueInputException(*ir, IFT_localIndexKnotVector [ n ], "local index knot vector out of range");
+                throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "local index knot vector out of range");
             }
         }
     }
-
-    return IRRT_OK;
 }
 
 

@@ -42,15 +42,13 @@
 
 namespace oofem {
 
-IRResultType PrescribedGradientHomogenization :: initializeFrom(InputRecord *ir)
+void PrescribedGradientHomogenization :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, mGradient, _IFT_PrescribedGradientHomogenization_gradient);
 
     mCenterCoord.resize( mGradient.giveNumberOfColumns() );
     mCenterCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_PrescribedGradientHomogenization_centercoords)
-
-    return IRRT_OK;
 }
 
 void PrescribedGradientHomogenization :: giveInputRecord(DynamicInputRecord &input)

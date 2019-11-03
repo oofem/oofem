@@ -50,18 +50,19 @@ namespace oofem {
 class Truss3dnl : public Truss3d
 {
 protected:
-  double initialStretch;
+    double initialStretch;
+
 public:
     Truss3dnl(int n, Domain * d);
     virtual ~Truss3dnl() { }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_Truss3dnl_Name; }
-    virtual const char *giveClassName() const { return "Truss3dnl"; }
+    const char *giveInputRecordName() const override { return _IFT_Truss3dnl_Name; }
+    const char *giveClassName() const override { return "Truss3dnl"; }
 
-    IRResultType initializeFrom(InputRecord *ir);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void initializeFrom(InputRecord &ir) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
 protected:
 

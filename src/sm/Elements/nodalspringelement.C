@@ -104,8 +104,8 @@ NodalSpringElement :: computeNumberOfGlobalDofs()
 }
 
 
-IRResultType
-NodalSpringElement :: initializeFrom(InputRecord *ir)
+void
+NodalSpringElement :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, dofMask, _IFT_NodalSpringElement_dofmask);
     IR_GIVE_FIELD(ir, springConstants, _IFT_NodalSpringElement_springConstants);
@@ -127,8 +127,6 @@ NodalSpringElement :: initializeFrom(InputRecord *ir)
     activityTimeFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
     IR_GIVE_FIELD(ir, dofManArray, _IFT_Element_nodes);
-    
-    return IRRT_OK;
 }
 
 void NodalSpringElement :: printOutputAt(FILE *File, TimeStep *tStep)

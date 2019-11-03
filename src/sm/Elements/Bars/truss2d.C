@@ -281,17 +281,17 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
     }
 }
 
-IRResultType
-Truss2d :: initializeFrom(InputRecord *ir)
+void
+Truss2d :: initializeFrom(InputRecord &ir)
 {
+    NLStructuralElement :: initializeFrom(ir);
+
     cs_mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        throw ValueInputException(*ir, _IFT_Truss2d_cs, "Unsupported mode");
+        throw ValueInputException(ir, _IFT_Truss2d_cs, "Unsupported mode");
     }
-
-    return NLStructuralElement :: initializeFrom(ir);
 }
 
 

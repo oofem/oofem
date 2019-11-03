@@ -46,8 +46,8 @@ REGISTER_Material(M1Material);
 M1Material :: M1Material(int n, Domain *d) : MicroplaneMaterial(n, d)
 { E = 0.; nu = 0.; EN = 0.; s0 = 0.; HN = 0.; }
 
-IRResultType
-M1Material :: initializeFrom(InputRecord *ir)
+void
+M1Material :: initializeFrom(InputRecord &ir)
 {
     MicroplaneMaterial :: initializeFrom(ir);
 
@@ -60,8 +60,6 @@ M1Material :: initializeFrom(InputRecord *ir)
     HN = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, HN, _IFT_M1Material_hn);
     ENtan = EN * HN / ( EN + HN );
-
-    return IRRT_OK;
 }
 
 void
@@ -371,8 +369,8 @@ M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMod
 }
 
 
-IRResultType
-M1Material :: initializeFrom(InputRecord *ir)
+void
+M1Material :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
 
@@ -405,8 +403,6 @@ M1Material :: initializeFrom(InputRecord *ir)
         NN.at(imp, 5) = s * s * s * s;
         mw.at(imp) = 2. / nmp;
     }
-
-    return IRRT_OK;
 }
 
 bool

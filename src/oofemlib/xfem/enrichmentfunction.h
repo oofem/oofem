@@ -83,7 +83,7 @@ public:
      */
     virtual void giveJump(std :: vector< double > &oJumps) const = 0;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "EnrichmentFunction"; }
     int giveNumberOfDofs() const { return numberOfDofs; }

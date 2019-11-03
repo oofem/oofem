@@ -273,8 +273,8 @@ InterfaceElem1d :: computeVolumeAround(GaussPoint *gp)
 }
 
 
-IRResultType
-InterfaceElem1d :: initializeFrom(InputRecord *ir)
+void
+InterfaceElem1d :: initializeFrom(InputRecord &ir)
 {
     StructuralElement :: initializeFrom(ir);
 
@@ -283,7 +283,7 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
         OOFEM_ERROR("wrong reference node or normal specified");
     }
-    if ( ir->hasField(_IFT_InterfaceElem1d_dofIDs) ) {
+    if ( ir.hasField(_IFT_InterfaceElem1d_dofIDs) ) {
         IR_GIVE_FIELD(ir, dofids, _IFT_InterfaceElem1d_refnode);
     } else {
         switch ( domain->giveNumberOfSpatialDimensions() ) {
@@ -302,7 +302,6 @@ InterfaceElem1d :: initializeFrom(InputRecord *ir)
     }
 
     this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
-    return IRRT_OK;
 }
 
 

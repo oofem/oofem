@@ -40,8 +40,8 @@
 
 namespace oofem {
 
-IRResultType
-BSplineInterpolation :: initializeFrom(InputRecord *ir)
+void
+BSplineInterpolation :: initializeFrom(InputRecord &ir)
 {
     IntArray degree_tmp;
 
@@ -59,7 +59,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
     if ( degree_tmp.giveSize() != nsd ) {
-        throw ValueInputException(*ir, _IFT_BSplineInterpolation_degree, "degree size mismatch");
+        throw ValueInputException(ir, _IFT_BSplineInterpolation_degree, "degree size mismatch");
     }
 
     for ( int i = 0; i < nsd; i++ ) {
@@ -70,14 +70,14 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
         int size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
-            throw ValueInputException(*ir, IFT_knotVector [ n ], "invalid size of knot vector");
+            throw ValueInputException(ir, IFT_knotVector [ n ], "invalid size of knot vector");
         }
 
         // check for monotonicity of knot vector without multiplicity
         double knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                throw ValueInputException(*ir, IFT_knotVector [ n ], "knot vector is not monotonic");
+                throw ValueInputException(ir, IFT_knotVector [ n ], "knot vector is not monotonic");
             }
 
             knotVal = knotValues [ n ].at(i + 1);
@@ -99,13 +99,13 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             }
         } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
-                throw ValueInputException(*ir, IFT_knotMultiplicity [ n ], "knot multiplicity size mismatch");
+                throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity size mismatch");
             }
 
             // check for multiplicity range (skip the first and last one)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
-                    throw ValueInputException(*ir, IFT_knotMultiplicity [ n ], "knot multiplicity out of range");
+                    throw ValueInputException(ir, IFT_knotMultiplicity [ n ], "knot multiplicity out of range");
                 }
             }
 
@@ -141,8 +141,6 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         numberOfKnotSpans [ n ] = size - 1;
         numberOfControlPoints [ n ] = sum - degree [ n ] - 1;
     }
-
-    return IRRT_OK;
 }
 
 

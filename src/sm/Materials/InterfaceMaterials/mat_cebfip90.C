@@ -119,9 +119,11 @@ CebFipSlip90Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 }
 
 
-IRResultType
-CebFipSlip90Material :: initializeFrom(InputRecord *ir)
+void
+CebFipSlip90Material :: initializeFrom(InputRecord &ir)
 {
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, tmax, _IFT_CebFipSlip90Material_tmax);
     IR_GIVE_FIELD(ir, tres, _IFT_CebFipSlip90Material_tres);
 
@@ -130,7 +132,6 @@ CebFipSlip90Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, s3, _IFT_CebFipSlip90Material_s3);
 
     alpha = 0.4;
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 

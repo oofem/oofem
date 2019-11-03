@@ -444,8 +444,8 @@ LIBeam3dNL2 :: computeStressVector(FloatArray &answer, const FloatArray &strain,
 }
 
 
-IRResultType
-LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
+void
+LIBeam3dNL2 :: initializeFrom(InputRecord &ir)
 {
     // first call parent
     NLStructuralElement :: initializeFrom(ir);
@@ -472,7 +472,6 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
     tc.beTranspositionOf(lcs);
 
     this->computeQuaternionFromRotMtrx(q, tc);
-    return IRRT_OK;
 }
 
 

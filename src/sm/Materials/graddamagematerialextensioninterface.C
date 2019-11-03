@@ -62,13 +62,11 @@ GradientDamageMaterialExtensionInterface :: giveGradientDamageStiffnessMatrix_dd
 }
   
 
-IRResultType
-GradientDamageMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
+void
+GradientDamageMaterialExtensionInterface :: initializeFrom(InputRecord &ir)
 {
     // read the characteristic length
     IR_GIVE_FIELD(ir, internalLength, _IFT_GradientDamageMaterialExtensionInterface_l);
-
-    return IRRT_OK;
 }
 
 GradientDamageMaterialStatusExtensionInterface :: GradientDamageMaterialStatusExtensionInterface() : Interface(), nonlocalDamageDrivingVariableGrad(), tempNonlocalDamageDrivingVariableGrad()

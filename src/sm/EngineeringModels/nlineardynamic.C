@@ -101,7 +101,7 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
 void
 NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 {
-    InputRecord *ir = mStep->giveAttributesRecord();
+    auto &ir = mStep->giveAttributesRecord();
 
     StructuralEngngModel :: updateAttributes(mStep);
 
@@ -119,8 +119,8 @@ NonLinearDynamic :: updateAttributes(MetaStep *mStep)
 }
 
 
-IRResultType
-NonLinearDynamic :: initializeFrom(InputRecord *ir)
+void
+NonLinearDynamic :: initializeFrom(InputRecord &ir)
 {
     StructuralEngngModel :: initializeFrom(ir);
 
@@ -156,7 +156,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_INFO("Selecting Three-point Backward Euler metod\n");
     } else {
-        throw ValueInputException(*ir, _IFT_NonLinearDynamic_ddtScheme, "Time-stepping scheme not found!");
+        throw ValueInputException(ir, _IFT_NonLinearDynamic_ddtScheme, "Time-stepping scheme not found!");
     }
 
     MANRMSteps = 0;
@@ -168,15 +168,13 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
         communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                             this->giveNumberOfProcesses());
 
-        if ( ir->hasField(_IFT_NonLinearDynamic_nonlocalext) ) {
+        if ( ir.hasField(_IFT_NonLinearDynamic_nonlocalext) ) {
             nonlocalExt = 1;
             nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
                                                          this->giveNumberOfProcesses());
         }
     }
 #endif
-
-    return IRRT_OK;
 }
 
 

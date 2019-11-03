@@ -93,7 +93,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Quad1PlaneStrain_Name; }
     const char *giveClassName() const override { return "Quad1PlaneStrain"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;

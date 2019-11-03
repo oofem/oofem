@@ -87,8 +87,8 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
     return nMethod.get();
 }
 
-IRResultType
-LinearStatic :: initializeFrom(InputRecord *ir)
+void
+LinearStatic :: initializeFrom(InputRecord &ir)
 {
     StructuralEngngModel :: initializeFrom(ir);
 
@@ -108,9 +108,6 @@ LinearStatic :: initializeFrom(InputRecord *ir)
     }
 
 #endif
-
-
-    return IRRT_OK;
 }
 
 

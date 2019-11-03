@@ -86,7 +86,7 @@ protected:
 public:
     FluidMaterialEvaluator(int i, EngngModel * _master = nullptr);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void solveYourself() override;
 

@@ -55,8 +55,8 @@ MazarsMaterial :: MazarsMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n,
 }
 
 
-IRResultType
-MazarsMaterial :: initializeFrom(InputRecord *ir)
+void
+MazarsMaterial :: initializeFrom(InputRecord &ir)
 {
     int ver;
 
@@ -81,7 +81,7 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
     } else if ( ver == 0 ) {
         this->modelVersion = maz_original;
     } else {
-        throw ValueInputException(*ir, _IFT_MazarsMaterial_version, "unknown version");
+        throw ValueInputException(ir, _IFT_MazarsMaterial_version, "unknown version");
     }
 
     IR_GIVE_FIELD(ir, this->e0, _IFT_MazarsMaterial_e0);
@@ -107,8 +107,6 @@ MazarsMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->hRefc, _IFT_MazarsMaterial_hrefc);
 
     this->mapper.initializeFrom(ir);
-
-    return IRRT_OK;
 }
 
 

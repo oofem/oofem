@@ -86,11 +86,11 @@ Truss1dGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
   
 
 
-IRResultType
-Truss1dGradDamage :: initializeFrom(InputRecord *ir)
+void
+Truss1dGradDamage :: initializeFrom(InputRecord &ir)
 {
     GradientDamageElement :: initializeFrom(ir);
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

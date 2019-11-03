@@ -348,8 +348,8 @@ TrabBoneNL3D :: giveInterface(InterfaceType type)
 }
 
 
-IRResultType
-TrabBoneNL3D :: initializeFrom(InputRecord *ir)
+void
+TrabBoneNL3D :: initializeFrom(InputRecord &ir)
 {
     TrabBone3D :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
@@ -361,8 +361,6 @@ TrabBoneNL3D :: initializeFrom(InputRecord *ir)
 
     mParam = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, mParam, _IFT_TrabBoneNL3D_m);
-
-    return IRRT_OK;
 }
 
 

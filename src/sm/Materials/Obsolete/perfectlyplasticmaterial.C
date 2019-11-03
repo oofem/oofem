@@ -632,12 +632,11 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
 }
 
 
-IRResultType
-PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
+void
+PerfectlyPlasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = Material :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    return this->giveLinearElasticMaterial()->initializeFrom(ir);
+    Material :: initializeFrom(ir);
+    this->giveLinearElasticMaterial()->initializeFrom(ir);
 }
 
 

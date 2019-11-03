@@ -75,7 +75,7 @@ public:
     const char *giveClassName() const override { return "EnrFrontDoNothing"; }
     const char *giveInputRecordName() const override { return _IFT_EnrFrontDoNothing_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
+    void initializeFrom(InputRecord &ir) override { }
     void giveInputRecord(DynamicInputRecord &input) override;
 
     double giveSupportRadius() const override { return 0.0; }

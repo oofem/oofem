@@ -76,8 +76,8 @@ DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 // reads the model parameters from the input file
-IRResultType
-DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
+void
+DruckerPragerCutMat :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
@@ -95,8 +95,6 @@ DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, a, _IFT_DruckerPragerCutMat_a); // exponent in damage law
     IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_DruckerPragerCutMat_yieldTol); //tolerance of the error in the yield criterion
     IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_DruckerPragerCutMat_newtonIter); //Maximum number of iterations in lambda search
-
-    return IRRT_OK;
 }
 
 

@@ -84,7 +84,7 @@ public:
     Set(int n, Domain * d) : FEMComponent(n, d), mElementListIsSorted(false) { }
     virtual ~Set() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     /**
      * Returns list of elements within set.

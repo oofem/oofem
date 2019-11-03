@@ -71,7 +71,7 @@ protected:
 public:
     TSplineInterpolation(int nsd) : BSplineInterpolation(nsd) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void setNumberOfControlPoints(int num) { this->totalNumberOfControlPoints = num; }
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

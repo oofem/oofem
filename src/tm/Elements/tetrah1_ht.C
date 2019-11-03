@@ -84,11 +84,11 @@ Tetrah1_ht :: computeGaussPoints()
 }
 
 
-IRResultType
-Tetrah1_ht :: initializeFrom(InputRecord *ir)
+void
+Tetrah1_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 

@@ -72,7 +72,7 @@ public:
 
     int estimateError(EE_ErrorMode mode, TimeStep *tStep) override;
     RemeshingCriteria *giveRemeshingCrit() override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_CombinedZZSIErrorEstimator_Name; }
     const char *giveClassName() const override { return "CombinedZZSIErrorEstimator"; }
     void setDomain(Domain *d) override;
@@ -107,7 +107,7 @@ public:
     double giveDofManDensity(int num) override;
     RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep) override;
     int estimateMeshDensities(TimeStep *tStep) override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return nullptr; }
     const char *giveClassName() const override { return "CombinedZZSIRemeshingCriteria"; }
     void setDomain(Domain *d) override;

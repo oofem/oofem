@@ -89,8 +89,8 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
 }
 
 
-IRResultType
-ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
+void
+ScalarErrorIndicator :: initializeFrom(InputRecord &ir)
 {
     ErrorEstimator :: initializeFrom(ir);
 

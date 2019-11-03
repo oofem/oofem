@@ -383,12 +383,10 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
 }
 
 
-IRResultType
-PhaseFieldElement :: initializeFrom(InputRecord *ir)
+void
+PhaseFieldElement :: initializeFrom(InputRecord &ir)
 {
     //nlGeo = 0;
-
-    return IRRT_OK;
 }
 
 

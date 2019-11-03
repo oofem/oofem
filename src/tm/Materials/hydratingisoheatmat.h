@@ -97,7 +97,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_HydratingIsoHeatMaterial_Name; }
     const char *giveClassName() const override { return "HydratingIsoHeatMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

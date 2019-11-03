@@ -44,12 +44,11 @@ REGISTER_CrossSection(FluidCrossSection);
 FluidCrossSection :: FluidCrossSection(int n, Domain *d) : CrossSection(n, d), matNumber(0) { }
 
 
-IRResultType
-FluidCrossSection :: initializeFrom(InputRecord *ir)
+void
+FluidCrossSection :: initializeFrom(InputRecord &ir)
 {
+    CrossSection :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->matNumber, _IFT_FluidCrossSection_material);
-
-    return CrossSection :: initializeFrom(ir);
 }
 
 

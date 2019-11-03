@@ -557,8 +557,8 @@ TrPlaneStrRot :: GiveDerivativeVY(const FloatArray &lCoords)
 }
 
 
-IRResultType
-TrPlaneStrRot :: initializeFrom(InputRecord *ir)
+void
+TrPlaneStrRot :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
     TrPlaneStress2d :: initializeFrom(ir);
@@ -577,8 +577,6 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
     if ( numberOfRotGaussPoints != 1 ) {
         OOFEM_ERROR("numberOfRotGaussPoints size mismatch - must be equal to one");
     }
-    
-    return IRRT_OK;
 }
 
 

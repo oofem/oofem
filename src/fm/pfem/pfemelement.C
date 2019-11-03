@@ -63,13 +63,12 @@ PFEMElement :: PFEMElement(int n, Domain *aDomain) :
 PFEMElement :: ~PFEMElement()
 { }
 
-IRResultType
-PFEMElement :: initializeFrom(InputRecord *ir)
+void
+PFEMElement :: initializeFrom(InputRecord &ir)
 {
     FMElement :: initializeFrom(ir);
 
     this->computeGaussPoints();
-    return IRRT_OK;
 }
 
 

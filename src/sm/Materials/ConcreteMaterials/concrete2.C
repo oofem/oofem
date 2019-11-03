@@ -52,9 +52,11 @@ Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d),
 
 Concrete2 :: ~Concrete2() { }
 
-IRResultType
-Concrete2 :: initializeFrom(InputRecord *ir)
+void
+Concrete2 :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, E, _IFT_Concrete2_e);
     IR_GIVE_FIELD(ir, n, _IFT_Concrete2_n);
     IR_GIVE_FIELD(ir, SCCC, _IFT_Concrete2_sccc);
@@ -76,7 +78,6 @@ Concrete2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, stirrLAMBDA, _IFT_Concrete2_stirr_lambda);
 
     this->linearElasticMaterial.initializeFrom(ir);
-    return Material :: initializeFrom(ir);
 }
 
 

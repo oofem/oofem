@@ -84,7 +84,7 @@ public:
     /// Constructor.
     StructuralPythonMaterial(int n, Domain * d);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

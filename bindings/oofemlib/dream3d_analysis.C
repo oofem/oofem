@@ -44,7 +44,7 @@ using namespace H5;
 class OOFEM_EXPORT BasicInputRecord : public InputRecord
 {
 public:
-    std::unique_ptr<InputRecord> clone() override { return std::unique_ptr<InputRecord>(); }
+    std::unique_ptr<InputRecord> clone() const override { return std::unique_ptr<InputRecord>(); }
     std :: string giveRecordAsString() const override { return ""; }
     void giveField(int &answer, InputFieldType id) override { }
     void giveField(double &answer, InputFieldType id) override { }

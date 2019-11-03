@@ -347,10 +347,10 @@ DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 }
 
 
-IRResultType
-DKTPlate :: initializeFrom(InputRecord *ir)
+void
+DKTPlate :: initializeFrom(InputRecord &ir)
 {
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
 }
 
 

@@ -57,15 +57,14 @@ SUPGElement :: SUPGElement(int n, Domain *aDomain) :
 { }
 
 
-IRResultType
-SUPGElement :: initializeFrom(InputRecord *ir)
+void
+SUPGElement :: initializeFrom(InputRecord &ir)
 {
+    FMElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_SUPGElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_SUPGElement_bcodes);
     }
-
-    return FMElement :: initializeFrom(ir);
 }
 
 

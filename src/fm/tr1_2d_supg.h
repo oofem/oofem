@@ -124,7 +124,7 @@ public:
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void updateYourself(TimeStep *tStep) override;
     /// Used to check consistency and initialize some element geometry data (area,b,c).

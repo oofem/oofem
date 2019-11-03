@@ -150,17 +150,17 @@ LineDistributedSpring::giveInternalForcesVector(FloatArray &answer,
 
 
   
-IRResultType
-LineDistributedSpring :: initializeFrom(InputRecord *ir)
+void
+LineDistributedSpring :: initializeFrom(InputRecord &ir)
 {
+    StructuralElement::initializeFrom(ir);
+
     IR_GIVE_FIELD (ir, dofs, _IFT_LineDistributedSpring_Dofs);
     IR_GIVE_FIELD (ir, springStiffnesses, _IFT_LineDistributedSpring_Stifnesses);
 
     if (dofs.giveSize() != springStiffnesses.giveSize()) {
       OOFEM_ERROR ("dofs and k params size mismatch");
     }
-    // from element
-    return StructuralElement::initializeFrom(ir);
 }
 
 int

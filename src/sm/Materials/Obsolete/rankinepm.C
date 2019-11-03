@@ -52,14 +52,13 @@ RankinePlasticMaterial :: RankinePlasticMaterial(int n, Domain *d) : MPlasticMat
 }
 
 
-IRResultType
-RankinePlasticMaterial :: initializeFrom(InputRecord *ir)
+void
+RankinePlasticMaterial :: initializeFrom(InputRecord &ir)
 {
     MPlasticMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, k, _IFT_RankinePlasticMaterial_ry);
-    return IRRT_OK;
 }
 
 

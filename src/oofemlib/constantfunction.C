@@ -41,12 +41,12 @@
 namespace oofem {
 REGISTER_Function(ConstantFunction);
 
-IRResultType
-ConstantFunction :: initializeFrom(InputRecord *ir)
+void
+ConstantFunction :: initializeFrom(InputRecord &ir)
 {
-    IR_GIVE_FIELD(ir, value, _IFT_ConstantFunction_f);
+    Function :: initializeFrom(ir);
 
-    return Function :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, value, _IFT_ConstantFunction_f);
 }
 
 

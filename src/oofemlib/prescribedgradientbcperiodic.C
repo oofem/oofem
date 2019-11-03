@@ -368,13 +368,13 @@ bool PrescribedGradientBCPeriodic :: isStrainDof(Dof *dof)
 }
 
 
-IRResultType PrescribedGradientBCPeriodic :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCPeriodic :: initializeFrom(InputRecord &ir)
 {
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    PrescribedGradientHomogenization::initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_PrescribedGradientBCPeriodic_masterSet)
     IR_GIVE_FIELD(ir, this->jump, _IFT_PrescribedGradientBCPeriodic_jump)
-
-    ActiveBoundaryCondition :: initializeFrom(ir);
-    return PrescribedGradientHomogenization::initializeFrom(ir);
 }
 
 

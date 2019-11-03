@@ -228,7 +228,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_TrabBone3D_Name; }
     const char *giveClassName() const override { return "TrabBone3D"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

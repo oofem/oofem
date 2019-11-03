@@ -2560,9 +2560,11 @@ StructuralMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint
     }
 }
 
-IRResultType
-StructuralMaterial :: initializeFrom(InputRecord *ir)
+void
+StructuralMaterial :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     referenceTemperature = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
 
@@ -2574,8 +2576,6 @@ StructuralMaterial :: initializeFrom(InputRecord *ir)
         // and not previosly defined
         propertyDictionary.add(tAlpha, alpha);
     }
-
-    return Material :: initializeFrom(ir);
 }
 
 

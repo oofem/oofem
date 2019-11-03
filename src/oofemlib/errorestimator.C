@@ -56,8 +56,8 @@ ErrorEstimator :: setDomain(Domain *d)
 
 
 
-IRResultType
-ErrorEstimator :: initializeFrom(InputRecord *ir)
+void
+ErrorEstimator :: initializeFrom(InputRecord &ir)
 {
     regionSkipMap.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, regionSkipMap, _IFT_ErrorEstimator_regionskipmap);
@@ -65,8 +65,6 @@ ErrorEstimator :: initializeFrom(InputRecord *ir)
     int val = ( int ) this->IStype;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_ErrorEstimator_IStype);
     this->IStype = ( InternalStateType ) val;
-
-    return IRRT_OK;
 }
 
 void ErrorEstimator :: reinitialize()

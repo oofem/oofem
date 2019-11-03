@@ -223,8 +223,8 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 }
 
 
-IRResultType
-WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
+void
+WallClockLoadBalancerMonitor :: initializeFrom(InputRecord &ir)
 {
     LoadBalancerMonitor :: initializeFrom(ir);
 
@@ -248,8 +248,6 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     }
 
 #endif
-
-    return IRRT_OK;
 }
 
 }

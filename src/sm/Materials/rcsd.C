@@ -252,12 +252,11 @@ RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduced
 }
 
 
-IRResultType
-RCSDMaterial :: initializeFrom(InputRecord *ir)
+void
+RCSDMaterial :: initializeFrom(InputRecord &ir)
 {
+    RCM2Material :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDMaterial_sdtransitioncoeff);
-
-    return RCM2Material :: initializeFrom(ir);
 }
 
 

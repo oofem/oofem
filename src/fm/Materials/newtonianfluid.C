@@ -43,12 +43,12 @@
 namespace oofem {
 REGISTER_Material(NewtonianFluidMaterial);
 
-IRResultType
-NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
+void
+NewtonianFluidMaterial :: initializeFrom(InputRecord &ir)
 {
+    FluidDynamicMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, viscosity, _IFT_NewtonianFluidMaterial_mu);
 
-    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 

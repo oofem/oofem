@@ -152,7 +152,7 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // identification and auxiliary functions
     const char *giveInputRecordName() const override { return _IFT_RankineMat_Name; }

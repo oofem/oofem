@@ -48,8 +48,8 @@ namespace oofem {
 
 REGISTER_Material(OrthotropicLinearElasticMaterial);
 
-IRResultType
-OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
 {
     double value;
     int size;
@@ -222,8 +222,6 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
         alpha = {propertyDictionary.at(tAlphax), propertyDictionary.at(tAlphay), propertyDictionary.at(tAlphaz), 0., 0., 0.};
     }
-
-    return IRRT_OK;
 }
 
 

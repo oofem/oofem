@@ -77,7 +77,7 @@ protected:
 public:
     MooneyRivlinMaterial(int n, Domain *d);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp,

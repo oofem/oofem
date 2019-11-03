@@ -66,7 +66,7 @@ FractureManager :: clear() { }
 
 
 
-IRResultType FractureManager :: initializeFrom(InputRecord *ir)
+void FractureManager :: initializeFrom(InputRecord &ir)
 {
     // Read number of failure criterias to evaluate
     int numCriterias;
@@ -74,11 +74,6 @@ IRResultType FractureManager :: initializeFrom(InputRecord *ir)
     this->criteriaList.resize(numCriterias);
     bool verbose = false;
     IR_GIVE_OPTIONAL_FIELD(ir, verbose, _IFT_FracManager_verbose);
-
-#define VERBOSE
-
-
-    return IRRT_OK;
 }
 
 
@@ -88,8 +83,8 @@ int FractureManager :: instanciateYourself(DataReader &dr)
 
     // Create and initialize all failure criterias
     for ( int i = 1; i <= ( int ) this->criteriaList.size(); i++ ) {
-        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_failCritRec, i);
-        mir->giveRecordKeywordField(name);
+        auto &mir = dr.giveInputRecord(DataReader :: IR_failCritRec, i);
+        mir.giveRecordKeywordField(name);
 
         auto failCriteria = classFactory.createFailureCriteria(name.c_str(), i, this);
         if ( !failCriteria ) {
@@ -243,20 +238,17 @@ DamagedNeighborLayered :: evaluateFailureCriteria(FailureCriteriaStatus *fcStatu
 
 
 
-IRResultType FailureCriteria :: initializeFrom(InputRecord *ir)
+void FailureCriteria :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 
 
-IRResultType DamagedNeighborLayered :: initializeFrom(InputRecord *ir)
+void DamagedNeighborLayered :: initializeFrom(InputRecord &ir)
 {
     // Read damage threshold value
     IR_GIVE_FIELD(ir, this->DamageThreshold, _IFT_DamagedNeighborLayered_DamageThreshold);
 
     this->setType(ELLocal);
-
-    return IRRT_OK;
 }
 
 #endif
@@ -266,8 +258,7 @@ IRResultType DamagedNeighborLayered :: initializeFrom(InputRecord *ir)
 //===================================================
 // Failure Criteria Status
 //===================================================
-IRResultType FailureCriteriaStatus :: initializeFrom(InputRecord *ir)
+void FailureCriteriaStatus :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 } // end namespace oofem

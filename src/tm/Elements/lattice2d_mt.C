@@ -180,8 +180,8 @@ Lattice2d_mt :: giveDofManDofIDMask(int inode, IntArray &answer) const
     answer = {P_f};
 }
 
-IRResultType
-Lattice2d_mt :: initializeFrom(InputRecord *ir)
+void
+Lattice2d_mt :: initializeFrom(InputRecord &ir)
 {
     // first call parent
     LatticeTransportElement :: initializeFrom(ir);
@@ -212,8 +212,6 @@ Lattice2d_mt :: initializeFrom(InputRecord *ir)
     }
 
     numberOfGaussPoints = 1;
-
-    return IRRT_OK;
 }
 
 double

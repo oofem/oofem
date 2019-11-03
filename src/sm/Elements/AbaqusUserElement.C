@@ -69,7 +69,7 @@ AbaqusUserElement :: ~AbaqusUserElement()
 }
 
 
-IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
+void AbaqusUserElement :: initializeFrom(InputRecord &ir)
 {
     StructuralElement :: initializeFrom(ir);
 
@@ -119,8 +119,6 @@ IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("couldn't load symbol uel,\ndlerror: %s\n", dlresult);
     }
 #endif
-
-    return IRRT_OK;
 }
 
 

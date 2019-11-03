@@ -44,8 +44,8 @@
 namespace oofem {
 REGISTER_Material(Eurocode2CreepMaterial);
 
-IRResultType
-Eurocode2CreepMaterial :: initializeFrom(InputRecord *ir)
+void
+Eurocode2CreepMaterial :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, fcm28, _IFT_Eurocode2CreepMaterial_fcm28);
 
@@ -59,12 +59,12 @@ Eurocode2CreepMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, h0, _IFT_Eurocode2CreepMaterial_h0); // equivalent thickness, in mm !!!
 
     this->retardationSpectrumApproximation = false;
-    if ( ir->hasField(_IFT_Eurocode2CreepMaterial_spectrum) ) {
+    if ( ir.hasField(_IFT_Eurocode2CreepMaterial_spectrum) ) {
         this->retardationSpectrumApproximation = true;
     }
 
     this->temperatureDependent = false;
-    if ( ir->hasField(_IFT_Eurocode2CreepMaterial_temperatureDependent) ) {
+    if ( ir.hasField(_IFT_Eurocode2CreepMaterial_temperatureDependent) ) {
         this->temperatureDependent = true;
     }
 
@@ -93,8 +93,6 @@ Eurocode2CreepMaterial :: initializeFrom(InputRecord *ir)
     // spectrum switch is initialized here)
     // initialize Kelvin chain aging material
     KelvinChainMaterial :: initializeFrom(ir);
-
-    return IRRT_OK;
 }
 
 

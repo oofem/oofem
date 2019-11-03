@@ -184,7 +184,7 @@ public:
      */
     bool hasAnalyticalTangentStiffness() const override { return true; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     FloatArray giveInterfaceStrength() override { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }

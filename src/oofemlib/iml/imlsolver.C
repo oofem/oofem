@@ -63,8 +63,8 @@ IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m),
 {}
 
 
-IRResultType
-IMLSolver :: initializeFrom(InputRecord *ir)
+void
+IMLSolver :: initializeFrom(InputRecord &ir)
 {
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_IMLSolver_stype);
@@ -90,7 +90,7 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     } else if ( precondType == IML_ICPrec ) {
         M = std::make_unique<CompCol_ICPreconditioner>();
     } else {
-        throw ValueInputException(*ir, _IFT_IMLSolver_lsprecond, "unknown preconditioner type");
+        throw ValueInputException(ir, _IFT_IMLSolver_lsprecond, "unknown preconditioner type");
     }
 
     // initialize precond attributes

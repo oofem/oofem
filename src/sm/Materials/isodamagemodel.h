@@ -248,7 +248,7 @@ public:
      */
     virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) = 0;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsotropicDamageMaterialStatus(gp); }

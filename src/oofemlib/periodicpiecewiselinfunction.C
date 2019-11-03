@@ -104,15 +104,14 @@ double PeriodicPiecewiseLinFunction :: evaluateVelocityAtTime(double time)
     return add + PiecewiseLinFunction :: evaluateVelocityAtTime(time);
 }
 
-IRResultType
-PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord *ir)
+void
+PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord &ir)
 {
+    PiecewiseLinFunction :: initializeFrom(ir);
     period = -1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, period, _IFT_PeriodicPiecewiseLinFunction_period);
     addTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, addTF, _IFT_PeriodicPiecewiseLinFunction_addtf);
-
-    return PiecewiseLinFunction :: initializeFrom(ir);
 }
 
 

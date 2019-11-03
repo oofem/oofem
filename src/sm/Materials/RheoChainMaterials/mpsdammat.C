@@ -226,13 +226,13 @@ MPSDamMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-IRResultType
-MPSDamMaterial :: initializeFrom(InputRecord *ir)
+void
+MPSDamMaterial :: initializeFrom(InputRecord &ir)
 {
     MPSMaterial :: initializeFrom(ir);
 
     this->isotropic = false;
-    if ( ir->hasField(_IFT_MPSDamMaterial_isotropic) ) {
+    if ( ir.hasField(_IFT_MPSDamMaterial_isotropic) ) {
         this->isotropic = true;
     }
 
@@ -241,7 +241,7 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
 
     this->timeDepFracturing = false;
 
-    if ( ir->hasField(_IFT_MPSDamMaterial_timedepfracturing) ) {
+    if ( ir.hasField(_IFT_MPSDamMaterial_timedepfracturing) ) {
         this->timeDepFracturing = true;
         //
         IR_GIVE_FIELD(ir, fib_s, _IFT_MPSDamMaterial_fib_s);
@@ -250,7 +250,7 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
         this->gf28 = 0.;
         this->ft28 = 0.;
         
-        if (  ( ir->hasField(_IFT_MPSDamMaterial_ft28) ) && ( ir->hasField(_IFT_MPSDamMaterial_gf28) ) )  {
+        if (  ( ir.hasField(_IFT_MPSDamMaterial_ft28) ) && ( ir.hasField(_IFT_MPSDamMaterial_gf28) ) )  {
             
             IR_GIVE_FIELD(ir, gf28, _IFT_MPSDamMaterial_gf28);
             if (gf28 < 0.) {
@@ -295,8 +295,6 @@ MPSDamMaterial :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, checkSnapBack, _IFT_MPSDamMaterial_checkSnapBack);
-
-    return IRRT_OK;
 }
 
 

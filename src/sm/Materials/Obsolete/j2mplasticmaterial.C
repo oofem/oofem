@@ -61,8 +61,8 @@ J2MPlasticMaterial :: ~J2MPlasticMaterial()
     //
 }
 
-IRResultType
-J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
+void
+J2MPlasticMaterial :: initializeFrom(InputRecord &ir)
 {
     double value;
 
@@ -93,8 +93,6 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
     } else {
         this->rmType = mpm_CuttingPlane;
     }
-
-    return IRRT_OK;
 }
 
 

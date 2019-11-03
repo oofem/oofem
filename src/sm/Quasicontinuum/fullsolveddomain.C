@@ -58,8 +58,8 @@ QCFullsolveddomain :: ~QCFullsolveddomain()
 // Destructor
 { }
 
-IRResultType
-QCFullsolveddomain :: initializeFrom(InputRecord *ir)
+void
+QCFullsolveddomain :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainNodes, _IFT_FullSolvedDomain_nodes);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainElements, _IFT_FullSolvedDomain_elements);
@@ -74,8 +74,6 @@ QCFullsolveddomain :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("invalid format of FullSolvedDomainBox");
     }
 #endif
-
-    return IRRT_OK;
 }
 
 void

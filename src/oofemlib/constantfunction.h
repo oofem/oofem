@@ -70,7 +70,7 @@ public:
     double evaluateVelocityAtTime(double t) override { return 0.; }
     double evaluateAccelerationAtTime(double t) override { return 0.; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     const char *giveClassName() const override { return "ConstantFunction"; }

@@ -98,9 +98,11 @@ NRSolver :: ~NRSolver()
 {}
 
 
-IRResultType
-NRSolver :: initializeFrom(InputRecord *ir)
+void
+NRSolver :: initializeFrom(InputRecord &ir)
 {
+    SparseNonLinearSystemNM :: initializeFrom(ir);
+
     // Choosing a big "enough" number. (Alternative: Force input of maxinter)
     nsmax = ( int ) 1e8;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_NRSolver_maxiter);
@@ -174,7 +176,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
         mCalcStiffBeforeRes = false;
     }
 
-    solutionDependentExternalForcesFlag = ir->hasField(_IFT_NRSolver_solutionDependentExternalForces);
+    solutionDependentExternalForcesFlag = ir.hasField(_IFT_NRSolver_solutionDependentExternalForces);
 
 
     this->constrainedNRminiter = 0;
@@ -185,7 +187,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->maxIncAllowed, _IFT_NRSolver_maxinc);
 
     dg_forceScale.clear();
-    if ( ir->hasField(_IFT_NRSolver_forceScale) ) {
+    if ( ir.hasField(_IFT_NRSolver_forceScale) ) {
         IntArray dofs;
         FloatArray forces;
         IR_GIVE_FIELD(ir, forces, _IFT_NRSolver_forceScale);
@@ -195,7 +197,6 @@ NRSolver :: initializeFrom(InputRecord *ir)
         }
     }
 
-    return SparseNonLinearSystemNM :: initializeFrom(ir);
 }
 
 

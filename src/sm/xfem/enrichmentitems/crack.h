@@ -58,7 +58,7 @@ public:
 
     const char *giveClassName() const override { return "Crack"; }
     const char *giveInputRecordName() const override { return _IFT_Crack_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void AppendCohesiveZoneGaussPoint(GaussPoint *ipGP);
     void ClearCohesiveZoneGaussPoints() {mCohesiveZoneGaussPoints.clear(); mCohesiveZoneArcPositions.clear();}

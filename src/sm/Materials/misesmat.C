@@ -56,8 +56,8 @@ MisesMat :: MisesMat(int n, Domain *d) : StructuralMaterial(n, d),
 {}
 
 
-IRResultType
-MisesMat :: initializeFrom(InputRecord *ir)
+void
+MisesMat :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial.initializeFrom(ir); // takes care of elastic constants
@@ -78,8 +78,6 @@ MisesMat :: initializeFrom(InputRecord *ir)
 
     yieldTol = 1.e-6;
     IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_MisesMat_yieldTol); // tolerance in the yield condition
-
-    return IRRT_OK;
 }
 
 // creates a new material status  corresponding to this class

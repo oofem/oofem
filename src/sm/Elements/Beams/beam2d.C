@@ -377,17 +377,17 @@ Beam2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 }
 
 
-IRResultType
-Beam2d :: initializeFrom(InputRecord *ir)
+void
+Beam2d :: initializeFrom(InputRecord &ir)
 {
     // first call parent
     BeamBaseElement :: initializeFrom(ir);
 
-    if ( ir->hasField(_IFT_Beam2d_dofstocondense) ) {
+    if ( ir.hasField(_IFT_Beam2d_dofstocondense) ) {
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
         if ( val.giveSize() >= 6 ) {
-            throw ValueInputException(*ir, _IFT_Beam2d_dofstocondense, "wrong input data for condensed dofs");
+            throw ValueInputException(ir, _IFT_Beam2d_dofstocondense, "wrong input data for condensed dofs");
         }
 
         DofIDItem mask[] = {
@@ -408,7 +408,6 @@ Beam2d :: initializeFrom(InputRecord *ir)
             }
         }
     }
-    return IRRT_OK;
 }
 
 

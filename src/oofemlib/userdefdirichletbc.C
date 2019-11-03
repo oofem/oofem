@@ -128,8 +128,8 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, double time)
 }
 
 
-IRResultType
-UserDefDirichletBC :: initializeFrom(InputRecord *ir)
+void
+UserDefDirichletBC :: initializeFrom(InputRecord &ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
@@ -146,13 +146,11 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
         // Load and call Python function
         mpFunc = PyObject_GetAttrString(mpModule, "giveUserDefBC");
         if ( !mpFunc ) {
-            throw ValueInputException(*ir, _IFT_UserDefDirichletBC_filename, "Cannot find function 'giveUserDefBC' in file: " + mFileName);
+            throw ValueInputException(ir, _IFT_UserDefDirichletBC_filename, "Cannot find function 'giveUserDefBC' in file: " + mFileName);
         }
     } else   {
-        throw ValueInputException(*ir, _IFT_UserDefDirichletBC_filename, "Cannot find module in file: " + mFileName);
+        throw ValueInputException(ir, _IFT_UserDefDirichletBC_filename, "Cannot find module in file: " + mFileName);
     }
-
-    return IRRT_OK;
 }
 
 

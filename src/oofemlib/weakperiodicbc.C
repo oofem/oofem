@@ -70,8 +70,8 @@ WeakPeriodicBoundaryCondition :: ~WeakPeriodicBoundaryCondition()
 {
 }
 
-IRResultType
-WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
+void
+WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord &ir)
 {
     ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
 
@@ -140,8 +140,6 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
         gamma_ids.followedBy(dofid);
         gammaDman->appendDof( new MasterDof( gammaDman.get(), ( DofIDItem )dofid ) );
     }
-
-    return IRRT_OK;
 }
 
 void WeakPeriodicBoundaryCondition :: computeOrthogonalBasis()

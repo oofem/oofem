@@ -41,14 +41,13 @@
 namespace oofem {
 REGISTER_BoundaryCondition(NodalLoad);
 
-IRResultType
-NodalLoad :: initializeFrom(InputRecord *ir)
+void
+NodalLoad :: initializeFrom(InputRecord &ir)
 {
+    Load :: initializeFrom(ir);
     int value = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_NodalLoad_cstype);
     coordSystemType = ( CoordSystType ) value;
-
-    return Load :: initializeFrom(ir);
 }
 
 

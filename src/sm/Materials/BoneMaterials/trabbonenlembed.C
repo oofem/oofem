@@ -144,8 +144,8 @@ TrabBoneNLEmbed :: giveInterface(InterfaceType type)
     }
 }
 
-IRResultType
-TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
+void
+TrabBoneNLEmbed :: initializeFrom(InputRecord &ir)
 {
     TrabBoneEmbed :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
@@ -157,8 +157,6 @@ TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
 
     mParam = 1.5;
     IR_GIVE_OPTIONAL_FIELD(ir, mParam, _IFT_TrabBoneNLEmbed_m);
-
-    return IRRT_OK;
 }
 
 

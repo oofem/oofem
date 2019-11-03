@@ -125,7 +125,7 @@ public:
     /// Perform averaging on a master CemhydMatStatus.
     virtual void averageTemperature();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     /// Use different methods to evaluate material parameters
     int conductivityType, capacityType, densityType;
     /// Array containing warnings supression for density, conductivity, capacity, high temperature.

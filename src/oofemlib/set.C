@@ -48,11 +48,13 @@
 #include <list>
 
 namespace oofem {
-IRResultType Set :: initializeFrom(InputRecord *ir)
+void Set :: initializeFrom(InputRecord &ir)
 {
+    FEMComponent :: initializeFrom(ir);
+
     IntArray inputNodes;
     std :: list< Range >inputNodeRanges;
-    if ( ir->hasField(_IFT_Set_allNodes) ) { // generate a list with all the node numbers
+    if ( ir.hasField(_IFT_Set_allNodes) ) { // generate a list with all the node numbers
        this->nodes.enumerate(this->giveDomain()->giveNumberOfDofManagers()); 
     } else {
         IR_GIVE_OPTIONAL_FIELD(ir, inputNodes, _IFT_Set_nodes);
@@ -60,7 +62,7 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
         this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
     }
 
-    if ( ir->hasField(_IFT_Set_allElements) ) { // generate a list with all the element numbers
+    if ( ir.hasField(_IFT_Set_allElements) ) { // generate a list with all the element numbers
         this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
         mElementListIsSorted = false;
     } else {
@@ -81,8 +83,6 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
 
     this->elementSurfaces.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementSurfaces, _IFT_Set_elementSurfaces);
-
-    return FEMComponent :: initializeFrom(ir);
 }
 
 

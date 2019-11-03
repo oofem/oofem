@@ -45,9 +45,12 @@
 namespace oofem {
 REGISTER_Material(B3SolidMaterial);
 
-IRResultType
-B3SolidMaterial :: initializeFrom(InputRecord *ir)
+void
+B3SolidMaterial :: initializeFrom(InputRecord &ir)
 {
+    // ph!!!
+    //KelvinChainMaterial :: initializeFrom(ir);
+
     //
     // NOTE
     //
@@ -115,7 +118,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     if ( this->shMode == B3_PointShrinkage ) {   // #2 in enumerator
 
         if ( this->MicroPrestress == 0 ) {
-            throw ValueInputException(*ir, _IFT_B3SolidMaterial_microprestress, "to use B3_PointShrinkageMPS - MicroPrestress must be = 1"); //or else no external fiels would be found
+            throw ValueInputException(ir, _IFT_B3SolidMaterial_microprestress, "to use B3_PointShrinkageMPS - MicroPrestress must be = 1"); //or else no external fiels would be found
         }
 
         kSh = -1;
@@ -128,14 +131,14 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
 
         // either kSh or initHum and finalHum must be given in input record
         if ( !( ( this->kSh != -1 ) || ( ( initHum != -1 ) && ( finalHum != -1 ) ) ) ) {
-            throw ValueInputException(*ir, "none", "either kSh or initHum and finalHum must be given in input record");
+            throw ValueInputException(ir, "none", "either kSh or initHum and finalHum must be given in input record");
         }
         
         if ( ( initHum < 0.2 || initHum > 0.98 ) && this->kSh == -1 ) {
-            throw ValueInputException(*ir, _IFT_B3SolidMaterial_initialhumidity, "initital humidity out of range (0.2 - 0.98)");
+            throw ValueInputException(ir, _IFT_B3SolidMaterial_initialhumidity, "initital humidity out of range (0.2 - 0.98)");
         }
         if ( ( finalHum < 0.2 || finalHum > 0.98 ) && this->kSh == -1 ) {
-            throw ValueInputException(*ir, _IFT_B3SolidMaterial_finalhumidity, "final humidity out of range (0.2 - 0.98)");
+            throw ValueInputException(ir, _IFT_B3SolidMaterial_finalhumidity, "final humidity out of range (0.2 - 0.98)");
         }
         
 
@@ -175,10 +178,6 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     if ( mode == 0 ) {
         this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     }
-
-    // ph!!!
-    //return KelvinChainMaterial :: initializeFrom(ir);
-    return IRRT_OK;
 }
 
 void

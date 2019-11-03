@@ -70,7 +70,7 @@ AbaqusUserMaterial :: ~AbaqusUserMaterial()
 #endif
 }
 
-IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
+void AbaqusUserMaterial :: initializeFrom(InputRecord &ir)
 {
     std :: string umatname;
 
@@ -115,16 +115,14 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    if ( ir->hasField(_IFT_AbaqusUserMaterial_numericalTangent) ) {
+    if ( ir.hasField(_IFT_AbaqusUserMaterial_numericalTangent) ) {
         mUseNumericalTangent = true;
     }
 
-    if ( ir->hasField(_IFT_AbaqusUserMaterial_numericalTangentPerturbation) ) {
+    if ( ir.hasField(_IFT_AbaqusUserMaterial_numericalTangentPerturbation) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, mPerturbation, _IFT_AbaqusUserMaterial_numericalTangentPerturbation);
         printf("mPerturbation: %e\n", mPerturbation);
     }
-
-    return IRRT_OK;
 }
 
 void AbaqusUserMaterial :: giveInputRecord(DynamicInputRecord &input)

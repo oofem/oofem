@@ -90,7 +90,7 @@ public:
 
     const char *giveClassName() const override { return "Axisymm3d"; }
     const char *giveInputRecordName() const override { return _IFT_Axisymm3d_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 };
 } // end namespace oofem
 #endif // axisymm3d_h

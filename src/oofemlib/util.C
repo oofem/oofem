@@ -150,7 +150,7 @@ std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode,
      * be updated as reading e-model components (nodes, etc). But we need this record being available
      * through the whole e-model instanciation
      */
-    auto emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1)->clone();
+    auto emodelir = dr.giveInputRecord(DataReader :: IR_emodelRec, 1).clone();
     emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
 
     auto problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
@@ -166,7 +166,7 @@ std::unique_ptr<EngngModel> InstanciateProblem(DataReader &dr, problemMode mode,
         problem->setContextOutputMode(COM_Always);
     }
 
-    problem->instanciateYourself( dr, emodelir.get(), dataOutputFileName.c_str(), desc.c_str() );
+    problem->instanciateYourself( dr, *emodelir, dataOutputFileName.c_str(), desc.c_str() );
 
     return problem;
 }

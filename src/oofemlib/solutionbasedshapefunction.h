@@ -145,7 +145,7 @@ public:
     SolutionbasedShapeFunction(int n, Domain * d);
     virtual ~SolutionbasedShapeFunction() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     bool requiresActiveDofs() override { return true; }
     int giveNumberOfInternalDofManagers() override { return 1; }

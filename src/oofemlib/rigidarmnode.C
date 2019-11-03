@@ -48,8 +48,8 @@ RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
 
-IRResultType
-RigidArmNode :: initializeFrom(InputRecord *ir)
+void
+RigidArmNode :: initializeFrom(InputRecord &ir)
 {
     Node :: initializeFrom(ir);
 
@@ -57,10 +57,8 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
     if ( masterMask.giveSize() != this->dofidmask->giveSize() ) {
-        throw ValueInputException(*ir, _IFT_DofManager_mastermask, "mastermask size mismatch");
+        throw ValueInputException(ir, _IFT_DofManager_mastermask, "mastermask size mismatch");
     }
-
-    return IRRT_OK;
 }
 
 void

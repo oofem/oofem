@@ -436,9 +436,11 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
  */
 
 
-IRResultType
-Concrete3 :: initializeFrom(InputRecord *ir)
+void
+Concrete3 :: initializeFrom(InputRecord &ir)
 {
+    RCM2Material :: initializeFrom(ir);
+
     int exmode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, exmode, _IFT_Concrete3_exp_soft);
     if ( exmode ) {
@@ -446,7 +448,5 @@ Concrete3 :: initializeFrom(InputRecord *ir)
     } else {
         softeningMode = linearSoftening;
     }
-
-    return RCM2Material :: initializeFrom(ir);
 }
 } // end namespace oofem

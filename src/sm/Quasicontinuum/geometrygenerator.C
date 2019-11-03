@@ -47,14 +47,13 @@ GeometryGenerator :: ~GeometryGenerator()
 // Destructor
 { }
 
-IRResultType
-GeometryGenerator :: initializeParticleGenerator(InputRecord *ir)
+void
+GeometryGenerator :: initializeParticleGenerator(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, maxNumOfParticles, _IFT_GeometryGenerator_numOfParticles);
     IR_GIVE_FIELD(ir, maxNumOfIterations, _IFT_GeometryGenerator_numOfIterations);
     IR_GIVE_FIELD(ir, maxNumOfItOnePar, _IFT_GeometryGenerator_numOfItOnePar);
     IR_GIVE_FIELD(ir, ParticleRadius, _IFT_GeometryGenerator_particleRadius);
-
 
     //...
 
@@ -66,8 +65,6 @@ GeometryGenerator :: initializeParticleGenerator(InputRecord *ir)
      * }
      */
 #endif
-
-    return IRRT_OK;
 }
 
 void
@@ -165,11 +162,9 @@ void
 GeometryGenerator :: loadParticles()
 {}
 
-IRResultType
-GeometryGenerator :: initializeLinkGenerator(InputRecord *ir)
+void
+GeometryGenerator :: initializeLinkGenerator(InputRecord &ir)
 {
-    return IRRT_OK;
-
 }
 
 void

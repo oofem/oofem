@@ -129,11 +129,11 @@ Quad1PlateSubSoil :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespons
 }
 
 
-IRResultType
-Quad1PlateSubSoil :: initializeFrom(InputRecord *ir)
+void
+Quad1PlateSubSoil :: initializeFrom(InputRecord &ir)
 {
     this->numberOfGaussPoints = 4;
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

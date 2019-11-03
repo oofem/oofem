@@ -80,7 +80,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_BazantNajjarMoistureTransferMaterial_Name; }
     const char *giveClassName() const override { return "BazantNajjarMoistureTransferMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 };

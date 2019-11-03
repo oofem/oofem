@@ -90,21 +90,15 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-
-IRResultType
-TrPlaneStrain :: initializeFrom(InputRecord *ir)
+void
+TrPlaneStrain :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = PlaneStrainElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    PlaneStrainElement :: initializeFrom(ir);
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
     }
-
-    return IRRT_OK;
 }
 
 

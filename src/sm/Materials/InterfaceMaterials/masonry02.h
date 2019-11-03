@@ -105,7 +105,7 @@ public:
     Masonry02(int n, Domain * d);
     virtual ~Masonry02();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_Masonry02_Name; }

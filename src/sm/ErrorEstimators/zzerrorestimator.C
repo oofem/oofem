@@ -212,8 +212,8 @@ ZZErrorEstimator :: giveRemeshingCrit()
 }
 
 
-IRResultType
-ZZErrorEstimator :: initializeFrom(InputRecord *ir)
+void
+ZZErrorEstimator :: initializeFrom(InputRecord &ir)
 {
     int n;
 
@@ -452,13 +452,11 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     return 1;
 }
 
-IRResultType
-ZZRemeshingCriteria :: initializeFrom(InputRecord *ir)
+void
+ZZRemeshingCriteria :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, this->requiredError, _IFT_ZZRemeshingCriteria_requirederror);
     IR_GIVE_FIELD(ir, this->minElemSize, _IFT_ZZRemeshingCriteria_minelemsize);
-
-    return IRRT_OK;
 }
 
 

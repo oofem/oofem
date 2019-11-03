@@ -594,21 +594,21 @@ RheoChainMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-IRResultType
-RheoChainMaterial :: initializeFrom(InputRecord *ir)
+void
+RheoChainMaterial :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
 
     // if the casting time is not defined, we set it to zero such that it concides
     // with the beginning of the computational time
-    if ( ! ir->hasField(_IFT_Material_castingtime) ) {
+    if ( !ir.hasField(_IFT_Material_castingtime) ) {
       this->castingTime = 0.;
     }
     
     this->talpha = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, talpha, _IFT_RheoChainMaterial_talpha);
 
-    if ( ir->hasField(_IFT_RheoChainMaterial_lattice) ) {
+    if ( ir.hasField(_IFT_RheoChainMaterial_lattice) ) {
         lattice = true;
         this->alphaOne = 1.;
         this->alphaTwo = 1.;
@@ -636,8 +636,6 @@ RheoChainMaterial :: initializeFrom(InputRecord *ir)
     ///@warning Stiffness is time dependant, so the variable changes with time.
     //ph !!! why was it put here?
     //this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
-
-    return IRRT_OK;
 }
 
 LinearElasticMaterial *

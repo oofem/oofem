@@ -79,8 +79,8 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 }
 
 
-IRResultType
-DIIDynamic :: initializeFrom(InputRecord *ir)
+void
+DIIDynamic :: initializeFrom(InputRecord &ir)
 {
     StructuralEngngModel :: initializeFrom(ir);
 
@@ -122,12 +122,10 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
             theta = 1.37;
         }
     } else {
-        throw ValueInputException(*ir, _IFT_DIIDynamic_ddtScheme, "Time-stepping scheme not found!");
+        throw ValueInputException(ir, _IFT_DIIDynamic_ddtScheme, "Time-stepping scheme not found!");
     }
 
     IR_GIVE_FIELD(ir, deltaT, _IFT_DIIDynamic_deltat);
-
-    return IRRT_OK;
 }
 
 

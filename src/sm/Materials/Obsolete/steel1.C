@@ -173,14 +173,13 @@ Steel1 :: GiveLCPlasticStrainGradient(GaussPoint *gp,
 }
 
 
-IRResultType
-Steel1 :: initializeFrom(InputRecord *ir)
+void
+Steel1 :: initializeFrom(InputRecord &ir)
 {
-    double value;
+    PerfectlyPlasticMaterial :: initializeFrom(ir);
 
+    double value;
     IR_GIVE_FIELD(ir, value, _IFT_Steel1_ry);
     propertyDictionary.add( 'k', value / sqrt(3.) );
-
-    return PerfectlyPlasticMaterial :: initializeFrom(ir);
 }
 } // end namespace oofem

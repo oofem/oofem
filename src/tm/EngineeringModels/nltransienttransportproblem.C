@@ -51,8 +51,8 @@ NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_m
 {
 }
 
-IRResultType
-NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
+void
+NLTransientTransportProblem :: initializeFrom(InputRecord &ir)
 {
      NonStationaryTransportProblem :: initializeFrom(ir);
 
@@ -70,8 +70,6 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
     } else {
         NR_Mode = nrsolverModifiedNRM;
     }
-
-    return IRRT_OK;
 }
 
 TimeStep *

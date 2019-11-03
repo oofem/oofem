@@ -42,8 +42,10 @@
 namespace oofem {
 REGISTER_DofManager(SlaveNode);
 
-IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
+void SlaveNode :: initializeFrom(InputRecord &ir)
 {
+    Node :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, masterDofManagers, _IFT_SlaveNode_masterDofManagers);
     IR_GIVE_OPTIONAL_FIELD(ir, masterWeights, _IFT_SlaveNode_weights);
 
@@ -51,9 +53,8 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
         masterWeights.resize( masterDofManagers.giveSize() );
         masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
     } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
-        throw ValueInputException(*ir, _IFT_SlaveNode_weights, "master dof managers and weights size mismatch.");
+        throw ValueInputException(ir, _IFT_SlaveNode_weights, "master dof managers and weights size mismatch.");
     }
-    return Node :: initializeFrom(ir);
 }
 
 

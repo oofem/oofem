@@ -100,10 +100,10 @@ Tria2PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 
 
 
-IRResultType
-Tria2PlateSubSoil :: initializeFrom(InputRecord *ir)
+void
+Tria2PlateSubSoil :: initializeFrom(InputRecord &ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 //TODO ZZNodalRecoveryModel can not determine some values.  This is cause by sum of row entries is zero for (N^T)N matrix for vertices,  yielding zero entries in lumped form.

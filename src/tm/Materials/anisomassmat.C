@@ -43,16 +43,17 @@
 namespace oofem {
 REGISTER_Material(AnisotropicMassTransferMaterial);
 
-IRResultType
-AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+AnisotropicMassTransferMaterial :: initializeFrom(InputRecord &ir)
 {
+    TransportMaterial :: initializeFrom(ir);
+
     FloatMatrix c;
     IR_GIVE_FIELD(ir, c, _IFT_AnisotropicMassTransferMaterial_c);     // Read permeability matrix c from input file
     if ( c.giveNumberOfColumns() != 3 && c.giveNumberOfRows() != 3 ) {
-        throw ValueInputException(*ir, _IFT_AnisotropicMassTransferMaterial_c, "c must be a 3x3");
+        throw ValueInputException(ir, _IFT_AnisotropicMassTransferMaterial_c, "c must be a 3x3");
     }
     k = c;
-    return TransportMaterial :: initializeFrom(ir);
 }
 
 

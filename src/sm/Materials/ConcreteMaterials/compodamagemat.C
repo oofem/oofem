@@ -55,8 +55,10 @@ CompoDamageMat :: ~CompoDamageMat()
 }
 
 
-IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
+void CompoDamageMat :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     double value;
 
     //define transversely othotropic material stiffness parameters
@@ -109,8 +111,6 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 
     this->afterIter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, _IFT_CompoDamageMat_allowSnapBack);
-
-    return Material :: initializeFrom(ir);
 }
 
 void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)

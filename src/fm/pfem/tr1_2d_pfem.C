@@ -116,13 +116,12 @@ TR1_2D_PFEM ::   giveElementDofIDMask(IntArray &answer) const
 }
 
 
-IRResultType
-TR1_2D_PFEM :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_PFEM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType ret = this->PFEMElement :: initializeFrom(ir);
+    PFEMElement :: initializeFrom(ir);
 
     this->computeGaussPoints();
-    return ret;
 }
 
 void

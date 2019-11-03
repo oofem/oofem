@@ -44,14 +44,14 @@ Particle :: Particle(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
 
-IRResultType
-Particle :: initializeFrom(InputRecord *ir)
+void
+Particle :: initializeFrom(InputRecord &ir)
 {
+    Node :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, radius, _IFT_Particle_rad);
     if ( radius < 0.0 ) {
-        throw ValueInputException(*ir, _IFT_Particle_rad, "must be positive");
+        throw ValueInputException(ir, _IFT_Particle_rad, "must be positive");
     }
-
-    return Node :: initializeFrom(ir);
 }
 } // namespace oofem

@@ -93,7 +93,7 @@ public:
     /// Destructor.
     virtual ~LinearConstraintBC();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_LinearConstraintBC_Name; }
     void assemble(SparseMtrx &answer, TimeStep *tStep,
                   CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;

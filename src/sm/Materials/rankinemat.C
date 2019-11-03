@@ -77,8 +77,8 @@ RankineMat :: hasMaterialModeCapability(MaterialMode mode) const
 
 
 // reads the model parameters from the input file
-IRResultType
-RankineMat :: initializeFrom(InputRecord *ir)
+void
+RankineMat :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
@@ -104,7 +104,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         ep = ep - sig0 / E; // user input is strain at peak stress sig0 and is converted to plastic strain at peak stress sig0
         md = 1. / log(50. * E * ep / sig0); // exponent used on the 1st plasticity branch
     } else {
-        throw ValueInputException(*ir, _IFT_RankineMat_plasthardtype, "Plasticity hardening type is unknown");
+        throw ValueInputException(ir, _IFT_RankineMat_plasthardtype, "Plasticity hardening type is unknown");
     }
 
     yieldtol = 1.e-10;
@@ -130,14 +130,14 @@ RankineMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, param2, _IFT_RankineMat_param2);
         IR_GIVE_FIELD(ir, param3, _IFT_RankineMat_param3);
     } else {
-        throw ValueInputException(*ir, _IFT_RankineMat_damlaw, "Damage law is unknown");
+        throw ValueInputException(ir, _IFT_RankineMat_damlaw, "Damage law is unknown");
     }
 
     double gf = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, gf, _IFT_RankineMat_gf); // dissipated energy per unit VOLUME
 
     if ( ( a != 0. ) && ( gf != 0 ) ) {
-        throw ValueInputException(*ir, _IFT_RankineMat_gf, "parameters a and gf cannot be prescribed simultaneously");
+        throw ValueInputException(ir, _IFT_RankineMat_gf, "parameters a and gf cannot be prescribed simultaneously");
     }
 
     if ( gf > 0. ) {
@@ -152,8 +152,6 @@ RankineMat :: initializeFrom(InputRecord *ir)
         double kappaf = ( -B + sqrt(B * B - 4. * A * C) ) / ( 2. * A );
         a = 1. / kappaf;
     }
-
-    return IRRT_OK;
 }
 
 

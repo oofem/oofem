@@ -224,8 +224,8 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
     return this->nMethod.get();
 }
 
-IRResultType
-SUPG :: initializeFrom(InputRecord *ir)
+void
+SUPG :: initializeFrom(InputRecord &ir)
 {
     FluidModel :: initializeFrom(ir);
 
@@ -234,7 +234,7 @@ SUPG :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, atolv, _IFT_SUPG_atolv);
 
 
-    stopmaxiter = ir->hasField(_IFT_SUPG_stopmaxiter);
+    stopmaxiter = ir.hasField(_IFT_SUPG_stopmaxiter);
 
     maxiter = 200;
     IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_SUPG_maxiter);
@@ -295,8 +295,6 @@ SUPG :: initializeFrom(InputRecord *ir)
         this->materialInterface = std::make_unique<LevelSetPCS>( 1, this->giveDomain(1) );
         this->materialInterface->initializeFrom(ir);
     }
-
-    return IRRT_OK;
 }
 
 

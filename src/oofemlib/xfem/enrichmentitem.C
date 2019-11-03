@@ -81,7 +81,7 @@ EnrichmentItem :: ~EnrichmentItem()
 {
 }
 
-IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
+void EnrichmentItem :: initializeFrom(InputRecord &ir)
 {
     mEnrFrontIndex = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mEnrFrontIndex, _IFT_EnrichmentItem_front);
@@ -90,14 +90,12 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     mPropLawIndex = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mPropLawIndex, _IFT_EnrichmentItem_propagationlaw);
 
-    if ( ir->hasField(_IFT_EnrichmentItem_inheritbc) ) {
+    if ( ir.hasField(_IFT_EnrichmentItem_inheritbc) ) {
         mInheritBoundaryConditions = true;
     }
-    if ( ir->hasField(_IFT_EnrichmentItem_inheritorderedbc) ) {
+    if ( ir.hasField(_IFT_EnrichmentItem_inheritorderedbc) ) {
         mInheritOrderedBoundaryConditions = true;
     }
-
-    return IRRT_OK;
 }
 
 

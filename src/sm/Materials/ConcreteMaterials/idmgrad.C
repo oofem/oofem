@@ -54,8 +54,8 @@ IsotropicGradientDamageMaterial :: IsotropicGradientDamageMaterial(int n, Domain
 {}
 
 
-IRResultType
-IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicGradientDamageMaterial :: initializeFrom(InputRecord &ir)
 {
     IsotropicDamageMaterial1 :: initializeFrom(ir);
     GradientDamageMaterialExtensionInterface :: initializeFrom(ir);
@@ -73,7 +73,7 @@ IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
     } else if ( formulationType == 2 ) {
         this->gradientDamageFormulationType =   GDFT_Eikonal;
     } else {
-        throw ValueInputException(*ir, _IFT_IsotropicGradientDamageMaterial_formulationType, "Unknown gradient damage formulation");
+        throw ValueInputException(ir, _IFT_IsotropicGradientDamageMaterial_formulationType, "Unknown gradient damage formulation");
     }
 
 

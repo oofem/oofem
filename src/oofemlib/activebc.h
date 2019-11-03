@@ -72,7 +72,7 @@ public:
     /// Destructor.
     virtual ~ActiveBoundaryCondition() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override
+    void initializeFrom(InputRecord &ir) override
     {
         GeneralBoundaryCondition :: initializeFrom(ir);
 
@@ -81,8 +81,6 @@ public:
         for ( int i = 0; i < tempB.giveSize() / 2; ++i ) {
             this->addElementSide( tempB[i * 2], tempB[i * 2 + 1] );
         }
-
-        return IRRT_OK;
     }
 
     ///  @name Methods supporting classical input files.

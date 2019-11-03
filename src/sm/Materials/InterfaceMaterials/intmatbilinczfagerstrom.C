@@ -311,8 +311,8 @@ IntMatBilinearCZFagerstrom :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, 
 
 
 //const double tolerance = 1.0e-12; // small number
-IRResultType
-IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
+void
+IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZFagerstrom_kn);
     this->knc = kn0;                        // Defaults to the same stiffness in compression and tension
@@ -336,17 +336,16 @@ IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
 
     // check validity of the material paramters
     if ( this->kn0 < 0.0 ) {
-        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_kn, "must be positive");
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZFagerstrom_kn, "must be positive");
     } else if ( this->ks0 < 0.0 ) {
-        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_ks, "must be positive");
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZFagerstrom_ks, "must be positive");
     } else if ( this->GIc < 0.0 ) {
-        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_g2c, "must be positive");
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZFagerstrom_g2c, "must be positive");
     } else if ( this->GIIc < 0.0 ) {
-        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_g2c, "must be positive");
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZFagerstrom_g2c, "must be positive");
     } else if ( this->gamma < 0.0  ) { 
-        throw ValueInputException(*ir, _IFT_IntMatBilinearCZFagerstrom_gamma, "must be positive");
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZFagerstrom_gamma, "must be positive");
     }
-    return IRRT_OK;
 }
 
 void IntMatBilinearCZFagerstrom :: giveInputRecord(DynamicInputRecord &input)

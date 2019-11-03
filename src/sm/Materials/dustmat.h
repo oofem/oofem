@@ -447,7 +447,7 @@ public:
     /// Constructor
     DustMaterial(int n, Domain * d);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "DustMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_DustMaterial_Name; }

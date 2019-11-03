@@ -42,13 +42,13 @@
 namespace oofem {
 REGISTER_Material(NonlinearMassTransferMaterial);
 
-IRResultType
-NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+NonlinearMassTransferMaterial :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, C, _IFT_NonlinearMassTransferMaterial_c);
     IR_GIVE_FIELD(ir, alpha, _IFT_NonlinearMassTransferMaterial_alpha);
-
-    return Material :: initializeFrom(ir);
 }
 
 double

@@ -105,8 +105,8 @@ IsotropicDamageMaterial1 :: ~IsotropicDamageMaterial1()
     }
 }
 
-IRResultType
-IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
+void
+IsotropicDamageMaterial1 :: initializeFrom(InputRecord &ir)
 {
     int equivStrainTypeRecord;
     IsotropicDamageMaterial :: initializeFrom(ir);
@@ -138,7 +138,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         this->equivStrainType = EST_Griffith;
         IR_GIVE_OPTIONAL_FIELD(ir, griff_n, _IFT_IsotropicDamageMaterial1_n);
     } else {
-        throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_equivstraintype, "Unknown equivStrainType");
+        throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_equivstraintype, "Unknown equivStrainType");
     }
 
     // specify the type of formula for damage evolution law
@@ -150,10 +150,10 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     //applies only in this class
     switch ( damageLaw ) {
     case 0:     // exponential softening - default
-        if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
+        if ( ir.hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
             this->softType = ST_Exponential_Cohesive_Crack;
             IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
-        } else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
+        } else if ( ir.hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
             this->softType = ST_Exponential_Cohesive_Crack;
             IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
         } else {
@@ -163,10 +163,10 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
         break;
     case 1:     // linear softening law
-        if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
+        if ( ir.hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
             this->softType = ST_Linear_Cohesive_Crack;
             IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
-        } else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
+        } else if ( ir.hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
             this->softType = ST_Linear_Cohesive_Crack;
             IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
         } else {
@@ -182,13 +182,13 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         wf  = 0.;
         wk  = 0.;
         sk  = 0.;
-        if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
+        if ( ir.hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
             this->softType = ST_BiLinear_Cohesive_Crack;
             IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
             // Gft is for the bilinear law, and corresponds to the total energy required to fail the specimen
             IR_GIVE_FIELD(ir, gft, _IFT_IsotropicDamageMaterial1_gft);
 
-            if ( ir->hasField(_IFT_IsotropicDamageMaterial1_ek) ) {
+            if ( ir.hasField(_IFT_IsotropicDamageMaterial1_ek) ) {
                 // ek is for the bilinear law, and corresponds to the strain at the knee point
                 IR_GIVE_FIELD(ir, ek, _IFT_IsotropicDamageMaterial1_ek);
             } else {
@@ -200,7 +200,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
 
                 dumWf1 = 2. * gf / ( e0 * E );
                 if ( dumWf1 < wk ) {
-                    throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_wk, "Bilinear softening: wk is larger then gf allows");
+                    throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_wk, "Bilinear softening: wk is larger then gf allows");
                 }
                 sk = ( e0 * E ) * ( 1 - wk / dumWf1 );
                 wf = 2. * ( gft - e0 * E * wk / 2.0 ) / sk;
@@ -209,7 +209,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
                 gf = 0.;
                 gft = 0.;
             }
-        } else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wk) ) {
+        } else if ( ir.hasField(_IFT_IsotropicDamageMaterial1_wk) ) {
             double E;
 
             this->softType = ST_BiLinear_Cohesive_Crack;
@@ -221,32 +221,32 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
 
             if ( wk < 0.0 || wk > wf ) {
-                throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_wk, "Bilinear softening: wk must be in interval <0;wf>");
+                throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_wk, "Bilinear softening: wk must be in interval <0;wf>");
             }
             if ( sk < 0.0 || sk > e0 * E ) {
-                throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_sk, "Bilinear softening: sk must be in interval <0;ft>");
+                throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_sk, "Bilinear softening: sk must be in interval <0;ft>");
             }
-        } else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wkwf) ) {
+        } else if ( ir.hasField(_IFT_IsotropicDamageMaterial1_wkwf) ) {
             double dummy, E;
             this->softType = ST_BiLinear_Cohesive_Crack;
             IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
             // wkwf is for the bilinear law, and corresponds to the ratio of crack opening at the knee point and max crack opening
             IR_GIVE_FIELD(ir, dummy, _IFT_IsotropicDamageMaterial1_wkwf);
             if ( dummy < 0.0 || dummy > 1.0 ) {
-                throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_wkwf, "Bilinear softening: wk/wf ratio (wkwf) must be in interval <0;1>");
+                throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_wkwf, "Bilinear softening: wk/wf ratio (wkwf) must be in interval <0;1>");
             } else {
                 wk = dummy * wf;
             }
             // sk is for the bilinear law, and corresponds to the ratio of stress at the knee point an tensile strength
             IR_GIVE_FIELD(ir, dummy, _IFT_IsotropicDamageMaterial1_skft);
             if ( dummy < 0.0 || dummy > 1.0 ) {
-                throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_skft, "Bilinear softening: sk/ft ratio (skft) must be in interval <0;1>");
+                throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_skft, "Bilinear softening: sk/ft ratio (skft) must be in interval <0;1>");
             } else {
                 IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
                 sk = dummy * e0 * E;
             }
         } else {
-            throw ValueInputException(*ir, "none", "Bilinear softening for ef not implemented");
+            throw ValueInputException(ir, "none", "Bilinear softening for ef not implemented");
         }
 
         // check if the model is reduced to linear softening
@@ -255,12 +255,12 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
             this->softType = ST_Linear_Cohesive_Crack;
             gf = gft;
         } else if ( gft < gf ) {
-            throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_gft, "Bilinear softening: gft < gf");
+            throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_gft, "Bilinear softening: gft < gf");
         } else if ( wk == 0.0 && wf != 0 ) {
             OOFEM_WARNING("Bilinear softening: parameters defined as for Linear_Cohesive_Crack");
             this->softType = ST_Linear_Cohesive_Crack;
         } else if ( wf < wk ) {
-            throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_wf, "Bilinear softening: wf < wk");
+            throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_wf, "Bilinear softening: wf < wk");
         } else if ( gf == 0 && sk == 0.0 ) {
             OOFEM_WARNING("Bilinear softening: parameters defined as for Linear_Cohesive_Crack");
             this->softType = ST_Linear_Cohesive_Crack;
@@ -274,9 +274,9 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, c1, _IFT_IsotropicDamageMaterial1_c1);
         c2 = 6.93;
         IR_GIVE_OPTIONAL_FIELD(ir, c2, _IFT_IsotropicDamageMaterial1_c2);
-        if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
+        if ( ir.hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
             IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
-        } else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
+        } else if ( ir.hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
             IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
             double E;
             IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
@@ -286,7 +286,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
             aux -= 0.5 * ( 1. + c1 * c1 * c1 ) * exp(-c2);
             wf = gf / ( aux * E * e0 );
         } else {
-            throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_wf, "wf or gf must be specified for Hordijk softening law");
+            throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_wf, "wf or gf must be specified for Hordijk softening law");
         }
         break;
     case 4:
@@ -335,7 +335,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         break;
 
     default:
-        throw ValueInputException(*ir, _IFT_IsotropicDamageMaterial1_damageLaw, "Unknown value");
+        throw ValueInputException(ir, _IFT_IsotropicDamageMaterial1_damageLaw, "Unknown value");
     }
 
     if ( ( softType == ST_Exponential_Cohesive_Crack ) || ( softType == ST_Linear_Cohesive_Crack ) || ( softType == ST_BiLinear_Cohesive_Crack ) ) {
@@ -360,8 +360,6 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
     }
 
     this->mapper.initializeFrom(ir);
-
-    return IRRT_OK;
 }
 
 

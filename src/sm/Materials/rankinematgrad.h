@@ -113,7 +113,7 @@ public:
     const char *giveClassName() const override { return "RankineMatGrad"; }
     const char *giveInputRecordName() const override  { return _IFT_RankineMatGrad_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     Interface *giveInterface(InterfaceType t) override {
         if ( t == GradientDamageMaterialExtensionInterfaceType ) {

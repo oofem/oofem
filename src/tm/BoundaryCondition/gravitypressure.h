@@ -71,7 +71,7 @@ public:
     bcGeomType giveBCGeoType() const override { return GravityPressureBGT; }
     void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "GravityPressure"; }
     const char *giveInputRecordName() const override { return _IFT_GravityPressure_Name; }

@@ -43,7 +43,6 @@
 
 #include "logger.h" // for missing __func__ in MSC
 #include "oofemcfg.h"
-#include "irresulttype.h"
 
 namespace oofem {
 class IntArray;
@@ -62,7 +61,7 @@ typedef const char *InputFieldType;
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_FIELD(__ir, __value, __id) __ir->giveField(__value, __id);
+#define IR_GIVE_FIELD(__ir, __value, __id) __ir.giveField(__value, __id);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -70,7 +69,7 @@ typedef const char *InputFieldType;
  * field identified by __kwd and stores the  result into __value parameter.
  * Includes also the error reporting.
  */
-#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id) __ir->giveOptionalField(__value, __id);
+#define IR_GIVE_OPTIONAL_FIELD(__ir, __value, __id) __ir.giveOptionalField(__value, __id);
 
 /**
  * Macro facilitating the use of input record reading methods.
@@ -78,7 +77,7 @@ typedef const char *InputFieldType;
  * and its number (__value param). Includes also the error reporting.
  */
 #define IR_GIVE_RECORD_KEYWORD_FIELD(__ir, __name, __value) \
-    __ir->giveRecordKeywordField(__name, __value);
+    __ir.giveRecordKeywordField(__name, __value);
 
 
 
@@ -98,7 +97,7 @@ public:
     virtual ~InputRecord() = default;
 
     /** Creates a newly allocated copy of the receiver */
-    virtual std::unique_ptr<InputRecord> clone() = 0;
+    virtual std::unique_ptr<InputRecord> clone() const = 0;
 
     /// Returns string representation of record in OOFEMs text format.
     virtual std :: string giveRecordAsString() const = 0;

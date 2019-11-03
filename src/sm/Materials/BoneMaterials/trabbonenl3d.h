@@ -93,7 +93,7 @@ public:
     const char *giveClassName() const override { return "TrabBoneNL3D"; }
     const char *giveInputRecordName() const override { return _IFT_TrabBoneNL3D_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType it) override;

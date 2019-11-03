@@ -48,9 +48,11 @@ HeMoKunzelMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-IRResultType
-HeMoKunzelMaterial :: initializeFrom(InputRecord *ir)
+void
+HeMoKunzelMaterial :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     int type = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_HeMoKunzelMaterial_iso_type);
     this->Isotherm = ( isothermType ) type;
@@ -125,9 +127,6 @@ HeMoKunzelMaterial :: initializeFrom(InputRecord *ir)
 
     hv = 2.5e6;
     IR_GIVE_OPTIONAL_FIELD(ir, hv, _IFT_HeMoKunzelMaterial_hv);
-
-
-    return Material :: initializeFrom(ir);
 }
 
 

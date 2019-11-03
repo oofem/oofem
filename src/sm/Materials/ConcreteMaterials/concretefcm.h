@@ -98,7 +98,7 @@ public:
     ConcreteFCM(int n, Domain *d);
     virtual ~ConcreteFCM() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "ConcreteFCM"; }
     const char *giveInputRecordName() const override { return _IFT_ConcreteFCM_Name; }
 

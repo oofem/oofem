@@ -156,7 +156,7 @@ public:
     void updatePosition(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override { previousLevelSetValues = levelSetValues; }
     double computeCriticalTimeStep(TimeStep *tStep) override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void reinitialization(TimeStep *tStep);
 

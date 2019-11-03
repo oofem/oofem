@@ -96,9 +96,11 @@ TR1_2D_CBS :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 
-IRResultType
-TR1_2D_CBS :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_CBS :: initializeFrom(InputRecord &ir)
 {
+    CBSElement :: initializeFrom(ir);
+
     //<RESTRICTED_SECTION>
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_pvof);
@@ -112,8 +114,6 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
     }
 
     //</RESTRICTED_SECTION>
-
-    return CBSElement :: initializeFrom(ir);
 }
 
 

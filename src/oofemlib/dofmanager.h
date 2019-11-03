@@ -440,7 +440,7 @@ public:
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void printYourself() override;

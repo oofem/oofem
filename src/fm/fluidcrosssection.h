@@ -61,7 +61,7 @@ public:
      */
     FluidCrossSection(int n, Domain * d);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     int checkConsistency() override;

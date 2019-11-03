@@ -91,8 +91,8 @@ FETISolver :: estimateMaxPackSize(IntArray &map, DataStream &buff, int &packUnpa
 }
 
 
-IRResultType
-FETISolver :: initializeFrom(InputRecord *ir)
+void
+FETISolver :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, ni, _IFT_FETISolver_maxiter);
     IR_GIVE_FIELD(ir, err, _IFT_FETISolver_maxerr);
@@ -111,8 +111,6 @@ FETISolver :: initializeFrom(InputRecord *ir)
     if ( err > 0.1 ) {
         err = 0.1;
     }
-
-    return IRRT_OK;
 }
 
 void FETISolver :: setUpCommunicationMaps()

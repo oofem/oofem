@@ -116,8 +116,8 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     kappa = nonlocalEquivalentStrain;
 }
 
-IRResultType
-MazarsNLMaterial :: initializeFrom(InputRecord *ir)
+void
+MazarsNLMaterial :: initializeFrom(InputRecord &ir)
 {
     MazarsMaterial :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
@@ -128,8 +128,6 @@ MazarsNLMaterial :: initializeFrom(InputRecord *ir)
     }
 
     this->hReft = this->hRefc = 1.0;
-
-    return IRRT_OK;
 }
 
 

@@ -960,9 +960,11 @@ TrabBone3D :: constructFabricTransformationMatrix(FloatMatrix &answer)
     answer.at(6, 6) = ( x1 * y2 + x2 * y1 );
 }
 
-IRResultType
-TrabBone3D :: initializeFrom(InputRecord *ir)
+void
+TrabBone3D :: initializeFrom(InputRecord &ir)
 {
+    StructuralMaterial :: initializeFrom(ir);
+
     // Mandatory parameters
     IR_GIVE_FIELD(ir, eps0, _IFT_TrabBone3D_eps0);
     IR_GIVE_FIELD(ir, nu0, _IFT_TrabBone3D_nu0);
@@ -1050,9 +1052,6 @@ TrabBone3D :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, rel_yield_tol, _IFT_TrabBone3D_rel_yield_tol);
     strain_tol = 1.e-9;
     IR_GIVE_OPTIONAL_FIELD(ir, strain_tol, _IFT_TrabBone3D_strain_tol);
-
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

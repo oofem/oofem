@@ -70,17 +70,17 @@ TransportGradientNeumann :: TransportGradientNeumann(int n, Domain *d) :
 }
 
 
-IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
+void TransportGradientNeumann :: initializeFrom(InputRecord &ir)
 {
+    ActiveBoundaryCondition :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, mGradient, _IFT_TransportGradientNeumann_gradient);
 
     IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientNeumann_surfSets);
     this->mCenterCoord.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientNeumann_centerCoords)
     
-    this->dispControl = ir->hasField(_IFT_TransportGradientNeumann_dispControl);
-    
-    return ActiveBoundaryCondition :: initializeFrom(ir);
+    this->dispControl = ir.hasField(_IFT_TransportGradientNeumann_dispControl);    
 }
 
 

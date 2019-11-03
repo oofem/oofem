@@ -63,7 +63,7 @@ public:
     /// Destructor
     virtual ~CrackExportModule();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput) override;
     void initialize() override;
     void terminate() override;

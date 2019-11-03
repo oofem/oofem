@@ -169,8 +169,8 @@ MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 //   **********************************************************************************************
 
 
-IRResultType
-MPSMaterial :: initializeFrom(InputRecord *ir)
+void
+MPSMaterial :: initializeFrom(InputRecord &ir)
 {
     double fc, c, wc, ac;
 
@@ -186,12 +186,12 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     double tf;
     IR_GIVE_FIELD(ir, tf, _IFT_RheoChainMaterial_timefactor);
     if ( tf != 1. ) {
-        throw ValueInputException(*ir, _IFT_RheoChainMaterial_timefactor, "for MPS material timefactor must be equal to 1.");
+        throw ValueInputException(ir, _IFT_RheoChainMaterial_timefactor, "for MPS material timefactor must be equal to 1.");
     }
 
     // initialize exponent p or p_tilde of the governing equation
-    if ( ir->hasField(_IFT_MPSMaterial_p_tilde) &&  ir->hasField(_IFT_MPSMaterial_p) ) {
-        throw ValueInputException(*ir, _IFT_MPSMaterial_p_tilde, "for MPS p and p_tilde cannot be defined at the same time");
+    if ( ir.hasField(_IFT_MPSMaterial_p_tilde) && ir.hasField(_IFT_MPSMaterial_p) ) {
+        throw ValueInputException(ir, _IFT_MPSMaterial_p_tilde, "for MPS p and p_tilde cannot be defined at the same time");
     }
 
     double p_tilde = 2.;
@@ -226,7 +226,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     int type = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_MPSMaterial_coupledanalysistype);
     if ( type >= 4 ) {
-        throw ValueInputException(*ir, _IFT_MPSMaterial_coupledanalysistype, "must be 0, 1, 2 or 3");
+        throw ValueInputException(ir, _IFT_MPSMaterial_coupledanalysistype, "must be 0, 1, 2 or 3");
     }
 
     this->CoupledAnalysis = ( coupledAnalysisType ) type;
@@ -292,7 +292,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
 
         /// flag - if true, external fields and reference temperature are in Celsius
         this->temperScaleDifference = 0.;
-        if ( ir->hasField(_IFT_MPSMaterial_temperInCelsius) ) {
+        if ( ir.hasField(_IFT_MPSMaterial_temperInCelsius) ) {
             this->temperScaleDifference = 273.15;
         }
 
@@ -313,7 +313,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     this->eps_cas0 = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, eps_cas0, _IFT_MPSMaterial_eps_cas0);
 
-    if ( ir->hasField(_IFT_MPSMaterial_alpha_as) &&  ir->hasField(_IFT_MPSMaterial_fc) ) {
+    if ( ir.hasField(_IFT_MPSMaterial_alpha_as) && ir.hasField(_IFT_MPSMaterial_fc) ) {
         double alpha_as;
         // table 5.1-13 from fib2010
         // alpha_as = 800 for cem 32.5N
@@ -333,7 +333,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     b4_alpha = 0.;
     b4_r_t = 0.;
 
-    if ( ir->hasField(_IFT_MPSMaterial_B4_cem_type) ) {
+    if ( ir.hasField(_IFT_MPSMaterial_B4_cem_type) ) {
         /// auxiliary parameters for autogenous shrinkage according to B4 model
         double b4_r_alpha = 0., b4_eps_au_cem = 0., b4_tau_au_cem = 0., b4_r_ea, b4_r_ew, b4_r_tw;
         int b4_cem_type;
@@ -365,11 +365,11 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
             b4_r_ea = -0.75;
             b4_r_ew = -3.5;
         } else {
-            throw ValueInputException(*ir, _IFT_MPSMaterial_B4_cem_type, "Unknown cement type");
+            throw ValueInputException(ir, _IFT_MPSMaterial_B4_cem_type, "Unknown cement type");
         }
 
 
-        if ( ir->hasField(_IFT_MPSMaterial_B4_eps_au_infty) ) {
+        if ( ir.hasField(_IFT_MPSMaterial_B4_eps_au_infty) ) {
             IR_GIVE_FIELD(ir, b4_eps_au_infty, _IFT_MPSMaterial_B4_eps_au_infty);
         } else {
             IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wc);
@@ -377,7 +377,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
             b4_eps_au_infty = -b4_eps_au_cem *pow(ac / 6., b4_r_ea) *  pow(wc / 0.38, b4_r_ew);
         }
 
-        if ( ir->hasField(_IFT_MPSMaterial_B4_tau_au) ) {
+        if ( ir.hasField(_IFT_MPSMaterial_B4_tau_au) ) {
             IR_GIVE_FIELD(ir, b4_tau_au, _IFT_MPSMaterial_B4_tau_au); // must be in units of the analysis
         } else {
             IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wc);
@@ -385,7 +385,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
             b4_tau_au *= lambda0; // converted to desired time unit
         }
 
-        if ( ir->hasField(_IFT_MPSMaterial_B4_alpha) ) {
+        if ( ir.hasField(_IFT_MPSMaterial_B4_alpha) ) {
             IR_GIVE_FIELD(ir, b4_alpha, _IFT_MPSMaterial_B4_alpha);
         } else {
             IR_GIVE_FIELD(ir, wc, _IFT_MPSMaterial_wc);
@@ -397,11 +397,9 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     }
 
     if ( ( eps_cas0 != 0. ) && ( b4_eps_au_infty != 0. ) ) {
-        throw ValueInputException(*ir, _IFT_MPSMaterial_B4_eps_au_infty,
+        throw ValueInputException(ir, _IFT_MPSMaterial_B4_eps_au_infty,
                                   "autogenous shrinkage cannot be described according to fib and B4 simultaneously");
     }
-
-    return IRRT_OK;
 }
 
 

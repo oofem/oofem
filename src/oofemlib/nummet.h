@@ -98,7 +98,7 @@ public:
     /// @return Engineering model receiver is connected to.
     EngngModel *giveEngngModel() { return engngModel; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir)  { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
 
     /**
      * Reinitializes the receiver. This is used, when topology of problem has changed

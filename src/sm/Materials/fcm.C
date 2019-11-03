@@ -1974,8 +1974,8 @@ FCMMaterial :: computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearD
 
   
 
-IRResultType
-FCMMaterial :: initializeFrom(InputRecord *ir)
+void
+FCMMaterial :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial.initializeFrom(ir);
@@ -1985,12 +1985,12 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
 
 
     this->crackSpacing = -1.;
-    if  ( ir->hasField(_IFT_FCM_crackSpacing) ) {
+    if ( ir.hasField(_IFT_FCM_crackSpacing) ) {
         IR_GIVE_FIELD(ir, crackSpacing, _IFT_FCM_crackSpacing);
     }
 
     this->multipleCrackShear = false;
-    if  ( ir->hasField(_IFT_FCM_multipleCrackShear) ) {
+    if ( ir.hasField(_IFT_FCM_multipleCrackShear) ) {
         this->multipleCrackShear = true;
     }
 
@@ -2012,8 +2012,6 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, shearCoeffNumer, _IFT_FCM_shearCoeffNumer);
     this->normalCoeffNumer = -1. * fcm_BIGNUMBER;
     IR_GIVE_OPTIONAL_FIELD(ir, normalCoeffNumer, _IFT_FCM_normalCoeffNumer);
-
-    return IRRT_OK;
 }
 
 

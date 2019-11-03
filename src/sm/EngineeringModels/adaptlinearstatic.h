@@ -76,7 +76,7 @@ public:
 
     void updateDomainLinks() override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // identification
     const char *giveClassName() const override { return "AdaptiveLinearStatic"; }

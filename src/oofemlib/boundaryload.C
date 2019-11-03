@@ -90,8 +90,8 @@ BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatA
 }
 
 
-IRResultType
-BoundaryLoad :: initializeFrom(InputRecord *ir)
+void
+BoundaryLoad :: initializeFrom(InputRecord &ir)
 {
     Load :: initializeFrom(ir);
 
@@ -113,8 +113,6 @@ BoundaryLoad :: initializeFrom(InputRecord *ir)
 
     temperOffset = 273.15;
     IR_GIVE_OPTIONAL_FIELD(ir, temperOffset, _IFT_BoundaryLoad_temperOffset);
-    
-    return IRRT_OK;
 }
 
 

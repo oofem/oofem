@@ -271,20 +271,15 @@ RerShell :: giveArea()
 }
 
 
-IRResultType
-RerShell :: initializeFrom(InputRecord *ir)
+void
+RerShell :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
     }
-
-    return IRRT_OK;
 }
 
 

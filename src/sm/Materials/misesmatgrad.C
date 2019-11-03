@@ -508,9 +508,11 @@ MisesMatGrad :: computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp
 
 
 
-IRResultType
-MisesMatGrad :: initializeFrom(InputRecord *ir)
+void
+MisesMatGrad :: initializeFrom(InputRecord &ir)
 {
+    MisesMat :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, L, _IFT_MisesMatGrad_l);
     if ( L < 0.0 ) {
         L = 0.0;
@@ -518,8 +520,6 @@ MisesMatGrad :: initializeFrom(InputRecord *ir)
 
     mParam = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, mParam, _IFT_MisesMatGrad_m);
-
-    return MisesMat :: initializeFrom(ir);
 }
 
 

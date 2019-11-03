@@ -77,7 +77,7 @@ public:
     const char *giveClassName() const override { return "EnrFrontLinearBranchFuncRadius"; }
     const char *giveInputRecordName() const override { return _IFT_EnrFrontLinearBranchFuncRadius_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     double giveSupportRadius() const override { return mEnrichmentRadius; }

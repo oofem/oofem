@@ -74,7 +74,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LineDistributedSpring_Name; }
     const char *giveClassName() const override { return "LineDistributedSpring"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return this->dofs.giveSize(); }
     void giveDofManDofIDMask(int inode, IntArray &) const override;

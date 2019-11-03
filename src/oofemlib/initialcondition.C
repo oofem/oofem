@@ -74,8 +74,8 @@ void InitialCondition :: printYourself()
 }
 
 
-IRResultType
-InitialCondition :: initializeFrom(InputRecord *ir)
+void
+InitialCondition :: initializeFrom(InputRecord &ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
@@ -90,8 +90,6 @@ InitialCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->set, _IFT_InitialCondition_set);
     this->dofIDs.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->dofIDs, _IFT_InitialCondition_dofs);
-
-    return IRRT_OK;
 }
 
 

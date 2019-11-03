@@ -130,9 +130,11 @@ BondCEBMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
     }
 }
 
-IRResultType
-BondCEBMaterial :: initializeFrom(InputRecord *ir)
+void
+BondCEBMaterial :: initializeFrom(InputRecord &ir)
 {
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     // mandatory parameters
     IR_GIVE_FIELD(ir, kn, _IFT_BondCEBMaterial_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_BondCEBMaterial_ks);
@@ -152,8 +154,6 @@ BondCEBMaterial :: initializeFrom(InputRecord *ir)
       ks = taumax/s1;
       OOFEM_WARNING("Parameter ks adjusted");
     }
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 

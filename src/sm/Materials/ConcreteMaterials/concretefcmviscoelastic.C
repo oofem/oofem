@@ -50,8 +50,8 @@ ConcreteFCMViscoElastic :: ConcreteFCMViscoElastic(int n, Domain *d) : ConcreteF
 }
 
   
-IRResultType
-ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
+void
+ConcreteFCMViscoElastic :: initializeFrom(InputRecord &ir)
 {
     ConcreteFCM :: initializeFrom(ir);
 
@@ -59,7 +59,7 @@ ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
 
     this->fib = false;
     
-    if ( ir->hasField(_IFT_ConcreteFCMViscoElastic_timedepfracturing) ) {
+    if ( ir.hasField(_IFT_ConcreteFCMViscoElastic_timedepfracturing) ) {
         this->fib = true;
         //
         IR_GIVE_FIELD(ir, fib_s, _IFT_ConcreteFCMViscoElastic_fib_s);
@@ -67,24 +67,20 @@ ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fib_fcm28, _IFT_ConcreteFCMViscoElastic_fcm28);
 
         IR_GIVE_FIELD(ir, timeFactor, _IFT_ConcreteFCMViscoElastic_timeFactor);
-	IR_GIVE_FIELD(ir, stiffnessFactor, _IFT_ConcreteFCMViscoElastic_stiffnessFactor);
+        IR_GIVE_FIELD(ir, stiffnessFactor, _IFT_ConcreteFCMViscoElastic_stiffnessFactor);
 
-	ConcreteFCM :: Gf = -1.;
-	ConcreteFCM :: Ft = -1.;	  
+        ConcreteFCM :: Gf = -1.;
+        ConcreteFCM :: Ft = -1.;
         IR_GIVE_OPTIONAL_FIELD(ir, ConcreteFCM :: Ft, _IFT_ConcreteFCMViscoElastic_ft28);
-	IR_GIVE_OPTIONAL_FIELD(ir, ConcreteFCM :: Gf, _IFT_ConcreteFCMViscoElastic_gf28);
-	
+        IR_GIVE_OPTIONAL_FIELD(ir, ConcreteFCM :: Gf, _IFT_ConcreteFCMViscoElastic_gf28);
     }
 
 
     if ( propertyDictionary.includes(tAlpha) ) {
-      if( propertyDictionary.at(tAlpha) != 0. ) {
-	OOFEM_ERROR("tAlpha must be set to zero in ConcreteFCMViscoElastic material");
-      }
+        if( propertyDictionary.at(tAlpha) != 0. ) {
+            OOFEM_ERROR("tAlpha must be set to zero in ConcreteFCMViscoElastic material");
+        }
     }
-
-    
-    return IRRT_OK;
 }
   
 

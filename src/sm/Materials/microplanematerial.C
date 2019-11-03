@@ -129,8 +129,8 @@ MicroplaneMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                               answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
 }
 
-IRResultType
-MicroplaneMaterial :: initializeFrom(InputRecord *ir)
+void
+MicroplaneMaterial :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
 
@@ -140,7 +140,6 @@ MicroplaneMaterial :: initializeFrom(InputRecord *ir)
     // number of microplanes
     IR_GIVE_FIELD(ir, numberOfMicroplanes, _IFT_MicroplaneMaterial_nmp);
     this->initializeData(numberOfMicroplanes);
-    return IRRT_OK;
 }
 
 

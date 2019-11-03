@@ -120,8 +120,8 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
     }
 }
 
-IRResultType
-SymmetryBarrier :: initializeFrom(InputRecord *ir)
+void
+SymmetryBarrier :: initializeFrom(InputRecord &ir)
 {
     FloatArray normals;
 
@@ -163,9 +163,7 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mask, _IFT_SymmetryBarrier_activemask);
     if ( mask.giveSize() != 3 ) {
-        throw ValueInputException(*ir, _IFT_SymmetryBarrier_activemask, "size must be 3");
+        throw ValueInputException(ir, _IFT_SymmetryBarrier_activemask, "size must be 3");
     }
-
-    return IRRT_OK;
 }
 } // end namespace oofem

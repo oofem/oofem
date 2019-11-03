@@ -282,9 +282,11 @@ LIBeam3d :: computeLength()
 }
 
 
-IRResultType
-LIBeam3d :: initializeFrom(InputRecord *ir)
+void
+LIBeam3d :: initializeFrom(InputRecord &ir)
 {
+    StructuralElement :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d_refnode);
     if ( referenceNode == 0 ) {
         OOFEM_ERROR("wrong reference node specified");
@@ -297,8 +299,6 @@ LIBeam3d :: initializeFrom(InputRecord *ir)
     //  } else {
     //    dofsToCondense = NULL;
     //  }
-
-    return StructuralElement :: initializeFrom(ir);
 }
 
 

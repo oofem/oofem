@@ -96,7 +96,7 @@ MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), Unk
 {}
 
 
-IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
+void MicroMaterial :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, this->inputFileNameMicro, _IFT_MicroMaterial_fileName);
 
@@ -105,8 +105,6 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
     this->problemMicro = InstanciateProblem(drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
     OOFEM_LOG_INFO("Microproblem instanciated\n");
-
-    return IRRT_OK;
 }
 
 

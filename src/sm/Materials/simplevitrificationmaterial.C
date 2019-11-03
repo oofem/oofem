@@ -41,8 +41,10 @@ namespace oofem {
 REGISTER_Material(SimpleVitrificationMaterial);
 
 
-IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
+void SimpleVitrificationMaterial :: initializeFrom(InputRecord &ir)
 {
+    StructuralMaterial :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, this->vitrTime, _IFT_SimpleVitrificationMaterial_vitrificationTime);
 
     IR_GIVE_FIELD(ir, this->E, _IFT_SimpleVitrificationMaterial_E);
@@ -54,8 +56,6 @@ IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->nu_r, _IFT_SimpleVitrificationMaterial_nu_r);
     IR_GIVE_FIELD(ir, this->G_r, _IFT_SimpleVitrificationMaterial_G_r);
     IR_GIVE_FIELD(ir, this->alpha_r, _IFT_SimpleVitrificationMaterial_alpha_r);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

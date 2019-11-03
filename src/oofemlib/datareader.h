@@ -75,7 +75,7 @@ public:
      * @param irType Determines type of record to be returned.
      * @param recordId Determines the record  number corresponding to component number.
      */
-    virtual InputRecord *giveInputRecord(InputRecordType irType, int recordId) = 0;
+    virtual InputRecord &giveInputRecord(InputRecordType irType, int recordId) = 0;
 
     /**
      * Peak in advance into the record list.

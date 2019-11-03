@@ -48,8 +48,8 @@ ConcreteFCM :: ConcreteFCM(int n, Domain *d) : FCMMaterial(n, d), RandomMaterial
     shearType = SHR_Unknown;
 }
 
-IRResultType
-ConcreteFCM :: initializeFrom(InputRecord *ir)
+void
+ConcreteFCM :: initializeFrom(InputRecord &ir)
 {
     FCMMaterial :: initializeFrom(ir);
     RandomMaterialExtensionInterface :: initializeFrom(ir);
@@ -89,11 +89,11 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, soft_function_w, _IFT_ConcreteFCM_soft_function_w);
 
         if ( soft_w.at(1) > 0. ) {
-            throw ValueInputException(*ir, _IFT_ConcreteFCM_soft_w, "The first entry in soft_w must be 0.");
+            throw ValueInputException(ir, _IFT_ConcreteFCM_soft_w, "The first entry in soft_w must be 0.");
         }
 
         if ( soft_w.giveSize() != soft_function_w.giveSize() ) {
-            throw ValueInputException(*ir, _IFT_ConcreteFCM_soft_function_w, "the size of 'soft_w' and 'soft(w)' must be the same");
+            throw ValueInputException(ir, _IFT_ConcreteFCM_soft_function_w, "the size of 'soft_w' and 'soft(w)' must be the same");
         }
         break;
 
@@ -105,7 +105,7 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, Ft, _IFT_ConcreteFCM_ft);
 
         if ( this->giveCrackSpacing() > 0. ) {
-            throw ValueInputException(*ir, _IFT_FCM_crackSpacing, "crack spacing must not be defined in strain-defined materials (does not make sense)");
+            throw ValueInputException(ir, _IFT_FCM_crackSpacing, "crack spacing must not be defined in strain-defined materials (does not make sense)");
         }
 
         break;
@@ -117,21 +117,21 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, soft_function_eps, _IFT_ConcreteFCM_soft_function_eps);
 
         if ( soft_eps.at(1) > 0. ) {
-            throw ValueInputException(*ir, _IFT_ConcreteFCM_soft_eps, "The first entry in soft_eps must be 0.");
+            throw ValueInputException(ir, _IFT_ConcreteFCM_soft_eps, "The first entry in soft_eps must be 0.");
         }
 
         if ( soft_eps.giveSize() != soft_function_eps.giveSize() ) {
-            throw ValueInputException(*ir, _IFT_ConcreteFCM_soft_function_eps, "the size of 'soft_eps' and 'soft(eps)' must be the same");
+            throw ValueInputException(ir, _IFT_ConcreteFCM_soft_function_eps, "the size of 'soft_eps' and 'soft(eps)' must be the same");
         }
 
         if ( this->giveCrackSpacing() > 0. ) {
-            throw ValueInputException(*ir, "foo", "crack spacing must not be defined in strain-defined materials (does not make sense)");
+            throw ValueInputException(ir, "foo", "crack spacing must not be defined in strain-defined materials (does not make sense)");
         }
 
         break;
 
     default:
-        throw ValueInputException(*ir, _IFT_ConcreteFCM_softType, "Unknown softening type");
+        throw ValueInputException(ir, _IFT_ConcreteFCM_softType, "Unknown softening type");
     }
 
 
@@ -150,7 +150,7 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_ConcreteFCM_beta);
 
         if ( beta >= 1. ) {
-            throw ValueInputException(*ir, _IFT_ConcreteFCM_beta, "Parameter beta must be <= 1");
+            throw ValueInputException(ir, _IFT_ConcreteFCM_beta, "Parameter beta must be <= 1");
         }
 
         break;
@@ -172,13 +172,13 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, beta_function, _IFT_ConcreteFCM_beta_function);
 
         if ( beta_w.giveSize() != beta_function.giveSize() ) {
-            throw ValueInputException(*ir, _IFT_ConcreteFCM_beta_function, "the size of 'beta_w' and 'beta(w)' must be the same");
+            throw ValueInputException(ir, _IFT_ConcreteFCM_beta_function, "the size of 'beta_w' and 'beta(w)' must be the same");
         }
         break;
 
 
     default:
-        throw ValueInputException(*ir, _IFT_ConcreteFCM_shearType, "Shear stiffness reduction typ is unknown");
+        throw ValueInputException(ir, _IFT_ConcreteFCM_shearType, "Shear stiffness reduction typ is unknown");
     }
 
 
@@ -209,10 +209,8 @@ ConcreteFCM :: initializeFrom(InputRecord *ir)
         break;
 
     default:
-        throw ValueInputException(*ir, _IFT_ConcreteFCM_shearStrengthType, "Shear stiffness reduction type is unknown");
+        throw ValueInputException(ir, _IFT_ConcreteFCM_shearStrengthType, "Shear stiffness reduction type is unknown");
     }
-
-    return IRRT_OK;
 }
 
 

@@ -159,15 +159,13 @@ TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0,
 }
 
 
-IRResultType
-TrabBoneEmbed :: initializeFrom(InputRecord *ir)
+void
+TrabBoneEmbed :: initializeFrom(InputRecord &ir)
 {
-    // Read material properties here
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, eps0, _IFT_TrabBoneEmbed_eps0);
     IR_GIVE_FIELD(ir, nu0, _IFT_TrabBoneEmbed_nu0);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

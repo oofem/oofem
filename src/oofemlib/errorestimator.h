@@ -151,7 +151,7 @@ public:
     bool skipRegion(int reg);
     virtual void reinitialize();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 };
 } // end namespace oofem
 #endif // errorestimator_h

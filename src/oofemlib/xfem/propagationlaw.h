@@ -70,7 +70,7 @@ public:
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
 
-    virtual IRResultType initializeFrom(InputRecord *ir) = 0;
+    virtual void initializeFrom(InputRecord &ir) = 0;
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     virtual bool hasPropagation() const = 0;
@@ -90,7 +90,7 @@ public:
     const char *giveClassName() const override { return "PLDoNothing"; }
     const char *giveInputRecordName() const override { return _IFT_PLDoNothing_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
+    void initializeFrom(InputRecord &ir) override { }
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bool hasPropagation() const override { return false; }
@@ -110,7 +110,7 @@ public:
     const char *giveClassName() const override { return "PLCrackPrescribedDir"; }
     const char *giveInputRecordName() const override { return _IFT_PLCrackPrescribedDir_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bool hasPropagation() const override { return mIncrementLength > 0.; }
@@ -133,7 +133,7 @@ public:
     const char *giveClassName() const override { return "PLnodeRadius"; }
     const char *giveInputRecordName() const override { return _IFT_PLnodeRadius_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bool hasPropagation() const override { return mRadius > 0.; }

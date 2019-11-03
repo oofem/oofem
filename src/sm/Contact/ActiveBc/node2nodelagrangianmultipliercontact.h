@@ -79,18 +79,18 @@ public:
     /// Destructor.
     virtual ~Node2NodeLagrangianMultiplierContact() {};
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
+    void assemble(SparseMtrx &answer, TimeStep *tStep,
+                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
 
 
-    virtual const char *giveClassName() const { return "Node2NodeLagrangianMultiplierContact"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Node2NodeLagrangianMultiplierContact_Name; }
+    const char *giveClassName() const override { return "Node2NodeLagrangianMultiplierContact"; }
+    const char *giveInputRecordName() const override { return _IFT_Node2NodeLagrangianMultiplierContact_Name; }
 
     int giveNumberOfInternalDofManagers() override { return masterSet.giveSize(); }
     DofManager *giveInternalDofManager(int i) override { return this->lmdm.at(i - 1).get(); }

@@ -45,7 +45,6 @@
 #include "classfactory.h"
 #include "dof.h"
 #include "oofemtxtinputrecord.h"
-#include "irresulttype.h"
 #include "mathfem.h"
 #ifdef __SM_MODULE
  #include "sm/EngineeringModels/structengngmodel.h"
@@ -422,15 +421,17 @@ ErrorCheckingExportModule :: ErrorCheckingExportModule(int n, EngngModel *e) : E
 {
 }
 
-IRResultType
-ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
+void
+ErrorCheckingExportModule :: initializeFrom(InputRecord &ir)
 {
+    ExportModule :: initializeFrom(ir);
+
     allPassed = true;
     this->errorCheckingRules.clear();
 
     filename = std::string("");
 
-    if ( ir->hasField(_IFT_ErrorCheckingExportModule_filename) ) {
+    if ( ir.hasField(_IFT_ErrorCheckingExportModule_filename) ) {
         IR_GIVE_FIELD(ir, this->filename, _IFT_ErrorCheckingExportModule_filename);
     }
     else {
@@ -440,7 +441,7 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     // Reads all the rules;
     std :: ifstream inputStream(this->filename);
     if ( !inputStream ) {
-        throw ValueInputException(*ir, _IFT_ErrorCheckingExportModule_filename, "Couldn't open file");
+        throw ValueInputException(ir, _IFT_ErrorCheckingExportModule_filename, "Couldn't open file");
     }
     double tol = 0.;
     if ( this->scanToErrorChecks(inputStream,  tol) ) {
@@ -454,7 +455,7 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     }
 
     this->writeIST.clear();
-    writeChecks = ir->hasField(_IFT_ErrorCheckingExportModule_writeIST);
+    writeChecks = ir.hasField(_IFT_ErrorCheckingExportModule_writeIST);
     if ( writeChecks ) {
         IR_GIVE_FIELD(ir, this->writeIST, _IFT_ErrorCheckingExportModule_writeIST);
     }
@@ -462,8 +463,6 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     if ( errorCheckingRules.size() == 0 && !writeChecks ) {
         OOFEM_WARNING("No rules found (possibly wrong file or syntax).");
     }
-
-    return ExportModule :: initializeFrom(ir);
 }
 
 void

@@ -89,15 +89,11 @@ L4Axisymm :: giveInterface(InterfaceType interface)
 }
 
 
-IRResultType
-L4Axisymm :: initializeFrom(InputRecord *ir)
+void
+L4Axisymm :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
+    NLStructuralElement :: initializeFrom(ir);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
@@ -107,8 +103,6 @@ L4Axisymm :: initializeFrom(InputRecord *ir)
     }
 
     numberOfFiAndShGaussPoints = 1;
-
-    return IRRT_OK;
 }
 
 

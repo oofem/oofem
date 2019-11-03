@@ -68,11 +68,11 @@ QWedge_mt :: QWedge_mt(int n, Domain *aDomain) : QWedge_ht(n, aDomain)
 }
 
 
-IRResultType
-QWedge_ht :: initializeFrom(InputRecord *ir)
+void
+QWedge_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 6;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 
 }
 

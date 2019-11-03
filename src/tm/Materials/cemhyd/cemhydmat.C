@@ -402,7 +402,7 @@ void CemhydMat :: averageTemperature()
     }
 }
 
-IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
+void CemhydMat :: initializeFrom(InputRecord &ir)
 {
     castingTime = 0.;
 
@@ -437,8 +437,6 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_CemhydMat_reinforcementDegree);
     IR_GIVE_FIELD(ir, XMLfileName, _IFT_CemhydMat_inputFileName);
-
-    return IRRT_OK;
 }
 
 

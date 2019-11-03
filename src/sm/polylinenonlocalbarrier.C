@@ -180,8 +180,8 @@ PolylineNonlocalBarrier :: giveDistancePointLine(const FloatArray &coordsA, cons
 }
 
 
-IRResultType
-PolylineNonlocalBarrier :: initializeFrom(InputRecord *ir)
+void
+PolylineNonlocalBarrier :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, vertexNodes, _IFT_PolylineNonlocalBarrier_vertexnodes);
 
@@ -191,7 +191,5 @@ PolylineNonlocalBarrier :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, localXCoordIndx, _IFT_PolylineNonlocalBarrier_xcoordindx);
     IR_GIVE_OPTIONAL_FIELD(ir, localYCoordIndx, _IFT_PolylineNonlocalBarrier_ycoordindx);
-
-    return IRRT_OK;
 }
 } // end namespace oofem

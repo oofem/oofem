@@ -122,7 +122,7 @@ public:
 
     bcType giveType() const override { return UnknownBT; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void postInitialize() override;

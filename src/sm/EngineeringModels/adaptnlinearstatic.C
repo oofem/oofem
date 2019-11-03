@@ -85,9 +85,11 @@ AdaptiveNonLinearStatic :: ~AdaptiveNonLinearStatic()
 { }
 
 
-IRResultType
-AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
+void
+AdaptiveNonLinearStatic :: initializeFrom(InputRecord &ir)
 {
+    NonLinearStatic :: initializeFrom(ir);
+
     int _val;
 
     int meshPackageId = 0;
@@ -100,14 +102,11 @@ AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_preMappingLoadBalancingFlag);
     preMappingLoadBalancingFlag = _val > 0;
 
-    NonLinearStatic :: initializeFrom(ir);
 
     // check if error estimator initioalized
     if (this->defaultErrEstimator == NULL) {
       OOFEM_ERROR ("AdaptiveNonLinearStatic :: initializeFrom: Error estimator not defined [eetype missing]");
     }
-
-    return IRRT_OK;
 }
 
 void
@@ -763,8 +762,6 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
 {
     int mStepNum = tStep->giveMetaStepNumber();
     int hasfixed, mode;
-    InputRecord *ir;
-    MetaStep *iMStep;
     FloatArray _incrementalLoadVector, _incrementalLoadVectorOfPrescribed;
     SparseNonLinearSystemNM :: referenceLoadInputModeType rlm;
     //Domain* sourceDomain = sourceProblem->giveDomain(domainIndx);
@@ -779,9 +776,9 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     _incrementalLoadVectorOfPrescribed.zero();
 
     for ( int imstep = 1; imstep < mStepNum; imstep++ ) {
-        iMStep = this->giveMetaStep(imstep);
-        ir = iMStep->giveAttributesRecord();
-        //hasfixed = ir->hasField("fixload");
+        auto iMStep = this->giveMetaStep(imstep);
+        auto &ir = iMStep->giveAttributesRecord();
+        //hasfixed = ir.hasField("fixload");
         hasfixed = 1;
         if ( hasfixed ) {
             // test for control mode
@@ -798,7 +795,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
             IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_AdaptiveNonLinearStatic_controlmode);
 
             // check if displacement control takes place
-            if ( ir->hasField(_IFT_AdaptiveNonLinearStatic_ddm) ) {
+            if ( ir.hasField(_IFT_AdaptiveNonLinearStatic_ddm) ) {
                 OOFEM_ERROR("fixload recovery not supported for direct displacement control");
             }
 
@@ -823,7 +820,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                 }
             } else if ( mode == ( int ) nls_indirectControl ) {
                 // bad practise here
-                if ( !ir->hasField(_IFT_NonLinearStatic_donotfixload) ) {
+                if ( !ir.hasField(_IFT_NonLinearStatic_donotfixload) ) {
                     TimeStep *old = new TimeStep(firststep, this, imstep, firststep - 1.0, deltaT, 0);
                     this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
                                                                   rlm, this->giveDomain(domainIndx), old);
@@ -839,8 +836,8 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     } // end loop over meta-steps
 
     /* if direct control; add to initial load also previous steps in same metestep */
-    iMStep = this->giveMetaStep(mStepNum);
-    ir = iMStep->giveAttributesRecord();
+    auto iMStep = this->giveMetaStep(mStepNum);
+    auto &ir = iMStep->giveAttributesRecord();
     mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_AdaptiveNonLinearStatic_controlmode);
     int firststep = iMStep->giveFirstStepNumber();

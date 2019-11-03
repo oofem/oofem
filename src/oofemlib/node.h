@@ -175,7 +175,7 @@ public:
     // miscellaneous
     const char *giveClassName() const override { return "Node"; }
     const char *giveInputRecordName() const override { return _IFT_Node_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void printYourself() override;
     int checkConsistency() override;

@@ -401,8 +401,8 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
 }
 
 
-IRResultType
-FiberedCrossSection :: initializeFrom(InputRecord *ir)
+void
+FiberedCrossSection :: initializeFrom(InputRecord &ir)
 {
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
@@ -424,16 +424,14 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
          num != fiberWidths.giveSize()    ||
          num != fiberYcoords.giveSize()   ||
          num != fiberZcoords.giveSize() ) {
-        throw ValueInputException(*ir, _IFT_FiberedCrossSection_fibermaterials, "Array size mismatch ");
+        throw ValueInputException(ir, _IFT_FiberedCrossSection_fibermaterials, "Array size mismatch ");
     }
 
     if ( num <= 0 ) {
-        throw ValueInputException(*ir, _IFT_FiberedCrossSection_fibermaterials, "number of fibers == 0 is not allowed");
+        throw ValueInputException(ir, _IFT_FiberedCrossSection_fibermaterials, "number of fibers == 0 is not allowed");
     }
 
     area = fiberThicks.dotProduct(fiberWidths);
-
-    return IRRT_OK;
 }
 
 void FiberedCrossSection :: createMaterialStatus(GaussPoint &iGP)

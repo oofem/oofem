@@ -90,7 +90,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LIBeam3dNL_Name; }
     const char *giveClassName() const override { return "LIBeam3dNL"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
 #ifdef __OOFEG

@@ -77,7 +77,7 @@ public:
     const char *giveClassName() const override { return "WinklerPasternakMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_WinklerPasternakMaterial_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;

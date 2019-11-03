@@ -108,7 +108,7 @@ public:
 
     const char *giveClassName() const override { return "M1Material"; }
     const char *giveInputRecordName() const override { return _IFT_M1Material_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(gp); }
 
@@ -193,7 +193,7 @@ public:
     void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     const char *giveClassName() const override { return "M1Material"; }
     const char *giveInputRecordName() const override { return _IFT_M1Material_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(gp); }
 

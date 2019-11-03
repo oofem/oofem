@@ -76,8 +76,8 @@ StaggeredSolver :: StaggeredSolver(Domain *d, EngngModel *m) : NRSolver(d, m)
 }
 
 
-IRResultType
-StaggeredSolver :: initializeFrom(InputRecord *ir)
+void
+StaggeredSolver :: initializeFrom(InputRecord &ir)
 {
     NRSolver ::initializeFrom(ir);
 
@@ -95,7 +95,6 @@ StaggeredSolver :: initializeFrom(InputRecord *ir)
         }
         this->UnknownNumberingSchemeList[i].setDofIdArray(idList);
     }
-    return IRRT_OK;
 }
 
 

@@ -60,15 +60,13 @@ FRCFCMNL :: FRCFCMNL(int n, Domain *d) : FRCFCM(n, d), StructuralNonlocalMateria
 {}
 
 
-IRResultType
-FRCFCMNL :: initializeFrom(InputRecord *ir)
+void
+FRCFCMNL :: initializeFrom(InputRecord &ir)
 {
     FRCFCM :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
     //    IR_GIVE_FIELD(ir, participAngle, _IFT_FRCFCMNL_participAngle);
     participAngle = 90.;
-
-    return IRRT_OK;
 }
 
 

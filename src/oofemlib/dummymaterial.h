@@ -57,7 +57,7 @@ public:
 
     const char *giveClassName() const override { return "DummyMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_DummyMaterial_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
+    void initializeFrom(InputRecord &ir) override { }
 };
 } // end namespace oofem
 #endif // material_h

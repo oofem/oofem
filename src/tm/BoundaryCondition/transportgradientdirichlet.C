@@ -68,20 +68,20 @@ namespace oofem {
 REGISTER_BoundaryCondition(TransportGradientDirichlet);
 
 
-IRResultType TransportGradientDirichlet :: initializeFrom(InputRecord *ir)
+void TransportGradientDirichlet :: initializeFrom(InputRecord &ir)
 {
+    GeneralBoundaryCondition :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, mGradient, _IFT_TransportGradientDirichlet_gradient);
 
     mCenterCoord.resize(3);
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
 
-    this->tractionControl = ir->hasField(_IFT_TransportGradientDirichlet_tractionControl);
+    this->tractionControl = ir.hasField(_IFT_TransportGradientDirichlet_tractionControl);
     if ( this->tractionControl ) {
         IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientDirichlet_surfSets);
         //IR_GIVE_FIELD(ir, edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
-
-    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

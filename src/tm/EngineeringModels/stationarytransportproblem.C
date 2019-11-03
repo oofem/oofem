@@ -66,8 +66,8 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
 }
 
 
-IRResultType
-StationaryTransportProblem :: initializeFrom(InputRecord *ir)
+void
+StationaryTransportProblem :: initializeFrom(InputRecord &ir)
 {
     EngngModel :: initializeFrom(ir);
 
@@ -76,7 +76,7 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
     this->sparseMtrxType = ( SparseMtrxType ) val;
 
     ///@todo Combine this option with structural problems, where it is possible to keep the secant tangent elastic tangent (or generally, the initial tangent) etc. One option should fit all common needs here.
-    this->keepTangent = ir->hasField(_IFT_StationaryTransportProblem_keepTangent);
+    this->keepTangent = ir.hasField(_IFT_StationaryTransportProblem_keepTangent);
 
     // read field export flag
     IntArray exportFields;
@@ -98,8 +98,6 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         //UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
         UnknownsField = std::make_unique<PrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
     }
-
-    return IRRT_OK;
 }
 
 

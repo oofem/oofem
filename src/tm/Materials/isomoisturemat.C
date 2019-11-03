@@ -37,10 +37,10 @@
 #include "gausspoint.h"
 
 namespace oofem {
-IRResultType
-IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord &ir)
 {
-    return Material :: initializeFrom(ir);
+    Material :: initializeFrom(ir);
 }
 
 

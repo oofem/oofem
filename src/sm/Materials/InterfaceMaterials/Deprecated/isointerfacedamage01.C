@@ -156,9 +156,11 @@ IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, In
 }
 
 
-IRResultType
-IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+IsoInterfaceDamageMaterial :: initializeFrom(InputRecord &ir)
 {
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, kn, _IFT_IsoInterfaceDamageMaterial_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_IsoInterfaceDamageMaterial_ks);
 
@@ -173,8 +175,6 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
 
     beta = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_IsoInterfaceDamageMaterial_beta);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 

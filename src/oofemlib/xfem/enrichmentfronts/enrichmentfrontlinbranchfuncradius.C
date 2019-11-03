@@ -160,11 +160,9 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< doubl
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
-IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
+void EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
-
-    return IRRT_OK;
 }
 
 void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input)

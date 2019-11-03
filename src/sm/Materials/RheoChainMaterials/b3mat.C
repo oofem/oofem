@@ -42,8 +42,8 @@
 namespace oofem {
 REGISTER_Material(B3Material);
 
-IRResultType
-B3Material :: initializeFrom(InputRecord *ir)
+void
+B3Material :: initializeFrom(InputRecord &ir)
 {
     MaxwellChainMaterial :: initializeFrom(ir);
 
@@ -115,8 +115,6 @@ B3Material :: initializeFrom(InputRecord *ir)
     if ( mode == 0 ) {
         this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     }
-
-    return IRRT_OK;
 }
 
 void

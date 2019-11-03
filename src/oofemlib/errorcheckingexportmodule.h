@@ -183,7 +183,7 @@ public:
     ErrorCheckingExportModule(const ErrorCheckingExportModule &) = delete;
     ErrorCheckingExportModule &operator=(const ErrorCheckingExportModule &) = delete;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
 
     const char *giveClassName() const override { return "ErrorCheckingExportModule"; }

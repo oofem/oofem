@@ -128,11 +128,9 @@ RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : TransportMaterial(n, d)
 { }
 
 
-IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
+void RVEStokesFlow :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, this->rveFilename, _IFT_RVEStokesFlow_fileName);
-
-    return IRRT_OK;
 }
 
 

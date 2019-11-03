@@ -151,7 +151,7 @@ IntArray XfemManager :: giveEnrichedDofIDs(const DofManager &iDMan) const
     return dofIdArray;
 }
 
-IRResultType XfemManager :: initializeFrom(InputRecord *ir)
+void XfemManager :: initializeFrom(InputRecord &ir)
 {
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
 
@@ -178,8 +178,6 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
     // TODO: Read as input.
     XfemTolerances :: setCharacteristicElementLength(0.001);
-
-    return IRRT_OK;
 }
 
 
@@ -211,8 +209,8 @@ int XfemManager :: instanciateYourself(DataReader &dr)
 
     enrichmentItemList.resize(numberOfEnrichmentItems);
     for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
-        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_enrichItemRec, i);
-        mir->giveRecordKeywordField(name);
+        auto &mir = dr.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+        mir.giveRecordKeywordField(name);
 
         std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() ) );
         if ( ei.get() == NULL ) {
@@ -226,8 +224,8 @@ int XfemManager :: instanciateYourself(DataReader &dr)
 
     mNucleationCriteria.resize(numberOfNucleationCriteria);
     for ( int i = 1; i <= numberOfNucleationCriteria; i++ ) {
-        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, i);
-        mir->giveRecordKeywordField(name);
+        auto &mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, i);
+        mir.giveRecordKeywordField(name);
 
         std :: unique_ptr< NucleationCriterion >nc( classFactory.createNucleationCriterion( name.c_str(), this->giveDomain() ) );
         if ( nc.get() == NULL ) {

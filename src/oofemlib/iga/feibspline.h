@@ -126,7 +126,7 @@ public:
     }
 
     int giveNsd() override { return nsd; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }

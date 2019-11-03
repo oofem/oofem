@@ -661,16 +661,14 @@ MooneyRivlinMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-IRResultType
-MooneyRivlinMaterial :: initializeFrom(InputRecord *ir)
+void
+MooneyRivlinMaterial :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, K, _IFT_MooneyRivlinMaterial_k);
     IR_GIVE_FIELD(ir, C1, _IFT_MooneyRivlinMaterial_c1);
     IR_GIVE_FIELD(ir, C2, _IFT_MooneyRivlinMaterial_c2);
-
-    return IRRT_OK;
 }
 
 } // end namespace oofem

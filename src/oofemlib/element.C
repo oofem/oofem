@@ -634,8 +634,8 @@ Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 }
 
 
-IRResultType
-Element :: initializeFrom(InputRecord *ir)
+void
+Element :: initializeFrom(InputRecord &ir)
 {
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
@@ -658,7 +658,7 @@ Element :: initializeFrom(InputRecord *ir)
 
     elemLocalCS.clear();
 
-    if ( ir->hasField(_IFT_Element_lcs) ) { //local coordinate system
+    if ( ir.hasField(_IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         FloatArray triplets;
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
@@ -685,7 +685,7 @@ Element :: initializeFrom(InputRecord *ir)
 
     partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
-    if ( ir->hasField(_IFT_Element_remote) ) {
+    if ( ir.hasField(_IFT_Element_remote) ) {
         parallel_mode = Element_remote;
     } else {
         parallel_mode = Element_local;
@@ -695,8 +695,6 @@ Element :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
-
-    return IRRT_OK;
 }
 
 

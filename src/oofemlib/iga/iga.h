@@ -94,7 +94,7 @@ protected:
 #endif
 public:
     IGAElement(int n, Domain * aDomain) : Element(n, aDomain) { }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 #ifdef __PARALLEL_MODE
     elementParallelMode giveKnotSpanParallelMode(int) const override;
@@ -116,7 +116,7 @@ class OOFEM_EXPORT IGATSplineElement : public IGAElement
 {
 public:
     IGATSplineElement(int n, Domain * aDomain) : IGAElement(n, aDomain) { }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 };
 } // end namespace oofem
 #endif //iga_h

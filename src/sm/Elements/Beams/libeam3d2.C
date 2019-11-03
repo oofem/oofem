@@ -291,8 +291,8 @@ LIBeam3d2 :: computeLength()
 }
 
 
-IRResultType
-LIBeam3d2 :: initializeFrom(InputRecord *ir)
+void
+LIBeam3d2 :: initializeFrom(InputRecord &ir)
 {
     // first call parent
    NLStructuralElement :: initializeFrom(ir);
@@ -313,8 +313,6 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
     FloatMatrix lcs;
     this->giveLocalCoordinateSystem(lcs);
     this->tc.beTranspositionOf(lcs);
-
-    return IRRT_OK;
 }
 
 

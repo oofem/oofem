@@ -57,10 +57,10 @@ SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
 { }
 
 
-IRResultType
-SUPGElement2 :: initializeFrom(InputRecord *ir)
+void
+SUPGElement2 :: initializeFrom(InputRecord &ir)
 {
-    return SUPGElement :: initializeFrom(ir);
+    SUPGElement :: initializeFrom(ir);
 }
 
 

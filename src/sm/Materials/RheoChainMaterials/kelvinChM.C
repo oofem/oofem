@@ -278,14 +278,11 @@ KelvinChainMaterial :: CreateStatus(GaussPoint *gp) const
     return new KelvinChainMaterialStatus(gp, nUnits);
 }
 
-IRResultType
-KelvinChainMaterial :: initializeFrom(InputRecord *ir)
+void
+KelvinChainMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = RheoChainMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
+    RheoChainMaterial :: initializeFrom(ir);
     this->giveDiscreteTimes(); // Makes sure the new discrete times are evaluated.
-    return IRRT_OK;
 }
 
 /****************************************************************************************/

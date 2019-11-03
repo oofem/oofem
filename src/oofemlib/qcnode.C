@@ -58,7 +58,7 @@ qcNode :: qcNode(int n, Domain *aDomain) : Node(n, aDomain)
 #endif
 }
 
-IRResultType qcNode :: initializeFrom(InputRecord *ir)
+void qcNode :: initializeFrom(InputRecord &ir)
 {
     Node :: initializeFrom(ir);
     this->masterElement = -1;
@@ -85,8 +85,6 @@ IRResultType qcNode :: initializeFrom(InputRecord *ir)
 #else
     OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
 #endif
-
-    return IRRT_OK;
 }
 
 int qcNode :: checkConsistency()

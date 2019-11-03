@@ -75,7 +75,7 @@ public:
     void updateYourself(TimeStep *tStep) override;
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // identification
     const char *giveInputRecordName() const { return _IFT_NLTransientTransportProblem_Name; }

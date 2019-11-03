@@ -64,7 +64,7 @@ protected:
 public:
     CBSElement(int n, Domain * aDomain);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;

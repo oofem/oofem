@@ -670,9 +670,11 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
 
 
-IRResultType
-CylindricalALM :: initializeFrom(InputRecord *ir)
+void
+CylindricalALM :: initializeFrom(InputRecord &ir)
 {
+    SparseNonLinearSystemNM :: initializeFrom(ir);
+
     double oldPsi =  Psi; // default from constructor
     double initialStepLength, forcedInitialStepLength;
     int hpcMode;
@@ -874,10 +876,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     }
 
     this->giveLinearSolver()->initializeFrom(ir);
-
-    SparseNonLinearSystemNM :: initializeFrom(ir);
-
-    return IRRT_OK;
 }
 
 

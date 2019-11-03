@@ -58,9 +58,8 @@ std::vector<std::unique_ptr<EnrichmentItem>> NucleationCriterion::nucleateEnrich
     return eiList;
 }
 
-IRResultType NucleationCriterion::initializeFrom(InputRecord *ir) 
+void NucleationCriterion::initializeFrom(InputRecord &ir) 
 {
-    return IRRT_OK;
 }
 
 int NucleationCriterion::instanciateYourself(DataReader &dr)
@@ -68,8 +67,8 @@ int NucleationCriterion::instanciateYourself(DataReader &dr)
     std :: string name;
 
     // Instantiate enrichment function
-    InputRecord *mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, 1);
-    mir->giveRecordKeywordField(name);
+    auto &mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, 1);
+    mir.giveRecordKeywordField(name);
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, mpDomain );
     if ( mpEnrichmentFunc ) {
@@ -77,8 +76,6 @@ int NucleationCriterion::instanciateYourself(DataReader &dr)
     } else {
         OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
     }
-
-    return IRRT_OK;
 }
 
 void NucleationCriterion :: appendInputRecords(DynamicDataReader &oDR)

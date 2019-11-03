@@ -81,7 +81,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_InterfaceElem2dQuad_Name; }
     const char *giveClassName() const override { return "InterfaceElem2dQuad"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     MaterialMode giveMaterialMode() override { return _2dInterface; }

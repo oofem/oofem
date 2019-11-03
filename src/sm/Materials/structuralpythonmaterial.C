@@ -47,7 +47,7 @@ StructuralPythonMaterial :: StructuralPythonMaterial(int n, Domain *d) :
 {}
 
 
-IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
+void StructuralPythonMaterial :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
 
@@ -55,7 +55,7 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 
     module = bp::import(moduleName.c_str());
     if ( !module ) {
-        throw ValueInputException(*ir, _IFT_StructuralPythonMaterial_moduleName, "Module not importable.");
+        throw ValueInputException(ir, _IFT_StructuralPythonMaterial_moduleName, "Module not importable.");
     }
     // lambda for finding function and checking that it is callable
     // returns true (OK) if the function was not found, or was found and it callable
@@ -69,17 +69,15 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
     };
     // try to find all necessary functions; false means the function is not callable, in which case warning was already printed above
     if ( !(tryDef("computeStress",smallDef) && tryDef("computePK1Stress",largeDef) && tryDef("computeStressTangent",smallDefTangent) && tryDef("computePK1StressTangent",largeDefTangent))) {
-        throw ValueInputException(*ir, _IFT_StructuralPythonMaterial_moduleName, "missing functions");
+        throw ValueInputException(ir, _IFT_StructuralPythonMaterial_moduleName, "missing functions");
     }
     if ( !smallDefTangent && !!smallDef ){ OOFEM_WARNING("Using numerical tangent for small deformations."); }
     if ( !largeDefTangent && !!largeDef ){ OOFEM_WARNING("Using numerical tangent for large deformations."); }
     if ( !smallDef && !largeDef ) {
-        throw ValueInputException(*ir, _IFT_StructuralPythonMaterial_moduleName, "No functions for small/large deformations found.");
+        throw ValueInputException(ir, _IFT_StructuralPythonMaterial_moduleName, "No functions for small/large deformations found.");
     }
 
     pert = 1e-12;
-
-    return IRRT_OK;
 }
 
 void StructuralPythonMaterial :: giveInputRecord(DynamicInputRecord &input)

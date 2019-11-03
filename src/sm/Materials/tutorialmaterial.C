@@ -48,16 +48,14 @@ TutorialMaterial :: TutorialMaterial(int n, Domain *d) : StructuralMaterial(n, d
 {}
 
 
-IRResultType
-TutorialMaterial :: initializeFrom(InputRecord *ir)
+void
+TutorialMaterial :: initializeFrom(InputRecord &ir)
 {
+    StructuralMaterial :: initializeFrom(ir);
+
     D.initializeFrom(ir);
-
     IR_GIVE_FIELD(ir, this->sig0, _IFT_TutorialMaterial_yieldstress);
-
     IR_GIVE_FIELD(ir, this->H, _IFT_TutorialMaterial_hardeningmoduli);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

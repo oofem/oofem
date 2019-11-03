@@ -287,9 +287,9 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 }
 
 
-IRResultType
-LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
+void
+LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord &ir)
 {
-    return LargeStrainMasterMaterial :: initializeFrom(ir);
+    LargeStrainMasterMaterial :: initializeFrom(ir);
 }
 } // end namespace oofem

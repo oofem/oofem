@@ -140,8 +140,8 @@ InterpolatingFuction :: evaluateAtTime(double t)
 
 
 
-IRResultType
-InterpolatingFuction :: initializeFrom(InputRecord *ir)
+void
+InterpolatingFuction :: initializeFrom(InputRecord &ir)
 {
     std :: string name;
 
@@ -150,7 +150,7 @@ InterpolatingFuction :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        throw ValueInputException(*ir, _IFT_InterpolatingFuction_filename, "Unable to open file: " + name);
+        throw ValueInputException(ir, _IFT_InterpolatingFuction_filename, "Unable to open file: " + name);
     }
 
     double deltaX, deltaY;
@@ -165,7 +165,5 @@ InterpolatingFuction :: initializeFrom(InputRecord *ir)
     for ( int i = 0; i < numberReal[0] * numberReal[1]; i++ ) {
         inputField >> field[3 * i] >> field[3 * i + 1] >> field[3 * i + 2];
     }
-
-    return IRRT_OK;
 }
 } // end namespace oofem

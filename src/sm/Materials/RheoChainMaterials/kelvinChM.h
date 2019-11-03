@@ -71,7 +71,7 @@ public:
     // identification and auxiliary functions
     const char *giveClassName() const override { return "KelvinChainMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void  giveShrinkageStrainVector(FloatArray &answer,
                                     GaussPoint *gp,

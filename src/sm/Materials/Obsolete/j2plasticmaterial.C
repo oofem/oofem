@@ -55,8 +55,8 @@ J2plasticMaterial :: ~J2plasticMaterial()
 {
 }
 
-IRResultType
-J2plasticMaterial :: initializeFrom(InputRecord *ir)
+void
+J2plasticMaterial :: initializeFrom(InputRecord &ir)
 {
     double value;
 
@@ -79,8 +79,6 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     if ( fabs(isotropicModuli) > 1.e-12 ) {
         isotropicHardeningFlag = 1;
     }
-
-    return IRRT_OK;
 }
 
 void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)

@@ -59,7 +59,7 @@ class SUPGElement2 : public SUPGElement
 public:
     SUPGElement2(int n, Domain * aDomain);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     // characteristic  matrix

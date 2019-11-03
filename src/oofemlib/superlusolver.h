@@ -73,7 +73,7 @@ public:
     SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return SMT_CompCol; }
 
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "SuperLUSolver"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_SuperLU_MT; }
 

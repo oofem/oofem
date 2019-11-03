@@ -84,7 +84,7 @@ protected:
 public:
     TransportGradientDirichlet(int n, Domain *d) : BoundaryCondition(n, d) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void postInitialize() override;
 

@@ -105,23 +105,23 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
     return linSolver.get();
 }
 
-IRResultType
-NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
+void
+NonStationaryTransportProblem :: initializeFrom(InputRecord &ir)
 {
     EngngModel :: initializeFrom(ir);
 
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_initt) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_initt) ) {
         IR_GIVE_FIELD(ir, initT, _IFT_NonStationaryTransportProblem_initt);
     }
 
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltat) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_deltat) ) {
         IR_GIVE_FIELD(ir, deltaT, _IFT_NonStationaryTransportProblem_deltat);
-    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltatfunction) ) {
+    } else if ( ir.hasField(_IFT_NonStationaryTransportProblem_deltatfunction) ) {
         IR_GIVE_FIELD(ir, dtFunction, _IFT_NonStationaryTransportProblem_deltatfunction);
-    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
+    } else if ( ir.hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
-        throw ValueInputException(*ir, "none", "Time step not defined");
+        throw ValueInputException(ir, "none", "Time step not defined");
     }
 
     IR_GIVE_FIELD(ir, alpha, _IFT_NonStationaryTransportProblem_alpha);
@@ -129,12 +129,12 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
      * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
      */
     // read lumped capacity stabilization flag
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_lumpedcapa) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_lumpedcapa) ) {
         lumpedCapacityStab = 1;
     }
 
     //secure equation renumbering, otherwise keep efficient algorithms
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
         changingProblemSize = true;
         UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
     } else {
@@ -147,8 +147,6 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
-
-    return IRRT_OK;
 }
 
 

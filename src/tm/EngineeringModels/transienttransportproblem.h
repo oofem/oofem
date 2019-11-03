@@ -116,7 +116,7 @@ public:
     TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     bool requiresEquationRenumbering(TimeStep *tStep) override;
     int forceEquationNumbering() override;

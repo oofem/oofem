@@ -369,12 +369,11 @@ IDNLMaterial :: giveInterface(InterfaceType type)
 }
 
 
-IRResultType
-IDNLMaterial :: initializeFrom(InputRecord *ir)
+void
+IDNLMaterial :: initializeFrom(InputRecord &ir)
 {
     IsotropicDamageMaterial1 :: initializeFrom(ir);
     StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    return IRRT_OK;
 }
 
 
