@@ -71,7 +71,7 @@ public:
      */
     NM_Status petsc_solve(PetscSparseMtrx &A, Vec b, Vec x);
 
-    virtual const char *giveClassName() const override { return "PetscSolver"; }
+    const char *giveClassName() const override { return "PetscSolver"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_Petsc; }
     SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return SMT_PetscMtrx; }
 };

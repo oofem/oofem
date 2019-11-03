@@ -92,8 +92,8 @@ public:
     // PF
     int giveNumberOfDofManagers() const override { return 4; }
     StructuralInterfaceElement *giveElement() override { return this; }
-	virtual void giveDofManDofIDMask_u(IntArray &answer) override;
-    virtual void giveDofManDofIDMask_d(IntArray &answer) override;
+	void giveDofManDofIDMask_u(IntArray &answer) override;
+    void giveDofManDofIDMask_d(IntArray &answer) override;
 
     virtual void computeStiffnessMatrix_uu(FloatMatrix &, MatResponseMode, TimeStep *);
     virtual void computeStiffnessMatrix_ud(FloatMatrix &, MatResponseMode, TimeStep *);

@@ -86,7 +86,7 @@ public:
     void initializeFrom(InputRecord &ir) override;
     int checkConsistency() override;
 
-    virtual Interface *giveInterface(InterfaceType) override = 0;
+    Interface *giveInterface(InterfaceType) override = 0;
 
     virtual Element *giveElement() { return this; }
 
