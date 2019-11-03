@@ -131,9 +131,9 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
      */
 
     // add interpolation elements (with new CS and no mat)
-    const char *elemType;
     if ( interpolationMeshNodes.size() != 0 ) {
         // for 2d
+        const char *elemType;
         if ( nDimensions == 2 ) {
             //elemType  = "TrPlaneStrain";
             elemType  = "TrPlaneStress2d";
@@ -141,21 +141,21 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
         } else {
             elemType  = "LTRSpace";
         }
-    }
 
-    int nelem = d->giveNumberOfElements();
-    DynamicInputRecord irEl;
-    // over interpolation elements
-    for ( int i = 1; i <= ninterpelem; i++ ) {
-        int elemNumber = nelem + i;
-        d->resizeElements(elemNumber);
-        auto elem = classFactory.createElement(elemType, elemNumber, d);
-        irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
-        //irEl.setField( ncrosssect, _IFT_Element_crosssect);
-        //irEl.setField( nmat, _IFT_Element_mat);
-        elem->initializeFrom(irEl);
-        elem->setGlobalNumber(elemNumber);
-        d->setElement(elemNumber, std::move(elem));
+        int nelem = d->giveNumberOfElements();
+        DynamicInputRecord irEl;
+        // over interpolation elements
+        for ( int i = 1; i <= ninterpelem; i++ ) {
+            int elemNumber = nelem + i;
+            d->resizeElements(elemNumber);
+            auto elem = classFactory.createElement(elemType, elemNumber, d);
+            irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
+            //irEl.setField( ncrosssect, _IFT_Element_crosssect);
+            //irEl.setField( nmat, _IFT_Element_mat);
+            elem->initializeFrom(irEl);
+            elem->setGlobalNumber(elemNumber);
+            d->setElement(elemNumber, std::move(elem));
+        }
     }
 }
 

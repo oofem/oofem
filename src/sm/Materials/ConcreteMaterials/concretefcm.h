@@ -145,7 +145,7 @@ protected:
     double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) override { return this->give(ft_strength, gp); }
     virtual double giveFractureEnergy(GaussPoint *gp, TimeStep *tStep) { return this->give(gf_ID, gp); }
     double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) override;
-    virtual double giveCrackingModulusInTension(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i);
+    double giveCrackingModulusInTension(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) override;
     double computeEffectiveShearModulus(GaussPoint *gp, TimeStep *tStep, int i) override;
     double computeD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) override;
     double computeNumerD2ModulusForCrack(GaussPoint *gp, TimeStep *tStep, int icrack) override;

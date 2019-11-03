@@ -834,7 +834,7 @@ CylindricalALM :: initializeFrom(InputRecord &ir)
 
     if ( nccdg >= 1 ) {
         IntArray _val;
-        char name [ 12 ];
+        char name [ 16 ];
         // create an empty set
         __DofIDSet _set;
         // resize dof group vector

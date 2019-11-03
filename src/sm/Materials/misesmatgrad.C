@@ -535,7 +535,7 @@ MisesMatGradStatus :: ~MisesMatGradStatus()
 
 
 void
-MisesMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MisesMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status {");

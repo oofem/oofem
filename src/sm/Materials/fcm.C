@@ -89,7 +89,7 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     int nCr = status->giveNumberOfCracks();
     int nMaxCr = status->giveMaxNumberOfCracks(gp);
 
-    double maxErr;
+    double maxErr = 0.;
     double maxTau = 0.;
 
     double G;

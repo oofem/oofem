@@ -76,6 +76,7 @@ int NucleationCriterion::instanciateYourself(DataReader &dr)
     } else {
         OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
     }
+    return 1;
 }
 
 void NucleationCriterion :: appendInputRecords(DynamicDataReader &oDR)
