@@ -76,13 +76,12 @@ ContactManager :: initializeFrom(InputRecord *ir)
 int 
 ContactManager :: instanciateYourself(DataReader &dr)
 {
-    IRResultType result = IRRT_OK; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     // Create and instantiate contact definitions
     for ( int i = 1; i <= this->giveNumberOfContactDefinitions(); i++ ) {
         InputRecord *ir = dr.giveInputRecord(DataReader :: IR_contactDefRec, i);
-        result = ir->giveRecordKeywordField(name);
+        ir->giveRecordKeywordField(name);
         this->contactDefinitionList[i-1] = classFactory.createContactDefinition( name.c_str(), this );
         if ( this->contactDefinitionList[i-1] ) {
             this->contactDefinitionList[i-1]->initializeFrom(ir);
@@ -92,7 +91,7 @@ ContactManager :: instanciateYourself(DataReader &dr)
         }
     }
 
-    return result;
+    return 1;
 }
 
 

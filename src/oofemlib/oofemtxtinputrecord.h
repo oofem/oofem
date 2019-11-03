@@ -83,19 +83,19 @@ public:
     void finish(bool wrn = true) override;
 
 public:
-    IRResultType giveRecordKeywordField(std :: string &answer, int &value) override;
-    IRResultType giveRecordKeywordField(std :: string &answer) override;
-    IRResultType giveField(int &answer, InputFieldType id) override;
-    IRResultType giveField(double &answer, InputFieldType id) override;
-    IRResultType giveField(bool &answer, InputFieldType id) override;
-    IRResultType giveField(std :: string &answer, InputFieldType id) override;
-    IRResultType giveField(FloatArray &answer, InputFieldType id) override;
-    IRResultType giveField(IntArray &answer, InputFieldType id) override;
-    IRResultType giveField(FloatMatrix &answer, InputFieldType id) override;
-    IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) override;
-    IRResultType giveField(Dictionary &answer, InputFieldType id) override;
-    IRResultType giveField(std :: list< Range > &answer, InputFieldType id) override;
-    IRResultType giveField(ScalarFunction &answer, InputFieldType id) override;
+    void giveRecordKeywordField(std :: string &answer, int &value) override;
+    void giveRecordKeywordField(std :: string &answer) override;
+    void giveField(int &answer, InputFieldType id) override;
+    void giveField(double &answer, InputFieldType id) override;
+    void giveField(bool &answer, InputFieldType id) override;
+    void giveField(std :: string &answer, InputFieldType id) override;
+    void giveField(FloatArray &answer, InputFieldType id) override;
+    void giveField(IntArray &answer, InputFieldType id) override;
+    void giveField(FloatMatrix &answer, InputFieldType id) override;
+    void giveField(std :: vector< std :: string > &answer, InputFieldType id) override;
+    void giveField(Dictionary &answer, InputFieldType id) override;
+    void giveField(std :: list< Range > &answer, InputFieldType id) override;
+    void giveField(ScalarFunction &answer, InputFieldType id) override;
 
     bool hasField(InputFieldType id) override;
     void printYourself() override;

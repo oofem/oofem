@@ -141,127 +141,114 @@ void DynamicInputRecord :: finish(bool wrn)
     ///@todo Implement warning about unread entries
 }
 
-IRResultType DynamicInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
+void DynamicInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
 {
     answer = this->recordKeyword;
     value = this->recordNumber;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveRecordKeywordField(std :: string &answer)
+void DynamicInputRecord :: giveRecordKeywordField(std :: string &answer)
 {
     answer = this->recordKeyword;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(int &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(int &answer, InputFieldType id)
 {
     std :: map< std :: string, int > :: iterator it = this->intRecord.find(id);
     if ( it == this->intRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(double &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(double &answer, InputFieldType id)
 {
     std :: map< std :: string, double > :: iterator it = this->doubleRecord.find(id);
     if ( it == this->doubleRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(bool &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(bool &answer, InputFieldType id)
 {
     std :: map< std :: string, bool > :: iterator it = this->boolRecord.find(id);
     if ( it == this->boolRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std :: string &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(std :: string &answer, InputFieldType id)
 {
     std :: map< std :: string, std :: string > :: iterator it = this->stringRecord.find(id);
     if ( it == this->stringRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(FloatArray &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 {
     std :: map< std :: string, FloatArray > :: iterator it = this->floatArrayRecord.find(id);
     if ( it == this->floatArrayRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(IntArray &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(IntArray &answer, InputFieldType id)
 {
     std :: map< std :: string, IntArray > :: iterator it = this->intArrayRecord.find(id);
     if ( it == this->intArrayRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 {
     std :: map< std :: string, FloatMatrix > :: iterator it = this->matrixRecord.find(id);
     if ( it == this->matrixRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
 {
     std :: map< std :: string, std :: vector< std :: string > > :: iterator it = this->stringListRecord.find(id);
     if ( it == this->stringListRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(Dictionary &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 {
     std :: map< std :: string, Dictionary > :: iterator it = this->dictionaryRecord.find(id);
     if ( it == this->dictionaryRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std :: list< Range > &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(std :: list< Range > &answer, InputFieldType id)
 {
     std :: map< std :: string, std :: list< Range > > :: iterator it = this->rangeRecord.find(id);
     if ( it == this->rangeRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
 {
     std :: map< std :: string, ScalarFunction > :: iterator it = this->scalarFunctionRecord.find(id);
     if ( it == this->scalarFunctionRecord.end() ) {
         throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
 bool DynamicInputRecord :: hasField(InputFieldType id)

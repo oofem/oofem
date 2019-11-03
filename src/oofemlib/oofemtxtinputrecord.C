@@ -99,7 +99,7 @@ OOFEMTXTInputRecord :: setRecordString(std :: string newRec)
     }
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
 {
     if ( tokenizer.giveNumberOfTokens() > 0 ) {
@@ -113,10 +113,9 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
     } else {
         throw BadFormatInputException(*this, "RecordID", lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer)
 {
     if ( tokenizer.giveNumberOfTokens() > 0 ) {
@@ -125,10 +124,9 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer)
     } else {
         throw BadFormatInputException(*this, "RecordID", lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -143,10 +141,9 @@ OOFEMTXTInputRecord :: giveField(int &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -161,10 +158,9 @@ OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -181,10 +177,9 @@ OOFEMTXTInputRecord :: giveField(bool &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(std :: string &answer, InputFieldType id)
 {
     int indx = 0;
@@ -207,10 +202,9 @@ OOFEMTXTInputRecord :: giveField(std :: string &answer, InputFieldType id)
         answer = "";
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -239,10 +233,9 @@ OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -271,10 +264,9 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -303,10 +295,9 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -327,10 +318,9 @@ OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFi
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -360,10 +350,9 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
@@ -399,10 +388,9 @@ OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
 {
     const char *rec;
@@ -442,7 +430,6 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
     } else {
         throw MissingKeywordInputException(*this, id, lineNumber);
     }
-    return IRRT_OK;
 }
 
 bool
@@ -657,16 +644,4 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
 
 }
 
-
-/*
-void
-OOFEMTXTInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
-                                    IRResultType result, const char *file, int line)
-{
-    oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
-                              "Input error on line %d: \"%s\", field keyword \"%s\"\nIn function %s::%s\nRecord:\"%s\"",
-                              lineNumber, strerror(result), id, _class, proc, this->giveRecordAsString().c_str());
-    OOFEM_EXIT(1); ///@todo We should never directly exit when dealing with user input.
-}
-*/
 } // end namespace oofem

@@ -36,7 +36,7 @@
 
 namespace oofem {
 
-IRResultType
+void
 InputRecord :: giveOptionalField(int &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -44,10 +44,9 @@ InputRecord :: giveOptionalField(int &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(double &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -55,10 +54,9 @@ InputRecord :: giveOptionalField(double &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(bool &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -66,10 +64,9 @@ InputRecord :: giveOptionalField(bool &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(std :: string &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -77,10 +74,9 @@ InputRecord :: giveOptionalField(std :: string &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(FloatArray &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -88,10 +84,9 @@ InputRecord :: giveOptionalField(FloatArray &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(IntArray &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -99,10 +94,9 @@ InputRecord :: giveOptionalField(IntArray &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(FloatMatrix &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -110,10 +104,9 @@ InputRecord :: giveOptionalField(FloatMatrix &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(std :: vector< std :: string > &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -121,10 +114,9 @@ InputRecord :: giveOptionalField(std :: vector< std :: string > &answer, InputFi
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -132,10 +124,9 @@ InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(std :: list< Range > &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -143,10 +134,9 @@ InputRecord :: giveOptionalField(std :: list< Range > &answer, InputFieldType id
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
 {
     if ( this->hasField(id) ) {
@@ -154,7 +144,6 @@ InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
             this->giveField(answer, id);
         } catch ( MissingKeywordInputException & ) { }
     }
-    return IRRT_OK;
 }
 
 

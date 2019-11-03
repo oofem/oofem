@@ -106,67 +106,65 @@ public:
     /**@name Compulsory field extraction methods
      * Reads the field value identified by keyword
      * @param answer contains result
-     * @param idString field keyword
-     * @return IRResultType
+     * @param id field keyword
      */
     //@{
     /// Reads the record id field  (type of record) and its corresponding number.
-    virtual IRResultType giveRecordKeywordField(std :: string &answer, int &value) = 0;
+    virtual void giveRecordKeywordField(std :: string &answer, int &value) = 0;
     /// Reads the record id field  (type of record).
-    virtual IRResultType giveRecordKeywordField(std :: string &answer) = 0;
+    virtual void giveRecordKeywordField(std :: string &answer) = 0;
     /// Reads the integer field value.
-    virtual IRResultType giveField(int &answer, InputFieldType id) = 0;
+    virtual void giveField(int &answer, InputFieldType id) = 0;
     /// Reads the double field value.
-    virtual IRResultType giveField(double &answer, InputFieldType id) = 0;
+    virtual void giveField(double &answer, InputFieldType id) = 0;
     /// Reads the bool field value.
-    virtual IRResultType giveField(bool &answer, InputFieldType id) = 0;
+    virtual void giveField(bool &answer, InputFieldType id) = 0;
     /// Reads the string field value.
-    virtual IRResultType giveField(std :: string &answer, InputFieldType id) = 0;
+    virtual void giveField(std :: string &answer, InputFieldType id) = 0;
     /// Reads the FloatArray field value.
-    virtual IRResultType giveField(FloatArray &answer, InputFieldType id) = 0;
+    virtual void giveField(FloatArray &answer, InputFieldType id) = 0;
     /// Reads the IntArray field value.
-    virtual IRResultType giveField(IntArray &answer, InputFieldType id) = 0;
+    virtual void giveField(IntArray &answer, InputFieldType id) = 0;
     /// Reads the FloatMatrix field value.
-    virtual IRResultType giveField(FloatMatrix &answer, InputFieldType id) = 0;
+    virtual void giveField(FloatMatrix &answer, InputFieldType id) = 0;
     /// Reads the vector of strings.
-    virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) = 0;
+    virtual void giveField(std :: vector< std :: string > &answer, InputFieldType id) = 0;
     /// Reads the Dictionary field value.
-    virtual IRResultType giveField(Dictionary &answer, InputFieldType id) = 0;
+    virtual void giveField(Dictionary &answer, InputFieldType id) = 0;
     /// Reads the std::list<Range> field value.
-    virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id) = 0;
+    virtual void giveField(std :: list< Range > &answer, InputFieldType id) = 0;
     /// Reads the ScalarFunction field value.
-    virtual IRResultType giveField(ScalarFunction &function, InputFieldType id) = 0;
+    virtual void giveField(ScalarFunction &function, InputFieldType id) = 0;
     //@}
 
     /**@name Optional field extraction methods
      * Reads the field value identified by keyword
      * @param answer contains result
-     * @param idString field keyword
-     * @return IRResultType
+     * @param id field keyword
      */
     //@{
     /// Reads the integer field value.
-    IRResultType giveOptionalField(int &answer, InputFieldType id);
+    void giveOptionalField(int &answer, InputFieldType id);
     /// Reads the double field value.
-    IRResultType giveOptionalField(double &answer, InputFieldType id);
+    void giveOptionalField(double &answer, InputFieldType id);
     /// Reads the bool field value.
-    IRResultType giveOptionalField(bool &answer, InputFieldType id);
+    void giveOptionalField(bool &answer, InputFieldType id);
     /// Reads the string field value.
-    IRResultType giveOptionalField(std :: string &answer, InputFieldType id);
+    void giveOptionalField(std :: string &answer, InputFieldType id);
     /// Reads the FloatArray field value.
-    IRResultType giveOptionalField(FloatArray &answer, InputFieldType id);
+    void giveOptionalField(FloatArray &answer, InputFieldType id);
     /// Reads the IntArray field value.
-    IRResultType giveOptionalField(IntArray &answer, InputFieldType id);
+    void giveOptionalField(IntArray &answer, InputFieldType id);
     /// Reads the FloatMatrix field value.
-    IRResultType giveOptionalField(FloatMatrix &answer, InputFieldType id);
+    void giveOptionalField(FloatMatrix &answer, InputFieldType id);
     /// Reads the vector of strings.
-    IRResultType giveOptionalField(std :: vector< std :: string > &answer, InputFieldType id);
+    void giveOptionalField(std :: vector< std :: string > &answer, InputFieldType id);
     /// Reads the Dictionary field value.
-    IRResultType giveOptionalField(Dictionary &answer, InputFieldType id);
+    void giveOptionalField(Dictionary &answer, InputFieldType id);
     /// Reads the std::list<Range> field value.
-    IRResultType giveOptionalField(std :: list< Range > &answer, InputFieldType id);
+    void giveOptionalField(std :: list< Range > &answer, InputFieldType id);
     /// Reads the ScalarFunction field value.
-    IRResultType giveOptionalField(ScalarFunction &function, InputFieldType id);
+    void giveOptionalField(ScalarFunction &function, InputFieldType id);
     //@}
 
     /// Returns true if record contains field identified by idString keyword.
