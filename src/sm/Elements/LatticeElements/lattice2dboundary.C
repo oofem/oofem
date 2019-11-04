@@ -47,6 +47,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dof.h"
 #include "../sm/Materials/structuralmaterial.h"
 
 #ifdef __OOFEG
@@ -615,7 +616,7 @@ void Lattice2dBoundary :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep
     FloatArray gpCoords;
     giveGpCoordinates(gpCoords);
 
-    IntArray projectionComponent(2);
+    FloatArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
     FloatArray specimenDimension(2);
@@ -681,7 +682,7 @@ void Lattice2dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tSt
     EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
-    IntArray projectionComponent(2);
+    FloatArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
 
@@ -722,7 +723,7 @@ void Lattice2dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
 
-    IntArray projectionComponent(2);
+    FloatArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
     //specimen dimension
@@ -801,7 +802,7 @@ Lattice2dBoundary :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             specimenDimension.at(2) =  this->giveNode(3)->giveCoordinate(2);
 
 
-            IntArray projectionComponent(2);
+            FloatArray projectionComponent(2);
             giveSwitches(projectionComponent);
 
 
@@ -858,7 +859,7 @@ Lattice2dBoundary :: giveCrossSectionCoordinates(FloatArray &coords)
 {
     FloatArray gpCoords;
     this->giveGpCoordinates(gpCoords);
-    IntArray projectionComponent(2);
+    FloatArray projectionComponent(2);
     giveSwitches(projectionComponent);
 
     FloatArray specimenDimension(2);

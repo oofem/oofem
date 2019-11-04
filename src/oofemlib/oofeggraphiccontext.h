@@ -49,7 +49,7 @@
 
 extern "C" {
  #define new __new
- #define class __class
+  //#define class __class
  #define inline __inline
  #define min __min
  #define max __max

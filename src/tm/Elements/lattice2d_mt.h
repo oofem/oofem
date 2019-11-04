@@ -112,8 +112,8 @@ public:
     // Graphics output
     void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void giveCrossSectionCoordinates(FloatArray &coords) override;
+    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep);
+    void giveCrossSectionCoordinates(FloatArray &coords);
 #endif
 
 protected:
