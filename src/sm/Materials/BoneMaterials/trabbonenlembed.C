@@ -53,18 +53,14 @@ REGISTER_Material(TrabBoneNLEmbed);
 
 TrabBoneNLEmbed :: TrabBoneNLEmbed(int n, Domain *d) : TrabBoneEmbed(n, d), StructuralNonlocalMaterialExtensionInterface(d)
 {
-    R = 0.;
 }
-
-TrabBoneNLEmbed :: ~TrabBoneNLEmbed()
-{ }
 
 void
 TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
+    auto nlstatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
     FloatArray SDstrainVector;
     double cumPlastStrain;
-    TrabBoneNLEmbedStatus *nlstatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
@@ -83,24 +79,21 @@ TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
                                            const FloatArray &strainVector,
                                            TimeStep *tStep)
 {
-    TrabBoneNLEmbedStatus *nlStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
+    auto nlStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
-    double tempDam, tempTSED;
-    FloatArray plasDef, totalStress;
-    FloatMatrix compliance, elasticity;
+    FloatArrayF<6> strain = strainVector;
+    
+    auto compliance = this->constructIsoComplTensor(eps0, nu0);
+    auto elasticity = inv(compliance);
 
-    compliance.resize(6, 6);
-    this->constructIsoComplTensor(compliance, eps0, nu0);
-    elasticity.beInverseOf(compliance);
+    // Unused?
+    double tempDam = 0;
+    FloatArrayF<6> plasDef;
 
-    tempDam = 0;
-    plasDef.resize(6);
+    auto totalStress = dot(elasticity, strain);
 
-    totalStress.beProductOf(elasticity, strainVector);
+    double tempTSED = 0.5 * dot(strain, totalStress);
 
-    tempTSED = 0.5 * strainVector.dotProduct(totalStress);
-
-    answer.resize(6);
     answer = totalStress;
 
     nlStatus->setTempDam(tempDam);
@@ -112,17 +105,17 @@ TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
 void
 TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
 {
-    double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
-    TrabBoneNLEmbedStatus *nonlocStatus, *status = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(tStep);
 
     auto list = status->giveIntegrationDomainList();
 
+    double nonlocalCumPlastStrain = 0.0;
     for ( auto &lir: *list ) {
-        nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(lir.nearGp) );
-        nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
+        auto nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(lir.nearGp) );
+        double nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
         nonlocalContribution *= lir.weight;
         nonlocalCumPlastStrain += nonlocalContribution;
     }
@@ -140,7 +133,7 @@ TrabBoneNLEmbed :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
         return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -186,7 +179,6 @@ TrabBoneNLEmbed :: computeWeightFunction(const FloatArray &src, const FloatArray
 TrabBoneNLEmbedStatus :: TrabBoneNLEmbedStatus(GaussPoint *g) :
     TrabBoneEmbedStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
-    localCumPlastStrainForAverage = 0.0;
 }
 
 

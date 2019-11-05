@@ -57,7 +57,7 @@ class TrabBoneNLEmbedStatus : public TrabBoneEmbedStatus, public StructuralNonlo
 {
 protected:
     /// Equivalent strain for averaging.
-    double localCumPlastStrainForAverage;
+    double localCumPlastStrainForAverage = 0.;
 
 public:
     TrabBoneNLEmbedStatus(GaussPoint * g);
@@ -65,7 +65,7 @@ public:
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Gives the local cumulative plastic strain.
-    double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
+    double giveLocalCumPlastStrainForAverage() const { return localCumPlastStrainForAverage; }
     /// Sets the local cumulative plastic strain.
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
@@ -86,12 +86,11 @@ public:
 class TrabBoneNLEmbed : public TrabBoneEmbed, public StructuralNonlocalMaterialExtensionInterface
 {
 protected:
-    double R;
-    double mParam;
+    double R = 0.;
+    double mParam = 0.;
 
 public:
     TrabBoneNLEmbed(int n, Domain * d);
-    virtual ~TrabBoneNLEmbed();
 
     const char *giveClassName() const override { return "TrabBoneNLEmbed"; }
     const char *giveInputRecordName() const override { return _IFT_TrabBoneNLEmbed_Name; }

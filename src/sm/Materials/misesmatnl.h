@@ -67,7 +67,6 @@ public:
     // STATE VARIABLE
     // declare state variable access and modification methods
     double giveLocalCumPlasticStrainForAverage() { return localCumPlasticStrainForAverage; }
-    const FloatArray *giveLTangentContrib();
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "MisesMatNlStatus"; }

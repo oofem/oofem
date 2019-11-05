@@ -53,15 +53,14 @@ class TrabBoneGrad3DStatus : public TrabBone3DStatus, GradientDamageMaterialStat
 {
 protected:
     /// Equivalent strain for avaraging
-    double nlKappa;
+    double nlKappa = 0.;
     /// Reference to the basic elastic material
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
     TrabBoneGrad3DStatus(GaussPoint *g);
-    virtual ~TrabBoneGrad3DStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "TrabBoneGrad3DStatus"; }
 
@@ -80,12 +79,11 @@ public:
 class TrabBoneGrad3D : public TrabBone3D, GradientDamageMaterialExtensionInterface
 {
 protected:
-    double L;
-    double mParam;
+    double L = 0.;
+    double mParam = 0.;
 
 public:
     TrabBoneGrad3D(int n, Domain *d);
-    virtual ~TrabBoneGrad3D();
 
     const char *giveClassName() const override { return "TrabBoneGrad3D"; }
     const char *giveInputRecordName() const override { return _IFT_TrabBoneGrad3D_Name; }
@@ -116,7 +114,7 @@ public:
     void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
 
     void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) override;
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     //LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 

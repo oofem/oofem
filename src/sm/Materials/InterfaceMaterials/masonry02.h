@@ -76,32 +76,32 @@ class Masonry02 : public MPlasticMaterial2
 {
 protected:
     /// Tensile strength.
-    double ft0;
+    double ft0 = 0.;
     /// Mode I GF.
-    double gfI;
+    double gfI = 0.;
     /// Mode II GF.
-    double gfII;
+    double gfII = 0.;
     /// Residual friction angle.
-    double tanfir;
+    double tanfir = 0.;
     /// Initial friction angle.
-    double tanfi0;
+    double tanfi0 = 0.;
     /// Initial cohesion of joint.
-    double c0;
+    double c0 = 0.;
     /// Cap mode parameters.
-    double Cnn, Css, Cn;
-    // double fm;
+    double Cnn = 0., Css = 0., Cn = 0.;
+    // double fm = 0.;
 
     /// Elastic properties.
-    double kn, ks;
+    double kn = 0., ks = 0.;
 
     /// Dilatancy angle.
-    double tanpsi;
+    double tanpsi = 0.;
 
     /// Cap mode parameters.
-    double sic, spc, smc, src;
-    double kp, km, kr;
-public:
+    double sic = 0., spc = 0., smc = 0., src = 0.;
+    double kp = 0., km = 0., kr = 0.;
 
+public:
     Masonry02(int n, Domain * d);
     virtual ~Masonry02();
 

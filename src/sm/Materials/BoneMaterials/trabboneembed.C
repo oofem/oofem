@@ -57,33 +57,22 @@ TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *tStep)
 {
-    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
+    // 'auto status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
-    FloatMatrix elasticity, compliance;
+    auto compliance = this->constructIsoComplTensor(eps0, nu0);
+    auto elasticity = inv(compliance);
 
-    this->constructIsoComplTensor(compliance, eps0, nu0);
-    elasticity.beInverseOf(compliance);
-
-    answer.resize(6, 6);
     answer = elasticity;
-
-    status->setSmtrx(answer);
 }
 
 
 void
 TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
-    double tempAlpha;
-    FloatArray tempPlasDef;
+    auto status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
-    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
-
-    tempPlasDef.resize(6);
-    tempAlpha = 0.;
-
-    status->setTempPlasDef(tempPlasDef);
-    status->setTempAlpha(tempAlpha);
+    status->setTempPlasDef(zeros<6>());
+    status->setTempAlpha(0.);
 }
 
 
@@ -116,29 +105,25 @@ TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &totalStrain,
                                          TimeStep *tStep)
 {
-    double tempDam, tempTSED;
-    FloatArray plasDef;
-    FloatArray totalStress;
-    FloatMatrix compliance, elasticity;
+    auto status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
-    this->constructIsoComplTensor(compliance, eps0, nu0);
-    elasticity.beInverseOf(compliance);
+    FloatArrayF<6> strain = totalStrain;
 
-    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
+    auto compliance = this->constructIsoComplTensor(eps0, nu0);
+    auto elasticity = inv(compliance);
+
     this->initTempStatus(gp);
 
-    performPlasticityReturn(gp, totalStrain);
+    performPlasticityReturn(gp, strain);
 
-    tempDam = computeDamage(gp, tStep);
+    double tempDam = computeDamage(gp, tStep);
+    //FloatArrayF<6> plasDef;
 
-    plasDef.resize(6);
+    auto stress = dot(elasticity, strain);
 
-    totalStress.beProductOf(elasticity, totalStrain);
+    double tempTSED = 0.5 * dot(strain, stress);
 
-    tempTSED = 0.5 * totalStrain.dotProduct(totalStress);
-
-    answer.resize(6);
-    answer = totalStress;
+    answer = stress;
     status->setTempDam(tempDam);
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
@@ -146,16 +131,17 @@ TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
 }
 
 
-void
-TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0, const double nu0)
+FloatMatrixF<6,6>
+TrabBoneEmbed :: constructIsoComplTensor(double eps0, double nu0)
 {
     double mu0 = eps0 / ( 2 * ( 1 + nu0 ) );
 
-    answer.resize(6, 6);
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 1 / eps0;
-    answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = -nu0 / eps0;
-    answer.at(3, 1) = answer.at(2, 3) = answer.at(3, 2) = -nu0 / eps0;
-    answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = 1 / mu0;
+    FloatMatrixF<6,6> c;
+    c.at(1, 1) = c.at(2, 2) = c.at(3, 3) = 1 / eps0;
+    c.at(1, 2) = c.at(2, 1) = c.at(1, 3) = -nu0 / eps0;
+    c.at(3, 1) = c.at(2, 3) = c.at(3, 2) = -nu0 / eps0;
+    c.at(4, 4) = c.at(5, 5) = c.at(6, 6) = 1 / mu0;
+    return c;
 }
 
 
@@ -172,7 +158,7 @@ TrabBoneEmbed :: initializeFrom(InputRecord &ir)
 int
 TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
     if ( type == IST_DamageScalar ) {
         answer.resize(1);
         answer.at(1) = 0.;
@@ -214,20 +200,6 @@ TrabBoneEmbed :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 
 TrabBoneEmbedStatus :: TrabBoneEmbedStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
-    alpha = 0.0;
-    dam = 0.0;
-    tsed = 0.0;
-    tempAlpha = 0.0;
-    tempDam = 0.0;
-    tempTSED = 0.0;
-    smtrx.resize(6, 6);
-}
-
-
-double
-TrabBoneEmbedStatus :: giveTempTSED()
-{
-    return tempTSED;
 }
 
 

@@ -444,6 +444,11 @@ FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 /// I expressed in Voigt form
 const FloatArrayF<6> I6 {1., 1., 1., 0., 0., 0.};
 
+/// For more readable code
+template<int N>
+FloatArrayF<N> zeros() {
+    return FloatArrayF<N>();
+}
 
 } // end namespace oofem
 #endif // floatarrayf_h

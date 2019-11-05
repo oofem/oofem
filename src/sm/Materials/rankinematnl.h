@@ -63,7 +63,6 @@ public:
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     double giveLocalCumPlasticStrainForAverage() const { return localCumPlasticStrainForAverage; }
-    const FloatArray *giveLTangentContrib() const;
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "RankineMatNlStatus"; }

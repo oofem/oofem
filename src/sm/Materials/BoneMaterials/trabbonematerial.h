@@ -36,6 +36,7 @@
 #define trabbonematerial_h
 
 #include "sm/Materials/structuralmaterial.h"
+#include "floatarrayf.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "cltypes.h"
@@ -67,32 +68,31 @@ namespace oofem {
 class TrabBoneMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    double tempAlpha, alpha;
-    double tempDam, dam;
-    double smtrx, slope;
-    double sigC, matConstC;
-    FloatArray tempEpsp, epsp, tempDepsp;
+    double tempAlpha = 0., alpha = 0.;
+    double tempDam = 0., dam = 0.;
+    double slope = 0.;
+    double sigC = 0., matConstC = 0.;
+
+    FloatArrayF<1> tempEpsp, epsp, tempDepsp;
 
 public:
     TrabBoneMaterialStatus(GaussPoint * g);
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveAlpha();
-    double giveTempAlpha();
-    double giveDam();
-    double giveTempDam();
-    double giveSmtrx();
-    double giveSlope();
-    double giveSigC();
-    double giveMatConstC();
-    const FloatArray &givePlasStrainVector();
-    const FloatArray &giveTempPlasStrainVector();
-    const FloatArray &giveTempIncPlasStrainVector();
+    double giveAlpha() const { return alpha; }
+    double giveTempAlpha() const { return tempAlpha; }
+    double giveDam() const { return dam; }
+    double giveTempDam() const { return tempDam; }
+    double giveSlope() const { return slope; }
+    double giveSigC() const { return sigC; }
+    double giveMatConstC() const { return matConstC; }
+    const FloatArrayF<1> &givePlasStrainVector() const { return epsp; }
+    const FloatArrayF<1> &giveTempPlasStrainVector() const { return tempEpsp; }
+    const FloatArrayF<1> &giveTempIncPlasStrainVector() const { return tempDepsp; }
 
     void setTempAlpha(double al) { tempAlpha = al; }
     void setTempDam(double da) { tempDam = da; }
-    void setSmtrx(double smt) { smtrx = smt; }
     void setSlope(double slp) { slope = slp; }
     void setSigC(double sc) { sigC = sc; }
     void setMatConstC(double mcc) { matConstC = mcc; }
@@ -115,7 +115,11 @@ public:
 class TrabBoneMaterial : public StructuralMaterial
 {
 protected:
-    double E0, Eil, Eie, kie, Ek, Cc, Cc2, EpsC, SigYp, SigYn, adam;
+    double E0 = 0., Eil = 0., Eie = 0.;
+    double kie = 0., Ek = 0.;
+    double Cc = 0., Cc2 = 0., EpsC = 0.;
+    double SigYp = 0., SigYn = 0.;
+    double adam = 0.;
 
 public:
     TrabBoneMaterial(int n, Domain * d);
@@ -128,7 +132,7 @@ public:
 
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep);
 
     void give1dStressStiffMtrx(FloatMatrix &answer,
                                MatResponseMode mode, GaussPoint *gp,
