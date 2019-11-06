@@ -1217,10 +1217,10 @@ PYBIND11_MODULE(oofempy, m) {
       .value("IST_IncrementCreepModulus", oofem::InternalStateType::IST_IncrementCreepModulus)
       ;
     
-    py::register_exception<oofem::InputException>(m, "ValueError");
-    py::register_exception<oofem::MissingKeywordInputException>(m, "ValueError");
-    py::register_exception<oofem::BadFormatInputException>(m, "ValueError");
-    py::register_exception<oofem::ValueInputException>(m, "ValueError");
+    py::register_exception<oofem::InputException>(m, "InputException");
+    py::register_exception<oofem::MissingKeywordInputException>(m, "MissingKeywordInputException");
+    py::register_exception<oofem::BadFormatInputException>(m, "BadFormatInputException");
+    py::register_exception<oofem::ValueInputException>(m, "ValueInputException");
 
     py::enum_<oofem::MatResponseMode>(m, "MatResponseMode")
         .value("TangentStiffness", oofem::MatResponseMode::TangentStiffness)
