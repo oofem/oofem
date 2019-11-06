@@ -164,10 +164,11 @@ IsoInterfaceDamageMaterial_2 :: giveIPValue(FloatArray &answer, GaussPoint *gp, 
 }
 
 
-IRResultType
-IsoInterfaceDamageMaterial_2 :: initializeFrom(InputRecord *ir)
+void
+IsoInterfaceDamageMaterial_2 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     std :: ifstream is;
     int nbrOfLinesToRead;
 
@@ -219,8 +220,6 @@ IsoInterfaceDamageMaterial_2 :: initializeFrom(InputRecord *ir)
     // We add e0 to the strains since strains should be given as the increase in
     // strain relative to e0.
     strains.add(e0);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 

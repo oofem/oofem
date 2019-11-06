@@ -40,10 +40,10 @@ LatticeTransportElement :: LatticeTransportElement(int n, Domain *aDomain, Eleme
 { }
 
 
-IRResultType
-LatticeTransportElement :: initializeFrom(InputRecord *ir)
+void
+LatticeTransportElement :: initializeFrom(InputRecord &ir)
 {
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 

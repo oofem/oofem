@@ -57,23 +57,10 @@ REGISTER_Material(TrabBoneNL);
 
 TrabBoneNL :: TrabBoneNL(int n, Domain *d) : TrabBoneMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
 {
-    R = 0.;
 }
 
 //
 // END: CONSTRUCTOR
-/////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////
-// BEGIN: DESTRUCTOR
-//
-
-TrabBoneNL :: ~TrabBoneNL()
-{ }
-
-//
-// END: DESTRUCTOR
 /////////////////////////////////////////////////////////////////
 
 
@@ -84,9 +71,9 @@ TrabBoneNL :: ~TrabBoneNL()
 void
 TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
 {
+    auto nlstatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
+
     FloatArray SDstrainVector;
-    double cumPlastStrain;
-    TrabBoneNLStatus *nlstatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
@@ -94,7 +81,7 @@ TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
     nlstatus->letTempStrainVectorBe(strainVector);
 
     this->performPlasticityReturn(gp, strainVector);
-    this->computeLocalCumPlastStrain(cumPlastStrain, strainVector, gp, tStep);
+    double cumPlastStrain = this->computeLocalCumPlastStrain(strainVector, gp, tStep);
     nlstatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
 
@@ -113,7 +100,7 @@ TrabBoneNL :: giveRealStressVector_1d(FloatArray &answer,
                                       const FloatArray &strainVector,
                                       TimeStep *tStep)
 {
-    TrabBoneNLStatus *nlStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
+    auto nlStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
     double tempDamage = computeDamage(gp, tStep);
     double plasStrain = nlStatus->giveTempPlasStrainVector().at(1);
@@ -138,20 +125,20 @@ TrabBoneNL :: giveRealStressVector_1d(FloatArray &answer,
 // BEGIN: SUBROUTINE OF NONLOCAL ALPHA EVALUATION
 //
 
-void
-TrabBoneNL :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
+double
+TrabBoneNL :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
 {
-    double nonlocalContribution, nonlocalCumPlastStrain = 0.0;
-    TrabBoneNLStatus *nonlocStatus, *status = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(tStep);
 
     auto list = status->giveIntegrationDomainList();
 
+    double nonlocalCumPlastStrain = 0.0;
     for ( auto &lir: *list ) {
-        nonlocStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(lir.nearGp) );
-        nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
+        auto nonlocStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(lir.nearGp) );
+        double nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
         nonlocalContribution *= lir.weight;
         nonlocalCumPlastStrain += nonlocalContribution;
     }
@@ -159,7 +146,7 @@ TrabBoneNL :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tSt
     nonlocalCumPlastStrain *= 1. / status->giveIntegrationScale();
 
     double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
-    alpha = mParam * nonlocalCumPlastStrain + ( 1 - mParam ) * localCumPlastStrain;
+    return mParam * nonlocalCumPlastStrain + ( 1 - mParam ) * localCumPlastStrain;
 }
 
 //
@@ -190,20 +177,11 @@ TrabBoneNL :: giveInterface(InterfaceType type)
 // BEGIN: PARAMETERS OF INPUT FILE
 //
 
-IRResultType
-TrabBoneNL :: initializeFrom(InputRecord *ir)
+void
+TrabBoneNL :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
-
-    result = TrabBoneMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    TrabBoneMaterial :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, R, _IFT_TrabBoneNL_r);
     if ( R < 0.0 ) {
@@ -212,8 +190,6 @@ TrabBoneNL :: initializeFrom(InputRecord *ir)
 
     mParam = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, mParam, _IFT_TrabBoneNL_m);
-
-    return IRRT_OK;
 }
 
 //
@@ -269,7 +245,6 @@ TrabBoneNL :: computeWeightFunction(const FloatArray &src, const FloatArray &coo
 TrabBoneNLStatus :: TrabBoneNLStatus(GaussPoint *g) :
     TrabBoneMaterialStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
 {
-    localCumPlastStrainForAverage = 0.0;
 }
 
 
@@ -329,7 +304,7 @@ TrabBoneNLStatus :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
         return this;
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 

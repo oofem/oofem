@@ -76,21 +76,16 @@ double BoundaryCondition :: give(Dof *dof, ValueModeType mode, double time)
 }
 
 
-IRResultType
-BoundaryCondition :: initializeFrom(InputRecord *ir)
+void
+BoundaryCondition :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
-    result = GeneralBoundaryCondition :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ir->hasField(_IFT_BoundaryCondition_values) ) {
+    if ( ir.hasField(_IFT_BoundaryCondition_values) ) {
         IR_GIVE_FIELD(ir, values, _IFT_BoundaryCondition_values);
     } else {
         double prescribedValue;
-        if ( ir->hasField(_IFT_BoundaryCondition_PrescribedValue) ) {
+        if ( ir.hasField(_IFT_BoundaryCondition_PrescribedValue) ) {
             IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue);
         } else {
             IR_GIVE_FIELD(ir, prescribedValue, _IFT_BoundaryCondition_PrescribedValue_d);
@@ -104,8 +99,6 @@ BoundaryCondition :: initializeFrom(InputRecord *ir)
         values.zero();
         values.add(prescribedValue);
     }
-
-    return IRRT_OK;
 }
 
 

@@ -53,8 +53,8 @@ StructuralMaterialSettable :: StructuralMaterialSettable(int n, Domain *d) :
 {}
 
 
-IRResultType
-StructuralMaterialSettable :: initializeFrom(InputRecord *ir)
+void
+StructuralMaterialSettable :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
     return isoLE.initializeFrom(ir);

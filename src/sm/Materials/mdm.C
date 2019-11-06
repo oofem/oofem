@@ -766,14 +766,12 @@ MDM :: giveThermalDilatationVector(FloatArray &answer,
 }
 
 
-IRResultType
-MDM :: initializeFrom(InputRecord *ir)
+void
+MDM :: initializeFrom(InputRecord &ir)
 //
 // initializes according to string
 //
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->tempDillatCoeff, _IFT_MDM_talpha);
     IR_GIVE_FIELD(ir, this->ParMd, _IFT_MDM_parmd);
     IR_GIVE_FIELD(ir, this->nonlocal, _IFT_MDM_nonloc);
@@ -784,28 +782,26 @@ MDM :: initializeFrom(InputRecord *ir)
             R = 0.0;
         }
 
-        if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        if ( ir.hasField(_IFT_MDM_efp) && ir.hasField(_IFT_MDM_ep) ) {
             // read raw_params if available
             IR_GIVE_FIELD(ir, this->mdm_Efp, _IFT_MDM_efp);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
-        } else if ( ( ir->hasField(_IFT_MDM_gf) ) && ( ir->hasField(_IFT_MDM_ft) ) ) {
+        } else if ( ir.hasField(_IFT_MDM_gf) && ir.hasField(_IFT_MDM_ft) ) {
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->Ft, _IFT_MDM_ft);
         } else {
-            OOFEM_WARNING("unknown set of parameters");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, _IFT_MDM_nonloc, "unknown set of parameters");
         }
     } else { // local case
-        if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        if ( ir.hasField(_IFT_MDM_efp) && ir.hasField(_IFT_MDM_ep) ) {
             // read raw_params if available
             IR_GIVE_FIELD(ir, this->mdm_Efp, _IFT_MDM_efp);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
-        } else if ( ( ir->hasField(_IFT_MDM_gf) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        } else if ( ir.hasField(_IFT_MDM_gf) && ir.hasField(_IFT_MDM_ep) ) {
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
         } else {
-            OOFEM_WARNING("unknown set of parameters");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, _IFT_MDM_nonloc, "unknown set of parameters");
         }
     }
 
@@ -833,30 +829,21 @@ MDM :: initializeFrom(InputRecord *ir)
     OOFEM_LOG_INFO("MDM: using optional mapper %d\n", mapperType);
 #endif
 
-    result = MicroplaneMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MicroplaneMaterial :: initializeFrom(ir);
     
     if ( this->nonlocal ) {
-        result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-        if ( result != IRRT_OK ) return result;
+        StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
     }
 
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    linearElasticMaterial.initializeFrom(ir);
 
 #ifdef MDM_MAPPING_DEBUG
-    result = mapperSFT.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = mapperLST.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    mapperSFT.initializeFrom(ir);
+    mapperLST.initializeFrom(ir);
 #else
-    result = mapper.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    mapper.initializeFrom(ir);
 #endif
-    result = mapper2.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
-    return IRRT_OK;
+    mapper2.initializeFrom(ir);
 }
 
 

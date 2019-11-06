@@ -72,7 +72,7 @@ public:
     FloatMatrixF<6,6> computeTangent3D(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     double give(int aProperty, GaussPoint *gp) const override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "NewtonianFluidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_NewtonianFluidMaterial_Name; }

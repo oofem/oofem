@@ -466,7 +466,7 @@ public:
     /// Destructor
     virtual ~ConcreteDPM();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "ConcreteDPM"; }
     const char *giveInputRecordName() const override { return _IFT_ConcreteDPM_Name; }

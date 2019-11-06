@@ -89,7 +89,7 @@ public:
 
     TransportCrossSection * giveTransportCrossSection();
     Material * giveMaterial() override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "TransportElement"; }
     
     /**

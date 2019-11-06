@@ -85,7 +85,7 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double give(int aProperty, GaussPoint *gp) const override;
 

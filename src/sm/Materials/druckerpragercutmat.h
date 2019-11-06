@@ -107,7 +107,7 @@ public:
     
     bool hasCastingTimeSupport() const override { return true; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

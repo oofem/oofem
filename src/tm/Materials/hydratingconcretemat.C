@@ -43,14 +43,11 @@ REGISTER_Material(HydratingConcreteMat);
 
 HydratingConcreteMat :: HydratingConcreteMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d){ }
 
-IRResultType
-HydratingConcreteMat :: initializeFrom(InputRecord *ir)
+void
+HydratingConcreteMat :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     // set conductivity k and capacity c
-    result = IsotropicHeatTransferMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    IsotropicHeatTransferMaterial :: initializeFrom(ir);
 
     activationEnergy = 38400; //J/mol/K
     referenceTemperature = 25.;//C
@@ -116,8 +113,7 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
         this->aSet = pow( VCemSet/(4./3.*M_PI*ng), 1./3.);
         this->zSet = pow( (VCemSet+VGelSet)/(4./3.*M_PI*ng), 1./3.);
     } else {
-        OOFEM_WARNING("Unknown hydration model type %d", hydrationModelType);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_HydratingConcreteMat_hydrationModelType, "Unknown hdyration model");
     }
 
     IR_GIVE_FIELD(ir, Qpot, _IFT_HydratingConcreteMat_qpot); // [1/s]
@@ -142,8 +138,6 @@ HydratingConcreteMat :: initializeFrom(InputRecord *ir)
 
     reinforcementDegree = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_HydratingConcreteMat_reinforcementDegree);
-
-    return IRRT_OK;
 }
 
 // returns hydration power [W/m3 of concrete]

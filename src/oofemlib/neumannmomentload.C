@@ -48,12 +48,10 @@
 namespace oofem {
 REGISTER_BoundaryCondition(NeumannMomentLoad);
 
-IRResultType
-NeumannMomentLoad :: initializeFrom(InputRecord *ir)
+void
+NeumannMomentLoad :: initializeFrom(InputRecord &ir)
 {
     BoundaryLoad :: initializeFrom(ir);
-
-    IRResultType result;
 
     IR_GIVE_FIELD(ir, g, _IFT_NeumannMomentLoad_Gradient);
     p = 0.;
@@ -61,8 +59,6 @@ NeumannMomentLoad :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, cset, _IFT_NeumannMomentLoad_CenterSet);
 
     xbar.resize(0);
-
-    return result;
 }
 
 void

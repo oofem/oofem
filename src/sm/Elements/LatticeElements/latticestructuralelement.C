@@ -41,9 +41,9 @@ LatticeStructuralElement :: LatticeStructuralElement(int n, Domain *aDomain) : S
 LatticeStructuralElement :: ~LatticeStructuralElement()
 { }
 
-IRResultType
-LatticeStructuralElement :: initializeFrom(InputRecord *ir)
+void
+LatticeStructuralElement :: initializeFrom(InputRecord &ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 } // end namespace oofem

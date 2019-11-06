@@ -19,7 +19,7 @@ public:
     PrescribedGradientBCWeakPeriodic(int n, Domain *d);
     virtual ~PrescribedGradientBCWeakPeriodic();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void postInitialize() override;
 

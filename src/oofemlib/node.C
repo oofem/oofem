@@ -85,21 +85,16 @@ Node :: giveCoordinate(int i)
 }
 
 
-IRResultType Node :: initializeFrom(InputRecord *ir)
+void Node :: initializeFrom(InputRecord &ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int size;
 
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    result = DofManager :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    DofManager :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, coordinates, _IFT_Node_coords);
 
@@ -113,7 +108,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
 
 
     // Read if available local coordinate system in this node
-    if ( ir->hasField(_IFT_Node_lcs) ) {
+    if ( ir.hasField(_IFT_Node_lcs) ) {
         FloatArray triplets;
         IR_GIVE_FIELD(ir, triplets, _IFT_Node_lcs);
         size = triplets.giveSize();
@@ -153,8 +148,6 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
             localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
         localCoordinateSystem->at(1, 2) * localCoordinateSystem->at(2, 1);
     }
-
-    return IRRT_OK;
 }
 
 void Node :: giveInputRecord(DynamicInputRecord &input)

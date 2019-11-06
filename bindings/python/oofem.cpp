@@ -80,7 +80,6 @@ namespace py = pybind11;
 #include "gausspoint.h"
 #include "inputrecord.h"
 #include "dynamicinputrecord.h"
-#include "irresulttype.h"
 
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
@@ -255,8 +254,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
         int giveIPValue(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::InternalStateType type, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(int, MaterialBase, giveIPValue, std::ref(answer), gp, type, tStep); 
         }
-        oofem::IRResultType initializeFrom(oofem::InputRecord *ir) override {
-            PYBIND11_OVERLOAD(oofem::IRResultType, MaterialBase, initializeFrom, ir); 
+        void initializeFrom(oofem::InputRecord &ir) override {
+            PYBIND11_OVERLOAD(void, MaterialBase, initializeFrom, ir); 
         }
         //virtual void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
         //virtual void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
@@ -303,8 +302,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
         const char *giveClassName() const override {
             PYBIND11_OVERLOAD(const char*, StructuralMaterialBase, giveClassName, ); 
         }
-        oofem::IRResultType initializeFrom(oofem::InputRecord *ir) override {
-            PYBIND11_OVERLOAD(oofem::IRResultType, StructuralMaterialBase, initializeFrom, ir); 
+        void initializeFrom(oofem::InputRecord &ir) override {
+            PYBIND11_OVERLOAD(void, StructuralMaterialBase, initializeFrom, ir); 
         }
         void giveInputRecord(oofem::DynamicInputRecord &input) override {
            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveInputRecord, input); 
@@ -1229,13 +1228,11 @@ PYBIND11_MODULE(oofempy, m) {
       .value("IST_EquivalentTime", oofem::InternalStateType::IST_EquivalentTime)
       .value("IST_IncrementCreepModulus", oofem::InternalStateType::IST_IncrementCreepModulus)
       ;
-
-    py::enum_<oofem::IRResultType>(m, "IRResultType")
-      .value("IRRT_OK", oofem::IRResultType::IRRT_OK)
-      .value("IRRT_NOTFOUND", oofem::IRResultType::IRRT_NOTFOUND)
-      .value("IRRT_BAD_FORMAT", oofem::IRResultType::IRRT_BAD_FORMAT)
-    ;
-
+    
+    py::register_exception<oofem::InputException>(m, "ValueError");
+    py::register_exception<oofem::MissingInputException>(m, "ValueError");
+    py::register_exception<oofem::BadFormatInputException>(m, "ValueError");
+    py::register_exception<oofem::ValueException>(m, "ValueError");
 
     py::enum_<oofem::MatResponseMode>(m, "MatResponseMode")
         .value("TangentStiffness", oofem::MatResponseMode::TangentStiffness)

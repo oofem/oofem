@@ -74,7 +74,7 @@ public:
     /// Destructor
     virtual ~InitModule();
     /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir) = 0;
+    virtual void initializeFrom(InputRecord &ir) = 0;
     /// Reads the input. Abstract service.
     virtual void doInit() = 0;
     /// Returns class name of the receiver.

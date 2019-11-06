@@ -102,7 +102,7 @@ public:
     void solveYourselfAt(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof) override;
 
     /**

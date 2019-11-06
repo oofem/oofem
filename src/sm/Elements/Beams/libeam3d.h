@@ -61,7 +61,7 @@ public:
     LIBeam3d(int n, Domain * d);
     virtual ~LIBeam3d() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep) override;
     void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override

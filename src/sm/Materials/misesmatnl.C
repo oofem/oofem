@@ -288,15 +288,11 @@ MisesMatNl :: giveInterface(InterfaceType type)
 }
 
 
-IRResultType
-MisesMatNl :: initializeFrom(InputRecord *ir)
+void
+MisesMatNl :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MisesMat :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MisesMat :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     averType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, averType, _IFT_MisesMatNl_averagingtype);
@@ -315,8 +311,6 @@ MisesMatNl :: initializeFrom(InputRecord *ir)
     if ( averType >= 2 && averType <= 5 ) {
         IR_GIVE_OPTIONAL_FIELD(ir, Rf, _IFT_MisesMatNl_rf);
     }
-
-    return IRRT_OK;
 }
 
 

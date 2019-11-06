@@ -61,7 +61,7 @@ public:
     int giveNumberOfInternalDofManagers() override { return 1; }
     DofManager *giveInternalDofManager(int i) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bcType giveType() const override { return UnknownBT; }

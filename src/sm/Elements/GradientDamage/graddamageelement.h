@@ -62,14 +62,11 @@ protected:
     IntArray locationArray_d;
     double penalty;
 
-
-
-
 public:
     GradientDamageElement();
     virtual ~GradientDamageElement() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
 protected:
     virtual StructuralElement *giveStructuralElement() = 0;

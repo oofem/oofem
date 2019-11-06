@@ -76,7 +76,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_InterfaceElement3dTrLin_Name; }
     const char *giveClassName() const override { return "InterfaceElement3dTrLin"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_wedge_1; }
     integrationDomain giveIntegrationDomain() const override { return _Triangle; }
 

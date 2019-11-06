@@ -76,10 +76,9 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 }
 
 
-IRResultType
-EigenValueDynamic :: initializeFrom(InputRecord *ir)
+void
+EigenValueDynamic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     //EngngModel::instanciateFrom (ir);
 
     IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, _IFT_EigenValueDynamic_nroot);
@@ -106,7 +105,7 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+    suppressOutput = ir.hasField(_IFT_EngngModel_suppressOutput);
 
     if ( suppressOutput ) {
         printf("Suppressing output.\n");
@@ -119,8 +118,6 @@ EigenValueDynamic :: initializeFrom(InputRecord *ir)
         fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
         fprintf(outputStream, "%s\n", simulationDescription.c_str());
     }
-
-    return IRRT_OK;
 }
 
 

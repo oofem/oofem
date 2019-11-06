@@ -2007,11 +2007,10 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Int
 }
 
 
-IRResultType
-AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+AnisotropicDamageMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial.initializeFrom(ir);
     E = linearElasticMaterial.giveYoungsModulus();
     nu = linearElasticMaterial.givePoissonsRatio();
@@ -2060,8 +2059,6 @@ AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     if ( damageLawType == DLT_Desmorat2 ) {
         IR_GIVE_FIELD(ir, aA, _IFT_AnisotropicDamageMaterial_aA);
     }
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 void

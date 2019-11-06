@@ -64,7 +64,7 @@ public:
 
     const char *giveClassName() const override { return "DoublePowerLawMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_DoublePowerLawMaterial_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 };

@@ -71,7 +71,7 @@ public:
     const char *giveClassName() const override { return "QWedge_ht"; }
 
     int computeNumberOfDofs() override { return 15; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _3dHeat; }
 
     Interface *giveInterface(InterfaceType t) override;

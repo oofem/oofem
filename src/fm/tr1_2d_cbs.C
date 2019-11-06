@@ -76,12 +76,9 @@ TR1_2D_CBS :: TR1_2D_CBS(int n, Domain *aDomain) :
     , LEPlicElementInterface()
     //</RESTRICTED_SECTION>
 {
-    // Constructor.
     numberOfDofMans  = 3;
 }
 
-TR1_2D_CBS :: ~TR1_2D_CBS()
-{ }
 
 FEInterpolation *
 TR1_2D_CBS :: giveInterpolation() const { return & interp; }
@@ -99,12 +96,12 @@ TR1_2D_CBS :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 
-IRResultType
-TR1_2D_CBS :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_CBS :: initializeFrom(InputRecord &ir)
 {
-    //<RESTRICTED_SECTION>
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    CBSElement :: initializeFrom(ir);
 
+    //<RESTRICTED_SECTION>
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1CBS_pvof);
     if ( vof > 0.0 ) {
@@ -117,8 +114,6 @@ TR1_2D_CBS :: initializeFrom(InputRecord *ir)
     }
 
     //</RESTRICTED_SECTION>
-
-    return CBSElement :: initializeFrom(ir);
 }
 
 
@@ -676,12 +671,11 @@ TR1_2D_CBS :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeSt
 int
 TR1_2D_CBS :: checkConsistency()
 {
-    Node *node1, *node2, *node3;
     double x1, x2, x3, y1, y2, y3;
 
-    node1 = giveNode(1);
-    node2 = giveNode(2);
-    node3 = giveNode(3);
+    auto node1 = giveNode(1);
+    auto node2 = giveNode(2);
+    auto node3 = giveNode(3);
 
     // init geometry data
     x1 = node1->giveCoordinate(1);

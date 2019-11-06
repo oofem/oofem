@@ -41,20 +41,17 @@
 namespace oofem {
 REGISTER_Material(HydratingIsoHeatMaterial);
 
-IRResultType
-HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
+void
+HydratingIsoHeatMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     int value;
     double dvalue;
 
     // set k, c - necessary; rc beton Hellmich 2428 kJ/m3
-    result = IsotropicHeatTransferMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    IsotropicHeatTransferMaterial :: initializeFrom(ir);
 
     // setup hydration model
-    result = HydrationModelInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    HydrationModelInterface :: initializeFrom(ir);
 
     dvalue = -2.;
     IR_GIVE_OPTIONAL_FIELD(ir, dvalue, _IFT_HydratingIsoHeatMaterial_hydration);
@@ -71,7 +68,7 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
         setMixture( ( MixtureType ) value );
         printf("\nHydratingHeatMat %d: using mixture %d.\n", giveNumber(), value);
 
-        if ( ir->hasField(_IFT_HydratingIsoHeatMaterial_noHeat) ) {
+        if ( ir.hasField(_IFT_HydratingIsoHeatMaterial_noHeat) ) {
             hydrationHeat = false;
             printf( "HydratingHeatMat %d: hydration heat neglected.\n", giveNumber() );
         } else {
@@ -80,7 +77,7 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 
         if ( hydrationHeat ) {
             // include hydration internal source in LHS?
-            if ( ir->hasField(_IFT_HydratingIsoHeatMaterial_noLHS) ) {
+            if ( ir.hasField(_IFT_HydratingIsoHeatMaterial_noLHS) ) {
                 hydrationLHS = false;
                 printf( "HydratingHeatMat %d: hydration heat not included in LHS.\n", giveNumber() );
             } else {
@@ -88,8 +85,6 @@ HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
             }
         }
     }
-
-    return IRRT_OK;
 }
 
 void

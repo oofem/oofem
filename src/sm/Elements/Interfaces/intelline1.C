@@ -136,11 +136,12 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
 }
 
 
-IRResultType
-IntElLine1 :: initializeFrom(InputRecord *ir)
+void
+IntElLine1 :: initializeFrom(InputRecord &ir)
 {
-    this->axisymmode = ir->hasField(_IFT_IntElLine1_axisymmode);
-    IRResultType result = StructuralInterfaceElement :: initializeFrom(ir);
+    StructuralInterfaceElement :: initializeFrom(ir);
+
+    this->axisymmode = ir.hasField(_IFT_IntElLine1_axisymmode);
 
     // Check if node numbering is ok
     int nodeInd1 = this->giveDofManagerNumber(1);
@@ -168,8 +169,6 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
         printf("Renumbering element %d\n.\n", this->giveNumber());
         dofManArray = {dofManArray.at(3), dofManArray.at(1), dofManArray.at(4), dofManArray.at(2)};
     }
-
-    return result;
 }
 
 

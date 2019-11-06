@@ -138,7 +138,7 @@ protected:
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override = 0;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const override = 0;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // Integration
     virtual double edgeComputeLengthAround(GaussPoint *gp, const int iedge);

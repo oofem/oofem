@@ -61,10 +61,10 @@ IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *
 }
 
 
-IRResultType
-IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    LinearElasticMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
@@ -73,8 +73,6 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );
     this->initTangents();
-
-    return LinearElasticMaterial :: initializeFrom(ir);
 }
 
 

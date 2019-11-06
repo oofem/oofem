@@ -101,7 +101,6 @@ public:
     FastMarchingMethod(Domain * d) : dmanTrialQueue( FMM_DofmanRecordDelegate_greater(& this->dmanValuesPtr) ) {
         domain = d;
     }
-    ~FastMarchingMethod() { }
 
     /**
      * Solution of problem.

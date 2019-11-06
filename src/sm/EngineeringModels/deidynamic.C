@@ -58,15 +58,13 @@ NumericalMethod *DEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 }
 
 
-IRResultType
-DEIDynamic :: initializeFrom(InputRecord *ir)
+void
+DEIDynamic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralEngngModel :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, dumpingCoef, _IFT_DEIDynamic_dumpcoef); // C = dumpingCoef * M
     IR_GIVE_FIELD(ir, deltaT, _IFT_DEIDynamic_deltat);
-
-    return StructuralEngngModel :: initializeFrom(ir);
 }
 
 

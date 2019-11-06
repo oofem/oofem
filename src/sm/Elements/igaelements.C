@@ -62,10 +62,10 @@ REGISTER_Element(NURBSSpace3dElement);
 BsplinePlaneStressElement :: BsplinePlaneStressElement(int n, Domain *aDomain) : IGAElement(n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) { }
 
 
-IRResultType BsplinePlaneStressElement :: initializeFrom(InputRecord *ir)
+void BsplinePlaneStressElement :: initializeFrom(InputRecord &ir)
 {
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
-    return IGAElement :: initializeFrom(ir);
+    IGAElement :: initializeFrom(ir);
 }
 
 
@@ -84,10 +84,10 @@ int BsplinePlaneStressElement :: checkConsistency()
 NURBSPlaneStressElement :: NURBSPlaneStressElement(int n, Domain *aDomain) : IGAElement(n, aDomain), PlaneStressStructuralElementEvaluator(), interpolation(2) { }
 
 
-IRResultType NURBSPlaneStressElement :: initializeFrom(InputRecord *ir)
+void NURBSPlaneStressElement :: initializeFrom(InputRecord &ir)
 {
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
-    return IGAElement :: initializeFrom(ir);
+    IGAElement :: initializeFrom(ir);
 }
 
 
@@ -110,10 +110,10 @@ TSplinePlaneStressElement :: TSplinePlaneStressElement(int n, Domain *aDomain) :
 NURBSSpace3dElement :: NURBSSpace3dElement(int n, Domain *aDomain) : IGAElement(n, aDomain), Space3dStructuralElementEvaluator(), interpolation(3) { }
 
 
-IRResultType NURBSSpace3dElement :: initializeFrom(InputRecord *ir)
+void NURBSSpace3dElement :: initializeFrom(InputRecord &ir)
 {
     //PlaneStressStructuralElementEvaluator::initializeFrom(ir);
-    return IGAElement :: initializeFrom(ir);
+    IGAElement :: initializeFrom(ir);
 }
 
 

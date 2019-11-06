@@ -55,15 +55,11 @@ LargeStrainMasterMaterial :: LargeStrainMasterMaterial(int n, Domain *d) : Struc
 }
 
 // reads the model parameters from the input file
-IRResultType
-LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
+void
+LargeStrainMasterMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, slaveMat, _IFT_LargeStrainMasterMaterial_slaveMat); // number of slave material
     IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_LargeStrainMasterMaterial_m); // type of Set-Hill strain tensor
-
-    return IRRT_OK;
 }
 
 // creates a new material status  corresponding to this class

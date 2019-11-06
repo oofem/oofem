@@ -90,8 +90,8 @@ CombinedZZSIErrorEstimator :: giveRemeshingCrit()
     return this->rc.get();
 }
 
-IRResultType
-CombinedZZSIErrorEstimator :: initializeFrom(InputRecord *ir)
+void
+CombinedZZSIErrorEstimator :: initializeFrom(InputRecord &ir)
 {
     zzee.initializeFrom(ir);
     siee.initializeFrom(ir);
@@ -160,14 +160,11 @@ CombinedZZSIRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     return 1;
 }
 
-IRResultType
-CombinedZZSIRemeshingCriteria :: initializeFrom(InputRecord *ir)
+void
+CombinedZZSIRemeshingCriteria :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = zzrc.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    return dirc.initializeFrom(ir);
+    zzrc.initializeFrom(ir);
+    dirc.initializeFrom(ir);
 }
 
 

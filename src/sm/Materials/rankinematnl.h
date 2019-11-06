@@ -63,7 +63,6 @@ public:
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     double giveLocalCumPlasticStrainForAverage() const { return localCumPlasticStrainForAverage; }
-    const FloatArray *giveLTangentContrib() const;
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "RankineMatNlStatus"; }
@@ -97,7 +96,7 @@ public:
     const char *giveClassName() const override { return "RankineMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_RankineMatNl_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType) override;

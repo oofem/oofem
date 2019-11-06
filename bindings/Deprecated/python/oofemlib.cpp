@@ -1494,7 +1494,7 @@ object engngModel(bp::tuple args, bp::dict kw)
     }
     //engngm->Instanciate_init(outFile.c_str(), engngm->giveNumberOfDomains());
     engngm->letOutputBaseFileNameBe(outFile);
-    engngm->initializeFrom(&ir);
+    engngm->initializeFrom(ir);
 
     if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
       OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
@@ -1574,7 +1574,7 @@ object element(bp::tuple args, bp::dict kw)
     // construct OOFEMTXTInputRecord from bp::dict **kw
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     // pass input record to elem
-    elem->initializeFrom(&ir);
+    elem->initializeFrom(ir);
     // convert element to PyObject (expected by raw_function, which enables fun(*args,**kw) syntax in python)
     return object(ptr(elem.release()));
 }
@@ -1603,7 +1603,7 @@ object dofManager(bp::tuple args, bp::dict kw)
     if (!dofMan) { OOFEM_LOG_ERROR("dofManager: wrong input data"); }
     dofMan->setGlobalNumber(number);
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
-    dofMan->initializeFrom(&ir);
+    dofMan->initializeFrom(ir);
     return object(ptr(dofMan.release()));
 }
 
@@ -1627,7 +1627,7 @@ object generalBoundaryCondition(bp::tuple args, bp::dict kw)
     auto bc = classFactory.createBoundaryCondition(aClass.c_str(),number,domain);
     if (!bc) { OOFEM_LOG_ERROR("generalBoundaryCondition: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
-    bc->initializeFrom(&ir);
+    bc->initializeFrom(ir);
     return object(ptr(bc.release()));
 }
 
@@ -1653,7 +1653,7 @@ object material(bp::tuple args, bp::dict kw)
     auto mat = classFactory.createMaterial(aClass.c_str(),number,domain);
     if (!mat) { OOFEM_LOG_ERROR("material: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
-    mat->initializeFrom(&ir);
+    mat->initializeFrom(ir);
     return object(mat);
 }
 
@@ -1676,7 +1676,7 @@ object crossSection(bp::tuple args, bp::dict kw)
     auto cs = classFactory.createCrossSection(aClass.c_str(),number,domain);
     if (!cs) { OOFEM_LOG_ERROR("crossSection: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
-    cs->initializeFrom(&ir);
+    cs->initializeFrom(ir);
     return object(cs);
 }
 
@@ -1700,7 +1700,7 @@ object loadTimeFunction(bp::tuple args, bp::dict kw)
     auto ltf = classFactory.createFunction(aClass.c_str(),number,domain);
     if (!ltf) { OOFEM_LOG_ERROR("function: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
-    ltf->initializeFrom(&ir);
+    ltf->initializeFrom(ir);
     return object(ltf);
 }
 
@@ -1724,7 +1724,7 @@ object exportModule(bp::tuple args, bp::dict kw)
     auto module = classFactory.createExportModule(aClass.c_str(),number,engngm);
     if (!module) { OOFEM_LOG_ERROR("exportModule: wrong input data"); }
     OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
-    module->initializeFrom(&ir);
+    module->initializeFrom(ir);
     return object(module);
 }
 

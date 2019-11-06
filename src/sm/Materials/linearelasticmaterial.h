@@ -80,7 +80,7 @@ public:
     /// Constructor.
     LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     /**

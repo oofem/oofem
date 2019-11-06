@@ -53,10 +53,8 @@ namespace oofem {
 REGISTER_PropagationLaw(PLHoopStressCirc)
 
 /////////////////////////////////////////////
-IRResultType PLHoopStressCirc :: initializeFrom(InputRecord *ir)
+void PLHoopStressCirc :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mRadius,                          _IFT_PLHoopStressCirc_Radius);
     IR_GIVE_FIELD(ir, mAngleInc,                        _IFT_PLHoopStressCirc_AngleInc);
     IR_GIVE_FIELD(ir, mIncrementLength,         _IFT_PLHoopStressCirc_IncLength);
@@ -67,8 +65,6 @@ IRResultType PLHoopStressCirc :: initializeFrom(InputRecord *ir)
     if ( useRadialBasisFunc == 1 ) {
         mUseRadialBasisFunc = true;
     }
-
-    return IRRT_OK;
 }
 
 void PLHoopStressCirc :: giveInputRecord(DynamicInputRecord &input)

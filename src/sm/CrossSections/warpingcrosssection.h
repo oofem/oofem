@@ -55,7 +55,7 @@ protected:
 public:
     WarpingCrossSection(int n, Domain *d) : SimpleCrossSection(n, d), WarpingNodeNumber(0) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // identification and auxiliary functions
 

@@ -110,7 +110,7 @@ public:
     double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
     double give(int aProperty, GaussPoint *) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     const char *giveClassName() const override { return "NewtonianFluidMaterial"; }

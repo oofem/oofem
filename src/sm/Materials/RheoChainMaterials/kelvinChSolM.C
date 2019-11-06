@@ -226,10 +226,10 @@ KelvinChainSolidMaterial :: CreateStatus(GaussPoint *gp) const
     return new KelvinChainSolidMaterialStatus(gp, nUnits);
 }
 
-IRResultType
-KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
+void
+KelvinChainSolidMaterial :: initializeFrom(InputRecord &ir)
 {
-    return RheoChainMaterial :: initializeFrom(ir);
+    RheoChainMaterial :: initializeFrom(ir);
 }
 
 // useless here

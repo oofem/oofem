@@ -49,16 +49,13 @@ namespace oofem {
 REGISTER_Material(NonlinearFluidMaterial);
 
 
-IRResultType
-NonlinearFluidMaterial :: initializeFrom(InputRecord *ir)
+void
+NonlinearFluidMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
+    FluidDynamicMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, viscosity, _IFT_NonlinearFluidMaterial_mu);
     IR_GIVE_FIELD(ir, alpha, _IFT_NonlinearFluidMaterial_alpha);
     IR_GIVE_FIELD(ir, c, _IFT_NonlinearFluidMaterial_C);
-
-    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 

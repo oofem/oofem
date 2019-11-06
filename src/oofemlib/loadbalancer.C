@@ -65,8 +65,8 @@ LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 
 void LoadBalancer::migrateLoad(Domain *d) {}
 void LoadBalancer::printStatistics() const {}
-IRResultType LoadBalancer::initializeFrom(InputRecord *ir) { return IRRT_OK; }
-IRResultType LoadBalancerMonitor::initializeFrom(InputRecord *ir) { return IRRT_OK; }
+void LoadBalancer::initializeFrom(InputRecord &ir) { }
+void LoadBalancerMonitor::initializeFrom(InputRecord &ir) { }
 
 #else
 
@@ -77,17 +77,13 @@ LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 }
 
 
-IRResultType
-LoadBalancer :: initializeFrom(InputRecord *ir)
+void
+LoadBalancer :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     IntArray wtp;
     IR_GIVE_OPTIONAL_FIELD(ir, wtp, _IFT_LoadBalancer_wtp);
 
     this->initializeWtp(wtp);
-
-    return IRRT_OK;
 }
 
 void
@@ -548,10 +544,9 @@ LoadBalancer :: printStatistics() const
 }
 
 
-IRResultType
-LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
+void
+LoadBalancerMonitor :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     int nproc = emodel->giveNumberOfProcesses();
     int nodeWeightMode = 0;
 
@@ -576,25 +571,7 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("unsupported node weight type, using default value");
         staticNodeWeightFlag = false;
     }
-
-    return IRRT_OK;
 }
-
-
-/*
- * void
- * LoadBalancer::migrateLoad () {}
- *
- * IRResultType
- * LoadBalancer::initializeFrom (InputRecord* ir) {
- *
- * return IRRT_OK;
- * }
- *
- * IRResultType
- * LoadBalancerMonitor::initializeFrom (InputRecord* ir) {return IRRT_OK;}
- */
-
 
 #endif // end __PARALLEL_MODE
 } // end namespace oofem

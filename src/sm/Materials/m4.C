@@ -187,13 +187,10 @@ M4Material :: giveRealMicroplaneStressVector(GaussPoint *gp, int mnumber,
 }
 
 
-IRResultType
-M4Material :: initializeFrom(InputRecord *ir)
+void
+M4Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MicroplaneMaterial_Bazant :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MicroplaneMaterial_Bazant :: initializeFrom(ir);
 
     c1 = 6.20e-1;
     c2 = 2.76;
@@ -228,8 +225,6 @@ M4Material :: initializeFrom(InputRecord *ir)
     EV = E / ( 1 - 2 * nu );
     ED = 5 * E / ( 2 + 3 * mu ) / ( 1 + nu );
     ET = mu * ED;
-
-    return IRRT_OK;
 }
 
 

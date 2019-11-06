@@ -78,7 +78,7 @@ public:
     virtual ~LoadBalancerMonitor() { }
 
     /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     /**@name Load evaluation and imbalance detection methods*/
     //@{
@@ -157,7 +157,7 @@ public:
 
     //@}
     ///Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     /// Returns reference to its domain.
     Domain *giveDomain() { return domain; }

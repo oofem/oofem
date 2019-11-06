@@ -40,15 +40,13 @@
 namespace oofem {
 REGISTER_Material(IsotropicLinMoistureTransferMaterial);
 
-IRResultType
-IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, permeability, _IFT_IsotropicLinMoistureTransferMaterial_perm);
     IR_GIVE_FIELD(ir, moistureCapacity, _IFT_IsotropicLinMoistureTransferMaterial_capa);
-
-    return IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 }
 
 

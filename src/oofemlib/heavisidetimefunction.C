@@ -51,15 +51,13 @@ HeavisideTimeFunction :: evaluateAtTime(double time)
 }
 
 
-IRResultType
-HeavisideTimeFunction :: initializeFrom(InputRecord *ir)
+void
+HeavisideTimeFunction :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    Function :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, origin, _IFT_HeavisideTimeFunction_origin);
     IR_GIVE_FIELD(ir, value, _IFT_HeavisideTimeFunction_value);
-
-    return Function :: initializeFrom(ir);
 }
 
 

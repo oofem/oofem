@@ -53,10 +53,10 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArra
     answer.times(factor);
 }
 
-IRResultType
-PointLoad :: initializeFrom(InputRecord *ir)
+void
+PointLoad :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    Load :: initializeFrom(ir);
 
     int dummy;
     IR_GIVE_FIELD(ir, dummy, "ndofs");
@@ -69,8 +69,6 @@ PointLoad :: initializeFrom(InputRecord *ir)
     value = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_PointLoad_cstype);
     coordSystemType = ( CoordSystType ) value;
-
-    return Load :: initializeFrom(ir);
 }
 
 

@@ -156,7 +156,7 @@ public:
      */
     void computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoint *gp, TimeStep *tStep, double stress);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 

@@ -94,10 +94,10 @@ TrPlaneStressGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
 
   
 
-IRResultType
-TrPlaneStressGradDamage :: initializeFrom(InputRecord *ir)
+void
+TrPlaneStressGradDamage :: initializeFrom(InputRecord &ir)
 {
-    return TrPlaneStress2d :: initializeFrom(ir);
+    TrPlaneStress2d :: initializeFrom(ir);
 }
 
 

@@ -209,16 +209,7 @@ void SUPGTangentAssembler :: matrixFromElement(FloatMatrix &answer, Element &el,
 
 SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master), accelerationVector()
 {
-    initFlag = 1;
     ndomains = 1;
-    consistentMassFlag = 0;
-    equationScalingFlag = false;
-    lscale = uscale = dscale = 1.0;
-}
-
-
-SUPG :: ~SUPG()
-{
 }
 
 
@@ -233,22 +224,17 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
     return this->nMethod.get();
 }
 
-IRResultType
-SUPG :: initializeFrom(InputRecord *ir)
+void
+SUPG :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = FluidModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    FluidModel :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, rtolv, _IFT_SUPG_rtolv);
     atolv = 1.e-15;
     IR_GIVE_OPTIONAL_FIELD(ir, atolv, _IFT_SUPG_atolv);
 
 
-    stopmaxiter = ir->hasField(_IFT_SUPG_stopmaxiter);
+    stopmaxiter = ir.hasField(_IFT_SUPG_stopmaxiter);
 
     maxiter = 200;
     IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_SUPG_maxiter);
@@ -309,8 +295,6 @@ SUPG :: initializeFrom(InputRecord *ir)
         this->materialInterface = std::make_unique<LevelSetPCS>( 1, this->giveDomain(1) );
         this->materialInterface->initializeFrom(ir);
     }
-
-    return IRRT_OK;
 }
 
 

@@ -19,7 +19,7 @@ public:
     PrescribedGradientBCWeakDirichlet(int n, Domain *d);
     virtual ~PrescribedGradientBCWeakDirichlet();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void postInitialize() override;
 

@@ -58,49 +58,49 @@ protected:
 public:
     IntElLine1PF(int n, Domain *d);
 
-    virtual FEInterpolation *giveInterpolation() const;
+    FEInterpolation *giveInterpolation() const override;
 
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    int computeNumberOfDofs() override { return 12; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
-    virtual double computeAreaAround(GaussPoint *gp);
-    virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const;
+    double computeAreaAround(GaussPoint *gp) override;
+    void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const;
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
+    int testElementExtension(ElementExtension ext) override { return 0; }
 
     //virtual Interface *giveInterface(InterfaceType) { return NULL; }
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_IntElLine1PF_Name; }
-    virtual const char *giveClassName() const { return "IntElLine1PF"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveInputRecordName() const override { return _IFT_IntElLine1PF_Name; }
+    const char *giveClassName() const override { return "IntElLine1PF"; }
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
+    void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep) override
     {
         answer = this->giveInterfaceCrossSection()->giveEngTraction_2d(jump, gp, tStep);
     }
 
-    virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
+    void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep) override
     {
         answer = this->giveInterfaceCrossSection()->give2dStiffnessMatrix_Eng(rMode, ip, tStep);
     }
 
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
 
     // PF
-    int giveNumberOfDofManagers() const { return 4; }
-    StructuralInterfaceElement *giveElement() { return this; }
-	virtual void giveDofManDofIDMask_u(IntArray &answer);
-    virtual void giveDofManDofIDMask_d(IntArray &answer);
+    int giveNumberOfDofManagers() const override { return 4; }
+    StructuralInterfaceElement *giveElement() override { return this; }
+	void giveDofManDofIDMask_u(IntArray &answer) override;
+    void giveDofManDofIDMask_d(IntArray &answer) override;
 
     virtual void computeStiffnessMatrix_uu(FloatMatrix &, MatResponseMode, TimeStep *);
     virtual void computeStiffnessMatrix_ud(FloatMatrix &, MatResponseMode, TimeStep *);
     virtual void computeStiffnessMatrix_dd(FloatMatrix &, MatResponseMode, TimeStep *);
     //virtual void computeStiffnessMatrix_du(FloatMatrix &, MatResponseMode, TimeStep *);
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
     virtual void giveInternalForcesVectorUD(FloatArray &fu, FloatArray &fd, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual double computeDamageAt(GaussPoint *gp, ValueModeType valueMode, TimeStep *stepN);
     virtual void computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer );
@@ -143,11 +143,11 @@ protected:
     FloatArray oldAlpha;
     double prescribed_damage = 0.;
 
-    virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
+    void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeGaussPoints() override;
 
     virtual int giveApproxOrder() { return 1; }
-    Element_Geometry_Type giveGeometryType() const { return EGT_quad_1_interface; };
+    Element_Geometry_Type giveGeometryType() const override { return EGT_quad_1_interface; };
 };
 } // end namespace oofem
 #endif

@@ -69,7 +69,7 @@ public:
     double evaluateVelocityAtTime(double t) override;
     double evaluateAccelerationAtTime(double t) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "LocalGaussianRandomFunction"; }
     const char *giveInputRecordName() const override { return _IFT_LocalGaussianRandomFunction_Name; }
 

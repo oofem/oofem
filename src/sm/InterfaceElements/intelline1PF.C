@@ -126,19 +126,15 @@ IntElLine1PF :: computeAreaAround(IntegrationPoint *ip)
 }
 
 
-IRResultType
-IntElLine1PF :: initializeFrom(InputRecord *ir)
+void
+IntElLine1PF :: initializeFrom(InputRecord &ir)
 {
-    //const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-    if ( ir->hasField(_IFT_IntElLine1PF_prescribedDamage) )
-    {
+    StructuralInterfaceElement :: initializeFrom(ir);
+
+    if ( ir.hasField(_IFT_IntElLine1PF_prescribedDamage) ) {
         IR_GIVE_FIELD(ir, this->prescribed_damage, _IFT_IntElLine1PF_prescribedDamage);
         //this->alpha.setValues(2, damage, damage);
     }
-    return StructuralInterfaceElement :: initializeFrom(ir);
-
-
 }
 
 

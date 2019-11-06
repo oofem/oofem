@@ -86,7 +86,6 @@ protected:
 
 public:
     TR1_2D_SUPG2(int n, Domain * d);
-    virtual ~TR1_2D_SUPG2();
 
     void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
     void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep) override;
@@ -121,7 +120,7 @@ public:
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void updateYourself(TimeStep *tStep) override;
 

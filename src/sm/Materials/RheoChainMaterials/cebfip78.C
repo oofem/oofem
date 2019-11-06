@@ -40,10 +40,10 @@
 namespace oofem {
 REGISTER_Material(CebFip78Material);
 
-IRResultType
-CebFip78Material :: initializeFrom(InputRecord *ir)
+void
+CebFip78Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    MaxwellChainMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E28, _IFT_CebFip78Material_e28);
     IR_GIVE_FIELD(ir, fibf, _IFT_CebFip78Material_fibf);
@@ -51,8 +51,6 @@ CebFip78Material :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, kap_c, _IFT_CebFip78Material_kap_c);
     IR_GIVE_FIELD(ir, kap_tt, _IFT_CebFip78Material_kap_tt);
     IR_GIVE_FIELD(ir, u, _IFT_CebFip78Material_u);
-
-    return MaxwellChainMaterial :: initializeFrom(ir);
 }
 
 

@@ -154,10 +154,10 @@ SpringElement :: computeNumberOfGlobalDofs()
 }
 
 
-IRResultType
-SpringElement :: initializeFrom(InputRecord *ir)
+void
+SpringElement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralElement :: initializeFrom(ir);
 
     int _mode;
     IR_GIVE_FIELD(ir, _mode, _IFT_SpringElement_mode);
@@ -170,7 +170,6 @@ SpringElement :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->dir, _IFT_SpringElement_orientation);
         this->dir.normalize();
     }
-    return StructuralElement :: initializeFrom(ir);
 }
 
 void SpringElement :: printOutputAt(FILE *File, TimeStep *tStep)

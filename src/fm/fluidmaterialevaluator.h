@@ -69,13 +69,13 @@ class GaussPoint;
 class FluidMaterialEvaluator : public EngngModel
 {
 protected:
-    double deltaT; ///< Time increment.
+    double deltaT = 1.; ///< Time increment.
 
-    int ndim; /// Number of spatial dimensions.
+    int ndim = 3; /// Number of spatial dimensions.
     IntArray cmpntFunctions; /// Time functions controlling each component of the deviatoric part of the stress.
-    int volFunction; /// Time function controlling the volumetric/pressure part
+    int volFunction = 0; /// Time function controlling the volumetric/pressure part
     IntArray sControl, eControl;
-    bool pressureControl;
+    bool pressureControl = false;
 
     IntArray vars;
 
@@ -84,10 +84,9 @@ protected:
     std :: ofstream outfile;
 
 public:
-    FluidMaterialEvaluator(int i, EngngModel * _master = NULL);
-    virtual ~FluidMaterialEvaluator();
+    FluidMaterialEvaluator(int i, EngngModel * _master = nullptr);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void solveYourself() override;
 

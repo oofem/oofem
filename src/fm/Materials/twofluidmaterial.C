@@ -53,18 +53,13 @@ TwoFluidMaterial :: checkConsistency()
 }
 
 
-IRResultType
-TwoFluidMaterial :: initializeFrom(InputRecord *ir)
+void
+TwoFluidMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        OOFEM_WARNING("mat array should have two values");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_TwoFluidMaterial_mat, "mat array should have two values");
     }
-
-    return IRRT_OK;
 }
 
 

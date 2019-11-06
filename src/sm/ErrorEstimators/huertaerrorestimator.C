@@ -563,10 +563,9 @@ HuertaErrorEstimator :: giveRemeshingCrit()
 }
 
 
-IRResultType
-HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
+void
+HuertaErrorEstimator :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                       // Required by IR_GIVE_FIELD macro
     int n, level, wErrorFlag = 0;
 
     ErrorEstimator :: initializeFrom(ir);
@@ -976,10 +975,9 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 }
 
 
-IRResultType
-HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
+void
+HuertaRemeshingCriteria :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     double coeff;
     int noRemeshFlag = 0, wErrorFlag = 0;
 
@@ -1002,8 +1000,6 @@ HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
     if ( coeff > 0.0 && coeff <= 1.0 ) {
         this->refineCoeff = coeff;
     }
-
-    return IRRT_OK;
 }
 
 
@@ -3888,7 +3884,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     double rtolv = -1.0, minStepLength = 0.0, initialStepLength = -1.0, stepLength = -1.0, psi = 1.0;
     IntArray ddm, hpc;
     FloatArray ddv, hpcw;
-    IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
 #if defined ( USE_OUTPUT_FILE ) || defined ( USE_CONTEXT_FILE )
     sprintf(line, "/home/dr/Huerta/%s_%d.out", problemName, problemId);
@@ -3917,9 +3912,8 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #endif
         refinedReader.insertInputRecord(DataReader :: IR_emodelRec, std::move(ir));
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >(problem) ) {
-        InputRecord *ir;
         nmstep = tStep->giveMetaStepNumber();
-        ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
+        auto &ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
         IR_GIVE_OPTIONAL_FIELD(ir, stiffMode, _IFT_NonLinearStatic_stiffmode);
         IR_GIVE_OPTIONAL_FIELD(ir, controlMode, _IFT_NonLinearStatic_controlmode);

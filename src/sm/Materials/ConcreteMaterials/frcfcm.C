@@ -49,16 +49,10 @@ FRCFCM :: FRCFCM(int n, Domain *d) : ConcreteFCM(n, d)
 
 
 
-IRResultType
-FRCFCM :: initializeFrom(InputRecord *ir)
+void
+FRCFCM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = ConcreteFCM :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
+    ConcreteFCM :: initializeFrom(ir);
 
     this->fibreActivationOpening = 0.e-6;
     IR_GIVE_OPTIONAL_FIELD(ir, fibreActivationOpening, _IFT_FRCFCM_fibreActivationOpening);
@@ -116,8 +110,7 @@ FRCFCM :: initializeFrom(InputRecord *ir)
 
     default:
         fiberShearStrengthType = FSS_Unknown;
-        OOFEM_WARNING("Softening type number %d is unknown", type);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_FRCFCM_fssType, "Softening type is unknown");
     }
 
 
@@ -143,8 +136,7 @@ FRCFCM :: initializeFrom(InputRecord *ir)
 
     default:
         fiberDamageType = FDAM_Unknown;
-        OOFEM_WARNING("Fibre damage type number %d is unknown", type);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_FRCFCM_fDamType, "Fibre damage type is unknown");
     }
 
 
@@ -168,16 +160,16 @@ FRCFCM :: initializeFrom(InputRecord *ir)
 
     default:
         fiberType = FT_Unknown;
-        OOFEM_WARNING("Fibre type number %d is unknown", type);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_FRCFCM_fiberType, "Fibre type is unknown");
     }
 
     if ( ( fiberType == FT_CAF ) || ( fiberType == FT_SAF ) ) {
-        if  ( ir->hasField(_IFT_FRCFCM_orientationVector) ) {
+        if  ( ir.hasField(_IFT_FRCFCM_orientationVector) ) {
             IR_GIVE_FIELD(ir, orientationVector, _IFT_FRCFCM_orientationVector);
 
             if ( !( ( this->orientationVector.giveSize() == 2 ) || ( this->orientationVector.giveSize() == 3 ) ) ) {
-                OOFEM_ERROR("length of the fibre orientation vector must be 2 for 2D and 3 for 3D analysis");
+                throw ValueInputException(ir, _IFT_FRCFCM_orientationVector, 
+                                          "length of the fibre orientation vector must be 2 for 2D and 3 for 3D analysis");
             }
 
             // we normalize the user-defined orientation vector
@@ -198,23 +190,23 @@ FRCFCM :: initializeFrom(InputRecord *ir)
     // general properties
     IR_GIVE_FIELD(ir, Vf, _IFT_FRCFCM_Vf);
     if ( Vf < 0. ) {
-        OOFEM_ERROR("fibre volume content must not be negative");
+        throw ValueInputException(ir, _IFT_FRCFCM_Vf, "fibre volume content must not be negative");
     }
 
     IR_GIVE_FIELD(ir, Df, _IFT_FRCFCM_Df);
     if ( Df <= 0. ) {
-        OOFEM_ERROR("fibre diameter must be positive");
+        throw ValueInputException(ir, _IFT_FRCFCM_Df, "fibre diameter must be positive");
     }
 
     IR_GIVE_FIELD(ir, Ef, _IFT_FRCFCM_Ef);
     if ( Ef <= 0. ) {
-        OOFEM_ERROR("fibre stiffness must be positive");
+        throw ValueInputException(ir, _IFT_FRCFCM_Ef, "fibre stiffness must be positive");
     }
 
     // compute or read shear modulus of fibers
     double nuf = 0.;
     Gfib = 0.;
-    if  ( ir->hasField(_IFT_FRCFCM_nuf) ) {
+    if  ( ir.hasField(_IFT_FRCFCM_nuf) ) {
         IR_GIVE_FIELD(ir, nuf, _IFT_FRCFCM_nuf);
         Gfib = Ef / ( 2. * ( 1. + nuf ) );
     } else {
@@ -227,13 +219,13 @@ FRCFCM :: initializeFrom(InputRecord *ir)
     // debonding
     IR_GIVE_FIELD(ir, tau_0, _IFT_FRCFCM_tau_0);
     if ( tau_0 <= 0. ) {
-        OOFEM_ERROR("shear strength must be positive");
+        throw ValueInputException(ir, _IFT_FRCFCM_tau_0, "shear strength must be positive");
     }
 
     // snubbing coefficient
     IR_GIVE_FIELD(ir, f, _IFT_FRCFCM_f);
     if ( f < 0. ) {
-        OOFEM_ERROR("snubbing coefficient must not be negative");
+        throw ValueInputException(ir, _IFT_FRCFCM_f, "snubbing coefficient must not be negative");
     }
 
     // for SRF only
@@ -260,11 +252,9 @@ FRCFCM :: initializeFrom(InputRecord *ir)
         this->w_star = this->Lf * this->Lf * this->tau_0 / ( ( 1. + this->eta ) * this->Ef * this->Df );
     }
 
-    if  ( ir->hasField(_IFT_FRCFCM_computeCrackSpacing) ) {
+    if  ( ir.hasField(_IFT_FRCFCM_computeCrackSpacing) ) {
         this->crackSpacing = this->computeCrackSpacing();
     }
-
-    return IRRT_OK;
 }
 
 

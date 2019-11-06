@@ -84,10 +84,11 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
 VTKXMLExportModule :: ~VTKXMLExportModule() { }
 
 
-IRResultType
-VTKXMLExportModule :: initializeFrom(InputRecord *ir)
+void
+VTKXMLExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    ExportModule :: initializeFrom(ir);
+
     int val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
@@ -102,8 +103,6 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 
     this->particleExportFlag = false;
     IR_GIVE_OPTIONAL_FIELD(ir, particleExportFlag, _IFT_VTKXMLExportModule_particleexportflag); // Macro
-
-    return ExportModule :: initializeFrom(ir);
 }
 
 

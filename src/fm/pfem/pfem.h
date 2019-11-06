@@ -236,7 +236,7 @@ public:
 
 
     /// Initialization from given input record
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // consistency check
     int checkConsistency() override; // returns nonzero if o.k.

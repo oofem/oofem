@@ -58,10 +58,8 @@ qcNode :: qcNode(int n, Domain *aDomain) : Node(n, aDomain)
 #endif
 }
 
-IRResultType qcNode :: initializeFrom(InputRecord *ir)
+void qcNode :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     Node :: initializeFrom(ir);
     this->masterElement = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_qcNode_masterElement);
@@ -87,8 +85,6 @@ IRResultType qcNode :: initializeFrom(InputRecord *ir)
 #else
     OOFEM_ERROR("\"qcNode\" can be used only in \"QClinearStatic\" EngngModel");
 #endif
-
-    return IRRT_OK;
 }
 
 int qcNode :: checkConsistency()

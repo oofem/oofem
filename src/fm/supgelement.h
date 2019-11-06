@@ -67,13 +67,12 @@ protected:
      * Stabilization coefficients, updated for each solution step
      * in updateStabilizationCoeffs()
      */
-    double t_supg, t_pspg, t_lsic;
+    double t_supg = 0., t_pspg = 0., t_lsic = 0.;
 
 public:
     SUPGElement(int n, Domain * aDomain);
-    virtual ~SUPGElement();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;

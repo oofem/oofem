@@ -54,30 +54,30 @@ public:
     QPlaneStressGradDamage(int n, Domain * d);
     virtual ~QPlaneStressGradDamage() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_QPlaneStressGradDamage_Name; }
-    virtual const char *giveClassName() const { return "QPlaneStressGradDamage"; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-    virtual int computeNumberOfDofs() { return 20; }
+    const char *giveInputRecordName() const override { return _IFT_QPlaneStressGradDamage_Name; }
+    const char *giveClassName() const override { return "QPlaneStressGradDamage"; }
+    MaterialMode giveMaterialMode() override { return _PlaneStress; }
+    int computeNumberOfDofs() override { return 20; }
 
 protected:
-    virtual void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
 
-    virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    void giveDofManDofIDMask_u(IntArray &answer) const;
-    void giveDofManDofIDMask_d(IntArray &answer) const;
+    void computeGaussPoints() override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    void giveDofManDofIDMask_u(IntArray &answer) const override;
+    void giveDofManDofIDMask_d(IntArray &answer) const override;
 
     
-    virtual StructuralElement *giveStructuralElement() { return this; }
-    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
-    virtual void giveLocationArray_u(IntArray &answer);
-    virtual void giveLocationArray_d(IntArray &answer);
-    void postInitialize();
+    StructuralElement *giveStructuralElement() override { return this; }
+    NLStructuralElement *giveNLStructuralElement() override { return this; }
+    void giveLocationArray_u(IntArray &answer) override;
+    void giveLocationArray_d(IntArray &answer) override;
+    void postInitialize() override;
 
 };
 } // end namespace oofem

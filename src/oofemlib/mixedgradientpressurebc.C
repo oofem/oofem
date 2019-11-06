@@ -58,9 +58,9 @@ double MixedGradientPressureBC :: domainSize()
 }
 
 
-IRResultType MixedGradientPressureBC :: initializeFrom(InputRecord *ir)
+void MixedGradientPressureBC :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
     FloatArray devGradient;
     double pressure;
@@ -70,7 +70,5 @@ IRResultType MixedGradientPressureBC :: initializeFrom(InputRecord *ir)
 
     this->setPrescribedDeviatoricGradientFromVoigt(devGradient);
     this->setPrescribedPressure(pressure);
-
-    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 } // end namespace oofem

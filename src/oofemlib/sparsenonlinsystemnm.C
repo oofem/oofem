@@ -40,16 +40,13 @@
 
 namespace oofem {
 
-IRResultType
-SparseNonLinearSystemNM :: initializeFrom(InputRecord *ir)
+void
+SparseNonLinearSystemNM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     randPertAmplitude = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, randPertAmplitude, _IFT_NonLinearStatic_randPertAmplitude);
     if ( randPertAmplitude < 0. ) {
-        OOFEM_WARNING("Random pertubation amplitude can not be negative");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_NonLinearStatic_randPertAmplitude, "Random pertubation amplitude can not be negative");
     }
     randSeed = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, randSeed, _IFT_NonLinearStatic_randSeed);
@@ -61,19 +58,16 @@ SparseNonLinearSystemNM :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, igp_PertWeightArray, _IFT_NonLinearStatic_pertw);
     if ( igp_PertDmanDofSrcArray.giveSize() ) {
         if ( ( igp_PertDmanDofSrcArray.giveSize() % 2 ) != 0 ) {
-            OOFEM_WARNING("Pert map size must be an even number, it contains pairs <node, nodeDof>");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, _IFT_NonLinearStatic_pert, "Pert map size must be an even number, it contains pairs <node, nodeDof>");
         }
         int nsize = igp_PertDmanDofSrcArray.giveSize() / 2;
         if ( igp_PertWeightArray.giveSize() != nsize ) {
-            OOFEM_WARNING("Pert map size and weight array size mismatch");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, _IFT_NonLinearStatic_pert, "Pert map size and weight array size mismatch");
         }
         pert_init_needed = true;
     } else {
         pert_init_needed = false;
     }
-    return IRRT_OK;
 }
 
 void 

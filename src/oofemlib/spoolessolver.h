@@ -95,7 +95,7 @@ public:
     NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
     /// Initializes receiver from given record.
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // identification
     const char *giveClassName() const override { return "SpoolesSolver"; }

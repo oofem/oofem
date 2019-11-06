@@ -355,11 +355,9 @@ IntMatBilinearCZJansson :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, Gau
 
 
 const double tolerance = 1.0e-12; // small number
-IRResultType
-IntMatBilinearCZJansson :: initializeFrom(InputRecord *ir)
+void
+IntMatBilinearCZJansson :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZJansson_kn);
     this->knc = kn0;                        // Defaults to the same stiffness in compression and tension
     IR_GIVE_OPTIONAL_FIELD(ir, this->knc, _IFT_IntMatBilinearCZJansson_knc);
@@ -380,28 +378,21 @@ IntMatBilinearCZJansson :: initializeFrom(InputRecord *ir)
 
     // check validity of the material paramters
     if ( this->kn0 < 0.0 ) {
-        OOFEM_WARNING("stiffness kn0 is negative (%.2e)", this->kn0);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZJansson_kn, "must be positive");
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_WARNING("stiffness ks0 is negative (%.2e)", this->ks0);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZJansson_ks, "must be positive");
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZJansson_g1c, "must be positive");
     } else if ( this->GIIc < 0.0 ) {
-        OOFEM_WARNING("GIIc is negative (%.2e)", this->GIIc);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZJansson_g2c, "must be positive");
     } else if ( this->gamma < 0.0  ) { 
-        OOFEM_WARNING("gamma (%.2e) is below zero which is unphysical",  this->gamma);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZJansson_gamma, "must be positive");
     }
 
-    if( ir->hasField(_IFT_IntMatBilinearCZJansson_semiexplicit) ) {
+    if ( ir.hasField(_IFT_IntMatBilinearCZJansson_semiexplicit) ) {
         mSemiExplicit = true;
         printf("In IntMatBilinearCZJansson::initializeFrom: Semi-explicit time integration activated.\n");
     }
-
-    return IRRT_OK;
 }
 
 int

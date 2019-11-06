@@ -55,16 +55,13 @@ J2plasticMaterial :: ~J2plasticMaterial()
 {
 }
 
-IRResultType
-J2plasticMaterial :: initializeFrom(InputRecord *ir)
+void
+J2plasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
-    result = PlasticMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    PlasticMaterial :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, _IFT_J2plasticMaterial_ry);
     k = value / sqrt(3.0);
@@ -82,8 +79,6 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     if ( fabs(isotropicModuli) > 1.e-12 ) {
         isotropicHardeningFlag = 1;
     }
-
-    return IRRT_OK;
 }
 
 void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)

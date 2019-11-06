@@ -64,7 +64,7 @@ public:
 
     const char *giveClassName() const override { return "Inclusion"; }
     const char *giveInputRecordName() const override { return _IFT_Inclusion_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     CrossSection *giveCrossSection() { return mpCrossSection; }
 };
 } /* namespace oofem */

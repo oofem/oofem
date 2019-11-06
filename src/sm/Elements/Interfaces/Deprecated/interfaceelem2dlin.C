@@ -130,11 +130,11 @@ InterfaceElem2dLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespon
 }
 
 
-IRResultType
-InterfaceElem2dLin :: initializeFrom(InputRecord *ir)
+void
+InterfaceElem2dLin :: initializeFrom(InputRecord &ir)
 {
-    this->axisymmode = ir->hasField(_IFT_InterfaceElem2dLin_axisymmode);
-    return StructuralElement :: initializeFrom(ir);
+    this->axisymmode = ir.hasField(_IFT_InterfaceElem2dLin_axisymmode);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

@@ -133,11 +133,10 @@ void AdaptiveLinearStatic :: restoreContext(DataStream &stream, ContextMode mode
     LinearStatic :: restoreContext(stream, mode);
 }
 
-IRResultType
-AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
-// input from inputString
+void
+AdaptiveLinearStatic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    LinearStatic :: initializeFrom(ir);
 
     int meshPackageId = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, meshPackageId, _IFT_AdaptiveLinearStatic_meshpackage);
@@ -149,8 +148,6 @@ AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
     } else {
         meshPackage = MPT_T3D;
     }
-
-    return LinearStatic :: initializeFrom(ir);
 }
 
 

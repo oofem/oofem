@@ -73,20 +73,20 @@ public:
     /// Constructor
     PFEMElement2d(int n, Domain *d);
     /// Destructor
-    ~PFEMElement2d();
+    virtual ~PFEMElement2d();
 
-    virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
+    double computeCriticalTimeStep(TimeStep *tStep) override = 0;
 
-    virtual const char *giveClassName() const { return "PFEMElement2d"; }
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    const char *giveClassName() const override { return "PFEMElement2d"; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
 
-    virtual void giveElementDofIDMask(IntArray &answer) const = 0;
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const = 0;
-    virtual int computeNumberOfDofs() = 0;
-    IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkConsistency();
+    void giveElementDofIDMask(IntArray &answer) const override = 0;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override = 0;
+    int computeNumberOfDofs() override = 0;
+    void initializeFrom(InputRecord &ir) override;
+    int checkConsistency() override;
 
-    virtual Interface *giveInterface(InterfaceType) = 0;
+    Interface *giveInterface(InterfaceType) override = 0;
 
     virtual Element *giveElement() { return this; }
 
@@ -100,21 +100,21 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
-    virtual FEInterpolation *giveVelocityInterpolation() = 0;
-    virtual FEInterpolation *givePressureInterpolation() = 0;
+    FEInterpolation *giveVelocityInterpolation() override = 0;
+    FEInterpolation *givePressureInterpolation() override = 0;
 
 protected:
-    virtual void computeGaussPoints() = 0;
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) = 0;
-    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *tStep) = 0;
+    void computeGaussPoints() override = 0;
+    void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override = 0;
+    void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *tStep) override = 0;
 
-    virtual void computeBMatrix(FloatMatrix &answer, GaussPoint *gp);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep); //K
-    virtual void computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *tStep); //L
-    virtual void computeDivergenceMatrix(FloatMatrix &answerx, TimeStep *tStep); //D
-    virtual void computeGradientMatrix(FloatMatrix &answer, TimeStep *tStep); //G
+    void computeBMatrix(FloatMatrix &answer, GaussPoint *gp) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep) override; //K
+    void computePressureLaplacianMatrix(FloatMatrix &answer, TimeStep *tStep) override; //L
+    void computeDivergenceMatrix(FloatMatrix &answerx, TimeStep *tStep) override; //D
+    void computeGradientMatrix(FloatMatrix &answer, TimeStep *tStep) override; //G
 
-    void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    void computePrescribedRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) override;
 
     /// Calculates the shape function matrix on an edge
     void computeEdgeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);

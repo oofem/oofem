@@ -81,7 +81,7 @@ public:
     StructuralMaterialEvaluator(int i, EngngModel *master = nullptr);
     virtual ~StructuralMaterialEvaluator();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void solveYourself() override;
 

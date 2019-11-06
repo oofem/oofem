@@ -61,12 +61,12 @@ QWedge :: QWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNo
 }
 
 
-IRResultType
-QWedge :: initializeFrom(InputRecord *ir)
+void
+QWedge :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 9;
 
-    return Structural3DElement :: initializeFrom(ir);
+    Structural3DElement :: initializeFrom(ir);
 }
 
 FEInterpolation *

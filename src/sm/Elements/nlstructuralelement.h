@@ -212,7 +212,7 @@ public:
     double computeCurrentVolume(TimeStep *tStep);
 
     // data management
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     // definition

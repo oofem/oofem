@@ -106,7 +106,7 @@ public:
 
     const char *giveClassName() const override { return "MazarsNLMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     Interface *giveInterface(InterfaceType it) override;
 
     void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;

@@ -74,7 +74,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_QTrPlaneStress2d_Name; }
     const char *giveClassName() const override { return "QTrPlaneStress2d"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;

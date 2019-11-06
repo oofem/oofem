@@ -146,17 +146,10 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
 }
 
 
-IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCWeak :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-    result = ActiveBoundaryCondition :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    result = PrescribedGradientHomogenization :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    PrescribedGradientHomogenization :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
 //    printf("mTractionInterpOrder: %d\n", mTractionInterpOrder);
@@ -199,8 +192,6 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     if ( mMirrorFunction == 0 ) {
         mPeriodicityNormal = {0.0, 1.0};
     }
-
-    return IRRT_OK;
 }
 
 

@@ -150,7 +150,7 @@ public:
      */
     virtual int mapStatus(MaterialStatus &oStatus) const = 0;
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
     /**
      * Setups the input record of receiver.
      * @param input Input record to be filled.

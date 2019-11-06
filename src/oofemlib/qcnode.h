@@ -85,7 +85,7 @@ public:
     /// Destructor.
     virtual ~qcNode(void) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void postInitialize() override;
     void postInitializeAsHangingNode();
     int checkConsistency() override;

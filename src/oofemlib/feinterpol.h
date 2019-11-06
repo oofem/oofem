@@ -143,7 +143,7 @@ public:
     FEInterpolation(int o) : order(o) { }
     virtual ~FEInterpolation() { }
     /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
 
     /* @name basic interpolation services */
     //@{

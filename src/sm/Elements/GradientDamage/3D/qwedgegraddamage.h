@@ -55,28 +55,28 @@ public:
     QWedgeGradDamage(int, Domain *);
     virtual ~QWedgeGradDamage() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    void giveDofManDofIDMask_u(IntArray &answer) const;
-    void giveDofManDofIDMask_d(IntArray &answer) const;
+    void initializeFrom(InputRecord &ir) override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    void giveDofManDofIDMask_u(IntArray &answer) const override;
+    void giveDofManDofIDMask_d(IntArray &answer) const override;
     
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QWedgeGradDamage_Name; }
-    virtual const char *giveClassName() const { return "QWedgeGradDamage"; }
-    virtual int computeNumberOfDofs() { return 51; }
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
+    const char *giveInputRecordName() const override { return _IFT_QWedgeGradDamage_Name; }
+    const char *giveClassName() const override { return "QWedgeGradDamage"; }
+    int computeNumberOfDofs() override { return 51; }
+    MaterialMode giveMaterialMode() override { return _3dMat; }
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer);
-    virtual void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual StructuralElement *giveStructuralElement() { return this; }
-    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
+    void computeGaussPoints() override;
+    void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer) override;
+    void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    StructuralElement *giveStructuralElement() override { return this; }
+    NLStructuralElement *giveNLStructuralElement() override { return this; }
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
-    virtual void giveLocationArray_u(IntArray &answer){;}
-    virtual void giveLocationArray_d(IntArray &answer){;}
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    void giveLocationArray_u(IntArray &answer) override { }
+    void giveLocationArray_d(IntArray &answer) override { }
 
 };
 }

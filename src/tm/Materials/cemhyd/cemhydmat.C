@@ -402,13 +402,11 @@ void CemhydMat :: averageTemperature()
     }
 }
 
-IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
+void CemhydMat :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     castingTime = 0.;
 
-    result = IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
-    if ( result != IRRT_OK ) return result;
+    IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
 
     conductivityType = 0;
     capacityType = 0;
@@ -439,8 +437,6 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_CemhydMat_reinforcementDegree);
     IR_GIVE_FIELD(ir, XMLfileName, _IFT_CemhydMat_inputFileName);
-
-    return IRRT_OK;
 }
 
 

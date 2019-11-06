@@ -104,7 +104,7 @@ public:
     double giveWidth() { return width; }
     int computeNumberOfDofs() override { return 2; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void updateInternalState(TimeStep *tStep) override;
 

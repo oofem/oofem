@@ -118,7 +118,7 @@ public:
 
     Interface *giveInterface(InterfaceType t) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep) override;

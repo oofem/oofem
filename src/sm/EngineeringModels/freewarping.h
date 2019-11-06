@@ -98,7 +98,7 @@ public:
     TimeStep *giveNextStep() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void getCenterOfGravity(FloatMatrix &answer) { answer = this->CG; }
 

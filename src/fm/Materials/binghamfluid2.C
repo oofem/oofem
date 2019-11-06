@@ -59,11 +59,10 @@ BinghamFluidMaterial2 :: BinghamFluidMaterial2(int n, Domain *d) : FluidDynamicM
 { }
 
 
-IRResultType
-BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
+void
+BinghamFluidMaterial2 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    FluidDynamicMaterial :: initializeFrom(ir);
     // we use rather object's member data than to store data into slow
     // key-val dictionary with lot of memory allocations
     IR_GIVE_FIELD(ir, mu_0, _IFT_BinghamFluidMaterial2_mu0);
@@ -74,7 +73,6 @@ BinghamFluidMaterial2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, stressGrowthRate, _IFT_BinghamFluidMaterial2_stressGrowthRate);
     tau_c = tau_0 * mu_inf / ( mu_inf - mu_0 );
     //tau_c = tau_0;
-    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 

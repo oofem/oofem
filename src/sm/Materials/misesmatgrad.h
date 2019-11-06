@@ -58,16 +58,16 @@ public:
     MisesMatGradStatus(GaussPoint *g);
     virtual ~MisesMatGradStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     // definition
-    virtual const char *giveClassName() const { return "MisesMatGradStatus"; }
+    const char *giveClassName() const override { return "MisesMatGradStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *tStep);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual double giveNonlocalCumulatedStrain() { return nonlocalDamageDrivingVariable; }
-    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalDamageDrivingVariable = nonlocalCumulatedStrain; }
+    double giveNonlocalCumulatedStrain() const { return nonlocalDamageDrivingVariable; }
+    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalDamageDrivingVariable = nonlocalCumulatedStrain; }
 };
 
 
@@ -88,7 +88,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_MisesMatGrad_Name; }
     const char *giveClassName() const override { return "MisesMatGrad"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     Interface *giveInterface(InterfaceType t) override {
@@ -132,7 +132,7 @@ public:
     //    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
 protected:
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MisesMatGradStatus(gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MisesMatGradStatus(gp); }
 };
 } // end namespace oofem
 #define MisesMatGrad_h

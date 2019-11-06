@@ -56,7 +56,7 @@ protected:
 public:
     Tr1Darcy(int, Domain *);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     FEInterpolation *giveInterpolation() const override;
 

@@ -56,10 +56,10 @@ RankineMatGrad :: RankineMatGrad(int n, Domain *d) : RankineMat(n, d), GradientD
 }
 
 /////////////////////////////////////////////////////////////////////////////
-IRResultType
-RankineMatGrad :: initializeFrom(InputRecord *ir)
+void
+RankineMatGrad :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
+    RankineMat :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, L, _IFT_RankineMatGrad_L);
     if ( L < 0.0 ) {
@@ -80,11 +80,8 @@ RankineMatGrad :: initializeFrom(InputRecord *ir)
     } else if ( formulationType == 2 ) {
         this->gradientDamageFormulationType =   GDFT_Eikonal;
     } else {
-        OOFEM_WARNING("Unknown gradient damage formulation %d", formulationType);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_RankineMatGrad_formulationType, "Unknown gradient damage formulation");
     }
-
-    return RankineMat :: initializeFrom(ir);
 }
 /////////////////////////////////////////////////////////////////////////////
 

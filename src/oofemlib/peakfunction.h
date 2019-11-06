@@ -65,7 +65,7 @@ public:
     }
     virtual ~PeakFunction() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "PeakFunction"; }
     const char *giveInputRecordName() const override { return _IFT_PeakFunction_Name; }
 

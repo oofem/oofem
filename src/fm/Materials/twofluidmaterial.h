@@ -68,7 +68,7 @@ public:
      */
     TwoFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     FloatArrayF<6> computeDeviatoricStress3D(const FloatArrayF<6> &answer, GaussPoint *gp, TimeStep *tStep) const override;

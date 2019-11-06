@@ -124,7 +124,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_RCSDEMaterial_Name; }
     const char *giveClassName() const override { return "RCSDEMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double give(int aProperty, GaussPoint *gp) const override;
 

@@ -74,9 +74,6 @@ Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), Spat
     this->numberOfGaussPoints = 5;
 }
 
-Tet21Stokes :: ~Tet21Stokes()
-{ }
-
 void Tet21Stokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {

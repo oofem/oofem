@@ -97,10 +97,10 @@ QPlaneStrainGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
 
   
 
-IRResultType
-QPlaneStrainGradDamage :: initializeFrom(InputRecord *ir)
+void
+QPlaneStrainGradDamage :: initializeFrom(InputRecord &ir)
 {
-    return QPlaneStrain :: initializeFrom(ir);
+    QPlaneStrain :: initializeFrom(ir);
 }
 
 void

@@ -327,7 +327,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
     }
 
 
-    int nnodes,ntriangles,ntetras; // nedges,
+    int nnodes = 0, ntriangles = 0, ntetras = 0; // nedges,
 
     /*read second line from t3d out file
         4 numbers
@@ -410,7 +410,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
     Element *parentElementPtr = domain->giveElement(1); //??km??
     // loop over triangles, read dofman numbers and create new elements
     for (int itriangle = 1; itriangle <= ntriangles; itriangle++) {
-        int elemNumber;
+        int elemNumber = 0;
         IntArray dofManagers(3);
         std::getline(inputStream, line); 
         //convert const char to char in order to use strtok
@@ -443,7 +443,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
 
     // loop over tetras, read dofman numbers and create new elements
     for (int itetra = 1; itetra <= ntetras; itetra++) {
-        int elemNumber;
+        int elemNumber = 0;
         IntArray dofManagers(4);
         std::getline(inputStream, line); 
         //convert const char to char in order to use strtok
@@ -483,7 +483,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
-        crossSection->initializeFrom(&ir);
+        crossSection->initializeFrom(ir);
         ( * dNew )->setCrossSection(i, std::move(crossSection));
     }
 
@@ -496,7 +496,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto mat = classFactory.createMaterial(name.c_str(), i, * dNew);
-        mat->initializeFrom(&ir);
+        mat->initializeFrom(ir);
         ( * dNew )->setMaterial(i, std::move(mat));
     }
 
@@ -509,7 +509,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
-        barrier->initializeFrom(&ir);
+        barrier->initializeFrom(ir);
         ( * dNew )->setNonlocalBarrier(i, std::move(barrier));
     }
 
@@ -522,7 +522,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
-        bc->initializeFrom(&ir);
+        bc->initializeFrom(ir);
         ( * dNew )->setBoundaryCondition(i, std::move(bc));
     }
 
@@ -535,7 +535,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         ir.giveRecordKeywordField(name);
 
         auto ic = std::make_unique<InitialCondition>(i, *dNew);
-        ic->initializeFrom(&ir);
+        ic->initializeFrom(ir);
         ( * dNew )->setInitialCondition(i, std::move(ic));
     }
 
@@ -552,7 +552,7 @@ T3DInterface :: t3d_2_OOFEM(const char *t3dOutFile, Domain **dNew)
         
         //ltf = classFactory.createLoadTimeFunction(name.c_str(), i, * dNew);
         auto ltf = classFactory.createFunction(name.c_str(), i, * dNew);
-        ltf->initializeFrom(&ir);
+        ltf->initializeFrom(ir);
         //( * dNew )->setLoadTimeFunction(i, ltf);
         ( * dNew )->setFunction(i, std::move(ltf));
     }
@@ -619,7 +619,7 @@ T3DInterface :: createVTKExportMesh(const char *t3dOutFile,std::vector<FloatArra
     3 - number of triangles
     4 - number of tetras
   */
-  int nnodes,ntriangles;// nedges, ntetras
+  int nnodes = 0, ntriangles = 0; // nedges, ntetras
   std::getline(inputStream, line);
   //convert const char to char in order to use strtok
   char *currentLine = new char[line.size() + 1];
@@ -742,7 +742,7 @@ T3DInterface :: createQCInterpolationMesh(const char *t3dOutFile,std::vector<Flo
     3 - number of triangles
     4 - number of tetras
   */
-  int nnodes,ntriangles,ntetras;//nedges,
+  int nnodes = 0, ntriangles = 0, ntetras = 0; //nedges,
   std::getline(inputStream, line);
   //convert const char to char in order to use strtok
   char *currentLine = new char[line.size() + 1];

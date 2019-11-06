@@ -296,10 +296,10 @@ StructuralInterfaceElement :: giveIPValue(FloatArray &answer, IntegrationPoint *
 }
 
 
-IRResultType
-StructuralInterfaceElement :: initializeFrom(InputRecord *ir)
+void
+StructuralInterfaceElement :: initializeFrom(InputRecord &ir)
 {
-    return Element :: initializeFrom(ir);
+    Element :: initializeFrom(ir);
 }
 
 void StructuralInterfaceElement :: giveInputRecord(DynamicInputRecord &input)

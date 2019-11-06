@@ -36,8 +36,6 @@
 #define SRC_OOFEMLIB_XFEM_NUCLEATIONCRITERION_H_
 
 
-#include "irresulttype.h"
-
 #include <memory>
 #include <vector>
 
@@ -58,7 +56,7 @@ public:
 
     virtual std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     virtual int instanciateYourself(DataReader &dr);
 
     virtual void appendInputRecords(DynamicDataReader &oDR);

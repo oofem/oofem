@@ -67,10 +67,10 @@ PFEMElement2d :: ~PFEMElement2d()
 { }
 
 
-IRResultType
-PFEMElement2d :: initializeFrom(InputRecord *ir)
+void
+PFEMElement2d :: initializeFrom(InputRecord &ir)
 {
-    return this->PFEMElement :: initializeFrom(ir);
+    PFEMElement :: initializeFrom(ir);
 }
 
 int

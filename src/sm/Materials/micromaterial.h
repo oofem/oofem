@@ -91,7 +91,7 @@ public:
 
     std :: string inputFileNameMicro;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_MicroMaterial_Name; }
     const char *giveClassName() const override { return "MicroMaterial"; }

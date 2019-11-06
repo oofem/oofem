@@ -61,14 +61,13 @@ TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 }
 
 
-IRResultType
-TR_SHELL01 :: initializeFrom(InputRecord *ir)
+void
+TR_SHELL01 :: initializeFrom(InputRecord &ir)
 {
     // proc tady neni return = this...   ??? termitovo
-    IRResultType result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
+    plate->initializeFrom(ir);
+    membrane->initializeFrom(ir);
 
 #if 0
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
@@ -82,17 +81,6 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
         return result;
     }
 #endif
-
-    result = plate->initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    result = membrane->initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
 }
 
 void

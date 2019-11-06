@@ -181,7 +181,7 @@ public:
 
     const char *giveClassName() const override { return "Eurocode2CreepMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_Eurocode2CreepMaterial_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

@@ -244,11 +244,10 @@ FE2FluidMaterial :: computeTangents3D(MatResponseMode mode, GaussPoint *gp, Time
     };
 }
 
-IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
+void FE2FluidMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    FluidDynamicMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_FE2FluidMaterial_fileName);
-    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)

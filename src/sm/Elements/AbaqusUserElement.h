@@ -200,7 +200,7 @@ public:
         return tempAmatrx;
     }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void postInitialize() override;
 

@@ -141,7 +141,7 @@ public:
      */
     FE2FluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     int checkConsistency() override;

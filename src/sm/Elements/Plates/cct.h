@@ -104,7 +104,7 @@ public:
     // definition & identification
     const char *giveClassName() const override { return "CCTPlate"; }
     const char *giveInputRecordName() const override { return _IFT_CCTPlate_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 9; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;

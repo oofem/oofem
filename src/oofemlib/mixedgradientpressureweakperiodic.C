@@ -90,10 +90,9 @@ DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 }
 
 
-IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir)
+void MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
+    MixedGradientPressureBC :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->order, _IFT_MixedGradientPressureWeakPeriodic_order);
     if ( this->order < 0 ) {
@@ -111,8 +110,6 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
         // then the linear terms, [x,0,0], [0,x,0] ... and so on
         this->tractionsdman->appendDof( new MasterDof( tractionsdman.get(), ( DofIDItem ) dofid ) );
     }
-
-    return MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 

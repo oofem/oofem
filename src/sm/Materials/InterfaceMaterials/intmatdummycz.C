@@ -56,9 +56,9 @@ FloatMatrixF<3,3> IntMatDummyCZ :: give3dStiffnessMatrix_dTdj(MatResponseMode rM
     return zero<3,3>();
 }
 
-IRResultType IntMatDummyCZ :: initializeFrom(InputRecord *ir)
+void IntMatDummyCZ :: initializeFrom(InputRecord &ir)
 {
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatDummyCZ :: giveInputRecord(DynamicInputRecord &input)

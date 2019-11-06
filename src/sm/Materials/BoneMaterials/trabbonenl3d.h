@@ -56,15 +56,14 @@ class TrabBoneNL3DStatus : public TrabBone3DStatus, public StructuralNonlocalMat
 {
 protected:
     /// Equivalent strain for averaging.
-    double localCumPlastStrainForAverage;
+    double localCumPlastStrainForAverage = 0.;
 
 public:
     TrabBoneNL3DStatus(GaussPoint * g);
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
-    const FloatArray *giveLTangentContrib();
+    double giveLocalCumPlastStrainForAverage() const { return localCumPlastStrainForAverage; }
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "TrabBoneNL3DStatus"; }
@@ -83,22 +82,21 @@ public StructuralNonlocalMaterialExtensionInterface,
 public NonlocalMaterialStiffnessInterface
 {
 protected:
-    double R;
-    double mParam;
+    double R = 0.;
+    double mParam = 0.;
 
 public:
     TrabBoneNL3D(int n, Domain * d);
-    virtual ~TrabBoneNL3D();
 
     const char *giveClassName() const override { return "TrabBoneNL3D"; }
     const char *giveInputRecordName() const override { return _IFT_TrabBoneNL3D_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType it) override;
 
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) override;
 
     /**
      * Computes the local cumulated plastic strain from given strain vector (full form).
@@ -107,9 +105,9 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    void computeLocalCumPlastStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    double computeLocalCumPlastStrain(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep)
     {
-        TrabBone3D :: computeCumPlastStrain(kappa, gp, tStep);
+        return TrabBone3D :: computeCumPlastStrain(gp, tStep);
     }
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep) override;

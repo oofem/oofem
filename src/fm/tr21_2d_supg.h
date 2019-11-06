@@ -62,7 +62,6 @@ protected:
 
 public:
     TR21_2D_SUPG(int n, Domain * aDomain);
-    virtual ~TR21_2D_SUPG();
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;

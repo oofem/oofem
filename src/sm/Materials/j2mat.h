@@ -65,7 +65,7 @@ public:
     J2Mat(int n, Domain * d);
     virtual ~J2Mat();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_J2Mat_Name; }
     const char *giveClassName() const override { return "J2Mat"; }
 

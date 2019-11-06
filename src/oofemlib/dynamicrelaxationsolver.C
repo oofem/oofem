@@ -55,10 +55,10 @@ DynamicRelaxationSolver :: DynamicRelaxationSolver(Domain *d, EngngModel *m) : N
 }
 
 
-IRResultType
-DynamicRelaxationSolver :: initializeFrom(InputRecord *ir)
+void
+DynamicRelaxationSolver :: initializeFrom(InputRecord &ir)
 {
-    return NRSolver :: initializeFrom(ir);
+    NRSolver :: initializeFrom(ir);
 }
 
 

@@ -65,7 +65,7 @@ public:
     const char *giveClassName() const override { return "Tr_WarpElement"; }
 
     int computeNumberOfDofs() override { return 4; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _Warping; }
     double giveThicknessAt(const FloatArray &gcoords);
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;

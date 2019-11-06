@@ -75,16 +75,10 @@ SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode) const
 
 
 // reads the model parameters from the input file
-IRResultType
-SteelRelaxMat :: initializeFrom(InputRecord *ir)
+void
+SteelRelaxMat :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->E, _IFT_SteelRelaxMat_E); // Young's modulus
 
@@ -136,9 +130,6 @@ SteelRelaxMat :: initializeFrom(InputRecord *ir)
     //this->tolerance =  1. / this->stiffnessFactor;
     this->tolerance =  1. / 1.e6;
     IR_GIVE_OPTIONAL_FIELD(ir, this->tolerance, _IFT_SteelRelaxMat_tolerance);
-
-
-    return IRRT_OK;
 }
 
 // creates a new material status  corresponding to this class

@@ -146,7 +146,7 @@ protected:
 public:
     LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
 

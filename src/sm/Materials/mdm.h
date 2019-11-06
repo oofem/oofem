@@ -260,7 +260,7 @@ public:
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     const char *giveInputRecordName() const override { return _IFT_MDM_Name; }

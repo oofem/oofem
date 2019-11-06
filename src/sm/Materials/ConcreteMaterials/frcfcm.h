@@ -113,7 +113,7 @@ public:
     FRCFCM(int n, Domain *d);
     virtual ~FRCFCM() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new FRCFCMStatus(gp); }
 

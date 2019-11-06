@@ -40,10 +40,10 @@ CompCol_ICPreconditioner :: CompCol_ICPreconditioner(const SparseMtrx &A, InputR
 { }
 
 
-IRResultType
-CompCol_ICPreconditioner :: initializeFrom(InputRecord *ir)
+void
+CompCol_ICPreconditioner :: initializeFrom(InputRecord &ir)
 {
-    return Preconditioner :: initializeFrom(ir);
+    Preconditioner :: initializeFrom(ir);
 }
 
 

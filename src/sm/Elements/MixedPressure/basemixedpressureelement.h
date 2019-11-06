@@ -55,7 +55,7 @@ public:
     BaseMixedPressureElement();
     virtual ~BaseMixedPressureElement() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
 protected:
 

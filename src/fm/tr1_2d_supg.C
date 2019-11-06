@@ -76,9 +76,6 @@ TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
     numberOfDofMans  = 3;
 }
 
-TR1_2D_SUPG :: ~TR1_2D_SUPG()
-{ }
-
 int
 TR1_2D_SUPG :: computeNumberOfDofs()
 {
@@ -94,10 +91,10 @@ TR1_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 FEInterpolation *
 TR1_2D_SUPG :: giveInterpolation() const { return & interp; }
 
-IRResultType
-TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_SUPG :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;               // Required by IR_GIVE_FIELD macro
+    SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
@@ -110,12 +107,8 @@ TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
         this->temp_vof = this->vof;
     }
 
-    result = SUPGElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+
     this->initGeometry();
-    return IRRT_OK;
 }
 
 

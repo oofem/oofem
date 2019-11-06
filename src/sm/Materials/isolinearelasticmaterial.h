@@ -109,7 +109,7 @@ public:
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
      * alpha ("talpha") are read. The parent class instanciateFrom method is called.
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -187,21 +187,21 @@ public:
     **
     */
 
-    virtual void giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                                         MatResponseMode,
-                                                         GaussPoint * gp,
-                                                         TimeStep * tStep);
+    void giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix & answer,
+                                                 MatResponseMode,
+                                                 GaussPoint * gp,
+                                                 TimeStep * tStep) override;
 
 
-    virtual void giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix & answer,
-                                                    MatResponseMode, GaussPoint * gp,
-                                                    TimeStep * tStep);
+    void giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix & answer,
+                                            MatResponseMode, GaussPoint * gp,
+                                            TimeStep * tStep) override;
 
 
-    virtual void giveInverseOfBulkModulus(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { answer  = 3. * ( 1. - 2. * nu ) / E; }
+    void giveInverseOfBulkModulus(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override { answer  = 3. * ( 1. - 2. * nu ) / E; }
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep);
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) override;
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) override;
 
 };
 } // end namespace oofem

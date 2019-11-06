@@ -77,7 +77,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_HydratingHeMoMaterial_Name; }
     const char *giveClassName() const override { return "HydratingHeMoMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // post-processing
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;

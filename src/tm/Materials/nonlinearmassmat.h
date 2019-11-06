@@ -67,7 +67,7 @@ protected:
 public:
     NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,

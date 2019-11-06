@@ -42,18 +42,13 @@
 namespace oofem {
 REGISTER_Material(TwoPhaseMaterial);
 
-IRResultType
-TwoPhaseMaterial :: initializeFrom(InputRecord *ir)
+void
+TwoPhaseMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoPhaseMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        OOFEM_WARNING("mat array should have two values");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_TwoPhaseMaterial_mat, "must have two values");
     }
-
-    return IRRT_OK;
 }
 
 

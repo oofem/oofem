@@ -109,7 +109,7 @@ public:
     /// Creates empty Output Manager. By default all components are selected.
     OutputManager(Domain * d);
     /// Initializes receiver according to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir);
 
     /**
      * Does the dofmanager output.

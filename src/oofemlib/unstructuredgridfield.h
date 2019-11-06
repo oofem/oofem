@@ -226,7 +226,7 @@ protected:
   private:
   public:
     CellInsertionFunctor () {}
-    virtual bool evaluate (Cell& member, OctantRecT<Cell>* cell) override {
+    bool evaluate (Cell& member, OctantRecT<Cell>* cell) override {
       BoundingBox b;
       member.giveBoundingBox(b);
       OctantRec::BoundingBoxStatus s = cell->testBoundingBox(b);

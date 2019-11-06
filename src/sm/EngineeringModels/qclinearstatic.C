@@ -83,11 +83,9 @@ QClinearStatic :: ~QClinearStatic()
 }
 
 
-IRResultType
-QClinearStatic :: initializeFrom(InputRecord *ir)
+void
+QClinearStatic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     LinearStatic :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, qcApproach, _IFT_QuasiContinuum_approach);
@@ -179,8 +177,6 @@ QClinearStatic :: initializeFrom(InputRecord *ir)
     }
 
 #endif
-
-    return IRRT_OK;
 }
 
 
@@ -290,11 +286,9 @@ void QClinearStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-IRResultType
-QClinearStatic :: initializeFullSolvedDomain(InputRecord *ir)
+void
+QClinearStatic :: initializeFullSolvedDomain(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainNodes, _IFT_FullSolvedDomain_nodes);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainElements, _IFT_FullSolvedDomain_elements);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainRadius, _IFT_FullSolvedDomain_radius);
@@ -308,8 +302,6 @@ QClinearStatic :: initializeFullSolvedDomain(InputRecord *ir)
         OOFEM_ERROR("invalid format of FullSolvedDomainBox");
     }
 #endif
-
-    return IRRT_OK;
 }
 
 
@@ -702,7 +694,7 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
 {
     // TO DO: use octree here
     double minDistance = 1.0e100;
-    DofManager *p;
+    DofManager *p = nullptr;
     // loop over all particles (nodes in existing domain)
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
         double dist = distance(coords, *d->giveDofManager(i)->giveCoordinates() );
@@ -715,7 +707,7 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
         return p;
     } else {
         OOFEM_ERROR( "Neares particle for point [%d, %d] not found", coords.at(1), coords.at(2) );
-        return NULL;
+        return nullptr;
     }
 }
 

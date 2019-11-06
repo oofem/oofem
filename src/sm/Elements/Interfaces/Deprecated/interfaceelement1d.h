@@ -84,7 +84,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_InterfaceElem1d_Name; }
     const char *giveClassName() const override { return "InterfaceElem1d"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
     integrationDomain giveIntegrationDomain() const override { return _Point; }
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;

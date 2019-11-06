@@ -98,7 +98,7 @@ class ConcreteFCMViscoElastic : public ConcreteFCM
 public:
     ConcreteFCMViscoElastic(int n, Domain *d);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "ConcreteFCMViscoElastic"; }
     const char *giveInputRecordName() const override { return _IFT_ConcreteFCMViscoElastic_Name; }
 

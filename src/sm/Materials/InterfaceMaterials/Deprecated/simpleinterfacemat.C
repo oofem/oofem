@@ -121,10 +121,10 @@ SimpleInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
 }
 
 
-IRResultType
-SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
+void
+SimpleInterfaceMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     frictCoeff = 0.;
     stiffCoeff = 0.;
@@ -135,8 +135,6 @@ SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_SimpleInterfaceMaterial_frictCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_SimpleInterfaceMaterial_stiffCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_SimpleInterfaceMaterial_normalClearance);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 

@@ -379,10 +379,10 @@ double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp) const
     return linearElasticMaterial->give(aProperty, gp);
 }
 
-IRResultType
-IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicDamageMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
     //Set limit on the maximum isotropic damage parameter if needed
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IsotropicDamageMaterial_maxOmega);
@@ -393,7 +393,6 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, permStrain, _IFT_IsotropicDamageMaterial_permstrain);
 
     IR_GIVE_FIELD(ir, tempDillatCoeff, _IFT_IsotropicDamageMaterial_talpha);
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 

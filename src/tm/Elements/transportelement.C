@@ -72,16 +72,12 @@ TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
 }
 
 
-IRResultType
-TransportElement :: initializeFrom(InputRecord *ir)
+void
+TransportElement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                          // Required by IR_GIVE_FIELD macro
-
-    result = Element::initializeFrom(ir);
+    Element::initializeFrom(ir);
     this->vofFunction = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, vofFunction, _IFT_TransportElement_vof_function);
-
-    return result;
 }
 
 

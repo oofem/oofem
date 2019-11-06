@@ -87,24 +87,24 @@ public:
     /// Assignment operator.
     DynamicInputRecord &operator = ( const DynamicInputRecord & );
 
-    std::unique_ptr<InputRecord> clone() override { return std::make_unique<DynamicInputRecord>(*this); }
+    std::unique_ptr<InputRecord> clone() const override { return std::make_unique<DynamicInputRecord>(*this); }
     void finish(bool wrn = true) override;
 
     std :: string giveRecordAsString() const override;
 
-    IRResultType giveRecordKeywordField(std :: string &answer, int &value) override;
-    IRResultType giveRecordKeywordField(std :: string &answer) override;
-    IRResultType giveField(int &answer, InputFieldType id) override;
-    IRResultType giveField(double &answer, InputFieldType id) override;
-    IRResultType giveField(bool &answer, InputFieldType id) override;
-    IRResultType giveField(std :: string &answer, InputFieldType id) override;
-    IRResultType giveField(FloatArray &answer, InputFieldType id) override;
-    IRResultType giveField(IntArray &answer, InputFieldType id) override;
-    IRResultType giveField(FloatMatrix &answer, InputFieldType id) override;
-    IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id) override;
-    IRResultType giveField(Dictionary &answer, InputFieldType id) override;
-    IRResultType giveField(std :: list< Range > &answer, InputFieldType id) override;
-    IRResultType giveField(ScalarFunction &function, InputFieldType id) override;
+    void giveRecordKeywordField(std :: string &answer, int &value) override;
+    void giveRecordKeywordField(std :: string &answer) override;
+    void giveField(int &answer, InputFieldType id) override;
+    void giveField(double &answer, InputFieldType id) override;
+    void giveField(bool &answer, InputFieldType id) override;
+    void giveField(std :: string &answer, InputFieldType id) override;
+    void giveField(FloatArray &answer, InputFieldType id) override;
+    void giveField(IntArray &answer, InputFieldType id) override;
+    void giveField(FloatMatrix &answer, InputFieldType id) override;
+    void giveField(std :: vector< std :: string > &answer, InputFieldType id) override;
+    void giveField(Dictionary &answer, InputFieldType id) override;
+    void giveField(std :: list< Range > &answer, InputFieldType id) override;
+    void giveField(ScalarFunction &function, InputFieldType id) override;
 
     bool hasField(InputFieldType id) override;
     void printYourself() override;
@@ -127,9 +127,6 @@ public:
     void setField(InputFieldType id);
     /// Removes given field from record.
     void unsetField(InputFieldType id);
-
-    void report_error(const char *_class, const char *proc, InputFieldType id,
-                      IRResultType result, const char *file, int line) override;
 };
 } // end namespace oofem
 #endif // dynamicinputrecord_h

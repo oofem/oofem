@@ -53,8 +53,6 @@ public:
      * @param d Domain to which new object will belongs.
      */
     TractionPressureBC(int i, Domain * d) : BoundaryCondition(i, d) { }
-    /// Destructor.
-    virtual ~TractionPressureBC() { }
 
     double give(Dof *dof, ValueModeType mode, double time) override;
 

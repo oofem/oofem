@@ -54,15 +54,11 @@ namespace oofem {
 REGISTER_PropagationLaw(PLCZdamageRadius)
 
 /////////////////////////////////////////////
-IRResultType PLCZdamageRadius :: initializeFrom(InputRecord *ir)
+void PLCZdamageRadius :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-    
     IR_GIVE_FIELD(ir, mIncrementRadius,         _IFT_PLCZdamageRadius_IncRadius);
     IR_GIVE_FIELD(ir, mDamageThreshold, _IFT_PLCZdamageRadius_DamageThreshold);
     IR_GIVE_OPTIONAL_FIELD(ir, this->mPropCS, _IFT_PLCZdamageRadius_PropagationCS);
-
-    return IRRT_OK;
 }
 
 void PLCZdamageRadius :: giveInputRecord(DynamicInputRecord &input)

@@ -78,7 +78,7 @@ public:
     PrescribedMean(int n, Domain * d) : ActiveBoundaryCondition(n, d), lambdaDman(std::make_unique<Node>(0, this->domain) ) {}
     virtual ~PrescribedMean() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                   const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;

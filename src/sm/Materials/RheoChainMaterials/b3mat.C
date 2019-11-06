@@ -42,13 +42,10 @@
 namespace oofem {
 REGISTER_Material(B3Material);
 
-IRResultType
-B3Material :: initializeFrom(InputRecord *ir)
+void
+B3Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MaxwellChainMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MaxwellChainMaterial :: initializeFrom(ir);
 
     //
     // NOTE
@@ -118,8 +115,6 @@ B3Material :: initializeFrom(InputRecord *ir)
     if ( mode == 0 ) {
         this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     }
-
-    return IRRT_OK;
 }
 
 void

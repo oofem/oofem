@@ -45,12 +45,9 @@ REGISTER_ContactDefinition(ContactDefinitionNode2NodeL)
 ContactDefinitionNode2Node :: ContactDefinitionNode2Node(ContactManager *cMan) : ContactDefinition(cMan){}
     
 
-IRResultType
-ContactDefinitionNode2Node :: initializeFrom(InputRecord *ir)
+void
+ContactDefinitionNode2Node :: initializeFrom(InputRecord &ir)
 {
- 
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-    
     IntArray masterNodes;
     IntArray slaveNodes;
     IR_GIVE_FIELD(ir, masterNodes, _IFT_ContactDefinitionNode2Node_MasterNodes);
@@ -65,11 +62,7 @@ ContactDefinitionNode2Node :: initializeFrom(InputRecord *ir)
 
         this->addContactElement(master);
     }
-    
-    return IRRT_OK;
 }
-
-
 
 
 // Same version but with Lagrange multipliers
@@ -79,11 +72,9 @@ ContactDefinitionNode2NodeL :: ContactDefinitionNode2NodeL(ContactManager *cMan)
 }
     
 
-IRResultType
-ContactDefinitionNode2NodeL :: initializeFrom(InputRecord *ir)
+void
+ContactDefinitionNode2NodeL :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-    
     IntArray masterNodes;
     IntArray slaveNodes;
     IR_GIVE_FIELD(ir, masterNodes, _IFT_ContactDefinitionNode2Node_MasterNodes);
@@ -96,14 +87,6 @@ ContactDefinitionNode2NodeL :: initializeFrom(InputRecord *ir)
 
         this->addContactElement(master);
     }
-    
-    
-      
-    return IRRT_OK;
 }
-
-
-
-
 
 }

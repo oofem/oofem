@@ -84,7 +84,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_ForeignTemperatureFieldLoad_Name; }
     const char *giveClassName() const override { return "ForeignTemperatureFieldLoad"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 };
 } // end namespace oofem
 #endif // foreigntempfield_h

@@ -105,7 +105,7 @@ public:
     const char *giveClassName() const override { return "FRCFCMNL"; }
     const char *giveInputRecordName() const override { return _IFT_FRCFCMNL_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;

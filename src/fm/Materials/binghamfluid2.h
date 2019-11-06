@@ -124,7 +124,7 @@ public:
 
     double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) const override;
     double give(int aProperty, GaussPoint *gp) const override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "BinghamFluidMaterial2"; }
     const char *giveInputRecordName() const override { return _IFT_BinghamFluidMaterial2_Name; }

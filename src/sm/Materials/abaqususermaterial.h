@@ -131,7 +131,7 @@ public:
      *  - umat (required, string): Filename of umat file dynamically library.
      *  - name (optional, string, default "umat"): Name of material model (used for input to umat routine).
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

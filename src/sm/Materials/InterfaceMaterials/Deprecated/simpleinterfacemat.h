@@ -108,7 +108,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new SimpleInterfaceMaterialStatus(gp); }

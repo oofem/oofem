@@ -109,11 +109,9 @@ ExpCZMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 }
 
 
-IRResultType
-ExpCZMaterial :: initializeFrom(InputRecord *ir)
+void
+ExpCZMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->GIc, _IFT_ExpCZMaterial_g1c);
 
     this->sigfs = 0.0;
@@ -130,10 +128,8 @@ ExpCZMaterial :: initializeFrom(InputRecord *ir)
 
     // check validity of the material paramters
     if ( this->GIc < 0.0 ) {
-        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_ExpCZMaterial_g1c, "GIc must be positive");
     }
-    return IRRT_OK;
 }
 
 int

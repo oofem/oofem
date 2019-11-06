@@ -254,11 +254,10 @@ InterpolatingFuction :: evaluateAtTime(double t)
 
 
 
-IRResultType
-InterpolatingFuction :: initializeFrom(InputRecord *ir)
+void
+InterpolatingFuction :: initializeFrom(InputRecord &ir)
 {
     std :: string name;
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     this->dimension = 2;
     IR_GIVE_OPTIONAL_FIELD(ir, dimension, _IFT_InterpolatingFuction_dim);
@@ -268,8 +267,7 @@ InterpolatingFuction :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        OOFEM_WARNING("Unable to open file %s", name.c_str());
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_InterpolatingFuction_filename, "Unable to open file: " + name);
     }
 
     if(this->dimension == 2){//2D field
@@ -298,7 +296,5 @@ InterpolatingFuction :: initializeFrom(InputRecord *ir)
         inputField >> field.at(4 * i+1) >> field.at(4 * i + 2) >> field.at(4 * i + 3) >> field.at(4 * i + 4);
       }
     }
-
-    return IRRT_OK;
 }
 } // end namespace oofem

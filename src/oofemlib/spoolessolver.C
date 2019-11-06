@@ -93,11 +93,9 @@ SpoolesSolver :: ~SpoolesSolver()
     }
 }
 
-IRResultType
-SpoolesSolver :: initializeFrom(InputRecord *ir)
+void
+SpoolesSolver :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     int val;
     std :: string msgFileName;
 
@@ -112,8 +110,6 @@ SpoolesSolver :: initializeFrom(InputRecord *ir)
         msgFile = stdout;
         msgFileCloseFlag = 0;
     }
-
-    return IRRT_OK;
 }
 
 

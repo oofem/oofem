@@ -85,7 +85,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_TR_SHELL01_Name; }
     const char *giveClassName() const override { return "TR_SHELL01"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep) override;
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep) override;

@@ -45,10 +45,11 @@
 namespace oofem {
 REGISTER_Material(B3SolidMaterial);
 
-IRResultType
-B3SolidMaterial :: initializeFrom(InputRecord *ir)
+void
+B3SolidMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    // ph!!!
+    //KelvinChainMaterial :: initializeFrom(ir);
 
     //
     // NOTE
@@ -117,8 +118,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     if ( this->shMode == B3_PointShrinkage ) {   // #2 in enumerator
 
         if ( this->MicroPrestress == 0 ) {
-            OOFEM_WARNING("to use B3_PointShrinkageMPS - MicroPrestress must be = 1");       //or else no external fiels would be found
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, _IFT_B3SolidMaterial_microprestress, "to use B3_PointShrinkageMPS - MicroPrestress must be = 1"); //or else no external fiels would be found
         }
 
         kSh = -1;
@@ -131,16 +131,18 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
 
         // either kSh or initHum and finalHum must be given in input record
         if ( !( ( this->kSh != -1 ) || ( ( initHum != -1 ) && ( finalHum != -1 ) ) ) ) {
-            OOFEM_WARNING("either kSh or initHum and finalHum must be given in input record");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, "none", "either kSh or initHum and finalHum must be given in input record");
         }
         
-         if ( ( ( initHum < 0.2 ) || ( initHum > 0.98 ) || ( finalHum < 0.2 ) || ( finalHum > 0.98 ) ) && ( this->kSh == -1 ) ) {
-          OOFEM_ERROR("initital humidity or final humidity out of range (0.2 - 0.98)");
+        if ( ( initHum < 0.2 || initHum > 0.98 ) && this->kSh == -1 ) {
+            throw ValueInputException(ir, _IFT_B3SolidMaterial_initialhumidity, "initital humidity out of range (0.2 - 0.98)");
+        }
+        if ( ( finalHum < 0.2 || finalHum > 0.98 ) && this->kSh == -1 ) {
+            throw ValueInputException(ir, _IFT_B3SolidMaterial_finalhumidity, "final humidity out of range (0.2 - 0.98)");
         }
         
 
-	 if ( this->kSh == -1 ) { // predict kSh from composition
+        if ( this->kSh == -1 ) { // predict kSh from composition
             IR_GIVE_OPTIONAL_FIELD(ir, alpha1, _IFT_B3Material_alpha1);       // influence of cement type
             IR_GIVE_OPTIONAL_FIELD(ir, alpha2, _IFT_B3Material_alpha2);       // influence of curing type
             this->kSh = alpha1 * alpha2 * ( 1 - pow(finalHum, 3.) ) * ( 0.019 * pow(wc * c, 2.1) * pow(fc, -0.28) + 270 ) * 1.e-6 / fabs(initHum - finalHum);
@@ -176,10 +178,6 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     if ( mode == 0 ) {
         this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     }
-
-    // ph!!!
-    //return KelvinChainMaterial :: initializeFrom(ir);
-    return IRRT_OK;
 }
 
 void

@@ -51,13 +51,10 @@ NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_m
 {
 }
 
-IRResultType
-NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
+void
+NLTransientTransportProblem :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    result = NonStationaryTransportProblem :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+     NonStationaryTransportProblem :: initializeFrom(ir);
 
     int val = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NLTransientTransportProblem_nsmax);
@@ -73,8 +70,6 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
     } else {
         NR_Mode = nrsolverModifiedNRM;
     }
-
-    return IRRT_OK;
 }
 
 TimeStep *

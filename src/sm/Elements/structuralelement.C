@@ -1227,10 +1227,10 @@ StructuralElement :: adaptiveUpdate(TimeStep *tStep)
     return result;
 }
 
-IRResultType
-StructuralElement :: initializeFrom(InputRecord *ir)
+void
+StructuralElement :: initializeFrom(InputRecord &ir)
 {
-    return Element :: initializeFrom(ir);
+    Element :: initializeFrom(ir);
 }
 
 void StructuralElement :: giveInputRecord(DynamicInputRecord &input)

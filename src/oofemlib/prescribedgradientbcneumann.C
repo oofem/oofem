@@ -72,10 +72,10 @@ PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 }
 
 
-IRResultType PrescribedGradientBCNeumann :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCNeumann :: initializeFrom(InputRecord &ir)
 {
     ActiveBoundaryCondition :: initializeFrom(ir);
-    return PrescribedGradientHomogenization :: initializeFrom(ir);
+    PrescribedGradientHomogenization :: initializeFrom(ir);
 }
 
 

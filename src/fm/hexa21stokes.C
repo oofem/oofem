@@ -78,9 +78,6 @@ Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), Sp
     this->numberOfGaussPoints = 27;
 }
 
-Hexa21Stokes :: ~Hexa21Stokes()
-{ }
-
 void Hexa21Stokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {

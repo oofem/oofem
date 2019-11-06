@@ -94,7 +94,7 @@ public:
 
     const char *giveClassName() const override { return "HydratingConcreteMat"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // post-processing
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;

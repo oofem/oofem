@@ -51,11 +51,11 @@ Node2NodeLagrangianMultiplierContact :: Node2NodeLagrangianMultiplierContact(int
 {}
 
 
-IRResultType
-Node2NodeLagrangianMultiplierContact :: initializeFrom(InputRecord *ir)
+void
+Node2NodeLagrangianMultiplierContact :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-    this->useTangent = ir->hasField(_IFT_Node2NodeLagrangianMultiplierContact_useTangent);
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    this->useTangent = ir.hasField(_IFT_Node2NodeLagrangianMultiplierContact_useTangent);
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_Node2NodeLagrangianMultiplierContact_masterSet);
     IR_GIVE_FIELD(ir, this->slaveSet, _IFT_Node2NodeLagrangianMultiplierContact_slaveSet);
 
@@ -64,8 +64,6 @@ Node2NodeLagrangianMultiplierContact :: initializeFrom(InputRecord *ir)
         lmdm.push_back(std :: unique_ptr< Node >(new Node(0, domain) ) );
         lmdm.at(pos)->appendDof(new MasterDof(this->lmdm.at(pos).get(), ( DofIDItem ) ( this->giveDomain()->giveNextFreeDofID() ) ) );
     }
-
-    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 

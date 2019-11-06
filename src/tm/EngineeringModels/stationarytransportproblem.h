@@ -88,7 +88,7 @@ public:
     TimeStep *giveNextStep() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int checkConsistency() override;
 

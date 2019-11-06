@@ -72,7 +72,7 @@ public:
     /// Destructor.
     virtual ~SlaveNode(void) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void postInitialize() override;
     bool isDofTypeCompatible(dofType type) const override { return ( type == DT_master || type == DT_slave ); }
     void updateLocalNumbering(EntityRenumberingFunctor &f) override;

@@ -79,18 +79,18 @@ public:
     /// Destructor.
     virtual ~Node2NodePenaltyContact() {};
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
+    void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
 
 
-    virtual const char *giveClassName() const { return "Node2NodePenaltyContact"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Node2NodePenaltyContact_Name; }
+    const char *giveClassName() const override { return "Node2NodePenaltyContact"; }
+    const char *giveInputRecordName() const override { return _IFT_Node2NodePenaltyContact_Name; }
 
 
     void computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
@@ -101,7 +101,7 @@ public:
 
     void computeExternalForcesFromContact(FloatArray &answer,  Node *masterNode, Node *slaveNode, TimeStep *tStep);
 
-    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
 
 };
 } // end namespace oofem

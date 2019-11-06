@@ -41,10 +41,10 @@
 namespace oofem {
 REGISTER_BoundaryCondition(ConstantEdgeLoad);
 
-IRResultType
-ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
+void
+ConstantEdgeLoad :: initializeFrom(InputRecord &ir)
 {
-    return BoundaryLoad :: initializeFrom(ir);
+    BoundaryLoad :: initializeFrom(ir);
 }
 
 void

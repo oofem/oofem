@@ -83,11 +83,9 @@ Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
 }
 
 
-IRResultType
-Material :: initializeFrom(InputRecord *ir)
+void
+Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     double value;
 
 #  ifdef VERBOSE
@@ -102,8 +100,6 @@ Material :: initializeFrom(InputRecord *ir)
     
     this->preCastingTimeMat = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, preCastingTimeMat, _IFT_Material_preCastingTimeMat);
-
-    return IRRT_OK;
 }
 
 

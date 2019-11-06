@@ -48,16 +48,16 @@ HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e) { 
 
 HOMExportModule :: ~HOMExportModule() { }
 
-IRResultType
-HOMExportModule :: initializeFrom(InputRecord *ir)
+void
+HOMExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
+    ExportModule :: initializeFrom(ir);
+
     IR_GIVE_OPTIONAL_FIELD(ir, this->ists, _IFT_HOMExportModule_ISTs);
     this->reactions = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->reactions, _IFT_HOMExportModule_reactions);
     this->scale = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->scale, _IFT_HOMExportModule_scale);
-    return ExportModule :: initializeFrom(ir);
 }
 
 void

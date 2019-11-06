@@ -35,149 +35,114 @@
 #include "inputrecord.h"
 
 namespace oofem {
-InputRecord :: InputRecord() { }
 
-InputRecord :: InputRecord(const InputRecord &src) {  }
-
-InputRecord &
-InputRecord :: operator = ( const InputRecord & src )
-{
-    return * this;
-}
-
-const char *
-InputRecord :: strerror(IRResultType rt)
-{
-    switch ( rt ) {
-    case IRRT_NOTFOUND:
-        return "Missing Keyword"; // string literal is statically allocated, return safe
-
-    case IRRT_BAD_FORMAT:
-        return "Bad format";
-
-    default:
-        return "Unknown error";
-    }
-}
-
-IRResultType
+void
 InputRecord :: giveOptionalField(int &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(double &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(bool &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(std :: string &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(FloatArray &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(IntArray &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(FloatMatrix &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(std :: vector< std :: string > &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(std :: list< Range > &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
-IRResultType
+void
 InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
 {
-    IRResultType r = this->giveField(answer, id);
-    if ( r == IRRT_NOTFOUND ) {
-        return IRRT_OK;
-    } else {
-        return r;
+    if ( this->hasField(id) ) {
+        try {
+            this->giveField(answer, id);
+        } catch ( MissingKeywordInputException & ) { }
     }
 }
 
@@ -190,14 +155,25 @@ InputException::InputException(const InputRecord& ir, std::string keyword, int n
 MissingKeywordInputException::MissingKeywordInputException(const InputRecord& ir, std::string kw, int n) :
     InputException(ir, std::move(kw), n)
 {
-    msg = "Missing keyword \"" + keyword + "\" on input " + std::to_string(number) + "\nRecord: \"" + record + "\"";
+    msg = "Missing keyword \"" + keyword + "\" on input " + std::to_string(number) + \
+          "\nRecord: \"" + record + "\"";
 }
 
 
 BadFormatInputException::BadFormatInputException(const InputRecord& ir, std::string kw, int n) :
     InputException(ir, std::move(kw), n)
 {
-    msg = "Bad format for record \"" + keyword + "\" on input " + std::to_string(number) + "\nRecord: \"" + record + "\"";
+    msg = "Bad format for keyword \"" + keyword + "\" on input " + std::to_string(number) + \
+          "\nRecord: \"" + record + "\"";
+}
+
+
+ValueInputException::ValueInputException(const InputRecord& ir, std::string kw, const std::string &reason) :
+    InputException(ir, std::move(kw), -1)
+{
+    msg = "Value input error for keyword \"" + keyword + "\"" + \
+          "\nReason: \"" + reason + "\"\n" + \
+          "\nRecord: \"" + record + "\"";
 }
 
 
@@ -208,6 +184,11 @@ const char* MissingKeywordInputException::what() const noexcept
 
 
 const char* BadFormatInputException::what() const noexcept
+{
+    return msg.c_str();
+}
+
+const char* ValueInputException::what() const noexcept
 {
     return msg.c_str();
 }

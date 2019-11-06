@@ -53,25 +53,23 @@ class TrabBoneGrad3DStatus : public TrabBone3DStatus, GradientDamageMaterialStat
 {
 protected:
     /// Equivalent strain for avaraging
-    double nlKappa;
+    double nlKappa = 0.;
     /// Reference to the basic elastic material
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
     TrabBoneGrad3DStatus(GaussPoint *g);
-    virtual ~TrabBoneGrad3DStatus();
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    virtual const char *giveClassName() const { return "TrabBoneGrad3DStatus"; }
+    const char *giveClassName() const override { return "TrabBoneGrad3DStatus"; }
 
 
-    virtual double giveNonlocalCumulatedStrain() { return nonlocalDamageDrivingVariable; }
-    virtual void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalDamageDrivingVariable = nonlocalCumulatedStrain; }
+    double giveNonlocalCumulatedStrain() const { return nonlocalDamageDrivingVariable; }
+    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalDamageDrivingVariable = nonlocalCumulatedStrain; }
 
-    virtual void initTempStatus();
-
-    virtual void updateYourself(TimeStep *);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *) override;
 };
 
 
@@ -81,19 +79,18 @@ public:
 class TrabBoneGrad3D : public TrabBone3D, GradientDamageMaterialExtensionInterface
 {
 protected:
-    double L;
-    double mParam;
+    double L = 0.;
+    double mParam = 0.;
 
 public:
     TrabBoneGrad3D(int n, Domain *d);
-    virtual ~TrabBoneGrad3D();
 
-    virtual const char *giveClassName() const { return "TrabBoneGrad3D"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TrabBoneGrad3D_Name; }
+    const char *giveClassName() const override { return "TrabBoneGrad3D"; }
+    const char *giveInputRecordName() const override { return _IFT_TrabBoneGrad3D_Name; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual bool hasMaterialModeCapability(MaterialMode mode) const;
-    virtual Interface *giveInterface(InterfaceType t) {
+    void initializeFrom(InputRecord &ir) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
+    Interface *giveInterface(InterfaceType t) override {
         if ( t == GradientDamageMaterialExtensionInterfaceType ) {
             return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
@@ -101,33 +98,29 @@ public:
         }
     }
 
-    virtual void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
     void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep);
+    void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
 
-
-
-
-
-    virtual void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) override;
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     //LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
 protected:
     // Creates the corresponding material status
-    MaterialStatus *CreateStatus(GaussPoint *gp) const { return new TrabBoneGrad3DStatus(gp); }
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneGrad3DStatus(gp); }
 };
 } // end namespace oofem
 

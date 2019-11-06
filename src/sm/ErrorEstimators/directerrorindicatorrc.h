@@ -98,7 +98,7 @@ public:
     double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0) override;
     double giveDofManDensity(int num) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int estimateMeshDensities(TimeStep *tStep) override;
     RemeshingStrategy giveRemeshingStrategy(TimeStep *tStep) override;

@@ -132,7 +132,7 @@ public:
      */
     double computeBondForceStiffness(double kappa) const;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CebFipSlip90MaterialStatus(gp); }

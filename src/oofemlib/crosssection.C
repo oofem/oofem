@@ -64,19 +64,12 @@ CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npointsXY, in
     return irule.setUpIntegrationPoints( element->giveIntegrationDomain(), npointsXY, npointsZ, element->giveMaterialMode() );
 }
 
-IRResultType
-CrossSection :: initializeFrom(InputRecord *ir)
-//
-// instanciates receiver from input record
-//
+void
+CrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     // Read set number the cross section is applied to
     this->setNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _IFT_CrossSection_SetNumber);
-
-    return IRRT_OK;
 }
 
 void

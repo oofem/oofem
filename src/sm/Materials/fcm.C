@@ -89,7 +89,7 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     int nCr = status->giveNumberOfCracks();
     int nMaxCr = status->giveMaxNumberOfCracks(gp);
 
-    double maxErr;
+    double maxErr = 0.;
     double maxTau = 0.;
 
     double G;
@@ -1974,32 +1974,23 @@ FCMMaterial :: computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearD
 
   
 
-IRResultType
-FCMMaterial :: initializeFrom(InputRecord *ir)
+void
+FCMMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     this->nAllowedCracks = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, nAllowedCracks, _IFT_FCM_nAllowedCracks);
 
 
     this->crackSpacing = -1.;
-    if  ( ir->hasField(_IFT_FCM_crackSpacing) ) {
+    if ( ir.hasField(_IFT_FCM_crackSpacing) ) {
         IR_GIVE_FIELD(ir, crackSpacing, _IFT_FCM_crackSpacing);
     }
 
     this->multipleCrackShear = false;
-    if  ( ir->hasField(_IFT_FCM_multipleCrackShear) ) {
+    if ( ir.hasField(_IFT_FCM_multipleCrackShear) ) {
         this->multipleCrackShear = true;
     }
 
@@ -2021,8 +2012,6 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, shearCoeffNumer, _IFT_FCM_shearCoeffNumer);
     this->normalCoeffNumer = -1. * fcm_BIGNUMBER;
     IR_GIVE_OPTIONAL_FIELD(ir, normalCoeffNumer, _IFT_FCM_normalCoeffNumer);
-
-    return IRRT_OK;
 }
 
 

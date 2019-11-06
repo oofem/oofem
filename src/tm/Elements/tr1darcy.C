@@ -60,10 +60,10 @@ Tr1Darcy :: Tr1Darcy(int n, Domain *aDomain) : TransportElement(n, aDomain)
     numberOfDofMans = 3;
 }
 
-IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
+void Tr1Darcy :: initializeFrom(InputRecord &ir)
 {
     this->numberOfGaussPoints = 1;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 FEInterpolation *
@@ -94,10 +94,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mod
 
         auto D = mat->computeTangent2D(mode, gp, tStep);
         Ke += detJ * gp->giveWeight() * Tdot(B, dot(D, B));
-        std::cout << "D = " << D << std::endl;
-        std::cout << "B = " << B << std::endl;
     }
-    std::cout << "Ke = " << Ke << std::endl;
     answer = Ke;
 }
 
@@ -135,13 +132,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
         auto w = mat->computeFlux2D(gradp, p, gp, tStep);
 
         fe += -gp->giveWeight() * detJ * Tdot(B, w);
-        std::cout << "f_B = " << B << std::endl;
-        std::cout << "n = " << B << std::endl;
-        std::cout << "p = " << p << std::endl;
-        std::cout << "grad = " << gradp << std::endl;
-        std::cout << "w = " << p << std::endl;
     }
-    std::cout << "fe = " << fe << std::endl;
     answer = fe;
 }
 

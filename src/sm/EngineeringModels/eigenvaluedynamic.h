@@ -89,7 +89,7 @@ public:
     int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) override;
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
     bool newDofHandling() override { return true; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
     TimeStep *giveNextStep() override;

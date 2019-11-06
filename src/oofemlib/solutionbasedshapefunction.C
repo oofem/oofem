@@ -69,10 +69,10 @@ SolutionbasedShapeFunction :: SolutionbasedShapeFunction(int n, Domain *d) : Act
 {}
 
 
-IRResultType
-SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
+void
+SolutionbasedShapeFunction :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    ActiveBoundaryCondition :: initializeFrom(ir);
 
     // Load problem file
     this->filename = "";
@@ -101,8 +101,6 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
     }
 
     init();
-
-    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 DofManager *
@@ -477,7 +475,7 @@ SolutionbasedShapeFunction :: setLoads(EngngModel &myEngngModel, int d)
 
     int bcID = myEngngModel.giveDomain(1)->giveNumberOfBoundaryConditions() + 1;
     auto myBodyLoad = classFactory.createBoundaryCondition( "deadweight", bcID, myEngngModel.giveDomain(1) );
-    myBodyLoad->initializeFrom(& ir);
+    myBodyLoad->initializeFrom(ir);
     myEngngModel.giveDomain(1)->setBoundaryCondition(bcID, std::move(myBodyLoad));
 
     for ( auto &elem : myEngngModel.giveDomain(1)->giveElements() ) {
@@ -614,7 +612,7 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
         bcID = d->giveDofManager()->giveDomain()->giveNumberOfBoundaryConditions() + 1;
 
         auto myBC = classFactory.createBoundaryCondition( "boundarycondition", bcID, d->giveDofManager()->giveDomain() );
-        myBC->initializeFrom(& ir);
+        myBC->initializeFrom(ir);
         d->giveDofManager()->giveDomain()->setBoundaryCondition(bcID, std::move(myBC));
 
         d->setBcId(bcID);

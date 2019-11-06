@@ -56,16 +56,12 @@ InteractionPFEMParticle :: InteractionPFEMParticle(int n, Domain *aDomain) : PFE
 /**
  * Gets from the source line from the data file all the data of the receiver.
  */
-IRResultType
-InteractionPFEMParticle :: initializeFrom(InputRecord *ir)
+void
+InteractionPFEMParticle :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;							// Required by IR_GIVE_FIELD macro
-
-    result = PFEMParticle :: initializeFrom(ir);
+    PFEMParticle :: initializeFrom(ir);
 
     IR_GIVE_OPTIONAL_FIELD(ir, coupledNode, _IFT_InteractionPFEMParticle_CoupledNode);
-
-    return (result != IRRT_OK) ? result : IRRT_OK;
 }
 
 /**

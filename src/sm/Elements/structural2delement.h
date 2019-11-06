@@ -83,7 +83,7 @@ public:
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     double computeVolumeAround(GaussPoint *gp) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double giveCharacteristicLength(const FloatArray &normalToCrackPlane) override;
 

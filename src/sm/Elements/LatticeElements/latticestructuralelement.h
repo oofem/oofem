@@ -56,7 +56,7 @@ public:
     LatticeStructuralElement(int n, Domain *d);
     virtual ~LatticeStructuralElement();
 
-    virtual IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     /**
      * Returns the cross-sectional area of the lattice element.

@@ -67,15 +67,13 @@ useNumTangent(true)
 {}
 
 
-IRResultType
-StructuralFE2Material :: initializeFrom(InputRecord *ir)
+void
+StructuralFE2Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_StructuralFE2Material_fileName);
 
-    useNumTangent = ir->hasField(_IFT_StructuralFE2Material_useNumericalTangent);
-
-    return StructuralMaterial :: initializeFrom(ir);
+    useNumTangent = ir.hasField(_IFT_StructuralFE2Material_useNumericalTangent);
 }
 
 
@@ -403,10 +401,9 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
         DynamicDataReader dataReader("fe2");
         if ( ext_xMan != NULL ) {
 
-            IRResultType result; // Required by IR_GIVE_FIELD macro
             std::vector<std::unique_ptr<EnrichmentItem>> eiList;
 
-            //DynamicInputRecord *xmanRec = std::make_unique<DynamicInputRecord>();
+            //auto &xmanRec = std::make_unique<DynamicInputRecord>();
             //ext_xMan->giveInputRecord(* xmanRec);
             //dataReader.insertInputRecord(DataReader :: IR_xfemManRec, xmanRec);
 
@@ -417,13 +414,9 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
                 ext_ei->appendInputRecords(dataReader);
 
 
-                InputRecord *mir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+                auto &mir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
                 std :: string name;
-                result = mir->giveRecordKeywordField(name);
-
-                if ( result != IRRT_OK ) {
-                    mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
-                }
+                mir.giveRecordKeywordField(name);
 
                 std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this_xMan, rve_domain ) );
                 if ( ei.get() == NULL ) {

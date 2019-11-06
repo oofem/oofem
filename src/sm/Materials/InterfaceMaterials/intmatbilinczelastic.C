@@ -109,11 +109,9 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, Gau
 
 
 const double tolerance = 1.0e-12; // small number
-IRResultType
-IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
+void
+IntMatBilinearCZElastic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZElastic_kn);
     this->knc = kn0;                        // Defaults to the same stiffness in compression and tension
     IR_GIVE_OPTIONAL_FIELD(ir, this->knc, _IFT_IntMatBilinearCZElastic_knc);
@@ -132,25 +130,19 @@ IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
     this->gnmax = 2.0 * GIc / sigfn;                         // @todo defaults to zero - will this cause problems?
     this->kn1 = -this->sigfn / ( this->gnmax - this->gn0 );  // slope during softening part in normal dir
 
-    result = StructuralInterfaceMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     // check validity of the material paramters
     double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
     if ( this->kn0 < 0.0 ) {
-        OOFEM_WARNING("stiffness kn0 is negative (%.2e)", this->kn0);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZElastic_kn, "stiffness kn0 is negative");
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_WARNING("stiffness ks0 is negative (%.2e)", this->ks0);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZElastic_ks, "stiffness ks0 is negative");
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_WARNING("GIc is negative (%.2e)", this->GIc);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IntMatBilinearCZElastic_g1c, "GIc is negative");
     } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        //OOFEM_WARNING("kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical", this->kn0, kn0min);
-        //return IRRT_BAD_FORMAT;
+        //throw ValueInputException(ir, _IFT_IntMatBilinearCZElastic_kn, "kn0 is below minimum stiffness, which is unphysical");
     }
-    return IRRT_OK;
 }
 
 void IntMatBilinearCZElastic :: giveInputRecord(DynamicInputRecord &input)

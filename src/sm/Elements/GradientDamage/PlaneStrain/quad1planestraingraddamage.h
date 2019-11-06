@@ -48,39 +48,33 @@ protected:
   static IntArray locationArray_u;
   static IntArray locationArray_d;
 
-
 public:
     Quad1PlaneStrainGradDamage(int n, Domain * d);
     virtual ~Quad1PlaneStrainGradDamage() { }
 
-    //    virtual IRResultType initializeFrom(InputRecord *ir);
+    //void initializeFrom(InputRecord &ir) override;
 
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1PlaneStrainGradDamage_Name; }
-    virtual const char *giveClassName() const { return "Quad1PlaneStrainGradDamage"; }
+    const char *giveInputRecordName() const override { return _IFT_Quad1PlaneStrainGradDamage_Name; }
+    const char *giveClassName() const override { return "Quad1PlaneStrainGradDamage"; }
 
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
-    virtual int computeNumberOfDofs() { return 12; }
+    MaterialMode giveMaterialMode() override { return _PlaneStrain; }
+    int computeNumberOfDofs() override { return 12; }
 
 protected:
-    virtual void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer);
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override { GradientDamageElement :: computeStiffnessMatrix(answer, rMode, tStep); }
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override { GradientDamageElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    void giveDofManDofIDMask_u(IntArray &answer) const;
-    void giveDofManDofIDMask_d(IntArray &answer) const;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    void giveDofManDofIDMask_u(IntArray &answer) const override;
+    void giveDofManDofIDMask_d(IntArray &answer) const override;
     
-    virtual StructuralElement *giveStructuralElement() { return this; }
-    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
-    void postInitialize();
-    virtual void giveLocationArray_u(IntArray &answer);
-    virtual void giveLocationArray_d(IntArray &answer);
-
-
-
-
-    
+    StructuralElement *giveStructuralElement() override { return this; }
+    NLStructuralElement *giveNLStructuralElement() override { return this; }
+    void postInitialize() override;
+    void giveLocationArray_u(IntArray &answer) override;
+    void giveLocationArray_d(IntArray &answer) override;
 };
 } // end namespace oofem
 #endif // quad1planestraingrad_h

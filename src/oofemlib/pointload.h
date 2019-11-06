@@ -87,7 +87,7 @@ public:
     CoordSystType giveCoordSystMode() override { return coordSystemType; }
     //FormulationType giveFormulationType () override { return FT_Entity; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bcType giveType() const override { return lType; }

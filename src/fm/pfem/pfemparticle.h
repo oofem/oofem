@@ -73,12 +73,12 @@ public:
     /**
      * Destructor.
      */
-    ~PFEMParticle(void) { }
+    virtual ~PFEMParticle(void) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkConsistency();
+    void initializeFrom(InputRecord &ir) override;
+    int checkConsistency() override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
     /// Returns the free-propery flag
     virtual bool isFree() { return freeFlag; }
@@ -95,13 +95,13 @@ public:
     /// Sets the activeFlag to false
     virtual void deactivate() { activeFlag = false; }
 
-    virtual void printOutputAt(FILE *stream, TimeStep *stepN);
+    void printOutputAt(FILE *stream, TimeStep *stepN) override;
 
-    virtual const char *giveClassName() const { return "PFEMParticle"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PFEMParticle_Name; }
+    const char *giveClassName() const override { return "PFEMParticle"; }
+    const char *giveInputRecordName() const override { return _IFT_PFEMParticle_Name; }
 
 #ifdef __OOFEG
-    virtual void drawScalar(oofegGraphicContext &gc);
+    void drawScalar(oofegGraphicContext &gc) override;
 #endif
 };
 } // end namespace oofem

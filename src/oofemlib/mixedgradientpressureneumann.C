@@ -657,9 +657,9 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
 }
 
 
-IRResultType MixedGradientPressureNeumann :: initializeFrom(InputRecord *ir)
+void MixedGradientPressureNeumann :: initializeFrom(InputRecord &ir)
 {
-    return MixedGradientPressureBC :: initializeFrom(ir);
+    MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 

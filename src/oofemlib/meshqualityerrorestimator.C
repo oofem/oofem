@@ -115,8 +115,8 @@ int MeshQualityErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tSte
     return true;
 }
 
-IRResultType MeshQualityErrorEstimator :: initializeFrom(InputRecord *ir)
+void MeshQualityErrorEstimator :: initializeFrom(InputRecord &ir)
 {
-    return ErrorEstimator :: initializeFrom(ir);
+    ErrorEstimator :: initializeFrom(ir);
 }
 } // end namespace oofem

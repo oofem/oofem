@@ -111,7 +111,7 @@ public:
     double computeDamageParamPrime(double tempKappa);
     virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 

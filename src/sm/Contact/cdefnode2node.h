@@ -76,7 +76,7 @@ public:
     /// Destructor.
     virtual ~ContactDefinitionNode2Node(){};
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "ContactDefinitionNode2Node"; }
     virtual const char *giveInputRecordName() const { return _IFT_ContactDefinitionNode2Node_Name; } 
@@ -98,7 +98,7 @@ public:
     /// Destructor.
     virtual ~ContactDefinitionNode2NodeL(){};
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "ContactDefinitionNode2NodeL"; }
     const char *giveInputRecordName() const override { return _IFT_ContactDefinitionNode2NodeL_Name; }

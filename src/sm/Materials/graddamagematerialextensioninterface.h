@@ -101,11 +101,7 @@ public:
     virtual void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) = 0;
     virtual void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) = 0;
 
-
-
-
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 };
 
 class GradientDamageMaterialStatusExtensionInterface : public Interface

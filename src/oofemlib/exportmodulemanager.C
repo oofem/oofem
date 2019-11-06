@@ -44,14 +44,11 @@ ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager< 
 ExportModuleManager :: ~ExportModuleManager()
 { }
 
-IRResultType
-ExportModuleManager :: initializeFrom(InputRecord *ir)
+void
+ExportModuleManager :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     this->numberOfModules = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfModules, _IFT_ModuleManager_nmodules);
-    return IRRT_OK;
 }
 
 std::unique_ptr<ExportModule> ExportModuleManager :: CreateModule(const char *name, int n, EngngModel *emodel)

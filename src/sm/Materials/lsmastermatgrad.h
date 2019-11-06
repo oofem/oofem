@@ -61,7 +61,7 @@ public:
     LargeStrainMasterMaterialGrad(int n, Domain *d);
     virtual ~LargeStrainMasterMaterialGrad();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     Interface *giveInterface(InterfaceType t) override {
         if ( t == GradientDamageMaterialExtensionInterfaceType ) {

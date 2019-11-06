@@ -55,7 +55,7 @@ class TrabBoneNLStatus : public TrabBoneMaterialStatus, public StructuralNonloca
 {
 protected:
     /// Equivalent strain for averaging.
-    double localCumPlastStrainForAverage;
+    double localCumPlastStrainForAverage = 0.;
 
 public:
     TrabBoneNLStatus(GaussPoint * g);
@@ -81,28 +81,27 @@ public:
 class TrabBoneNL : public TrabBoneMaterial, public StructuralNonlocalMaterialExtensionInterface
 {
 protected:
-    double R;
-    double mParam;
+    double R = 0.;
+    double mParam = 0.;
 
 public:
     TrabBoneNL(int n, Domain * d);
-    virtual ~TrabBoneNL();
 
     const char *giveClassName() const override { return "TrabBoneNL"; }
     const char *giveInputRecordName() const override { return _IFT_TrabBoneNL_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType) override;
 
-    void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) override;
 
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
-    void computeLocalCumPlastStrain(double &alpha, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    double computeLocalCumPlastStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     {
-        TrabBoneMaterial :: computeCumPlastStrain(alpha, gp, tStep);
+        return TrabBoneMaterial :: computeCumPlastStrain(gp, tStep);
     }
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;

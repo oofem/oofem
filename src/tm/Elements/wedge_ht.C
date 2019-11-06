@@ -68,11 +68,11 @@ Wedge_mt :: Wedge_mt(int n, Domain *aDomain) : Wedge_ht(n, aDomain)
 }
 
 
-IRResultType
-Wedge_ht :: initializeFrom(InputRecord *ir)
+void
+Wedge_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 6;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 
 }
 

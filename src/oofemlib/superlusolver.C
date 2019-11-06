@@ -60,10 +60,9 @@ SuperLUSolver :: SuperLUSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(
 SuperLUSolver :: ~SuperLUSolver() { }
 
 
-IRResultType
-SuperLUSolver :: initializeFrom(InputRecord *ir)
+void
+SuperLUSolver :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 
 NM_Status

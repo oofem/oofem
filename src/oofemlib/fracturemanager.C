@@ -66,37 +66,25 @@ FractureManager :: clear() { }
 
 
 
-IRResultType FractureManager :: initializeFrom(InputRecord *ir)
+void FractureManager :: initializeFrom(InputRecord &ir)
 {
     // Read number of failure criterias to evaluate
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     int numCriterias;
     IR_GIVE_FIELD(ir, numCriterias, _IFT_FracManager_numcriterias);
     this->criteriaList.resize(numCriterias);
     bool verbose = false;
     IR_GIVE_OPTIONAL_FIELD(ir, verbose, _IFT_FracManager_verbose);
-
-#define VERBOSE
-
-
-    return IRRT_OK;
 }
 
 
 int FractureManager :: instanciateYourself(DataReader &dr)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     // Create and initialize all failure criterias
     for ( int i = 1; i <= ( int ) this->criteriaList.size(); i++ ) {
-        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_failCritRec, i);
-        result = mir->giveRecordKeywordField(name);
-
-        if ( result != IRRT_OK ) { ///@todo Make so that this can't fail.
-            IR_IOERR("", mir, result);
-        }
+        auto &mir = dr.giveInputRecord(DataReader :: IR_failCritRec, i);
+        mir.giveRecordKeywordField(name);
 
         auto failCriteria = classFactory.createFailureCriteria(name.c_str(), i, this);
         if ( !failCriteria ) {
@@ -250,24 +238,17 @@ DamagedNeighborLayered :: evaluateFailureCriteria(FailureCriteriaStatus *fcStatu
 
 
 
-IRResultType FailureCriteria :: initializeFrom(InputRecord *ir)
+void FailureCriteria :: initializeFrom(InputRecord &ir)
 {
-    //IRResultType result; // Required by IR_GIVE_FIELD macro
-
-    return IRRT_OK;
 }
 
 
-IRResultType DamagedNeighborLayered :: initializeFrom(InputRecord *ir)
+void DamagedNeighborLayered :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     // Read damage threshold value
     IR_GIVE_FIELD(ir, this->DamageThreshold, _IFT_DamagedNeighborLayered_DamageThreshold);
 
     this->setType(ELLocal);
-
-    return IRRT_OK;
 }
 
 #endif
@@ -277,10 +258,7 @@ IRResultType DamagedNeighborLayered :: initializeFrom(InputRecord *ir)
 //===================================================
 // Failure Criteria Status
 //===================================================
-IRResultType FailureCriteriaStatus :: initializeFrom(InputRecord *ir)
+void FailureCriteriaStatus :: initializeFrom(InputRecord &ir)
 {
-    //IRResultType result; // Required by IR_GIVE_FIELD macro
-
-    return IRRT_OK;
 }
 } // end namespace oofem
