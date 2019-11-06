@@ -56,10 +56,10 @@ namespace oofem {
 class LIBeam3dBoundaryBeam : public LIBeam3dBoundary
 {
 public:
-    LIBeam3dBoundaryBeam(int n, Domain * d);
+    LIBeam3dBoundaryBeam(int n, Domain *d);
     virtual ~LIBeam3dBoundaryBeam() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 15; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
@@ -70,7 +70,6 @@ public:
 
 protected:
     void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep) override;
-
 };
 } // end namespace oofem
 #endif // libeam3dboundarybeam_h

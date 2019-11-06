@@ -84,10 +84,9 @@ LatticeLinearElastic :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-IRResultType
-LatticeLinearElastic :: initializeFrom(InputRecord *ir)
+void
+LatticeLinearElastic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     LatticeStructuralMaterial :: initializeFrom(ir);
     RandomMaterialExtensionInterface :: initializeFrom(ir);
@@ -128,8 +127,6 @@ LatticeLinearElastic :: initializeFrom(InputRecord *ir)
     this->cAlpha = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cAlpha, _IFT_LatticeLinearElastic_calpha);
 
-
-    return IRRT_OK;
 }
 
 MaterialStatus *

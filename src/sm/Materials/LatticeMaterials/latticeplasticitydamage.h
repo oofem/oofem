@@ -224,7 +224,7 @@ public:
     const char *giveClassName() const { return "LatticePlasticityDamage"; }
 
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 

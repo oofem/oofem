@@ -75,11 +75,9 @@ LatticeSlip :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-IRResultType
-LatticeSlip :: initializeFrom(InputRecord *ir)
+void
+LatticeSlip :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
-
 
     LatticeLinearElastic :: initializeFrom(ir);
 
@@ -97,7 +95,6 @@ LatticeSlip :: initializeFrom(InputRecord *ir)
     //Parameter which limits the stress in slip direction.
     IR_GIVE_FIELD(ir, tauZero, _IFT_LatticeSlip_t0); // Macro
 
-    return IRRT_OK;
 }
 
 

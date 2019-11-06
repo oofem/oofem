@@ -94,7 +94,7 @@ public:
 
     virtual const char *giveInputRecordName() const override { return _IFT_LatticeLink3d_Name; }
     virtual const char *giveClassName()  const override { return "LatticeLink3d"; }
-    virtual IRResultType initializeFrom(InputRecord *ir) override;
+    virtual void initializeFrom(InputRecord &ir) override;
 
     virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 

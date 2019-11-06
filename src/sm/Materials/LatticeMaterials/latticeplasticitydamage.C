@@ -80,10 +80,9 @@ LatticePlasticityDamage :: hasMaterialModeCapability(MaterialMode mode)
     }
 }
 
-IRResultType
-LatticePlasticityDamage :: initializeFrom(InputRecord *ir)
+void
+LatticePlasticityDamage :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     LatticeLinearElastic :: initializeFrom(ir);
 
@@ -131,7 +130,6 @@ LatticePlasticityDamage :: initializeFrom(InputRecord *ir)
     this->damageFlag = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, damageFlag, _IFT_LatticePlasticityDamage_damage);
 
-    return IRRT_OK;
 }
 
 void

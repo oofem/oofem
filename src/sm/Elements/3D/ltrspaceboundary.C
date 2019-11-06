@@ -59,14 +59,11 @@ LTRSpaceBoundary :: LTRSpaceBoundary(int n, Domain *aDomain) :
     numberOfGaussPoints = 1;
 }
 
-IRResultType
-LTRSpaceBoundary :: initializeFrom(InputRecord *ir)
+void
+LTRSpaceBoundary :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
+    Structural3DElement :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, location, _IFT_LTRSpaceBoundary_Location);
-
-    return Structural3DElement :: initializeFrom(ir);
 }
 
 Interface *
@@ -423,10 +420,10 @@ LTRSpaceBoundary :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *t
     unitCellSize.at(3) = this->giveNode(5)->giveCoordinate(3);
 
     IntArray switches1, switches2, switches3, switches4;
-    this->giveSwitches( switches1, this->location.at(1) );
-    this->giveSwitches( switches2, this->location.at(2) );
-    this->giveSwitches( switches3, this->location.at(3) );
-    this->giveSwitches( switches4, this->location.at(4) );
+    this->giveSwitches(switches1, this->location.at(1) );
+    this->giveSwitches(switches2, this->location.at(2) );
+    this->giveSwitches(switches3, this->location.at(3) );
+    this->giveSwitches(switches4, this->location.at(4) );
 
     FloatMatrix k1, k2, k3, k4;
     k1.resize(3, 9);
@@ -478,7 +475,7 @@ LTRSpaceBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords)
     unitCellSize.at(3) = this->giveNode(5)->giveCoordinate(3);
 
     IntArray switches;
-    this->giveSwitches( switches, this->location.at(nodeNumber) );
+    this->giveSwitches(switches, this->location.at(nodeNumber) );
 
     coords.resize(3);
     coords.at(1) = this->giveNode(nodeNumber)->giveCoordinate(1) + switches.at(1) * unitCellSize.at(1);

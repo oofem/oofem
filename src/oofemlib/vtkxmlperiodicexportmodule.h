@@ -70,7 +70,7 @@ public:
     /// Destructor
     virtual ~VTKXMLPeriodicExportModule();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "VTKXMLPeriodicExportModule"; }
 

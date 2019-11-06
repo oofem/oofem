@@ -33,33 +33,33 @@
  */
 
 #ifndef bondlink3dboundary_h
- #define bondlink3dboundary_h
+#define bondlink3dboundary_h
 
- #include "bondlink3d.h"
+#include "bondlink3d.h"
 
 ///@name Input fields for BondLink3d
 //@{
- #define _IFT_BondLink3dBoundary_Name "bondlink3dboundary"
- #define _IFT_LatticeLink3dBoundary_location "location"
+#define _IFT_BondLink3dBoundary_Name "bondlink3dboundary"
+#define _IFT_LatticeLink3dBoundary_location "location"
 //@}
 
 namespace oofem {
 /**
  * This class implements a bond link for connecting beam (frame) and continuum elements in unstructured meshes.
  * The main idea is to use the rotation of the beam element and the rigid arm from the beam node to the continuum element node
- * to compute the displacement jump along the rebar element (and two components, which are perpendicular to each other and lie 
+ * to compute the displacement jump along the rebar element (and two components, which are perpendicular to each other and lie
  * in a plane for which the direction along the rebar is normal to.
  * At least one node is located at the image boundary.
  * These nodes are replaced with a periodic mirror nodes and a control node is used to impose the macroscopic (average) strain.
  * MACROSCOPIC INPUT: DEFORMATION GRADIENT TENSOR (3D, 9 COMPONENTS: Exx Exy Exz Eyx Eyy Eyz Ezx Ezy Ezz)
- * 
-*/
+ *
+ */
 
 class BondLink3dBoundary : public BondLink3d
 {
 protected:
-  IntArray location;
-  
+    IntArray location;
+
 public:
     BondLink3dBoundary(int n, Domain *);
     virtual ~BondLink3dBoundary();
@@ -71,24 +71,24 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &) const override;
 
     virtual void computeGeometryProperties() override;
-    
+
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
-    
+
     virtual const char *giveInputRecordName() const override { return _IFT_BondLink3dBoundary_Name; }
     virtual const char *giveClassName()  const override { return "BondLink3dBoundary"; }
-    virtual IRResultType initializeFrom(InputRecord *ir) override;
+    virtual void initializeFrom(InputRecord &ir) override;
 
-    virtual Element_Geometry_Type giveGeometryType() const  override { return EGT_line_1; } 
+    virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
- #ifdef __OOFEG
+#ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
     virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep * tStep, UnknownType);
- #endif
+    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+#endif
 
 
 protected:
@@ -99,17 +99,13 @@ protected:
 
     virtual void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep);
     void giveSwitches(IntArray &answer, int location);
-    
+
     /**
      * This computes the geometrical properties of the element. It is called only once.
      */
     void computePropertiesOfCrossSection();
 
     virtual integrationDomain  giveIntegrationDomain() const override { return _Line; }
-
 };
-
-
-
 } // end namespace oofem
 #endif //bondlink3dboundary_h

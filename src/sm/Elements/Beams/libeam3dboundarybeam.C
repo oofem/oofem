@@ -50,24 +50,23 @@ REGISTER_Element(LIBeam3dBoundaryBeam);
 
 LIBeam3dBoundaryBeam :: LIBeam3dBoundaryBeam(int n, Domain *aDomain) : LIBeam3dBoundary(n, aDomain)
     // Constructor.
-{
-}
+{}
 
 
-IRResultType
-LIBeam3dBoundaryBeam :: initializeFrom(InputRecord *ir)
+void
+LIBeam3dBoundaryBeam :: initializeFrom(InputRecord &ir)
 {
-    return LIBeam3dBoundary :: initializeFrom(ir);
+    LIBeam3dBoundary :: initializeFrom(ir);
 }
 
 
 void
 LIBeam3dBoundaryBeam :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if (inode == 3) {
-        answer = {E_xx, E_zx, K_xx};
+    if ( inode == 3 ) {
+        answer = { E_xx, E_zx, K_xx };
     } else {
-        answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+        answer = { D_u, D_v, D_w, R_u, R_v, R_w };
     }
 }
 
@@ -76,37 +75,37 @@ void
 LIBeam3dBoundaryBeam :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     double unitCellSize;
-    unitCellSize=this->giveNode(3)->giveCoordinate(1);
+    unitCellSize = this->giveNode(3)->giveCoordinate(1);
 
     IntArray switches1, switches2;
-    this->giveSwitches(switches1, this->location.at(1));
-    this->giveSwitches(switches2, this->location.at(2));
+    this->giveSwitches(switches1, this->location.at(1) );
+    this->giveSwitches(switches2, this->location.at(2) );
 
     FloatMatrix k1, k2;
-    k1.resize(6,3); k2.resize(6,3);
+    k1.resize(6, 3);
+    k2.resize(6, 3);
 
-    k1.at(1,1) = unitCellSize * switches1.at(1);
-    k1.at(1,3) = - this->giveNode(1)->giveCoordinate(3) * unitCellSize * switches1.at(1);
-    k1.at(3,2) = unitCellSize * switches1.at(1);
-
-    //Peter: Add the rules for rotational DOFs (around) y-axes
-    //rotation around y-axis
-    k1.at(5,3) = -unitCellSize*switches1.at(1);
-    
-    k2.at(1,1) = unitCellSize * switches2.at(1);
-    k2.at(1,3) = - this->giveNode(2)->giveCoordinate(3) * unitCellSize * switches2.at(1);
-    k2.at(3,2) = unitCellSize * switches2.at(1);
+    k1.at(1, 1) = unitCellSize * switches1.at(1);
+    k1.at(1, 3) = -this->giveNode(1)->giveCoordinate(3) * unitCellSize * switches1.at(1);
+    k1.at(3, 2) = unitCellSize * switches1.at(1);
 
     //Peter: Add the rules for rotational DOFs (around) y-axes
     //rotation around y-axis
-    k2.at(5,3) = -unitCellSize*switches2.at(1);
-    
-    answer.resize(12,12);
+    k1.at(5, 3) = -unitCellSize *switches1.at(1);
+
+    k2.at(1, 1) = unitCellSize * switches2.at(1);
+    k2.at(1, 3) = -this->giveNode(2)->giveCoordinate(3) * unitCellSize * switches2.at(1);
+    k2.at(3, 2) = unitCellSize * switches2.at(1);
+
+    //Peter: Add the rules for rotational DOFs (around) y-axes
+    //rotation around y-axis
+    k2.at(5, 3) = -unitCellSize *switches2.at(1);
+
+    answer.resize(12, 12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,15);
+    answer.resizeWithData(12, 15);
 
-    answer.assemble(k1, {1,2,3,4,5,6}, {13,14,15});
-    answer.assemble(k2, {7,8,9,10,11,12}, {13,14,15});
+    answer.assemble(k1, { 1, 2, 3, 4, 5, 6 }, { 13, 14, 15 });
+    answer.assemble(k2, { 7, 8, 9, 10, 11, 12 }, { 13, 14, 15 });
 }
-
 } // end namespace oofem

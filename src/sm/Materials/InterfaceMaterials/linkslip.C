@@ -72,11 +72,12 @@ namespace oofem {
   {}
 
 
-  IRResultType
-  LinkSlip :: initializeFrom(InputRecord *ir)
+  void
+  LinkSlip :: initializeFrom(InputRecord &ir)
   {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
+    StructuralInterfaceMaterial :: initializeFrom(ir);;
+    
     //axial stiffness
     IR_GIVE_FIELD(ir, kNormal, _IFT_LinkSlip_kn); // Macro
 
@@ -109,7 +110,6 @@ namespace oofem {
       }
     }
     
-    return StructuralInterfaceMaterial :: initializeFrom(ir);;
   }
 
 

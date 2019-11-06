@@ -267,10 +267,9 @@ LatticeLink3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
     };
 }
 
-IRResultType
-LatticeLink3d :: initializeFrom(InputRecord *ir)
+void
+LatticeLink3d :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
     LatticeStructuralElement :: initializeFrom(ir);
 
@@ -282,7 +281,6 @@ LatticeLink3d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_LatticeLink3d_l_end);
 
-    return IRRT_OK;
 }
 
 

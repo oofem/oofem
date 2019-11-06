@@ -72,11 +72,9 @@ LatticeDamageViscoelastic :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-IRResultType
-LatticeDamageViscoelastic :: initializeFrom(InputRecord *ir)
+void
+LatticeDamageViscoelastic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
-
 
     LatticeDamage :: initializeFrom(ir);
 
@@ -102,7 +100,6 @@ LatticeDamageViscoelastic :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
     }
 
-    return IRRT_OK;
 }
 
 

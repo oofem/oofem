@@ -450,16 +450,14 @@ Lattice3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
     }
 }
 
-IRResultType
-Lattice3dBoundary :: initializeFrom(InputRecord *ir)
+void
+Lattice3dBoundary :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     Lattice3d :: initializeFrom(ir);
 
     this->location.resize(2);
     IR_GIVE_FIELD(ir, location, _IFT_Lattice3dBoundary_location); // Macro
 
-    return IRRT_OK;
 }
 
 

@@ -67,11 +67,10 @@ VTKXMLPeriodicExportModule :: ~VTKXMLPeriodicExportModule()
 {}
 
 
-IRResultType
-VTKXMLPeriodicExportModule :: initializeFrom(InputRecord *ir)
+void
+VTKXMLPeriodicExportModule :: initializeFrom(InputRecord &ir)
 {
     VTKXMLExportModule :: initializeFrom(ir);
-    return IRRT_OK;
 }
 
 
@@ -94,11 +93,11 @@ VTKXMLPeriodicExportModule :: giveSwitches(IntArray &answer, int location) {
             }
         }
     }
-    
+
     return;
 }
 
-  
+
 void
 VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region)
 {
@@ -191,7 +190,7 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
                         cellNodes.at(ielnode) = elem->giveNode(ielnode)->giveNumber();
                     }
                 }
-            } else   {//Standard case
+            } else {  //Standard case
 #endif
             this->giveElementCell(cellNodes, elem);
 #ifdef __SM_MODULE
@@ -215,11 +214,11 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
         }
 
 
-        // Export primary, internal and XFEM variables as nodal quantities	  
+        // Export primary, internal and XFEM variables as nodal quantities
         this->exportPrimaryVars(vtkPiece, mapG2L, mapL2G, region, tStep);
-	
+
         this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
-       
+
 
         const IntArray &elements = this->giveRegionSet(region)->giveElementList();
         this->exportCellVars(vtkPiece, elements, tStep);
@@ -245,7 +244,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
 
     int extraNodes = 0.;
     for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
-        element = domain->giveElement( elements.at(ie) );
+        element = domain->giveElement(elements.at(ie) );
 
 #ifdef __SM_MODULE
         if ( dynamic_cast< LTRSpaceBoundary * >( element ) ) {
@@ -337,9 +336,9 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                     //get only the unique nodes
                     int repeatFlag = 0;
                     for ( int j = nnodes + 1; j <= nnodes + uniqueNodes; j++ ) {
-                        double dx = fabs( uniqueNodeTable.at(j, 1) - nodeCoords.at(1) );
-                        double dy = fabs( uniqueNodeTable.at(j, 2) - nodeCoords.at(2) );
-                        double dz = fabs( uniqueNodeTable.at(j, 3) - nodeCoords.at(3) );
+                        double dx = fabs(uniqueNodeTable.at(j, 1) - nodeCoords.at(1) );
+                        double dy = fabs(uniqueNodeTable.at(j, 2) - nodeCoords.at(2) );
+                        double dz = fabs(uniqueNodeTable.at(j, 3) - nodeCoords.at(3) );
                         if ( dx < 1e-9 && dy < 1e-9 && dz < 1e-9 ) {//node already present
                             repeatFlag++;
                             regionToUniqueMap.at(nnodes + totalNodes) = j;
@@ -392,9 +391,9 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                     //get only the unique nodes
                     int repeatFlag = 0;
                     for ( int j = nnodes + 1; j <= nnodes + uniqueNodes; j++ ) {
-                        double dx = fabs( uniqueNodeTable.at(j, 1) - nodeCoords.at(1) );
-                        double dy = fabs( uniqueNodeTable.at(j, 2) - nodeCoords.at(2) );
-                        double dz = fabs( uniqueNodeTable.at(j, 3) - nodeCoords.at(3) );
+                        double dx = fabs(uniqueNodeTable.at(j, 1) - nodeCoords.at(1) );
+                        double dy = fabs(uniqueNodeTable.at(j, 2) - nodeCoords.at(2) );
+                        double dz = fabs(uniqueNodeTable.at(j, 3) - nodeCoords.at(3) );
                         if ( dx < 1e-9 && dy < 1e-9 && dz < 1e-9 ) {//node already present
                             repeatFlag++;
                             regionToUniqueMap.at(nnodes + totalNodes) = j;
@@ -409,7 +408,7 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
                         regionToUniqueMap.at(nnodes + totalNodes) = nnodes + uniqueNodes;
                     }
                 }
-            } else   { //regular element
+            } else {   //regular element
 #endif
             node = element->giveNode(elementNode)->giveNumber();
             if ( regionG2LNodalNumbers.at(node) == 0 ) {     // assign new number
@@ -455,9 +454,9 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
     IntArray dofIdArray;
     controlNode->giveCompleteMasterDofIDArray(dofIdArray);
 
-    FloatArray macroField( controlNode->giveNumberOfDofs() );
+    FloatArray macroField(controlNode->giveNumberOfDofs() );
     for ( int j = 1; j <= controlNode->giveNumberOfDofs(); j++ ) {
-        macroField.at(j) = controlNode->giveDofWithID( dofIdArray.at(j) )->giveUnknown(VM_Total, tStep);
+        macroField.at(j) = controlNode->giveDofWithID(dofIdArray.at(j) )->giveUnknown(VM_Total, tStep);
     }
 
     //Get unit cell size
@@ -477,19 +476,19 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                 //find the periodic node, enough to find the first occurrence
                 int pos = 0;
                 if ( mapL2G.at(inode) != 0 ) {
-                    pos = regionToUniqueMap.findFirstIndexOf( mapL2G.at(inode) );
+                    pos = regionToUniqueMap.findFirstIndexOf(mapL2G.at(inode) );
                 }
                 if ( pos ) {
                     DofManager *dman = d->giveNode(periodicMap.at(pos) );
                     IntArray switches;
-                    giveSwitches( switches, locationMap.at(pos) );
+                    giveSwitches(switches, locationMap.at(pos) );
                     //get the master unknown
                     FloatArray helpArray;
                     this->getNodalVariableFromPrimaryField(helpArray, dman, tStep, type, region);
                     //recalculate the image unknown
                     if ( type == DisplacementVector ) {
                         if ( dofIdArray.giveSize() == 9 ) { //Macroscale: 3D SOLID, LTRSpaceBoundary
-                            valueArray.resize( helpArray.giveSize() );
+                            valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(3) * switches.at(3) * macroField.at(3);
                             valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(4) +
@@ -497,36 +496,35 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                             valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(7) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(8) + unitCellSize.at(3) * switches.at(3) * macroField.at(9);
                         } else if ( dofIdArray.giveSize() == 1 ) { //Macroscale: TRUSS
-                            valueArray.resize( helpArray.giveSize() );
+                            valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
                             valueArray.at(2) = helpArray.at(2);
                             valueArray.at(3) = helpArray.at(3);
                         } else if ( dofIdArray.giveSize() == 4 ) { //Macroscale: 2D MEMBRANE, LTRSpaceBoundaryMembrane
-                            valueArray.resize( helpArray.giveSize() );
+                            valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(2);
                             valueArray.at(2) = helpArray.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(4);
                             valueArray.at(3) = helpArray.at(3);
                         } else if ( dofIdArray.giveSize() == 3 ) { //Macroscale: 2D BEAM, LTRSpaceBoundaryBeam OR old 2D
-			  //Debug: We need to change this. If we use 2D elements then 3, something different.
-			  //We can do this by looking at the IDs of Dofs? If it is 1,2,6 it is a 2d beam element. If it
-			  //is 2d then this is the old approach. We know the control DOF ID Array. So, we can solve this already?
-			  if(dofIdArray.at(1) == E_xx && dofIdArray.at(2) == E_yy && dofIdArray.at(3) == G_xy){//Old 2d approach
-			    valueArray.resize( helpArray.giveSize() );
-                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
-                            valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3);
-                            valueArray.at(3) = helpArray.at(3);
-			  }
-			  else{
-			  valueArray.resize( helpArray.giveSize() );
-                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) -
-                                               dman->giveCoordinate(3) * unitCellSize.at(1) * switches.at(1) * macroField.at(3);
-                            valueArray.at(2) = helpArray.at(2);
-                            valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(2);
-			  }
+                            //Debug: We need to change this. If we use 2D elements then 3, something different.
+                            //We can do this by looking at the IDs of Dofs? If it is 1,2,6 it is a 2d beam element. If it
+                            //is 2d then this is the old approach. We know the control DOF ID Array. So, we can solve this already?
+                            if ( dofIdArray.at(1) == E_xx && dofIdArray.at(2) == E_yy && dofIdArray.at(3) == G_xy ) {//Old 2d approach
+                                valueArray.resize(helpArray.giveSize() );
+                                valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
+                                valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3);
+                                valueArray.at(3) = helpArray.at(3);
+                            } else   {
+                                valueArray.resize(helpArray.giveSize() );
+                                valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) -
+                                                   dman->giveCoordinate(3) * unitCellSize.at(1) * switches.at(1) * macroField.at(3);
+                                valueArray.at(2) = helpArray.at(2);
+                                valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(2);
+                            }
                         } else if ( dofIdArray.giveSize() == 10 ) { //Macroscale: 2D PLATE, LTRSpaceBoundaryPlate
-                            valueArray.resize( helpArray.giveSize() );
+                            valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(2) -
                                                dman->giveCoordinate(3) * unitCellSize.at(1) * switches.at(1) * macroField.at(7) -
@@ -539,7 +537,7 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                             valueArray.at(3) = helpArray.at(3) + unitCellSize.at(1) * switches.at(1) * macroField.at(5) +
                                                unitCellSize.at(2) * switches.at(2) * macroField.at(6);
                         } else if ( dofIdArray.giveSize() == 6 ) { //Macroscale: 3D SOLID, LTRSpaceBoundaryVoigt, Lattice3dBoundary
-                            valueArray.resize( helpArray.giveSize() );
+                            valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
                                                unitCellSize.at(3) * switches.at(3) * macroField.at(5) + unitCellSize.at(2) * switches.at(2) * macroField.at(6);
                             valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) +
@@ -583,7 +581,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L
                 //find the periodic node, enough to find the first occurrence
                 int pos = 0;
                 if ( mapL2G.at(nodeNum) != 0 ) {
-                    pos = regionToUniqueMap.findFirstIndexOf( mapL2G.at(nodeNum) );
+                    pos = regionToUniqueMap.findFirstIndexOf(mapL2G.at(nodeNum) );
                 }
 
                 if ( pos ) {

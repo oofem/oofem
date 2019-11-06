@@ -82,7 +82,7 @@ public:
     //
     virtual const char *giveInputRecordName() const override { return _IFT_Lattice2dBoundary_Name; }
     virtual const char *giveClassName() const override { return "Lattice2dBoundary"; }
-    virtual IRResultType initializeFrom(InputRecord *ir) override;
+    virtual void initializeFrom(InputRecord &ir) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;

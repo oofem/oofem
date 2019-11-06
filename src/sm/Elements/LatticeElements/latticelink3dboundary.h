@@ -74,7 +74,7 @@ public:
     virtual void giveGPCoordinates(FloatArray &coords) { coords = this->globalCentroid; }
     virtual const char *giveInputRecordName() const { return _IFT_LatticeLink3dBoundary_Name; }
     virtual const char *giveClassName() const { return "LatticeLink3dBoundary"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     void saveContext(DataStream &stream, ContextMode mode);
 

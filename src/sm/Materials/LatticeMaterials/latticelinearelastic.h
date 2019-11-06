@@ -97,7 +97,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticeLinearElastic_Name; }
     const char *giveClassName() const override { return "LatticeLinearElastic"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 
     void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep) override;

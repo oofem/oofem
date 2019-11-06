@@ -70,20 +70,16 @@ LatticeNeumannCouplingNode :: ~LatticeNeumannCouplingNode()
 // Destructor.
 {}
 
-IRResultType
-LatticeNeumannCouplingNode :: initializeFrom(InputRecord *ir)
+void
+LatticeNeumannCouplingNode :: initializeFrom(InputRecord &ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     FloatArray triplets;
 
     Node :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, directionVector, _IFT_LatticeNeumannCouplingNode_direction);
     IR_GIVE_FIELD(ir, couplingNodes, _IFT_LatticeNeumannCouplingNode_couplingnodes);
-
-    return IRRT_OK;
 }
 
 
@@ -91,7 +87,7 @@ void
 LatticeNeumannCouplingNode :: computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
-  FloatArray contribution;
+    FloatArray contribution;
 
     if ( this->giveLoadArray()->isEmpty() ) {
         answer.resize(0);
@@ -141,29 +137,29 @@ LatticeNeumannCouplingNode :: computeLoadCouplingContribution(FloatArray &answer
     double factor = 0.;
 
     FloatArray contribution;
-    answer.resize( this->directionVector.giveSize() );
+    answer.resize(this->directionVector.giveSize() );
 
     IntArray coupledModels;
     double waterPressureNew = 0., waterPressureOld = 0.;
 
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
         ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
-        if ( coupledModels.at(2) != 0 && !(stepN->giveNumber()<=domain->giveEngngModel()->giveNumberOfFirstStep()) ) {
+        if ( coupledModels.at(2) != 0 && !( stepN->giveNumber() <= domain->giveEngngModel()->giveNumberOfFirstStep() ) ) {
             for ( int k = 0; k < nCouplingNodes; k++ ) {
                 Node *coupledNode;
-                coupledNode  =  domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(2) )->giveDomain(1)->giveNode( couplingNodes(k) );
+                coupledNode  =  domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem(coupledModels.at(2) )->giveDomain(1)->giveNode(couplingNodes(k) );
                 couplingCoords = * ( coupledNode->giveCoordinates() );
                 TimeStep *previousStep = domain->giveEngngModel()->giveMasterEngngModel()->givePreviousStep();
 
                 waterPressureNew = coupledNode->giveDofWithID(P_f)->giveUnknown(VM_Total, stepN);
                 if ( !stepN->givePreviousStep()->isTheFirstStep() ) {
                     waterPressureOld = coupledNode->giveDofWithID(P_f)->giveUnknown(VM_Total, previousStep);
-                } else   {
+                } else {
                     waterPressureOld = 0.;
                 }
 
                 waterPressure = waterPressureNew - waterPressureOld;
-                distance = sqrt( pow(couplingCoords.at(1) - coordinates.at(1), 2.) + pow(couplingCoords.at(2) - coordinates.at(2), 2.) );
+                distance = sqrt(pow(couplingCoords.at(1) - coordinates.at(1), 2.) + pow(couplingCoords.at(2) - coordinates.at(2), 2.) );
                 factor = waterPressure * distance;
                 contribution = this->directionVector;
                 contribution.times(factor);

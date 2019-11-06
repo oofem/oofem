@@ -62,10 +62,10 @@ protected:
     IntArray location;
 
 public:
-    LIBeam3dBoundary(int n, Domain * d);
+    LIBeam3dBoundary(int n, Domain *d);
     virtual ~LIBeam3dBoundary() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 21; }
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;

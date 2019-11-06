@@ -74,7 +74,7 @@ public:
     /// Destructor.
     virtual ~LatticeCrossSection() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int testCrossSectionExtension(CrossSectExtension ext) override { return this->crossSectionType; }
 

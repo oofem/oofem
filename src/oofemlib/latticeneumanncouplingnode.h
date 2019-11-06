@@ -77,7 +77,7 @@ public:
     virtual void  computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
 
     const char *giveClassName() const { return "LatticeNeumannCouplingNode"; }
-    IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir);
 
     IntArray *giveCouplingNodes();
 

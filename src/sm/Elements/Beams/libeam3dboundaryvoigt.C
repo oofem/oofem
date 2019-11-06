@@ -50,21 +50,20 @@ REGISTER_Element(LIBeam3dBoundaryVoigt);
 
 LIBeam3dBoundaryVoigt :: LIBeam3dBoundaryVoigt(int n, Domain *aDomain) : LIBeam3dBoundary(n, aDomain)
     // Constructor.
-{
-}
+{}
 
 
-IRResultType
-LIBeam3dBoundaryVoigt :: initializeFrom(InputRecord *ir)
+void
+LIBeam3dBoundaryVoigt :: initializeFrom(InputRecord &ir)
 {
-    return LIBeam3dBoundary :: initializeFrom(ir);
+    LIBeam3dBoundary :: initializeFrom(ir);
 }
 
 
 void
 LIBeam3dBoundaryVoigt :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
 }
 
 
@@ -73,37 +72,37 @@ LIBeam3dBoundaryVoigt :: computeTransformationMatrix(FloatMatrix &answer, TimeSt
 {
     FloatArray unitCellSize;
     unitCellSize.resize(3);
-    unitCellSize.at(1)=this->giveNode(3)->giveCoordinate(1);
-    unitCellSize.at(2)=this->giveNode(3)->giveCoordinate(2);
-    unitCellSize.at(3)=this->giveNode(3)->giveCoordinate(3);
+    unitCellSize.at(1) = this->giveNode(3)->giveCoordinate(1);
+    unitCellSize.at(2) = this->giveNode(3)->giveCoordinate(2);
+    unitCellSize.at(3) = this->giveNode(3)->giveCoordinate(3);
 
     IntArray switches1, switches2;
-    this->giveSwitches(switches1, this->location.at(1));
-    this->giveSwitches(switches2, this->location.at(2));
+    this->giveSwitches(switches1, this->location.at(1) );
+    this->giveSwitches(switches2, this->location.at(2) );
 
     FloatMatrix k1, k2;
-    k1.resize(6,6); k2.resize(6,6);
+    k1.resize(6, 6);
+    k2.resize(6, 6);
 
-    k1.at(1,1) = unitCellSize.at(1)*switches1.at(1);
-    k1.at(1,5) = unitCellSize.at(3)*switches1.at(3);
-    k1.at(1,6) = unitCellSize.at(2)*switches1.at(2);
-    k1.at(2,2) = unitCellSize.at(2)*switches1.at(2);
-    k1.at(2,4) = unitCellSize.at(3)*switches1.at(3);
-    k1.at(3,3) = unitCellSize.at(3)*switches1.at(3);
+    k1.at(1, 1) = unitCellSize.at(1) * switches1.at(1);
+    k1.at(1, 5) = unitCellSize.at(3) * switches1.at(3);
+    k1.at(1, 6) = unitCellSize.at(2) * switches1.at(2);
+    k1.at(2, 2) = unitCellSize.at(2) * switches1.at(2);
+    k1.at(2, 4) = unitCellSize.at(3) * switches1.at(3);
+    k1.at(3, 3) = unitCellSize.at(3) * switches1.at(3);
 
-    k2.at(1,1) = unitCellSize.at(1)*switches2.at(1);
-    k2.at(1,5) = unitCellSize.at(3)*switches2.at(3);
-    k2.at(1,6) = unitCellSize.at(2)*switches2.at(2);
-    k2.at(2,2) = unitCellSize.at(2)*switches2.at(2);
-    k2.at(2,4) = unitCellSize.at(3)*switches2.at(3);
-    k2.at(3,3) = unitCellSize.at(3)*switches2.at(3);
+    k2.at(1, 1) = unitCellSize.at(1) * switches2.at(1);
+    k2.at(1, 5) = unitCellSize.at(3) * switches2.at(3);
+    k2.at(1, 6) = unitCellSize.at(2) * switches2.at(2);
+    k2.at(2, 2) = unitCellSize.at(2) * switches2.at(2);
+    k2.at(2, 4) = unitCellSize.at(3) * switches2.at(3);
+    k2.at(3, 3) = unitCellSize.at(3) * switches2.at(3);
 
-    answer.resize(12,12);
+    answer.resize(12, 12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,18);
+    answer.resizeWithData(12, 18);
 
-    answer.assemble(k1, {1,2,3,4,5,6}, {13,14,15,16,17,18});
-    answer.assemble(k2, {7,8,9,10,11,12}, {13,14,15,16,17,18});
+    answer.assemble(k1, { 1, 2, 3, 4, 5, 6 }, { 13, 14, 15, 16, 17, 18 });
+    answer.assemble(k2, { 7, 8, 9, 10, 11, 12 }, { 13, 14, 15, 16, 17, 18 });
 }
-
 } // end namespace oofem

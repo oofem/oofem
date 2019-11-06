@@ -369,11 +369,10 @@ Lattice3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
     };
 }
 
-IRResultType
-Lattice3d :: initializeFrom(InputRecord *ir)
+void
+Lattice3d :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    // first call parent
+  
     LatticeStructuralElement :: initializeFrom(ir);
 
     minLength = 1.e-20;
@@ -392,7 +391,6 @@ Lattice3d :: initializeFrom(InputRecord *ir)
     pressures.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, pressures, _IFT_Lattice3d_pressures);
 
-    return IRRT_OK;
 }
 
 

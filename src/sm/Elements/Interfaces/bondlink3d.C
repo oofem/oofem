@@ -72,13 +72,13 @@ BondLink3d :: ~BondLink3d()
 double
 BondLink3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
-  //Returns artifical volume (bond area times bond length) so that general parts of post processing work (dissipated energy, etc.)
-  //Later on this artificial volume is divided by the bond length again so that the correct bond area is used.
-  double myPi = 3.14159;
-  return pow(this->bondLength,2.)*this->bondDiameter*myPi;
+    //Returns artifical volume (bond area times bond length) so that general parts of post processing work (dissipated energy, etc.)
+    //Later on this artificial volume is divided by the bond length again so that the correct bond area is used.
+    double myPi = 3.14159;
+    return pow(this->bondLength, 2.) * this->bondDiameter * myPi;
 }
 
-  
+
 void
 BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
@@ -106,7 +106,7 @@ BondLink3d :: computeBmatrixAt(GaussPoint *aGaussPoint, FloatMatrix &answer, int
     answer.at(2, 2) = 1.;
     answer.at(2, 4) = this->rigid.at(3);
     answer.at(2, 6) = -this->rigid.at(1);
-    
+
     //Second node
     answer.at(2, 8) = -1.;
 
@@ -135,12 +135,12 @@ BondLink3d :: giveGPCoordinates(FloatArray &coords)
 
 void
 BondLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                    TimeStep *tStep)
+                                     TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
     FloatMatrix d, b, bt, db;
     FloatArray u, slip;
-    
+
     this->computeVectorOf(VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
@@ -150,29 +150,29 @@ BondLink3d :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
 
     answer.clear();
 
-    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0); 
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     this->computeBmatrixAt(gp, b);
     bt.beTranspositionOf(b);
-    
+
     if ( !this->isActivated(tStep) ) {
-      slip.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-      slip.zero();
+        slip.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
+        slip.zero();
     }
     slip.beProductOf(b, u);
-    
+
     answer.resize(9, 9);
     answer.zero();
- 
+
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
     db.beProductOf(d, b);
     answer.beProductOf(bt, db);
 
     //Introduce integration of bond strength
-    double area = this->computeVolumeAround(gp)/this->giveLength();
-    answer.times(area);        
+    double area = this->computeVolumeAround(gp) / this->giveLength();
+    answer.times(area);
 
-    
+
     return;
 }
 
@@ -180,7 +180,7 @@ void BondLink3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
+    integrationRulesArray [ 0 ].reset(new GaussIntegrationRule(1, this, 1, 3) );
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _3dMat);
 }
 
@@ -202,7 +202,7 @@ BondLink3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
             answer.at(i, j) = lcs.at(i, j);
             answer.at(i + 3, j + 3) = lcs.at(i, j);
             answer.at(i + 6, j + 6) = lcs.at(i, j);
-	    //            answer.at(i + 9, j + 9) = lcs.at(i, j);
+            //            answer.at(i + 9, j + 9) = lcs.at(i, j);
         }
     }
 
@@ -241,40 +241,36 @@ BondLink3d :: giveBondDiameter()
     return this->bondDiameter;
 }
 
-  
-  
+
+
 
 void
 BondLink3d ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-  if(inode==1){
-    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
-  }
-  else{
-    answer = { D_u, D_v, D_w};
-  }
+    if ( inode == 1 ) {
+        answer = { D_u, D_v, D_w, R_u, R_v, R_w };
+    } else   {
+        answer = { D_u, D_v, D_w };
+    }
 }
 
-IRResultType
-BondLink3d :: initializeFrom(InputRecord *ir)
+void
+BondLink3d :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
     StructuralElement :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->bondLength, _IFT_BondLink3d_length);
-    
+
     IR_GIVE_FIELD(ir, this->bondDiameter, _IFT_BondLink3d_diameter);
-    
+
     IR_GIVE_FIELD(ir, this->directionVector, _IFT_BondLink3d_dirvector);
 
     IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_BondLink3d_length_end);
 
-    if(this->bondEndLength < this->bondLength){
-      this->bondLength = this->bondEndLength;
+    if ( this->bondEndLength < this->bondLength ) {
+        this->bondLength = this->bondEndLength;
     }
-    
-    return IRRT_OK;
 }
 
 
@@ -305,8 +301,8 @@ BondLink3d :: computeGeometryProperties()
     //Continuum node
     nodeB  = this->giveNode(2);
 
-    
-    //Calculate components of distance from continuum node to lattice node.    
+
+    //Calculate components of distance from continuum node to lattice node.
     for ( int i = 0; i < 3; i++ ) {
         coordsA.at(i + 1) =  nodeA->giveCoordinate(i + 1);
         coordsB.at(i + 1) =  nodeB->giveCoordinate(i + 1);
@@ -318,7 +314,7 @@ BondLink3d :: computeGeometryProperties()
     for ( int i = 0; i < 3; i++ ) {
         rigidGlobal.at(i + 1) = coordsA.at(i + 1) - coordsB.at(i + 1);
     }
-       
+
     //Construct an initial temporary local coordinate system
     FloatArray normal(3), s(3), t(3);
 
@@ -350,9 +346,9 @@ BondLink3d :: computeGeometryProperties()
     //Set up rotation matrix
     FloatMatrix lcs(3, 3);
 
-    this->localCoordinateSystem.resize(3,3);
+    this->localCoordinateSystem.resize(3, 3);
     this->localCoordinateSystem.zero();
-    
+
     for ( int i = 1; i <= 3; i++ ) {
         this->localCoordinateSystem.at(1, i) = normal.at(i);
         this->localCoordinateSystem.at(2, i) = s.at(i);
@@ -361,39 +357,37 @@ BondLink3d :: computeGeometryProperties()
 
     // Rotate rigidarm vector into local coordinate system
 
-    this->rigid.beProductOf(localCoordinateSystem,rigidGlobal);
+    this->rigid.beProductOf(localCoordinateSystem, rigidGlobal);
 
-    
+
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
-      this->globalCentroid.at(i) = nodeB->giveCoordinate(i);;
+        this->globalCentroid.at(i) = nodeB->giveCoordinate(i);
+        ;
     }
-    
+
     this->geometryFlag = 1;
-    
+
     return;
 }
-  
-  void
-  BondLink3d :: saveContext(DataStream &stream, ContextMode mode)
-  {
-    StructuralElement :: saveContext(stream, mode);
-    
-  }
-  
 
-  void
-  BondLink3d :: restoreContext(DataStream &stream, ContextMode mode)
+void
+BondLink3d :: saveContext(DataStream &stream, ContextMode mode)
 {
-  
-  StructuralElement :: restoreContext(stream, mode);
-  
+    StructuralElement :: saveContext(stream, mode);
+}
+
+
+void
+BondLink3d :: restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralElement :: restoreContext(stream, mode);
 }
 
 
 void
 BondLink3d :: giveInternalForcesVector(FloatArray &answer,
-				       TimeStep *tStep, int useUpdatedGpRecord)
+                                       TimeStep *tStep, int useUpdatedGpRecord)
 //
 // returns nodal representation of real internal forces - necessary only for
 // non-linear analysis.
@@ -416,21 +410,21 @@ BondLink3d :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( GaussPoint *gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( GaussPoint *gp : * this->giveDefaultIntegrationRulePtr() ) {
         this->computeBmatrixAt(gp, b);
 
         if ( useUpdatedGpRecord == 1 ) {
             auto status = gp->giveMaterialStatus();
             StructuralMaterialStatus *matStat = dynamic_cast< StructuralMaterialStatus * >( status );
-            if ( matStat )
+            if ( matStat ) {
                 stress = matStat->giveStressVector();
-            else {
+            } else {
                 StructuralInterfaceMaterialStatus *ms = static_cast< StructuralInterfaceMaterialStatus * >( status );
                 stress = ms->giveTraction();
             }
         } else {
             if ( !this->isActivated(tStep) ) {
-                strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+                strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
                 strain.zero();
             }
             strain.beProductOf(b, u);
@@ -445,7 +439,8 @@ BondLink3d :: giveInternalForcesVector(FloatArray &answer,
 
         // now every gauss point has real stress vector
         // compute nodal representation of internal forces using f = B^T*Sigma dV
-        double dV = this->computeVolumeAround(gp)/this->giveLength();;
+        double dV = this->computeVolumeAround(gp) / this->giveLength();
+        ;
         if ( stress.giveSize() == 6 ) {
             // It may happen that e.g. plane strain is computed
             // using the default 3D implementation. If so,
@@ -453,7 +448,7 @@ BondLink3d :: giveInternalForcesVector(FloatArray &answer,
             // (Note that no reduction will take place if
             //  the simulation is actually 3D.)
             FloatArray stressTemp;
-            StructuralMaterial :: giveReducedSymVectorForm( stressTemp, stress, gp->giveMaterialMode() );
+            StructuralMaterial :: giveReducedSymVectorForm(stressTemp, stress, gp->giveMaterialMode() );
             answer.plusProduct(b, stressTemp, dV);
         } else {
             answer.plusProduct(b, stress, dV);
@@ -471,24 +466,24 @@ BondLink3d :: giveInternalForcesVector(FloatArray &answer,
 double
 BondLink3d :: giveLength()
 {
-  //returns the bond length, not the length between the two nodes
+    //returns the bond length, not the length between the two nodes
     return this->bondLength;
 }
 
 void
 BondLink3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->give3dStiffnessMatrix_Eng(rMode, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix_Eng(rMode, gp, tStep);
 }
 
 void
 BondLink3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-      answer = static_cast< StructuralInterfaceCrossSection* >(this->giveCrossSection())->giveEngTraction_3d(strain, gp, tStep);
+    answer = static_cast< StructuralInterfaceCrossSection * >( this->giveCrossSection() )->giveEngTraction_3d(strain, gp, tStep);
 }
 
- 
-  
+
+
 #ifdef __OOFEG
 
 void
@@ -523,7 +518,7 @@ void BondLink3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
@@ -552,7 +547,7 @@ void BondLink3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep
     WCRec p [ 2 ]; /* points */
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);

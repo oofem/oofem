@@ -122,7 +122,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_LatticeSlip_Name; }
     virtual const char *giveClassName() const { return "LatticeSlip"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     virtual void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep);
 

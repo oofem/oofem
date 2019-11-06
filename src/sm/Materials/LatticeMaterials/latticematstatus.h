@@ -200,7 +200,7 @@ public:
     double giveTempDeltaDissipation() { return tempDeltaDissipation; }
     void setTempDeltaDissipation(double newDiss) { tempDeltaDissipation = newDiss; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
 
 
     Interface *giveInterface(InterfaceType) override;

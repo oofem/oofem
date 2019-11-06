@@ -60,7 +60,8 @@
 #endif
 
 namespace oofem {
-REGISTER_DofManager(LatticeDirichletCouplingNode);
+
+  REGISTER_DofManager(LatticeDirichletCouplingNode);
 
 LatticeDirichletCouplingNode :: LatticeDirichletCouplingNode(int n, Domain *aDomain) :
     Node(n, aDomain)
@@ -70,19 +71,16 @@ LatticeDirichletCouplingNode :: ~LatticeDirichletCouplingNode()
 // Destructor.
 {}
 
-IRResultType
-LatticeDirichletCouplingNode :: initializeFrom(InputRecord *ir)
+void
+LatticeDirichletCouplingNode :: initializeFrom(InputRecord &ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     FloatArray triplets;
 
     Node :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, couplingElements, _IFT_LatticeDirichletCouplingNode_couplingelements);
 
-    return IRRT_OK;
 }
 
 void LatticeDirichletCouplingNode :: printYourself()
@@ -235,4 +233,5 @@ void LatticeDirichletCouplingNode :: printOutputAt(FILE *stream, TimeStep *stepN
         fprintf(stream, "  dof %d f % .16e\n", this->giveGlobalNumber(), activedirichletbc);
     }
 }
+  
 } // end namespace oofem

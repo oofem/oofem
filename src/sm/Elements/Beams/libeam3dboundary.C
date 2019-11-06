@@ -57,10 +57,10 @@ LIBeam3dBoundary :: LIBeam3dBoundary(int n, Domain *aDomain) : LIBeam3d(n, aDoma
 }
 
 
-IRResultType
-LIBeam3dBoundary :: initializeFrom(InputRecord *ir)
+void
+LIBeam3dBoundary :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    LIBeam3d :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dBoundary_refnode);
     if ( referenceNode == 0 ) {
@@ -68,18 +68,16 @@ LIBeam3dBoundary :: initializeFrom(InputRecord *ir)
     }
 
     IR_GIVE_FIELD(ir, location, _IFT_LIBeam3dBoundary_location);
-
-    return LIBeam3d :: initializeFrom(ir);
 }
 
 
 void
 LIBeam3dBoundary :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if (inode == 3) {
-        answer = {E_xx, E_xy, E_xz, E_yx, E_yy, E_yz, E_zx, E_zy, E_zz};
+    if ( inode == 3 ) {
+        answer = { E_xx, E_xy, E_xz, E_yx, E_yy, E_yz, E_zx, E_zy, E_zz };
     } else {
-        answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+        answer = { D_u, D_v, D_w, R_u, R_v, R_w };
     }
 }
 
@@ -111,17 +109,17 @@ LIBeam3dBoundary :: recalculateCoordinates(int nodeNumber, FloatArray &coords)
 {
     FloatArray unitCellSize;
     unitCellSize.resize(3);
-    unitCellSize.at(1)=this->giveNode(3)->giveCoordinate(1);
-    unitCellSize.at(2)=this->giveNode(3)->giveCoordinate(2);
-    unitCellSize.at(3)=this->giveNode(3)->giveCoordinate(3);
+    unitCellSize.at(1) = this->giveNode(3)->giveCoordinate(1);
+    unitCellSize.at(2) = this->giveNode(3)->giveCoordinate(2);
+    unitCellSize.at(3) = this->giveNode(3)->giveCoordinate(3);
 
     IntArray switches;
-    this->giveSwitches(switches, this->location.at(nodeNumber));
+    this->giveSwitches(switches, this->location.at(nodeNumber) );
 
     coords.resize(3);
-    coords.at(1) = this->giveNode(nodeNumber)->giveCoordinate(1) + switches.at(1)*unitCellSize.at(1);
-    coords.at(2) = this->giveNode(nodeNumber)->giveCoordinate(2) + switches.at(2)*unitCellSize.at(2);
-    coords.at(3) = this->giveNode(nodeNumber)->giveCoordinate(3) + switches.at(3)*unitCellSize.at(3);
+    coords.at(1) = this->giveNode(nodeNumber)->giveCoordinate(1) + switches.at(1) * unitCellSize.at(1);
+    coords.at(2) = this->giveNode(nodeNumber)->giveCoordinate(2) + switches.at(2) * unitCellSize.at(2);
+    coords.at(3) = this->giveNode(nodeNumber)->giveCoordinate(3) + switches.at(3) * unitCellSize.at(3);
 
     return;
 }
@@ -160,9 +158,9 @@ LIBeam3dBoundary :: computeGlobalCoordinates(FloatArray &answer, const FloatArra
     recalculateCoordinates(2, coordsNodeB);
 
     answer.resize(3);
-    answer.at(1) = n1 * coordsNodeA.at(1) + n2 *coordsNodeB.at(1);
-    answer.at(2) = n1 * coordsNodeA.at(2) + n2 *coordsNodeB.at(2);
-    answer.at(3) = n1 * coordsNodeA.at(3) + n2 *coordsNodeB.at(3);
+    answer.at(1) = n1 * coordsNodeA.at(1) + n2 * coordsNodeB.at(1);
+    answer.at(2) = n1 * coordsNodeA.at(2) + n2 * coordsNodeB.at(2);
+    answer.at(3) = n1 * coordsNodeA.at(3) + n2 * coordsNodeB.at(3);
 
     return 1;
 }
@@ -211,7 +209,7 @@ LIBeam3dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     FloatMatrix lcs;
 
-    answer.resize(this->computeNumberOfDofs(), this->computeNumberOfDofs());
+    answer.resize(this->computeNumberOfDofs(), this->computeNumberOfDofs() );
     answer.zero();
 
     this->giveLocalCoordinateSystem(lcs);
@@ -226,8 +224,8 @@ LIBeam3dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
     //do not rotate extra DOFs
     for ( int i = 13; i <= this->computeNumberOfDofs(); i++ ) {
         for ( int j = 13; j <= this->computeNumberOfDofs(); j++ ) {
-            if (i==j) {
-                answer.at(i ,j) = 1.;
+            if ( i == j ) {
+                answer.at(i, j) = 1.;
             }
         }
     }
@@ -266,35 +264,36 @@ LIBeam3dBoundary :: computeTransformationMatrix(FloatMatrix &answer, TimeStep *t
 {
     FloatArray unitCellSize;
     unitCellSize.resize(3);
-    unitCellSize.at(1)=this->giveNode(3)->giveCoordinate(1);
-    unitCellSize.at(2)=this->giveNode(3)->giveCoordinate(2);
-    unitCellSize.at(3)=this->giveNode(3)->giveCoordinate(3);
+    unitCellSize.at(1) = this->giveNode(3)->giveCoordinate(1);
+    unitCellSize.at(2) = this->giveNode(3)->giveCoordinate(2);
+    unitCellSize.at(3) = this->giveNode(3)->giveCoordinate(3);
 
     IntArray switches1, switches2;
-    this->giveSwitches(switches1, this->location.at(1));
-    this->giveSwitches(switches2, this->location.at(2));
+    this->giveSwitches(switches1, this->location.at(1) );
+    this->giveSwitches(switches2, this->location.at(2) );
 
     FloatMatrix k1, k2;
-    k1.resize(6,9); k2.resize(6,9);
+    k1.resize(6, 9);
+    k2.resize(6, 9);
 
     for ( int i = 1; i <= 3; i++ ) {
-        k1.at(i, 3*i-2) = unitCellSize.at(1)*switches1.at(1);
-        k1.at(i, 3*i-1) = unitCellSize.at(2)*switches1.at(2);
-        k1.at(i, 3*i) = unitCellSize.at(3)*switches1.at(3);
+        k1.at(i, 3 * i - 2) = unitCellSize.at(1) * switches1.at(1);
+        k1.at(i, 3 * i - 1) = unitCellSize.at(2) * switches1.at(2);
+        k1.at(i, 3 * i) = unitCellSize.at(3) * switches1.at(3);
     }
 
     for ( int i = 1; i <= 3; i++ ) {
-        k2.at(i, 3*i-2) = unitCellSize.at(1)*switches2.at(1);
-        k2.at(i, 3*i-1) = unitCellSize.at(2)*switches2.at(2);
-        k2.at(i, 3*i) = unitCellSize.at(3)*switches2.at(3);
+        k2.at(i, 3 * i - 2) = unitCellSize.at(1) * switches2.at(1);
+        k2.at(i, 3 * i - 1) = unitCellSize.at(2) * switches2.at(2);
+        k2.at(i, 3 * i) = unitCellSize.at(3) * switches2.at(3);
     }
 
-    answer.resize(12,12);
+    answer.resize(12, 12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,21);
+    answer.resizeWithData(12, 21);
 
-    answer.assemble(k1, {1,2,3,4,5,6}, {13,14,15,16,17,18,19,20,21});
-    answer.assemble(k2, {7,8,9,10,11,12}, {13,14,15,16,17,18,19,20,21});
+    answer.assemble(k1, { 1, 2, 3, 4, 5, 6 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
+    answer.assemble(k2, { 7, 8, 9, 10, 11, 12 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
 }
 
 
@@ -313,15 +312,15 @@ LIBeam3dBoundary :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Time
     this->giveRotationMatrix(GtoL);
     GtoLT.beTranspositionOf(GtoL);
     R.beSubMatrixOf(GtoL, 1, 12, 1, 12);
-    uG.beProductOf(GtoLT,u);
+    uG.beProductOf(GtoLT, u);
     //transform
     this->computeTransformationMatrix(T, tStep);
-    dispVecG.beProductOf(T,uG);
+    dispVecG.beProductOf(T, uG);
     //rotate to local
-    dispVecL.beProductOf(R,dispVecG);
+    dispVecL.beProductOf(R, dispVecG);
 
     this->computeBmatrixAt(gp, B);
-    answer.beProductOf(B,dispVecL);
+    answer.beProductOf(B, dispVecL);
 }
 
 
@@ -335,7 +334,7 @@ LIBeam3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     answer.clear();
     fintsub.resize(12);
 
-    for ( auto &gp : *this->giveDefaultIntegrationRulePtr() ) {
+    for ( auto &gp : * this->giveDefaultIntegrationRulePtr() ) {
         this->computeBmatrixAt(gp, B);
 
         if ( useUpdatedGpRecord == 1 ) {
@@ -343,7 +342,7 @@ LIBeam3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
             vStress = matStat->giveStressVector();
         } else {
             if ( !this->isActivated(tStep) ) {
-                vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
+                vStrain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
                 vStrain.zero();
             }
             this->computeStrainVector(vStrain, gp, tStep);
@@ -355,7 +354,7 @@ LIBeam3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
 
         if ( vStress.giveSize() == 6 ) {
             FloatArray stressTemp;
-            StructuralMaterial :: giveReducedSymVectorForm( stressTemp, vStress, gp->giveMaterialMode() );
+            StructuralMaterial :: giveReducedSymVectorForm(stressTemp, vStress, gp->giveMaterialMode() );
             fintsub.plusProduct(B, stressTemp, dV);
         } else {
             fintsub.plusProduct(B, vStress, dV);
@@ -366,13 +365,13 @@ LIBeam3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     this->giveRotationMatrix(GtoL);
     R.beSubMatrixOf(GtoL, 1, 12, 1, 12);
     Rt.beTranspositionOf(R);
-    fintG.beProductOf(Rt,fintsub);
+    fintG.beProductOf(Rt, fintsub);
     //transform
     this->computeTransformationMatrix(T, tStep);
     Tt.beTranspositionOf(T);
-    fintGT.beProductOf(Tt,fintG);
+    fintGT.beProductOf(Tt, fintG);
     //rotate back to local cs
-    answer.beProductOf(GtoL,fintGT);
+    answer.beProductOf(GtoL, fintGT);
 }
 
 
@@ -390,5 +389,4 @@ LIBeam3dBoundary :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
     }
     return LIBeam3d :: giveIPValue(answer, gp, type, tStep);
 }
-
 } // end namespace oofem

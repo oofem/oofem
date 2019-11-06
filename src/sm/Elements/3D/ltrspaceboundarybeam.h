@@ -61,14 +61,14 @@ protected:
     void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep) override;
 
 public:
-    LTRSpaceBoundaryBeam(int n, Domain * d);
+    LTRSpaceBoundaryBeam(int n, Domain *d);
     virtual ~LTRSpaceBoundaryBeam() { }
 
     int computeNumberOfDofs() override { return 15; };
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
 
     // definition & identification
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_LTRSpaceBoundaryBeam_Name; }
     const char *giveClassName() const override { return "LTRSpaceBoundaryBeam"; }
 };

@@ -117,7 +117,7 @@ public:
 
     const char *giveInputRecordName() const override { return _IFT_Lattice3d_Name; }
     const char *giveClassName() const override { return "Lattice3d"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 
 

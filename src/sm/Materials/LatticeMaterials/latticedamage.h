@@ -192,7 +192,7 @@ public:
 
     virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     virtual FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 

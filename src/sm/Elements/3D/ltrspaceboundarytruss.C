@@ -52,19 +52,18 @@ REGISTER_Element(LTRSpaceBoundaryTruss);
 
 LTRSpaceBoundaryTruss :: LTRSpaceBoundaryTruss(int n, Domain *aDomain) :
     LTRSpaceBoundary(n, aDomain)
-{
-}
+{}
 
-IRResultType
-LTRSpaceBoundaryTruss :: initializeFrom(InputRecord *ir)
+void
+LTRSpaceBoundaryTruss :: initializeFrom(InputRecord &ir)
 {
-    return LTRSpaceBoundary :: initializeFrom(ir);
+    LTRSpaceBoundary :: initializeFrom(ir);
 }
 
 void
 LTRSpaceBoundaryTruss :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if (inode == 5) {
+    if ( inode == 5 ) {
         answer = { E_xx };
     } else {
         answer = { D_u, D_v, D_w };
@@ -78,24 +77,23 @@ LTRSpaceBoundaryTruss :: computeTransformationMatrix(FloatMatrix &answer, TimeSt
     double unitCellSize = this->giveNode(5)->giveCoordinate(1);
 
     IntArray switches1, switches2, switches3, switches4;
-    this->giveSwitches(switches1, this->location.at(1));
-    this->giveSwitches(switches2, this->location.at(2));
-    this->giveSwitches(switches3, this->location.at(3));
-    this->giveSwitches(switches4, this->location.at(4));
+    this->giveSwitches(switches1, this->location.at(1) );
+    this->giveSwitches(switches2, this->location.at(2) );
+    this->giveSwitches(switches3, this->location.at(3) );
+    this->giveSwitches(switches4, this->location.at(4) );
 
     FloatMatrix k;
-    k.resize(12,1);
+    k.resize(12, 1);
 
-    k.at(1,1) = unitCellSize*switches1.at(1);
-    k.at(4,1) = unitCellSize*switches2.at(1);
-    k.at(7,1) = unitCellSize*switches3.at(1);
-    k.at(10,1) = unitCellSize*switches4.at(1);
+    k.at(1, 1) = unitCellSize * switches1.at(1);
+    k.at(4, 1) = unitCellSize * switches2.at(1);
+    k.at(7, 1) = unitCellSize * switches3.at(1);
+    k.at(10, 1) = unitCellSize * switches4.at(1);
 
-    answer.resize(12,12);
+    answer.resize(12, 12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,13);
+    answer.resizeWithData(12, 13);
 
-    answer.assemble(k, {1,2,3,4,5,6,7,8,9,10,11,12}, {13});
+    answer.assemble(k, { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 }, { 13 });
 }
-
 } // end namespace oofem

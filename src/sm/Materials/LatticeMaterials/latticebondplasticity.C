@@ -83,10 +83,9 @@ LatticeBondPlasticity :: computeDHardeningDKappa(double kappa)
 }
 
 
-IRResultType
-LatticeBondPlasticity :: initializeFrom(InputRecord *ir)
+void
+LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
 
     LatticeLinearElastic :: initializeFrom(ir);
 
@@ -114,7 +113,6 @@ LatticeBondPlasticity :: initializeFrom(InputRecord *ir)
     this->ef = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->ef, _IFT_LatticeBondPlasticity_ef);
 
-    return IRRT_OK;
 }
 
 MaterialStatus *

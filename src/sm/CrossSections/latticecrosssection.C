@@ -63,21 +63,17 @@ LatticeCrossSection :: checkConsistency()
     return 1;
 }
 
-IRResultType
-LatticeCrossSection :: initializeFrom(InputRecord *ir)
+void
+LatticeCrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     CrossSection :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->materialNum, _IFT_LatticeCrossSection_Material);
 
     double thickness = 0.0;
-    if ( ir->hasField(_IFT_LatticeCrossSection_thickness) ) {
+    if ( ir.hasField(_IFT_LatticeCrossSection_thickness) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_LatticeCrossSection_thickness);
         propertyDictionary.add(CS_Thickness, thickness);
     }
-
-    return IRRT_OK;
 }
 
 double LatticeCrossSection :: giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep) const

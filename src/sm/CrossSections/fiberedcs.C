@@ -411,6 +411,8 @@ FiberedCrossSection :: initializeFrom(InputRecord &ir)
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
 #  endif
 
+     CrossSection :: initializeFrom(ir);
+  
     IR_GIVE_FIELD(ir, fiberMaterials, _IFT_FiberedCrossSection_fibermaterials);
     IR_GIVE_FIELD(ir, fiberThicks, _IFT_FiberedCrossSection_thicks);
     IR_GIVE_FIELD(ir, fiberWidths, _IFT_FiberedCrossSection_widths);

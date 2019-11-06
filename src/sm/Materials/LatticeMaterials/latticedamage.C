@@ -74,11 +74,12 @@ LatticeDamage :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-IRResultType
-LatticeDamage :: initializeFrom(InputRecord *ir)
+void
+LatticeDamage :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
+    LatticeLinearElastic :: initializeFrom(ir);
+  
     softeningType = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_LatticeDamage_softeningType); // Macro
 
@@ -106,7 +107,7 @@ LatticeDamage :: initializeFrom(InputRecord *ir)
     this->biotType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage_btype);
 
-    return LatticeLinearElastic :: initializeFrom(ir);
+   
 }
 
 

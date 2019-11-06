@@ -91,7 +91,7 @@ public:
     void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
 
     // definition & identification
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_LTRSpaceBoundary_Name; }
     const char *giveClassName() const override { return "LTRSpaceBoundary"; }
 

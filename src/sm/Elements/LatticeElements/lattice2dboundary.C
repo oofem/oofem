@@ -433,16 +433,14 @@ double Lattice2dBoundary :: givePitch()
 
 
 
-IRResultType
-Lattice2dBoundary :: initializeFrom(InputRecord *ir)
+void
+Lattice2dBoundary :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    // first call parent
+        // first call parent
     Lattice2d :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, location, _IFT_Lattice2dBoundary_location); // Macro
 
     this->computeGaussPoints();
-    return IRRT_OK;
 }
 
 

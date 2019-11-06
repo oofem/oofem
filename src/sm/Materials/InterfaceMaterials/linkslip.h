@@ -134,7 +134,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_LinkSlip_Name; }
     virtual const char *giveClassName() const { return "LinkSlip"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir) override;
 
     //  virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
 

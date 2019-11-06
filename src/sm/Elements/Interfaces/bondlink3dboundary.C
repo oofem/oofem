@@ -68,12 +68,12 @@ BondLink3dBoundary :: ~BondLink3dBoundary()
 
 void
 BondLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
-                                    TimeStep *tStep)
+                                             TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
     FloatMatrix d, b, bt, db;
     FloatArray u, slip;
-    
+
     this->computeVectorOf(VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
@@ -83,29 +83,29 @@ BondLink3dBoundary :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMod
 
     answer.clear();
 
-    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0); 
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     this->computeBmatrixAt(gp, b);
     bt.beTranspositionOf(b);
-    
+
     if ( !this->isActivated(tStep) ) {
-      slip.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-      slip.zero();
+        slip.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );
+        slip.zero();
     }
     slip.beProductOf(b, u);
-    
+
     answer.resize(9, 9);
     answer.zero();
- 
+
     this->computeConstitutiveMatrixAt(d, rMode, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
     db.beProductOf(d, b);
     answer.beProductOf(bt, db);
 
     //Introduce integration of bond strength
-    double area = this->computeVolumeAround(gp)/this->giveLength();
-    answer.times(area);        
+    double area = this->computeVolumeAround(gp) / this->giveLength();
+    answer.times(area);
 
-    
+
     return;
 }
 
@@ -114,38 +114,39 @@ BondLink3dBoundary :: computeTransformationMatrix(FloatMatrix &answer, TimeStep 
 {
     FloatArray unitCellSize;
     unitCellSize.resize(3);
-    unitCellSize.at(1)=this->giveNode(3)->giveCoordinate(1);
-    unitCellSize.at(2)=this->giveNode(3)->giveCoordinate(2);
-    unitCellSize.at(3)=this->giveNode(3)->giveCoordinate(3);
+    unitCellSize.at(1) = this->giveNode(3)->giveCoordinate(1);
+    unitCellSize.at(2) = this->giveNode(3)->giveCoordinate(2);
+    unitCellSize.at(3) = this->giveNode(3)->giveCoordinate(3);
 
     IntArray switches1, switches2;
-    this->giveSwitches(switches1, this->location.at(1));
-    this->giveSwitches(switches2, this->location.at(2));
+    this->giveSwitches(switches1, this->location.at(1) );
+    this->giveSwitches(switches2, this->location.at(2) );
 
     FloatMatrix k1, k2;
-    k1.resize(6,9); k2.resize(6,9);
+    k1.resize(6, 9);
+    k2.resize(6, 9);
 
     for ( int i = 1; i <= 3; i++ ) {
-        k1.at(i, 3*i-2) = unitCellSize.at(1)*switches1.at(1);
-        k1.at(i, 3*i-1) = unitCellSize.at(2)*switches1.at(2);
-        k1.at(i, 3*i) = unitCellSize.at(3)*switches1.at(3);
+        k1.at(i, 3 * i - 2) = unitCellSize.at(1) * switches1.at(1);
+        k1.at(i, 3 * i - 1) = unitCellSize.at(2) * switches1.at(2);
+        k1.at(i, 3 * i) = unitCellSize.at(3) * switches1.at(3);
     }
 
     for ( int i = 1; i <= 3; i++ ) {
-        k2.at(i, 3*i-2) = unitCellSize.at(1)*switches2.at(1);
-        k2.at(i, 3*i-1) = unitCellSize.at(2)*switches2.at(2);
-        k2.at(i, 3*i) = unitCellSize.at(3)*switches2.at(3);
+        k2.at(i, 3 * i - 2) = unitCellSize.at(1) * switches2.at(1);
+        k2.at(i, 3 * i - 1) = unitCellSize.at(2) * switches2.at(2);
+        k2.at(i, 3 * i) = unitCellSize.at(3) * switches2.at(3);
     }
 
-    answer.resize(12,12);
+    answer.resize(12, 12);
     answer.beUnitMatrix();
-    answer.resizeWithData(12,21);
+    answer.resizeWithData(12, 21);
 
-    answer.assemble(k1, {1,2,3,4,5,6}, {13,14,15,16,17,18,19,20,21});
-    answer.assemble(k2, {7,8,9,10,11,12}, {13,14,15,16,17,18,19,20,21});
+    answer.assemble(k1, { 1, 2, 3, 4, 5, 6 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
+    answer.assemble(k2, { 7, 8, 9, 10, 11, 12 }, { 13, 14, 15, 16, 17, 18, 19, 20, 21 });
 }
 
-  
+
 bool
 BondLink3dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
@@ -161,7 +162,7 @@ BondLink3dBoundary :: computeGtoLRotationMatrix(FloatMatrix &answer)
             answer.at(i, j) = lcs.at(i, j);
             answer.at(i + 3, j + 3) = lcs.at(i, j);
             answer.at(i + 6, j + 6) = lcs.at(i, j);
-	    //            answer.at(i + 9, j + 9) = lcs.at(i, j);
+            //            answer.at(i + 9, j + 9) = lcs.at(i, j);
         }
     }
 
@@ -180,33 +181,28 @@ BondLink3dBoundary :: giveLocalCoordinateSystem(FloatMatrix &answer)
     return 1;
 }
 
-  
+
 
 void
 BondLink3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-  if(inode==1){
-    answer = { D_u, D_v, D_w, R_u, R_v, R_w };
-  }
-  else if(inode==2){
-    answer = { D_u, D_v, D_w};
-  }
-  else if(inode==3){
-    answer = { E_xx, E_xy, E_xz, E_yx, E_yy, E_yz, E_zx, E_zy, E_zz };
-  }
+    if ( inode == 1 ) {
+        answer = { D_u, D_v, D_w, R_u, R_v, R_w };
+    } else if ( inode == 2 )        {
+        answer = { D_u, D_v, D_w };
+    } else if ( inode == 3 )        {
+        answer = { E_xx, E_xy, E_xz, E_yx, E_yy, E_yz, E_zx, E_zy, E_zz };
+    }
 }
 
-IRResultType
-BondLink3dBoundary :: initializeFrom(InputRecord *ir)
+void
+BondLink3dBoundary :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
     StructuralElement :: initializeFrom(ir);
 
     location.resize(2);
     IR_GIVE_FIELD(ir, location, _IFT_LatticeLink3dBoundary_location); // Macro
-   
-    return IRRT_OK;
 }
 
 
@@ -224,8 +220,8 @@ BondLink3dBoundary :: computeGeometryProperties()
     //Continuum node
     nodeB  = this->giveNode(2);
 
-    
-    //Calculate components of distance from continuum node to lattice node.    
+
+    //Calculate components of distance from continuum node to lattice node.
     for ( int i = 0; i < 3; i++ ) {
         coordsA.at(i + 1) =  nodeA->giveCoordinate(i + 1);
         coordsB.at(i + 1) =  nodeB->giveCoordinate(i + 1);
@@ -237,7 +233,7 @@ BondLink3dBoundary :: computeGeometryProperties()
     for ( int i = 0; i < 3; i++ ) {
         rigidGlobal.at(i + 1) = coordsA.at(i + 1) - coordsB.at(i + 1);
     }
-       
+
     //Construct an initial temporary local coordinate system
     FloatArray normal(3), s(3), t(3);
 
@@ -269,9 +265,9 @@ BondLink3dBoundary :: computeGeometryProperties()
     //Set up rotation matrix
     FloatMatrix lcs(3, 3);
 
-    this->localCoordinateSystem.resize(3,3);
+    this->localCoordinateSystem.resize(3, 3);
     this->localCoordinateSystem.zero();
-    
+
     for ( int i = 1; i <= 3; i++ ) {
         this->localCoordinateSystem.at(1, i) = normal.at(i);
         this->localCoordinateSystem.at(2, i) = s.at(i);
@@ -280,42 +276,40 @@ BondLink3dBoundary :: computeGeometryProperties()
 
     // Rotate rigidarm vector into local coordinate system
 
-    this->rigid.beProductOf(localCoordinateSystem,rigidGlobal);
+    this->rigid.beProductOf(localCoordinateSystem, rigidGlobal);
 
-    
+
     this->globalCentroid.resize(3);
     for ( int i = 1; i <= 3; i++ ) {
-      this->globalCentroid.at(i) = nodeB->giveCoordinate(i);;
+        this->globalCentroid.at(i) = nodeB->giveCoordinate(i);
+        ;
     }
-    
+
     this->geometryFlag = 1;
-    
+
     return;
 }
-  
-  void
-  BondLink3dBoundary :: saveContext(DataStream &stream, ContextMode mode)
-  {
-    StructuralElement :: saveContext(stream, mode);
-    
-  }
-  
 
-  void
-  BondLink3dBoundary :: restoreContext(DataStream &stream, ContextMode mode)
+void
+BondLink3dBoundary :: saveContext(DataStream &stream, ContextMode mode)
 {
-  
-  StructuralElement :: restoreContext(stream, mode);
-    
+    StructuralElement :: saveContext(stream, mode);
+}
+
+
+void
+BondLink3dBoundary :: restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralElement :: restoreContext(stream, mode);
 }
 
 
 void
 BondLink3dBoundary :: giveInternalForcesVector(FloatArray &answer,
-					  TimeStep *tStep, int useUpdatedGpRecord)
+                                               TimeStep *tStep, int useUpdatedGpRecord)
 {
-  FloatMatrix b, bt;
-  FloatArray u, stress(6), slip(6);
+    FloatMatrix b, bt;
+    FloatArray u, stress(6), slip(6);
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
     this->computeVectorOf(VM_Total, tStep, u);
@@ -327,11 +321,11 @@ BondLink3dBoundary :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+    for ( GaussPoint *gp: * this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
-	bt.beTranspositionOf(b);
-	
+        bt.beTranspositionOf(b);
+
         if ( useUpdatedGpRecord == 1 ) {
             stress = matStat->giveStressVector();
         } else {
@@ -343,13 +337,13 @@ BondLink3dBoundary :: giveInternalForcesVector(FloatArray &answer,
             this->computeStressVector(stress, slip, gp, tStep);
         }
 
-	answer.beProductOf(bt, stress);
-	
-	//Introduce integration of bond strength
-	double area = this->computeVolumeAround(gp)/this->giveLength();
-	answer.times(area);	
+        answer.beProductOf(bt, stress);
+
+        //Introduce integration of bond strength
+        double area = this->computeVolumeAround(gp) / this->giveLength();
+        answer.times(area);
     }
-       
+
     // if inactive update state, but no contribution to global system
     if ( !this->isActivated(tStep) ) {
         answer.zero();
@@ -358,7 +352,7 @@ BondLink3dBoundary :: giveInternalForcesVector(FloatArray &answer,
 }
 
 
-  
+
 void
 BondLink3dBoundary :: giveSwitches(IntArray &answer, int location) {
     int counter = 1;
@@ -379,7 +373,7 @@ BondLink3dBoundary :: giveSwitches(IntArray &answer, int location) {
     return;
 }
 
-  
+
 void
 BondLink3dBoundary :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
@@ -392,8 +386,8 @@ BondLink3dBoundary :: computeStressVector(FloatArray &answer, const FloatArray &
     this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
 }
 
- 
-  
+
+
 #ifdef __OOFEG
 
 void
@@ -428,7 +422,7 @@ void BondLink3dBoundary :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tS
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
@@ -457,7 +451,7 @@ void BondLink3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeSte
     WCRec p [ 2 ]; /* points */
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetColor(gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
 
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);

@@ -68,11 +68,9 @@ LatticeViscoelastic :: hasMaterialModeCapability(MaterialMode mode)
 }
 
 
-IRResultType
-LatticeViscoelastic :: initializeFrom(InputRecord *ir)
+void
+LatticeViscoelastic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                             // Required by IR_GIVE_FIELD macro
-
 
     LatticeLinearElastic :: initializeFrom(ir);
 
@@ -89,7 +87,6 @@ LatticeViscoelastic :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
     }
 
-    return IRRT_OK;
 }
 
 

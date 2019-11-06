@@ -110,7 +110,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_LatticeDamageViscoelastic_Name; }
     virtual const char *giveClassName() const { return "LatticeDamageViscoelastic"; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
