@@ -143,7 +143,7 @@ py::object createEngngModelOfType(const char* type, py::args args, py::kwargs kw
     if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
       oofem::OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
-      engngm->instanciateDefaultMetaStep(&ir);
+      engngm->instanciateDefaultMetaStep(ir);
     }
 
     engngm->Instanciate_init();
@@ -173,7 +173,7 @@ py::object domain(py::args args, py::kwargs kw)
     d->setDomainType(dType);
     // output manager record
     oofem::OOFEMTXTInputRecord omir = makeOutputManagerOOFEMTXTInputRecordFrom(kw);
-    d->giveOutputManager()->initializeFrom(&omir);
+    d->giveOutputManager()->initializeFrom(omir);
     py::object ret = py::cast(d.release());
     /* ????????????????????
     // sets the last created domain as default one for furtherscript
