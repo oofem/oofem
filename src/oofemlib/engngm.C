@@ -1344,18 +1344,21 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             } else {
               OOFEM_ERROR ("Unsupported element boundary load type");
             }
-            // assemble the contribution
-            va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+
+            if ( assembleFlag ) {
+              // assemble the contribution
+              va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-            if ( assembleFlag ) {            
+              {
                 answer.assemble(charVec, loc);
                 if ( eNorms ) {
                   eNorms->assembleSquared(charVec, dofids);
                 }
                 assembleFlag = false;
-            }
+              }
+            } // end assembleFlag
   
           } // end loop over lement boundary loads
         } 
