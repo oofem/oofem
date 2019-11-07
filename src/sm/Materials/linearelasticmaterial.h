@@ -83,6 +83,9 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
+    const FloatMatrixF<6,6> &giveTangent() const { return tangent; }
+    const FloatArrayF<6> &giveAlpha() const { return alpha; }
+    
     /**
      * Computes the plane strain and plane stress tangents from the 3D tangent.
      */

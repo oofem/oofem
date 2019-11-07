@@ -53,7 +53,7 @@ namespace oofem {
  * Implementation of matrix containing floating point numbers.
  * @author Mikael Öhman
  */
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 class OOFEM_EXPORT FloatMatrixF
 {
 protected:
@@ -93,8 +93,8 @@ public:
     }
     template<typename... V> FloatMatrixF(const std::array<const FloatArrayF<N>,M> &x)
     {
-        for (int i = 0; i < N; ++i) {
-            for (int j = 0; j < M; ++j) {
+        for (std::size_t i = 0; i < N; ++i) {
+            for (std::size_t j = 0; j < M; ++j) {
                 (*this)(i,j) = x[j][i];
             }
         }
@@ -112,7 +112,7 @@ public:
      * @param i Required number of rows.
      * @param j Required number of columns.
      */
-    void checkBounds(int i, int j) const
+    void checkBounds(std::size_t i, std::size_t j) const
     {
         if ( i <= 0 ) {
             throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " <= 0");
@@ -126,9 +126,9 @@ public:
     }
 
     /// Returns number of rows of receiver.
-    int rows() const { return N; }
+    std::size_t rows() const { return N; }
     /// Returns number of columns of receiver.
-    int cols() const { return M; }
+    std::size_t cols() const { return M; }
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -201,31 +201,44 @@ public:
     }
 
     /**
+     * Extract sub matrix (can also reorder the matrix). Implements 0-based indexing.
+     * @param r Rows to extract.
+     * @param c Columns to extract.
+     */
+    template<std::size_t R, std::size_t C>
+    FloatMatrixF<R,C> operator()(std::size_t const (&r)[R], std::size_t const (&c)[C]) const
+    {
+        FloatMatrixF<R,C> x;
+        for ( std::size_t i = 0; i < R; ++i ) {
+            for ( std::size_t j = 0; j < C; ++j ) {
+                x(i, j) = (*this)(r[i], c[j]);
+            }
+        }
+        return x;
+    }
+    
+    /// Assemble x into self.
+    template<std::size_t R, std::size_t C>
+    inline void assemble(const FloatMatrixF<R,C> &x, int const (&r)[R], int const (&c)[C] )
+    {
+        for ( std::size_t i = 0; i < R; ++i ) {
+            for ( std::size_t j = 0; j < C; ++j ) {
+                (*this)(r[i], c[j]) += x(i, j);
+            }
+        }
+    }
+
+    
+    /**
      * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.
      * @param src Array to set at column c.
      * @param c Column to set.
      */
     void setColumn(const FloatArrayF<N> &src, int c)
     {
-        for ( int i = 0; i < N; i++ ) {
+        for ( std::size_t i = 0; i < N; i++ ) {
             (*this)(i, c) = src[i];
         }
-    }
-
-    /**
-     * Extract sub matrix (can also reorder the matrix).
-     * Zero based indexing.
-     */
-    template<int P, int K>
-    FloatMatrixF<P,K> sub(const std::array<int, P> &rows, const std::array<int,K> &cols)
-    {
-        FloatMatrixF<P,K> out;
-        for ( int i = 0; i < P; ++i ) {
-            for ( int j = 0; j < K; ++j ) {
-                out(i, j) = (*this)(rows[i], cols[j]);
-            }
-        }
-        return out;
     }
 
     /**
@@ -236,14 +249,14 @@ public:
      * @param b Matrix b in equation.
      * @param dV Scaling factor.
      */
-    template<int P>
+    template<std::size_t P>
     void plusProductSymmUpper(const FloatMatrixF<P,N> &a, const FloatMatrixF<P,M> &b, double dV)
     {
         ///@todo Larger matrices needs optimized BLAS.
-        for ( int i = 0; i < N; ++i ) {
-            for ( int j = i; j < M; ++j ) {
+        for ( std::size_t i = 0; i < N; ++i ) {
+            for ( std::size_t j = i; j < M; ++j ) {
                 double summ = 0.;
-                for ( int k = 0; k < P; ++k ) {
+                for ( std::size_t k = 0; k < P; ++k ) {
                     summ += a(k, i) * b(k, j);
                 }
                 (*this)(i, j) += summ * dV;
@@ -259,8 +272,8 @@ public:
     void plusDyadSymmUpper(const FloatArrayF<N> &a, double dV)
     {
         ///@todo This method should only exist if we have N == M, how do I enforce this?
-        for ( int i = 0; i < N; ++i ) {
-            for ( int j = i; j < N; ++j ) {
+        for ( std::size_t i = 0; i < N; ++i ) {
+            for ( std::size_t j = i; j < N; ++j ) {
                 (*this)(i, j) += a[i] * a[j] * dV;
             }
         }
@@ -271,14 +284,14 @@ public:
      * @param b Matrix b in equation.
      * @param dV Scaling factor.
      */
-    template<int P>
+    template<std::size_t P>
     void plusProductUnsym(const FloatMatrixF<P,N> &a, const FloatMatrixF<P,M> &b, double dV)
     {
         ///@todo Larger matrices needs optimized BLAS.
-        for ( int i = 0; i < N; ++i ) {
-            for ( int j = 0; j < M; ++j ) {
+        for ( std::size_t i = 0; i < N; ++i ) {
+            for ( std::size_t j = 0; j < M; ++j ) {
                 double summ = 0.;
-                for ( int k = 0; k < P; ++k ) {
+                for ( std::size_t k = 0; k < P; ++k ) {
                     summ += a(k, i) * b(k, j);
                 }
                 (*this)(i, j) += summ * dV;
@@ -294,8 +307,8 @@ public:
     void plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
     {
         ///@todo This method should only exist if we have N == M, how do I enforce this?
-        for ( int i = 0; i < N; ++i ) {
-            for ( int j = 0; j < M; ++j ) {
+        for ( std::size_t i = 0; i < N; ++i ) {
+            for ( std::size_t j = 0; j < M; ++j ) {
                 (*this)(i, j) += a[i] * b[j] * dV;
             }
         }
@@ -305,8 +318,8 @@ public:
      */
     void symmetrized()
     {
-        for ( int i = 2; i <= this->rows(); i++ ) {
-            for ( int j = 1; j < i; j++ ) {
+        for ( std::size_t i = 2; i <= this->rows(); i++ ) {
+            for ( std::size_t j = 1; j < i; j++ ) {
                 this->at(i, j) = this->at(j, i);
             }
         }
@@ -317,15 +330,15 @@ public:
     {
         printf("%s (%d x %d): \n", name.c_str(), N, M);
         if ( this->rows() <= 250 && this->cols() <= 250 ) {
-            for ( int i = 0; i < this->rows(); ++i ) {
-                for ( int j = 0; j < this->cols() && j < 100; ++j ) {
+            for ( std::size_t i = 0; i < this->rows(); ++i ) {
+                for ( std::size_t j = 0; j < this->cols() && j < 100; ++j ) {
                     printf( "%10.3e  ", (*this)(i, j) );
                 }
                 printf("\n");
             }
         } else {
-            for ( int i = 0; i < this->rows() && i < 20; ++i ) {
-                for ( int j = 0; j < this->cols() && j < 10; ++j ) {
+            for ( std::size_t i = 0; i < this->rows() && i < 20; ++i ) {
+                for ( std::size_t j = 0; j < this->cols() && j < 10; ++j ) {
                     printf( "%10.3e  ", (*this)(i, j) );
                 }
                 if ( this->cols() > 10 ) printf(" ...");
@@ -364,12 +377,27 @@ public:
     }
 };
 
-template<int N, int M>
+
+/// Assemble components into zero matrix.
+template<std::size_t N, std::size_t M, std::size_t R, std::size_t C>
+inline FloatMatrixF<N,M> assemble(const FloatMatrixF<R,C> &x, int const (&r)[R], int const (&c)[C] )
+{
+    FloatMatrixF<N,M> out;
+    for ( std::size_t i = 0; i < R; ++i ) {
+        for ( std::size_t j = 0; j < C; ++j ) {
+            out(r[i], c[j]) = x(i, j);
+        }
+    }
+    return out;
+}
+
+
+template<std::size_t N, std::size_t M>
 std::ostream & operator << ( std::ostream & out, const FloatMatrixF<N,M> & x )
 {
     out << N << " " << M << " {";
-    for ( int i = 0; i < N; ++i ) {
-        for ( int j = 0; j < M; ++j ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
+        for ( std::size_t j = 0; j < M; ++j ) {
             out << " " << x(i, j);
         }
         out << ";";
@@ -378,81 +406,81 @@ std::ostream & operator << ( std::ostream & out, const FloatMatrixF<N,M> & x )
     return out;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator * ( double a, const FloatMatrixF<N,M> & x )
 {
     FloatMatrixF<N,M> out;
-    for ( int i = 0; i < N*M; ++i ) {
+    for ( std::size_t i = 0; i < N*M; ++i ) {
         out[i] = x[i] * a;
     }
     return out;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator * ( const FloatMatrixF<N,M> & x, double a )
 {
     return a*x;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator / ( const FloatMatrixF<N,M> & x, double a )
 {
     FloatMatrixF<N,M> out;
-    for ( int i = 0; i < N*M; ++i ) {
+    for ( std::size_t i = 0; i < N*M; ++i ) {
         out[i] = x[i] / a;
     }
     return out;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator + ( const FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
     FloatMatrixF<N,M> out;
-    for ( int i = 0; i < N*M; ++i ) {
+    for ( std::size_t i = 0; i < N*M; ++i ) {
         out[i] = x[i] + y[i];
     }
     return out;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> operator - ( const FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
     FloatMatrixF<N,M> out;
-    for ( int i = 0; i < N*M; ++i ) {
+    for ( std::size_t i = 0; i < N*M; ++i ) {
         out[i] = x[i] - y[i];
     }
     return out;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator += ( FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
-    for ( int i = 0; i < N*M; ++i ) {
+    for ( std::size_t i = 0; i < N*M; ++i ) {
         x[i] += y[i];
     }
     return x;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator -= ( FloatMatrixF<N,M> & x, const FloatMatrixF<N,M> & y )
 {
-    for ( int i = 0; i < N*M; ++i ) {
+    for ( std::size_t i = 0; i < N*M; ++i ) {
         x[i] -= y[i];
     }
     return x;
 }
 
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> &operator *= ( FloatMatrixF<N,M> & x, double a )
 {
-    for ( int i = 0; i < N*M; ++i ) {
+    for ( std::size_t i = 0; i < N*M; ++i ) {
         x[i] *= a;
     }
     return x;
 }
 
 /// Returns true if no element is not finite (NAN or infinite)
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 bool isfinite(const FloatMatrixF<N,M> &mat)
 {
     for ( auto &val : mat ) {
@@ -467,12 +495,12 @@ bool isfinite(const FloatMatrixF<N,M> &mat)
  * Constructs the N matrix
  * @param n Vector with components which will appear in respective diagonal.
  */
-template<int N, int NSD>
+template<std::size_t N, std::size_t NSD>
 FloatMatrixF<N*3,NSD> Nmatrix(const FloatArrayF<N> &n)
 {
     FloatMatrixF<N*3,NSD> out;
-    for ( int i = 0; i < N; ++i ) {
-        for ( int j = 0; j < NSD; ++j ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
+        for ( std::size_t j = 0; j < NSD; ++j ) {
             out( j, i * NSD + j ) = n[j];
         }
     }
@@ -518,12 +546,12 @@ inline FloatMatrixF<3,3> local_cs(const FloatArrayF<3> &normal)
 }
 
 /// Constructs transposed matrix
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<M,N> transpose(const FloatMatrixF<N,M> &mat)
 {
     FloatMatrixF<M,N> out;
-    for ( int i = 0; i < N; ++i ) {
-        for ( int j = 0; j < M; ++j ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
+        for ( std::size_t j = 0; j < M; ++j ) {
             out(j, i) = mat(i, j);
         }
     }
@@ -531,15 +559,15 @@ FloatMatrixF<M,N> transpose(const FloatMatrixF<N,M> &mat)
 }
 
 /// Computes @f$ a \cdot b @f$.
-template<int N, int M, int P>
+template<std::size_t N, std::size_t M, std::size_t P>
 FloatMatrixF<N,P> dot(const FloatMatrixF<N,M> &a, const FloatMatrixF<M,P> &b)
 {
     FloatMatrixF<N,P> out;
     ///@todo BLAS for larger matrix sizes (maybe)
-    for ( int i = 0; i < N; i++ ) {
-        for ( int j = 0; j < P; j++ ) {
+    for ( std::size_t i = 0; i < N; i++ ) {
+        for ( std::size_t j = 0; j < P; j++ ) {
             double coeff = 0.;
-            for ( int k = 0; k < M; k++ ) {
+            for ( std::size_t k = 0; k < M; k++ ) {
                 coeff += a(i, k) * b(k, j);
             }
             out(i, j) = coeff;
@@ -549,15 +577,15 @@ FloatMatrixF<N,P> dot(const FloatMatrixF<N,M> &a, const FloatMatrixF<M,P> &b)
 }
 
 /// Computes @f$ a \cdot b^{\mathrm{T}} @f$.
-template<int N, int M, int P>
+template<std::size_t N, std::size_t M, std::size_t P>
 FloatMatrixF<N,P> dotT(const FloatMatrixF<N,M> &a, const FloatMatrixF<P,M> &b)
 {
     FloatMatrixF<N,P> out;
     ///@todo BLAS for larger matrix sizes (maybe)
-    for ( int i = 0; i < N; i++ ) {
-        for ( int j = 0; j < P; j++ ) {
+    for ( std::size_t i = 0; i < N; i++ ) {
+        for ( std::size_t j = 0; j < P; j++ ) {
             double coeff = 0.;
-            for ( int k = 0; k < M; k++ ) {
+            for ( std::size_t k = 0; k < M; k++ ) {
                 coeff += a(i, k) * b(j, k);
             }
             out(i, j) = coeff;
@@ -567,15 +595,15 @@ FloatMatrixF<N,P> dotT(const FloatMatrixF<N,M> &a, const FloatMatrixF<P,M> &b)
 }
 
 /// Computes @f$ a^{\mathrm{T}} \cdot b @f$.
-template<int N, int M, int P>
+template<std::size_t N, std::size_t M, std::size_t P>
 FloatMatrixF<N,P> Tdot(const FloatMatrixF<M,N> &a, const FloatMatrixF<M,P> &b)
 {
     FloatMatrixF<N,P> out;
     ///@todo BLAS for larger matrix sizes (maybe)
-    for ( int i = 0; i < N; i++ ) {
-        for ( int j = 0; j < P; j++ ) {
+    for ( std::size_t i = 0; i < N; i++ ) {
+        for ( std::size_t j = 0; j < P; j++ ) {
             double coeff = 0.;
-            for ( int k = 0; k < M; k++ ) {
+            for ( std::size_t k = 0; k < M; k++ ) {
                 coeff += a(k, i) * b(k, j);
             }
             out(i, j) = coeff;
@@ -585,13 +613,13 @@ FloatMatrixF<N,P> Tdot(const FloatMatrixF<M,N> &a, const FloatMatrixF<M,P> &b)
 }
 
 /// Computes @$ m_ij x_j = m \cdot x @$
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatArrayF<N> dot(const FloatMatrixF<N,M> &m, const FloatArrayF<M> &x)
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < N; i++ ) {
+    for ( std::size_t i = 0; i < N; i++ ) {
         double sum = 0.;
-        for ( int j = 0; j < M; j++ ) {
+        for ( std::size_t j = 0; j < M; j++ ) {
             sum += m(i, j) * x[j];
         }
         out[i] = sum;
@@ -600,13 +628,13 @@ FloatArrayF<N> dot(const FloatMatrixF<N,M> &m, const FloatArrayF<M> &x)
 }
 
 /// Computes @$ x_j m_ji = x \cdot m = m^{\mathrm{T}} \cdot x @$
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatArrayF<N> dot(const FloatArrayF<M> &x, const FloatMatrixF<M,N> &m)
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < N; i++ ) {
+    for ( std::size_t i = 0; i < N; i++ ) {
         double sum = 0.;
-        for ( int j = 0; j < M; j++ ) {
+        for ( std::size_t j = 0; j < M; j++ ) {
             sum += x[j] * m(j, i);
         }
         out[i] = sum;
@@ -615,19 +643,19 @@ FloatArrayF<N> dot(const FloatArrayF<M> &x, const FloatMatrixF<M,N> &m)
 }
 
 /// Computes @$ x_j m_ji = x \cdot m = m^{\mathrm{T}} \cdot x @$
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatArrayF<N> Tdot(const FloatMatrixF<M,N> &m, const FloatArrayF<M> &x)
 {
     return dot(x, m);
 }
 
 /// Computes the dyadic product @f$ m_{ij} = a_i b_j @f$.
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<N,M> dyad(const FloatArrayF<N> &a, const FloatArrayF<M> &b)
 {
     FloatMatrixF<N,M> out;
-    for ( int i = 0; i < N; ++i ) {
-        for ( int j = 0; j < M; ++j ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
+        for ( std::size_t j = 0; j < M; ++j ) {
             out(i, j) = a[i] * b[j];
         }
     }
@@ -635,14 +663,14 @@ FloatMatrixF<N,M> dyad(const FloatArrayF<N> &a, const FloatArrayF<M> &b)
 }
 
 /// Computes @f$ a = r^{\mathrm{T}} \cdot a \cdot r @f$
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<M,M> rotate(FloatMatrixF<N,N> &a, const FloatMatrixF<N,M> &r)
 {
     return dot(dotT(r, a), r);
 }
 
 /// Computes @f$ a = r \cdot a \cdot r^{\mathrm{T}} @f$
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatMatrixF<M,M> unrotate(FloatMatrixF<N,N> &a, const FloatMatrixF<M,N> &r)
 {
     return dotT(dot(r, a), r);
@@ -651,11 +679,11 @@ FloatMatrixF<M,M> unrotate(FloatMatrixF<N,N> &a, const FloatMatrixF<M,N> &r)
 /**
  * Returns a copy of the given matrix column,
  */
-template<int N, int M>
-FloatArrayF<N> column(const FloatMatrixF<N,M> &mat, int col)
+template<std::size_t N, std::size_t M>
+FloatArrayF<N> column(const FloatMatrixF<N,M> &mat, std::size_t col)
 {
     FloatArrayF<N> ans;
-    for ( int row = 0; row < N; ++row ) {
+    for ( std::size_t row = 0; row < N; ++row ) {
         ans[row] = mat(row, col);
     }
     return ans;
@@ -754,11 +782,11 @@ inline FloatArrayF<6> to_voigt_strain(const FloatMatrixF<3,3> &t)
 /**
  * Constructs diagonal matrix from vector.
  */
-template<int N>
+template<std::size_t N>
 FloatMatrixF<N,N> diag(const FloatArrayF<N> &v)
 {
     FloatMatrixF<N,N> out;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         out(i, i) = v[i];
     }
     return out;
@@ -767,11 +795,11 @@ FloatMatrixF<N,N> diag(const FloatArrayF<N> &v)
 /**
  * Constructs diagonal matrix from vector.
  */
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 FloatArrayF<N*M> flatten(const FloatMatrixF<N,M> &m)
 {
     FloatArrayF<N*M> out;
-    for (int i = 0; i < N*M; ++i) {
+    for (std::size_t i = 0; i < N*M; ++i) {
         out[i] = m[i];
     }
     return out;
@@ -801,11 +829,11 @@ void swap_46(FloatMatrixF<9,9> &t)
     // OOFEM: 11, 22, 33, 23, 13, 12, 32, 31, 21
     // UMAT:  11, 22, 33, 12, 13, 23, 32, 21, 31
 
-    std::array<int, 9> abq2oo = {0, 1, 2, 5, 4, 3, 6, 8, 7};
+    std::array<std::size_t, 9> abq2oo = {0, 1, 2, 5, 4, 3, 6, 8, 7};
 
     FloatMatrixF<9,9> tmp;
-    for ( int i = 0; i < 9; i++ ) {
-        for ( int j = 0; j < 9; j++ ) {
+    for ( std::size_t i = 0; i < 9; i++ ) {
+        for ( std::size_t j = 0; j < 9; j++ ) {
             tmp(i, j) = t(abq2oo[ i ], abq2oo[ j ]);
         }
     }
@@ -815,18 +843,18 @@ void swap_46(FloatMatrixF<9,9> &t)
 #endif
 
 /// Constructs a zero matrix (this is the default behavior when constructing a matrix, this is just for nicer syntax)
-template<int N,int M>
+template<std::size_t N,std::size_t M>
 FloatMatrixF<N,M> zero()
 {
     return FloatMatrixF<N,M>();
 }
 
 /// Constructs an identity matrix
-template<int N>
+template<std::size_t N>
 FloatMatrixF<N,N> eye()
 {
     FloatMatrixF<N,N> out;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         out(i, i) = 1.;
     }
     return out;
@@ -859,12 +887,12 @@ const FloatMatrixF<6,6> I6_I6 = {
  * 0   N_1 0   0   ...
  * 0   0   N_1 0   ... 
  */
-template<int N, int NSD>
+template<std::size_t N, std::size_t NSD>
 FloatMatrixF<NSD,N> Nmatrix(const FloatArrayF<N> &n)
 {
     FloatMatrixF<NSD,N*NSD> out;
-    for ( int i = 0; i < N; ++i ) {
-        for ( int j = 0; j < NSD; ++j ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
+        for ( std::size_t j = 0; j < NSD; ++j ) {
             out( j, i * NSD + j ) = n[j];
         }
     }
@@ -872,11 +900,11 @@ FloatMatrixF<NSD,N> Nmatrix(const FloatArrayF<N> &n)
 }
 
 /// Constructs the B matrix for 3D momentum balance problems.
-template<int N>
+template<std::size_t N>
 FloatMatrixF<6, N*3> Bmatrix_3d(const FloatMatrixF<3,N> &dN)
 {
     FloatMatrixF<6, N*3> B;
-    for ( int j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
+    for ( std::size_t j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
         B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
         B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
         B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
@@ -885,11 +913,11 @@ FloatMatrixF<6, N*3> Bmatrix_3d(const FloatMatrixF<3,N> &dN)
 }
 
 /// Constructs the B matrix for plane stress momentum balance problems.
-template<int N>
+template<std::size_t N>
 FloatMatrixF<3,N*2> Bmatrix_2d(const FloatMatrixF<2,N> &dN)
 {
     FloatMatrixF<3,N*2> B;
-    for ( int j = 0, k = 0; j < N; j++, k += 2 ) {
+    for ( std::size_t j = 0, k = 0; j < N; j++, k += 2 ) {
         B(0, k + 0) = B(2, k + 1) = dN(0, j);
         B(1, k + 1) = B(2, k + 0) = dN(1, j);
     }
@@ -902,11 +930,11 @@ FloatMatrixF<3,N*2> Bmatrix_2d(const FloatMatrixF<2,N> &dN)
 /**
  * Computes the  trace of the matrix.
  */
-template<int N>
+template<std::size_t N>
 double trace(const FloatMatrixF<N,N> &mat)
 {
     double s = 0.;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         s += mat(i, i);
     }
     return s;
@@ -917,11 +945,11 @@ double trace(const FloatMatrixF<N,N> &mat)
  * The Frobenius norm is defined as the square root of the sum of the absolute squares of its elements.
  * @return Frobenius norm.
  */
-template<int N>
+template<std::size_t N>
 double frobeniusNorm(const FloatMatrixF<N,N> &mat)
 {
     double n = 0.;
-    for ( int i = 0; i < N*N; ++i ) {
+    for ( std::size_t i = 0; i < N*N; ++i ) {
         n += mat[i] * mat[i];
     }
     return std::sqrt( n );
@@ -933,14 +961,14 @@ double frobeniusNorm(const FloatMatrixF<N,N> &mat)
  * @param p Norm type, 1 norm, else 2 norm.
  * @return Norm.
  */
-template<int N>
+template<std::size_t N>
 double norm(const FloatMatrixF<N,N> &mat, int p=1)
 {
     if ( p == 1 ) {
         double max_col = 0.;
-        for ( int j = 0; j < N; j++ ) {
+        for ( std::size_t j = 0; j < N; j++ ) {
             double col_sum  = 0.;
-            for ( int i = 0; i < N; i++ ) {
+            for ( std::size_t i = 0; i < N; i++ ) {
                 col_sum += fabs( mat(i, j) );
             }
             if ( col_sum > max_col ) {
@@ -961,7 +989,7 @@ double norm(const FloatMatrixF<N,N> &mat, int p=1)
  * @param p Norm type, 1 norm, else 2 norm.
  * @return Conditioning of receiver.
  */
-template<int N>
+template<std::size_t N>
 double rcond(const FloatMatrixF<N,N> &mat, int p=1)
 {
     ///@todo Do we need lapack here?
@@ -973,7 +1001,7 @@ double rcond(const FloatMatrixF<N,N> &mat, int p=1)
 }
 
 /// Computes the determinant
-template<int N>
+template<std::size_t N>
 double det(const FloatMatrixF<N,N> &mat)
 {
     OOFEM_ERROR("TODO");
@@ -996,7 +1024,7 @@ inline double det(const FloatMatrixF<3,3> &mat)
 }
 
 /// Computes the inverse
-template<int N>
+template<std::size_t N>
 FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat)
 {
     // gaussian elimination - slow but safe
@@ -1004,37 +1032,37 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat)
     // initialize answer to be unity matrix;
     auto out = eye<N>();
     // lower triangle elimination by columns
-    for ( int i = 1; i < N; i++ ) {
+    for ( std::size_t  i = 1; i < N; i++ ) {
         double piv = tmp.at(i, i);
         if ( std::abs(piv) < 1.e-24 ) {
             OOFEM_ERROR("pivot (%d,%d) to close to small (< 1.e-24)", i, i);
         }
-        for ( int j = i + 1; j <= N; j++ ) {
+        for ( std::size_t j = i + 1; j <= N; j++ ) {
             double linkomb = tmp.at(j, i) / tmp.at(i, i);
-            for ( int k = i; k <= N; k++ ) {
+            for ( std::size_t  k = i; k <= N; k++ ) {
                 tmp.at(j, k) -= tmp.at(i, k) * linkomb;
             }
-            for ( int k = 1; k <= N; k++ ) {
+            for ( std::size_t  k = 1; k <= N; k++ ) {
                 out.at(j, k) -= out.at(i, k) * linkomb;
             }
         }
     }
     // upper triangle elimination by columns
-    for ( int i = N; i > 1; i-- ) {
+    for ( std::size_t  i = N; i > 1; i-- ) {
         double piv = tmp.at(i, i);
-        for ( int j = i - 1; j > 0; j-- ) {
+        for ( std::size_t  j = i - 1; j > 0; j-- ) {
             double linkomb = tmp.at(j, i) / piv;
-            for ( int k = i; k > 0; k-- ) {
+            for ( std::size_t  k = i; k > 0; k-- ) {
                 tmp.at(j, k) -= tmp.at(i, k) * linkomb;
             }
-            for ( int k = N; k > 0; k-- ) {
+            for ( std::size_t  k = N; k > 0; k-- ) {
                 out.at(j, k) -= out.at(i, k) * linkomb;
             }
         }
     }
     // diagonal scaling
-    for ( int i = 1; i <= N; i++ ) {
-        for ( int j = 1; j <= N; j++ ) {
+    for ( std::size_t  i = 1; i <= N; i++ ) {
+        for ( std::size_t  j = 1; j <= N; j++ ) {
             out.at(i, j) /= tmp.at(i, i);
         }
     }
@@ -1078,7 +1106,7 @@ inline FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat)
  * @param nf Number of significant figures.
  * @return Pair of eigenvalues and vectors..
  */
-template<int N>
+template<std::size_t N>
 std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(FloatMatrixF<N,N> &mat, int nf)
 {
     OOFEM_ERROR("TODO");
@@ -1106,7 +1134,7 @@ inline std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(FloatMatrixF<2,2> &mat, 
  * @param transpose Solves for the transpose of K.
  * @return False if K is singular, otherwise true.
  */
-template<int N>
+template<std::size_t N>
 bool solve(FloatMatrixF<N,N> &k, const FloatArrayF<N> &b, FloatArrayF<N> &answer, bool transpose=false)
 {
     OOFEM_ERROR("TODO");
@@ -1120,7 +1148,7 @@ bool solve(FloatMatrixF<N,N> &k, const FloatArrayF<N> &b, FloatArrayF<N> &answer
  * @param transpose Solves for the transpose of K.
  * @return False if K is singular, otherwise true.
  */
-template<int N, int M>
+template<std::size_t N, std::size_t M>
 bool solve(FloatMatrixF<N,N> &k, FloatMatrixF<N,M> &B, FloatMatrixF<N,M> &answer, bool transpose=false)
 {
     OOFEM_ERROR("TODO");

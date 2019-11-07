@@ -173,7 +173,7 @@ FEI2dQuadBiQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry
 {
     auto dn = evaldNdxi(lcoords);
     FloatMatrixF<2,2> jacT;
-    for ( int i = 1; i <= dn.cols(); i++ ) {
+    for ( std::size_t i = 1; i <= dn.cols(); i++ ) {
         const auto &c = cellgeo.giveVertexCoordinates(i);
         double x = c.at(xind);
         double y = c.at(yind);

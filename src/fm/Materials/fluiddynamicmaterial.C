@@ -51,26 +51,27 @@ FluidDynamicMaterial :: computeDeviatoricStress3D(const FloatArrayF<6> &eps, dou
 std::pair<FloatArrayF<3>, double>
 FluidDynamicMaterial :: computeDeviatoricStress2D(const FloatArrayF<3> &eps, double pressure, GaussPoint *gp, TimeStep *tStep) const
 {
-    //auto [stress, epsv] = this->computeDeviatoricStress3D({eps[0], eps[1], 0., 0., 0., eps[2]}, pressure, gp, tStep);
-    auto val = this->computeDeviatoricStress3D({eps[0], eps[1], 0., 0., 0., eps[2]}, pressure, gp, tStep);
+    //auto [stress, epsv] = this->computeDeviatoricStress3D(assemble<6>(eps, {0, 1, 5}), pressure, gp, tStep);
+    auto val = this->computeDeviatoricStress3D(assemble<6>(eps, {0, 1, 5}), pressure, gp, tStep);
     auto stress3 = val.first;
-    return {{stress3[0], stress3[1], stress3[5]}, val.second};
+    auto epsv = val.second;
+    return {stress3[{0, 1, 5}], epsv};
 }
 
 
 FloatArrayF<3>
 FluidDynamicMaterial :: computeDeviatoricStress2D(const FloatArrayF<3> &eps, GaussPoint *gp, TimeStep *tStep) const
 {
-    auto stress3 = this->computeDeviatoricStress3D({eps[0], eps[1], 0., 0., 0., eps[2]}, gp, tStep);
-    return {stress3[0], stress3[1], stress3[5]};
+    auto stress3 = this->computeDeviatoricStress3D(assemble<6>(eps, {0, 1, 5}), gp, tStep);
+    return stress3[{0, 1, 5}];
 }
 
 
 FloatArrayF<4>
 FluidDynamicMaterial :: computeDeviatoricStressAxi(const FloatArrayF<4> &eps, GaussPoint *gp, TimeStep *tStep) const
 {
-    auto stress3 = this->computeDeviatoricStress3D({eps[0], eps[1], eps[2], 0., 0., eps[3]}, gp, tStep);
-    return {stress3[0], stress3[1], stress3[2], stress3[5]};
+    auto stress3 = this->computeDeviatoricStress3D(assemble<6>(eps, {0, 1, 2, 5}), gp, tStep);
+    return stress3[{0, 1, 2, 5}];
 }
 
 
@@ -78,11 +79,7 @@ FloatMatrixF<3,3>
 FluidDynamicMaterial :: computeTangent2D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto dsdd3 = this->computeTangent3D(mode, gp, tStep);
-    return {
-        dsdd3(0, 0), dsdd3(1, 0), dsdd3(5, 0),
-        dsdd3(0, 1), dsdd3(1, 1), dsdd3(5, 1),
-        dsdd3(0, 5), dsdd3(1, 5), dsdd3(5, 5)
-    };
+    return dsdd3({0, 1, 5}, {0, 1, 5});
 }
 
 
@@ -90,12 +87,7 @@ FloatMatrixF<4,4>
 FluidDynamicMaterial :: computeTangentAxi(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto dsdd3 = this->computeTangent3D(mode, gp, tStep);
-    return {
-        dsdd3(0, 0), dsdd3(1, 0), dsdd3(2, 0), dsdd3(5, 0),
-        dsdd3(0, 1), dsdd3(1, 1), dsdd3(2, 1), dsdd3(5, 1),
-        dsdd3(0, 2), dsdd3(1, 2), dsdd3(2, 2), dsdd3(5, 2),
-        dsdd3(0, 5), dsdd3(1, 5), dsdd3(2, 5), dsdd3(5, 5)
-    };
+    return dsdd3({0, 1, 2, 5}, {0, 1, 2, 5});
 }
 
 
@@ -104,8 +96,8 @@ FluidDynamicMaterial :: computeTangents3D(MatResponseMode mode, GaussPoint *gp, 
 {
     return {
         this->computeTangent3D(mode, gp, tStep),
-        FloatArrayF<6>(),
-        FloatArrayF<6>(),
+        zeros<6>(),
+        zeros<6>(),
         0.
     };
 }
@@ -116,14 +108,9 @@ FluidDynamicMaterial :: computeTangents2D(MatResponseMode mode, GaussPoint *gp, 
 {
     auto t = this->computeTangents3D(mode, gp, tStep);
 
-    FloatMatrixF<3,3> dsdd = {
-        t.dsdd(0, 0), t.dsdd(1, 0), t.dsdd(5, 0),
-        t.dsdd(0, 1), t.dsdd(1, 1), t.dsdd(5, 1),
-        t.dsdd(0, 5), t.dsdd(1, 5), t.dsdd(5, 5),
-    };
-    FloatArrayF<3> dsdp = {t.dsdp[0], t.dsdp[1], t.dsdp[5]};
-    FloatArrayF<3> dedd = {t.dedd[0], t.dedd[1], t.dedd[5]};
-
+    auto dsdd = t.dsdd({0, 1, 5}, {0, 1, 5});
+    auto dsdp = t.dsdp[{0, 1, 5}];
+    auto dedd = t.dedd[{0, 1, 5}];
     return {dsdd, dsdp, dedd, t.dedp};
 }
 
@@ -146,7 +133,7 @@ FluidDynamicMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 int
 FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_DeviatoricStress ) {
         answer = status->giveDeviatoricStressVector();
         return 1;
