@@ -4980,53 +4980,27 @@ Supported modes& \_2dInterface, \_3dInterface\\
 
 \subsection{Material models for lattice elements}
 
-Lattice elements have to be used with material models describing the constitutive behavior in the form of vector of  tractions and strains determined from displacement jumps smeared out over the element length.
+Lattice elements have to be used with material models describing the constitutive behavior in the form of vector of tractions and strains determined from displacement jumps smeared out over the element length.
 
-\subsubsection{Latticedamage2d}
-This is a damage lattice material used together with latticedamage2d elements.
+\subsubsection{Latticedamage}
+This is a damage lattice material used together with lattice elements.
 It uses a scalar damage relationship of the form
 \begin{equation}
 \boldsymbol{\sigma} = \left(1-\omega\right) \mathbf{D}_{\rm e} \boldsymbol{\varepsilon}
 \end{equation}
-where $\boldsymbol{\sigma} = \left( \sigma_{\rm n}, \sigma_{\rm t}, \sigma_{\rm \phi}\right)^{T}$ is a vector of tractions and $\boldsymbol{\varepsilon} = \left( \varepsilon_{\rm n}, \varepsilon_{\rm t}, \varepsilon_{\rm \phi}\right)^{T}$ is a vector of strains obtained from displacement jumps smeared over the element length.
+where $\boldsymbol{\sigma}$ is a vector of tractions and $\boldsymbol{\varepsilon}$ is a vector of strains obtained from displacement jumps smeared over the element length.
 Furthermore, $\omega$ is the damage variable varying from 0 (undamaged) to 1 (fully damaged). 
 Also, $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix which is based on the elastic modulus of the lattice material $E$, and a parameter $\gamma$ which is the ratio of the modulus of the shear and normal direction.
-The strength envelope is elliptic (Figure~\ref{StrengthLatticeDamage2d}) and determined by three  parameters, $f_{\rm t}$, $f_{\rm q}$ and $f_{\rm c}$. The evolution of the damage variable $\omega$ is controlled by normal stress-normal crack opening law. The three possible laws are linear, bilinear and exponential (Figure~\ref{SofteningLatticeDamage2d}).
+The strength envelope (onset of damage) is elliptic and determined by three  parameters, $f_{\rm t}$, $f_{\rm q}$ and $f_{\rm c}$. The evolution of the damage variable $\omega$ is controlled by normal stress-normal crack opening law. The three possible laws are linear, bilinear and exponential.
 
-\begin{figure}[!htb]
-\begin{htmlonly}
-  \centerline{\includegraphics[width=0.7\textwidth]{figStrengthLatticeDamage2d.eps}}
-\end{htmlonly}
-%begin{latexonly}
- \centerline{\includegraphics[width=0.7\textwidth]{figStrengthLatticeDamage2d}}
-%end{latexonly}
-  \caption{Strength envelope of LatticeDamage2d.}
-  \label{StrengthLatticeDamage2d}
-\end{figure}
-
-
-\begin{figure}[!htb]
-\begin{tabular}{ccc}
-%\begin{htmlonly}
-%  \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2da.eps} & \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2db.eps} & \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2dc.eps}\\
-%\end{htmlonly}
-%begin{latexonly}
-\includegraphics[width=0.3\textwidth]{figSofteningLatticeDamage2da} & \includegraphics[width=0.3\textwidth]{figSofteningLatticeDamage2db} & \includegraphics[width=0.3\textwidth]{figSofteningLatticeDamage2dc}\\
-%end{latexonly}
-(a) & (b) & (c)
-\end{tabular}
-  \caption{Softening types of LatticeDamage2d: (a) linear softening, (b) bilinear softening, (c) exponential softening.}
-  \label{SofteningLatticeDamage2d}
-\end{figure}
-
-The model parameters are summarised in Tab.~\ref{latticedamage2d_table}.
+The model parameters are summarised in Tab.~\ref{latticedamage_table}.
 \begin{table}[!htb]
 %\begin{center}
 \begin{mmt}
 \hline
-Description & Saclar damage model for lattice2d \\
+Description & Scalar damage model for lattice elements \\
 \hline
-Record Format & \descitem{latticedamage2d} \elemparam{}{in} 
+Record Format & \descitem{latticedamage} \elemparam{}{in} 
 \elemparam{d}{rn} \elemparam{talpha}{rn} \elemparam{e}{rn} \elemparam{a1}{rn} \elemparam{a2}{rn} \elemparam{e0}{rn}  \elemparam{coh}{rn} \elemparam{ec}{rn} \elemparam{stype}{rn} \elemparam{wf}{rn} \elemparam{wf1}{rn} \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
@@ -5040,14 +5014,18 @@ Parameters &- \param{} material number\\
 &- \param{stype} softening types: 1-linear, 2-bilinear and 3-exponential\\
 &- \param{wf} displacement threshold related to fracture energy used in all three softening types.\\
 
-Supported modes& 2dlattice\\
+Supported modes& 1dlattice, 2dlattice, 3dlattice\\
 \hline
 \end{mmt}
-\caption{Scalar damage model for 2d lattice elements -- summary.}
-\label{latticedamage2d_table}
+\caption{Scalar damage model for lattice elements -- summary.}
+\label{latticedamage_table}
 %\end{center}
 \end{table}
 
+\subsubsection{Latticslip}
+This is a elasto-plastic model for slip between lattice elements used together with lattice link elements.
+
+The theory of the model is described in the paper ``P. Grassl and A. Antonelli. "3D network modelling of fracture processes in fibre-reinforced geomaterials", International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.``
 
 \subsection{Material models for steel relaxation}
 

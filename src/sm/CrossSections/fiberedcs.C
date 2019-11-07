@@ -397,7 +397,10 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         answer = status->giveStrainVector();
         return 1;
     }
-    return CrossSection :: giveIPValue(answer, gp, type, tStep);
+//     return CrossSection :: giveIPValue(answer, gp, type, tStep);
+    ///@todo so far this only works for elements where each layer has its own integration rule
+    int layer = gp->giveIntegrationRule()->giveNumber();
+    return this->giveDomain()->giveMaterial( fiberMaterials.at(layer) )->giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -408,6 +411,8 @@ FiberedCrossSection :: initializeFrom(InputRecord &ir)
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
 #  endif
 
+     CrossSection :: initializeFrom(ir);
+  
     IR_GIVE_FIELD(ir, fiberMaterials, _IFT_FiberedCrossSection_fibermaterials);
     IR_GIVE_FIELD(ir, fiberThicks, _IFT_FiberedCrossSection_thicks);
     IR_GIVE_FIELD(ir, fiberWidths, _IFT_FiberedCrossSection_widths);
@@ -592,5 +597,25 @@ FiberedCrossSection :: checkConsistency()
         }
     }
     return result;
+}
+
+Material *
+FiberedCrossSection :: giveMaterial(IntegrationPoint *ip)
+{
+    ///@todo We should keep track in integration point (integration rule) what material from layer is assigned. Otherwise difficulties due to different elements and IP numbering.
+    if ( ip->giveIntegrationRule()->giveIntegrationDomain() == _Cube ||
+        ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge
+    ) {
+        return domain->giveMaterial( fiberMaterials.at(1) );
+        //return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
+    }
+    
+    if (ip->hasSlaveGaussPoint()) {
+        return domain->giveMaterial( fiberMaterials.at(1) );//virtual master, has no material assigned in input file
+    } else {
+        return domain->giveMaterial( fiberMaterials.at(1) );//virtual master, has no material assigned in input file
+        //OOFEM_ERROR("Not implemented.")
+    }
+    return nullptr;
 }
 } // end namespace oofem

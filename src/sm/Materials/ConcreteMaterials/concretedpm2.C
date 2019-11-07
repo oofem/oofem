@@ -580,7 +580,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord &ir)
 
     this->ASoft = 15;
     IR_GIVE_OPTIONAL_FIELD(ir, ASoft, _IFT_ConcreteDPM2_asoft);
-
+    
     helem = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, helem, _IFT_ConcreteDPM2_helem);
 
@@ -1473,7 +1473,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
             tempPlasticStrain.subtract(elasticStrain);
             status->letTempPlasticStrainBe(tempPlasticStrain);
         } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
-            OOFEM_LOG_INFO("Subincrementation %d required\n", subincrementcounter);
+	  //            OOFEM_LOG_INFO("Subincrementation %d required\n", subincrementcounter);
             subincrementcounter = 0;
             elasticStrain.beProductOf(C, effectiveStress);
             tempPlasticStrain = tempStrain;
@@ -1656,6 +1656,8 @@ ConcreteDPM2 :: computeDuctilityMeasure(double sig,
         ductilityMeasure = ( AHard + ( BHard - AHard ) * exp( -x / ( CHard ) ) ) / thetaConst;
     }
 
+    printf("ductilityMeasure = %e at x = %e\n", ductilityMeasure, x);
+    
     return ductilityMeasure;
 }
 

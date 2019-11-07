@@ -365,6 +365,31 @@ The element is defined in x,y plane. The element features are summarized in Tabl
 \elementDescription{Unknowns}{Three dofs ($u$-displacement, $v$-displacement, $w$-rotation) are required in each node.}
 \end{elementsummary}
 
+The theory of lattice2d is described in the paper ``P. Grassl and M. Jir\'{a}sek. Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp. 957-968, 2010.''
+
+\subsubsection{Lattice2dboundary}
+Represents three-node lattice element for boundary of 2d periodic cells. The first two nodes have 3 degrees of freedom as for the element lattice2d. The third node is used to control the loading of the periodic cell using two normal (xx and yy) and one shear strain (xy) component.
+The element is defined in x,y plane. 
+
+The theory pf lattice2dbounday is described in the paper ``P. Grassl and M. Jir\'{a}sek. Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp. 957-968, 2010.''
+
+\subsubsection{Lattice3d}
+Represents two-node 3d lattice element. Each node has six degrees of freedom.
+The theory of lattice3d is described in the paper ``P. Grassl, J. Bolander. Three-Dimensional Network Model for Coupling of Fracture and Mass Transport in Quasi-Brittle Geomaterials, Materials, 9, 782, 2016.''
+
+\subsubsection{Lattice3dboundary}
+Represents three-noded 3d lattice element for boundary of 3d periodic cells. The first two nodes have 6 degrees of freedom as for the element lattice3d. The third node is used to control the loading of the periodic cell using three normal (xx, yy and zz) and three shear strain (yz, xz, xy) components.
+
+The theory of lattice3dboundary is described in the paper ``I. Athanasiadis, S. Wheeler and P. Grassl. Hydro-mechanical network modelling of particulate composites, International Journal of Solids and Structures. Vol. 130-131, Pages 49-60, 2018.''
+
+\subsubsection{Latticelink3d}
+Represents two-node 3d link element connecting 3d beam and 3d lattice elements. Each node has six degrees of freedom.
+The theory of latticelink3d is described in the paper ``P. Grassl and A. Antonelli. 3D network modelling of fracture processes in fibre-reinforced geomaterials, International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.''
+
+\subsubsection{Latticelink3dboundary}
+Represents three-node 3d boundary link element connecting 3d beam and 3d lattice elements. The first two nodes have the same meaning as for latticelink3d. The third node is used to control the loading of the periodic cell using three normal (xx, yy and zz) and three shear strain (yz, xz, xy) components.
+
+The theory of latticelink3dboundary is described in the paper ``P. Grassl and A. Antonelli. 3D network modelling of fracture processes in fibre-reinforced geomaterials, International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.''
 
 %-----------------------------------------------------------------------------------------------
 \clearpage

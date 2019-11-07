@@ -61,6 +61,7 @@ namespace py = pybind11;
 #include "Materials/structuralms.h"
 
 #include "crosssection.h"
+
 #include "field.h"
 #include "feinterpol.h"
 #include "util.h"
@@ -68,6 +69,9 @@ namespace py = pybind11;
 #include "oofemtxtdatareader.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
+
+#include "classfactory.h"
+
 #include "chartype.h"
 #include "elementgeometrytype.h"
 #include "internalstatetype.h"
@@ -79,6 +83,7 @@ namespace py = pybind11;
 
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
+
 
 #include <iostream>
 
@@ -579,6 +584,7 @@ PYBIND11_MODULE(oofempy, m) {
         ;
     
     py::class_<oofem::IntArray>(m, "IntArray")
+
         .def(py::init<int>(), py::arg("n")=0)
         .def(py::init<const oofem::IntArray&>())
         .def(py::init([](py::sequence s){
@@ -626,6 +632,7 @@ PYBIND11_MODULE(oofempy, m) {
             if (i >= (size_t) s.giveSize()) throw py::index_error();
             return s[i];
         })
+
     ;
     py::implicitly_convertible<py::sequence, oofem::IntArray>();
 
@@ -636,6 +643,7 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::OOFEMTXTDataReader, oofem::DataReader>(m, "OOFEMTXTDataReader")
         .def(py::init<std::string>())
     ;
+
 
     py::class_<oofem::InputRecord>(m, "InputRecord")
     ;
@@ -680,6 +688,7 @@ PYBIND11_MODULE(oofempy, m) {
         ;
 
 
+
     py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveNumber", &oofem::TimeStep::giveNumber)
         .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
@@ -693,6 +702,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("isTheFirstStep", &oofem::TimeStep::isTheFirstStep)
         .def("isTheCurrentTimeStep", &oofem::TimeStep::isTheCurrentTimeStep)
         ;
+
 
     py::class_<oofem::EngngModel>(m, "EngngModel")
         .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
@@ -716,6 +726,7 @@ PYBIND11_MODULE(oofempy, m) {
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
+
         .def(py::init<int, int, oofem::EngngModel*>())
         .def("giveNumber", &oofem::Domain::giveNumber)
         .def("setNumber", &oofem::Domain::setNumber)
@@ -759,7 +770,9 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfDofs", &oofem::DofManager::giveNumberOfDofs)
         .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
         .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
+
         .def("hasCoordinates", &oofem::DofManager::hasCoordinates)
+
         .def("giveCoordinates", &oofem::DofManager::giveCoordinates, py::return_value_policy::reference)
         .def("appendDof", &oofem::DofManager::appendDof, py::keep_alive<1, 2>())
         .def("removeDof", &oofem::DofManager::removeDof)
@@ -919,8 +932,7 @@ PYBIND11_MODULE(oofempy, m) {
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
-  
-
+ 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
         .def("createEngngModel", &oofem::ClassFactory::createEngngModel)

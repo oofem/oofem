@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -35,7 +35,7 @@
 #ifndef lattice2d_h
 #define lattice2d_h
 
-#include "sm/Elements/latticestructuralelement.h"
+#include "sm/Elements/LatticeElements/latticestructuralelement.h"
 
 ///@name Input fields for Lattice2d
 //@{
@@ -90,7 +90,7 @@ public:
     int giveCrackFlag() override;
 
     double giveCrackWidth() override;
-    double giveOldCrackWidth() override;
+    //double giveOldCrackWidth() override;
 
     double giveDissipation() override;
     double giveDeltaDissipation() override;
@@ -109,10 +109,10 @@ public:
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep *tStep, UnknownType) override;
     void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void giveCrossSectionCoordinates(FloatArray &coords) override;
+    void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep);
+    void giveCrossSectionCoordinates(FloatArray &coords);
 #endif
 
 protected:

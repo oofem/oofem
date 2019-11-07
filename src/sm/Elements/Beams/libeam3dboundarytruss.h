@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2019   Borek Patzak
  *
  *
  *
@@ -32,18 +32,41 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "sm/Elements/latticestructuralelement.h"
+#ifndef libeam3dboundarytruss_h
+#define libeam3dboundarytruss_h
+
+#include "sm/Elements/Beams/libeam3dboundary.h"
+
+///@name Input fields for LIBeam3dBoundaryTruss
+//@{
+#define _IFT_LIBeam3dBoundaryTruss_Name "libeam3dboundarytruss"
+//@}
 
 namespace oofem {
-LatticeStructuralElement :: LatticeStructuralElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
-{ }
-
-LatticeStructuralElement :: ~LatticeStructuralElement()
-{ }
-
-void
-LatticeStructuralElement :: initializeFrom(InputRecord &ir)
+/**
+ * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
+ * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
+ * MACROSCOPIC INPUT: AXIAL STRAIN Exx (1D, 1 COMPONENT)
+ *
+ * @author: Adam Sciegaj
+ */
+class LIBeam3dBoundaryTruss : public LIBeam3dBoundary
 {
-    StructuralElement :: initializeFrom(ir);
-}
+public:
+    LIBeam3dBoundaryTruss(int n, Domain *d);
+    virtual ~LIBeam3dBoundaryTruss() { }
+
+    void initializeFrom(InputRecord &ir) override;
+
+    int computeNumberOfDofs() override { return 13; }
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+
+    // definition & identification
+    const char *giveInputRecordName() const override { return _IFT_LIBeam3dBoundaryTruss_Name; }
+    const char *giveClassName() const override { return "LIBeam3dBoundaryTruss"; }
+
+protected:
+    void computeTransformationMatrix(FloatMatrix &answer, TimeStep *tStep) override;
+};
 } // end namespace oofem
+#endif // libeam3dboundarytruss_h

@@ -580,6 +580,12 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
         }
         fprintf(FID, "];\n");
     }
+            
+    // Output the current load level (useful for CALM solver)
+    double loadLevel = domain->giveEngngModel()->giveLoadLevel();
+    fprintf( FID, "\tReactionForces.LoadLevel = [" );
+    fprintf( FID, "%.9e", loadLevel);
+    fprintf( FID, "];\n" );
 }
 
 
