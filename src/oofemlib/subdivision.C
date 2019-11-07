@@ -3537,7 +3537,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         mesh->giveElement(i)->drawGeometry();
     }
 
-    ESIEventLoop(YES, "After bisection; Press Ctrl-p to continue");
+    ESIEventLoop(YES, (char*) "After bisection; Press Ctrl-p to continue");
  #endif
 #endif
 

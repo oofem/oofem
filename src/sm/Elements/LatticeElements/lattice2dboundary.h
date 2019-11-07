@@ -88,11 +88,11 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
 #ifdef __OOFEG
-    void          drawYourself(oofegGraphicContext &context, TimeStep *tStep);
-    void          drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
+    void          drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
+    void          drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
     void          drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
-    void drawDeformedGeometry(oofegGraphicContext &,  TimeStep *tStep, UnknownType);
-    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawDeformedGeometry(oofegGraphicContext &,  TimeStep *tStep, UnknownType) override;
+    void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
     virtual void giveCrossSectionCoordinates(FloatArray &coords);
 #endif
 

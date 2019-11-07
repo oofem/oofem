@@ -103,7 +103,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *tStep);
+                                int node, TimeStep *tStep) override;
 #endif
 
 protected:

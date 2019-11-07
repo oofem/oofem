@@ -266,7 +266,7 @@ public:
         int giveEdgeIndex(int iNode, int jNode) override;
         void importConnectivity(ConnectivityTable *ct) override;
 #ifdef __OOFEG
-        void drawGeometry();
+        void drawGeometry() override;
 #endif
 #ifdef __PARALLEL_MODE
         void numberSharedEdges(int iNode, IntArray &connNodes);
@@ -293,7 +293,7 @@ public:
         int giveEdgeIndex(int iNode, int jNode) override;
         void importConnectivity(ConnectivityTable *ct) override;
 #ifdef __OOFEG
-        void drawGeometry();
+        void drawGeometry() override;
 #endif
 #ifdef __PARALLEL_MODE
         void numberSharedEdges(int iNode, IntArray &connNodes);

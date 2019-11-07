@@ -89,10 +89,10 @@ public:
 
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
-    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
+    virtual void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
+    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
     virtual void drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
 #endif
 
 protected:
