@@ -81,7 +81,7 @@ public:
                                 int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg) override;
 
-    void exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep);
+    void exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;
     void exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;
 };
 } // end namespace oofem

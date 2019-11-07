@@ -74,8 +74,8 @@ public:
 
     ~LatticeDirichletCouplingNode();                                            // destructor
 
-    const char *giveClassName() const { return "LatticeDirichletCouplingNode"; }
-    void initializeFrom(InputRecord &ir);
+    const char *giveClassName() const override { return "LatticeDirichletCouplingNode"; }
+    void initializeFrom(InputRecord &ir) override;
 
     IntArray *giveCouplingNodes();
 
@@ -87,9 +87,9 @@ public:
 
     double computeUnknownCouplingContribution(TimeStep *stepN);
 
-    void printOutputAt(FILE *stream, TimeStep *stepN);
+    void printOutputAt(FILE *stream, TimeStep *stepN) override;
 
-    void         printYourself();
+    void printYourself() override;
 };
 } // end namespace oofem
 

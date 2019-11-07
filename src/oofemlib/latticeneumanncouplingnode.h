@@ -76,14 +76,14 @@ public:
 
     virtual void  computeLoadVectorAt(FloatArray &answer, TimeStep *stepN, ValueModeType mode);
 
-    const char *giveClassName() const { return "LatticeNeumannCouplingNode"; }
-    void initializeFrom(InputRecord &ir);
+    const char *giveClassName() const override { return "LatticeNeumannCouplingNode"; }
+    void initializeFrom(InputRecord &ir) override;
 
     IntArray *giveCouplingNodes();
 
     void computeLoadCouplingContribution(FloatArray &answer, TimeStep *stepN);
 
-    void         printYourself();
+    void printYourself() override;
 };
 } // end namespace oofem
 

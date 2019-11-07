@@ -90,13 +90,13 @@ public:
 
     const char *giveClassName() const override { return "LinkSlipStatus"; }
     
-    virtual void initTempStatus();
+    virtual void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *) override;
 
-    void saveContext(DataStream &stream, ContextMode mode);
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    void restoreContext(DataStream &stream, ContextMode mode);
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 
 /**
@@ -131,8 +131,8 @@ public:
 
     virtual bool hasAnalyticalTangentStiffness() const override { return true; }
     
-    virtual const char *giveInputRecordName() const { return _IFT_LinkSlip_Name; }
-    virtual const char *giveClassName() const { return "LinkSlip"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_LinkSlip_Name; }
+    virtual const char *giveClassName() const override { return "LinkSlip"; }
 
     virtual void initializeFrom(InputRecord &ir) override;
 
@@ -149,10 +149,10 @@ public:
 	
     FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
     
-    virtual Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType) override;
                                   
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 
 protected:
@@ -160,7 +160,7 @@ protected:
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime);
+                            TimeStep *atTime) override;
 };
 } // end namespace oofem
 

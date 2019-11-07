@@ -335,19 +335,19 @@ LatticeDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 
 MaterialStatus *
 LatticeDamageViscoelasticStatus :: giveViscoelasticMatStatus() {
-    Material *mat;
-    RheoChainMaterial *rChMat;
-    GaussPoint *rChGP;
+  //    Material *mat;
+  //    RheoChainMaterial *rChMat;
+  //    GaussPoint *rChGP;
 
     // @todo: Don't now how to fix this!
     //    mat = domain->giveMaterial(slaveMat);
     //    rChMat = dynamic_cast< RheoChainMaterial * >(mat);
 
-    rChGP = this->giveViscoelasticGaussPoint();
+    //    rChGP = this->giveViscoelasticGaussPoint();
 
-    MaterialStatus *mS = rChMat->giveStatus(rChGP);
+    //    MaterialStatus *mS = rChMat->giveStatus(rChGP);
 
-    return mS;
+    return NULL;
 }
 
 

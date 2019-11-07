@@ -70,16 +70,16 @@ public:
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
 
-    const char *giveClassName() const { return "LatticeDamageViscoelasticStatus"; }
+    const char *giveClassName() const override { return "LatticeDamageViscoelasticStatus"; }
 
-    virtual void initTempStatus();
+    virtual void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *) override; // update after new equilibrium state reached
 
 
-    virtual void saveContext(DataStream &stream, ContextMode mode);
+    virtual void saveContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void restoreContext(DataStream &stream, ContextMode mode);
+    virtual void restoreContext(DataStream &stream, ContextMode mode) override;
 
     GaussPoint *giveViscoelasticGaussPoint() { return viscoelasticGP; }
 
@@ -107,10 +107,10 @@ public:
     /// Destructor
     virtual ~LatticeDamageViscoelastic();
 
-    virtual const char *giveInputRecordName() const { return _IFT_LatticeDamageViscoelastic_Name; }
-    virtual const char *giveClassName() const { return "LatticeDamageViscoelastic"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_LatticeDamageViscoelastic_Name; }
+    virtual const char *giveClassName() const override { return "LatticeDamageViscoelastic"; }
 
-    virtual void initializeFrom(InputRecord &ir);
+    virtual void initializeFrom(InputRecord &ir) override;
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
@@ -118,22 +118,22 @@ public:
     virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode rmode,
                                         GaussPoint *gp,
-                                        TimeStep *atTime);
+                                        TimeStep *atTime) override;
 
     virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode rmode,
                                         GaussPoint *gp,
-                                        TimeStep *atTime);
+                                        TimeStep *atTime) override;
 
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
+                                      const FloatArray &, TimeStep *) override;
 
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     RheoChainMaterial *giveViscoelasticMaterial();
 
@@ -142,7 +142,7 @@ protected:
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime);
+                            TimeStep *atTime) override;
 };
 } // end namespace oofem
 

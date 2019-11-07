@@ -137,20 +137,15 @@ public:
 
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
-    const char *giveClassName() const { return "LatticePlasticityDamageStatus"; }
+    const char *giveClassName() const override { return "LatticePlasticityDamageStatus"; }
 
-    virtual void initTempStatus();
+    virtual void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *) override;
 
-    // double giveE0() { return e0; }
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    //void setE0(double val) { e0 = val; }
-
-
-    void saveContext(DataStream &stream, ContextMode mode);
-
-    void restoreContext(DataStream &stream, ContextMode mode);
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 
 /**
@@ -220,11 +215,11 @@ public:
     /// Destructor
     ~LatticePlasticityDamage();
 
-    virtual const char *giveInputRecordName() const { return _IFT_LatticePlasticityDamage_Name; }
-    const char *giveClassName() const { return "LatticePlasticityDamage"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamage_Name; }
+    const char *giveClassName() const override { return "LatticePlasticityDamage"; }
 
 
-    virtual void initializeFrom(InputRecord &ir);
+    virtual void initializeFrom(InputRecord &ir) override;
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
@@ -302,7 +297,7 @@ public:
 
     double computeEquivalentStress(const FloatArray &tempSigma);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -312,7 +307,7 @@ protected:
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
                     InternalStateType type,
-                    TimeStep *atTime);
+                    TimeStep *atTime) override;
 
     int giveIPValueSize(InternalStateType type,
                         GaussPoint *gp);

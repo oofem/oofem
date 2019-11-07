@@ -116,7 +116,7 @@ public:
 
     const char *giveClassName() const override { return "LatticeMaterialStatus"; }
 
-    void initTempStatus();
+    void initTempStatus() override;
 
     void updateYourself(TimeStep *) override;
 

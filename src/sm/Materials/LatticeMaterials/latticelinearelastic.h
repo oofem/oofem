@@ -128,7 +128,7 @@ public:
 
     MaterialStatus *giveStatus(GaussPoint *gp) const override;
 
-    double  give(int aProperty, GaussPoint *gp) const;
+    double  give(int aProperty, GaussPoint *gp) const override;
 
 protected:
 
@@ -152,7 +152,7 @@ public:
 
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
-    const char *giveClassName() const { return "LatticeLinearElasticMaterialStatus"; }
+    const char *giveClassName() const override { return "LatticeLinearElasticMaterialStatus"; }
 };
 } // end namespace oofem
 

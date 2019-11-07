@@ -66,15 +66,15 @@ public:
 
     void   printOutputAt(FILE *file, TimeStep *tStep);
 
-    const char *giveClassName() const { return "LatticeSlipStatus"; }
+    const char *giveClassName() const override { return "LatticeSlipStatus"; }
 
-    virtual void initTempStatus();
+    virtual void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *); // update after new equilibrium state reached
+    virtual void updateYourself(TimeStep *) override;
 
-    void saveContext(DataStream &stream, ContextMode mode);
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    void restoreContext(DataStream &stream, ContextMode mode);
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 
 
@@ -119,12 +119,12 @@ public:
     /// Destructor
     virtual ~LatticeSlip();
 
-    virtual const char *giveInputRecordName() const { return _IFT_LatticeSlip_Name; }
-    virtual const char *giveClassName() const { return "LatticeSlip"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_LatticeSlip_Name; }
+    virtual const char *giveClassName() const override { return "LatticeSlip"; }
 
-    virtual void initializeFrom(InputRecord &ir);
+    virtual void initializeFrom(InputRecord &ir) override;
 
-    virtual void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep);
+    virtual void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep) override;
 
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
@@ -133,17 +133,17 @@ public:
     virtual void give1dLatticeStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode rmode,
                                         GaussPoint *gp,
-                                        TimeStep *atTime);
+                                        TimeStep *atTime) override;
 
     virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode rmode,
                                         GaussPoint *gp,
-                                        TimeStep *atTime);
+                                        TimeStep *atTime) override;
 
     virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode rmode,
                                         GaussPoint *gp,
-                                        TimeStep *atTime);
+                                        TimeStep *atTime) override;
 
     double computeDeltaDissipation(GaussPoint *gp,
                                    TimeStep *atTime);
@@ -151,19 +151,19 @@ public:
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
 
-    virtual Interface *giveInterface(InterfaceType);
+    virtual Interface *giveInterface(InterfaceType) override;
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
+                                      const FloatArray &, TimeStep *) override;
 
-    virtual void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
+    virtual void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) override { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
 
-    virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
+    virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) override { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
 
-    virtual void giveRandomParameters(FloatArray &param);
+    virtual void giveRandomParameters(FloatArray &param) override;
 
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 
     virtual double  give(int aProperty, GaussPoint *gp);
@@ -175,7 +175,7 @@ protected:
     virtual int giveIPValue(FloatArray &answer,
                             GaussPoint *gp,
                             InternalStateType type,
-                            TimeStep *atTime);
+                            TimeStep *atTime) override;
 };
 } // end namespace oofem
 

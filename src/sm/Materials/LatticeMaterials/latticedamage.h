@@ -122,7 +122,7 @@ public:
 
     const char *giveClassName() const override { return "LatticeDamageStatus"; }
 
-    void initTempStatus();
+    void initTempStatus() override;
 
     void updateYourself(TimeStep *) override;
 
@@ -190,7 +190,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticeDamage_Name; }
     const char *giveClassName() const override { return "LatticeDamage"; }
 
-    virtual bool hasAnalyticalTangentStiffness() const { return true; }
+    virtual bool hasAnalyticalTangentStiffness() const override { return true; }
 
     void initializeFrom(InputRecord &ir) override;
 
@@ -221,7 +221,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    double give(int aProperty, GaussPoint *gp) const;
+    double give(int aProperty, GaussPoint *gp) const override;
 
 
 protected:

@@ -95,16 +95,16 @@ public:
 
     virtual void   printOutputAt(FILE *file, TimeStep *tStep);
 
-    const char *giveClassName() const { return "LatticeBondPlasticityStatus"; }
+    const char *giveClassName() const override { return "LatticeBondPlasticityStatus"; }
 
-    virtual void initTempStatus();
+    virtual void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *);
+    virtual void updateYourself(TimeStep *) override;
 
 
-    void  saveContext(DataStream &stream, ContextMode mode);
+    void  saveContext(DataStream &stream, ContextMode mode) override;
 
-    void  restoreContext(DataStream &stream, ContextMode mode);
+    void  restoreContext(DataStream &stream, ContextMode mode) override;
 };
 
 class LatticeBondPlasticity : public LatticeLinearElastic
@@ -157,8 +157,8 @@ public:
     /// Destructor
     ~LatticeBondPlasticity();
 
-    virtual const char *giveInputRecordName() const { return _IFT_LatticeBondPlasticity_Name; }
-    const char *giveClassName() const { return "LatticeBondPlasticity"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_LatticeBondPlasticity_Name; }
+    const char *giveClassName() const override { return "LatticeBondPlasticity"; }
 
     double computeHardening(double kappa);
 
@@ -171,7 +171,7 @@ public:
     double computeDShiftDKappa(const double kappa);
 
 
-    virtual void initializeFrom(InputRecord &ir);
+    virtual void initializeFrom(InputRecord &ir) override;
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
 
@@ -227,7 +227,7 @@ public:
 
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *);
+                              const FloatArray &, TimeStep *) override;
 
 
     void performPlasticityReturn(FloatArray &answer,
@@ -245,7 +245,7 @@ public:
                              GaussPoint *gp);
 
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 

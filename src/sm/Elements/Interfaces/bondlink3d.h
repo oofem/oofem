@@ -105,7 +105,7 @@ public:
     virtual void computeGeometryProperties();
 
     void giveInternalForcesVector(FloatArray &answer,
-                                  TimeStep *tStep, int useUpdatedGpRecord);
+                                  TimeStep *tStep, int useUpdatedGpRecord) override;
 
     virtual const char *giveInputRecordName() const override { return _IFT_BondLink3d_Name; }
     virtual const char *giveClassName()  const override { return "BondLink3d"; }
