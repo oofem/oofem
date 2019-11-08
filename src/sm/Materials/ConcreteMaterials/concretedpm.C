@@ -396,7 +396,7 @@ ConcreteDPM :: giveRealStressVector_3d(FloatArray &answer,
     FloatArray elasticStrain = strain;
     FloatArray tempPlasticStrain = status->giveTempPlasticStrain();
     elasticStrain.subtract(tempPlasticStrain);
-    applyElasticStiffness(effectiveStress, elasticStrain, eM, nu);
+    effectiveStress = applyElasticStiffness(elasticStrain, eM, nu);
 
     // compute the nominal stress
     answer = effectiveStress;
@@ -693,7 +693,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
     // compute elastic strains and trial stress
     FloatArray elasticStrain = strain;
     elasticStrain.subtract(tempPlasticStrain);
-    applyElasticStiffness(effectiveStress, elasticStrain, eM, nu);
+    effectiveStress = applyElasticStiffness(elasticStrain, eM, nu);
 
     //Compute trial coordinates
     computeTrialCoordinates(effectiveStress, gp);
@@ -711,7 +711,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
                 //This was no real vertex case
                 //get the original tempKappaP and stress
                 tempKappaP = status->giveTempKappaP();
-                applyElasticStiffness(effectiveStress, elasticStrain, eM, nu);
+                effectiveStress = applyElasticStiffness(elasticStrain, eM, nu);
             }
         }
 
@@ -723,7 +723,7 @@ ConcreteDPM :: performPlasticityReturn(GaussPoint *gp,
     // update temp kappaP
     status->letTempKappaPBe(tempKappaP);
     // compute the plastic strains
-    applyElasticCompliance(elasticStrain, effectiveStress, eM, nu);
+    elasticStrain = applyElasticCompliance(effectiveStress, eM, nu);
     tempPlasticStrain = strain;
     tempPlasticStrain.subtract(elasticStrain);
     status->letTempPlasticStrainBe(tempPlasticStrain);
@@ -959,7 +959,7 @@ ConcreteDPM :: performRegularReturn(FloatArray &effectiveStress,
     stressPrincipal(1) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial - 2. * M_PI / 3.);
     stressPrincipal(2) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial + 2. * M_PI / 3.);
 
-    transformStressVectorTo(effectiveStress, stressPrincipalDir, stressPrincipal, 1);
+    effectiveStress = transformStressVectorTo(stressPrincipalDir, stressPrincipal, 1);
 }
 
 void

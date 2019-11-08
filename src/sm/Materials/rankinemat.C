@@ -600,8 +600,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     }
 
     // transform to global coordinates
-    FloatMatrix T;
-    givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
+    FloatMatrix T = givePlaneStressVectorTranformationMtrx(nPrinc, true);
     answer.rotatedWith(T, 't');
 }
 
@@ -639,8 +638,7 @@ RankineMat :: computeEta(FloatArray &answer, RankineMatStatus *status)
     StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
-    FloatMatrix T(3, 3);
-    givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
+    FloatMatrix T = givePlaneStressVectorTranformationMtrx(nPrinc, true);
     answer.beProductOf(T, eta);
 }
 

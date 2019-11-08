@@ -128,8 +128,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
         k += mu;
 
         FloatArray plasticStrain = status->givePlasticStrain();
-        FloatArray dPlStrain;
-        applyDeviatoricElasticCompliance(dPlStrain, devTrialStress, 0.5);
+        FloatArray dPlStrain = applyDeviatoricElasticCompliance(devTrialStress, 0.5);
         plasticStrain.add(mu * 3. / (2. * effectiveTrialStress), dPlStrain);
         status->letTempPlasticStrainBe(plasticStrain);
     }

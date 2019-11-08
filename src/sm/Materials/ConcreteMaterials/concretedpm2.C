@@ -1864,12 +1864,11 @@ ConcreteDPM2 :: performRegularReturn(FloatArray &effectiveStress,
     returnResult = RR_Converged;
     if ( mode3d ) {
         FloatArray stressPrincipal(6);
-        stressPrincipal.zero();
 
         stressPrincipal(0) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial);
         stressPrincipal(1) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial - 2. * M_PI / 3.);
         stressPrincipal(2) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial + 2. * M_PI / 3.);
-        transformStressVectorTo(effectiveStress, stressPrincipalDir, stressPrincipal, 1);
+        effectiveStress = transformStressVectorTo(stressPrincipalDir, stressPrincipal, 1);
     } else {
         effectiveStress.at(1) = sig * 3;
     }
@@ -2532,10 +2531,10 @@ ConcreteDPM2 :: computeAlpha(FloatArray &effectiveStressTension,
     //Transform the tension and compression principal stresses back to the original coordinate system
 
     //Take care of type of stress state for tension
-    transformStressVectorTo(effectiveStressTension, stressPrincipalDir, principalStressTension, 1);
+    effectiveStressTension = transformStressVectorTo(stressPrincipalDir, principalStressTension, 1);
 
     //Take care of type of stress state for compression
-    transformStressVectorTo(effectiveStressCompression, stressPrincipalDir, principalStressCompression, 1);
+    effectiveStressCompression = transformStressVectorTo(stressPrincipalDir, principalStressCompression, 1);
 
     //Determine the two factors from the stress
 

@@ -289,9 +289,8 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     elasticStrainDeviator.subtract(plasticStrainDeviator);
 
     // compute trial stresses
-    FloatArray stressDeviator;
     double volumetricStress = 3. * kM * volumetricElasticTrialStrain;
-    applyDeviatoricElasticStiffness(stressDeviator, elasticStrainDeviator, gM);
+    FloatArray stressDeviator = applyDeviatoricElasticStiffness(elasticStrainDeviator, gM);
     // norm of trial stress deviator
     double trialStressJTwo = computeSecondStressInvariant(stressDeviator);
 
@@ -324,12 +323,11 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     status->letTempKappaBe(tempKappa);
 
     // compute full stresses from deviatoric and volumetric part and store them
-    FloatArray stress;
-    computeDeviatoricVolumetricSum(stress, stressDeviator, volumetricStress);
+    FloatArray stress = computeDeviatoricVolumetricSum(stressDeviator, volumetricStress);
     status->letTempStressVectorBe(stress);
 
     // compute and update plastic strains, volumetric and deviatoric part
-    applyDeviatoricElasticCompliance(elasticStrainDeviator, stressDeviator, gM);
+    elasticStrainDeviator = applyDeviatoricElasticCompliance(stressDeviator, gM);
     plasticStrainDeviator = strainDeviator;
     plasticStrainDeviator.subtract(elasticStrainDeviator);
     status->letTempPlasticStrainDeviatorBe(plasticStrainDeviator);

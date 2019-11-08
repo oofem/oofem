@@ -103,8 +103,8 @@ class OrthotropicLinearElasticMaterial : public LinearElasticMaterial
 {
 protected:
     CS_type cs_type;
-    std::unique_ptr<FloatMatrix> localCoordinateSystem;
-    std::unique_ptr<FloatArray> helpPlaneNormal;
+    FloatMatrixF<3,3> localCoordinateSystem;
+    FloatArrayF<3> helpPlaneNormal;
     // in localCoordinateSystem the unity vectors are stored
     // COLUMWISE (this is exception, but allows faster numerical
     // implementation)
@@ -128,8 +128,8 @@ public:
                                        TimeStep *tStep) override;
 
 protected:
-    void giveTensorRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
-    void giveRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
+    FloatMatrixF<3,3> giveTensorRotationMatrix(GaussPoint *gp) const;
+    FloatMatrixF<6,6> giveRotationMatrix(GaussPoint *gp) const;
 
     friend class CrossSection;
 };

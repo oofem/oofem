@@ -105,7 +105,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, tStep);
         princStress.resize(6);
         tempCrackDirs = status->giveTempCrackDirs();
-        this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
+        answer = this->transformStressVectorTo(tempCrackDirs, princStress, 1);
 
         StructuralMaterial :: giveReducedSymVectorForm( reducedSpaceStressVector, answer, gp->giveMaterialMode() );
         status->letTempStressVectorBe(reducedSpaceStressVector);

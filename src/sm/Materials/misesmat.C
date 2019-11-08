@@ -204,8 +204,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
         FloatArray elStrainDev;
         double elStrainVol;
         elStrainVol = computeDeviatoricVolumetricSplit(elStrainDev, elStrain);
-        FloatArray trialStressDev;
-        applyDeviatoricElasticStiffness(trialStressDev, elStrainDev, G);
+        FloatArray trialStressDev = applyDeviatoricElasticStiffness(elStrainDev, G);
         /**************************************************************/
         double trialStressVol = 3 * K * elStrainVol;
         /**************************************************************/
@@ -220,9 +219,8 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
             // increment of cumulative plastic strain
             double dKappa = yieldValue / ( H + 3. * G );
             kappa += dKappa;
-            FloatArray dPlStrain;
             // the following line is equivalent to multiplication by scaling matrix P
-            applyDeviatoricElasticCompliance(dPlStrain, trialStressDev, 0.5);
+            FloatArray dPlStrain = applyDeviatoricElasticCompliance(trialStressDev, 0.5);
             // increment of plastic strain
             plStrain.add(sqrt(3. / 2.) * dKappa / trialS, dPlStrain);
             // scaling of deviatoric trial stress
@@ -232,7 +230,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
         // assemble the stress from the elastically computed volumetric part
         // and scaled deviatoric part
 
-        computeDeviatoricVolumetricSum(fullStress, trialStressDev, trialStressVol);
+        fullStress = computeDeviatoricVolumetricSum(trialStressDev, trialStressVol);
     }
 
     // store the effective stress in status

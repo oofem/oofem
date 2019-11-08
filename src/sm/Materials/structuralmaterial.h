@@ -308,27 +308,28 @@ public:
      * @param s Input vector
      * @return Volumetric part (diagonal components divided by 3).
      */
-    static double computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s);
-    static void computeDeviatoricVolumetricSum(FloatArray &s, const FloatArray &dev, double mean);
+    static double computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArrayF<6> &s);
+    static std::pair<FloatArrayF<6>, double> computeDeviatoricVolumetricSplit(const FloatArrayF<6> &s);
+    static FloatArrayF<6> computeDeviatoricVolumetricSum(const FloatArrayF<6> &dev, double mean);
 
-    static void applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu);
-    static void applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double GModulus);
+    static FloatArrayF<6> applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu);
+    static FloatArrayF<6> applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double GModulus);
 
-    static void applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu);
-    static void applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus);
+    static FloatArrayF<6> applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu);
+    static FloatArrayF<6> applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double GModulus);
 
-    static void applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu);
-    static void applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu);
+    static FloatArrayF<6> applyElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu);
+    static FloatArrayF<6> applyElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu);
 
-    static double computeStressNorm(const FloatArray &stress);
+    static double computeStressNorm(const FloatArrayF<6> &stress);
 
-    static double computeFirstInvariant(const FloatArray &s);
-    static double computeSecondStressInvariant(const FloatArray &s);
-    static double computeThirdStressInvariant(const FloatArray &s);
+    static double computeFirstInvariant(const FloatArrayF<6> &s);
+    static double computeSecondStressInvariant(const FloatArrayF<6> &s);
+    static double computeThirdStressInvariant(const FloatArrayF<6> &s);
 
-    static double computeFirstCoordinate(const FloatArray &s);
-    static double computeSecondCoordinate(const FloatArray &s);
-    static double computeThirdCoordinate(const FloatArray &s);
+    static double computeFirstCoordinate(const FloatArrayF<6> &s);
+    static double computeSecondCoordinate(const FloatArrayF<6> &s);
+    static double computeThirdCoordinate(const FloatArrayF<6> &s);
     //@}
 
     /**
@@ -626,8 +627,8 @@ public:
      * @param strainVector 3d strain.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    static void transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                        const FloatArray &strainVector, bool transpose = false);
+    static FloatArrayF<6> transformStrainVectorTo(const FloatMatrixF<3,3> &base,
+                                                  const FloatArrayF<6> &strain, bool transpose = false);
     /**
      * Transforms 3d stress vector into another coordinate system.
      * @param answer Transformed stress vector.
@@ -637,53 +638,50 @@ public:
      * @param stressVector Transformed 3d strain.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    static void transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                        const FloatArray &stressVector, bool transpose = false);
-
+    static FloatArrayF<6> transformStressVectorTo(const FloatMatrixF<3,3> &base,
+                                                  const FloatArrayF<6> &stress, bool transpose = false);
     /**
      * Computes equivalent of von Mises stress. Returns 0 if six stress components do not exist on the material.
      * @param currentStress Stress vector given by 6 components.
      */
-    static double computeVonMisesStress(const FloatArray *currentStress);
+    static double computeVonMisesStress(const FloatArray &currentStress);
+    static double computeVonMisesStress_3D(const FloatArrayF<6> &stress);
+    static double computeVonMisesStress_PlaneStress(const FloatArrayF<3> &stress);
 
     /**
      * Computes 3d strain vector transformation matrix from standard vector transformation matrix.
-     * @param answer Transformation matrix for strain vector.
      * @param base A (3,3) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.
      * @param transpose Determines if we transpose matrix before transforming.
+     * @returns Transformation matrix for strain vector.
      */
-    static void giveStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                                  bool transpose = false);
+    static FloatMatrixF<6,6> giveStrainVectorTranformationMtrx(const FloatMatrixF<3,3> &base, bool transpose = false);
 
     /**
      * Computes 2d strain vector transformation matrix from standard vector transformation matrix.
-     * @param answer Transformation matrix for strain vector.
      * @param base A (2,2) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.
      * @param transpose Determines if we transpose matrix before transforming.
+     * @returns Transformation matrix for strain vector.
      */
-    static void give2DStrainVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                                    bool transpose = false);
+    static FloatMatrixF<3,3> give2DStrainVectorTranformationMtrx(const FloatMatrixF<2,2> &base, bool transpose = false);
 
     /**
      * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
-     * @param answer Transformation matrix for stress vector.
      * @param base A (3,3) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.
      * @param transpose Determines if we transpose matrix before transforming.
+     * @returns Transformation matrix for stress vector.
      */
-    static void giveStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                                  bool transpose = false);
+    static FloatMatrixF<6,6> giveStressVectorTranformationMtrx(const FloatMatrixF<3,3> &base, bool transpose = false);
     /**
      * Computes 2d stress vector transformation matrix from standard vector transformation matrix.
-     * @param answer Transformation matrix for stress vector.
      * @param base A (2,2) matrix, where on each column are stored unit direction vectors of
      * local coordinate axes to which we do transformation.
      * @param transpose Determines if we transpose matrix before transforming.
+     * @return Transformation matrix for stress vector.
      */
-    static void givePlaneStressVectorTranformationMtrx(FloatMatrix &answer, const FloatMatrix &base,
-                                                       bool transpose = false);
+    static FloatMatrixF<3,3> givePlaneStressVectorTranformationMtrx(const FloatMatrixF<2,2> &base, bool transpose = false);
     /**
      * Method for sorting newly computed principal values (pVal) and
      * corresponding principal directions (pDir) to be closed

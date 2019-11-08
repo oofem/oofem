@@ -41,6 +41,8 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "fieldmanager.h"
@@ -1573,7 +1575,7 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 
 
 double
-StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s)
+StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArrayF<6> &s)
 {
     double vol = s [ 0 ] + s [ 1 ] + s [ 2 ];
     double mean = vol / 3.0;
@@ -1585,108 +1587,105 @@ StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const Fl
 }
 
 
-void
-StructuralMaterial :: computeDeviatoricVolumetricSum(FloatArray &s, const FloatArray &dev, double mean)
+FloatArrayF<6>
+StructuralMaterial :: computeDeviatoricVolumetricSum(const FloatArrayF<6> &dev, double mean)
 {
-    s = dev;
+    auto s = dev;
     s [ 0 ] += mean;
     s [ 1 ] += mean;
     s [ 2 ] += mean;
+    return s;
 }
 
-void
-StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu)
 {
-    applyDeviatoricElasticCompliance( strain, stress, EModulus / 2. / ( 1. + nu ) );
+    return applyDeviatoricElasticCompliance( stress, EModulus / 2. / ( 1. + nu ) );
 }
 
-void
-StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double GModulus)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double GModulus)
 {
-    strain.resize(6);
-    strain [ 0 ] = 1. / ( 2. * GModulus ) * stress [ 0 ];
-    strain [ 1 ] = 1. / ( 2. * GModulus ) * stress [ 1 ];
-    strain [ 2 ] = 1. / ( 2. * GModulus ) * stress [ 2 ];
-    strain [ 3 ] = 1. / GModulus * stress [ 3 ];
-    strain [ 4 ] = 1. / GModulus * stress [ 4 ];
-    strain [ 5 ] = 1. / GModulus * stress [ 5 ];
+    return {
+        1. / ( 2. * GModulus ) * stress [ 0 ],
+        1. / ( 2. * GModulus ) * stress [ 1 ],
+        1. / ( 2. * GModulus ) * stress [ 2 ],
+        11. / GModulus * stress [ 3 ],
+        1. / GModulus * stress [ 4 ],
+        1. / GModulus * stress [ 5 ],
+    };
 }
 
 
-void
-StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu)
 {
-    applyDeviatoricElasticStiffness( stress, strain, EModulus / ( 2. * ( 1. + nu ) ) );
+    return applyDeviatoricElasticStiffness( strain, EModulus / ( 2. * ( 1. + nu ) ) );
 }
 
-void
-StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double GModulus)
 {
-    stress.resize(6);
-    stress [ 0 ] = 2. * GModulus * strain [ 0 ];
-    stress [ 1 ] = 2. * GModulus * strain [ 1 ];
-    stress [ 2 ] = 2. * GModulus * strain [ 2 ];
-    stress [ 3 ] = GModulus * strain [ 3 ];
-    stress [ 4 ] = GModulus * strain [ 4 ];
-    stress [ 5 ] = GModulus * strain [ 5 ];
+    return {
+        2. * GModulus * strain [ 0 ],
+        2. * GModulus * strain [ 1 ],
+        2. * GModulus * strain [ 2 ],
+        GModulus * strain [ 3 ],
+        GModulus * strain [ 4 ],
+        GModulus * strain [ 5 ],
+    };
 }
 
-void
-StructuralMaterial :: applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu)
 {
     double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
 
-    stress.resize(6);
-    stress [ 0 ] = factor * ( ( 1. - nu ) * strain [ 0 ] + nu * strain [ 1 ] + nu * strain [ 2 ] );
-    stress [ 1 ] = factor * ( nu * strain [ 0 ] + ( 1. - nu ) * strain [ 1 ] + nu * strain [ 2 ] );
-    stress [ 2 ] = factor * ( nu * strain [ 0 ] + nu * strain [ 1 ] + ( 1. - nu ) * strain [ 2 ] );
-    stress [ 3 ] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 3 ] );
-    stress [ 4 ] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 4 ] );
-    stress [ 5 ] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 5 ] );
+    return {
+        factor * ( ( 1. - nu ) * strain [ 0 ] + nu * strain [ 1 ] + nu * strain [ 2 ] ),
+        factor * ( nu * strain [ 0 ] + ( 1. - nu ) * strain [ 1 ] + nu * strain [ 2 ] ),
+        factor * ( nu * strain [ 0 ] + nu * strain [ 1 ] + ( 1. - nu ) * strain [ 2 ] ),
+        factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 3 ] ),
+        factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 4 ] ),
+        factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 5 ] ),
+    };
 }
 
-void
-StructuralMaterial :: applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu)
 {
-    strain.resize(6);
-    strain [ 0 ] = ( stress [ 0 ] - nu * stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
-    strain [ 1 ] = ( -nu * stress [ 0 ] + stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
-    strain [ 2 ] = ( -nu * stress [ 0 ] - nu * stress [ 1 ] + stress [ 2 ] ) / EModulus;
-    strain [ 3 ] = ( 2. * ( 1. + nu ) * stress [ 3 ] ) / EModulus;
-    strain [ 4 ] = ( 2. * ( 1. + nu ) * stress [ 4 ] ) / EModulus;
-    strain [ 5 ] = ( 2. * ( 1. + nu ) * stress [ 5 ] ) / EModulus;
+    return {
+        ( stress [ 0 ] - nu * stress [ 1 ] - nu * stress [ 2 ] ) / EModulus,
+        ( -nu * stress [ 0 ] + stress [ 1 ] - nu * stress [ 2 ] ) / EModulus,
+        ( -nu * stress [ 0 ] - nu * stress [ 1 ] + stress [ 2 ] ) / EModulus,
+        ( 2. * ( 1. + nu ) * stress [ 3 ] ) / EModulus,
+        ( 2. * ( 1. + nu ) * stress [ 4 ] ) / EModulus,
+        ( 2. * ( 1. + nu ) * stress [ 5 ] ) / EModulus,
+    };
 }
 
 double
-StructuralMaterial :: computeStressNorm(const FloatArray &s)
+StructuralMaterial :: computeStressNorm(const FloatArrayF<6> &s)
 {
-    if ( s.giveSize() == 1 ) {
-        return fabs(s [ 0 ]);
-    }
-
     return sqrt(s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] +
                 2. * s [ 3 ] * s [ 3 ] + 2. * s [ 4 ] * s [ 4 ] + 2. * s [ 5 ] * s [ 5 ]);
 }
 
 double
-StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
+StructuralMaterial :: computeFirstInvariant(const FloatArrayF<6> &s)
 {
-    if ( s.giveSize() == 1 ) {
-        return s [ 0 ];
-    }
-
     return s [ 0 ] + s [ 1 ] + s [ 2 ];
 }
 
 double
-StructuralMaterial :: computeSecondStressInvariant(const FloatArray &s)
+StructuralMaterial :: computeSecondStressInvariant(const FloatArrayF<6> &s)
 {
     return .5 * ( s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] ) +
            s [ 3 ] * s [ 3 ] + s [ 4 ] * s [ 4 ] + s [ 5 ] * s [ 5 ];
 }
 
 double
-StructuralMaterial :: computeThirdStressInvariant(const FloatArray &s)
+StructuralMaterial :: computeThirdStressInvariant(const FloatArrayF<6> &s)
 {
     return ( 1. / 3. ) * ( s [ 0 ] * s [ 0 ] * s [ 0 ] + 3. * s [ 0 ] * s [ 5 ] * s [ 5 ] +
                            3. * s [ 0 ] * s [ 4 ] * s [ 4 ] + 6. * s [ 3 ] * s [ 5 ] * s [ 4 ] +
@@ -1697,14 +1696,14 @@ StructuralMaterial :: computeThirdStressInvariant(const FloatArray &s)
 
 
 double
-StructuralMaterial :: computeFirstCoordinate(const FloatArray &s)
+StructuralMaterial :: computeFirstCoordinate(const FloatArrayF<6> &s)
 {
     // This function computes the first Haigh-Westergaard coordinate
     return computeFirstInvariant(s) / sqrt(3.);
 }
 
 double
-StructuralMaterial :: computeSecondCoordinate(const FloatArray &s)
+StructuralMaterial :: computeSecondCoordinate(const FloatArrayF<6> &s)
 {
     // This function computes the second Haigh-Westergaard coordinate
     // from the deviatoric stress state
@@ -1712,7 +1711,7 @@ StructuralMaterial :: computeSecondCoordinate(const FloatArray &s)
 }
 
 double
-StructuralMaterial :: computeThirdCoordinate(const FloatArray &s)
+StructuralMaterial :: computeThirdCoordinate(const FloatArrayF<6> &s)
 {
     // This function computes the third Haigh-Westergaard coordinate
     // from the deviatoric stress state
@@ -1734,50 +1733,56 @@ StructuralMaterial :: computeThirdCoordinate(const FloatArray &s)
     return 1. / 3. * acos(c1);
 }
 
+
 double
-StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
+StructuralMaterial :: computeVonMisesStress(const FloatArray &stress)
 {
-    double J2;
-    double v1, v2, v3;
+    if ( stress.giveSize() == 3 ) {
+        return computeVonMisesStress_PlaneStress(stress);
 
-    if ( currentStress == NULL ) {
-        return 0.0;
-    }
-
-    if ( currentStress->giveSize() == 3 ) {
-        // Plane stress
-
-        return sqrt( currentStress->at(1) * currentStress->at(1) + currentStress->at(2) * currentStress->at(2)
-                     - currentStress->at(1) * currentStress->at(2) + 3 * currentStress->at(3) * currentStress->at(3) );
-    } else if ( currentStress->giveSize() == 4 ) {
+    } else if ( stress.giveSize() == 4 ) {
         // Plane strain
-        v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
-        v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
-        v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
+        double v1 = ( ( stress.at(1) - stress.at(2) ) * ( stress.at(1) - stress.at(2) ) );
+        double v2 = ( ( stress.at(2) - stress.at(3) ) * ( stress.at(2) - stress.at(3) ) );
+        double v3 = ( ( stress.at(3) - stress.at(1) ) * ( stress.at(3) - stress.at(1) ) );
 
-        J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4);
-
-        return sqrt(3 * J2);
-    } else if ( currentStress->giveSize() == 6 ) {
-        // 3D
-        v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
-        v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
-        v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
-
-        J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-             currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+        double J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stress.at(4) * stress.at(4);
 
         return sqrt(3 * J2);
+    } else if ( stress.giveSize() == 6 ) {
+        return computeVonMisesStress_3D(stress);
     } else {
         return 0.0;
     }
 }
 
 
-void
-StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
-                                                        const FloatMatrix &base,
-                                                        bool transpose)
+double
+StructuralMaterial :: computeVonMisesStress_PlaneStress(const FloatArrayF<3> &stress)
+{
+    return sqrt( stress.at(1) * stress.at(1) + stress.at(2) * stress.at(2)
+                - stress.at(1) * stress.at(2) + 3 * stress.at(3) * stress.at(3) );
+}
+
+
+double 
+StructuralMaterial :: computeVonMisesStress_3D(const FloatArrayF<6> &stress)
+{
+    double v1 = ( ( stress.at(1) - stress.at(2) ) * ( stress.at(1) - stress.at(2) ) );
+    double v2 = ( ( stress.at(2) - stress.at(3) ) * ( stress.at(2) - stress.at(3) ) );
+    double v3 = ( ( stress.at(3) - stress.at(1) ) * ( stress.at(3) - stress.at(1) ) );
+
+    double J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stress.at(4) * stress.at(4) +
+             stress.at(5) * stress.at(5) + stress.at(6) * stress.at(6);
+
+    return sqrt(3 * J2);
+}
+
+
+
+FloatMatrixF<6,6>
+StructuralMaterial :: giveStrainVectorTranformationMtrx(const FloatMatrixF<3,3> &base,
+                                                        bool trans)
 //
 // returns transformation matrix for 3d - strains to another system of axes,
 // given by base.
@@ -1787,16 +1792,9 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(6, 6);
-    answer.zero();
+    auto t = trans ? transpose(base) : base;
 
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    FloatMatrixF<6,6> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = t.at(3, 1) * t.at(3, 1);
@@ -1838,13 +1836,14 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(6, 4) = ( t.at(2, 1) * t.at(3, 2) + t.at(3, 1) * t.at(2, 2) );
     answer.at(6, 5) = ( t.at(1, 1) * t.at(3, 2) + t.at(3, 1) * t.at(1, 2) );
     answer.at(6, 6) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+    
+    return answer;
 }
 
 
-void
-StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
-                                                          const FloatMatrix &base,
-                                                          bool transpose)
+FloatMatrixF<3,3>
+StructuralMaterial :: give2DStrainVectorTranformationMtrx(const FloatMatrixF<2,2> &base,
+                                                          bool trans)
 //
 // returns transformation matrix for 2d - strains to another system of axes,
 // given by base.
@@ -1854,16 +1853,8 @@ StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(3, 3);
-    answer.zero();
-
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    auto t = trans ? transpose(base) : base;
+    FloatMatrixF<3,3> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = t.at(1, 1) * t.at(2, 1);
@@ -1875,13 +1866,13 @@ StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(3, 1) = 2.0 * t.at(1, 1) * t.at(1, 2);
     answer.at(3, 2) = 2.0 * t.at(2, 1) * t.at(2, 2);
     answer.at(3, 3) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+    return answer;
 }
 
 
-void
-StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
-                                                        const FloatMatrix &base,
-                                                        bool transpose)
+FloatMatrixF<6,6>
+StructuralMaterial :: giveStressVectorTranformationMtrx(const FloatMatrixF<3,3> &base,
+                                                        bool trans)
 //
 // returns transformation matrix for 3d - stress to another system of axes,
 // given by base.
@@ -1891,16 +1882,9 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(6, 6);
-    answer.zero();
+    auto t = trans ? transpose(base) : base;
 
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    FloatMatrixF<6,6> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = t.at(3, 1) * t.at(3, 1);
@@ -1942,13 +1926,14 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(6, 4) = ( t.at(2, 1) * t.at(3, 2) + t.at(3, 1) * t.at(2, 2) );
     answer.at(6, 5) = ( t.at(1, 1) * t.at(3, 2) + t.at(3, 1) * t.at(1, 2) );
     answer.at(6, 6) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+    
+    return answer;
 }
 
 
-void
-StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer,
-                                                             const FloatMatrix &base,
-                                                             bool transpose)
+FloatMatrixF<3,3>
+StructuralMaterial :: givePlaneStressVectorTranformationMtrx(const FloatMatrixF<2,2> &base,
+                                                             bool trans)
 //
 // returns transformation matrix for 2d - stress to another system of axes,
 // given by base.
@@ -1958,16 +1943,9 @@ StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(3, 3);
-    answer.zero();
+    auto t = trans ? transpose(base) : base;
 
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    FloatMatrixF<3,3> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = 2.0 * t.at(1, 1) * t.at(2, 1);
@@ -1979,12 +1957,13 @@ StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer
     answer.at(3, 1) = t.at(1, 1) * t.at(1, 2);
     answer.at(3, 2) = t.at(2, 1) * t.at(2, 2);
     answer.at(3, 3) = t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2);
+    return answer;
 }
 
 
-void
-StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &strainVector, bool transpose)
+FloatArrayF<6>
+StructuralMaterial :: transformStrainVectorTo(const FloatMatrixF<3,3> &base,
+                                              const FloatArrayF<6> &strain, bool transpose)
 //
 // performs transformation of 3d-strain vector to another system of axes,
 // given by base.
@@ -1994,16 +1973,14 @@ StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMat
 //
 // If transpose == 1 we transpose base matrix before transforming
 {
-    FloatMatrix tt;
-
-    StructuralMaterial :: giveStrainVectorTranformationMtrx(tt, base, transpose);
-    answer.beProductOf(tt, strainVector);
+    auto tt = StructuralMaterial :: giveStrainVectorTranformationMtrx(base, transpose);
+    return dot(tt, strain);
 }
 
 
-void
-StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &stressVector, bool transpose)
+FloatArrayF<6>
+StructuralMaterial :: transformStressVectorTo(const FloatMatrixF<3,3> &base,
+                                              const FloatArrayF<6> &stress, bool transpose)
 //
 //
 // performs transformation of 3d-stress vector to another system of axes,
@@ -2013,12 +1990,9 @@ StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMat
 // be expressed in the same coordinate system as strainVector
 // If transpose == 1 we transpose base matrix before transforming
 //
-
 {
-    FloatMatrix tt;
-
-    StructuralMaterial :: giveStressVectorTranformationMtrx(tt, base, transpose);
-    answer.beProductOf(tt, stressVector);
+    auto tt = StructuralMaterial :: giveStressVectorTranformationMtrx(base, transpose);
+    return dot(tt, stress);
 }
 
 
@@ -2125,7 +2099,11 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_vonMisesStress ) {
         ///@todo What about the stress meassure in large deformations here? The internal state type should specify "Cauchy" or something.
         answer.resize(1);
-        answer.at(1) = this->computeVonMisesStress( & status->giveStressVector() );
+        if ( status->giveStressVector().giveSize() == 6 ) {
+            answer.at(1) = this->computeVonMisesStress_3D( status->giveStressVector() );
+        } else {
+            answer.at(1) = this->computeVonMisesStress( status->giveStressVector() );
+        }
         return 1;
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
@@ -2238,9 +2216,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
             base.at(3, 3) = 1.0;
 
             if ( type == IST_CylindricalStressTensor ) {
-                this->transformStressVectorTo(answer, base, val, false);
+                answer = this->transformStressVectorTo(base, val, false);
             } else {
-                this->transformStrainVectorTo(answer, base, val, false);
+                answer = this->transformStrainVectorTo(base, val, false);
             }
         } else {
             answer = val;

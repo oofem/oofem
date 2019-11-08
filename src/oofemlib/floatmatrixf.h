@@ -86,7 +86,9 @@ public:
     {
 #ifndef NDEBUG
         if ( mat.giveNumberOfRows() != N || mat.giveNumberOfColumns() != M ) {
-            OOFEM_ERROR("Can't convert dynamic float matrix of size %d x %d to fixed size %d x %d\n", mat.giveNumberOfRows(), mat.giveNumberOfColumns(), N, M);
+            throw std::out_of_range("Can't convert dynamic float matrix of size " + 
+                std::to_string(mat.giveNumberOfRows()) + "x" + std::to_string(mat.giveNumberOfRows()) + 
+                " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
         }
 #endif
         std::copy_n(mat.begin(), N*M, values.begin());
