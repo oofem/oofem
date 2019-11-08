@@ -118,10 +118,10 @@ protected:
 
 public:
     /// Voigt index map
-    static std :: vector< std :: vector< int > >vIindex;
+    static std :: array< std :: array< int, 3 >, 3 >vIindex;
 
     /// Symmetric Voigt index map
-    static std :: vector< std :: vector< int > >svIndex;
+    static std :: array< std :: array< int, 3 >, 3 >svIndex;
 
     static int giveSymVI(int ind1, int ind2) { return svIndex [ ind1 - 1 ] [ ind2 - 1 ]; }
     static int giveVI(int ind1, int ind2) { return vIindex [ ind1 - 1 ] [ ind2 - 1 ]; }

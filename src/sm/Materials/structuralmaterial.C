@@ -49,16 +49,16 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-std :: vector< std :: vector< int > >StructuralMaterial :: vIindex = {
-    { 1, 6, 5 },
-    { 9, 2, 4 },
-    { 8, 7, 3 }
+std :: array< std :: array< int, 3 >, 3 >StructuralMaterial :: vIindex = {
+    1, 6, 5,
+    9, 2, 4,
+    8, 7, 3
 };
 
-std :: vector< std :: vector< int > >StructuralMaterial :: svIndex = {
-    { 1, 6, 5 },
-    { 6, 2, 4 },
-    { 5, 4, 3 }
+std :: array< std :: array< int, 3 >, 3 >StructuralMaterial :: svIndex = {
+    1, 6, 5,
+    6, 2, 4,
+    5, 4, 3
 };
 
 
