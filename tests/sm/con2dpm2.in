@@ -35,5 +35,5 @@ Set 5 nodes 1 4
 #ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1 value -5e-04
 #ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1 value -2.54481363e+06
 #ELEMENT tStep 5 number 1 gp 1 keyword 4 component 1 value 2.5e-03
-#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 1 value -1.68219235e+06
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 1 value -1.68202554e+06
 #%END_CHECK%
