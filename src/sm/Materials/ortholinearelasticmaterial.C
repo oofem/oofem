@@ -377,11 +377,10 @@ OrthotropicLinearElasticMaterial :: giveRotationMatrix(GaussPoint *gp) const
 }
 
 
-void
-OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                                GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
     auto transf = this->giveRotationMatrix(gp);
-    answer = dot(transf, alpha);
+    return dot(transf, alpha);
 }
 } // end namespace oofem

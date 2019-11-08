@@ -264,7 +264,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Returns the reference temperature of receiver.
      */

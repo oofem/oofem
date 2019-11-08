@@ -177,9 +177,8 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 }
 
 
-void
-RheoChainMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                           GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+RheoChainMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
 // eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
@@ -188,16 +187,17 @@ RheoChainMaterial :: giveThermalDilatationVector(FloatArray &answer,
 //
 {
     MaterialMode mMode =  gp->giveMaterialMode();
-
-    answer.resize(6);
-    answer.zero();
-
     if ( mMode ==  _2dLattice || mMode ==  _3dLattice ) {
-        answer.at(1) = ( this->talpha );
+        return {this->talpha, 0., 0., 0., 0., 0.};
     } else {
-        answer.at(1) = ( this->talpha );
-        answer.at(2) = ( this->talpha );
-        answer.at(3) = ( this->talpha );
+        return {
+            talpha,
+            talpha,
+            talpha,
+            0.,
+            0.,
+            0.,
+        };
     }
 }
 

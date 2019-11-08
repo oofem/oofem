@@ -353,7 +353,7 @@ public:
     /// Compute increment of dissipation for post-processing reasons
     double computeDeltaDissipation(double omega, FloatArray &reducedStrain, GaussPoint *gp, TimeStep *tStep);
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp,  TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp,  TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

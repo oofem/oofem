@@ -218,8 +218,8 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCM2MaterialStatus(gp); }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
-    { linearElasticMaterial->giveThermalDilatationVector(answer, gp, tStep); }
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override
+    { return linearElasticMaterial->giveThermalDilatationVector(gp, tStep); }
 
 protected:
 

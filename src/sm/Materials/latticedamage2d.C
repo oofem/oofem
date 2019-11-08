@@ -624,13 +624,18 @@ LatticeDamage2d :: giveElasticStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-LatticeDamage2d :: giveThermalDilatationVector(FloatArray &answer,
-                                               GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+LatticeDamage2d :: giveThermalDilatationVector(GaussPoint *gp,  TimeStep *tStep) const
 {
-    answer.resize(3);
-    answer.zero();
-    answer.at(1) = this->give(tAlpha, gp);
+    auto alpha = this->give(tAlpha, gp);
+    return {
+        alpha,
+        alpha,
+        alpha,
+        0.,
+        0.,
+        0.,
+    };
 }
 
 

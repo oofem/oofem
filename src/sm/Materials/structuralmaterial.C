@@ -2312,21 +2312,12 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
 
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
-        FloatArray fullAnswer, e0;
+        auto e0 = this->giveThermalDilatationVector(gp, tStep);
 
-        this->giveThermalDilatationVector(e0, gp, tStep);
-
-        if ( e0.giveSize() ) {
-            fullAnswer = e0;
-            if ( mode == VM_Total ) {
-                fullAnswer.times(et.at(1) - this->referenceTemperature);
-            } else {
-                fullAnswer.times( et.at(1) );
-            }
-
-            StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
-            //answer = fullAnswer;
-        }
+        double scale = mode == VM_Total ? (et.at(1) - this->referenceTemperature) : et.at(1); 
+        FloatArray fullAnswer = e0 * scale;
+        StructuralMaterial :: giveReducedSymVectorForm( answer, fullAnswer, gp->giveMaterialMode() );
+        //answer = fullAnswer;
     }
 
     //join temperature and eigenstrain vectors, compare vector sizes
@@ -2400,20 +2391,10 @@ StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer
 
 
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
-        FloatArray fullAnswer, e0;
 
-        this->giveThermalDilatationVector(e0, gp, tStep);
-
-        if ( e0.giveSize() ) {
-            fullAnswer = e0;
-            if ( mode == VM_Total ) {
-                fullAnswer.times(et.at(1) - this->referenceTemperature);
-            } else {
-                fullAnswer.times( et.at(1) );
-            }
-
-            answer = fullAnswer;
-        }
+        auto e0 = this->giveThermalDilatationVector(gp, tStep);
+        double scale = mode == VM_Total ? (et.at(1) - this->referenceTemperature) : et.at(1);
+        answer = e0 * scale;
     }
 
     //join temperature and eigenstrain vectors, compare vector sizes
@@ -2523,19 +2504,18 @@ StructuralMaterial :: giveReducedSymMatrixForm(FloatMatrix &answer, const FloatM
     answer.beSubMatrixOf(full, indx, indx);
 }
 
-void
-StructuralMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+StructuralMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
     double alpha = this->give(tAlpha, gp);
-    if ( alpha > 0.0 ) {
-        answer.resize(6);
-        answer.zero();
-        answer.at(1) = alpha;
-        answer.at(2) = alpha;
-        answer.at(3) = alpha;
-    } else {
-        answer.clear();
-    }
+    return {
+        alpha,
+        alpha,
+        alpha,
+        0.,
+        0.,
+        0.,
+    };
 }
 
 void

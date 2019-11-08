@@ -115,7 +115,7 @@ public:
         cs_type(unknownCS)
     { }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_OrthotropicLinearElasticMaterial_Name; }
     const char *giveClassName() const override { return "OrthotropicLinearElasticMaterial"; }

@@ -94,7 +94,7 @@ public:
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp,
                                        TimeStep *tStep) override;
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep) override;
     void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;

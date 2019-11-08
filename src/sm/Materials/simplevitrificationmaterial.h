@@ -85,7 +85,7 @@ public:
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

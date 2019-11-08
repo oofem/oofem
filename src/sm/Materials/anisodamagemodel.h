@@ -252,7 +252,7 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
     //InternalStateValueType giveIPValueType(InternalStateType type) override;
-    //void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *) override;
+    //FloatArrayF<6> giveThermalDilatationVector(GaussPoint *, TimeStep *) const override;
 
     /**
      * Computes the equivalent strain measure from given strain vector (full form).

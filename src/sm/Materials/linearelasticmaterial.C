@@ -89,10 +89,10 @@ LinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-LinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+LinearElasticMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
-    answer = alpha;
+    return alpha;
 }
 
 

@@ -388,8 +388,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveCauchyStressVector_1d, std::ref(answer), gp, reducedF, tStep);   
         }
 
-        void giveThermalDilatationVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveThermalDilatationVector, std::ref(answer), gp, tStep);   
+        void giveThermalDilatationVector(oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
+            PYBIND11_OVERLOAD(oofem::FloatArrayF<6>, StructuralMaterialBase, giveThermalDilatationVector, gp, tStep);   
         }
         void computeStressIndependentStrainVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, computeStressIndependentStrainVector, std::ref(answer), gp, tStep, mode);   

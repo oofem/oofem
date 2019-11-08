@@ -211,11 +211,11 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
 }
 
 
-void
-TutorialMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+TutorialMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
     double alpha = D.give(tAlpha, gp);
-    answer = {alpha, alpha, alpha, 0., 0., 0.};
+    return {alpha, alpha, alpha, 0., 0., 0.};
 }
 
 

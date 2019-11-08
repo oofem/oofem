@@ -34,6 +34,7 @@
 
 #include "simplevitrificationmaterial.h"
 #include "gausspoint.h"
+#include "floatarrayf.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 
@@ -149,14 +150,15 @@ void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, 
 }
 
 
-void SimpleVitrificationMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                                GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6> SimpleVitrificationMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
     bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
-    answer.resize(6);
-    answer.at(1) = vitr ? this->alpha_r.at(1) : this->alpha.at(1);
-    answer.at(2) = vitr ? this->alpha_r.at(2) : this->alpha.at(2);
-    answer.at(3) = vitr ? this->alpha_r.at(3) : this->alpha.at(3);
+    return {
+        vitr ? this->alpha_r.at(1) : this->alpha.at(1),
+        vitr ? this->alpha_r.at(2) : this->alpha.at(2),
+        vitr ? this->alpha_r.at(3) : this->alpha.at(3),
+        0., 0., 0.,
+    };
 }
 
 

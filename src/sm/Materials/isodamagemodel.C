@@ -357,9 +357,8 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
 }
 
 
-void
-IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                       GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+IsotropicDamageMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
 // eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
@@ -367,11 +366,12 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
 // gp (element) local axes
 //
 {
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = this->tempDillatCoeff;
-    answer.at(2) = this->tempDillatCoeff;
-    answer.at(3) = this->tempDillatCoeff;
+    return {
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        0., 0., 0.,
+    };
 }
 
 double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp) const
