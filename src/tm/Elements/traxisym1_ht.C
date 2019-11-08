@@ -46,10 +46,23 @@
 
 namespace oofem {
 REGISTER_Element(TrAxisym1_ht);
+REGISTER_Element(TrAxisym1_hmt);
+REGISTER_Element(TrAxisym1_mt);
 
 TrAxisym1_ht :: TrAxisym1_ht(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
 { }
 
+TrAxisym1_hmt :: TrAxisym1_hmt(int n, Domain *aDomain) : TrAxisym1_ht(n, aDomain)
+{
+    this->emode = HeatMass1TransferEM; // This could be done in a better way.
+}
+
+TrAxisym1_mt :: TrAxisym1_mt(int n, Domain *aDomain) : TrAxisym1_ht(n, aDomain)
+{
+    this->emode = Mass1TransferEM;
+}  
+
+  
 
 double
 TrAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
