@@ -104,6 +104,7 @@ protected:
     double computeEdgeVolumeAround(GaussPoint *gp, int) override;
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp) override;
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
     void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
     void computeGaussPoints() override;
 

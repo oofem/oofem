@@ -234,7 +234,7 @@ IntElPoint :: initializeFrom(InputRecord &ir)
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
-    FloatArray n;
+    FloatArray n(3);
     IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_IntElPoint_normal);
     normal = n;
     

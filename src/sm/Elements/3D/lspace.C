@@ -714,8 +714,10 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
         int j = ( i ) % 4 + 1;
         h1 = * domain->giveNode( snodes.at(i) )->giveCoordinates();
         h1.subtract(gc);
+	h1.normalize();
         h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
         h2.subtract(gc);
+	h2.normalize();	
         n.beVectorProductOf(h1, h2);
         if ( n.computeSquaredNorm() > 1.e-6 ) {
             n.normalize();
