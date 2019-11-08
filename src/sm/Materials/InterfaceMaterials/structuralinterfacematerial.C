@@ -73,14 +73,10 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 }
 
 
-IRResultType
-StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
+void
+StructuralInterfaceMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, this->useNumericalTangent, _IFT_StructuralInterfaceMaterial_useNumericalTangent);
-
-    return IRRT_OK;
 }
 
 

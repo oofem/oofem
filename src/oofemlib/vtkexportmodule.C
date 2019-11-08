@@ -72,10 +72,11 @@ VTKExportModule :: VTKExportModule(int n, EngngModel *e) : ExportModule(n, e), i
 VTKExportModule :: ~VTKExportModule() { }
 
 
-IRResultType
-VTKExportModule :: initializeFrom(InputRecord *ir)
+void
+VTKExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    ExportModule :: initializeFrom(ir);
+
     int val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKExportModule_cellvars);
@@ -85,8 +86,6 @@ VTKExportModule :: initializeFrom(InputRecord *ir)
     val = NodalRecoveryModel :: NRM_ZienkiewiczZhu;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_VTKExportModule_stype);
     stype = ( NodalRecoveryModel :: NodalRecoveryModelType ) val;
-
-    return ExportModule :: initializeFrom(ir);
 }
 
 

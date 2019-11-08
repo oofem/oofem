@@ -35,7 +35,7 @@
 #ifndef truss1d_h
 #define truss1d_h
 
-#include "sm/Elements/structuralelement.h"
+#include "sm/Elements/nlstructuralelement.h"
 #include "sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "sm/ErrorEstimators/zzerrorestimator.h"
 #include "sm/ErrorEstimators/huertaerrorestimator.h"
@@ -53,16 +53,16 @@ class FEI1dLin;
  * This class implements a two-node truss bar element for one-dimensional
  * analysis.
  */
-class Truss1d : public StructuralElement,
-public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
-public ZZErrorEstimatorInterface,
-public HuertaErrorEstimatorInterface
+class Truss1d : public NLStructuralElement,
+    public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
+    public ZZErrorEstimatorInterface,
+    public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI1dLin interp;
 
 public:
-    Truss1d(int n, Domain * d);
+    Truss1d(int n, Domain *d);
     virtual ~Truss1d() { }
 
     FEInterpolation *giveInterpolation() const override;
@@ -79,7 +79,7 @@ public:
     { return this->computeLength(); }
 
     double computeVolumeAround(GaussPoint *gp) override;
-    
+
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
@@ -89,7 +89,7 @@ public:
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
-    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) override;
+    void drawDeformedGeometry(oofegGraphicContext & gc, TimeStep * tStep, UnknownType) override;
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
@@ -113,10 +113,9 @@ public:
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
-    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer); ///@todo BH is just used in nlstructuralelement
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override; ///@todo BH is just used in nlstructuralelement
     void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
     void computeGaussPoints() override;
-
 };
 } // end namespace oofem
 #endif // truss1d_h

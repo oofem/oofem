@@ -309,11 +309,11 @@ CCTPlate :: computeArea ()
  
 }
 
-IRResultType
-CCTPlate :: initializeFrom(InputRecord *ir)
+void
+CCTPlate :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
 }
 
 

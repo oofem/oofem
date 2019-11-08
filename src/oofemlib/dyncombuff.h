@@ -116,7 +116,7 @@ public:
      * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      * @return True if request is successful.
      */
-    virtual int waitCompletion() override;
+    int waitCompletion() override;
  #endif
     //@}
 
@@ -212,9 +212,9 @@ public:
     { return __read(dest, n, MPI_CHAR); }
 
 
-    virtual int iSend(int dest, int tag) override;
-    virtual int iRecv(int source, int tag, int count = 0) override;
-    virtual int bcast(int root) override;
+    int iSend(int dest, int tag) override;
+    int iRecv(int source, int tag, int count = 0) override;
+    int bcast(int root) override;
 
     /**
      * Tests if the operation identified by this->request is complete.
@@ -232,7 +232,7 @@ public:
      * then the object is deallocated by the call to MPI_WAIT and the request handle is set to MPI_REQUEST_NULL.
      * @return True if request is successful.
      */
-    virtual int waitCompletion() override;
+    int waitCompletion() override;
 
 
     static void printInfo() { packetPool.printInfo(); }

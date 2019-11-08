@@ -73,16 +73,15 @@ protected:
 
 public:
     LargeStrainMasterMaterial(int n, Domain *d);
-    virtual ~LargeStrainMasterMaterial();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_LargeStrainMasterMaterial_Name; }
     const char *giveClassName() const override { return "LargeStrainMasterMaterial"; }
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -114,17 +113,16 @@ protected:
 
 public:
     LargeStrainMasterMaterialStatus(GaussPoint *g, Domain *d, int s);
-    virtual ~LargeStrainMasterMaterialStatus();
 
-    const FloatMatrix &givePmatrix() { return Pmatrix; }
-    const FloatMatrix &giveTLmatrix() { return TLmatrix; }
-    const FloatMatrix &giveTransformationMatrix() { return transformationMatrix; }
+    const FloatMatrix &givePmatrix() const { return Pmatrix; }
+    const FloatMatrix &giveTLmatrix() const { return TLmatrix; }
+    const FloatMatrix &giveTransformationMatrix() const { return transformationMatrix; }
 
     void setPmatrix(const FloatMatrix &values) { Pmatrix = values; }
     void setTLmatrix(const FloatMatrix &values) { TLmatrix = values; }
     void setTransformationMatrix(const FloatMatrix &values) { transformationMatrix = values; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void initTempStatus() override;
     void updateYourself(TimeStep *) override;
 

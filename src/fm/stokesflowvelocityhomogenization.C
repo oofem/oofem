@@ -48,9 +48,6 @@ StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, Engn
 {
 }
 
-StokesFlowVelocityHomogenization :: ~StokesFlowVelocityHomogenization()
-{ }
-
 
 double
 StokesFlowVelocityHomogenization :: giveAreaOfRVE()

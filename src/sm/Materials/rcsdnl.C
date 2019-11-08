@@ -346,17 +346,12 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 }
 
 
-IRResultType
-RCSDNLMaterial :: initializeFrom(InputRecord *ir)
+void
+RCSDNLMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     //RCSDEMaterial::instanciateFrom (ir);
-    result = this->giveLinearElasticMaterial()->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;    
-
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    this->giveLinearElasticMaterial()->initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, Ft, _IFT_RCSDNLMaterial_ft);
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDNLMaterial_sdtransitioncoeff);
@@ -374,18 +369,15 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         R = 0.0;
     }
 
-    if ( ir->hasField(_IFT_RCSDNLMaterial_ef) ) { // if ef is specified, Gf is computed acordingly
+    if ( ir.hasField(_IFT_RCSDNLMaterial_ef) ) { // if ef is specified, Gf is computed acordingly
         IR_GIVE_FIELD(ir, this->ef, _IFT_RCSDNLMaterial_ef);
         this->Gf = this->Ft * this->ef;
-    } else if ( ir->hasField(_IFT_RCSDNLMaterial_gf) ) { // otherwise if Gf is specified, ef is computed acordingly
+    } else if ( ir.hasField(_IFT_RCSDNLMaterial_gf) ) { // otherwise if Gf is specified, ef is computed acordingly
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        OOFEM_WARNING("cannot determine Gf and ef from input data");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, "none", "cannot determine Gf and ef from input data");
     }
-
-    return IRRT_OK;
 }
 
 
@@ -446,12 +438,8 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(GaussPoint *g) :
 }
 
 
-RCSDNLMaterialStatus :: ~RCSDNLMaterialStatus()
-{ }
-
-
 void
-RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FloatArray helpVec;
 

@@ -91,26 +91,24 @@ MatlabExportModule :: ~MatlabExportModule()
 { }
 
 
-IRResultType
-MatlabExportModule :: initializeFrom(InputRecord *ir)
+void
+MatlabExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     ExportModule :: initializeFrom(ir);
 
-    exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
+    exportMesh = ir.hasField(_IFT_MatlabExportModule_mesh);
     
-    exportData = ir->hasField(_IFT_MatlabExportModule_data);
+    exportData = ir.hasField(_IFT_MatlabExportModule_data);
     if ( exportData ) {
         IR_GIVE_OPTIONAL_FIELD(ir, this->dataNodeSet, _IFT_MatlabExportModule_DataNodeSet);
     }
     
-    exportArea = ir->hasField(_IFT_MatlabExportModule_area);
-    exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
-    exportHomogenizeIST = ir->hasField(_IFT_MatlabExportModule_homogenizeInternalVars);
+    exportArea = ir.hasField(_IFT_MatlabExportModule_area);
+    exportSpecials = ir.hasField(_IFT_MatlabExportModule_specials);
+    exportHomogenizeIST = ir.hasField(_IFT_MatlabExportModule_homogenizeInternalVars);
 
 
-    exportReactionForces = ir->hasField(_IFT_MatlabExportModule_ReactionForces);
+    exportReactionForces = ir.hasField(_IFT_MatlabExportModule_ReactionForces);
     reactionForcesDofManList.resize(0);
     if ( exportReactionForces ) {
         IR_GIVE_OPTIONAL_FIELD(ir, reactionForcesDofManList, _IFT_MatlabExportModule_DofManList);
@@ -118,7 +116,7 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->reactionForcesNodeSet, _IFT_MatlabExportModule_ReactionForcesNodeSet);
     }
 
-    exportIntegrationPointFields = ir->hasField(_IFT_MatlabExportModule_IntegrationPoints);
+    exportIntegrationPointFields = ir.hasField(_IFT_MatlabExportModule_IntegrationPoints);
     elList.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_MatlabExportModule_internalVarsToExport);
     if ( exportIntegrationPointFields ) {
@@ -127,9 +125,8 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
 
-    noscaling = ir->hasField(_IFT_MatlabExportModule_noScaledHomogenization);
+    noscaling = ir.hasField(_IFT_MatlabExportModule_noScaledHomogenization);
 
-    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -583,6 +580,12 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
         }
         fprintf(FID, "];\n");
     }
+            
+    // Output the current load level (useful for CALM solver)
+    double loadLevel = domain->giveEngngModel()->giveLoadLevel();
+    fprintf( FID, "\tReactionForces.LoadLevel = [" );
+    fprintf( FID, "%.9e", loadLevel);
+    fprintf( FID, "];\n" );
 }
 
 

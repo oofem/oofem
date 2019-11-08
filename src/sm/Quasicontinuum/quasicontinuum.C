@@ -131,9 +131,9 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
      */
 
     // add interpolation elements (with new CS and no mat)
-    const char *elemType;
     if ( interpolationMeshNodes.size() != 0 ) {
         // for 2d
+        const char *elemType;
         if ( nDimensions == 2 ) {
             //elemType  = "TrPlaneStrain";
             elemType  = "TrPlaneStress2d";
@@ -141,21 +141,21 @@ Quasicontinuum :: createInterpolationElements(Domain *d)
         } else {
             elemType  = "LTRSpace";
         }
-    }
 
-    int nelem = d->giveNumberOfElements();
-    DynamicInputRecord irEl;
-    // over interpolation elements
-    for ( int i = 1; i <= ninterpelem; i++ ) {
-        int elemNumber = nelem + i;
-        d->resizeElements(elemNumber);
-        auto elem = classFactory.createElement(elemType, elemNumber, d);
-        irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
-        //irEl.setField( ncrosssect, _IFT_Element_crosssect);
-        //irEl.setField( nmat, _IFT_Element_mat);
-        elem->initializeFrom(& irEl);
-        elem->setGlobalNumber(elemNumber);
-        d->setElement(elemNumber, std::move(elem));
+        int nelem = d->giveNumberOfElements();
+        DynamicInputRecord irEl;
+        // over interpolation elements
+        for ( int i = 1; i <= ninterpelem; i++ ) {
+            int elemNumber = nelem + i;
+            d->resizeElements(elemNumber);
+            auto elem = classFactory.createElement(elemType, elemNumber, d);
+            irEl.setField(interpolationMeshNodes [ i - 1 ], _IFT_Element_nodes);
+            //irEl.setField( ncrosssect, _IFT_Element_crosssect);
+            //irEl.setField( nmat, _IFT_Element_mat);
+            elem->initializeFrom(irEl);
+            elem->setGlobalNumber(elemNumber);
+            d->setElement(elemNumber, std::move(elem));
+        }
     }
 }
 
@@ -170,7 +170,7 @@ Quasicontinuum :: addCrosssectionToInterpolationElements(Domain *d)
     DynamicInputRecord irCS;
     irCS.setField(1.0, _IFT_SimpleCrossSection_thick);
     irCS.setField(1.0, _IFT_SimpleCrossSection_width);
-    crossSection->initializeFrom(& irCS);
+    crossSection->initializeFrom(irCS);
     d->setCrossSection(ncrosssect, std::move(crossSection));
 
     for ( int i = 1; i <= interpolationElementNumbers.giveSize(); i++ ) {
@@ -193,7 +193,7 @@ Quasicontinuum :: applyApproach1(Domain *d)
     irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_n);
     irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha);
     irMat.setField(0.0, _IFT_Material_density);
-    mat->initializeFrom(& irMat);
+    mat->initializeFrom(irMat);
     d->setMaterial(nmat, std::move(mat));
 
 
@@ -359,7 +359,7 @@ Quasicontinuum :: applyApproach2(Domain *d, int homMtrxType, double volumeOfInte
     } else {
         OOFEM_ERROR("Invalid homMtrxType");
     }
-    mat->initializeFrom(& irMat);
+    mat->initializeFrom(irMat);
     d->setMaterial(nmat, std::move(mat));
 
 
@@ -549,7 +549,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
             irMat.setField(0.0, _IFT_IsotropicLinearElasticMaterial_talpha);
             irMat.setField(0.0, _IFT_Material_density);
 
-            mat->initializeFrom(& irMat);
+            mat->initializeFrom(irMat);
             d->setMaterial(nmat, std::move(mat));
         }
 
@@ -582,7 +582,7 @@ Quasicontinuum :: applyApproach3(Domain *d, int homMtrxType)
             irMat.setField(alpha, _IFT_AnisotropicLinearElasticMaterial_talpha);
             irMat.setField(0.0, _IFT_Material_density);
 
-            mat->initializeFrom(& irMat);
+            mat->initializeFrom(irMat);
             d->setMaterial(nmat, std::move(mat));
         }
     } else {
@@ -823,7 +823,7 @@ Quasicontinuum :: stiffnessAssignment(std :: vector< FloatMatrix > &individualSt
         double totalLength = distance(*qn1->giveCoordinates(), *qn2->giveCoordinates());
         lengths.times(1 / totalLength); // it is better to use relative lengths
         double sumLength = lengths.sum();
-        if ( sumLength < 0.9999 or sumLength > 1.0001 ) {
+        if ( (sumLength < 0.9999) || (sumLength > 1.0001) ) {
             return false;
         }
 

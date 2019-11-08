@@ -77,7 +77,7 @@ public:
     virtual ~LinearEdgeLoad() { }
 
     int giveApproxOrder() override { return 1; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     bcGeomType giveBCGeoType() const override { return EdgeLoadBGT; }
     FormulationType giveFormulationType() override { return formulation; }

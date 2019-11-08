@@ -120,7 +120,10 @@ StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, Integration
     FloatArray u;
 
     if ( !this->isActivated(tStep) ) {
-        answer.resize(3);
+        //match dimensions
+        //answer.resize(3);
+        this->computeNmatrixAt(ip, N);
+        answer.resize(N.giveNumberOfRows());
         answer.zero();
         return;
     }
@@ -293,10 +296,10 @@ StructuralInterfaceElement :: giveIPValue(FloatArray &answer, IntegrationPoint *
 }
 
 
-IRResultType
-StructuralInterfaceElement :: initializeFrom(InputRecord *ir)
+void
+StructuralInterfaceElement :: initializeFrom(InputRecord &ir)
 {
-    return Element :: initializeFrom(ir);
+    Element :: initializeFrom(ir);
 }
 
 void StructuralInterfaceElement :: giveInputRecord(DynamicInputRecord &input)

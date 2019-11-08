@@ -93,7 +93,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Truss3d_Name; }
     const char *giveClassName() const override { return "Truss3d"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _1dMat; }
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;

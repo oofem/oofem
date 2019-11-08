@@ -50,10 +50,11 @@ REGISTER_Material(IntMatIsoDamageTable);
 IntMatIsoDamageTable :: IntMatIsoDamageTable(int n, Domain *d) : IntMatIsoDamage(n, d) {}
 
 
-IRResultType
-IntMatIsoDamageTable :: initializeFrom(InputRecord *ir)
+void
+IntMatIsoDamageTable :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     std :: ifstream is;
     int nbrOfLinesToRead;
 
@@ -105,8 +106,6 @@ IntMatIsoDamageTable :: initializeFrom(InputRecord *ir)
     // We add e0 to the tableJumps since these should be given as the increase in
     // strain relative to e0.
     tableJumps.add(e0);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 

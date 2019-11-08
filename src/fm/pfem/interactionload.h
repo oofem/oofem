@@ -68,19 +68,19 @@ protected:
 public:
     InteractionLoad(int i, Domain *d) : LinearEdgeLoad(i, d), coupledParticles(2) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
+    void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
 
-    virtual int giveApproxOrder() { return 1; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
-    virtual FormulationType giveFormulationType() { return formulation; }
+    int giveApproxOrder() override { return 1; }
+    void initializeFrom(InputRecord &ir) override;
+    void giveInputRecord(DynamicInputRecord &input) override;
+    bcGeomType giveBCGeoType() const override { return EdgeLoadBGT; }
+    FormulationType giveFormulationType() override { return formulation; }
 
-    virtual const char *giveClassName() const { return "InteractionLoad"; }
-    virtual const char *giveInputRecordName() const { return _IFT_InteractionLoad_Name; }
+    const char *giveClassName() const override { return "InteractionLoad"; }
+    const char *giveInputRecordName() const override { return _IFT_InteractionLoad_Name; }
 
 protected:
-    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const;
+    void computeNArray(FloatArray &answer, const FloatArray &coords) const override;
 };
 } // end namespace oofem
 #endif // interactionload_h

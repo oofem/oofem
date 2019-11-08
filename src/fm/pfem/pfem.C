@@ -54,6 +54,7 @@
 #include "load.h"
 #include "pfemparticle.h"
 #include "octreelocalizert.h" //changed from "octreelocalizer.h"
+#include "octreelocalizertutil.h" 
 #include "spatiallocalizer.h"
 #include "classfactory.h"
 #include "mathfem.h"
@@ -211,11 +212,9 @@ PFEM :: forceEquationNumbering(int id)
 
 
 
-IRResultType
-PFEM :: initializeFrom(InputRecord *ir)
+void
+PFEM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
-
     EngngModel :: initializeFrom(ir);
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
@@ -253,8 +252,6 @@ PFEM :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, associatedMaterial, _IFT_PFEM_associatedMaterial);
     IR_GIVE_FIELD(ir, associatedCrossSection, _IFT_PFEM_associatedCrossSection);
     IR_GIVE_FIELD(ir, associatedPressureBC, _IFT_PFEM_pressureBC);
-
-    return IRRT_OK;
 }
 
 

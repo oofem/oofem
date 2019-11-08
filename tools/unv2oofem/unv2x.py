@@ -11,6 +11,8 @@
 #              some datasets from UNV file and store them in a FEM object structure
 # To Do:   add UNV data handler functions for other datasets (to be defined)
 #          add your own code to write the model into your own file format
+# For documentation see http://sdrl.uc.edu/sdrl/referenceinfo/universalfileformats/file-format-storehouse/universal-file-datasets-summary
+
 import os
 import os.path
 import sys
@@ -32,7 +34,7 @@ class UNVParser:
 
     def mapping(self):
         """Returns mapping for .unv elements"""
-    #   Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
+        #Table of element properties. It contains mapping of nodes, edges and faces between unv and OOFEM element.
     
         # TODO: Use a linked list where each oofem element is linked to the type of element and use the linked list when mapping occurs. In that way, we only need to specify each type of element (descritization) once.
     
@@ -41,7 +43,6 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
         oofem_elemProp.append(oofem_elementProperties("Truss1D", [0,1], [], []))
         oofem_elemProp.append(oofem_elementProperties("Interface1d", oofem_elemProp[-1]))
-        oofem_elemProp.append(oofem_elementProperties("intelline1", [0,1,2,3], [], []))
         oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
         oofem_elemProp.append(oofem_elementProperties("Truss3D",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Beam2D",oofem_elemProp[-1]))
@@ -56,7 +57,7 @@ class UNVParser:
         #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
         oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
         oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2DXFEM", oofem_elemProp[-1]))
-        oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("TrPlaneStrain",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Axisymm3D",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Tr1ht",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Tr1hmt",oofem_elemProp[-1]))
@@ -66,6 +67,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("CCTplate",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
+        oofem_elemProp.append(oofem_elementProperties("Tria2PlateSubSoil", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("PlaneStress2DXFEM", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("Quad1PlaneStrain", oofem_elemProp[-1]))
@@ -75,6 +77,8 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1hmt", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1mt", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Interface2dlin", [0,1,3,2], [[0,1],[],[3,2],[]], []))
+        oofem_elemProp.append(oofem_elementProperties("IntElLine1", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("QPlaneStress2D", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("Quad2plateSubsoil", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("LSpace", [4,7,6,5,0,3,2,1], [[4,7],[7,6],[6,5],[5,4],[4,0],[7,3],[6,2],[5,1],[0,3],[3,2],[2,0],[1,0]], [[4,7,6,5],[0,3,2,1],[4,0,3,7],[7,3,2,6],[6,2,1,5],[5,1,0,4]]))#checked

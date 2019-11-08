@@ -64,7 +64,7 @@ public:
 
     FEInterpolation *giveInterpolation() const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     int giveNumberOfIPForMassMtrxIntegration() override { return 9; }
 
     Interface *giveInterface(InterfaceType) override;

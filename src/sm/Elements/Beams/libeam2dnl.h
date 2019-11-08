@@ -81,7 +81,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LIBeam2dNL_Name; }
     const char *giveClassName() const override { return "LIBeam2dNL"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

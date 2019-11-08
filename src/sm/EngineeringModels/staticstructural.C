@@ -98,15 +98,10 @@ StaticStructural :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
     return tStep->giveNumber() % 2;
 }
 
-IRResultType
-StaticStructural :: initializeFrom(InputRecord *ir)
+void
+StaticStructural :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralEngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralEngngModel :: initializeFrom(ir);
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
@@ -134,7 +129,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
 
-    mRecomputeStepAfterPropagation = ir->hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
+    mRecomputeStepAfterPropagation = ir.hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
 
 #ifdef __PARALLEL_MODE
     ///@todo Where is the best place to create these?
@@ -145,7 +140,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
         communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                             this->giveNumberOfProcesses());
 
-        if ( ir->hasField(_IFT_StaticStructural_nonlocalExtension) ) {
+        if ( ir.hasField(_IFT_StaticStructural_nonlocalExtension) ) {
             nonlocalExt = 1;
             nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
                                                          this->giveNumberOfProcesses());
@@ -155,18 +150,14 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 #endif
 
     this->field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_Displacements, 0);
-
-    return IRRT_OK;
 }
 
 
 void
 StaticStructural :: updateAttributes(MetaStep *mStep)
 {
-    IRResultType result;                  // Required by IR_GIVE_FIELD macro
-
     MetaStep *mStep1 = this->giveMetaStep( mStep->giveNumber() ); //this line ensures correct input file in staggered problem
-    InputRecord *ir = mStep1->giveAttributesRecord();
+    auto &ir = mStep1->giveAttributesRecord();
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
@@ -197,7 +188,7 @@ StaticStructural :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
 
-    mRecomputeStepAfterPropagation = ir->hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
+    mRecomputeStepAfterPropagation = ir.hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
 
     EngngModel :: updateAttributes(mStep1);
 }
@@ -376,7 +367,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
     }
     if ( !( status & NM_Success ) ) {
-        OOFEM_ERROR("No success in solving problem");
+      OOFEM_WARNING("No success in solving problem at step %d", tStep->giveNumber());
     }
 }
 

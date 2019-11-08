@@ -61,12 +61,8 @@ namespace oofem {
 REGISTER_Element(TR1_2D_SUPG_AXI);
 
 TR1_2D_SUPG_AXI :: TR1_2D_SUPG_AXI(int n, Domain *aDomain) : TR1_2D_SUPG(n, aDomain)
-    // Constructor.
 { }
 
-TR1_2D_SUPG_AXI :: ~TR1_2D_SUPG_AXI()
-// Destructor
-{ }
 
 void
 TR1_2D_SUPG_AXI :: computeGaussPoints()

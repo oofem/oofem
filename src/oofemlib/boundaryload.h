@@ -154,7 +154,7 @@ public:
      * Reads number of dofs into nDofs attribute (i.e. the number of dofs, which are on loaded entity),
      * its loadType into loadType attribute and coordinate system type into csType attribute.
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to

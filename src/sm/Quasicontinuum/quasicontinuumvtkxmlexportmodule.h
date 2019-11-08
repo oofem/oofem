@@ -78,7 +78,7 @@ public:
     /// Destructor
     virtual ~QuasicontinuumVTKXMLExportModule();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 protected:
     //

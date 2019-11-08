@@ -113,8 +113,6 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d), numberOfMicroplanes(0) { }
-    /// Destructor.
-    virtual ~MicroplaneMaterial() { }
 
     /**
      * Computes the length of normal strain vector on given microplane.
@@ -162,7 +160,7 @@ public:
                                        GaussPoint *gp,
                                        TimeStep *tStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 };
 } // end namespace oofem

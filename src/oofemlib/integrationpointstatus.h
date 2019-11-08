@@ -70,7 +70,7 @@ public:
     /// Destructor.
     virtual ~IntegrationPointStatus() = default;
     /// Print receiver's output to given stream.
-    virtual void printOutputAt(FILE *file, TimeStep *tStep) { }
+    virtual void printOutputAt(FILE *file, TimeStep *tStep) const { }
     /**
      * Update equilibrium history variables according to temp-variables.
      * Invoked, after new equilibrium state has been reached.

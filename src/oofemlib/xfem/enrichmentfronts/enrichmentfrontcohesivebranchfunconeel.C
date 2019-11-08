@@ -111,9 +111,8 @@ void EnrFrontCohesiveBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< doub
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
-IRResultType EnrFrontCohesiveBranchFuncOneEl :: initializeFrom(InputRecord *ir)
+void EnrFrontCohesiveBranchFuncOneEl :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 
 void EnrFrontCohesiveBranchFuncOneEl :: giveInputRecord(DynamicInputRecord &input)

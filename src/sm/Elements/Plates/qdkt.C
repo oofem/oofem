@@ -343,10 +343,10 @@ QDKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
 }
 
 
-IRResultType
-QDKTPlate :: initializeFrom(InputRecord *ir)
+void
+QDKTPlate :: initializeFrom(InputRecord &ir)
 {
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
 }
 
 

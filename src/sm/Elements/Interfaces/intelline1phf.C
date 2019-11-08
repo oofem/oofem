@@ -131,12 +131,12 @@ IntElLine1PhF :: computeAreaAround(IntegrationPoint *ip)
 }
 
 
-IRResultType
-IntElLine1PhF :: initializeFrom(InputRecord *ir)
+void
+IntElLine1PhF :: initializeFrom(InputRecord &ir)
 {
+    StructuralInterfaceElement :: initializeFrom(ir);
     this->axisymmode = false;
-    this->axisymmode = ir->hasField(_IFT_IntElLine1PhF_axisymmode);
-    return StructuralInterfaceElement :: initializeFrom(ir);
+    this->axisymmode = ir.hasField(_IFT_IntElLine1PhF_axisymmode);
 }
 
 

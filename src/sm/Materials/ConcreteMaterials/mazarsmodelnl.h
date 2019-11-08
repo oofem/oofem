@@ -59,10 +59,8 @@ protected:
 public:
     /// Constructor
     MazarsNLMaterialStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~MazarsNLMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the local equivalent strain to be averaged.
     double giveLocalEquivalentStrainForAverage() { return localEquivalentStrainForAverage; }
@@ -105,12 +103,10 @@ protected:
 public:
     /// Constructor
     MazarsNLMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MazarsNLMaterial();
 
     const char *giveClassName() const override { return "MazarsNLMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     Interface *giveInterface(InterfaceType it) override;
 
     void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;

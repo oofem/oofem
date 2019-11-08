@@ -85,7 +85,7 @@ public:
     IntMatBilinearCZFagerstromRate(int n, Domain *d);
 
     FloatArrayF<3> giveFirstPKTraction_3d(const FloatArrayF<3> &jump, const FloatMatrixF<3,3> &F, GaussPoint *gp, TimeStep *tStep) const override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void printYourself() override;
     bool hasAnalyticalTangentStiffness() const override { return true; }

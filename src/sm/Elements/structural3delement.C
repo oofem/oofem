@@ -46,11 +46,11 @@ Structural3DElement :: Structural3DElement(int n, Domain *aDomain) :
 {}
 
 
-IRResultType
-Structural3DElement :: initializeFrom(InputRecord *ir)
+void
+Structural3DElement :: initializeFrom(InputRecord &ir)
 {
-    this->matRotation = ir->hasField(_IFT_Structural3DElement_materialCoordinateSystem);
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
+    this->matRotation = ir.hasField(_IFT_Structural3DElement_materialCoordinateSystem);
 }
 
 

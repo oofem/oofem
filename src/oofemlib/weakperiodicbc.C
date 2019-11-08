@@ -70,15 +70,10 @@ WeakPeriodicBoundaryCondition :: ~WeakPeriodicBoundaryCondition()
 {
 }
 
-IRResultType
-WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
+void
+WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
-    result = ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
 
     orderOfPolygon = 2;
     IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
@@ -91,13 +86,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dofids, _IFT_WeakPeriodicBoundaryCondition_dofids);
     ndofids = dofids.giveSize();
 
-    ngp = -1;        // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
-    if ( ngp != -1 ) {
-        OOFEM_WARNING("ngp isn't being used anymore! see how the interpolator constructs the integration rule automatically.");
-        return IRRT_BAD_FORMAT;
-    }
-
+    ngp = -1;        // ngp is deprecated
 
     nlgeo = false;
     IR_GIVE_OPTIONAL_FIELD(ir, nlgeo, _IFT_WeakPeriodicBoundaryCondition_nlgeo );
@@ -151,8 +140,6 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
         gamma_ids.followedBy(dofid);
         gammaDman->appendDof( new MasterDof( gammaDman.get(), ( DofIDItem )dofid ) );
     }
-
-    return IRRT_OK;
 }
 
 void WeakPeriodicBoundaryCondition :: computeOrthogonalBasis()

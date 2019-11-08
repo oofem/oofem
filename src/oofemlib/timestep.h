@@ -195,7 +195,7 @@ public:
     /// Returns time discretization.
     TimeDiscretizationType giveTimeDiscretization() { return timeDiscretization; }
 
-    IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    void initializeFrom(InputRecord &ir) { }
     /**
      * Stores receiver state to output stream.
      * @param stream Output stream.

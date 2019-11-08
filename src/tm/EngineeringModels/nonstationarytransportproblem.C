@@ -87,19 +87,7 @@ void IntSourceLHSAssembler :: matrixFromElement(FloatMatrix &answer, Element &el
 }
 
 
-NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = NULL) : StationaryTransportProblem(i, _master)
-{
-    ndomains = 1;
-    lumpedCapacityStab = 0;
-    initT = 0.;
-    deltaT = 0.;
-    dtFunction = 0;
-    internalVarUpdateStamp = 0;
-    changingProblemSize = false;
-    solverType = ST_Direct;
-}
-
-NonStationaryTransportProblem :: ~NonStationaryTransportProblem()
+NonStationaryTransportProblem :: NonStationaryTransportProblem(int i, EngngModel *_master = nullptr) : StationaryTransportProblem(i, _master)
 {
 }
 
@@ -117,27 +105,23 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
     return linSolver.get();
 }
 
-IRResultType
-NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
+void
+NonStationaryTransportProblem :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    EngngModel :: initializeFrom(ir);
 
-    result = EngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_initt) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_initt) ) {
         IR_GIVE_FIELD(ir, initT, _IFT_NonStationaryTransportProblem_initt);
     }
 
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltat) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_deltat) ) {
         IR_GIVE_FIELD(ir, deltaT, _IFT_NonStationaryTransportProblem_deltat);
-    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_deltatfunction) ) {
+    } else if ( ir.hasField(_IFT_NonStationaryTransportProblem_deltatfunction) ) {
         IR_GIVE_FIELD(ir, dtFunction, _IFT_NonStationaryTransportProblem_deltatfunction);
-    } else if ( ir->hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
+    } else if ( ir.hasField(_IFT_NonStationaryTransportProblem_prescribedtimes) ) {
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_NonStationaryTransportProblem_prescribedtimes);
     } else {
-        OOFEM_WARNING("Time step not defined");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, "none", "Time step not defined");
     }
 
     IR_GIVE_FIELD(ir, alpha, _IFT_NonStationaryTransportProblem_alpha);
@@ -145,12 +129,12 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
      * if (this->giveNumericalMethod (giveCurrentStep())) nMethod -> instanciateFrom (ir);
      */
     // read lumped capacity stabilization flag
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_lumpedcapa) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_lumpedcapa) ) {
         lumpedCapacityStab = 1;
     }
 
     //secure equation renumbering, otherwise keep efficient algorithms
-    if ( ir->hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
+    if ( ir.hasField(_IFT_NonStationaryTransportProblem_changingproblemsize) ) {
         changingProblemSize = true;
         UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 1);
     } else {
@@ -163,9 +147,6 @@ NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
-
-
-    return IRRT_OK;
 }
 
 

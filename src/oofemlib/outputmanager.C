@@ -48,17 +48,15 @@ OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), eleme
     dofman_all_out_flag = element_all_out_flag = 0;
 }
 
-IRResultType
-OutputManager :: initializeFrom(InputRecord *ir)
+void
+OutputManager :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    tstep_all_out_flag  = ir->hasField(_IFT_OutputManager_tstepall);
+    tstep_all_out_flag  = ir.hasField(_IFT_OutputManager_tstepall);
     tstep_step_out      = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, _IFT_OutputManager_tstepstep);
 
-    dofman_all_out_flag = ir->hasField(_IFT_OutputManager_dofmanall);
-    element_all_out_flag = ir->hasField(_IFT_OutputManager_elementall);
+    dofman_all_out_flag = ir.hasField(_IFT_OutputManager_dofmanall);
+    element_all_out_flag = ir.hasField(_IFT_OutputManager_elementall);
 
     tsteps_out.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, tsteps_out, _IFT_OutputManager_tstepsout);
@@ -70,8 +68,6 @@ OutputManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, element_out, _IFT_OutputManager_elementoutput);
     element_except.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, element_except, _IFT_OutputManager_elementexcept);
-
-    return IRRT_OK;
 }
 
 void

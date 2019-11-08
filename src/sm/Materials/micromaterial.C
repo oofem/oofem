@@ -66,7 +66,6 @@ REGISTER_Material(MicroMaterial);
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
 MicroMaterialStatus :: MicroMaterialStatus(GaussPoint *gp) : StructuralMaterialStatus(gp) { }
 
-MicroMaterialStatus :: ~MicroMaterialStatus() { }
 
 void MicroMaterialStatus :: initTempStatus()
 {
@@ -78,7 +77,7 @@ void MicroMaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 }
 
-void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 { }
 
 void MicroMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
@@ -97,10 +96,8 @@ MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), Unk
 {}
 
 
-IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
+void MicroMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->inputFileNameMicro, _IFT_MicroMaterial_fileName);
 
     OOFEM_LOG_INFO( "** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str() );
@@ -108,8 +105,6 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
     this->problemMicro = InstanciateProblem(drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
     OOFEM_LOG_INFO("Microproblem instanciated\n");
-
-    return IRRT_OK;
 }
 
 

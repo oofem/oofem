@@ -68,7 +68,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_L4Axisymm_Name; }
     const char *giveClassName() const override { return "L4Axisymm"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;

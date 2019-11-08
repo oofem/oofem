@@ -54,20 +54,18 @@ namespace oofem {
 class IsotropicLinMoistureTransferMaterial : public IsotropicMoistureTransferMaterial
 {
 protected:
-    double moistureCapacity;
-    double permeability;
+    double moistureCapacity = 0.;
+    double permeability = 0.;
 
 public:
     IsotropicLinMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
-    virtual ~IsotropicLinMoistureTransferMaterial() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
-    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
+    void initializeFrom(InputRecord &ir) override;
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) const override;
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_IsotropicLinMoistureTransferMaterial_Name; }
     const char *giveClassName() const override { return "IsotropicLinMoistureTransferMaterial"; }
-
 };
 } // end namespace oofem
 #endif // isolinmoisturemat_h

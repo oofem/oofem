@@ -39,15 +39,13 @@
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-IRResultType
-LinearElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+LinearElasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
     preCastStiffnessReduction = 0.99999999;
     IR_GIVE_OPTIONAL_FIELD(ir, preCastStiffnessReduction, _IFT_LinearElasticMaterial_preCastStiffRed);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 
@@ -420,6 +418,13 @@ LinearElasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_ElasticStrainTensor ) {
         this->giveStressDependentPartOfStrainVector(answer, gp, status->giveStrainVector(), tStep, VM_Total);
+        return 1;
+    } else if ( type == IST_ThermalStrainTensor ) {
+        this->computeStressIndependentStrainVector_3d(answer, gp, tStep, VM_Total);
+        return 1;
+    } else if ( type == IST_CreepStrainTensor ) {
+        answer.resize(6);
+        answer.zero();
         return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);

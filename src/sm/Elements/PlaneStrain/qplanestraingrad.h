@@ -52,7 +52,7 @@ public:
     QPlaneStrainGrad(int n, Domain * d);
     virtual ~QPlaneStrainGrad() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_QPlaneStrainGrad_Name; }
     const char *giveClassName() const override { return "QPlaneStrainGrad"; }

@@ -55,10 +55,11 @@ CompoDamageMat :: ~CompoDamageMat()
 }
 
 
-IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
+void CompoDamageMat :: initializeFrom(InputRecord &ir)
 {
+    Material :: initializeFrom(ir);
+
     double value;
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //define transversely othotropic material stiffness parameters
     IR_GIVE_FIELD(ir, value, _IFT_CompoDamageMat_exx);
@@ -110,8 +111,6 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 
     this->afterIter = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->allowSnapBack, _IFT_CompoDamageMat_allowSnapBack);
-
-    return Material :: initializeFrom(ir);
 }
 
 void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
@@ -588,7 +587,7 @@ CompoDamageMatStatus :: ~CompoDamageMatStatus()
 { }
 
 
-void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     int maxComponents = 0;
     StructuralMaterialStatus :: printOutputAt(file, tStep);

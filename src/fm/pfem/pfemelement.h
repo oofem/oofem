@@ -69,14 +69,14 @@ public:
     /// Constructor
     PFEMElement(int, Domain *);
     /// Destructor
-    ~PFEMElement();
+    virtual ~PFEMElement();
 
     ///Initializes receiver acording to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir) override;
 
     // characteristic  matrix
-    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *);
-    void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *);
+    void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep *) override;
+    void giveCharacteristicVector(FloatArray & answer, CharType, ValueModeType, TimeStep *) override;
 
     /** Calculates diagonal mass matrix as vector*/
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *) = 0;
@@ -85,20 +85,19 @@ public:
     /// Calculates critical time step
     virtual double computeCriticalTimeStep(TimeStep *tStep) = 0;
 
-    virtual void updateInternalState(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual int checkConsistency();
+    void updateInternalState(TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    int checkConsistency() override;
 
     /// Returns the interpolation for velocity
     virtual FEInterpolation *giveVelocityInterpolation() = 0;
     /// Returns the interpolation for the pressure
     virtual FEInterpolation *givePressureInterpolation() = 0;
 
-    void computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    
+    computeLoadVector(FloatArray &answer, BodyLoad *load, CharType type, ValueModeType mode, TimeStep *tStep) override;
     
     // definition
-    virtual const char *giveClassName() const { return "PFEMElement"; }
+    const char *giveClassName() const override { return "PFEMElement"; }
 
     /// Returns mask of velocity Dofs
     virtual const IntArray &giveVelocityDofMask() const = 0;

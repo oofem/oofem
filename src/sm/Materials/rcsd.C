@@ -252,19 +252,16 @@ RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduced
 }
 
 
-IRResultType
-RCSDMaterial :: initializeFrom(InputRecord *ir)
+void
+RCSDMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    RCM2Material :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDMaterial_sdtransitioncoeff);
-
-    return RCM2Material :: initializeFrom(ir);
 }
 
 
 double
-RCSDMaterial :: give(int aProperty, GaussPoint *gp)
+RCSDMaterial :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -480,12 +477,8 @@ RCSDMaterialStatus :: RCSDMaterialStatus(GaussPoint *g) :
 }
 
 
-RCSDMaterialStatus :: ~RCSDMaterialStatus()
-{ }
-
-
 void
-RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     char s [ 11 ];
 

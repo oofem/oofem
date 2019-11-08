@@ -51,9 +51,6 @@ Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement
     integrationRulesArray.resize( 0 );
 }
 
-Line2BoundaryElement :: ~Line2BoundaryElement()
-{ }
-
 FEInterpolation *Line2BoundaryElement :: giveInterpolation() const
 {
     return & this->fei;

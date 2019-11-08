@@ -83,7 +83,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_CohesiveSurface3d_Name; }
 
     // input and output
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 #ifdef __OOFEG
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;

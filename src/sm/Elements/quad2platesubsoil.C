@@ -99,11 +99,11 @@ Quad2PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 }
 
 
-IRResultType
-Quad2PlateSubSoil :: initializeFrom(InputRecord *ir)
+void
+Quad2PlateSubSoil :: initializeFrom(InputRecord &ir)
 {
     this->numberOfGaussPoints = 4;
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

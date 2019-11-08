@@ -70,25 +70,25 @@ public:
     /**
      * Destructor.
      */
-    ~InteractionPFEMParticle(void) { }
+    virtual ~InteractionPFEMParticle(void) { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkConsistency();
+    void initializeFrom(InputRecord &ir) override;
+    int checkConsistency() override;
 
-    virtual void updateYourself(TimeStep *tStep);
+    void updateYourself(TimeStep *tStep) override;
 
-    virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                             ValueModeType mode, TimeStep *stepN);
+    void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
+                                     ValueModeType mode, TimeStep *stepN) override;
 
     void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
 
-    virtual void printOutputAt(FILE *stream, TimeStep *stepN);
+    void printOutputAt(FILE *stream, TimeStep *stepN) const override;
 
-    virtual const char *giveClassName() const { return "InteractionPFEMParticle"; }
-    virtual const char *giveInputRecordName() const { return _IFT_InteractionPFEMParticle_Name; }
+    const char *giveClassName() const override { return "InteractionPFEMParticle"; }
+    const char *giveInputRecordName() const override { return _IFT_InteractionPFEMParticle_Name; }
 
 #ifdef __OOFEG
-    virtual void drawScalar(oofegGraphicContext &gc);
+    void drawScalar(oofegGraphicContext &gc) override;
 #endif
 
 private:

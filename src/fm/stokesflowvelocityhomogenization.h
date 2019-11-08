@@ -52,8 +52,7 @@ namespace oofem
 class StokesFlowVelocityHomogenization : public StokesFlow
 {
 public:
-    StokesFlowVelocityHomogenization(int i, EngngModel * _master = NULL);
-    virtual ~StokesFlowVelocityHomogenization();
+    StokesFlowVelocityHomogenization(int i, EngngModel * _master = nullptr);
 
     /** Compute area of domain (includes holes)*/
     double giveAreaOfRVE();

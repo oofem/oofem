@@ -72,8 +72,13 @@ TransportElement :: TransportElement(int n, Domain *aDomain, ElementMode em) :
 }
 
 
-TransportElement :: ~TransportElement()
-{ }
+void
+TransportElement :: initializeFrom(InputRecord &ir)
+{
+    Element::initializeFrom(ir);
+    this->vofFunction = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, vofFunction, _IFT_TransportElement_vof_function);
+}
 
 
 void
@@ -1040,7 +1045,7 @@ void
 TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
                                                 int iSurf, TimeStep *tStep, ValueModeType mode, int indx)
 {
-    OOFEM_ERROR("STOP");
+    // OOFEM_ERROR("STOP"); 
     if ( !this->testElementExtension(Element_SurfaceLoadSupport) ) {
         OOFEM_ERROR("no surface load support");
     }
@@ -1418,6 +1423,15 @@ TransportElement :: giveMaterial()
     return static_cast< TransportCrossSection* >( this->giveCrossSection() )->giveMaterial();
 }
 
+double
+TransportElement::computeVof(TimeStep *tStep)
+{
+    if ( this->vofFunction ) {
+        return this->giveDomain()->giveFunction(this->vofFunction)->evaluateAtTime(tStep->giveTargetTime());
+    } else {
+        return 1.0;
+    }
+}
 
 #ifdef __OOFEG
 int

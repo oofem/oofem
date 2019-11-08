@@ -63,8 +63,8 @@ RCM2Material :: ~RCM2Material()
     //delete linearElasticMaterial;
 }
 
-int
-RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+RCM2Material :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
@@ -792,11 +792,9 @@ RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCr
 }
 
 
-IRResultType
-RCM2Material :: initializeFrom(InputRecord *ir)
+void
+RCM2Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, Gf, _IFT_RCM2Material_gf);
     IR_GIVE_FIELD(ir, Ft, _IFT_RCM2Material_ft);
 
@@ -804,7 +802,7 @@ RCM2Material :: initializeFrom(InputRecord *ir)
 }
 
 double
-RCM2Material :: give(int aProperty, GaussPoint *gp)
+RCM2Material :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -997,11 +995,6 @@ RCM2MaterialStatus :: RCM2MaterialStatus(GaussPoint *g) :
 }
 
 
-RCM2MaterialStatus :: ~RCM2MaterialStatus()
-{ }
-
-
-
 int
 RCM2MaterialStatus :: isCrackActive(int i) const
 //
@@ -1021,15 +1014,14 @@ RCM2MaterialStatus :: isCrackActive(int i) const
 }
 
 void
-RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->giveTempAlreadyCrack() ) {
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             switch ( crackStatuses.at(i) ) {
             case pscm_NONE:
                 strcpy(s, "NONE");

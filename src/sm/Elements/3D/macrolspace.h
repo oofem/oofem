@@ -65,7 +65,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_MacroLSpace_Name; }
     const char *giveClassName() const override { return "MacroLSpace"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 

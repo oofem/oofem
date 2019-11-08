@@ -82,9 +82,8 @@ FEMComponent :: errorInfo(const char *func) const
     return std :: string(this->giveClassName()) + "::" + func + ", number: " + std::to_string(this->giveNumber());
 }
 
-IRResultType FEMComponent :: initializeFrom(InputRecord* ir)
+void FEMComponent :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 
 int FEMComponent :: checkConsistency()

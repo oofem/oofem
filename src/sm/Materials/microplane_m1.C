@@ -46,12 +46,10 @@ REGISTER_Material(M1Material);
 M1Material :: M1Material(int n, Domain *d) : MicroplaneMaterial(n, d)
 { E = 0.; nu = 0.; EN = 0.; s0 = 0.; HN = 0.; }
 
-IRResultType
-M1Material :: initializeFrom(InputRecord *ir)
+void
+M1Material :: initializeFrom(InputRecord &ir)
 {
     MicroplaneMaterial :: initializeFrom(ir);
-
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     if ( nu != 0.25 ) {
         OOFEM_WARNING("Poisson ratio of microplane model M1 must be set to 0.25");
@@ -62,8 +60,6 @@ M1Material :: initializeFrom(InputRecord *ir)
     HN = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, HN, _IFT_M1Material_hn);
     ENtan = EN * HN / ( EN + HN );
-
-    return IRRT_OK;
 }
 
 void
@@ -220,9 +216,6 @@ M1MaterialStatus :: M1MaterialStatus(GaussPoint *g) :
 {}
 
 
-M1MaterialStatus :: ~M1MaterialStatus()
-{ }
-
 void
 M1MaterialStatus :: initTempStatus()
 {
@@ -230,7 +223,7 @@ M1MaterialStatus :: initTempStatus()
 }
 
 void
-M1MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+M1MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { sigN ");
@@ -376,13 +369,10 @@ M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMod
 }
 
 
-IRResultType
-M1Material :: initializeFrom(InputRecord *ir)
+void
+M1Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E, _IFT_M1Material_e);
     EN = 1.5 * E;
@@ -413,12 +403,10 @@ M1Material :: initializeFrom(InputRecord *ir)
         NN.at(imp, 5) = s * s * s * s;
         mw.at(imp) = 2. / nmp;
     }
-
-    return IRRT_OK;
 }
 
-int
-M1Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+M1Material :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _PlaneStress;
 }

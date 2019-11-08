@@ -37,6 +37,7 @@
 
 #include "feinterpol.h"
 #include "floatarray.h"
+#include <array>
 
 ///@name Input fields for BSplineInterpolation
 //@{
@@ -82,7 +83,6 @@ public:
     BSplineInterpolation(int nsd) : FEInterpolation(0),
         nsd(nsd)
     {}
-    virtual ~BSplineInterpolation() {}
 
     integrationDomain giveIntegrationDomain() const override {
         if ( nsd == 3 ) {
@@ -126,7 +126,7 @@ public:
     }
 
     int giveNsd() override { return nsd; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }

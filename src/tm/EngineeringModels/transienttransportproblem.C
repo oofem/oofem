@@ -54,19 +54,10 @@
 namespace oofem {
 REGISTER_EngngModel(TransientTransportProblem);
 
-TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *master) : EngngModel(i, master),
-    alpha(0.5),
-    dtFunction(0),
-    prescribedTimes(),
-    initT(0.),
-    deltaT(1.),
-    keepTangent(false),
-    lumped(false)
+TransientTransportProblem :: TransientTransportProblem(int i, EngngModel *master) : EngngModel(i, master)
 {
     ndomains = 1;
 }
-
-TransientTransportProblem :: ~TransientTransportProblem() {}
 
 
 NumericalMethod *TransientTransportProblem :: giveNumericalMethod(MetaStep *mStep)
@@ -78,10 +69,10 @@ NumericalMethod *TransientTransportProblem :: giveNumericalMethod(MetaStep *mSte
 }
 
 
-IRResultType
-TransientTransportProblem :: initializeFrom(InputRecord *ir)
+void
+TransientTransportProblem :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    EngngModel :: initializeFrom(ir);
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
@@ -89,23 +80,23 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->alpha, _IFT_TransientTransportProblem_alpha);
 
-    if ( ir->hasField(_IFT_TransientTransportProblem_initt) ) {
+    if ( ir.hasField(_IFT_TransientTransportProblem_initt) ) {
         IR_GIVE_FIELD(ir, initT, _IFT_TransientTransportProblem_initt);
     }
     
     prescribedTimes.clear();
     dtFunction = 0;
-    if ( ir->hasField(_IFT_TransientTransportProblem_dtFunction) ) {
+    if ( ir.hasField(_IFT_TransientTransportProblem_dtFunction) ) {
         IR_GIVE_FIELD(ir, this->dtFunction, _IFT_TransientTransportProblem_dtFunction);
-    } else if ( ir->hasField(_IFT_TransientTransportProblem_prescribedTimes) ) {
+    } else if ( ir.hasField(_IFT_TransientTransportProblem_prescribedTimes) ) {
         IR_GIVE_FIELD(ir, this->prescribedTimes, _IFT_TransientTransportProblem_prescribedTimes);
     } else {
         IR_GIVE_FIELD(ir, this->deltaT, _IFT_TransientTransportProblem_deltaT);
     }
 
-    this->keepTangent = ir->hasField(_IFT_TransientTransportProblem_keepTangent);
+    this->keepTangent = ir.hasField(_IFT_TransientTransportProblem_keepTangent);
 
-    this->lumped = ir->hasField(_IFT_TransientTransportProblem_lumped);
+    this->lumped = ir.hasField(_IFT_TransientTransportProblem_lumped);
 
     field = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 2, this->alpha);
 
@@ -126,9 +117,6 @@ TransientTransportProblem :: initializeFrom(InputRecord *ir)
     }
     
 //     InternalVariableField(IST_HydrationDegree, FT_Unknown, MMA_ClosestPoint, this->giveDomain(1));
-    
-
-    return EngngModel :: initializeFrom(ir);
 }
 
 

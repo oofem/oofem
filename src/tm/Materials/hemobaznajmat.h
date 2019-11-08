@@ -56,19 +56,19 @@ class HeMoBazNajMaterial : public TransportMaterial
 {
 protected:
     /// sorption isotherm derivative [kg/m^3]
-    double moistureCapacity;
+    double moistureCapacity = 0.;
 
     /// maximal permeability [kg/ m s]
-    double C1;
+    double C1 = 0.;
     /// exponent in nonlinear permeability function [-]
-    double n;
+    double n = 0.;
     /// fraction minimal/maximal permeability [-]
-    double alpha0;
+    double alpha0 = 0.;
     /// nonlinear threshold [-]
-    double hC;
+    double hC = 0.;
 
-    double heatConductivity; ///< Conductivity (k in input file).
-    double heatCapacity;     ///< Capacity (c in input file).
+    double heatConductivity = 0.; ///< Conductivity (k in input file).
+    double heatCapacity = 0.;     ///< Capacity (c in input file).
 
 public:
     /**
@@ -77,44 +77,33 @@ public:
      * @param d Domain to which new material will belong.
      */
     HeMoBazNajMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
-    /// Destructor.
-    virtual ~HeMoBazNajMaterial() { }
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    std::pair<FloatArrayF<3>, FloatArrayF<3>> computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *atTime) override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveCharacteristicValue(MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *atTime) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
-    double give(int aProperty, GaussPoint *gp) override;
-
-    int hasMaterialModeCapability(MaterialMode mode) override;
-    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     const char *giveInputRecordName() const override { return _IFT_HeMoBazNajMaterial_Name; }
     const char *giveClassName() const override { return "HeMoBazNajMaterial"; }
 
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new HeMoTransportMaterialStatus(gp); }
+
 protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
+    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
-    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-
-    double perm_mm(double h, double T);
-    double perm_mh(double h, double T);
-    double perm_hm(double h, double T);
-    double perm_hh(double h, double T);
+    double perm_mm(double h, double T) const;
+    double perm_mh(double h, double T) const;
+    double perm_hm(double h, double T) const;
+    double perm_hh(double h, double T) const;
 };
 } // end namespace oofem
 #endif // hemobaznajmat_h

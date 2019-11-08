@@ -60,14 +60,13 @@ Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomai
     recoverStress(false) 
     {}
 
-IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
+void Shell7Base :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
     //IR_GIVE_OPTIONAL_FIELD(ir, this->recoverStress, _IFT_Shell7base_recoverStress);
-    if ( ir->hasField(_IFT_Shell7base_recoverStress) ) {
+    if ( ir.hasField(_IFT_Shell7base_recoverStress) ) {
         this->recoverStress = true;
     }
-    return result;
 
 }
 

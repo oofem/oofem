@@ -140,7 +140,7 @@ private:
     // definition & identification
     const char *giveClassName() const override { return "MITC4Shell"; }
     const char *giveInputRecordName() const override { return _IFT_MITC4Shell_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     int computeNumberOfDofs() override { return 24; }
     int computeNumberOfGlobalDofs() override { return 24; }
     integrationDomain giveIntegrationDomain() const override { return _3dDegShell; }

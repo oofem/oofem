@@ -45,16 +45,14 @@ REGISTER_Material(WinklerPasternakMaterial);
 WinklerPasternakMaterial:: WinklerPasternakMaterial (int n, Domain* d): StructuralMaterial(n, d) 
 { }
 
-WinklerPasternakMaterial::~WinklerPasternakMaterial()
-{ }
 
-IRResultType
-WinklerPasternakMaterial :: initializeFrom(InputRecord *ir)
+void
+WinklerPasternakMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, c1, _IFT_WinklerPasternakMaterial_C1);
-    if (ir->hasField(_IFT_WinklerPasternakMaterial_C2)) {
+    if ( ir.hasField(_IFT_WinklerPasternakMaterial_C2)) {
       // isotropic case
       IR_GIVE_FIELD(ir, c2x, _IFT_WinklerPasternakMaterial_C2);
       c2y = c2x;
@@ -62,8 +60,6 @@ WinklerPasternakMaterial :: initializeFrom(InputRecord *ir)
       IR_GIVE_FIELD(ir, c2x, _IFT_WinklerPasternakMaterial_C2X);
       IR_GIVE_FIELD(ir, c2y, _IFT_WinklerPasternakMaterial_C2Y);
     }
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 
@@ -111,8 +107,8 @@ WinklerPasternakMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-int
-WinklerPasternakMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+WinklerPasternakMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //

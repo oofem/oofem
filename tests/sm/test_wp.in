@@ -1,5 +1,5 @@
 test_wp.out
-"Winkler pasternak model: test of settlement profile"
+Winkler pasternak model: test of settlement profile
 StaticStructural nsteps 1 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 vars 4 1 2 4 10 stype 2

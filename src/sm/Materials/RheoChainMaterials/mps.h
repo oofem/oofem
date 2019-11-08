@@ -125,7 +125,6 @@ protected:
 
 public:
     MPSMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~MPSMaterialStatus() { }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -217,7 +216,7 @@ protected:
 
     enum coupledAnalysisType { Basic, MPS_full, MPS_humidity, MPS_temperature } CoupledAnalysis;
 
-    double EspringVal; // elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
+    mutable double EspringVal; // elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
 
     /// additional parameters for sorption isotherm (used to compute relative humidity from water content)
     //double w_h, n, a; //constant (obtained from experiments) A [Pedersen, 1990]
@@ -257,12 +256,11 @@ protected:
 
 public:
     MPSMaterial(int n, Domain *d) : KelvinChainSolidMaterial(n, d) { }
-    virtual ~MPSMaterial() { }
 
     const char *giveInputRecordName() const override { return _IFT_MPSMaterial_Name; }
     const char *giveClassName() const override { return "MPSMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -272,9 +270,9 @@ public:
     void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
     /// Evaluation of the basic creep compliance function - can be used to compute elastic modulus in derived damage material
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -284,24 +282,24 @@ protected:
     void computeCharTimes() override;
 
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain
-    void computeCharCoefficients(FloatArray &answer, double, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
-    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) override;
+    double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) const override;
 
-    double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu) override;
-    double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) override;
+    double computeBetaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const override;
+    double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const override;
 
     /// Evaluation of the flow term viscosity
     double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
 
     /// Returns initial value of the flow term viscosity
-    double giveInitViscosity(TimeStep *tStep);
+    double giveInitViscosity(TimeStep *tStep) const;
 
     void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
-    int hasIncrementalShrinkageFormulation() override { return 1; }
+    bool hasIncrementalShrinkageFormulation() const override { return true; }
 
     /// Evaluation of the shrinkageStrainVector - shrinkage is fully dependent on humidity rate in given GP
     void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
@@ -312,38 +310,38 @@ protected:
     /// Evaluation of the autogenousShrinkageStrainVector according to Bazant's B4 model. In the model the evolution depends on temperature adjusted age, here on equivalent age (additional humidity influence)
     void computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
-    //double inverse_sorption_isotherm(double w);
+    //double inverse_sorption_isotherm(double w) const;
 
     /// Gives value of humidity at given GP and timestep
     /// option = 0 ... beginning of the time step
     /// option = 1 ... end of the time step
     /// option = 2 ... average values
     /// option = 3 ... incremental values
-    double giveHumidity(GaussPoint *gp, TimeStep *tStep, int option);
+    double giveHumidity(GaussPoint *gp, TimeStep *tStep, int option) const;
 
     /// Gives value of temperature at given GP and timestep
     /// option = 0 ... beginning of the time step
     /// option = 1 ... end of the time step
     /// option = 2 ... average values
     /// option = 3 ... incremental values
-    double giveTemperature(GaussPoint *gp, TimeStep *tStep, int option);
+    double giveTemperature(GaussPoint *gp, TimeStep *tStep, int option) const;
 
     /// Evaluation of the factor transforming real time to reduced time (effect on the flow term)
     /// option = 0 ... beginning of the time step
     /// option = 1 ... end of the time step
     /// option = 2 ... average value
-    double computePsiR(GaussPoint *gp, TimeStep *tStep, int option);
+    double computePsiR(GaussPoint *gp, TimeStep *tStep, int option) const;
 
     /// Evaluation of the factor transforming real time to reduced time (effect on the evolution of microprestress)
-    double computePsiS(GaussPoint *gp, TimeStep *tStep);
+    double computePsiS(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of the factor transforming real time to equivalent time (effect on the solidified volume)
-    double computePsiE(GaussPoint *gp, TimeStep *tStep);
+    double computePsiE(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Computes equivalent time at given time step and GP.
     /// If option == 0, equivalentTime is evaluated in the middle of the time step (to determine solidified ratio).
     /// If option == 1, equivalentTime is evaluated at the end of the time step. (for updating).
-    double computeEquivalentTime(GaussPoint *gp, TimeStep *tStep, int option);
+    double computeEquivalentTime(GaussPoint *gp, TimeStep *tStep, int option) const;
 
     friend class RankineMPSmat;
 };

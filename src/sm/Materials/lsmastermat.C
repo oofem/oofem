@@ -54,20 +54,12 @@ LargeStrainMasterMaterial :: LargeStrainMasterMaterial(int n, Domain *d) : Struc
     slaveMat = 0;
 }
 
-// destructor
-LargeStrainMasterMaterial :: ~LargeStrainMasterMaterial()
-{ }
-
 // reads the model parameters from the input file
-IRResultType
-LargeStrainMasterMaterial :: initializeFrom(InputRecord *ir)
+void
+LargeStrainMasterMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, slaveMat, _IFT_LargeStrainMasterMaterial_slaveMat); // number of slave material
     IR_GIVE_OPTIONAL_FIELD(ir, m, _IFT_LargeStrainMasterMaterial_m); // type of Set-Hill strain tensor
-
-    return IRRT_OK;
 }
 
 // creates a new material status  corresponding to this class
@@ -423,12 +415,8 @@ LargeStrainMasterMaterialStatus :: LargeStrainMasterMaterialStatus(GaussPoint *g
 }
 
 
-LargeStrainMasterMaterialStatus :: ~LargeStrainMasterMaterialStatus()
-{ }
-
-
 void
-LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LargeStrainMasterMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     MaterialStatus *mS = sMat->giveStatus(gp);

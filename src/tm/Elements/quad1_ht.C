@@ -71,8 +71,6 @@ Quad1_mt :: Quad1_mt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
     emode = Mass1TransferEM;
 }
 
-Quad1_ht :: ~Quad1_ht()
-{ }
 
 FEInterpolation *
 Quad1_ht :: giveInterpolation() const { return & interpolation; }
@@ -88,26 +86,21 @@ Quad1_ht :: computeGaussPoints()
 }
 
 
-IRResultType
-Quad1_ht :: initializeFrom(InputRecord *ir)
+void
+Quad1_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 
 double
 Quad1_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
-    weight      = gp->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness, gp); // 't'
-    volume      = determinant * weight * thickness;
-
-    return volume;
+    double thickness = this->giveCrossSection()->give(CS_Thickness, gp); // 't'
+    return determinant * gp->giveWeight() * thickness;
 }
 
 
@@ -143,7 +136,7 @@ Quad1_ht :: giveInterface(InterfaceType interface)
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 

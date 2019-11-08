@@ -58,9 +58,8 @@ protected:
 
 public:
     RankinePlasticMaterial(int n, Domain * d);
-    virtual ~RankinePlasticMaterial();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_RankinePlasticMaterial_Name; }
     const char *giveClassName() const override { return "RankinePlasticMaterial"; }

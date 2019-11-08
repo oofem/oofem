@@ -77,7 +77,7 @@ public:
      * belonging to receiver. Receiver may use value-name extracting functions
      * to extract particular field from record.
      */
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
 };
 } // end namespace oofem
 #endif // mesherinterface_h

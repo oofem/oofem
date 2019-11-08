@@ -54,20 +54,13 @@
 namespace oofem {
 SUPGElement2 :: SUPGElement2(int n, Domain *aDomain) :
     SUPGElement(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 { }
 
 
-SUPGElement2 :: ~SUPGElement2()
-// Destructor.
-{ }
-
-IRResultType
-SUPGElement2 :: initializeFrom(InputRecord *ir)
+void
+SUPGElement2 :: initializeFrom(InputRecord &ir)
 {
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
-
-    return SUPGElement :: initializeFrom(ir);
+    SUPGElement :: initializeFrom(ir);
 }
 
 

@@ -76,23 +76,15 @@ protected:
     FloatArray mGradient;
     FloatArray mCenterCoord;
 
-    bool tractionControl;
+    bool tractionControl = false;
     /// Stores one "psi" value for each node
     std :: map< int, FloatArray > xis;
     IntArray surfSets;
 
 public:
-    /**
-     * Creates boundary condition with given number, belonging to given domain.
-     * @param n Boundary condition number.
-     * @param d Domain to which new object will belongs.
-     */
     TransportGradientDirichlet(int n, Domain *d) : BoundaryCondition(n, d) { }
 
-    /// Destructor
-    virtual ~TransportGradientDirichlet() { }
-
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void postInitialize() override;
 

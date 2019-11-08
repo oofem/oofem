@@ -57,24 +57,18 @@
 namespace oofem {
 PFEMElement :: PFEMElement(int n, Domain *aDomain) :
     FMElement(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 { }
 
 
 PFEMElement :: ~PFEMElement()
-// Destructor.
 { }
 
-IRResultType
-PFEMElement :: initializeFrom(InputRecord *ir)
+void
+PFEMElement :: initializeFrom(InputRecord &ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    //IRResultType result;                               // Required by IR_GIVE_FIELD macro
-
     FMElement :: initializeFrom(ir);
 
     this->computeGaussPoints();
-    return IRRT_OK;
 }
 
 
@@ -216,7 +210,7 @@ PFEMElement :: updateInternalState(TimeStep *stepN)
 }
 
 void
-PFEMElement :: printOutputAt(FILE *file, TimeStep *tStep)
+PFEMElement :: printOutputAt(FILE *file, TimeStep *tStep) const
 // Performs end-of-step operations.
 {
 #ifdef __PARALLEL_MODE

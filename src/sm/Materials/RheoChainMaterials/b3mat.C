@@ -42,31 +42,28 @@
 namespace oofem {
 REGISTER_Material(B3Material);
 
-IRResultType
-B3Material :: initializeFrom(InputRecord *ir)
+void
+B3Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MaxwellChainMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MaxwellChainMaterial :: initializeFrom(ir);
 
     //
     // NOTE
     //
     // this material model is unit dependent!
-    // units must be in Mpa, m, MN.
+    // units must be in MPa, m, MN.
     //
     //
     double fc = 0.0, c = 0.0, wc = 0.0, ac = 0.0, alpha1 = 0.0, alpha2 = 0.0;
 
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_B3Material_mode);
+    IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0); // age when drying begins (in days)
+    IR_GIVE_FIELD(ir, fc, _IFT_B3Material_fc); // 28-day standard mean cylinder compression strength in MPa //needed for E28
     if ( mode == 0 ) { // default, determine raw params q1,..,q5 from composition
-        IR_GIVE_FIELD(ir, fc, _IFT_B3Material_fc); // 28-day standard cylinder compression strength in MPa
         IR_GIVE_FIELD(ir, c, _IFT_B3Material_cc); // cement content of concrete  in kg m^-3.
         IR_GIVE_FIELD(ir, wc, _IFT_B3Material_wc); // ratio (by weight) of water to cementitious material
         IR_GIVE_FIELD(ir, ac, _IFT_B3Material_ac); // ratio (by weight) of aggregate to cement
-        IR_GIVE_FIELD(ir, t0, _IFT_B3Material_t0); // age when drying begins (in days)
     } else { // read raw Basic creep parameters
         IR_GIVE_FIELD(ir, q1, _IFT_B3Material_q1);
         IR_GIVE_FIELD(ir, q2, _IFT_B3Material_q2);
@@ -118,8 +115,6 @@ B3Material :: initializeFrom(InputRecord *ir)
     if ( mode == 0 ) {
         this->predictParametersFrom(fc, c, wc, ac, t0, alpha1, alpha2);
     }
-
-    return IRRT_OK;
 }
 
 void
@@ -177,56 +172,55 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
 
         q5 = 7.57e5 * ( 1. / fc ) * pow(EpsSinf, -0.6);
 
-        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf\n",
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1 %lf q2 %lf q3 %lf q4 %lf q5 %lf kt %lf EpsSinf %lf\n",
                 this->number, q1, q2, q3, q4, q5, kt, EpsSinf);
     } else {
-        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf\n",
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1 %lf q2 %lf q3 %lf q4 %lf\n",
                 this->number, q1, q2, q3, q4);
     }
 }
 
 
 double
-B3Material :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep)
+B3Material :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const
 {
     // computes the value of creep function at time t
     // when load is acting from time t_prime
     // t-t_prime = duration of loading
 
-    double Qf, Z, r, Q, C0, TauSh, St1, St2, H1, H2, Cd;
-    double n, m;
-
-    m = 0.5;
-    n = 0.1;
+    double m = 0.5;
+    double n = 0.1;
 
     // basic creep
 
-    Qf = 1. / ( 0.086 * pow(t_prime, 2. / 9.) + 1.21 * pow(t_prime, 4. / 9.) );
-    Z  = pow(t_prime, -m) * log( 1. + pow(t - t_prime, n) );
-    r  = 1.7 * pow(t_prime, 0.12) + 8.0;
-    Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
+    double Qf = 1. / ( 0.086 * pow(t_prime, 2. / 9.) + 1.21 * pow(t_prime, 4. / 9.) );
+    double Z  = pow(t_prime, -m) * log( 1. + pow(t - t_prime, n) );
+    double r  = 1.7 * pow(t_prime, 0.12) + 8.0;
+    double Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow ( t - t_prime, n ) ) + q4 *log(t / t_prime);
+    double C0 = q2 * Q + q3 *log( 1. + pow ( t - t_prime, n ) ) + q4 *log(t / t_prime);
 
-
+    double Cd;
     if ( this->shMode == B3_AverageShrinkage ) {
         // Aditional creep due to drying
 
-        TauSh = kt * pow(ks * 2.0 * vs, 2.);
+        double TauSh = kt * pow(ks * 2.0 * vs, 2.);
+        double St1;
         if ( ( t - t0 ) >= 0 ) {
             St1  = tanh( pow( ( t - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St1 = 0.0;
         }
 
+        double St2;
         if ( ( t_prime - t0 ) >= 0 ) {
             St2  = tanh( pow( ( t_prime - t0 ) / TauSh, 1. / 2. ) );
         } else {
             St2 = 0.0;
         }
 
-        H1  = 1. - ( 1. - hum ) * St1;
-        H2  = 1. - ( 1. - hum ) * St2;
+        double H1  = 1. - ( 1. - hum ) * St1;
+        double H2  = 1. - ( 1. - hum ) * St2;
         Cd = q5 * pow( ( exp(-8.0 * H1) - exp(-8.0 * H2) ), 0.5 );
     } else {
         Cd = 0.0;
@@ -243,8 +237,6 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
                                         TimeStep *tStep,
                                         ValueModeType mode)
 {
-    FloatArray prevAnswer;
-
     if ( this->shMode == B3_NoShrinkage ) {
         answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         answer.zero();
@@ -259,6 +251,7 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
         this->computeTotalAverageShrinkageStrainVector(answer, gp, tStep);
 
         if ( ( mode == VM_Incremental ) && ( !tStep->isTheFirstStep() ) ) {
+            FloatArray prevAnswer;
             this->computeTotalAverageShrinkageStrainVector( prevAnswer, gp, tStep->givePreviousStep() );
             answer.subtract(prevAnswer);
         }
@@ -273,10 +266,8 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
     /*
      * returns average shrinkage strain vector of cross-section at drying
      */
-    double TauSh, St, kh, help, E607, Et0Tau, EpsShInf, EpsSh;
     double time = this->relMatAge - this->castingTime + tStep->giveTargetTime() / timeFactor;
     int size;
-    FloatArray fullAnswer;
     MaterialMode mode = gp->giveMaterialMode();
 
     if ( ( mode == _3dShell ) || ( mode ==  _3dBeam ) || ( mode == _2dPlate ) || ( mode == _2dBeam ) ) {
@@ -285,30 +276,36 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
         size = 6;
     }
 
-    fullAnswer.resize(size);
-    fullAnswer.zero();
+    FloatArray fullAnswer(size);
 
     // size dependence
-    TauSh = kt * pow(ks * 2.0 * vs, 2.);
-    // time curve
-    St  = tanh( pow( ( time - t0 ) / TauSh, 1. / 2. ) );
+    double TauSh = kt * pow(ks * 2.0 * vs, 2.);
+    // time curve, check if before t0
+    double St;
+    if (time > t0) {
+        St = tanh( pow( ( time - t0 ) / TauSh, 1. / 2. ) );
+    } else {
+        St = 0.;
+    }
+    
     // humidity dependence
+    double kh;
     if ( hum <= 0.98 ) {
         kh = 1. - pow(hum, 3);
     } else if ( hum == 1 ) {
         kh = -0.2;              // swelling in water
     } else {
         // linear interpolation for 0.98 <= h <= 1.
-        help = 1. - pow(hum, 3);
+        double help = 1. - pow(hum, 3);
         kh = help + ( -0.2 - help ) / ( 1. - 0.98 ) * ( hum - 0.98 );
     }
 
     // time dependence of ultimate shrinkage
-    E607 = E28 * pow(607 / ( 4. + 0.85 * 607 ), 0.5);
-    Et0Tau = E28 * pow( ( t0 + TauSh ) / ( 4. + 0.85 * ( t0 + TauSh ) ), 0.5 );
-    EpsShInf = EpsSinf * E607 / Et0Tau;
+    double E607 = E28 * pow(607 / ( 4. + 0.85 * 607 ), 0.5);
+    double Et0Tau = E28 * pow( ( t0 + TauSh ) / ( 4. + 0.85 * ( t0 + TauSh ) ), 0.5 );
+    double EpsShInf = EpsSinf * E607 / Et0Tau;
     // mean shrinkage in the cross section:
-    EpsSh = -EpsShInf * kh * St;
+    double EpsSh = -EpsShInf * kh * St;
 
     fullAnswer.at(1) = fullAnswer.at(2) = fullAnswer.at(3) = EpsSh * 1.e-6;
 
@@ -323,12 +320,11 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     //  r       - coefficient
     //  rprime  - coefficient
     //  at      - coeff relating stress-induced thermal strain and shrinkage
-    double sv, sn, et0, et, wrate = 0.0, trate = 0.0, h1;
+    double wrate = 0.0, trate = 0.0;
     double time = this->relMatAge - this->castingTime + tStep->giveTargetTime() / timeFactor;
-    int err, tflag = 0, wflag = 0;
+    int tflag = 0, wflag = 0;
     MaxwellChainMaterialStatus *status = static_cast< MaxwellChainMaterialStatus * >( this->giveStatus(gp) );
     int size;
-    FloatArray fullAnswer;
     MaterialMode mmode = gp->giveMaterialMode();
 
     if ( ( mmode == _3dShell ) || ( mmode ==  _3dBeam ) || ( mmode == _2dPlate ) || ( mmode == _2dBeam ) ) {
@@ -337,9 +333,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
         size = 6;
     }
 
-    fullAnswer.resize(size);
-    fullAnswer.zero();
-
+    FloatArray fullAnswer(size);
 
     /* ask for humidity and temperature from external sources, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
@@ -349,6 +343,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
+        int err;
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -360,6 +355,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
+        int err;
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -380,7 +376,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     //    if ( status->giveStressVector().giveSize() ) {
     //        stressVector      = status->giveStressVector();
     if ( status->giveViscoelasticStressVector().giveSize() ) {
-        stressVector      = status->giveViscoelasticStressVector();
+        stressVector = status->giveViscoelasticStressVector();
     } else {
         stressVector.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
         stressVector.zero();
@@ -388,16 +384,16 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
 
     StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
     // compute volumetric stress
-    sv = 0.0;
+    double sv = 0.0;
     for ( int i = 1; i <= 3; i++ ) {
         sv += stressVector.at(i);
     }
 
-    et = 1. / this->computeCreepFunction(time + 0.01, time, gp, tStep);
-    et0 = 1. / this->computeCreepFunction(t0 + 0.01, t0, gp, tStep);
+    double et = 1. / this->computeCreepFunction(time + 0.01, time, gp, tStep);
+    double et0 = 1. / this->computeCreepFunction(t0 + 0.01, t0, gp, tStep);
 
-    h1 = es0 * ( et0 / et );
-    sn = sgn(wrate + at * trate);
+    double h1 = es0 * ( et0 / et );
+    double sn = sgn(wrate + at * trate);
     // compute increment of shrinkage strain
     fullAnswer.at(1) = h1 * ( 1.0 + sn * ( r * fullStressVector.at(1) + rprime * sv ) ) * ( wrate + at * trate );
     fullAnswer.at(2) = h1 * ( 1.0 + sn * ( r * fullStressVector.at(2) + rprime * sv ) ) * ( wrate + at * trate );
@@ -429,14 +425,11 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
 }
 
 double
-B3Material :: inverse_sorption_isotherm(double w)
+B3Material :: inverse_sorption_isotherm(double w) const
 {
-    // phi ... relative humidity
     // w_h, n, a ... constants obtained from experiments
-    double phi;
-
     // relative humidity
-    phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
+    double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
         OOFEM_ERROR("Relative humidity h = %e (w=%e) is out of range", phi, w);

@@ -112,7 +112,7 @@ ConcreteDPMStatus :: updateYourself(TimeStep *tStep)
 }
 
 void
-ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // Call corresponding function of the parent class to print
     // variables defined there.
@@ -298,22 +298,12 @@ ConcreteDPM :: ~ConcreteDPM()
 {
 }
 
-IRResultType
-ConcreteDPM :: initializeFrom(InputRecord *ir)
+void
+ConcreteDPM :: initializeFrom(InputRecord &ir)
 {
-    // Required by IR_GIVE_FIELD macro
-    IRResultType result;
-
     // call the corresponding service for the linear elastic material
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     double value;
     // elastic parameters
@@ -336,7 +326,7 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]
-    if ( ir->hasField(_IFT_ConcreteDPM_wf) ) {
+    if ( ir.hasField(_IFT_ConcreteDPM_wf) ) {
         IR_GIVE_FIELD(ir, ef, _IFT_ConcreteDPM_wf);
         // fracture energy
     } else {
@@ -377,8 +367,6 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_ConcreteDPM_yieldtol);
     newtonIter = 100;
     IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_ConcreteDPM_newtoniter);
-
-    return IRRT_OK;
 }
 
 void

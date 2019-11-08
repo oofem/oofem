@@ -264,7 +264,7 @@ public:
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     /**

@@ -243,11 +243,9 @@ LineSearchNM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
     }
 }
 
-IRResultType
-LineSearchNM :: initializeFrom(InputRecord *ir)
+void
+LineSearchNM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     /* default values set in constructor
      * ls_tolerance = 0.80;
      * amplifFactor = 2.5;
@@ -282,7 +280,5 @@ LineSearchNM :: initializeFrom(InputRecord *ir)
 
     //printf ("\nLineSearchNM::initializeFrom: tol=%e, ampl=%e, maxEta=%e\n",
     //    ls_tolerance, amplifFactor,maxEta);
-
-    return IRRT_OK;
 }
 } // end namespace oofem

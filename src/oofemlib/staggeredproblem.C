@@ -76,18 +76,18 @@ StaggeredProblem :: ~StaggeredProblem()
 
 ///////////
 int
-StaggeredProblem :: instanciateYourself(DataReader &dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
+StaggeredProblem :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *dataOutputFileName, const char *desc)
 {
     int result;
     result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName, desc);
-    ir->finish();
+    ir.finish();
     // instanciate slave problems
     result &= this->instanciateSlaveProblems();
     return result;
 }
 
 int
-StaggeredProblem :: instanciateDefaultMetaStep(InputRecord *ir)
+StaggeredProblem :: instanciateDefaultMetaStep(InputRecord &ir)
 {
     if ( timeDefinedByProb ) {
         /* just set a nonzero number of steps;
@@ -128,36 +128,28 @@ StaggeredProblem :: instanciateSlaveProblems()
 }
 
 
-IRResultType
-StaggeredProblem :: initializeFrom(InputRecord *ir)
+void
+StaggeredProblem :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_EngngModel_nsteps);
     if ( numberOfSteps <= 0 ) {
-        OOFEM_ERROR("nsteps not specified, bad format");
+        throw ValueInputException(ir, _IFT_EngngModel_nsteps, "nsteps must be > 0");
     }
-    if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
-        result = EngngModel :: initializeFrom(ir);
-        if ( result != IRRT_OK ) {
-            return result;
-        }
+    if ( ir.hasField(_IFT_StaggeredProblem_deltat) ) {
+        EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
         dtFunction = 0;
-    } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
-        result = EngngModel :: initializeFrom(ir);
-        if ( result != IRRT_OK ) {
-            return result;
-        }
+    } else if ( ir.hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
+        EngngModel :: initializeFrom(ir);
         IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         dtFunction = 0;
-    } else if ( ir->hasField(_IFT_StaggeredProblem_dtf) ) {
+    } else if ( ir.hasField(_IFT_StaggeredProblem_dtf) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     } else {
         IR_GIVE_FIELD(ir, timeDefinedByProb, _IFT_StaggeredProblem_timeDefinedByProb);
     }
 
-    if ( ir->hasField(_IFT_StaggeredProblem_adaptiveStepLength) ) {
+    if ( ir.hasField(_IFT_StaggeredProblem_adaptiveStepLength) ) {
         adaptiveStepLength = true;
         this->minStepLength = 0.;
         IR_GIVE_OPTIONAL_FIELD(ir, minStepLength, _IFT_StaggeredProblem_minsteplength);
@@ -174,15 +166,14 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
-        OOFEM_WARNING("stepMultiplier must be > 0");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_StaggeredProblem_stepmultiplier, "stepMultiplier must be > 0");
     }
 
     //    timeLag = 0.;
     //    IR_GIVE_OPTIONAL_FIELD(ir, timeLag, _IFT_StaggeredProblem_timeLag);
 
     inputStreamNames.resize(2);
-    if ( ir->hasField(_IFT_StaggeredProblem_prob3) ){
+    if ( ir.hasField(_IFT_StaggeredProblem_prob3) ){
         inputStreamNames.resize(3);
     }
     
@@ -204,14 +195,14 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         domainList.clear();
     }
 
-    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+    suppressOutput = ir.hasField(_IFT_EngngModel_suppressOutput);
 
     if ( suppressOutput ) {
         printf("Suppressing output.\n");
     } else {
 
         if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-            OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+            throw ValueInputException(ir, "None", "can't open output file: " + this->dataOutputFileName);
         }
 
         fprintf(outputStream, "%s", PRG_HEADER);
@@ -224,19 +215,13 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
         }
 #endif
     }
-
-
-
-    return IRRT_OK;
 }
 
 
 void
 StaggeredProblem :: updateAttributes(MetaStep *mStep)
 {
-    IRResultType result;                  // Required by IR_GIVE_FIELD macro
-
-    InputRecord *ir = mStep->giveAttributesRecord();
+    auto &ir = mStep->giveAttributesRecord();
 
     EngngModel :: updateAttributes(mStep);
 
@@ -246,14 +231,14 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     }
 
     if ( !timeDefinedByProb ) {
-        if ( ir->hasField(_IFT_StaggeredProblem_deltat) ) {
+        if ( ir.hasField(_IFT_StaggeredProblem_deltat) ) {
             IR_GIVE_FIELD(ir, deltaT, _IFT_StaggeredProblem_deltat);
             IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
             IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
             if ( stepMultiplier < 0 ) {
                 OOFEM_ERROR("stepMultiplier must be > 0")
             }
-        } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
+        } else if ( ir.hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
             IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
         }
     }

@@ -179,12 +179,12 @@ Quad1Mindlin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode
 }
 
 
-IRResultType
-Quad1Mindlin :: initializeFrom(InputRecord *ir)
+void
+Quad1Mindlin :: initializeFrom(InputRecord &ir)
 {
     this->numberOfGaussPoints = 4;
-    this->reducedIntegrationFlag = ir->hasField(_IFT_Quad1Mindlin_ReducedIntegration);
-    return NLStructuralElement :: initializeFrom(ir);
+    this->reducedIntegrationFlag = ir.hasField(_IFT_Quad1Mindlin_ReducedIntegration);
+    NLStructuralElement :: initializeFrom(ir);
 }
 
 

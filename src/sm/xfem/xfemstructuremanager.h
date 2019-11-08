@@ -66,7 +66,7 @@ public:
     virtual ~XfemStructureManager();
 
     /// Initializes receiver according to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     int instanciateYourself(DataReader &dr) override;

@@ -70,8 +70,9 @@ FEI2dTrLin :: evaldNdx(const FEICellGeometry &cellgeo) const
     double detJ = x1 * ( y2 - y3 ) + x2 * ( y3 - y1 ) + x3 * ( y1 - y2 );
 
     FloatMatrixF<2,3> ans = {
-        y2 - y3, y3 - y1, y1 - y2,
-        x3 - x2, x1 - x3, x2 - x1,
+        y2 - y3, x3 - x2,
+        y3 - y1, x1 - x3,
+        y1 - y2, x2 - x1,
     };
 
     return {detJ, ans * (1./detJ)};

@@ -228,16 +228,16 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
 }
 
 
-IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
+void PrescribedGradient :: initializeFrom(InputRecord &ir)
 {
     GeneralBoundaryCondition :: initializeFrom(ir);
-    return PrescribedGradientHomogenization :: initializeFrom(ir);
+    PrescribedGradientHomogenization :: initializeFrom(ir);
 }
 
 
 void PrescribedGradient :: giveInputRecord(DynamicInputRecord &input)
 {
     GeneralBoundaryCondition :: giveInputRecord(input);
-    return PrescribedGradientHomogenization :: giveInputRecord(input);
+    PrescribedGradientHomogenization :: giveInputRecord(input);
 }
 } // end namespace oofem

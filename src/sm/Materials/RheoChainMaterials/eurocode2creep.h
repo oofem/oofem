@@ -69,7 +69,6 @@ protected:
 
 public:
     Eurocode2CreepMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~Eurocode2CreepMaterialStatus() { }
 
     void updateYourself(TimeStep *tStep) override;
 
@@ -107,7 +106,7 @@ protected:
     double tau1;
 
     /// stiffness of the zeroth Kelvin unit
-    double EspringVal;
+    mutable double EspringVal;
 
     // ELASTICITY + SHORT TERM + STRENGTH
     /// mean compressive strength at 28 days default - to be specified in units of the analysis (e.g. 30.e6 + stiffnessFacotr 1. or 30. + stiffnessFactor 1.e6)
@@ -174,7 +173,6 @@ public:
     Eurocode2CreepMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {
         shType = EC2_NoShrinkage;
     }
-    virtual ~Eurocode2CreepMaterial() { }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -183,34 +181,34 @@ public:
 
     const char *giveClassName() const override { return "Eurocode2CreepMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_Eurocode2CreepMaterial_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     /// evaluates concrete strength at given age 
-    virtual double computeConcreteStrengthAtAge(double age);
+    virtual double computeConcreteStrengthAtAge(double age) const;
 
     /// evaluates concrete mean elastic modulus at given age
-    virtual double computeMeanElasticModulusAtAge(double age);
+    virtual double computeMeanElasticModulusAtAge(double age) const;
 
 
     /// Evaluation of the compliance function
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Evaluation of the compliance function (according to appendix B from the EC)
-    virtual double computeCreepCoefficient(double t, double t_prime, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCreepCoefficient(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const;
 
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 1; }
+    bool hasIncrementalShrinkageFormulation() const override { return true; }
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
 
     /// implements B.9
-    virtual double computeEquivalentAge(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeEquivalentAge(GaussPoint *gp, TimeStep *tStep) const;
 
     /// implements B.10
-    virtual double computeEquivalentMaturity(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeEquivalentMaturity(GaussPoint *gp, TimeStep *tStep) const;
 
 
     /// sets parameters for elasticity and strength according to formulas from EC
@@ -226,13 +224,13 @@ protected:
     void computeCharTimes() override;
 
     /// computes correction factor which multiplies the retardation times
-    double computeRetardationTimeCorrection(int mu);
+    double computeRetardationTimeCorrection(int mu) const;
 
     /// evaluates retardation spectrum at given time (t-t')
-    double evaluateSpectrumAt(double tau);
+    double evaluateSpectrumAt(double tau) const;
 
     /// Evaluation of characteristic moduli of the Kelvin chain.
-    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// computes increment of drying shrinkage - the shrinkage strain is isotropic
     void computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);

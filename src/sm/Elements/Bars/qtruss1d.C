@@ -59,10 +59,10 @@ QTruss1d :: QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 }
 
 
-IRResultType
-QTruss1d :: initializeFrom(InputRecord *ir)
+void
+QTruss1d :: initializeFrom(InputRecord &ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 void

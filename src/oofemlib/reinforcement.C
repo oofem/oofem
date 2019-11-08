@@ -39,11 +39,9 @@
 namespace oofem {
 REGISTER_BoundaryCondition(Reinforcement);
 
-IRResultType
-Reinforcement :: initializeFrom(InputRecord *ir)
+void
+Reinforcement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating load ",number)
 #  endif
@@ -51,7 +49,5 @@ Reinforcement :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, porosity, _IFT_Reinforcement_porosity);
     IR_GIVE_FIELD(ir, shapefactor,  _IFT_Reinforcement_shapeFactor);
     IR_GIVE_FIELD(ir, permeability, _IFT_Reinforcement_permeability);
-
-    return IRRT_OK;
 }
 } // end namespace oofem

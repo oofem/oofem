@@ -61,16 +61,13 @@ J2MPlasticMaterial :: ~J2MPlasticMaterial()
     //
 }
 
-IRResultType
-J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
+void
+J2MPlasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 
-    result = MPlasticMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MPlasticMaterial :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, _IFT_J2MPlasticMaterial_ry);
     k = value / sqrt(3.0);
@@ -96,8 +93,6 @@ J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
     } else {
         this->rmType = mpm_CuttingPlane;
     }
-
-    return IRRT_OK;
 }
 
 

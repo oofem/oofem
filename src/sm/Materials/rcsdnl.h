@@ -64,9 +64,8 @@ protected:
 
 public:
     RCSDNLMaterialStatus(GaussPoint *gp);
-    virtual ~RCSDNLMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const FloatArray &giveNonlocalStrainVector() { return nonlocalStrainVector; }
     const FloatArray &giveTempNonlocalStrainVector() { return tempNonlocalStrainVector; }
@@ -119,7 +118,7 @@ public:
 
     Interface *giveInterface(InterfaceType t) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep) override;

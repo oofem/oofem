@@ -72,7 +72,7 @@ public:
     /// Destructor
     virtual ~CompoDamageMatStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
 
@@ -147,7 +147,7 @@ public:
     const char *giveClassName() const override { return "CompositeDamageMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_CompoDamageMat_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CompoDamageMatStatus(gp); }

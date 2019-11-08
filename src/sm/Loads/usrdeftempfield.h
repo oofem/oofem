@@ -89,7 +89,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_UserDefinedTemperatureField_Name; }
     const char *giveClassName() const override { return "UserDefinedTemperatureField"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 };
 } // end namespace oofem
 #endif // usrdeftempfield_h

@@ -84,10 +84,11 @@ VTKXMLExportModule :: VTKXMLExportModule(int n, EngngModel *e) : ExportModule(n,
 VTKXMLExportModule :: ~VTKXMLExportModule() { }
 
 
-IRResultType
-VTKXMLExportModule :: initializeFrom(InputRecord *ir)
+void
+VTKXMLExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    ExportModule :: initializeFrom(ir);
+
     int val;
 
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
@@ -102,8 +103,6 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
 
     this->particleExportFlag = false;
     IR_GIVE_OPTIONAL_FIELD(ir, particleExportFlag, _IFT_VTKXMLExportModule_particleexportflag); // Macro
-
-    return ExportModule :: initializeFrom(ir);
 }
 
 
@@ -270,7 +269,9 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_quad9_2 ) ||
-        ( elemGT == EGT_wedge_1 ) ) {} else if ( elemGT == EGT_hexa_27 ) {
+        ( elemGT == EGT_wedge_1 ) ) {  
+            
+    } else if ( elemGT == EGT_hexa_27 ) {
         nodeMapping = {
             5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18, 23, 25, 26, 24, 22, 21, 27
         };
@@ -287,9 +288,6 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
             1, 2, 4, 3
         };
     } else if ( elemGT == EGT_quad_21_interface ) {
-//        nodeMapping = {
-//            1, 2, 5, 4, 3, 6
-//        };
         nodeMapping = {
             1, 2, 5, 4, 3, 6
         };
@@ -396,12 +394,14 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             }
         } // end loop over composite elements
 
+#ifndef __VTK_MODULE
         if (anyPieceNonEmpty == 0) {
           // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
           fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
           fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
           fprintf(this->fileStream, "</Piece>\n");
         }
+#endif
 
         
     } else {     // if (particleExportFlag)
@@ -499,8 +499,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
  #endif
 
     writer->SetFileName( fname.c_str() );
-    writer->SetInput(this->fileStream); // VTK 4
-    //writer->SetInputData(this->fileStream); // VTK 6
+    //writer->SetInput(this->fileStream); // VTK 4
+    writer->SetInputData(this->fileStream); // VTK 6
 
     // Optional - set the mode. The default is binary.
     //writer->SetDataModeToBinary();
@@ -725,7 +725,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
                 continue;
             }
 
-            regionElInd.followedBy(ei);
+            regionElInd.followedBy(elNum);
 
             cellNum++;
 
@@ -1700,7 +1700,7 @@ VTKXMLExportModule :: writeExternalForces(VTKPiece &vtkPiece)
         // Header
 #ifdef __VTK_MODULE
         vtkSmartPointer< vtkDoubleArray >varArray = vtkSmartPointer< vtkDoubleArray > :: New();
-        varArray->SetName(name);
+        varArray->SetName(name.c_str());
         varArray->SetNumberOfComponents(ncomponents);
         varArray->SetNumberOfTuples(numNodes);
 
@@ -2129,6 +2129,9 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 nc = 1;
             } else if ( vtype == ISVT_VECTOR ) {
                 nc = 3;
+                if ( isttype == IST_BeamForceMomentTensor ) { //AS: to make the hack work
+                    nc = 6;
+                }
             } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                 nc = 9;
             } else {

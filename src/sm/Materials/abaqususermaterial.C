@@ -70,13 +70,11 @@ AbaqusUserMaterial :: ~AbaqusUserMaterial()
 #endif
 }
 
-IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
+void AbaqusUserMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
     std :: string umatname;
 
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->numState, _IFT_AbaqusUserMaterial_numState);
     IR_GIVE_FIELD(ir, this->properties, _IFT_AbaqusUserMaterial_properties);
@@ -117,16 +115,14 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    if ( ir->hasField(_IFT_AbaqusUserMaterial_numericalTangent) ) {
+    if ( ir.hasField(_IFT_AbaqusUserMaterial_numericalTangent) ) {
         mUseNumericalTangent = true;
     }
 
-    if ( ir->hasField(_IFT_AbaqusUserMaterial_numericalTangentPerturbation) ) {
+    if ( ir.hasField(_IFT_AbaqusUserMaterial_numericalTangentPerturbation) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, mPerturbation, _IFT_AbaqusUserMaterial_numericalTangentPerturbation);
         printf("mPerturbation: %e\n", mPerturbation);
     }
-
-    return IRRT_OK;
 }
 
 void AbaqusUserMaterial :: giveInputRecord(DynamicInputRecord &input)
@@ -653,7 +649,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
     stateVector = tempStateVector;
 }
 
-void AbaqusUserMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
+void AbaqusUserMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(File, tStep);
 

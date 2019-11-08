@@ -45,16 +45,14 @@ REGISTER_Function(CalculatorFunction);
 
 CalculatorFunction :: CalculatorFunction(int n, Domain *d) : Function(n, d) { }
 
-IRResultType
-CalculatorFunction :: initializeFrom(InputRecord *ir)
+void
+CalculatorFunction :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    Function :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, fExpression, _IFT_CalculatorFunction_f);
     IR_GIVE_OPTIONAL_FIELD(ir, dfdtExpression, _IFT_CalculatorFunction_dfdt);
     IR_GIVE_OPTIONAL_FIELD(ir, d2fdt2Expression, _IFT_CalculatorFunction_d2fdt2);
-
-    return Function :: initializeFrom(ir);
 }
 
 

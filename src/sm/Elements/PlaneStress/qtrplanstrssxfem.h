@@ -89,7 +89,7 @@ public:
 
     Element_Geometry_Type giveGeometryType() const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override;
     void giveInputRecord(DynamicInputRecord &input) override;
 

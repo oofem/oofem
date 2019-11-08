@@ -83,14 +83,12 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
     return false;
 }
 
-IRResultType Inclusion :: initializeFrom(InputRecord *ir)
+void Inclusion :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    EnrichmentItem :: initializeFrom(ir);
 
     int crossSectionIndex = 0;
     IR_GIVE_FIELD(ir, crossSectionIndex, _IFT_Inclusion_CrossSection);
     mpCrossSection = this->giveDomain()->giveCrossSection(crossSectionIndex);
-
-    return EnrichmentItem :: initializeFrom(ir);
 }
 } /* namespace oofem */

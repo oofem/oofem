@@ -111,35 +111,32 @@ protected:
      */
     StateCounterType internalVarUpdateStamp;
 
-    LinSystSolverType solverType; ///@todo Remove this and use nonlinear methods.
+    LinSystSolverType solverType = ST_Direct; ///@todo Remove this and use nonlinear methods.
     std :: unique_ptr< SparseLinearSystemNM > linSolver; ///@todo Remove this and use nonlinear methods.
 
     /// Right hand side vector from boundary conditions.
     FloatArray bcRhs;
 
     /// Initial time from which the computation runs. Default is zero.
-    double initT;
+    double initT = 0.;
     /// Length of time step.
-    double deltaT;
-    double alpha;
+    double deltaT = 0.;
+    double alpha = 0.;
 
     /// If set then stabilization using lumped capacity will be used.
-    int lumpedCapacityStab;
+    int lumpedCapacityStab = 0;
 
     /// Associated time function for time step increment.
-    int dtFunction;
+    int dtFunction = 0;
 
     /// Specified times where the problem is solved
     FloatArray discreteTimes;
 
     /// Determines if there are change in the problem size (no application/removal of Dirichlet boundary conditions).
-    bool changingProblemSize;
+    bool changingProblemSize = false;
 
 public:
-    /// Constructor.
     NonStationaryTransportProblem(int i, EngngModel * _master);
-    /// Destructor.
-    virtual ~NonStationaryTransportProblem();
 
     void solveYourselfAt(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
@@ -153,7 +150,7 @@ public:
     TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     int checkConsistency() override;
 
     // identification

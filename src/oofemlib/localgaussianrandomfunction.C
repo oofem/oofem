@@ -73,11 +73,9 @@ LocalGaussianRandomFunction :: evaluateAccelerationAtTime(double t)
     return 0.;
 }
 
-IRResultType
-LocalGaussianRandomFunction :: initializeFrom(InputRecord *ir)
+void
+LocalGaussianRandomFunction :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomFunction_mean);
     IR_GIVE_FIELD(ir, variance, _IFT_LocalGaussianRandomFunction_variance);
     randomInteger = ( long ) ( -time(NULL) );
@@ -86,8 +84,6 @@ LocalGaussianRandomFunction :: initializeFrom(InputRecord *ir)
     if ( seed ) {
         randomInteger = seed;
     }
-
-    return IRRT_OK;
 }
 
 #define IA 16807

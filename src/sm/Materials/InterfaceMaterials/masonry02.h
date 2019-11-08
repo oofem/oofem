@@ -76,37 +76,37 @@ class Masonry02 : public MPlasticMaterial2
 {
 protected:
     /// Tensile strength.
-    double ft0;
+    double ft0 = 0.;
     /// Mode I GF.
-    double gfI;
+    double gfI = 0.;
     /// Mode II GF.
-    double gfII;
+    double gfII = 0.;
     /// Residual friction angle.
-    double tanfir;
+    double tanfir = 0.;
     /// Initial friction angle.
-    double tanfi0;
+    double tanfi0 = 0.;
     /// Initial cohesion of joint.
-    double c0;
+    double c0 = 0.;
     /// Cap mode parameters.
-    double Cnn, Css, Cn;
-    // double fm;
+    double Cnn = 0., Css = 0., Cn = 0.;
+    // double fm = 0.;
 
     /// Elastic properties.
-    double kn, ks;
+    double kn = 0., ks = 0.;
 
     /// Dilatancy angle.
-    double tanpsi;
+    double tanpsi = 0.;
 
     /// Cap mode parameters.
-    double sic, spc, smc, src;
-    double kp, km, kr;
-public:
+    double sic = 0., spc = 0., smc = 0., src = 0.;
+    double kp = 0., km = 0., kr = 0.;
 
+public:
     Masonry02(int n, Domain * d);
     virtual ~Masonry02();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    void initializeFrom(InputRecord &ir) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_Masonry02_Name; }
     const char *giveClassName() const override { return "Masonry02"; }
@@ -119,7 +119,7 @@ public:
     int giveSizeOfFullHardeningVarsVector() override { return 3; }
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const override { return 3; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

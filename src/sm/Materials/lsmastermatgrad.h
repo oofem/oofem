@@ -36,32 +36,36 @@
 #define lsmastermatgrad_h
 
 #include "lsmastermat.h"
-#include "sm/Materials/structuralmaterial.h"
-#include "sm/Materials/structuralms.h"
-#include "sm/Materials/linearelasticmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralms.h"
+#include "Materials/linearelasticmaterial.h"
 #include "dictionary.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "graddpmaterialextensioninterface.h"
+#include "graddamagematerialextensioninterface.h"
 
 namespace oofem {
 class GaussPoint;
 class Domain;
 
+
+#define _IFT_LargeStrainMasterMaterialGrad_Name "lsmastermatgrad"
+
+
 /**
  * This class implements an gradient version of LargeStrainMasterMaterial
  */
-class LargeStrainMasterMaterialGrad : public LargeStrainMasterMaterial, GradDpMaterialExtensionInterface
+class LargeStrainMasterMaterialGrad : public LargeStrainMasterMaterial, GradientDamageMaterialExtensionInterface
 {
 public:
-    LargeStrainMasterMaterialGrad(int n, Domain * d);
+    LargeStrainMasterMaterialGrad(int n, Domain *d);
     virtual ~LargeStrainMasterMaterialGrad();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    void initializeFrom(InputRecord &ir) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     Interface *giveInterface(InterfaceType t) override {
-        if ( t == GradDpMaterialExtensionInterfaceType ) {
-            return static_cast< GradDpMaterialExtensionInterface * >(this);
+        if ( t == GradientDamageMaterialExtensionInterfaceType ) {
+            return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
             return nullptr;
         }
@@ -69,11 +73,14 @@ public:
 
     void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+
+    void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
 
     void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -82,8 +89,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    void giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep) override;
+    virtual void giveFirstPKStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalDamageDrivningVariable, TimeStep *tStep);
 };
-
 } // end namespace oofem
 #endif // misesmat_h

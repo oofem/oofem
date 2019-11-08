@@ -97,67 +97,67 @@ public:
      */
     TR1_2D_PFEM(int n, Domain *aDomain, int particle1, int particle2, int particle3, int mat, int cs);
     /// Destructor
-    ~TR1_2D_PFEM();
+    virtual ~TR1_2D_PFEM();
 
-    virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep);
-    virtual void computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *tStep);
+    void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *tStep) override;
+    void computeDiagonalMassMtrx(FloatMatrix &answer, TimeStep *tStep) override;
 
-    virtual double computeCriticalTimeStep(TimeStep *tStep);
+    double computeCriticalTimeStep(TimeStep *tStep) override;
 
-    virtual const char *giveClassName() const { return "TR1_2D_PFEM"; }
-    virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_PFEM_Name; }
+    const char *giveClassName() const override { return "TR1_2D_PFEM"; }
+    const char *giveInputRecordName() const override { return _IFT_TR1_2D_PFEM_Name; }
 
-    virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_1; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_triangle_1; }
 
-    virtual void giveElementDofIDMask(IntArray &answer) const;
+    void giveElementDofIDMask(IntArray &answer) const override;
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual int computeNumberOfDofs();
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual int checkConsistency();
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    int computeNumberOfDofs() override;
+    void initializeFrom(InputRecord &ir) override;
+    int checkConsistency() override;
 
-    virtual double computeVolumeAround(GaussPoint *gp);
+    double computeVolumeAround(GaussPoint *gp) override;
 
-    virtual Interface *giveInterface(InterfaceType);
+    Interface *giveInterface(InterfaceType) override;
 
-    virtual void saveContext(DataStream &stream, ContextMode mode);
-    virtual void restoreContext(DataStream &stream, ContextMode mode);
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    virtual Element *giveElement() { return this; }
+    Element *giveElement() override { return this; }
 
 #ifdef __OOFEG
-    virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                        int node, TimeStep *atTime);
+    int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
+                                int node, TimeStep *atTime) override;
     // Graphics output
-    //virtual void drawYourself(oofegGraphicContext&);
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawScalar(oofegGraphicContext &context);
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //void drawYourself(oofegGraphicContext&) override;
+    void drawRawGeometry(oofegGraphicContext &) override;
+    void drawScalar(oofegGraphicContext &context) override;
+    //void drawDeformedGeometry(oofegGraphicContext&, UnknownType) override {}
 #endif
 
-    virtual FEInterpolation *giveVelocityInterpolation() { return & velocityInterpolation; }
-    virtual FEInterpolation *givePressureInterpolation() { return & pressureInterpolation; }
+    FEInterpolation *giveVelocityInterpolation() override { return & velocityInterpolation; }
+    FEInterpolation *givePressureInterpolation() override { return & pressureInterpolation; }
 
-    virtual FEInterpolation *giveInterpolation() const { return & velocityInterpolation; }
-    virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return id == P_f ? & pressureInterpolation : & velocityInterpolation; }
+    FEInterpolation *giveInterpolation() const override { return & velocityInterpolation; }
+    FEInterpolation *giveInterpolation(DofIDItem id) const override { return id == P_f ? & pressureInterpolation : & velocityInterpolation; }
 
-    virtual const IntArray &giveVelocityDofMask() const
+    const IntArray &giveVelocityDofMask() const override
     {
         return this->velocityDofMask;
     }
-    virtual const IntArray &givePressureDofMask() const
+    const IntArray &givePressureDofMask() const override
     {
         return this->pressureDofMask;
     }
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeGaussPoints() override;
+    void computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *tStep);
+    void computeDeviatoricStressDivergence(FloatArray &answer, TimeStep *tStep) override;
 
-    virtual void computeBodyLoadVectorAt(FloatArray &answer, BodyLoad *load, TimeStep *tStep, ValueModeType mode);
-    virtual void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep);
+    void computeBodyLoadVectorAt(FloatArray &answer, BodyLoad *load, TimeStep *tStep, ValueModeType mode) override;
+    void computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // tr1_2d_pfem_h

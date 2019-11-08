@@ -19,8 +19,10 @@ ConstantFunction 1 f(t) 1.0
 Set 1 elements 1 1
 
 #%BEGIN_CHECK% tolerance 1.e-3
+#TIME
 #NODE tStep  5 number 1 dof 10 unknown d value 3.59549990e+01
 #NODE tStep 29 number 1 dof 10 unknown d value 1.04396706e+02
 #ELEMENT tStep  5 number 1 gp 1 keyword 39 component 1 value 1.12531681e-01
 #ELEMENT tStep 29 number 1 gp 1 keyword 39 component 1 value 8.15578417e-01
+#ELEMENT tStep  5 number 1 gp 1 keyword 135 component 1 value 2.22269086e+04
 #%END_CHECK%

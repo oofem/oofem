@@ -64,6 +64,25 @@ struct modeStruct {
     double am, ap;
     std::unique_ptr<EngngModel> myEngngModel;
     std :: vector<SurfaceDataStruct> SurfaceData;
+
+    /* Visual c++ 2017 compatibility */
+#ifdef _MSC_VER
+	modeStruct() {}
+	modeStruct(std::unique_ptr<EngngModel>& model) : myEngngModel(std::move(model)) {}
+	modeStruct(modeStruct&& B) : myEngngModel(std::move(B.myEngngModel)) { am = B.am; ap = B.ap; SurfaceData = B.SurfaceData; }
+	modeStruct(modeStruct& B) : myEngngModel(std::move(B.myEngngModel)) { am = B.am; ap = B.ap; SurfaceData = B.SurfaceData; }
+
+	modeStruct& operator= (modeStruct& other) {
+		myEngngModel = std::move(other.myEngngModel);
+		am = other.am;
+		ap = other.ap;
+		SurfaceData = other.SurfaceData;
+		return *this;
+	}
+#endif /* end of Visual c++ 2017 compatibility */ 
+
+
+
 };
 
 class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition
@@ -126,7 +145,7 @@ public:
     SolutionbasedShapeFunction(int n, Domain * d);
     virtual ~SolutionbasedShapeFunction() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     bool requiresActiveDofs() override { return true; }
     int giveNumberOfInternalDofManagers() override { return 1; }

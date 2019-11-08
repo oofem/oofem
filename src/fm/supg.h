@@ -120,28 +120,28 @@ protected:
     FloatArray eNorm;
 
     ///@todo Use ScalarFunction here!
-    double deltaT;
-    int deltaTF;
+    double deltaT = 1.;
+    int deltaTF = 0;
     /// Convergence tolerance.
-    double atolv, rtolv;
+    double atolv = 1., rtolv = 1.;
     /// Max number of iterations.
-    int maxiter;
+    int maxiter = 0;
     /**
      * Flag if set to true (default), then when max number of iteration reached, computation stops
      * otherwise computation continues with next step.
      */
-    bool stopmaxiter;
+    bool stopmaxiter = true;
     /// Integration constant.
-    double alpha;
+    double alpha = 0.;
 
-    int initFlag;
-    int consistentMassFlag;
+    int initFlag = 1;
+    int consistentMassFlag = 0;
 
-    bool equationScalingFlag;
+    bool equationScalingFlag = false;
     // length, velocity, and density scales
-    double lscale, uscale, dscale;
+    double lscale = 1., uscale = 1., dscale = 1.;
     /// Reynolds number.
-    double Re;
+    double Re = 0.;
 
     // material interface representation for multicomponent flows
     std :: unique_ptr< MaterialInterface > materialInterface;
@@ -151,8 +151,7 @@ protected:
     // int fsflag;
 
 public:
-    SUPG(int i, EngngModel * _master = NULL);
-    virtual ~SUPG();
+    SUPG(int i, EngngModel * _master = nullptr);
 
     void solveYourselfAt(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
@@ -173,7 +172,7 @@ public:
     TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int checkConsistency() override;
     // identification

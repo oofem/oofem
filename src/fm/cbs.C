@@ -131,11 +131,10 @@ NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
     return nMethod.get();
 }
 
-IRResultType
-CBS :: initializeFrom(InputRecord *ir)
+void
+CBS :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    EngngModel :: initializeFrom(ir);
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
     solverType = ( LinSystSolverType ) val;
@@ -181,8 +180,6 @@ CBS :: initializeFrom(InputRecord *ir)
         fm->registerField(_velocityField, FT_Velocity);
     }
     //</RESTRICTED_SECTION>
-
-    return EngngModel :: initializeFrom(ir);
 }
 
 

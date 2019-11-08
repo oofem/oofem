@@ -143,15 +143,13 @@ HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-IRResultType
-HyperElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+HyperElasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, K, _IFT_HyperElasticMaterial_k);
     IR_GIVE_FIELD(ir, G, _IFT_HyperElasticMaterial_g);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 } // end namespace oofem

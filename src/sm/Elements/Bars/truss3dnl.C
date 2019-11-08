@@ -55,20 +55,13 @@ Truss3dnl :: Truss3dnl(int n, Domain *aDomain) : Truss3d(n, aDomain)
 }
 
 
-IRResultType
-Truss3dnl :: initializeFrom(InputRecord *ir)
+void
+Truss3dnl :: initializeFrom(InputRecord &ir)
 {
-  IRResultType result = Truss3d :: initializeFrom(ir);
-  if ( result != IRRT_OK ) {
-    return result;
-  }
+  Truss3d :: initializeFrom(ir);
   initialStretch = 1;
   IR_GIVE_OPTIONAL_FIELD(ir, initialStretch, _IFT_Truss3dnl_initialStretch);
-  
-  return IRRT_OK;      
 }
-
-
 
   
 void

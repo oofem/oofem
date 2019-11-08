@@ -53,7 +53,6 @@ REGISTER_Element(QWedge_ht);
 FEI3dWedgeQuad QWedge_ht :: interpolation;
 
 QWedge_ht :: QWedge_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
-    // Constructor.
 {
     numberOfDofMans = 15;
 }
@@ -69,11 +68,11 @@ QWedge_mt :: QWedge_mt(int n, Domain *aDomain) : QWedge_ht(n, aDomain)
 }
 
 
-IRResultType
-QWedge_ht :: initializeFrom(InputRecord *ir)
+void
+QWedge_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 6;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 
 }
 
@@ -91,15 +90,11 @@ QWedge_ht :: computeGaussPoints()
 
   double
 QWedge_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-    return volume;
+    return determinant * gp->giveWeight();
 }
 
 
@@ -109,7 +104,7 @@ QWedge_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
-    return result *gp->giveWeight();
+    return result * gp->giveWeight();
 }
   
   
@@ -133,7 +128,7 @@ QWedge_ht :: giveInterface(InterfaceType interface)
     }
 
     OOFEM_LOG_INFO("Interface on Lwedge element not supported");
-    return NULL;
+    return nullptr;
 }
 
 void

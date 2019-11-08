@@ -97,7 +97,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_TrPlaneStrain_Name; }
     const char *giveClassName() const override { return "TrPlaneStrain"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 protected:
     int giveNumberOfIPForMassMtrxIntegration() override { return 1; }

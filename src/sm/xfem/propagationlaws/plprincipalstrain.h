@@ -57,7 +57,7 @@ public:
     const char *giveClassName() const override { return "PLPrincipalStrain"; }
     const char *giveInputRecordName() const override { return _IFT_PLPrincipalStrain_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bool hasPropagation() const override { return mIncrementLength > 0.; }

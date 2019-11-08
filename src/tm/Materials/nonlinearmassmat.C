@@ -37,85 +37,58 @@
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include <floatmatrixf.h>
 
 namespace oofem {
 REGISTER_Material(NonlinearMassTransferMaterial);
 
-IRResultType
-NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+NonlinearMassTransferMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    Material :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, C, _IFT_NonlinearMassTransferMaterial_c);
     IR_GIVE_FIELD(ir, alpha, _IFT_NonlinearMassTransferMaterial_alpha);
-
-    return Material :: initializeFrom(ir);
-}
-
-void
-NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                          MatResponseMode mode,
-                                                          GaussPoint *gp,
-                                                          TimeStep *tStep)
-{
-    MaterialMode mMode = gp->giveMaterialMode();
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray &eps = status->giveTempGradient();
-    double gradPNorm;
-    FloatMatrix t1, t2;
-
-    gradPNorm = eps.computeNorm();
-
-    t1.beDyadicProductOf(eps, eps);
-    if ( gradPNorm != 0.0 ) {
-        t1.times( C * alpha * pow(gradPNorm, alpha - 2) );
-    }
-
-    switch  ( mMode ) {
-    case _1dHeat:
-        t2.resize(1, 1);
-        break;
-    case _2dHeat:
-        t2.resize(2, 2);
-        break;
-    case _3dHeat:
-        t2.resize(3, 3);
-        break;
-    default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode));
-    }
-    t2.beUnitMatrix();
-
-    answer.clear();
-    answer.add(t1);
-    answer.add(1 + C * pow(gradPNorm, alpha), t2);
 }
 
 double
 NonlinearMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 {
     return 0.;
 }
 
-void
-NonlinearMassTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+FloatArrayF<3>
+NonlinearMassTransferMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    double gradPNorm = grad.computeNorm();
-    answer.beScaled(-( 1. + C * pow(gradPNorm, alpha) ), grad);
-
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     ms->setTempGradient(grad);
     ms->setTempField(field);
+    
+    double gradPNorm = norm(grad);
+    auto answer = -( 1. + C * pow(gradPNorm, alpha) ) * grad;
     ms->setTempFlux(answer);
+    return answer;
+}
+
+
+FloatMatrixF<3,3>
+NonlinearMassTransferMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+{
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    const auto &eps = ms->giveTempGradient();
+    double gradPNorm = norm(eps);
+
+    auto scale = gradPNorm != 0. ? C * alpha * pow(gradPNorm, alpha - 2) : 1.;
+    auto t1 = scale * dyad(eps, eps);
+    return t1 + (1 + C * pow(gradPNorm, alpha)) * eye<3>();
 }
 
 int
 NonlinearMassTransferMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
     switch ( type ) {
     case IST_Velocity:

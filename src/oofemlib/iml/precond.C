@@ -37,7 +37,7 @@
 namespace oofem {
 Preconditioner :: Preconditioner(const SparseMtrx &a, InputRecord &attributes)
 {
-    this->initializeFrom(& attributes);
+    this->initializeFrom(attributes);
     this->init(a);
 };
 } // end namespace oofem

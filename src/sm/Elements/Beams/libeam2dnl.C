@@ -487,10 +487,10 @@ double LIBeam2dNL :: givePitch()
 }
 
 
-IRResultType
-LIBeam2dNL :: initializeFrom(InputRecord *ir)
+void
+LIBeam2dNL :: initializeFrom(InputRecord &ir)
 {
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
 }
 
 

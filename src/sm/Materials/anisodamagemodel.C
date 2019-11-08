@@ -62,11 +62,8 @@ AnisotropicDamageMaterial :: AnisotropicDamageMaterial(int n, Domain *d) : Struc
 {}
 
 
-int
-AnisotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports the given mode
-//
+bool
+AnisotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress;
     //return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
@@ -2010,11 +2007,10 @@ AnisotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Int
 }
 
 
-IRResultType
-AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+AnisotropicDamageMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial.initializeFrom(ir);
     E = linearElasticMaterial.giveYoungsModulus();
     nu = linearElasticMaterial.givePoissonsRatio();
@@ -2063,8 +2059,6 @@ AnisotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     if ( damageLawType == DLT_Desmorat2 ) {
         IR_GIVE_FIELD(ir, aA, _IFT_AnisotropicDamageMaterial_aA);
     }
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 void
@@ -2089,7 +2083,7 @@ AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(GaussPoint *g
 }
 
 void
-AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _PlaneStress ) { // special treatment of the out-of-plane strain

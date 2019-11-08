@@ -501,15 +501,13 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
 
 
 
-IRResultType
-NLStructuralElement :: initializeFrom(InputRecord *ir)
+void
+NLStructuralElement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    StructuralElement :: initializeFrom(ir);
 
     nlGeometry = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nlGeometry, _IFT_NLStructuralElement_nlgeoflag);
-
-    return StructuralElement :: initializeFrom(ir);
 }
 
 void NLStructuralElement :: giveInputRecord(DynamicInputRecord &input)

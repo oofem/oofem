@@ -118,7 +118,7 @@ public:
     // definition & identification
     const char *giveClassName() const override { return "QDKTPlate"; }
     const char *giveInputRecordName() const override { return _IFT_QDKTPlate_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 12; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;

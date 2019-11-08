@@ -60,9 +60,10 @@ XfemStructureManager :: XfemStructureManager(Domain *domain) :
 XfemStructureManager :: ~XfemStructureManager()
 {}
 
-IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
+void XfemStructureManager :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
+    XfemManager :: initializeFrom(ir);
+
     int splitCracks = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, splitCracks, _IFT_XfemStructureManager_splitCracks);
     if ( splitCracks == 1 ) {
@@ -88,8 +89,6 @@ IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
     if ( mCrackMergeTol > 1.0e-12 ) {
         printf("mCrackMergeTol: %e\n", mCrackMergeTol);
     }
-
-    return XfemManager :: initializeFrom(ir);
 }
 
 void XfemStructureManager :: giveInputRecord(DynamicInputRecord &input)
@@ -198,7 +197,7 @@ void XfemStructureManager :: splitCracks()
                                 //                        EnrichmentItem *newEI_1 = new Crack(n1, this, this->giveDomain() );
                                 auto newCrack = std::make_unique<Crack>( n1, this, this->giveDomain() );
 
-                                InputRecord *ir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+                                auto &ir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
                                 newCrack->initializeFrom(ir);
                                 newCrack->instanciateYourself(dataReader);
 

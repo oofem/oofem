@@ -58,17 +58,8 @@ namespace oofem {
 REGISTER_Material(IDNLMaterial);
 
 IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
-    //
-    // constructor
-    //
 {}
 
-
-IDNLMaterial :: ~IDNLMaterial()
-//
-// destructor
-//
-{ }
 
 void
 IDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
@@ -378,21 +369,11 @@ IDNLMaterial :: giveInterface(InterfaceType type)
 }
 
 
-IRResultType
-IDNLMaterial :: initializeFrom(InputRecord *ir)
+void
+IDNLMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
+    IsotropicDamageMaterial1 :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 }
 
 
@@ -844,12 +825,8 @@ IDNLMaterialStatus :: IDNLMaterialStatus(GaussPoint *g) :
 }
 
 
-IDNLMaterialStatus :: ~IDNLMaterialStatus()
-{ }
-
-
 void
-IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

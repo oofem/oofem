@@ -45,21 +45,17 @@ REGISTER_Material(WinklerMaterial);
 WinklerMaterial:: WinklerMaterial (int n, Domain* d): StructuralMaterial(n, d) 
 { }
 
-WinklerMaterial::~WinklerMaterial()
-{ }
 
-IRResultType
-WinklerMaterial :: initializeFrom(InputRecord *ir)
+void
+WinklerMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, c1, _IFT_WinklerMaterial_C1);
     globalFromulation = true;
     int var=1;
     IR_GIVE_OPTIONAL_FIELD(ir, var,  _IFT_WinklerMaterial_globalFlag);
     globalFromulation=var;
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 
@@ -112,24 +108,22 @@ WinklerMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseM
 void
 WinklerMaterial::give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep)
 {
+    if ( this->c1.giveSize() == 6 ) {
+        answer.beDiagonal(this->c1);
 
-  if (this->c1.giveSize() == 6) {
-    answer.beDiagonal(this->c1);
-
-    if (globalFromulation) {
-      Beam3dSubsoilMaterialInterface *ei = (Beam3dSubsoilMaterialInterface*) gp->giveElement()->giveInterface(Beam3dSubsoilMaterialInterfaceType);
-      FloatMatrix T;
-      if (ei) {
-	ei->B3SSMI_getUnknownsGtoLRotationMatrix (T);
-	answer.rotatedWith(T, 't');
-      } else {
-	OOFEM_ERROR("Beam3dSubsoilMaterialInterface required from element");
-      }
+        if (globalFromulation) {
+            Beam3dSubsoilMaterialInterface *ei = (Beam3dSubsoilMaterialInterface*) gp->giveElement()->giveInterface(Beam3dSubsoilMaterialInterfaceType);
+            FloatMatrix T;
+            if (ei) {
+                ei->B3SSMI_getUnknownsGtoLRotationMatrix (T);
+                answer.rotatedWith(T, 't');
+            } else {
+                OOFEM_ERROR("Beam3dSubsoilMaterialInterface required from element");
+            }
+        }
+    } else {
+        OOFEM_ERROR ("C1 attribute size error (shouldequal to 6 for 3dBeamSubsoil mode)");
     }
-    
-  } else {
-    OOFEM_ERROR ("C1 attribute size error (shouldequal to 6 for 3dBeamSubsoil mode)");
-  }
 }
 
 
@@ -140,13 +134,13 @@ WinklerMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-int
-WinklerMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+WinklerMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
 {
-  return ((mode == _2dPlateSubSoil) || (mode == _3dBeamSubSoil));
+    return mode == _2dPlateSubSoil || mode == _3dBeamSubSoil;
 }
 
 

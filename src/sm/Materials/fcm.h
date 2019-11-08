@@ -96,9 +96,8 @@ protected:
 
 public:
     FCMMaterialStatus(GaussPoint *g);
-    virtual ~FCMMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     /// returns number of cracks from the previous time step (equilibrated value)
     virtual int giveNumberOfCracks() const;
     /// returns temporary number of cracks
@@ -201,15 +200,14 @@ protected:
 
 public:
     FCMMaterial(int n, Domain *d);
-    virtual ~FCMMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveClassName() const override { return "FCMMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode,

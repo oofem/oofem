@@ -53,18 +53,13 @@ TwoFluidMaterial :: checkConsistency()
 }
 
 
-IRResultType
-TwoFluidMaterial :: initializeFrom(InputRecord *ir)
+void
+TwoFluidMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        OOFEM_WARNING("mat array should have two values");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_TwoFluidMaterial_mat, "mat array should have two values");
     }
-
-    return IRRT_OK;
 }
 
 
@@ -87,7 +82,7 @@ TwoFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep) cons
 
 
 double
-TwoFluidMaterial :: give(int aProperty, GaussPoint *gp)
+TwoFluidMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     TwoFluidMaterialStatus *status = static_cast< TwoFluidMaterialStatus * >( this->giveStatus(gp) );
     double vof = this->giveTempVOF(gp);
@@ -180,7 +175,7 @@ TwoFluidMaterialStatus :: TwoFluidMaterialStatus(GaussPoint *gp, const std::arra
 
 
 void
-TwoFluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TwoFluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     for ( auto &gp : slaveGps ) gp.giveMaterialStatus()->printOutputAt(file, tStep);
 }

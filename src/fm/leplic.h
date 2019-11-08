@@ -185,7 +185,7 @@ public:
     double giveUpdatedXCoordinate(int num) { return updated_XCoords.at(num); }
     double giveUpdatedYCoordinate(int num) { return updated_YCoords.at(num); }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     // identification

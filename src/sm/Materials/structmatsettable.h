@@ -64,7 +64,7 @@ public:
     /// Destructor
     virtual ~StructuralMaterialSettable() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "StructuralMaterialSettable"; }
     const char *giveInputRecordName() const override { return _IFT_StructuralMaterialSettable_Name; }

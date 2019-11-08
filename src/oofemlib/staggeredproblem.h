@@ -159,8 +159,8 @@ public:
     void terminate(TimeStep *tStep) override;
     void doStepOutput(TimeStep *tStep) override;
 
-    int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc) override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    int instanciateYourself(DataReader &dr, InputRecord &ir, const char *outFileName, const char *desc) override;
+    void initializeFrom(InputRecord &ir) override;
     void updateAttributes(MetaStep *mStep) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -214,7 +214,7 @@ public:
 
     EngngModel *giveSlaveProblem(int i) override;
     int giveNumberOfSlaveProblems() override { return (int)inputStreamNames.size(); }
-    int instanciateDefaultMetaStep(InputRecord *ir) override;
+    int instanciateDefaultMetaStep(InputRecord &ir) override;
 
 protected:
     int instanciateSlaveProblems();

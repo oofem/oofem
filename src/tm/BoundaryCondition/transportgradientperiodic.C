@@ -77,11 +77,6 @@ TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : Activ
 }
 
 
-TransportGradientPeriodic :: ~TransportGradientPeriodic()
-{
-}
-
-
 int TransportGradientPeriodic :: giveNumberOfInternalDofManagers()
 {
     return 1;
@@ -404,9 +399,10 @@ bool TransportGradientPeriodic :: isGradDof(Dof *dof)
 }
 
 
-IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
+void TransportGradientPeriodic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    //PrescribedGradientHomogenization::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->mGradient, _IFT_TransportGradientPeriodic_gradient)
     this->mCenterCoord = {0., 0., 0.};
@@ -414,9 +410,6 @@ IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_TransportGradientPeriodic_masterSet)
     IR_GIVE_FIELD(ir, this->jump, _IFT_TransportGradientPeriodic_jump)
-
-    return ActiveBoundaryCondition :: initializeFrom(ir);
-    //return PrescribedGradientHomogenization::initializeFrom(ir);
 }
 
 

@@ -62,7 +62,6 @@ protected:
 
 public:
     M1MaterialStatus(GaussPoint *g);
-    virtual ~M1MaterialStatus();
 
     const char *giveClassName() const override { return "M1MaterialStatus"; }
     void letTempNormalMplaneStressesBe(FloatArray sigmaN) { tempSigN =  std :: move(sigmaN); }
@@ -74,7 +73,7 @@ public:
     const FloatArray &giveTempNormalMplanePlasticStrains() { return tempEpspN; }
     const IntArray &givePlasticStateIndicators() { return plasticState; }
     void initTempStatus() override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void updateYourself(TimeStep *tStep) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -99,8 +98,6 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     M1Material(int n, Domain *d);
-    /// Destructor.
-    virtual ~M1Material() { }
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -111,7 +108,7 @@ public:
 
     const char *giveClassName() const override { return "M1Material"; }
     const char *giveInputRecordName() const override { return _IFT_M1Material_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(gp); }
 
@@ -148,7 +145,6 @@ protected:
 
 public:
     M1MaterialStatus(GaussPoint *g);
-    virtual ~M1MaterialStatus();
 
     // definition
     const char *giveClassName() const override { return "M1MaterialStatus"; }
@@ -190,8 +186,6 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     M1Material(int n, Domain *d);
-    /// Destructor.
-    virtual ~M1Material() { }
 
     void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
                                           const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -199,8 +193,8 @@ public:
     void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     const char *giveClassName() const override { return "M1Material"; }
     const char *giveInputRecordName() const override { return _IFT_M1Material_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    void initializeFrom(InputRecord &ir) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new M1MaterialStatus(gp); }
 
 protected:

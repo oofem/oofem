@@ -38,6 +38,8 @@ set (core_unsorted
     #
     symcompcol.C compcol.C
     unstructuredgridfield.C
+    # 
+    loadbalancer.C
     )
 
 #oofegutils
@@ -158,6 +160,8 @@ set (core_dofman
     rigidarmnode.C
     elementinternaldofman.C
     elementside.C
+    latticedirichletcouplingnode.C
+    latticeneumanncouplingnode.C
     )
 
 set (core_material
@@ -173,6 +177,7 @@ set (core_export
     errorcheckingexportmodule.C
     vtkexportmodule.C
     vtkxmlexportmodule.C
+    vtkxmlperiodicexportmodule.C
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C
@@ -264,7 +269,6 @@ set (core_parallel
     domaintransactionmanager.C
     parallelordering.C
     dyncombuff.C
-    loadbalancer.C
     wallclockloadbalancermonitor.C
     nonlocalmatwtp.C
     )

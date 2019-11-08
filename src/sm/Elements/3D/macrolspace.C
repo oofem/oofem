@@ -60,15 +60,14 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 MacroLSpace :: ~MacroLSpace() { }
 
 
-IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
+void MacroLSpace :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
+    LSpace :: initializeFrom(ir);;
 
     IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        OOFEM_WARNING("Need 8 master nodes from the microproblem defined on macroLspace element");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_MacroLspace_microMasterNodes, "Need 8 master nodes from the microproblem defined on macroLspace element");
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
@@ -76,7 +75,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 
 #if 0
-    if ( ir->hasField(_IFT_MacroLspace_stiffMatrxFileName) ) {
+    if ( ir.hasField(_IFT_MacroLspace_stiffMatrxFileName) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, this->stiffMatrxFileName, _IFT_MacroLspace_stiffMatrxFileName);
         if ( fopen(this->stiffMatrxFileName, "r") != NULL ) { //if the file exist
             stiffMatrxFile = fopen(this->stiffMatrxFileName, "r");
@@ -89,7 +88,6 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
         }
     }
 #endif
-    return LSpace :: initializeFrom(ir);;
 }
 
 
@@ -177,7 +175,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     if ( !timeFunct ) {
         OOFEM_ERROR("Couldn't create constant time function");
     }
-    timeFunct->initializeFrom(& ir_func);
+    timeFunct->initializeFrom(ir_func);
     microDomain->setFunction(1, std::move(timeFunct));
 
 
@@ -205,7 +203,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 if ( !bc ) {
                     OOFEM_ERROR("Couldn't create boundary condition.");
                 }
-                bc->initializeFrom(& ir_bc);
+                bc->initializeFrom(ir_bc);
                 microDomain->setBoundaryCondition(counter, std::move(bc));
                 counter++;
             }

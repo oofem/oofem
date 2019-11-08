@@ -1,0 +1,37 @@
+beam3d_rve_2.out
+Beam element test
+StaticStructural nsteps 1 nmodules 1 initialguess 1 lstype 0 smtype 1 stiffmode 1 rtolv 1.e-3 maxiter 10000
+vtkxmlperiodic tstep_all primvars 1 1 vars 2 4 1 stype 0 regionsets 1 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 12 nelem 10 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 0. 0.1 0. 
+node 3 coords 3 0. 0.2 0. 
+node 4 coords 3 0. 0.3 0. 
+node 5 coords 3 0. 0.4 0. 
+node 6 coords 3 0. 0.5 0.
+node 7 coords 3 0. 0.6 0.
+node 8 coords 3 0. 0.7 0.
+node 9 coords 3 0. 0.8 0.
+node 10 coords 3 0. 0.9 0.
+node 11 coords 3 0.1 0. 0.
+node 12 coords 3 1.0 1.0 1.0 
+libeam3d 1 nodes 2 1 2 refnode 11
+libeam3d 2 nodes 2 2 3 refnode 11
+libeam3d 3 nodes 2 3 4 refnode 11
+libeam3d 4 nodes 2 4 5 refnode 11
+libeam3d 5 nodes 2 5 6 refnode 11
+libeam3d 6 nodes 2 6 7 refnode 11
+libeam3d 7 nodes 2 7 8 refnode 11
+libeam3d 8 nodes 2 8 9 refnode 11
+libeam3d 9 nodes 2 9 10 refnode 11
+libeam3dboundaryplate 10 nodes 3 10 1 12 refnode 11 location 2 0 16
+FiberedCS 1 fibermaterials 16 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 thicks 16 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 widths 16 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 0.003 0.003 0.003 0.003 0.0015 0.003 0.003 0.0015 fiberycentrecoords 16 0.0045 0.0015 -0.0015 -0.0045 0.00375 0.0015 -0.0015 -0.00375 0.0045 0.0015 -0.0015 -0.0045 0.00375 0.0015 -0.0015 -0.00375 fiberzcentrecoords 16 -0.0015 -0.0015 -0.0015 -0.0015 -0.00375 -0.0045 -0.0045 -0.00375 0.0015 0.0015 0.0015 0.0015 0.00375 0.0045 0.0045 0.00375 thick 0.012 width 0.012 set 1
+isole 1 d 1.0 E 2e11 n 0.3 talpha 0.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 5 1 2 3 5 6 values 5 0 0 0 0 0 set 3
+BoundaryCondition 2 loadTimeFunction 1 dofs 10 1 2 4 5 7 8 10 11 12 13 values 10 0 0 0 0 0 0 0. 1. 0. 0 set 2
+PiecewiseLinFunction 1 nPoints 2 t 2 0. 1. f(t) 2 0. 1.
+set 1 elements 10 1 2 3 4 5 6 7 8 9 10
+set 2 nodes 1 12
+set 3 nodes 1 2

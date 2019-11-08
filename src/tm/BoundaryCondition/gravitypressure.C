@@ -41,10 +41,10 @@
 namespace oofem {
 REGISTER_BoundaryCondition(GravityPressure);
 
-IRResultType
-GravityPressure :: initializeFrom(InputRecord *ir)
+void
+GravityPressure :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    Load :: initializeFrom(ir);
 
     normalVector.resize(3);
     normalVector.zero();
@@ -53,8 +53,6 @@ GravityPressure :: initializeFrom(InputRecord *ir)
 
     zeroLevel = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, zeroLevel, _IFT_GravityPressure_zerolevel);
-
-    return Load :: initializeFrom(ir);
 }
 
 void

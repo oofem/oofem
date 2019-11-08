@@ -63,9 +63,8 @@ protected:
 
 public:
     CBSElement(int n, Domain * aDomain);
-    virtual ~CBSElement();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
@@ -104,7 +103,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *tStep);
+                                int node, TimeStep *tStep) override;
 #endif
 
 protected:

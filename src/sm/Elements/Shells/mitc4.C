@@ -379,10 +379,10 @@ MITC4Shell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
-IRResultType
-MITC4Shell :: initializeFrom(InputRecord *ir)
+void
+MITC4Shell :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    NLStructuralElement :: initializeFrom(ir);
 
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsXY, _IFT_Element_nip);
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsZ, _IFT_MITC4Shell_nipZ);
@@ -390,8 +390,6 @@ MITC4Shell :: initializeFrom(InputRecord *ir)
 
     directorType = 0; // default
     IR_GIVE_OPTIONAL_FIELD(ir, directorType, _IFT_MITC4Shell_directorType);
-
-    return this->NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -1089,13 +1087,13 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
             auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
             double thickness = this->giveCrossSection()->give(CS_Thickness, gp->giveGlobalCoordinates(), this, false);
             double J = thickness / 2.0;
-            double z, w;
+            double z;
             if (  type == IST_ShellMomentTensor ) {
                 z = gp->giveNaturalCoordinates().at(3) * ( thickness / 2 );
-            } else if (  type == IST_ShellForceTensor ) {
+            } else /*if (  type == IST_ShellForceTensor )*/ {
                 z = 1;
             }
-            w = gp->giveWeight() * J * z;
+            double w = gp->giveWeight() * J * z;
 
             FloatArray localStress, localStrain;
             this->computeStrainVector(localStrain, gp, tStep);

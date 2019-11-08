@@ -53,7 +53,6 @@ FEI2dTrLin Tr1_ht :: interp(1, 2);
 
 Tr1_ht :: Tr1_ht(int n, Domain *aDomain) :
     TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans  = 3;
     numberOfGaussPoints = 1;
@@ -75,7 +74,6 @@ Tr1_ht :: giveInterpolation() const { return & this->interp; }
 
 void
 Tr1_ht :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -85,24 +83,20 @@ Tr1_ht :: computeGaussPoints()
 }
 
 
-IRResultType
-Tr1_ht :: initializeFrom(InputRecord *ir)
+void
+Tr1_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 
 double
 Tr1_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    weight = gp->giveWeight();
-    volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness, gp);
-
-    return volume;
+    double determinant = fabs( this->interp.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double weight = gp->giveWeight();
+    return determinant * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 }
 
 
@@ -119,7 +113,7 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
     double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL); // 't'
-    return determinant *thick *gp->giveWeight();
+    return determinant * thick * gp->giveWeight();
 }
 
 
@@ -134,7 +128,7 @@ Tr1_ht :: giveInterface(InterfaceType interface)
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 } // end namespace oofem

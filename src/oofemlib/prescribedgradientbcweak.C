@@ -146,17 +146,10 @@ DofManager *PrescribedGradientBCWeak :: giveInternalDofManager(int i)
 }
 
 
-IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCWeak :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-    result = ActiveBoundaryCondition :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    result = PrescribedGradientHomogenization :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    PrescribedGradientHomogenization :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
 //    printf("mTractionInterpOrder: %d\n", mTractionInterpOrder);
@@ -199,8 +192,6 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     if ( mMirrorFunction == 0 ) {
         mPeriodicityNormal = {0.0, 1.0};
     }
-
-    return IRRT_OK;
 }
 
 
@@ -924,6 +915,7 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
 
+#ifdef __SM_MODULE
     StaticStructural *rveStatStruct = dynamic_cast<StaticStructural*>(rve);
     if ( rveStatStruct ) {
         //printf("Successfully casted rve to StaticStructural.\n");
@@ -932,6 +924,7 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
             Kmicro = rveStatStruct->stiffnessMatrix->clone();
         }
     }
+#endif
 
 
 #ifdef TIME_INFO
@@ -1021,8 +1014,9 @@ void PrescribedGradientBCWeak :: computeTangent(FloatMatrix& E, TimeStep* tStep)
 //    printf("rve_size: %e\n", rve_size);
 //    Ered.printYourself();
 
-    IntArray indx;
-    StructuralMaterial :: giveVoigtVectorMask(indx, _PlaneStress);
+    IntArray indx = {1,2,6,9}; // to make it independednt of sm module
+    //StructuralMaterial :: giveVoigtVectorMask(indx, _PlaneStress);
+    
 
 //    FloatMatrix EredT;
 //    EredT.beTranspositionOf(Ered);

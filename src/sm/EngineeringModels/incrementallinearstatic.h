@@ -84,7 +84,7 @@ public:
     IncrementalLinearStatic(int i, EngngModel *master = nullptr);
     virtual ~IncrementalLinearStatic();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void solveYourself() override;
     void solveYourselfAt(TimeStep *tStep) override;

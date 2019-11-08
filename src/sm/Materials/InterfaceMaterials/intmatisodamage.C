@@ -229,10 +229,10 @@ IntMatIsoDamage :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 }
 
 
-IRResultType
-IntMatIsoDamage :: initializeFrom(InputRecord *ir)
+void
+IntMatIsoDamage :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, kn, _IFT_IntMatIsoDamage_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_IntMatIsoDamage_ks);
@@ -246,8 +246,6 @@ IntMatIsoDamage :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IntMatIsoDamage_maxOmega);
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 
@@ -287,7 +285,7 @@ IntMatIsoDamageStatus :: IntMatIsoDamageStatus(GaussPoint *g) : StructuralInterf
 {}
 
 void
-IntMatIsoDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IntMatIsoDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

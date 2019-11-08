@@ -88,12 +88,10 @@ protected:
 public:
     /// Constructor
     DruckerPragerPlasticitySMStatus(GaussPoint * gp);
-    /// Destructor
-    virtual ~DruckerPragerPlasticitySMStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -232,7 +230,7 @@ public:
     /// Destructor
     virtual ~DruckerPragerPlasticitySM() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "DruckerPragerPlasticitySM"; }
     const char *giveInputRecordName() const override { return _IFT_DruckerPragerPlasticitySM_Name; }
@@ -330,7 +328,7 @@ public:
                     InternalStateType type,
                     TimeStep *tStep) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
     {

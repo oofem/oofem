@@ -39,6 +39,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "scalarfunction.h"
+#include "floatmatrixf.h"
 
 ///@name Input fields for IsotropicHeatTransferMaterial
 //@{
@@ -61,45 +62,31 @@ protected:
     ScalarFunction conductivity; ///< Conductivity (k in input file).
     ScalarFunction capacity;     ///< Capacity (c in input file).
     ScalarFunction density;      ///< Density (td in input file).
-    double maturityT0;           ///< Baseline for maturity mathod
+    double maturityT0 = 0.;           ///< Baseline for maturity mathod
 
 public:
     IsotropicHeatTransferMaterial(int n, Domain * d);
-    virtual ~IsotropicHeatTransferMaterial();
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-
-    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
-    virtual double  giveMaturityT0() { return maturityT0; }
+    virtual double giveMaturityT0() const { return maturityT0; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     const char *giveInputRecordName() const override { return _IFT_IsotropicHeatTransferMaterial_Name; }
     const char *giveClassName() const override { return "IsotropicHeatTransferMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
-    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-    double giveTemperature(GaussPoint *gp);
-};
-
-class IsotropicHeatTransferMaterialStatus : public TransportMaterialStatus
-{
-public:
-    IsotropicHeatTransferMaterialStatus(GaussPoint * g);
-    virtual ~IsotropicHeatTransferMaterialStatus();
-    void updateYourself(TimeStep *tStep) override;
+    double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
+    double giveTemperature(GaussPoint *gp) const;
 };
 
 } // end namespace oofem

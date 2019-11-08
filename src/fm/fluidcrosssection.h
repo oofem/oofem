@@ -60,10 +60,8 @@ public:
      * @param d Domain for cross section.
      */
     FluidCrossSection(int n, Domain * d);
-    /// Destructor.
-    virtual ~FluidCrossSection();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     int checkConsistency() override;

@@ -68,9 +68,8 @@ TF1 :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coo
     answer.at(1) = result;
 }
 
-IRResultType
-TF1 :: initializeFrom(InputRecord *ir)
+void
+TF1 :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 } // end namespace oofem

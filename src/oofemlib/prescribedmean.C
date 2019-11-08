@@ -50,11 +50,9 @@ double PrescribedMean :: domainSize;
 
 REGISTER_BoundaryCondition(PrescribedMean);
 
-IRResultType
-PrescribedMean :: initializeFrom(InputRecord *ir)
+void
+PrescribedMean :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, c, _IFT_PrescribedMean_Mean);
@@ -70,8 +68,6 @@ PrescribedMean :: initializeFrom(InputRecord *ir)
     lambdaDman->appendDof( new MasterDof( lambdaDman.get(), ( DofIDItem )newdofid ));
 
     domainSize=-1.;
-
-    return IRRT_OK;
 
 }
 

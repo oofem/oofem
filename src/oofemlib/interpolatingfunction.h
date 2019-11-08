@@ -41,6 +41,7 @@
 //@{
 #define _IFT_InterpolatingFuction_Name "interpolatingfunction"
 #define _IFT_InterpolatingFuction_filename "name"
+#define _IFT_InterpolatingFuction_dim "dim"
 //@}
 
 namespace oofem {
@@ -53,6 +54,7 @@ class OOFEM_EXPORT InterpolatingFuction : public Function
 protected:
     FloatArray field;
     IntArray numberReal;
+    int dimension;
 
 public:
     /// Constructor
@@ -65,7 +67,7 @@ public:
     double evaluateVelocityAtTime(double t) override { return 0.; }
     double evaluateAccelerationAtTime(double t) override { return 0.; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "InterpolatingFuction"; }
     const char *giveInputRecordName() const override { return _IFT_InterpolatingFuction_Name; }
 };

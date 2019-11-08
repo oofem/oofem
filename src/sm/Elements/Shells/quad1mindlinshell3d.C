@@ -456,11 +456,11 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
 }
 
 
-IRResultType
-Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
+void
+Quad1MindlinShell3D :: initializeFrom(InputRecord &ir)
 {
-    this->reducedIntegrationFlag = ir->hasField(_IFT_Quad1MindlinShell3D_ReducedIntegration);
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
+    this->reducedIntegrationFlag = ir.hasField(_IFT_Quad1MindlinShell3D_ReducedIntegration);
 }
 
 

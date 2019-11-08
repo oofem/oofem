@@ -74,7 +74,7 @@ public:
     LIBeam3d2(int n, Domain * d);
     virtual ~LIBeam3d2() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void updateYourself(TimeStep *tStep) override;
 

@@ -36,6 +36,7 @@
 #include "dofmanager.h"
 #include "math.h"
 #include "octreelocalizert.h"
+#include "octreelocalizertutil.h"
 #include "mathfem.h"
 
 namespace oofem {

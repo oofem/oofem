@@ -84,7 +84,7 @@ public:
      * The prescribed gradients columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     /**

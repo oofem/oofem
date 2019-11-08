@@ -50,7 +50,7 @@
 namespace oofem {
 REGISTER_EngngModel(StationaryTransportProblem);
 
-StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = NULL) : EngngModel(i, _master),
+StationaryTransportProblem :: StationaryTransportProblem(int i, EngngModel *_master = nullptr) : EngngModel(i, _master),
     nMethod(nullptr)
 {
     ndomains = 1;
@@ -66,20 +66,17 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
 }
 
 
-IRResultType
-StationaryTransportProblem :: initializeFrom(InputRecord *ir)
+void
+StationaryTransportProblem :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = EngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    EngngModel :: initializeFrom(ir);
 
     int val = SMT_Skyline;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     this->sparseMtrxType = ( SparseMtrxType ) val;
 
     ///@todo Combine this option with structural problems, where it is possible to keep the secant tangent elastic tangent (or generally, the initial tangent) etc. One option should fit all common needs here.
-    this->keepTangent = ir->hasField(_IFT_StationaryTransportProblem_keepTangent);
+    this->keepTangent = ir.hasField(_IFT_StationaryTransportProblem_keepTangent);
 
     // read field export flag
     IntArray exportFields;
@@ -101,8 +98,6 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
         //UnknownsField = std::make_unique<DofDistributedPrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
         UnknownsField = std::make_unique<PrimaryField>(this, 1, FT_TransportProblemUnknowns, 0);
     }
-
-    return IRRT_OK;
 }
 
 

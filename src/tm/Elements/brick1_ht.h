@@ -58,7 +58,6 @@ protected:
 
 public:
     Brick1_ht(int n, Domain * d);
-    virtual ~Brick1_ht();
 
     double computeVolumeAround(GaussPoint *gp) override;
     FEInterpolation *giveInterpolation() const override;
@@ -68,7 +67,7 @@ public:
     const char *giveClassName() const override { return "Brick1_ht"; }
 
     int computeNumberOfDofs() override { return 8; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _3dHeat; }
 
     Interface *giveInterface(InterfaceType t) override;

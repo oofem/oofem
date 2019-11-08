@@ -50,7 +50,6 @@ class QuadAxisym1_ht : public Quad1_ht
 {
 public:
     QuadAxisym1_ht(int n, Domain * d);
-    virtual ~QuadAxisym1_ht();
 
     double computeVolumeAround(GaussPoint *gp) override;
     double giveThicknessAt(const FloatArray &gcoords) override;

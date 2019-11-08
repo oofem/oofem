@@ -65,9 +65,6 @@ Tetrah1_hmt :: Tetrah1_hmt(int n, Domain *aDomain) : Tetrah1_ht(n, aDomain)
     this->emode = HeatMass1TransferEM; // This could be done in a better way.
 }
 
-Tetrah1_ht :: ~Tetrah1_ht()
-{ }
-
 
 FEInterpolation *
 Tetrah1_ht :: giveInterpolation() const
@@ -78,7 +75,6 @@ Tetrah1_ht :: giveInterpolation() const
 
 void
 Tetrah1_ht :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -88,25 +84,22 @@ Tetrah1_ht :: computeGaussPoints()
 }
 
 
-IRResultType
-Tetrah1_ht :: initializeFrom(InputRecord *ir)
+void
+Tetrah1_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 
 double
 Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-    return volume;
+    double weight = gp->giveWeight();
+    return determinant * weight;
 }
 
 
@@ -114,7 +107,7 @@ double
 Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
+                                                                        FEIElementGeometryWrapper(this) );
     return result * gp->giveWeight();
 }
 
@@ -122,11 +115,9 @@ Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 double
 Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double detJ, weight;
-    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-
-    weight = gp->giveWeight();
-    return detJ * weight;
+    double detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), 
+                                                                         FEIElementGeometryWrapper(this) ) );
+    return detJ * gp->giveWeight();
 }
 
 
@@ -141,7 +132,7 @@ Tetrah1_ht :: giveInterface(InterfaceType interface)
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 

@@ -42,8 +42,8 @@
 #include "contextioerr.h"
 
 namespace oofem {
-int
-PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
@@ -632,17 +632,16 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
 }
 
 
-IRResultType
-PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
+void
+PerfectlyPlasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = Material :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    return this->giveLinearElasticMaterial()->initializeFrom(ir);
+    Material :: initializeFrom(ir);
+    this->giveLinearElasticMaterial()->initializeFrom(ir);
 }
 
 
 double
-PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
+PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -706,10 +705,6 @@ PerfectlyPlasticMaterialStatus :: PerfectlyPlasticMaterialStatus(GaussPoint *g) 
 }
 
 
-PerfectlyPlasticMaterialStatus :: ~PerfectlyPlasticMaterialStatus()
-{ }
-
-
 void
 PerfectlyPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
@@ -743,7 +738,7 @@ PerfectlyPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode
 
 
 void
-PerfectlyPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+PerfectlyPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { yield_flag %d}\n", yield_flag);

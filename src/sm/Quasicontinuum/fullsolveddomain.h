@@ -66,7 +66,7 @@ public:
     QCFullsolveddomain();
     virtual ~QCFullsolveddomain();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     virtual void updateYourself();
 

@@ -475,15 +475,11 @@ void TrPlanestressRotAllman :: computeBoundaryEdgeLoadVector(FloatArray &answer,
  * }
  */
 
-IRResultType
-TrPlanestressRotAllman :: initializeFrom(InputRecord *ir)
+void
+TrPlanestressRotAllman :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = TrPlaneStress2d :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    TrPlaneStress2d :: initializeFrom(ir);
     numberOfGaussPoints = 4;
-    return IRRT_OK;
 }
 
 

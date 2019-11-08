@@ -38,6 +38,7 @@
 #include "rankinemat.h"
 #include "structuralnonlocalmaterialext.h"
 #include "nonlocmatstiffinterface.h"
+#include "nonlocalmaterialext.h"
 #include "cltypes.h"
 
 #define _IFT_RankineMatNl_Name "rankmatnl"
@@ -58,12 +59,10 @@ protected:
 
 public:
     RankineMatNlStatus(GaussPoint * g);
-    virtual ~RankineMatNlStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveLocalCumPlasticStrainForAverage() { return localCumPlasticStrainForAverage; }
-    const FloatArray *giveLTangentContrib();
+    double giveLocalCumPlasticStrainForAverage() const { return localCumPlasticStrainForAverage; }
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "RankineMatNlStatus"; }
@@ -74,8 +73,8 @@ public:
 
     void setKappa_nl(double kap) { kappa_nl = kap; }
     void setKappa_hat(double kap) { kappa_hat = kap; }
-    double giveKappa_nl() { return kappa_nl; }
-    double giveKappa_hat() { return kappa_hat; }
+    double giveKappa_nl() const { return kappa_nl; }
+    double giveKappa_hat() const { return kappa_hat; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -97,7 +96,7 @@ public:
     const char *giveClassName() const override { return "RankineMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_RankineMatNl_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType) override;
@@ -110,7 +109,7 @@ public:
      */
     virtual void computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
-    void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
+    //void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
     void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
     {
@@ -168,6 +167,9 @@ public:
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+
+    /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
+    double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
 
     int hasBoundedSupport() override { return 1; }
 

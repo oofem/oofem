@@ -53,7 +53,7 @@ public:
 
     virtual NLStructuralElement *giveElement( ) = 0;
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     virtual void giveDofManDofIDMask_u(IntArray &answer) = 0;
     virtual void giveDofManDofIDMask_d(IntArray &answer) = 0;
 

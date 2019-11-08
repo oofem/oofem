@@ -71,31 +71,30 @@ protected:
 
 public:
     RCSDMaterialStatus(GaussPoint * g);
-    virtual ~RCSDMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveTempMaxEquivStrain() { return tempMaxEquivStrain; }
+    double giveTempMaxEquivStrain() const { return tempMaxEquivStrain; }
     void setTempMaxEquivStrain(double val) { tempMaxEquivStrain = val; }
-    double giveDamageStiffCoeff() { return damageStiffCoeff; }
+    double giveDamageStiffCoeff() const { return damageStiffCoeff; }
     void setDamageStiffCoeff(double val) { damageStiffCoeff = val; }
-    double giveTempDamageCoeff() { return tempDamageCoeff; }
+    double giveTempDamageCoeff() const { return tempDamageCoeff; }
     void setTempDamageCoeff(double val) { tempDamageCoeff = val; }
     const FloatMatrix *giveDs0Matrix() { return & Ds0; }
     void setDs0Matrix(FloatMatrix &mtrx) { Ds0 = mtrx; }
-    double giveDamageEpsfCoeff() { return depsf; }
+    double giveDamageEpsfCoeff() const { return depsf; }
     void setDamageEpsfCoeff(double val) { depsf = val; }
-    double giveDamageEpspCoeff() { return depsp; }
+    double giveDamageEpspCoeff() const { return depsp; }
     void setDamageEpspCoeff(double val) { depsp = val; }
 
-    rcsdMode giveTempMode() { return tempMode; }
+    rcsdMode giveTempMode() const { return tempMode; }
     void setTempMode(rcsdMode mode) { tempMode = mode; }
 
     // query for non-tem variables (usefull for postprocessing)
-    double giveMaxEquivStrain() { return maxEquivStrain; }
-    double giveDamageCoeff() { return damageCoeff; }
+    double giveMaxEquivStrain() const { return maxEquivStrain; }
+    double giveDamageCoeff() const { return damageCoeff; }
 
-    rcsdMode giveMode() { return mode; }
+    rcsdMode giveMode() const { return mode; }
 
     const char *giveClassName() const override { return "RCSDMaterialStatus"; }
 
@@ -126,9 +125,9 @@ public:
     const char *giveInputRecordName() const override { return _IFT_RCSDMaterial_Name; }
     const char *giveClassName() const override { return "RCSDMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep) override;

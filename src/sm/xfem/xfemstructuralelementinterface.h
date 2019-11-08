@@ -72,7 +72,7 @@ public:
 
     virtual void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
 
-    virtual IRResultType initializeCZFrom(InputRecord *ir);
+    virtual void initializeCZFrom(InputRecord &ir);
     virtual void giveCZInputRecord(DynamicInputRecord &input);
 
     virtual void initializeCZMaterial();

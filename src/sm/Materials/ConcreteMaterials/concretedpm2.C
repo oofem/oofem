@@ -175,7 +175,7 @@ ConcreteDPM2Status :: updateYourself(TimeStep *tStep)
 }
 
 void
-ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteDPM2Status :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // Call corresponding function of the parent class to print
     StructuralMaterialStatus :: printOutputAt(file, tStep);
@@ -500,28 +500,18 @@ ConcreteDPM2 :: ConcreteDPM2(int n, Domain *d) :
 
 ConcreteDPM2 :: ~ConcreteDPM2() { }
 
-IRResultType
-ConcreteDPM2 :: initializeFrom(InputRecord *ir)
+void
+ConcreteDPM2 :: initializeFrom(InputRecord &ir)
 {
-    // Required by IR_GIVE_FIELD macro
-    IRResultType result;
-
     // call the corresponding service for the linear elastic material
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     //isotropic flag
     isotropicFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, isotropicFlag, _IFT_ConcreteDPM2_isoflag);
 
-    double value;
+    
     // elastic parameters
     IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e)
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
@@ -529,6 +519,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     propertyDictionary.add('n', nu);
 
     // done in strucutral material
+    //double value;
     //IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
     //propertyDictionary.add(tAlpha, value);
 
@@ -572,8 +563,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 2 ) {
-        OOFEM_WARNING("softening type not implemented");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_ConcreteDPM2_softeningType, "softening type not implemented");
     }
 
     IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);
@@ -590,7 +580,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 
     this->ASoft = 15;
     IR_GIVE_OPTIONAL_FIELD(ir, ASoft, _IFT_ConcreteDPM2_asoft);
-
+    
     helem = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, helem, _IFT_ConcreteDPM2_helem);
 
@@ -616,8 +606,6 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fcZero, _IFT_ConcreteDPM2_fcZero);
         IR_GIVE_OPTIONAL_FIELD(ir, timeFactor, _IFT_ConcreteDPM2_timeFactor);
     }
-
-    return IRRT_OK;
 }
 
 
@@ -1485,7 +1473,7 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
             tempPlasticStrain.subtract(elasticStrain);
             status->letTempPlasticStrainBe(tempPlasticStrain);
         } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
-            OOFEM_LOG_INFO("Subincrementation %d required\n", subincrementcounter);
+	  //            OOFEM_LOG_INFO("Subincrementation %d required\n", subincrementcounter);
             subincrementcounter = 0;
             elasticStrain.beProductOf(C, effectiveStress);
             tempPlasticStrain = tempStrain;
@@ -1668,6 +1656,8 @@ ConcreteDPM2 :: computeDuctilityMeasure(double sig,
         ductilityMeasure = ( AHard + ( BHard - AHard ) * exp( -x / ( CHard ) ) ) / thetaConst;
     }
 
+    printf("ductilityMeasure = %e at x = %e\n", ductilityMeasure, x);
+    
     return ductilityMeasure;
 }
 

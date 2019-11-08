@@ -93,7 +93,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_PlaneStress2d_Name; }
     const char *giveClassName() const override { return "PlaneStress2d"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 protected:
 

@@ -102,7 +102,9 @@ void exception_handler() {
         }
     } catch(const std::exception& e) {
         fprintf(stderr, "Caught exception: %s\n", e.what());
+#ifdef __GNUC__
         print_stacktrace();
+#endif
         exit(1);
     }
 }

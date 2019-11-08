@@ -116,10 +116,10 @@ CohesiveInterfaceMaterial :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, Ga
 }
 
 
-IRResultType
-CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
+void
+CohesiveInterfaceMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     // elastic parameters
     IR_GIVE_FIELD(ir, kn, _IFT_CohesiveInterfaceMaterial_kn);
@@ -132,8 +132,6 @@ CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
 
     smoothMag = 1.e+8;
     IR_GIVE_OPTIONAL_FIELD(ir, smoothMag, _IFT_CohesiveInterfaceMaterial_smoothMag);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void

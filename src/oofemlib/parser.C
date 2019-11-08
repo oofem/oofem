@@ -96,7 +96,13 @@ double Parser :: term(bool get) // multiply and divide
             }
             OOFEM_ERROR("divide by 0");
             return 1;
-
+        case MOD:
+            if ( ( d = prim(true) ) ) {
+                left = fmod(left,d);
+                break;
+            }
+            OOFEM_ERROR("divide by 0");
+            return 1;
         case POW:
             left = pow( left, prim(true) );
             break;
@@ -186,12 +192,24 @@ double Parser :: prim(bool get) // handle primaries
         double e = agr(true);
         return exp(e);
     }
+    case INT_FUNC:
+    {
+        double e = agr(true);
+        return (int)(e);
+    }
     case HEAVISIDE_FUNC: //Heaviside function
     {
         double time = look("t")->value;
         double e = agr(true);
 
         return time < e ? 0 : 1;
+    }
+
+    case HEAVISIDE_FUNC1: //Heaviside function
+    {
+        double e = agr(true);
+
+        return e<0 ? 0 : 1;
     }
 
     default:
@@ -252,6 +270,7 @@ Parser :: Token_value Parser :: get_token()
     case '-':
     case '(':
     case ')':
+    case '%':
         return curr_tok = Token_value(ch);
 
     case '=':
@@ -323,8 +342,12 @@ Parser :: Token_value Parser :: get_token()
                 return curr_tok = ASIN_FUNC;
             } else if ( !strncmp(string_value, "acos", 4) ) {
                 return curr_tok = ACOS_FUNC;
-            } else if ( !strncmp(string_value, "exp", 4) ) {
+            } else if ( !strncmp(string_value, "exp", 3) ) {
                 return curr_tok = EXP_FUNC;
+            } else if ( !strncmp(string_value, "int", 3) ) {
+                return curr_tok = INT_FUNC;
+            } else if ( !strncmp(string_value, "h1", 2) ) {
+                return curr_tok = HEAVISIDE_FUNC1;
             } else if ( !strncmp(string_value, "h", 1) ) {
                 return curr_tok = HEAVISIDE_FUNC;
             } else if ( !strncmp(string_value, "pi", 2) ) {

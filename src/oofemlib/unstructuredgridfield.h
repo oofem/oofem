@@ -48,8 +48,8 @@
 #include "fei2dquadquad.h"
 #include "fei3dtetlin.h"
 #include "fei3dhexalin.h"
+#include "octreelocalizert.h"
 
-#include "pfem/octreelocalizert.h"
 #include "error.h"
 
 namespace oofem {
@@ -226,7 +226,7 @@ protected:
   private:
   public:
     CellInsertionFunctor () {}
-    virtual bool evaluate (Cell& member, OctantRecT<Cell>* cell) override {
+    bool evaluate (Cell& member, OctantRecT<Cell>* cell) override {
       BoundingBox b;
       member.giveBoundingBox(b);
       OctantRec::BoundingBoxStatus s = cell->testBoundingBox(b);

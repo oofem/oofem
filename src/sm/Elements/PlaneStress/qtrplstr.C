@@ -87,11 +87,11 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
 }
 
 
-IRResultType
-QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
+void
+QTrPlaneStress2d :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    return PlaneStressElement :: initializeFrom(ir);
+    PlaneStressElement :: initializeFrom(ir);
 }
 
 

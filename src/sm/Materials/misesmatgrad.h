@@ -34,8 +34,8 @@
 
 #ifndef MisesMatGrad_h
 
-#include "sm/Materials/misesmat.h"
-#include "graddpmaterialextensioninterface.h"
+#include "Materials/misesmat.h"
+#include "graddamagematerialextensioninterface.h"
 #include "cltypes.h"
 
 ///@name Input fields for MisesMatGrad
@@ -49,49 +49,51 @@ namespace oofem {
 /**
  * Gradient Mises maaterial status.
  */
-class MisesMatGradStatus : public MisesMatStatus, GradDpMaterialStatusExtensionInterface
+class MisesMatGradStatus : public MisesMatStatus, GradientDamageMaterialStatusExtensionInterface
 {
 protected:
     double localCumPlastStrainForAverage;
 
 public:
-    MisesMatGradStatus(GaussPoint * g);
+    MisesMatGradStatus(GaussPoint *g);
     virtual ~MisesMatGradStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
+    // definition
     const char *giveClassName() const override { return "MisesMatGradStatus"; }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
-    double giveNonlocalCumulatedStrain() override { return nonlocalCumulatedStrain; }
-    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) override { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
+    double giveNonlocalCumulatedStrain() const { return nonlocalDamageDrivingVariable; }
+    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalDamageDrivingVariable = nonlocalCumulatedStrain; }
 };
 
 
 /**
  * Gradient Mises material.
  */
-class MisesMatGrad : public MisesMat, GradDpMaterialExtensionInterface
+class MisesMatGrad : public MisesMat, GradientDamageMaterialExtensionInterface
 {
 protected:
     double L;
     double mParam;
 
 public:
-    MisesMatGrad(int n, Domain * d);
+    MisesMatGrad(int n, Domain *d);
     virtual ~MisesMatGrad();
 
+    // definition
     const char *giveInputRecordName() const override { return _IFT_MisesMatGrad_Name; }
     const char *giveClassName() const override { return "MisesMatGrad"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    void initializeFrom(InputRecord &ir) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     Interface *giveInterface(InterfaceType t) override {
-        if ( t == GradDpMaterialExtensionInterfaceType ) {
-            return static_cast< GradDpMaterialExtensionInterface * >(this);
+        if ( t == GradientDamageMaterialExtensionInterfaceType ) {
+            return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
             return nullptr;
         }
@@ -99,16 +101,16 @@ public:
 
     void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
+    void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
+    void givePlaneStrainStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
+    void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
 
-    void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
+
 
     void give1dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void givePlaneStrainKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -120,8 +122,14 @@ public:
 
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
+
+    void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
+
     void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
+    //    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MisesMatGradStatus(gp); }

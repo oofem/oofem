@@ -87,7 +87,7 @@ public:
     void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
                          bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double calculateMinimumDistanceFromBoundary(const FloatArray &coords) override;
 

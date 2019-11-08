@@ -162,7 +162,7 @@ public:
     // identification and auxiliary functions
     const char *giveInputRecordName() const override { return _IFT_FiberedCrossSection_Name; }
     const char *giveClassName() const override { return "FiberedCrossSection"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void createMaterialStatus(GaussPoint &iGP) override; // ES
 
@@ -202,6 +202,8 @@ public:
     { OOFEM_ERROR("not implemented"); }
     void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override
     { OOFEM_ERROR("not implemented"); }
+    
+    Material *giveMaterial(IntegrationPoint *ip) override;
 };
 
 /**

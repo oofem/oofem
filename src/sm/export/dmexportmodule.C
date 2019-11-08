@@ -55,15 +55,13 @@ DofManExportModule :: ~DofManExportModule()
 { }
 
 
-IRResultType
-DofManExportModule :: initializeFrom(InputRecord *ir)
+void
+DofManExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    ExportModule :: initializeFrom(ir);
 
     // Read in dofMan's to export - defaults to all
     IR_GIVE_OPTIONAL_FIELD(ir, this->dofManList, _IFT_DofManExportModule_dmlist);
-
-    return ExportModule :: initializeFrom(ir);
 }
 
 

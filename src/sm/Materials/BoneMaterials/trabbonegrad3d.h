@@ -36,7 +36,7 @@
 #define TrabBoneGrad3D_h
 
 #include "trabbone3d.h"
-#include "sm/Materials/graddpmaterialextensioninterface.h"
+#include "../sm/Materials/graddamagematerialextensioninterface.h"
 #include "cltypes.h"
 
 #define _IFT_TrabBoneGrad3D_Name "trabbonegrad3d"
@@ -49,72 +49,77 @@ class LinearElasticMaterial;
 /**
  * Gradient bone damage-plastic material status.
  */
-class TrabBoneGrad3DStatus : public TrabBone3DStatus, GradDpMaterialStatusExtensionInterface
+class TrabBoneGrad3DStatus : public TrabBone3DStatus, GradientDamageMaterialStatusExtensionInterface
 {
 protected:
     /// Equivalent strain for avaraging
-    double nlKappa;
+    double nlKappa = 0.;
     /// Reference to the basic elastic material
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
     TrabBoneGrad3DStatus(GaussPoint *g);
-    virtual ~TrabBoneGrad3DStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "TrabBoneGrad3DStatus"; }
 
-    double giveNonlocalCumulatedStrain() override { return nonlocalCumulatedStrain; }
-    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) override { this->nonlocalCumulatedStrain = nonlocalCumulatedStrain; }
+
+    double giveNonlocalCumulatedStrain() const { return nonlocalDamageDrivingVariable; }
+    void setNonlocalCumulatedStrain(double nonlocalCumulatedStrain) { this->nonlocalDamageDrivingVariable = nonlocalCumulatedStrain; }
 
     void initTempStatus() override;
-
-    void updateYourself(TimeStep *tStep) override;
+    void updateYourself(TimeStep *) override;
 };
 
 
 /**
  * Gradient bone damage-plastic material model.
  */
-class TrabBoneGrad3D : public TrabBone3D, GradDpMaterialExtensionInterface
+class TrabBoneGrad3D : public TrabBone3D, GradientDamageMaterialExtensionInterface
 {
 protected:
-    double L;
-    double mParam;
+    double L = 0.;
+    double mParam = 0.;
 
 public:
     TrabBoneGrad3D(int n, Domain *d);
-    virtual ~TrabBoneGrad3D();
 
     const char *giveClassName() const override { return "TrabBoneGrad3D"; }
     const char *giveInputRecordName() const override { return _IFT_TrabBoneGrad3D_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    void initializeFrom(InputRecord &ir) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     Interface *giveInterface(InterfaceType t) override {
-        if ( t == GradDpMaterialExtensionInterfaceType ) {
-            return static_cast< GradDpMaterialExtensionInterface * >( this );
+        if ( t == GradientDamageMaterialExtensionInterfaceType ) {
+            return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
-            return nullptr;
+            return NULL;
         }
     }
 
-    void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
     void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
     void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void giveRealStressVectorGrad(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 
+    void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
+
+    void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) override;
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
+    //LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
+
+protected:
+    // Creates the corresponding material status
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneGrad3DStatus(gp); }
 };
 } // end namespace oofem

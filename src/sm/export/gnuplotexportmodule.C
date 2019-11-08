@@ -84,22 +84,22 @@ GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
 GnuplotExportModule::~GnuplotExportModule()
 {}
 
-IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
+void GnuplotExportModule::initializeFrom(InputRecord &ir)
 {
-    mExportReactionForces = ir->hasField(_IFT_GnuplotExportModule_ReactionForces);
-    mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
-    mExportBoundaryConditionsExtra = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditionsExtra);
-    mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
-    mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
-    mExportCrackLength = ir->hasField(_IFT_GnuplotExportModule_cracklength);
-    mExportInterfaceEl = ir->hasField(_IFT_GnuplotExportModule_interface_el);
+    ExportModule::initializeFrom(ir);
 
-    ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
+    mExportReactionForces = ir.hasField(_IFT_GnuplotExportModule_ReactionForces);
+    mExportBoundaryConditions = ir.hasField(_IFT_GnuplotExportModule_BoundaryConditions);
+    mExportBoundaryConditionsExtra = ir.hasField(_IFT_GnuplotExportModule_BoundaryConditionsExtra);
+    mExportMesh = ir.hasField(_IFT_GnuplotExportModule_mesh);
+    mExportXFEM = ir.hasField(_IFT_GnuplotExportModule_xfem);
+    mExportCrackLength = ir.hasField(_IFT_GnuplotExportModule_cracklength);
+    mExportInterfaceEl = ir.hasField(_IFT_GnuplotExportModule_interface_el);
 
-    ir->giveOptionalField(mMatForceRadii, _IFT_GnuplotExportModule_materialforceradii);
+    ir.giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
+
+    ir.giveOptionalField(mMatForceRadii, _IFT_GnuplotExportModule_materialforceradii);
 //    printf("mMatForceRadii: "); mMatForceRadii.printYourself();
-
-    return ExportModule::initializeFrom(ir);
 }
 
 void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)

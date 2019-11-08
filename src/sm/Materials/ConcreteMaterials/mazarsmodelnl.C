@@ -53,19 +53,13 @@ MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), S
 }
 
 
-MazarsNLMaterial :: ~MazarsNLMaterial()
-//
-// destructor
-//
-{ }
-
 Interface *
 MazarsNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
         return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -122,15 +116,11 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     kappa = nonlocalEquivalentStrain;
 }
 
-IRResultType
-MazarsNLMaterial :: initializeFrom(InputRecord *ir)
+void
+MazarsNLMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MazarsMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MazarsMaterial :: initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, R, _IFT_MazarsNLMaterial_r);
     if ( R < 0.0 ) {
@@ -138,8 +128,6 @@ MazarsNLMaterial :: initializeFrom(InputRecord *ir)
     }
 
     this->hReft = this->hRefc = 1.0;
-
-    return IRRT_OK;
 }
 
 
@@ -182,12 +170,8 @@ MazarsNLMaterialStatus :: MazarsNLMaterialStatus(GaussPoint *g) :
 }
 
 
-MazarsNLMaterialStatus :: ~MazarsNLMaterialStatus()
-{ }
-
-
 void
-MazarsNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MazarsNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

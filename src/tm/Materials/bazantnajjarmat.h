@@ -58,32 +58,31 @@ class BazantNajjarMoistureTransferMaterial : public IsotropicMoistureTransferMat
 {
 protected:
     /// sorption isotherm derivative [kg/m^3]
-    double moistureCapacity;
+    double moistureCapacity = 0.;
 
     /// maximal permeability [kg/ m s]
-    double C1;
+    double C1 = 0.;
     /// exponent in nonlinear permeability function [-]
-    double n;
+    double n = 0.;
     /// fraction minimal/maximal permeability [-]
-    double alpha0;
+    double alpha0 = 0.;
     /// nonlinear threshold [-]
-    double hC;
+    double hC = 0.;
 
 public:
     BazantNajjarMoistureTransferMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
-    virtual ~BazantNajjarMoistureTransferMaterial() { }
 
     /// evaluates permeability according to Bazant - Najjar function for diffusivity
-    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) const override;
     /// evaluates slope of the sorption isotherm
-    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_BazantNajjarMoistureTransferMaterial_Name; }
     const char *giveClassName() const override { return "BazantNajjarMoistureTransferMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 };
 } // end namespace oofem
 #endif // bazantnajjarmat_h

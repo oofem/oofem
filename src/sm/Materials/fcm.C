@@ -48,13 +48,9 @@ FCMMaterial :: FCMMaterial(int n, Domain *d) : StructuralMaterial(n, d),
     ecsMethod(ECSM_Unknown)
 {}
 
-FCMMaterial :: ~FCMMaterial() {}
 
-int
-FCMMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+FCMMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
@@ -93,7 +89,7 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     int nCr = status->giveNumberOfCracks();
     int nMaxCr = status->giveMaxNumberOfCracks(gp);
 
-    double maxErr;
+    double maxErr = 0.;
     double maxTau = 0.;
 
     double G;
@@ -1978,32 +1974,23 @@ FCMMaterial :: computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearD
 
   
 
-IRResultType
-FCMMaterial :: initializeFrom(InputRecord *ir)
+void
+FCMMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     this->nAllowedCracks = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, nAllowedCracks, _IFT_FCM_nAllowedCracks);
 
 
     this->crackSpacing = -1.;
-    if  ( ir->hasField(_IFT_FCM_crackSpacing) ) {
+    if ( ir.hasField(_IFT_FCM_crackSpacing) ) {
         IR_GIVE_FIELD(ir, crackSpacing, _IFT_FCM_crackSpacing);
     }
 
     this->multipleCrackShear = false;
-    if  ( ir->hasField(_IFT_FCM_multipleCrackShear) ) {
+    if ( ir.hasField(_IFT_FCM_multipleCrackShear) ) {
         this->multipleCrackShear = true;
     }
 
@@ -2025,13 +2012,11 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, shearCoeffNumer, _IFT_FCM_shearCoeffNumer);
     this->normalCoeffNumer = -1. * fcm_BIGNUMBER;
     IR_GIVE_OPTIONAL_FIELD(ir, normalCoeffNumer, _IFT_FCM_normalCoeffNumer);
-
-    return IRRT_OK;
 }
 
 
 double
-FCMMaterial :: give(int aProperty, GaussPoint *gp)
+FCMMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return linearElasticMaterial.give(aProperty, gp);
 }
@@ -2369,21 +2354,15 @@ FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
 }
 
 
-FCMMaterialStatus :: ~FCMMaterialStatus()
-{ }
-
-
-
 void
-FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->giveNumberOfCracks() > 0 ) {
-        for ( i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
+        for ( int i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
             switch ( crackStatuses.at(i) ) {
             case pscm_NONE:
                 strcpy(s, "NONE");

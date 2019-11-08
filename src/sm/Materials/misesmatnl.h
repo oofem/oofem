@@ -61,14 +61,12 @@ protected:
 
 public:
     MisesMatNlStatus(GaussPoint * g);
-    virtual ~MisesMatNlStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     // STATE VARIABLE
     // declare state variable access and modification methods
     double giveLocalCumPlasticStrainForAverage() { return localCumPlasticStrainForAverage; }
-    const FloatArray *giveLTangentContrib();
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "MisesMatNlStatus"; }
@@ -102,7 +100,7 @@ public:
     const char *giveClassName() const override { return "MisesMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_MisesMatNl_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType) override;

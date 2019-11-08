@@ -59,8 +59,8 @@ Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 Masonry02 :: ~Masonry02()
 { }
 
-int
-Masonry02 :: hasMaterialModeCapability(MaterialMode mode)
+bool
+Masonry02 :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
@@ -68,16 +68,11 @@ Masonry02 :: hasMaterialModeCapability(MaterialMode mode)
     return mode == _2dInterface;
 }
 
-IRResultType
-Masonry02 :: initializeFrom(InputRecord *ir)
+void
+Masonry02 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MPlasticMaterial2 :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MPlasticMaterial2 :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, ft0, _IFT_Masonry02_ft0);
     IR_GIVE_FIELD(ir, gfI, _IFT_Masonry02_gfi);
@@ -103,11 +98,9 @@ Masonry02 :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, km, _IFT_Masonry02_km);
     IR_GIVE_FIELD(ir, kr, _IFT_Masonry02_kr);
 
-    if ( ir->hasField(_IFT_Masonry02_cplane) ) {
+    if ( ir.hasField(_IFT_Masonry02_cplane) ) {
         this->rmType = mpm_CuttingPlane;
     }
-
-    return IRRT_OK;
 }
 
 

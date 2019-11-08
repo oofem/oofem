@@ -1,0 +1,27 @@
+hydratingConcreteMat06.out
+Test of hydrating concrete material, one linear triangluar element, transient transport solver, isothermal conditions, Rahimi-Agham's model
+TransientTransport nsteps 30 deltat 7200. alpha 0.5 nmodules 1
+errorcheck
+#vtkxml tstep_step 1 domain_all primvars 1 6 vars 4 37 39 56 96 stype 1
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 1 nltf 1 nset 1
+node 1 coords 3  1.0   0.0   0.0
+node 2 coords 3  2.2   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+tr1ht 1 nodes 3 1 2 3 crossSect 1
+SimpleTransportCS 1 thickness 0.15 mat 1
+#Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
+HydratingConcreteMat 1 d 2458. k 1.7 c 870.0 hydrationmodeltype 3 Qpot 509. masscement 400. w/c 0.50 a/c 5.0 castingTime 0. maturityT0 20.
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 10 values 1 20.0 set 1
+InitialCondition 1 Conditions 1 u 20.0 dofs 1 10 set 1
+ConstantFunction 1 f(t) 1.0
+Set 1 elements 1 1
+
+#%BEGIN_CHECK% tolerance 1.e-3
+#TIME
+#ELEMENT tStep 1 number 1 gp 1 keyword 39 component 1 value 0.05
+##ELEMENT tStep 30 number 1 gp 1 keyword 39 component 1 value 5.20334463e-01
+##ELEMENT tStep 6 number 2 gp 1 keyword 39 component 1 value 1.07180394e-01
+##ELEMENT tStep 30 number 2 gp 1 keyword 39 component 1 value 6.48537723e-01
+#%END_CHECK%

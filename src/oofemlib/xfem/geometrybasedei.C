@@ -70,34 +70,32 @@ GeometryBasedEI :: ~GeometryBasedEI()
 
 int GeometryBasedEI :: instanciateYourself(DataReader &dr)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     // Instantiate enrichment function
-    InputRecord *mir = dr.giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
-    result = mir->giveRecordKeywordField(name);
+    {
+        auto &mir = dr.giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
+        mir.giveRecordKeywordField(name);
 
-    if ( result != IRRT_OK ) {
-        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+        mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
+        if ( mpEnrichmentFunc ) {
+            mpEnrichmentFunc->initializeFrom(mir);
+        } else {
+            OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
+        }
     }
-
-    mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
-    if ( mpEnrichmentFunc ) {
-        mpEnrichmentFunc->initializeFrom(mir);
-    } else {
-        OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
-    }
-
 
     // Instantiate geometry
-    mir = dr.giveInputRecord(DataReader :: IR_geoRec, 1);
-    result = mir->giveRecordKeywordField(name);
-    mpBasicGeometry = classFactory.createGeometry( name.c_str() );
-    if ( !mpBasicGeometry ) {
-        OOFEM_ERROR( "unknown geometry domain (%s)", name.c_str() );
-    }
+    {
+        auto &mir = dr.giveInputRecord(DataReader :: IR_geoRec, 1);
+        mir.giveRecordKeywordField(name);
+        mpBasicGeometry = classFactory.createGeometry( name.c_str() );
+        if ( !mpBasicGeometry ) {
+            OOFEM_ERROR( "unknown geometry domain (%s)", name.c_str() );
+        }
 
-    mpBasicGeometry->initializeFrom(mir);
+        mpBasicGeometry->initializeFrom(mir);
+    }
 
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
@@ -106,8 +104,8 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
     } else {
         std :: string enrFrontNameStart, enrFrontNameEnd;
 
-        InputRecord *enrFrontStartIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        result = enrFrontStartIr->giveRecordKeywordField(enrFrontNameStart);
+        auto &enrFrontStartIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        enrFrontStartIr.giveRecordKeywordField(enrFrontNameStart);
 
         mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
         if ( mpEnrichmentFrontStart ) {
@@ -116,8 +114,8 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
             OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameStart.c_str() );
         }
 
-        InputRecord *enrFrontEndIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        result = enrFrontEndIr->giveRecordKeywordField(enrFrontNameEnd);
+        auto &enrFrontEndIr = dr.giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        enrFrontEndIr.giveRecordKeywordField(enrFrontNameEnd);
 
         mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
         if ( mpEnrichmentFrontEnd ) {
@@ -134,11 +132,11 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
     } else {
         std :: string propLawName;
 
-        InputRecord *propLawir = dr.giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
-        result = propLawir->giveRecordKeywordField(propLawName);
+        auto &propLawir = dr.giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
+        propLawir.giveRecordKeywordField(propLawName);
 
         mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
-        if ( mpPropagationLaw != NULL ) {
+        if ( mpPropagationLaw ) {
             mpPropagationLaw->initializeFrom(propLawir);
         } else {
             OOFEM_ERROR( "Failed to create propagation law (%s)", propLawName.c_str() );

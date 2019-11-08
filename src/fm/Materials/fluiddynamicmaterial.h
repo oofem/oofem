@@ -65,7 +65,7 @@ public:
     /// Constructor - creates new TransportMaterialStatus with number n, belonging to domain d and integration point g.
     FluidDynamicMaterialStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;

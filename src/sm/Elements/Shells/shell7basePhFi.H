@@ -128,7 +128,7 @@ protected:
     virtual const IntArray &giveOrderingPhFi(SolutionFieldPhFi fieldType) const = 0;
     virtual const IntArray &giveOrdering_Disp() const = 0;
     virtual const IntArray &giveOrdering_Damage() const = 0;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // Tangent matrices
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;

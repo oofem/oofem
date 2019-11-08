@@ -40,6 +40,7 @@
 #include "contextmode.h"
 #include "datastream.h"
 #include "error.h"
+#include "floatarray.h"
 
 #include <array>
 #include <initializer_list>
@@ -258,6 +259,16 @@ FloatArrayF<N> operator - ( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
 }
 
 template<int N>
+FloatArrayF<N> operator - ( const FloatArrayF<N> & x )
+{
+    FloatArrayF<N> out;
+    for ( int i = 0; i < N; ++i ) {
+        out[i] = - x[i];
+    }
+    return out;
+}
+
+template<int N>
 FloatArrayF<N> &operator += ( FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
     for ( int i = 0; i < N; ++i ) {
@@ -433,6 +444,11 @@ FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 /// I expressed in Voigt form
 const FloatArrayF<6> I6 {1., 1., 1., 0., 0., 0.};
 
+/// For more readable code
+template<int N>
+FloatArrayF<N> zeros() {
+    return FloatArrayF<N>();
+}
 
 } // end namespace oofem
 #endif // floatarrayf_h

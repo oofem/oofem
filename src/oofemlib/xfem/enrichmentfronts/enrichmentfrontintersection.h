@@ -76,7 +76,7 @@ public:
     const char *giveClassName() const override { return "EnrFrontIntersection"; }
     const char *giveInputRecordName() const override { return _IFT_EnrFrontIntersection_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     double giveSupportRadius() const override { return 0.0; }

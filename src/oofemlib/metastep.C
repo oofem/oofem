@@ -49,16 +49,12 @@ MetaStep :: MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib) :
 {}
 
 
-IRResultType
-MetaStep :: initializeFrom(InputRecord *ir)
+void
+MetaStep :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_MetaStep_nsteps);
 
-    this->attributes = ir->clone();
-
-    return IRRT_OK;
+    this->attributes = ir.clone();
 }
 
 int

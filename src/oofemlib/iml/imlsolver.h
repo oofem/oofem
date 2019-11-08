@@ -96,7 +96,7 @@ public:
 
     NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "IMLSolver"; }
     LinSystSolverType giveLinSystSolverType() const override { return ST_IML; }
     SparseMtrxType giveRecommendedMatrix(bool symmetric) const override { return symmetric ? SMT_SymCompCol : SMT_CompCol; }

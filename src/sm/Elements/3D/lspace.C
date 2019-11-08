@@ -87,12 +87,46 @@ LSpace :: giveInterface(InterfaceType interface)
 }
 
 
-IRResultType
-LSpace :: initializeFrom(InputRecord *ir)
+void
+LSpace :: initializeFrom(InputRecord &ir)
 {
+    Structural3DElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
-    return Structural3DElement :: initializeFrom(ir);
+    this->reducedShearIntegration = ir.hasField(_IFT_LSpace_reducedShearIntegration);
 }
+
+
+
+void
+LSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
+// Returns the [ 6 x (nno*3) ] strain-displacement matrix {B} of the receiver, eva-
+// luated at gp.
+// B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
+{
+    FEInterpolation *interp = this->giveInterpolation();
+    FloatMatrix dNdx, dNdxShear;
+    interp->evaldNdx( dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    if ( this->reducedShearIntegration ) {
+        interp->evaldNdx( dNdxShear, { 0., 0., 0. }, FEIElementGeometryWrapper(this) );
+    } else {
+        dNdxShear =  dNdx;
+    }
+
+    answer.resize(6, dNdx.giveNumberOfRows() * 3);
+    answer.zero();
+
+    for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
+        answer.at(1, 3 * i - 2) = dNdx.at(i, 1);
+        answer.at(2, 3 * i - 1) = dNdx.at(i, 2);
+        answer.at(3, 3 * i - 0) = dNdx.at(i, 3);
+
+        answer.at(5, 3 * i - 2) = answer.at(4, 3 * i - 1) = dNdxShear.at(i, 3);
+        answer.at(6, 3 * i - 2) = answer.at(4, 3 * i - 0) = dNdxShear.at(i, 2);
+        answer.at(6, 3 * i - 1) = answer.at(5, 3 * i - 0) = dNdxShear.at(i, 1);
+    }
+}
+
+
 
 
 void
@@ -151,7 +185,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 
     int size = 0;
 
-    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
+    for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
         giveIPValue(val, gp, type, tStep);
         if ( size == 0 ) {
             size = val.giveSize();
@@ -274,7 +308,7 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
                                             { 2, 6, 3 }, { 2, 3, 4 }, { 2, 4, 5 }, { 2, 5, 6 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
 
@@ -575,7 +609,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
         double length;
         FloatArray crackDir;
 
-        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+        for ( GaussPoint *gp : *this->giveDefaultIntegrationRulePtr() ) {
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
@@ -587,7 +621,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             //
             // obtain gp global coordinates
             this->computeGlobalCoordinates( gpc, gp->giveNaturalCoordinates() );
-            length = 0.3333 * cbrt(this->computeVolumeAround(gp));
+            length = 0.3333 * cbrt( this->computeVolumeAround(gp) );
             if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 

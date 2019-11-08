@@ -74,7 +74,7 @@ public:
     void trans_solve(const FloatArray &x, FloatArray &y) const override;
 
     const char *giveClassName() const override { return "ILU"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
 protected:
     void qsortRow(IntArray &, FloatArray &, int l, int r);

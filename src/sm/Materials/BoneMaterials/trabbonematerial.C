@@ -47,17 +47,17 @@ TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d
 { }
 
 
-int
-TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _1dMat;
 }
 
 
-void TrabBoneMaterial :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
+double TrabBoneMaterial :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
 {
-    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
-    alpha = status->giveTempAlpha();
+    auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
+    return status->giveTempAlpha();
 }
 
 
@@ -66,36 +66,28 @@ TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
                                           MatResponseMode mode, GaussPoint *gp,
                                           TimeStep *tStep)
 {
-    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
-
-    double epsnew;
-    double epsp, depsp;
-    double dam, alpha;
-    double matconstc;
-    FloatArray epsnewArray;
+    auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
     if ( mode == ElasticStiffness ) {
         answer.resize(1, 1);
         answer.at(1, 1) = E0;
     } else if ( mode == SecantStiffness ) {
-        dam = status->giveTempDam();
-        matconstc = status->giveMatConstC();
+        double dam = status->giveTempDam();
+        double matconstc = status->giveMatConstC();
 
         answer.resize(1, 1);
         answer.at(1, 1) = ( 1.0 - dam ) * E0 + matconstc;
     } else {
-        epsnew = status->giveTempStrainVector().at(1);
-        epsnewArray = status->giveTempStrainVector();
-        epsp = status->giveTempPlasStrainVector().at(1);
-        depsp = status->giveTempIncPlasStrainVector().at(1);
-        alpha = status->giveTempAlpha();
-        dam = status->giveTempDam();
-
-        answer.resize(1, 1);
+        double epsnew = status->giveTempStrainVector().at(1);
+        auto &epsnewArray = status->giveTempStrainVector();
+        double epsp = status->giveTempPlasStrainVector().at(1);
+        double depsp = status->giveTempIncPlasStrainVector().at(1);
+        double alpha = status->giveTempAlpha();
+        double dam = status->giveTempDam();
+        double matconstc = status->giveMatConstC();
 
         computeDensification(gp, epsnewArray);
-        matconstc = status->giveMatConstC();
-
+        answer.resize(1, 1);
         if ( depsp != 0.0 ) {
             answer.at(1, 1) = ( 1.0 - dam ) * ( E0 * ( Eil + Ek ) ) / ( E0 + Eil + Ek )
                               - E0 * E0 * ( epsnew - epsp ) / ( E0 + Eil + Ek ) * adam * exp(-adam * alpha) * depsp / fabs(depsp) + matconstc;
@@ -103,42 +95,36 @@ TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
             answer.at(1, 1) = ( 1.0 - dam ) * E0 + matconstc;
         }
     }
-
-    status->setSmtrx( answer.at(1, 1) );
 }
 
 
 void
 TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
-    double epsnew, epsold;
-    double epsp, depsp;
-    double alpha;
-    double sigp, sigY;
-    double gNewton, dgNewton;
+    auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
-    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
+    double epsnew = totalStrain.at(1);
+    double epsold = status->giveStrainVector().at(1);
+    double epsp = status->givePlasStrainVector().at(1);
+    double alpha = status->giveAlpha();
+    double sigp = E0 * epsnew - ( E0 + Ek ) * epsp;
 
-    epsnew = totalStrain.at(1);
-    epsold = status->giveStrainVector().at(1);
-    epsp = status->givePlasStrainVector().at(1);
-    alpha = status->giveAlpha();
-    sigp = E0 * epsnew - ( E0 + Ek ) * epsp;
-
+    double sigY;
     if ( sigp < 0.0 ) {
         sigY = SigYn;
     } else {
         sigY = SigYp;
     }
 
+    double depsp;
     if ( sigp / fabs(sigp) * sigp > sigY + Eil * alpha + Eie * ( 1 - exp(-kie * alpha) ) ) {
         depsp = epsnew - epsold;
-        gNewton = sigp / fabs(sigp) * ( E0 * epsnew - ( E0 + Ek ) * ( epsp + depsp ) ) - ( sigY + Eil * ( alpha +
+        double gNewton = sigp / fabs(sigp) * ( E0 * epsnew - ( E0 + Ek ) * ( epsp + depsp ) ) - ( sigY + Eil * ( alpha +
                                                                                                           sigp / fabs(sigp) * depsp ) + Eie * ( 1 - exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) ) );
         while ( fabs(gNewton) > 10.e-7 ) {
             gNewton = sigp / fabs(sigp) * ( E0 * epsnew - ( E0 + Ek ) * ( epsp + depsp ) ) - ( sigY + Eil * ( alpha +
                                                                                                               sigp / fabs(sigp) * depsp ) + Eie * ( 1 - exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) ) );
-            dgNewton = -sigp / fabs(sigp) * ( ( E0 + Ek ) + Eil +
+            double dgNewton = -sigp / fabs(sigp) * ( ( E0 + Ek ) + Eil +
                                              Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
             depsp += -gNewton / dgNewton;
         }
@@ -159,13 +145,9 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
 void
 TrabBoneMaterial :: computeDensification(GaussPoint *gp, const FloatArray &totalStrain)
 {
-    double epsnew, sigc;
-    double matconstc;
-
-    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
-
-    epsnew = totalStrain.at(1);
-
+    auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
+    double epsnew = totalStrain.at(1);
+    double sigc, matconstc;
     if ( epsnew > EpsC ) {
         sigc = 0.0;
         matconstc = 0.0;
@@ -201,13 +183,8 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
 double
 TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 {
-    double alpha;
-
-    computeCumPlastStrain(alpha, gp, tStep);
-
-    double dam = computeDamageParam(alpha, gp);
-
-    return dam;
+    double alpha = computeCumPlastStrain(gp, tStep);
+    return computeDamageParam(alpha, gp);
 }
 
 
@@ -216,24 +193,19 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
                                             const FloatArray &totalStrain,
                                             TimeStep *tStep)
 {
-    double epsnew, epsp;
-    double dam;
-    double sig, sigc;
+    auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
-    TrabBoneMaterialStatus *status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
 
     performPlasticityReturn(gp, totalStrain);
 
-    epsnew = totalStrain.at(1);
-
     computeDensification(gp, totalStrain);
 
-    dam = computeDamage(gp, tStep);
-
-    epsp = status->giveTempPlasStrainVector().at(1);
-    sigc = status->giveSigC();
-    sig = ( 1 - dam ) * E0 * ( epsnew - epsp ) + sigc;
+    double epsnew = totalStrain.at(1);
+    double dam = computeDamage(gp, tStep);
+    double epsp = status->giveTempPlasStrainVector().at(1);
+    double sigc = status->giveSigC();
+    double sig = ( 1 - dam ) * E0 * ( epsnew - epsp ) + sigc;
 
     answer.resize(1);
     answer.at(1) = sig;
@@ -243,12 +215,10 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 }
 
 
-IRResultType
-TrabBoneMaterial :: initializeFrom(InputRecord *ir)
+void
+TrabBoneMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    // Read material properties here
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E0, _IFT_TrabBoneMaterial_E0);
     IR_GIVE_FIELD(ir, Eil, _IFT_TrabBoneMaterial_Eil);
@@ -261,8 +231,6 @@ TrabBoneMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, SigYp, _IFT_TrabBoneMaterial_SigYp);
     IR_GIVE_FIELD(ir, SigYn, _IFT_TrabBoneMaterial_SigYn);
     IR_GIVE_FIELD(ir, adam, _IFT_TrabBoneMaterial_adam);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 
@@ -272,101 +240,16 @@ TrabBoneMaterial :: initializeFrom(InputRecord *ir)
 
 TrabBoneMaterialStatus :: TrabBoneMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
-    alpha = 0.0;
-    tempAlpha = 0.0;
-    dam = 0.0;
-    tempDam = 0.0;
-    smtrx = 0.0;
-    slope = 0.0;
-    sigC = 0.0;
-    matConstC = 0.0;
-    epsp.resize(1);
-    tempEpsp.resize(1);
-    epsp.at(1) = 0.0;
-    tempEpsp.at(1) = 0.0;
-    tempDepsp.resize(1);
-    tempDepsp.at(1) = 0.0;
-}
-
-
-TrabBoneMaterialStatus :: ~TrabBoneMaterialStatus()
-{ }
-
-
-double
-TrabBoneMaterialStatus :: giveAlpha()
-{
-    return alpha;
-}
-
-double
-TrabBoneMaterialStatus :: giveTempAlpha()
-{
-    return tempAlpha;
-}
-
-double
-TrabBoneMaterialStatus :: giveDam()
-{
-    return dam;
-}
-
-double
-TrabBoneMaterialStatus :: giveTempDam()
-{
-    return tempDam;
-}
-
-double
-TrabBoneMaterialStatus :: giveSmtrx()
-{
-    return smtrx;
-}
-
-double
-TrabBoneMaterialStatus :: giveSlope()
-{
-    return slope;
-}
-
-double
-TrabBoneMaterialStatus :: giveSigC()
-{
-    return sigC;
-}
-
-double
-TrabBoneMaterialStatus :: giveMatConstC()
-{
-    return matConstC;
-}
-
-const FloatArray &
-TrabBoneMaterialStatus :: givePlasStrainVector()
-{
-    return epsp;
-}
-
-const FloatArray &
-TrabBoneMaterialStatus :: giveTempPlasStrainVector()
-{
-    return tempEpsp;
-}
-
-const FloatArray &
-TrabBoneMaterialStatus :: giveTempIncPlasStrainVector()
-{
-    return tempDepsp;
 }
 
 
 void
-TrabBoneMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+TrabBoneMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
-    fprintf(file, "plastrains %f, alpha %f, dam %f, Slope %f, Smtrx %f ", this->tempEpsp.at(1),
-            this->tempAlpha, this->tempDam, this->slope, this->smtrx);
+    fprintf(file, "plastrains %f, alpha %f, dam %f, Slope %f ", this->tempEpsp.at(1),
+            this->tempAlpha, this->tempDam, this->slope);
     fprintf(file, "}\n");
 }
 

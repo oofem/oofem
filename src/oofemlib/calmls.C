@@ -101,8 +101,7 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 
 
 CylindricalALM :: ~CylindricalALM()
-{
-}
+{}
 
 
 NM_Status
@@ -197,9 +196,9 @@ restart:
     // This is useful e.g. to trigger localization in a homogeneous material under uniform stress without
     // the need to introduce material imperfections. The problem itself remains symmetric but the iterative
     // solution is brought to a nonsymmetric state and it gets a chance to converge to a nonsymmetric solution.
-    // Parameters of the perturbation technique are specified by the user and by default no perturbation is done. 
+    // Parameters of the perturbation technique are specified by the user and by default no perturbation is done.
     // Milan Jirasek
-    SparseNonLinearSystemNM :: applyPerturbation(&deltaXt);
+    SparseNonLinearSystemNM :: applyPerturbation(& deltaXt);
 
     if ( calm_Control == calm_hpc_off ) {
         XX = parallel_context->localNorm(deltaXt);
@@ -218,7 +217,7 @@ restart:
 
         // In case of paralllel analysis:
         FloatArray collected_XXRR;
-        parallel_context->accumulate({_XX, _RR}, collected_XXRR);
+        parallel_context->accumulate({ _XX, _RR }, collected_XXRR);
         _XX = collected_XXRR(0);
         _RR = collected_XXRR(1);
 
@@ -518,7 +517,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             }
 
             // loop over individual dofs
-            for ( Dof *_idofptr: *dman ) {
+            for ( Dof *_idofptr : *dman ) {
                 // loop over dof groups
                 for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                     // test if dof ID is in active set
@@ -551,7 +550,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             // loop over element internal Dofs
             for ( int _idofman = 1; _idofman <= elem->giveNumberOfInternalDofManagers(); _idofman++ ) {
                 // loop over individual dofs
-                for ( Dof *_idofptr: *elem->giveInternalDofManager(_idofman) ) {
+                for ( Dof *_idofptr : *elem->giveInternalDofManager(_idofman) ) {
                     // loop over dof groups
                     for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                         // test if dof ID is in active set
@@ -607,7 +606,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             }
 
             if ( ( fabs( dg_forceErr.at(_dg) ) > rtolf.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ||
-                ( fabs( dg_dispErr.at(_dg) )  > rtold.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ) {
+                 ( fabs( dg_dispErr.at(_dg) )  > rtold.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) || std :: isnan( dg_forceErr.at(_dg) ) || std :: isnan( dg_dispErr.at(_dg) ) ) {
                 errorOutOfRange = true;
             }
 
@@ -655,7 +654,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         }
 
         if ( ( fabs(forceErr) > rtolf.at(1) * CALM_MAX_REL_ERROR_BOUND ) ||
-            ( fabs(dispErr)  > rtold.at(1) * CALM_MAX_REL_ERROR_BOUND ) ) {
+             ( fabs(dispErr)  > rtold.at(1) * CALM_MAX_REL_ERROR_BOUND ) || ( std :: isnan(forceErr) ) || ( std :: isnan(dispErr) ) ) {
             errorOutOfRange = true;
         }
 
@@ -671,10 +670,10 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
 
 
-IRResultType
-CylindricalALM :: initializeFrom(InputRecord *ir)
+void
+CylindricalALM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    SparseNonLinearSystemNM :: initializeFrom(ir);
 
     double oldPsi =  Psi; // default from constructor
     double initialStepLength, forcedInitialStepLength;
@@ -725,8 +724,9 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         numberOfRequiredIterations = 1000;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
-    if ( result == IRRT_OK ) {
+    try {
+        IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
+    } catch ( InputException & ) {
         if ( minIterations > 3 && minIterations < 1000 ) {
             numberOfRequiredIterations = minIterations;
         }
@@ -834,7 +834,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     if ( nccdg >= 1 ) {
         IntArray _val;
-        char name [ 12 ];
+        char name [ 16 ];
         // create an empty set
         __DofIDSet _set;
         // resize dof group vector
@@ -876,10 +876,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     }
 
     this->giveLinearSolver()->initializeFrom(ir);
-
-    SparseNonLinearSystemNM :: initializeFrom(ir);
-
-    return IRRT_OK;
 }
 
 
@@ -1002,12 +998,12 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
 
             a1 = eta * eta * XX + Psi * Psi * RR;
             a2 = RR * Psi * Psi * DeltaLambda0 * 2.0
-                    + 2.0 * eta * XXt
-                    + 2.0 * eta * eta * X_Xt;
+                 + 2.0 * eta * XXt
+                 + 2.0 * eta * eta * X_Xt;
             a3 = dXdX
-                    + 2.0 * eta * dXX_
-                    + eta * eta * X_X_
-                    + DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
+                 + 2.0 * eta * dXX_
+                 + eta * eta * X_X_
+                 + DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
         } else if ( calm_Control == calm_hpc_on ) {
             double _rr = 0.;
             double _RR = 0.;
@@ -1025,7 +1021,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
             }
 
             FloatArray col_;
-            parallel_context->accumulate({_rr, _RR, _a2, _a3}, col_);
+            parallel_context->accumulate({ _rr, _RR, _a2, _a3 }, col_);
             a1 = eta * eta * col_(0) + Psi *Psi *col_(1);
             a2 = col_(1) * Psi * Psi * DeltaLambda0 * 2.0;
             a2 += 2.0 * col_(2);
@@ -1036,7 +1032,10 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         // solution of quadratic eqn.
         double discr = a2 * a2 - 4.0 * a1 * a3;
         if ( discr < 0.0 ) {
-            OOFEM_ERROR("discriminant is negative, solution failed");
+            OOFEM_WARNING("discriminant is negative, restarting the step");
+            deltaLambda = 0;
+            return 0;
+            //OOFEM_ERROR("discriminant is negative, solution failed");
         }
 
         discr = sqrt(discr);
@@ -1065,7 +1064,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
 
             // In case of parallel simulations (equiv to no-op on seq sim):
             FloatArray cola;
-            parallel_context->accumulate({a4, a5}, cola);
+            parallel_context->accumulate({ a4, a5 }, cola);
             a4 = cola(0);
             a5 = cola(1);
         }
@@ -1093,7 +1092,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
 
         // In case of parallel simulations (equiv to no-op on seq sim):
         FloatArray colv;
-        parallel_context->accumulate({nom, denom}, colv);
+        parallel_context->accumulate({ nom, denom }, colv);
         nom = colv(0);
         denom = colv(1);
 

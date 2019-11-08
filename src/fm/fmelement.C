@@ -40,10 +40,6 @@ FMElement :: FMElement(int n, Domain *aDomain) :
 { }
 
 
-FMElement :: ~FMElement()
-{ }
-
-
 void
 FMElement :: computeVectorOfVelocities(ValueModeType mode, TimeStep *tStep, FloatArray &velocities)
 {

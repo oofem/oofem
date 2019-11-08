@@ -95,15 +95,12 @@ REGISTER_Material(CemhydMat);
 
 CemhydMat :: CemhydMat(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d)
 {
-    MasterCemhydMatStatus = NULL;
+    MasterCemhydMatStatus = nullptr;
 }
-
-CemhydMat :: ~CemhydMat()
-{ }
 
 //returns hydration power [W/m3 of concrete]
 void
-CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     double averageTemperature;
     CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
@@ -135,7 +132,7 @@ CemhydMat :: computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeSt
 
 int CemhydMat :: giveCycleNumber(GaussPoint *gp)
 {
-    CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -145,7 +142,7 @@ int CemhydMat :: giveCycleNumber(GaussPoint *gp)
 
 double CemhydMat :: giveTimeOfCycle(GaussPoint *gp)
 {
-    CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -157,7 +154,7 @@ double CemhydMat :: giveTimeOfCycle(GaussPoint *gp)
 
 double CemhydMat :: giveDoHActual(GaussPoint *gp)
 {
-    CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     if ( MasterCemhydMatStatus ) {
         ms = MasterCemhydMatStatus;
     }
@@ -166,9 +163,9 @@ double CemhydMat :: giveDoHActual(GaussPoint *gp)
 }
 
 //standard units are [Wm-1K-1]
-double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep)
+double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const
 {
-    CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     double conduct = 0.0;
 
     if ( MasterCemhydMatStatus ) {
@@ -197,9 +194,9 @@ double CemhydMat :: giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep)
 }
 
 //normally it returns J/kg/K of concrete
-double CemhydMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep)
+double CemhydMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep) const
 {
-    CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     double capacityConcrete = 0.0;
 
     if ( MasterCemhydMatStatus ) {
@@ -228,9 +225,9 @@ double CemhydMat :: giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep)
     return capacityConcrete;
 }
 
-double CemhydMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep)
+double CemhydMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep) const
 {
-    CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
     double concreteBulkDensity = 0.0;
 
     if ( MasterCemhydMatStatus ) {
@@ -258,15 +255,15 @@ double CemhydMat :: giveConcreteDensity(GaussPoint *gp, TimeStep *tStep)
 }
 
 double
-CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+CemhydMat :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return ( giveConcreteCapacity(gp, tStep) * giveConcreteDensity(gp, tStep) );
     } else if ( mode == IntSource ) { //for nonlinear solver, return dHeat/dTemperature
-        TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+        auto status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
         //it suffices to compute derivative of Arrhenius equation
         //double actualTemperature = status->giveTempField().at(1);
-        double lastEquilibratedTemperature = status->giveField().at(1);
+        double lastEquilibratedTemperature = status->giveField();
         //double dt = tStep->giveTimeIncrement();
         double krate, EaOverR, val;
         CemhydMatStatus *ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
@@ -405,13 +402,11 @@ void CemhydMat :: averageTemperature()
     }
 }
 
-IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
+void CemhydMat :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
     castingTime = 0.;
 
-    result = IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
-    if ( result != IRRT_OK ) return result;
+    IsotropicHeatTransferMaterial :: initializeFrom(ir); //read d,k,c
 
     conductivityType = 0;
     capacityType = 0;
@@ -442,8 +437,6 @@ IRResultType CemhydMat :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_OPTIONAL_FIELD(ir, reinforcementDegree, _IFT_CemhydMat_reinforcementDegree);
     IR_GIVE_FIELD(ir, XMLfileName, _IFT_CemhydMat_inputFileName);
-
-    return IRRT_OK;
 }
 
 
@@ -14395,7 +14388,7 @@ double CemhydMatStatus :: giveAverageTemperature()
     if ( !cemhydmat->eachGP ) {
         ret = cemhydmat->MasterCemhydMatStatus->averageTemperature;
     } else {
-        ret = ms->giveField().at(1);
+        ret = ms->giveField();
     }
 
     return ret;
@@ -14403,13 +14396,10 @@ double CemhydMatStatus :: giveAverageTemperature()
 
 
 void
-CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+CemhydMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     CemhydMat *cemhydmat = static_cast< CemhydMat * >( this->gp->giveMaterial() );
-    CemhydMatStatus *ms = this;
-    if ( cemhydmat->MasterCemhydMatStatus ) {
-        ms = cemhydmat->MasterCemhydMatStatus;
-    }
+    const auto ms = cemhydmat->MasterCemhydMatStatus ? cemhydmat->MasterCemhydMatStatus : this;
 
     TransportMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "   status {");

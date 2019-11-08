@@ -44,6 +44,8 @@
 
 #include "qcmaterialextensioninterface.h"
 
+#include "MixedPressure/mixedpressurematerialextensioninterface.h"
+
 ///@name Input fields for IsotropicLinearElasticMaterial
 //@{
 #define _IFT_IsotropicLinearElasticMaterial_Name "isole"
@@ -69,7 +71,7 @@ class GaussPoint;
  * - Returning a material property (method 'give'). Only for non-standard elements.
  * - Returning real stress state vector(tensor) at gauss point for 3d - case.
  */
- class IsotropicLinearElasticMaterial : public LinearElasticMaterial, public QCMaterialExtensionInterface
+class IsotropicLinearElasticMaterial : public LinearElasticMaterial, public QCMaterialExtensionInterface, public MixedPressureMaterialExtensionInterface
 {
 protected:
     /// Young's modulus.
@@ -98,8 +100,6 @@ public:
      * @param nu Poisson ratio.
      */
     IsotropicLinearElasticMaterial(int n, Domain *d, double E, double nu);
-    /// Destructor.
-    virtual ~IsotropicLinearElasticMaterial() { }
 
     const char *giveClassName() const override { return "IsotropicLinearElasticMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_IsotropicLinearElasticMaterial_Name; }
@@ -109,7 +109,7 @@ public:
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
      * alpha ("talpha") are read. The parent class instanciateFrom method is called.
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -117,9 +117,9 @@ public:
 
     /// Initialized fixed size tangents. Called by ctor and initializeFrom.
     void initTangents();
-    FloatMatrixF<3,3> foo() { return this->tangentPlaneStress; }
+    FloatMatrixF< 3, 3 >foo() { return this->tangentPlaneStress; }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     /// Returns Young's modulus.
     double giveYoungsModulus() { return E; }
@@ -168,16 +168,41 @@ public:
     }
 
     double giveQcElasticParamneter() override { return E; }
-    double giveQcPlasticParamneter() override { return std::numeric_limits<float>::infinity(); }
+    double giveQcPlasticParamneter() override { return std :: numeric_limits< float > :: infinity(); }
 
     Interface *giveInterface(InterfaceType t) override {
         if ( t == QCMaterialExtensionInterfaceType ) {
-            //            return static_cast< QCMaterialExtensionInterface * >(this);
-            return this;
+	  return static_cast< QCMaterialExtensionInterface * >(this);
+          //  return this;
+        } else if ( t == MixedPressureMaterialExtensionInterfaceType ) {
+            return static_cast< MixedPressureMaterialExtensionInterface * >( this );
         } else {
             return nullptr;
         }
     }
+
+
+    /**
+    ** support for mixed u-p formulation
+    **
+    */
+
+    void giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix & answer,
+                                                 MatResponseMode,
+                                                 GaussPoint * gp,
+                                                 TimeStep * tStep) override;
+
+
+    void giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix & answer,
+                                            MatResponseMode, GaussPoint * gp,
+                                            TimeStep * tStep) override;
+
+
+    void giveInverseOfBulkModulus(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override { answer  = 3. * ( 1. - 2. * nu ) / E; }
+
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) override;
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) override;
+
 };
 } // end namespace oofem
 #endif // isolinearelasticmaterial_h

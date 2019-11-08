@@ -48,20 +48,14 @@ namespace oofem {
 
 REGISTER_Material(OrthotropicLinearElasticMaterial);
 
-IRResultType
-OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     double value;
     int size;
     FloatArray triplets;
 
-
-    result = LinearElasticMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    LinearElasticMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, _IFT_OrthotropicLinearElasticMaterial_ex);
     propertyDictionary.add(Ex, value);
@@ -228,8 +222,6 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 
         alpha = {propertyDictionary.at(tAlphax), propertyDictionary.at(tAlphay), propertyDictionary.at(tAlphaz), 0., 0., 0.};
     }
-
-    return IRRT_OK;
 }
 
 
@@ -262,7 +254,7 @@ OrthotropicLinearElasticMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 double
-OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
+OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == NYzx ) {
         return this->give(NYxz, gp) * this->give(Ez, gp) / this->give(Ex, gp);

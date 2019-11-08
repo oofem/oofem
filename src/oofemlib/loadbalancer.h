@@ -78,7 +78,7 @@ public:
     virtual ~LoadBalancerMonitor() { }
 
     /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     /**@name Load evaluation and imbalance detection methods*/
     //@{
@@ -125,6 +125,9 @@ public:
 
     LoadBalancer(Domain * d);
     virtual ~LoadBalancer() { }
+#ifdef _MSC_VER
+    LoadBalancer(LoadBalancer&& src) {domain = src.domain;}
+#endif
 
 
 
@@ -154,7 +157,7 @@ public:
 
     //@}
     ///Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     /// Returns reference to its domain.
     Domain *giveDomain() { return domain; }
@@ -178,8 +181,8 @@ public:
 protected:
         LoadBalancer *lb;
 public:
-        WorkTransferPlugin(LoadBalancer * _lb);
-        virtual ~WorkTransferPlugin();
+        WorkTransferPlugin(LoadBalancer * _lb) {lb = _lb;}
+        virtual ~WorkTransferPlugin() {}
 
         /**
          *  initializes receiver; should be called before any work transfer.

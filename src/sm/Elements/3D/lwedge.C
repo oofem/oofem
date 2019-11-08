@@ -56,17 +56,16 @@ REGISTER_Element(LWedge);
 FEI3dWedgeLin LWedge :: interpolation;
 
 LWedge :: LWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
-    // Constructor.
 {
     numberOfDofMans = 6;
 }
 
 
-IRResultType
-LWedge :: initializeFrom(InputRecord *ir)
+void
+LWedge :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 6;
-    return Structural3DElement :: initializeFrom(ir);
+    Structural3DElement :: initializeFrom(ir);
 }
 
 

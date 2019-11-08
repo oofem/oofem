@@ -16,7 +16,7 @@ tr1darcy 2 nodes 3 1 2 5
 tr1darcy 3 nodes 3 2 3 5
 tr1darcy 4 nodes 3 3 4 5
 SimpleTransportCS 1 mat 1 set 1
-anisomass 1 d 1.000000  C 4  1.000000  0.000000  0.000000  1.000000
+anisomass 1 d 1.000000  C 3 3 {1 0 0; 0 1 0; 0 0 1}
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 11 values 1 0.0 set 2
 BoundaryCondition 2 loadTimeFunction 1 dofs 1 11 values 1 1.0 set 3
 ConstantFunction 1 f(t) 1.0

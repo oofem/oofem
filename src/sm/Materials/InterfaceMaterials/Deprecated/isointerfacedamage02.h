@@ -72,7 +72,7 @@ public:
     /// Constructor
     IsoInterfaceDamageMaterialStatus_2(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
     double giveKappa() const { return kappa; }
@@ -172,7 +172,7 @@ public:
      */
     virtual double computeDamageParam(double kappa, const FloatArrayF<3> &strain, GaussPoint *gp) const;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsoInterfaceDamageMaterialStatus_2(gp); }

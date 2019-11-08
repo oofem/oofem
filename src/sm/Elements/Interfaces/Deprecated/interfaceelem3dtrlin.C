@@ -166,10 +166,10 @@ InterfaceElement3dTrLin :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatR
 }
 
 
-IRResultType
-InterfaceElement3dTrLin :: initializeFrom(InputRecord *ir)
+void
+InterfaceElement3dTrLin :: initializeFrom(InputRecord &ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

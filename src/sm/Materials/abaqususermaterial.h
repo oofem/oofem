@@ -131,7 +131,7 @@ public:
      *  - umat (required, string): Filename of umat file dynamically library.
      *  - name (optional, string, default "umat"): Name of material model (used for input to umat routine).
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
@@ -178,8 +178,6 @@ protected:
 public:
     /// Constructor.
     AbaqusUserMaterialStatus(GaussPoint * gp, int numState);
-    /// Destructor.
-    virtual ~AbaqusUserMaterialStatus() { }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -196,7 +194,7 @@ public:
         hasTangentFlag = true;
     }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "AbaqusUserMaterialStatus"; }
 };

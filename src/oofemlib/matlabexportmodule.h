@@ -113,7 +113,7 @@ public:
     MatlabExportModule(int n, EngngModel * e);
     virtual ~MatlabExportModule();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
     void initialize() override;
     void terminate() override;

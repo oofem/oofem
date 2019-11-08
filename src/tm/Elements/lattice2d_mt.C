@@ -59,33 +59,19 @@ REGISTER_Element(Lattice2d_mt);
 
 Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
     LatticeTransportElement(n, aDomain, em)
-    // Constructor.
 {
     numberOfDofMans  = 2;
-    area = -1.0;
-    length = 0.0;
-    couplingFlag = 0;
-    couplingNumbers.zero();
-    crackWidths.zero();
-    crackLengths.zero();
 }
 
-Lattice2d_mt :: ~Lattice2d_mt()
-// Destructor
-{ }
 
 double Lattice2d_mt :: giveLength()
-// Returns the length of the receiver.
 {
-    double dx, dy;
-    Node *nodeA, *nodeB;
-
     if ( length == 0. ) {
-        nodeA   = this->giveNode(1);
-        nodeB   = this->giveNode(2);
-        dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-        dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-        length  = sqrt(dx * dx + dy * dy);
+        Node *nodeA = this->giveNode(1);
+        Node *nodeB = this->giveNode(2);
+        double dx   = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
+        double dy   = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+        length = sqrt(dx * dx + dy * dy);
     }
 
     return length;
@@ -94,11 +80,9 @@ double Lattice2d_mt :: giveLength()
 double
 Lattice2d_mt :: givePressure()
 {
-    LatticeTransportMaterialStatus *status;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-
-    status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
+    auto status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
 
     return status->givePressure();
 }
@@ -106,11 +90,9 @@ Lattice2d_mt :: givePressure()
 double
 Lattice2d_mt :: giveOldPressure()
 {
-    LatticeTransportMaterialStatus *status;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
-
-    status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
+    auto status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
 
     return status->giveOldPressure();
 }
@@ -119,17 +101,13 @@ Lattice2d_mt :: giveOldPressure()
 double
 Lattice2d_mt :: giveMass()
 {
-    LatticeTransportMaterialStatus *status;
-
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
+    auto status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
 
-    status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
-    double mass = 0;
-    mass = status->giveMass();
+    double mass = status->giveMass();
     //multiply with volume
     mass *= this->length * this->width / 2.;
-
     return mass;
 }
 
@@ -137,12 +115,9 @@ Lattice2d_mt :: giveMass()
 void
 Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, const FloatArray &coords)
 {
-    double ksi, n1, n2;
-    //FloatMatrix* answer ;
-
-    ksi = coords.at(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
+    double ksi = coords.at(1);
+    double n1 = ( 1. - ksi ) * 0.5;
+    double n2 = ( 1. + ksi ) * 0.5;
 
     answer.resize(1, 2);
     answer.zero();
@@ -174,7 +149,6 @@ Lattice2d_mt :: computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &l
 
 void
 Lattice2d_mt :: updateInternalState(TimeStep *tStep)
-// Updates the receiver at end of step.
 {
     FloatArray f, r;
     FloatMatrix n;
@@ -182,7 +156,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
 
     // force updating ip values
     for ( auto &iRule: integrationRulesArray ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( auto &gp: *iRule ) {
             this->computeNmatrixAt( n, gp->giveNaturalCoordinates() );
             this->computeVectorOf({P_f}, VM_Total, tStep, r);
             f.beProductOf(n, r);
@@ -194,7 +168,6 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
 
 void
 Lattice2d_mt :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
@@ -207,14 +180,11 @@ Lattice2d_mt :: giveDofManDofIDMask(int inode, IntArray &answer) const
     answer = {P_f};
 }
 
-IRResultType
-Lattice2d_mt :: initializeFrom(InputRecord *ir)
+void
+Lattice2d_mt :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     // first call parent
-    result = LatticeTransportElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    LatticeTransportElement :: initializeFrom(ir);
 
     dimension = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, dimension, _IFT_Lattice2DMT_dim);
@@ -242,13 +212,10 @@ Lattice2d_mt :: initializeFrom(InputRecord *ir)
     }
 
     numberOfGaussPoints = 1;
-
-    return IRRT_OK;
 }
 
 double
 Lattice2d_mt :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
     return this->width *this->thickness *this->giveLength();
 }
@@ -256,14 +223,8 @@ Lattice2d_mt :: computeVolumeAround(GaussPoint *gp)
 void
 Lattice2d_mt :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    double dV;
-    FloatMatrix b, d, db;
-    GaussPoint *gp;
     std :: unique_ptr< IntegrationRule >&iRule = integrationRulesArray [ 0 ];
-    gp  = iRule->getIntegrationPoint(0);
-
-    double length = giveLength();
-    double k;
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
 
     answer.resize(2, 2);
     answer.zero();
@@ -272,8 +233,9 @@ Lattice2d_mt :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode r
     answer.at(2, 1) = -1;
     answer.at(2, 2) = 1.;
 
-    k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
-    dV      = this->computeVolumeAround(gp);
+    double k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
+    double dV = this->computeVolumeAround(gp);
+    double length = giveLength();
     double temp = k * dV / pow(length, 2.);
     answer.times(temp);
 }
@@ -282,8 +244,6 @@ Lattice2d_mt :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode r
 void
 Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
-    double dV, c;
-    FloatMatrix n;
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     answer.resize(2, 2);
     answer.zero();
@@ -291,8 +251,8 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.at(1, 2) = 1.;
     answer.at(2, 1) = 1.;
     answer.at(2, 2) = 2.;
-    c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
-    dV = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
+    double c = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Capacity, gp, tStep);
+    double dV = this->computeVolumeAround(gp) / ( 6.0 * this->dimension );
     answer.times(c * dV);
 }
 
@@ -301,32 +261,25 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
-    int n, nLoads;
-    double dV;
-    bcGeomType ltype;
-    Load *load;
     std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
-    Node *nodeA, *nodeB;
-
 
     FloatArray deltaX(3);
     FloatArray val, helpLoadVector, globalIPcoords;
     FloatMatrix nm;
-    double k;
     answer.clear();
 
     FloatArray gravityHelp(2);
 
-    nLoads = this->giveBodyLoadArray()->giveSize();
+    int nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        n     = bodyLoadArray.at(i);
-        load  = domain->giveLoad(n);
-        ltype = load->giveBCGeoType();
+        int n = bodyLoadArray.at(i);
+        auto load  = domain->giveLoad(n);
+        auto ltype = load->giveBCGeoType();
 
         if ( ltype == GravityPressureBGT ) {
             //Compute change of coordinates
-            nodeA   = this->giveNode(1);
-            nodeB   = this->giveNode(2);
+            Node *nodeA = this->giveNode(1);
+            Node *nodeB = this->giveNode(2);
             deltaX.at(1) = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
             deltaX.at(2) = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
             deltaX.at(3) = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
@@ -337,10 +290,10 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
             gravityHelp.at(1) = 1.;
             gravityHelp.at(2) = -1.;
 
-            dV  = this->computeVolumeAround(gp);
+            double dV = this->computeVolumeAround(gp);
             load->computeValueAt(val, tStep, deltaX, mode);
 
-            k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
+            double k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
 
             double helpFactor = val.at(1) * k * dV;
 
@@ -468,19 +421,15 @@ void Lattice2d_mt :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tSt
 void
 Lattice2d_mt :: giveCrossSectionCoordinates(FloatArray &coords)
 {
-    double x1, y1, x2, y2;
-    x1 = this->giveNode(1)->giveCoordinate(1);
-    y1 = this->giveNode(1)->giveCoordinate(2);
-    x2 = this->giveNode(2)->giveCoordinate(1);
-    y2 = this->giveNode(2)->giveCoordinate(2);
+    double x1 = this->giveNode(1)->giveCoordinate(1);
+    double y1 = this->giveNode(1)->giveCoordinate(2);
+    double x2 = this->giveNode(2)->giveCoordinate(1);
+    double y2 = this->giveNode(2)->giveCoordinate(2);
 
     //Compute normal and shear direction
-    FloatArray normalDirection;
-    FloatArray shearDirection;
-    normalDirection.resize(2);
-    normalDirection.zero();
-    shearDirection.resize(2);
-    shearDirection.zero();
+    FloatArray normalDirection(2);
+    FloatArray shearDirection(2);
+
     normalDirection.at(1) = x2 - x1;
     normalDirection.at(2) = y2 - y1;
     normalDirection.normalize();
@@ -489,8 +438,7 @@ Lattice2d_mt :: giveCrossSectionCoordinates(FloatArray &coords)
         shearDirection.at(2) = 1.;
     } else {
         shearDirection.at(1) = 1.0;
-        shearDirection.at(2) =
-            -normalDirection.at(1) / normalDirection.at(2);
+        shearDirection.at(2) = -normalDirection.at(1) / normalDirection.at(2);
     }
 
     shearDirection.normalize();
@@ -503,10 +451,6 @@ Lattice2d_mt :: giveCrossSectionCoordinates(FloatArray &coords)
     coords.at(5) = this->gpCoords.at(2) + shearDirection.at(2) * this->width / 2.;
     coords.at(6) = 0.;
 }
-
-
-
-
 
 #endif
 } // end namespace oofem

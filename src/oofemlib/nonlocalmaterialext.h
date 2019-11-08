@@ -40,6 +40,7 @@
 #include "intarray.h"
 #include "grid.h"
 #include "mathfem.h"
+#include "dynamicinputrecord.h"
 
 #include <list>
 #include <memory>
@@ -390,7 +391,7 @@ public:
     /// Returns reference to domain.
     Domain *giveDomain() { return this->domain; }
 
-    IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir);
     /**
      * Stores receiver in an input record
      * @param input Input record to be filled in.

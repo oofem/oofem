@@ -69,7 +69,6 @@ protected:
 
 public:
     TR1_2D_SUPG2_AXI(int n, Domain * d);
-    virtual ~TR1_2D_SUPG2_AXI();
 
     void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
     void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep) override;
@@ -96,14 +95,14 @@ public:
     const char *giveClassName() const override { return "TR1_2D_SUPG2_AXI"; }
     const char *giveInputRecordName() const override { return _IFT_TR1_2D_SUPG2_AXI_Name; }
     MaterialMode giveMaterialMode() override { return _2dAxiFlow; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *tStep);
+                                int node, TimeStep *tStep) override;
     // Graphics output
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;

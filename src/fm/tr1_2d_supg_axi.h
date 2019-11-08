@@ -57,7 +57,6 @@ protected:
 
 public:
     TR1_2D_SUPG_AXI(int n, Domain * d);
-    virtual ~TR1_2D_SUPG_AXI();
 
     void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep) override;
     void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep) override;

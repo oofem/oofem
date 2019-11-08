@@ -57,7 +57,7 @@ namespace oofem {
 class StationaryTransportProblem : public EngngModel
 {
 protected:
-    SparseMtrxType sparseMtrxType;
+    SparseMtrxType sparseMtrxType = SMT_Skyline;
     /// This field stores solution vector. For fixed size of problem, the PrimaryField is used, for growing/decreasing size, DofDistributedPrimaryField applies.
     std :: unique_ptr< PrimaryField > UnknownsField;
 
@@ -68,13 +68,10 @@ protected:
     /// Numerical method used to solve the problem
     std::unique_ptr<SparseNonLinearSystemNM> nMethod;
 
-    bool keepTangent;
+    bool keepTangent = false;
 
 public:
-    /// Constructor.
     StationaryTransportProblem(int i, EngngModel * _master);
-    /// Destructor.
-    virtual ~StationaryTransportProblem() {}
 
     void solveYourselfAt(TimeStep *tStep) override;
     void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d) override;
@@ -91,7 +88,7 @@ public:
     TimeStep *giveNextStep() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int checkConsistency() override;
 

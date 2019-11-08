@@ -65,14 +65,9 @@ FEI2dTrLin TR21_2D_SUPG :: pressureInterpolation(1, 2);
 
 TR21_2D_SUPG :: TR21_2D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain), ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans  = 6;
 }
-
-TR21_2D_SUPG :: ~TR21_2D_SUPG()
-// Destructor
-{ }
 
 FEInterpolation *
 TR21_2D_SUPG :: giveInterpolation() const

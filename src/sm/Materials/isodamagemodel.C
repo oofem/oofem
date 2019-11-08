@@ -61,11 +61,8 @@ IsotropicDamageMaterial :: ~IsotropicDamageMaterial()
     delete linearElasticMaterial;
 }
 
-int
-IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _1dMat;
 }
@@ -251,6 +248,31 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
 
     this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     answer.times(1.0 - tempDamage);
+
+    if ( mode == TangentStiffness ) {
+        double damage = status->giveDamage();
+        if ( tempDamage > damage ) {
+            double tempKappa;
+            FloatArray stress, strain, eta;
+            FloatMatrix correctionTerm;
+            stress = status->giveTempStressVector();
+            strain = status->giveTempStrainVector();
+            tempKappa = status->giveTempKappa();
+            // effective stress
+            stress.times( 1. / ( 1 - tempDamage ) );
+            //Computes derivative of the equivalent strain with regards to strain
+            this->computeEta(eta, strain, gp, tStep);
+            //compute derivative of damage function
+            double damagePrime = damageFunctionPrime(tempKappa, gp);
+            // dyadic product of eff stress and eta
+            correctionTerm.beDyadicProductOf(stress, eta);
+            // times minus derivative of damage function
+            correctionTerm.times(-damagePrime);
+            // add to secant stiffness
+            answer.add(correctionTerm);
+        }
+    }
+
     //TODO - correction for tangent mode
 }
 
@@ -295,7 +317,7 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         answer.resize(1);
         answer.at(1) = status->giveLe();
         return 1;
-    } else if (type == IST_CrackWidth) {
+    } else if ( type == IST_CrackWidth ) {
         answer.resize(1);
         FloatArray reducedTotalStrainVector;
         this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, status->giveStrainVector(), tStep, VM_Total);
@@ -308,7 +330,11 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
     } else if ( type == IST_CrackVector ) {
         status->giveCrackVector(answer);
         return 1;
-
+    } else if ( type == IST_CumPlasticStrain ) {
+        if ( permStrain ) {
+            answer.at(1) = evaluatePermanentStrain(status->giveKappa(), status->giveDamage());
+        }
+        return 1;
 #ifdef keep_track_of_dissipated_energy
     } else if ( type == IST_StressWorkDensity ) {
         answer.resize(1);
@@ -348,15 +374,15 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
     answer.at(3) = this->tempDillatCoeff;
 }
 
-double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp)
+double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return linearElasticMaterial->give(aProperty, gp);
 }
 
-IRResultType
-IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicDamageMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
     //Set limit on the maximum isotropic damage parameter if needed
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IsotropicDamageMaterial_maxOmega);
@@ -367,7 +393,6 @@ IsotropicDamageMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, permStrain, _IFT_IsotropicDamageMaterial_permstrain);
 
     IR_GIVE_FIELD(ir, tempDillatCoeff, _IFT_IsotropicDamageMaterial_talpha);
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 
@@ -396,12 +421,8 @@ IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(GaussPoint *g) : 
 }
 
 
-IsotropicDamageMaterialStatus :: ~IsotropicDamageMaterialStatus()
-{ }
-
-
 void
-IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IsotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

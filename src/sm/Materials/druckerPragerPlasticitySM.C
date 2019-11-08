@@ -64,9 +64,6 @@ DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(GaussPoint *g
     volumetricPlasticStrain = tempVolumetricPlasticStrain = 0.;
 }
 
-DruckerPragerPlasticitySMStatus :: ~DruckerPragerPlasticitySMStatus()
-{ }
-
 void
 DruckerPragerPlasticitySMStatus :: initTempStatus()
 {
@@ -93,7 +90,7 @@ DruckerPragerPlasticitySMStatus :: updateYourself(TimeStep *tStep)
 }
 
 void
-DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     // Call corresponding function of the parent class to print variables defined there.
     StructuralMaterialStatus :: printOutputAt(file, tStep);
@@ -194,18 +191,13 @@ DruckerPragerPlasticitySM :: DruckerPragerPlasticitySM(int n, Domain *d) :
 }
 
 
-IRResultType
-DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
+void
+DruckerPragerPlasticitySM :: initializeFrom(InputRecord &ir)
 {
-    // Required by IR_GIVE_FIELD macro
-    IRResultType result;
     // call the corresponding service of structural material
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
+    StructuralMaterial :: initializeFrom(ir);
     // call the corresponding service for the linear elastic material
-    result = LEMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    LEMaterial.initializeFrom(ir);
 
     // initialize elastic constants
     //eM = LEMaterial.give(Ex,gp);
@@ -231,16 +223,14 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, limitYieldStress, _IFT_DruckerPragerPlasticitySM_lys);
         break;
     default:
-        OOFEM_WARNING("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_DruckerPragerPlasticitySM_ht,
+                                  "must be 1 (linear hardening/softening) or 2 (exponential hardening/softening)");
     }
 
     yieldTol = 1.e-14;
     IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_DruckerPragerPlasticitySM_yieldtol);
     newtonIter = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_DruckerPragerPlasticitySM_newtoniter);
-
-    return IRRT_OK;
 }
 
 void

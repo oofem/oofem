@@ -127,10 +127,10 @@ IntElSurfTr1 :: computeAreaAround(IntegrationPoint *ip)
 }
 
 
-IRResultType
-IntElSurfTr1 :: initializeFrom(InputRecord *ir)
+void
+IntElSurfTr1 :: initializeFrom(InputRecord &ir)
 {
-    return StructuralInterfaceElement :: initializeFrom(ir);
+    StructuralInterfaceElement :: initializeFrom(ir);
 }
 
 

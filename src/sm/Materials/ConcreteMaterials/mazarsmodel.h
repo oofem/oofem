@@ -68,8 +68,6 @@ protected:
 public:
     /// Constructor.
     MazarsMaterialStatus(GaussPoint * g);
-    /// Destructor.
-    virtual ~MazarsMaterialStatus() { }
 
     /// Returns characteristic length stored in receiver.
     double giveLec() { return lec; }
@@ -109,13 +107,11 @@ protected:
 public:
     /// Constructor
     MazarsMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MazarsMaterial();
 
     const char *giveInputRecordName() const override { return _IFT_MazarsMaterial_Name; }
     const char *giveClassName() const override { return "MazarsMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
     void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;

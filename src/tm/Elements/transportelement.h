@@ -40,6 +40,8 @@
 #include "primaryfield.h"
 #include "matresponsemode.h"
 
+#define _IFT_TransportElement_vof_function "voffunction"
+
 namespace oofem {
 class TransportCrossSection;
 
@@ -57,10 +59,11 @@ protected:
     ElementMode emode;
     /// Stefan–Boltzmann constant W/m2/K4
     static const double stefanBoltzmann;
+    /// Fuction determining the relative volume of reference material in element
+    int vofFunction = 0;
 
 public:
     TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
-    virtual ~TransportElement();
 
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override;
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override;
@@ -86,7 +89,9 @@ public:
 
     TransportCrossSection * giveTransportCrossSection();
     Material * giveMaterial() override;
-
+    void initializeFrom(InputRecord &ir) override;
+    const char *giveClassName() const override { return "TransportElement"; }
+    
     /**
      * Gives the thickness at some global coordinate.
      * For solid elements, the value returned is 1.0 (which is the default implementation).
@@ -117,6 +122,12 @@ public:
      * @param tStep Time step.
      */
     virtual void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    /**
+     * Computes the relative volume of reference material in element.
+     * Default implementation uses user provided function.
+     * @param tStep Time step
+     */
+    virtual double computeVof(TimeStep *tStep);
 
     // time step termination
     void updateInternalState(TimeStep *tStep) override;

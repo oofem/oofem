@@ -93,7 +93,7 @@ public:
     /// Destructor.
     virtual ~RigidArmNode(void) { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void postInitialize() override;
     void updateLocalNumbering(EntityRenumberingFunctor &f) override;
     int checkConsistency() override;

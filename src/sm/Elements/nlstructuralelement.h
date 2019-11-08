@@ -212,7 +212,7 @@ public:
     double computeCurrentVolume(TimeStep *tStep);
 
     // data management
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     // definition
@@ -232,7 +232,7 @@ protected:
         OOFEM_ERROR("method not implemented for this element");
         return;
     }
-    friend class GradDpElement;
+    friend class GradientDamageElement;
     friend class PhaseFieldElement;
     friend class XfemStructuralElementInterface;
 };

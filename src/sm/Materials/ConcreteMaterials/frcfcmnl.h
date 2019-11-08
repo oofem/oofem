@@ -70,19 +70,18 @@ protected:
 
 public:
     FRCFCMNLStatus(GaussPoint *g);
-    virtual ~FRCFCMNLStatus();
 
     /// LOCAL FIBER STRESSES (from crack opening)
-    double giveFiberStressLoc(int icrack) { return fiberStressLoc.at(icrack); }
-    double giveTempFiberStressLoc(int icrack) { return tempFiberStressLoc.at(icrack); }
+    double giveFiberStressLoc(int icrack) const { return fiberStressLoc.at(icrack); }
+    double giveTempFiberStressLoc(int icrack) const { return tempFiberStressLoc.at(icrack); }
     void setTempFiberStressLoc(int icrack, double newFiberStressLoc) { tempFiberStressLoc.at(icrack) = newFiberStressLoc; }
 
     /// NON-LOCAL FIBER STRESSES (from surrounding cracks)
-    double giveFiberStressNL(int icrack) { return fiberStressNL.at(icrack); }
-    double giveTempFiberStressNL(int icrack) { return tempFiberStressNL.at(icrack); }
+    double giveFiberStressNL(int icrack) const { return fiberStressNL.at(icrack); }
+    double giveTempFiberStressNL(int icrack) const { return tempFiberStressNL.at(icrack); }
     void setTempFiberStressNL(int icrack, double newFiberStressNL) { tempFiberStressNL.at(icrack) = newFiberStressNL; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "FRCFCMNLStatus"; }
 
@@ -106,7 +105,7 @@ public:
     const char *giveClassName() const override { return "FRCFCMNL"; }
     const char *giveInputRecordName() const override { return _IFT_FRCFCMNL_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;

@@ -397,19 +397,22 @@ FiberedCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         answer = status->giveStrainVector();
         return 1;
     }
-    return CrossSection :: giveIPValue(answer, gp, type, tStep);
+//     return CrossSection :: giveIPValue(answer, gp, type, tStep);
+    ///@todo so far this only works for elements where each layer has its own integration rule
+    int layer = gp->giveIntegrationRule()->giveNumber();
+    return this->giveDomain()->giveMaterial( fiberMaterials.at(layer) )->giveIPValue(answer, gp, type, tStep);
 }
 
 
-IRResultType
-FiberedCrossSection :: initializeFrom(InputRecord *ir)
+void
+FiberedCrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1 ("Instanciating cross section ",this->giveNumber())
 #  endif
 
+     CrossSection :: initializeFrom(ir);
+  
     IR_GIVE_FIELD(ir, fiberMaterials, _IFT_FiberedCrossSection_fibermaterials);
     IR_GIVE_FIELD(ir, fiberThicks, _IFT_FiberedCrossSection_thicks);
     IR_GIVE_FIELD(ir, fiberWidths, _IFT_FiberedCrossSection_widths);
@@ -426,18 +429,14 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
          num != fiberWidths.giveSize()    ||
          num != fiberYcoords.giveSize()   ||
          num != fiberZcoords.giveSize() ) {
-        OOFEM_WARNING("Array size mismatch ");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_FiberedCrossSection_fibermaterials, "Array size mismatch ");
     }
 
     if ( num <= 0 ) {
-        OOFEM_WARNING("number of fibers == 0 is not allowed");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_FiberedCrossSection_fibermaterials, "number of fibers == 0 is not allowed");
     }
 
     area = fiberThicks.dotProduct(fiberWidths);
-
-    return IRRT_OK;
 }
 
 void FiberedCrossSection :: createMaterialStatus(GaussPoint &iGP)
@@ -598,5 +597,25 @@ FiberedCrossSection :: checkConsistency()
         }
     }
     return result;
+}
+
+Material *
+FiberedCrossSection :: giveMaterial(IntegrationPoint *ip)
+{
+    ///@todo We should keep track in integration point (integration rule) what material from layer is assigned. Otherwise difficulties due to different elements and IP numbering.
+    if ( ip->giveIntegrationRule()->giveIntegrationDomain() == _Cube ||
+        ip->giveIntegrationRule()->giveIntegrationDomain() == _Wedge
+    ) {
+        return domain->giveMaterial( fiberMaterials.at(1) );
+        //return this->domain->giveMaterial( this->giveLayerMaterial(ip->giveNumber()) );
+    }
+    
+    if (ip->hasSlaveGaussPoint()) {
+        return domain->giveMaterial( fiberMaterials.at(1) );//virtual master, has no material assigned in input file
+    } else {
+        return domain->giveMaterial( fiberMaterials.at(1) );//virtual master, has no material assigned in input file
+        //OOFEM_ERROR("Not implemented.")
+    }
+    return nullptr;
 }
 } // end namespace oofem

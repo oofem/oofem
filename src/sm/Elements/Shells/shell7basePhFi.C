@@ -63,10 +63,9 @@ Shell7BasePhFi :: Shell7BasePhFi(int n, Domain *aDomain) : Shell7Base(n, aDomain
 	this->numberOfLayers = nLayers;
 }
 
-IRResultType Shell7BasePhFi :: initializeFrom(InputRecord *ir)
+void Shell7BasePhFi :: initializeFrom(InputRecord &ir)
 {
     Shell7Base :: initializeFrom(ir);
-    return IRRT_OK;
 }
 
 

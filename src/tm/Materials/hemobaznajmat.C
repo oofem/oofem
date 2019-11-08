@@ -33,7 +33,7 @@
  */
 
 #include "tm/Materials/hemobaznajmat.h"
-#include "floatmatrix.h"
+#include "floatmatrixf.h"
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -42,21 +42,17 @@ namespace oofem {
 
 REGISTER_Material( HeMoBazNajMaterial );
 
-int
-HeMoBazNajMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+HeMoBazNajMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( ( mode == _2dHeMo ) || ( mode == _3dHeMo ) ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _2dHeMo || mode == _3dHeMo;
 }
 
 
-IRResultType
-HeMoBazNajMaterial :: initializeFrom(InputRecord *ir)
+void
+HeMoBazNajMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    Material :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, C1, _IFT_HeMoBazNajMaterial_c1);
     IR_GIVE_FIELD(ir, n, _IFT_HeMoBazNajMaterial_n);
@@ -68,258 +64,118 @@ HeMoBazNajMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, heatConductivity, _IFT_HeMoBazNajMaterial_k);
     IR_GIVE_FIELD(ir, heatCapacity, _IFT_HeMoBazNajMaterial_c);
-
-     return Material :: initializeFrom(ir);
 }
 
 
 double
-HeMoBazNajMaterial :: give(int aProperty, GaussPoint *gp)
-//
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
-//
+HeMoBazNajMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return this->Material :: give(aProperty, gp);
 }
 
 
-void
-HeMoBazNajMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
+std::pair<FloatArrayF<3>, FloatArrayF<3>>
+HeMoBazNajMaterial :: computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const
 {
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
 
-    FloatArray s;
-    s = ms->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
-    }
-    double h = s.at(2);
-    double t = s.at(1);
+    auto ans_w = perm_mm(h, t) * grad_w + perm_mh(h, t) * grad_t;
+    auto ans_t = perm_hm(h, t) * grad_w + perm_hh(h, t) * grad_t;
 
-    FloatArray ans_w, ans_t;
-    int size = grad.giveSize() / 2;
-    FloatArray grad_w(size), grad_t(size);
-    for (int i = 1; i <= size; ++i) {
-        grad_w.at(i) = grad.at(i);
-    }
-    for (int i = 1; i <= size; ++i) {
-        grad_t.at(i) = grad.at(i+size);
-    }
+    ms->setTempTemperature(t);
+    ms->setTempTemperatureGradient(grad_t);
+    ms->setTempHeatFlux(ans_t);
+    ms->setTempHumidity(h);
+    ms->setTempHumidityGradient(grad_w);
+    ms->setTempHumidityFlux(ans_w);
 
-    ans_w.beScaled(perm_mm(h, t), grad_w);
-    ans_w.beScaled(perm_mh(h, t), grad_t);
-    ans_t.beScaled(perm_hm(h, t), grad_w);
-    ans_t.beScaled(perm_hh(h, t), grad_t);
-    
-    answer.resize(size * 2);
-    answer.zero();
-    answer.addSubVector(ans_w, 1);
-    answer.addSubVector(ans_t, size+1);
-
-    ms->setTempField(field);
-    ms->setTempGradient(grad);
-    ms->setTempFlux(answer);
+    return {ans_t, ans_w};
 }
 
 
-void
-HeMoBazNajMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *atTime)
+FloatMatrixF<3,3>
+HeMoBazNajMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    /*
-     * returns constitutive matrix of receiver
-     */
-    if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
-        this->computeConductivityMtrx(answer, mode, gp, atTime);
+    auto status = static_cast< HeMoTransportMaterialStatus * >( this->giveStatus(gp) );
+
+    double t = status->giveTempTemperature();
+    double h = status->giveTempHumidity();
+
+    double k = 0.0;
+    if ( mode == Conductivity_ww ) {
+        k = perm_mm(h, t);
+    } else if ( mode == Conductivity_wh ) {
+        k = perm_mh(h, t);
+    } else if ( mode == Conductivity_hw ) {
+        k = perm_hm(h, t);
+    } else if ( mode == Conductivity_hh ) {
+        k = perm_hh(h, t);
     } else {
-        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("Unknown MatResponseMode");
     }
+
+    return k * eye<3>();
 }
 
 
 double
 HeMoBazNajMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *atTime)
+                                          TimeStep *atTime) const
 {
     return this->computeCapacityCoeff(mode, gp, atTime);
 }
 
 
-void HeMoBazNajMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
-{
-    MaterialMode mmode = gp->giveMaterialMode();
-    switch ( mmode ) {
-    case _2dHeMo:
-        this->matcond2d(answer, gp, mode, atTime);
-        return;
-
-    case _3dHeMo:
-        this->matcond3d(answer, gp, mode, atTime);
-        return;
-
-    default:
-        OOFEM_ERROR("Unsupported MaterialMode");
-    }
-}
-
-
-void
-HeMoBazNajMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
-{
-    double k = 0.0, h = 0.0, t = 0.0;
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    
-    FloatArray s;
-    s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
-    }
-    h = s.at(2);
-    t = s.at(1);
-
-
-    if ( mode == Conductivity_ww ) {
-        k = perm_mm(h, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_mh(h, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_hm(h, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = perm_hh(h, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(1, 1);
-    d.at(1, 1) = k;
-}
-
-void
-HeMoBazNajMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
-{
-    double k = 0.0, h = 0.0, t = 0.0;
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArray s;
-    s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
-    }
-    h = s.at(2);
-    t = s.at(1);
-    
-    if ( mode == Conductivity_ww ) {
-        k = perm_mm(h, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_mh(h, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_hm(h, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = perm_hh(h, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(2, 2);
-    d.at(1, 1) = k;
-    d.at(1, 2) = 0.0;
-    d.at(2, 1) = 0.0;
-    d.at(2, 2) = k;
-}
-
-void
-HeMoBazNajMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime)
-{
-    double k = 0.0, h = 0.0, t = 0.0;
-    TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArray s;
-    s = status->giveTempField();
-    if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
-    }
-    h = s.at(2);
-    t = s.at(1);
-
-    if ( mode == Conductivity_ww ) {
-        k = perm_mm(h, t);
-    } else if ( mode == Conductivity_wh ) {
-        k = perm_mh(h, t);
-    } else if ( mode == Conductivity_hw ) {
-        k = perm_hm(h, t);
-    } else if ( mode == Conductivity_hh ) {
-        k = perm_hh(h, t);
-    } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
-    }
-
-    d.resize(3, 3);
-    d.at(1, 1) = k;
-    d.at(1, 2) = 0.0;
-    d.at(1, 3) = 0.0;
-    d.at(2, 1) = 0.0;
-    d.at(2, 2) = k;
-    d.at(2, 3) = 0.0;
-    d.at(3, 1) = 0.0;
-    d.at(3, 2) = 0.0;
-    d.at(3, 3) = k;
-}
-
-
-double HeMoBazNajMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime)
+double HeMoBazNajMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
     if ( mode == Capacity_ww ) {
-      return this->moistureCapacity;
+        return this->moistureCapacity;
 
     } else if ( mode == Capacity_wh ) {
-      return 0.0;
+        return 0.0;
 
     } else if ( mode == Capacity_hw ) {
-      return 0.0;
+        return 0.0;
 
     } else if ( mode == Capacity_hh ) {
-      return this->heatCapacity;
+        return this->heatCapacity;
 
     } else {
         OOFEM_ERROR("Unknown MatResponseMode");
+        return 0.;
     }
-
-    return 0.0; // to make compiler happy
 }
 
 
 double
-HeMoBazNajMaterial :: perm_mm(double h, double T)
+HeMoBazNajMaterial :: perm_mm(double h, double T) const
 {
-    return ( C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - h ) / ( 1. - hC ), n ) ) ) );
+    return C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - h ) / ( 1. - hC ), n ) ) );
 }
 
 double
-HeMoBazNajMaterial :: perm_mh(double h, double T)
+HeMoBazNajMaterial :: perm_mh(double h, double T) const
 {
-    return (0.);
+    return 0.;
 }
 
 double
-HeMoBazNajMaterial :: perm_hm(double h, double T)
+HeMoBazNajMaterial :: perm_hm(double h, double T) const
 {
-    return (0.);
+    return 0.;
 }
 
 double
-HeMoBazNajMaterial :: perm_hh(double h, double T)
+HeMoBazNajMaterial :: perm_hh(double h, double T) const
 {
-  return this->heatConductivity;
+    return this->heatConductivity;
 }
 
 bool
-HeMoBazNajMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
+HeMoBazNajMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode) const
 {
-    if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
+    if ( mode == Conductivity_ww || mode == Conductivity_hh || mode == Conductivity_hw || mode == Conductivity_wh ) {
         return true;
     } else {
         OOFEM_ERROR( "isCharacteristicMtrxSymmetric : unknown mode (%s)", __MatResponseModeToString(mode) );

@@ -316,10 +316,10 @@ LIBeam2d :: givePitch()
 }
 
 
-IRResultType
-LIBeam2d :: initializeFrom(InputRecord *ir)
+void
+LIBeam2d :: initializeFrom(InputRecord &ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

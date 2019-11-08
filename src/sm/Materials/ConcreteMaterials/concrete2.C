@@ -52,10 +52,10 @@ Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d),
 
 Concrete2 :: ~Concrete2() { }
 
-IRResultType
-Concrete2 :: initializeFrom(InputRecord *ir)
+void
+Concrete2 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    Material :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E, _IFT_Concrete2_e);
     IR_GIVE_FIELD(ir, n, _IFT_Concrete2_n);
@@ -77,16 +77,12 @@ Concrete2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, stirrEREF, _IFT_Concrete2_stirr_eref);
     IR_GIVE_FIELD(ir, stirrLAMBDA, _IFT_Concrete2_stirr_lambda);
 
-    result = this->linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    return Material :: initializeFrom(ir);
+    this->linearElasticMaterial.initializeFrom(ir);
 }
 
 
 double
-Concrete2 :: give(int aProperty, GaussPoint *gp)
+Concrete2 :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -1254,11 +1250,6 @@ Concrete2MaterialStatus :: Concrete2MaterialStatus(GaussPoint *g) :
     SCCM = EPM = E0PM = SRF = SEZ = 0.0;
     SCTM = -1.0;     // init status if SCTM < 0.;
 }
-
-
-
-Concrete2MaterialStatus :: ~Concrete2MaterialStatus()
-{ }
 
 
 void

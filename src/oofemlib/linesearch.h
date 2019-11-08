@@ -91,7 +91,7 @@ public:
     NM_Status solve(FloatArray &r, FloatArray &dr, FloatArray &F, FloatArray &R, FloatArray *R0,
                     IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const { return "LineSearchNM"; }
 
 protected:

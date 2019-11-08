@@ -52,14 +52,13 @@
 #include "mesherinterface.h"
 #include "errorestimator.h"
 #include "materialmappingalgorithm.h"
-#include "loadbalancer.h"
 #include "function.h"
 #include "material.h"
 #include "crosssection.h"
 #include "nonlocalbarrier.h"
 #include "exportmodule.h"
 #include "initmodule.h"
-
+#include "loadbalancer.h"
 
 #include "gaussintegrationrule.h"
 #include "lobattoir.h"

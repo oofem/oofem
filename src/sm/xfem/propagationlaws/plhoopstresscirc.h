@@ -81,7 +81,7 @@ public:
     const char *giveClassName() const override { return "PLHoopStressCirc"; }
     const char *giveInputRecordName() const override { return _IFT_PLHoopStressCirc_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     bool hasPropagation() const override { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael

@@ -62,7 +62,7 @@ public:
     PiecewiseLinFunction(int i, Domain * d);
     virtual ~PiecewiseLinFunction() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "PiecewiseLinFunction"; }
     const char *giveInputRecordName() const override { return _IFT_PiecewiseLinFunction_Name; }

@@ -111,7 +111,7 @@ public:
     EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
     virtual ~EnrichmentItem();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     virtual int instanciateYourself(DataReader &dr) = 0;
 
     /**

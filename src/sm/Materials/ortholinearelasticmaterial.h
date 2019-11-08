@@ -114,15 +114,14 @@ public:
     OrthotropicLinearElasticMaterial(int n, Domain * d) : LinearElasticMaterial(n, d),
         cs_type(unknownCS)
     { }
-    virtual ~OrthotropicLinearElasticMaterial() { }
 
     void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
     const char *giveInputRecordName() const override { return _IFT_OrthotropicLinearElasticMaterial_Name; }
     const char *giveClassName() const override { return "OrthotropicLinearElasticMaterial"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp,

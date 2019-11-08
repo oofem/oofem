@@ -144,7 +144,7 @@ public:
 
     void printYourself() override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "InitialCondition"; }
     const char *giveInputRecordName() const override { return _IFT_InitialCondition_Name; }
 };

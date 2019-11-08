@@ -23,11 +23,10 @@ PrescribedGradientBCWeakDirichlet :: ~PrescribedGradientBCWeakDirichlet()
     // TODO Auto-generated destructor stub
 }
 
-IRResultType PrescribedGradientBCWeakDirichlet :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCWeakDirichlet :: initializeFrom(InputRecord &ir)
 {
+    PrescribedGradientBCWeak :: initializeFrom(ir);
     mMeshIsPeriodic = false;
-
-    return PrescribedGradientBCWeak :: initializeFrom(ir);
 }
 
 void PrescribedGradientBCWeakDirichlet :: postInitialize()

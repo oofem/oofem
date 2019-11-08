@@ -77,11 +77,9 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
     }
 }
 
-IRResultType
-UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
+void
+UserDefinedTemperatureField :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, size, _IFT_UserDefinedTemperatureField_size);
     if ( size > 3 ) {
         size = 3;
@@ -98,7 +96,5 @@ UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
     if ( size > 2 ) {
         IR_GIVE_FIELD(ir, ftExpression [ 2 ], _IFT_UserDefinedTemperatureField_t3);
     }
-
-    return IRRT_OK;
 }
 } // end namespace oofem

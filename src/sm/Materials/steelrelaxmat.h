@@ -156,11 +156,11 @@ public:
      */
     void computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoint *gp, TimeStep *tStep, double stress);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     const char *giveInputRecordName() const override { return _IFT_SteelRelaxMat_Name; }
     const char *giveClassName() const override { return "SteelRelaxMat"; }
@@ -188,16 +188,15 @@ protected:
 
 public:
     SteelRelaxMatStatus(GaussPoint *g);
-    virtual ~SteelRelaxMatStatus();
 
     void setTempRelaxIntVariable(double src) { tempRelaxIntVariable = src; }
-    double giveTempRelaxIntVariable(void) { return tempRelaxIntVariable; }
-    double giveRelaxIntVariable(void) { return relaxIntVariable; }
+    double giveTempRelaxIntVariable() const { return tempRelaxIntVariable; }
+    double giveRelaxIntVariable() const { return relaxIntVariable; }
 
     void setPrestress(double src) { prestress = src; }
-    double givePrestress(void) { return prestress; }
+    double givePrestress() const { return prestress; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
 

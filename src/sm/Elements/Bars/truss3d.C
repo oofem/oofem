@@ -203,10 +203,10 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 }
 
 
-IRResultType
-Truss3d :: initializeFrom(InputRecord *ir)
+void
+Truss3d :: initializeFrom(InputRecord &ir)
 {
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
 }
 
 

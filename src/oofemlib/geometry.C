@@ -355,14 +355,11 @@ void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
     answer.at(2) = atan2( xp.at(2), xp.at(1) );
 }
 
-IRResultType Line :: initializeFrom(InputRecord *ir)
+void Line :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     mVertices.resize(2);
     IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Line_start);
     IR_GIVE_FIELD(ir, mVertices [ 1 ], _IFT_Line_end);
-    return IRRT_OK;
 }
 
 bool Line :: isPointInside(FloatArray *point)
@@ -674,14 +671,11 @@ void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iAr
     oGlobalCoord = { mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) };
 }
 
-IRResultType Circle :: initializeFrom(InputRecord *ir)
+void Circle :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     mVertices.resize(1);
     IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Circle_center);
     IR_GIVE_FIELD(ir, radius, _IFT_Circle_radius);
-    return IRRT_OK;
 }
 
 bool Circle :: intersects(Element *element)
@@ -1252,11 +1246,8 @@ void PolygonLine :: giveTangent(FloatArray &oTangent, const double &iArcPosition
     OOFEM_ERROR("Arc position not found.")
 }
 
-IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
+void PolygonLine :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
-
     FloatArray points;
     IR_GIVE_FIELD(ir, points, _IFT_PolygonLine_points);
 
@@ -1266,13 +1257,10 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
         mVertices.push_back({points.at(2 * ( i - 1 ) + 1), points.at( 2 * ( i   ) )});
     }
 
-
 #ifdef __BOOST_MODULE
     // Precompute bounding box to speed up calculation of intersection points.
     calcBoundingBox(LC, UC);
 #endif
-
-    return IRRT_OK;
 }
 
 void PolygonLine :: giveInputRecord(DynamicInputRecord &input)
@@ -1793,9 +1781,8 @@ void PolygonLine :: cropPolygon(const double &iArcPosStart, const double &iArcPo
 
 }
 
-IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
+void PointSwarm :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     IntArray idList;
 
     IR_GIVE_FIELD(ir, idList, _IFT_PointSwarm_nodeID); // Macro
@@ -1803,6 +1790,5 @@ IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
     for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->idList.push_back( idList.at(i) );
     }
-    return IRRT_OK;
 }
 } // end namespace oofem
