@@ -122,16 +122,16 @@ public:
     double give(int aProperty, GaussPoint *gp) const override;
 
     /// Returns Young's modulus.
-    double giveYoungsModulus() { return E; }
+    double giveYoungsModulus() const { return E; }
 
     /// Returns Poisson's ratio.
-    double givePoissonsRatio() { return nu; }
+    double givePoissonsRatio() const { return nu; }
 
     /// Returns the shear elastic modulus @f$ G = \frac{E}{2(1+\nu)} @f$.
-    double giveShearModulus() override { return G; }
+    double giveShearModulus() const override { return G; }
 
     /// Returns the bulk elastic modulus @f$ K = \frac{E}{3(1-2\nu)} @f$.
-    double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
+    double giveBulkModulus() const { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
     void givePlaneStressStiffMtrx(FloatMatrix & answer,
                                   MatResponseMode, GaussPoint * gp,
@@ -172,8 +172,7 @@ public:
 
     Interface *giveInterface(InterfaceType t) override {
         if ( t == QCMaterialExtensionInterfaceType ) {
-	  return static_cast< QCMaterialExtensionInterface * >(this);
-          //  return this;
+            return static_cast< QCMaterialExtensionInterface * >(this);
         } else if ( t == MixedPressureMaterialExtensionInterfaceType ) {
             return static_cast< MixedPressureMaterialExtensionInterface * >( this );
         } else {

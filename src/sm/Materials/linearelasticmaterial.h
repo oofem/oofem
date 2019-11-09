@@ -114,7 +114,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     ///@todo This makes no sense in this  base class, it should belong to isotropiclinearelastic material.
-    virtual double giveShearModulus() { return 1.; }
+    virtual double giveShearModulus() const { return 1.; }
     bool hasCastingTimeSupport() const override { return true; }
     const char *giveClassName() const override { return "LinearElasticMaterial"; }
 };
