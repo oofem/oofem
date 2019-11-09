@@ -785,20 +785,6 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
     }
 }
 
-void
-StructuralMaterial :: giveStressDependentPartOfStrainVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                               const FloatArray &reducedStrainVector,
-                                                               TimeStep *tStep, ValueModeType mode)
-{
-    FloatArray epsilonTemperature;
-
-    answer = reducedStrainVector;
-    this->computeStressIndependentStrainVector_3d(epsilonTemperature, gp, tStep, mode);
-    if ( epsilonTemperature.giveSize() ) {
-        answer.subtract(epsilonTemperature);
-    }
-}
-
 
 int
 StructuralMaterial :: giveSizeOfVoigtSymVector(MaterialMode mode)
@@ -1574,18 +1560,30 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 }
 
 
-double
-StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArrayF<6> &s)
+std::pair<FloatArrayF<6>, double>
+StructuralMaterial :: computeDeviatoricVolumetricSplit(const FloatArrayF<6> &s)
 {
     double vol = s [ 0 ] + s [ 1 ] + s [ 2 ];
     double mean = vol / 3.0;
-    dev = s;
+    auto dev = s;
     dev.at(1) -= mean;
     dev.at(2) -= mean;
     dev.at(3) -= mean;
-    return mean;
+    return {dev, mean};
 }
 
+
+FloatArrayF<6>
+StructuralMaterial :: computeDeviator(const FloatArrayF<6> &s)
+{
+    double vol = s [ 0 ] + s [ 1 ] + s [ 2 ];
+    double mean = vol / 3.0;
+    FloatArrayF<6> dev = s;
+    dev.at(1) -= mean;
+    dev.at(2) -= mean;
+    dev.at(3) -= mean;
+    return dev;
+}
 
 FloatArrayF<6>
 StructuralMaterial :: computeDeviatoricVolumetricSum(const FloatArrayF<6> &dev, double mean)
@@ -1610,7 +1608,7 @@ StructuralMaterial :: applyDeviatoricElasticCompliance(const FloatArrayF<6> &str
         1. / ( 2. * GModulus ) * stress [ 0 ],
         1. / ( 2. * GModulus ) * stress [ 1 ],
         1. / ( 2. * GModulus ) * stress [ 2 ],
-        11. / GModulus * stress [ 3 ],
+        1. / GModulus * stress [ 3 ],
         1. / GModulus * stress [ 4 ],
         1. / GModulus * stress [ 5 ],
     };
@@ -2337,27 +2335,23 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 }
 
 
-void
-StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer,
-                                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+FloatArrayF<6>
+StructuralMaterial :: computeStressIndependentStrainVector_3d(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
-    FloatArray et, eigenstrain;
     if ( gp->giveIntegrationRule() == NULL ) {
         ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
-        answer.clear();
-        return;
+        return zeros<6>();
     }
-    Element *elem = gp->giveElement();
-    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
-
-    answer.clear();
 
     if ( tStep->giveIntrinsicTime() < this->castingTime ) {
-        return;
+        return zeros<6>();
     }
 
     //sum up all prescribed temperatures over an element
     //elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
+    FloatArray et, eigenstrain;
+    Element *elem = gp->giveElement();
+    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
     if ( selem ) {
         selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     }
@@ -2370,12 +2364,11 @@ StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
     FieldPtr tf = fm->giveField(FT_Temperature);
-
     if ( tf ) {
         // temperature field registered
         FloatArray gcoords, et2;
-        int err;
         elem->computeGlobalCoordinates( gcoords, gp->giveNaturalCoordinates() );
+        int err;
         if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
@@ -2390,27 +2383,17 @@ StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer
     }
 
 
+    FloatArrayF<6> answer;
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
 
         auto e0 = this->giveThermalDilatationVector(gp, tStep);
         double scale = mode == VM_Total ? (et.at(1) - this->referenceTemperature) : et.at(1);
         answer = e0 * scale;
     }
-
-    //join temperature and eigenstrain vectors, compare vector sizes
-    if ( answer.giveSize() ) {
-        if ( eigenstrain.giveSize() ) {
-            if ( answer.giveSize() != eigenstrain.giveSize() ) {
-                OOFEM_ERROR( "Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
-            }
-
-            answer.add(eigenstrain);
-        }
-    } else {
-        if ( eigenstrain.giveSize() ) {
-            answer = eigenstrain;
-        }
+    if ( eigenstrain.giveSize() ) {
+        answer += FloatArrayF<6>(eigenstrain);
     }
+    return answer;
 }
 
 

@@ -281,8 +281,7 @@ public:
      */
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
-    virtual void computeStressIndependentStrainVector_3d(FloatArray &answer,
-                                                         GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    FloatArrayF<6> computeStressIndependentStrainVector_3d(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     /// Common functions for convenience
     //@{
     /**
@@ -308,7 +307,7 @@ public:
      * @param s Input vector
      * @return Volumetric part (diagonal components divided by 3).
      */
-    static double computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArrayF<6> &s);
+    static FloatArrayF<6> computeDeviator(const FloatArrayF<6> &s);
     static std::pair<FloatArrayF<6>, double> computeDeviatoricVolumetricSplit(const FloatArrayF<6> &s);
     static FloatArrayF<6> computeDeviatoricVolumetricSum(const FloatArrayF<6> &dev, double mean);
 
@@ -437,8 +436,6 @@ public:
      */
     void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
                                                TimeStep *tStep, ValueModeType mode);
-    void giveStressDependentPartOfStrainVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
-                                                  TimeStep *tStep, ValueModeType mode);
 
     int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type) override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;

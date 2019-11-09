@@ -1519,8 +1519,6 @@ ConcreteDPM2 :: performVertexReturn(FloatArray &effectiveStress,
                                     double apexStress, double tempKappaP,
                                     GaussPoint *gp)
 {
-    FloatArray deviatoricStressTrial;
-    double sigTrial;
     double yieldValue = 0.;
     double yieldValueMid = 0.;
     double sig2 = 0.;
@@ -1529,7 +1527,11 @@ ConcreteDPM2 :: performVertexReturn(FloatArray &effectiveStress,
     double sigAnswer;
     double ratioPotential;
 
-    sigTrial = computeDeviatoricVolumetricSplit(deviatoricStressTrial, effectiveStress);
+    //auto [deviatoricStressTrial, sigTrial] = computeDeviatoricVolumetricSplit(effectiveStress); // c++17
+    auto tmp = computeDeviatoricVolumetricSplit(effectiveStress);
+    auto deviatoricStressTrial = tmp.first;
+    auto sigTrial = tmp.second;
+    
     double rhoTrial = computeSecondCoordinate(deviatoricStressTrial);
 
     double kappaInitial = tempKappaP;
@@ -1720,7 +1722,10 @@ ConcreteDPM2 :: performRegularReturn(FloatArray &effectiveStress,
     //compute invariants from stress state
     if ( mode3d ) {
         StructuralMaterial :: computePrincipalValDir(helpStress, stressPrincipalDir, trialStress, principal_stress);
-        trialSig = computeDeviatoricVolumetricSplit(deviatoricTrialStress, trialStress);
+        //auto [deviatoricTrialStress, trialSig] = computeDeviatoricVolumetricSplit(trialStress); // c++17
+        auto tmp = computeDeviatoricVolumetricSplit(trialStress);
+        auto deviatoricTrialStress = tmp.first;
+        trialSig = tmp.second;
         trialRho = computeSecondCoordinate(deviatoricTrialStress);
     } else {  //1d case
         double angle; // this variable is used only as an input to the function computeTrialCoordinates and is not important and it is already calculated
@@ -2715,8 +2720,10 @@ ConcreteDPM2 :: computeTrialCoordinates(const FloatArray &stress, double &sigNew
             thetaNew = M_PI / 6;
         }
     } else {
-        FloatArray deviatoricStress;
-        sigNew = computeDeviatoricVolumetricSplit(deviatoricStress, stress);
+        //auto [deviatoricStressm, sigNew] = computeDeviatoricVolumetricSplit(stress);
+        auto tmp = computeDeviatoricVolumetricSplit(stress);
+        auto deviatoricStress = tmp.first;
+        sigNew = tmp.second;
         rhoNew = computeSecondCoordinate(deviatoricStress);
         thetaNew = computeThirdCoordinate(deviatoricStress);
     }
@@ -2762,17 +2769,14 @@ void
 ConcreteDPM2 :: computeDRhoDStress(FloatArray &answer,
                                    const FloatArray &stress) const
 {
-    int size = 6;
     //compute volumetric deviatoric split
-    FloatArray deviatoricStress;
-    computeDeviatoricVolumetricSplit(deviatoricStress, stress);
+    auto deviatoricStress = computeDeviator(stress);
     double rho = computeSecondCoordinate(deviatoricStress);
 
     //compute the derivative of J2 with respect to the stress
-    FloatArray dJ2DStress;
-    dJ2DStress = deviatoricStress;
-    for ( int i = 3; i < size; i++ ) {
-        dJ2DStress(i) = deviatoricStress(i) * 2.0;
+    auto dJ2DStress = deviatoricStress;
+    for ( int i = 3; i < 6; i++ ) {
+        dJ2DStress[i] = deviatoricStress[i] * 2.0;
     }
 
     //compute the derivative of rho with respect to stress
@@ -2802,16 +2806,14 @@ ConcreteDPM2 :: computeDDRhoDDStress(FloatMatrix &answer,
     int size = 6;
 
     //compute volumetric deviatoric split
-    FloatArray deviatoricStress;
-    computeDeviatoricVolumetricSplit(deviatoricStress, stress);
+    auto deviatoricStress = computeDeviator(stress);
     double rho = computeSecondCoordinate(deviatoricStress);
 
 
     //compute first dericative of J2
-    FloatArray dJ2dstress;
-    dJ2dstress = deviatoricStress;
+    auto dJ2dstress = deviatoricStress;
     for ( int i = 3; i < deviatoricStress.giveSize(); i++ ) {
-        dJ2dstress(i) = deviatoricStress(i) * 2.;
+        dJ2dstress[i] = deviatoricStress[i] * 2.;
     }
 
     //compute second derivative of J2

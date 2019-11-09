@@ -35,6 +35,8 @@
 #include "hyperelasticmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -102,37 +104,38 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 void
 HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
 {
-    double J2;
-    FloatMatrix C(3, 3);
-    FloatMatrix invC;
-    FloatArray strainVector;
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    
+    FloatArrayF<6> strain = totalStrain;
+    
+    auto thermalStrain = computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+    auto elasticStrain = strain - thermalStrain;
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    this->giveStressDependentPartOfStrainVector_3d(strainVector, gp,
-                                                totalStrain,
-                                                tStep, VM_Total);
+    FloatMatrixF<3,3> C;
+    C.at(1, 1) = 1. + 2. * elasticStrain.at(1);
+    C.at(2, 2) = 1. + 2. * elasticStrain.at(2);
+    C.at(3, 3) = 1. + 2. * elasticStrain.at(3);
+    C.at(1, 2) = C.at(2, 1) = elasticStrain.at(6);
+    C.at(1, 3) = C.at(3, 1) = elasticStrain.at(5);
+    C.at(2, 3) = C.at(3, 2) = elasticStrain.at(4);
+    auto invC = inv(C);
+    double J2 = det(C);
 
-    C.at(1, 1) = 1. + 2. * strainVector.at(1);
-    C.at(2, 2) = 1. + 2. * strainVector.at(2);
-    C.at(3, 3) = 1. + 2. * strainVector.at(3);
-    C.at(1, 2) = C.at(2, 1) = strainVector.at(6);
-    C.at(1, 3) = C.at(3, 1) = strainVector.at(5);
-    C.at(2, 3) = C.at(3, 2) = strainVector.at(4);
-    invC.beInverseOf(C);
-    J2 = C.giveDeterminant();
-
-    answer.resize(6);
     double aux = ( K - 2. / 3. * G ) * ( J2 - 1. ) / 2. - G;
-    answer.at(1) = aux * invC.at(1, 1) + G;
-    answer.at(2) = aux * invC.at(2, 2) + G;
-    answer.at(3) = aux * invC.at(3, 3) + G;
-    answer.at(4) = aux * invC.at(2, 3);
-    answer.at(5) = aux * invC.at(1, 3);
-    answer.at(6) = aux * invC.at(1, 2);
+    FloatArrayF<6> stress = {
+        aux * invC.at(1, 1) + G,
+        aux * invC.at(2, 2) + G,
+        aux * invC.at(3, 3) + G,
+        aux * invC.at(2, 3),
+        aux * invC.at(1, 3),
+        aux * invC.at(1, 2),
+    };
 
     // update gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
+    
+    answer = stress;
 }
 
 

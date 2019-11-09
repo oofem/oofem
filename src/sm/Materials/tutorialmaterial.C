@@ -80,11 +80,11 @@ void
 TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &totalStrain, TimeStep *tStep)
 {
-    FloatArray strain;
-    TutorialMaterialStatus *status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
 
     // subtract stress thermal expansion
-    this->giveStressDependentPartOfStrainVector_3d(strain, gp, totalStrain, tStep, VM_Total);
+    auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+    FloatArray strain = totalStrain - thermalStrain;
 
     FloatArray trialElastStrain;
     trialElastStrain.beDifferenceOf(strain, status->givePlasticStrain());

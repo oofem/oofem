@@ -394,8 +394,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
         void computeStressIndependentStrainVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, computeStressIndependentStrainVector, std::ref(answer), gp, tStep, mode);   
         }
-        void computeStressIndependentStrainVector_3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, computeStressIndependentStrainVector_3d, std::ref(answer), gp, tStep, mode);   
+        FloatArrayF<6> computeStressIndependentStrainVector_3d(oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) override {
+            PYBIND11_OVERLOAD(FloatArrayF<6>, StructuralMaterialBase, computeStressIndependentStrainVector_3d, gp, tStep, mode);   
         }
 
         void give3dMaterialStiffnessMatrix(oofem::FloatMatrix &answer, oofem::MatResponseMode mode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {

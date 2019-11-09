@@ -201,9 +201,10 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
         // elastic predictor
         FloatArray elStrain = totalStrain;
         elStrain.subtract(plStrain);
-        FloatArray elStrainDev;
-        double elStrainVol;
-        elStrainVol = computeDeviatoricVolumetricSplit(elStrainDev, elStrain);
+        //auto [elStrainDev, elStrainVol] = computeDeviatoricVolumetricSplit(elStrain); // c++17
+        auto tmp = computeDeviatoricVolumetricSplit(elStrain);
+        auto elStrainDev = tmp.first;
+        auto elStrainVol = tmp.second;
         FloatArray trialStressDev = applyDeviatoricElasticStiffness(elStrainDev, G);
         /**************************************************************/
         double trialStressVol = 3 * K * elStrainVol;

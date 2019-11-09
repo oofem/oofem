@@ -224,15 +224,14 @@ DustMaterial :: giveRealStressVector_3d(FloatArray &answer,
                                      const FloatArray &totalStrain,
                                      TimeStep *tStep)
 {
-    FloatArray strainVectorR;
-
-    DustMaterialStatus *status = static_cast< DustMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< DustMaterialStatus * >( this->giveStatus(gp) );
 
     // Initialize temp variables for this Gauss point
     this->initTempStatus(gp);
 
     // subtract stress-independent part of strain
-    this->giveStressDependentPartOfStrainVector_3d(strainVectorR, gp, totalStrain, tStep, VM_Total);
+    auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+    auto strainVectorR = totalStrain - thermalStrain;
 
     // perform the local stress return and update the history variables
     performStressReturn(gp, strainVectorR);
@@ -250,15 +249,19 @@ DustMaterial :: performStressReturn(GaussPoint *gp, const FloatArray &strain)
     DustMaterialStatus *status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
 
     // compute total strain components
-    FloatArray strainDeviator;
-    double volumetricStrain;
-    volumetricStrain = computeDeviatoricVolumetricSplit(strainDeviator, strain);
+    //auto [strainDeviator, volumetricStrain] = computeDeviatoricVolumetricSplit(strain); // c++17
+    auto tmp = computeDeviatoricVolumetricSplit(strain);
+    auto strainDeviator = tmp.first;
+    auto volumetricStrain = tmp.second;
 
     // compute trial elastic strains
     FloatArray plasticStrain = status->givePlasticStrain();
-    double volumetricPlasticStrain;
-    FloatArray plasticStrainDeviator;
-    volumetricPlasticStrain = computeDeviatoricVolumetricSplit(plasticStrainDeviator, plasticStrain);
+    
+    //auto [plasticStrainDeviator, volumetricPlasticStrain] = computeDeviatoricVolumetricSplit(plasticStrain); // c++17
+    auto tmp2 = computeDeviatoricVolumetricSplit(plasticStrain);
+    auto plasticStrainDeviator = tmp2.first;
+    auto volumetricPlasticStrain = tmp2.second;
+    
     double volumetricElasticStrain = volumetricStrain - volumetricPlasticStrain;
     FloatArray elasticStrainDeviator = strainDeviator;
     elasticStrainDeviator.subtract(plasticStrainDeviator);
@@ -333,13 +336,15 @@ DustMaterial :: performStressReturn(GaussPoint *gp, const FloatArray &strain)
     // compute correct stress
     m.times(lambda);
     plasticStrain.add(m);
-    double mVol;
-    FloatArray mDeviator;
-    mVol = computeDeviatoricVolumetricSplit(mDeviator, m);
+
+    //auto [mDeviator, mVol] = computeDeviatoricVolumetricSplit(m); // c++17
+    auto tmp3 = computeDeviatoricVolumetricSplit(m);
+    auto mDeviator = tmp3.first;
+    auto mVol = tmp3.second;
+    
     i1 -= 3 * bulkModulus * mVol;
     volumetricStress = i1 / 3.;
-    mDeviator.times(-2 * shearModulus);
-    stressDeviator.add(mDeviator);
+    stressDeviator.add(-2 * shearModulus, mDeviator);
 
     // compute full stresses from deviatoric and volumetric part and store them
     FloatArray stress = stressDeviator;
