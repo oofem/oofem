@@ -61,8 +61,6 @@ private:
 public:
     /// Constructor
     StructuralMaterialSettable(int n, Domain *d);
-    /// Destructor
-    virtual ~StructuralMaterialSettable() {}
 
     void initializeFrom(InputRecord &ir) override;
 
