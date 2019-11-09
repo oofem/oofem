@@ -65,7 +65,7 @@ class SimpleVitrificationMaterial : public StructuralMaterial
 {
 private:
     /// Vitrification time (when equal or larger than this time the material changes response).
-    double vitrTime;
+    double vitrTime = 0.;
     /// Material parameters for the glassy part of the model (after vitrification).
     FloatArray E, nu, G, alpha;
     /// Material parameters for the rubbery part of the model (before vitrification).
@@ -85,6 +85,8 @@ public:
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
 
+    FloatMatrixF<6,6> computeTangent(bool vitr) const;
+                                 
     FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
