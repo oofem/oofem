@@ -117,7 +117,6 @@ public:
 
     /// Initialized fixed size tangents. Called by ctor and initializeFrom.
     void initTangents();
-    FloatMatrixF< 3, 3 >foo() { return this->tangentPlaneStress; }
 
     double give(int aProperty, GaussPoint *gp) const override;
 
