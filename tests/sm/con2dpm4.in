@@ -1,7 +1,7 @@
 con2dpm4.out
 #
 Concrete Plasticity Triaxial Tension
-StaticStructural nsteps 2 solverType "calm" rtolf 2.e-3 reqIterations 100 stiffMode 2 maxiter 100 stepLength 5.e-4 minsteplength 5.e-4 Psi 0. hpcmode 2 hpc 2 2 1 hpcw 1 1. nmodules 1
+StaticStructural nsteps 2 solverType "calm" rtolf 2.e-3 reqIterations 100 stiffMode 1 maxiter 100 stepLength 5.e-4 minsteplength 5.e-4 Psi 0. hpcmode 2 hpc 2 2 1 hpcw 1 1. nmodules 1
 errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all

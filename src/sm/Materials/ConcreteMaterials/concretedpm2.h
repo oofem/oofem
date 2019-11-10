@@ -44,13 +44,12 @@
 #include "gausspoint.h"
 #include "mathfem.h"
 
-#define DYNCON_TOL 1.e-6
+#define CDPM2_TOL 1.e-6
 #define keep_track_of_dissipated_energy
 ///@name Input fields for ConcreteDPM2
 //@{
 #define _IFT_ConcreteDPM2_Name "con2dpm"
 #define _IFT_ConcreteDPM2_fc "fc"
-#define _IFT_ConcreteDPM2_fcZero "fczero"
 #define _IFT_ConcreteDPM2_ft "ft"
 #define _IFT_ConcreteDPM2_ecc "ecc"
 #define _IFT_ConcreteDPM2_kinit "kinit"
@@ -69,7 +68,7 @@
 #define _IFT_ConcreteDPM2_ftOne "ft1"
 #define _IFT_ConcreteDPM2_wfOne "wf1"
 #define _IFT_ConcreteDPM2_rateFlag "rateflag"
-#define _IFT_ConcreteDPM2_timeFactor "timefactor"
+#define _IFT_ConcreteDPM2_deltatime "deltat"
 #define _IFT_ConcreteDPM2_helem "helem"
 #define _IFT_ConcreteDPM2_isoflag "isoflag"
 //@}
@@ -77,7 +76,7 @@
 namespace oofem {
 /**
  * This class implements the material status associated to ConcreteDPM2.
- * @author Peter Grassl
+ * @author Peter Grassl, Dimitrios Xenos
  */
 class ConcreteDPM2Status : public StructuralMaterialStatus
 {
@@ -103,8 +102,6 @@ protected:
     FloatArray reducedStrain;
     FloatArray tempReducedStrain;
 
-    double dFDKappa;
-    double deltaLambda;
     //@}
 
     /// @name Hardening variable
@@ -438,13 +435,6 @@ public:
 
 
     /**
-     * Assign the temp value of the rate factor of the damage model.
-     * @param v New temp value of the damage variable
-     */
-    void letDeltaLambdaBe(double v)
-    { deltaLambda = v; }
-
-    /**
      * Assign the temp value of the hardening variable of the plasticity model.
      * @param v New temp value of the hardening variable
      */
@@ -591,6 +581,8 @@ public:
  * The plasticity model describes only hardening and perfect plasticity.
  * It is based on the effective stress. The damage parameter of the isotropic damage model is based on the total volumetric strain.
  * An exponential softening law is implemented.
+ *
+ * @author Peter Grassl, Dimitrios Xenos
  */
 class ConcreteDPM2 : public StructuralMaterial
 {
@@ -680,12 +672,14 @@ protected:
     int softeningType;
 
     /// Input parameter which simulates a loading rate. Only for debugging purposes.
-    double timeFactor;
+    double deltaTime;
 
-    /// This parameter is needed for the rate dependence. It should be read in if rate dependence is considered.
-    double fcZero;
-
-    /// Flag which signals if strainRate effects should be considered.
+    /** Flag which signals if strainRate effects should be considered.
+     * 0 = no strain rate (default)
+     * 1 = mod. CEB strain rate effect for strength and squared for fracture energy
+     * 2 = mod. CEB strain rate effect for strength and linear for fracture energy
+     * 3 = mod. CEB strain rate effect for strength with constant fracture energy
+     */
     int strainRateFlag;
 
 public:
@@ -1029,10 +1023,10 @@ public:
     double computeAlpha(FloatArray &effectiveStressTension, FloatArray &effectiveStressCompression, FloatArray &effectiveStress);
 
     /// Compute damage parameter in tension.
-    virtual double computeDamageParamTension(double equivStrain, double kappaOne, double kappaTwo, double le, double omegaOld);
+    virtual double computeDamageParamTension(double equivStrain, double kappaOne, double kappaTwo, double le, double omegaOld, double rateFactor);
 
     /// Compute damage parameter in compression.
-    virtual double computeDamageParamCompression(double equivStrain, double kappaOne, double kappaTwo, double omegaOld);
+    virtual double computeDamageParamCompression(double equivStrain, double kappaOne, double kappaTwo, double omegaOld, double rateFactor);
 
     /// Compute equivalent strain value for tension.
     double computeDeltaPlasticStrainNormTension(double tempKappaD, double kappaD, GaussPoint *gp);
