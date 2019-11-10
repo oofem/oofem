@@ -1,4 +1,4 @@
-fc0documentclass[a4paper]{article}
+\documentclass[a4paper]{article}
 \usepackage{html}
 \usepackage{graphicx}
 %\usepackage{hyperref}
@@ -4138,8 +4138,6 @@ Concrete is strongly rate dependent. If the loading rate is increased, the tensi
 \end{equation}
 where $X$ is the continuous compression measure (= 1 means only compression, = 0 means only tension).
 
-The functions $\alpha_{\rm rt}$ and $\alpha_{\rm rc}$ depend on the input parameter $f_{\rm c0}$. A recommended value for $f_{\rm c0}$ is 10~MPa.
-
 \begin{table}[!htb]
 %\begin{center}
 \begin{mmt}
@@ -4174,11 +4172,11 @@ Parameters &- \param{d} material density\\
 &- \param{dilation} dilation factor, optional, default value 0.85\\
 &- \param{hp} hardening modulus, optional, default value 0.5\\
 &- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
-&- \param{rateflag} flag which allows for the consideration of the effect of strain rates (using a modified CEB-FIP Model code model) if set to 1, 2 or 3. Default value 0 which corresponds to no strain rate effect.\\
+&- \param{rateflag} flag which allows for the consideration of the effect of strain rates (using CEB-FIP Model code 2010) if set to 1, 2 or 3. Default value 0 which corresponds to no strain rate effect.\\
 \begin{itemize}\setlength{\itemsep}{-3pt}
 \item[1 -] CEB-Model code 2010 rate factor for strength and square rate factor for fracture energy  
-\item[2 -] modified CEB-Model code 2010 rate factor for strength and fracture energy
-\item[3 -] modified CEB-Model code 2010 rate factor for strength and no rate factor for fracture energy
+\item[2 -] CEB-Model code 2010 rate factor for strength and fracture energy
+\item[3 -] CEB-Model code 2010 rate factor for strength and no rate factor for fracture energy
 \end{itemize}\\
 &- \param{yieldtol} tolerance for the implicit stress return algorithm, optional, default value $1 \times 10^{-6}$\\
 &- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
