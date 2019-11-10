@@ -94,7 +94,7 @@ class LatticeViscoelastic : public LatticeLinearElastic
 {
 protected:
     /// 'slave' material model number.
-    int slaveMat;
+    int slaveMat = 0;
 
 
 public:

@@ -843,7 +843,7 @@ LatticeDamageStatus :: initTempStatus()
 }
 
 void
-LatticeDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crackFlag %d\n", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crackFlag);

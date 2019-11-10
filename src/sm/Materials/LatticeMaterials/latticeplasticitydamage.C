@@ -52,12 +52,7 @@ namespace oofem {
 REGISTER_Material(LatticePlasticityDamage);
 
 LatticePlasticityDamage :: LatticePlasticityDamage(int n, Domain *d) : LatticeLinearElastic(n, d)
-    //
-    // constructor
-    //
 {
-    yieldTol = 0.;
-    myPi = 3.141592653;
 }
 
 
@@ -1118,7 +1113,7 @@ LatticePlasticityDamageStatus :: initTempStatus()
 }
 
 void
-LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
 

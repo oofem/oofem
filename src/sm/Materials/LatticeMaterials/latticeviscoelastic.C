@@ -44,7 +44,6 @@ REGISTER_Material(LatticeViscoelastic);
 
 LatticeViscoelastic :: LatticeViscoelastic(int n, Domain *d) : LatticeLinearElastic(n, d)
 {
-    slaveMat = 0;
 }
 
 

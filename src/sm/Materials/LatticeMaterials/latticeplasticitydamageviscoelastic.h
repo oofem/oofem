@@ -55,31 +55,29 @@ class LatticePlasticityDamageViscoelasticStatus : public LatticePlasticityDamage
 
 {
 protected:
-    GaussPoint *viscoelasticGP;
+    GaussPoint *viscoelasticGP = nullptr;
     /// 'slave' material model number.
-    int slaveMat;
+    int slaveMat = 0;
 
 public:
 
     /// Constructor
     LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
-    /// Destructor
-    ~LatticePlasticityDamageViscoelasticStatus() {}
 
     /// Prints the receiver state to given stream
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
 
     const char *giveClassName() const override { return "LatticePlasticityDamageViscoelasticStatus"; }
 
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override; 
+    void updateYourself(TimeStep *) override; 
 
 
-    virtual void saveContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void restoreContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     GaussPoint *giveViscoelasticGaussPoint() { return viscoelasticGP; }
 
@@ -99,8 +97,7 @@ class LatticePlasticityDamageViscoelastic : public LatticePlasticityDamage
 {
 protected:
     /// 'slave' (= viscoelastic) material model number.
-    int slaveMat;
-
+    int slaveMat = 0;
 
 public:
 

@@ -52,19 +52,13 @@ REGISTER_Material(LatticeBondPlasticity);
 
 LatticeBondPlasticity :: LatticeBondPlasticity(int n, Domain *d) : LatticeLinearElastic(n, d)
 {
-    yieldTol = 0.;
-    myPi = 3.141592653;
 }
 
 
-int
-LatticeBondPlasticity :: hasMaterialModeCapability(MaterialMode mode)
+bool
+LatticeBondPlasticity :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( mode == _3dLattice ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return mode == _3dLattice;
 }
 
 double

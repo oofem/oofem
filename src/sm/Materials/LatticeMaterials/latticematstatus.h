@@ -55,10 +55,10 @@ class LatticeMaterialStatus : public StructuralMaterialStatus, public RandomMate
 protected:
 
     /// Equilibrated normal stress
-    double normalStress;
+    double normalStress = 0.;
 
     /// Non-equilibrated normal stress
-    double tempNormalStress;
+    double tempNormalStress = 0.;
 
     /// Reduced strain, which is temperature free
     FloatArray reducedStrain;
@@ -67,16 +67,16 @@ protected:
     FloatArray tempReducedStrain;
 
     /// dissipation
-    double dissipation;
+    double dissipation = 0.;
 
     /// Non-equilibrated increment of dissipation
-    double tempDissipation;
+    double tempDissipation = 0.;
 
     ///Increment of dissipation
-    double deltaDissipation;
+    double deltaDissipation = 0.;
 
     /// Non-equilibrated increment of dissipation
-    double tempDeltaDissipation;
+    double tempDeltaDissipation = 0.;
 
     FloatArray plasticStrain;
 
@@ -85,34 +85,32 @@ protected:
     FloatArray oldPlasticStrain;
 
     /// Characteristic length
-    double le;
+    double le = 0.;
 
     /** the crack_flag indicates if the gp is damaged (cracked):
      *  crack_flag = 0 gp is undamaged
      *  crack_flag = 1 gp is damaged and damage grows
      *  crack_flag = 2 gp is damaged and damage does not grow
      */
-    int crackFlag;
+    int crackFlag = 0;
 
     /// Non-equilibrated temp flag.
-    int tempCrackFlag;
+    int tempCrackFlag = 0;
 
     /// Non-equilibrated crack width
-    double tempCrackWidth;
+    double tempCrackWidth = 0.;
 
     /// Crack width
-    double crackWidth;
+    double crackWidth = 0.;
 
 
-    int updateFlag;
+    int updateFlag = 0;
 
 
 public:
 
     /// Constructor
     LatticeMaterialStatus(GaussPoint *g);
-    /// Destructor.
-    virtual ~LatticeMaterialStatus() { }
 
     const char *giveClassName() const override { return "LatticeMaterialStatus"; }
 
@@ -175,7 +173,7 @@ public:
 
 
     /// Returns characteristic length stored in receiver
-    double giveLe()  { return le; }
+    double giveLe() const { return le; }
 
     /// Sets characteristic length to given value
     void   setLe(double ls) { le = ls; }
@@ -199,9 +197,6 @@ public:
     virtual double giveDeltaDissipation() { return deltaDissipation; }
     double giveTempDeltaDissipation() { return tempDeltaDissipation; }
     void setTempDeltaDissipation(double newDiss) { tempDeltaDissipation = newDiss; }
-
-    virtual void initializeFrom(InputRecord &ir) { }
-
 
     Interface *giveInterface(InterfaceType) override;
 

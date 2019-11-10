@@ -106,19 +106,19 @@ class LinkSlip : public StructuralInterfaceMaterial
 protected:
 
     ///Normal modulus
-    double kNormal;
+    double kNormal = 0.;
 
     ///Lateral modulus
-    double kLateral;
+    double kLateral = 0.;
 
     int type = 0;
     
     ///Strength for slip component
-    double tauMax,tauFinal;
+    double tauMax = 0., tauFinal = 0.;
     
-    double s1,s2,s3;
+    double s1 = 0., s2 = 0., s3 = 0.;
 
-    double alpha;
+    double alpha = 0.;
 
 public:
 

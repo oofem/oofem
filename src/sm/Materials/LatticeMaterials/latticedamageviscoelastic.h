@@ -55,35 +55,33 @@ class LatticeDamageViscoelasticStatus : public LatticeDamageStatus
 
 {
 protected:
-    GaussPoint *viscoelasticGP;
+    GaussPoint *viscoelasticGP = nullptr;
     /// 'slave' material model number.
-    int slaveMat;
+    int slaveMat = 0;
 
 public:
 
     /// Constructor
     LatticeDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
-    /// Destructor
-    ~LatticeDamageViscoelasticStatus() {}
 
     /// Prints the receiver state to given stream
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
 
     const char *giveClassName() const override { return "LatticeDamageViscoelasticStatus"; }
 
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override; // update after new equilibrium state reached
+    void updateYourself(TimeStep *) override; // update after new equilibrium state reached
 
 
-    virtual void saveContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void restoreContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     GaussPoint *giveViscoelasticGaussPoint() { return viscoelasticGP; }
 
-    MaterialStatus *giveViscoelasticMatStatus();
+    MaterialStatus *giveViscoelasticMatStatus() const;
 };
 
 
@@ -96,7 +94,7 @@ class LatticeDamageViscoelastic : public LatticeDamage
 {
 protected:
     /// 'slave' (= viscoelastic) material model number.
-    int slaveMat;
+    int slaveMat = 0;
 
 
 public:
@@ -136,10 +134,10 @@ public:
 
 protected:
 
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *atTime) override;
+    int giveIPValue(FloatArray &answer,
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *atTime) override;
 };
 } // end namespace oofem
 

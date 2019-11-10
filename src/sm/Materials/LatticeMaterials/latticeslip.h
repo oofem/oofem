@@ -58,8 +58,6 @@ public:
 
     /// Constructor
     LatticeSlipStatus(GaussPoint *g);
-    /// Destructor
-    ~LatticeSlipStatus() {}
 
     void  letTempPlasticStrainBe(const FloatArray &v)
     { tempPlasticStrain = v; }
@@ -68,9 +66,9 @@ public:
 
     const char *giveClassName() const override { return "LatticeSlipStatus"; }
 
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override;
+    void updateYourself(TimeStep *) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
 
@@ -89,26 +87,26 @@ class LatticeSlip : public LatticeLinearElastic
 protected:
 
     ///Normal modulus
-    double eNormal;
+    double eNormal = 0.;
 
     ///Ratio of shear and normal modulus
-    double alphaOne;
+    double alphaOne = 0.;
 
     ///Ratio of torsion and normal modulus
-    double alphaTwo;
+    double alphaTwo = 0.;
 
     ///Strength for slip component
-    double tauZero;
+    double tauZero = 0.;
 
     /// coefficient variation of the Gaussian distribution
-    double coefficientOfVariation;
+    double coefficientOfVariation = 0.;
 
     /// flag which chooses between no distribution (0) and Gaussian distribution (1)
-    double localRandomType;
+    double localRandomType = 0.;
 
-    double cAlpha;
+    double cAlpha = 0.;
 
-    double tAlphaMean;
+    double tAlphaMean = 0.;
 
 public:
 

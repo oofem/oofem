@@ -70,39 +70,36 @@ protected:
 
     FloatArray tempElasticStrain;
 
-    double kappaP;
+    double kappaP = 0.;
 
-    double tempKappaP;
+    double tempKappaP = 0.;
 
-    double kappaDOne, kappaDTwo;//, kappaDThree;
+    double kappaDOne = 0., kappaDTwo = 0.;//, kappaDThree;
 
-    double tempKappaDOne, tempKappaDTwo;//, tempKappaDThree;
+    double tempKappaDOne = 0., tempKappaDTwo = 0.;//, tempKappaDThree;
 
-    double damage;
+    double damage = 0.;
 
-    double tempDamage;
+    double tempDamage = 0.;
 
     //double e0;
 
-    int compressionFlag;
+    int compressionFlag = 0;
 
 public:
 
     /// Constructor
     LatticePlasticityDamageStatus(int n, Domain *d, GaussPoint *g);
-    /// Destructor
-    ~LatticePlasticityDamageStatus() {}
 
+    double giveKappaP() const { return kappaP; }
 
-    double giveKappaP() { return kappaP; }
+    double giveTempKappaP() const { return tempKappaP; }
 
-    double giveTempKappaP() { return tempKappaP; }
-
-    double giveKappaDOne() { return kappaDOne; }
-    double giveKappaDTwo() { return kappaDTwo; }
+    double giveKappaDOne() const { return kappaDOne; }
+    double giveKappaDTwo() const { return kappaDTwo; }
     //   double giveKappaDThree() { return kappaDThree; }
-    double giveTempKappaDOne() { return tempKappaDOne; }
-    double giveTempKappaDTwo() { return tempKappaDTwo; }
+    double giveTempKappaDOne() const { return tempKappaDOne; }
+    double giveTempKappaDTwo() const { return tempKappaDTwo; }
     //double giveTempKappaDThree() { return tempKappaDThree; }
 
     void  giveTempElasticStrain(FloatArray &answer) const
@@ -125,23 +122,23 @@ public:
 
     //void   setTempKappaDThree(double newKappa) { tempKappaDThree = newKappa; }
 
-    double giveDamage() { return damage; }
+    double giveDamage() const { return damage; }
 
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() const { return tempDamage; }
 
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
 
-    int giveCompressionFlag() { return compressionFlag; }
+    int giveCompressionFlag() const { return compressionFlag; }
 
     void setCompressionFlag(int flag) { compressionFlag = flag; }
 
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "LatticePlasticityDamageStatus"; }
 
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override;
+    void updateYourself(TimeStep *) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
 
@@ -156,41 +153,38 @@ class LatticePlasticityDamage : public LatticeLinearElastic
 protected:
 
     enum LatticePlasticityDamage_ReturnResult { RR_NotConverged, RR_Converged };
-    LatticePlasticityDamage_ReturnResult returnResult;
+    LatticePlasticityDamage_ReturnResult returnResult = RR_NotConverged;
 
-    double initialYieldStress;
+    double initialYieldStress = 0.;
 
     /// tensile strength
-    double ft;
+    double ft = 0.;
     /// compressive strength
-    double fc;
+    double fc = 0.;
     /// frictional angle of the yield surface
-    double frictionAngleOne;
+    double frictionAngleOne = 0.;
     /// frictional angle of the yield surface
-    double frictionAngleTwo;
+    double frictionAngleTwo = 0.;
     /// frictional angle of the plastic potential
-    double flowAngleOne;
+    double flowAngleOne = 0.;
 
     /// frictional angle of the plastic potential
-    double flowAngleTwo;
+    double flowAngleTwo = 0.;
 
     /// determines the softening -> corresponds to crack opening (not strain) when tension stress vanishes
-    double wf;
+    double wf = 0.;
 
     /// softening type determines the type of softening. 0 is exponential and 1 is bilinear.
-    int softeningType;
+    int softeningType = 0;
 
     /// tensile stress value for bilinear stress-crack opening curve
-    double ftOne;
+    double ftOne = 0.;
 
     /// crack opening value for bilinear stress-crack opening curve
-    double wfOne;
+    double wfOne = 0.;
 
     ///hardening parameter
-    double aHard;
-
-    //pi constant
-    double myPi;
+    double aHard = 0.;
 
     /// first parameter for thermal expansion
     //double tAlphaOne;
@@ -200,20 +194,20 @@ protected:
     //double tAlphaThree;
 
     /// yield tolerance
-    double yieldTol;
+    double yieldTol = 0.;
     /// maximum number of iterations for stress return
-    int newtonIter;
-    int numberOfSubIncrements;
+    int newtonIter = 0;
+    int numberOfSubIncrements = 0;
 
     //damageFlag
-    int damageFlag;
+    int damageFlag = 0;
 
 public:
 
     /// Constructor
     LatticePlasticityDamage(int n, Domain *d);
 
-    virtual const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamage_Name; }
+    const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamage_Name; }
     const char *giveClassName() const override { return "LatticePlasticityDamage"; }
 
 
@@ -263,7 +257,7 @@ public:
 
     virtual void computeDamageParam(double &omega, double kappaOne, double kappaTwo, GaussPoint *gp);
 
-    virtual FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
     void performPlasticityReturn(FloatArray &stress,
                                  GaussPoint *gp,
@@ -295,7 +289,7 @@ public:
 
     double computeEquivalentStress(const FloatArray &tempSigma);
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 

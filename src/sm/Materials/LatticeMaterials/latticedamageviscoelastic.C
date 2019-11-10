@@ -308,7 +308,7 @@ LatticeDamageViscoelasticStatus :: initTempStatus()
 }
 
 void
-LatticeDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus *mS = this->giveViscoelasticMatStatus();
 
@@ -321,7 +321,7 @@ LatticeDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 MaterialStatus *
-LatticeDamageViscoelasticStatus :: giveViscoelasticMatStatus() {
+LatticeDamageViscoelasticStatus :: giveViscoelasticMatStatus() const {
   //    Material *mat;
   //    RheoChainMaterial *rChMat;
   //    GaussPoint *rChGP;

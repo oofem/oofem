@@ -64,15 +64,12 @@ protected:
     double kappaP;
     double tempKappaP;
 
-    int surfaceValue;
+    int surfaceValue = 0.;
 
 public:
 
     /// Constructor
     LatticeBondPlasticityStatus(int n, Domain *d, GaussPoint *g);
-    /// Destructor
-    ~LatticeBondPlasticityStatus() {}
-
 
     /// Returns the last equilibrated scalar measure of the largest strain level
     double giveKappaP() { return kappaP; }
@@ -117,38 +114,35 @@ protected:
     enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic };
     LatticeBondPlasticity_ReturnResult returnResult;
 
-    double initialYieldStress;
+    double initialYieldStress = 0.;
 
     /// compressive strength
-    double fc;
+    double fc = 0.;
     /// frictional angle of the yield surface
-    double frictionAngleOne;
-    double frictionAngleTwo;
+    double frictionAngleOne = 0.;
+    double frictionAngleTwo = 0.;
 
-    double hardeningLimit;
+    double hardeningLimit = 0.;
 
     /// frictional angle of the plastic potential
-    double flowAngle;
+    double flowAngle = 0.;
 
     /// determines the softening -> corresponds to crack opening (not strain) when tension stress vanishes
-    double wf;
+    double wf = 0.;
 
-    int oldApproachFlag;
-
-    //pi constant
-    double myPi;
+    int oldApproachFlag = 0;
 
     /// yield tolerance
-    double yieldTol;
+    double yieldTol = 0.;
 
     /// maximum number of iterations for stress return
-    int newtonIter;
+    int newtonIter = 0;
 
     /// maximum number of subincrements
-    int numberOfSubIncrements;
+    int numberOfSubIncrements = 0;
 
     //parameter in hardening law
-    double ef;
+    double ef = 0.;
 
 public:
 
@@ -181,7 +175,7 @@ public:
 
     double computeTransition(const double kappa, GaussPoint *gp);
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
     /* Compute the A matrix used for closest point return

@@ -47,7 +47,6 @@ REGISTER_Material(LatticePlasticityDamageViscoelastic);
 
 LatticePlasticityDamageViscoelastic :: LatticePlasticityDamageViscoelastic(int n, Domain *d) : LatticePlasticityDamage(n, d)
 {
-    slaveMat = 0;
 }
 
 
@@ -311,7 +310,7 @@ LatticePlasticityDamageViscoelasticStatus :: initTempStatus()
 }
 
 void
-LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus *mS = this->giveViscoelasticMatStatus();
 
