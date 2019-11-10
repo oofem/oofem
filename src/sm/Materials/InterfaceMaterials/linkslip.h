@@ -70,9 +70,9 @@ class LinkSlipStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
-  double kappa=0;
+  double kappa = 0;
 
-  double tempKappa=0;
+  double tempKappa = 0;
 
 public:
 
