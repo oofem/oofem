@@ -170,7 +170,7 @@ MooneyRivlinMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
 
     I2 = 0.5 * ( I1 * I1 - CC.at(1, 1) - CC.at(2, 2) - CC.at(3, 3) );
 
-
+    answer.resize(9, 9);
     answer.at(1, 1) = ( 2. * C1 * ( 5. * I1 * invF.at(1, 1) * invF.at(1, 1) - 12. * F.at(1, 1) * invF.at(1, 1) + 9. ) ) / ( 9. * pow(J, 2. / 3.) );
     answer.at(1, 2) = -( 2. * C1 * ( 6. * F.at(1, 1) * invF.at(2, 2) + 6. * F.at(2, 2) * invF.at(1, 1) - 2. * I1 * invF.at(1, 1) * invF.at(2, 2) - 3. * I1 * invF.at(1, 2) * invF.at(2, 1) ) ) / ( 9. * pow(J, 2. / 3.) );
     answer.at(1, 3) = -( 2. * C1 * ( 6. * F.at(1, 1) * invF.at(3, 3) + 6. * F.at(3, 3) * invF.at(1, 1) - 2. * I1 * invF.at(1, 1) * invF.at(3, 3) - 3. * I1 * invF.at(1, 3) * invF.at(3, 1) ) ) / ( 9. * pow(J, 2. / 3.) );
