@@ -1,0 +1,81 @@
+ltrspaceboundary03.out
+3D RVE - periodic boundary conditions with LTRSpaceBoundaryVoigt elements, periodicity in x y z
+StaticStructural nsteps 1 solverType "calm" stepLength 0.3 Psi 0 hpc 2 126 31 initialguess 1 nmodules 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 9 nelem 56 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 1
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 3 1 1 1
+node 9 coords 3 5.827886e-02 0.000000e+00 0.000000e+00
+node 24 coords 3 0.000000e+00 4.124619e-02 0.000000e+00
+node 33 coords 3 0.000000e+00 0.000000e+00 4.902652e-02
+node 45 coords 3 4.791257e-02 5.177834e-02 0.000000e+00
+node 63 coords 3 4.791257e-02 0.000000e+00 5.059616e-02
+node 90 coords 3 0.000000e+00 4.791257e-02 5.059616e-02
+node 99 coords 3 4.463697e-02 4.791257e-02 5.059616e-02
+node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 6 31 32 33 40 41 42 load 1 2
+ltrspaceboundaryvoigt 14 nodes 5 99 9 45 90 126 crossSect 1 mat 1 location 4 0 17 14 22
+ltrspaceboundaryvoigt 15 nodes 5 9 99 63 90 126 crossSect 1 mat 1 location 4 17 0 16 22
+ltrspaceboundaryvoigt 16 nodes 5 99 9 63 45 126 crossSect 1 mat 1 location 4 0 17 16 14
+ltrspaceboundaryvoigt 18 nodes 5 24 99 9 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundaryvoigt 53 nodes 5 24 99 45 90 126 crossSect 1 mat 1 location 4 23 0 14 22
+ltrspaceboundaryvoigt 54 nodes 5 9 24 45 90 126 crossSect 1 mat 1 location 4 17 23 14 22
+ltrspaceboundaryvoigt 55 nodes 5 24 9 1 90 126 crossSect 1 mat 1 location 4 23 17 26 22
+ltrspaceboundaryvoigt 57 nodes 5 90 99 45 24 126 crossSect 1 mat 1 location 4 0 0 14 14
+ltrspaceboundaryvoigt 58 nodes 5 9 1 63 45 126 crossSect 1 mat 1 location 4 17 17 16 14
+ltrspaceboundaryvoigt 59 nodes 5 1 90 45 24 126 crossSect 1 mat 1 location 4 17 0 14 14
+ltrspaceboundaryvoigt 60 nodes 5 1 99 63 45 126 crossSect 1 mat 1 location 4 17 0 16 14
+ltrspaceboundaryvoigt 61 nodes 5 1 90 99 45 126 crossSect 1 mat 1 location 4 17 0 0 14
+ltrspaceboundaryvoigt 72 nodes 5 45 24 99 9 126 crossSect 1 mat 1 location 4 0 22 0 0
+ltrspaceboundaryvoigt 73 nodes 5 24 45 99 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundaryvoigt 136 nodes 5 9 24 99 45 126 crossSect 1 mat 1 location 4 14 23 0 14
+ltrspaceboundaryvoigt 140 nodes 5 24 9 99 90 126 crossSect 1 mat 1 location 4 23 14 0 22
+ltrspaceboundaryvoigt 176 nodes 5 45 24 90 1 126 crossSect 1 mat 1 location 4 0 0 0 16
+ltrspace 177 nodes 4 24 45 90 99 crossSect 1 mat 1
+ltrspaceboundaryvoigt 178 nodes 5 33 1 99 63 126 crossSect 1 mat 1 location 4 16 17 0 16
+ltrspaceboundaryvoigt 179 nodes 5 33 1 90 99 126 crossSect 1 mat 1 location 4 16 17 0 0
+ltrspaceboundaryvoigt 180 nodes 5 45 33 99 63 126 crossSect 1 mat 1 location 4 0 16 0 16
+ltrspaceboundaryvoigt 181 nodes 5 33 45 1 63 126 crossSect 1 mat 1 location 4 16 0 16 16
+ltrspaceboundaryvoigt 182 nodes 5 45 33 90 99 126 crossSect 1 mat 1 location 4 0 16 0 0
+ltrspaceboundaryvoigt 183 nodes 5 33 45 90 1 126 crossSect 1 mat 1 location 4 16 0 0 16
+ltrspaceboundaryvoigt 253 nodes 5 99 9 63 90 126 crossSect 1 mat 1 location 4 0 16 16 22
+ltrspaceboundaryvoigt 254 nodes 5 45 9 99 90 126 crossSect 1 mat 1 location 4 0 16 0 22
+ltrspaceboundaryvoigt 255 nodes 5 9 45 99 63 126 crossSect 1 mat 1 location 4 16 0 0 16
+ltrspaceboundaryvoigt 256 nodes 5 9 45 24 90 126 crossSect 1 mat 1 location 4 16 0 22 22
+ltrspaceboundaryvoigt 257 nodes 5 1 9 24 90 126 crossSect 1 mat 1 location 4 25 16 22 22
+ltrspaceboundaryvoigt 261 nodes 5 45 9 1 63 126 crossSect 1 mat 1 location 4 0 16 16 16
+ltrspaceboundaryvoigt 287 nodes 5 33 24 9 90 126 crossSect 1 mat 1 location 4 22 22 0 22
+ltrspaceboundaryvoigt 288 nodes 5 1 33 24 9 126 crossSect 1 mat 1 location 4 22 22 22 0
+ltrspaceboundaryvoigt 290 nodes 5 33 9 24 90 126 crossSect 1 mat 1 location 4 22 14 23 22
+ltrspaceboundaryvoigt 304 nodes 5 1 33 9 24 126 crossSect 1 mat 1 location 4 23 22 14 23
+ltrspace 415 nodes 4 33 24 90 99 crossSect 1 mat 1
+ltrspaceboundaryvoigt 419 nodes 5 90 33 99 24 126 crossSect 1 mat 1 location 4 0 0 0 14
+ltrspaceboundaryvoigt 437 nodes 5 9 33 63 90 126 crossSect 1 mat 1 location 4 16 25 16 22
+ltrspaceboundaryvoigt 438 nodes 5 33 9 1 90 126 crossSect 1 mat 1 location 4 25 16 25 22
+ltrspaceboundaryvoigt 441 nodes 5 9 33 1 90 126 crossSect 1 mat 1 location 4 17 25 26 22
+ltrspaceboundaryvoigt 442 nodes 5 33 9 63 90 126 crossSect 1 mat 1 location 4 25 17 16 22
+ltrspaceboundaryvoigt 453 nodes 5 9 63 99 90 126 crossSect 1 mat 1 location 4 14 0 0 22
+ltrspaceboundaryvoigt 454 nodes 5 33 63 9 90 126 crossSect 1 mat 1 location 4 22 0 14 22
+ltrspaceboundaryvoigt 455 nodes 5 99 63 9 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+ltrspaceboundaryvoigt 456 nodes 5 63 33 9 90 126 crossSect 1 mat 1 location 4 0 22 0 22
+ltrspace 458 nodes 4 33 63 24 99 crossSect 1 mat 1
+ltrspaceboundaryvoigt 462 nodes 5 9 63 1 24 126 crossSect 1 mat 1 location 4 14 0 14 14
+ltrspaceboundaryvoigt 463 nodes 5 63 33 1 24 126 crossSect 1 mat 1 location 4 0 0 14 14
+ltrspaceboundaryvoigt 464 nodes 5 33 63 99 24 126 crossSect 1 mat 1 location 4 0 0 0 14
+ltrspace 468 nodes 4 63 45 99 9 crossSect 1 mat 1
+ltrspace 469 nodes 4 63 24 45 9 crossSect 1 mat 1
+ltrspace 470 nodes 4 24 63 45 99 crossSect 1 mat 1
+ltrspaceboundaryvoigt 474 nodes 5 99 63 45 24 126 crossSect 1 mat 1 location 4 0 0 14 14
+ltrspaceboundaryvoigt 475 nodes 5 63 9 45 24 126 crossSect 1 mat 1 location 4 0 14 14 14
+ltrspaceboundaryvoigt 476 nodes 5 63 9 99 45 126 crossSect 1 mat 1 location 4 0 14 0 14
+ltrspace 537 nodes 4 63 1 24 9 crossSect 1 mat 1
+ltrspace 538 nodes 4 63 1 33 24 crossSect 1 mat 1
+simplecs 1
+isole 1 talpha 0. d 0. e 30.e9 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+NodalLoad 2 loadTimeFunction 1 Components 6 1 -2.428585877 -0.285714 0. 0. 1.714285812 reference
+ConstantFunction 1 f(t) 1.
+set 1 nodes 1 126
+#%BEGIN_CHECK% tolerance 1e-3
+#LOADLEVEL tStep 1 value 5.8333226238e+06
+#%END_CHECK%

@@ -1,0 +1,90 @@
+ltrspaceboundary04.out
+3D RVE - periodic boundary conditions with LTRSpaceBoundary elements, periodicity in x y z
+StaticStructural nsteps 1 initialguess 1 nmodules 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 9 nelem 56 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 1
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 3 1 1 1
+node 9 coords 3 5.827886e-02 0.000000e+00 0.000000e+00
+node 24 coords 3 0.000000e+00 4.124619e-02 0.000000e+00
+node 33 coords 3 0.000000e+00 0.000000e+00 4.902652e-02
+node 45 coords 3 4.791257e-02 5.177834e-02 0.000000e+00
+node 63 coords 3 4.791257e-02 0.000000e+00 5.059616e-02
+node 90 coords 3 0.000000e+00 4.791257e-02 5.059616e-02
+node 99 coords 3 4.463697e-02 4.791257e-02 5.059616e-02
+node 126 coords 3 1.000000e-01 1.000000e-01 1.000000e-01 dofidmask 9 31 38 36 39 32 34 37 35 33 bc 9 2 2 2 2 2 2 2 2 2
+ltrspaceboundary 14 nodes 5 99 9 45 90 126 crossSect 1 mat 1 location 4 0 17 14 22
+ltrspaceboundary 15 nodes 5 9 99 63 90 126 crossSect 1 mat 1 location 4 17 0 16 22
+ltrspaceboundary 16 nodes 5 99 9 63 45 126 crossSect 1 mat 1 location 4 0 17 16 14
+ltrspaceboundary 18 nodes 5 24 99 9 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundary 53 nodes 5 24 99 45 90 126 crossSect 1 mat 1 location 4 23 0 14 22
+ltrspaceboundary 54 nodes 5 9 24 45 90 126 crossSect 1 mat 1 location 4 17 23 14 22
+ltrspaceboundary 55 nodes 5 24 9 1 90 126 crossSect 1 mat 1 location 4 23 17 26 22
+ltrspaceboundary 57 nodes 5 90 99 45 24 126 crossSect 1 mat 1 location 4 0 0 14 14
+ltrspaceboundary 58 nodes 5 9 1 63 45 126 crossSect 1 mat 1 location 4 17 17 16 14
+ltrspaceboundary 59 nodes 5 1 90 45 24 126 crossSect 1 mat 1 location 4 17 0 14 14
+ltrspaceboundary 60 nodes 5 1 99 63 45 126 crossSect 1 mat 1 location 4 17 0 16 14
+ltrspaceboundary 61 nodes 5 1 90 99 45 126 crossSect 1 mat 1 location 4 17 0 0 14
+ltrspaceboundary 72 nodes 5 45 24 99 9 126 crossSect 1 mat 1 location 4 0 22 0 0
+ltrspaceboundary 73 nodes 5 24 45 99 90 126 crossSect 1 mat 1 location 4 22 0 0 22
+ltrspaceboundary 136 nodes 5 9 24 99 45 126 crossSect 1 mat 1 location 4 14 23 0 14
+ltrspaceboundary 140 nodes 5 24 9 99 90 126 crossSect 1 mat 1 location 4 23 14 0 22
+ltrspaceboundary 176 nodes 5 45 24 90 1 126 crossSect 1 mat 1 location 4 0 0 0 16
+ltrspace 177 nodes 4 24 45 90 99 crossSect 1 mat 1
+ltrspaceboundary 178 nodes 5 33 1 99 63 126 crossSect 1 mat 1 location 4 16 17 0 16
+ltrspaceboundary 179 nodes 5 33 1 90 99 126 crossSect 1 mat 1 location 4 16 17 0 0
+ltrspaceboundary 180 nodes 5 45 33 99 63 126 crossSect 1 mat 1 location 4 0 16 0 16
+ltrspaceboundary 181 nodes 5 33 45 1 63 126 crossSect 1 mat 1 location 4 16 0 16 16
+ltrspaceboundary 182 nodes 5 45 33 90 99 126 crossSect 1 mat 1 location 4 0 16 0 0
+ltrspaceboundary 183 nodes 5 33 45 90 1 126 crossSect 1 mat 1 location 4 16 0 0 16
+ltrspaceboundary 253 nodes 5 99 9 63 90 126 crossSect 1 mat 1 location 4 0 16 16 22
+ltrspaceboundary 254 nodes 5 45 9 99 90 126 crossSect 1 mat 1 location 4 0 16 0 22
+ltrspaceboundary 255 nodes 5 9 45 99 63 126 crossSect 1 mat 1 location 4 16 0 0 16
+ltrspaceboundary 256 nodes 5 9 45 24 90 126 crossSect 1 mat 1 location 4 16 0 22 22
+ltrspaceboundary 257 nodes 5 1 9 24 90 126 crossSect 1 mat 1 location 4 25 16 22 22
+ltrspaceboundary 261 nodes 5 45 9 1 63 126 crossSect 1 mat 1 location 4 0 16 16 16
+ltrspaceboundary 287 nodes 5 33 24 9 90 126 crossSect 1 mat 1 location 4 22 22 0 22
+ltrspaceboundary 288 nodes 5 1 33 24 9 126 crossSect 1 mat 1 location 4 22 22 22 0
+ltrspaceboundary 290 nodes 5 33 9 24 90 126 crossSect 1 mat 1 location 4 22 14 23 22
+ltrspaceboundary 304 nodes 5 1 33 9 24 126 crossSect 1 mat 1 location 4 23 22 14 23
+ltrspace 415 nodes 4 33 24 90 99 crossSect 1 mat 1
+ltrspaceboundary 419 nodes 5 90 33 99 24 126 crossSect 1 mat 1 location 4 0 0 0 14
+ltrspaceboundary 437 nodes 5 9 33 63 90 126 crossSect 1 mat 1 location 4 16 25 16 22
+ltrspaceboundary 438 nodes 5 33 9 1 90 126 crossSect 1 mat 1 location 4 25 16 25 22
+ltrspaceboundary 441 nodes 5 9 33 1 90 126 crossSect 1 mat 1 location 4 17 25 26 22
+ltrspaceboundary 442 nodes 5 33 9 63 90 126 crossSect 1 mat 1 location 4 25 17 16 22
+ltrspaceboundary 453 nodes 5 9 63 99 90 126 crossSect 1 mat 1 location 4 14 0 0 22
+ltrspaceboundary 454 nodes 5 33 63 9 90 126 crossSect 1 mat 1 location 4 22 0 14 22
+ltrspaceboundary 455 nodes 5 99 63 9 90 126 crossSect 1 mat 1 location 4 0 0 0 22
+ltrspaceboundary 456 nodes 5 63 33 9 90 126 crossSect 1 mat 1 location 4 0 22 0 22
+ltrspace 458 nodes 4 33 63 24 99 crossSect 1 mat 1
+ltrspaceboundary 462 nodes 5 9 63 1 24 126 crossSect 1 mat 1 location 4 14 0 14 14
+ltrspaceboundary 463 nodes 5 63 33 1 24 126 crossSect 1 mat 1 location 4 0 0 14 14
+ltrspaceboundary 464 nodes 5 33 63 99 24 126 crossSect 1 mat 1 location 4 0 0 0 14
+ltrspace 468 nodes 4 63 45 99 9 crossSect 1 mat 1
+ltrspace 469 nodes 4 63 24 45 9 crossSect 1 mat 1
+ltrspace 470 nodes 4 24 63 45 99 crossSect 1 mat 1
+ltrspaceboundary 474 nodes 5 99 63 45 24 126 crossSect 1 mat 1 location 4 0 0 14 14
+ltrspaceboundary 475 nodes 5 63 9 45 24 126 crossSect 1 mat 1 location 4 0 14 14 14
+ltrspaceboundary 476 nodes 5 63 9 99 45 126 crossSect 1 mat 1 location 4 0 14 0 14
+ltrspace 537 nodes 4 63 1 24 9 crossSect 1 mat 1
+ltrspace 538 nodes 4 63 1 33 24 crossSect 1 mat 1
+simplecs 1
+isole 1 talpha 0. d 0. e 30.e9 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 1 dofs 9 31 38 36 39 32 34 37 35 33 values 9 0.3 0.2 0.05 0.6 -0.5 0.25 0.15 0.35 0.0 set 1
+ConstantFunction 1 f(t) 1.
+set 1 nodes 1 126
+
+#%BEGIN_CHECK% tolerance 1e-3
+#REACTION tStep 1 number 126 dof 31 value 5.8333333333333e+06
+#REACTION tStep 1 number 126 dof 38 value 1.0000e+07
+#REACTION tStep 1 number 126 dof 36 value 2.5000e+06
+#REACTION tStep 1 number 126 dof 39 value 1.0000e+07
+#REACTION tStep 1 number 126 dof 32 value -1.4166666666667e+07
+#REACTION tStep 1 number 126 dof 34 value 7.5000e+06
+#REACTION tStep 1 number 126 dof 37 value 2.5000e+06
+#REACTION tStep 1 number 126 dof 35 value 7.5000e+06
+#REACTION tStep 1 number 126 dof 33 value -1.6666666666667e+06
+#%END_CHECK%

@@ -48,8 +48,8 @@
 #include "fei2dquadquad.h"
 #include "fei3dtetlin.h"
 #include "fei3dhexalin.h"
-
 #include "octreelocalizert.h"
+
 #include "error.h"
 
 namespace oofem {

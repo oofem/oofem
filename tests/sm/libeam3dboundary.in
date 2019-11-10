@@ -1,0 +1,46 @@
+libeam3dboundary.out
+Reinforcement test case in 3D RVE - periodicity with LIBeam3dBoundary elements
+StaticStructural nsteps 1 deltat 1.0 rtolf 1.0e-4 MaxIter 30 minIter 1 nmodules 1 initialguess 1
+#vtkxmlperiodic tstep_all domain_all primvars 1 1 vars 2 7 8 stype 0
+#vtkxmlperiodic tstep_all domain_all ipvars 2 7 8
+#matlab tstep_all mesh data reactionforces integrationpoints internalvars 2 7 8
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 11 nelem 8 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nset 3
+node 1 coords 3 0.0 -0.2 0.0
+node 2 coords 3 0.0 -0.1 0.0
+node 3 coords 3 0.0 0.0 0.0 
+node 4 coords 3 0.0 0.1 0.0 
+node 5 coords 3 -0.2 0.0 0.0
+node 6 coords 3 -0.1 0.0 0.0
+node 7 coords 3 0.0 0.0 0.0 
+node 8 coords 3 0.1 0.0 0.0 
+node 9 coords 3 -0.1 0.0 0.0
+node 10 coords 3 0.0 0.1 0.0
+node 11 coords 3 0.4 0.4 0.4 
+libeam3d 1 nodes 2 1 2 refnode 9 crossSect 1
+libeam3d 2 nodes 2 2 3 refnode 9 crossSect 1
+libeam3d 3 nodes 2 3 4 refnode 9 crossSect 1
+libeam3dboundary 4 nodes 3 4 1 11 refnode 6 crossSect 1 location 2 0 16
+libeam3d 5 nodes 2 5 6 refnode 10 crossSect 1
+libeam3d 6 nodes 2 6 7 refnode 10 crossSect 1
+libeam3d 7 nodes 2 7 8 refnode 10 crossSect 1
+libeam3dboundary 8 nodes 3 8 5 11 refnode 10 crossSect 1 location 2 0 22
+Set 1 elementranges { (1 8) }
+Set 2 nodes 1 11
+Set 3 nodes 2 1 5
+FiberedCS 1 fibermaterials 1 1 thicks 1 17.72455923e-3 widths 1 17.72455923e-3 thick 17.72455923e-3 width 17.72455923e-3 fiberycentrecoords 1 8.862279616e-3 fiberzcentrecoords 1 8.862279616e-3
+MisesMat 1 d 1.0 E 2e11 n 0.3 sig0 500e6 H 8.456659619e8 omega_crit 0 a 0 tAlpha 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 0 0 0 0 0 0 set 3
+BoundaryCondition 2 loadTimeFunction 1 dofs 9 31 38 36 39 32 34 37 35 33 values 9 0.3e-5 0.4e-5 0 0.4e-5 -0.5e-5 0 0 0 0 set 2
+ConstantFunction 1 f(t) 1
+PiecewiseLinFunction 2 t 2 0.0 15.0 f(t) 2 0.0 1.5
+
+#%BEGIN_CHECK% tolerance 1e-3
+#REACTION tStep 1 number 11 dof 31 value 7.540953415e+01
+#REACTION tStep 1 number 11 dof 32 value -1.256751341e+02
+#ELEMENT tStep 1 number 4 gp 1 keyword 7 component 1 value -3.141878e+02
+#ELEMENT tStep 1 number 8 gp 1 keyword 7 component 1 value 1.885238e+02
+##TIME
+#%END_CHECK%

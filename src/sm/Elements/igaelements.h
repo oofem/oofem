@@ -171,7 +171,7 @@ public:
     const char *giveClassName() const override { return "TSplinePlaneStressElement"; }
 #ifdef __OOFEG
     // Graphics output
-    virtual void  drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    void  drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
 protected:

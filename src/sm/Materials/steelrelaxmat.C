@@ -45,29 +45,13 @@
 namespace oofem {
 REGISTER_Material(SteelRelaxMat);
 
-// constructor
 SteelRelaxMat :: SteelRelaxMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
-    E = 0.;
-    k1 = 0.;
-    k2 = 0.;
-    rho1000 = 0.;
-    mu = 0.;
-    timeFactor = 0.;
-    //stiffnessFactor = 1.e6;
-    //    prestress = 0.;
 }
-
-// destructor
-SteelRelaxMat :: ~SteelRelaxMat()
-{}
 
 
 bool
 SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode) const
-//
-// returns whether the receiver supports the given mode
-//
 {
     return mode == _1dMat;
 }
@@ -461,8 +445,6 @@ SteelRelaxMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTy
 
 SteelRelaxMatStatus :: SteelRelaxMatStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
-    relaxIntVariable = tempRelaxIntVariable = 0.;
-    prestress = 0.;
 }
 
 
