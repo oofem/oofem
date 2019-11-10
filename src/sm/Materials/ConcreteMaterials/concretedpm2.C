@@ -1068,7 +1068,6 @@ ConcreteDPM2 :: computeRateFactor(double alpha,
     }
 
     //For compression according to CEB-FIP Model Code 2010
-    double strainRateZeroCompression = -30.e-6;
     double rateFactorCompression = 1.;
     double strainRateRatioCompression = strainRate / ( -30.e-6 );
     if ( strainRate > -30.e-6 ) {
