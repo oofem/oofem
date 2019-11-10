@@ -212,13 +212,13 @@ public:
      */
     //@{
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
-    virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveFirstPKStressVector_3d
-    virtual void giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual FloatArrayF<5> giveFirstPKStressVector_PlaneStrain(const FloatArrayF<5> &vF, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveFirstPKStressVector_3d
-    virtual void giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual FloatArrayF<4> giveFirstPKStressVector_PlaneStress(const FloatArrayF<4> &vF, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveFirstPKStressVector_3d
-    virtual void giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual FloatArrayF<1> giveFirstPKStressVector_1d(const FloatArrayF<1> &vF, GaussPoint *gp, TimeStep *tStep) const;
     //@}
 
     /**
@@ -255,8 +255,8 @@ public:
      */
     virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
-    void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp, MaterialMode matMode);
-    void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &S, const FloatArray &F, MaterialMode matMode);
+    void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp, MaterialMode matMode) const;
+    void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &S, const FloatArray &F, MaterialMode matMode) const;
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
@@ -346,9 +346,8 @@ public:
     { OOFEM_ERROR("not implemented "); }
 
 
-    virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep);
+    virtual FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
+                                                    GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void give3dMaterialStiffnessMatrix_dCde(FloatMatrix &answer,
                                                     MatResponseMode mode,
@@ -457,9 +456,8 @@ public:
                                           MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual void givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                               MatResponseMode mmode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    virtual FloatMatrixF<4,4> givePlaneStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp,
+                                               TimeStep *tStep) const;
 
     virtual void givePlaneStressStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
@@ -488,9 +486,8 @@ public:
                                           MatResponseMode mmode, GaussPoint *gp,
                                           TimeStep *tStep);
 
-    virtual void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                               MatResponseMode mmode, GaussPoint *gp,
-                                               TimeStep *tStep);
+    virtual FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode,
+                                                            GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void givePlaneStrainStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
@@ -514,9 +511,8 @@ public:
                                        MatResponseMode mmode, GaussPoint *gp,
                                        TimeStep *tStep);
 
-    virtual void give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                            MatResponseMode mmode, GaussPoint *gp,
-                                            TimeStep *tStep);
+    virtual FloatMatrixF<1,1> give1dStressStiffMtrx_dPdF(MatResponseMode mmode,
+                                                         GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void give1dStressStiffMtrx_dCde(FloatMatrix &answer,
                                             MatResponseMode mmode, GaussPoint *gp,

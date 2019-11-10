@@ -208,7 +208,7 @@ public:
      * @param c Columns to extract.
      */
     template<std::size_t R, std::size_t C>
-    FloatMatrixF<R,C> operator()(std::size_t const (&r)[R], std::size_t const (&c)[C]) const
+    FloatMatrixF<R,C> operator()(int const (&r)[R], int const (&c)[C]) const
     {
         FloatMatrixF<R,C> x;
         for ( std::size_t i = 0; i < R; ++i ) {

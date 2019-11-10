@@ -35,6 +35,8 @@
 #include "mooneyrivlin.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "classfactory.h"
 #include "mathfem.h"
 
@@ -45,132 +47,68 @@ MooneyRivlinMaterial :: MooneyRivlinMaterial(int n, Domain *d) : StructuralMater
 { }
 
 
-void
-MooneyRivlinMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
+FloatArrayF<9>
+MooneyRivlinMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const
 // returns 9 components of the first piola kirchhoff stress corresponding to the given deformation gradinet
-
 {
-    double J, I1, I2, barI1, barI2;
-    FloatMatrix F, C, Cpow2, invFt, FC, invF;
-
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     //store deformation gradient into matrix
-    F.beMatrixForm(vF);
-    invF.beInverseOf(F);
-    invFt.beTranspositionOf(invF);
-    // compute jacobian
-    J = F.giveDeterminant();
-    // compute right Cauchy-Green tensor
-    C.beTProductOf(F, F);
-    // compute C*C
-    Cpow2.beProductOf(C, C);
-    // compute F*C
-    FC.beProductOf(F, C);
+    auto F = from_voigt_form(vF);
+    auto invF = inv(F);
+    auto invFt = transpose(invF);
+
+    auto J = det(F);
+    auto C = Tdot(F, F);
+    auto CC = dot(C, C);
+    auto FC = dot(F, C);
+
     //compute first invariant of deviatoric part of C;
-    I1 = ( C.at(1, 1) + C.at(2, 2) + C.at(3, 3) );
-    I2 = 1. / 2. * ( I1 * I1 - Cpow2.at(1, 1) - Cpow2.at(2, 2) - Cpow2.at(3, 3) );
-    barI1 = I1 * pow(J, -2. / 3.);
-    barI2 = I2 * pow(J, -4. / 3.);
+    auto I1 = ( C.at(1, 1) + C.at(2, 2) + C.at(3, 3) );
+    auto I2 = 1. / 2. * ( I1 * I1 - CC.at(1, 1) - CC.at(2, 2) - CC.at(3, 3) );
+    auto barI1 = I1 * pow(J, -2. / 3.);
+    auto barI2 = I2 * pow(J, -4. / 3.);
 
-
-    FloatMatrix P;
     //first part of stress tensor : C1 * \frac{\partial \bar{I}_1}{\partial F_ij}
-    P.add(2 * C1 / pow(J, 2 / 3.), F);
-    P.add(-2. / 3. * C1 * barI1, invFt);
+    auto P = (2 * C1 / pow(J, 2 / 3.)) * F;
+    P += (-2. / 3. * C1 * barI1) * invFt;
     // second part of stress tensor : C2 * \frac{\partial \bar{I}_2}{\partial F_ij}
-    P.add( 2. * C2 * barI1 / pow(J, 2. / 3.), F );
-    P.add(-4. / 3. * C2 * barI2, invFt);
-    P.add(-2. * C2 / pow(J, 4. / 3.), FC );
+    P += ( 2. * C2 * barI1 / pow(J, 2. / 3.)) * F;
+    P += (-4. / 3. * C2 * barI2) * invFt;
+    P += (-2. * C2 / pow(J, 4. / 3.)) * FC;
     // third part of stress tensor : K * \frac{\partial ln J }{F_ij}
-    P.add(K, invFt);
+    P += K * invFt;
 
-    answer.beVectorForm(P);
+    auto vP = to_voigt_form(P);
 
     // update gp
     status->letTempFVectorBe(vF);
-    status->letTempPVectorBe(answer);
-}
-
-void
-MooneyRivlinMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
-// returns 4 components of the First PK Stress corresponding to the given deformation gradient
-
-{
-    double J, I1, I2, barI1, barI2;
-    FloatArray vF, vP;
-    FloatMatrix F, C, CC, invFt, FC, invF;
-
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    vF = {
-        reducedvF.at(1), reducedvF.at(2), reducedvF.at(3), 0, 0, reducedvF.at(4), 0, 0, reducedvF.at(5)
-    };
-    //store deformation gradient into matrix
-    F.beMatrixForm(vF);
-    invF.beInverseOf(F);
-    invFt.beTranspositionOf(invF);
-    // compute jacobian and its log
-    J = F.giveDeterminant();
-    // compute right Cauchy-Green tensor
-    C.beTProductOf(F, F);
-    // compute C*C
-    CC.beProductOf(C, C);
-    // compute F*C
-    FC.beProductOf(F, C);
-    //compute first invariant of deviatoric part of C;
-    I1 = ( C.at(1, 1) + C.at(2, 2) + C.at(3, 3) );
-    I2 = 1. / 2. * ( I1 * I1 - CC.at(1, 1) - CC.at(2, 2) - CC.at(3, 3) );
-    barI1 = I1 * pow(J, -2. / 3.);
-    barI2 = I2 * pow(J, -4. / 3.);
-
-
-    FloatMatrix P;
-    //first part of stress tensor : C1 * \frac{\partial \bar{I}_1}{\partial F_ij}
-    P.add( 2 * C1 / pow(J, 2 / 3.), F );
-    P.add(-2. / 3. * C1 * barI1, invFt);
-    // second part of stress tensor : C2 * \frac{\partial \bar{I}_2}{\partial F_ij}
-    P.add( 2. * C2 * barI1 / pow(J, 2. / 3.), F );
-    P.add(-4. / 3. * C2 * barI2, invFt);
-    P.add(-2. * C2 / pow(J, 4. / 3.), FC);
-    // third part of stress tensor : K * \frac{\partial ln J }{F_ij}
-    P.add(K, invFt);
-    vP.beVectorForm(P);
-    StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStrain);
-    answer.beVectorForm(P);
-
-    // update gp
-    status->letTempFVectorBe(reducedvF);
-    status->letTempPVectorBe(answer);
+    status->letTempPVectorBe(vP);
+    return vP;
 }
 
 
-void
-MooneyRivlinMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                           MatResponseMode mode,
-                                                           GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<9,9>
+MooneyRivlinMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
+                                                           GaussPoint *gp, TimeStep *tStep) const
 // returns the 9x9 tangent stiffness matrix - dP/dF
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    double I1, I2, J, lnJ;
-    FloatMatrix C, CC, invF, FC, B;
+    const auto &vF = status->giveTempFVector();
+    auto F = from_voigt_form(vF);
+    auto C = Tdot(F, F);
+    auto CC = dot(C, C);
+    auto B = dotT(F, F);
+    auto invF = inv(F);
+    auto FC = dot(F, C);
 
+    auto J = det(F);
+    auto lnJ = log(J);
+    auto I1 = C.at(1, 1) + C.at(2, 2) + C.at(3, 3);
 
-    FloatArray vF = status->giveTempFVector();
-    FloatMatrix F = { { vF.at(1), vF.at(6), vF.at(5) }, { vF.at(9), vF.at(2), vF.at(4) }, { vF.at(8), vF.at(7), vF.at(3) } };
-    C.beTProductOf(F, F);
-    CC.beProductOf(C, C);
-    B.beProductTOf(F, F);
-    invF.beInverseOf(F);
-    FC.beProductOf(F, C);
-
-    J = F.giveDeterminant();
-    lnJ = log(J);
-    I1 = C.at(1, 1) + C.at(2, 2) + C.at(3, 3);
-
-    I2 = 0.5 * ( I1 * I1 - CC.at(1, 1) - CC.at(2, 2) - CC.at(3, 3) );
-
-    answer.resize(9, 9);
+    auto I2 = 0.5 * ( I1 * I1 - CC.at(1, 1) - CC.at(2, 2) - CC.at(3, 3) );
+    FloatMatrixF<9,9> answer;
     answer.at(1, 1) = ( 2. * C1 * ( 5. * I1 * invF.at(1, 1) * invF.at(1, 1) - 12. * F.at(1, 1) * invF.at(1, 1) + 9. ) ) / ( 9. * pow(J, 2. / 3.) );
     answer.at(1, 2) = -( 2. * C1 * ( 6. * F.at(1, 1) * invF.at(2, 2) + 6. * F.at(2, 2) * invF.at(1, 1) - 2. * I1 * invF.at(1, 1) * invF.at(2, 2) - 3. * I1 * invF.at(1, 2) * invF.at(2, 1) ) ) / ( 9. * pow(J, 2. / 3.) );
     answer.at(1, 3) = -( 2. * C1 * ( 6. * F.at(1, 1) * invF.at(3, 3) + 6. * F.at(3, 3) * invF.at(1, 1) - 2. * I1 * invF.at(1, 1) * invF.at(3, 3) - 3. * I1 * invF.at(1, 3) * invF.at(3, 1) ) ) / ( 9. * pow(J, 2. / 3.) );
@@ -519,37 +457,33 @@ MooneyRivlinMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
     answer.at(9, 7) = answer.at(9, 7) + K * ( invF.at(1, 2) * invF.at(2, 3) - invF.at(1, 3) * invF.at(2, 2) * lnJ );
     answer.at(9, 8) = answer.at(9, 8) - K *invF.at(1, 2) * invF.at(1, 3) * ( lnJ - 1. );
     answer.at(9, 9) = answer.at(9, 9) - K *invF.at(1, 2) * invF.at(1, 2) * ( lnJ - 1. );
+    
+    return answer;
 }
 
 
 
-void
-MooneyRivlinMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                                      MatResponseMode mode,
-                                                      GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<5,5>
+MooneyRivlinMaterial :: givePlaneStrainStiffMtrx_dPdF(MatResponseMode mode,
+                                                      GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    double I1, I2, J, lnJ;
-    FloatMatrix C, CC, invF, FC, B;
+    const auto &vF = status->giveTempFVector();
+    auto F = from_voigt_form(vF);
+    auto C = Tdot(F, F);
+    auto CC = dot(C, C);
+    auto B = dotT(F, F);
+    auto invF = inv(F);
+    auto FC = dot(F, C);
 
+    auto J = det(F);
+    auto lnJ = log(J);
+    auto I1 = C.at(1, 1) + C.at(2, 2) + C.at(3, 3);
 
-    FloatArray vF = status->giveTempFVector();
-    FloatMatrix F = { { vF.at(1), vF.at(5), 0 }, { vF.at(4), vF.at(2), 0 }, { 0, 0, vF.at(3) } };
-    C.beTProductOf(F, F);
-    CC.beProductOf(C, C);
-    B.beProductTOf(F, F);
-    invF.beInverseOf(F);
-    FC.beProductOf(F, C);
+    auto I2 = 0.5 * ( I1 * I1 - CC.at(1, 1) - CC.at(2, 2) - CC.at(3, 3) );
 
-    J = F.giveDeterminant();
-    lnJ = log(J);
-    I1 = C.at(1, 1) + C.at(2, 2) + C.at(3, 3);
-
-    I2 = 0.5 * ( I1 * I1 - CC.at(1, 1) - CC.at(2, 2) - CC.at(3, 3) );
-
-    answer.resize(5, 5);
-
+    FloatMatrixF<5,5> answer;
     answer.at(1, 1) = ( 2. * C1 * ( 5. * I1 * invF.at(1, 1) * invF.at(1, 1) - 12. * F.at(1, 1) * invF.at(1, 1) + 9. ) ) / ( 9. * pow(J, 2. / 3.) );
     answer.at(1, 2) = -( 2. * C1 * ( 6. * F.at(1, 1) * invF.at(2, 2) + 6. * F.at(2, 2) * invF.at(1, 1) - 2. * I1 * invF.at(1, 1) * invF.at(2, 2) - 3. * I1 * invF.at(1, 2) * invF.at(2, 1) ) ) / ( 9. * pow(J, 2. / 3.) );
     answer.at(1, 3) = -( 2. * C1 * ( 6. * F.at(1, 1) * invF.at(3, 3) + 6. * F.at(3, 3) * invF.at(1, 1) - 2. * I1 * invF.at(1, 1) * invF.at(3, 3) - 3. * I1 * invF.at(1, 3) * invF.at(3, 1) ) ) / ( 9. * pow(J, 2. / 3.) );
@@ -650,6 +584,8 @@ MooneyRivlinMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
     answer.at(5, 3) = answer.at(5, 3) + K * ( invF.at(1, 2) * invF.at(3, 3) - invF.at(1, 3) * invF.at(3, 2) * lnJ );
     answer.at(5, 4) = answer.at(5, 4) + K * ( invF.at(1, 2) * invF.at(2, 1) - invF.at(1, 1) * invF.at(2, 2) * lnJ );
     answer.at(5, 5) = answer.at(5, 5) - K *invF.at(1, 2) * invF.at(1, 2) * ( lnJ - 1. );
+    
+    return answer;
 }
 
 

@@ -90,8 +90,8 @@ LSpace :: giveInterface(InterfaceType interface)
 void
 LSpace :: initializeFrom(InputRecord &ir)
 {
-    Structural3DElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
+    Structural3DElement :: initializeFrom(ir);
     this->reducedShearIntegration = ir.hasField(_IFT_LSpace_reducedShearIntegration);
 }
 

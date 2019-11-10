@@ -307,59 +307,59 @@ StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(FloatArray &answer, Gau
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
+FloatArrayF<9>
+StructuralMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const
 {
     // Default implementation used if this method is not overloaded by the particular material model.
     // 1) Compute Green-Lagrange strain and call standard method for small strains.
     // 2) Treat stress as second Piola-Kirchhoff stress and convert to first Piola-Kirchhoff stress.
     // 3) Set state variables F, P
 
-    FloatArray vE, vS;
-    FloatMatrix F, E;
-    F.beMatrixForm(vF);
-    E.beTProductOf(F, F);
-    E.at(1, 1) -= 1.0;
-    E.at(2, 2) -= 1.0;
-    E.at(3, 3) -= 1.0;
-    E.times(0.5);
-    vE.beSymVectorFormOfStrain(E);      // 6
+    auto F = from_voigt_form(vF);
+    auto E = 0.5 * (Tdot(F, F) - eye<3>());
+    auto vE = to_voigt_strain(E);
 
-    ///@todo Have this function:
-    this->giveRealStressVector_3d(vS, gp, vE, tStep);
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+#if 1
+    /// FIXME: Temporary const-cast; these functions should be made const. 
+    /// This workaround is just to limit the size of a single refactoring.
+    auto self = const_cast<StructuralMaterial*>(this);
+    FloatArray s;
+    self->giveRealStressVector_3d(s, gp, vE, tStep);
+    FloatArrayF<6> vS = s;
+#else
+    auto vS = this->giveRealStressVector_3d(vE, gp, tStep);
+#endif
 
     // Compute first PK stress from second PK stress
-    FloatMatrix P, S;
-    S.beMatrixForm(vS);
-    P.beProductOf(F, S);
-    answer.beVectorForm(P);
-
-    status->letTempPVectorBe(answer);
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto S = from_voigt_stress(vS);
+    auto P = dot(F, S);
+    auto vP = to_voigt_form(P);
+    status->letTempPVectorBe(vP);
     status->letTempFVectorBe(vF);
+
+    return vP;
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+FloatArrayF<5>
+StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(const FloatArrayF<5> &vF, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatArray vF, vP;
-    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, _PlaneStrain);
-    this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
-    StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStrain);
+    auto vP = this->giveFirstPKStressVector_3d(assemble<9>(vF, {0, 1, 2, 5, 8}), gp, tStep);
+    return vP[{0, 1, 2, 5, 8}];
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+FloatArrayF<4>
+StructuralMaterial :: giveFirstPKStressVector_PlaneStress(const FloatArrayF<4> &reducedvF, GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray F_control, P_control; // Determines which components are controlled by F and P resp.
     FloatArray vF, increment_vF, vP, vP_control, vP_n;
     FloatMatrix tangent, tangent_Pcontrol;
     // Iterate to find full vF.
-    StructuralMaterial :: giveVoigtVectorMask(F_control, _PlaneStress);
+    StructuralMaterial :: giveVoigtVectorMask(F_control, _PlaneStress); // {0, 1, 5, 8};
     // Compute the negated the array of control since we need P_control as well;
     P_control.resize( 9 - F_control.giveSize() );
     for ( int i = 1, j = 1; i <= 9; i++ ) {
@@ -376,16 +376,17 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
 
     // Iterate to find full vF.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
+        vP = this->giveFirstPKStressVector_3d(vF, gp, tStep);
         vP_control.beSubArrayOf(vP, P_control);
         vP_n.beSubArrayOf(vP, F_control);
         double norm = vP_n.computeNorm();
         if ( vP_control.computeNorm() < 1e-6 * norm ) { ///@todo We need a tolerance here!
+            FloatArray answer;
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStress);
-            return;
+            return answer;
         }
 
-        this->give3dMaterialStiffnessMatrix_dPdF(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
         increment_vF.negated();
@@ -393,12 +394,12 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
     }
 
     OOFEM_WARNING("Iteration did not converge");
-    answer.clear();
+    return zeros<4>();
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+FloatArrayF<1>
+StructuralMaterial :: giveFirstPKStressVector_1d(const FloatArrayF<1> &reducedvF, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
@@ -416,26 +417,27 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     vF.at(1) = reducedvF.at(1);
     // Iterate to find full vF.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
+        vP = this->giveFirstPKStressVector_3d(vF, gp, tStep);
         vP_control.beSubArrayOf(vP, P_control);
         if ( vP_control.computeNorm() < 1e-6 * vP.at(1) ) { ///@todo We need a tolerance here!
+            FloatArray answer;
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
-            return;
+            return answer;
         }
 
-        this->give3dMaterialStiffnessMatrix_dPdF(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
         vF.assemble(increment_vF, P_control);
     }
 
     OOFEM_WARNING("Iteration did not converge");
-    answer.clear();
+    return zeros<1>();
 }
 
 
 void
-StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, const FloatArray &S, const FloatArray &F, MaterialMode matMode)
+StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, const FloatArray &S, const FloatArray &F, MaterialMode matMode) const
 {
     // Converts the reduced dSdE-stiffness to reduced dPdF-sitiffness for different MaterialModes
     // Performs the following operation dPdF = I_ik * S_jl + F_im F_kn C_mjnl,
@@ -618,7 +620,7 @@ StructuralMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer, Ga
 }
 
 void
-StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp, MaterialMode matMode)
+StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp, MaterialMode matMode) const
 {
     // Default implementation for converting dSdE to dPdF. This includes updating the
     // state variables of P and F.
@@ -686,47 +688,79 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                         MatResponseMode mode,
-                                                         GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<9,9>
+StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
+                                                         GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix dSdE;
-    this->give3dMaterialStiffnessMatrix(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _3dMat);
+#if 1
+    /// FIXME: Temporary const-cast; these functions should be made const. 
+    /// This workaround is just to limit the size of a single refactoring.
+    auto self = const_cast<StructuralMaterial*>(this);
+    FloatMatrix dSdE, dPdF;
+    self->give3dMaterialStiffnessMatrix(dSdE, mode, gp, tStep);
+    self->give_dPdF_from(dSdE, dPdF, gp, _3dMat);
+    return dPdF;
+#else
+    auto dSdE = self->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    return compute_PdF_3D(dSdE, gp);
+#endif
 }
 
 
-void
-StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<4,4>
+StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(MatResponseMode mode,
+                                                    GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix dSdE;
-    this->givePlaneStressStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _PlaneStress);
+#if 1
+    /// FIXME: Temporary const-cast; these functions should be made const. 
+    /// This workaround is just to limit the size of a single refactoring.
+    auto self = const_cast<StructuralMaterial*>(this);
+    FloatMatrix dSdE, dPdF;
+    self->givePlaneStressStiffMtrx(dSdE, mode, gp, tStep);
+    self->give_dPdF_from(dSdE, dPdF, gp, _PlaneStress);
+    return dPdF;
+#else
+    auto dSdE = self->givePlaneStressStiffMtrx(mode, gp, tStep);
+    return compute_PdF_PlaneStress(dSdE, gp);
+#endif
 }
 
 
-void
-StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<5,5>
+StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(MatResponseMode mode,
+                                                    GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix dSdE;
-    this->givePlaneStrainStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _PlaneStrain);
+#if 1
+    /// FIXME: Temporary const-cast; these functions should be made const. 
+    /// This workaround is just to limit the size of a single refactoring.
+    auto self = const_cast<StructuralMaterial*>(this);
+    FloatMatrix dSdE, dPdF;
+    self->givePlaneStrainStiffMtrx(dSdE, mode, gp, tStep);
+    self->give_dPdF_from(dSdE, dPdF, gp, _PlaneStrain);
+    return dPdF;
+#else
+    auto dSdE = self->givePlaneStressStiffMtrx(mode, gp, tStep);
+    return compute_PdF_PlaneStrain(dSdE, gp);
+#endif
 }
 
 
-void
-StructuralMaterial :: give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                                 MatResponseMode mode,
-                                                 GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+StructuralMaterial :: give1dStressStiffMtrx_dPdF(MatResponseMode mode,
+                                                 GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix dSdE;
-    this->give1dStressStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _1dMat);
+#if 1
+    /// FIXME: Temporary const-cast; these functions should be made const. 
+    /// This workaround is just to limit the size of a single refactoring.
+    auto self = const_cast<StructuralMaterial*>(this);
+    FloatMatrix dSdE, dPdF;
+    self->give1dStressStiffMtrx(dSdE, mode, gp, tStep);
+    self->give_dPdF_from(dSdE, dPdF, gp, _1dMat);
+    return dPdF;
+#else
+    auto dSdE = self->give1dStressStiffMtrx(mode, gp, tStep);
+    return compute_PdF_1d(dSdE, gp);
+#endif
 }
 
 

@@ -39,6 +39,7 @@
 #include "gausspoint.h"
 #include "floatarray.h"
 #include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "datastream.h"
@@ -699,13 +700,13 @@ SimpleCrossSection :: giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, co
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 
     if ( mode == _3dMat ) {
-        mat->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_3d(reducedvF, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
-        mat->giveFirstPKStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_PlaneStrain(reducedvF, gp, tStep);
     } else if ( mode == _PlaneStress ) {
-        mat->giveFirstPKStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_PlaneStress(reducedvF, gp, tStep);
     } else if ( mode == _1dMat ) {
-        mat->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_1d(reducedvF, gp, tStep);
     } else {
         OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
     }
@@ -760,13 +761,13 @@ SimpleCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
 
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
-        mat->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
+        answer = mat->give3dMaterialStiffnessMatrix_dPdF(rMode, gp, tStep);
     } else if ( mode == _PlaneStress ) {
-        mat->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+        answer = mat->givePlaneStressStiffMtrx_dPdF(rMode, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
-        mat->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
+        answer = mat->givePlaneStrainStiffMtrx_dPdF(rMode, gp, tStep);
     } else if ( mode == _1dMat ) {
-        mat->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+        answer = mat->give1dStressStiffMtrx_dPdF(rMode, gp, tStep);
     } else {
         OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
     }

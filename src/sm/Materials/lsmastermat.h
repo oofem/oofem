@@ -85,18 +85,17 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix & answer,
-                                            MatResponseMode,
+    FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode,
                                             GaussPoint * gp,
-                                            TimeStep * tStep) override;
+                                            TimeStep * tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *) override
     { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
-    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep) override;
+    FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// transformation matrices
-    void constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eigenVectors);
-    void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stress, double E1, double E2, double E3);
+    void constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eigenVectors) const;
+    void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stress, double E1, double E2, double E3) const;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
