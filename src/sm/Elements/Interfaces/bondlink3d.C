@@ -62,12 +62,9 @@ REGISTER_Element(BondLink3d);
 
 BondLink3d :: BondLink3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
-    numberOfDofMans     = 2;
-    geometryFlag = 0;
+    numberOfDofMans = 2;
 }
 
-BondLink3d :: ~BondLink3d()
-{}
 
 double
 BondLink3d :: computeVolumeAround(GaussPoint *aGaussPoint)
