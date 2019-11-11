@@ -383,9 +383,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode 
     stiffness.beProductOf(status->givePmatrix(), junk);
     stiffness.add( status->giveTLmatrix() );
 
-    FloatMatrix answer;
-    this->convert_dSdE_2_dPdF(answer, stiffness, status->giveTempStressVector(), status->giveTempFVector(), _3dMat);
-    return answer;
+    return convert_dSdE_2_dPdF_3D(stiffness, status->giveTempStressVector(), status->giveTempFVector());
 }
 
 
