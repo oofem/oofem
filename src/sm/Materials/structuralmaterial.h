@@ -256,8 +256,10 @@ public:
      */
     virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
-    void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp, MaterialMode matMode) const;
-    void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, const FloatArray &S, const FloatArray &F, MaterialMode matMode) const;
+    static FloatMatrixF<9,9> convert_dSdE_2_dPdF_3D(const FloatMatrixF<6,6> &dSdE, const FloatArrayF<6> &S, const FloatArrayF<9> &F);
+    static FloatMatrixF<5,5> convert_dSdE_2_dPdF_PlaneStrain(const FloatMatrixF<4,4> &dSdE, const FloatArrayF<4> &S, const FloatArrayF<5> &F);
+    static FloatMatrixF<4,4> convert_dSdE_2_dPdF_PlaneStress(const FloatMatrixF<3,3> &dSdE, const FloatArrayF<3> &S, const FloatArrayF<4> &F);
+    static FloatMatrixF<1,1> convert_dSdE_2_dPdF_1D(const FloatMatrixF<1,1> &dSdE, const FloatArrayF<1> &S, const FloatArrayF<1> &F);
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
