@@ -1886,9 +1886,9 @@ ConcreteDPM2 :: performRegularReturn(FloatArray &effectiveStress,
     returnResult = RR_Converged;
     if ( mode3d ) {
         FloatArray stressPrincipal(6);
-        stressPrincipal(0) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial);
-        stressPrincipal(1) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial - 2. * M_PI / 3.);
-        stressPrincipal(2) = sig + sqrt(2. / 3.) * rho * cos(thetaTrial + 2. * M_PI / 3.);
+        stressPrincipal(0) = sig + sqrt(2. / 3.) * rho * cos(theta);
+        stressPrincipal(1) = sig + sqrt(2. / 3.) * rho * cos(theta - 2. * M_PI / 3.);
+        stressPrincipal(2) = sig + sqrt(2. / 3.) * rho * cos(theta + 2. * M_PI / 3.);
         effectiveStress = transformStressVectorTo(stressPrincipalDir, stressPrincipal, 1);
 
     } else {
