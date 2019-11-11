@@ -55,35 +55,33 @@ class LatticePlasticityDamageViscoelasticStatus : public LatticePlasticityDamage
 
 {
 protected:
-    GaussPoint *viscoelasticGP;
+    GaussPoint *viscoelasticGP = nullptr;
     /// 'slave' material model number.
-    int slaveMat;
+    int slaveMat = 0;
 
 public:
 
     /// Constructor
     LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
-    /// Destructor
-    ~LatticePlasticityDamageViscoelasticStatus() {}
 
     /// Prints the receiver state to given stream
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
 
     const char *giveClassName() const override { return "LatticePlasticityDamageViscoelasticStatus"; }
 
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override; 
+    void updateYourself(TimeStep *) override; 
 
 
-    virtual void saveContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void restoreContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     GaussPoint *giveViscoelasticGaussPoint() { return viscoelasticGP; }
 
-    MaterialStatus *giveViscoelasticMatStatus();
+    MaterialStatus *giveViscoelasticMatStatus() const;
 };
 
 
@@ -99,55 +97,52 @@ class LatticePlasticityDamageViscoelastic : public LatticePlasticityDamage
 {
 protected:
     /// 'slave' (= viscoelastic) material model number.
-    int slaveMat;
-
+    int slaveMat = 0;
 
 public:
 
     /// Constructor
     LatticePlasticityDamageViscoelastic(int n, Domain *d);
 
-    /// Destructor
-    virtual ~LatticePlasticityDamageViscoelastic();
+    const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamageViscoelastic_Name; }
+    const char *giveClassName() const override { return "LatticePlasticityDamageViscoelastic"; }
 
-    virtual const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamageViscoelastic_Name; }
-    virtual const char *giveClassName() const override { return "LatticePlasticityDamageViscoelastic"; }
+    
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual void initializeFrom(InputRecord &ir) override;
-
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
 
-    virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+    void give2dLatticeStiffMtrx(FloatMatrix &answer,
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
-    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
-
-
-    virtual int hasMaterialModeCapability(MaterialMode mode) override;
+    void give3dLatticeStiffMtrx(FloatMatrix &answer,
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                              const FloatArray &, TimeStep *) override;
+
+
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     RheoChainMaterial *giveViscoelasticMaterial();
 
-    virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 
 protected:
 
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *atTime) override;
+    int giveIPValue(FloatArray &answer,
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *atTime) override;
 };
 } // end namespace oofem
 

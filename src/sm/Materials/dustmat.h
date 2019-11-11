@@ -79,23 +79,23 @@ public:
 
 protected:
     /// Plastic strain
-    FloatArray plasticStrain;
-    FloatArray tempPlasticStrain;
+    FloatArrayF<6> plasticStrain;
+    FloatArrayF<6> tempPlasticStrain;
 
     /// Hardening parameter q
-    double q;
-    double tempQ;
+    double q = 0;
+    double tempQ = 0;
 
     /// Current bulk modulus
-    double bulkModulus;
+    double bulkModulus = 0;
     /// Current shear modulus
-    double shearModulus;
+    double shearModulus = 0;
     /// Current Young's modulus
-    double youngsModulus;
+    double youngsModulus = 0;
 
     /// Indicates the state (i.e. elastic, yielding, unloading) of the Gauss point
-    int stateFlag;
-    int tempStateFlag;
+    int stateFlag = 0;
+    int tempStateFlag = 0;
 
 public:
     /// Constructor
@@ -114,7 +114,7 @@ public:
      * Get the full plastic strain vector from the material status.
      * @return Plastic strain.
      */
-    const FloatArray &givePlasticStrain() const { return plasticStrain; }
+    const FloatArrayF<6> &givePlasticStrain() const { return plasticStrain; }
     /**
      * Get the full plastic strain vector from the material status.
      * @return Volumetric part of plastic strain.
@@ -135,7 +135,7 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @return Temp value of plastic strain vector.
      */
-    const FloatArray &giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const FloatArrayF<6> &giveTempPlasticStrain() const { return tempPlasticStrain; }
     /**
      * Get the temp value of the hardening variable q from the material status.
      * @return Temp value of hardening variable kappaP.
@@ -167,7 +167,7 @@ public:
      * Assign the value of plastic strain.
      * @param v New value of plastic strain.
      */
-    void letPlasticStrainBe(const FloatArray &v) { plasticStrain = v; }
+    void letPlasticStrainBe(const FloatArrayF<6> &v) { plasticStrain = v; }
     /**
      * Assign the value of variable q
      * @param v New value of variable q
@@ -193,17 +193,17 @@ public:
      * Get the value of actual bulk modulus of the status
      * @return Value of bulk modulus
      */
-    double giveBulkModulus() { return bulkModulus; }
+    double giveBulkModulus() const { return bulkModulus; }
     /**
      * Get the value of actual shear modulus of the status
      * @return Value of shear modulus
      */
-    double giveShearModulus() { return shearModulus; }
+    double giveShearModulus() const { return shearModulus; }
     /**
      * Get the value of actual Young's modulus of the status
      * @return Value of Young's modulus
      */
-    double giveYoungsModulus() { return youngsModulus; }
+    double giveYoungsModulus() const { return youngsModulus; }
 };
 
 /**
@@ -234,52 +234,52 @@ protected:
     IsotropicLinearElasticMaterial LEMaterial;
 
     /// Parameter determining shape of yield surface
-    double alpha;
+    double alpha = 0.;
     /// Parameter determining shape of yield surface
-    double beta;
+    double beta = 0.;
     /// Parameter determining shape of yield surface
-    double lambda;
+    double lambda = 0.;
     /// Parameter determining shape of yield surface
-    double theta;
+    double theta = 0.;
     /// Parameter determining shape of yield surface (param T in original publication)
-    double ft;
+    double ft = 0.;
     /// Parameter determining shape of yield surface (param R in original publication)
-    double rEll;
+    double rEll = 0.;
     /// Parameter determining hardening type
-    int hardeningType;
+    int hardeningType = 0;
     /// Parameter increasing stiffness (parameter M in original publication)
-    double mStiff;
+    double mStiff = 0.;
     /// Parameter determining shape of yield surface (param X0 in original publication)
-    double x0;
+    double x0 = 0.;
     /// Parameter determining shape of yield surface
-    double q0;
+    double q0 = 0.;
     /// Parameter determining hardening law (parameter W in original publication)
-    double wHard;
+    double wHard = 0.;
     /// Parameter determining hardening law (parameter D in original publication)
-    double dHard;
+    double dHard = 0.;
     /// Tollerance for iterative methods
-    double newtonTol;
+    double newtonTol = 0.;
     /// Maximum number of iterations for iterative methods
-    int newtonIter;
+    int newtonIter = 0;
 
     /**
      * Auxiliary equation Fe (7.8)
      * @param i1 Trace of stress tensor
      * @return Fe
      */
-    double functionFe(double i1);
+    double functionFe(double i1) const;
     /**
      * Derivative by i1 of auxiliary equation (7.8)
      * @param i1 Trace of stress tensor
      * @return @f$ \frac{\partial Fe}{\partial i_1 } @f$
      */
-    double functionFeDI1(double i1);
+    double functionFeDI1(double i1) const;
     /**
      * Second derivative by i1 of auxiliary equation (7.8)
      * @param i1 Trace of stress tensor
      * @return @f$ \frac{\partial^2 Fe}{\partial i1^2 } @f$
      */
-    double functionFeDI1DI1(double i1);
+    double functionFeDI1DI1(double i1) const;
     /**
      * Auxiliary equation Fc (7.9)
      * @param i1 Trace of stress tensor
@@ -287,26 +287,26 @@ protected:
      * @param q Parameter q
      * @return Fc
      */
-    double functionFc(double rho, double i1, double q);
+    double functionFc(double rho, double i1, double q) const;
     /**
      * Auxiliary equation X (7.11)
      * @param q Parameter q
      * @return X
      */
-    double functionX(double q);
+    double functionX(double q) const;
     /**
      * Derivative by q of auxiliary equation X (7.11)
      * @param q Parameter q
      * @return @f$ \frac{\partial X }{\partial q} @f$
      */
-    double functionXDQ(double q);
+    double functionXDQ(double q) const;
     /**
      * Yield function 1 (shear dominant), equation 7.5
      * @param rho Second Haigh-Westergaard coordinate
      * @param i1 Trace of stress tensor
      * @return Value
      */
-    double yieldFunction1(double rho, double i1);
+    double yieldFunction1(double rho, double i1) const;
     /**
      * Yield function 2 (compression dominant), equation 7.6
      * @param rho Second Haigh-Westergaard coordinate
@@ -314,71 +314,71 @@ protected:
      * @param q Parameter q
      * @return value
      */
-    double yieldFunction2(double rho, double i1, double q);
+    double yieldFunction2(double rho, double i1, double q) const;
     /**
      * Yield function 3 (tension dominant), equation 7.7
      * @param i1 Trace of stress tensor
      * @return value
      */
-    double yieldFunction3(double i1);
+    double yieldFunction3(double i1) const;
     /**
      * Solves q0 according to given parameters, equation 7.12
      * @param answer Result
      */
-    void solveQ0(double &answer);
+    void solveQ0(double &answer) const;
     /**
      * Computes and sets all elastic moduli, with possible stiffening. Equation 7.4
      * @param bulkModulus Bulk modulus
      * @param shearModulus Shear modulus
      * @param gp Gauss point
      */
-    void computeAndSetBulkAndShearModuli(double &bulkModulus, double &shearModulus, GaussPoint *gp);
+    void computeAndSetBulkAndShearModuli(double &bulkModulus, double &shearModulus, GaussPoint *gp) const;
     /**
      * Perform stress return and update all internal variables
      * @param gp Gauss point
      * @param strain Strain
      */
-    void performStressReturn(GaussPoint *gp, const FloatArray &strain);
+    void performStressReturn(GaussPoint *gp, const FloatArrayF<6> &strain) const;
     /**
      * Computes direction of plastic yielding m1, equation 7.17
-     * @param answer Result
      * @param stressDeviator Deviator of stress tensor
      * @param rho Second Haigh-Westergaard coordinate
      * @param i1 Trace of stress tensor
      * @param q Parameter q
+     * @param return Result
      */
-    void computePlastStrainDirM1(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q);
+    FloatArrayF<6> computePlastStrainDirM1(const FloatArrayF<6> &stressDeviator, double rho, double i1, double q) const;
     /**
      * Computes direction of plastic yielding m2, equation 7.19
-     * @param answer Result
      * @param stressDeviator Deviator of stress tensor
      * @param rho Second Haigh-Westergaard coordinate
      * @param i1 Trace of stress tensor
      * @param q Parameter q
+     * @param return Result
      */
-    void computePlastStrainDirM2(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q);
+    FloatArrayF<6> computePlastStrainDirM2(const FloatArrayF<6> &stressDeviator, double rho, double i1, double q) const;
     /**
      * Computes direction of plastic yielding m2, equation 7.18
-     * @param answer Result
      * @param stressDeviator Deviator of stress tensor
      * @param rho Second Haigh-Westergaard coordinate
      * @param i1 Trace of stress tensor
      * @param q Parameter q
+     * @param return Result
      */
-    void computePlastStrainDirM3(FloatArray &answer, const FloatArray &stressDeviator, double rho, double i1, double q);
+    FloatArrayF<6> computePlastStrainDirM3(const FloatArrayF<6> &stressDeviator, double rho, double i1, double q) const;
     /**
      * Auxiliary equation H (7.33 or 7.34)
      * @param q Parameter q from previous step
      * @param tempQ Parameter tempQ
      * @return H
      */
-    double functionH(double q, double tempQ);
+    double functionH(double q, double tempQ) const;
     /**
      * Derivative by tempQ of auxiliary equation H (7.33 or 7.34)
      * @param tempQ Parameter tempQ
      * @return @f$ \frac{\partial X}{\partial tempQ} @f$
      */
-    double functionHDQ(double tempQ);
+    double functionHDQ(double tempQ) const;
     /**
      * Auxiliary equation I1 (7.32)
      * @param q Parameter q from previous step
@@ -387,35 +387,35 @@ protected:
      * @param bulkModulus Bulk modulus
      * @return I1
      */
-    double functionI1(double q, double tempQ, double i1, double bulkModulus);
+    double functionI1(double q, double tempQ, double i1, double bulkModulus) const;
     /**
      * Derivative by tempQ of auxiliary equation I1 (7.32)
      * @param tempQ Parameter tempQ
      * @param bulkModulus Bulk modulus
      * @return @f$ \frac{\partial I1}{\partial tempQ} @f$
      */
-    double functionI1DQ(double tempQ, double bulkModulus);
+    double functionI1DQ(double tempQ, double bulkModulus) const;
     /**
      * Performs stress return of case of yield function F1, computes new value of tempQ and sets it to status. Equation 7.31
      * @param i1 Trace of stress tensor
      * @param rho Second Haigh-Westergaard coordinate
      * @param gp Gauss point
      */
-    void performF1return(double i1, double rho, GaussPoint *gp);
+    void performF1return(double i1, double rho, GaussPoint *gp) const;
     /**
      * Performs stress return of case of yield function F2, computes new value of tempQ and sets it to status. Equation 7.38
      * @param i1 Trace of stress tensor
      * @param rho Second Haigh-Westergaard coordinate
      * @param gp Gauss point
      */
-    void performF2return(double i1, double rho, GaussPoint *gp);
+    void performF2return(double i1, double rho, GaussPoint *gp) const;
     /**
      * Computes tempQ from volumetric plastic strain increment, equation 7.44
      * @param answer Result tempQ
      * @param q Parameter q from previous step
      * @param deltaVolumetricPlasticStrain Volumetric plastic strain increment
      */
-    void computeQFromPlastVolEps(double &answer, double q, double deltaVolumetricPlasticStrain);
+    void computeQFromPlastVolEps(double &answer, double q, double deltaVolumetricPlasticStrain) const;
     /**
      * Computed value of plastic multiplier for F2 yield function, equation 7.39
      * @param tempQ Parameter tempQ
@@ -423,7 +423,7 @@ protected:
      * @param i1 Trace of stress tensor
      * @param bulkModulus Bulk modulus
      */
-    double computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus);
+    double computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus) const;
     /**
      * Computed derivative by tempQ of equation 7.39
      * @param tempQ Parameter tempQ
@@ -431,7 +431,7 @@ protected:
      * @param i1 Trace of stress tensor
      * @param bulkModulus Bulk modulus
      */
-    double computeDeltaGamma2DQ(double tempQ, double q, double i1, double bulkModulus);
+    double computeDeltaGamma2DQ(double tempQ, double q, double i1, double bulkModulus) const;
     /**
      * Equation 7.38
      * @param tempQ Parameter tempQ
@@ -441,7 +441,7 @@ protected:
      * @param bulkModulus Bulk modulus
      * @param shearModulus Shear modulus
      */
-    double fTempR2(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus);
+    double fTempR2(double tempQ, double q, double i1, double rho, double bulkModulus, double shearModulus) const;
 
 public:
     /// Constructor
@@ -464,9 +464,9 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override
     {
-        LEMaterial.giveThermalDilatationVector(answer, gp, tStep);
+        return LEMaterial.giveThermalDilatationVector(gp, tStep);
     }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

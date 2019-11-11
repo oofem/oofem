@@ -53,34 +53,19 @@ namespace oofem {
 REGISTER_Material(LatticeLinearElastic);
 
 // constructor which creates a dummy material without a status and without random extension interface
-LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double a1, double a2) : LatticeStructuralMaterial(n, d)
-
+LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double a1, double a2) :
+    LatticeStructuralMaterial(n, d),
+    eNormalMean(e0),
+    alphaOne(a1),
+    alphaTwo(a2)
 {
-    eNormalMean = e0;
-    alphaOne = a1;
-    alphaTwo = a2;
-    nu = 0.;
 }
 
 
-
-LatticeLinearElastic :: ~LatticeLinearElastic()
-//
-// destructor
-//
-{}
-
-int
-LatticeLinearElastic :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+LatticeLinearElastic :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( ( mode == _2dLattice ) || ( mode == _3dLattice ) || ( mode == _1dLattice ) ) {
-        return 1;
-    }
-
-    return 0;
+    return ( mode == _2dLattice ) || ( mode == _3dLattice ) || ( mode == _1dLattice );
 }
 
 
@@ -325,9 +310,8 @@ LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gaus
 
 
 
-void
-LatticeLinearElastic :: giveThermalDilatationVector(FloatArray &answer,
-                                                    GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+LatticeLinearElastic :: giveThermalDilatationVector(GaussPoint *gp,  TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
 // caused by unit temperature in direction of
@@ -340,10 +324,7 @@ LatticeLinearElastic :: giveThermalDilatationVector(FloatArray &answer,
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
     alpha += this->cAlpha / length;
 
-    answer.resize(6);
-    answer.zero();
-
-    answer.at(1) = alpha;
+    return {alpha, 0., 0., 0., 0., 0.};
 }
 
 
@@ -417,7 +398,7 @@ LatticeLinearElasticMaterialStatus :: LatticeLinearElasticMaterialStatus(GaussPo
 
 
 void
-LatticeLinearElasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeLinearElasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FloatArray forces;
 

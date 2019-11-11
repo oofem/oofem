@@ -70,13 +70,15 @@ LargeStrainMasterMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
+FloatArrayF<9>
+LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const
 {
-    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
-    this->initTempStatus(gp);
+    auto status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
+    /// FIXME: Temporary const-cast workaround until necessary functions have been converted to const:
+    const_cast<LargeStrainMasterMaterial*>(this)->initTempStatus(gp);
 
-    StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
+    auto sMat_ = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
+    auto sMat = const_cast< StructuralMaterial * > ( sMat_ );
 
     double lambda1, lambda2, lambda3, E1, E2, E3;
     FloatArray eVals, SethHillStrainVector, stressVector, stressM;
@@ -134,6 +136,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     stressVector.at(5) = 0.5 * stressVector.at(5);
     stressVector.at(6) = 0.5 * stressVector.at(6);
     secondPK.beProductOf(P, stressVector);
+    FloatArray answer;
     answer.beProductOf(F, secondPK); // P = F*S
     junk.zero();
     junk.beProductOf(L2, T);
@@ -141,11 +144,12 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, Gaus
     status->setPmatrix(P);
     status->setTLmatrix(TL);
     status->letTempStressVectorBe(answer);
+    return answer;
 }
 
 
 void
-LargeStrainMasterMaterial :: constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eVecs)
+LargeStrainMasterMaterial :: constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eVecs) const
 {
     answer.resize(6, 6);
     answer.at(1, 1) = eVecs.at(1, 1) * eVecs.at(1, 1);
@@ -193,7 +197,7 @@ LargeStrainMasterMaterial :: constructTransformationMatrix(FloatMatrix &answer, 
 
 
 void
-LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stressM, double E1, double E2, double E3)
+LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stressM, double E1, double E2, double E3) const
 {
     double gamma12, gamma13, gamma23, gamma112, gamma221, gamma113, gamma331, gamma223, gamma332, gamma;
     double lambda1 = eigenValues.at(1);
@@ -337,11 +341,11 @@ LargeStrainMasterMaterial :: constructL1L2TransformationMatrices(FloatMatrix &an
     answer1.at(6, 6) = gamma12;
 }
 
-void
-LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<9,9>
+LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
-    StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
+    auto status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
+    auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
     FloatMatrix stiffness;
 
     sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, tStep);
@@ -379,14 +383,16 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &ans
     stiffness.beProductOf(status->givePmatrix(), junk);
     stiffness.add( status->giveTLmatrix() );
 
+    FloatMatrix answer;
     this->convert_dSdE_2_dPdF(answer, stiffness, status->giveTempStressVector(), status->giveTempFVector(), _3dMat);
+    return answer;
 }
 
 
 int
 LargeStrainMasterMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
 
     if ( type == IST_StressTensor ) {
         answer = status->giveStressVector();

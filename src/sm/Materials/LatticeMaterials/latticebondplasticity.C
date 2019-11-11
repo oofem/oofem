@@ -52,32 +52,23 @@ REGISTER_Material(LatticeBondPlasticity);
 
 LatticeBondPlasticity :: LatticeBondPlasticity(int n, Domain *d) : LatticeLinearElastic(n, d)
 {
-    yieldTol = 0.;
-    myPi = 3.141592653;
 }
 
 
-LatticeBondPlasticity :: ~LatticeBondPlasticity()
-{}
-
-int
-LatticeBondPlasticity :: hasMaterialModeCapability(MaterialMode mode)
+bool
+LatticeBondPlasticity :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( mode == _3dLattice ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return mode == _3dLattice;
 }
 
 double
-LatticeBondPlasticity :: computeHardening(double kappa)
+LatticeBondPlasticity :: computeHardening(double kappa) const
 {
     return exp(pow(kappa / this->ef, 2.) );
 }
 
 double
-LatticeBondPlasticity :: computeDHardeningDKappa(double kappa)
+LatticeBondPlasticity :: computeDHardeningDKappa(double kappa) const
 {
     return 2. * kappa / ( pow(this->ef, 2.) ) * exp(pow(kappa / this->ef, 2.) );
 }
@@ -118,12 +109,11 @@ LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
 MaterialStatus *
 LatticeBondPlasticity :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeBondPlasticityStatus *answer = new LatticeBondPlasticityStatus(1, LatticeBondPlasticity :: domain, gp);
-    return answer;
+    return new LatticeBondPlasticityStatus(1, LatticeBondPlasticity :: domain, gp);
 }
 
 double
-LatticeBondPlasticity :: computeShift(const double kappa)
+LatticeBondPlasticity :: computeShift(const double kappa) const
 {
     double hardening = computeHardening(kappa);
 
@@ -136,7 +126,7 @@ LatticeBondPlasticity :: computeShift(const double kappa)
 
 
 double
-LatticeBondPlasticity :: computeParamA(const double kappa)
+LatticeBondPlasticity :: computeParamA(const double kappa) const
 {
     double hardening = computeHardening(kappa);
 
@@ -150,7 +140,7 @@ LatticeBondPlasticity :: computeParamA(const double kappa)
 
 
 double
-LatticeBondPlasticity :: computeDShiftDKappa(const double kappa)
+LatticeBondPlasticity :: computeDShiftDKappa(const double kappa) const
 {
     double dHardeningDKappa = computeDHardeningDKappa(kappa);
 
@@ -163,7 +153,7 @@ LatticeBondPlasticity :: computeDShiftDKappa(const double kappa)
 
 
 double
-LatticeBondPlasticity :: computeDParamADKappa(const double kappa)
+LatticeBondPlasticity :: computeDParamADKappa(const double kappa) const
 {
     double dHardeningDKappa = computeDHardeningDKappa(kappa);
 
@@ -903,7 +893,7 @@ LatticeBondPlasticityStatus :: initTempStatus()
 }
 
 void
-LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

@@ -47,27 +47,13 @@ REGISTER_Material(LatticePlasticityDamageViscoelastic);
 
 LatticePlasticityDamageViscoelastic :: LatticePlasticityDamageViscoelastic(int n, Domain *d) : LatticePlasticityDamage(n, d)
 {
-    slaveMat = 0;
 }
 
 
-LatticePlasticityDamageViscoelastic :: ~LatticePlasticityDamageViscoelastic()
-//
-// destructor
-//
-{}
-
-int
-LatticePlasticityDamageViscoelastic :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+LatticePlasticityDamageViscoelastic :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( mode == _3dLattice ) {
-        return 1;
-    }
-
-    return 0;
+    return mode == _3dLattice;
 }
 
 
@@ -324,7 +310,7 @@ LatticePlasticityDamageViscoelasticStatus :: initTempStatus()
 }
 
 void
-LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus *mS = this->giveViscoelasticMatStatus();
 
@@ -337,7 +323,7 @@ LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep 
 }
 
 MaterialStatus *
-LatticePlasticityDamageViscoelasticStatus :: giveViscoelasticMatStatus() {
+LatticePlasticityDamageViscoelasticStatus :: giveViscoelasticMatStatus() const {
   //    Material *mat;
   //    RheoChainMaterial *rChMat;
   //    GaussPoint *rChGP;

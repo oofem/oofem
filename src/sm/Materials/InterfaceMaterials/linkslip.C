@@ -39,6 +39,7 @@
 #include "floatmatrixf.h"
 #include "floatarray.h"
 #include "floatarrayf.h"
+#include "floatmatrixf.h"
 //#include "CrossSections/structuralcrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
@@ -56,26 +57,17 @@
 // #endif
 
 namespace oofem {
-  REGISTER_Material(LinkSlip);
+REGISTER_Material(LinkSlip);
 
-  /// constructor which creates a dummy material without a status and without random extension interface
-  LinkSlip :: LinkSlip(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
-  {
-  }
-
-
-
-  LinkSlip :: ~LinkSlip()
-  //
-  // destructor
-  //
-  {}
+/// constructor which creates a dummy material without a status and without random extension interface
+LinkSlip :: LinkSlip(int n, Domain *d) : StructuralInterfaceMaterial(n, d)
+{
+}
 
 
-  void
-  LinkSlip :: initializeFrom(InputRecord &ir)
-  {
-
+void
+LinkSlip :: initializeFrom(InputRecord &ir)
+{
     StructuralInterfaceMaterial :: initializeFrom(ir);;
     
     //axial stiffness
@@ -92,83 +84,76 @@ namespace oofem {
     
     IR_GIVE_FIELD(ir, tauMax, _IFT_LinkSlip_t0); // Macro
 
-    if(type == 1 || type == 2){
-      IR_GIVE_FIELD(ir, s1, _IFT_LinkSlip_s1);
-      IR_GIVE_FIELD(ir, alpha, _IFT_LinkSlip_alpha);
+    if ( type == 1 || type == 2 ) {
+        IR_GIVE_FIELD(ir, s1, _IFT_LinkSlip_s1);
+        IR_GIVE_FIELD(ir, alpha, _IFT_LinkSlip_alpha);
     }
     
-    if(type == 2){
-      IR_GIVE_FIELD(ir, s2, _IFT_LinkSlip_s2);
-      IR_GIVE_FIELD(ir, s3, _IFT_LinkSlip_s3);
-      IR_GIVE_FIELD(ir, tauFinal, _IFT_LinkSlip_tf);
+    if ( type == 2 ) {
+        IR_GIVE_FIELD(ir, s2, _IFT_LinkSlip_s2);
+        IR_GIVE_FIELD(ir, s3, _IFT_LinkSlip_s3);
+        IR_GIVE_FIELD(ir, tauFinal, _IFT_LinkSlip_tf);
     }
 
-    if(type == 1 || type == 2){
-      if ((type == 1 || type == 2) && this->kNormal < this->tauMax/this->s1) {
-	this->kNormal = this->tauMax/this->s1;
-	OOFEM_WARNING("Parameter kN adjusted");
-      }
+    if ( type == 1 || type == 2 ) {
+        if ( (type == 1 || type == 2) && this->kNormal < this->tauMax/this->s1 ) {
+            this->kNormal = this->tauMax/this->s1;
+            OOFEM_WARNING("Parameter kN adjusted");
+        }
     }
-    
-  }
+}
 
 
-  MaterialStatus *
-  LinkSlip :: CreateStatus(GaussPoint *gp) const
-  {
-    LinkSlipStatus *answer = new LinkSlipStatus(gp);
-
-    return answer;
-  }
+MaterialStatus *
+LinkSlip :: CreateStatus(GaussPoint *gp) const
+{
+    return new LinkSlipStatus(gp);
+}
   
-  double
-  LinkSlip :: evaluateBondStress(const double kappa) const
-  {
-    if(this->type == 0){//elastic-perfectly plastic
-      return this->tauMax;
-    }
-    else if(this->type == 1){//modified bond model      
-      if ( kappa <= 0. ){
-        return 0.;
-      }
-      if ( kappa <= s1 ){
-        return tauMax * pow(kappa/s1, alpha);
-      }     
-      return tauMax;
-    }
-    else if(this->type == 2){
-      if ( kappa <= 0. ){
-        return 0.;
-      }
-      if ( kappa <= s1 ){
-        return tauMax * pow(kappa/s1, alpha);
-      }
-      if ( kappa <= s2 ){
+double
+LinkSlip :: evaluateBondStress(const double kappa) const
+{
+    if ( this->type == 0 ) { //elastic-perfectly plastic
+        return this->tauMax;
+    } else if ( this->type == 1 ) { //modified bond model      
+        if ( kappa <= 0. ){
+            return 0.;
+        }
+        if ( kappa <= s1 ) {
+            return tauMax * pow(kappa/s1, alpha);
+        }
         return tauMax;
-      }
-      if ( kappa <= s3 ){
-        return tauMax - (tauMax-tauFinal) * (kappa-s2) / (s3-s2);
-      }
-      return tauFinal;
-    }
-    else{//unknown type
-      OOFEM_ERROR("Unknown bond model type. Type should be 0, 1 or 2.");
+    } else if ( this->type == 2 ) {
+        if ( kappa <= 0. ) {
+            return 0.;
+        }
+        if ( kappa <= s1 ) {
+            return tauMax * pow(kappa/s1, alpha);
+        }
+        if ( kappa <= s2 ) {
+            return tauMax;
+        }
+        if ( kappa <= s3 ) {
+            return tauMax - (tauMax-tauFinal) * (kappa-s2) / (s3-s2);
+        }
+        return tauFinal;
+    } else { //unknown type
+        OOFEM_ERROR("Unknown bond model type. Type should be 0, 1 or 2.");
     }
     
     return 0.; //Should not be here. 
-  }
+}
 
 
 FloatArrayF<3>
 LinkSlip :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const
 {
-    LinkSlipStatus *status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
 
     //For axial (first) component, strain has the meanig of slip. Stress is traction.
     
-    FloatArray oldTraction,oldJump;
-    oldTraction = status->giveTraction();
-    oldJump = status->giveJump();
+    const auto &oldTraction = status->giveTraction();
+    const auto &oldJump = status->giveJump();
 
     //evaluate tempKappa (no elastic strain in axial direction)
     double tempKappa = status->giveKappa() + fabs(jump.at(1)-oldJump.at(1));
@@ -181,14 +166,14 @@ LinkSlip :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeS
     
     double f = fabs(traction.at(1)) - evaluateBondStress(tempKappa);
 
-    if(f>0){//plastic response.
-      //Reduced stress by increasing plastic strain.
-      traction.at(1) = evaluateBondStress(tempKappa);;
+    if ( f > 0 ) { //plastic response.
+        //Reduced stress by increasing plastic strain.
+        traction.at(1) = evaluateBondStress(tempKappa);;
     }
 
     //Compute the lateral stress components
     for ( int i = 2; i <= 3; i++ ) { // only diagonal terms matter
-      traction.at(i) =  this->kLateral * jump.at(i);
+        traction.at(i) = this->kLateral * jump.at(i);
     }
 
     //Set temp values in status needed for dissipation
@@ -197,69 +182,42 @@ LinkSlip :: giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeS
     status->letTempTractionBe(traction);
 
     return traction;
-  }
+}
 
-  Interface *
-  LinkSlip :: giveInterface(InterfaceType type)
-  {
-    return NULL;
-  }
+Interface *
+LinkSlip :: giveInterface(InterfaceType type)
+{
+    return nullptr;
+}
 
 FloatMatrixF<3,3>
 LinkSlip :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
-  {
- 
-    /* Returns elastic moduli in reduced stress-strain space*/
-    FloatMatrixF<3,3> answer;
+{
+    return diag<3>({this->kNormal, this->kLateral, this->kLateral});
+}
 
-    answer.at(1, 1) = this->kNormal;
-    answer.at(2, 2) = this->kLateral; // shear
-    answer.at(3, 3) = this->kLateral; // shear    
-
-    return answer;
-    
-  }
-
-  LinkSlipStatus :: LinkSlipStatus(GaussPoint *g) :  StructuralInterfaceMaterialStatus(g)
-  {
-
-  }
+LinkSlipStatus :: LinkSlipStatus(GaussPoint *g) :  StructuralInterfaceMaterialStatus(g)
+{
+}
   
 
-  void
-  LinkSlipStatus :: initTempStatus()
-  //
-  // initializes temp variables according to variables form previous equlibrium state.
-  // builds new crackMap
-  //
-  {
+void
+LinkSlipStatus :: initTempStatus()
+//
+// initializes temp variables according to variables form previous equlibrium state.
+// builds new crackMap
+//
+{
     StructuralInterfaceMaterialStatus :: initTempStatus();
     this->tempKappa = this->kappa;
-  }
+}
   
 
-  void
-  LinkSlip :: giveThermalDilatationVector(FloatArray &answer,
-					  GaussPoint *gp,  TimeStep *tStep)
-  //
-  // returns a FloatArray(3) of initial strain vector
-  // caused by unit temperature in direction of
-  // gp (element) local axes
-  //
-  {
-    double alpha = this->give(tAlpha, gp);
-  
-    answer.resize(3);
-    answer.zero();
-
-    answer.at(1) = alpha;
-  }
-
-  void
-  LinkSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
-  {
+void
+LinkSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
+{
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
-        fprintf(file, "  jump ");
+    fprintf(file, "  jump ");
     for ( auto &val : this->jump ) {
         fprintf(file, " %.4e", val );
     }
@@ -272,62 +230,49 @@ LinkSlip :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, Tim
     
     fprintf(file, "kappa %.8e\n", this->kappa);
     return;
-  }
+}
   
-  void
-  LinkSlipStatus :: saveContext(DataStream &stream, ContextMode mode)
-  //
-  // saves full information stored in this Status
-  // no temp variables stored
-  //
-  {
+void
+LinkSlipStatus :: saveContext(DataStream &stream, ContextMode mode)
+{
     // save parent class status
   
     StructuralInterfaceMaterialStatus :: saveContext(stream, mode);
   
     // write a raw data
     if ( !stream.write(kappa) ) {
-      THROW_CIOERR(CIO_IOERR);
+        THROW_CIOERR(CIO_IOERR);
     }
     
-  }
+}
 
 
-  void
-  LinkSlipStatus :: restoreContext(DataStream &stream, ContextMode mode)
-  //
-  // restores full information stored in stream to this Status
-  //
-  {
+void
+LinkSlipStatus :: restoreContext(DataStream &stream, ContextMode mode)
+{
     StructuralInterfaceMaterialStatus :: restoreContext(stream, mode);
   
     // read raw data
     if ( !stream.read(kappa) ) {
-      THROW_CIOERR(CIO_IOERR);
+        THROW_CIOERR(CIO_IOERR);
     }
-   
-  }
+}
  
-  void
-  LinkSlipStatus :: updateYourself(TimeStep *atTime)
-  //
-  // updates variables (nonTemp variables describing situation at previous equilibrium state)
-  // after a new equilibrium state has been reached
-  // temporary variables are having values corresponding to newly reached equilibrium.
-  //
-  {
+void
+LinkSlipStatus :: updateYourself(TimeStep *atTime)
+{
     StructuralInterfaceMaterialStatus :: updateYourself(atTime);
     this->kappa = this->tempKappa;
-  }
+}
 
  
-  int
-  LinkSlip :: giveIPValue(FloatArray &answer,
-			  GaussPoint *gp,
-			  InternalStateType type,
-			  TimeStep *atTime)
-  {
-    LinkSlipStatus *status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
+int
+LinkSlip :: giveIPValue(FloatArray &answer,
+                        GaussPoint *gp,
+                        InternalStateType type,
+                        TimeStep *atTime)
+{
+    auto status = static_cast< LinkSlipStatus * >( this->giveStatus(gp) );
     if ( type == IST_InterfaceJump ) {
         answer.resize(3);
         answer.zero();
@@ -342,5 +287,5 @@ LinkSlip :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, Tim
         return StructuralInterfaceMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 //     return Material :: giveIPValue(answer, gp, type, atTime);
-  }
+}
 }

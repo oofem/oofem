@@ -42,21 +42,11 @@
 
 namespace oofem {
 IsotropicDamageMaterial :: IsotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
 {
-    linearElasticMaterial = NULL;
-    llcriteria = idm_strainLevelCR;
-    maxOmega = 0.999999;
-    permStrain = 0;
 }
 
 
 IsotropicDamageMaterial :: ~IsotropicDamageMaterial()
-//
-// destructor
-//
 {
     delete linearElasticMaterial;
 }
@@ -328,7 +318,7 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
         answer.at(1) = status->giveCrackAngle();
         return 1;
     } else if ( type == IST_CrackVector ) {
-        status->giveCrackVector(answer);
+        answer = status->giveCrackVector();
         return 1;
     } else if ( type == IST_CumPlasticStrain ) {
         if ( permStrain ) {
@@ -357,9 +347,8 @@ IsotropicDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
 }
 
 
-void
-IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                       GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+IsotropicDamageMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
 // eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
@@ -367,11 +356,12 @@ IsotropicDamageMaterial :: giveThermalDilatationVector(FloatArray &answer,
 // gp (element) local axes
 //
 {
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = this->tempDillatCoeff;
-    answer.at(2) = this->tempDillatCoeff;
-    answer.at(3) = this->tempDillatCoeff;
+    return {
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        0., 0., 0.,
+    };
 }
 
 double IsotropicDamageMaterial :: give(int aProperty, GaussPoint *gp) const
@@ -408,16 +398,6 @@ IsotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 IsotropicDamageMaterialStatus :: IsotropicDamageMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g)
 {
-    kappa = tempKappa = 0.0;
-    damage = tempDamage = 0.0;
-    le = 0.0;
-    crack_angle = -1000.0;
-    crackVector.resize(3);
-    crackVector.zero();
-#ifdef keep_track_of_dissipated_energy
-    stressWork = tempStressWork = 0.0;
-    dissWork = tempDissWork = 0.0;
-#endif
 }
 
 
@@ -466,13 +446,6 @@ IsotropicDamageMaterialStatus :: updateYourself(TimeStep *tStep)
     this->stressWork = this->tempStressWork;
     this->dissWork = this->tempDissWork;
 #endif
-}
-
-void
-IsotropicDamageMaterialStatus :: giveCrackVector(FloatArray &answer)
-{
-    answer = crackVector;
-    answer.times(damage);
 }
 
 

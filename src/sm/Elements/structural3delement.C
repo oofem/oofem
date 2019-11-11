@@ -291,6 +291,7 @@ void Structural3DElement :: computeGaussPoints()
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = std :: make_unique< GaussIntegrationRule >(1, this, 1, 6);
+        printf("numberOfGaussPoints %d\n", numberOfGaussPoints);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }

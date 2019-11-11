@@ -57,10 +57,10 @@ class TutorialMaterial : public StructuralMaterial
 {
 protected:
     /// Hardening modulus.
-    double H;
+    double H = 0.;
 
     /// Initial (uniaxial) yield stress.
-    double sig0;
+    double sig0 = 0.;
 
     IsotropicLinearElasticMaterial D;
 
@@ -81,12 +81,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
-
-protected:
-    static void giveDeviatoricProjectionMatrix(FloatMatrix &answer);
-
-    static void computeSphDevPartOf(const FloatArray &sigV, FloatArray &sigSph, FloatArray &sigDev); 
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 };
 
 
@@ -94,29 +89,29 @@ class TutorialMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     /// Temporary plastic strain (the given iteration)
-    FloatArray tempPlasticStrain;
+    FloatArrayF<6> tempPlasticStrain;
 
     ///  Last equilibriated plastic strain (end of last time step)
-    FloatArray plasticStrain;
+    FloatArrayF<6> plasticStrain;
 
-    FloatArray tempDevTrialStress;
+    FloatArrayF<6> tempDevTrialStress;
 
-    double tempK;
-    double k;
+    double tempK = 0.;
+    double k = 0.;
 
 public:
     TutorialMaterialStatus(GaussPoint * g);
 
-    const FloatArray &givePlasticStrain() { return plasticStrain; }
+    const FloatArrayF<6> &givePlasticStrain() const { return plasticStrain; }
 
-    void letTempPlasticStrainBe(const FloatArray &values) { tempPlasticStrain = values; }
+    void letTempPlasticStrainBe(const FloatArrayF<6> &values) { tempPlasticStrain = values; }
 
-    double giveK() { return this->k; }
+    double giveK() const { return this->k; }
 
     void letTempKBe(double value) { tempK = value; }
 
-    void letTempDevTrialStressBe(const FloatArray &values) { tempDevTrialStress = values; }
-    const FloatArray &giveTempDevTrialStress() { return tempDevTrialStress; }
+    void letTempDevTrialStressBe(const FloatArrayF<6> &values) { tempDevTrialStress = values; }
+    const FloatArrayF<6> &giveTempDevTrialStress() const { return tempDevTrialStress; }
 
     const char *giveClassName() const override { return "TutorialMaterialStatus"; }
 

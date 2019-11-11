@@ -1017,17 +1017,17 @@ FCMMaterial :: initializeCrack(GaussPoint *gp, TimeStep *tStep, FloatMatrix &bas
         status->setCrackDirs(base);
 
         if ( mMode == _PlaneStress ) {
-            this->givePlaneStressVectorTranformationMtrx(sigmaG2L, base, 0);
-            this->give2DStrainVectorTranformationMtrx(epsG2L, base, 0);
+            sigmaG2L = this->givePlaneStressVectorTranformationMtrx(base, 0);
+            epsG2L = this->give2DStrainVectorTranformationMtrx(base, 0);
 
-            this->givePlaneStressVectorTranformationMtrx(sigmaL2G, base, 1);
-            this->give2DStrainVectorTranformationMtrx(epsL2G, base, 1);
+            sigmaL2G = this->givePlaneStressVectorTranformationMtrx(base, 1);
+            epsL2G = this->give2DStrainVectorTranformationMtrx(base, 1);
         } else {
-            this->giveStressVectorTranformationMtrx(sigmaG2L, base, 0);
-            this->giveStrainVectorTranformationMtrx(epsG2L, base, 0);
+            sigmaG2L = this->giveStressVectorTranformationMtrx(base, 0);
+            epsG2L = this->giveStrainVectorTranformationMtrx(base, 0);
 
-            this->giveStressVectorTranformationMtrx(sigmaL2G, base, 1);
-            this->giveStrainVectorTranformationMtrx(epsL2G, base, 1);
+            sigmaL2G = this->giveStressVectorTranformationMtrx(base, 1);
+            epsL2G = this->giveStrainVectorTranformationMtrx(base, 1);
         }
 
         status->setG2LStressVectorTransformationMtrx(sigmaG2L);

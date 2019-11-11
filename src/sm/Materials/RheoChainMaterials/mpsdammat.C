@@ -430,10 +430,10 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
 
             if ( mode == _PlaneStress ) {
                 principalStress.resizeWithValues(3);
-                givePlaneStressVectorTranformationMtrx(Tstress, principalDir, true);
+                Tstress = givePlaneStressVectorTranformationMtrx(principalDir, true);
             } else {
                 principalStress.resizeWithValues(6);
-                giveStressVectorTranformationMtrx(Tstress, principalDir, true);
+                Tstress = giveStressVectorTranformationMtrx(principalDir, true);
             }
 
             principalStress.rotatedWith(Tstress, 'n');

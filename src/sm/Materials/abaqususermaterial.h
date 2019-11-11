@@ -117,6 +117,9 @@ private:
 
     /// Name of the file that contains the umat function
     std :: string filename;
+    
+    static int const abq2oo9[9];
+    static int const abq2oo6[6];
 
 public:
     /// Constructor.
@@ -139,20 +142,18 @@ public:
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                            MatResponseMode mode,
+    FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep) override;
+                                            TimeStep *tStep) const override;
 
-    void givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                       MatResponseMode mmode, GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp,
+                                       TimeStep *tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                    const FloatArray &reducedF, TimeStep *tStep) override;
+    FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp,
+                                              TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

@@ -147,7 +147,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     princStress.resizeWithValues(6);
 
     tempCrackDirs = status->giveTempCrackDirs();
-    this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
+    answer = this->transformStressVectorTo(tempCrackDirs, princStress, 1);
 
     status->letTempStrainVectorBe(totalStrain);
     StructuralMaterial :: giveReducedSymVectorForm( reducedStressVector, answer, gp->giveMaterialMode() );
@@ -708,7 +708,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // final step - transform stiffnes to global c.s
     //
 
-    this->giveStressVectorTranformationMtrx(t, tempCrackDirs, 1);
+    t = this->giveStressVectorTranformationMtrx(tempCrackDirs, 1);
     df.rotatedWith(t, 't');
 
     StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode() );

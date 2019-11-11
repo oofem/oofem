@@ -61,27 +61,25 @@ public:
 
     /// Constructor
     LatticeViscoelasticStatus(GaussPoint *g);
-    /// Destructor
-    ~LatticeViscoelasticStatus() {}
 
     /// Prints the receiver state to given stream
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
 
     const char *giveClassName() const override { return "LatticeViscoelasticStatus"; }
 
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override; 
+    void updateYourself(TimeStep *) override; 
 
 
-    virtual void saveContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    virtual void restoreContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 
     GaussPoint *giveSlaveGaussPointVisco() { return this->slaveGpVisco.get(); }
 
-    MaterialStatus *giveViscoelasticMatStatus();
+    MaterialStatus *giveViscoelasticMatStatus() const;
 };
 
 
@@ -96,7 +94,7 @@ class LatticeViscoelastic : public LatticeLinearElastic
 {
 protected:
     /// 'slave' material model number.
-    int slaveMat;
+    int slaveMat = 0;
 
 
 public:
@@ -104,44 +102,42 @@ public:
     /// Constructor
     LatticeViscoelastic(int n, Domain *d);
 
-    /// Destructor
-    virtual ~LatticeViscoelastic();
 
-    virtual const char *giveInputRecordName() const override { return _IFT_LatticeViscoelastic_Name; }
-    virtual const char *giveClassName() const override { return "LatticeViscoelastic"; }
+    const char *giveInputRecordName() const override { return _IFT_LatticeViscoelastic_Name; }
+    const char *giveClassName() const override { return "LatticeViscoelastic"; }
 
-    virtual void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
-    virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+    void give2dLatticeStiffMtrx(FloatMatrix &answer,
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
-    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode rmode,
-                                        GaussPoint *gp,
-                                        TimeStep *atTime) override;
+    void give3dLatticeStiffMtrx(FloatMatrix &answer,
+                                MatResponseMode rmode,
+                                GaussPoint *gp,
+                                TimeStep *atTime) override;
 
 
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *) override;
+    void giveRealStressVector(FloatArray &answer, GaussPoint *,
+                              const FloatArray &, TimeStep *) override;
 
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     RheoChainMaterial *giveViscoelasticMaterial();
 
 protected:
 
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *atTime) override;
+    int giveIPValue(FloatArray &answer,
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *atTime) override;
 };
 } // end namespace oofem
 

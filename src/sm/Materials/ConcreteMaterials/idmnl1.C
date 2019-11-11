@@ -714,7 +714,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 
         //
         if ( gp->giveMaterialMode() != _1dMat ) {
-            this->giveStressVectorTranformationMtrx(t, princDir, 0);
+            t = this->giveStressVectorTranformationMtrx(princDir);
         }
 
         //

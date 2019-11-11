@@ -38,6 +38,8 @@
 #include "sm/Elements/structuralelement.h"
 #include "gausspoint.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "datastream.h"
@@ -141,12 +143,12 @@ SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoin
      * Therefore, this cross-section may only be allowed to give the elastic response.
      */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    FloatArray elasticStrain, et, e0;
+    FloatArray elasticStrain, et;
     FloatMatrix tangent;
     elasticStrain = strain;
     this->giveTemperatureVector(et, gp, tStep);
     if ( et.giveSize() > 0 ) {
-        mat->giveThermalDilatationVector(e0, gp, tStep);
+        auto e0 = mat->giveThermalDilatationVector(gp, tStep);
         double thick = this->give(CS_Thickness, gp);
         elasticStrain.at(1) -= e0.at(1) * ( et.at(1) - mat->giveReferenceTemperature() );
         if ( et.giveSize() > 1 ) {
@@ -170,14 +172,14 @@ SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoin
      * Mikael: See earlier response to comment
      */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    FloatArray elasticStrain, et, e0;
+    FloatArray elasticStrain, et;
     FloatMatrix tangent;
     elasticStrain = strain;
     this->giveTemperatureVector(et, gp, tStep);
     if ( et.giveSize() > 0 ) {
         double thick = this->give(CS_Thickness, gp);
         double width = this->give(CS_Width, gp);
-        mat->giveThermalDilatationVector(e0, gp, tStep);
+        auto e0 = mat->giveThermalDilatationVector(gp, tStep);
         elasticStrain.at(1) -= e0.at(1) * ( et.at(1) - mat->giveReferenceTemperature() );
         if ( et.giveSize() > 1 ) {
             elasticStrain.at(5) -= e0.at(1) * et.at(2) / thick;     // kappa_y
@@ -204,13 +206,13 @@ SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint
      * Mikael: See earlier response to comment
      */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    FloatArray elasticStrain, et, e0;
+    FloatArray elasticStrain, et;
     FloatMatrix tangent;
     elasticStrain = strain;
     this->giveTemperatureVector(et, gp, tStep);
     if ( et.giveSize() > 0 ) {
         double thick = this->give(CS_Thickness, gp);
-        mat->giveThermalDilatationVector(e0, gp, tStep);
+        auto e0 = mat->giveThermalDilatationVector(gp, tStep);
         if ( et.giveSize() > 1 ) {
             elasticStrain.at(1) -= e0.at(1) * et.at(2) / thick;     // kappa_x
             elasticStrain.at(2) -= e0.at(2) * et.at(2) / thick;     // kappa_y
@@ -234,13 +236,13 @@ SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint
      * Mikael: See earlier response to comment
      */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    FloatArray elasticStrain, et, e0;
+    FloatArray elasticStrain, et;
     FloatMatrix tangent;
     elasticStrain = strain;
     this->giveTemperatureVector(et, gp, tStep);
     if ( et.giveSize() ) {
         double thick = this->give(CS_Thickness, gp);
-        mat->giveThermalDilatationVector(e0, gp, tStep);
+        auto e0 = mat->giveThermalDilatationVector(gp, tStep);
         elasticStrain.at(1) -= e0.at(1) * ( et.at(1) - mat->giveReferenceTemperature() );
         elasticStrain.at(2) -= e0.at(2) * ( et.at(1) - mat->giveReferenceTemperature() );
         if ( et.giveSize() > 1 ) {
@@ -698,13 +700,13 @@ SimpleCrossSection :: giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, co
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 
     if ( mode == _3dMat ) {
-        mat->giveFirstPKStressVector_3d(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_3d(reducedvF, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
-        mat->giveFirstPKStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_PlaneStrain(reducedvF, gp, tStep);
     } else if ( mode == _PlaneStress ) {
-        mat->giveFirstPKStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_PlaneStress(reducedvF, gp, tStep);
     } else if ( mode == _1dMat ) {
-        mat->giveFirstPKStressVector_1d(answer, gp, reducedvF, tStep);
+        answer = mat->giveFirstPKStressVector_1d(reducedvF, gp, tStep);
     } else {
         OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
     }
@@ -759,13 +761,13 @@ SimpleCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,
 
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
-        mat->give3dMaterialStiffnessMatrix_dPdF(answer, rMode, gp, tStep);
+        answer = mat->give3dMaterialStiffnessMatrix_dPdF(rMode, gp, tStep);
     } else if ( mode == _PlaneStress ) {
-        mat->givePlaneStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+        answer = mat->givePlaneStressStiffMtrx_dPdF(rMode, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
-        mat->givePlaneStrainStiffMtrx_dPdF(answer, rMode, gp, tStep);
+        answer = mat->givePlaneStrainStiffMtrx_dPdF(rMode, gp, tStep);
     } else if ( mode == _1dMat ) {
-        mat->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
+        answer = mat->give1dStressStiffMtrx_dPdF(rMode, gp, tStep);
     } else {
         OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mode) );
     }

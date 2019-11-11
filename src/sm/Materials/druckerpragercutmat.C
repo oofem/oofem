@@ -113,13 +113,12 @@ DruckerPragerCutMat :: computeYieldValueAt(GaussPoint *gp, int isurf, const Floa
         this->computePrincipalValues(princStress, stressVector, principal_stress);
         return princStress.at(isurf) - this->sigT;
     } else { //Drucker-Prager, surface 4
-        double volumetricStress;
         double DPYieldStressInShear = tau0 + H *strainSpaceHardeningVariables.at(4);
-        double JTwo;
-        FloatArray deviatoricStress;
-
-        volumetricStress = this->computeDeviatoricVolumetricSplit(deviatoricStress, stressVector);
-        JTwo = computeSecondStressInvariant(deviatoricStress);
+        //auto [deviatoricStress, volumetricStress] = this->computeDeviatoricVolumetricSplit(stressVector); // c++17
+        auto tmp = this->computeDeviatoricVolumetricSplit(stressVector); // c++17
+        auto deviatoricStress = tmp.first;
+        auto volumetricStress = tmp.second;
+        auto JTwo = computeSecondStressInvariant(deviatoricStress);
         return 3. * alpha * volumetricStress + sqrt(JTwo) - DPYieldStressInShear;
     }
 }
@@ -144,11 +143,9 @@ DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType
         answer.at(5) = t.at(1, isurf) * t.at(3, isurf); //xz = 13
         answer.at(6) = t.at(1, isurf) * t.at(2, isurf); //xy = 12
     } else { //DP nonassociated
-        double sqrtJTwo;
-        FloatArray deviatoricStress;
 
-        this->computeDeviatoricVolumetricSplit(deviatoricStress, stressVector);
-        sqrtJTwo = sqrt( computeSecondStressInvariant(deviatoricStress) );
+        auto deviatoricStress = this->computeDeviator(stressVector);
+        auto sqrtJTwo = sqrt( computeSecondStressInvariant(deviatoricStress) );
 
         answer.at(1) = alphaPsi + deviatoricStress.at(1) / 2. / sqrtJTwo;
         answer.at(2) = alphaPsi + deviatoricStress.at(2) / 2. / sqrtJTwo;
@@ -179,10 +176,9 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
 
     if ( isurf == 4 ) {
         double c1 = 0.;
-        FloatArray deviatoricStress;
         double JTwo, sqrtJTwo;
 
-        computeDeviatoricVolumetricSplit(deviatoricStress, fullStressVector);
+        auto deviatoricStress = computeDeviator(fullStressVector);
         JTwo = computeSecondStressInvariant(deviatoricStress);
         sqrtJTwo = sqrt(JTwo);
 

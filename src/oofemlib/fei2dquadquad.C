@@ -141,7 +141,7 @@ FEI2dQuadQuad :: evaldNdxi(const FloatArrayF<2> &lcoords)
         -eta * ( 1. - ksi ),
         -ksi * ( 1. - eta ), // 7
         -0.5 * ( 1. - ksi * ksi ),
-        0.5 * ( 1. - eta * eta ), // 8
+        0.5 * ( 1. - eta * eta ), // 83
         -eta * ( 1. + ksi )
     };
 }
@@ -183,7 +183,7 @@ FEI2dQuadQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &
 {
     auto dn = evaldNdxi(lcoords);
     FloatMatrixF<2,2> jacT;
-    for ( int i = 1; i <= dn.cols(); i++ ) {
+    for ( std::size_t i = 1; i <= dn.cols(); i++ ) {
         const auto &c = cellgeo.giveVertexCoordinates(i);
         double x = c.at(xind);
         double y = c.at(yind);

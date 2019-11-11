@@ -225,8 +225,7 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatR
         StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
         effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
-        FloatMatrix T(3, 3);
-        givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
+        FloatMatrix T = givePlaneStressVectorTranformationMtrx(nPrinc, true);
         FloatArray etaglob(3);
         etaglob.beProductOf(T, eta);
 
@@ -303,8 +302,7 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_du_NB(FloatMatrix &answer, M
             StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
             effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
-            FloatMatrix T(3, 3);
-            givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
+            FloatMatrix T = givePlaneStressVectorTranformationMtrx(nPrinc, true);
             FloatArray etaglob(3);
             etaglob.beProductOf(T, eta);
 
@@ -385,8 +383,7 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_du_BB(FloatMatrix &answer, M
             StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
             effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
-            FloatMatrix T(3, 3);
-            givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
+            FloatMatrix T = givePlaneStressVectorTranformationMtrx(nPrinc, true);
             FloatArray etaglob(3);
             etaglob.beProductOf(T, eta);
 

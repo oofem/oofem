@@ -46,6 +46,8 @@
 #include "vtkxmlexportmodule.h"
 #include "fracturemanager.h"
 #include "dof.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "connectivitytable.h"
 #include <fstream>
 
@@ -583,13 +585,12 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
 void
 Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat, TimeStep *tStep, FloatMatrix A [ 3 ] [ 3 ]) 
 {
-    const FloatArray &lcoords = gp->giveNaturalCoordinates();
-    FloatMatrix D;
+    const auto &lcoords = gp->giveNaturalCoordinates();
 
     // Material stiffness when internal work is formulated in terms of P and F:
     // \Delta(P*G^I) = L^IJ * \Delta g_J
     // A[I][J] = L^IJ = L_klmn * [G^I]_l * [G^J]_n
-    mat->give3dMaterialStiffnessMatrix_dPdF(D, TangentStiffness, gp, tStep);    // D_ijkl - cartesian system (Voigt)
+    auto D = mat->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);    // D_ijkl - cartesian system (Voigt)
     FloatMatrix G;
     this->evalInitialContravarBaseVectorsAt(lcoords, G);
     for (int I = 1; I <= 3; I++) {
@@ -724,11 +725,10 @@ void
 Shell7Base :: computeStressMatrix(FloatMatrix &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *tStep)
 {
     FloatMatrix F;
-    FloatArray vF, vP;
     computeFAt(gp->giveNaturalCoordinates(), F, genEps, tStep);
-    vF.beVectorForm(F);
-    static_cast< StructuralMaterial * >( mat )->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
-    answer.beMatrixForm(vP);
+    auto vF = to_voigt_form(F);
+    auto vP = static_cast< StructuralMaterial * >( mat )->giveFirstPKStressVector_3d(vF, gp, tStep);
+    answer = from_voigt_form(vP);
 }
 
 

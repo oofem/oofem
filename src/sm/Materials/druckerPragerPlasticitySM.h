@@ -330,9 +330,9 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override
     {
-        LEMaterial.giveThermalDilatationVector(answer, gp, tStep);
+        return LEMaterial.giveThermalDilatationVector(gp, tStep);
     }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

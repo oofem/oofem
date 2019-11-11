@@ -45,6 +45,8 @@
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "intarray.h"
 #include "load.h"
 #include "boundaryload.h"
@@ -984,10 +986,10 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
 
     if ( type == GlobalForceTensor ) {
-        FloatArray stress, localStress, localStrain;
+        FloatArray localStress, localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         this->computeStressVector(localStress, localStrain, gp, tStep);
-        mat->transformStressVectorTo(stress,  GtoLRotationMatrix, localStress, false);
+        auto stress = mat->transformStressVectorTo(GtoLRotationMatrix, localStress, false);
 
         answer.at(1, 1) = stress.at(1);
         answer.at(2, 2) = stress.at(2);
@@ -999,9 +1001,9 @@ MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(1, 2) = stress.at(6);
         answer.at(2, 1) = stress.at(6);
     } else if ( type == GlobalStrainTensor ) {
-        FloatArray strain, localStrain;
+        FloatArray localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
-        mat->transformStrainVectorTo(strain,  GtoLRotationMatrix, localStrain, false);
+        auto strain = mat->transformStrainVectorTo(GtoLRotationMatrix, localStrain, false);
 
         answer.at(1, 1) = strain.at(1);
         answer.at(2, 2) = strain.at(2);
@@ -1079,9 +1081,7 @@ void
 MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
-        FloatArray mLocal;
-        mLocal.resize(6);
-        mLocal.zero();
+        FloatArray mLocal(6);
 
         for ( int i = 0; i < nPointsZ; i++ ) {
             auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
@@ -1103,7 +1103,7 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
 
         // local to global
         this->computeGtoLRotationMatrix();
-        StructuralMaterial::transformStressVectorTo(answer,  GtoLRotationMatrix, mLocal, false);
+        answer = StructuralMaterial::transformStressVectorTo(GtoLRotationMatrix, mLocal, false);
     } else if ( type == IST_CurvatureTensor ) {
         FloatArray h;
         FloatMatrix dn;
@@ -1124,16 +1124,14 @@ MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateTyp
             rotY(i) = dofs.at(i * 6 + 5);
         }
         FloatArray cLocal(6);
-        cLocal.zero();
         cLocal.at(1) = rotY.dotProduct(hkx);
         cLocal.at(2) = -rotX.dotProduct(hky);
         cLocal.at(6) = rotY.dotProduct(hky) - rotX.dotProduct(hkx);
 
-        StructuralMaterial::transformStrainVectorTo(answer, GtoLRotationMatrix, cLocal, false);
+        answer = StructuralMaterial::transformStrainVectorTo(GtoLRotationMatrix, cLocal, false);
     } else if ( type == IST_ShellStrainTensor ) {
-        FloatArray coords;
         auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
-        coords = gp->giveNaturalCoordinates();
+        FloatArray coords = gp->giveNaturalCoordinates();
         coords.at(3) = 0;     //set to midplane
         GaussIntegrationRule iRule(1, this, 1, 10);
         GaussPoint midGP( &iRule, 1, coords, 1, this->giveMaterialMode() );

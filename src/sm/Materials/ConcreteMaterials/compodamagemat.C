@@ -167,7 +167,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
         }
 
         //transform strain to local c.s.
-        this->transformStrainVectorTo(strainVectorL, elementCs, reducedTotalStrainVector, 0);
+        strainVectorL = this->transformStrainVectorTo(elementCs, reducedTotalStrainVector, 0);
         //strainVectorL.printYourself();
 
         //damage criteria based on stress, assuming same damage parameter for tension/compression
@@ -215,9 +215,9 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
             switch ( mMode ) {
             case _3dMat:
                 ans = st->giveStrainVector();
-                this->transformStrainVectorTo(equilStrainVectorL, elementCs, ans, 0);
+                equilStrainVectorL = this->transformStrainVectorTo(elementCs, ans, 0);
                 ans = st->giveStressVector();
-                this->transformStressVectorTo(equilStressVectorL, elementCs, ans, 0);
+                equilStressVectorL = this->transformStressVectorTo(elementCs, ans, 0);
                 break;
 
             case _1dMat:
@@ -328,7 +328,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
         //stressVectorL.printYourself();
         //transform local c.s to global c.s.
         st->tempStressMLCS = stressVectorL;
-        this->transformStressVectorTo(answer, elementCs, stressVectorL, 1);
+        answer = this->transformStressVectorTo(elementCs, stressVectorL, 1);
         break;
     }
     case _1dMat: {
@@ -426,7 +426,7 @@ int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint
         }
 
         //rotate from unrotated (base) c.s. to local material c.s.
-        this->giveStrainVectorTranformationMtrx(answer, Lt);
+        answer = this->giveStrainVectorTranformationMtrx(Lt);
         return 1;
 
         break;

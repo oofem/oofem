@@ -167,8 +167,7 @@ public:
      */
     double giveDeviatoricPlasticStrainNorm()
     {
-        FloatArray dev;
-        StructuralMaterial :: computeDeviatoricVolumetricSplit(dev, plasticStrain);
+        auto dev = StructuralMaterial :: computeDeviator(plasticStrain);
         return sqrt( .5 * ( 2. * dev [ 0 ] * dev [ 0 ] + 2. * dev [ 1 ] * dev [ 1 ] + 2. * dev [ 2 ] * dev [ 2 ] +
             dev [ 3 ] * dev [ 3 ] + dev [ 4 ] * dev [ 4 ] + dev [ 5 ] * dev [ 5 ] ) );
     }

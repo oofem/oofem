@@ -70,8 +70,7 @@ double
 LatticeLink3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     //Returns artifical volume (bond area times bond length) so that general parts of post processing work
-    double myPi = 3.14159;
-    return pow(this->bondLength, 2.) * this->bondDiameter * myPi;
+    return pow(this->bondLength, 2.) * this->bondDiameter * M_PI;
 }
 
 

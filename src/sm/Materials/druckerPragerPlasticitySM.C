@@ -239,10 +239,7 @@ DruckerPragerPlasticitySM :: giveRealStressVector_3d(FloatArray &answer,
                                                   const FloatArray &totalStrain,
                                                   TimeStep *tStep)
 {
-    FloatArray strainVectorR;
-
-    DruckerPragerPlasticitySMStatus *status =
-        static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
 
     // Initialize temp variables for this gauss point
     initTempStatus(gp);
@@ -250,8 +247,8 @@ DruckerPragerPlasticitySM :: giveRealStressVector_3d(FloatArray &answer,
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
-    this->giveStressDependentPartOfStrainVector_3d(strainVectorR, gp, totalStrain,
-                                                tStep, VM_Total);
+    auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+    FloatArray strainVectorR = totalStrain - thermalStrain;
 
     // perform the local stress return and update the history variables
     performLocalStressReturn(gp, strainVectorR);
@@ -271,15 +268,16 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
         static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
 
     // split total strains in volumetric and deviatoric part
-    FloatArray strainDeviator;
-    double volumetricStrain;
     // elastic constants
     double eM = LEMaterial.give(Ex, gp);
     double nu = LEMaterial.give(NYxz, gp);
     double gM = eM / ( 2. * ( 1. + nu ) );
     double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
-    volumetricStrain = computeDeviatoricVolumetricSplit(strainDeviator, strain);
+    //auto [strainDeviator, volumetricStrain] = computeDeviatoricVolumetricSplit(strain); // c++17
+    auto tmp = computeDeviatoricVolumetricSplit(strain);
+    auto strainDeviator = tmp.first;
+    auto volumetricStrain = tmp.second;
 
     // compute trial elastic strains
     double volumetricElasticTrialStrain =
@@ -289,9 +287,8 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     elasticStrainDeviator.subtract(plasticStrainDeviator);
 
     // compute trial stresses
-    FloatArray stressDeviator;
     double volumetricStress = 3. * kM * volumetricElasticTrialStrain;
-    applyDeviatoricElasticStiffness(stressDeviator, elasticStrainDeviator, gM);
+    FloatArray stressDeviator = applyDeviatoricElasticStiffness(elasticStrainDeviator, gM);
     // norm of trial stress deviator
     double trialStressJTwo = computeSecondStressInvariant(stressDeviator);
 
@@ -324,12 +321,11 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     status->letTempKappaBe(tempKappa);
 
     // compute full stresses from deviatoric and volumetric part and store them
-    FloatArray stress;
-    computeDeviatoricVolumetricSum(stress, stressDeviator, volumetricStress);
+    FloatArray stress = computeDeviatoricVolumetricSum(stressDeviator, volumetricStress);
     status->letTempStressVectorBe(stress);
 
     // compute and update plastic strains, volumetric and deviatoric part
-    applyDeviatoricElasticCompliance(elasticStrainDeviator, stressDeviator, gM);
+    elasticStrainDeviator = applyDeviatoricElasticCompliance(stressDeviator, gM);
     plasticStrainDeviator = strainDeviator;
     plasticStrainDeviator.subtract(elasticStrainDeviator);
     status->letTempPlasticStrainDeviatorBe(plasticStrainDeviator);
@@ -603,9 +599,10 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
 
-    const FloatArray &stressVector = status->giveTempStressVector();
-    FloatArray deviatoricStress;
-    computeDeviatoricVolumetricSplit(deviatoricStress, stressVector);
+    const auto &stressVector = status->giveTempStressVector();
+
+    auto deviatoricStress = computeDeviator(stressVector);
+    
     double normOfStress = sqrt( 2. * computeSecondStressInvariant(deviatoricStress) );
     // elastic constants
     double eM = LEMaterial.give(Ex, gp);
@@ -709,8 +706,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     double HBar = computeYieldStressPrime(tempKappa, eM);
 
     // compute elastic trial strain deviator of latest temp-state
-    FloatArray strainDeviator;
-    computeDeviatoricVolumetricSplit(strainDeviator, status->giveTempStrainVector());
+    auto strainDeviator = computeDeviator(status->giveTempStrainVector());
 
     FloatArray elasticStrainDeviator = strainDeviator;
     elasticStrainDeviator.subtract( status->givePlasticStrainDeviator() );

@@ -54,23 +54,11 @@ LatticeDamage :: LatticeDamage(int n, Domain *d) : LatticeLinearElastic(n, d)
 {}
 
 
-LatticeDamage :: ~LatticeDamage()
-//
-// destructor
-//
-{}
 
-int
-LatticeDamage :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+LatticeDamage :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( ( mode == _2dLattice ) || ( mode == _3dLattice ) ) {
-        return 1;
-    }
-
-    return 0;
+    return ( mode == _2dLattice ) || ( mode == _3dLattice );
 }
 
 
@@ -855,7 +843,7 @@ LatticeDamageStatus :: initTempStatus()
 }
 
 void
-LatticeDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crackFlag %d\n", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crackFlag);

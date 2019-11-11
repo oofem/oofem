@@ -200,10 +200,10 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override
     {
         double alpha = this->linearElasticMaterial->give(tAlpha, gp);
-        answer = {alpha, alpha, alpha, 0, 0, 0};
+        return {alpha, alpha, alpha, 0., 0., 0.};
     }
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
