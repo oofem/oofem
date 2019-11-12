@@ -5302,7 +5302,9 @@ is not the isotherm itself but its derivative---the moisture capacity):
 
 \item
 {\bf Linear} isotherm ($isothermType=0$) is characterized only by its
-slope given by parameter $moistureCapacity$.
+slope given by parameter \emph{capa}. The isotherm can be
+shifted vertically, this is done by \emph{isooffset} which has a
+meaning of moisture content at zero relative humidity.
 
 \item
 {\bf Piecewise linear} isotherm ($isothermType=1$) is defined by two 
@@ -5359,7 +5361,18 @@ condensation. Empirical formulae for estimation of the parameters can
 be found in \cite{Xi}. Note that these formulae hold quite accurately
 for cement paste only; a reduction of the moisture ratio is necessary 
 if the isotherm
-should be applied for concrete. 
+should be applied for concrete.
+
+\item
+{\bf Bilinear} isotherm ($isothermType=6$) is defined by its
+moisture capacity \emph{capa} for relative humidity less than
+\emph{hx}. Parameter \emph{wf} defines moisture content at full
+saturation, $h = 1$. Convergence is substantially improved by a smooth transition on
+interval $(hx-dx, hx+dx)$.
+Similarly to the linear isotherm the moisture content can be
+adjusted by parameter \emph{isooffset}. 
+
+
 \end{enumerate}
 
 The present implementation covers three functions for 
@@ -5416,6 +5429,7 @@ Record Format & \descitem{NlIsoMoistureMat} \elemparam{num}{in}
 \optelemparam{dd}{rn} \optelemparam{wf}{rn} \optelemparam{b}{rn}
 \optelemparam{uh}{rn} \optelemparam{A}{rn} \optelemparam{nn}{rn}
 \optelemparam{c}{rn} \optelemparam{k}{rn} \optelemparam{Vm}{rn}
+\optelemparam{hx}{rn} \optelemparam{dx}{rn}
 \optelemparam{perm\_h}{ra} \optelemparam{perm\_c(h)}{ra}
 \optelemparam{c1}{rn} \optelemparam{n}{rn} \optelemparam{alpha0}{rn}
 \optelemparam{hc}{rn} \optelemparam{alphah}{rn}
@@ -5424,18 +5438,21 @@ Record Format & \descitem{NlIsoMoistureMat} \elemparam{num}{in}
 \\
 Parameters &- \param{num} material model number \\
 &- \param{d} material density \\
-&- \param{isothermType} isotherm function as listed above (0, 1, ...5)
+&- \param{isothermType} isotherm function as listed above (0, 1, ...6)
 \\
 &- \param{permeabilityType} moisture permeability function as listed
 above (0, 1, 2) \\
 &- \param{rhodry} [kg/m$^3$] density of dry material (for $isothermType=4$ and 5) \\
-&- \param{capa} [kg/m$^3$] moisture capacity (for $isothermType=0$) \\
+&- \param{capa} [kg/m$^3$] moisture capacity (for $isothermType=0$ and
+6) \\
+&- \param{isooffset} [kg/m$^3$] moisture capacity at zero relative
+humidity (for $isothermType=0$ and 6) \\
 &- \param{iso\_h} [-] humidity array (for $isothermType=1$) \\
 &- \param{iso\_w(h)} [kg/m$^3$] moisture content array (for
 $isothermType=1$) \\
 &- \param{dd} [-] parameter (for $isothermType=2$)\\
 &- \param{wf} [kg/m$^3$] is the moisture content at free saturation
-(for $isothermType=3$) \\
+(for $isothermType=3$ and 6) \\
 &- \param{b} [-] parameter (for $isothermType=3$) \\
 &- \param{uh} [kg/kg] maximum hygroscopically
 bound water by adsorption (for $isothermType=4$) \\
@@ -5444,7 +5461,8 @@ bound water by adsorption (for $isothermType=4$) \\
 &- \param{Vm} (for $isothermType=5$) \\
 &- \param{k} (for $isothermType=5$) \\
 &- \param{C} (for $isothermType=5$) \\
-&- \param{perm\_h} [-] humidity array (for $permeabilityType=0$) \\
+&- \param{hx} [-] transition relative humidity (for $isothermType=6$) \\
+&- \param{dx} [-] length of the smooth transition (for $isothermType=6$) \\
 &- \param{perm\_c(h)} [kg m$^{-1}$ s$^{-1}$] moisture permeability
 array (for $permeabilityType=0$) \\
 &- \param{c1} [kg m$^{-1}$ s$^{-1}$] moisture permeability at full
