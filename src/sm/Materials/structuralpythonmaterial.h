@@ -79,7 +79,7 @@ private:
     bp::object largeDef, largeDefTangent;
 
     /// Numerical pertubation for numerical tangents
-    double pert;
+    double pert = 1e-12;
 public:
     /// Constructor.
     StructuralPythonMaterial(int n, Domain * d);
@@ -89,22 +89,20 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    void callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
-    void callTangentFunction(FloatMatrix &answer, bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
+    FloatArray callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
+    FloatMatrix callTangentFunction(bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                            MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *tStep) override;
+    FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode, GaussPoint *gp,
+                                                         TimeStep *tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                    const FloatArray &reducedF, TimeStep *tStep) override;
+    FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp,
+                                              TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
