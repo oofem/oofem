@@ -2390,8 +2390,11 @@ FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
                 fprintf( file, "%f ", crackDirs.at(j, i) );
             }
 
-            fprintf(file, "}}");
-            ;
+            fprintf(file, "} ");
+            
+	    fprintf(file, "crack_width %.4e", this->giveCharLength(i) * this->giveCrackStrain(i) );
+
+            fprintf(file, " } ");	    
         }
     }
 

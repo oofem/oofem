@@ -106,6 +106,13 @@ Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 }
 
 
+  void
+Truss3d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    this->computeBmatrixAt(gp, answer);
+}
+
+  
 void
 Truss3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
