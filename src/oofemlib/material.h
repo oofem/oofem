@@ -325,7 +325,7 @@ public:
      * Default implementation simply extracts status from integration point and
      * calls its initTempStatus method.
      */
-    virtual void initTempStatus(GaussPoint *gp);
+    virtual void initTempStatus(GaussPoint *gp) const;
 
     /**
      * Stores receiver state to output stream.

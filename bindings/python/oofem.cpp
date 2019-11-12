@@ -281,7 +281,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
       oofem::MaterialStatus* giveStatus (oofem::GaussPoint* gp) const override {
         PYBIND11_OVERLOAD(oofem::MaterialStatus*, MaterialBase, giveStatus, gp);
       }
-        void initTempStatus(oofem::GaussPoint *gp) override {
+        void initTempStatus(oofem::GaussPoint *gp) const override {
             PYBIND11_OVERLOAD(void, MaterialBase, initTempStatus, gp); 
         }
         const char *giveClassName() const override {

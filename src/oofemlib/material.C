@@ -220,7 +220,7 @@ Material :: giveStatus(GaussPoint *gp) const
 
 
 void
-Material :: initTempStatus(GaussPoint *gp)
+Material :: initTempStatus(GaussPoint *gp) const
 //
 // Initialize MatStatus (respective it's temporary variables at the begining
 // of integrating incremental constitutive relations) to correct values
