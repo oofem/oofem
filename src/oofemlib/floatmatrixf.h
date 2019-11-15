@@ -32,6 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#pragma once
+
 #ifndef floatmatrixf_h
 #define floatmatrixf_h
 
@@ -73,7 +75,7 @@ public:
      * Constructor (values are specified column-wise)
      * @note The syntax {{x,y,z},{...}} can be achieved by nested initializer_list, but 
      */
-    template<typename... V, class = typename std::enable_if_t<sizeof...(V) == N*M>>
+    template< typename... V, class = typename std::enable_if_t<sizeof...(V) == N*M> >
     FloatMatrixF(V... x) : values{x...} { }
     /**
      * Empty ctor, initializes to zero.
@@ -241,6 +243,20 @@ public:
         for ( std::size_t i = 0; i < N; i++ ) {
             (*this)(i, c) = src[i];
         }
+    }
+    
+    /**
+     * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.
+     * @param src Array to set at column c.
+     * @param c Column to set.
+     */
+    FloatArrayF<N> column(int j) const
+    {
+        FloatArrayF<N> c;
+        for ( std::size_t i = 0; i < N; i++ ) {
+            c[i] = (*this)(i, j);
+        }
+        return c;
     }
 
     /**
@@ -794,6 +810,20 @@ FloatMatrixF<N,N> diag(const FloatArrayF<N> &v)
     return out;
 }
 
+
+/**
+ * Extract diagonal from matrix.
+ */
+template<std::size_t N>
+FloatArrayF<N> diag(const FloatMatrixF<N,N> &m)
+{
+    FloatArrayF<N> out;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        out[i] = m(i, i);
+    }
+    return out;
+}
+
 /**
  * Constructs diagonal matrix from vector.
  */
@@ -1109,13 +1139,184 @@ inline FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat)
  * @return Pair of eigenvalues and vectors..
  */
 template<std::size_t N>
-std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(FloatMatrixF<N,N> &mat, int nf)
+std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(const FloatMatrixF<N,N> &mat, int nf=9)
 {
-    OOFEM_ERROR("TODO");
+    FloatArrayF<N> eval = diag(mat);
+    FloatMatrixF<N,N> v = eye<N>();
+
+    double sum = 0.0;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        for ( std::size_t j = 0; j < N; ++j ) {
+            sum += fabs( mat(i, j) );
+        }
+    }
+
+    if ( sum <= 0.0 ) {
+        return {zeros<N>(), eye<N>()};
+    }
+
+    auto m = mat;
+    /* ---- REDUCE MATRIX TO DIAGONAL ---------------- */
+    double c_b2 = .10;
+    double tol = pow(c_b2, nf);
+    int ite = 0;
+    double ssum;
+    do {
+        ssum = 0.0;
+        for ( std::size_t j = 1; j < N; ++j ) {
+            for ( std::size_t i = 0; i < j; ++i ) {
+                if ( ( fabs( m(i, j) ) / sum ) > tol ) {
+                    ssum += fabs( m(i, j) );
+                    /* ---- CALCULATE ROTATION ANGLE ----------------- */
+                    double aa = atan2( m(i, j) * 2.0, eval[i] - eval[j] ) /  2.0;
+                    double si = sin(aa);
+                    double co = cos(aa);
+                    /*
+                     *   // ---- MODIFY "I" AND "J" COLUMNS OF "A" AND "V"
+                     *   for (k = 0; k < neq; ++k) {
+                     *    tt = m(k, i);
+                     *    m(k, i) = co * tt + si * m(k, j);
+                     *    m(k, j) = -si * tt + co * m(k, j);
+                     *    tt = v(k, i);
+                     *    v(k, i) = co * tt + si * v(k, j);
+                     *    // L500:
+                     *    v(k, j) = -si * tt + co * v(k, j);
+                     *   }
+                     *   // ---- MODIFY DIAGONAL TERMS --------------------
+                     *   m(i, i) = co * m(i, i) + si * m(j, i);
+                     *   m(j, j) = -si * m(i, j) + co * m(j, j);
+                     *   m(i, j) = 0.0;
+                     *   // ---- MAKE "A" MATRIX SYMMETRICAL --------------
+                     *   for (k = 1; k <= neq; ++k) {
+                     *    m(i, k) = m(k, i);
+                     *    m(j, k) = m(k, j);
+                     *    // L600:
+                     *   }
+                     */
+                    // ---- MODIFY "I" AND "J" COLUMNS OF "A" AND "V"
+                    for ( std::size_t k = 0; k < i; ++k ) {
+                        double tt = m(k, i);
+                        m(k, i) = co * tt + si * m(k, j);
+                        m(k, j) = -si * tt + co * m(k, j);
+                        tt = v(k, i);
+                        v(k, i) = co * tt + si * v(k, j);
+                        v(k, j) = -si * tt + co * v(k, j);
+                    }
+
+                    // diagonal term (i,i)
+                    double tt = eval[i];
+                    eval[i] = co * tt + si * m(i, j);
+                    double aij = -si * tt + co * m(i, j);
+                    tt = v(i, i);
+                    v(i, i) = co * tt + si * v(i, j);
+                    v(i, j) = -si * tt + co * v(i, j);
+
+                    for ( std::size_t k = i + 1; k < j; ++k ) {
+                        double tt = m(i, k);
+                        m(i, k) = co * tt + si * m(k, j);
+                        m(k, j) = -si * tt + co * m(k, j);
+                        tt = v(k, i);
+                        v(k, i) = co * tt + si * v(k, j);
+                        v(k, j) = -si * tt + co * v(k, j);
+                    }
+
+                    // diagonal term (j,j)
+                    tt = m(i, j);
+                    double aji = co * tt + si * eval[j];
+                    eval[j] = -si * tt + co * eval[j];
+
+                    tt = v(j, i);
+                    v(j, i) = co * tt + si * v(j, j);
+                    v(j, j) = -si * tt + co * v(j, j);
+                    //
+                    for ( std::size_t k = j + 1; k < N; ++k ) {
+                        double tt = m(i, k);
+                        m(i, k) = co * tt + si * m(j, k);
+                        m(j, k) = -si * tt + co * m(j, k);
+                        tt = v(k, i);
+                        v(k, i) = co * tt + si * v(k, j);
+                        v(k, j) = -si * tt + co * v(k, j);
+                    }
+
+                    // ---- MODIFY DIAGONAL TERMS --------------------
+                    eval[i] = co * eval[i] + si * aji;
+                    eval[j] = -si * aij + co * eval[j];
+                    m(i, j) = 0.0;
+                } else {
+                    /* ---- A(I,J) MADE ZERO BY ROTATION ------------- */
+                    ;
+                }
+            }
+        }
+        /* ---- CHECK FOR CONVERGENCE -------------------- */
+        if ( ++ite > 50 ) {
+            throw std::runtime_error("eig computation failed");
+        }
+    } while ( fabs(ssum) / sum > tol );
+    return {eval, v};
 }
 
+
+/**
+ * Computes (real) eigenvalues and eigenvectors of receiver (must be symmetric) using inverse iterations.
+ * @param mat Matrix.
+ * @return Pair of eigenvalues and vectors..
+ */
+template<std::size_t N>
+std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig_inverse(const FloatMatrixF<N,N> &mat)
+{
+    int nitem = 100;
+    double rtol = 1e-12;
+
+    FloatArrayF<N> w;
+    std::array<FloatArrayF<N>, N> x;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        w[i] += 1.;
+        x[i][i] = 1.;
+    }
+    auto invmat = inv(mat);
+
+    for ( int it = 0; it < nitem; it++ ) {
+        auto z = x;
+        //  solve matrix equation K.X = M.X
+        for ( std::size_t i = 0; i < N; ++i ) {
+            x[i] = dot(invmat, z[i]);
+        }
+
+        //  evaluation of Rayleigh quotients
+        auto old_w = w;
+        for ( std::size_t i = 0; i < N; i++ ) {
+            w[i] = dot(z[i], x[i]) / dot(x[i], x[i]);
+        }
+
+        orthogonalize(x);
+
+        //  check convergence
+        if ( norm2(old_w - w) <= norm2(w) * rtol ) {
+            break;
+        }
+    }
+
+    return {w, x};
+}
+
+
+template<std::size_t N>
+void orthogonalize(std::array<FloatArrayF<N>, N> &x)
+{
+    for ( std::size_t j = 0; j < N; j++ ) {
+        auto t = x[j];
+        for ( std::size_t ii = 0; ii < j; ii++ ) {
+            x[j] -= dot(x[ii], t) * x[ii];
+        }
+        x[j] *= 1.0 / norm(x[j]);
+    }
+}
+
+
+#if 0
 template<>
-inline std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(FloatMatrixF<2,2> &mat, int nf)
+inline std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(const FloatMatrixF<2,2> &mat, int nf)
 {
     double b = - (mat(0,0) + mat(1,1))/2.;
     double c = mat(0,0) * mat(1,1) - mat(0,1) * mat(1,0);
@@ -1127,33 +1328,135 @@ inline std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(FloatMatrixF<2,2> &mat, 
     OOFEM_ERROR("TODO"); // is this even worth specializing? I don't think we ever use it for 2x2. Typically just 3x3, 6x6, 9x9
     return {vals, vecs};
 }
+#endif
 
 /**
  * Solves the  system of linear equations @f$ K\cdot a = b @f$ .
  * Uses Gaussian elimination with pivoting directly on receiver.
  * @param b RHS of linear system.
- * @param answer Solution of linear equations.
- * @param transpose Solves for the transpose of K.
- * @return False if K is singular, otherwise true.
+ * @return Solution of linear equations.
  */
 template<std::size_t N>
-bool solve(FloatMatrixF<N,N> &k, const FloatArrayF<N> &b, FloatArrayF<N> &answer, bool transpose=false)
+FloatArrayF<N> solve(FloatMatrixF<N,N> mtrx, const FloatArrayF<N> &b)
 {
-    OOFEM_ERROR("TODO");
+    auto answer = b;
+    // initialize answer to be unity matrix;
+    // lower triangle elimination by columns
+    for ( std::size_t i = 0; i < N - 1; i++ ) {
+        // find the suitable row and pivot
+        double piv = fabs( mtrx(i, i) );
+        std::size_t pivRow = i;
+        for ( std::size_t j = i + 1; j < N; j++ ) {
+            if ( fabs( mtrx(j, i) ) > piv ) {
+                pivRow = j;
+                piv = fabs( mtrx(j, i) );
+            }
+        }
+
+        if ( piv < 1.e-20 ) {
+            throw std::runtime_error("Singular pivot encountered");
+        }
+
+        // exchange rows
+        if ( pivRow != i ) {
+            for ( std::size_t j = i; j < N; j++ ) {
+                double help = mtrx(i, j);
+                mtrx(i, j) = mtrx(pivRow, j);
+                mtrx(pivRow, j) = help;
+            }
+            double help = answer[i];
+            answer[i] = answer[pivRow];
+            answer[pivRow] = help;
+        }
+
+        for ( std::size_t j = i + 1; j < N; j++ ) {
+            double linkomb = mtrx(j, i) / mtrx(i, i);
+            for ( std::size_t k = i; k < N; k++ ) {
+                mtrx(j, k) -= mtrx(i, k) * linkomb;
+            }
+
+            answer[j] -= answer[i] * linkomb;
+        }
+    }
+
+    // back substitution
+    for ( int i = N - 1; i >= 0; i-- ) {
+        double help = 0.;
+        for ( std::size_t j = i + 1; j < N; j++ ) {
+            help += mtrx(i, j) * answer[j];
+        }
+
+        answer[i] = ( answer[i] - help ) / mtrx(i, i);
+    }
+    return answer;
 }
 
 /**
  * Solves the  system of linear equations @f$ K\cdot A = B @f$ .
  * Uses Gaussian elimination with pivoting directly on receiver.
  * @param B RHS of linear system.
- * @param answer Solution of linear equations, each column corresponding to columns in B.
- * @param transpose Solves for the transpose of K.
- * @return False if K is singular, otherwise true.
+ * @return Solution of linear equations, each column corresponding to columns in B.
  */
 template<std::size_t N, std::size_t M>
-bool solve(FloatMatrixF<N,N> &k, FloatMatrixF<N,M> &B, FloatMatrixF<N,M> &answer, bool transpose=false)
+FloatMatrixF<N,M> solve(FloatMatrixF<N,N> mtrx, const FloatMatrixF<N,M> &B)
 {
-    OOFEM_ERROR("TODO");
+    auto answer = B;
+    // initialize answer to be unity matrix;
+    // lower triangle elimination by columns
+    for ( std::size_t i = 0; i < N - 1; i++ ) {
+        // find the suitable row and pivot
+        double piv = fabs( mtrx(i, i) );
+        std::size_t pivRow = i;
+        for ( int j = i + 1; j < N; j++ ) {
+            if ( fabs( mtrx(j, i) ) > piv ) {
+                pivRow = j;
+                piv = fabs( mtrx(j, i) );
+            }
+        }
+
+        if ( fabs(piv) < 1.e-20 ) {
+            throw std::runtime_error("pivot too small, matrix problem could not be solved");
+        }
+
+        // exchange rows
+        if ( pivRow != i ) {
+            for ( std::size_t j = i; j < N; j++ ) {
+                double help = mtrx(i, j);
+                mtrx(i, j) = mtrx(pivRow, j);
+                mtrx(pivRow, j) = help;
+            }
+
+            for ( std::size_t j = 0; j < M; j++ ) {
+                double help = answer(i, j);
+                answer(i, j) = answer(pivRow, j);
+                answer(pivRow, j) = help;
+            }
+        }
+
+        for ( std::size_t j = i + 1; j < N; j++ ) {
+            double linkomb = mtrx(j, i) / mtrx(i, i);
+            for ( std::size_t k = i; k < N; k++ ) {
+                mtrx(j, k) -= mtrx(i, k) * linkomb;
+            }
+
+            for ( std::size_t k = 0; k < M; k++ ) {
+                answer(j, k) -= answer(i, k) * linkomb;
+            }
+        }
+    }
+
+    // back substitution
+    for ( std::size_t i = N - 1; i >= 0; i-- ) {
+        for ( std::size_t k = 0; k < M; k++ ) {
+            double help = 0.;
+            for ( std::size_t j = i + 1; j < N; j++ ) {
+                help += mtrx(i, j) * answer(j, k);
+            }
+
+            answer(i, k) = ( answer(i, k) - help ) / mtrx(i, i);
+        }
+    }
+    return answer;
 }
 ///@}
 
