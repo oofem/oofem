@@ -54,11 +54,7 @@ int const AbaqusUserMaterial :: abq2oo9[9] = {0, 1, 2, 5, 4, 3, 6, 8, 7};
 int const AbaqusUserMaterial :: abq2oo6[6] = {0, 1, 2, 5, 4, 3};
 
 AbaqusUserMaterial :: AbaqusUserMaterial(int n, Domain *d) :
-    StructuralMaterial(n, d),
-    umatobj(nullptr), umat(nullptr),
-    mStressInterpretation(0),
-    mUseNumericalTangent(false),
-    mPerturbation(1.0e-7)
+    StructuralMaterial(n, d)
 { }
 
 AbaqusUserMaterial :: ~AbaqusUserMaterial()
@@ -86,8 +82,11 @@ void AbaqusUserMaterial :: initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, this->filename, _IFT_AbaqusUserMaterial_userMaterial);
     umatname = "umat";
     IR_GIVE_OPTIONAL_FIELD(ir, umatname, _IFT_AbaqusUserMaterial_name);
-    strncpy(this->cmname, umatname.c_str(), 80);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->initialStress, _IFT_AbaqusUserMaterial_initialStress);
+    strncpy(this->cmname, umatname.c_str(), 79);
+    
+    FloatArray s(6);
+    IR_GIVE_OPTIONAL_FIELD(ir, s, _IFT_AbaqusUserMaterial_initialStress);
+    this->initialStress = s;
 
 #ifdef _WIN32
     ///@todo Check all the windows support.
@@ -149,7 +148,7 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
 void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                          MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    AbaqusUserMaterialStatus *ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
         // Evaluating the function once, so that the tangent can be obtained.
         FloatArray stress(6), strain(6);
@@ -248,9 +247,9 @@ AbaqusUserMaterial :: givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, Gauss
 }
 
 void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &reducedStrain, TimeStep *tStep)
+                                                   const FloatArray &strain, TimeStep *tStep)
 {
-    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     /* User-defined material name, left justified. Some internal material models are given names starting with
      * the “ABQ_” character string. To avoid conflict, you should not use “ABQ_” as the leading string for
      * CMNAME. */
@@ -261,14 +260,11 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     int nshr = 3;
 
     int ntens = ndi + nshr;
-    FloatArray strain = ms->giveStrainVector();
-    FloatArray stress = ms->giveStressVector();
-    // adding the initial stress
-    stress.add(initialStress);
-    FloatArray strainIncrement;
-    strainIncrement.beDifferenceOf(reducedStrain, strain);
-    FloatArray state = ms->giveStateVector();
-    FloatMatrix jacobian(ntens, ntens);
+    FloatArrayF<6> old_strain = ms->giveStrainVector();
+    FloatArrayF<6> old_stress = initialStress + ms->giveStressVector();
+    auto strainIncrement = FloatArrayF<6>(strain) - old_strain;
+    auto state = ms->giveStateVector();
+    FloatMatrixF<6,6> abq_jacobian;
     int numProperties = this->properties.giveSize();
 
     // Temperature and increment
@@ -290,8 +286,8 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
 
     // Outputs only in a fully coupled thermal-stress analysis:
     double rpl = 0.0; // Volumetric heat generation per unit time at the end of the increment caused by mechanical working of the material.
-    FloatArray ddsddt(ntens); // Variation of the stress increments with respect to the temperature.
-    FloatArray drplde(ntens); // Variation of RPL with respect to the strain increments.
+    FloatArrayF<6> ddsddt; // Variation of the stress increments with respect to the temperature.
+    FloatArrayF<6> drplde; // Variation of RPL with respect to the strain increments.
     double drpldt = 0.0; // Variation of RPL with respect to the temperature.
 
     /* An array containing the coordinates of this point. These are the current coordinates if geometric
@@ -306,8 +302,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
      * strain components are already rotated by this amount before UMAT is called. This matrix is passed in
      * as a unit matrix for small-displacement analysis and for large-displacement analysis if the basis system
      * for the material point rotates with the material (as in a shell element or when a local orientation is used).*/
-    FloatMatrix drot(3, 3);
-    drot.beUnitMatrix();
+    auto drot = eye<3>();
 
     /* Characteristic element length, which is a typical length of a line across an element for a first-order
      * element; it is half of the same typical length for a second-order element. For beams and trusses it is a
@@ -319,14 +314,12 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
 
     /* Array containing the deformation gradient at the beginning of the increment. See the discussion
      * regarding the availability of the deformation gradient for various element types. */
-    FloatMatrix dfgrd0(3, 3);
-    dfgrd0.beUnitMatrix();
+    auto dfgrd0 = eye<3>();
     /* Array containing the deformation gradient at the end of the increment. The components of this array
      * are set to zero if nonlinear geometric effects are not included in the step definition associated with
      * this increment. See the discussion regarding the availability of the deformation gradient for various
      * element types. */
-    FloatMatrix dfgrd1(3, 3);
-    dfgrd1.beUnitMatrix();
+    auto dfgrd1 = eye<3>();
 
     int noel = gp->giveElement()->giveNumber(); // Element number.
     int npt = 0; // Integration point number.
@@ -341,16 +334,16 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     double dpred;
 
     // Change to Abaqus's component order
-    stress.changeComponentOrder();
-    strain.changeComponentOrder();
-    strainIncrement.changeComponentOrder();
+    auto abq_stress = old_stress[abq2oo6];
+    auto abq_old_strain = old_strain[abq2oo6];
+    auto abq_strainIncrement = strainIncrement[abq2oo6];
 
     //    printf("stress oofem: "); stress.printYourself();
 
     OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector_3d - Calling subroutine");
-    this->umat(stress.givePointer(), // STRESS
+    this->umat(abq_stress.givePointer(), // STRESS
                state.givePointer(), // STATEV
-               jacobian.givePointer(), // DDSDDE
+               abq_jacobian.givePointer(), // DDSDDE
                & sse, // SSE
                & spd, // SPD
                & scd, // SCD
@@ -358,8 +351,8 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
                ddsddt.givePointer(), // DDSDDT
                drplde.givePointer(), // DRPLDE
                & drpldt, // DRPLDT
-               strain.givePointer(), // STRAN
-               strainIncrement.givePointer(), // DSTRAN
+               abq_old_strain.givePointer(), // STRAN
+               abq_strainIncrement.givePointer(), // DSTRAN
                time, // TIME
                & dtime, // DTIME
                & temp, // TEMP
@@ -387,20 +380,15 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
                & kinc); // KINC
 
     // Change to OOFEM's component order
-    stress.changeComponentOrder();
+    auto jacobian = abq_jacobian(abq2oo6, abq2oo6);
     // subtracking the initial stress
-    stress.subtract(initialStress);
-    strain.changeComponentOrder();
-    strainIncrement.changeComponentOrder();
-    jacobian.changeComponentOrder();
+    auto stress = abq_stress[abq2oo6] - initialStress;
 
-    ms->letTempStrainVectorBe(reducedStrain);
+    ms->letTempStrainVectorBe(strain);
     ms->letTempStressVectorBe(stress);
     ms->letTempStateVectorBe(state);
     ms->letTempTangentBe(jacobian);
     answer = stress;
-
-    OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector - Calling subroutine was successful");
 }
 
 
@@ -408,7 +396,7 @@ FloatArrayF<9>
 AbaqusUserMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp,
                                                 TimeStep *tStep) const
 {
-    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     /* User-defined material name, left justified. Some internal material models are given names starting with
      * the “ABQ_” character string. To avoid conflict, you should not use “ABQ_” as the leading string for
      * CMNAME. */
@@ -585,14 +573,12 @@ AbaqusUserMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, Gauss
         
         return vP;
     }
-
-    OOFEM_LOG_DEBUG("AbaqusUserMaterial :: giveRealStressVector_3d - Calling subroutine was successful");
 }
 
 
 int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Undefined || type == IST_AbaqusStateVector ) {
         // The undefined value is used to just dump the entire state vector.
         answer = ms->giveStateVector();

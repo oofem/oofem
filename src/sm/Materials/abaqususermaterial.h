@@ -38,6 +38,7 @@
 #include "sm/Materials/structuralmaterial.h"
 #include "sm/Materials/structuralms.h"
 #include "floatarray.h"
+#include "floatarrayf.h"
 #include "floatmatrix.h"
 
 ///@name Input fields for AbaqusUserMaterial
@@ -81,7 +82,7 @@ class AbaqusUserMaterial : public StructuralMaterial
 {
 private:
     /// Dynamically loaded umat.
-    void *umatobj;
+    void *umatobj = nullptr;
 
     /// Pointer to the dynamically loaded umat-function (translated to C)
     void ( * umat )(double *stress, double *statev, double *ddsdde, double *sse, double *spd, // 5
@@ -90,30 +91,31 @@ private:
                     double *dtemp, double predef [ 1 ], double dpred [ 1 ], char cmname [ 80 ], int *ndi, // 5
                     int *nshr, int *ntens, int *nstatv, double *props, int *nprops, double coords [ 3 ], // 6
                     double *drot, double *pnewdt, double *celent, double *dfgrd0, double *dfgrd1, // 5
-                    int *noel, int *npt, int *layer, int *kspt, int *kstep, int *kinc); // 6
+                    int *noel, int *npt, int *layer, int *kspt, int *kstep, int *kinc) = nullptr; // 6
     /// Name for material routine.
     char cmname [ 80 ];
     /// Size of the state vector.
-    int numState;
+    int numState = 0;
+
     /// Material properties.
     FloatArray properties;
     /// Initial stress.
-    FloatArray initialStress;
+    FloatArrayF<6> initialStress;
     /**
      * Flag to determine how the stress and Jacobian are interpreted.
      * 0 implies that the P and dPdF are returned from the umat routine.
      */
-    int mStressInterpretation;
+    int mStressInterpretation = 0;
 
     /**
      * Flag to determine if numerical tangent should be used.
      */
-    bool mUseNumericalTangent;
+    bool mUseNumericalTangent = false;
 
     /**
      * Size of perturbation if numerical tangent is used.
      */
-    double mPerturbation;
+    double mPerturbation = 1e-7;
 
     /// Name of the file that contains the umat function
     std :: string filename;
