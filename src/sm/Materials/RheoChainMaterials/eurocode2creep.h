@@ -59,16 +59,16 @@ class Eurocode2CreepMaterialStatus : public KelvinChainMaterialStatus
 {
 protected:
     /// temperature-dependent equivalent age, maturity (equilibrated value)
-    double maturity;
+    double maturity = 0.;
     /// temperature-dependent equivalent age, maturity (temporary value)
-    double tempMaturity;
+    double tempMaturity = 0.;
     /// temperature (equilibrated value)
-    double temperature;
+    double temperature = 0.;
     /// temperature (temporary value)
-    double tempTemperature;
+    double tempTemperature = 0.;
 
 public:
-    Eurocode2CreepMaterialStatus(GaussPoint *g, int nunits);
+    Eurocode2CreepMaterialStatus(GaussPoint *g, int nunits): KelvinChainMaterialStatus(g, nunits) {}
 
     void updateYourself(TimeStep *tStep) override;
 
@@ -103,76 +103,74 @@ protected:
     /// fixed retardation time of the first unit
     // the reason it is introduced is the application of the correction factors
     // to achieve a better approximation of the compliance function by the retardation spectrum
-    double tau1;
+    double tau1 = 0.;
 
     /// stiffness of the zeroth Kelvin unit
-    mutable double EspringVal;
+    mutable double EspringVal = 0.;
 
     // ELASTICITY + SHORT TERM + STRENGTH
     /// mean compressive strength at 28 days default - to be specified in units of the analysis (e.g. 30.e6 + stiffnessFacotr 1. or 30. + stiffnessFactor 1.e6)
-    double fcm28;
+    double fcm28 = 0.;
 
     /// Young's modulus at 28 days default [MPa]
-    double Ecm28;
+    double Ecm28 = 0.;
 
     /// factor unifying stiffnesses (Ecm is predicted from fcm...)
-    double stiffnessFactor;
+    double stiffnessFactor = 0.;
 
     /// parameter determined by cement type
-    double s;
+    double s = 0.;
 
     // CREEP
     /// drying creep coefficient
-    double phi_RH;
+    double phi_RH = 0.;
 
     /// drying creep coefficient
-    double beta_fcm;
+    double beta_fcm = 0.;
 
     /// drying creep coefficient
-    double beta_H;
+    double beta_H = 0.;
 
     /// effective thickness [mm]
-    double h0;
+    double h0 = 0.;
 
     /// influence of cement type on concrete equivalent age, B.9 in EC2
-    double alpha_T_cement;
+    double alpha_T_cement = 0.;
 
 
     // DRYING SHRINKAGE
     /// duration of curing [day, sec, ...]
-    double t0;
+    double t0 = 0.;
 
     /// age (absolute) when concrete started drying, must be in days!
-    double begOfDrying;
+    double begOfDrying = 0.;
 
     /// drying shrinkage coefficient
-    double kh;
+    double kh = 0.;
 
     /// asymptotic value of drying shrinkage at zero relative humidity, B.11 in EC2
-    double eps_cd_0;
+    double eps_cd_0 = 0.;
 
 
     // AUTEGENOUS SHRINKAGE
     /// asymptotic value of autogenous shrinakge, 3.12 in EC2
-    double eps_ca_infty;
+    double eps_ca_infty = 0.;
 
     /// shrinkage option
-    enum ec2ShrinkageType { EC2_NoShrinkage, EC2_TotalShrinkage, EC2_DryingShrinkage, EC2_AutogenousShrinkage } shType;
+    enum ec2ShrinkageType { EC2_NoShrinkage, EC2_TotalShrinkage, EC2_DryingShrinkage, EC2_AutogenousShrinkage } shType = EC2_NoShrinkage;
 
     /**
      * If true, analysis of retardation spectrum is used for evaluation of Kelvin units moduli
      * If false, least-squares method is used for evaluation of Kelvin units moduli (default)
      */
-    bool retardationSpectrumApproximation;
+    bool retardationSpectrumApproximation = 0.;
 
     /// switch for temperature dependence of concrete maturity (default option is off)
-    bool temperatureDependent;
+    bool temperatureDependent = 0.;
 
 
 public:
-    Eurocode2CreepMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {
-        shType = EC2_NoShrinkage;
-    }
+    Eurocode2CreepMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {}
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;

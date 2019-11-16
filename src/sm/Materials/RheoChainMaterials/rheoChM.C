@@ -45,13 +45,8 @@
 #include "contextioerr.h"
 
 namespace oofem {
-RheoChainMaterial :: RheoChainMaterial(int n, Domain *d) : StructuralMaterial(n, d),
-    EparVal(), charTimes(), discreteTimeScale()
+RheoChainMaterial :: RheoChainMaterial(int n, Domain *d) : StructuralMaterial(n, d)
 {
-    nUnits = 0;
-    relMatAge = 0.0;
-    linearElasticMaterial = NULL;
-    EparValTime = -1.0;
 }
 
 
@@ -706,15 +701,8 @@ RheoChainMaterialStatus :: RheoChainMaterialStatus(GaussPoint *g, int nunits) :
     StructuralMaterialStatus(g),
     nUnits(nunits),
     hiddenVars(nUnits),
-    tempHiddenVars(nUnits),
-    shrinkageStrain()
+    tempHiddenVars(nUnits)
 {
-
-
-#ifdef keep_track_of_strains
-    thermalStrain = 0.;
-    tempThermalStrain = 0.;
-#endif
 }
 
 

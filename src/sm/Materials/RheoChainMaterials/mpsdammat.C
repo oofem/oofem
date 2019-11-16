@@ -52,25 +52,12 @@ REGISTER_Material(MPSDamMaterial);
 
 
 MPSDamMaterialStatus :: MPSDamMaterialStatus(GaussPoint *g, int nunits) :
-    MPSMaterialStatus(g, nunits), effectiveStressVector(), tempEffectiveStressVector()
+    MPSMaterialStatus(g, nunits),
+    crackVector(3)
 {
-    kappa = tempKappa = 0.0;
-    damage = tempDamage = 0.0;
-    charLength = 0.0;
-    crackVector.resize(3);
-    crackVector.zero();
-
-    var_e0 = var_gf = 0.;
-
     int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( g->giveMaterialMode() );
     effectiveStressVector.resize(rsize);
-    effectiveStressVector.zero();
     tempEffectiveStressVector = effectiveStressVector;
-
-#ifdef supplementary_info
-    crackWidth = 0.;
-    residTensileStrength = 0.;
-#endif
 }
 
 
@@ -204,19 +191,7 @@ MPSDamMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
 
 MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
-
-{
-    maxOmega = 0.999999;
-
-    softType = ST_Exponential_Cohesive_Crack;
-    ecsMethod = ECSM_Projection;
-    //    const_e0 = 0.;
-    const_gf = 0.;
-    checkSnapBack = 1; //snapback check by default
-
-    E = -1.;
-
-}
+{}
 
 
 bool

@@ -57,7 +57,7 @@ class Domain;
 class J2MPlasticMaterial : public MPlasticMaterial
 {
 protected:
-    int kinematicHardeningFlag, isotropicHardeningFlag;
+    int kinematicHardeningFlag = 0, isotropicHardeningFlag;
     double kinematicModuli, isotropicModuli;
     double k;
 

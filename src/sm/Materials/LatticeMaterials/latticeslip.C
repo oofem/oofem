@@ -259,11 +259,10 @@ LatticeSlip :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) cons
 }
 
 void
-LatticeSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "plasticStrain %.8e, dissipation %f, deltaDissipation %f, crackFlag %d\n", this->plasticStrain.at(1), this->dissipation, this->deltaDissipation, this->crackFlag);
-    return;
 }
 
 double

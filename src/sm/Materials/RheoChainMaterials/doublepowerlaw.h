@@ -54,10 +54,10 @@ namespace oofem {
 class DoublePowerLawMaterial : public MaxwellChainMaterial
 {
 protected:
-    double E28; ///< Young modulus at age of 28 days [MPa].
-    double fi1; ///< Basic creep coefficient.
-    double m, n;
-    double alpha;
+    double E28 = 0.; ///< Young modulus at age of 28 days [MPa].
+    double fi1 = 0.; ///< Basic creep coefficient.
+    double m = 0., n = 0.;
+    double alpha = 0.;
 
 public:
     DoublePowerLawMaterial(int n, Domain *d) : MaxwellChainMaterial(n, d) { }

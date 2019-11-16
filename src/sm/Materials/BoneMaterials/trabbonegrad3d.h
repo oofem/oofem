@@ -55,7 +55,7 @@ protected:
     /// Equivalent strain for avaraging
     double nlKappa = 0.;
     /// Reference to the basic elastic material
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
 
 public:
     TrabBoneGrad3DStatus(GaussPoint *g);
