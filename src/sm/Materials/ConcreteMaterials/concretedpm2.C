@@ -52,44 +52,9 @@ namespace oofem {
 REGISTER_Material(ConcreteDPM2);
 
 ConcreteDPM2Status :: ConcreteDPM2Status(GaussPoint *gp) :
-    StructuralMaterialStatus(gp),
-    reducedStrain(),
-    tempReducedStrain(),
-    plasticStrain(),
-    tempPlasticStrain()
+    StructuralMaterialStatus(gp)
 {
-    kappaP = tempKappaP = 0.;
-
-    equivStrain = tempEquivStrain = 0.;
-    equivStrainTension = tempEquivStrainTension = 0.;
-    equivStrainCompression = tempEquivStrainCompression = 0;
-
-    kappaDTension = tempKappaDTension = 0.;
-    kappaDCompression = tempKappaDCompression = 0.;
-
-    kappaDTensionOne = tempKappaDTensionOne = 0.;
-    kappaDCompressionOne = tempKappaDCompressionOne = 0.;
-    kappaDTensionTwo = tempKappaDTensionTwo = 0.;
-    kappaDCompressionTwo = tempKappaDCompressionTwo = 0.;
-
-    alpha = tempAlpha = 0.;
-
-    damageTension = tempDamageTension = 0.;
-    damageCompression = tempDamageCompression = 0.;
-
-    //    deltaLambda = 0.;
-    state_flag = temp_state_flag = ConcreteDPM2Status :: ConcreteDPM2_Elastic;
-    rateFactor = 1.;
-    rateStrain = tempRateStrain = 0.;
-
-#ifdef keep_track_of_dissipated_energy
-    stressWork = tempStressWork = 0.0;
-    dissWork = tempDissWork = 0.0;
-#endif
 }
-
-ConcreteDPM2Status :: ~ConcreteDPM2Status()
-{ }
 
 void
 ConcreteDPM2Status :: initTempStatus()
