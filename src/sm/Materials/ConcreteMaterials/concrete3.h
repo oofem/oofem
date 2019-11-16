@@ -59,7 +59,7 @@ class Concrete3 : public RCM2Material
 
 private:
     //double shearRetFactor; // shearRetentionFactor
-    Concrete3_softeningMode softeningMode;
+    Concrete3_softeningMode softeningMode = linearSoftening;
 
 public:
     Concrete3(int n, Domain * d);

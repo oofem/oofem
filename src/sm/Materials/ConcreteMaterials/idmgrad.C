@@ -50,7 +50,9 @@
 namespace oofem {
 REGISTER_Material(IsotropicGradientDamageMaterial);
 
-IsotropicGradientDamageMaterial :: IsotropicGradientDamageMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), GradientDamageMaterialExtensionInterface(d)
+IsotropicGradientDamageMaterial :: IsotropicGradientDamageMaterial(int n, Domain *d) :
+    IsotropicDamageMaterial1(n, d),
+    GradientDamageMaterialExtensionInterface(d)
 {}
 
 

@@ -1245,10 +1245,8 @@ Concrete2 :: CreateStatus(GaussPoint *gp) const
 
 
 Concrete2MaterialStatus :: Concrete2MaterialStatus(GaussPoint *g) :
-    StructuralMaterialStatus(g), plasticStrainVector(), plasticStrainIncrementVector()
+    StructuralMaterialStatus(g)
 {
-    SCCM = EPM = E0PM = SRF = SEZ = 0.0;
-    SCTM = -1.0;     // init status if SCTM < 0.;
 }
 
 

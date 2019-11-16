@@ -82,11 +82,11 @@ protected:
     FloatArray tempStrainSpaceHardeningVarsVector;
 
     /// Yield function status indicator.
-    int state_flag;
-    int temp_state_flag;
+    state_flag_values state_flag = MPlasticMaterial2Status :: PM_Elastic;
+    state_flag_values temp_state_flag = MPlasticMaterial2Status :: PM_Elastic;
 
     /// Isotropic damage variables
-    double damage, tempDamage;
+    double damage = 0., tempDamage = 0.;
 
     /// Consistency parameter values (needed for algorithmic stiffness).
     FloatArray gamma, tempGamma;
@@ -95,7 +95,6 @@ protected:
 
 public:
     MPlasticMaterial2Status(GaussPoint * g, int statusSize);
-    virtual ~MPlasticMaterial2Status();
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -123,9 +122,9 @@ public:
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
 
-    int giveStateFlag() { return state_flag; }
-    int giveTempStateFlag() { return temp_state_flag; }
-    void letTempStateFlagBe(int v) { temp_state_flag = v; }
+    state_flag_values giveStateFlag() { return state_flag; }
+    state_flag_values giveTempStateFlag() { return temp_state_flag; }
+    void letTempStateFlagBe(state_flag_values v) { temp_state_flag = v; }
 
     const IntArray &giveTempActiveConditionMap() { return tempActiveConditionMap; }
     void setTempActiveConditionMap(IntArray v) { tempActiveConditionMap = std :: move(v); }

@@ -93,14 +93,14 @@ protected:
     FloatArray plasticStrainVector; // full form
     FloatArray plasticStrainIncrementVector;
 
-    double tempSCCM, tempEPM, tempSCTM, tempE0PM, tempSRF, tempSEZ;
+    double tempSCCM = 0., tempEPM = 0., tempSCTM = 0., tempE0PM = 0., tempSRF = 0., tempSEZ = 0.;
 
-    double SCCM; ///< Current pressure strength.
-    double EPM;  ///< Max. eff. plastic strain.
-    double SCTM; ///< Current tension strength.
-    double E0PM; ///< Max. vol. plastic strain.
-    double SRF;  ///< current stress in stirrups.
-    double SEZ;  ///< Current strain in transverse (z) direction.
+    double SCCM = 0.; ///< Current pressure strength.
+    double EPM = 0.;  ///< Max. eff. plastic strain.
+    double SCTM = -1.; ///< Current tension strength.
+    double E0PM = 0.; ///< Max. vol. plastic strain.
+    double SRF = 0.;  ///< current stress in stirrups.
+    double SEZ = 0.;  ///< Current strain in transverse (z) direction.
 
 public:
     Concrete2MaterialStatus(GaussPoint * g);

@@ -53,8 +53,7 @@ Concrete3 :: CreateStatus(GaussPoint *gp) const
  */
 {
     // double Ee, Gf, Et, Etp, Ft, Le, minEffStrainForFullyOpenCrack;
-    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( RCM2Material :: CreateStatus(gp) );
-    return status;
+    return RCM2Material :: CreateStatus(gp);
 }
 
 

@@ -50,11 +50,6 @@ CompoDamageMat :: CompoDamageMat(int n, Domain *d) : StructuralMaterial(n, d)
 }
 
 
-CompoDamageMat :: ~CompoDamageMat()
-{
-}
-
-
 void CompoDamageMat :: initializeFrom(InputRecord &ir)
 {
     Material :: initializeFrom(ir);
@@ -578,13 +573,7 @@ CompoDamageMatStatus :: CompoDamageMatStatus(GaussPoint *g) : StructuralMaterial
 
     this->elemCharLength.resize(3);
     this->elemCharLength.zero();
-
-    this->Iteration = 0;
 }
-
-// destructor
-CompoDamageMatStatus :: ~CompoDamageMatStatus()
-{ }
 
 
 void CompoDamageMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const

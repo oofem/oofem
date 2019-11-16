@@ -151,7 +151,7 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
 
 
     // update state flag
-    int newState, state = status->giveStateFlag();
+    MPlasticMaterial2Status :: state_flag_values newState, state = status->giveStateFlag();
     bool yieldFlag = false;
     for ( int i = 1; i <= nsurf; i++ ) {
         if ( gamma.at(i) > 0. ) {
@@ -2073,17 +2073,9 @@ MPlasticMaterial2 :: getNewPopulation(IntArray &result, IntArray &candidateMask,
 
 MPlasticMaterial2Status :: MPlasticMaterial2Status(GaussPoint *g, int statusSize) :
     StructuralMaterialStatus(g), plasticStrainVector(), tempPlasticStrainVector(),
-    strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize),
-    state_flag(MPlasticMaterial2Status :: PM_Elastic),
-    temp_state_flag(MPlasticMaterial2Status :: PM_Elastic),
-    damage(0.),
-    tempDamage(0.),
-    gamma(),
-    tempGamma()
+    strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize)
 { }
 
-MPlasticMaterial2Status :: ~MPlasticMaterial2Status()
-{ }
 
 void
 MPlasticMaterial2Status :: printOutputAt(FILE *file, TimeStep *tStep) const
@@ -2202,9 +2194,11 @@ MPlasticMaterial2Status :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    if ( !stream.read(state_flag) ) {
+    int val;
+    if ( !stream.read(val) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+    state_flag = (state_flag_values)val;
 
     if ( ( iores = gamma.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);

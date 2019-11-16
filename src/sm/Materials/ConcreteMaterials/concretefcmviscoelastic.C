@@ -43,11 +43,7 @@ namespace oofem {
 REGISTER_Material(ConcreteFCMViscoElastic);
 
 ConcreteFCMViscoElastic :: ConcreteFCMViscoElastic(int n, Domain *d) : ConcreteFCM(n, d)
-{
-  //    viscoElasticMaterial = new RheoChainMaterial(n, d);
-
-  viscoMat = 0;
-}
+{}
 
   
 void
@@ -416,7 +412,7 @@ ConcreteFCMViscoElastic :: giveEquivalentTime(GaussPoint *gp, TimeStep *tStep)
 
 ConcreteFCMViscoElasticStatus :: ConcreteFCMViscoElasticStatus(GaussPoint *gp) :
   ConcreteFCMStatus(gp),
-  slaveGpVisco( new GaussPoint( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
+  slaveGpVisco(std::make_unique<GaussPoint>( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
 {
 
 }

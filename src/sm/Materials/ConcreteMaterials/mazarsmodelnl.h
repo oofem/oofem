@@ -54,7 +54,7 @@ class MazarsNLMaterialStatus : public MazarsMaterialStatus, public StructuralNon
 {
 protected:
     /// Equivalent strain for averaging.
-    double localEquivalentStrainForAverage;
+    double localEquivalentStrainForAverage = 0.;
 
 public:
     /// Constructor
@@ -98,7 +98,7 @@ class MazarsNLMaterial : public MazarsMaterial, public StructuralNonlocalMateria
 {
 protected:
     /// Interaction radius, related to the nonlocal characteristic length of material.
-    double R;
+    double R = 0.;
 
 public:
     /// Constructor

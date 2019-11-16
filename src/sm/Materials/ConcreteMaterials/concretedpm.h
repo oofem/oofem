@@ -96,53 +96,50 @@ protected:
     FloatArray plasticStrain;
     FloatArray tempPlasticStrain;
 
-    double tempVolumetricPlasticStrain;
+    double tempVolumetricPlasticStrain = 0.;
 
-    double dFDKappa;
-    double deltaLambda;
+    double dFDKappa = 0.;
+    double deltaLambda = 0.;
     //@}
 
     /// @name Hardening variable
     //@{
-    double kappaP;
-    double tempKappaP;
+    double kappaP = 0.;
+    double tempKappaP = 0.;
     //@}
 
-    double le;
+    double le = 0.;
 
     /// @name History variables of the damage model
     //@{
-    double equivStrain;
-    double tempEquivStrain;
+    double equivStrain = 0.;
+    double tempEquivStrain = 0.;
 
-    double kappaD;
-    double tempKappaD;
+    double kappaD = 0.;
+    double tempKappaD = 0.;
 
-    double damage;
-    double tempDamage;
+    double damage = 0.;
+    double tempDamage = 0.;
 
-    double deltaEquivStrain;
+    double deltaEquivStrain = 0.;
     //@}
 
     /// @name Indicates the state (i.e. elastic, unloading, plastic, damage, vertex) of the Gauss point
     //@{
-    int state_flag;
-    int temp_state_flag;
+    int state_flag = ConcreteDPM_Elastic;
+    int temp_state_flag = ConcreteDPM_Elastic;
     //@}
 
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     ///  @name History variable of the modified size-dependent adjustment
     /// (indicating value of omega*ft/E+kappaD at the onset of localization)
-    double epsloc;
-    double tempEpsloc;
+    double epsloc = -1.;
+    double tempEpsloc = -1.;
 #endif
 
 public:
     /// Constructor.
     ConcreteDPMStatus(GaussPoint * gp);
-
-    /// Destructor.
-    virtual ~ConcreteDPMStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;

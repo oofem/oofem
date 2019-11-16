@@ -69,8 +69,6 @@ class CompoDamageMatStatus : public StructuralMaterialStatus
 public:
     /// Constructor
     CompoDamageMatStatus(GaussPoint * g);
-    /// Destructor
-    virtual ~CompoDamageMatStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -96,7 +94,7 @@ public:
     FloatArray omega;
 
     /// Iteration in the time step
-    int Iteration;
+    int Iteration = 0;
 
     /// Stress at which damage starts. For uniaxial loading is equal to given maximum stress in the input. The stress is linearly interpolated between increments at IP [6 tension, 6 compression]
     FloatArray initDamageStress;
@@ -141,8 +139,6 @@ class CompoDamageMat : public StructuralMaterial
 public:
     /// Constructor
     CompoDamageMat(int n, Domain * d);
-    /// Destructor
-    virtual ~CompoDamageMat();
 
     const char *giveClassName() const override { return "CompositeDamageMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_CompoDamageMat_Name; }
@@ -172,7 +168,7 @@ public:
      * This is important for stress evaluation which is unequilibrated in the beginning.
      * Variables strainAtMaxStress, initDamageStress, maxStrainAtZeroStress are evaluated afterIter.
      */
-    int afterIter;
+    int afterIter = 0;
 
 protected:
     /**

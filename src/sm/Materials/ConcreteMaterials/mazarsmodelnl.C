@@ -44,13 +44,7 @@ namespace oofem {
 REGISTER_Material(MazarsNLMaterial);
 
 MazarsNLMaterial :: MazarsNLMaterial(int n, Domain *d) : MazarsMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
-    //
-    // constructor
-    //
-{
-    //linearElasticMaterial = new IsotropicLinearElasticMaterial (n,d);
-    R = 0.;
-}
+{}
 
 
 Interface *
@@ -165,9 +159,7 @@ MazarsNLMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gau
 
 MazarsNLMaterialStatus :: MazarsNLMaterialStatus(GaussPoint *g) :
     MazarsMaterialStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
-{
-    localEquivalentStrainForAverage = 0.0;
-}
+{}
 
 
 void
