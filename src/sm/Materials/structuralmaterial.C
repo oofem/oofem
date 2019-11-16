@@ -1463,6 +1463,70 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
     }
 }
 
+
+FloatArrayF<3>
+StructuralMaterial :: computePrincipalValues(const FloatMatrixF<3,3> &s)
+{
+    double I1 = s(0,0) + s(1,1) + s(2,2);
+    double I2 = s(0,0) * s(1,1) + s(1,1) * s(2,2) + s(2,2) * s(0,0) -
+                ( s(0,1) * s(1,0) + s(0,2) * s(2,0) + s(1,2) * s(2,1) );
+    double I3 = s(0,0) * s(1,1) * s(2,2) + s(0,1) * s(0,2) * s(1,2) + s(1,0) * s(2,0) * s(2,1) -
+                ( s(0,0) * s(1,2) * s(2,1) + s(1,1) * s(0,2) * s(2,0) + s(2,2) * s(0,1) * s(1,0) );
+
+    return computePrincipalValues(I1, I2, I3);
+}
+
+
+FloatArrayF<3>
+StructuralMaterial :: computePrincipalValues(double I1, double I2, double I3)
+{
+    double CUBIC_ZERO = 1e-100;
+    double q = ( I1 * I1 - 3.0 * I2 ) / 9.0;
+    double r = ( - 2.0 * I1 * I1 * I1 + 9.0 * I1 * I2 - 27.0 * I3 ) / 54.0;
+    double a3 = I1 / 3.0;
+
+    //Hydrostatic case, in such a case q=r=0
+    if ( (fabs(q) < CUBIC_ZERO) && ( fabs(r) < CUBIC_ZERO ) ) {
+        return {a3, a3, a3};
+    }
+    
+    // three real roots (clamping to prevent rounding errors
+    double help = clamp(r / sqrt(q * q * q), -1., 1.);
+    double phi = acos(help) / 3.0;
+    double p = 2.0 * sqrt(q);
+
+    FloatArrayF<3> v = {
+        a3 - p * cos(phi - 2. * M_PI / 3.),
+        a3 - p * cos(phi ),
+        a3 - p * cos(phi + 2. * M_PI / 3.),
+    };
+    if (v[0] > v[1]) std::swap(v[0], v[1]);
+    if (v[1] > v[2]) std::swap(v[1], v[2]);
+    if (v[0] > v[1]) std::swap(v[0], v[1]);
+    return v;
+}
+
+
+std::pair<FloatArrayF<3>, FloatMatrixF<3,3>>
+StructuralMaterial :: computePrincipalValDir(const FloatMatrixF<3,3> &s)
+{
+    //auto [eigVal, eigVec] = eig(s, 10);
+    auto tmp = eig(s, 10);
+    // Sort by largest eigenvalue
+    for ( int ii = 0; ii < 2; ii++ ) {
+        for ( int jj = 0; jj < 2; jj++ ) {
+            if ( tmp.first[jj + 1] > tmp.first[jj] ) {
+                std::swap(tmp.first[jj], tmp.first[jj + 1]);
+                for ( int kk = 0; kk < 3; kk++ ) {
+                    std::swap(tmp.second(kk, jj), tmp.second(kk, jj + 1));
+                }
+            }
+        }
+    }
+    return tmp;
+}
+
+
 void
 StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s, stressStrainPrincMode mode)
 //
@@ -2050,8 +2114,8 @@ StructuralMaterial :: transformStressVectorTo(const FloatMatrixF<3,3> &base,
 
 
 void
-StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *pDir,
-                                                FloatMatrix *toPDir)
+StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray &pVal, FloatMatrix &pDir,
+                                                const FloatMatrix &toPDir)
 //
 // this method sorts newly computed principal values (pVal) and
 // corresponding principal directions (pDir) to be closed to
@@ -2061,37 +2125,20 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 // and normalized.
 //
 {
-    int maxJ = 0, size;
-    double cosine, maxCosine, swap;
-
-#ifdef DEBUG
-    if ( ( !pDir->isSquare() ) || ( !toPDir->isSquare() ) ) {
-        OOFEM_SERROR("Not square matrix");
-    }
-
-    if ( pDir->giveNumberOfRows() != toPDir->giveNumberOfRows() ) {
-        OOFEM_SERROR("Incompatible matrices");
-    }
-
-    if ( pDir->giveNumberOfRows() != pVal->giveSize() ) {
-        OOFEM_SERROR("Incompatible pVal Array size");
-    }
-
-#endif
 
     //
     // compute cosine matrix, where member i,j is cosine of angle
     // between toPDir i th eigen vector and j th pDir eigen vector
     //
     // sort pVal and pDir
-    size = pDir->giveNumberOfRows();
-    for ( int i = 1; i <= size - 1; i++ ) {
+    int maxJ = 0;
+    for ( int i = 1; i <= 3 - 1; i++ ) {
         // find closest pDir vector to toPDir i-th vector
-        maxCosine = 0.0;
-        for ( int j = i; j <= size; j++ ) {
-            cosine = 0.;
-            for ( int k = 1; k <= size; k++ ) {
-                cosine += toPDir->at(k, i) * pDir->at(k, j);
+        double maxCosine = 0.0;
+        for ( int j = i; j <= 3; j++ ) {
+            double cosine = 0.;
+            for ( int k = 1; k <= 3; k++ ) {
+                cosine += toPDir.at(k, i) * pDir.at(k, j);
             }
 
             cosine = fabs(cosine);
@@ -2104,13 +2151,13 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
         // swap entries
         if ( maxJ != i ) {
             // swap eigenVectors and values
-            swap = pVal->at(maxJ);
-            pVal->at(maxJ) = pVal->at(i);
-            pVal->at(i) = swap;
-            for ( int k = 1; k <= size; k++ ) {
-                swap = pDir->at(k, maxJ);
-                pDir->at(k, maxJ) = pDir->at(k, i);
-                pDir->at(k, i) = swap;
+            double swap = pVal.at(maxJ);
+            pVal.at(maxJ) = pVal.at(i);
+            pVal.at(i) = swap;
+            for ( int k = 1; k <= 3; k++ ) {
+                double swap = pDir.at(k, maxJ);
+                pDir.at(k, maxJ) = pDir.at(k, i);
+                pDir.at(k, i) = swap;
             }
         }
     }

@@ -1033,21 +1033,12 @@ double rcond(const FloatMatrixF<N,N> &mat, int p=1)
 }
 
 /// Computes the determinant
-template<std::size_t N>
-double det(const FloatMatrixF<N,N> &mat)
-{
-    OOFEM_ERROR("TODO");
-}
-
-/// Computes the determinant
-template<>
 inline double det(const FloatMatrixF<2,2> &mat)
 {
     return mat(0, 0) * mat(1, 1) - mat(0, 1) * mat(1, 0);
 }
 
 /// Computes the determinant
-template<>
 inline double det(const FloatMatrixF<3,3> &mat)
 {
     return mat(0, 0) * mat(1, 1) * mat(2, 2) + mat(0, 1) * mat(1, 2) * mat(2, 0) +

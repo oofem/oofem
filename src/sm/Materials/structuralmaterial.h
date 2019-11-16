@@ -38,6 +38,9 @@
 #include "material.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
+#include "mathfem.h"
 #include "matconst.h"
 #include "matstatus.h"
 #include "../stressstrainprincmode.h"
@@ -295,14 +298,36 @@ public:
      */
     static void computePrincipalValues(FloatArray &answer, const FloatArray &s, stressStrainPrincMode mode);
     /**
+     * Compute principal values of a stress/strain matrix. Matrix must be symmetric.
+     * @param answer Computed principal values.
+     * @param s Symmetric matrix.
+     * @return Sorted eigenvalues.
+     */
+    static FloatArrayF<3> computePrincipalValues(const FloatMatrixF<3,3> &s);
+    
+    /**
+     * Compute principal values from invariants.
+     * @param I1 First invariant
+     * @param I2 Second invariant
+     * @param I3 Third invariant
+     * @return Sorted list of principal values.
+     */
+    static FloatArrayF<3> computePrincipalValues(double I1, double I2, double I3);
+    /**
      * Computes principal values and directions of stress or strain vector.
      * @param answer Computed principal values.
      * @param dir Principal directions (stored column wise).
      * @param s Stress/strain vector.
      * @param mode Stress strain principal mode.
      */
-    static void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s,
-                                       stressStrainPrincMode mode);
+    static void computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s, stressStrainPrincMode mode);
+    /**
+     * Computes principal values and directions of stress or strain matrix (must be symmetric).
+     * @param dir Principal directions (stored column wise).
+     * @param s Stress/strain matrix.
+     * @return Computed principal values.
+     */
+    static std::pair<FloatArrayF<3>, FloatMatrixF<3,3>> computePrincipalValDir(const FloatMatrixF<3,3> &s);
 
     /**
      * Computes split of receiver into deviatoric and volumetric part.
@@ -698,7 +723,7 @@ public:
      * @param pDir New eigenvectors.
      * @param toPDir Old eigenvector.
      */
-    static void sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *pDir, FloatMatrix *toPDir);
+    static void sortPrincDirAndValCloseTo(FloatArray &pVal, FloatMatrix &pDir, const FloatMatrix &toPDir);
 
     friend class CrossSection;
     friend class StructuralCrossSection;
