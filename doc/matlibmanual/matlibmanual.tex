@@ -4021,7 +4021,7 @@ size in the direction of the body diagonal can be 173 mm.
 
 This model is an extension of the ConcreteDPM presented in \ref{sec:cdpm}.
 CDPM2 has been developed by Grassl, Xenos, Nystr\"{o}m, Rempling and Gylltoft for modelling the failure of concrete for both static and dynamic loading. It is is described in detail in \cite{GraXenNys13}.
-The main differences between CDPM2 and ConcreteDPM are that in CDPM2 the plasticity part exhibits hardening once damage is active. Furthermore, two independent damage parameters describing tensile and compressive damage are introduced.
+The main differences between CDPM2 and ConcreteDPM are that in CDPM2 the plasticity part exhibits hardening once damage is active. Furthermore, two independent damage parameters, which describe tensile and compressive damage, are introduced.
 The parameters of CDPM2 are summarised in Tab.~\ref{cdpm2_table}
 
 The stress for the anisotropic damage plasticity model (ISOFLAG=0) is defined as
@@ -4138,8 +4138,6 @@ Concrete is strongly rate dependent. If the loading rate is increased, the tensi
 \end{equation}
 where $X$ is the continuous compression measure (= 1 means only compression, = 0 means only tension).
 
-The functions $\alpha_{\rm rt}$ and $\alpha_{\rm rc}$ depend on the input parameter $f_{\rm c0}$. A recommended value for $f_{\rm c0}$ is 10~MPa.
-
 \begin{table}[!htb]
 %\begin{center}
 \begin{mmt}
@@ -4174,8 +4172,12 @@ Parameters &- \param{d} material density\\
 &- \param{dilation} dilation factor, optional, default value 0.85\\
 &- \param{hp} hardening modulus, optional, default value 0.5\\
 &- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
-&- \param{rateflag} flag which allows for the consideration of the effect of strain rates if set to 1, default value 0\\
-&- \param{fcZero} Input parameter for modelling the effect of strain value. Recommended value $10$~MPa. Only if rateflag=1, \param{fcZero} has to be specified.\\
+&- \param{rateflag} flag which allows for the consideration of the effect of strain rates (using CEB-FIP Model code 2010) if set to 1, 2 or 3. Default value 0 which corresponds to no strain rate effect.\\
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[1 -] CEB-Model code 2010 rate factor for strength and square rate factor for fracture energy  
+\item[2 -] CEB-Model code 2010 rate factor for strength and fracture energy
+\item[3 -] CEB-Model code 2010 rate factor for strength and no rate factor for fracture energy
+\end{itemize}\\
 &- \param{yieldtol} tolerance for the implicit stress return algorithm, optional, default value $1 \times 10^{-6}$\\
 &- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
 Supported modes& 3dMat, PlaneStrain\\
@@ -4185,8 +4187,6 @@ Supported modes& 3dMat, PlaneStrain\\
 \label{cdpm2_table}
 %\end{center}
 \end{table}
-
-
 
 
 \subsubsection{Fixed crack model for concrete - ConcreteFCM}
@@ -5302,7 +5302,9 @@ is not the isotherm itself but its derivative---the moisture capacity):
 
 \item
 {\bf Linear} isotherm ($isothermType=0$) is characterized only by its
-slope given by parameter $moistureCapacity$.
+slope given by parameter \emph{capa}. The isotherm can be
+shifted vertically, this is done by \emph{isooffset} which has a
+meaning of moisture content at zero relative humidity.
 
 \item
 {\bf Piecewise linear} isotherm ($isothermType=1$) is defined by two 
@@ -5359,7 +5361,18 @@ condensation. Empirical formulae for estimation of the parameters can
 be found in \cite{Xi}. Note that these formulae hold quite accurately
 for cement paste only; a reduction of the moisture ratio is necessary 
 if the isotherm
-should be applied for concrete. 
+should be applied for concrete.
+
+\item
+{\bf Bilinear} isotherm ($isothermType=6$) is defined by its
+moisture capacity \emph{capa} for relative humidity less than
+\emph{hx}. Parameter \emph{wf} defines moisture content at full
+saturation, $h = 1$. Convergence is substantially improved by a smooth transition on
+interval $(hx-dx, hx+dx)$.
+Similarly to the linear isotherm the moisture content can be
+adjusted by parameter \emph{isooffset}. 
+
+
 \end{enumerate}
 
 The present implementation covers three functions for 
@@ -5416,6 +5429,7 @@ Record Format & \descitem{NlIsoMoistureMat} \elemparam{num}{in}
 \optelemparam{dd}{rn} \optelemparam{wf}{rn} \optelemparam{b}{rn}
 \optelemparam{uh}{rn} \optelemparam{A}{rn} \optelemparam{nn}{rn}
 \optelemparam{c}{rn} \optelemparam{k}{rn} \optelemparam{Vm}{rn}
+\optelemparam{hx}{rn} \optelemparam{dx}{rn}
 \optelemparam{perm\_h}{ra} \optelemparam{perm\_c(h)}{ra}
 \optelemparam{c1}{rn} \optelemparam{n}{rn} \optelemparam{alpha0}{rn}
 \optelemparam{hc}{rn} \optelemparam{alphah}{rn}
@@ -5424,18 +5438,21 @@ Record Format & \descitem{NlIsoMoistureMat} \elemparam{num}{in}
 \\
 Parameters &- \param{num} material model number \\
 &- \param{d} material density \\
-&- \param{isothermType} isotherm function as listed above (0, 1, ...5)
+&- \param{isothermType} isotherm function as listed above (0, 1, ...6)
 \\
 &- \param{permeabilityType} moisture permeability function as listed
 above (0, 1, 2) \\
 &- \param{rhodry} [kg/m$^3$] density of dry material (for $isothermType=4$ and 5) \\
-&- \param{capa} [kg/m$^3$] moisture capacity (for $isothermType=0$) \\
+&- \param{capa} [kg/m$^3$] moisture capacity (for $isothermType=0$ and
+6) \\
+&- \param{isooffset} [kg/m$^3$] moisture capacity at zero relative
+humidity (for $isothermType=0$ and 6) \\
 &- \param{iso\_h} [-] humidity array (for $isothermType=1$) \\
 &- \param{iso\_w(h)} [kg/m$^3$] moisture content array (for
 $isothermType=1$) \\
 &- \param{dd} [-] parameter (for $isothermType=2$)\\
 &- \param{wf} [kg/m$^3$] is the moisture content at free saturation
-(for $isothermType=3$) \\
+(for $isothermType=3$ and 6) \\
 &- \param{b} [-] parameter (for $isothermType=3$) \\
 &- \param{uh} [kg/kg] maximum hygroscopically
 bound water by adsorption (for $isothermType=4$) \\
@@ -5444,7 +5461,8 @@ bound water by adsorption (for $isothermType=4$) \\
 &- \param{Vm} (for $isothermType=5$) \\
 &- \param{k} (for $isothermType=5$) \\
 &- \param{C} (for $isothermType=5$) \\
-&- \param{perm\_h} [-] humidity array (for $permeabilityType=0$) \\
+&- \param{hx} [-] transition relative humidity (for $isothermType=6$) \\
+&- \param{dx} [-] length of the smooth transition (for $isothermType=6$) \\
 &- \param{perm\_c(h)} [kg m$^{-1}$ s$^{-1}$] moisture permeability
 array (for $permeabilityType=0$) \\
 &- \param{c1} [kg m$^{-1}$ s$^{-1}$] moisture permeability at full

@@ -50,7 +50,7 @@
 #define _IFT_NlIsoMoistureMaterial_capa "capa"
 #define _IFT_NlIsoMoistureMaterial_hx "hx"
 #define _IFT_NlIsoMoistureMaterial_dx "dx"
-#define _IFT_NlIsoMoistureMaterial_iso_offset "isoOffset"
+#define _IFT_NlIsoMoistureMaterial_iso_offset "isooffset"
 #define _IFT_NlIsoMoistureMaterial_iso_h "iso_h"
 #define _IFT_NlIsoMoistureMaterial_iso_wh "iso_w(h)"
 #define _IFT_NlIsoMoistureMaterial_dd "dd"

@@ -430,6 +430,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(const FloatArrayF<1> &reducedvF
         tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
+	increment_vF.negated();
         vF.assemble(increment_vF, P_control);
     }
 

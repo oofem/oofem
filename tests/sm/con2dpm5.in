@@ -1,0 +1,21 @@
+con2dpm5.out
+Test of 1D CDPM2 on a 1D truss element
+NonLinearStatic nmsteps 1 nsteps 50 contextOutputStep 10000000 nmodules 0
+nsteps 3 rtolv 1.e-3 controllmode 0 stepLength 5.e-5 minsteplength 1.e-5 Psi 0. hpcmode 2  hpc 2 2 1 hpcw 1 1. reqIterations 100000 stiffMode 1 maxiter 100000 donotfixload 
+domain 1DTruss
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0
+node 1 coords 3 0.0 0.0 0.0 bc 1 1
+node 2 coords 3 0.25000 0.0 0.0 load 1 2 
+truss1d 1 nodes 2 1 2 mat 1 crossSect 1 
+SimpleCS 1 thick 1.0 width 0.10
+con2dpm 1 d 0 E 20.e9 n 0.2 talpha 0. wf 800.e-6  fc 35e6 ft 2.e6 hp 0.025 yieldtol 1.e-10 asoft 7. stype 2 isoflag 1
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+NodalLoad 2 loadTimeFunction 1 components 1 1.0
+ConstantFunction 1 f(t) 1.0
+###### Used for Extractor
+###
+#%BEGIN_CHECK% 
+#NODE number 2 dof 1 unknown d
+#LOADLEVEL
+#%END_CHECK%

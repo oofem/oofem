@@ -72,6 +72,8 @@ NlIsoMoistureMaterial :: initializeFrom(InputRecord &ir)
 
     if ( this->Isotherm == linear ) { // linear isotherm = type 0
         IR_GIVE_FIELD(ir, moistureCapacity, _IFT_NlIsoMoistureMaterial_capa);
+	this->iso_offset = 0.;
+        IR_GIVE_OPTIONAL_FIELD ( ir, iso_offset, _IFT_NlIsoMoistureMaterial_iso_offset );	
     } else if ( this->Isotherm == multilinear ) { // multilinear isotherm = type 1
         IR_GIVE_FIELD(ir, iso_h, _IFT_NlIsoMoistureMaterial_iso_h);
         IR_GIVE_FIELD(ir, iso_wh, _IFT_NlIsoMoistureMaterial_iso_wh);
@@ -265,7 +267,7 @@ double
 NlIsoMoistureMaterial :: giveMoistureContent(double humidity) const
 {
     if ( this->Isotherm == linear ) {
-        return moistureCapacity*humidity;
+      return max(moistureCapacity*humidity + iso_offset, 0.);
     } else if ( this->Isotherm == multilinear ) {
         double tol = 1.e-10;
         for ( int i = 1; i <= iso_h.giveSize(); i++ ) {
@@ -289,7 +291,7 @@ NlIsoMoistureMaterial :: giveMoistureContent(double humidity) const
     } else if ( this->Isotherm == bilinear ) {
 
         if( humidity <= (hx-dx) ) {
-            return moistureCapacity*humidity + iso_offset;
+	  return max(moistureCapacity*humidity + iso_offset, 0.);
 
         } else if (humidity >= (hx + dx) ) {
             return hx*moistureCapacity + (humidity-hx)*capa2  + iso_offset;

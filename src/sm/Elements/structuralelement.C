@@ -143,13 +143,14 @@ void StructuralElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, B
         } else {
             ///@todo Support this...
             // transform from local boundary to element local c.s
-            /*if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
-             *  force.rotatedWith(T, 'n');
-             * }*/
-            // then to global c.s
-            if ( this->computeLoadGToLRotationMtrx(T) ) {
-                force.rotatedWith(T, 't');
+	    // uncommented since the other (now commented) approach did not work correctly
+            if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
+             force.rotatedWith(T, 'n');
             }
+            // then to global c.s
+            //if ( this->computeLoadGToLRotationMtrx(T) ) {
+            //    force.rotatedWith(T, 't');
+            //}
         }
 
         // Construct n-matrix
