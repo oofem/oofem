@@ -206,8 +206,8 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
         // keep old principal values
         status->letTempCrackDirsBe(crackDirs);
     } else {
-        this->sortPrincDirAndValCloseTo(& principalStrain,
-                                        & tempCrackDirs, & crackDirs);
+        this->sortPrincDirAndValCloseTo(principalStrain,
+                                        tempCrackDirs, crackDirs);
         status->letTempCrackDirsBe(tempCrackDirs);
     }
 
