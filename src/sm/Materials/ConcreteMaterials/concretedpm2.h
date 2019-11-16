@@ -106,79 +106,76 @@ protected:
 
     /// @name Hardening variable
     //@{
-    double kappaP;
-    double tempKappaP;
+    double kappaP = 0.;
+    double tempKappaP = 0.;
     //@}
 
-    double kappaPPeak;
+    double kappaPPeak = 0.;
 
-    double le;
+    double le = 0.;
 
-    double alpha;
-    double tempAlpha;
+    double alpha = 0.;
+    double tempAlpha = 0.;
 
-    double equivStrain;
-    double tempEquivStrain;
+    double equivStrain = 0.;
+    double tempEquivStrain = 0.;
 
-    double equivStrainTension;
-    double tempEquivStrainTension;
+    double equivStrainTension = 0.;
+    double tempEquivStrainTension = 0.;
 
-    double equivStrainCompression;
-    double tempEquivStrainCompression;
+    double equivStrainCompression = 0.;
+    double tempEquivStrainCompression = 0.;
 
-    double kappaDTension;
-    double tempKappaDTension;
+    double kappaDTension = 0.;
+    double tempKappaDTension = 0.;
 
-    double kappaDCompression;
-    double tempKappaDCompression;
+    double kappaDCompression = 0.;
+    double tempKappaDCompression = 0.;
 
-    double kappaDTensionOne;
-    double tempKappaDTensionOne;
+    double kappaDTensionOne = 0.;
+    double tempKappaDTensionOne = 0.;
 
-    double kappaDCompressionOne;
-    double tempKappaDCompressionOne;
+    double kappaDCompressionOne = 0.;
+    double tempKappaDCompressionOne = 0.;
 
-    double kappaDTensionTwo;
-    double tempKappaDTensionTwo;
+    double kappaDTensionTwo = 0.;
+    double tempKappaDTensionTwo = 0.;
 
-    double kappaDCompressionTwo;
-    double tempKappaDCompressionTwo;
+    double kappaDCompressionTwo = 0.;
+    double tempKappaDCompressionTwo = 0.;
 
-    double damageTension;
-    double tempDamageTension;
+    double damageTension = 0.;
+    double tempDamageTension = 0.;
 
-    double damageCompression;
-    double tempDamageCompression;
+    double damageCompression = 0.;
+    double tempDamageCompression = 0.;
 
-    double deltaEquivStrain;
+    double deltaEquivStrain = 0.;
 
-    double rateFactor;
-    double tempRateFactor;
+    double rateFactor = 1.;
+    double tempRateFactor = 0.;
 
     /// Strains that are used for calculation of strain rates
-    double rateStrain;
-    double tempRateStrain;
+    double rateStrain = 0.;
+    double tempRateStrain = 0.;
 
     /// Indicates the state (i.e. elastic, unloading, plastic, damage, vertex) of the Gauss point
-    int state_flag;
-    int temp_state_flag;
+    int state_flag = ConcreteDPM2Status :: ConcreteDPM2_Elastic;
+    int temp_state_flag = ConcreteDPM2Status :: ConcreteDPM2_Elastic;
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
-    double stressWork;
+    double stressWork = 0.;
     /// Non-equilibrated density of total work done by stresses on strain increments.
-    double tempStressWork;
+    double tempStressWork = 0.;
     /// Density of dissipated work.
-    double dissWork;
+    double dissWork = 0.;
     /// Non-equilibrated density of dissipated work.
-    double tempDissWork;
+    double tempDissWork = 0.;
 #endif
 
 public:
     /// Constructor
     ConcreteDPM2Status(GaussPoint *gp);
-
-    /// Destructor
-    virtual ~ConcreteDPM2Status();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
