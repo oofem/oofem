@@ -60,22 +60,8 @@ ConcreteDPMStatus :: ConcreteDPMStatus(GaussPoint *gp) :
     stressVector.resize(6);
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
-
-    kappaP = tempKappaP = 0.;
-    kappaD = tempKappaD = 0.;
-    damage = tempDamage = 0.;
-    equivStrain = tempEquivStrain = 0.;
-    deltaLambda = 0.;
-    state_flag = temp_state_flag = ConcreteDPMStatus :: ConcreteDPM_Elastic;
-#ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
-    epsloc = -1.; // negative value means that it has not been set yet
-    tempEpsloc = -1.0;
-#endif
-    le = 0.;
 }
 
-ConcreteDPMStatus :: ~ConcreteDPMStatus()
-{ }
 
 void
 ConcreteDPMStatus :: initTempStatus()

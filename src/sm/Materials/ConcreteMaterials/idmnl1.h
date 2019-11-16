@@ -56,7 +56,7 @@ class IDNLMaterialStatus : public IsotropicDamageMaterial1Status, public Structu
 {
 protected:
     /// Equivalent strain for averaging.
-    double localEquivalentStrainForAverage;
+    double localEquivalentStrainForAverage = 0.;
 
     /* // Variables used to track loading/reloading
      * public:

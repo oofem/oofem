@@ -63,9 +63,9 @@ protected:
     std :: unique_ptr< GaussPoint >slaveGpVisco;
   
     /// hydration-degree dependent tensile strength
-    double var_ft;
+    double var_ft = 0.;
     /// hydration-degree dependent fracture energy
-    double var_gf;
+    double var_gf = 0.;
   
 public:
     ConcreteFCMViscoElasticStatus(GaussPoint *g);
@@ -118,17 +118,17 @@ public:
 
 protected:
     /// number of the viscoelastic material
-    int viscoMat;
+    int viscoMat = 0;
 
-    bool fib;
-    double fib_s;
-    double fib_fcm28;
+    bool fib = false;
+    double fib_s = 0.;
+    double fib_fcm28 = 0.;
     /* scaling time factor, 1 day expressed in the time units of the analysis
      *  e.g. if the time runs in days it is 1, if in seconds it is 86400 */
-    double timeFactor;
+    double timeFactor = 0.;
     /* scaling factor transforming PREDICTED strength and fracture energy
      *  e.g. if the stiffness should be in MPa, then stiffnessFactor = 1.e6 */
-    double stiffnessFactor;    
+    double stiffnessFactor = 0.;    
 
 
     double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) override;

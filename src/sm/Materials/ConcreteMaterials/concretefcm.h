@@ -96,7 +96,6 @@ class ConcreteFCM : public FCMMaterial, public RandomMaterialExtensionInterface
 {
 public:
     ConcreteFCM(int n, Domain *d);
-    virtual ~ConcreteFCM() { }
 
     void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "ConcreteFCM"; }
@@ -112,23 +111,23 @@ public:
 
 protected:
     /// Fracture energy
-    double Gf;
+    double Gf = 0.;
     /// Tensile strength
-    double Ft;
+    double Ft = 0.;
     /// shear retention factor
-    double beta;
+    double beta = 0.;
     /// shear factor
-    double sf;
+    double sf = 0.;
     /// shear factor for numerical purpose
-    double sf_numer;
+    double sf_numer = 0.;
 
     // 3 parameters for collins aggregate interlock:
     /// Collins' aggregate interlock: compressive strength in MPa
-    double fc;
+    double fc = 0.;
     /// Collins' aggregate interlock: aggregate diameter in appropriate units (same as FE mesh)
-    double ag;
+    double ag = 0.;
     /// Collins' aggregate interlock: 1 for meter, 1000 for analysis in mm
-    double lengthScale;
+    double lengthScale = 0.;
 
     /// user-defined softening (traction-COD)
     FloatArray soft_w, soft_function_w;
@@ -138,9 +137,9 @@ protected:
     FloatArray beta_w, beta_function;
 
     /// hardening modulus
-    double H;
+    double H = 0.;
     /// strain at failure
-    double eps_f;
+    double eps_f = 0.;
 
     double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) override { return this->give(ft_strength, gp); }
     virtual double giveFractureEnergy(GaussPoint *gp, TimeStep *tStep) { return this->give(gf_ID, gp); }
@@ -163,11 +162,11 @@ protected:
 
     /// type of reduction of the shear stiffness caused by cracking
     enum ShearRetentionType { SHR_NONE, SHR_Const_ShearRetFactor, SHR_Const_ShearFactorCoeff, SHR_UserDefined_ShearRetFactor, SHR_Unknown };
-    ShearRetentionType shearType;
+    ShearRetentionType shearType = SHR_Unknown;
 
     /// defines the maximum value of shear stress
     enum ShearStrengthType { SHS_NONE, SHS_Const_Ft, SHS_Collins_Interlock, SHS_Residual_Ft, SHS_Unknown };
-    ShearStrengthType shearStrengthType;
+    ShearStrengthType shearStrengthType = SHS_Unknown;
 };
 } // end namespace oofem
 #endif // concretefcm_h

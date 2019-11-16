@@ -63,11 +63,10 @@ protected:
         GDFT_Eikonal = 2
     };
 
+    GradientDamageFormulationType gradientDamageFormulationType = GDFT_Standard;
 
-    GradientDamageFormulationType gradientDamageFormulationType;
-
-    double di_rho;
-    double di_eta;
+    double di_rho = 0.;
+    double di_eta = 0.;
 
 
 public:

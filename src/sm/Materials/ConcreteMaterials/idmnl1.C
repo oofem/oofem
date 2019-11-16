@@ -57,7 +57,10 @@
 namespace oofem {
 REGISTER_Material(IDNLMaterial);
 
-IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
+IDNLMaterial :: IDNLMaterial(int n, Domain *d) :
+    IsotropicDamageMaterial1(n, d),
+    StructuralNonlocalMaterialExtensionInterface(d),
+    NonlocalMaterialStiffnessInterface()
 {}
 
 

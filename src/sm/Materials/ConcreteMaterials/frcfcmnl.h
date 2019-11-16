@@ -100,7 +100,6 @@ class FRCFCMNL : public FRCFCM, public StructuralNonlocalMaterialExtensionInterf
 {
 public:
     FRCFCMNL(int n, Domain *d);
-    virtual ~FRCFCMNL() {}
 
     const char *giveClassName() const override { return "FRCFCMNL"; }
     const char *giveInputRecordName() const override { return _IFT_FRCFCMNL_Name; }
@@ -147,7 +146,7 @@ public:
 
 protected:
     /// participation angle. The target gauss point must fall into this angle to contribute to the nonlocal stress
-    double participAngle;
+    double participAngle = 0.;
 };
 } // end namespace oofem
 #endif // frcfcmnl_h
