@@ -77,27 +77,27 @@ protected:
     /// Temporary stress vector in reduced form (increments are used mainly in nonlinear analysis)
     FloatArray tempEffectiveStressVector;
     /// Scalar measure of the largest strain level ever reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar measure of the largest strain level.
-    double tempKappa;
+    double tempKappa = 0.;
     /// Damage level of material.
-    double damage;
+    double damage = 0.;
     /// Non-equilibrated damage level of material.
-    double tempDamage;
+    double tempDamage = 0.;
 
     /// Characteristic length
-    double charLength;
+    double charLength = 0.;
     /// Crack orientation normalized to damage magnitude. This is useful for plotting cracks as a vector field (paraview etc.).
     FloatArray crackVector;
 
     /// hydration-degree dependent equivalent strain at stress peak
-    double var_e0;
+    double var_e0 = 0.;
     /// hydration-degree dependent fracture energy
-    double var_gf;
+    double var_gf = 0.;
 
 #ifdef supplementary_info
-    double crackWidth;
-    double residTensileStrength;
+    double crackWidth = 0.;
+    double residTensileStrength = 0.;
 #endif
 
 public:
@@ -181,22 +181,22 @@ class MPSDamMaterial : public MPSMaterial
 {
 protected:
 
-    bool timeDepFracturing;
-    double fib_s;
-    double fib_fcm28;
-    bool isotropic;
+    bool timeDepFracturing = false;
+    double fib_s = 0.;
+    double fib_fcm28 = 0.;
+    bool isotropic = false;
 
     /// dummy Young's modulus
-    double E;
+    double E = -1.;
 
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergence problems. Set to something like 0.99 if needed.
-    double maxOmega;
+    double maxOmega = 0.999999;
 
     /// Equivalent strain at stress peak (or a similar parameter).
     //double const_e0;
 
     /// constant tensile strength
-    double ft;
+    double ft = 0.;
 
     /**
      * Determines the softening -> corresponds to the initial fracture energy. For a linear law, it is the area
@@ -204,26 +204,25 @@ protected:
      * and a tangent to the softening part of the curve at the peak stress. For a bilinear law,
      * gf corresponds to area bounded by elasticity and the first linear softening line projected to zero stress.
      */
-    double const_gf;
+    double const_gf = 0.;
+
+    /// Check possible snap back flag
+    int checkSnapBack = 1;
 
     /** Type characterizing the formula for the damage law. For example, linear softening can be specified
      *   with fracturing strain or crack opening.
      */
     enum SofteningType { ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_Disable_Damage };
-
-    /// Check possible snap back flag
-    int checkSnapBack;
-
     /// Parameter specifying the type of softening (damage law).
-    SofteningType softType;
+    SofteningType softType = ST_Exponential_Cohesive_Crack;
 
     /// Method used for evaluation of characteristic element size
-    ElementCharSizeMethod ecsMethod;
+    ElementCharSizeMethod ecsMethod = ECSM_Projection;
 
     /// 28-day value of tensile strength. Used only with "timedepfracturing"
-    double ft28;
+    double ft28 = 0.;
     /// 28-day value of fracture energy. Used only with "timedepfracturing"
-    double gf28;
+    double gf28 = 0.;
 
 public:
     MPSDamMaterial(int n, Domain *d);

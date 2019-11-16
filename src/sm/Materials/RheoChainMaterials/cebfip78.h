@@ -56,12 +56,12 @@ namespace oofem {
 class CebFip78Material : public MaxwellChainMaterial
 {
 protected:
-    double E28;    ///< Young modulus at age of 28 days [MPa].
-    double fibf;   ///< Basic creep coefficient.
-    double kap_a_per_area;  ///< Coefficient of hydrometric conditions.
-    double kap_c;  ///< Coefficient of type of cement.
-    double kap_tt; ///< Coefficient of temperature effects.
-    double u;      ///< Surface imposed to environment [mm^2]; temporary here ; should be in crosssection level.
+    double E28 = 0.;    ///< Young modulus at age of 28 days [MPa].
+    double fibf = 0.;   ///< Basic creep coefficient.
+    double kap_a_per_area = 0.;  ///< Coefficient of hydrometric conditions.
+    double kap_c = 0.;  ///< Coefficient of type of cement.
+    double kap_tt = 0.; ///< Coefficient of temperature effects.
+    double u = 0.;      ///< Surface imposed to environment [mm^2]; temporary here ; should be in crosssection level.
 
 public:
     CebFip78Material(int n, Domain *d) : MaxwellChainMaterial(n, d) { }

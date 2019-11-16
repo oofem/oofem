@@ -664,17 +664,6 @@ Eurocode2CreepMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *g
 /****************************************************************************************/
 /**********     Eurocode2CreepMaterialStatus - HUMIDITY ****************************************/
 
-
-Eurocode2CreepMaterialStatus :: Eurocode2CreepMaterialStatus(GaussPoint *g, int nunits) :
-    KelvinChainMaterialStatus(g, nunits)
-{
-    tempMaturity = 0.;
-    maturity = tempMaturity;
-
-    tempTemperature = 0.;
-    temperature = tempTemperature;
-}
-
 void
 Eurocode2CreepMaterialStatus :: updateYourself(TimeStep *tStep)
 {

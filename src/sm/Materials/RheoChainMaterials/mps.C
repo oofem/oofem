@@ -53,27 +53,10 @@ REGISTER_Material(MPSMaterial);
 MPSMaterialStatus :: MPSMaterialStatus(GaussPoint *gp, int nunits) :
     KelvinChainSolidMaterialStatus(gp, nunits)
 {
-    hum = -1.;
-    hum_increment = -1.;
-    T = -1.;
-    T_increment = -1.;
-    storedEmodulusFlag = false;
-    storedEmodulus = -1.;
-    equivalentTime = 0.;
-    equivalentTimeTemp = 0.;
-    flowTermViscosityTemp = -1.;
-
 #ifdef keep_track_of_strains
-    dryingShrinkageStrain = 0.;
-    tempDryingShrinkageStrain = 0.;
-    autogenousShrinkageStrain = 0.;
-    tempAutogenousShrinkageStrain = 0.;
-
     int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
     creepStrain.resize(rsize);
-    creepStrain.zero();
     creepStrainIncrement.resize(rsize);
-    creepStrainIncrement.zero();
 #endif
 }
 

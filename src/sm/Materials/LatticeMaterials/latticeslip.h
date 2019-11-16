@@ -55,14 +55,13 @@ protected:
 
 
 public:
-
     /// Constructor
     LatticeSlipStatus(GaussPoint *g);
 
     void  letTempPlasticStrainBe(const FloatArray &v)
     { tempPlasticStrain = v; }
 
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "LatticeSlipStatus"; }
 
@@ -82,7 +81,6 @@ public:
  */
 
 class LatticeSlip : public LatticeLinearElastic
-    //
 {
 protected:
 

@@ -99,25 +99,25 @@ class MPSMaterialStatus : public KelvinChainSolidMaterialStatus
 {
 protected:
     /// Values of humidity and temperature in a particular GP and their increment
-    double hum;
-    double hum_increment;
-    double T;
-    double T_increment;
-    double T_max;
+    double hum = -1.;
+    double hum_increment = -1.;
+    double T = -1.;
+    double T_increment = -1.;
+    double T_max = 0.;
     /// Hidden variable - equivalent time: necessary to compute solidified volume
-    double equivalentTime;
-    double equivalentTimeTemp;
-    double flowTermViscosity;
-    double flowTermViscosityTemp;
+    double equivalentTime = 0.;
+    double equivalentTimeTemp = 0.;
+    double flowTermViscosity = 0.;
+    double flowTermViscosityTemp = -1.;
     /// flag for Emodulus - true if modulus has been already computed in the current time step
-    bool storedEmodulusFlag;
-    double storedEmodulus;
-
+    bool storedEmodulusFlag = false;
+    double storedEmodulus = -1.;
+    
 #ifdef keep_track_of_strains
-    double dryingShrinkageStrain;
-    double tempDryingShrinkageStrain;
-    double autogenousShrinkageStrain;
-    double tempAutogenousShrinkageStrain;
+    double dryingShrinkageStrain = 0.;
+    double tempDryingShrinkageStrain = 0.;
+    double autogenousShrinkageStrain = 0.;
+    double tempAutogenousShrinkageStrain = 0.;
     FloatArray creepStrain;
     FloatArray creepStrainIncrement;
 #endif
@@ -204,54 +204,52 @@ public:
 class MPSMaterial : public KelvinChainSolidMaterial
 {
 protected:
-
-
     /// age when temperature or humidity starts to change
-    double t0;
+    double t0 = 0.;
     /// compliances of the B3 model
-    double q1, q2, q3, q4;
+    double q1 = 0., q2 = 0., q3 = 0., q4 = 0.;
     /// constant equal to one day in time units of analysis (eg. 86400 if the analysis runs in seconds)
-    double lambda0;
+    double lambda0 = 0.;
 
 
     enum coupledAnalysisType { Basic, MPS_full, MPS_humidity, MPS_temperature } CoupledAnalysis;
 
-    mutable double EspringVal; // elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
+    mutable double EspringVal = 0.; // elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
 
     /// additional parameters for sorption isotherm (used to compute relative humidity from water content)
     //double w_h, n, a; //constant (obtained from experiments) A [Pedersen, 1990]
 
     // MPS theory parameters
     /// proportionality parameter between change of humidity and shrinkage
-    double kSh;
+    double kSh = 0.;
     /// fluidity parameter used in viscosity evolution equation
-    double muS, k3;
+    double muS = 0., k3 = 0.;
     /// kTm replaces ln(h) on RHS of the differential equation describing evolution of MPS
-    double kTm;
+    double kTm = 0.;
     /// parameter reducing creep effects of thermal cycling (replaces kTm in such case)
-    double kTc;
+    double kTc = 0.;
     /// parameter reducing creep effects of thermal cycling
-    double ct;
+    double ct = 0.;
     /// reference room temperature for MPS algorithm [K]
-    double roomTemperature;
+    double roomTemperature = 0.;
     /// activation energies
-    double QEtoR, QRtoR, QStoR; //[K]
+    double QEtoR = 0., QRtoR = 0., QStoR = 0.; //[K]
     /// parameters that control the effect of humidity on rates of hydration, creep and microprestress relaxation
-    double alphaE, alphaR, alphaS; //[-]
+    double alphaE = 0., alphaR = 0., alphaS = 0.; //[-]
     /// exponent in the microprestress/viscosity governing equation
-    double p;
+    double p = 0.;
     /// parameters for nonlinear shrinkage function
-    double sh_a, sh_hC, sh_n;
+    double sh_a = 0., sh_hC = 0., sh_n = 0.;
     /// parameter for autogenous shrinkage according to fib MC 2010
-    double eps_cas0;
+    double eps_cas0 = 0.;
     /// parameters for autogenous shrinkage according to B4 model
-    double b4_eps_au_infty, b4_tau_au, b4_alpha, b4_r_t;
+    double b4_eps_au_infty = 0., b4_tau_au = 0., b4_alpha = 0., b4_r_t = 0.;
 
     /// scaling factor 1. for Pa, 1.e6 for MPa - only for empirical formulas - q1-q4 and ft and gf
-    double stiffnessFactor;
+    double stiffnessFactor = 0.;
 
     /// 0 for Kelvin, 273.15 for Celsius
-    double temperScaleDifference;
+    double temperScaleDifference = 0.;
 
 
 public:

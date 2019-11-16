@@ -58,8 +58,8 @@ class B3SolidMaterialStatus : public KelvinChainMaterialStatus
 {
 protected:
     /// Microprestresses
-    double microprestress_old;
-    double microprestress_new;
+    double microprestress_old = 0.;
+    double microprestress_new = 0.;
 
 public:
     B3SolidMaterialStatus(GaussPoint *g, int nunits);
@@ -85,42 +85,40 @@ public:
 class B3SolidMaterial : public KelvinChainMaterial
 {
 protected:
-    double t0;
-    double w, E28, q1, q2, q3, q4, q5; // predicted data
+    double t0 = 0.;
+    double w = 0., E28 = 0., q1 = 0., q2 = 0., q3 = 0., q4 = 0., q5 = 0.; // predicted data
 
     /// constant equal to one day in time units of analysis (eg. 86400 if the analysis runs in seconds)
-    double lambda0;
+    double lambda0 = 0.;
 
-    enum b3ShModeType { B3_NoShrinkage, B3_AverageShrinkage, B3_PointShrinkage } shMode;
+    enum b3ShModeType { B3_NoShrinkage, B3_AverageShrinkage, B3_PointShrinkage } shMode = B3_NoShrinkage;
     /// Additional parameters for average cross section shrinkage
-    double EpsSinf, kt, ks, vs, hum;
+    double EpsSinf = 0., kt = 0., ks = 0., vs = 0., hum = 0.;
     /// Additional parameters for free shrinkage at material point
-    double es0, r, rprime, at;
+    double es0 = 0., r = 0., rprime = 0., at = 0.;
     // Additional parameters for sorption isotherm (used to compute relative humidity from water content)
-    double w_h;    ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
-    double n;      ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
-    double a;      ///< Constant (obtained from experiments) A [Pedersen, 1990]
-    mutable double EspringVal; ///< elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
+    double w_h = 0.;    ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
+    double n = 0.;      ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
+    double a = 0.;      ///< Constant (obtained from experiments) A [Pedersen, 1990]
+    mutable double EspringVal = 0.; ///< elastic modulus of the aging spring (first member of Kelvin chain if retardation spectrum is used)
     /**
      * If 0, analysis of retardation spectrum is used for evaluation of Kelvin units moduli (default).
      * If 1, least-squares method is used for evaluation of Kelvin units moduli.
      */
-    int EmoduliMode;
+    int EmoduliMode = 0;
     /**
      * If 1, computation exploiting Microprestress solidification theory is done.
      * Default value is 0 = without external fields it can be used for basic creep.
      */
-    int MicroPrestress;
-    double c0;  ///< MPS constant c0 [MPa^-1 * day^-1]
-    double c1;  ///< MPS constant c1 (=C1*R*T/M)
-    double tS0; ///< MPS tS0 - necessary for the initial value of microprestress (age when the load is applied)
-    double kSh; ///< MPS shrinkage parameter. Either this or inithum and finalhum must be given in input record
+    int MicroPrestress = 0;
+    double c0 = 0.;  ///< MPS constant c0 [MPa^-1 * day^-1]
+    double c1 = 0.;  ///< MPS constant c1 (=C1*R*T/M)
+    double tS0 = 0.; ///< MPS tS0 - necessary for the initial value of microprestress (age when the load is applied)
+    double kSh = 0.; ///< MPS shrinkage parameter. Either this or inithum and finalhum must be given in input record
 
 
 public:
-    B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {
-        shMode = B3_NoShrinkage;
-    }
+    B3SolidMaterial(int n, Domain *d) : KelvinChainMaterial(n, d) {}
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;

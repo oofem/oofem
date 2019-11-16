@@ -71,7 +71,7 @@ class RheoChainMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     /// Number of units in the chain.
-    int nUnits;
+    int nUnits = 0;
     /// Hidden (internal) variables, the meaning of which depends on the type of chain.
     std :: vector< FloatArray >hiddenVars;
     std :: vector< FloatArray >tempHiddenVars;
@@ -86,11 +86,11 @@ protected:
      * essential when giveRealStressVector of the viscoelastic material is called 
      * more than once in one time step and at one time step.
      */
-    double currentTime;
+    double currentTime = 0.;
 
 #ifdef keep_track_of_strains
-    double thermalStrain;
-    double tempThermalStrain;
+    double thermalStrain = 0.;
+    double tempThermalStrain = 0.;
 #endif
 
 public:
@@ -140,26 +140,26 @@ class RheoChainMaterial : public StructuralMaterial
 {
 protected:
     /// thermal dilatation coeff.
-    double talpha;
+    double talpha = 0.;
     /// Number of (Maxwell or Kelvin) units in the rheologic chain.
-    int nUnits;
+    int nUnits = 0.;
     /// Physical age of the material at castingTime
-    double relMatAge;
+    double relMatAge = 0.;
 
-    bool lattice;
+    bool lattice = false;
     /// Poisson's ratio (assumed to be constant, unaffected by creep).
-    double nu;
+    double nu = 0.;
     /// Parameters for the lattice model
-    double alphaOne, alphaTwo;
+    double alphaOne = 0., alphaTwo = 0.;
     /// Time for which the partial moduli of individual units have been evaluated.
-    mutable double EparValTime;
+    mutable double EparValTime = -1.;
 
     /// Time from which the model should give a good approximation. Optional field. Default value is 0.1 [day].
-    double begOfTimeOfInterest; // local one or taken from e-model
+    double begOfTimeOfInterest = 0.; // local one or taken from e-model
     /// Time (age???) up to which the model should give a good approximation.
-    double endOfTimeOfInterest; // local one or taken from e-model
+    double endOfTimeOfInterest = 0.; // local one or taken from e-model
     /// Associated linearElasticMaterial, with E = 1.
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
     /// Partial moduli of individual units.
     mutable FloatArray EparVal;
     //FloatArray relaxationTimes;
@@ -173,7 +173,7 @@ protected:
      * (gives the number of simulation time units in one day,
      *  e.g. 86400 if the simulation works with seconds as the time units)
      */
-    double timeFactor;
+    double timeFactor = 0.;
 
 public:
     RheoChainMaterial(int n, Domain *d);
