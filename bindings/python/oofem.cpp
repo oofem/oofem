@@ -398,7 +398,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
         oofem::FloatArrayF<6> giveThermalDilatationVector(oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveThermalDilatationVector, gp, tStep);   
         }
-        void computeStressIndependentStrainVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) override {
+        void computeStressIndependentStrainVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) const override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, computeStressIndependentStrainVector, std::ref(answer), gp, tStep, mode);   
         }
 #if 0
@@ -418,8 +418,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, give3dMaterialStiffnessMatrix_dCde, std::ref(answer), mode, gp, tStep);   
         }
 
-        void givePlaneStressStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStressStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        FloatMatrixF<3,3> givePlaneStressStiffMtrx(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStressStiffMtrx, mmode, gp, tStep); 
         }
         oofem::FloatMatrixF<4,4> givePlaneStressStiffMtrx_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, givePlaneStressStiffMtrx_dPdF, mmode, gp, tStep);   

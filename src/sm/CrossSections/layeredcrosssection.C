@@ -210,14 +210,12 @@ LayeredCrossSection :: giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatR
     
     //Average stiffness over all layers
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        FloatMatrix subAnswer;
         GaussPoint *slaveGP = this->giveSlaveGaussPoint(masterGp, layer - 1);
         Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
         double layerThick = this->layerThicks.at(layer);
         totThick += layerThick;
-        dynamic_cast< StructuralMaterial * >(layerMat)->givePlaneStressStiffMtrx(subAnswer, rMode, slaveGP, tStep);
-        subAnswer.times(layerThick);
-        answer.add(subAnswer);
+        auto subAnswer = dynamic_cast< StructuralMaterial * >(layerMat)->givePlaneStressStiffMtrx(rMode, slaveGP, tStep);
+        answer.add(layerThick, subAnswer);
     }
     answer.times(1./totThick);
 }

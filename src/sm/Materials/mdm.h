@@ -312,9 +312,7 @@ protected:
     void applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp);
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 

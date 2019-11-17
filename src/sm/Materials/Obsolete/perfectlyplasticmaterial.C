@@ -392,12 +392,10 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                                     MatResponseMode mode,
+FloatMatrixF<3,3>
+PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                                      GaussPoint *gp,
-                                                     TimeStep *tStep)
-
+                                                     TimeStep *tStep) const
 //
 // returns receiver's 2dPlaneStressMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -406,12 +404,13 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlaneStressStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 
@@ -426,11 +425,10 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
         return this->linearElasticMaterial->givePlaneStrainStiffMtrx(mode, gp, tStep);
     } else {
-        FloatMatrix answer;
+        FloatMatrix fullAnswer, answer;
         const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
         return answer;

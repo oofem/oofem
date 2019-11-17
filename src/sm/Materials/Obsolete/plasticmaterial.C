@@ -232,7 +232,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
 FloatArray *
 PlasticMaterial :: ComputeGradientVector(GaussPoint *gp,
                                          FloatArray *fullStressVector,
-                                         FloatArray *fullStressSpaceHardeningVars)
+                                         FloatArray *fullStressSpaceHardeningVars) const
 {
     /*
      * Computes gradient vector R in reduced form.
@@ -281,7 +281,7 @@ FloatArray *
 PlasticMaterial :: ComputeResidualVector(GaussPoint *gp, double Gamma,
                                          FloatArray *plasticStrainVectorR,
                                          FloatArray *strainSpaceHardeningVariables,
-                                         FloatArray *gradientVectorR)
+                                         FloatArray *gradientVectorR) const
 {
     /* Computes Residual vector for closes point projection algorithm */
 
@@ -312,7 +312,7 @@ PlasticMaterial :: ComputeResidualVector(GaussPoint *gp, double Gamma,
 void
 PlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                                const FloatArray &elasticStrainVectorR,
-                                               TimeStep *tStep)
+                                               TimeStep *tStep) const
 {
     /* Computes the full trial elastic stress vector */
 
@@ -327,7 +327,7 @@ PlasticMaterial :: computeConsistentModuli(FloatMatrix &answer,
                                            FloatMatrix &hardeningModuliInverse,
                                            double Gamma,
                                            const FloatArray &fullStressVector,
-                                           const FloatArray &fullStressSpaceHardeningVars)
+                                           const FloatArray &fullStressSpaceHardeningVars) const
 {
     /* returns consistent moduli in reduced form.
      * Note: elasticModuli and hardeningModuli will be inverted
@@ -377,11 +377,10 @@ PlasticMaterial :: computeConsistentModuli(FloatMatrix &answer,
 
 // ----------------------------------------------------------------------------//
 
-void
-PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseMode mode,
+FloatMatrix
+PlasticMaterial :: giveConsistentStiffnessMatrix(MatResponseMode mode,
                                                  GaussPoint *gp,
-                                                 TimeStep *tStep)
+                                                 TimeStep *tStep) const
 {
     //
     // returns receiver material matrix for given reached state
@@ -404,8 +403,7 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     // check for elastic cases
     if ( ( status->giveTempStateFlag() == PM_Elastic ) || ( status->giveTempStateFlag() == PM_Unloading ) ) {
         this->computeReducedElasticModuli(elasticModuli, gp, tStep);
-        answer = elasticModuli;
-        return;
+        return elasticModuli;
     }
 
     //
@@ -454,13 +452,13 @@ PlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     delete gradientVector;
     delete stressSpaceHardeningVars;
 
-    answer =  answerR;
+    return answerR;
 }
 
 void
 PlasticMaterial :: computeDiagModuli(FloatMatrix &answer,
                                      GaussPoint *gp, FloatMatrix &elasticModuliInverse,
-                                     FloatMatrix &hardeningModuliInverse)
+                                     FloatMatrix &hardeningModuliInverse) const
 {
     //
     // assembles diagonal moduli from elasticModuliInverse and hardeningModuliInverse
@@ -494,11 +492,9 @@ PlasticMaterial :: computeDiagModuli(FloatMatrix &answer,
 void
 PlasticMaterial :: computeReducedElasticModuli(FloatMatrix &answer,
                                                GaussPoint *gp,
-                                               TimeStep *tStep)
+                                               TimeStep *tStep) const
 {  /* Returns elastic moduli in reduced stress-strain space*/
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer,
-                                                           ElasticStiffness,
-                                                           gp, tStep);
+    this->linearElasticMaterial->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 
@@ -541,17 +537,15 @@ PlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
     } else {
-        this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
 
-void
-PlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                            MatResponseMode mode,
+FloatMatrixF<3,3>
+PlasticMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
-
+                                            TimeStep *tStep) const
 //
 // returns receiver's 2dPlaneStressMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -561,9 +555,9 @@ PlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlaneStressStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
@@ -582,9 +576,7 @@ PlasticMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
     if ( mode == ElasticStiffness ) {
         return this->linearElasticMaterial->givePlaneStrainStiffMtrx(mode, gp, tStep);
     } else {
-        FloatMatrix answer;
-        const_cast<PlasticMaterial*>(this)->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
-        return answer;
+        return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
@@ -601,9 +593,7 @@ PlasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
     if ( mode == ElasticStiffness ) {
         return this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     } else {
-        FloatMatrix answer;
-        const_cast<PlasticMaterial*>(this)->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
-        return answer;
+        return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
@@ -624,7 +614,7 @@ PlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     } else {
-        this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
@@ -645,7 +635,7 @@ PlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     } else {
-        this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
@@ -666,7 +656,7 @@ PlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
     } else {
-        this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 

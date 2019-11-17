@@ -531,7 +531,7 @@ void
 Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
                                                     GaussPoint *gp,
                                                     TimeStep *tStep,
-                                                    ValueModeType mode)
+                                                    ValueModeType mode) const
 {
     answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
     answer.zero();
@@ -588,7 +588,7 @@ Eurocode2CreepMaterial :: giveShrinkageStrainVector(FloatArray &answer,
 }
 
 void
-Eurocode2CreepMaterial :: computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen)
+Eurocode2CreepMaterial :: computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen) const
 {
     int size;
     MaterialMode mode = gp->giveMaterialMode();
@@ -616,7 +616,7 @@ Eurocode2CreepMaterial :: computeIncrementOfDryingShrinkageVector(FloatArray &an
 
 
 void
-Eurocode2CreepMaterial :: computeIncrementOfAutogenousShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen)
+Eurocode2CreepMaterial :: computeIncrementOfAutogenousShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen) const
 {
     int size;
     MaterialMode mode = gp->giveMaterialMode();

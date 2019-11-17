@@ -193,12 +193,11 @@ LinearElasticMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, Ga
 void
 LinearElasticMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->givePlaneStressStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->givePlaneStressStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);

@@ -337,10 +337,7 @@ protected:
     //                                    TimeStep *tStep) = 0;
 
     // next functions overloaded rom structural material level
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
     void give2dBeamLayerStiffMtrx(FloatMatrix &answer,

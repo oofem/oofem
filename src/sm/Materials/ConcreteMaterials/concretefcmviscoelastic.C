@@ -121,8 +121,8 @@ ConcreteFCMViscoElastic :: giveRealStressVector(FloatArray &answer, GaussPoint *
 
 void
 ConcreteFCMViscoElastic :: computeStressIndependentStrainVector(FloatArray &answer,
-								GaussPoint *gp, TimeStep *tStep, ValueModeType mode) {
-
+                                GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
+{
   // temperature strain is treated ONLY by the rheoMat
 
   if ( !this->isActivated(tStep) ) {

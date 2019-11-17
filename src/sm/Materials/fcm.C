@@ -2276,14 +2276,14 @@ FCMMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-FCMMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
+FloatMatrixF<3,3>
+FCMMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
-
+                                        TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<FCMMaterial*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 

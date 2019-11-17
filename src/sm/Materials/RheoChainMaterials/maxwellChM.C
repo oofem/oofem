@@ -144,7 +144,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 
 void
 MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
-                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)

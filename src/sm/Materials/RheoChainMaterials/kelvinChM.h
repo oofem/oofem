@@ -73,13 +73,13 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    void  giveShrinkageStrainVector(FloatArray &answer,
+    void giveShrinkageStrainVector(FloatArray &answer,
                                     GaussPoint *gp,
                                     TimeStep *tStep,
-                                    ValueModeType mode) override
+                                    ValueModeType mode) const override
     { answer.clear(); }
 
-    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

@@ -761,21 +761,20 @@ MPSDamMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-MPSDamMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
+FloatMatrixF<3,3>
+MPSDamMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep)
+                                           TimeStep *tStep) const
 {
-    RheoChainMaterial :: givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    auto d = RheoChainMaterial :: givePlaneStressStiffMtrx(ElasticStiffness, gp, tStep);
 
     if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
-        return;
+        return d;
     }
 
-    MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage = min(status->giveTempDamage(), this->maxOmega);
-    answer.times(1.0 - tempDamage);
+    return d * (1.0 - tempDamage);
 }
 
 

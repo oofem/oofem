@@ -123,7 +123,7 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     const char *giveClassName() const override { return "B3SolidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_B3SolidMaterial_Name; }
@@ -137,10 +137,10 @@ public:
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return true; }
 
-    void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of the shrinkageStrainVector. Shrinkage is fully dependent on humidity rate in given GP
-    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     void predictParametersFrom(double, double, double, double, double, double, double);
 
@@ -162,7 +162,7 @@ protected:
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     /**
      * Computes microprestress at given time step and GP.

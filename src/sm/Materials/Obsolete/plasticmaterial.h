@@ -161,64 +161,60 @@ public:
 protected:
     // add here some auxiliary functions if needed
     FloatArray *ComputeGradientVector(GaussPoint *gp, FloatArray *fullStressVector,
-                                      FloatArray *fullStressSpaceHardeningVars);
+                                      FloatArray *fullStressSpaceHardeningVars) const;
     FloatArray *ComputeResidualVector(GaussPoint *gp, double Gamma,
                                       FloatArray *plasticStrainVectorR,
                                       FloatArray *strainSpaceHardeningVariables,
-                                      FloatArray *gradientVectorR);
-    virtual void giveConsistentStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode,
+                                      FloatArray *gradientVectorR) const;
+    virtual FloatMatrix giveConsistentStiffnessMatrix(MatResponseMode,
                                                GaussPoint *gp,
-                                               TimeStep *tStep);
+                                               TimeStep *tStep) const;
 
     void  computeConsistentModuli(FloatMatrix &answer,
                                   GaussPoint *gp, FloatMatrix &elasticModuliInverse,
                                   FloatMatrix &hardeningModuliInverse,
                                   double Gamma, const FloatArray &fullStressVector,
-                                  const FloatArray &fullStressSpaceHardeningVars);
+                                  const FloatArray &fullStressSpaceHardeningVars) const;
     void  computeDiagModuli(FloatMatrix &answer,
                             GaussPoint *gp, FloatMatrix &elasticModuliInverse,
-                            FloatMatrix &hardeningModuliInverse);
+                            FloatMatrix &hardeningModuliInverse) const;
 
     virtual FloatArray *ComputeStressSpaceHardeningVars(GaussPoint *gp,
-                                                        FloatArray *strainSpaceHardeningVariables)
+                                                        FloatArray *strainSpaceHardeningVariables) const
     { return NULL; }
     virtual double computeYieldValueAt(GaussPoint *gp, FloatArray *stressVector,
-                                       FloatArray *stressSpaceHardeningVars) { return 0.; }
+                                       FloatArray *stressSpaceHardeningVars) const { return 0.; }
     virtual void   computeHardeningReducedModuli(FloatMatrix &answer,
                                                  GaussPoint *gp,
                                                  FloatArray *strainSpaceHardeningVariables,
-                                                 TimeStep *tStep) = 0;
+                                                 TimeStep *tStep) const = 0;
     virtual FloatArray *ComputeStressGradient(GaussPoint *gp, FloatArray *stressVector,
-                                              FloatArray *stressSpaceHardeningVars) { return NULL; }
+                                              FloatArray *stressSpaceHardeningVars) const { return NULL; }
     virtual FloatArray *ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *gp,
                                                                        FloatArray *stressVector,
-                                                                       FloatArray *stressSpaceHardeningVars)
+                                                                       FloatArray *stressSpaceHardeningVars) const
     { return NULL; }
-    virtual int hasHardening() { return 0; }
+    virtual int hasHardening() const { return 0; }
     virtual void  computeReducedGradientMatrix(FloatMatrix &answer,
                                                GaussPoint *gp,
                                                const FloatArray &stressVector,
-                                               const FloatArray &stressSpaceHardeningVars) = 0;
+                                               const FloatArray &stressSpaceHardeningVars) const = 0;
 
     virtual void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
-                                             const FloatArray &strainIncrement, TimeStep *tStep);
+                                             const FloatArray &strainIncrement, TimeStep *tStep) const;
     virtual void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp,
-                                             TimeStep *tStep);
+                                             TimeStep *tStep) const;
     virtual void compute3dElasticModuli(FloatMatrix &answer, GaussPoint *gp,
-                                        TimeStep *tStep) = 0;
+                                        TimeStep *tStep) const = 0;
 
     // auxiliary functions
-    virtual int giveSizeOfFullHardeningVarsVector() { return 0; }
+    virtual int giveSizeOfFullHardeningVarsVector() const { return 0; }
     virtual int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const { return 0; }
 
     friend class PlasticMaterialStatus;
 
     // next functions overloaded rom structural material level
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 

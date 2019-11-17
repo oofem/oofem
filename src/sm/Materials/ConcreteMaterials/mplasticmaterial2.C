@@ -1714,11 +1714,10 @@ MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-MPlasticMaterial2 :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                              MatResponseMode mode,
+FloatMatrixF<3,3>
+MPlasticMaterial2 :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
+                                              TimeStep *tStep) const
 
 //
 // returns receiver's 2dPlaneStressMtrx
@@ -1730,12 +1729,12 @@ MPlasticMaterial2 :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+            return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
         } else {
-            answer = this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
+            return this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->givePlaneStressStiffMtrx(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlaneStressStiffMtrx(mode, gp, tStep);
     }
 }
 

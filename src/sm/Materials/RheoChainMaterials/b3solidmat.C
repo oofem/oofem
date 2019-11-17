@@ -391,7 +391,7 @@ void
 B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
                                              GaussPoint *gp,
                                              TimeStep *tStep,
-                                             ValueModeType mode)
+                                             ValueModeType mode) const
 {
     FloatArray prevAnswer;
 
@@ -418,7 +418,7 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
 }
 
 void
-B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * returns average shrinkage strain vector of cross section at drying
@@ -469,7 +469,7 @@ B3SolidMaterial :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, 
 
 
 void
-B3SolidMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+B3SolidMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const
 {
     /* dEpsSh/dt = kSh * dh/dt   (h = humidity)
      * ->> EpsSh = kSh * h_difference
@@ -535,24 +535,23 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) con
 
 
 void
-B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
 //
 {
-    double v, eta;
-    FloatArray help, reducedAnswer, sigma;
-    FloatMatrix C;
-    KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
     if ( mode == VM_Incremental ) {
-        v = computeSolidifiedVolume(tStep);
-        eta = this->computeFlowTermViscosity(gp, tStep);         //evaluated too in the middle of the time-step
+        double v = computeSolidifiedVolume(tStep);
+        double eta = this->computeFlowTermViscosity(gp, tStep);         //evaluated too in the middle of the time-step
 
+        FloatArray help, reducedAnswer;
         //        sigma = status->giveStressVector();         //stress vector at the beginning of time-step
-        sigma = status->giveViscoelasticStressVector();         //stress vector at the beginning of time-step
+        auto sigma = status->giveViscoelasticStressVector();         //stress vector at the beginning of time-step
+        FloatMatrix C;
         this->giveUnitComplianceMatrix(C, gp, tStep);
         reducedAnswer.resize( C.giveNumberOfRows() );
         reducedAnswer.zero();

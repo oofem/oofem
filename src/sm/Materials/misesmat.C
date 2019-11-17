@@ -470,18 +470,15 @@ MisesMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-MisesMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                     MatResponseMode mmode, GaussPoint *gp,
-                                     TimeStep *tStep)
+FloatMatrixF<3,3>
+MisesMat :: givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
-    MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     // start from the elastic stiffness
-    linearElasticMaterial.givePlaneStressStiffMtrx(answer, mmode, gp, tStep);
+    auto d = linearElasticMaterial.givePlaneStressStiffMtrx(mmode, gp, tStep);
     if ( mmode != TangentStiffness ) {
         double omega = status->giveTempDamage();
-        answer.times(1. - omega);
-        return;
+        return d * (1. - omega);
     }
 
     double kappa = status->giveCumulativePlasticStrain();
@@ -489,7 +486,7 @@ MisesMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     // increment of cumulative plastic strain as an indicator of plastic loading
     double dKappa = tempKappa - kappa;
     if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
-        return;
+        return d;
     }
     // Compute elastoplastic consistent tangent (Box 9.6)
     FloatArray stress, fullStress;
@@ -529,15 +526,16 @@ MisesMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     correction.beDyadicProductOf(n, n);
     correction.times(alpha);
 
+    FloatMatrixF<3,3> answer;
     answer.at(1, 1) = 0.5 * ( Es1 + Es2 );
     answer.at(2, 2) = answer.at(1, 1);
     answer.at(1, 2) = 0.5 * ( Es1 - Es2 );
     answer.at(2, 1) = answer.at(1, 2);
     answer.at(3, 3) = Es3;
-    answer.subtract(correction);
+    answer -= FloatMatrixF<3,3>(correction);
     //@todo: add damage part of the stiffness
+    return answer;
 }
-
 
 
 FloatMatrixF<1,1>
