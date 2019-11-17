@@ -64,7 +64,7 @@ class LargeStrainMasterMaterial : public StructuralMaterial
 {
 protected:
     /// Reference to the basic elastic material.
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
 
     /// 'slave' material model number.
     int slaveMat = 0;

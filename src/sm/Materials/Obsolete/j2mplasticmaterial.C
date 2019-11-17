@@ -46,20 +46,10 @@ REGISTER_Material(J2MPlasticMaterial);
 
 J2MPlasticMaterial :: J2MPlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
-    //
-    // constructor
-    //
-    kinematicHardeningFlag = isotropicHardeningFlag = 0;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     this->nsurf = 1;
 }
 
-J2MPlasticMaterial :: ~J2MPlasticMaterial()
-{
-    //
-    // destructor
-    //
-}
 
 void
 J2MPlasticMaterial :: initializeFrom(InputRecord &ir)

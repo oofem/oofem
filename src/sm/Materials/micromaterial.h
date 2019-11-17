@@ -108,10 +108,10 @@ public:
     std::unique_ptr<EngngModel> problemMicro;
 
     /// Pointer to the macroscale domain.
-    Domain *macroDomain;
+    Domain *macroDomain = nullptr;
 
     /// Pointer to the macroscale element.
-    MacroLSpace *macroLSpaceElement;
+    MacroLSpace *macroLSpaceElement = nullptr;
 
     /// Related to numbering scheme.
     void init(void) override;
@@ -132,22 +132,22 @@ public:
     /// Array containing default equation numbers for all nodes [DofManagerNumber][DOF].
     std::vector<IntArray> microDefaultDofs;
     /// Flag signalizing whether micromaterial is used by other element.
-    bool microMatIsUsed;
+    bool microMatIsUsed = false;
 
 protected:
-    bool isDefaultNumbering;
+    bool isDefaultNumbering = true;
     /// The maximum DOFs corresponding to released all of the boundary conditions.
-    int maxNumberOfDomainEquation;
+    int maxNumberOfDomainEquation = 0;
     /// Required number of domain equations.
-    int reqNumberOfDomainEquation;
+    int reqNumberOfDomainEquation = 0;
     /// Number of DOF Managers.
-    int NumberOfDofManagers;
+    int NumberOfDofManagers = 0;
     enum EquationNumbering { AllNodes, BoundaryNodes, InteriorNodes };
-    EquationNumbering DofEquationNumbering;
+    EquationNumbering DofEquationNumbering = AllNodes;
     /// Number of equations associated with boundary nodes.
-    int totalBoundaryDofs;
+    int totalBoundaryDofs = 0;
     /// Number of equations associated with boundary nodes.
-    int totalInternalDofs;
+    int totalInternalDofs = 0;
 };
 } // end namespace oofem
 #endif // micromaterial_h

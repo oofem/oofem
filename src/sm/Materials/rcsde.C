@@ -47,18 +47,12 @@ namespace oofem {
 REGISTER_Material(RCSDEMaterial);
 
 RCSDEMaterial :: RCSDEMaterial(int n, Domain *d) : RCM2Material(n, d)
-    //
-    // constructor
-    //
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
 
 RCSDEMaterial :: ~RCSDEMaterial()
-//
-// destructor
-//
 {
     delete linearElasticMaterial;
 }
@@ -452,13 +446,8 @@ RCSDEMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, in
 
 
 RCSDEMaterialStatus :: RCSDEMaterialStatus(GaussPoint *g) :
-    RCM2MaterialStatus(g), Ds0()
-{
-    maxEquivStrain = tempMaxEquivStrain = 0.0;
-    damageCoeff = tempDamageCoeff = 1.0;
-    transitionEps = epsF2 = 0.0;
-    rcsdMode = tempRcsdMode = rcMode;
-}
+    RCM2MaterialStatus(g)
+{}
 
 
 void

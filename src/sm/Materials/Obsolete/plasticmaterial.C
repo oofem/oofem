@@ -47,18 +47,10 @@ namespace oofem {
 #define PLASTIC_MATERIAL_MAX_ITERATIONS 40
 
 PlasticMaterial :: PlasticMaterial(int n, Domain *d)  : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
-{
-    linearElasticMaterial = NULL;
-}
+{}
 
 
 PlasticMaterial :: ~PlasticMaterial()
-//
-// destructor
-//
 {
     delete linearElasticMaterial;
 }
@@ -704,10 +696,7 @@ PlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 PlasticMaterialStatus :: PlasticMaterialStatus(GaussPoint *g, int statusSize) :
     StructuralMaterialStatus(g), plasticStrainVector(), tempPlasticStrainVector(),
     strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize)
-{
-    state_flag = temp_state_flag = PM_Elastic;
-    gamma = temp_gamma = 0.;
-}
+{}
 
 
 void

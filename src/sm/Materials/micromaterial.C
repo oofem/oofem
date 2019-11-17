@@ -89,10 +89,7 @@ void MicroMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 }
 
 
-MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme(),
-    microMatIsUsed(false),
-    isDefaultNumbering(true),
-    DofEquationNumbering(AllNodes)
+MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme()
 {}
 
 

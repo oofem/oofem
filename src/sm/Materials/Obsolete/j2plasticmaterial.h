@@ -56,14 +56,13 @@ class Domain;
 class J2plasticMaterial : public PlasticMaterial
 {
 protected:
-    int kinematicHardeningFlag, isotropicHardeningFlag;
-    double kinematicModuli, isotropicModuli;
-    //double E, nu; // isotropic material constants
-    double k;
+    int kinematicHardeningFlag = 0, isotropicHardeningFlag = 0;
+    double kinematicModuli = 0., isotropicModuli = 0.;
+    //double E = 0., nu = 0.; // isotropic material constants
+    double k = 0.;
 
 public:
     J2plasticMaterial(int n, Domain * d);
-    virtual ~J2plasticMaterial();
 
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;

@@ -46,8 +46,7 @@ namespace oofem {
 REGISTER_Material(SteelRelaxMat);
 
 SteelRelaxMat :: SteelRelaxMat(int n, Domain *d) : StructuralMaterial(n, d)
-{
-}
+{}
 
 
 bool

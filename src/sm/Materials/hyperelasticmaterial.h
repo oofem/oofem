@@ -53,8 +53,8 @@ namespace oofem {
 class HyperElasticMaterial : public StructuralMaterial
 {
 protected:
-    double K; ///< Bulk modulus.
-    double G; ///< Shear modulus.
+    double K = 0.; ///< Bulk modulus.
+    double G = 0.; ///< Shear modulus.
 
 public:
     HyperElasticMaterial(int n, Domain * d);

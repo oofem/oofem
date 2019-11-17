@@ -50,14 +50,7 @@ REGISTER_Material(MisesMatNl);
 
 MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 {
-    Rf = 0.;
-    exponent = 1.;
-    averType = 0;
 }
-
-
-MisesMatNl :: ~MisesMatNl()
-{ }
 
 
 void
@@ -447,9 +440,7 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
 
 MisesMatNlStatus :: MisesMatNlStatus(GaussPoint *g) :
     MisesMatStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
-{
-    localCumPlasticStrainForAverage = 0.0;
-}
+{}
 
 
 void

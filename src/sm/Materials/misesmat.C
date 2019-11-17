@@ -604,9 +604,6 @@ MisesMatStatus :: MisesMatStatus(GaussPoint *g) :
 {
     stressVector.resize(6);
     strainVector.resize(6);
-
-    damage = tempDamage = 0.;
-    kappa = tempKappa = 0.;
     effStress.resize(6);
     tempEffStress.resize(6);
 }

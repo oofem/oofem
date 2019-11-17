@@ -57,13 +57,12 @@ class Domain;
 class J2MPlasticMaterial : public MPlasticMaterial
 {
 protected:
-    int kinematicHardeningFlag = 0, isotropicHardeningFlag;
-    double kinematicModuli, isotropicModuli;
-    double k;
+    int kinematicHardeningFlag = 0, isotropicHardeningFlag = 0;
+    double kinematicModuli = 0., isotropicModuli = 0.;
+    double k = 0.;
 
 public:
     J2MPlasticMaterial(int n, Domain * d);
-    virtual ~J2MPlasticMaterial();
 
     void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_J2MPlasticMaterial_Name; }

@@ -46,17 +46,8 @@ namespace oofem {
 REGISTER_Material(RCSDNLMaterial);
 
 RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
-{
-    //linearElasticMaterial = new IsotropicLinearElasticMaterial (n,d);
-    SDTransitionCoeff2 = 0.;
-    R = 0.;
-}
+{}
 
-
-RCSDNLMaterial :: ~RCSDNLMaterial()
-{
-    //delete linearElasticMaterial;
-}
 
 Interface *
 RCSDNLMaterial :: giveInterface(InterfaceType type)

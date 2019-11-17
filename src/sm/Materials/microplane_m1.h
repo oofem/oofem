@@ -86,10 +86,10 @@ public:
 class M1Material : public MicroplaneMaterial
 {
 protected:
-    double EN; // normal microplane elastic modulus
-    double ENtan; // normal microplane tangent (elastoplastic) modulus
-    double HN; // normal microplane hardening/softening modulus
-    double s0; // normal microplane initial yield stress
+    double EN = 0.; // normal microplane elastic modulus
+    double ENtan = 0.; // normal microplane tangent (elastoplastic) modulus
+    double HN = 0.; // normal microplane hardening/softening modulus
+    double s0 = 0.; // normal microplane initial yield stress
 
 public:
     /**
@@ -168,12 +168,12 @@ public:
 class M1Material : public StructuralMaterial
 {
 protected:
-    double E; // Young's modulus
-    double nu; // Poisson ratio
-    double EN; // normal microplane elastic modulus
-    double HN; // normal microplane hardening/softening modulus
-    double s0; // normal microplane initial yield stress
-    int nmp; // number of microplanes
+    double E = 0.; // Young's modulus
+    double nu = 0.; // Poisson ratio
+    double EN = 0.; // normal microplane elastic modulus
+    double HN = 0.; // normal microplane hardening/softening modulus
+    double s0 = 0.; // normal microplane initial yield stress
+    int nmp = 0; // number of microplanes
     FloatMatrix n; // microplane normals
     FloatMatrix N; // N = n x n in Voigt notation
     FloatMatrix NN; // NN = n x n x n x n in special notation

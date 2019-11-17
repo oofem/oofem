@@ -48,12 +48,8 @@ namespace oofem {
 
 REGISTER_Material(RankineMatGrad);
 
-// constructor
 RankineMatGrad :: RankineMatGrad(int n, Domain *d) : RankineMat(n, d), GradientDamageMaterialExtensionInterface(d)
-{
-    L = 0.;
-    negligible_damage = 0.;
-}
+{}
 
 /////////////////////////////////////////////////////////////////////////////
 void
@@ -687,9 +683,7 @@ RankineMatGrad :: giveDimension(GaussPoint *gp)
 
 RankineMatGradStatus :: RankineMatGradStatus(GaussPoint *g) :
     RankineMatStatus(g)
-{
-    nonlocalDamageDrivingVariable = 0;
-}
+{}
 
 void
 RankineMatGradStatus :: printOutputAt(FILE *file, TimeStep *tStep) const

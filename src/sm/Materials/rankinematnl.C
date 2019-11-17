@@ -48,9 +48,6 @@ namespace oofem {
 REGISTER_Material(RankineMatNl);
 
 RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
-    //
-    // constructor
-    //
 { }
 
 void
@@ -407,9 +404,7 @@ RankineMatNl :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
 
 RankineMatNlStatus :: RankineMatNlStatus(GaussPoint *g) :
     RankineMatStatus(g), StructuralNonlocalMaterialStatusExtensionInterface()
-{
-    localCumPlasticStrainForAverage = 0.0;
-}
+{}
 
 
 void

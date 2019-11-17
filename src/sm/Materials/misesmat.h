@@ -77,28 +77,27 @@ protected:
     IsotropicLinearElasticMaterial linearElasticMaterial;
 
     /// Elastic shear modulus.
-    double G;
+    double G = 0.;
 
     /// Elastic bulk modulus.
-    double K;
+    double K = 0.;
 
     /// Hardening modulus.
-    double H;
+    double H = 0.;
 
     /// Initial (uniaxial) yield stress.
     ScalarFunction sig0;
 
     /// critical(maximal) damage.
-    double omega_crit;
+    double omega_crit = 0.;
     /// exponent in damage function.
-    double a;
+    double a = 0.;
 
     /// tolerance for the yield function in RRM algorithm.
-    double yieldTol;
+    double yieldTol = 0.;
 
 public:
     MisesMat(int n, Domain *d);
-    virtual ~MisesMat() {}
 
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
     void performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
@@ -166,22 +165,22 @@ protected:
     FloatArray trialStressD;
 
     /// volumetric trial stress - needed for tangent stiffness.
-    double trialStressV;
+    double trialStressV = 0.;
 
     FloatArray effStress;
     FloatArray tempEffStress;
 
     /// Cumulative plastic strain (initial).
-    double kappa;
+    double kappa = 0.;
 
     /// Cumulative plastic strain (final).
-    double tempKappa;
+    double tempKappa = 0.;
 
     /// damage variable (initial).
-    double damage;
+    double damage = 0.;
 
     /// damage variable (final).
-    double tempDamage;
+    double tempDamage = 0.;
 
 
 public:

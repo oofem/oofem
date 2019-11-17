@@ -52,19 +52,6 @@ REGISTER_Material(RankineMat);
 RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
-    E = 0.;
-    nu = 0.;
-    H0 = 0.;
-    sig0 = 0.;
-    delSigY = 0.;
-    ep = 0.;
-    md = 0.;
-    damlaw = 1;
-    param1 = 0.;
-    param2 = 0.;
-    param3 = 0.;
-    param4 = 0.;
-    param5 = 0.;
 }
 
 

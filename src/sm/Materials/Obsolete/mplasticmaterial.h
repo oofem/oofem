@@ -76,8 +76,8 @@ protected:
     FloatArray tempStrainSpaceHardeningVarsVector;
 
     /// Yield function status indicator.
-    int state_flag;
-    int temp_state_flag;
+    int state_flag = MPlasticMaterialStatus :: PM_Elastic;
+    int temp_state_flag = MPlasticMaterialStatus :: PM_Elastic;
 
     /// Consistency parameter values (needed for algorithmic stiffness).
     FloatArray gamma, tempGamma;
@@ -142,14 +142,14 @@ class MPlasticMaterial : public StructuralMaterial
 {
 protected:
     /// Reference to bulk (undamaged) material.
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
     /// Number of yield surfaces.
-    int nsurf;
+    int nsurf = 0;
     /// Protected type to determine the return mapping algorithm.
-    enum ReturnMappingAlgoType { mpm_ClosestPoint, mpm_CuttingPlane } rmType;
+    enum ReturnMappingAlgoType { mpm_ClosestPoint, mpm_CuttingPlane } rmType = mpm_ClosestPoint;
     /// Type that allows to distinguish between yield function and loading function.
     enum functType { yieldFunction, loadFunction };
-    enum plastType { associatedPT, nonassociatedPT } plType;
+    enum plastType { associatedPT, nonassociatedPT } plType = associatedPT;
 
 public:
     MPlasticMaterial(int n, Domain * d);

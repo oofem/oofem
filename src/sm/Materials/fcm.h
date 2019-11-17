@@ -92,7 +92,7 @@ protected:
     FloatMatrix transMatrix_L2Gstrain;
 
     /// number of maximum possible cracks (optional parameter)
-    int nMaxCracks;
+    int nMaxCracks = 0;
 
 public:
     FCMMaterialStatus(GaussPoint *g);

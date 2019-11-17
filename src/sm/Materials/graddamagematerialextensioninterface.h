@@ -59,12 +59,12 @@ class FloatMatrix;
 class GradientDamageMaterialExtensionInterface : public Interface
 {
 protected:
-    Domain *dom;
+    Domain *dom = nullptr;
 
     /**
      * Initial(user defined) characteristic length of the nonlocal model
      */
-    double internalLength;
+    double internalLength = 0.;
 
 
 
@@ -112,10 +112,10 @@ public:
     virtual ~GradientDamageMaterialStatusExtensionInterface() { }
 
 protected:
-    double nonlocalDamageDrivingVariable;
-    double localDamageDrivingVariable;
-    double tempNonlocalDamageDrivingVariable;
-    double tempLocalDamageDrivingVariable;
+    double nonlocalDamageDrivingVariable = 0.;
+    double localDamageDrivingVariable = 0.;
+    double tempNonlocalDamageDrivingVariable = 0.;
+    double tempLocalDamageDrivingVariable = 0.;
 
     FloatArray nonlocalDamageDrivingVariableGrad;
     FloatArray tempNonlocalDamageDrivingVariableGrad;

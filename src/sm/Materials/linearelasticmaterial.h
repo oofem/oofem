@@ -66,7 +66,7 @@ class LinearElasticMaterial : public StructuralMaterial
 {
 protected:
     /// artificial isotropic damage to reflect reduction in stiffness for time < castingTime.
-    double preCastStiffnessReduction;
+    double preCastStiffnessReduction = 0.;
 
     /// Preconstructed 3d tangent
     FloatMatrixF<6,6> tangent;

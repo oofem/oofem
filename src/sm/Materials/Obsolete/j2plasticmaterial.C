@@ -47,12 +47,7 @@ REGISTER_Material(J2plasticMaterial);
 
 J2plasticMaterial :: J2plasticMaterial(int n, Domain *d) : PlasticMaterial(n, d)
 {
-    kinematicHardeningFlag = isotropicHardeningFlag = 0;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
-}
-
-J2plasticMaterial :: ~J2plasticMaterial()
-{
 }
 
 void

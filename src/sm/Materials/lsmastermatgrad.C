@@ -51,12 +51,8 @@ REGISTER_Material(LargeStrainMasterMaterialGrad);
 // constructor
 LargeStrainMasterMaterialGrad :: LargeStrainMasterMaterialGrad(int n, Domain *d) : LargeStrainMasterMaterial(n, d), GradientDamageMaterialExtensionInterface(d)
 {
-    slaveMat = 0;
 }
 
-// destructor
-LargeStrainMasterMaterialGrad :: ~LargeStrainMasterMaterialGrad()
-{ }
 
 // specifies whether a given material mode is supported by this model
 bool

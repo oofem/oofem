@@ -62,8 +62,7 @@ REGISTER_Material(StructuralFE2Material);
 
 int StructuralFE2Material :: n = 1;
 
-StructuralFE2Material :: StructuralFE2Material(int n, Domain *d) : StructuralMaterial(n, d),
-useNumTangent(true)
+StructuralFE2Material :: StructuralFE2Material(int n, Domain *d) : StructuralMaterial(n, d)
 {}
 
 
@@ -251,16 +250,11 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
 
 StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile) :
     StructuralMaterialStatus(g),
-    mNewlyInitialized(true)
+    mInputFile(inputfile)
 {
-    mInputFile = inputfile;
-
-    this->oldTangent = true;
-
     if ( !this->createRVE(1, inputfile, rank) ) { ///@TODO FIXME createRVE
         OOFEM_ERROR("Couldn't create RVE");
     }
-
 }
 
 PrescribedGradientHomogenization* StructuralFE2MaterialStatus::giveBC()

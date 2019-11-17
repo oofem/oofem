@@ -86,60 +86,59 @@ class RankineMat : public StructuralMaterial
 {
 protected:
     /// Reference to the basic elastic material.
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
 
     /// Young's modulus.
-    double E;
+    double E = 0.;
 
     /// Poisson's ratio.
-    double nu;
+    double nu = 0.;
 
     /// Initial hardening modulus.
-    double H0;
+    double H0 = 0.;
 
     /// Type of plastic hardening (0=linear, 1=exponential)
-    int plasthardtype;
+    int plasthardtype = 0;
 
     /// Final increment of yield stress (at infinite cumulative plastic strain)
-    double delSigY;
+    double delSigY = 0.;
 
     /// Initial (uniaxial) yield stress.
-    double sig0;
+    double sig0 = 0.;
 
     /// Relative tolerance in yield condition
-    double yieldtol;
+    double yieldtol = 0.;
 
     /// Parameter that controls damage evolution (a=0 turns damage off).
-    double a;
+    double a = 0.;
 
     /// Total strain at peak stress sig0--Used only if plasthardtype=2
-    double ep;
+    double ep = 0.;
 
     /// Exponent in hardening law--Used only if plasthardtype=2
-    double md;
+    double md = 0.;
 
     /// type of damage law (0=exponential, 1=exponential and  damage starts after peak stress sig0)
-    int damlaw;
+    int damlaw = 1;
 
     /// coefficient required when damlaw=1 or 2
-    double param1;
+    double param1 = 0.;
 
     /// coefficient required when  damlaw=1 or 2
-    double param2;
+    double param2 = 0.;
 
     /// coefficient required when damlaw=2
-    double param3;
+    double param3 = 0.;
 
     /// coefficient required when damlaw=2
-    double param4;
+    double param4 = 0.;
 
     /// coefficient required when damlaw=2
-    double param5;
+    double param5 = 0.;
 
 
 public:
     RankineMat(int n, Domain * d);
-    virtual ~RankineMat() { }
 
     double evalYieldFunction(const FloatArray &sigPrinc, const double kappa);
     double evalYieldStress(const double kappa);
@@ -208,36 +207,36 @@ protected:
     FloatArray tempEffStress;
 
     /// Cumulative plastic strain (initial).
-    double kappa;
+    double kappa = 0.;
 
     /// Cumulative plastic strain (final).
-    double tempKappa;
+    double tempKappa = 0.;
 
     /**
      * Increments of cumulative plastic strain
      * associated with the first and secomnd principal stress
      * (used in the case of vertex return, needed for stiffness)
      */
-    double dKappa1, dKappa2;
+    double dKappa1 = 0., dKappa2 = 0.;
 
     /// Damage (initial).
-    double damage;
+    double damage = 0.;
 
     /// Damage (final).
-    double tempDamage;
+    double tempDamage = 0.;
 
     /// Tangent shear stiffness (needed for tangent matrix).
-    double tanG;
+    double tanG = 0.;
 
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
-    double stressWork;
+    double stressWork = 0.;
     /// Non-equilibrated density of total work done by stresses on strain increments.
-    double tempStressWork;
+    double tempStressWork = 0.;
     /// Density of dissipated work.
-    double dissWork;
+    double dissWork = 0.;
     /// Non-equilibrated density of dissipated work.
-    double tempDissWork;
+    double tempDissWork = 0.;
 #endif
 
 public:

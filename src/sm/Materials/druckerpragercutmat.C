@@ -54,20 +54,7 @@ DruckerPragerCutMat :: DruckerPragerCutMat(int n, Domain *d) : MPlasticMaterial2
     //     this->rmType = mpm_ClosestPoint;
 
     this->plType = nonassociatedPT; // Rankine associated, DP nonassociated
-
-    sigT = 0.;
-    H = 0.;
-    omegaCrit = 0.;
-    a = 0.;
-    yieldTol = 0.;
-    newtonIter = 30;
-    G = 0.;
-    K = 0.;
 }
-
-// destructor
-DruckerPragerCutMat :: ~DruckerPragerCutMat()
-{ }
 
 bool
 DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode) const

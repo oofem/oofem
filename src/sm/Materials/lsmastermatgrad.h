@@ -59,7 +59,6 @@ class LargeStrainMasterMaterialGrad : public LargeStrainMasterMaterial, Gradient
 {
 public:
     LargeStrainMasterMaterialGrad(int n, Domain *d);
-    virtual ~LargeStrainMasterMaterialGrad();
 
     void initializeFrom(InputRecord &ir) override;
     bool hasMaterialModeCapability(MaterialMode mode) const override;

@@ -67,7 +67,7 @@ protected:
     /// C1 constant, defined as $\int_0^hE_{oed}(z)\left\(d\Psi(z)\over dz\right\)^2\ dz$
     FloatArray c1;
     /// Flag indicating whether subsoil model defined in global or element local c.s.
-    bool globalFromulation;
+    bool globalFromulation = false;
 
 public:
     /**

@@ -51,11 +51,11 @@ class RankineMatNlStatus : public RankineMatStatus, public StructuralNonlocalMat
 {
 protected:
     /// Equivalent strain for averaging.
-    double localCumPlasticStrainForAverage;
+    double localCumPlasticStrainForAverage = 0.;
 
     /// For printing only
-    double kappa_nl;
-    double kappa_hat;
+    double kappa_nl = 0.;
+    double kappa_hat = 0.;
 
 public:
     RankineMatNlStatus(GaussPoint * g);
@@ -91,7 +91,6 @@ public NonlocalMaterialStiffnessInterface
 {
 public:
     RankineMatNl(int n, Domain * d);
-    virtual ~RankineMatNl() { }
 
     const char *giveClassName() const override { return "RankineMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_RankineMatNl_Name; }

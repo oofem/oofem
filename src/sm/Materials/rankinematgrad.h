@@ -63,9 +63,8 @@ protected:
      *  between initializeFrom and giveInputRecord methods is lost.
      */
 
-
-    double kappa_nl;
-    double kappa_hat;
+    double kappa_nl = 0.;
+    double kappa_hat = 0.;
 
 public:
 
@@ -94,21 +93,20 @@ public:
 class RankineMatGrad : public RankineMat, GradientDamageMaterialExtensionInterface
 {
 protected:
-    double L;
-    double mParam;
-    double negligible_damage;
+    double L = 0.;
+    double mParam = 0.;
+    double negligible_damage = 0.;
 
     enum GradientDamageFormulationType {
         GDFT_Standard = 0,
         GDFT_Eikonal = 2
     };
 
-    GradientDamageFormulationType gradientDamageFormulationType;
+    GradientDamageFormulationType gradientDamageFormulationType = GDFT_Standard;
 
 
 public:
     RankineMatGrad(int n, Domain *d);
-    virtual ~RankineMatGrad() { }
 
     const char *giveClassName() const override { return "RankineMatGrad"; }
     const char *giveInputRecordName() const override  { return _IFT_RankineMatGrad_Name; }

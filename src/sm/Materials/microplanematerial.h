@@ -73,7 +73,7 @@ class MicroplaneMaterial : public StructuralMaterial
 {
 protected:
     /// Number of microplanes.
-    int numberOfMicroplanes;
+    int numberOfMicroplanes = 0;
 
     /// Integration weights of microplanes.
     FloatArray microplaneWeights;
@@ -100,10 +100,10 @@ protected:
     std::vector<FloatArrayF<6>> L;
 
     /// Young's modulus
-    double E;
+    double E = 0.;
 
     /// Poisson's ratio
-    double nu;
+    double nu = 0.;
 
 public:
 
@@ -112,7 +112,7 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d), numberOfMicroplanes(0) { }
+    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
 
     /**
      * Computes the length of normal strain vector on given microplane.
