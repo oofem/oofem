@@ -70,20 +70,20 @@ public:
 
 protected:
     /// Volumetric plastic strain.
-    double volumetricPlasticStrain;
-    double tempVolumetricPlasticStrain;
+    double volumetricPlasticStrain = 0.;
+    double tempVolumetricPlasticStrain = 0.;
 
     /// Deviatoric of plastic strain.
     FloatArray plasticStrainDeviator;
     FloatArray tempPlasticStrainDeviator;
 
     /// Hardening variable.
-    double kappa;
-    double tempKappa;
+    double kappa = 0.;
+    double tempKappa = 0.;
 
     /// Indicates the state (i.e. elastic, yielding, vertex, unloading) of the Gauss point
-    int state_flag;
-    int temp_state_flag;
+    int state_flag = DruckerPragerPlasticitySMStatus :: DP_Elastic;
+    int temp_state_flag = DruckerPragerPlasticitySMStatus :: DP_Elastic;
 
 public:
     /// Constructor
@@ -200,35 +200,33 @@ protected:
      * 1: linear hardening/softening with cutoff at zero stress.
      * 2: exponential hardening/softening to limitYieldStress.
      */
-    int hardeningType;
+    int hardeningType = 1;
     /// Parameter of the exponential laws.
-    double kappaC;
+    double kappaC = 0.;
     /// Hardening modulus normalized with the elastic modulus, parameter of the linear hardening/softening law.
-    double hardeningModulus;
+    double hardeningModulus = 0.;
     /// Parameter of the exponential hardening law.
-    double limitYieldStress;
+    double limitYieldStress = 0.;
     /// Parameter of all three laws, this is the initial value of the yield stress in pure shear.
-    double initialYieldStress;
+    double initialYieldStress = 0.;
     /// Friction coefficient, parameter of the yield criterion.
-    double alpha;
+    double alpha = 0.;
     /// Dilatancy coefficient, parameter of the flow rule.
-    double alphaPsi;
+    double alphaPsi = 0.;
     /// Scalar factor between rate of plastic multiplier and rate of hardening variable.
-    double kFactor;
+    double kFactor = 0.;
 
     /// Associated linear elastic material.
     IsotropicLinearElasticMaterial LEMaterial;
 
     /// Yield tolerance.
-    double yieldTol;
+    double yieldTol = 0.;
     /// Maximum number of iterations for stress return.
-    int newtonIter;
+    int newtonIter = 0;
 
 public:
     /// Constructor
     DruckerPragerPlasticitySM(int n, Domain * d);
-    /// Destructor
-    virtual ~DruckerPragerPlasticitySM() {}
 
     void initializeFrom(InputRecord &ir) override;
 

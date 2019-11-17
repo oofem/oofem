@@ -44,7 +44,7 @@ REGISTER_Material(M1Material);
 #ifdef microplane_m1_new_implementation
 // ========================= new implementation =========================
 M1Material :: M1Material(int n, Domain *d) : MicroplaneMaterial(n, d)
-{ E = 0.; nu = 0.; EN = 0.; s0 = 0.; HN = 0.; }
+{ }
 
 void
 M1Material :: initializeFrom(InputRecord &ir)

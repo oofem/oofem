@@ -61,9 +61,9 @@ class WinklerPasternakMaterial : public StructuralMaterial
 {
 protected:
     /// C1 constant, defined as $\int_0^hE_{oed}(z)\left\(d\Psi(z)\over dz\right\)^2\ dz$
-    double c1;
+    double c1 = 0.;
     /// C2 constants in x and y directions, defined as $\int_0^hG_{x,y}(z)Psi^2(z)\ dz$
-    double c2x, c2y;
+    double c2x = 0., c2y = 0.;
 
 public:
     /**

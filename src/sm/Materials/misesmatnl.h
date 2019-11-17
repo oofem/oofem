@@ -57,7 +57,7 @@ class MisesMatNlStatus : public MisesMatStatus, public StructuralNonlocalMateria
 protected:
     // STATE VARIABLE DECLARATION
     // Equivalent strain for avaraging
-    double localCumPlasticStrainForAverage;
+    double localCumPlasticStrainForAverage = 0.;
 
 public:
     MisesMatNlStatus(GaussPoint * g);
@@ -89,13 +89,12 @@ class MisesMatNl : public MisesMat, public StructuralNonlocalMaterialExtensionIn
 public NonlocalMaterialStiffnessInterface
 {
 protected:
-    double Rf;
-    double exponent;
-    int averType;
+    double Rf = 0.;
+    double exponent = 1.;
+    int averType = 0;
 
 public:
     MisesMatNl(int n, Domain * d);
-    virtual ~MisesMatNl();
 
     const char *giveClassName() const override { return "MisesMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_MisesMatNl_Name; }

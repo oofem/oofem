@@ -51,14 +51,7 @@ namespace oofem {
 REGISTER_Material(AnisotropicDamageMaterial);
 
 AnisotropicDamageMaterial :: AnisotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d),
-    linearElasticMaterial(n, d),
-    E(0.),
-    nu(0.),
-    kappa0(0.),
-    kappaf(0.),
-    aA(0.),
-    equivStrainType(EST_Unknown),
-    damageLawType(DLT_Unknown)
+    linearElasticMaterial(n, d)
 {}
 
 
@@ -2070,17 +2063,8 @@ AnisotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g),
-    kappa(0.0), tempKappa(0.0),
-    damage(3, 3), tempDamage(3, 3),
-    strainZ(0.0), tempStrainZ(0.0),
-    flag(0), tempFlag(0),
-    storedFactor(1.0), tempStoredFactor(1.0)
-#ifdef keep_track_of_dissipated_energy
-    ,stressWork(0.0), tempStressWork(0.0),
-    dissWork(0.0), tempDissWork(0.0)
-#endif
-{
-}
+    damage(3, 3), tempDamage(3, 3)
+{}
 
 void
 AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const

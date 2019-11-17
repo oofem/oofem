@@ -56,8 +56,6 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     MicroplaneMaterial_Bazant(int n, Domain * d);
-    /// Destructor.
-    virtual ~MicroplaneMaterial_Bazant() { }
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;

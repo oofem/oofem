@@ -52,11 +52,10 @@ namespace oofem {
 class MisesMatGradStatus : public MisesMatStatus, GradientDamageMaterialStatusExtensionInterface
 {
 protected:
-    double localCumPlastStrainForAverage;
+    double localCumPlastStrainForAverage = 0.;
 
 public:
     MisesMatGradStatus(GaussPoint *g);
-    virtual ~MisesMatGradStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -77,12 +76,11 @@ public:
 class MisesMatGrad : public MisesMat, GradientDamageMaterialExtensionInterface
 {
 protected:
-    double L;
-    double mParam;
+    double L = 0.;
+    double mParam = 0.;
 
 public:
     MisesMatGrad(int n, Domain *d);
-    virtual ~MisesMatGrad();
 
     // definition
     const char *giveInputRecordName() const override { return _IFT_MisesMatGrad_Name; }

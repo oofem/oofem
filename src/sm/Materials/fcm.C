@@ -2309,7 +2309,6 @@ FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
     transMatrix_L2Gstress(), transMatrix_L2Gstrain()
 {
     // resize in constructor according to stress-state
-    this->nMaxCracks = 0;
     this->nMaxCracks = giveMaxNumberOfCracks(gp);
 
     crackStatuses.resize(this->nMaxCracks);

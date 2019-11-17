@@ -58,10 +58,6 @@ DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(GaussPoint *g
     strainVector.resize(6);
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
-
-    kappa = tempKappa = 0.;
-    state_flag = temp_state_flag = DruckerPragerPlasticitySMStatus :: DP_Elastic;
-    volumetricPlasticStrain = tempVolumetricPlasticStrain = 0.;
 }
 
 void
@@ -184,11 +180,7 @@ DruckerPragerPlasticitySMStatus :: restoreContext(DataStream &stream, ContextMod
 DruckerPragerPlasticitySM :: DruckerPragerPlasticitySM(int n, Domain *d) :
     StructuralMaterial(n, d),
     LEMaterial(n, d)
-{
-    kFactor = 0.;
-    yieldTol = 0.;
-    newtonIter = 0;
-}
+{}
 
 
 void

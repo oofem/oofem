@@ -117,7 +117,7 @@ class StructuralMaterial : public Material
 {
 protected:
     /// Reference temperature (temperature, when material has been built into structure).
-    double referenceTemperature;
+    double referenceTemperature = 0.;
 
 public:
     /// Voigt index map

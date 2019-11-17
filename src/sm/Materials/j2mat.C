@@ -46,16 +46,9 @@ REGISTER_Material(J2Mat);
 
 J2Mat :: J2Mat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
-    //
-    // constructor
-    //
-    kinematicHardeningFlag = isotropicHardeningFlag = 0;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     this->nsurf = 1;
 }
-
-J2Mat :: ~J2Mat()
-{ }
 
 void
 J2Mat :: initializeFrom(InputRecord &ir)

@@ -67,41 +67,40 @@ protected:
     //LinearElasticMaterial *linearElasticMaterial;
 
     /// Elastic shear modulus.
-    double G;
+    double G = 0.;
 
     /// Elastic bulk modulus.
-    double K;
+    double K = 0.;
 
     /// Hardening modulus.
-    double H;
+    double H = 0.;
 
     /// Uniaxial tensile strength for cut-off.
-    double sigT;
+    double sigT = 0.;
 
     /// Initial yield stress under pure shear.
-    double tau0;
+    double tau0 = 0.;
 
     /// Friction coefficient.
-    double alpha;
+    double alpha = 0.;
 
     ///Dilatancy coefficient (allowing non-associated plasticity).
-    double alphaPsi;
+    double alphaPsi = 0.;
 
     /// Tolerance of the error in the yield criterion.
-    double yieldTol;
+    double yieldTol = 0.;
 
     /// Maximum number of iterations in lambda search.
-    int newtonIter;
+    int newtonIter = 30;
 
     /// Maximum damage value.
-    double omegaCrit;
+    double omegaCrit = 0.;
 
     /// Parameter for damage computation from cumulative plastic strain
-    double a;
+    double a = 0.;
 
 public:
     DruckerPragerCutMat(int n, Domain * d);
-    virtual ~DruckerPragerCutMat();
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
     

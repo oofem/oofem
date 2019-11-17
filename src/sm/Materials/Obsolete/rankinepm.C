@@ -43,9 +43,6 @@ REGISTER_Material(RankinePlasticMaterial);
 
 RankinePlasticMaterial :: RankinePlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
-    //
-    // constructor
-    //
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     this->nsurf = 3;
     this->rmType = mpm_CuttingPlane;

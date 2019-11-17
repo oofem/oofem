@@ -50,12 +50,7 @@ REGISTER_Material(MisesMatGrad);
 /////////////////////////////////////////////////////////////////
 
 MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d), GradientDamageMaterialExtensionInterface(d)
-{
-    L = 0.;
-}
-
-MisesMatGrad :: ~MisesMatGrad()
-{ }
+{}
 
 
 bool
@@ -525,13 +520,7 @@ MisesMatGrad :: initializeFrom(InputRecord &ir)
 
 MisesMatGradStatus :: MisesMatGradStatus(GaussPoint *g) :
     MisesMatStatus(g)
-{
-    nonlocalDamageDrivingVariable = 0;
-}
-
-
-MisesMatGradStatus :: ~MisesMatGradStatus()
-{ }
+{}
 
 
 void

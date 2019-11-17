@@ -60,7 +60,7 @@ protected:
     PrescribedGradientHomogenization *bc;
 
     FloatMatrix tangent;
-    bool oldTangent;
+    bool oldTangent = true;
 
     /// Interface normal direction
     FloatArray mNormalDir;
@@ -103,7 +103,7 @@ public:
     void addStateVariables(const MaterialStatus &iStatus) override { OOFEM_ERROR("Not implemented."); }
 
     // For debugging only
-    bool mNewlyInitialized;
+    bool mNewlyInitialized = true;
 };
 
 
@@ -122,7 +122,7 @@ class StructuralFE2Material : public StructuralMaterial
 protected:
     std :: string inputfile;
     static int n;
-    bool useNumTangent;
+    bool useNumTangent = false;
 
 public:
     StructuralFE2Material(int n, Domain * d);

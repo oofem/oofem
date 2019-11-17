@@ -175,13 +175,12 @@ public:
 class RCM2Material : public StructuralMaterial
 {
 protected:
-    LinearElasticMaterial *linearElasticMaterial;
-    double Gf, Ft;
-    //double beta;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
+    double Gf = 0., Ft = 0.;
+    //double beta = 0.;
 
 public:
     RCM2Material(int n, Domain * d);
-    virtual ~RCM2Material();
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 

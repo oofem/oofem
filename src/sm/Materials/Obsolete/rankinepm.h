@@ -54,7 +54,7 @@ class RankinePlasticMaterial : public MPlasticMaterial
 {
 protected:
     /// Yield value.
-    double k;
+    double k = 0.;
 
 public:
     RankinePlasticMaterial(int n, Domain * d);

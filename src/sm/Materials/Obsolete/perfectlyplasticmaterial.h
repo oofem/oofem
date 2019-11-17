@@ -113,18 +113,13 @@ public:
 class PerfectlyPlasticMaterial : public StructuralMaterial
 {
 protected:
-    int yieldCriteria;
-    int loadingCriteria;
-    LinearElasticMaterial *linearElasticMaterial;
+    int yieldCriteria = 0;
+    int loadingCriteria = 0;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
 
 public:
 
-    PerfectlyPlasticMaterial(int n, Domain * d) : StructuralMaterial(n, d)
-    {
-        yieldCriteria = 0;
-        loadingCriteria = 0;
-        linearElasticMaterial = NULL;
-    }
+    PerfectlyPlasticMaterial(int n, Domain * d) : StructuralMaterial(n, d) {}
 
     virtual ~PerfectlyPlasticMaterial() {
         delete linearElasticMaterial;

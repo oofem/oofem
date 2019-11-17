@@ -57,13 +57,12 @@ class Domain;
 class J2Mat : public MPlasticMaterial2
 {
 protected:
-    int kinematicHardeningFlag, isotropicHardeningFlag;
-    double kinematicModuli, isotropicModuli;
-    double k;
+    int kinematicHardeningFlag = 0, isotropicHardeningFlag = 0;
+    double kinematicModuli = 0., isotropicModuli = 0.;
+    double k = 0.;
 
 public:
     J2Mat(int n, Domain * d);
-    virtual ~J2Mat();
 
     void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_J2Mat_Name; }

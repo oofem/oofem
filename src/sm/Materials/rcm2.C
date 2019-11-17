@@ -46,22 +46,9 @@ namespace oofem {
 #define rcm_RESIDUALSTIFFFACTOR 1.e-3
 
 RCM2Material :: RCM2Material(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
 {
-    linearElasticMaterial = NULL;
-    Gf = Ft = 0.;
 }
 
-
-RCM2Material :: ~RCM2Material()
-//
-// destructor
-//
-{
-    //delete linearElasticMaterial;
-}
 
 bool
 RCM2Material :: hasMaterialModeCapability(MaterialMode mode) const

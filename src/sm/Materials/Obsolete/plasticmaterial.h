@@ -61,11 +61,11 @@ protected:
     FloatArray tempStrainSpaceHardeningVarsVector;
 
     /// Yield function status indicator.
-    int state_flag;
-    int temp_state_flag;
+    int state_flag = PM_Elastic;
+    int temp_state_flag = PM_Elastic;
 
     /// Plastic consistency parameter.
-    double gamma, temp_gamma;
+    double gamma = 0., temp_gamma = 0.;
 
 public:
     PlasticMaterialStatus(GaussPoint * g, int statusSize);
@@ -117,7 +117,7 @@ class PlasticMaterial : public StructuralMaterial
 {
 protected:
     /// Reference to bulk (undamaged) material
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
 
 public:
     PlasticMaterial(int n, Domain * d);

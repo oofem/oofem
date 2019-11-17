@@ -68,32 +68,32 @@ class AnisotropicDamageMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     /// Scalar measure of the largest strain level ever reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar measure of the largest strain level.
-    double tempKappa;
+    double tempKappa = 0.;
     /// Second order damage tensor
     FloatMatrix damage;
     /// Non-equilibrated second order damage tensor
     FloatMatrix tempDamage;
     /// Out-of-plane value for 2dPlaneStress mode
-    double strainZ;
+    double strainZ = 0.;
     /// Non-equilibrated out-of-plane value for 2dPlaneStress mode
-    double tempStrainZ;
+    double tempStrainZ = 0.;
     /// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
-    int flag;
-    int tempFlag;
-    double storedFactor;
-    double tempStoredFactor;
+    int flag = 0;
+    int tempFlag = 0;
+    double storedFactor = 1.;
+    double tempStoredFactor = 1.;
 
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
-    double stressWork;
+    double stressWork = 0.;
     /// Non-equilibrated density of total work done by stresses on strain increments.
-    double tempStressWork;
+    double tempStressWork = 0.;
     /// Density of dissipated work.
-    double dissWork;
+    double dissWork = 0.;
     /// Non-equilibrated density of dissipated work.
-    double tempDissWork;
+    double tempDissWork = 0.;
 #endif
 
 public:
@@ -180,23 +180,23 @@ protected:
     /// Reference to bulk (undamaged) material
     IsotropicLinearElasticMaterial linearElasticMaterial;
     /// Young's modulus
-    double E;
+    double E = 0.;
     /// Poisson's ratio
-    double nu;
+    double nu = 0.;
     /// Damage threshold kappa0, as defined in the paper mentioned above.
-    double kappa0;
+    double kappa0 = 0.;
     /// Damage parameter kappa_f (in the paper denoted as "a")
-    double kappaf;
+    double kappaf = 0.;
     /// Damage parameter a*A, needed to obtain Kappa(trD), according to eq. 33 in the paper mentioned above.
-    double aA;
+    double aA = 0.;
     /// Type characterizing the algorithm used to compute equivalent strain measure.
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
     /// Parameter specifying the definition of equivalent strain.
-    EquivStrainType equivStrainType;
+    EquivStrainType equivStrainType = EST_Unknown;
     /// Type characterizing the damage law.
     enum DamLawType { DLT_Unknown, DLT_Desmorat1, DLT_Desmorat2, DLT_Linear, DLT_Exponential };
     /// Parameter specifying the damage law.
-    DamLawType damageLawType;
+    DamLawType damageLawType = DLT_Unknown;
 
 public:
     /// Constructor

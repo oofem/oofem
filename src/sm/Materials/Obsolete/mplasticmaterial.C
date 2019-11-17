@@ -46,20 +46,11 @@ namespace oofem {
 #define PLASTIC_MATERIAL_MAX_ITERATIONS 90
 
 MPlasticMaterial :: MPlasticMaterial(int n, Domain *d)  : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
 {
-    linearElasticMaterial = NULL;
-    rmType = mpm_ClosestPoint;
-    plType = associatedPT;
 }
 
 
 MPlasticMaterial :: ~MPlasticMaterial()
-//
-// destructor
-//
 {
     delete linearElasticMaterial;
 }
@@ -1357,13 +1348,9 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 
 
 MPlasticMaterialStatus :: MPlasticMaterialStatus(GaussPoint *g, int statusSize) :
-    StructuralMaterialStatus(g), plasticStrainVector(), tempPlasticStrainVector(),
-    strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize),
-    gamma(),
-    tempGamma()
-{
-    state_flag = temp_state_flag = MPlasticMaterialStatus :: PM_Elastic;
-}
+    StructuralMaterialStatus(g),
+    strainSpaceHardeningVarsVector(statusSize), tempStrainSpaceHardeningVarsVector(statusSize)
+{}
 
 
 void
