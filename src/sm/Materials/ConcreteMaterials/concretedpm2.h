@@ -67,7 +67,8 @@
 #define _IFT_ConcreteDPM2_softeningType "stype"
 #define _IFT_ConcreteDPM2_ftOne "ft1"
 #define _IFT_ConcreteDPM2_wfOne "wf1"
-#define _IFT_ConcreteDPM2_rateFlag "rateflag"
+#define _IFT_ConcreteDPM2_strengthratetype "sratetype"
+#define _IFT_ConcreteDPM2_energyratetype "eratetype"
 #define _IFT_ConcreteDPM2_deltatime "deltat"
 #define _IFT_ConcreteDPM2_helem "helem"
 #define _IFT_ConcreteDPM2_isoflag "isoflag"
@@ -98,10 +99,9 @@ protected:
     //@{
     FloatArray plasticStrain;
     FloatArray tempPlasticStrain;
-
+    
     FloatArray reducedStrain;
     FloatArray tempReducedStrain;
-
     //@}
 
     /// @name Hardening variable
@@ -673,14 +673,21 @@ protected:
     /// Input parameter which simulates a loading rate. Only for debugging purposes.
     double deltaTime;
 
-    /** Flag which signals if strainRate effects should be considered.
+    /** Type of strength strain rate dependence used.
      * 0 = no strain rate (default)
-     * 1 = mod. CEB strain rate effect for strength and squared for fracture energy
-     * 2 = mod. CEB strain rate effect for strength and linear for fracture energy
-     * 3 = mod. CEB strain rate effect for strength with constant fracture energy
+     * 1 = Model Code 2010 initial branch of strain rate effect for strength
+     * 2 = Model Code 2010 initial and second branch of strain rate effect for strength
      */
-    int strainRateFlag;
+    int strengthRateType;
+    
+    /** Type of energy strain rate dependence used if strengthRateType >0 .
+     * 0 = mod. CEB strain rate effect for strength with constant fracture energy
+     * 1 = CEB strain rate effect for strength and linear for fracture energy
+     * 2 = mod. CEB strain rate effect for strength and squared for fracture energy
 
+     */
+    int energyRateType;
+    
 public:
     /// Constructor
     ConcreteDPM2(int n, Domain *d);

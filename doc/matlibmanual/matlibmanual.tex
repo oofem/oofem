@@ -4172,11 +4172,17 @@ Parameters &- \param{d} material density\\
 &- \param{dilation} dilation factor, optional, default value 0.85\\
 &- \param{hp} hardening modulus, optional, default value 0.5\\
 &- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
-&- \param{rateflag} flag which allows for the consideration of the effect of strain rates (using CEB-FIP Model code 2010) if set to 1, 2 or 3. Default value 0 which corresponds to no strain rate effect.\\
+&- \param{sratetype}  Dynamic increase factor (DIF) for strength
 \begin{itemize}\setlength{\itemsep}{-3pt}
-\item[1 -] CEB-Model code 2010 rate factor for strength and square rate factor for fracture energy  
-\item[2 -] CEB-Model code 2010 rate factor for strength and fracture energy
-\item[3 -] CEB-Model code 2010 rate factor for strength and no rate factor for fracture energy
+\item[0 -] DIF = 1  
+\item[1 -] First branch of Model Code 2010 DIF for strength.
+\item[2 -] First and second branch of Model Code 2010 DIF for strength
+\end{itemize}\\
+&- \param{eratetype} Dynamic increase factor (DIF) for fracture energy. Only used if sratetype is not equal to 0. 
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] DIF = 1
+\item[1 -] DIF from sratetype  
+\item[2 -] DIF squared from sratetype
 \end{itemize}\\
 &- \param{yieldtol} tolerance for the implicit stress return algorithm, optional, default value $1 \times 10^{-6}$\\
 &- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
