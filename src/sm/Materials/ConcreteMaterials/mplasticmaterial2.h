@@ -340,18 +340,9 @@ protected:
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
-    void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                 MatResponseMode,
-                                 GaussPoint *gp,
-                                 TimeStep *tStep) override;
-
-    void giveFiberStiffMtrx(FloatMatrix &answer,
-                            MatResponseMode, GaussPoint *gp,
-                            TimeStep *tStep) override;
+    FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> giveFiberStiffMtrx(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
     long getPopulationSignature(IntArray &mask) const;

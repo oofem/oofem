@@ -519,50 +519,44 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
 // 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
 //
 {
-    FloatMatrix layerMatrix;
-    double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
-    double layerZCoord2;
-
-    answer.resize(5, 5);
-    answer.zero();
-
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord, gp);
-    top = this->give(CS_TopZCoord, gp);
+    double bottom = this->give(CS_BottomZCoord, gp);
+    double top = this->give(CS_TopZCoord, gp);
 
+    answer.resize(5,5);
+    answer.zero();
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         GaussPoint *layerGp = giveSlaveGaussPoint(gp, layer - 1);
 
         ///@todo Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
-        StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
-        mat->givePlateLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
+        auto mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
+        auto layerMatrix = mat->givePlateLayerStiffMtrx(rMode, layerGp, tStep);
         if ( this->layerRots.at(layer) != 0. ) {
             double rot = this->layerRots.at(layer);
             double c = cos(rot * M_PI / 180.);
             double s = sin(rot * M_PI / 180.);
-            FloatMatrix rotTangent = {
-                {  c *c,    s *s,  0,  0,    -c *s },
-                {  s *s,    c *c,  0,  0,     c *s },
-                {    0,      0,  c,  s,       0 },
-                {    0,      0, -s,  c,       0 },
-                { 2 * c * s, -2 * c * s,  0,  0, c * c - s * s }
+            FloatMatrixF<5,5> rotTangent = {
+                 c *c,  s *s, 0., 0.,     2 * c * s,
+                 s *s,  c *c, 0., 0.,    -2 * c * s,
+                   0.,    0.,  c, -s,            0.,
+                   0.,    0.,  s,  c,            0.,
+                -c *s, c *s,  0., 0., c * c - s * s,
             };
-            layerMatrix.rotatedWith(rotTangent, 't');
+            layerMatrix = unrotate(layerMatrix, rotTangent);
         }
 
         //
         // resolve current layer z-coordinate
         //
-        layerThick = this->layerThicks.at(layer);
-        layerWidth  = this->layerWidths.at(layer);
-        layerZeta   = layerGp->giveNaturalCoordinate(3);
-        layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
-        layerZCoord2 = layerZCoord * layerZCoord;
+        double layerThick = this->layerThicks.at(layer);
+        double layerWidth  = this->layerWidths.at(layer);
+        double layerZeta   = layerGp->giveNaturalCoordinate(3);
+        double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+        double layerZCoord2 = layerZCoord * layerZCoord;
         //
         // perform integration
         //
         // 1) bending terms mx, my, mxy
-
         answer.at(1, 1) += layerMatrix.at(1, 1) * layerWidth * layerThick * layerZCoord2;
         answer.at(1, 2) += layerMatrix.at(1, 2) * layerWidth * layerThick * layerZCoord2;
         answer.at(1, 3) += layerMatrix.at(1, 5) * layerWidth * layerThick * layerZCoord2;
@@ -599,46 +593,41 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
 // 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
 //
 {
-    FloatMatrix layerMatrix;
-    double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
-    // double zi, zi1;
-    double layerZCoord2;
-
     answer.resize(8, 8);
     answer.zero();
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord, gp);
-    top = this->give(CS_TopZCoord, gp);
+    double bottom = this->give(CS_BottomZCoord, gp);
+    double top = this->give(CS_TopZCoord, gp);
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         GaussPoint *layerGp = giveSlaveGaussPoint(gp, layer - 1);
 
         ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
         /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
-        StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
-        mat->givePlateLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
+        auto mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(layer) ) );
+        auto layerMatrix = mat->givePlateLayerStiffMtrx(rMode, layerGp, tStep);
         if ( this->layerRots.at(layer) != 0. ) {
             double rot = this->layerRots.at(layer);
             double c = cos(rot);
             double s = sin(rot);
-            FloatMatrix rotTangent = {
-                {  c *c,    s *s,  0,  0,    -c *s },
-                {  s *s,    c *c,  0,  0,     c *s },
-                {    0,      0,  c,  s,       0 },
-                {    0,      0, -s,  c,       0 },
-                { 2 * c * s, -2 * c * s,  0,  0, c * c - s * s }
+            FloatMatrixF<5,5> rotTangent = {
+                 c *c,  s *s, 0., 0.,     2 * c * s,
+                 s *s,  c *c, 0., 0.,    -2 * c * s,
+                   0.,    0.,  c, -s,            0.,
+                   0.,    0.,  s,  c,            0.,
+                -c *s, c *s,  0., 0., c * c - s * s,
             };
-            layerMatrix.rotatedWith(rotTangent, 't');
+            layerMatrix = unrotate(layerMatrix, rotTangent);
         }
 
         //
         // resolve current layer z-coordinate
         //
-        layerThick = this->layerThicks.at(layer);
-        layerWidth  = this->layerWidths.at(layer);
-        layerZeta   = layerGp->giveNaturalCoordinate(3);
-        layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
-        layerZCoord2 = layerZCoord * layerZCoord;
+        double layerThick = this->layerThicks.at(layer);
+        double layerWidth  = this->layerWidths.at(layer);
+        double layerZeta   = layerGp->giveNaturalCoordinate(3);
+        double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+        double layerZCoord2 = layerZCoord * layerZCoord;
         //
         // perform integration
         //
@@ -677,6 +666,7 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
     }
 }
 
+
 void
 LayeredCrossSection :: give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
@@ -684,8 +674,6 @@ LayeredCrossSection :: give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatR
     answer.resize(6,6);
     answer.zero();
 }
-    
-
 
 
 void
@@ -703,7 +691,6 @@ LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
 // 2) strainVectorShell {eps_x,eps_y,gamma_xy, kappa_x, kappa_y, kappa_xy, gamma_zx, gamma_zy}
 //
 {
-    FloatMatrix layerMatrix;
     double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     double layerZCoord2;
 
@@ -719,8 +706,8 @@ LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
 
         ///@todo The logic in this whole class is pretty messy to support both slave-gp's and normal gps. Rethinking the approach is necessary.
         /// Just using the gp number doesn't nicely support more than 1 gp per layer. Must rethink.
-        StructuralMaterial *mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(i) ) );
-        mat->give2dBeamLayerStiffMtrx(layerMatrix, rMode, layerGp, tStep);
+        auto mat = static_cast< StructuralMaterial * >( domain->giveMaterial( this->giveLayerMaterial(i) ) );
+        auto layerMatrix = mat->give2dBeamLayerStiffMtrx(rMode, layerGp, tStep);
         if ( this->layerRots.at(i) != 0. ) {
             OOFEM_ERROR("Doesn't support layer rotations.");
         }

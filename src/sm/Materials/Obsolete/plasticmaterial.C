@@ -598,11 +598,10 @@ PlasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
 }
 
 
-void
-PlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                            MatResponseMode mode,
+FloatMatrixF<2,2>
+PlasticMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -612,18 +611,17 @@ PlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give2dBeamLayerStiffMtrx(mode, gp, tStep);
     } else {
-        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+        return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
 
-void
-PlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
+FloatMatrixF<5,5>
+PlasticMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep)
+                                           TimeStep *tStep) const
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -633,18 +631,17 @@ PlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlateLayerStiffMtrx(mode, gp, tStep);
     } else {
-        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+        return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 
 
-void
-PlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
-                                      MatResponseMode mode,
+FloatMatrixF<3,3>
+PlasticMaterial :: giveFiberStiffMtrx(MatResponseMode mode,
                                       GaussPoint *gp,
-                                      TimeStep *tStep)
+                                      TimeStep *tStep) const
 //
 // returns receiver's Fiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
@@ -654,9 +651,9 @@ PlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
 // this implementation should be faster.
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->giveFiberStiffMtrx(mode, gp, tStep);
     } else {
-        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+        return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 

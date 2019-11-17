@@ -267,12 +267,8 @@ protected:
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
-    void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                 GaussPoint *gp,
-                                 TimeStep *tStep) override;
+    FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 };
 } // end namespace oofem
 #endif // rcm2_h

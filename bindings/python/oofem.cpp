@@ -449,8 +449,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, give1dStressStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);   
         }
 
-        void give2dBeamLayerStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give2dBeamLayerStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        oofem::FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give2dBeamLayerStiffMtrx, mmode, gp, tStep);   
         }
         void give2dLatticeStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, give2dLatticeStiffMtrx, std::ref(answer), mmode, gp, tStep);   

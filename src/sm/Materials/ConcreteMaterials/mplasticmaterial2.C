@@ -1784,11 +1784,10 @@ MPlasticMaterial2 :: give1dStressStiffMtrx(MatResponseMode mode,
 
 
 
-void
-MPlasticMaterial2 :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                              MatResponseMode mode,
+FloatMatrixF<2,2>
+MPlasticMaterial2 :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
+                                              TimeStep *tStep) const
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -1799,22 +1798,21 @@ MPlasticMaterial2 :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+            return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
         } else {
-            answer = this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
+            return this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->give2dBeamLayerStiffMtrx(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give2dBeamLayerStiffMtrx(mode, gp, tStep);
     }
 }
 
 
 
-void
-MPlasticMaterial2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mode,
+FloatMatrixF<5,5>
+MPlasticMaterial2 :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                              GaussPoint *gp,
-                                             TimeStep *tStep)
+                                             TimeStep *tStep) const
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -1825,20 +1823,19 @@ MPlasticMaterial2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+            return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
         } else {
-            answer = this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
+            return this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->givePlateLayerStiffMtrx(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlateLayerStiffMtrx(mode, gp, tStep);
     }
 }
 
-void
-MPlasticMaterial2 :: giveFiberStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
+FloatMatrixF<3,3>
+MPlasticMaterial2 :: giveFiberStiffMtrx(MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
+                                        TimeStep *tStep) const
 //
 // returns receiver's 1dFiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
@@ -1849,12 +1846,12 @@ MPlasticMaterial2 :: giveFiberStiffMtrx(FloatMatrix &answer,
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+            return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
         } else {
-            answer = this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
+            return this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->giveFiberStiffMtrx(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->giveFiberStiffMtrx(mode, gp, tStep);
     }
 }
 

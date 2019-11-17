@@ -443,11 +443,10 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoi
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
         return this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     } else {
-        FloatMatrix answer;
+        FloatMatrix fullAnswer, answer;
         const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
         return answer;
@@ -456,11 +455,10 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoi
 
 
 
-void
-PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                                     MatResponseMode mode,
+FloatMatrixF<2,2>
+PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                                      GaussPoint *gp,
-                                                     TimeStep *tStep)
+                                                     TimeStep *tStep) const
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -469,21 +467,21 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give2dBeamLayerStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 
 
-void
-PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                                    MatResponseMode mode,
+FloatMatrixF<5,5>
+PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                                     GaussPoint *gp,
-                                                    TimeStep *tStep)
+                                                    TimeStep *tStep) const
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -492,12 +490,13 @@ PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlateLayerStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 

@@ -286,12 +286,11 @@ LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussP
 void
 LinearElasticMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->give2dBeamLayerStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->give2dBeamLayerStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -312,12 +311,11 @@ LinearElasticMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, Ga
 void
 LinearElasticMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->givePlateLayerStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->givePlateLayerStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -338,12 +336,11 @@ LinearElasticMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, Gau
 void
 LinearElasticMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->giveFiberStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->giveFiberStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);

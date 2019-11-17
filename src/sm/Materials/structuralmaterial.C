@@ -654,13 +654,13 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         answer = this->give1dStressStiffMtrx(rMode, gp, tStep);
         break;
     case _PlateLayer:
-        this->givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->givePlateLayerStiffMtrx(rMode, gp, tStep);
         break;
     case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->give2dBeamLayerStiffMtrx(rMode, gp, tStep);
         break;
     case _Fiber:
-        this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->giveFiberStiffMtrx(rMode, gp, tStep);
         break;
     case _Warping:
         answer = eye<2>();
@@ -1053,8 +1053,8 @@ StructuralMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
     FloatMatrix m3d;
     // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
     const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    auto invMat3d = inv(FloatMatrixF<6,6>(m3d));
-    return inv(invMat3d({0, 1, 5}, {0, 1, 5}));
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 1, 5}, {0, 1, 5}));
 }
 
 FloatMatrixF<4,4>
@@ -1077,99 +1077,46 @@ StructuralMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
     FloatMatrix m3d;
     // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
     const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    auto invMat3d = inv(FloatMatrixF<6,6>(m3d));
-    return {1. / invMat3d.at(1, 1)};
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return {1. / c3d.at(1, 1)};
 }
 
 
-void
-StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
+FloatMatrixF<2,2>
+StructuralMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
-                                               TimeStep *tStep)
-//
-// return material stiffness matrix for2dBeamLayer mode
-//
+                                               TimeStep *tStep) const
 {
-    FloatMatrix m3d, invMat3d, invMatLayer(2, 2);
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-
-    invMatLayer.at(1, 1) = invMat3d.at(1, 1);
-    invMatLayer.at(1, 2) = invMat3d.at(1, 5);
-    invMatLayer.at(2, 1) = invMat3d.at(5, 1);
-    invMatLayer.at(2, 2) = invMat3d.at(5, 5);
-
-    answer.beInverseOf(invMatLayer);
+    FloatMatrix m3d;
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 1}, {0, 1}));
 }
 
 
-void
-StructuralMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                              MatResponseMode mode,
+FloatMatrixF<5,5>
+StructuralMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
-//
-// return material stiffness matrix for 2dPlateLayer
-//
+                                              TimeStep *tStep) const
 {
-    FloatMatrix m3d, invMat3d, invMatLayer(5, 5);
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-    //invMatLayer.beSubMatrixOf(invMat3d, indx, indx);
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 1; j <= 2; j++ ) {
-            invMatLayer.at(i, j) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 4; i <= 6; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i - 1, j - 1) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i, j - 1) = invMat3d.at(i, j);
-            invMatLayer.at(j - 1, i) = invMat3d.at(j, i);
-        }
-    }
-
-    answer.beInverseOf(invMatLayer);
+    FloatMatrix m3d;
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 1, 3, 4, 5}, {0, 1, 3, 4, 5}));
 }
 
-void
-StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<3,3>
+StructuralMaterial :: giveFiberStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
-//
-// return material stiffness matrix for 2dPlateLayer
-//
+                                         TimeStep *tStep) const
 {
-    FloatMatrix m3d, invMat3d, invMatLayer(3, 3);
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-
-    invMatLayer.at(1, 1) = invMat3d.at(1, 1);
-    invMatLayer.at(1, 2) = invMat3d.at(1, 5);
-    invMatLayer.at(1, 3) = invMat3d.at(1, 6);
-    invMatLayer.at(2, 1) = invMat3d.at(5, 1);
-    invMatLayer.at(2, 2) = invMat3d.at(5, 5);
-    invMatLayer.at(2, 3) = invMat3d.at(5, 6);
-    invMatLayer.at(3, 1) = invMat3d.at(6, 1);
-    invMatLayer.at(3, 2) = invMat3d.at(6, 5);
-    invMatLayer.at(3, 3) = invMat3d.at(6, 6);
-
-    answer.beInverseOf(invMatLayer);
+    FloatMatrix m3d;
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 4, 5}, {0, 4, 5}));
 }
 
 void

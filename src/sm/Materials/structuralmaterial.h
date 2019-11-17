@@ -547,9 +547,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -562,9 +560,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mmode, GaussPoint *gp,
-                                         TimeStep *tStep);
+    virtual FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -577,9 +573,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveFiberStiffMtrx(FloatMatrix &answer,
-                                    MatResponseMode mmode, GaussPoint *gp,
-                                    TimeStep *tStep);
+    virtual FloatMatrixF<3,3> giveFiberStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Method for computing 2d lattice stiffness matrix of receiver.

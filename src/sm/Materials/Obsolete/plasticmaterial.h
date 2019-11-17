@@ -220,20 +220,11 @@ protected:
 
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                 MatResponseMode mode,
-                                 GaussPoint *gp,
-                                 TimeStep *tStep) override;
+    FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveFiberStiffMtrx(FloatMatrix &answer,
-                            MatResponseMode mode,
-                            GaussPoint *gp,
-                            TimeStep *tStep) override;
+    FloatMatrixF<3,3> giveFiberStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 };
 } // end namespace oofem
 #endif // plasticmaterial_h
