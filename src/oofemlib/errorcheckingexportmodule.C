@@ -415,9 +415,7 @@ EigenValueErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-ErrorCheckingExportModule :: ErrorCheckingExportModule(int n, EngngModel *e) : ExportModule(n, e),
-    allPassed(true),
-    writeChecks(false)
+ErrorCheckingExportModule :: ErrorCheckingExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
 }
 
