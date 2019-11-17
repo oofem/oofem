@@ -263,7 +263,7 @@ public:
     bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->gf != 0. ); }
     void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
     void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
     /**
      * computes the value of damage parameter omega,
@@ -305,7 +305,7 @@ public:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-    double damageFunctionPrime(double kappa, GaussPoint *gp) override;
+    double damageFunctionPrime(double kappa, GaussPoint *gp) const override;
     /**
      * Returns the value of compliance parameter
      * corresponding to a given value

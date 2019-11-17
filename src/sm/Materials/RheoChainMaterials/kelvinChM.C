@@ -112,7 +112,7 @@ KelvinChainMaterial :: computeCharCoefficients(double tPrime, GaussPoint *gp, Ti
 }
 
 double
-KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+KelvinChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.

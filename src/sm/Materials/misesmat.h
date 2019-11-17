@@ -99,16 +99,16 @@ protected:
 public:
     MisesMat(int n, Domain *d);
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) const;
     void performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
 
-    double computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep);
-    double computeYieldStressPrime(double kappa);
+    double computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep) const;
+    double computeYieldStressPrime(double kappa) const;
 
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
-    double computeDamageParam(double tempKappa);
-    double computeDamageParamPrime(double tempKappa);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
+    double computeDamageParam(double tempKappa) const;
+    double computeDamageParamPrime(double tempKappa) const;
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     void initializeFrom(InputRecord &ir) override;
 
@@ -130,7 +130,7 @@ public:
                                   TimeStep *tStep) override;
 
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
 
@@ -139,8 +139,8 @@ public:
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
 
 
-    double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
-    double giveTemperature(GaussPoint *gp, TimeStep *tStep);
+    double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
+    double giveTemperature(GaussPoint *gp, TimeStep *tStep) const;
 
 protected:
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);

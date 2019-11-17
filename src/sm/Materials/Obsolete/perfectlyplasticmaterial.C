@@ -438,11 +438,8 @@ PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                                  MatResponseMode mode,
-                                                  GaussPoint *gp,
-                                                  TimeStep *tStep)
+FloatMatrixF<1,1>
+PerfectlyPlasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 
 //
 // returns receiver's 1dMaterialStiffnessMAtrix
@@ -450,10 +447,12 @@ PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
 {
     FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 

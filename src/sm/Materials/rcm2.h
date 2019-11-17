@@ -270,9 +270,8 @@ protected:
     void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp,
+                                            TimeStep *tStep) const override;
     void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;

@@ -81,7 +81,7 @@ public:
      * @param nei The element with the non local material extension.
      */
     virtual void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
-                                 bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) = 0;
+                                 bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei) = 0;
 
     /**
      * Abstract method calculating the minimum distance of the Gauss Point

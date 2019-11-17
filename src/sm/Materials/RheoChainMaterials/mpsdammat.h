@@ -294,10 +294,8 @@ public:
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
+                                            TimeStep *tStep) const override;
 };
 } // end namespace oofem
 #endif // mpsdammat_h

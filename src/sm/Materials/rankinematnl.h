@@ -170,7 +170,7 @@ public:
     /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
     double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
 
-    int hasBoundedSupport() override { return 1; }
+    int hasBoundedSupport() const override { return 1; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

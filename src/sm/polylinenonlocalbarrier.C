@@ -59,7 +59,7 @@ PolylineNonlocalBarrier :: ~PolylineNonlocalBarrier()
 
 void
 PolylineNonlocalBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
-                                           bool &shieldFlag, NonlocalMaterialExtensionInterface *nei)
+                                           bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei)
 {
     if ( this->isActivated(c1, c2) ) {
         weight = 0.0;

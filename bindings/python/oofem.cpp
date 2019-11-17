@@ -438,8 +438,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, givePlaneStrainStiffMtrx_dCde, std::ref(answer), mmode, gp, tStep);   
         }
 
-        void give1dStressStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give1dStressStiffMtrx, std::ref(answer), mmode, gp, tStep);   
+        oofem::FloatMatrixF<1,1> give1dStressStiffMtrx(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give1dStressStiffMtrx, mmode, gp, tStep);
         }
         
         oofem::FloatMatrixF<1,1> give1dStressStiffMtrx_dPdF(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {

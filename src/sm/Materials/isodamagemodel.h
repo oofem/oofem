@@ -238,7 +238,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) { OOFEM_ERROR("not implemented"); }
+    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const { OOFEM_ERROR("not implemented"); }
     /**
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param[out] omega Contains result.
@@ -253,6 +253,9 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsotropicDamageMaterialStatus(gp); }
 
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp,
+                                            TimeStep *tStep) const override;
+    
 protected:
     /**
      * Abstract service allowing to perform some initialization, when damage first appear.
@@ -270,7 +273,7 @@ protected:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-    virtual double damageFunctionPrime(double kappa, GaussPoint *gp) {
+    virtual double damageFunctionPrime(double kappa, GaussPoint *gp) const {
         OOFEM_ERROR("not implemented");
         return 0;
     }
@@ -283,9 +286,6 @@ protected:
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // isodamagemodel_h

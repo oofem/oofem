@@ -200,7 +200,7 @@ public:
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return true; }
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     /// implements B.9
     virtual double computeEquivalentAge(GaussPoint *gp, TimeStep *tStep) const;

@@ -529,15 +529,13 @@ public:
      * However, this reduction is quite time consuming and if it is possible,
      * it is recommended to overload this method and provide direct method for computing
      * particular stiffness matrix.
-     * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     * @return Stiffness matrix.
      */
     //@{
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mmode, GaussPoint *gp,
-                                       TimeStep *tStep);
+    virtual FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual FloatMatrixF<1,1> give1dStressStiffMtrx_dPdF(MatResponseMode mmode,
                                                          GaussPoint *gp, TimeStep *tStep) const;

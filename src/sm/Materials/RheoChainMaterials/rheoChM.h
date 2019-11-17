@@ -201,7 +201,7 @@ public:
      *    { answer.clear(); }*/
 
     /// Evaluation of the incremental modulus.
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) const = 0;
 
     /*    virtual double giveIncrementalModulus(GaussPoint *gp, TimeStep *tStep) {
      * if ( (tStep->giveIntrinsicTime() < this->castingTime) && ( this->zeroStiffness > 0. ) ) {
@@ -241,10 +241,8 @@ public:
                                   MatResponseMode mmode,
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp,
+                                            TimeStep *tStep) const override;
 
     void give2dLatticeStiffMtrx(FloatMatrix &answer,
                                 MatResponseMode mmode,

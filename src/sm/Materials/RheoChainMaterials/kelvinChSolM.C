@@ -45,7 +45,7 @@ KelvinChainSolidMaterial :: KelvinChainSolidMaterial(int n, Domain *d) : RheoCha
 { }
 
 double
-KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.

@@ -611,8 +611,7 @@ ConcreteDPM2 :: giveRealStressVector_1d(FloatArray &answer,
         }
     }
 
-    FloatMatrix D;
-    this->linearElasticMaterial.give1dStressStiffMtrx(D, ElasticStiffness, gp, tStep);
+    auto D = this->linearElasticMaterial.give1dStressStiffMtrx(ElasticStiffness, gp, tStep);
 
     // compute elastic strains and trial stress
     FloatArray effectiveStress;
@@ -2605,26 +2604,24 @@ ConcreteDPM2 :: computeHardeningTwoPrime(double kappa) const
     }
 }
 
-void
-ConcreteDPM2 :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+ConcreteDPM2 :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
-    answer.resize(1, 1);
-    answer.at(1, 1) = eM;
+    auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
     if ( mode == SecantStiffness ) {
         FloatArray elasticStrain = status->giveTempReducedStrain();
         if ( elasticStrain.giveSize() == 0 ) {
-            return;
+            return {eM};
         }
         elasticStrain.subtract(status->giveTempPlasticStrain() );
-        FloatArray effectiveStress;
-        effectiveStress.beProductOf(answer, elasticStrain);
-        if ( effectiveStress.at(1) > 0 ) {
+        auto effectiveStress = eM * elasticStrain.at(1);
+        if ( effectiveStress > 0 ) {
             double omegaTension = min(status->giveTempDamageTension(), 0.999999);
-            answer.times(1.0 - omegaTension);
+            return {eM * (1.0 - omegaTension)};
         }
     }
+    return {eM};
 }
 
 void

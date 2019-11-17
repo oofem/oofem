@@ -103,7 +103,7 @@ MaxwellChainMaterial :: computeCharCoefficients(double tPrime, GaussPoint *gp, T
 
 
 double
-MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.

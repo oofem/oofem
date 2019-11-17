@@ -168,7 +168,7 @@ public:
                                           const FloatArray &reducesStrain, TimeStep *tStep) override;
     void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
 protected:
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
     void givePlaneStressStiffMtrx(FloatMatrix &answer,
                                   MatResponseMode mode,
                                   GaussPoint *gp,

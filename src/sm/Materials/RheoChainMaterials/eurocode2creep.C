@@ -333,7 +333,7 @@ Eurocode2CreepMaterial :: computeEquivalentAge(GaussPoint *gp, TimeStep *tStep) 
 
 
 double
-Eurocode2CreepMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+Eurocode2CreepMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.

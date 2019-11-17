@@ -221,16 +221,15 @@ SteelRelaxMat :: giveRealStressVector(FloatArray &answer,
 }
 
 
-void
-SteelRelaxMat :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mode,
+FloatMatrixF<1,1>
+SteelRelaxMat :: give1dStressStiffMtrx(MatResponseMode mode,
                                        GaussPoint *gp,
-                                       TimeStep *tStep)
+                                       TimeStep *tStep) const
 {
-    answer.resize(1, 1);
-    answer.zero();
     if ( this->isActivated(tStep) ) {
-        answer.at(1, 1) = this->E;
+        return {this->E};
+    } else {
+        return {0.};
     }
 }
 

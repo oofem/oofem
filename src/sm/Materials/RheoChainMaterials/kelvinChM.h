@@ -92,7 +92,7 @@ protected:
 
     FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     LinearElasticMaterial *giveLinearElasticMaterial();
 };

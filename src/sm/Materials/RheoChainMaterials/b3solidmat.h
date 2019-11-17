@@ -145,10 +145,10 @@ protected:
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /// Evaluation of the relative volume of the solidified material.
-    double computeSolidifiedVolume(TimeStep *tStep);
+    double computeSolidifiedVolume(TimeStep *tStep) const;
 
     /// Evaluation of the flow term viscosity.
-    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
+    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const;
 
     double inverse_sorption_isotherm(double w) const;
 
@@ -160,7 +160,7 @@ protected:
 
     void computeCharTimes() override;
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
 
@@ -171,7 +171,7 @@ protected:
      * @param option If 0, microprestress is evaluated in the middle of the time step (used for stiffnesses).
      * If 1, MPS is evaluated at the end of the time step. (Used for updating).
      */
-    double computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option);
+    double computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option) const;
 
     /// Computes initial value of the MicroPrestress
     double giveInitMicroPrestress() const;
@@ -180,7 +180,7 @@ protected:
     double giveHumidity(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Computes relative humidity increment at given time step and GP
-    double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep);
+    double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) const;
 };
 } // end namespace oofem
 #endif // b3solidmat_h

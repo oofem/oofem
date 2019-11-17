@@ -630,7 +630,7 @@ MPSMaterial :: computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *
 
 
 double
-MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -788,7 +788,7 @@ MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const
 }
 
 double
-MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
+MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
 {
     double eta = 0., tHalfStep;
 

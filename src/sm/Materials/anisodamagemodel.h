@@ -279,9 +279,7 @@ protected:
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain, GaussPoint *gp,
                                   TimeStep *atTime);
     void computePlaneStressSigmaZ(double &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector,

@@ -92,7 +92,7 @@ public:
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return false; }
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Evaluation of the relative volume of the solidified material
     virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) const = 0;

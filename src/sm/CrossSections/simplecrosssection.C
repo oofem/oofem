@@ -128,7 +128,7 @@ void
 SimpleCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->give1dStressStiffMtrx(answer, rMode, gp, tStep);
+    answer = mat->give1dStressStiffMtrx(rMode, gp, tStep);
 }
 
 
@@ -306,7 +306,7 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
         } else if ( mode == _PlaneStrain ) {
             mat->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
         } else if ( mode == _1dMat ) {
-            mat->give1dStressStiffMtrx(answer, rMode, gp, tStep);
+            answer = mat->give1dStressStiffMtrx(rMode, gp, tStep);
         } else {
             mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         }
@@ -317,21 +317,18 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
 void
 SimpleCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 
-    FloatMatrix mat3d;
-    double area, Iy, shearAreaz;
-
-    mat->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
-    area = this->give(CS_Area, gp);
-    Iy   = this->give(CS_InertiaMomentY, gp);
-    shearAreaz = this->give(CS_ShearAreaZ, gp);
+    auto mat1d = mat->give1dStressStiffMtrx(rMode, gp, tStep);
+    auto area = this->give(CS_Area, gp);
+    auto Iy   = this->give(CS_InertiaMomentY, gp);
+    auto shearAreaz = this->give(CS_ShearAreaZ, gp);
 
     answer.resize(3, 3);
     answer.zero();
 
-    answer.at(1, 1) = mat3d.at(1, 1) * area;
-    answer.at(2, 2) = mat3d.at(1, 1) * Iy;
+    answer.at(1, 1) = mat1d.at(1, 1) * area;
+    answer.at(2, 2) = mat1d.at(1, 1) * Iy;
     answer.at(3, 3) = shearAreaz * mat->give('G', gp);
 }
 
@@ -341,12 +338,11 @@ SimpleCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode r
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
 
-    FloatMatrix mat3d;
     double area, E, G, Iy, Iz, Ik;
     double shearAreay, shearAreaz;
 
-    mat->give1dStressStiffMtrx(mat3d, rMode, gp, tStep);
-    E    = mat3d.at(1, 1);
+    auto mat1d = mat->give1dStressStiffMtrx(rMode, gp, tStep);
+    E    = mat1d.at(1, 1);
     G    = mat->give('G', gp);
     area = this->give(CS_Area, gp);
     Iy   = this->give(CS_InertiaMomentY, gp);

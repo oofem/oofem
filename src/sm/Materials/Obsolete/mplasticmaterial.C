@@ -1234,22 +1234,25 @@ MPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-MPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
+FloatMatrixF<1,1>
+MPlasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                           GaussPoint *gp,
-                                          TimeStep *tStep)
+                                          TimeStep *tStep) const
 
 //
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     } else if ( rmType == mpm_ClosestPoint ) {
-        this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        FloatMatrix answer;
+        const_cast<MPlasticMaterial*>(this)->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        return answer;
     } else {
-        this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
+        FloatMatrix answer;
+        const_cast<MPlasticMaterial*>(this)->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
+        return answer;
     }
 }
 

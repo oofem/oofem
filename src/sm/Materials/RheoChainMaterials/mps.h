@@ -282,7 +282,7 @@ protected:
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain
     FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) const override;
 
@@ -290,7 +290,7 @@ protected:
     double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const override;
 
     /// Evaluation of the flow term viscosity
-    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
+    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Returns initial value of the flow term viscosity
     double giveInitViscosity(TimeStep *tStep) const;

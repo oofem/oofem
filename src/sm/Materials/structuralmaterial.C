@@ -651,9 +651,8 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
         break;
     case _1dMat:
-        this->give1dStressStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->give1dStressStiffMtrx(rMode, gp, tStep);
         break;
-
     case _PlateLayer:
         this->givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
         break;
@@ -664,8 +663,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
         break;
     case _Warping:
-        answer.resize(2, 2);
-        answer.beUnitMatrix();
+        answer = eye<2>();
         break;
     case _1dLattice:
         this->give2dLatticeStiffMtrx(answer, rMode, gp, tStep);
@@ -753,15 +751,7 @@ StructuralMaterial :: give1dStressStiffMtrx_dPdF(MatResponseMode mode,
     /// TODO: use ref. when ms has been converted to to use fixed size arrays.
     const FloatArrayF<9> vF = status->giveTempFVector();
     const FloatArrayF<6> vS = status->giveTempStressVector();
-#if 1
-    /// FIXME: Temporary const-cast; these functions should be made const. 
-    /// This workaround is just to limit the size of a single refactoring.
-    auto self = const_cast<StructuralMaterial*>(this);
-    FloatMatrix dSdE;
-    self->give1dStressStiffMtrx(dSdE, mode, gp, tStep);
-#else
-    auto dSdE = self->give1dStressStiffMtrx(mode, gp, tStep);
-#endif
+    auto dSdE = this->give1dStressStiffMtrx(mode, gp, tStep);
     return convert_dSdE_2_dPdF_1D(dSdE, vS[{0}], vF[{0}]);
 }
 
@@ -1138,24 +1128,19 @@ StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
     answer.at(4, 4) = m3d.at(6, 6);
 }
 
-void
-StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                            MatResponseMode mode,
+FloatMatrixF<1,1>
+StructuralMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
-//
-// return material stiffness matrix for 1d stress strain mode
-//
+                                            TimeStep *tStep) const
 {
     FloatMatrix m3d, invMat3d;
-    double val11;
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
+    auto self = const_cast<StructuralMaterial*>(this);
+    self->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
 
     invMat3d.beInverseOf(m3d);
-    val11 = invMat3d.at(1, 1);
-    answer.resize(1, 1);
-    answer.at(1, 1) = 1. / val11;
+    double val11 = invMat3d.at(1, 1);
+    return {1. / val11};
 }
 
 

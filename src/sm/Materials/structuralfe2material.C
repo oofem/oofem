@@ -371,8 +371,7 @@ void StructuralFE2MaterialStatus :: copyStateVariables(const MaterialStatus &iSt
 
 
     //////////////////////////////
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
-    StructuralFE2MaterialStatus *fe2ms = dynamic_cast<StructuralFE2MaterialStatus*>(&tmpStat);
+    const StructuralFE2MaterialStatus *fe2ms = dynamic_cast<const StructuralFE2MaterialStatus*>(&iStatus);
 
     if ( !fe2ms ) {
         OOFEM_ERROR("Failed to cast StructuralFE2MaterialStatus.")

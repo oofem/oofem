@@ -140,9 +140,8 @@ public:
                                   MatResponseMode, GaussPoint * gp,
                                   TimeStep * tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseMode, GaussPoint * gp,
-                               TimeStep * tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint * gp,
+                                            TimeStep * tStep) const override;
 
     /**
      * Computes bulk modulus from given Young's modulus and Poisson's ratio.

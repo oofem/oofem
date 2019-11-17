@@ -524,21 +524,18 @@ RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-RheoChainMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
+FloatMatrixF<1,1>
+RheoChainMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep)
+                                           TimeStep *tStep) const
 {
     this->giveStatus(gp); // Ensures correct status creation
     if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
-        StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
-        sMat->give1dStressStiffMtrx(answer, mode, gp, tStep);
-	return;
+        auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
+        return sMat->give1dStressStiffMtrx(mode, gp, tStep);
     } else {
         double incrStiffness = this->giveEModulus(gp, tStep);
-        this->giveLinearElasticMaterial()->give1dStressStiffMtrx(answer, mode, gp, tStep);
-        answer.times(incrStiffness);
+        return incrStiffness * this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     }
 }
 
@@ -628,6 +625,7 @@ RheoChainMaterial :: initializeFrom(InputRecord &ir)
     double endTime = this->giveEndOfTimeOfInterest();
     this->discreteTimeScale = this->generateLogTimeScale(this->begOfTimeOfInterest, endTime, MNC_NPOINTS - 1);
 
+    this->giveLinearElasticMaterial();
     ///@warning Stiffness is time dependant, so the variable changes with time.
     //ph !!! why was it put here?
     //this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)

@@ -192,18 +192,16 @@ IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                                        MatResponseMode mode,
+FloatMatrixF<1,1>
+IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                                         GaussPoint *gp,
-                                                        TimeStep *tStep)
+                                                        TimeStep *tStep) const
 {
-    answer.resize(1, 1);
-    answer.at(1, 1) = this->E;
-
-    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+    double e = this->E;
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
+        e *= 1. - this->preCastStiffnessReduction;
     }
+    return {e};
 }
 
 

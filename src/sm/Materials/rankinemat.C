@@ -485,18 +485,18 @@ RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     evaluatePlaneStressStiffMtrx(answer, mode, gp, tStep, gprime);
 }
 
-void
-RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+RankineMat :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-    answer.resize(1, 1);
-    answer.at(1, 1) = this->E;
     if ( mode == ElasticStiffness ) {
+        return {E};
     } else if ( mode == SecantStiffness ) {
+        auto status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
         double om = status->giveTempDamage();
-        answer.times(1.0 - om);
+        return {E * (1.0 - om)};
     } else {
         OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)");
+        return {0.};
     }
 }
 

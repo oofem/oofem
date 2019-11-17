@@ -171,36 +171,36 @@ protected:
      *
      * StateCounterType lastUpdatedStateCounter;
      */
-    Domain *domain;
+    Domain *domain = nullptr;
     /// Map indicating regions to skip (region - cross section model).
     IntArray regionMap;
     /// Flag indicating whether to keep nonlocal interaction tables of integration points cached.
-    bool permanentNonlocTableFlag;
+    bool permanentNonlocTableFlag = false;
     /// Type characterizing the nonlocal weight function.
     enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement, WFT_Green_21 };
     /// Parameter specifying the type of nonlocal weight function.
     WeightFunctionType weightFun;
     /// Grid on which the eikonal equation will be solved (used by eikonal nonlocal models)
-    int gridSize;
+    int gridSize = 0;
     std::unique_ptr<Grid> grid;
     /// Auxiliary matrix to store minimum distances of grid points from Gauss points
     std::unique_ptr<FloatMatrix> minDist2;
     /// Optional parameters setting details of the fast marching method
-    double initDiag;
-    int order;
-    int centDiff;
+    double initDiag = 0.;
+    int order = 0;
+    int centDiff = 0;
 
     /**
      * Characteristic length of the nonlocal model
      * (its interpretation depends on the type of weight function).
      */
-    double cl;
+    mutable double cl = 0.;
 
     /// Support radius.
-    double suprad;
+    mutable double suprad = 0.;
 
     /// For "undernonlocal" or "overnonlocal" formulation.
-    double mm;
+    double mm = 0.;
 
     /// Type characterizing the scaling approach.
     enum ScalingType { ST_Unknown, ST_Standard, ST_Noscaling, ST_Borino };
@@ -218,7 +218,7 @@ protected:
      * Is different to cl when a Stress-based or a Distance-based
      * nonlocal variation is applied
      */
-    double cl0;
+    double cl0 = 0.;
     /// Type characterizing the Nonlocal variation
     enum NlVariationType { NLVT_Standard, NLVT_DistanceBasedLinear, NLVT_StressBased, NLVT_DistanceBasedExponential };
     ///Parameter specifying the type of nonlocal variation.
@@ -228,7 +228,7 @@ protected:
      * gives its minimum allowed value. It is used when a Stress-based
      * or a Distance-based nonlocal variation is applied
      */
-    double beta;
+    double beta = 0.;
     /**
      * Parameter used when Distance-based nonlocal variation is applied
      * When it is multiplied with the interaction radius cl gives the maxinmum
@@ -236,7 +236,7 @@ protected:
      * from the boundary is larger than this value the interaction radius cl is set
      * to cl0
      */
-    double zeta;
+    double zeta = 0.;
 
     /**
      * Parameter specifying the periodic shift in x-direction. Typically it is zero.
@@ -245,16 +245,16 @@ protected:
      * but also if the source point shifted by -px or +px satisfies this condition.
      * This is useful if the mesh represents a periodic cell.
      */
-    double px;
+    double px = 0.;
 
     // Parameters used by models with evolving characteristic length.
 
     /// Final value of interaction radius, for a model with evolving characteristic length.
-    double Rf;
+    double Rf = 0.;
     /// Parameter used as an exponent by models with evolving characteristic length.
-    double exponent;
+    double exponent = 0.;
     /// Parameter specifying how the weight function should be adjusted due to damage.
-    int averType;
+    int averType = 0;
 
 public:
     /**
@@ -281,7 +281,7 @@ public:
      * last modification time mark is kept.
      * @see Element::updateBeforeNonlocalAverage
      */
-    void updateDomainBeforeNonlocAverage(TimeStep *tStep);
+    void updateDomainBeforeNonlocAverage(TimeStep *tStep) const;
 
     /**
      * Builds list of integration points which take part in nonlocal average in given integration point.
@@ -291,7 +291,7 @@ public:
      * influencing integration points would be wasting of space and should be cleared after averaging has
      * been finished in integration point. The endIPNonlocalAverage method will ensure this.
      */
-    void buildNonlocalPointTable(GaussPoint *gp);
+    void buildNonlocalPointTable(GaussPoint *gp) const;
 
     /**
      * Rebuild list of integration points which take part
@@ -335,7 +335,7 @@ public:
      * receiver's associated integration point.
      * Rebuilds the IP list by calling  buildNonlocalPointTable if not available.
      */
-    std :: vector< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp);
+    std :: vector< localIntegrationRecord > *giveIPIntegrationList(GaussPoint *gp) const;
 
     /**
      * Evaluates the basic nonlocal weight function for a given distance
@@ -344,7 +344,7 @@ public:
      * @param distance Distance between interacting points.
      * @return Value of weight function.
      */
-    virtual double computeWeightFunction(double distance);
+    virtual double computeWeightFunction(double distance) const;
 
     /**
      * Evaluates the basic nonlocal weight function for two points
@@ -354,13 +354,13 @@ public:
      * @param coord Coordinates of receiver point.
      * @return Value of weight function.
      */
-    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord);
+    virtual double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const;
 
     /**
      * Provides the integral of the weight function
      * over the contributing volume in 1, 2 or 3D.
      */
-    double giveIntegralOfWeightFunction(const int spatial_dimension);
+    double giveIntegralOfWeightFunction(const int spatial_dimension) const;
 
 
     /// Determines the maximum value of the nonlocal weight function.
@@ -370,7 +370,7 @@ public:
      * Determines the number of material regions of domain.
      * In the current implementation the region is associated with cross section model.
      */
-    int giveNumberOfRegions();
+    int giveNumberOfRegions() const;
     /*
      * Returns the region id of given element
      * @param element pointer to element which region id is requested.
@@ -381,12 +381,12 @@ public:
      * Determines, whether receiver has bounded weighting function (limited support).
      * @return True if weighting function bounded, zero otherwise.
      */
-    virtual int hasBoundedSupport() { return 1; }
+    virtual int hasBoundedSupport() const { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function.
      * i.e., the distance at which the interaction weight becomes zero.
      */
-    virtual double evaluateSupportRadius();
+    virtual double evaluateSupportRadius() const;
 
     /// Returns reference to domain.
     Domain *giveDomain() { return this->domain; }
@@ -423,7 +423,7 @@ protected:
      */
     //bool isBarrierActivated (const FloatArray& c1, const FloatArray& c2) const;
 
-    void applyBarrierConstraints(const FloatArray &gpCoords, const FloatArray &jGpCoords, double &weight);
+    void applyBarrierConstraints(const FloatArray &gpCoords, const FloatArray &jGpCoords, double &weight) const;
 
     /**
      * Manipulates weight on integration point in the element.
@@ -433,7 +433,7 @@ protected:
      * @param gp Pointer to the GP owing the PointTable.
      * @param jGp Pointer to GP in the PointTable.
      */
-    void manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp);
+    void manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp) const;
 
     /**
      * Provides the distance based interaction radius
@@ -443,7 +443,7 @@ protected:
      * @param gpCoords The Gauss points' coordinates, whose interaction radius is calculated based on the distance-based averaging approach.
      * @return New interaction radius based on the Distance of the Gauss Point from Nonlocal Boundaries.
      */
-    double giveDistanceBasedInteractionRadius(const FloatArray &gpCoords);
+    double giveDistanceBasedInteractionRadius(const FloatArray &gpCoords) const;
 
     int  mapToGridPoint(double x, double x0) { return 1 + gridSize + ( int ) ceil(gridSize * ( x - x0 ) / suprad - 0.5); }
     double mapToGridCoord(double x, double x0) { return 1. + gridSize + gridSize * ( x - x0 ) / suprad; }

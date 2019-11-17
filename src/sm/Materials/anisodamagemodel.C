@@ -1239,20 +1239,21 @@ void AnisotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, 
                                                            GaussPoint *gp, TimeStep *atTime)
 {}
 
-void AnisotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                                        GaussPoint *gp, TimeStep *atTime)
+FloatMatrixF<1,1> AnisotropicDamageMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
     // Implementation of the 3D stiffness matrix
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
-        linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+        return linearElasticMaterial.give1dStressStiffMtrx(mode, gp, atTime);
     } else {
+        auto status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
         FloatArray strain = status->giveTempStrainVector();
         if ( ( strain.at(1) + strain.at(2) + strain.at(3) )  > 0 ) {
             //@todo eq 56
         } else {
             //@todo eq 57
         }
+        OOFEM_ERROR("not implemented");
+        return {0.};
     }
 }
 

@@ -224,10 +224,10 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
 }
 
 
-void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                                      GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+IsotropicDamageMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage;
     if ( mode == ElasticStiffness ) {
         tempDamage = 0.0;
@@ -236,8 +236,8 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
         tempDamage = min(tempDamage, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
-    answer.times(1.0 - tempDamage);
+    auto answer = this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
+    answer *= 1.0 - tempDamage;
 
     if ( mode == TangentStiffness ) {
         double damage = status->giveDamage();
@@ -259,10 +259,10 @@ void IsotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatRe
             // times minus derivative of damage function
             correctionTerm.times(-damagePrime);
             // add to secant stiffness
-            answer.add(correctionTerm);
+            answer += FloatMatrixF<1,1>(correctionTerm);
         }
     }
-
+    return answer;
     //TODO - correction for tangent mode
 }
 
