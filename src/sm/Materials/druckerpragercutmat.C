@@ -92,7 +92,7 @@ DruckerPragerCutMat :: CreateStatus(GaussPoint *gp) const
 }
 
 double
-DruckerPragerCutMat :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector, const FloatArray &strainSpaceHardeningVariables)
+DruckerPragerCutMat :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector, const FloatArray &strainSpaceHardeningVariables) const
 {
     //strainSpaceHardeningVariables = kappa
     if ( isurf <= 3 ) { //Rankine, surfaces 1,2,3
@@ -112,7 +112,7 @@ DruckerPragerCutMat :: computeYieldValueAt(GaussPoint *gp, int isurf, const Floa
 
 //associated and nonassociated flow rule
 void
-DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector, const FloatArray &stressSpaceHardeningVars)
+DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector, const FloatArray &stressSpaceHardeningVars) const
 {
     FloatArray princStress(3);
     FloatMatrix t(3, 3);
@@ -146,7 +146,7 @@ DruckerPragerCutMat :: computeStressGradientVector(FloatArray &answer, functType
 //necesarry only for mpm_ClosestPoint, see Jirasek: Inelastic analysis of structures, pp. 411.
 //Hessian matrix
 void
-DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
+DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables) const
 {
     switch ( gp->giveMaterialMode() ) {
     case _3dMat:
@@ -211,13 +211,13 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
 void
 DruckerPragerCutMat :: computeReducedElasticModuli(FloatMatrix &answer,
                                                    GaussPoint *gp,
-                                                   TimeStep *tStep)
+                                                   TimeStep *tStep) const
 {  /* Returns elastic moduli in reduced stress-strain space*/
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
+    this->linearElasticMaterial->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
 }
 
 //answer is dkappa (cumulative plastic strain), flow rule
-void DruckerPragerCutMat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp, const FloatArray &stress, const FloatArray &dlambda, const FloatArray &dplasticStrain, const IntArray &activeConditionMap)
+void DruckerPragerCutMat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp, const FloatArray &stress, const FloatArray &dlambda, const FloatArray &dplasticStrain, const IntArray &activeConditionMap) const
 {
     answer.resize(4);
     answer.zero();
@@ -228,7 +228,7 @@ void DruckerPragerCutMat :: computeStrainHardeningVarsIncrement(FloatArray &answ
 }
 
 // Computes the derivative of yield/loading function with respect to kappa_1, kappa_2 etc.
-void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
+void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables) const
 {
     answer.resize(1);  //1 hardening variable for DP model - kappa
     answer.zero();
@@ -240,7 +240,7 @@ void DruckerPragerCutMat :: computeKGradientVector(FloatArray &answer, functType
 
 //necesarry only for mpm_ClosestPoint
 //Computes second mixed derivative of loading function with respect to stress and hardening vars.
-void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables)
+void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix, int isurf, GaussPoint *gp, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVariables) const
 {
     int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     gradientMatrix.resize(size, 1); //six stresses in 3D and one kappa
@@ -248,7 +248,7 @@ void DruckerPragerCutMat :: computeReducedSKGradientMatrix(FloatMatrix &gradient
 }
 
 // computes dKappa_i/dsig_j gradient matrix
-void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda)
+void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda) const
 {
     int size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     answer.resize(1, size);
@@ -256,7 +256,7 @@ void DruckerPragerCutMat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix
 }
 
 // computes dKappa_i/dLambda_j for one surface
-void DruckerPragerCutMat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda)
+void DruckerPragerCutMat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf, const IntArray &activeConditionMap, const FloatArray &fullStressVector, const FloatArray &strainSpaceHardeningVars, const FloatArray &dlambda) const
 {
     int indx;
     answer.resize(1, actSurf); //actSurf = number of active surfaces

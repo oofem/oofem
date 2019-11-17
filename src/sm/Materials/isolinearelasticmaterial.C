@@ -178,16 +178,15 @@ IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<4,4>
+IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
-    answer = tangentPlaneStrain;
-
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+        return tangentPlaneStrain * (1. - this->preCastStiffnessReduction);
+    } else {
+        return tangentPlaneStrain;
     }
 }
 

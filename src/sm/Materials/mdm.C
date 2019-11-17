@@ -641,13 +641,13 @@ MDM :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
 }
 
 
-void
-MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<4,4>
+MDM :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<MDM*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
-
 
 
 int

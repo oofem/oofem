@@ -206,10 +206,10 @@ void IsotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, Ma
 }
 
 
-void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                                         GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<4,4>
+IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage;
     if ( mode == ElasticStiffness ) {
         tempDamage = 0.0;
@@ -218,8 +218,7 @@ void IsotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, Ma
         tempDamage = min(tempDamage, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
-    answer.times(1.0 - tempDamage);
+    return (1.0 - tempDamage) * this->linearElasticMaterial->givePlaneStrainStiffMtrx(mode, gp, tStep);
     //TODO - correction for tangent mode
 }
 

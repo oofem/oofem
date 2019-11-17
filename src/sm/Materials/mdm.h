@@ -316,9 +316,7 @@ protected:
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode, GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);
     void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n);

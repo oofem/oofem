@@ -103,7 +103,6 @@ protected:
 
 public:
     Masonry02(int n, Domain * d);
-    virtual ~Masonry02();
 
     void initializeFrom(InputRecord &ir) override;
     bool hasMaterialModeCapability(MaterialMode mode) const override;
@@ -116,7 +115,7 @@ public:
                              GaussPoint *gp,
                              TimeStep *tStep) override;
 
-    int giveSizeOfFullHardeningVarsVector() override { return 3; }
+    int giveSizeOfFullHardeningVarsVector() const override { return 3; }
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const override { return 3; }
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
@@ -125,47 +124,47 @@ public:
 
 
 protected:
-    int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) override { return 2; }
+    int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) const override { return 2; }
     //
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
 
     double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                               const FloatArray &stressSpaceHardeningVars) override;
+                               const FloatArray &stressSpaceHardeningVars) const override;
 
     void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                     const FloatArray &stressSpaceHardeningVars) override;
+                                     const FloatArray &stressSpaceHardeningVars) const override;
     void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &stress, const FloatArray &dlambda,
-                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) override;
+                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) const override;
     void computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector,
-                                const FloatArray &strainSpaceHardeningVariables) override;
+                                const FloatArray &strainSpaceHardeningVariables) const override;
 
     void computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap,
                                                   const FloatArray &fullStressVector,
                                                   const FloatArray &strainSpaceHardeningVars,
-                                                  const FloatArray &gamma) override;
+                                                  const FloatArray &gamma) const override;
     void computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf,
                                                 const IntArray &activeConditionMap,
                                                 const FloatArray &fullStressVector,
                                                 const FloatArray &strainSpaceHardeningVars,
-                                                const FloatArray &gamma) override;
-    int hasHardening() override { return 1; }
+                                                const FloatArray &gamma) const override;
+    int hasHardening() const override { return 1; }
 
     void computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                        const FloatArray &strainSpaceHardeningVariables) override;
+                                        const FloatArray &strainSpaceHardeningVariables) const override;
     void computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                        const FloatArray &strainSpaceHardeningVariables) override;
+                                        const FloatArray &strainSpaceHardeningVariables) const override;
 
 
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 
-    void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Cap mode related functions.
-    double computeF3HardeningLaw(double k);
-    double computeF3HardeningGradient(double k);
+    double computeF3HardeningLaw(double k) const;
+    double computeF3HardeningGradient(double k) const;
 };
 } // end namespace oofem
 #endif // masonry02_h

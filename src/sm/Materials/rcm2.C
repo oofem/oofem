@@ -902,11 +902,10 @@ RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<4,4>
+RCM2Material :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
+                                         TimeStep *tStep) const
 
 //
 // return receiver's 2dPlaneStrainMtrx constructed from
@@ -914,7 +913,10 @@ RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 

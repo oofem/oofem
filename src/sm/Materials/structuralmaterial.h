@@ -510,9 +510,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp,
+                                                        TimeStep *tStep) const;
 
     virtual FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode,
                                                             GaussPoint *gp, TimeStep *tStep) const;

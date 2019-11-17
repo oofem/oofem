@@ -120,7 +120,7 @@ void
 SimpleCrossSection :: giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
+    answer = mat->givePlaneStrainStiffMtrx(rMode, gp, tStep);
 }
 
 
@@ -304,7 +304,7 @@ SimpleCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
         } else if ( mode == _PlaneStress ) {
             mat->givePlaneStressStiffMtrx(answer, rMode, gp, tStep);
         } else if ( mode == _PlaneStrain ) {
-            mat->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
+            answer = mat->givePlaneStrainStiffMtrx(rMode, gp, tStep);
         } else if ( mode == _1dMat ) {
             answer = mat->give1dStressStiffMtrx(rMode, gp, tStep);
         } else {

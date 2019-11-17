@@ -505,21 +505,18 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
     }
 }
 
-void
-RheoChainMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                              MatResponseMode mode,
+FloatMatrixF<4,4>
+RheoChainMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
+                                              TimeStep *tStep) const
 {
     this->giveStatus(gp); // Ensures correct status creation
     if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
-        StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
-        sMat->givePlaneStrainStiffMtrx(answer, mode, gp, tStep);
-	return;
+        auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
+        return sMat->givePlaneStrainStiffMtrx(mode, gp, tStep);
     } else {
         double incrStiffness = this->giveEModulus(gp, tStep);
-        this->giveLinearElasticMaterial()->givePlaneStrainStiffMtrx(answer, mode, gp, tStep);
-        answer.times(incrStiffness);
+        return incrStiffness * this->linearElasticMaterial->givePlaneStrainStiffMtrx(mode, gp, tStep);
     }
 }
 

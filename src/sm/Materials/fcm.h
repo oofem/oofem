@@ -219,10 +219,7 @@ public:
                                   GaussPoint *gp,
                                   TimeStep *tStep) override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;

@@ -568,11 +568,10 @@ PlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-PlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                            MatResponseMode mode,
+FloatMatrixF<4,4>
+PlasticMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 
 //
 // return receiver's 2dPlaneStrainMtrx constructed from
@@ -581,9 +580,11 @@ PlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 //
 {
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlaneStrainStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        FloatMatrix answer;
+        const_cast<PlasticMaterial*>(this)->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+        return answer;
     }
 }
 

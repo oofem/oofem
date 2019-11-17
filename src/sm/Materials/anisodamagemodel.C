@@ -1235,9 +1235,6 @@ void AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, 
     }
 }
 
-void AnisotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                                           GaussPoint *gp, TimeStep *atTime)
-{}
 
 FloatMatrixF<1,1> AnisotropicDamageMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
