@@ -1091,7 +1091,7 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
     const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
     //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     auto c3d = inv(FloatMatrixF<6,6>(m3d));
-    return inv(c3d({0, 1}, {0, 1}));
+    return inv(c3d({0, 4}, {0, 4}));
 }
 
 
