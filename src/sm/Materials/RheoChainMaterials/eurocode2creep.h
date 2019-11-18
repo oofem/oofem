@@ -175,7 +175,7 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     const char *giveClassName() const override { return "Eurocode2CreepMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_Eurocode2CreepMaterial_Name; }
@@ -200,7 +200,7 @@ public:
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return true; }
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     /// implements B.9
     virtual double computeEquivalentAge(GaussPoint *gp, TimeStep *tStep) const;
@@ -231,10 +231,10 @@ protected:
     FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// computes increment of drying shrinkage - the shrinkage strain is isotropic
-    void computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);
+    void computeIncrementOfDryingShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen) const;
 
     /// computes increment of autogenous shrinkage - the shrinkage strain is isotropic
-    void computeIncrementOfAutogenousShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen);
+    void computeIncrementOfAutogenousShrinkageVector(FloatArray &answer, GaussPoint *gp, double tNow, double tThen) const;
 };
 } // end namespace oofem
 #endif // eurocode2creep_h

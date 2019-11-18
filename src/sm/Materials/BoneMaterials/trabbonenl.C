@@ -220,7 +220,7 @@ TrabBoneNL :: giveInputRecord(DynamicInputRecord &input)
 //
 
 double
-TrabBoneNL :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
+TrabBoneNL :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
 {
     double dist = distance(src, coord);
 

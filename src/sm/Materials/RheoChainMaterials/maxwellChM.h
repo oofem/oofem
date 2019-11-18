@@ -80,11 +80,11 @@ public:
     void giveShrinkageStrainVector(FloatArray &answer,
                                    GaussPoint *gp,
                                    TimeStep *tStep,
-                                   ValueModeType mode) override
+                                   ValueModeType mode) const override
     { answer.clear(); }
 
     void giveEigenStrainVector(FloatArray &answer,
-                               GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+                               GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -106,7 +106,7 @@ protected:
      */
     FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
     LinearElasticMaterial *giveLinearElasticMaterial();
 };
 } // end namespace oofem

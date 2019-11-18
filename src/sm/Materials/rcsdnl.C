@@ -380,7 +380,7 @@ RCSDNLMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
 
 
 double
-RCSDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
+RCSDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
 {
     // Bell shaped function decaying with the distance.
 

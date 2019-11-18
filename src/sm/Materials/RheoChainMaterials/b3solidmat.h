@@ -123,7 +123,7 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     const char *giveClassName() const override { return "B3SolidMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_B3SolidMaterial_Name; }
@@ -137,18 +137,18 @@ public:
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return true; }
 
-    void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of the shrinkageStrainVector. Shrinkage is fully dependent on humidity rate in given GP
-    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /// Evaluation of the relative volume of the solidified material.
-    double computeSolidifiedVolume(TimeStep *tStep);
+    double computeSolidifiedVolume(TimeStep *tStep) const;
 
     /// Evaluation of the flow term viscosity.
-    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
+    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const;
 
     double inverse_sorption_isotherm(double w) const;
 
@@ -160,9 +160,9 @@ protected:
 
     void computeCharTimes() override;
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     /**
      * Computes microprestress at given time step and GP.
@@ -171,7 +171,7 @@ protected:
      * @param option If 0, microprestress is evaluated in the middle of the time step (used for stiffnesses).
      * If 1, MPS is evaluated at the end of the time step. (Used for updating).
      */
-    double computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option);
+    double computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int option) const;
 
     /// Computes initial value of the MicroPrestress
     double giveInitMicroPrestress() const;
@@ -180,7 +180,7 @@ protected:
     double giveHumidity(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Computes relative humidity increment at given time step and GP
-    double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep);
+    double giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) const;
 };
 } // end namespace oofem
 #endif // b3solidmat_h

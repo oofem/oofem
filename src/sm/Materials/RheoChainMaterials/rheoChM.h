@@ -201,7 +201,7 @@ public:
      *    { answer.clear(); }*/
 
     /// Evaluation of the incremental modulus.
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) const = 0;
 
     /*    virtual double giveIncrementalModulus(GaussPoint *gp, TimeStep *tStep) {
      * if ( (tStep->giveIntrinsicTime() < this->castingTime) && ( this->zeroStiffness > 0. ) ) {
@@ -233,18 +233,9 @@ public:
                                        GaussPoint *gp,
                                        TimeStep *tStep) override;
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void give2dLatticeStiffMtrx(FloatMatrix &answer,
                                 MatResponseMode mmode,
@@ -257,7 +248,7 @@ public:
                                 TimeStep *tStep) override;
 
     void computeStressIndependentStrainVector(FloatArray &answer,
-                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     /**
      * Computes, for the given integration point,
@@ -270,7 +261,7 @@ public:
     virtual void giveShrinkageStrainVector(FloatArray &answer,
                                            GaussPoint *gp,
                                            TimeStep *tStep,
-                                           ValueModeType mode)
+                                           ValueModeType mode) const
     { answer.clear(); }
 
     // Note: must take LoadResponseMode into account
@@ -282,7 +273,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.
      */
-    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) { }
+    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const { }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -347,9 +338,9 @@ protected:
     void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &tSteps, double t0, double tr, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of elastic compliance matrix for unit Young's modulus.
-    void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const;
     /// Evaluation of elastic stiffness matrix for unit Young's modulus.
-    void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Update of partial moduli of individual chain units
     virtual void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) const;
@@ -382,7 +373,7 @@ protected:
      * @param mode Determines response mode (Total or incremental).
      */
     void computeTrueStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp,
-                                                  TimeStep *tStep, ValueModeType mode);
+                                                  TimeStep *tStep, ValueModeType mode) const;
 };
 } // end namespace oofem
 #endif // rheochm_h

@@ -46,9 +46,6 @@ REGISTER_Material(Masonry02);
 
 Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
-    //
-    // constructor
-    //
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     this->nsurf = 3;
     //this->rmType = mpm_CuttingPlane;
@@ -56,8 +53,6 @@ Masonry02 :: Masonry02(int n, Domain *d) : MPlasticMaterial2(n, d)
     this->plType = nonassociatedPT;
 }
 
-Masonry02 :: ~Masonry02()
-{ }
 
 bool
 Masonry02 :: hasMaterialModeCapability(MaterialMode mode) const
@@ -106,7 +101,7 @@ Masonry02 :: initializeFrom(InputRecord &ir)
 
 double
 Masonry02 :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                                 const FloatArray &strainSpaceHardeningVariables)
+                                 const FloatArray &strainSpaceHardeningVariables) const
 {
     if ( isurf == 1 ) {
         // tension mode
@@ -150,7 +145,7 @@ Masonry02 :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &st
 
 void
 Masonry02 :: computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                         const FloatArray &strainSpaceHardeningVariables)
+                                         const FloatArray &strainSpaceHardeningVariables) const
 {
     answer.resize(2);
     answer.zero();
@@ -204,7 +199,7 @@ Masonry02 :: computeStressGradientVector(FloatArray &answer, functType ftype, in
 void
 Masonry02 :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                                  const FloatArray &stress, const FloatArray &dlambda,
-                                                 const FloatArray &dplasticStrain, const IntArray &activeConditionMap)
+                                                 const FloatArray &dplasticStrain, const IntArray &activeConditionMap) const
 {
     double help = this->gfI * this->c0 / ( this->gfII * this->ft0 );
 
@@ -262,7 +257,7 @@ Masonry02 :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPo
                                                     const IntArray &activeConditionMap,
                                                     const FloatArray &fullStressVector,
                                                     const FloatArray &strainSpaceHardeningVars,
-                                                    const FloatArray &dlambda)
+                                                    const FloatArray &dlambda) const
 {
     // computes dk(i)/dLambda(j)
     int indx;
@@ -338,7 +333,7 @@ Masonry02 :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPo
 
 void
 Masonry02 :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &stressVector,
-                                    const FloatArray &strainSpaceHardeningVariables)
+                                    const FloatArray &strainSpaceHardeningVariables) const
 {
     answer.resize(3);
 
@@ -394,7 +389,7 @@ void
 Masonry02 :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap,
                                                       const FloatArray &fullStressVector,
                                                       const FloatArray &strainSpaceHardeningVars,
-                                                      const FloatArray &dlambda)
+                                                      const FloatArray &dlambda) const
 {
     // computes dk(i)/dsig(j) gradient matrix
     answer.resize(3, 2);
@@ -416,7 +411,7 @@ Masonry02 :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, Gauss
 
 void
 Masonry02 :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                            const FloatArray &strainSpaceHardeningVariables)
+                                            const FloatArray &strainSpaceHardeningVariables) const
 {
     // computes second derivatives of load fuction with respect to stresses
     gradientMatrix.resize(2, 2);
@@ -430,7 +425,7 @@ Masonry02 :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i,
 
 void
 Masonry02 :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &stressVector,
-                                            const FloatArray &strainSpaceHardeningVariables)
+                                            const FloatArray &strainSpaceHardeningVariables) const
 {
     // computes mixed derivative of load function with respect to stress and hardening variables
     gradientMatrix.resize(2, 3);
@@ -507,9 +502,9 @@ Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResp
 {
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            this->giveConsistentStiffnessMatrix(answer, mode, gp, tStep);
+            answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
         } else {
-            this->giveElastoPlasticStiffnessMatrix(answer, mode, gp, tStep);
+            answer = this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
         }
     } else {
         this->computeReducedElasticModuli(answer, gp, tStep);
@@ -520,7 +515,7 @@ Masonry02 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResp
 void
 Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
+                                         TimeStep *tStep) const
 {  /* Returns elastic moduli in reduced stress-strain space*/
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dInterface ) {
@@ -529,7 +524,7 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
         answer.at(2, 2) = ks;
         answer.at(1, 2) = answer.at(2, 1) = 0.0;
     } else {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
+        this->linearElasticMaterial->giveStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
     }
 }
 
@@ -545,7 +540,7 @@ Masonry02 :: computeReducedElasticModuli(FloatMatrix &answer,
  */
 
 double
-Masonry02 :: computeF3HardeningLaw(double k)
+Masonry02 :: computeF3HardeningLaw(double k) const
 {
     // ideal case
 
@@ -588,7 +583,7 @@ Masonry02 :: computeF3HardeningLaw(double k)
 }
 
 double
-Masonry02 :: computeF3HardeningGradient(double k)
+Masonry02 :: computeF3HardeningGradient(double k) const
 {
     // use secant stiffness
     if ( k < 0. ) {

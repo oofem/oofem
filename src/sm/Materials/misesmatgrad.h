@@ -99,8 +99,8 @@ public:
 
     void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
     void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
 
     void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
@@ -125,7 +125,7 @@ public:
     void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) override;
     void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
 
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const override;
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     //    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 

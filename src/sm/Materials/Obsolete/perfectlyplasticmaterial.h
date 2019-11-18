@@ -173,26 +173,11 @@ protected:
                                                       MatResponseMode mode, GaussPoint *gp,
                                                       TimeStep *tStep);
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
-    void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                 MatResponseMode mode,
-                                 GaussPoint *gp,
-                                 TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &strainIncrement, TimeStep *tStep);

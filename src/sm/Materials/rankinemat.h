@@ -140,14 +140,14 @@ protected:
 public:
     RankineMat(int n, Domain * d);
 
-    double evalYieldFunction(const FloatArray &sigPrinc, const double kappa);
-    double evalYieldStress(const double kappa);
-    double evalPlasticModulus(const double kappa);
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
-    double computeDamageParam(double tempKappa);
-    double computeDamageParamPrime(double tempKappa);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    double evalYieldFunction(const FloatArray &sigPrinc, const double kappa) const;
+    double evalYieldStress(const double kappa) const;
+    double evalPlasticModulus(const double kappa) const;
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain) const;
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
+    double computeDamageParam(double tempKappa) const;
+    double computeDamageParamPrime(double tempKappa) const;
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
@@ -168,19 +168,14 @@ public:
                                           const FloatArray &reducesStrain, TimeStep *tStep) override;
     void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
 protected:
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
     /**
      * Executive method used by local and gradient version.
      * (with different parameters gprime)
      */
-    void evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep, double gprime);
+    FloatMatrixF<3,3> evaluatePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
+                                                   TimeStep *tStep, double gprime) const;
 
     /// Computes derivatives of final kappa with respect to final strain.
     void computeEta(FloatArray &answer, RankineMatStatus *status);

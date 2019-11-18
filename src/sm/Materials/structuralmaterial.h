@@ -286,7 +286,7 @@ public:
      * @param mode Determines response mode (Total or incremental).
      */
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     FloatArrayF<6> computeStressIndependentStrainVector_3d(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     /// Common functions for convenience
     //@{
@@ -462,7 +462,7 @@ public:
      * @param mode Determines value mode.
      */
     void giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrainVector,
-                                               TimeStep *tStep, ValueModeType mode);
+                                               TimeStep *tStep, ValueModeType mode) const;
 
     int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type) override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
@@ -480,12 +480,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
-
-    virtual FloatMatrixF<4,4> givePlaneStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp,
-                                               TimeStep *tStep) const;
+    virtual FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<4,4> givePlaneStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void givePlaneStressStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
@@ -510,12 +506,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
-
-    virtual FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode,
-                                                            GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void givePlaneStrainStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
@@ -529,18 +521,14 @@ public:
      * However, this reduction is quite time consuming and if it is possible,
      * it is recommended to overload this method and provide direct method for computing
      * particular stiffness matrix.
-     * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     * @return Stiffness matrix.
      */
     //@{
-    virtual void give1dStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mmode, GaussPoint *gp,
-                                       TimeStep *tStep);
-
-    virtual FloatMatrixF<1,1> give1dStressStiffMtrx_dPdF(MatResponseMode mmode,
-                                                         GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF<1,1> give1dStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void give1dStressStiffMtrx_dCde(FloatMatrix &answer,
                                             MatResponseMode mmode, GaussPoint *gp,
@@ -559,9 +547,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mmode, GaussPoint *gp,
-                                          TimeStep *tStep);
+    virtual FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -574,9 +560,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mmode, GaussPoint *gp,
-                                         TimeStep *tStep);
+    virtual FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -589,9 +573,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveFiberStiffMtrx(FloatMatrix &answer,
-                                    MatResponseMode mmode, GaussPoint *gp,
-                                    TimeStep *tStep);
+    virtual FloatMatrixF<3,3> giveFiberStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Method for computing 2d lattice stiffness matrix of receiver.

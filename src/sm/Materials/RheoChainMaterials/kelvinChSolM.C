@@ -45,7 +45,7 @@ KelvinChainSolidMaterial :: KelvinChainSolidMaterial(int n, Domain *d) : RheoCha
 { }
 
 double
-KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -77,7 +77,7 @@ KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 }
 
 void
-KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)

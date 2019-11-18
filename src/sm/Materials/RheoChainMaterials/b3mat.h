@@ -97,7 +97,7 @@ protected:
 public:
     B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) {}
 
-    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     const char *giveClassName() const override { return "B3Material"; }
     const char *giveInputRecordName() const override { return _IFT_B3Material_Name; }
@@ -108,9 +108,9 @@ public:
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return true; }
 
-    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
     /// Free shrinkage at material point, requires staggered analysis.
-    virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /**

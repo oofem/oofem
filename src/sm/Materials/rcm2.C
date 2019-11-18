@@ -884,12 +884,10 @@ RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<3,3>
+RCM2Material :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
-
+                                         TimeStep *tStep) const
 //
 // returns receiver's 2dPlaneStressMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -898,15 +896,16 @@ RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<4,4>
+RCM2Material :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
+                                         TimeStep *tStep) const
 
 //
 // return receiver's 2dPlaneStrainMtrx constructed from
@@ -914,29 +913,33 @@ RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                      MatResponseMode mode,
+FloatMatrixF<1,1>
+RCM2Material :: give1dStressStiffMtrx(MatResponseMode mode,
                                       GaussPoint *gp,
-                                      TimeStep *tStep)
+                                      TimeStep *tStep) const
 
 //
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<2,2>
+RCM2Material :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
+                                         TimeStep *tStep) const
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -945,15 +948,17 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
+FloatMatrixF<5,5>
+RCM2Material :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
+                                        TimeStep *tStep) const
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -962,7 +967,10 @@ RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 

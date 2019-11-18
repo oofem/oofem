@@ -132,17 +132,14 @@ public:
     /// Returns the bulk elastic modulus @f$ K = \frac{E}{3(1-2\nu)} @f$.
     double giveBulkModulus() const { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
-    void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode, GaussPoint * gp,
+                                               TimeStep * tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * tStep) override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode, GaussPoint * gp,
+                                               TimeStep * tStep) const override;
 
-    void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseMode, GaussPoint * gp,
-                               TimeStep * tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint * gp,
+                                            TimeStep * tStep) const override;
 
     /**
      * Computes bulk modulus from given Young's modulus and Poisson's ratio.

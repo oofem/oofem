@@ -405,7 +405,7 @@ void
 MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
                                          GaussPoint *gp,
                                          TimeStep *tStep,
-                                         ValueModeType mode)
+                                         ValueModeType mode) const
 {
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
         OOFEM_ERROR("unsupported mode");
@@ -630,7 +630,7 @@ MPSMaterial :: computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *
 
 
 double
-MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -788,7 +788,7 @@ MPSMaterial :: computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const
 }
 
 double
-MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
+MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const
 {
     double eta = 0., tHalfStep;
 
@@ -1039,7 +1039,7 @@ MPSMaterial :: giveInitViscosity(TimeStep *tStep) const
 
 
 void
-MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -1122,7 +1122,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
 
 
 void
-MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const
 {
     /* dEpsSh/dt = kSh * dh/dt   (h = humidity)
      * ->> EpsSh = kSh * h_difference
@@ -1160,7 +1160,7 @@ MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint 
 }
 
 void
-MPSMaterial :: computeFibAutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+MPSMaterial :: computeFibAutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const
 {
     /* from fib MC 2010: equations 5.1-76, 5.1-79
      * eps_cas(t) = eps_cas0 * beta_as(t)
@@ -1209,7 +1209,7 @@ MPSMaterial :: computeFibAutogenousShrinkageStrainVector(FloatArray &answer, Gau
 
 
 void
-MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+MPSMaterial :: computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const
 {
     /* from Bazant's B4 model (ver. Dec 2014): equations 23-25 and Table 2
      * eps_au(t) = eps_au_infty * [ 1 + (tau_au / t_eq)^alpha ]^r_t

@@ -552,9 +552,9 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 
 //Computes derivative of the equivalent strain with regards to strain, used in tangent formulation
 void
-IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    LinearElasticMaterial *lmat = this->linearElasticMaterial;
 
     if ( strain.isEmpty() ) {
         answer.zero();
@@ -988,11 +988,11 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 }
 
 double
-IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
+IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp) const
 {
     const double e0 = this->give(e0_ID, gp);
     double ef = 0.;
-    const double E = this->giveLinearElasticMaterial()->give('E', gp);
+    const double E = this->linearElasticMaterial->give('E', gp);
     IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
     const double Le = status->giveLe();
 

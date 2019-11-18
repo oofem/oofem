@@ -265,7 +265,7 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
     //void updateYourself(GaussPoint *gp, TimeStep *tStep) override;
 
-    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     /// Evaluation of the basic creep compliance function - can be used to compute elastic modulus in derived damage material
     double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
@@ -282,7 +282,7 @@ protected:
     /// Evaluation of characteristic moduli of the non-aging Kelvin chain
     FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) const override;
 
@@ -290,23 +290,23 @@ protected:
     double computeLambdaMu(GaussPoint *gp, TimeStep *tStep, int Mu) const override;
 
     /// Evaluation of the flow term viscosity
-    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep);
+    double computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Returns initial value of the flow term viscosity
     double giveInitViscosity(TimeStep *tStep) const;
 
-    void  giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     bool hasIncrementalShrinkageFormulation() const override { return true; }
 
     /// Evaluation of the shrinkageStrainVector - shrinkage is fully dependent on humidity rate in given GP
-    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computePointShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of the autogenousShrinkageStrainVector according to fib MC 2010 - autogenous shrinkage is fully dependent on the equivalent age at given GP
-    void computeFibAutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeFibAutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of the autogenousShrinkageStrainVector according to Bazant's B4 model. In the model the evolution depends on temperature adjusted age, here on equivalent age (additional humidity influence)
-    void computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    void computeB4AutogenousShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     //double inverse_sorption_isotherm(double w) const;
 

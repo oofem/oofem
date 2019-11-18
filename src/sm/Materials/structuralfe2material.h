@@ -70,7 +70,7 @@ protected:
 public:
     StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile);
 
-    EngngModel *giveRVE() { return this->rve.get(); }
+    EngngModel *giveRVE() const { return this->rve.get(); }
     PrescribedGradientHomogenization *giveBC();// { return this->bc; }
 
     void markOldTangent();

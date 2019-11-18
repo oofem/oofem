@@ -164,46 +164,42 @@ IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-void
-IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<3,3>
+IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
-    answer = tangentPlaneStress;
-
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+        return tangentPlaneStress * (1. - this->preCastStiffnessReduction);
+    } else {
+        return tangentPlaneStress;
     }
 }
 
 
-void
-IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<4,4>
+IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
-    answer = tangentPlaneStrain;
-
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+        return tangentPlaneStrain * (1. - this->preCastStiffnessReduction);
+    } else {
+        return tangentPlaneStrain;
     }
 }
 
 
-void
-IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                                        MatResponseMode mode,
+FloatMatrixF<1,1>
+IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                                         GaussPoint *gp,
-                                                        TimeStep *tStep)
+                                                        TimeStep *tStep) const
 {
-    answer.resize(1, 1);
-    answer.at(1, 1) = this->E;
-
-    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+    double e = this->E;
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
+        e *= 1. - this->preCastStiffnessReduction;
     }
+    return {e};
 }
 
 
