@@ -79,10 +79,10 @@ public:
     void  giveShrinkageStrainVector(FloatArray &answer,
                                     GaussPoint *gp,
                                     TimeStep *tStep,
-                                    ValueModeType mode) override
+                                    ValueModeType mode) const override
     { answer.clear(); }
 
-    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -92,7 +92,7 @@ public:
 protected:
     bool hasIncrementalShrinkageFormulation() const override { return false; }
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Evaluation of the relative volume of the solidified material
     virtual double computeSolidifiedVolume(GaussPoint *gp, TimeStep *tStep) const = 0;

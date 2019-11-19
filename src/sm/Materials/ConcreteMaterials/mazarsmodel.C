@@ -495,9 +495,7 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
 
 MazarsMaterialStatus :: MazarsMaterialStatus(GaussPoint *g) :
     IsotropicDamageMaterial1Status(g)
-{
-    lec = 0.0;
-}
+{}
 
 void
 MazarsMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)

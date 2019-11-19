@@ -65,23 +65,23 @@ class LatticeLinearElastic : public LatticeStructuralMaterial, public RandomMate
 protected:
 
     ///Normal modulus
-    double eNormalMean;
+    double eNormalMean = 0.;
     ///Ratio of shear and normal modulus
-    double alphaOne;
+    double alphaOne = 0.;
     ///Ratio of torsion and normal modulus
-    double alphaTwo;
+    double alphaTwo = 0.;
 
-    double nu;
+    double nu = 0.;
 
     /// coefficient variation of the Gaussian distribution
-    double coefficientOfVariation;
+    double coefficientOfVariation = 0.;
 
     /// flag which chooses between no distribution (0) and Gaussian distribution (1)
-    double localRandomType;
+    double localRandomType = 0.;
 
-    double cAlpha;
+    double cAlpha = 0.;
 
-    double tAlphaMean;
+    double tAlphaMean = 0.;
 
 public:
 
@@ -91,33 +91,30 @@ public:
 
     LatticeLinearElastic(int n, Domain *d, double eNormalMean, double alphaOne, double alphaTwo);
 
-    /// Destructor
-    virtual ~LatticeLinearElastic();
-
     const char *giveInputRecordName() const override { return _IFT_LatticeLinearElastic_Name; }
     const char *giveClassName() const override { return "LatticeLinearElastic"; }
 
     void initializeFrom(InputRecord &ir) override;
 
 
-    void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
 
-    virtual FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual FloatMatrixF< 1, 1 >give1dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 1, 1 >give1dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    virtual FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    virtual FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
     Interface *giveInterface(InterfaceType) override;
@@ -147,10 +144,8 @@ public:
 
     /// Constructor
     LatticeLinearElasticMaterialStatus(GaussPoint *g);
-    /// Destructor
-    ~LatticeLinearElasticMaterialStatus() {}
 
-    void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "LatticeLinearElasticMaterialStatus"; }
 };

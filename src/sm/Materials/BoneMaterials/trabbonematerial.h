@@ -126,7 +126,7 @@ public:
 
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 
-    void computeDensification(GaussPoint *gp, const FloatArray &totalStrain);
+    void computeDensification(GaussPoint *gp, const FloatArray &totalStrain) const;
 
     double computeDamageParam(double alpha, GaussPoint *gp);
 
@@ -134,9 +134,8 @@ public:
 
     virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep);
 
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mode, GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
+                               TimeStep *tStep) const override;
 
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &reducedStrain, TimeStep *tStep) override;

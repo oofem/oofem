@@ -51,14 +51,7 @@ namespace oofem {
 REGISTER_Material(AnisotropicDamageMaterial);
 
 AnisotropicDamageMaterial :: AnisotropicDamageMaterial(int n, Domain *d) : StructuralMaterial(n, d),
-    linearElasticMaterial(n, d),
-    E(0.),
-    nu(0.),
-    kappa0(0.),
-    kappaf(0.),
-    aA(0.),
-    equivStrainType(EST_Unknown),
-    damageLawType(DLT_Unknown)
+    linearElasticMaterial(n, d)
 {}
 
 
@@ -311,7 +304,7 @@ AnisotropicDamageMaterial :: computeDamage(FloatMatrix &tempDamage, const FloatM
 }
 
 double
-AnisotropicDamageMaterial :: computeTraceD(double equivStrain)
+AnisotropicDamageMaterial :: computeTraceD(double equivStrain) const
 {
     double knu, aux;
     double answer = 0.;
@@ -1066,9 +1059,9 @@ AnisotropicDamageMaterial :: correctBigValues(FloatMatrix &matrix)
 }
 
 double
-AnisotropicDamageMaterial :: computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp)
+AnisotropicDamageMaterial :: computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp) const
 {
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     int flag = status->giveFlag();
     //int tempFlag=status->giveTempFlag();
     double Dc = 1.00, trD = 0;
@@ -1103,7 +1096,7 @@ AnisotropicDamageMaterial :: computeCorrectionFactor(FloatMatrix tempDamageTenso
 {
     // In the case that the material has experimented some damaged under compression, this must affect the material behaviour when it is
     // under tension in the future
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     int tempFlag = status->giveFlag();
     double tempStoredFactor = status->giveStoredFactor();
     double Dc = 1.00, trD = 0;
@@ -1180,12 +1173,12 @@ AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                                           GaussPoint *gp, TimeStep *atTime)
+FloatMatrixF<3,3>
+AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
-        linearElasticMaterial.giveStiffnessMatrix(answer, mode, gp, atTime);
+        return linearElasticMaterial.givePlaneStressStiffMtrx(mode, gp, atTime);
     } else {
         FloatArray totalStrain = status->giveTempStrainVector();
         FloatArray reducedTotalStrainVector;
@@ -1229,7 +1222,7 @@ void AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, 
         //q = -nu/E;
         r = 1. / ( 1. - C13 * q );
         s = 1. / ( 1. - q * C23 - C23 * q * q * r * C13 );
-        answer.resize(3, 3);
+        FloatMatrixF<3,3> answer;
         answer.at(2, 1) = s * ( C21 + C11 * C23 * q * r );
         answer.at(2, 2) = s * ( C22 + C12 * C23 * q * r );
         answer.at(2, 3) = s * ( C26 + C16 * C23 * q * r ) * 1. / 2.;
@@ -1239,33 +1232,32 @@ void AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, 
         answer.at(3, 1) = C61 + C63 * q * ( answer.at(1, 1) + answer.at(2, 1) );
         answer.at(3, 2) = C62 + C63 * q * ( answer.at(1, 2) + answer.at(2, 2) );
         answer.at(3, 3) = ( C66 + C63 * q * ( answer.at(1, 3) + answer.at(2, 3) ) ) * 1. / 2.;
+        return answer;
     }
 }
 
-void AnisotropicDamageMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                                           GaussPoint *gp, TimeStep *atTime)
-{}
 
-void AnisotropicDamageMaterial :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                                        GaussPoint *gp, TimeStep *atTime)
+FloatMatrixF<1,1> AnisotropicDamageMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const
 {
     // Implementation of the 3D stiffness matrix
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
-        linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+        return linearElasticMaterial.give1dStressStiffMtrx(mode, gp, atTime);
     } else {
+        auto status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
         FloatArray strain = status->giveTempStrainVector();
         if ( ( strain.at(1) + strain.at(2) + strain.at(3) )  > 0 ) {
             //@todo eq 56
         } else {
             //@todo eq 57
         }
+        OOFEM_ERROR("not implemented");
+        return {0.};
     }
 }
 
 void
 AnisotropicDamageMaterial :: computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector, GaussPoint *gp,
-                                                      TimeStep *atTime)
+                                                      TimeStep *atTime) const
 //
 {
     FloatMatrix inPlaneStrain, B, eVecs;
@@ -1348,7 +1340,7 @@ AnisotropicDamageMaterial :: computePlaneStressStrain(FloatMatrix &answer, Float
 
 void
 AnisotropicDamageMaterial :: computePlaneStressSigmaZ(double &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector,
-                                                      double epsilonZ, GaussPoint *gp, TimeStep *atTime)
+                                                      double epsilonZ, GaussPoint *gp, TimeStep *atTime) const
 //
 {
     FloatMatrix Auxiliar, inPlaneStrain;
@@ -1736,7 +1728,7 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
 }
 
 void
-AnisotropicDamageMaterial :: computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor, FloatMatrix damageTensor, GaussPoint *gp)
+AnisotropicDamageMaterial :: computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor, FloatMatrix damageTensor, GaussPoint *gp) const
 //
 // Implementation of the 3D stiffness matrix, according to the equations 56 and 57 of the reference paper.
 {
@@ -2070,17 +2062,8 @@ AnisotropicDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 
 
 AnisotropicDamageMaterialStatus :: AnisotropicDamageMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g),
-    kappa(0.0), tempKappa(0.0),
-    damage(3, 3), tempDamage(3, 3),
-    strainZ(0.0), tempStrainZ(0.0),
-    flag(0), tempFlag(0),
-    storedFactor(1.0), tempStoredFactor(1.0)
-#ifdef keep_track_of_dissipated_energy
-    ,stressWork(0.0), tempStressWork(0.0),
-    dissWork(0.0), tempDissWork(0.0)
-#endif
-{
-}
+    damage(3, 3), tempDamage(3, 3)
+{}
 
 void
 AnisotropicDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const

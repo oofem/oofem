@@ -52,8 +52,8 @@ class FloatMatrix;
 class IntArray;
 class IntegrationRule;
 
-template <int N> class FloatArrayF;
-template <int N, int M> class FloatMatrixF;
+template <std::size_t N> class FloatArrayF;
+template <std::size_t N, std::size_t M> class FloatMatrixF;
 
 /**
  * Class representing a general abstraction for cell geometry.

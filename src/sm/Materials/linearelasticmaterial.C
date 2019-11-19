@@ -37,6 +37,8 @@
 #include "sm/CrossSections/simplecrosssection.h"
 #include "sm/Materials/structuralms.h"
 #include "dynamicinputrecord.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 
 namespace oofem {
 void
@@ -89,35 +91,36 @@ LinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-LinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+LinearElasticMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
-    answer = alpha;
+    return alpha;
 }
 
 
 void
-LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain_, TimeStep *tStep)
 {
-    FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    FloatArrayF<6> strain = strain_;
 
-    this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
+    FloatMatrix d_;
+    this->give3dMaterialStiffnessMatrix(d_, TangentStiffness, gp, tStep);
+    FloatMatrixF<6,6> d = d_;
 
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
-        this->giveStressDependentPartOfStrainVector_3d(strainVector, gp, reducedStrain, tStep, VM_Total);
-        answer.beProductOf(d, strainVector);
+        auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+        auto strainVector = strain - thermalStrain;
+        answer = dot(d, strainVector);
     } else { // changes in material stiffness ->> incremental formulation
-        this->giveStressDependentPartOfStrainVector_3d(strainVector, gp, reducedStrain, tStep, VM_Incremental);
-        strainIncrement.beDifferenceOf( strainVector, status->giveStrainVector() );
+        auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Incremental);
+        auto strainIncrement = strain - thermalStrain - FloatArrayF<6>(status->giveStrainVector());
 
-        answer.beProductOf(d, strainIncrement);
-        answer.add( status->giveStressVector() );
+        answer = dot(d, strainIncrement) + status->giveStressVector();
     }
 
     // update gp
-    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
 
@@ -165,12 +168,11 @@ LinearElasticMaterial :: giveRealStressVector_3dDegeneratedShell(FloatArray &ans
 void
 LinearElasticMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->givePlaneStrainStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->givePlaneStrainStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -191,12 +193,11 @@ LinearElasticMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, Ga
 void
 LinearElasticMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->givePlaneStressStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->givePlaneStressStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -217,12 +218,10 @@ LinearElasticMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, Ga
 void
 LinearElasticMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto d = this->give1dStressStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->give1dStressStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) {  // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -287,12 +286,11 @@ LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussP
 void
 LinearElasticMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->give2dBeamLayerStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->give2dBeamLayerStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -313,12 +311,11 @@ LinearElasticMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, Ga
 void
 LinearElasticMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->givePlateLayerStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->givePlateLayerStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -339,12 +336,11 @@ LinearElasticMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, Gau
 void
 LinearElasticMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
+    auto d = this->giveFiberStiffMtrx(TangentStiffness, gp, tStep);
+
     FloatArray strainVector, strainIncrement;
-    FloatMatrix d;
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    this->giveFiberStiffMtrx(d, TangentStiffness, gp, tStep);
-
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
         answer.beProductOf(d, strainVector);
@@ -420,7 +416,7 @@ LinearElasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Interna
         this->giveStressDependentPartOfStrainVector(answer, gp, status->giveStrainVector(), tStep, VM_Total);
         return 1;
     } else if ( type == IST_ThermalStrainTensor ) {
-        this->computeStressIndependentStrainVector_3d(answer, gp, tStep, VM_Total);
+        answer = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
         return 1;
     } else if ( type == IST_CreepStrainTensor ) {
         answer.resize(6);

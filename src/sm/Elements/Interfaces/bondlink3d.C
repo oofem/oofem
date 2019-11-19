@@ -62,20 +62,16 @@ REGISTER_Element(BondLink3d);
 
 BondLink3d :: BondLink3d(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 {
-    numberOfDofMans     = 2;
-    geometryFlag = 0;
+    numberOfDofMans = 2;
 }
 
-BondLink3d :: ~BondLink3d()
-{}
 
 double
 BondLink3d :: computeVolumeAround(GaussPoint *aGaussPoint)
 {
     //Returns artifical volume (bond area times bond length) so that general parts of post processing work (dissipated energy, etc.)
     //Later on this artificial volume is divided by the bond length again so that the correct bond area is used.
-    double myPi = 3.14159;
-    return pow(this->bondLength, 2.) * this->bondDiameter * myPi;
+    return pow(this->bondLength, 2.) * this->bondDiameter * M_PI;
 }
 
 

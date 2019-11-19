@@ -93,14 +93,14 @@ protected:
     FloatArray plasticStrainVector; // full form
     FloatArray plasticStrainIncrementVector;
 
-    double tempSCCM, tempEPM, tempSCTM, tempE0PM, tempSRF, tempSEZ;
+    double tempSCCM = 0., tempEPM = 0., tempSCTM = 0., tempE0PM = 0., tempSRF = 0., tempSEZ = 0.;
 
-    double SCCM; ///< Current pressure strength.
-    double EPM;  ///< Max. eff. plastic strain.
-    double SCTM; ///< Current tension strength.
-    double E0PM; ///< Max. vol. plastic strain.
-    double SRF;  ///< current stress in stirrups.
-    double SEZ;  ///< Current strain in transverse (z) direction.
+    double SCCM = 0.; ///< Current pressure strength.
+    double EPM = 0.;  ///< Max. eff. plastic strain.
+    double SCTM = -1.; ///< Current tension strength.
+    double E0PM = 0.; ///< Max. vol. plastic strain.
+    double SRF = 0.;  ///< current stress in stirrups.
+    double SEZ = 0.;  ///< Current strain in transverse (z) direction.
 
 public:
     Concrete2MaterialStatus(GaussPoint * g);
@@ -150,41 +150,37 @@ public:
 class Concrete2 : public DeformationTheoryMaterial
 {
 private:
-    double SCCC; ///< Pressure strength.
-    double SCCT; ///< Tension strength.
-    double EPP;  ///< Threshold eff. plastic strain for softening in compress.
-    double EPU;  ///< Ultimate eff. pl. strain.
-    double EOPP; ///< Threshold volumetric plastic strain for soft. in tension.
-    double EOPU; ///< Ultimate vol. pl. strain.
+    double SCCC = 0.; ///< Pressure strength.
+    double SCCT = 0.; ///< Tension strength.
+    double EPP = 0.;  ///< Threshold eff. plastic strain for softening in compress.
+    double EPU = 0.;  ///< Ultimate eff. pl. strain.
+    double EOPP = 0.; ///< Threshold volumetric plastic strain for soft. in tension.
+    double EOPU = 0.; ///< Ultimate vol. pl. strain.
     /**
      * Threshold value of the relative shear deformation
      * (psi^2/eef) at which shear is considered in layers. for
      * lower r.s.d. the transverse shear remains elastic decoupled
      * from bending. default value SHEARTOL = 0.01
      */
-    double SHEARTOL;
+    double SHEARTOL = 0.;
 
-    double E, n;
+    double E = 0., n = 0.;
     // stirrups
-    double stirrE, stirrFt, stirrA, stirrTOL, stirrEREF, stirrLAMBDA;
+    double stirrE = 0., stirrFt = 0., stirrA = 0., stirrTOL = 0., stirrEREF = 0., stirrLAMBDA = 0.;
     /// Indicates that plastic flow (not deformation theory) is used in pressure.
-    int IS_PLASTIC_FLOW;
+    int IS_PLASTIC_FLOW = 0;
     /// Determines if state variables should be updated or not (>0 updates).
-    int IFAD;
+    int IFAD = 0;
 
     IsotropicLinearElasticMaterial linearElasticMaterial;
 
 public:
     Concrete2(int n, Domain * d);
-    virtual ~Concrete2();
 
     void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &, TimeStep *tStep) override;
 
-    void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                 MatResponseMode mode,
-                                 GaussPoint *gp,
-                                 TimeStep *tStep) override;
+    FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

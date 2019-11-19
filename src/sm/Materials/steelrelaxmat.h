@@ -80,60 +80,58 @@ class Domain;
 class SteelRelaxMat : public StructuralMaterial
 {
 protected:
-
     /// Young's modulus
-    double E;
+    double E = 0.;
 
     /// constant depending on the reinforcement class
-    double k1;
+    double k1 = 0.;
 
     /// constant depending on the reinforcement class
-    double k2;
+    double k2 = 0.;
 
     /// constant depending on the reinforcement class
-    double rho1000;
+    double rho1000 = 0.;
 
     /// ratio of prestress vs. characteristic strength
-    double mu;
+    double mu = 0.;
 
     /**
      * Scaling factor transforming the actual time into
      * appropriate units needed by the formulae of the eurocode. For analysis
      * in days timeFactor = 1, for analysis in seconds timeFactor = 86,400.
      */
-    double timeFactor;
+    double timeFactor = 0.;
 
     //double stiffnessFactor;
 
     /// characteristic strength of prestressing steel in appropriate units (not necessarily MPa)
-    double charStrength;
+    double charStrength = 0.;
 
     /// tolerance specifying the residual in the stress evaluation algorithm, default value is $10^{-6}$
-    double tolerance;
+    double tolerance = 0.;
 
     /**
      * Ratio of stress to characteristic strength
      * under which the relaxation is zero (typically 0.4--0.5); default
      * value is zero.
      */
-    double relRelaxBound;
+    double relRelaxBound = 0.;
 
     /**
      * 0 = approach according to Ba\v{z}ant and Yu, 
      * 1 = equivalent time approach according to Eurocode 2 and {\sl{fib}} Model Code 2010
      */
-    enum approachType { Bazant_EC2, EquivTime_EC2 } Approach;
+    enum approachType { Bazant_EC2, EquivTime_EC2 } Approach = Bazant_EC2;
 
 public:
     SteelRelaxMat(int n, Domain *d);
-    virtual ~SteelRelaxMat();
 
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     /**
      * evaluates stress-related strain - subtracts not only temperature strains but also strains caused by steel relaxation
@@ -177,14 +175,14 @@ class SteelRelaxMatStatus : public StructuralMaterialStatus
 {
 protected:
 
-  /**
-   * For Bazant's approach this internal variable is a cumulative viscous strain
-   * while for Eurocode approach (equivalent time) it is a cumulative prestress loss
-   */
-    double relaxIntVariable;
-    double tempRelaxIntVariable;
+    /**
+     * For Bazant's approach this internal variable is a cumulative viscous strain
+     * while for Eurocode approach (equivalent time) it is a cumulative prestress loss
+     */
+    double relaxIntVariable = 0.;
+    double tempRelaxIntVariable = 0.;
 
-    double prestress;
+    double prestress = 0.;
 
 public:
     SteelRelaxMatStatus(GaussPoint *g);

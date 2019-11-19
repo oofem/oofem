@@ -43,11 +43,7 @@ namespace oofem {
 REGISTER_Material(ConcreteFCMViscoElastic);
 
 ConcreteFCMViscoElastic :: ConcreteFCMViscoElastic(int n, Domain *d) : ConcreteFCM(n, d)
-{
-  //    viscoElasticMaterial = new RheoChainMaterial(n, d);
-
-  viscoMat = 0;
-}
+{}
 
   
 void
@@ -125,8 +121,8 @@ ConcreteFCMViscoElastic :: giveRealStressVector(FloatArray &answer, GaussPoint *
 
 void
 ConcreteFCMViscoElastic :: computeStressIndependentStrainVector(FloatArray &answer,
-								GaussPoint *gp, TimeStep *tStep, ValueModeType mode) {
-
+                                GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
+{
   // temperature strain is treated ONLY by the rheoMat
 
   if ( !this->isActivated(tStep) ) {
@@ -416,7 +412,7 @@ ConcreteFCMViscoElastic :: giveEquivalentTime(GaussPoint *gp, TimeStep *tStep)
 
 ConcreteFCMViscoElasticStatus :: ConcreteFCMViscoElasticStatus(GaussPoint *gp) :
   ConcreteFCMStatus(gp),
-  slaveGpVisco( new GaussPoint( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
+  slaveGpVisco(std::make_unique<GaussPoint>( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
 {
 
 }

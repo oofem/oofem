@@ -633,21 +633,23 @@ MDM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
 }
 
-void
-MDM :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                GaussPoint *gp, TimeStep *tStep)
+
+FloatMatrixF<3,3>
+MDM :: givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<MDM*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<4,4>
+MDM :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<MDM*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
-
 
 
 int
@@ -754,15 +756,15 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, T
     }
 }
 
-void
-MDM :: giveThermalDilatationVector(FloatArray &answer,
-                                   GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+MDM :: giveThermalDilatationVector(GaussPoint *gp,  TimeStep *tStep) const
 {
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = this->tempDillatCoeff;
-    answer.at(2) = this->tempDillatCoeff;
-    answer.at(3) = this->tempDillatCoeff;
+    return {
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        0., 0., 0.
+    };
 }
 
 
@@ -1141,7 +1143,7 @@ MDM :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp,
 
 
 double
-MDM :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
+MDM :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
 {
     // Bell shaped function decaying with the distance.
 

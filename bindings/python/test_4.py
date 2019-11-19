@@ -18,10 +18,10 @@ class MyMaterial(oofempy.StructuralMaterial):
     # However a workaround is to override giveStatus, see below 
     def CreateStatus(self, gp):
         return oofempy.StructuralMaterialStatus (gp)
-    def give1dStressStiffMtrx(self, answer, mode, gp, tStep):
-        answer.resize(1,1)
+    def give1dStressStiffMtrx(self, mode, gp, tStep):
+        answer = oofempy.FloatMatrix(1,1)
         answer[0,0] = self.k
-        return
+        return answer;
     def giveRealStressVector_1d (self, answer, gp, reducedStrain, tStep):
         answer.resize(1)
         answer[0] = self.k * reducedStrain[0]

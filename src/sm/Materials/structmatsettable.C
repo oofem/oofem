@@ -57,7 +57,7 @@ void
 StructuralMaterialSettable :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
-    return isoLE.initializeFrom(ir);
+    isoLE.initializeFrom(ir);
 }
 
 void
@@ -66,8 +66,8 @@ StructuralMaterialSettable :: giveRealStressVector_3d(FloatArray &answer,
                                                   const FloatArray &totalStrain,
                                                   TimeStep *atTime)
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray& stressVector = status->giveStressVector();
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    const auto &stressVector = status->giveStressVector();
 
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(stressVector);
@@ -82,7 +82,7 @@ StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
 {
-    isoLE.give3dMaterialStiffnessMatrix(answer,mode,gp,atTime);
+    isoLE.give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
 }
 
 MaterialStatus *

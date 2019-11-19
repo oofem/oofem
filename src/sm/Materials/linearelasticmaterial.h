@@ -66,7 +66,7 @@ class LinearElasticMaterial : public StructuralMaterial
 {
 protected:
     /// artificial isotropic damage to reflect reduction in stiffness for time < castingTime.
-    double preCastStiffnessReduction;
+    double preCastStiffnessReduction = 0.;
 
     /// Preconstructed 3d tangent
     FloatMatrixF<6,6> tangent;
@@ -83,6 +83,9 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
+    const FloatMatrixF<6,6> &giveTangent() const { return tangent; }
+    const FloatArrayF<6> &giveAlpha() const { return alpha; }
+    
     /**
      * Computes the plane strain and plane stress tangents from the 3D tangent.
      */
@@ -91,7 +94,7 @@ public:
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                        MatResponseMode mode, GaussPoint *gp,
                                        TimeStep *tStep) override;
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep) override;
     void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -111,7 +114,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     ///@todo This makes no sense in this  base class, it should belong to isotropiclinearelastic material.
-    virtual double giveShearModulus() { return 1.; }
+    virtual double giveShearModulus() const { return 1.; }
     bool hasCastingTimeSupport() const override { return true; }
     const char *giveClassName() const override { return "LinearElasticMaterial"; }
 };

@@ -4650,7 +4650,7 @@ int CemhydMatStatus :: countboxc(int boxsize, int qx, int qy, int qz)
 
 
 void CemhydMatStatus :: makeinert(long int ndesire) {
-    struct togo *headtogo, *tailtogo, *newtogo, *lasttogo, *onetogo;
+    struct togo *headtogo, *tailtogo, *newtogo = nullptr, *lasttogo, *onetogo;
     long int idesire;
     int px, py, pz, placed, cntpore, cntmax;
 

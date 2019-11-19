@@ -41,22 +41,24 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "mathfem.h"
 #include "engngm.h"
 #include "fieldmanager.h"
 #include "dynamicinputrecord.h"
 
 namespace oofem {
-std :: vector< std :: vector< int > >StructuralMaterial :: vIindex = {
-    { 1, 6, 5 },
-    { 9, 2, 4 },
-    { 8, 7, 3 }
+std :: array< std :: array< int, 3 >, 3 >StructuralMaterial :: vIindex = {
+    1, 6, 5,
+    9, 2, 4,
+    8, 7, 3
 };
 
-std :: vector< std :: vector< int > >StructuralMaterial :: svIndex = {
-    { 1, 6, 5 },
-    { 6, 2, 4 },
-    { 5, 4, 3 }
+std :: array< std :: array< int, 3 >, 3 >StructuralMaterial :: svIndex = {
+    1, 6, 5,
+    6, 2, 4,
+    5, 4, 3
 };
 
 
@@ -307,59 +309,59 @@ StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(FloatArray &answer, Gau
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep)
+FloatArrayF<9>
+StructuralMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const
 {
     // Default implementation used if this method is not overloaded by the particular material model.
     // 1) Compute Green-Lagrange strain and call standard method for small strains.
     // 2) Treat stress as second Piola-Kirchhoff stress and convert to first Piola-Kirchhoff stress.
     // 3) Set state variables F, P
 
-    FloatArray vE, vS;
-    FloatMatrix F, E;
-    F.beMatrixForm(vF);
-    E.beTProductOf(F, F);
-    E.at(1, 1) -= 1.0;
-    E.at(2, 2) -= 1.0;
-    E.at(3, 3) -= 1.0;
-    E.times(0.5);
-    vE.beSymVectorFormOfStrain(E);      // 6
+    auto F = from_voigt_form(vF);
+    auto E = 0.5 * (Tdot(F, F) - eye<3>());
+    auto vE = to_voigt_strain(E);
 
-    ///@todo Have this function:
-    this->giveRealStressVector_3d(vS, gp, vE, tStep);
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+#if 1
+    /// FIXME: Temporary const-cast; these functions should be made const. 
+    /// This workaround is just to limit the size of a single refactoring.
+    auto self = const_cast<StructuralMaterial*>(this);
+    FloatArray s;
+    self->giveRealStressVector_3d(s, gp, vE, tStep);
+    FloatArrayF<6> vS = s;
+#else
+    auto vS = this->giveRealStressVector_3d(vE, gp, tStep);
+#endif
 
     // Compute first PK stress from second PK stress
-    FloatMatrix P, S;
-    S.beMatrixForm(vS);
-    P.beProductOf(F, S);
-    answer.beVectorForm(P);
-
-    status->letTempPVectorBe(answer);
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto S = from_voigt_stress(vS);
+    auto P = dot(F, S);
+    auto vP = to_voigt_form(P);
+    status->letTempPVectorBe(vP);
     status->letTempFVectorBe(vF);
+
+    return vP;
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+FloatArrayF<5>
+StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(const FloatArrayF<5> &vF, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatArray vF, vP;
-    StructuralMaterial :: giveFullVectorFormF(vF, reducedvF, _PlaneStrain);
-    this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
-    StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStrain);
+    auto vP = this->giveFirstPKStressVector_3d(assemble<9>(vF, {0, 1, 2, 5, 8}), gp, tStep);
+    return vP[{0, 1, 2, 5, 8}];
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+FloatArrayF<4>
+StructuralMaterial :: giveFirstPKStressVector_PlaneStress(const FloatArrayF<4> &reducedvF, GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray F_control, P_control; // Determines which components are controlled by F and P resp.
     FloatArray vF, increment_vF, vP, vP_control, vP_n;
     FloatMatrix tangent, tangent_Pcontrol;
     // Iterate to find full vF.
-    StructuralMaterial :: giveVoigtVectorMask(F_control, _PlaneStress);
+    StructuralMaterial :: giveVoigtVectorMask(F_control, _PlaneStress); // {0, 1, 5, 8};
     // Compute the negated the array of control since we need P_control as well;
     P_control.resize(9 - F_control.giveSize() );
     for ( int i = 1, j = 1; i <= 9; i++ ) {
@@ -376,16 +378,17 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
 
     // Iterate to find full vF.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
+        vP = this->giveFirstPKStressVector_3d(vF, gp, tStep);
         vP_control.beSubArrayOf(vP, P_control);
         vP_n.beSubArrayOf(vP, F_control);
         double norm = vP_n.computeNorm();
         if ( vP_control.computeNorm() < 1e-6 * norm ) { ///@todo We need a tolerance here!
+            FloatArray answer;
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStress);
-            return;
+            return answer;
         }
 
-        this->give3dMaterialStiffnessMatrix_dPdF(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
         increment_vF.negated();
@@ -393,12 +396,12 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(FloatArray &answer, Ga
     }
 
     OOFEM_WARNING("Iteration did not converge");
-    answer.clear();
+    return zeros<4>();
 }
 
 
-void
-StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+FloatArrayF<1>
+StructuralMaterial :: giveFirstPKStressVector_1d(const FloatArrayF<1> &reducedvF, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
@@ -416,14 +419,15 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     vF.at(1) = reducedvF.at(1);
     // Iterate to find full vF.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        this->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
+        vP = this->giveFirstPKStressVector_3d(vF, gp, tStep);
         vP_control.beSubArrayOf(vP, P_control);
         if ( vP_control.computeNorm() < 1e-6 * vP.at(1) ) { ///@todo We need a tolerance here!
+            FloatArray answer;
             StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
-            return;
+            return answer;
         }
 
-        this->give3dMaterialStiffnessMatrix_dPdF(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
 	increment_vF.negated();
@@ -431,210 +435,199 @@ StructuralMaterial :: giveFirstPKStressVector_1d(FloatArray &answer, GaussPoint 
     }
 
     OOFEM_WARNING("Iteration did not converge");
-    answer.clear();
+    return zeros<1>();
 }
 
 
-void
-StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &C, const FloatArray &S, const FloatArray &F, MaterialMode matMode)
+FloatMatrixF<9,9>
+StructuralMaterial :: convert_dSdE_2_dPdF_3D(const FloatMatrixF<6,6> &C, const FloatArrayF<6> &S, const FloatArrayF<9> &F)
 {
     // Converts the reduced dSdE-stiffness to reduced dPdF-sitiffness for different MaterialModes
     // Performs the following operation dPdF = I_ik * S_jl + F_im F_kn C_mjnl,
     // See for example: G.A. Holzapfel, Nonlinear Solid Mechanics: A Continuum Approach for
     // Engineering, 2000, ISBN-10: 0471823198.
 
-    if ( matMode == _3dMat ) {
-        //Save terms associated with H = [du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx]
+    //Save terms associated with H = [du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx]
+    FloatMatrixF<9,9> answer;
 
 #if 1
-
-        answer.resize(9, 9);
-        answer(0, 0) = F(0) * C(0, 0) * F(0) + F(0) * C(0, 5) * F(5) + F(0) * C(0, 4) * F(4) + F(5) * C(5, 0) * F(0) + F(5) * C(5, 5) * F(5) + F(5) * C(5, 4) * F(4) + F(4) * C(4, 0) * F(0) + F(4) * C(4, 5) * F(5) + F(4) * C(4, 4) * F(4) + S(0);
-        answer(0, 1) = F(0) * C(0, 5) * F(8) + F(0) * C(0, 1) * F(1) + F(0) * C(0, 3) * F(3) + F(5) * C(5, 5) * F(8) + F(5) * C(5, 1) * F(1) + F(5) * C(5, 3) * F(3) + F(4) * C(4, 5) * F(8) + F(4) * C(4, 1) * F(1) + F(4) * C(4, 3) * F(3) + 0.0;
-        answer(0, 2) = F(0) * C(0, 4) * F(7) + F(0) * C(0, 3) * F(6) + F(0) * C(0, 2) * F(2) + F(5) * C(5, 4) * F(7) + F(5) * C(5, 3) * F(6) + F(5) * C(5, 2) * F(2) + F(4) * C(4, 4) * F(7) + F(4) * C(4, 3) * F(6) + F(4) * C(4, 2) * F(2) + 0.0;
-        answer(0, 3) = F(0) * C(0, 4) * F(8) + F(0) * C(0, 3) * F(1) + F(0) * C(0, 2) * F(3) + F(5) * C(5, 4) * F(8) + F(5) * C(5, 3) * F(1) + F(5) * C(5, 2) * F(3) + F(4) * C(4, 4) * F(8) + F(4) * C(4, 3) * F(1) + F(4) * C(4, 2) * F(3) + 0.0;
-        answer(0, 4) = F(0) * C(0, 4) * F(0) + F(0) * C(0, 3) * F(5) + F(0) * C(0, 2) * F(4) + F(5) * C(5, 4) * F(0) + F(5) * C(5, 3) * F(5) + F(5) * C(5, 2) * F(4) + F(4) * C(4, 4) * F(0) + F(4) * C(4, 3) * F(5) + F(4) * C(4, 2) * F(4) + S(4);
-        answer(0, 5) = F(0) * C(0, 5) * F(0) + F(0) * C(0, 1) * F(5) + F(0) * C(0, 3) * F(4) + F(5) * C(5, 5) * F(0) + F(5) * C(5, 1) * F(5) + F(5) * C(5, 3) * F(4) + F(4) * C(4, 5) * F(0) + F(4) * C(4, 1) * F(5) + F(4) * C(4, 3) * F(4) + S(5);
-        answer(0, 6) = F(0) * C(0, 5) * F(7) + F(0) * C(0, 1) * F(6) + F(0) * C(0, 3) * F(2) + F(5) * C(5, 5) * F(7) + F(5) * C(5, 1) * F(6) + F(5) * C(5, 3) * F(2) + F(4) * C(4, 5) * F(7) + F(4) * C(4, 1) * F(6) + F(4) * C(4, 3) * F(2) + 0.0;
-        answer(0, 7) = F(0) * C(0, 0) * F(7) + F(0) * C(0, 5) * F(6) + F(0) * C(0, 4) * F(2) + F(5) * C(5, 0) * F(7) + F(5) * C(5, 5) * F(6) + F(5) * C(5, 4) * F(2) + F(4) * C(4, 0) * F(7) + F(4) * C(4, 5) * F(6) + F(4) * C(4, 4) * F(2) + 0.0;
-        answer(0, 8) = F(0) * C(0, 0) * F(8) + F(0) * C(0, 5) * F(1) + F(0) * C(0, 4) * F(3) + F(5) * C(5, 0) * F(8) + F(5) * C(5, 5) * F(1) + F(5) * C(5, 4) * F(3) + F(4) * C(4, 0) * F(8) + F(4) * C(4, 5) * F(1) + F(4) * C(4, 4) * F(3) + 0.0;
-        answer(1, 0) = F(8) * C(5, 0) * F(0) + F(8) * C(5, 5) * F(5) + F(8) * C(5, 4) * F(4) + F(1) * C(1, 0) * F(0) + F(1) * C(1, 5) * F(5) + F(1) * C(1, 4) * F(4) + F(3) * C(3, 0) * F(0) + F(3) * C(3, 5) * F(5) + F(3) * C(3, 4) * F(4) + 0.0;
-        answer(1, 1) = F(8) * C(5, 5) * F(8) + F(8) * C(5, 1) * F(1) + F(8) * C(5, 3) * F(3) + F(1) * C(1, 5) * F(8) + F(1) * C(1, 1) * F(1) + F(1) * C(1, 3) * F(3) + F(3) * C(3, 5) * F(8) + F(3) * C(3, 1) * F(1) + F(3) * C(3, 3) * F(3) + S(1);
-        answer(1, 2) = F(8) * C(5, 4) * F(7) + F(8) * C(5, 3) * F(6) + F(8) * C(5, 2) * F(2) + F(1) * C(1, 4) * F(7) + F(1) * C(1, 3) * F(6) + F(1) * C(1, 2) * F(2) + F(3) * C(3, 4) * F(7) + F(3) * C(3, 3) * F(6) + F(3) * C(3, 2) * F(2) + 0.0;
-        answer(1, 3) = F(8) * C(5, 4) * F(8) + F(8) * C(5, 3) * F(1) + F(8) * C(5, 2) * F(3) + F(1) * C(1, 4) * F(8) + F(1) * C(1, 3) * F(1) + F(1) * C(1, 2) * F(3) + F(3) * C(3, 4) * F(8) + F(3) * C(3, 3) * F(1) + F(3) * C(3, 2) * F(3) + S(3);
-        answer(1, 4) = F(8) * C(5, 4) * F(0) + F(8) * C(5, 3) * F(5) + F(8) * C(5, 2) * F(4) + F(1) * C(1, 4) * F(0) + F(1) * C(1, 3) * F(5) + F(1) * C(1, 2) * F(4) + F(3) * C(3, 4) * F(0) + F(3) * C(3, 3) * F(5) + F(3) * C(3, 2) * F(4) + 0.0;
-        answer(1, 5) = F(8) * C(5, 5) * F(0) + F(8) * C(5, 1) * F(5) + F(8) * C(5, 3) * F(4) + F(1) * C(1, 5) * F(0) + F(1) * C(1, 1) * F(5) + F(1) * C(1, 3) * F(4) + F(3) * C(3, 5) * F(0) + F(3) * C(3, 1) * F(5) + F(3) * C(3, 3) * F(4) + 0.0;
-        answer(1, 6) = F(8) * C(5, 5) * F(7) + F(8) * C(5, 1) * F(6) + F(8) * C(5, 3) * F(2) + F(1) * C(1, 5) * F(7) + F(1) * C(1, 1) * F(6) + F(1) * C(1, 3) * F(2) + F(3) * C(3, 5) * F(7) + F(3) * C(3, 1) * F(6) + F(3) * C(3, 3) * F(2) + 0.0;
-        answer(1, 7) = F(8) * C(5, 0) * F(7) + F(8) * C(5, 5) * F(6) + F(8) * C(5, 4) * F(2) + F(1) * C(1, 0) * F(7) + F(1) * C(1, 5) * F(6) + F(1) * C(1, 4) * F(2) + F(3) * C(3, 0) * F(7) + F(3) * C(3, 5) * F(6) + F(3) * C(3, 4) * F(2) + 0.0;
-        answer(1, 8) = F(8) * C(5, 0) * F(8) + F(8) * C(5, 5) * F(1) + F(8) * C(5, 4) * F(3) + F(1) * C(1, 0) * F(8) + F(1) * C(1, 5) * F(1) + F(1) * C(1, 4) * F(3) + F(3) * C(3, 0) * F(8) + F(3) * C(3, 5) * F(1) + F(3) * C(3, 4) * F(3) + S(5);
-        answer(2, 0) = F(7) * C(4, 0) * F(0) + F(7) * C(4, 5) * F(5) + F(7) * C(4, 4) * F(4) + F(6) * C(3, 0) * F(0) + F(6) * C(3, 5) * F(5) + F(6) * C(3, 4) * F(4) + F(2) * C(2, 0) * F(0) + F(2) * C(2, 5) * F(5) + F(2) * C(2, 4) * F(4) + 0.0;
-        answer(2, 1) = F(7) * C(4, 5) * F(8) + F(7) * C(4, 1) * F(1) + F(7) * C(4, 3) * F(3) + F(6) * C(3, 5) * F(8) + F(6) * C(3, 1) * F(1) + F(6) * C(3, 3) * F(3) + F(2) * C(2, 5) * F(8) + F(2) * C(2, 1) * F(1) + F(2) * C(2, 3) * F(3) + 0.0;
-        answer(2, 2) = F(7) * C(4, 4) * F(7) + F(7) * C(4, 3) * F(6) + F(7) * C(4, 2) * F(2) + F(6) * C(3, 4) * F(7) + F(6) * C(3, 3) * F(6) + F(6) * C(3, 2) * F(2) + F(2) * C(2, 4) * F(7) + F(2) * C(2, 3) * F(6) + F(2) * C(2, 2) * F(2) + S(2);
-        answer(2, 3) = F(7) * C(4, 4) * F(8) + F(7) * C(4, 3) * F(1) + F(7) * C(4, 2) * F(3) + F(6) * C(3, 4) * F(8) + F(6) * C(3, 3) * F(1) + F(6) * C(3, 2) * F(3) + F(2) * C(2, 4) * F(8) + F(2) * C(2, 3) * F(1) + F(2) * C(2, 2) * F(3) + 0.0;
-        answer(2, 4) = F(7) * C(4, 4) * F(0) + F(7) * C(4, 3) * F(5) + F(7) * C(4, 2) * F(4) + F(6) * C(3, 4) * F(0) + F(6) * C(3, 3) * F(5) + F(6) * C(3, 2) * F(4) + F(2) * C(2, 4) * F(0) + F(2) * C(2, 3) * F(5) + F(2) * C(2, 2) * F(4) + 0.0;
-        answer(2, 5) = F(7) * C(4, 5) * F(0) + F(7) * C(4, 1) * F(5) + F(7) * C(4, 3) * F(4) + F(6) * C(3, 5) * F(0) + F(6) * C(3, 1) * F(5) + F(6) * C(3, 3) * F(4) + F(2) * C(2, 5) * F(0) + F(2) * C(2, 1) * F(5) + F(2) * C(2, 3) * F(4) + 0.0;
-        answer(2, 6) = F(7) * C(4, 5) * F(7) + F(7) * C(4, 1) * F(6) + F(7) * C(4, 3) * F(2) + F(6) * C(3, 5) * F(7) + F(6) * C(3, 1) * F(6) + F(6) * C(3, 3) * F(2) + F(2) * C(2, 5) * F(7) + F(2) * C(2, 1) * F(6) + F(2) * C(2, 3) * F(2) + S(3);
-        answer(2, 7) = F(7) * C(4, 0) * F(7) + F(7) * C(4, 5) * F(6) + F(7) * C(4, 4) * F(2) + F(6) * C(3, 0) * F(7) + F(6) * C(3, 5) * F(6) + F(6) * C(3, 4) * F(2) + F(2) * C(2, 0) * F(7) + F(2) * C(2, 5) * F(6) + F(2) * C(2, 4) * F(2) + S(4);
-        answer(2, 8) = F(7) * C(4, 0) * F(8) + F(7) * C(4, 5) * F(1) + F(7) * C(4, 4) * F(3) + F(6) * C(3, 0) * F(8) + F(6) * C(3, 5) * F(1) + F(6) * C(3, 4) * F(3) + F(2) * C(2, 0) * F(8) + F(2) * C(2, 5) * F(1) + F(2) * C(2, 4) * F(3) + 0.0;
-        answer(3, 0) = F(8) * C(4, 0) * F(0) + F(8) * C(4, 5) * F(5) + F(8) * C(4, 4) * F(4) + F(1) * C(3, 0) * F(0) + F(1) * C(3, 5) * F(5) + F(1) * C(3, 4) * F(4) + F(3) * C(2, 0) * F(0) + F(3) * C(2, 5) * F(5) + F(3) * C(2, 4) * F(4) + 0.0;
-        answer(3, 1) = F(8) * C(4, 5) * F(8) + F(8) * C(4, 1) * F(1) + F(8) * C(4, 3) * F(3) + F(1) * C(3, 5) * F(8) + F(1) * C(3, 1) * F(1) + F(1) * C(3, 3) * F(3) + F(3) * C(2, 5) * F(8) + F(3) * C(2, 1) * F(1) + F(3) * C(2, 3) * F(3) + S(3);
-        answer(3, 2) = F(8) * C(4, 4) * F(7) + F(8) * C(4, 3) * F(6) + F(8) * C(4, 2) * F(2) + F(1) * C(3, 4) * F(7) + F(1) * C(3, 3) * F(6) + F(1) * C(3, 2) * F(2) + F(3) * C(2, 4) * F(7) + F(3) * C(2, 3) * F(6) + F(3) * C(2, 2) * F(2) + 0.0;
-        answer(3, 3) = F(8) * C(4, 4) * F(8) + F(8) * C(4, 3) * F(1) + F(8) * C(4, 2) * F(3) + F(1) * C(3, 4) * F(8) + F(1) * C(3, 3) * F(1) + F(1) * C(3, 2) * F(3) + F(3) * C(2, 4) * F(8) + F(3) * C(2, 3) * F(1) + F(3) * C(2, 2) * F(3) + S(2);
-        answer(3, 4) = F(8) * C(4, 4) * F(0) + F(8) * C(4, 3) * F(5) + F(8) * C(4, 2) * F(4) + F(1) * C(3, 4) * F(0) + F(1) * C(3, 3) * F(5) + F(1) * C(3, 2) * F(4) + F(3) * C(2, 4) * F(0) + F(3) * C(2, 3) * F(5) + F(3) * C(2, 2) * F(4) + 0.0;
-        answer(3, 5) = F(8) * C(4, 5) * F(0) + F(8) * C(4, 1) * F(5) + F(8) * C(4, 3) * F(4) + F(1) * C(3, 5) * F(0) + F(1) * C(3, 1) * F(5) + F(1) * C(3, 3) * F(4) + F(3) * C(2, 5) * F(0) + F(3) * C(2, 1) * F(5) + F(3) * C(2, 3) * F(4) + 0.0;
-        answer(3, 6) = F(8) * C(4, 5) * F(7) + F(8) * C(4, 1) * F(6) + F(8) * C(4, 3) * F(2) + F(1) * C(3, 5) * F(7) + F(1) * C(3, 1) * F(6) + F(1) * C(3, 3) * F(2) + F(3) * C(2, 5) * F(7) + F(3) * C(2, 1) * F(6) + F(3) * C(2, 3) * F(2) + 0.0;
-        answer(3, 7) = F(8) * C(4, 0) * F(7) + F(8) * C(4, 5) * F(6) + F(8) * C(4, 4) * F(2) + F(1) * C(3, 0) * F(7) + F(1) * C(3, 5) * F(6) + F(1) * C(3, 4) * F(2) + F(3) * C(2, 0) * F(7) + F(3) * C(2, 5) * F(6) + F(3) * C(2, 4) * F(2) + 0.0;
-        answer(3, 8) = F(8) * C(4, 0) * F(8) + F(8) * C(4, 5) * F(1) + F(8) * C(4, 4) * F(3) + F(1) * C(3, 0) * F(8) + F(1) * C(3, 5) * F(1) + F(1) * C(3, 4) * F(3) + F(3) * C(2, 0) * F(8) + F(3) * C(2, 5) * F(1) + F(3) * C(2, 4) * F(3) + S(4);
-        answer(4, 0) = F(0) * C(4, 0) * F(0) + F(0) * C(4, 5) * F(5) + F(0) * C(4, 4) * F(4) + F(5) * C(3, 0) * F(0) + F(5) * C(3, 5) * F(5) + F(5) * C(3, 4) * F(4) + F(4) * C(2, 0) * F(0) + F(4) * C(2, 5) * F(5) + F(4) * C(2, 4) * F(4) + S(4);
-        answer(4, 1) = F(0) * C(4, 5) * F(8) + F(0) * C(4, 1) * F(1) + F(0) * C(4, 3) * F(3) + F(5) * C(3, 5) * F(8) + F(5) * C(3, 1) * F(1) + F(5) * C(3, 3) * F(3) + F(4) * C(2, 5) * F(8) + F(4) * C(2, 1) * F(1) + F(4) * C(2, 3) * F(3) + 0.0;
-        answer(4, 2) = F(0) * C(4, 4) * F(7) + F(0) * C(4, 3) * F(6) + F(0) * C(4, 2) * F(2) + F(5) * C(3, 4) * F(7) + F(5) * C(3, 3) * F(6) + F(5) * C(3, 2) * F(2) + F(4) * C(2, 4) * F(7) + F(4) * C(2, 3) * F(6) + F(4) * C(2, 2) * F(2) + 0.0;
-        answer(4, 3) = F(0) * C(4, 4) * F(8) + F(0) * C(4, 3) * F(1) + F(0) * C(4, 2) * F(3) + F(5) * C(3, 4) * F(8) + F(5) * C(3, 3) * F(1) + F(5) * C(3, 2) * F(3) + F(4) * C(2, 4) * F(8) + F(4) * C(2, 3) * F(1) + F(4) * C(2, 2) * F(3) + 0.0;
-        answer(4, 4) = F(0) * C(4, 4) * F(0) + F(0) * C(4, 3) * F(5) + F(0) * C(4, 2) * F(4) + F(5) * C(3, 4) * F(0) + F(5) * C(3, 3) * F(5) + F(5) * C(3, 2) * F(4) + F(4) * C(2, 4) * F(0) + F(4) * C(2, 3) * F(5) + F(4) * C(2, 2) * F(4) + S(2);
-        answer(4, 5) = F(0) * C(4, 5) * F(0) + F(0) * C(4, 1) * F(5) + F(0) * C(4, 3) * F(4) + F(5) * C(3, 5) * F(0) + F(5) * C(3, 1) * F(5) + F(5) * C(3, 3) * F(4) + F(4) * C(2, 5) * F(0) + F(4) * C(2, 1) * F(5) + F(4) * C(2, 3) * F(4) + S(3);
-        answer(4, 6) = F(0) * C(4, 5) * F(7) + F(0) * C(4, 1) * F(6) + F(0) * C(4, 3) * F(2) + F(5) * C(3, 5) * F(7) + F(5) * C(3, 1) * F(6) + F(5) * C(3, 3) * F(2) + F(4) * C(2, 5) * F(7) + F(4) * C(2, 1) * F(6) + F(4) * C(2, 3) * F(2) + 0.0;
-        answer(4, 7) = F(0) * C(4, 0) * F(7) + F(0) * C(4, 5) * F(6) + F(0) * C(4, 4) * F(2) + F(5) * C(3, 0) * F(7) + F(5) * C(3, 5) * F(6) + F(5) * C(3, 4) * F(2) + F(4) * C(2, 0) * F(7) + F(4) * C(2, 5) * F(6) + F(4) * C(2, 4) * F(2) + 0.0;
-        answer(4, 8) = F(0) * C(4, 0) * F(8) + F(0) * C(4, 5) * F(1) + F(0) * C(4, 4) * F(3) + F(5) * C(3, 0) * F(8) + F(5) * C(3, 5) * F(1) + F(5) * C(3, 4) * F(3) + F(4) * C(2, 0) * F(8) + F(4) * C(2, 5) * F(1) + F(4) * C(2, 4) * F(3) + 0.0;
-        answer(5, 0) = F(0) * C(5, 0) * F(0) + F(0) * C(5, 5) * F(5) + F(0) * C(5, 4) * F(4) + F(5) * C(1, 0) * F(0) + F(5) * C(1, 5) * F(5) + F(5) * C(1, 4) * F(4) + F(4) * C(3, 0) * F(0) + F(4) * C(3, 5) * F(5) + F(4) * C(3, 4) * F(4) + S(5);
-        answer(5, 1) = F(0) * C(5, 5) * F(8) + F(0) * C(5, 1) * F(1) + F(0) * C(5, 3) * F(3) + F(5) * C(1, 5) * F(8) + F(5) * C(1, 1) * F(1) + F(5) * C(1, 3) * F(3) + F(4) * C(3, 5) * F(8) + F(4) * C(3, 1) * F(1) + F(4) * C(3, 3) * F(3) + 0.0;
-        answer(5, 2) = F(0) * C(5, 4) * F(7) + F(0) * C(5, 3) * F(6) + F(0) * C(5, 2) * F(2) + F(5) * C(1, 4) * F(7) + F(5) * C(1, 3) * F(6) + F(5) * C(1, 2) * F(2) + F(4) * C(3, 4) * F(7) + F(4) * C(3, 3) * F(6) + F(4) * C(3, 2) * F(2) + 0.0;
-        answer(5, 3) = F(0) * C(5, 4) * F(8) + F(0) * C(5, 3) * F(1) + F(0) * C(5, 2) * F(3) + F(5) * C(1, 4) * F(8) + F(5) * C(1, 3) * F(1) + F(5) * C(1, 2) * F(3) + F(4) * C(3, 4) * F(8) + F(4) * C(3, 3) * F(1) + F(4) * C(3, 2) * F(3) + 0.0;
-        answer(5, 4) = F(0) * C(5, 4) * F(0) + F(0) * C(5, 3) * F(5) + F(0) * C(5, 2) * F(4) + F(5) * C(1, 4) * F(0) + F(5) * C(1, 3) * F(5) + F(5) * C(1, 2) * F(4) + F(4) * C(3, 4) * F(0) + F(4) * C(3, 3) * F(5) + F(4) * C(3, 2) * F(4) + S(3);
-        answer(5, 5) = F(0) * C(5, 5) * F(0) + F(0) * C(5, 1) * F(5) + F(0) * C(5, 3) * F(4) + F(5) * C(1, 5) * F(0) + F(5) * C(1, 1) * F(5) + F(5) * C(1, 3) * F(4) + F(4) * C(3, 5) * F(0) + F(4) * C(3, 1) * F(5) + F(4) * C(3, 3) * F(4) + S(1);
-        answer(5, 6) = F(0) * C(5, 5) * F(7) + F(0) * C(5, 1) * F(6) + F(0) * C(5, 3) * F(2) + F(5) * C(1, 5) * F(7) + F(5) * C(1, 1) * F(6) + F(5) * C(1, 3) * F(2) + F(4) * C(3, 5) * F(7) + F(4) * C(3, 1) * F(6) + F(4) * C(3, 3) * F(2) + 0.0;
-        answer(5, 7) = F(0) * C(5, 0) * F(7) + F(0) * C(5, 5) * F(6) + F(0) * C(5, 4) * F(2) + F(5) * C(1, 0) * F(7) + F(5) * C(1, 5) * F(6) + F(5) * C(1, 4) * F(2) + F(4) * C(3, 0) * F(7) + F(4) * C(3, 5) * F(6) + F(4) * C(3, 4) * F(2) + 0.0;
-        answer(5, 8) = F(0) * C(5, 0) * F(8) + F(0) * C(5, 5) * F(1) + F(0) * C(5, 4) * F(3) + F(5) * C(1, 0) * F(8) + F(5) * C(1, 5) * F(1) + F(5) * C(1, 4) * F(3) + F(4) * C(3, 0) * F(8) + F(4) * C(3, 5) * F(1) + F(4) * C(3, 4) * F(3) + 0.0;
-        answer(6, 0) = F(7) * C(5, 0) * F(0) + F(7) * C(5, 5) * F(5) + F(7) * C(5, 4) * F(4) + F(6) * C(1, 0) * F(0) + F(6) * C(1, 5) * F(5) + F(6) * C(1, 4) * F(4) + F(2) * C(3, 0) * F(0) + F(2) * C(3, 5) * F(5) + F(2) * C(3, 4) * F(4) + 0.0;
-        answer(6, 1) = F(7) * C(5, 5) * F(8) + F(7) * C(5, 1) * F(1) + F(7) * C(5, 3) * F(3) + F(6) * C(1, 5) * F(8) + F(6) * C(1, 1) * F(1) + F(6) * C(1, 3) * F(3) + F(2) * C(3, 5) * F(8) + F(2) * C(3, 1) * F(1) + F(2) * C(3, 3) * F(3) + 0.0;
-        answer(6, 2) = F(7) * C(5, 4) * F(7) + F(7) * C(5, 3) * F(6) + F(7) * C(5, 2) * F(2) + F(6) * C(1, 4) * F(7) + F(6) * C(1, 3) * F(6) + F(6) * C(1, 2) * F(2) + F(2) * C(3, 4) * F(7) + F(2) * C(3, 3) * F(6) + F(2) * C(3, 2) * F(2) + S(3);
-        answer(6, 3) = F(7) * C(5, 4) * F(8) + F(7) * C(5, 3) * F(1) + F(7) * C(5, 2) * F(3) + F(6) * C(1, 4) * F(8) + F(6) * C(1, 3) * F(1) + F(6) * C(1, 2) * F(3) + F(2) * C(3, 4) * F(8) + F(2) * C(3, 3) * F(1) + F(2) * C(3, 2) * F(3) + 0.0;
-        answer(6, 4) = F(7) * C(5, 4) * F(0) + F(7) * C(5, 3) * F(5) + F(7) * C(5, 2) * F(4) + F(6) * C(1, 4) * F(0) + F(6) * C(1, 3) * F(5) + F(6) * C(1, 2) * F(4) + F(2) * C(3, 4) * F(0) + F(2) * C(3, 3) * F(5) + F(2) * C(3, 2) * F(4) + 0.0;
-        answer(6, 5) = F(7) * C(5, 5) * F(0) + F(7) * C(5, 1) * F(5) + F(7) * C(5, 3) * F(4) + F(6) * C(1, 5) * F(0) + F(6) * C(1, 1) * F(5) + F(6) * C(1, 3) * F(4) + F(2) * C(3, 5) * F(0) + F(2) * C(3, 1) * F(5) + F(2) * C(3, 3) * F(4) + 0.0;
-        answer(6, 6) = F(7) * C(5, 5) * F(7) + F(7) * C(5, 1) * F(6) + F(7) * C(5, 3) * F(2) + F(6) * C(1, 5) * F(7) + F(6) * C(1, 1) * F(6) + F(6) * C(1, 3) * F(2) + F(2) * C(3, 5) * F(7) + F(2) * C(3, 1) * F(6) + F(2) * C(3, 3) * F(2) + S(1);
-        answer(6, 7) = F(7) * C(5, 0) * F(7) + F(7) * C(5, 5) * F(6) + F(7) * C(5, 4) * F(2) + F(6) * C(1, 0) * F(7) + F(6) * C(1, 5) * F(6) + F(6) * C(1, 4) * F(2) + F(2) * C(3, 0) * F(7) + F(2) * C(3, 5) * F(6) + F(2) * C(3, 4) * F(2) + S(5);
-        answer(6, 8) = F(7) * C(5, 0) * F(8) + F(7) * C(5, 5) * F(1) + F(7) * C(5, 4) * F(3) + F(6) * C(1, 0) * F(8) + F(6) * C(1, 5) * F(1) + F(6) * C(1, 4) * F(3) + F(2) * C(3, 0) * F(8) + F(2) * C(3, 5) * F(1) + F(2) * C(3, 4) * F(3) + 0.0;
-        answer(7, 0) = F(7) * C(0, 0) * F(0) + F(7) * C(0, 5) * F(5) + F(7) * C(0, 4) * F(4) + F(6) * C(5, 0) * F(0) + F(6) * C(5, 5) * F(5) + F(6) * C(5, 4) * F(4) + F(2) * C(4, 0) * F(0) + F(2) * C(4, 5) * F(5) + F(2) * C(4, 4) * F(4) + 0.0;
-        answer(7, 1) = F(7) * C(0, 5) * F(8) + F(7) * C(0, 1) * F(1) + F(7) * C(0, 3) * F(3) + F(6) * C(5, 5) * F(8) + F(6) * C(5, 1) * F(1) + F(6) * C(5, 3) * F(3) + F(2) * C(4, 5) * F(8) + F(2) * C(4, 1) * F(1) + F(2) * C(4, 3) * F(3) + 0.0;
-        answer(7, 2) = F(7) * C(0, 4) * F(7) + F(7) * C(0, 3) * F(6) + F(7) * C(0, 2) * F(2) + F(6) * C(5, 4) * F(7) + F(6) * C(5, 3) * F(6) + F(6) * C(5, 2) * F(2) + F(2) * C(4, 4) * F(7) + F(2) * C(4, 3) * F(6) + F(2) * C(4, 2) * F(2) + S(4);
-        answer(7, 3) = F(7) * C(0, 4) * F(8) + F(7) * C(0, 3) * F(1) + F(7) * C(0, 2) * F(3) + F(6) * C(5, 4) * F(8) + F(6) * C(5, 3) * F(1) + F(6) * C(5, 2) * F(3) + F(2) * C(4, 4) * F(8) + F(2) * C(4, 3) * F(1) + F(2) * C(4, 2) * F(3) + 0.0;
-        answer(7, 4) = F(7) * C(0, 4) * F(0) + F(7) * C(0, 3) * F(5) + F(7) * C(0, 2) * F(4) + F(6) * C(5, 4) * F(0) + F(6) * C(5, 3) * F(5) + F(6) * C(5, 2) * F(4) + F(2) * C(4, 4) * F(0) + F(2) * C(4, 3) * F(5) + F(2) * C(4, 2) * F(4) + 0.0;
-        answer(7, 5) = F(7) * C(0, 5) * F(0) + F(7) * C(0, 1) * F(5) + F(7) * C(0, 3) * F(4) + F(6) * C(5, 5) * F(0) + F(6) * C(5, 1) * F(5) + F(6) * C(5, 3) * F(4) + F(2) * C(4, 5) * F(0) + F(2) * C(4, 1) * F(5) + F(2) * C(4, 3) * F(4) + 0.0;
-        answer(7, 6) = F(7) * C(0, 5) * F(7) + F(7) * C(0, 1) * F(6) + F(7) * C(0, 3) * F(2) + F(6) * C(5, 5) * F(7) + F(6) * C(5, 1) * F(6) + F(6) * C(5, 3) * F(2) + F(2) * C(4, 5) * F(7) + F(2) * C(4, 1) * F(6) + F(2) * C(4, 3) * F(2) + S(5);
-        answer(7, 7) = F(7) * C(0, 0) * F(7) + F(7) * C(0, 5) * F(6) + F(7) * C(0, 4) * F(2) + F(6) * C(5, 0) * F(7) + F(6) * C(5, 5) * F(6) + F(6) * C(5, 4) * F(2) + F(2) * C(4, 0) * F(7) + F(2) * C(4, 5) * F(6) + F(2) * C(4, 4) * F(2) + S(0);
-        answer(7, 8) = F(7) * C(0, 0) * F(8) + F(7) * C(0, 5) * F(1) + F(7) * C(0, 4) * F(3) + F(6) * C(5, 0) * F(8) + F(6) * C(5, 5) * F(1) + F(6) * C(5, 4) * F(3) + F(2) * C(4, 0) * F(8) + F(2) * C(4, 5) * F(1) + F(2) * C(4, 4) * F(3) + 0.0;
-        answer(8, 0) = F(8) * C(0, 0) * F(0) + F(8) * C(0, 5) * F(5) + F(8) * C(0, 4) * F(4) + F(1) * C(5, 0) * F(0) + F(1) * C(5, 5) * F(5) + F(1) * C(5, 4) * F(4) + F(3) * C(4, 0) * F(0) + F(3) * C(4, 5) * F(5) + F(3) * C(4, 4) * F(4) + 0.0;
-        answer(8, 1) = F(8) * C(0, 5) * F(8) + F(8) * C(0, 1) * F(1) + F(8) * C(0, 3) * F(3) + F(1) * C(5, 5) * F(8) + F(1) * C(5, 1) * F(1) + F(1) * C(5, 3) * F(3) + F(3) * C(4, 5) * F(8) + F(3) * C(4, 1) * F(1) + F(3) * C(4, 3) * F(3) + S(5);
-        answer(8, 2) = F(8) * C(0, 4) * F(7) + F(8) * C(0, 3) * F(6) + F(8) * C(0, 2) * F(2) + F(1) * C(5, 4) * F(7) + F(1) * C(5, 3) * F(6) + F(1) * C(5, 2) * F(2) + F(3) * C(4, 4) * F(7) + F(3) * C(4, 3) * F(6) + F(3) * C(4, 2) * F(2) + 0.0;
-        answer(8, 3) = F(8) * C(0, 4) * F(8) + F(8) * C(0, 3) * F(1) + F(8) * C(0, 2) * F(3) + F(1) * C(5, 4) * F(8) + F(1) * C(5, 3) * F(1) + F(1) * C(5, 2) * F(3) + F(3) * C(4, 4) * F(8) + F(3) * C(4, 3) * F(1) + F(3) * C(4, 2) * F(3) + S(4);
-        answer(8, 4) = F(8) * C(0, 4) * F(0) + F(8) * C(0, 3) * F(5) + F(8) * C(0, 2) * F(4) + F(1) * C(5, 4) * F(0) + F(1) * C(5, 3) * F(5) + F(1) * C(5, 2) * F(4) + F(3) * C(4, 4) * F(0) + F(3) * C(4, 3) * F(5) + F(3) * C(4, 2) * F(4) + 0.0;
-        answer(8, 5) = F(8) * C(0, 5) * F(0) + F(8) * C(0, 1) * F(5) + F(8) * C(0, 3) * F(4) + F(1) * C(5, 5) * F(0) + F(1) * C(5, 1) * F(5) + F(1) * C(5, 3) * F(4) + F(3) * C(4, 5) * F(0) + F(3) * C(4, 1) * F(5) + F(3) * C(4, 3) * F(4) + 0.0;
-        answer(8, 6) = F(8) * C(0, 5) * F(7) + F(8) * C(0, 1) * F(6) + F(8) * C(0, 3) * F(2) + F(1) * C(5, 5) * F(7) + F(1) * C(5, 1) * F(6) + F(1) * C(5, 3) * F(2) + F(3) * C(4, 5) * F(7) + F(3) * C(4, 1) * F(6) + F(3) * C(4, 3) * F(2) + 0.0;
-        answer(8, 7) = F(8) * C(0, 0) * F(7) + F(8) * C(0, 5) * F(6) + F(8) * C(0, 4) * F(2) + F(1) * C(5, 0) * F(7) + F(1) * C(5, 5) * F(6) + F(1) * C(5, 4) * F(2) + F(3) * C(4, 0) * F(7) + F(3) * C(4, 5) * F(6) + F(3) * C(4, 4) * F(2) + 0.0;
-        answer(8, 8) = F(8) * C(0, 0) * F(8) + F(8) * C(0, 5) * F(1) + F(8) * C(0, 4) * F(3) + F(1) * C(5, 0) * F(8) + F(1) * C(5, 5) * F(1) + F(1) * C(5, 4) * F(3) + F(3) * C(4, 0) * F(8) + F(3) * C(4, 5) * F(1) + F(3) * C(4, 4) * F(3) + S(0);
+    answer(0, 0) = F[0] * C(0, 0) * F[0] + F[0] * C(0, 5) * F[5] + F[0] * C(0, 4) * F[4] + F[5] * C(5, 0) * F[0] + F[5] * C(5, 5) * F[5] + F[5] * C(5, 4) * F[4] + F[4] * C(4, 0) * F[0] + F[4] * C(4, 5) * F[5] + F[4] * C(4, 4) * F[4] + S[0];
+    answer(0, 1) = F[0] * C(0, 5) * F[8] + F[0] * C(0, 1) * F[1] + F[0] * C(0, 3) * F[3] + F[5] * C(5, 5) * F[8] + F[5] * C(5, 1) * F[1] + F[5] * C(5, 3) * F[3] + F[4] * C(4, 5) * F[8] + F[4] * C(4, 1) * F[1] + F[4] * C(4, 3) * F[3] + 0.0;
+    answer(0, 2) = F[0] * C(0, 4) * F[7] + F[0] * C(0, 3) * F[6] + F[0] * C(0, 2) * F[2] + F[5] * C(5, 4) * F[7] + F[5] * C(5, 3) * F[6] + F[5] * C(5, 2) * F[2] + F[4] * C(4, 4) * F[7] + F[4] * C(4, 3) * F[6] + F[4] * C(4, 2) * F[2] + 0.0;
+    answer(0, 3) = F[0] * C(0, 4) * F[8] + F[0] * C(0, 3) * F[1] + F[0] * C(0, 2) * F[3] + F[5] * C(5, 4) * F[8] + F[5] * C(5, 3) * F[1] + F[5] * C(5, 2) * F[3] + F[4] * C(4, 4) * F[8] + F[4] * C(4, 3) * F[1] + F[4] * C(4, 2) * F[3] + 0.0;
+    answer(0, 4) = F[0] * C(0, 4) * F[0] + F[0] * C(0, 3) * F[5] + F[0] * C(0, 2) * F[4] + F[5] * C(5, 4) * F[0] + F[5] * C(5, 3) * F[5] + F[5] * C(5, 2) * F[4] + F[4] * C(4, 4) * F[0] + F[4] * C(4, 3) * F[5] + F[4] * C(4, 2) * F[4] + S[4];
+    answer(0, 5) = F[0] * C(0, 5) * F[0] + F[0] * C(0, 1) * F[5] + F[0] * C(0, 3) * F[4] + F[5] * C(5, 5) * F[0] + F[5] * C(5, 1) * F[5] + F[5] * C(5, 3) * F[4] + F[4] * C(4, 5) * F[0] + F[4] * C(4, 1) * F[5] + F[4] * C(4, 3) * F[4] + S[5];
+    answer(0, 6) = F[0] * C(0, 5) * F[7] + F[0] * C(0, 1) * F[6] + F[0] * C(0, 3) * F[2] + F[5] * C(5, 5) * F[7] + F[5] * C(5, 1) * F[6] + F[5] * C(5, 3) * F[2] + F[4] * C(4, 5) * F[7] + F[4] * C(4, 1) * F[6] + F[4] * C(4, 3) * F[2] + 0.0;
+    answer(0, 7) = F[0] * C(0, 0) * F[7] + F[0] * C(0, 5) * F[6] + F[0] * C(0, 4) * F[2] + F[5] * C(5, 0) * F[7] + F[5] * C(5, 5) * F[6] + F[5] * C(5, 4) * F[2] + F[4] * C(4, 0) * F[7] + F[4] * C(4, 5) * F[6] + F[4] * C(4, 4) * F[2] + 0.0;
+    answer(0, 8) = F[0] * C(0, 0) * F[8] + F[0] * C(0, 5) * F[1] + F[0] * C(0, 4) * F[3] + F[5] * C(5, 0) * F[8] + F[5] * C(5, 5) * F[1] + F[5] * C(5, 4) * F[3] + F[4] * C(4, 0) * F[8] + F[4] * C(4, 5) * F[1] + F[4] * C(4, 4) * F[3] + 0.0;
+    answer(1, 0) = F[8] * C(5, 0) * F[0] + F[8] * C(5, 5) * F[5] + F[8] * C(5, 4) * F[4] + F[1] * C(1, 0) * F[0] + F[1] * C(1, 5) * F[5] + F[1] * C(1, 4) * F[4] + F[3] * C(3, 0) * F[0] + F[3] * C(3, 5) * F[5] + F[3] * C(3, 4) * F[4] + 0.0;
+    answer(1, 1) = F[8] * C(5, 5) * F[8] + F[8] * C(5, 1) * F[1] + F[8] * C(5, 3) * F[3] + F[1] * C(1, 5) * F[8] + F[1] * C(1, 1) * F[1] + F[1] * C(1, 3) * F[3] + F[3] * C(3, 5) * F[8] + F[3] * C(3, 1) * F[1] + F[3] * C(3, 3) * F[3] + S[1];
+    answer(1, 2) = F[8] * C(5, 4) * F[7] + F[8] * C(5, 3) * F[6] + F[8] * C(5, 2) * F[2] + F[1] * C(1, 4) * F[7] + F[1] * C(1, 3) * F[6] + F[1] * C(1, 2) * F[2] + F[3] * C(3, 4) * F[7] + F[3] * C(3, 3) * F[6] + F[3] * C(3, 2) * F[2] + 0.0;
+    answer(1, 3) = F[8] * C(5, 4) * F[8] + F[8] * C(5, 3) * F[1] + F[8] * C(5, 2) * F[3] + F[1] * C(1, 4) * F[8] + F[1] * C(1, 3) * F[1] + F[1] * C(1, 2) * F[3] + F[3] * C(3, 4) * F[8] + F[3] * C(3, 3) * F[1] + F[3] * C(3, 2) * F[3] + S[3];
+    answer(1, 4) = F[8] * C(5, 4) * F[0] + F[8] * C(5, 3) * F[5] + F[8] * C(5, 2) * F[4] + F[1] * C(1, 4) * F[0] + F[1] * C(1, 3) * F[5] + F[1] * C(1, 2) * F[4] + F[3] * C(3, 4) * F[0] + F[3] * C(3, 3) * F[5] + F[3] * C(3, 2) * F[4] + 0.0;
+    answer(1, 5) = F[8] * C(5, 5) * F[0] + F[8] * C(5, 1) * F[5] + F[8] * C(5, 3) * F[4] + F[1] * C(1, 5) * F[0] + F[1] * C(1, 1) * F[5] + F[1] * C(1, 3) * F[4] + F[3] * C(3, 5) * F[0] + F[3] * C(3, 1) * F[5] + F[3] * C(3, 3) * F[4] + 0.0;
+    answer(1, 6) = F[8] * C(5, 5) * F[7] + F[8] * C(5, 1) * F[6] + F[8] * C(5, 3) * F[2] + F[1] * C(1, 5) * F[7] + F[1] * C(1, 1) * F[6] + F[1] * C(1, 3) * F[2] + F[3] * C(3, 5) * F[7] + F[3] * C(3, 1) * F[6] + F[3] * C(3, 3) * F[2] + 0.0;
+    answer(1, 7) = F[8] * C(5, 0) * F[7] + F[8] * C(5, 5) * F[6] + F[8] * C(5, 4) * F[2] + F[1] * C(1, 0) * F[7] + F[1] * C(1, 5) * F[6] + F[1] * C(1, 4) * F[2] + F[3] * C(3, 0) * F[7] + F[3] * C(3, 5) * F[6] + F[3] * C(3, 4) * F[2] + 0.0;
+    answer(1, 8) = F[8] * C(5, 0) * F[8] + F[8] * C(5, 5) * F[1] + F[8] * C(5, 4) * F[3] + F[1] * C(1, 0) * F[8] + F[1] * C(1, 5) * F[1] + F[1] * C(1, 4) * F[3] + F[3] * C(3, 0) * F[8] + F[3] * C(3, 5) * F[1] + F[3] * C(3, 4) * F[3] + S[5];
+    answer(2, 0) = F[7] * C(4, 0) * F[0] + F[7] * C(4, 5) * F[5] + F[7] * C(4, 4) * F[4] + F[6] * C(3, 0) * F[0] + F[6] * C(3, 5) * F[5] + F[6] * C(3, 4) * F[4] + F[2] * C(2, 0) * F[0] + F[2] * C(2, 5) * F[5] + F[2] * C(2, 4) * F[4] + 0.0;
+    answer(2, 1) = F[7] * C(4, 5) * F[8] + F[7] * C(4, 1) * F[1] + F[7] * C(4, 3) * F[3] + F[6] * C(3, 5) * F[8] + F[6] * C(3, 1) * F[1] + F[6] * C(3, 3) * F[3] + F[2] * C(2, 5) * F[8] + F[2] * C(2, 1) * F[1] + F[2] * C(2, 3) * F[3] + 0.0;
+    answer(2, 2) = F[7] * C(4, 4) * F[7] + F[7] * C(4, 3) * F[6] + F[7] * C(4, 2) * F[2] + F[6] * C(3, 4) * F[7] + F[6] * C(3, 3) * F[6] + F[6] * C(3, 2) * F[2] + F[2] * C(2, 4) * F[7] + F[2] * C(2, 3) * F[6] + F[2] * C(2, 2) * F[2] + S[2];
+    answer(2, 3) = F[7] * C(4, 4) * F[8] + F[7] * C(4, 3) * F[1] + F[7] * C(4, 2) * F[3] + F[6] * C(3, 4) * F[8] + F[6] * C(3, 3) * F[1] + F[6] * C(3, 2) * F[3] + F[2] * C(2, 4) * F[8] + F[2] * C(2, 3) * F[1] + F[2] * C(2, 2) * F[3] + 0.0;
+    answer(2, 4) = F[7] * C(4, 4) * F[0] + F[7] * C(4, 3) * F[5] + F[7] * C(4, 2) * F[4] + F[6] * C(3, 4) * F[0] + F[6] * C(3, 3) * F[5] + F[6] * C(3, 2) * F[4] + F[2] * C(2, 4) * F[0] + F[2] * C(2, 3) * F[5] + F[2] * C(2, 2) * F[4] + 0.0;
+    answer(2, 5) = F[7] * C(4, 5) * F[0] + F[7] * C(4, 1) * F[5] + F[7] * C(4, 3) * F[4] + F[6] * C(3, 5) * F[0] + F[6] * C(3, 1) * F[5] + F[6] * C(3, 3) * F[4] + F[2] * C(2, 5) * F[0] + F[2] * C(2, 1) * F[5] + F[2] * C(2, 3) * F[4] + 0.0;
+    answer(2, 6) = F[7] * C(4, 5) * F[7] + F[7] * C(4, 1) * F[6] + F[7] * C(4, 3) * F[2] + F[6] * C(3, 5) * F[7] + F[6] * C(3, 1) * F[6] + F[6] * C(3, 3) * F[2] + F[2] * C(2, 5) * F[7] + F[2] * C(2, 1) * F[6] + F[2] * C(2, 3) * F[2] + S[3];
+    answer(2, 7) = F[7] * C(4, 0) * F[7] + F[7] * C(4, 5) * F[6] + F[7] * C(4, 4) * F[2] + F[6] * C(3, 0) * F[7] + F[6] * C(3, 5) * F[6] + F[6] * C(3, 4) * F[2] + F[2] * C(2, 0) * F[7] + F[2] * C(2, 5) * F[6] + F[2] * C(2, 4) * F[2] + S[4];
+    answer(2, 8) = F[7] * C(4, 0) * F[8] + F[7] * C(4, 5) * F[1] + F[7] * C(4, 4) * F[3] + F[6] * C(3, 0) * F[8] + F[6] * C(3, 5) * F[1] + F[6] * C(3, 4) * F[3] + F[2] * C(2, 0) * F[8] + F[2] * C(2, 5) * F[1] + F[2] * C(2, 4) * F[3] + 0.0;
+    answer(3, 0) = F[8] * C(4, 0) * F[0] + F[8] * C(4, 5) * F[5] + F[8] * C(4, 4) * F[4] + F[1] * C(3, 0) * F[0] + F[1] * C(3, 5) * F[5] + F[1] * C(3, 4) * F[4] + F[3] * C(2, 0) * F[0] + F[3] * C(2, 5) * F[5] + F[3] * C(2, 4) * F[4] + 0.0;
+    answer(3, 1) = F[8] * C(4, 5) * F[8] + F[8] * C(4, 1) * F[1] + F[8] * C(4, 3) * F[3] + F[1] * C(3, 5) * F[8] + F[1] * C(3, 1) * F[1] + F[1] * C(3, 3) * F[3] + F[3] * C(2, 5) * F[8] + F[3] * C(2, 1) * F[1] + F[3] * C(2, 3) * F[3] + S[3];
+    answer(3, 2) = F[8] * C(4, 4) * F[7] + F[8] * C(4, 3) * F[6] + F[8] * C(4, 2) * F[2] + F[1] * C(3, 4) * F[7] + F[1] * C(3, 3) * F[6] + F[1] * C(3, 2) * F[2] + F[3] * C(2, 4) * F[7] + F[3] * C(2, 3) * F[6] + F[3] * C(2, 2) * F[2] + 0.0;
+    answer(3, 3) = F[8] * C(4, 4) * F[8] + F[8] * C(4, 3) * F[1] + F[8] * C(4, 2) * F[3] + F[1] * C(3, 4) * F[8] + F[1] * C(3, 3) * F[1] + F[1] * C(3, 2) * F[3] + F[3] * C(2, 4) * F[8] + F[3] * C(2, 3) * F[1] + F[3] * C(2, 2) * F[3] + S[2];
+    answer(3, 4) = F[8] * C(4, 4) * F[0] + F[8] * C(4, 3) * F[5] + F[8] * C(4, 2) * F[4] + F[1] * C(3, 4) * F[0] + F[1] * C(3, 3) * F[5] + F[1] * C(3, 2) * F[4] + F[3] * C(2, 4) * F[0] + F[3] * C(2, 3) * F[5] + F[3] * C(2, 2) * F[4] + 0.0;
+    answer(3, 5) = F[8] * C(4, 5) * F[0] + F[8] * C(4, 1) * F[5] + F[8] * C(4, 3) * F[4] + F[1] * C(3, 5) * F[0] + F[1] * C(3, 1) * F[5] + F[1] * C(3, 3) * F[4] + F[3] * C(2, 5) * F[0] + F[3] * C(2, 1) * F[5] + F[3] * C(2, 3) * F[4] + 0.0;
+    answer(3, 6) = F[8] * C(4, 5) * F[7] + F[8] * C(4, 1) * F[6] + F[8] * C(4, 3) * F[2] + F[1] * C(3, 5) * F[7] + F[1] * C(3, 1) * F[6] + F[1] * C(3, 3) * F[2] + F[3] * C(2, 5) * F[7] + F[3] * C(2, 1) * F[6] + F[3] * C(2, 3) * F[2] + 0.0;
+    answer(3, 7) = F[8] * C(4, 0) * F[7] + F[8] * C(4, 5) * F[6] + F[8] * C(4, 4) * F[2] + F[1] * C(3, 0) * F[7] + F[1] * C(3, 5) * F[6] + F[1] * C(3, 4) * F[2] + F[3] * C(2, 0) * F[7] + F[3] * C(2, 5) * F[6] + F[3] * C(2, 4) * F[2] + 0.0;
+    answer(3, 8) = F[8] * C(4, 0) * F[8] + F[8] * C(4, 5) * F[1] + F[8] * C(4, 4) * F[3] + F[1] * C(3, 0) * F[8] + F[1] * C(3, 5) * F[1] + F[1] * C(3, 4) * F[3] + F[3] * C(2, 0) * F[8] + F[3] * C(2, 5) * F[1] + F[3] * C(2, 4) * F[3] + S[4];
+    answer(4, 0) = F[0] * C(4, 0) * F[0] + F[0] * C(4, 5) * F[5] + F[0] * C(4, 4) * F[4] + F[5] * C(3, 0) * F[0] + F[5] * C(3, 5) * F[5] + F[5] * C(3, 4) * F[4] + F[4] * C(2, 0) * F[0] + F[4] * C(2, 5) * F[5] + F[4] * C(2, 4) * F[4] + S[4];
+    answer(4, 1) = F[0] * C(4, 5) * F[8] + F[0] * C(4, 1) * F[1] + F[0] * C(4, 3) * F[3] + F[5] * C(3, 5) * F[8] + F[5] * C(3, 1) * F[1] + F[5] * C(3, 3) * F[3] + F[4] * C(2, 5) * F[8] + F[4] * C(2, 1) * F[1] + F[4] * C(2, 3) * F[3] + 0.0;
+    answer(4, 2) = F[0] * C(4, 4) * F[7] + F[0] * C(4, 3) * F[6] + F[0] * C(4, 2) * F[2] + F[5] * C(3, 4) * F[7] + F[5] * C(3, 3) * F[6] + F[5] * C(3, 2) * F[2] + F[4] * C(2, 4) * F[7] + F[4] * C(2, 3) * F[6] + F[4] * C(2, 2) * F[2] + 0.0;
+    answer(4, 3) = F[0] * C(4, 4) * F[8] + F[0] * C(4, 3) * F[1] + F[0] * C(4, 2) * F[3] + F[5] * C(3, 4) * F[8] + F[5] * C(3, 3) * F[1] + F[5] * C(3, 2) * F[3] + F[4] * C(2, 4) * F[8] + F[4] * C(2, 3) * F[1] + F[4] * C(2, 2) * F[3] + 0.0;
+    answer(4, 4) = F[0] * C(4, 4) * F[0] + F[0] * C(4, 3) * F[5] + F[0] * C(4, 2) * F[4] + F[5] * C(3, 4) * F[0] + F[5] * C(3, 3) * F[5] + F[5] * C(3, 2) * F[4] + F[4] * C(2, 4) * F[0] + F[4] * C(2, 3) * F[5] + F[4] * C(2, 2) * F[4] + S[2];
+    answer(4, 5) = F[0] * C(4, 5) * F[0] + F[0] * C(4, 1) * F[5] + F[0] * C(4, 3) * F[4] + F[5] * C(3, 5) * F[0] + F[5] * C(3, 1) * F[5] + F[5] * C(3, 3) * F[4] + F[4] * C(2, 5) * F[0] + F[4] * C(2, 1) * F[5] + F[4] * C(2, 3) * F[4] + S[3];
+    answer(4, 6) = F[0] * C(4, 5) * F[7] + F[0] * C(4, 1) * F[6] + F[0] * C(4, 3) * F[2] + F[5] * C(3, 5) * F[7] + F[5] * C(3, 1) * F[6] + F[5] * C(3, 3) * F[2] + F[4] * C(2, 5) * F[7] + F[4] * C(2, 1) * F[6] + F[4] * C(2, 3) * F[2] + 0.0;
+    answer(4, 7) = F[0] * C(4, 0) * F[7] + F[0] * C(4, 5) * F[6] + F[0] * C(4, 4) * F[2] + F[5] * C(3, 0) * F[7] + F[5] * C(3, 5) * F[6] + F[5] * C(3, 4) * F[2] + F[4] * C(2, 0) * F[7] + F[4] * C(2, 5) * F[6] + F[4] * C(2, 4) * F[2] + 0.0;
+    answer(4, 8) = F[0] * C(4, 0) * F[8] + F[0] * C(4, 5) * F[1] + F[0] * C(4, 4) * F[3] + F[5] * C(3, 0) * F[8] + F[5] * C(3, 5) * F[1] + F[5] * C(3, 4) * F[3] + F[4] * C(2, 0) * F[8] + F[4] * C(2, 5) * F[1] + F[4] * C(2, 4) * F[3] + 0.0;
+    answer(5, 0) = F[0] * C(5, 0) * F[0] + F[0] * C(5, 5) * F[5] + F[0] * C(5, 4) * F[4] + F[5] * C(1, 0) * F[0] + F[5] * C(1, 5) * F[5] + F[5] * C(1, 4) * F[4] + F[4] * C(3, 0) * F[0] + F[4] * C(3, 5) * F[5] + F[4] * C(3, 4) * F[4] + S[5];
+    answer(5, 1) = F[0] * C(5, 5) * F[8] + F[0] * C(5, 1) * F[1] + F[0] * C(5, 3) * F[3] + F[5] * C(1, 5) * F[8] + F[5] * C(1, 1) * F[1] + F[5] * C(1, 3) * F[3] + F[4] * C(3, 5) * F[8] + F[4] * C(3, 1) * F[1] + F[4] * C(3, 3) * F[3] + 0.0;
+    answer(5, 2) = F[0] * C(5, 4) * F[7] + F[0] * C(5, 3) * F[6] + F[0] * C(5, 2) * F[2] + F[5] * C(1, 4) * F[7] + F[5] * C(1, 3) * F[6] + F[5] * C(1, 2) * F[2] + F[4] * C(3, 4) * F[7] + F[4] * C(3, 3) * F[6] + F[4] * C(3, 2) * F[2] + 0.0;
+    answer(5, 3) = F[0] * C(5, 4) * F[8] + F[0] * C(5, 3) * F[1] + F[0] * C(5, 2) * F[3] + F[5] * C(1, 4) * F[8] + F[5] * C(1, 3) * F[1] + F[5] * C(1, 2) * F[3] + F[4] * C(3, 4) * F[8] + F[4] * C(3, 3) * F[1] + F[4] * C(3, 2) * F[3] + 0.0;
+    answer(5, 4) = F[0] * C(5, 4) * F[0] + F[0] * C(5, 3) * F[5] + F[0] * C(5, 2) * F[4] + F[5] * C(1, 4) * F[0] + F[5] * C(1, 3) * F[5] + F[5] * C(1, 2) * F[4] + F[4] * C(3, 4) * F[0] + F[4] * C(3, 3) * F[5] + F[4] * C(3, 2) * F[4] + S[3];
+    answer(5, 5) = F[0] * C(5, 5) * F[0] + F[0] * C(5, 1) * F[5] + F[0] * C(5, 3) * F[4] + F[5] * C(1, 5) * F[0] + F[5] * C(1, 1) * F[5] + F[5] * C(1, 3) * F[4] + F[4] * C(3, 5) * F[0] + F[4] * C(3, 1) * F[5] + F[4] * C(3, 3) * F[4] + S[1];
+    answer(5, 6) = F[0] * C(5, 5) * F[7] + F[0] * C(5, 1) * F[6] + F[0] * C(5, 3) * F[2] + F[5] * C(1, 5) * F[7] + F[5] * C(1, 1) * F[6] + F[5] * C(1, 3) * F[2] + F[4] * C(3, 5) * F[7] + F[4] * C(3, 1) * F[6] + F[4] * C(3, 3) * F[2] + 0.0;
+    answer(5, 7) = F[0] * C(5, 0) * F[7] + F[0] * C(5, 5) * F[6] + F[0] * C(5, 4) * F[2] + F[5] * C(1, 0) * F[7] + F[5] * C(1, 5) * F[6] + F[5] * C(1, 4) * F[2] + F[4] * C(3, 0) * F[7] + F[4] * C(3, 5) * F[6] + F[4] * C(3, 4) * F[2] + 0.0;
+    answer(5, 8) = F[0] * C(5, 0) * F[8] + F[0] * C(5, 5) * F[1] + F[0] * C(5, 4) * F[3] + F[5] * C(1, 0) * F[8] + F[5] * C(1, 5) * F[1] + F[5] * C(1, 4) * F[3] + F[4] * C(3, 0) * F[8] + F[4] * C(3, 5) * F[1] + F[4] * C(3, 4) * F[3] + 0.0;
+    answer(6, 0) = F[7] * C(5, 0) * F[0] + F[7] * C(5, 5) * F[5] + F[7] * C(5, 4) * F[4] + F[6] * C(1, 0) * F[0] + F[6] * C(1, 5) * F[5] + F[6] * C(1, 4) * F[4] + F[2] * C(3, 0) * F[0] + F[2] * C(3, 5) * F[5] + F[2] * C(3, 4) * F[4] + 0.0;
+    answer(6, 1) = F[7] * C(5, 5) * F[8] + F[7] * C(5, 1) * F[1] + F[7] * C(5, 3) * F[3] + F[6] * C(1, 5) * F[8] + F[6] * C(1, 1) * F[1] + F[6] * C(1, 3) * F[3] + F[2] * C(3, 5) * F[8] + F[2] * C(3, 1) * F[1] + F[2] * C(3, 3) * F[3] + 0.0;
+    answer(6, 2) = F[7] * C(5, 4) * F[7] + F[7] * C(5, 3) * F[6] + F[7] * C(5, 2) * F[2] + F[6] * C(1, 4) * F[7] + F[6] * C(1, 3) * F[6] + F[6] * C(1, 2) * F[2] + F[2] * C(3, 4) * F[7] + F[2] * C(3, 3) * F[6] + F[2] * C(3, 2) * F[2] + S[3];
+    answer(6, 3) = F[7] * C(5, 4) * F[8] + F[7] * C(5, 3) * F[1] + F[7] * C(5, 2) * F[3] + F[6] * C(1, 4) * F[8] + F[6] * C(1, 3) * F[1] + F[6] * C(1, 2) * F[3] + F[2] * C(3, 4) * F[8] + F[2] * C(3, 3) * F[1] + F[2] * C(3, 2) * F[3] + 0.0;
+    answer(6, 4) = F[7] * C(5, 4) * F[0] + F[7] * C(5, 3) * F[5] + F[7] * C(5, 2) * F[4] + F[6] * C(1, 4) * F[0] + F[6] * C(1, 3) * F[5] + F[6] * C(1, 2) * F[4] + F[2] * C(3, 4) * F[0] + F[2] * C(3, 3) * F[5] + F[2] * C(3, 2) * F[4] + 0.0;
+    answer(6, 5) = F[7] * C(5, 5) * F[0] + F[7] * C(5, 1) * F[5] + F[7] * C(5, 3) * F[4] + F[6] * C(1, 5) * F[0] + F[6] * C(1, 1) * F[5] + F[6] * C(1, 3) * F[4] + F[2] * C(3, 5) * F[0] + F[2] * C(3, 1) * F[5] + F[2] * C(3, 3) * F[4] + 0.0;
+    answer(6, 6) = F[7] * C(5, 5) * F[7] + F[7] * C(5, 1) * F[6] + F[7] * C(5, 3) * F[2] + F[6] * C(1, 5) * F[7] + F[6] * C(1, 1) * F[6] + F[6] * C(1, 3) * F[2] + F[2] * C(3, 5) * F[7] + F[2] * C(3, 1) * F[6] + F[2] * C(3, 3) * F[2] + S[1];
+    answer(6, 7) = F[7] * C(5, 0) * F[7] + F[7] * C(5, 5) * F[6] + F[7] * C(5, 4) * F[2] + F[6] * C(1, 0) * F[7] + F[6] * C(1, 5) * F[6] + F[6] * C(1, 4) * F[2] + F[2] * C(3, 0) * F[7] + F[2] * C(3, 5) * F[6] + F[2] * C(3, 4) * F[2] + S[5];
+    answer(6, 8) = F[7] * C(5, 0) * F[8] + F[7] * C(5, 5) * F[1] + F[7] * C(5, 4) * F[3] + F[6] * C(1, 0) * F[8] + F[6] * C(1, 5) * F[1] + F[6] * C(1, 4) * F[3] + F[2] * C(3, 0) * F[8] + F[2] * C(3, 5) * F[1] + F[2] * C(3, 4) * F[3] + 0.0;
+    answer(7, 0) = F[7] * C(0, 0) * F[0] + F[7] * C(0, 5) * F[5] + F[7] * C(0, 4) * F[4] + F[6] * C(5, 0) * F[0] + F[6] * C(5, 5) * F[5] + F[6] * C(5, 4) * F[4] + F[2] * C(4, 0) * F[0] + F[2] * C(4, 5) * F[5] + F[2] * C(4, 4) * F[4] + 0.0;
+    answer(7, 1) = F[7] * C(0, 5) * F[8] + F[7] * C(0, 1) * F[1] + F[7] * C(0, 3) * F[3] + F[6] * C(5, 5) * F[8] + F[6] * C(5, 1) * F[1] + F[6] * C(5, 3) * F[3] + F[2] * C(4, 5) * F[8] + F[2] * C(4, 1) * F[1] + F[2] * C(4, 3) * F[3] + 0.0;
+    answer(7, 2) = F[7] * C(0, 4) * F[7] + F[7] * C(0, 3) * F[6] + F[7] * C(0, 2) * F[2] + F[6] * C(5, 4) * F[7] + F[6] * C(5, 3) * F[6] + F[6] * C(5, 2) * F[2] + F[2] * C(4, 4) * F[7] + F[2] * C(4, 3) * F[6] + F[2] * C(4, 2) * F[2] + S[4];
+    answer(7, 3) = F[7] * C(0, 4) * F[8] + F[7] * C(0, 3) * F[1] + F[7] * C(0, 2) * F[3] + F[6] * C(5, 4) * F[8] + F[6] * C(5, 3) * F[1] + F[6] * C(5, 2) * F[3] + F[2] * C(4, 4) * F[8] + F[2] * C(4, 3) * F[1] + F[2] * C(4, 2) * F[3] + 0.0;
+    answer(7, 4) = F[7] * C(0, 4) * F[0] + F[7] * C(0, 3) * F[5] + F[7] * C(0, 2) * F[4] + F[6] * C(5, 4) * F[0] + F[6] * C(5, 3) * F[5] + F[6] * C(5, 2) * F[4] + F[2] * C(4, 4) * F[0] + F[2] * C(4, 3) * F[5] + F[2] * C(4, 2) * F[4] + 0.0;
+    answer(7, 5) = F[7] * C(0, 5) * F[0] + F[7] * C(0, 1) * F[5] + F[7] * C(0, 3) * F[4] + F[6] * C(5, 5) * F[0] + F[6] * C(5, 1) * F[5] + F[6] * C(5, 3) * F[4] + F[2] * C(4, 5) * F[0] + F[2] * C(4, 1) * F[5] + F[2] * C(4, 3) * F[4] + 0.0;
+    answer(7, 6) = F[7] * C(0, 5) * F[7] + F[7] * C(0, 1) * F[6] + F[7] * C(0, 3) * F[2] + F[6] * C(5, 5) * F[7] + F[6] * C(5, 1) * F[6] + F[6] * C(5, 3) * F[2] + F[2] * C(4, 5) * F[7] + F[2] * C(4, 1) * F[6] + F[2] * C(4, 3) * F[2] + S[5];
+    answer(7, 7) = F[7] * C(0, 0) * F[7] + F[7] * C(0, 5) * F[6] + F[7] * C(0, 4) * F[2] + F[6] * C(5, 0) * F[7] + F[6] * C(5, 5) * F[6] + F[6] * C(5, 4) * F[2] + F[2] * C(4, 0) * F[7] + F[2] * C(4, 5) * F[6] + F[2] * C(4, 4) * F[2] + S[0];
+    answer(7, 8) = F[7] * C(0, 0) * F[8] + F[7] * C(0, 5) * F[1] + F[7] * C(0, 4) * F[3] + F[6] * C(5, 0) * F[8] + F[6] * C(5, 5) * F[1] + F[6] * C(5, 4) * F[3] + F[2] * C(4, 0) * F[8] + F[2] * C(4, 5) * F[1] + F[2] * C(4, 4) * F[3] + 0.0;
+    answer(8, 0) = F[8] * C(0, 0) * F[0] + F[8] * C(0, 5) * F[5] + F[8] * C(0, 4) * F[4] + F[1] * C(5, 0) * F[0] + F[1] * C(5, 5) * F[5] + F[1] * C(5, 4) * F[4] + F[3] * C(4, 0) * F[0] + F[3] * C(4, 5) * F[5] + F[3] * C(4, 4) * F[4] + 0.0;
+    answer(8, 1) = F[8] * C(0, 5) * F[8] + F[8] * C(0, 1) * F[1] + F[8] * C(0, 3) * F[3] + F[1] * C(5, 5) * F[8] + F[1] * C(5, 1) * F[1] + F[1] * C(5, 3) * F[3] + F[3] * C(4, 5) * F[8] + F[3] * C(4, 1) * F[1] + F[3] * C(4, 3) * F[3] + S[5];
+    answer(8, 2) = F[8] * C(0, 4) * F[7] + F[8] * C(0, 3) * F[6] + F[8] * C(0, 2) * F[2] + F[1] * C(5, 4) * F[7] + F[1] * C(5, 3) * F[6] + F[1] * C(5, 2) * F[2] + F[3] * C(4, 4) * F[7] + F[3] * C(4, 3) * F[6] + F[3] * C(4, 2) * F[2] + 0.0;
+    answer(8, 3) = F[8] * C(0, 4) * F[8] + F[8] * C(0, 3) * F[1] + F[8] * C(0, 2) * F[3] + F[1] * C(5, 4) * F[8] + F[1] * C(5, 3) * F[1] + F[1] * C(5, 2) * F[3] + F[3] * C(4, 4) * F[8] + F[3] * C(4, 3) * F[1] + F[3] * C(4, 2) * F[3] + S[4];
+    answer(8, 4) = F[8] * C(0, 4) * F[0] + F[8] * C(0, 3) * F[5] + F[8] * C(0, 2) * F[4] + F[1] * C(5, 4) * F[0] + F[1] * C(5, 3) * F[5] + F[1] * C(5, 2) * F[4] + F[3] * C(4, 4) * F[0] + F[3] * C(4, 3) * F[5] + F[3] * C(4, 2) * F[4] + 0.0;
+    answer(8, 5) = F[8] * C(0, 5) * F[0] + F[8] * C(0, 1) * F[5] + F[8] * C(0, 3) * F[4] + F[1] * C(5, 5) * F[0] + F[1] * C(5, 1) * F[5] + F[1] * C(5, 3) * F[4] + F[3] * C(4, 5) * F[0] + F[3] * C(4, 1) * F[5] + F[3] * C(4, 3) * F[4] + 0.0;
+    answer(8, 6) = F[8] * C(0, 5) * F[7] + F[8] * C(0, 1) * F[6] + F[8] * C(0, 3) * F[2] + F[1] * C(5, 5) * F[7] + F[1] * C(5, 1) * F[6] + F[1] * C(5, 3) * F[2] + F[3] * C(4, 5) * F[7] + F[3] * C(4, 1) * F[6] + F[3] * C(4, 3) * F[2] + 0.0;
+    answer(8, 7) = F[8] * C(0, 0) * F[7] + F[8] * C(0, 5) * F[6] + F[8] * C(0, 4) * F[2] + F[1] * C(5, 0) * F[7] + F[1] * C(5, 5) * F[6] + F[1] * C(5, 4) * F[2] + F[3] * C(4, 0) * F[7] + F[3] * C(4, 5) * F[6] + F[3] * C(4, 4) * F[2] + 0.0;
+    answer(8, 8) = F[8] * C(0, 0) * F[8] + F[8] * C(0, 5) * F[1] + F[8] * C(0, 4) * F[3] + F[1] * C(5, 0) * F[8] + F[1] * C(5, 5) * F[1] + F[1] * C(5, 4) * F[3] + F[3] * C(4, 0) * F[8] + F[3] * C(4, 5) * F[1] + F[3] * C(4, 4) * F[3] + S[0];
 
 #else
-        ///@todo Experimental - added 110814 by JB
-        // Conversion expressed in index form. Seems a tiny bit slower than that above but easier to debug.
-        FloatMatrix I(3, 3);
-        I.beUnitMatrix();
+    ///@todo Experimental - added 110814 by JB
+    // Conversion expressed in index form. Seems a tiny bit slower than that above but easier to debug.
+    auto I = eye<3>();
 
-        //I_ik * S_jl + F_im F_kn C_mjnl
-        answer.resize(9, 9);
-        for ( int i = 1; i <= 3; i++ ) {
-            for ( int j = 1; j <= 3; j++ ) {
-                for ( int k = 1; k <= 3; k++ ) {
-                    for ( int l = 1; l <= 3; l++ ) {
-                        for ( int m = 1; m <= 3; m++ ) {
-                            for ( int n = 1; n <= 3; n++ ) {
-                                answer.at(giveVI(i, j), giveVI(k, l) ) += I.at(i, k) * S.at(giveSymVI(j, l) ) + F.at(giveVI(i, m) ) * F.at(giveVI(k, n) ) * C.at(giveSymVI(m, j), giveSymVI(n, l) );
-                            }
+    //I_ik * S_jl + F_im F_kn C_mjnl
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            for ( int k = 1; k <= 3; k++ ) {
+                for ( int l = 1; l <= 3; l++ ) {
+                    for ( int m = 1; m <= 3; m++ ) {
+                        for ( int n = 1; n <= 3; n++ ) {
+                            answer.at(giveVI(i, j), giveVI(k, l) ) += I.at(i, k) * S.at(giveSymVI(j, l) ) + F.at(giveVI(i, m) ) * F.at(giveVI(k, n) ) * C.at(giveSymVI(m, j), giveSymVI(n, l) );
                         }
                     }
                 }
             }
         }
-
-#endif
-    } else if ( matMode == _PlaneStress ) {
-        // Save terms associated with H = [du/dx dv/dy du/dy dv/dx]
-
-        answer.resize(4, 4);
-        answer(0, 0) = F(0) * C(0, 0) * F(0) + F(0) * C(0, 2) * F(2) + F(2) * C(2, 0) * F(0) + F(2) * C(2, 2) * F(2) + S(0);
-        answer(0, 1) = F(0) * C(0, 2) * F(3) + F(0) * C(0, 1) * F(1) + F(2) * C(2, 2) * F(3) + F(2) * C(2, 1) * F(1) + 0.0;
-        answer(0, 2) = F(0) * C(0, 2) * F(0) + F(0) * C(0, 1) * F(2) + F(2) * C(2, 2) * F(0) + F(2) * C(2, 1) * F(2) + S(2);
-        answer(0, 3) = F(0) * C(0, 0) * F(3) + F(0) * C(0, 2) * F(1) + F(2) * C(2, 0) * F(3) + F(2) * C(2, 2) * F(1) + 0.0;
-        answer(1, 0) = F(3) * C(2, 0) * F(0) + F(3) * C(2, 2) * F(2) + F(1) * C(1, 0) * F(0) + F(1) * C(1, 2) * F(2) + 0.0;
-        answer(1, 1) = F(3) * C(2, 2) * F(3) + F(3) * C(2, 1) * F(1) + F(1) * C(1, 2) * F(3) + F(1) * C(1, 1) * F(1) + S(1);
-        answer(1, 2) = F(3) * C(2, 2) * F(0) + F(3) * C(2, 1) * F(2) + F(1) * C(1, 2) * F(0) + F(1) * C(1, 1) * F(2) + 0.0;
-        answer(1, 3) = F(3) * C(2, 0) * F(3) + F(3) * C(2, 2) * F(1) + F(1) * C(1, 0) * F(3) + F(1) * C(1, 2) * F(1) + S(2);
-        answer(2, 0) = F(0) * C(2, 0) * F(0) + F(0) * C(2, 2) * F(2) + F(2) * C(1, 0) * F(0) + F(2) * C(1, 2) * F(2) + S(2);
-        answer(2, 1) = F(0) * C(2, 2) * F(3) + F(0) * C(2, 1) * F(1) + F(2) * C(1, 2) * F(3) + F(2) * C(1, 1) * F(1) + 0.0;
-        answer(2, 2) = F(0) * C(2, 2) * F(0) + F(0) * C(2, 1) * F(2) + F(2) * C(1, 2) * F(0) + F(2) * C(1, 1) * F(2) + S(1);
-        answer(2, 3) = F(0) * C(2, 0) * F(3) + F(0) * C(2, 2) * F(1) + F(2) * C(1, 0) * F(3) + F(2) * C(1, 2) * F(1) + 0.0;
-        answer(3, 0) = F(3) * C(0, 0) * F(0) + F(3) * C(0, 2) * F(2) + F(1) * C(2, 0) * F(0) + F(1) * C(2, 2) * F(2) + 0.0;
-        answer(3, 1) = F(3) * C(0, 2) * F(3) + F(3) * C(0, 1) * F(1) + F(1) * C(2, 2) * F(3) + F(1) * C(2, 1) * F(1) + S(2);
-        answer(3, 2) = F(3) * C(0, 2) * F(0) + F(3) * C(0, 1) * F(2) + F(1) * C(2, 2) * F(0) + F(1) * C(2, 1) * F(2) + 0.0;
-        answer(3, 3) = F(3) * C(0, 0) * F(3) + F(3) * C(0, 2) * F(1) + F(1) * C(2, 0) * F(3) + F(1) * C(2, 2) * F(1) + S(0);
-    } else if ( matMode == _PlaneStrain ) {
-        //Save terms associated with H = [du/dx, dv/dy, dw/dz, du/dy, dv/dx] //@todo not fully checked
-
-        answer.resize(5, 5);
-        answer(0, 0) = F(0) * C(0, 0) * F(0) + F(0) * C(0, 3) * F(3) + F(3) * C(3, 0) * F(0) + F(3) * C(3, 3) * F(3) + S(0);
-        answer(0, 1) = F(0) * C(0, 3) * F(4) + F(0) * C(0, 1) * F(1) + F(3) * C(3, 3) * F(4) + F(3) * C(3, 1) * F(1) + 0.0;
-        answer(0, 2) = F(0) * C(0, 2) * F(2) + F(3) * C(3, 2) * F(2) + 0.0;
-        answer(0, 3) = F(0) * C(0, 3) * F(0) + F(0) * C(0, 1) * F(3) + F(3) * C(3, 3) * F(0) + F(3) * C(3, 1) * F(3) + S(3);
-        answer(0, 4) = F(0) * C(0, 0) * F(4) + F(0) * C(0, 3) * F(1) + F(3) * C(3, 0) * F(4) + F(3) * C(3, 3) * F(1) + 0.0;
-        answer(1, 0) = F(4) * C(3, 0) * F(0) + F(4) * C(3, 3) * F(3) + F(1) * C(1, 0) * F(0) + F(1) * C(1, 3) * F(3) + 0.0;
-        answer(1, 1) = F(4) * C(3, 3) * F(4) + F(4) * C(3, 1) * F(1) + F(1) * C(1, 3) * F(4) + F(1) * C(1, 1) * F(1) + S(1);
-        answer(1, 2) = F(4) * C(3, 2) * F(2) + F(1) * C(1, 2) * F(2) + 0.0;
-        answer(1, 3) = F(4) * C(3, 3) * F(0) + F(4) * C(3, 1) * F(3) + F(1) * C(1, 3) * F(0) + F(1) * C(1, 1) * F(3) + 0.0;
-        answer(1, 4) = F(4) * C(3, 0) * F(4) + F(4) * C(3, 3) * F(1) + F(1) * C(1, 0) * F(4) + F(1) * C(1, 3) * F(1) + S(3);
-        answer(2, 0) = F(2) * C(2, 0) * F(0) + F(2) * C(2, 3) * F(3) + 0.0;
-        answer(2, 1) = F(2) * C(2, 3) * F(4) + F(2) * C(2, 1) * F(1) + 0.0;
-        answer(2, 2) = F(2) * C(2, 2) * F(2) + S(2);
-        answer(2, 3) = F(2) * C(2, 3) * F(0) + F(2) * C(2, 1) * F(3) + 0.0;
-        answer(2, 4) = F(2) * C(2, 0) * F(4) + F(2) * C(2, 3) * F(1) + 0.0;
-        answer(3, 0) = F(0) * C(3, 0) * F(0) + F(0) * C(3, 3) * F(3) + F(3) * C(1, 0) * F(0) + F(3) * C(1, 3) * F(3) + S(3);
-        answer(3, 1) = F(0) * C(3, 3) * F(4) + F(0) * C(3, 1) * F(1) + F(3) * C(1, 3) * F(4) + F(3) * C(1, 1) * F(1) + 0.0;
-        answer(3, 2) = F(0) * C(3, 2) * F(2) + F(3) * C(1, 2) * F(2) + 0.0;
-        answer(3, 3) = F(0) * C(3, 3) * F(0) + F(0) * C(3, 1) * F(3) + F(3) * C(1, 3) * F(0) + F(3) * C(1, 1) * F(3) + S(1);
-        answer(3, 4) = F(0) * C(3, 0) * F(4) + F(0) * C(3, 3) * F(1) + F(3) * C(1, 0) * F(4) + F(3) * C(1, 3) * F(1) + 0.0;
-        answer(4, 0) = F(4) * C(0, 0) * F(0) + F(4) * C(0, 3) * F(3) + F(1) * C(3, 0) * F(0) + F(1) * C(3, 3) * F(3) + 0.0;
-        answer(4, 1) = F(4) * C(0, 3) * F(4) + F(4) * C(0, 1) * F(1) + F(1) * C(3, 3) * F(4) + F(1) * C(3, 1) * F(1) + S(3);
-        answer(4, 2) = F(4) * C(0, 2) * F(2) + F(1) * C(3, 2) * F(2) + 0.0;
-        answer(4, 3) = F(4) * C(0, 3) * F(0) + F(4) * C(0, 1) * F(3) + F(1) * C(3, 3) * F(0) + F(1) * C(3, 1) * F(3) + 0.0;
-        answer(4, 4) = F(4) * C(0, 0) * F(4) + F(4) * C(0, 3) * F(1) + F(1) * C(3, 0) * F(4) + F(1) * C(3, 3) * F(1) + S(0);
-    } else if ( matMode == _1dMat ) {
-        //Save terms associated with H = [du/dx]
-        /// @todo is this really correct??
-
-        answer.resize(1, 1);
-        answer(0, 0) = F(0) * C(0, 0) * F(0) + S(0);
     }
+#endif
+    return answer;
 }
+
+FloatMatrixF<5,5>
+StructuralMaterial :: convert_dSdE_2_dPdF_PlaneStrain(const FloatMatrixF<4,4> &C, const FloatArrayF<4> &S, const FloatArrayF<5> &F)
+{
+    //Save terms associated with H = [du/dx, dv/dy, dw/dz, du/dy, dv/dx] //@todo not fully checked
+    FloatMatrixF<5,5> answer;
+    answer(0, 0) = F[0] * C(0, 0) * F[0] + F[0] * C(0, 3) * F[3] + F[3] * C(3, 0) * F[0] + F[3] * C(3, 3) * F[3] + S[0];
+    answer(0, 1) = F[0] * C(0, 3) * F[4] + F[0] * C(0, 1) * F[1] + F[3] * C(3, 3) * F[4] + F[3] * C(3, 1) * F[1] + 0.0;
+    answer(0, 2) = F[0] * C(0, 2) * F[2] + F[3] * C(3, 2) * F[2] + 0.0;
+    answer(0, 3) = F[0] * C(0, 3) * F[0] + F[0] * C(0, 1) * F[3] + F[3] * C(3, 3) * F[0] + F[3] * C(3, 1) * F[3] + S[3];
+    answer(0, 4) = F[0] * C(0, 0) * F[4] + F[0] * C(0, 3) * F[1] + F[3] * C(3, 0) * F[4] + F[3] * C(3, 3) * F[1] + 0.0;
+    answer(1, 0) = F[4] * C(3, 0) * F[0] + F[4] * C(3, 3) * F[3] + F[1] * C(1, 0) * F[0] + F[1] * C(1, 3) * F[3] + 0.0;
+    answer(1, 1) = F[4] * C(3, 3) * F[4] + F[4] * C(3, 1) * F[1] + F[1] * C(1, 3) * F[4] + F[1] * C(1, 1) * F[1] + S[1];
+    answer(1, 2) = F[4] * C(3, 2) * F[2] + F[1] * C(1, 2) * F[2] + 0.0;
+    answer(1, 3) = F[4] * C(3, 3) * F[0] + F[4] * C(3, 1) * F[3] + F[1] * C(1, 3) * F[0] + F[1] * C(1, 1) * F[3] + 0.0;
+    answer(1, 4) = F[4] * C(3, 0) * F[4] + F[4] * C(3, 3) * F[1] + F[1] * C(1, 0) * F[4] + F[1] * C(1, 3) * F[1] + S[3];
+    answer(2, 0) = F[2] * C(2, 0) * F[0] + F[2] * C(2, 3) * F[3] + 0.0;
+    answer(2, 1) = F[2] * C(2, 3) * F[4] + F[2] * C(2, 1) * F[1] + 0.0;
+    answer(2, 2) = F[2] * C(2, 2) * F[2] + S[2];
+    answer(2, 3) = F[2] * C(2, 3) * F[0] + F[2] * C(2, 1) * F[3] + 0.0;
+    answer(2, 4) = F[2] * C(2, 0) * F[4] + F[2] * C(2, 3) * F[1] + 0.0;
+    answer(3, 0) = F[0] * C(3, 0) * F[0] + F[0] * C(3, 3) * F[3] + F[3] * C(1, 0) * F[0] + F[3] * C(1, 3) * F[3] + S[3];
+    answer(3, 1) = F[0] * C(3, 3) * F[4] + F[0] * C(3, 1) * F[1] + F[3] * C(1, 3) * F[4] + F[3] * C(1, 1) * F[1] + 0.0;
+    answer(3, 2) = F[0] * C(3, 2) * F[2] + F[3] * C(1, 2) * F[2] + 0.0;
+    answer(3, 3) = F[0] * C(3, 3) * F[0] + F[0] * C(3, 1) * F[3] + F[3] * C(1, 3) * F[0] + F[3] * C(1, 1) * F[3] + S[1];
+    answer(3, 4) = F[0] * C(3, 0) * F[4] + F[0] * C(3, 3) * F[1] + F[3] * C(1, 0) * F[4] + F[3] * C(1, 3) * F[1] + 0.0;
+    answer(4, 0) = F[4] * C(0, 0) * F[0] + F[4] * C(0, 3) * F[3] + F[1] * C(3, 0) * F[0] + F[1] * C(3, 3) * F[3] + 0.0;
+    answer(4, 1) = F[4] * C(0, 3) * F[4] + F[4] * C(0, 1) * F[1] + F[1] * C(3, 3) * F[4] + F[1] * C(3, 1) * F[1] + S[3];
+    answer(4, 2) = F[4] * C(0, 2) * F[2] + F[1] * C(3, 2) * F[2] + 0.0;
+    answer(4, 3) = F[4] * C(0, 3) * F[0] + F[4] * C(0, 1) * F[3] + F[1] * C(3, 3) * F[0] + F[1] * C(3, 1) * F[3] + 0.0;
+    answer(4, 4) = F[4] * C(0, 0) * F[4] + F[4] * C(0, 3) * F[1] + F[1] * C(3, 0) * F[4] + F[1] * C(3, 3) * F[1] + S[0];
+    return answer;
+}
+
+FloatMatrixF<4,4>
+StructuralMaterial :: convert_dSdE_2_dPdF_PlaneStress(const FloatMatrixF<3,3> &C, const FloatArrayF<3> &S, const FloatArrayF<4> &F)
+{
+    // Save terms associated with H = [du/dx dv/dy du/dy dv/dx]
+    FloatMatrixF<4,4> answer;
+    answer(0, 0) = F[0] * C(0, 0) * F[0] + F[0] * C(0, 2) * F[2] + F[2] * C(2, 0) * F[0] + F[2] * C(2, 2) * F[2] + S[0];
+    answer(0, 1) = F[0] * C(0, 2) * F[3] + F[0] * C(0, 1) * F[1] + F[2] * C(2, 2) * F[3] + F[2] * C(2, 1) * F[1] + 0.0;
+    answer(0, 2) = F[0] * C(0, 2) * F[0] + F[0] * C(0, 1) * F[2] + F[2] * C(2, 2) * F[0] + F[2] * C(2, 1) * F[2] + S[2];
+    answer(0, 3) = F[0] * C(0, 0) * F[3] + F[0] * C(0, 2) * F[1] + F[2] * C(2, 0) * F[3] + F[2] * C(2, 2) * F[1] + 0.0;
+    answer(1, 0) = F[3] * C(2, 0) * F[0] + F[3] * C(2, 2) * F[2] + F[1] * C(1, 0) * F[0] + F[1] * C(1, 2) * F[2] + 0.0;
+    answer(1, 1) = F[3] * C(2, 2) * F[3] + F[3] * C(2, 1) * F[1] + F[1] * C(1, 2) * F[3] + F[1] * C(1, 1) * F[1] + S[1];
+    answer(1, 2) = F[3] * C(2, 2) * F[0] + F[3] * C(2, 1) * F[2] + F[1] * C(1, 2) * F[0] + F[1] * C(1, 1) * F[2] + 0.0;
+    answer(1, 3) = F[3] * C(2, 0) * F[3] + F[3] * C(2, 2) * F[1] + F[1] * C(1, 0) * F[3] + F[1] * C(1, 2) * F[1] + S[2];
+    answer(2, 0) = F[0] * C(2, 0) * F[0] + F[0] * C(2, 2) * F[2] + F[2] * C(1, 0) * F[0] + F[2] * C(1, 2) * F[2] + S[2];
+    answer(2, 1) = F[0] * C(2, 2) * F[3] + F[0] * C(2, 1) * F[1] + F[2] * C(1, 2) * F[3] + F[2] * C(1, 1) * F[1] + 0.0;
+    answer(2, 2) = F[0] * C(2, 2) * F[0] + F[0] * C(2, 1) * F[2] + F[2] * C(1, 2) * F[0] + F[2] * C(1, 1) * F[2] + S[1];
+    answer(2, 3) = F[0] * C(2, 0) * F[3] + F[0] * C(2, 2) * F[1] + F[2] * C(1, 0) * F[3] + F[2] * C(1, 2) * F[1] + 0.0;
+    answer(3, 0) = F[3] * C(0, 0) * F[0] + F[3] * C(0, 2) * F[2] + F[1] * C(2, 0) * F[0] + F[1] * C(2, 2) * F[2] + 0.0;
+    answer(3, 1) = F[3] * C(0, 2) * F[3] + F[3] * C(0, 1) * F[1] + F[1] * C(2, 2) * F[3] + F[1] * C(2, 1) * F[1] + S[2];
+    answer(3, 2) = F[3] * C(0, 2) * F[0] + F[3] * C(0, 1) * F[2] + F[1] * C(2, 2) * F[0] + F[1] * C(2, 1) * F[2] + 0.0;
+    answer(3, 3) = F[3] * C(0, 0) * F[3] + F[3] * C(0, 2) * F[1] + F[1] * C(2, 0) * F[3] + F[1] * C(2, 2) * F[1] + S[0];
+    return answer;
+}
+
+FloatMatrixF<1,1>
+StructuralMaterial :: convert_dSdE_2_dPdF_1D(const FloatMatrixF<1,1> &C, const FloatArrayF<1> &S, const FloatArrayF<1> &F)
+{
+    //Save terms associated with H = [du/dx]
+    /// @todo is this really correct??
+    FloatMatrixF<1,1> answer;
+    answer(0, 0) = F[0] * C(0, 0) * F[0] + S[0];
+    return answer;
+}
+
 
 void
 StructuralMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
 {
     OOFEM_ERROR("not implemented ")
-}
-
-void
-StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp, MaterialMode matMode)
-{
-    // Default implementation for converting dSdE to dPdF. This includes updating the
-    // state variables of P and F.
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray reducedvF, reducedvP, reducedvS;
-    const FloatArray &vF = status->giveTempFVector();
-    const FloatArray &vP = status->giveTempPVector();
-    const FloatArray &vS = status->giveTempStressVector();
-
-    ///@todo This is unnecessary and inefficient, just a hack for now (it will be changed when everything is in working order!)
-    StructuralMaterial :: giveReducedVectorForm(reducedvF, vF, matMode);
-    StructuralMaterial :: giveReducedVectorForm(reducedvP, vP, matMode);
-    StructuralMaterial :: giveReducedSymVectorForm(reducedvS, vS, matMode);
-    //this->convert_P_2_S(reducedvS, reducedvP, reducedvF, matMode);
-    this->convert_dSdE_2_dPdF(answer, dSdE, reducedvS, reducedvF, matMode);
 }
 
 
@@ -652,27 +645,25 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         this->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
         break;
     case _PlaneStress:
-        this->givePlaneStressStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->givePlaneStressStiffMtrx(rMode, gp, tStep);
         break;
     case _PlaneStrain:
-        this->givePlaneStrainStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->givePlaneStrainStiffMtrx(rMode, gp, tStep);
         break;
     case _1dMat:
-        this->give1dStressStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->give1dStressStiffMtrx(rMode, gp, tStep);
         break;
-
     case _PlateLayer:
-        this->givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->givePlateLayerStiffMtrx(rMode, gp, tStep);
         break;
     case _2dBeamLayer:
-        this->give2dBeamLayerStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->give2dBeamLayerStiffMtrx(rMode, gp, tStep);
         break;
     case _Fiber:
-        this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
+        answer = this->giveFiberStiffMtrx(rMode, gp, tStep);
         break;
     case _Warping:
-        answer.resize(2, 2);
-        answer.beUnitMatrix();
+        answer = eye<2>();
         break;
     case _1dLattice:
         this->give2dLatticeStiffMtrx(answer, rMode, gp, tStep);
@@ -690,47 +681,62 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
-                                                         MatResponseMode mode,
-                                                         GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<9,9>
+StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
+                                                         GaussPoint *gp, TimeStep *tStep) const
 {
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    const auto &vF = status->giveTempFVector();
+    const auto &vS = status->giveTempStressVector();
+#if 1
+    /// FIXME: Temporary const-cast; these functions should be made const. 
+    /// This workaround is just to limit the size of a single refactoring.
+    auto self = const_cast<StructuralMaterial*>(this);
     FloatMatrix dSdE;
-    this->give3dMaterialStiffnessMatrix(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _3dMat);
+    self->give3dMaterialStiffnessMatrix(dSdE, mode, gp, tStep);
+#else
+    auto dSdE = self->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+#endif
+    return convert_dSdE_2_dPdF_3D(dSdE, vS, vF);
 }
 
 
-void
-StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<5,5>
+StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(MatResponseMode mode,
+                                                    GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix dSdE;
-    this->givePlaneStressStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _PlaneStress);
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    /// TODO: use ref. when ms has been converted to to use fixed size arrays.
+    FloatArrayF<9> vF = status->giveTempFVector();
+    FloatArrayF<6> vS = status->giveTempStressVector();
+    auto dSdE = this->givePlaneStrainStiffMtrx(mode, gp, tStep);
+    return convert_dSdE_2_dPdF_PlaneStrain(dSdE, vS[{0, 1, 2, 5}], vF[{0, 1, 2, 5, 8}]);
 }
 
 
-void
-StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(FloatMatrix &answer,
-                                                    MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<4,4>
+StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(MatResponseMode mode,
+                                                    GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix dSdE;
-    this->givePlaneStrainStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _PlaneStrain);
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    /// TODO: use ref. when ms has been converted to to use fixed size arrays.
+    FloatArrayF<9> vF = status->giveTempFVector();
+    FloatArrayF<6> vS = status->giveTempStressVector();
+    auto dSdE = this->givePlaneStressStiffMtrx(mode, gp, tStep);
+    return convert_dSdE_2_dPdF_PlaneStress(dSdE, vS[{0, 1, 5}], vF[{0, 1, 5, 8}]);
 }
 
 
-void
-StructuralMaterial :: give1dStressStiffMtrx_dPdF(FloatMatrix &answer,
-                                                 MatResponseMode mode,
-                                                 GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+StructuralMaterial :: give1dStressStiffMtrx_dPdF(MatResponseMode mode,
+                                                 GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix dSdE;
-    this->give1dStressStiffMtrx(dSdE, mode, gp, tStep);
-    this->give_dPdF_from(dSdE, answer, gp, _1dMat);
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    /// TODO: use ref. when ms has been converted to to use fixed size arrays.
+    const FloatArrayF<9> vF = status->giveTempFVector();
+    const FloatArrayF<6> vS = status->giveTempStressVector();
+    auto dSdE = this->give1dStressStiffMtrx(mode, gp, tStep);
+    return convert_dSdE_2_dPdF_1D(dSdE, vS[{0}], vF[{0}]);
 }
 
 
@@ -774,7 +780,7 @@ StructuralMaterial :: give1dStressStiffMtrx_dCde(FloatMatrix &answer,
 void
 StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, GaussPoint *gp,
                                                             const FloatArray &reducedStrainVector,
-                                                            TimeStep *tStep, ValueModeType mode)
+                                                            TimeStep *tStep, ValueModeType mode) const
 {
     /*
      * This functions subtract from reducedStrainVector its stress independent part
@@ -784,20 +790,6 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
 
     answer = reducedStrainVector;
     this->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, mode);
-    if ( epsilonTemperature.giveSize() ) {
-        answer.subtract(epsilonTemperature);
-    }
-}
-
-void
-StructuralMaterial :: giveStressDependentPartOfStrainVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                               const FloatArray &reducedStrainVector,
-                                                               TimeStep *tStep, ValueModeType mode)
-{
-    FloatArray epsilonTemperature;
-
-    answer = reducedStrainVector;
-    this->computeStressIndependentStrainVector_3d(epsilonTemperature, gp, tStep, mode);
     if ( epsilonTemperature.giveSize() ) {
         answer.subtract(epsilonTemperature);
     }
@@ -1053,182 +1045,78 @@ StructuralMaterial :: giveVoigtVectorMask(IntArray &answer, MaterialMode mmode)
 }
 
 
-void
-StructuralMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
+FloatMatrixF<3,3>
+StructuralMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
-                                               TimeStep *tStep)
-//
-// returns Mat stiffness for PlaneStress
-//
-{
-    FloatMatrix m3d, invMat3d, invAnswer;
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-
-    invAnswer.resize(3, 3);
-    //invAnswer.beSubMatrixOf(invMat3d, indx, indx);
-
-    invAnswer.at(1, 1) = invMat3d.at(1, 1);
-    invAnswer.at(1, 2) = invMat3d.at(1, 2);
-    invAnswer.at(1, 3) = invMat3d.at(1, 6);
-
-    invAnswer.at(2, 1) = invMat3d.at(2, 1);
-    invAnswer.at(2, 2) = invMat3d.at(2, 2);
-    invAnswer.at(2, 3) = invMat3d.at(2, 6);
-
-    invAnswer.at(3, 1) = invMat3d.at(6, 1);
-    invAnswer.at(3, 2) = invMat3d.at(6, 2);
-    invAnswer.at(3, 3) = invMat3d.at(6, 6);
-
-    answer.beInverseOf(invAnswer);
-}
-
-void
-StructuralMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep)
-//
-// return material stiffness matrix for PlaneStrain mode
-//
+                                               TimeStep *tStep) const
 {
     FloatMatrix m3d;
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    answer.resize(4, 4);
-    answer.zero();
-    //answer.beSubMatrixOf(m3d, indx, indx);
-
-    answer.at(1, 1) = m3d.at(1, 1);
-    answer.at(1, 2) = m3d.at(1, 2);
-    answer.at(1, 4) = m3d.at(1, 6);
-
-    answer.at(2, 1) = m3d.at(2, 1);
-    answer.at(2, 2) = m3d.at(2, 2);
-    answer.at(2, 4) = m3d.at(2, 6);
-
-    answer.at(3, 1) = m3d.at(3, 1);
-    answer.at(3, 2) = m3d.at(3, 2);
-    answer.at(3, 4) = m3d.at(3, 6);
-
-    answer.at(4, 1) = m3d.at(6, 1);
-    answer.at(4, 2) = m3d.at(6, 2);
-    answer.at(4, 4) = m3d.at(6, 6);
+    // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 1, 5}, {0, 1, 5}));
 }
 
-void
-StructuralMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                            MatResponseMode mode,
-                                            GaussPoint *gp,
-                                            TimeStep *tStep)
-//
-// return material stiffness matrix for 1d stress strain mode
-//
-{
-    FloatMatrix m3d, invMat3d;
-    double val11;
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-    val11 = invMat3d.at(1, 1);
-    answer.resize(1, 1);
-    answer.at(1, 1) = 1. / val11;
-}
-
-
-void
-StructuralMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                               MatResponseMode mode,
+FloatMatrixF<4,4>
+StructuralMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
-                                               TimeStep *tStep)
-//
-// return material stiffness matrix for2dBeamLayer mode
-//
+                                               TimeStep *tStep) const
 {
-    FloatMatrix m3d, invMat3d, invMatLayer(2, 2);
+    FloatMatrix tmp;
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(tmp, mode, gp, tStep);
+    FloatMatrixF<6,6> m3d = tmp;
+    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    return m3d({0, 1, 2, 5}, {0, 1, 2, 5});
+}
 
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-
-    invMatLayer.at(1, 1) = invMat3d.at(1, 1);
-    invMatLayer.at(1, 2) = invMat3d.at(1, 5);
-    invMatLayer.at(2, 1) = invMat3d.at(5, 1);
-    invMatLayer.at(2, 2) = invMat3d.at(5, 5);
-
-    answer.beInverseOf(invMatLayer);
+FloatMatrixF<1,1>
+StructuralMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
+                                            GaussPoint *gp,
+                                            TimeStep *tStep) const
+{
+    FloatMatrix m3d;
+    // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return {1. / c3d.at(1, 1)};
 }
 
 
-void
-StructuralMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                              MatResponseMode mode,
+FloatMatrixF<2,2>
+StructuralMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep) const
+{
+    FloatMatrix m3d;
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 4}, {0, 4}));
+}
+
+
+FloatMatrixF<5,5>
+StructuralMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
-//
-// return material stiffness matrix for 2dPlateLayer
-//
+                                              TimeStep *tStep) const
 {
-    FloatMatrix m3d, invMat3d, invMatLayer(5, 5);
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-    //invMatLayer.beSubMatrixOf(invMat3d, indx, indx);
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 1; j <= 2; j++ ) {
-            invMatLayer.at(i, j) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 4; i <= 6; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i - 1, j - 1) = invMat3d.at(i, j);
-        }
-    }
-
-    for ( int i = 1; i <= 2; i++ ) {
-        for ( int j = 4; j <= 6; j++ ) {
-            invMatLayer.at(i, j - 1) = invMat3d.at(i, j);
-            invMatLayer.at(j - 1, i) = invMat3d.at(j, i);
-        }
-    }
-
-    answer.beInverseOf(invMatLayer);
+    FloatMatrix m3d;
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 1, 3, 4, 5}, {0, 1, 3, 4, 5}));
 }
 
-void
-StructuralMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<3,3>
+StructuralMaterial :: giveFiberStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
-//
-// return material stiffness matrix for 2dPlateLayer
-//
+                                         TimeStep *tStep) const
 {
-    FloatMatrix m3d, invMat3d, invMatLayer(3, 3);
-
-    this->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-
-    invMat3d.beInverseOf(m3d);
-
-    invMatLayer.at(1, 1) = invMat3d.at(1, 1);
-    invMatLayer.at(1, 2) = invMat3d.at(1, 5);
-    invMatLayer.at(1, 3) = invMat3d.at(1, 6);
-    invMatLayer.at(2, 1) = invMat3d.at(5, 1);
-    invMatLayer.at(2, 2) = invMat3d.at(5, 5);
-    invMatLayer.at(2, 3) = invMat3d.at(5, 6);
-    invMatLayer.at(3, 1) = invMat3d.at(6, 1);
-    invMatLayer.at(3, 2) = invMat3d.at(6, 5);
-    invMatLayer.at(3, 3) = invMat3d.at(6, 6);
-
-    answer.beInverseOf(invMatLayer);
+    FloatMatrix m3d;
+    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
+    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    return inv(c3d({0, 4, 5}, {0, 4, 5}));
 }
 
 void
@@ -1445,6 +1333,70 @@ StructuralMaterial :: computePrincipalValues(FloatArray &answer, const FloatArra
     }
 }
 
+
+FloatArrayF<3>
+StructuralMaterial :: computePrincipalValues(const FloatMatrixF<3,3> &s)
+{
+    double I1 = s(0,0) + s(1,1) + s(2,2);
+    double I2 = s(0,0) * s(1,1) + s(1,1) * s(2,2) + s(2,2) * s(0,0) -
+                ( s(0,1) * s(1,0) + s(0,2) * s(2,0) + s(1,2) * s(2,1) );
+    double I3 = s(0,0) * s(1,1) * s(2,2) + s(0,1) * s(0,2) * s(1,2) + s(1,0) * s(2,0) * s(2,1) -
+                ( s(0,0) * s(1,2) * s(2,1) + s(1,1) * s(0,2) * s(2,0) + s(2,2) * s(0,1) * s(1,0) );
+
+    return computePrincipalValues(I1, I2, I3);
+}
+
+
+FloatArrayF<3>
+StructuralMaterial :: computePrincipalValues(double I1, double I2, double I3)
+{
+    double CUBIC_ZERO = 1e-100;
+    double q = ( I1 * I1 - 3.0 * I2 ) / 9.0;
+    double r = ( - 2.0 * I1 * I1 * I1 + 9.0 * I1 * I2 - 27.0 * I3 ) / 54.0;
+    double a3 = I1 / 3.0;
+
+    //Hydrostatic case, in such a case q=r=0
+    if ( (fabs(q) < CUBIC_ZERO) && ( fabs(r) < CUBIC_ZERO ) ) {
+        return {a3, a3, a3};
+    }
+    
+    // three real roots (clamping to prevent rounding errors
+    double help = clamp(r / sqrt(q * q * q), -1., 1.);
+    double phi = acos(help) / 3.0;
+    double p = 2.0 * sqrt(q);
+
+    FloatArrayF<3> v = {
+        a3 - p * cos(phi - 2. * M_PI / 3.),
+        a3 - p * cos(phi ),
+        a3 - p * cos(phi + 2. * M_PI / 3.),
+    };
+    if (v[0] > v[1]) std::swap(v[0], v[1]);
+    if (v[1] > v[2]) std::swap(v[1], v[2]);
+    if (v[0] > v[1]) std::swap(v[0], v[1]);
+    return v;
+}
+
+
+std::pair<FloatArrayF<3>, FloatMatrixF<3,3>>
+StructuralMaterial :: computePrincipalValDir(const FloatMatrixF<3,3> &s)
+{
+    //auto [eigVal, eigVec] = eig(s, 10);
+    auto tmp = eig(s, 10);
+    // Sort by largest eigenvalue
+    for ( int ii = 0; ii < 2; ii++ ) {
+        for ( int jj = 0; jj < 2; jj++ ) {
+            if ( tmp.first[jj + 1] > tmp.first[jj] ) {
+                std::swap(tmp.first[jj], tmp.first[jj + 1]);
+                for ( int kk = 0; kk < 3; kk++ ) {
+                    std::swap(tmp.second(kk, jj), tmp.second(kk, jj + 1));
+                }
+            }
+        }
+    }
+    return tmp;
+}
+
+
 void
 StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir, const FloatArray &s, stressStrainPrincMode mode)
 //
@@ -1597,121 +1549,130 @@ StructuralMaterial :: computePrincipalValDir(FloatArray &answer, FloatMatrix &di
 }
 
 
-double
-StructuralMaterial :: computeDeviatoricVolumetricSplit(FloatArray &dev, const FloatArray &s)
+std::pair<FloatArrayF<6>, double>
+StructuralMaterial :: computeDeviatoricVolumetricSplit(const FloatArrayF<6> &s)
 {
     double vol = s [ 0 ] + s [ 1 ] + s [ 2 ];
     double mean = vol / 3.0;
-    dev = s;
+    auto dev = s;
     dev.at(1) -= mean;
     dev.at(2) -= mean;
     dev.at(3) -= mean;
-    return mean;
+    return {dev, mean};
 }
 
 
-void
-StructuralMaterial :: computeDeviatoricVolumetricSum(FloatArray &s, const FloatArray &dev, double mean)
+FloatArrayF<6>
+StructuralMaterial :: computeDeviator(const FloatArrayF<6> &s)
 {
-    s = dev;
+    double vol = s [ 0 ] + s [ 1 ] + s [ 2 ];
+    double mean = vol / 3.0;
+    FloatArrayF<6> dev = s;
+    dev.at(1) -= mean;
+    dev.at(2) -= mean;
+    dev.at(3) -= mean;
+    return dev;
+}
+
+FloatArrayF<6>
+StructuralMaterial :: computeDeviatoricVolumetricSum(const FloatArrayF<6> &dev, double mean)
+{
+    auto s = dev;
     s [ 0 ] += mean;
     s [ 1 ] += mean;
     s [ 2 ] += mean;
+    return s;
 }
 
-void
-StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu)
 {
-    applyDeviatoricElasticCompliance(strain, stress, EModulus / 2. / ( 1. + nu ) );
+    return applyDeviatoricElasticCompliance(stress, EModulus / 2. / ( 1. + nu ) );
 }
 
-void
-StructuralMaterial :: applyDeviatoricElasticCompliance(FloatArray &strain, const FloatArray &stress, double GModulus)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double GModulus)
 {
-    strain.resize(6);
-    strain [ 0 ] = 1. / ( 2. * GModulus ) * stress [ 0 ];
-    strain [ 1 ] = 1. / ( 2. * GModulus ) * stress [ 1 ];
-    strain [ 2 ] = 1. / ( 2. * GModulus ) * stress [ 2 ];
-    strain [ 3 ] = 1. / GModulus * stress [ 3 ];
-    strain [ 4 ] = 1. / GModulus * stress [ 4 ];
-    strain [ 5 ] = 1. / GModulus * stress [ 5 ];
+    return {
+        1. / ( 2. * GModulus ) * stress [ 0 ],
+        1. / ( 2. * GModulus ) * stress [ 1 ],
+        1. / ( 2. * GModulus ) * stress [ 2 ],
+        1. / GModulus * stress [ 3 ],
+        1. / GModulus * stress [ 4 ],
+        1. / GModulus * stress [ 5 ],
+    };
 }
 
 
-void
-StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu)
 {
-    applyDeviatoricElasticStiffness(stress, strain, EModulus / ( 2. * ( 1. + nu ) ) );
+    return applyDeviatoricElasticStiffness(strain, EModulus / ( 2. * ( 1. + nu ) ) );
 }
 
-void
-StructuralMaterial :: applyDeviatoricElasticStiffness(FloatArray &stress, const FloatArray &strain, double GModulus)
+FloatArrayF<6>
+StructuralMaterial :: applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double GModulus)
 {
-    stress.resize(6);
-    stress [ 0 ] = 2. * GModulus * strain [ 0 ];
-    stress [ 1 ] = 2. * GModulus * strain [ 1 ];
-    stress [ 2 ] = 2. * GModulus * strain [ 2 ];
-    stress [ 3 ] = GModulus * strain [ 3 ];
-    stress [ 4 ] = GModulus * strain [ 4 ];
-    stress [ 5 ] = GModulus * strain [ 5 ];
+    return {
+        2. * GModulus * strain [ 0 ],
+        2. * GModulus * strain [ 1 ],
+        2. * GModulus * strain [ 2 ],
+        GModulus * strain [ 3 ],
+        GModulus * strain [ 4 ],
+        GModulus * strain [ 5 ],
+    };
 }
 
-void
-StructuralMaterial :: applyElasticStiffness(FloatArray &stress, const FloatArray &strain, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu)
 {
     double factor = EModulus / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
 
-    stress.resize(6);
-    stress [ 0 ] = factor * ( ( 1. - nu ) * strain [ 0 ] + nu * strain [ 1 ] + nu * strain [ 2 ] );
-    stress [ 1 ] = factor * ( nu * strain [ 0 ] + ( 1. - nu ) * strain [ 1 ] + nu * strain [ 2 ] );
-    stress [ 2 ] = factor * ( nu * strain [ 0 ] + nu * strain [ 1 ] + ( 1. - nu ) * strain [ 2 ] );
-    stress [ 3 ] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 3 ] );
-    stress [ 4 ] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 4 ] );
-    stress [ 5 ] = factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 5 ] );
+    return {
+        factor * ( ( 1. - nu ) * strain [ 0 ] + nu * strain [ 1 ] + nu * strain [ 2 ] ),
+        factor * ( nu * strain [ 0 ] + ( 1. - nu ) * strain [ 1 ] + nu * strain [ 2 ] ),
+        factor * ( nu * strain [ 0 ] + nu * strain [ 1 ] + ( 1. - nu ) * strain [ 2 ] ),
+        factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 3 ] ),
+        factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 4 ] ),
+        factor * ( ( ( 1. - 2. * nu ) / 2. ) * strain [ 5 ] ),
+    };
 }
 
-void
-StructuralMaterial :: applyElasticCompliance(FloatArray &strain, const FloatArray &stress, double EModulus, double nu)
+FloatArrayF<6>
+StructuralMaterial :: applyElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu)
 {
-    strain.resize(6);
-    strain [ 0 ] = ( stress [ 0 ] - nu * stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
-    strain [ 1 ] = ( -nu * stress [ 0 ] + stress [ 1 ] - nu * stress [ 2 ] ) / EModulus;
-    strain [ 2 ] = ( -nu * stress [ 0 ] - nu * stress [ 1 ] + stress [ 2 ] ) / EModulus;
-    strain [ 3 ] = ( 2. * ( 1. + nu ) * stress [ 3 ] ) / EModulus;
-    strain [ 4 ] = ( 2. * ( 1. + nu ) * stress [ 4 ] ) / EModulus;
-    strain [ 5 ] = ( 2. * ( 1. + nu ) * stress [ 5 ] ) / EModulus;
+    return {
+        ( stress [ 0 ] - nu * stress [ 1 ] - nu * stress [ 2 ] ) / EModulus,
+        ( -nu * stress [ 0 ] + stress [ 1 ] - nu * stress [ 2 ] ) / EModulus,
+        ( -nu * stress [ 0 ] - nu * stress [ 1 ] + stress [ 2 ] ) / EModulus,
+        ( 2. * ( 1. + nu ) * stress [ 3 ] ) / EModulus,
+        ( 2. * ( 1. + nu ) * stress [ 4 ] ) / EModulus,
+        ( 2. * ( 1. + nu ) * stress [ 5 ] ) / EModulus,
+    };
 }
 
 double
-StructuralMaterial :: computeStressNorm(const FloatArray &s)
+StructuralMaterial :: computeStressNorm(const FloatArrayF<6> &s)
 {
-    if ( s.giveSize() == 1 ) {
-        return fabs(s [ 0 ]);
-    }
-
     return sqrt(s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] +
                 2. * s [ 3 ] * s [ 3 ] + 2. * s [ 4 ] * s [ 4 ] + 2. * s [ 5 ] * s [ 5 ]);
 }
 
 double
-StructuralMaterial :: computeFirstInvariant(const FloatArray &s)
+StructuralMaterial :: computeFirstInvariant(const FloatArrayF<6> &s)
 {
-    if ( s.giveSize() == 1 ) {
-        return s [ 0 ];
-    }
-
     return s [ 0 ] + s [ 1 ] + s [ 2 ];
 }
 
 double
-StructuralMaterial :: computeSecondStressInvariant(const FloatArray &s)
+StructuralMaterial :: computeSecondStressInvariant(const FloatArrayF<6> &s)
 {
     return .5 * ( s [ 0 ] * s [ 0 ] + s [ 1 ] * s [ 1 ] + s [ 2 ] * s [ 2 ] ) +
            s [ 3 ] * s [ 3 ] + s [ 4 ] * s [ 4 ] + s [ 5 ] * s [ 5 ];
 }
 
 double
-StructuralMaterial :: computeThirdStressInvariant(const FloatArray &s)
+StructuralMaterial :: computeThirdStressInvariant(const FloatArrayF<6> &s)
 {
     return ( 1. / 3. ) * ( s [ 0 ] * s [ 0 ] * s [ 0 ] + 3. * s [ 0 ] * s [ 5 ] * s [ 5 ] +
                            3. * s [ 0 ] * s [ 4 ] * s [ 4 ] + 6. * s [ 3 ] * s [ 5 ] * s [ 4 ] +
@@ -1722,14 +1683,14 @@ StructuralMaterial :: computeThirdStressInvariant(const FloatArray &s)
 
 
 double
-StructuralMaterial :: computeFirstCoordinate(const FloatArray &s)
+StructuralMaterial :: computeFirstCoordinate(const FloatArrayF<6> &s)
 {
     // This function computes the first Haigh-Westergaard coordinate
     return computeFirstInvariant(s) / sqrt(3.);
 }
 
 double
-StructuralMaterial :: computeSecondCoordinate(const FloatArray &s)
+StructuralMaterial :: computeSecondCoordinate(const FloatArrayF<6> &s)
 {
     // This function computes the second Haigh-Westergaard coordinate
     // from the deviatoric stress state
@@ -1737,7 +1698,7 @@ StructuralMaterial :: computeSecondCoordinate(const FloatArray &s)
 }
 
 double
-StructuralMaterial :: computeThirdCoordinate(const FloatArray &s)
+StructuralMaterial :: computeThirdCoordinate(const FloatArrayF<6> &s)
 {
     // This function computes the third Haigh-Westergaard coordinate
     // from the deviatoric stress state
@@ -1759,50 +1720,56 @@ StructuralMaterial :: computeThirdCoordinate(const FloatArray &s)
     return 1. / 3. * acos(c1);
 }
 
+
 double
-StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
+StructuralMaterial :: computeVonMisesStress(const FloatArray &stress)
 {
-    double J2;
-    double v1, v2, v3;
+    if ( stress.giveSize() == 3 ) {
+        return computeVonMisesStress_PlaneStress(stress);
 
-    if ( currentStress == NULL ) {
-        return 0.0;
-    }
-
-    if ( currentStress->giveSize() == 3 ) {
-        // Plane stress
-
-        return sqrt(currentStress->at(1) * currentStress->at(1) + currentStress->at(2) * currentStress->at(2)
-                    - currentStress->at(1) * currentStress->at(2) + 3 * currentStress->at(3) * currentStress->at(3) );
-    } else if ( currentStress->giveSize() == 4 ) {
+    } else if ( stress.giveSize() == 4 ) {
         // Plane strain
-        v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
-        v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
-        v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
+        double v1 = ( ( stress.at(1) - stress.at(2) ) * ( stress.at(1) - stress.at(2) ) );
+        double v2 = ( ( stress.at(2) - stress.at(3) ) * ( stress.at(2) - stress.at(3) ) );
+        double v3 = ( ( stress.at(3) - stress.at(1) ) * ( stress.at(3) - stress.at(1) ) );
 
-        J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4);
-
-        return sqrt(3 * J2);
-    } else if ( currentStress->giveSize() == 6 ) {
-        // 3D
-        v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
-        v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
-        v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
-
-        J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-             currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+        double J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stress.at(4) * stress.at(4);
 
         return sqrt(3 * J2);
+    } else if ( stress.giveSize() == 6 ) {
+        return computeVonMisesStress_3D(stress);
     } else {
         return 0.0;
     }
 }
 
 
-void
-StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
-                                                        const FloatMatrix &base,
-                                                        bool transpose)
+double
+StructuralMaterial :: computeVonMisesStress_PlaneStress(const FloatArrayF<3> &stress)
+{
+    return sqrt( stress.at(1) * stress.at(1) + stress.at(2) * stress.at(2)
+                - stress.at(1) * stress.at(2) + 3 * stress.at(3) * stress.at(3) );
+}
+
+
+double 
+StructuralMaterial :: computeVonMisesStress_3D(const FloatArrayF<6> &stress)
+{
+    double v1 = ( ( stress.at(1) - stress.at(2) ) * ( stress.at(1) - stress.at(2) ) );
+    double v2 = ( ( stress.at(2) - stress.at(3) ) * ( stress.at(2) - stress.at(3) ) );
+    double v3 = ( ( stress.at(3) - stress.at(1) ) * ( stress.at(3) - stress.at(1) ) );
+
+    double J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stress.at(4) * stress.at(4) +
+             stress.at(5) * stress.at(5) + stress.at(6) * stress.at(6);
+
+    return sqrt(3 * J2);
+}
+
+
+
+FloatMatrixF<6,6>
+StructuralMaterial :: giveStrainVectorTranformationMtrx(const FloatMatrixF<3,3> &base,
+                                                        bool trans)
 //
 // returns transformation matrix for 3d - strains to another system of axes,
 // given by base.
@@ -1812,16 +1779,9 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(6, 6);
-    answer.zero();
+    auto t = trans ? transpose(base) : base;
 
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    FloatMatrixF<6,6> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = t.at(3, 1) * t.at(3, 1);
@@ -1863,13 +1823,14 @@ StructuralMaterial :: giveStrainVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(6, 4) = ( t.at(2, 1) * t.at(3, 2) + t.at(3, 1) * t.at(2, 2) );
     answer.at(6, 5) = ( t.at(1, 1) * t.at(3, 2) + t.at(3, 1) * t.at(1, 2) );
     answer.at(6, 6) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+    
+    return answer;
 }
 
 
-void
-StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
-                                                          const FloatMatrix &base,
-                                                          bool transpose)
+FloatMatrixF<3,3>
+StructuralMaterial :: give2DStrainVectorTranformationMtrx(const FloatMatrixF<2,2> &base,
+                                                          bool trans)
 //
 // returns transformation matrix for 2d - strains to another system of axes,
 // given by base.
@@ -1879,16 +1840,8 @@ StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(3, 3);
-    answer.zero();
-
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    auto t = trans ? transpose(base) : base;
+    FloatMatrixF<3,3> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = t.at(1, 1) * t.at(2, 1);
@@ -1900,13 +1853,13 @@ StructuralMaterial :: give2DStrainVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(3, 1) = 2.0 * t.at(1, 1) * t.at(1, 2);
     answer.at(3, 2) = 2.0 * t.at(2, 1) * t.at(2, 2);
     answer.at(3, 3) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+    return answer;
 }
 
 
-void
-StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
-                                                        const FloatMatrix &base,
-                                                        bool transpose)
+FloatMatrixF<6,6>
+StructuralMaterial :: giveStressVectorTranformationMtrx(const FloatMatrixF<3,3> &base,
+                                                        bool trans)
 //
 // returns transformation matrix for 3d - stress to another system of axes,
 // given by base.
@@ -1916,16 +1869,9 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(6, 6);
-    answer.zero();
+    auto t = trans ? transpose(base) : base;
 
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    FloatMatrixF<6,6> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = t.at(3, 1) * t.at(3, 1);
@@ -1967,13 +1913,14 @@ StructuralMaterial :: giveStressVectorTranformationMtrx(FloatMatrix &answer,
     answer.at(6, 4) = ( t.at(2, 1) * t.at(3, 2) + t.at(3, 1) * t.at(2, 2) );
     answer.at(6, 5) = ( t.at(1, 1) * t.at(3, 2) + t.at(3, 1) * t.at(1, 2) );
     answer.at(6, 6) = ( t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2) );
+    
+    return answer;
 }
 
 
-void
-StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer,
-                                                             const FloatMatrix &base,
-                                                             bool transpose)
+FloatMatrixF<3,3>
+StructuralMaterial :: givePlaneStressVectorTranformationMtrx(const FloatMatrixF<2,2> &base,
+                                                             bool trans)
 //
 // returns transformation matrix for 2d - stress to another system of axes,
 // given by base.
@@ -1983,16 +1930,9 @@ StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer
 // If transpose == 1 we transpose base matrix before transforming
 //
 {
-    FloatMatrix t;
-    answer.resize(3, 3);
-    answer.zero();
+    auto t = trans ? transpose(base) : base;
 
-    if ( transpose ) {
-        t.beTranspositionOf(base);
-    } else {
-        t = base;
-    }
-
+    FloatMatrixF<3,3> answer;
     answer.at(1, 1) = t.at(1, 1) * t.at(1, 1);
     answer.at(1, 2) = t.at(2, 1) * t.at(2, 1);
     answer.at(1, 3) = 2.0 * t.at(1, 1) * t.at(2, 1);
@@ -2004,12 +1944,13 @@ StructuralMaterial :: givePlaneStressVectorTranformationMtrx(FloatMatrix &answer
     answer.at(3, 1) = t.at(1, 1) * t.at(1, 2);
     answer.at(3, 2) = t.at(2, 1) * t.at(2, 2);
     answer.at(3, 3) = t.at(1, 1) * t.at(2, 2) + t.at(2, 1) * t.at(1, 2);
+    return answer;
 }
 
 
-void
-StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &strainVector, bool transpose)
+FloatArrayF<6>
+StructuralMaterial :: transformStrainVectorTo(const FloatMatrixF<3,3> &base,
+                                              const FloatArrayF<6> &strain, bool transpose)
 //
 // performs transformation of 3d-strain vector to another system of axes,
 // given by base.
@@ -2019,16 +1960,14 @@ StructuralMaterial :: transformStrainVectorTo(FloatArray &answer, const FloatMat
 //
 // If transpose == 1 we transpose base matrix before transforming
 {
-    FloatMatrix tt;
-
-    StructuralMaterial :: giveStrainVectorTranformationMtrx(tt, base, transpose);
-    answer.beProductOf(tt, strainVector);
+    auto tt = StructuralMaterial :: giveStrainVectorTranformationMtrx(base, transpose);
+    return dot(tt, strain);
 }
 
 
-void
-StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMatrix &base,
-                                              const FloatArray &stressVector, bool transpose)
+FloatArrayF<6>
+StructuralMaterial :: transformStressVectorTo(const FloatMatrixF<3,3> &base,
+                                              const FloatArrayF<6> &stress, bool transpose)
 //
 //
 // performs transformation of 3d-stress vector to another system of axes,
@@ -2038,18 +1977,15 @@ StructuralMaterial :: transformStressVectorTo(FloatArray &answer, const FloatMat
 // be expressed in the same coordinate system as strainVector
 // If transpose == 1 we transpose base matrix before transforming
 //
-
 {
-    FloatMatrix tt;
-
-    StructuralMaterial :: giveStressVectorTranformationMtrx(tt, base, transpose);
-    answer.beProductOf(tt, stressVector);
+    auto tt = StructuralMaterial :: giveStressVectorTranformationMtrx(base, transpose);
+    return dot(tt, stress);
 }
 
 
 void
-StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *pDir,
-                                                FloatMatrix *toPDir)
+StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray &pVal, FloatMatrix &pDir,
+                                                const FloatMatrix &toPDir)
 //
 // this method sorts newly computed principal values (pVal) and
 // corresponding principal directions (pDir) to be closed to
@@ -2059,37 +1995,20 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
 // and normalized.
 //
 {
-    int maxJ = 0, size;
-    double cosine, maxCosine, swap;
-
-#ifdef DEBUG
-    if ( ( !pDir->isSquare() ) || ( !toPDir->isSquare() ) ) {
-        OOFEM_SERROR("Not square matrix");
-    }
-
-    if ( pDir->giveNumberOfRows() != toPDir->giveNumberOfRows() ) {
-        OOFEM_SERROR("Incompatible matrices");
-    }
-
-    if ( pDir->giveNumberOfRows() != pVal->giveSize() ) {
-        OOFEM_SERROR("Incompatible pVal Array size");
-    }
-
-#endif
 
     //
     // compute cosine matrix, where member i,j is cosine of angle
     // between toPDir i th eigen vector and j th pDir eigen vector
     //
     // sort pVal and pDir
-    size = pDir->giveNumberOfRows();
-    for ( int i = 1; i <= size - 1; i++ ) {
+    int maxJ = 0;
+    for ( int i = 1; i <= 3 - 1; i++ ) {
         // find closest pDir vector to toPDir i-th vector
-        maxCosine = 0.0;
-        for ( int j = i; j <= size; j++ ) {
-            cosine = 0.;
-            for ( int k = 1; k <= size; k++ ) {
-                cosine += toPDir->at(k, i) * pDir->at(k, j);
+        double maxCosine = 0.0;
+        for ( int j = i; j <= 3; j++ ) {
+            double cosine = 0.;
+            for ( int k = 1; k <= 3; k++ ) {
+                cosine += toPDir.at(k, i) * pDir.at(k, j);
             }
 
             cosine = fabs(cosine);
@@ -2102,13 +2021,13 @@ StructuralMaterial :: sortPrincDirAndValCloseTo(FloatArray *pVal, FloatMatrix *p
         // swap entries
         if ( maxJ != i ) {
             // swap eigenVectors and values
-            swap = pVal->at(maxJ);
-            pVal->at(maxJ) = pVal->at(i);
-            pVal->at(i) = swap;
-            for ( int k = 1; k <= size; k++ ) {
-                swap = pDir->at(k, maxJ);
-                pDir->at(k, maxJ) = pDir->at(k, i);
-                pDir->at(k, i) = swap;
+            double swap = pVal.at(maxJ);
+            pVal.at(maxJ) = pVal.at(i);
+            pVal.at(i) = swap;
+            for ( int k = 1; k <= 3; k++ ) {
+                double swap = pDir.at(k, maxJ);
+                pDir.at(k, maxJ) = pDir.at(k, i);
+                pDir.at(k, i) = swap;
             }
         }
     }
@@ -2150,7 +2069,11 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else if ( type == IST_vonMisesStress ) {
         ///@todo What about the stress meassure in large deformations here? The internal state type should specify "Cauchy" or something.
         answer.resize(1);
-        answer.at(1) = this->computeVonMisesStress(& status->giveStressVector() );
+        if ( status->giveStressVector().giveSize() == 6 ) {
+            answer.at(1) = this->computeVonMisesStress_3D( status->giveStressVector() );
+        } else {
+            answer.at(1) = this->computeVonMisesStress( status->giveStressVector() );
+        }
         return 1;
     } else if ( type == IST_StrainTensor ) {
         ///@todo Fill in correct full form values here! This just adds zeros!
@@ -2263,9 +2186,9 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
             base.at(3, 3) = 1.0;
 
             if ( type == IST_CylindricalStressTensor ) {
-                this->transformStressVectorTo(answer, base, val, false);
+                answer = this->transformStressVectorTo(base, val, false);
             } else {
-                this->transformStrainVectorTo(answer, base, val, false);
+                answer = this->transformStrainVectorTo(base, val, false);
             }
         } else {
             answer = val;
@@ -2303,7 +2226,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
 
 void
 StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+                                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     FloatArray et, eigenstrain;
     if ( gp->giveIntegrationRule() == NULL ) {
@@ -2359,21 +2282,12 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 
 
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
-        FloatArray fullAnswer, e0;
+        auto e0 = this->giveThermalDilatationVector(gp, tStep);
 
-        this->giveThermalDilatationVector(e0, gp, tStep);
-
-        if ( e0.giveSize() ) {
-            fullAnswer = e0;
-            if ( mode == VM_Total ) {
-                fullAnswer.times(et.at(1) - this->referenceTemperature);
-            } else {
-                fullAnswer.times(et.at(1) );
-            }
-
-            StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode() );
-            //answer = fullAnswer;
-        }
+        double scale = mode == VM_Total ? (et.at(1) - this->referenceTemperature) : et.at(1); 
+        FloatArray fullAnswer = e0 * scale;
+        StructuralMaterial :: giveReducedSymVectorForm(answer, fullAnswer, gp->giveMaterialMode() );
+        //answer = fullAnswer;
     }
 
     //join temperature and eigenstrain vectors, compare vector sizes
@@ -2393,27 +2307,23 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 }
 
 
-void
-StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer,
-                                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+FloatArrayF<6>
+StructuralMaterial :: computeStressIndependentStrainVector_3d(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
-    FloatArray et, eigenstrain;
     if ( gp->giveIntegrationRule() == NULL ) {
         ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
-        answer.clear();
-        return;
+        return zeros<6>();
     }
-    Element *elem = gp->giveElement();
-    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
-
-    answer.clear();
 
     if ( tStep->giveIntrinsicTime() < this->castingTime ) {
-        return;
+        return zeros<6>();
     }
 
     //sum up all prescribed temperatures over an element
     //elem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
+    FloatArray et, eigenstrain;
+    Element *elem = gp->giveElement();
+    StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
     if ( selem ) {
         selem->computeResultingIPTemperatureAt(et, tStep, gp, mode);
     }
@@ -2426,12 +2336,11 @@ StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer
     /* add external source, if provided */
     FieldManager *fm = domain->giveEngngModel()->giveContext()->giveFieldManager();
     FieldPtr tf = fm->giveField(FT_Temperature);
-
     if ( tf ) {
         // temperature field registered
         FloatArray gcoords, et2;
-        int err;
         elem->computeGlobalCoordinates(gcoords, gp->giveNaturalCoordinates() );
+        int err;
         if ( ( err = tf->evaluateAt(et2, gcoords, mode, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, element %d, error code %d", elem->giveNumber(), err);
         }
@@ -2446,37 +2355,17 @@ StructuralMaterial :: computeStressIndependentStrainVector_3d(FloatArray &answer
     }
 
 
+    FloatArrayF<6> answer;
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
-        FloatArray fullAnswer, e0;
 
-        this->giveThermalDilatationVector(e0, gp, tStep);
-
-        if ( e0.giveSize() ) {
-            fullAnswer = e0;
-            if ( mode == VM_Total ) {
-                fullAnswer.times(et.at(1) - this->referenceTemperature);
-            } else {
-                fullAnswer.times(et.at(1) );
-            }
-
-            answer = fullAnswer;
-        }
+        auto e0 = this->giveThermalDilatationVector(gp, tStep);
+        double scale = mode == VM_Total ? (et.at(1) - this->referenceTemperature) : et.at(1);
+        answer = e0 * scale;
     }
-
-    //join temperature and eigenstrain vectors, compare vector sizes
-    if ( answer.giveSize() ) {
-        if ( eigenstrain.giveSize() ) {
-            if ( answer.giveSize() != eigenstrain.giveSize() ) {
-                OOFEM_ERROR("Vector of temperature strains has the size %d which is different with the size of eigenstrain vector %d, element %d", answer.giveSize(), eigenstrain.giveSize(), elem->giveNumber() );
-            }
-
-            answer.add(eigenstrain);
-        }
-    } else {
-        if ( eigenstrain.giveSize() ) {
-            answer = eigenstrain;
-        }
+    if ( eigenstrain.giveSize() ) {
+        answer += FloatArrayF<6>(eigenstrain);
     }
+    return answer;
 }
 
 
@@ -2570,19 +2459,18 @@ StructuralMaterial :: giveReducedSymMatrixForm(FloatMatrix &answer, const FloatM
     answer.beSubMatrixOf(full, indx, indx);
 }
 
-void
-StructuralMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+StructuralMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
     double alpha = this->give(tAlpha, gp);
-    if ( alpha > 0.0 ) {
-        answer.resize(6);
-        answer.zero();
-        answer.at(1) = alpha;
-        answer.at(2) = alpha;
-        answer.at(3) = alpha;
-    } else {
-        answer.clear();
-    }
+    return {
+        alpha,
+        alpha,
+        alpha,
+        0.,
+        0.,
+        0.,
+    };
 }
 
 void

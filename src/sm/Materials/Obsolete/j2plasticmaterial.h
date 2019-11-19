@@ -56,14 +56,13 @@ class Domain;
 class J2plasticMaterial : public PlasticMaterial
 {
 protected:
-    int kinematicHardeningFlag, isotropicHardeningFlag;
-    double kinematicModuli, isotropicModuli;
-    //double E, nu; // isotropic material constants
-    double k;
+    int kinematicHardeningFlag = 0, isotropicHardeningFlag = 0;
+    double kinematicModuli = 0., isotropicModuli = 0.;
+    //double E = 0., nu = 0.; // isotropic material constants
+    double k = 0.;
 
 public:
     J2plasticMaterial(int n, Domain * d);
-    virtual ~J2plasticMaterial();
 
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
@@ -79,31 +78,31 @@ protected:
     //
 
     FloatArray *ComputeStressSpaceHardeningVars(GaussPoint *gp,
-                                                FloatArray *strainSpaceHardeningVariables) override;
+                                                FloatArray *strainSpaceHardeningVariables) const override;
     double computeYieldValueAt(GaussPoint *gp, FloatArray *stressVector,
-                               FloatArray *stressSpaceHardeningVars) override;
+                               FloatArray *stressSpaceHardeningVars) const override;
     void computeHardeningReducedModuli(FloatMatrix &answer, GaussPoint *gp,
                                        FloatArray *strainSpaceHardeningVariables,
-                                       TimeStep *tStep) override;
+                                       TimeStep *tStep) const override;
     FloatArray *ComputeStressGradient(GaussPoint *gp, FloatArray *stressVector,
-                                      FloatArray *stressSpaceHardeningVars) override;
+                                      FloatArray *stressSpaceHardeningVars) const override;
     FloatArray *ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *gp,
                                                                FloatArray *stressVector,
-                                                               FloatArray *stressSpaceHardeningVars) override;
-    int hasHardening() override;
+                                                               FloatArray *stressSpaceHardeningVars) const override;
+    int hasHardening() const override;
     void computeReducedGradientMatrix(FloatMatrix &answer, GaussPoint *gp,
                                       const FloatArray &stressVector,
-                                      const FloatArray &stressSpaceHardeningVars) override;
+                                      const FloatArray &stressSpaceHardeningVars) const override;
     void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
-                                     const FloatArray &strainIncrement, TimeStep *tStep) override;
-    void compute3dElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+                                     const FloatArray &strainIncrement, TimeStep *tStep) const override;
+    void compute3dElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const override;
 
     // auxiliary function
-    double computeJ2InvariantAt(FloatArray *answer);
-    int giveSizeOfFullHardeningVarsVector() override;
+    double computeJ2InvariantAt(FloatArray *answer) const;
+    int giveSizeOfFullHardeningVarsVector() const override;
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const override;
-    double giveIsotropicHardeningVar(FloatArray *stressSpaceHardeningVars);
-    void giveStressBackVector(FloatArray &answer, const FloatArray &stressSpaceHardeningVars);
+    double giveIsotropicHardeningVar(FloatArray *stressSpaceHardeningVars) const;
+    void giveStressBackVector(FloatArray &answer, const FloatArray &stressSpaceHardeningVars) const;
 };
 } // end namespace oofem
 #endif // j2plasticmaterial_h

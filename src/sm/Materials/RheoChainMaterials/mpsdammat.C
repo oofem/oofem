@@ -52,25 +52,12 @@ REGISTER_Material(MPSDamMaterial);
 
 
 MPSDamMaterialStatus :: MPSDamMaterialStatus(GaussPoint *g, int nunits) :
-    MPSMaterialStatus(g, nunits), effectiveStressVector(), tempEffectiveStressVector()
+    MPSMaterialStatus(g, nunits),
+    crackVector(3)
 {
-    kappa = tempKappa = 0.0;
-    damage = tempDamage = 0.0;
-    charLength = 0.0;
-    crackVector.resize(3);
-    crackVector.zero();
-
-    var_e0 = var_gf = 0.;
-
     int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( g->giveMaterialMode() );
     effectiveStressVector.resize(rsize);
-    effectiveStressVector.zero();
     tempEffectiveStressVector = effectiveStressVector;
-
-#ifdef supplementary_info
-    crackWidth = 0.;
-    residTensileStrength = 0.;
-#endif
 }
 
 
@@ -204,19 +191,7 @@ MPSDamMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
 
 MPSDamMaterial :: MPSDamMaterial(int n, Domain *d) : MPSMaterial(n, d)
-
-{
-    maxOmega = 0.999999;
-
-    softType = ST_Exponential_Cohesive_Crack;
-    ecsMethod = ECSM_Projection;
-    //    const_e0 = 0.;
-    const_gf = 0.;
-    checkSnapBack = 1; //snapback check by default
-
-    E = -1.;
-
-}
+{}
 
 
 bool
@@ -430,10 +405,10 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
 
             if ( mode == _PlaneStress ) {
                 principalStress.resizeWithValues(3);
-                givePlaneStressVectorTranformationMtrx(Tstress, principalDir, true);
+                Tstress = givePlaneStressVectorTranformationMtrx(principalDir, true);
             } else {
                 principalStress.resizeWithValues(6);
-                giveStressVectorTranformationMtrx(Tstress, principalDir, true);
+                Tstress = giveStressVectorTranformationMtrx(principalDir, true);
             }
 
             principalStress.rotatedWith(Tstress, 'n');
@@ -786,56 +761,54 @@ MPSDamMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 }
 
 
-void
-MPSDamMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
+FloatMatrixF<3,3>
+MPSDamMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep)
+                                           TimeStep *tStep) const
 {
-    RheoChainMaterial :: givePlaneStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    auto d = RheoChainMaterial :: givePlaneStressStiffMtrx(ElasticStiffness, gp, tStep);
 
     if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
-        return;
-    }
-
-    MPSDamMaterialStatus *status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
-    double tempDamage = min(status->giveTempDamage(), this->maxOmega);
-    answer.times(1.0 - tempDamage);
-}
-
-void
-MPSDamMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep)
-{
-    RheoChainMaterial :: givePlaneStrainStiffMtrx(answer, ElasticStiffness, gp, tStep);
-
-    if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
-        return;
+        return d;
     }
 
     auto status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage = min(status->giveTempDamage(), this->maxOmega);
-    answer.times(1.0 - tempDamage);
+    return d * (1.0 - tempDamage);
 }
 
 
-void
-MPSDamMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
+FloatMatrixF<4,4>
+MPSDamMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
+                                           GaussPoint *gp,
+                                           TimeStep *tStep) const
+{
+    auto d = RheoChainMaterial :: givePlaneStrainStiffMtrx(ElasticStiffness, gp, tStep);
+
+    if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
+        return d;
+    }
+
+    auto status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
+    double tempDamage = min(status->giveTempDamage(), this->maxOmega);
+    return d * (1.0 - tempDamage);
+}
+
+
+FloatMatrixF<1,1>
+MPSDamMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
+                                        TimeStep *tStep) const
 {
-    RheoChainMaterial :: give1dStressStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    auto d = RheoChainMaterial :: give1dStressStiffMtrx(ElasticStiffness, gp, tStep);
 
     if ( mode == ElasticStiffness || ( mode == SecantStiffness && !this->isotropic ) ) {
-        return;
+        return d;
     }
 
     auto status = static_cast< MPSDamMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage = min(status->giveTempDamage(), this->maxOmega);
-    answer.times(1.0 - tempDamage);
+    return d * (1.0 - tempDamage);
 }
 
 

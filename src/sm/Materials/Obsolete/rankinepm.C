@@ -43,9 +43,6 @@ REGISTER_Material(RankinePlasticMaterial);
 
 RankinePlasticMaterial :: RankinePlasticMaterial(int n, Domain *d) : MPlasticMaterial(n, d)
 {
-    //
-    // constructor
-    //
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     this->nsurf = 3;
     this->rmType = mpm_CuttingPlane;
@@ -64,7 +61,7 @@ RankinePlasticMaterial :: initializeFrom(InputRecord &ir)
 
 double
 RankinePlasticMaterial :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                                              const FloatArray &stressSpaceHardeningVars)
+                                              const FloatArray &stressSpaceHardeningVars) const
 {
     FloatArray princStress(3);
     this->computePrincipalValues(princStress, stressVector, principal_stress);
@@ -74,7 +71,7 @@ RankinePlasticMaterial :: computeYieldValueAt(GaussPoint *gp, int isurf, const F
 
 void
 RankinePlasticMaterial :: computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                                      const FloatArray &stressSpaceHardeningVars)
+                                                      const FloatArray &stressSpaceHardeningVars) const
 {
     FloatArray princStress(3);
     FloatMatrix t(3, 3);
@@ -98,7 +95,7 @@ void
 RankinePlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                         GaussPoint *gp,
                                                         const FloatArray &strainSpaceHardeningVariables,
-                                                        TimeStep *tStep)
+                                                        TimeStep *tStep) const
 {
     answer.clear();
 }
@@ -106,7 +103,7 @@ RankinePlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
 void
 RankinePlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp,
                                                                          const FloatArray &stressVector,
-                                                                         const FloatArray &stressSpaceHardeningVars)
+                                                                         const FloatArray &stressSpaceHardeningVars) const
 {
     answer.clear();
 }
@@ -116,7 +113,7 @@ void
 RankinePlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isurf,
                                                        GaussPoint *gp,
                                                        const FloatArray &stressVector,
-                                                       const FloatArray &stressSpaceHardeningVars)
+                                                       const FloatArray &stressSpaceHardeningVars) const
 {
     answer.clear();
 }
@@ -124,7 +121,7 @@ RankinePlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int 
 
 void
 RankinePlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,
-                                                          const FloatArray &strainSpaceHardeningVariables)
+                                                          const FloatArray &strainSpaceHardeningVariables) const
 {
     answer.clear();
 }

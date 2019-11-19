@@ -99,20 +99,19 @@ protected:
      * Nondimensional parameter controlling the transition between rc and sd model,
      * with respect to shear stifness degradation.
      */
-    double SDTransitionCoeff2;
+    double SDTransitionCoeff2 = 0.;
     /**
      * Interaction radius, related to the nonlocal characteristic length of material.
      */
-    double R;
+    double R = 0.;
     /**
      * Strain at complete failure. For exponential law, ef is the strain at the intersection
      * of the horizontal axis with the tangent to the softening curve at peak stress.
      */
-    double ef;
+    double ef = 0.;
 
 public:
     RCSDNLMaterial(int n, Domain * d);
-    virtual ~RCSDNLMaterial();
 
     const char *giveClassName() const override { return "RCSDNLMaterial"; }
 
@@ -135,8 +134,8 @@ public:
      */
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
-    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
-    int hasBoundedSupport() override { return 1; }
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
+    int hasBoundedSupport() const override { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
      */

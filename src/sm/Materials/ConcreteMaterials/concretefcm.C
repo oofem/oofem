@@ -42,11 +42,7 @@ namespace oofem {
 REGISTER_Material(ConcreteFCM);
 
 ConcreteFCM :: ConcreteFCM(int n, Domain *d) : FCMMaterial(n, d), RandomMaterialExtensionInterface()
-{
-    Gf = Ft = 0.;
-    softType = ST_Unknown;
-    shearType = SHR_Unknown;
-}
+{}
 
 void
 ConcreteFCM :: initializeFrom(InputRecord &ir)

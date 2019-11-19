@@ -57,7 +57,7 @@ class MisesMatNlStatus : public MisesMatStatus, public StructuralNonlocalMateria
 protected:
     // STATE VARIABLE DECLARATION
     // Equivalent strain for avaraging
-    double localCumPlasticStrainForAverage;
+    double localCumPlasticStrainForAverage = 0.;
 
 public:
     MisesMatNlStatus(GaussPoint * g);
@@ -89,13 +89,12 @@ class MisesMatNl : public MisesMat, public StructuralNonlocalMaterialExtensionIn
 public NonlocalMaterialStiffnessInterface
 {
 protected:
-    double Rf;
-    double exponent;
-    int averType;
+    double Rf = 0.;
+    double exponent = 1.;
+    int averType = 0;
 
 public:
     MisesMatNl(int n, Domain * d);
-    virtual ~MisesMatNl();
 
     const char *giveClassName() const override { return "MisesMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_MisesMatNl_Name; }
@@ -111,16 +110,16 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const;
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
     void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
-    void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
+    double computeLocalCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const
     {
-        MisesMat :: computeCumPlastStrain(kappa, gp, tStep);
+        return MisesMat :: computeCumPlastStrain(gp, tStep);
     }
 
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     //void givePlaneStrainStiffMtrx(FloatMatrix& answer, MatResponseMode, GaussPoint *gp,TimeStep *tStep) override;
     //void give3dMaterialStiffnessMatrix(FloatMatrix& answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep) override;
 
@@ -157,7 +156,7 @@ public:
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
-    int hasBoundedSupport() override { return 1; }
+    int hasBoundedSupport() const override { return 1; }
 
     int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;

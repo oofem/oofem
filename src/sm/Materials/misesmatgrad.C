@@ -50,12 +50,7 @@ REGISTER_Material(MisesMatGrad);
 /////////////////////////////////////////////////////////////////
 
 MisesMatGrad :: MisesMatGrad(int n, Domain *d) : MisesMat(n, d), GradientDamageMaterialExtensionInterface(d)
-{
-    L = 0.;
-}
-
-MisesMatGrad :: ~MisesMatGrad()
-{ }
+{}
 
 
 bool
@@ -82,10 +77,10 @@ MisesMatGrad :: giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatRes
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _1dMat:
-        give1dStressStiffMtrx(answer, mode, gp, tStep);
+        answer = give1dStressStiffMtrx(mode, gp, tStep);
         break;
     case _PlaneStrain:
-        givePlaneStrainStiffMtrx(answer, mode, gp, tStep);
+        answer = givePlaneStrainStiffMtrx(mode, gp, tStep);
         break;
     case _3dMat:
         give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
@@ -154,14 +149,12 @@ MisesMatGrad :: giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, Mat
 
 
 
-void
-MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+MisesMatGrad :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    answer.resize(1, 1);
     double E = this->linearElasticMaterial.give('E', gp);
-    answer.at(1, 1) = E;
     if ( mode != TangentStiffness ) {
-        return;
+        return {E};
     }
 
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
@@ -175,8 +168,7 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
     double nlKappa =  status->giveNonlocalCumulatedStrain();
     double kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
     if ( dKappa <= 0.0 ) {
-        answer.at(1, 1) = ( 1. - tempDamage ) * E;
-        return;
+        return {( 1. - tempDamage ) * E};
     }
 
 
@@ -184,19 +176,20 @@ MisesMatGrad :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
     const FloatArray &stressVector = status->giveTempEffectiveStress();
     double stress = stressVector.at(1);
 
-    answer.at(1, 1) = ( 1. - tempDamage ) * E * H / ( E + H );
-    if ( ( tempDamage - damage ) > 0 ) {
-        answer.at(1, 1) = answer.at(1, 1) - ( 1. - mParam ) * computeDamageParamPrime(kappa) * E / ( E + H ) * signum(stress) * stress;
+    auto tangent = ( 1. - tempDamage ) * E * H / ( E + H );
+    if ( tempDamage > damage ) {
+        tangent -= ( 1. - mParam ) * computeDamageParamPrime(kappa) * E / ( E + H ) * signum(stress) * stress;
     }
+    return {tangent};
 }
 
 
-void
-MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<4,4>
+MisesMatGrad :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    this->linearElasticMaterial.giveStiffnessMatrix(answer, mode, gp, tStep);
+    auto d = this->linearElasticMaterial.givePlaneStrainStiffMtrx(mode, gp, tStep);
     if ( mode != TangentStiffness ) {
-        return;
+        return d;
     }
 
     MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
@@ -207,7 +200,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mo
     double damage = status->giveDamage();
 
     if ( dKappa <= 0.0 ) { // elastic loading - elastic stiffness plays the role of tangent stiffness
-        return;
+        return d;
     }
 
     // === plastic loading ===
@@ -224,7 +217,7 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mo
     double factor = -2. * sqrt(6.) * G * G / trialS;
     double factor1 = factor * sigmaY / ( ( H + 3. * G ) * trialS * trialS );
     stiffnessCorrection.times(factor1);
-    answer.add(stiffnessCorrection);
+    d += FloatMatrixF<4,4>(stiffnessCorrection);
     // another correction term
     stiffnessCorrection.zero();
     stiffnessCorrection.at(1, 1) = stiffnessCorrection.at(2, 2) = stiffnessCorrection.at(3, 3) = 2. / 3.;
@@ -233,9 +226,9 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mo
     stiffnessCorrection.at(4, 4) = 0.5;
     double factor2 = factor * dKappa;
     stiffnessCorrection.times(factor2);
-    answer.add(stiffnessCorrection);
+    d += FloatMatrixF<4,4>(stiffnessCorrection);
     //influence of damage
-    answer.times(1 - tempDamage);
+    d *= 1 - tempDamage;
     if ( tempDamage > damage ) {
         const FloatArray &effStress = status->giveTempEffectiveStress();
         double nlKappa = status->giveNonlocalCumulatedStrain();
@@ -244,8 +237,9 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mo
         double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
         stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
         stiffnessCorrection.times( scalar * ( 1. - mParam ) );
-        answer.add(stiffnessCorrection);
+        d += FloatMatrixF<4,4>(stiffnessCorrection);
     }
+    return d;
 }
 
 
@@ -472,14 +466,14 @@ MisesMatGrad :: giveRealStressVectorGradientDamage(FloatArray &answer1, double &
 }
 
 
-void
-MisesMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
+double
+MisesMatGrad :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
-    MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempCumulativePlasticStrain();
     double nlCumPlastStrain = status->giveNonlocalCumulatedStrain();
 
-    kappa = mParam * nlCumPlastStrain + ( 1 - mParam ) * localCumPlastStrain;
+    return mParam * nlCumPlastStrain + ( 1 - mParam ) * localCumPlastStrain;
 }
 
 
@@ -525,13 +519,7 @@ MisesMatGrad :: initializeFrom(InputRecord &ir)
 
 MisesMatGradStatus :: MisesMatGradStatus(GaussPoint *g) :
     MisesMatStatus(g)
-{
-    nonlocalDamageDrivingVariable = 0;
-}
-
-
-MisesMatGradStatus :: ~MisesMatGradStatus()
-{ }
+{}
 
 
 void

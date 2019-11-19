@@ -40,6 +40,7 @@
 #include "CrossSections/structuralcrosssection.h"
 #include "engngm.h"
 #include "mathfem.h"
+#include "floatarrayf.h"
 #include "Elements/LatticeElements/latticestructuralelement.h"
 #include "datastream.h"
 #include "staggeredproblem.h"
@@ -54,24 +55,10 @@ LatticeSlip :: LatticeSlip(int n, Domain *d) : LatticeLinearElastic(n, d)
 {}
 
 
-
-LatticeSlip :: ~LatticeSlip()
-//
-// destructor
-//
-{}
-
-int
-LatticeSlip :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+LatticeSlip :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( ( mode == _1dLattice ) || ( mode == _2dLattice ) || ( mode == _3dLattice ) ) {
-        return 1;
-    }
-
-    return 0;
+    return ( mode == _1dLattice ) || ( mode == _2dLattice ) || ( mode == _3dLattice );
 }
 
 
@@ -254,9 +241,8 @@ LatticeSlipStatus :: initTempStatus()
 }
 
 
-void
-LatticeSlip :: giveThermalDilatationVector(FloatArray &answer,
-                                           GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+LatticeSlip :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
 // caused by unit temperature in direction of
@@ -269,22 +255,18 @@ LatticeSlip :: giveThermalDilatationVector(FloatArray &answer,
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
     alpha += this->cAlpha / length;
 
-    answer.resize(6);
-    answer.zero();
-
-    answer.at(1) = alpha;
+    return {alpha, 0., 0., 0., 0., 0.};
 }
 
 void
-LatticeSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticeSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "plasticStrain %.8e, dissipation %f, deltaDissipation %f, crackFlag %d\n", this->plasticStrain.at(1), this->dissipation, this->deltaDissipation, this->crackFlag);
-    return;
 }
 
 double
-LatticeSlip :: give(int aProperty, GaussPoint *gp)
+LatticeSlip :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
     if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {

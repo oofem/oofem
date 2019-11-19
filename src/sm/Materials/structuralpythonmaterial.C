@@ -92,16 +92,16 @@ MaterialStatus *StructuralPythonMaterial :: CreateStatus(GaussPoint *gp) const
     return new StructuralPythonMaterialStatus(gp);
 }
 
-void StructuralPythonMaterial :: callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
+void StructuralPythonMaterial :: callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
 {
     // pass mutable args via bp::ref
     // pass "const" args without, which by default results in a new copy, ensuring the original won't be modified
-    func(oldStrain,oldStress,strain,stress,stateDict,tempStateDict,tStep->giveTargetTime());
+    return bp::extract<FloatArray>(func(oldStrain, oldStress, strain, stateDict, tempStateDict, tStep->giveTargetTime()));
 }
 
-void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
+void StructuralPythonMaterial :: callTangentFunction(bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
 {
-    answer=bp::extract<FloatMatrix>(func(strain,stress,stateDict,tempStateDict,tStep->giveTargetTime()));
+    return bp::extract<FloatMatrix>(func(strain, stress, stateDict, tempStateDict, tStep->giveTargetTime()));
 }
 
 void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
@@ -109,11 +109,11 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answ
     StructuralPythonMaterialStatus *ms = dynamic_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
 
     if ( this->smallDefTangent ) {
-        this->callTangentFunction(answer, this->smallDefTangent, ms->giveTempStrainVector(), ms->giveTempStressVector(), ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
+        answer = this->callTangentFunction(this->smallDefTangent, ms->giveTempStrainVector(), ms->giveTempStressVector(), ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
     } else {
-        FloatArray vE, vE_h, stress, stressh;
-        vE = ms->giveTempStrainVector();
-        stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempStressVector();
+        FloatArray vE_h, stress, stressh;
+        const auto &vE = ms->giveTempStrainVector();
+        const auto &stress = ms->giveTempStressVector();
         answer.resize(6, 6);
         for ( int i = 1; i <= 6; ++i ) {
             vE_h = vE;
@@ -130,28 +130,27 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answ
 }
 
 
-void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<9,9> StructuralPythonMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     StructuralPythonMaterialStatus *ms = dynamic_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
 
     if ( this->largeDefTangent ) {
-        this->callTangentFunction(answer, this->largeDefTangent, ms->giveTempFVector(), ms->giveTempPVector(), ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
+        return this->callTangentFunction(this->largeDefTangent, ms->giveTempFVector(), ms->giveTempPVector(), ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
     } else {
-        FloatArray vF, vF_h, stress, stressh;
-        vF = ms->giveTempFVector();
-        stress = ( ( StructuralMaterialStatus * ) gp->giveMaterialStatus() )->giveTempPVector();
-        answer.resize(9, 9);
+        const FloatArrayF<9> vF = ms->giveTempFVector();
+        const FloatArrayF<9> vP = ms->giveTempPVector();
+        FloatMatrixF<9,9> tangent;
         for ( int i = 1; i <= 9; ++i ) {
-            vF_h = vF;
+            auto vF_h = vF;
             vF_h.at(i) += pert;
-            this->giveFirstPKStressVector_3d(stressh, gp, vF_h, tStep);
-            stressh.subtract(stress);
-            stressh.times(1.0 / pert);
-            answer.setColumn(stressh, i);
+            auto vPh = this->giveFirstPKStressVector_3d(vF_h, gp, tStep);
+            dvP = (vPh - vP) / pert;
+            tangent.setColumn(dvP, i);
         }
 
         // Reset the internal variables
-        this->giveFirstPKStressVector_3d(stress, gp, vF, tStep);
+        this->giveFirstPKStressVector_3d(vF, gp, tStep);
+        return tangent;
     }
 }
 
@@ -159,13 +158,12 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix_dPdF(FloatMatrix 
 void StructuralPythonMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                                    const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
 
     ms->reinitTempStateDictionary();
 
-    this->callStressFunction(this->smallDef, 
-                              ms->giveStrainVector(), ms->giveStressVector(),
-                              strain, answer,
+    answer = this->callStressFunction(this->smallDef, 
+                              ms->giveStrainVector(), ms->giveStressVector(), strain,
                               ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
 
     ms->letTempStrainVectorBe(strain);
@@ -173,50 +171,49 @@ void StructuralPythonMaterial :: giveRealStressVector_3d(FloatArray &answer, Gau
 }
 
 
-void StructuralPythonMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                      const FloatArray &vF, TimeStep *tStep)
+FloatArrayF<9> StructuralPythonMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
 
     ms->reinitTempStateDictionary(); // Resets the temp dictionary to the equilibrated values
 
-    this->callStressFunction(this->smallDef, 
-                            ms->giveFVector(), ms->givePVector(),
-                            vF, answer,
+    auto vP = this->callStressFunction(this->smallDef, 
+                            ms->giveFVector(), ms->givePVector(), vF,
                             ms->giveStateDictionary(), ms->giveTempStateDictionary(), tStep);
 
-    FloatArray vE, vS;
-    FloatMatrix F, Finv, E, S;
-    F.beMatrixForm(vF);
-    Finv.beInverseOf(F);
-    // Compute Green-Lagrange strain
-    E.beTProductOf(F, F);
-    E.at(1, 1) -= 1.0;
-    E.at(2, 2) -= 1.0;
-    E.at(3, 3) -= 1.0;
-    E.times(0.5);
-    vE.beSymVectorFormOfStrain(E);
+    auto F = from_voigt_form(vF);
+    auto Finv = inv(F);
+    auto E = 0.5 * (Tdot(F, F) - eye<3>());
+    auto vE = to_voigt_strain(E);
     // Convert from P to S
-    S.beProductOf(Finv, answer);
-    vS.beSymVectorForm(S);
+    auto P = from_voigt_form(vP);
+    auto S = dot(Finv, P);
+    auto vS = to_voigt_stress(S);
 
     ms->letTempStrainVectorBe(vE);
     ms->letTempStressVectorBe(vS);
-    ms->letTempPVectorBe(answer);
+    ms->letTempPVectorBe(vP);
     ms->letTempFVectorBe(vF);
 }
 
 
 int StructuralPythonMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    StructuralPythonMaterialStatus *ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
-    bp::object val=ms->giveStateDictionary()[std::to_string(type).c_str()];
+    auto ms = static_cast< StructuralPythonMaterialStatus * >( this->giveStatus(gp) );
+    bp::object val = ms->giveStateDictionary()[std::to_string(type).c_str()];
     // call parent if we don't have this type in our records
-    if(!val) return StructuralMaterial::giveIPValue(answer,gp,type,tStep);
+    if ( !val ) {
+        return StructuralMaterial::giveIPValue(answer, gp, type, tStep);
+    }
     bp::extract<double> exNum(val);
     bp::extract<FloatArray> exMat(val);
-    if(exNum.check()){ answer=FloatArray{exNum()}; return 1; }
-    else if(exMat.check()){ answer=exMat(); return 1;} 
+    if ( exNum.check() ) {
+        answer = FloatArray{exNum()};
+        return 1;
+    } else if ( exMat.check() ) {
+        answer=exMat();
+        return 1;
+    } 
     OOFEM_WARNING("Dictionary entry of material state not float or something convertible to FloatArray");
     return 0;
 }

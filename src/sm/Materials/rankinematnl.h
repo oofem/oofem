@@ -51,11 +51,11 @@ class RankineMatNlStatus : public RankineMatStatus, public StructuralNonlocalMat
 {
 protected:
     /// Equivalent strain for averaging.
-    double localCumPlasticStrainForAverage;
+    double localCumPlasticStrainForAverage = 0.;
 
     /// For printing only
-    double kappa_nl;
-    double kappa_hat;
+    double kappa_nl = 0.;
+    double kappa_hat = 0.;
 
 public:
     RankineMatNlStatus(GaussPoint * g);
@@ -91,7 +91,6 @@ public NonlocalMaterialStiffnessInterface
 {
 public:
     RankineMatNl(int n, Domain * d);
-    virtual ~RankineMatNl() { }
 
     const char *giveClassName() const override { return "RankineMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_RankineMatNl_Name; }
@@ -107,17 +106,17 @@ public:
      * @param gp integration point.
      * @param tStep time step.
      */
-    virtual void computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const;
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
     //void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
     double computeDistanceModifier(double damage);
-    void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
+    double computeLocalCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const
     {
-        RankineMat :: computeCumPlastStrain(kappa, gp, tStep);
+        return RankineMat :: computeCumPlastStrain(gp, tStep);
     }
 
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     //void givePlaneStrainStiffMtrx(FloatMatrix& answer, MatResponseMode,GaussPoint * gp,TimeStep * tStep) override;
     //void give3dMaterialStiffnessMatrix(FloatMatrix& answer,  MatResponseMode,GaussPoint* gp, TimeStep* tStep) override;
 
@@ -171,7 +170,7 @@ public:
     /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
     double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
 
-    int hasBoundedSupport() override { return 1; }
+    int hasBoundedSupport() const override { return 1; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

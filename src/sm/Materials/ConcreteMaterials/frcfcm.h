@@ -75,9 +75,9 @@ class FRCFCMStatus : public ConcreteFCMStatus
 {
 protected:
     /// Damage level of material.
-    double damage;
+    double damage = 0.;
     /// Non-equilibrated damage level of material.
-    double tempDamage;
+    double tempDamage = 0.;
 
 public:
     FRCFCMStatus(GaussPoint *g);
@@ -111,7 +111,6 @@ class FRCFCM : public ConcreteFCM
 {
 public:
     FRCFCM(int n, Domain *d);
-    virtual ~FRCFCM() {}
 
     void initializeFrom(InputRecord &ir) override;
 
@@ -121,48 +120,48 @@ public:
 
 protected:
     /// fiber shear strength at zero slip
-    double tau_0;
+    double tau_0 = 0.;
 
     /// micromechanical parameter for fiber shear according to Sajdlova
-    double b0;
+    double b0 = 0.;
     /// micromechanical parameter for fiber shear according to Kabele
-    double b1, b2, b3;
+    double b1 = 0., b2 = 0., b3 = 0.;
 
     /// snubbing factor "f"
-    double f;
+    double f = 0.;
 
     /// auxiliary parameter computed from snubbing factor "f"
-    double g;
+    double g = 0.;
 
     /// volume fraction of fibers
-    double Vf;
+    double Vf = 0.;
 
     /// fiber length
-    double Lf;
+    double Lf = 0.;
 
     /// fiber diameter
-    double Df;
+    double Df = 0.;
 
     /// fiber Young's modulus
-    double Ef;
+    double Ef = 0.;
 
     /// fiber shear modulus
-    double Gfib;
+    double Gfib = 0.;
 
     /// fiber cross-sectional shear factor
-    double kfib;
+    double kfib = 0.;
 
     /// transitional opening
-    double w_star;
+    double w_star = 0.;
 
     /// aux. factor
-    double eta;
+    double eta = 0.;
 
     /// shear strain at full fibers rupture
-    double gammaCrackFail;
+    double gammaCrackFail = 0.;
 
     /// minimum opening at which damage can start
-    double minDamageOpening;
+    double minDamageOpening = 0.;
 
     /**
      * Exponent in the unloading-reloading constitutive law.
@@ -170,13 +169,13 @@ protected:
      * and the stress at maximum cracking strain
      * sigma(w) = sig_max * w^M / w_max^M
      */
-    int M;
+    int M = 0;
 
     /// orientation of fibres
     FloatArray orientationVector;
 
     /// crack opening at which the crossing fibers begin to be activated
-    double fibreActivationOpening;
+    double fibreActivationOpening = 0.;
 
     /**
      * smooth transition of the bridging stress if fibreActivationOpening is applied
@@ -184,19 +183,19 @@ protected:
      * dw1 = distance from the fibreActivationOpening where the smooth transition ends
      * smoothen = flag
      */
-    double dw0, dw1;
-    bool smoothen;
+    double dw0 = 0., dw1 = 0.;
+    bool smoothen = false;
 
     /**
      * Type strength of the shear bond. This is activated only for short fibers (SAF or SRF)
      * once the maximum crack opening exceeds w*
      */
     enum FiberShearStrengthType { FSS_NONE, FSS_Sajdlova, FSS_Kabele, FSS_Havlasek, FSS_Unknown };
-    FiberShearStrengthType fiberShearStrengthType;
+    FiberShearStrengthType fiberShearStrengthType = FSS_Unknown;
 
     /// Type of fibre damage which is triggered by crack shearing strain = w / u
     enum FiberDamageType { FDAM_NONE, FDAM_GammaCrackLin, FDAM_GammaCrackExp, FDAM_Unknown };
-    FiberDamageType fiberDamageType;
+    FiberDamageType fiberDamageType = FDAM_Unknown;
 
     /**
      * Type fo fibers in the composite.
@@ -206,7 +205,7 @@ protected:
      * SRF2D = short fibers random in 2D
      */
     enum FiberType { FT_CAF, FT_SAF, FT_SRF, FT_SRF2D, FT_Unknown };
-    FiberType fiberType;
+    FiberType fiberType = FT_Unknown;
 
     double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep, int i) override;
     /// evaluates the fiber bond if w > w*

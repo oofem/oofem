@@ -42,11 +42,7 @@
 namespace oofem {
 REGISTER_Material(FRCFCM);
 
-FRCFCM :: FRCFCM(int n, Domain *d) : ConcreteFCM(n, d)
-{
-    fiberShearStrengthType = FSS_Unknown;
-}
-
+FRCFCM :: FRCFCM(int n, Domain *d) : ConcreteFCM(n, d) {}
 
 
 void
@@ -1212,9 +1208,7 @@ FRCFCM :: computeOverallElasticStiffness(GaussPoint *gp, TimeStep *tStep) {
 
 
 FRCFCMStatus :: FRCFCMStatus(GaussPoint *gp) :
-    ConcreteFCMStatus(gp),
-    damage(0.),
-    tempDamage(0.)
+    ConcreteFCMStatus(gp)
 { }
 
 

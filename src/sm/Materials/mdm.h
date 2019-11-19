@@ -258,7 +258,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
@@ -270,9 +270,9 @@ public:
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
 
-    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
 
-    int hasBoundedSupport() override { return 1; }
+    int hasBoundedSupport() const override { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function.
      */
@@ -312,13 +312,9 @@ protected:
     void applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp);
     void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode, GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);
     void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n);

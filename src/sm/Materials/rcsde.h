@@ -61,11 +61,11 @@ public:
     enum __rcsdModeType { rcMode, sdMode };
 
 protected:
-    double maxEquivStrain, tempMaxEquivStrain;
-    double damageCoeff, tempDamageCoeff;
+    double maxEquivStrain = 0., tempMaxEquivStrain = 0.;
+    double damageCoeff = 1., tempDamageCoeff = 1.;
     FloatMatrix Ds0;
-    double transitionEps, epsF2;
-    __rcsdModeType rcsdMode, tempRcsdMode;
+    double transitionEps = 0., epsF2 = 0.;
+    __rcsdModeType rcsdMode = rcMode, tempRcsdMode = rcMode;
 
 public:
     RCSDEMaterialStatus(GaussPoint * g);
@@ -115,7 +115,7 @@ public:
 class RCSDEMaterial : public RCM2Material
 {
 protected:
-    double SDTransitionCoeff;
+    double SDTransitionCoeff = 0.;
 
 public:
     RCSDEMaterial(int n, Domain * d);

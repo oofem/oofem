@@ -570,10 +570,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                     for ( auto &gp_new : *(mpCZIntegrationRules_tmp[i]) ) {
 
                         // Fetch new material status. Create it if it does not exist.
-                        MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-                        if ( !ms_new ) {
-                            ms_new = mpCZMat->CreateStatus(gp_new);
-                        }
+                        MaterialStatus *ms_new = mpCZMat->giveStatus(gp_new);
 
                         // Find closest old GP.
                         double closest_dist_cz = 0.0;
@@ -622,10 +619,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                     for ( auto &gp_new : *(mpCZExtraIntegrationRules_tmp[i]) ) {
 
                         // Fetch new material status. Create it if it does not exist.
-                        MaterialStatus *ms_new = dynamic_cast<MaterialStatus*>( gp_new->giveMaterialStatus() );
-                        if ( !ms_new ) {
-                            ms_new = mpCZMat->CreateStatus(gp_new);
-                        }
+                        MaterialStatus *ms_new = mpCZMat->giveStatus(gp_new);
 
                         // Find closest old GP.
                         double closest_dist_cz = 0.0;

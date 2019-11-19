@@ -61,23 +61,20 @@ protected:
     /* FloatArray plasticStrain; */
     /* FloatArray tempPlasticStrain; */
 
-    double kappaP;
-    double tempKappaP;
+    double kappaP = 0.;
+    double tempKappaP = 0.;
 
-    int surfaceValue;
+    int surfaceValue = 0.;
 
 public:
 
     /// Constructor
     LatticeBondPlasticityStatus(int n, Domain *d, GaussPoint *g);
-    /// Destructor
-    ~LatticeBondPlasticityStatus() {}
-
 
     /// Returns the last equilibrated scalar measure of the largest strain level
-    double giveKappaP() { return kappaP; }
+    double giveKappaP() const { return kappaP; }
     /// Returns the temp. scalar measure of the largest strain level
-    double giveTempKappaP() { return tempKappaP; }
+    double giveTempKappaP() const { return tempKappaP; }
     void  letTempPlasticStrainBe(const FloatArray &v)
     { tempPlasticStrain = v; }
     /// Sets the temp scalar measure of the largest strain level to given value
@@ -93,18 +90,18 @@ public:
     }
 
 
-    virtual void   printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "LatticeBondPlasticityStatus"; }
 
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override;
+    void updateYourself(TimeStep *) override;
 
 
-    void  saveContext(DataStream &stream, ContextMode mode) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
 
-    void  restoreContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
 };
 
 class LatticeBondPlasticity : public LatticeLinearElastic
@@ -117,63 +114,58 @@ protected:
     enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic };
     LatticeBondPlasticity_ReturnResult returnResult;
 
-    double initialYieldStress;
+    double initialYieldStress = 0.;
 
     /// compressive strength
-    double fc;
+    double fc = 0.;
     /// frictional angle of the yield surface
-    double frictionAngleOne;
-    double frictionAngleTwo;
+    double frictionAngleOne = 0.;
+    double frictionAngleTwo = 0.;
 
-    double hardeningLimit;
+    double hardeningLimit = 0.;
 
     /// frictional angle of the plastic potential
-    double flowAngle;
+    double flowAngle = 0.;
 
     /// determines the softening -> corresponds to crack opening (not strain) when tension stress vanishes
-    double wf;
+    double wf = 0.;
 
-    int oldApproachFlag;
-
-    //pi constant
-    double myPi;
+    int oldApproachFlag = 0;
 
     /// yield tolerance
-    double yieldTol;
+    double yieldTol = 0.;
 
     /// maximum number of iterations for stress return
-    int newtonIter;
+    int newtonIter = 0;
 
     /// maximum number of subincrements
-    int numberOfSubIncrements;
+    int numberOfSubIncrements = 0;
 
     //parameter in hardening law
-    double ef;
+    double ef = 0.;
 
 public:
 
     /// Constructor
     LatticeBondPlasticity(int n, Domain *d);
-    /// Destructor
-    ~LatticeBondPlasticity();
 
-    virtual const char *giveInputRecordName() const override { return _IFT_LatticeBondPlasticity_Name; }
+    const char *giveInputRecordName() const override { return _IFT_LatticeBondPlasticity_Name; }
     const char *giveClassName() const override { return "LatticeBondPlasticity"; }
 
-    double computeHardening(double kappa);
+    double computeHardening(double kappa) const;
 
-    double computeDHardeningDKappa(double kappa);
+    double computeDHardeningDKappa(double kappa) const;
 
-    double computeParamA(const double kappa);
-    double computeDParamADKappa(const double kappa);
+    double computeParamA(const double kappa) const;
+    double computeDParamADKappa(const double kappa) const;
 
-    double computeShift(const double kappa);
-    double computeDShiftDKappa(const double kappa);
+    double computeShift(const double kappa) const;
+    double computeDShiftDKappa(const double kappa) const;
 
 
-    virtual void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
 
 
@@ -183,7 +175,7 @@ public:
 
     double computeTransition(const double kappa, GaussPoint *gp);
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
     /* Compute the A matrix used for closest point return
@@ -245,11 +237,9 @@ public:
                              GaussPoint *gp);
 
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
-protected:
 };
 } // end namespace oofem
 #endif

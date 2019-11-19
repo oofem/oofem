@@ -34,6 +34,8 @@
 
 #include "simplevitrificationmaterial.h"
 #include "gausspoint.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 
@@ -83,80 +85,93 @@ int SimpleVitrificationMaterial :: checkConsistency()
 }
 
 
-
-void SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+SimpleVitrificationMaterial :: computeTangent(bool vitr) const
 {
-    double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
-    bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
-    const FloatArray &activeNu = vitr ? this->nu_r : this->nu;
-    const FloatArray &activeE = vitr ? this->E_r : this->E;
-    const FloatArray &activeG = vitr ? this->G_r : this->G;
+    const auto &activeNu = vitr ? this->nu_r : this->nu;
+    const auto &activeE = vitr ? this->E_r : this->E;
+    const auto &activeG = vitr ? this->G_r : this->G;
 
-    nyz = nzy = activeNu.at(1);
-    nxz = nzx = activeNu.at(2);
-    nxy = nyx = activeNu.at(3);
+    //double [nyz, nxz, nxy] = activeNu; // c++17
+    //double [nzy, nzx, nyx] = activeNu;
 
-    eksi = 1. - ( nxy * nyx + nyz * nzy + nzx * nxz ) - ( nxy * nyz * nzx + nyx * nzy * nxz );
+    double nyz = activeNu.at(1);
+    double nxz = activeNu.at(2);
+    double nxy = activeNu.at(3);
 
-    answer.resize(6, 6);
-    answer.zero();
+    double nzy = activeNu.at(1);
+    double nzx = activeNu.at(2);
+    double nyx = activeNu.at(3);
+
+    double eksi = 1. - ( nxy * nyx + nyz * nzy + nzx * nxz ) - ( nxy * nyz * nzx + nyx * nzy * nxz );
+
+    FloatMatrixF<6,6> tangent;
     // switched letters from original oofem -> now produces same material stiffness matrix as Abaqus method
-    answer.at(1, 1) = activeE.at(1) * ( 1. - nyz * nzy ) / eksi;
-    answer.at(1, 2) = activeE.at(2) * ( nxy + nxz * nzy ) / eksi;
-    answer.at(1, 3) = activeE.at(3) * ( nxz + nyz * nxy ) / eksi;
-    answer.at(2, 2) = activeE.at(2) * ( 1. - nxz * nzx ) / eksi;
-    answer.at(2, 3) = activeE.at(3) * ( nyz + nyx * nxz ) / eksi;
-    answer.at(3, 3) = activeE.at(3) * ( 1. - nyx * nxy ) / eksi;
+    tangent.at(1, 1) = activeE.at(1) * ( 1. - nyz * nzy ) / eksi;
+    tangent.at(1, 2) = activeE.at(2) * ( nxy + nxz * nzy ) / eksi;
+    tangent.at(1, 3) = activeE.at(3) * ( nxz + nyz * nxy ) / eksi;
+    tangent.at(2, 2) = activeE.at(2) * ( 1. - nxz * nzx ) / eksi;
+    tangent.at(2, 3) = activeE.at(3) * ( nyz + nyx * nxz ) / eksi;
+    tangent.at(3, 3) = activeE.at(3) * ( 1. - nyx * nxy ) / eksi;
 
     // define the lower triangle
     for ( int i = 1; i < 4; i++ ) {
         for ( int j = 1; j < i; j++ ) {
-            answer.at(i, j) = answer.at(j, i);
+            tangent.at(i, j) = tangent.at(j, i);
         }
     }
 
-    answer.at(4, 4) = activeG.at(1);
-    answer.at(5, 5) = activeG.at(2);
-    answer.at(6, 6) = activeG.at(3);
+    tangent.at(4, 4) = activeG.at(1);
+    tangent.at(5, 5) = activeG.at(2);
+    tangent.at(6, 6) = activeG.at(3);
+    
+    return tangent;
+}
+
+
+
+void SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                                                  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+{
+    bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
+    answer = this->computeTangent(vitr);
 }
 
 
 void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                            const FloatArray &reducedStrain, TimeStep *tStep)
+                                                            const FloatArray &strain_, TimeStep *tStep)
 {
-    FloatArray strainVector;
-    FloatMatrix d;
-    FloatArray deltaStrain;
+    auto status = dynamic_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    StructuralMaterialStatus *status = dynamic_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    FloatArrayF<6> strain = strain_;
+    
+    auto thermalStrain = computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+    auto deltaStrain = strain - thermalStrain - FloatArrayF<6>(status->giveStrainVector());
 
-    this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
+    bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
+    auto d = this->computeTangent(vitr);
 
-    deltaStrain.beDifferenceOf( strainVector, status->giveStrainVector() );
+    auto deltaStress = dot(d, deltaStrain);
 
-    this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
-
-    FloatArray deltaStress;
-    deltaStress.beProductOf(d, deltaStrain);
-
-    answer = status->giveStressVector();
-    answer.add(deltaStress);
+    auto stress = status->giveStressVector() + deltaStress;
 
     // update gp
-    status->letTempStrainVectorBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
+    
+    answer = stress;
 }
 
 
-void SimpleVitrificationMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                                GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6> SimpleVitrificationMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
     bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
-    answer.resize(6);
-    answer.at(1) = vitr ? this->alpha_r.at(1) : this->alpha.at(1);
-    answer.at(2) = vitr ? this->alpha_r.at(2) : this->alpha.at(2);
-    answer.at(3) = vitr ? this->alpha_r.at(3) : this->alpha.at(3);
+    return {
+        vitr ? this->alpha_r.at(1) : this->alpha.at(1),
+        vitr ? this->alpha_r.at(2) : this->alpha.at(2),
+        vitr ? this->alpha_r.at(3) : this->alpha.at(3),
+        0., 0., 0.,
+    };
 }
 
 

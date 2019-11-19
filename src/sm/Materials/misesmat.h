@@ -77,39 +77,38 @@ protected:
     IsotropicLinearElasticMaterial linearElasticMaterial;
 
     /// Elastic shear modulus.
-    double G;
+    double G = 0.;
 
     /// Elastic bulk modulus.
-    double K;
+    double K = 0.;
 
     /// Hardening modulus.
-    double H;
+    double H = 0.;
 
     /// Initial (uniaxial) yield stress.
     ScalarFunction sig0;
 
     /// critical(maximal) damage.
-    double omega_crit;
+    double omega_crit = 0.;
     /// exponent in damage function.
-    double a;
+    double a = 0.;
 
     /// tolerance for the yield function in RRM algorithm.
-    double yieldTol;
+    double yieldTol = 0.;
 
 public:
     MisesMat(int n, Domain *d);
-    virtual ~MisesMat() {}
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) const;
     void performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
 
-    double computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep);
-    double computeYieldStressPrime(double kappa);
+    double computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep) const;
+    double computeYieldStressPrime(double kappa) const;
 
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
-    double computeDamageParam(double tempKappa);
-    double computeDamageParamPrime(double tempKappa);
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
+    double computeDamageParam(double tempKappa) const;
+    double computeDamageParamPrime(double tempKappa) const;
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     void initializeFrom(InputRecord &ir) override;
 
@@ -126,12 +125,9 @@ public:
                                        TimeStep *tStep) override;
 
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode, GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
 
@@ -140,8 +136,8 @@ public:
     void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
 
 
-    double give(int aProperty, GaussPoint *gp, TimeStep *tStep);
-    double giveTemperature(GaussPoint *gp, TimeStep *tStep);
+    double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
+    double giveTemperature(GaussPoint *gp, TimeStep *tStep) const;
 
 protected:
     void computeGLPlasticStrain(const FloatMatrix &F, FloatMatrix &Ep, FloatMatrix b, double J);
@@ -166,22 +162,22 @@ protected:
     FloatArray trialStressD;
 
     /// volumetric trial stress - needed for tangent stiffness.
-    double trialStressV;
+    double trialStressV = 0.;
 
     FloatArray effStress;
     FloatArray tempEffStress;
 
     /// Cumulative plastic strain (initial).
-    double kappa;
+    double kappa = 0.;
 
     /// Cumulative plastic strain (final).
-    double tempKappa;
+    double tempKappa = 0.;
 
     /// damage variable (initial).
-    double damage;
+    double damage = 0.;
 
     /// damage variable (final).
-    double tempDamage;
+    double tempDamage = 0.;
 
 
 public:

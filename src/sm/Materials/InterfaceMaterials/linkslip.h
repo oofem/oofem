@@ -70,29 +70,27 @@ class LinkSlipStatus : public StructuralInterfaceMaterialStatus
 {
 protected:
 
-  double kappa=0;
+  double kappa = 0;
 
-  double tempKappa=0;
+  double tempKappa = 0;
 
 public:
 
     /// Constructor
     LinkSlipStatus(GaussPoint *g);
-    /// Destructor
-    ~LinkSlipStatus() {}
     
-    double  giveKappa(){ return this->kappa; }
+    double giveKappa(){ return this->kappa; }
 
-    void  letTempKappaBe(const double &v)
+    void letTempKappaBe(const double &v)
     { this->tempKappa = v; }
 
-    void   printOutputAt(FILE *file, TimeStep *tStep) const override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "LinkSlipStatus"; }
     
-    virtual void initTempStatus() override;
+    void initTempStatus() override;
 
-    virtual void updateYourself(TimeStep *) override;
+    void updateYourself(TimeStep *) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
 
@@ -108,59 +106,53 @@ class LinkSlip : public StructuralInterfaceMaterial
 protected:
 
     ///Normal modulus
-    double kNormal;
+    double kNormal = 0.;
 
     ///Lateral modulus
-    double kLateral;
+    double kLateral = 0.;
 
-    int type;
+    int type = 0;
     
     ///Strength for slip component
-    double tauMax,tauFinal;
+    double tauMax = 0., tauFinal = 0.;
     
-    double s1,s2,s3;
+    double s1 = 0., s2 = 0., s3 = 0.;
 
-    double alpha;
+    double alpha = 0.;
 
 public:
 
     LinkSlip(int n, Domain *d);
 
-    /// Destructor
-    virtual ~LinkSlip();
-
-    virtual bool hasAnalyticalTangentStiffness() const override { return true; }
+    bool hasAnalyticalTangentStiffness() const override { return true; }
     
-    virtual const char *giveInputRecordName() const override { return _IFT_LinkSlip_Name; }
-    virtual const char *giveClassName() const override { return "LinkSlip"; }
+    const char *giveInputRecordName() const override { return _IFT_LinkSlip_Name; }
+    const char *giveClassName() const override { return "LinkSlip"; }
 
-    virtual void initializeFrom(InputRecord &ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     //  virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN, ValueModeType mode);
 
-    virtual void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep);
+    // virtual void  giveThermalDilatationVector(FloatArray &answer,  GaussPoint *gp,  TimeStep *tStep); // unused for interface materials
 
 
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
     
     double evaluateBondStress(const double kappa) const;
 
     FloatArrayF<3> giveEngTraction_3d(const FloatArrayF<3> &jump, GaussPoint *gp, TimeStep *tStep) const override;
-	
+
     FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
     
-    virtual Interface *giveInterface(InterfaceType) override;
+    Interface *giveInterface(InterfaceType) override;
                                   
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const override;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-
-protected:
-
-    virtual int giveIPValue(FloatArray &answer,
-                            GaussPoint *gp,
-                            InternalStateType type,
-                            TimeStep *atTime) override;
+    int giveIPValue(FloatArray &answer,
+                    GaussPoint *gp,
+                    InternalStateType type,
+                    TimeStep *atTime) override;
 };
 } // end namespace oofem
 

@@ -52,32 +52,14 @@ namespace oofem {
 REGISTER_Material(LatticePlasticityDamage);
 
 LatticePlasticityDamage :: LatticePlasticityDamage(int n, Domain *d) : LatticeLinearElastic(n, d)
-    //
-    // constructor
-    //
 {
-    yieldTol = 0.;
-    myPi = 3.141592653;
 }
 
 
-LatticePlasticityDamage :: ~LatticePlasticityDamage()
-//
-// destructor
-//
-{}
-
-int
-LatticePlasticityDamage :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+LatticePlasticityDamage :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    if ( mode == _3dLattice ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return mode == _3dLattice;
 }
 
 void
@@ -1131,7 +1113,7 @@ LatticePlasticityDamageStatus :: initTempStatus()
 }
 
 void
-LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
 

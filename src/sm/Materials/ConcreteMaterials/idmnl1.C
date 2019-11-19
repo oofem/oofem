@@ -57,7 +57,10 @@
 namespace oofem {
 REGISTER_Material(IDNLMaterial);
 
-IDNLMaterial :: IDNLMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
+IDNLMaterial :: IDNLMaterial(int n, Domain *d) :
+    IsotropicDamageMaterial1(n, d),
+    StructuralNonlocalMaterialExtensionInterface(d),
+    NonlocalMaterialStiffnessInterface()
 {}
 
 
@@ -714,7 +717,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 
         //
         if ( gp->giveMaterialMode() != _1dMat ) {
-            this->giveStressVectorTranformationMtrx(t, princDir, 0);
+            t = this->giveStressVectorTranformationMtrx(princDir);
         }
 
         //

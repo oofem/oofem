@@ -60,7 +60,7 @@ protected:
     PrescribedGradientHomogenization *bc;
 
     FloatMatrix tangent;
-    bool oldTangent;
+    bool oldTangent = true;
 
     /// Interface normal direction
     FloatArray mNormalDir;
@@ -70,7 +70,7 @@ protected:
 public:
     StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile);
 
-    EngngModel *giveRVE() { return this->rve.get(); }
+    EngngModel *giveRVE() const { return this->rve.get(); }
     PrescribedGradientHomogenization *giveBC();// { return this->bc; }
 
     void markOldTangent();
@@ -103,7 +103,7 @@ public:
     void addStateVariables(const MaterialStatus &iStatus) override { OOFEM_ERROR("Not implemented."); }
 
     // For debugging only
-    bool mNewlyInitialized;
+    bool mNewlyInitialized = true;
 };
 
 
@@ -122,7 +122,7 @@ class StructuralFE2Material : public StructuralMaterial
 protected:
     std :: string inputfile;
     static int n;
-    bool useNumTangent;
+    bool useNumTangent = false;
 
 public:
     StructuralFE2Material(int n, Domain * d);

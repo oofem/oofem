@@ -68,32 +68,32 @@ class AnisotropicDamageMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     /// Scalar measure of the largest strain level ever reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar measure of the largest strain level.
-    double tempKappa;
+    double tempKappa = 0.;
     /// Second order damage tensor
     FloatMatrix damage;
     /// Non-equilibrated second order damage tensor
     FloatMatrix tempDamage;
     /// Out-of-plane value for 2dPlaneStress mode
-    double strainZ;
+    double strainZ = 0.;
     /// Non-equilibrated out-of-plane value for 2dPlaneStress mode
-    double tempStrainZ;
+    double tempStrainZ = 0.;
     /// This flag turns into 1 and remains 1 when the trace of the damage tensor is >1 in compression (tr(strainTensor)<0)
-    int flag;
-    int tempFlag;
-    double storedFactor;
-    double tempStoredFactor;
+    int flag = 0;
+    int tempFlag = 0;
+    double storedFactor = 1.;
+    double tempStoredFactor = 1.;
 
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
-    double stressWork;
+    double stressWork = 0.;
     /// Non-equilibrated density of total work done by stresses on strain increments.
-    double tempStressWork;
+    double tempStressWork = 0.;
     /// Density of dissipated work.
-    double dissWork;
+    double dissWork = 0.;
     /// Non-equilibrated density of dissipated work.
-    double tempDissWork;
+    double tempDissWork = 0.;
 #endif
 
 public:
@@ -180,23 +180,23 @@ protected:
     /// Reference to bulk (undamaged) material
     IsotropicLinearElasticMaterial linearElasticMaterial;
     /// Young's modulus
-    double E;
+    double E = 0.;
     /// Poisson's ratio
-    double nu;
+    double nu = 0.;
     /// Damage threshold kappa0, as defined in the paper mentioned above.
-    double kappa0;
+    double kappa0 = 0.;
     /// Damage parameter kappa_f (in the paper denoted as "a")
-    double kappaf;
+    double kappaf = 0.;
     /// Damage parameter a*A, needed to obtain Kappa(trD), according to eq. 33 in the paper mentioned above.
-    double aA;
+    double aA = 0.;
     /// Type characterizing the algorithm used to compute equivalent strain measure.
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
     /// Parameter specifying the definition of equivalent strain.
-    EquivStrainType equivStrainType;
+    EquivStrainType equivStrainType = EST_Unknown;
     /// Type characterizing the damage law.
     enum DamLawType { DLT_Unknown, DLT_Desmorat1, DLT_Desmorat2, DLT_Linear, DLT_Exponential };
     /// Parameter specifying the damage law.
-    DamLawType damageLawType;
+    DamLawType damageLawType = DLT_Unknown;
 
 public:
     /// Constructor
@@ -212,7 +212,7 @@ public:
     void computePrincValDir2D(double &D1, double &D2, double &c, double &s, double Dx, double Dy, double Dxy);
     bool checkPrincVal2D(double Dx, double Dy, double Dxy);
     void computeDamage(FloatMatrix &tempDamage, const FloatMatrix &damage, double kappa, double eps1, double eps2, double ceps, double seps, double epsZ);
-    double computeTraceD(double equivStrain);
+    double computeTraceD(double equivStrain) const;
     double computeOutOfPlaneStrain(const FloatArray &inplaneStrain, const FloatMatrix &dam, bool tens_flag);
     double computeDimensionlessOutOfPlaneStress(const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
     void computeInplaneStress(FloatArray &inplaneStress, const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
@@ -228,7 +228,7 @@ public:
 
     void correctBigValues(FloatMatrix &matrix);
 
-    double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
+    double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp) const;
 
     double computeCorrectionFactor(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
 
@@ -252,7 +252,7 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
     //InternalStateValueType giveIPValueType(InternalStateType type) override;
-    //void giveThermalDilatationVector(FloatArray &answer, GaussPoint *, TimeStep *) override;
+    //FloatArrayF<6> giveThermalDilatationVector(GaussPoint *, TimeStep *) const override;
 
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
@@ -271,21 +271,13 @@ public:
 
 protected:
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain, GaussPoint *gp,
-                                  TimeStep *atTime);
+                                  TimeStep *atTime) const;
     void computePlaneStressSigmaZ(double &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector,
-                                  double epsZ, GaussPoint *gp, TimeStep *atTime);
+                                  double epsZ, GaussPoint *gp, TimeStep *atTime) const;
 
 #if 0
     void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
@@ -294,7 +286,7 @@ protected:
 #endif
 
     virtual void computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor,
-                                       FloatMatrix damageTensor, GaussPoint *gp);
+                                       FloatMatrix damageTensor, GaussPoint *gp) const;
 
     double computeK(GaussPoint *gp);
 

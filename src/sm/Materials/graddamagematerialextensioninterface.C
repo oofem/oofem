@@ -43,10 +43,10 @@
 
 namespace oofem {
 // constructor
-GradientDamageMaterialExtensionInterface :: GradientDamageMaterialExtensionInterface(Domain *d)  : Interface()
+GradientDamageMaterialExtensionInterface :: GradientDamageMaterialExtensionInterface(Domain *d)  : 
+    Interface(),
+    dom(d)
 {
-    dom = d;
-    internalLength = 0.;
 }
 
 void
@@ -69,12 +69,8 @@ GradientDamageMaterialExtensionInterface :: initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, internalLength, _IFT_GradientDamageMaterialExtensionInterface_l);
 }
 
-GradientDamageMaterialStatusExtensionInterface :: GradientDamageMaterialStatusExtensionInterface() : Interface(), nonlocalDamageDrivingVariableGrad(), tempNonlocalDamageDrivingVariableGrad()
+GradientDamageMaterialStatusExtensionInterface :: GradientDamageMaterialStatusExtensionInterface() : Interface()
 {
-    localDamageDrivingVariable = 0.;
-    nonlocalDamageDrivingVariable = 0.;
-    tempLocalDamageDrivingVariable = 0.;
-    tempNonlocalDamageDrivingVariable = 0.;
 }
 
 

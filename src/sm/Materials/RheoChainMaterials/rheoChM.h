@@ -71,7 +71,7 @@ class RheoChainMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     /// Number of units in the chain.
-    int nUnits;
+    int nUnits = 0;
     /// Hidden (internal) variables, the meaning of which depends on the type of chain.
     std :: vector< FloatArray >hiddenVars;
     std :: vector< FloatArray >tempHiddenVars;
@@ -86,11 +86,11 @@ protected:
      * essential when giveRealStressVector of the viscoelastic material is called 
      * more than once in one time step and at one time step.
      */
-    double currentTime;
+    double currentTime = 0.;
 
 #ifdef keep_track_of_strains
-    double thermalStrain;
-    double tempThermalStrain;
+    double thermalStrain = 0.;
+    double tempThermalStrain = 0.;
 #endif
 
 public:
@@ -140,26 +140,26 @@ class RheoChainMaterial : public StructuralMaterial
 {
 protected:
     /// thermal dilatation coeff.
-    double talpha;
+    double talpha = 0.;
     /// Number of (Maxwell or Kelvin) units in the rheologic chain.
-    int nUnits;
+    int nUnits = 0.;
     /// Physical age of the material at castingTime
-    double relMatAge;
+    double relMatAge = 0.;
 
-    bool lattice;
+    bool lattice = false;
     /// Poisson's ratio (assumed to be constant, unaffected by creep).
-    double nu;
+    double nu = 0.;
     /// Parameters for the lattice model
-    double alphaOne, alphaTwo;
+    double alphaOne = 0., alphaTwo = 0.;
     /// Time for which the partial moduli of individual units have been evaluated.
-    mutable double EparValTime;
+    mutable double EparValTime = -1.;
 
     /// Time from which the model should give a good approximation. Optional field. Default value is 0.1 [day].
-    double begOfTimeOfInterest; // local one or taken from e-model
+    double begOfTimeOfInterest = 0.; // local one or taken from e-model
     /// Time (age???) up to which the model should give a good approximation.
-    double endOfTimeOfInterest; // local one or taken from e-model
+    double endOfTimeOfInterest = 0.; // local one or taken from e-model
     /// Associated linearElasticMaterial, with E = 1.
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
     /// Partial moduli of individual units.
     mutable FloatArray EparVal;
     //FloatArray relaxationTimes;
@@ -173,7 +173,7 @@ protected:
      * (gives the number of simulation time units in one day,
      *  e.g. 86400 if the simulation works with seconds as the time units)
      */
-    double timeFactor;
+    double timeFactor = 0.;
 
 public:
     RheoChainMaterial(int n, Domain *d);
@@ -195,13 +195,13 @@ public:
     void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     /*    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
      *    { answer.clear(); }*/
 
     /// Evaluation of the incremental modulus.
-    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double giveEModulus(GaussPoint *gp, TimeStep *tStep) const = 0;
 
     /*    virtual double giveIncrementalModulus(GaussPoint *gp, TimeStep *tStep) {
      * if ( (tStep->giveIntrinsicTime() < this->castingTime) && ( this->zeroStiffness > 0. ) ) {
@@ -233,18 +233,9 @@ public:
                                        GaussPoint *gp,
                                        TimeStep *tStep) override;
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void give2dLatticeStiffMtrx(FloatMatrix &answer,
                                 MatResponseMode mmode,
@@ -257,7 +248,7 @@ public:
                                 TimeStep *tStep) override;
 
     void computeStressIndependentStrainVector(FloatArray &answer,
-                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     /**
      * Computes, for the given integration point,
@@ -270,7 +261,7 @@ public:
     virtual void giveShrinkageStrainVector(FloatArray &answer,
                                            GaussPoint *gp,
                                            TimeStep *tStep,
-                                           ValueModeType mode)
+                                           ValueModeType mode) const
     { answer.clear(); }
 
     // Note: must take LoadResponseMode into account
@@ -282,7 +273,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is the current time step).
      * @param mode Determines response mode.
      */
-    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) { }
+    virtual void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const { }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -347,9 +338,9 @@ protected:
     void computeDiscreteRelaxationFunction(FloatArray &answer, const FloatArray &tSteps, double t0, double tr, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Evaluation of elastic compliance matrix for unit Young's modulus.
-    void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void giveUnitComplianceMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const;
     /// Evaluation of elastic stiffness matrix for unit Young's modulus.
-    void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep);
+    void giveUnitStiffnessMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Update of partial moduli of individual chain units
     virtual void updateEparModuli(double tPrime, GaussPoint *gp, TimeStep *tStep) const;
@@ -382,7 +373,7 @@ protected:
      * @param mode Determines response mode (Total or incremental).
      */
     void computeTrueStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp,
-                                                  TimeStep *tStep, ValueModeType mode);
+                                                  TimeStep *tStep, ValueModeType mode) const;
 };
 } // end namespace oofem
 #endif // rheochm_h

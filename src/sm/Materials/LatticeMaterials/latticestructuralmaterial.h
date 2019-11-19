@@ -68,7 +68,7 @@ class LatticeStructuralMaterial : public StructuralMaterial
 {
 protected:
     /// Reference temperature (temperature, when material has been built into structure).
-    double referenceTemperature;
+    double referenceTemperature = 0.;
 
 public:
 

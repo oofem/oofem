@@ -188,7 +188,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(const FloatArrayF<3> &d, co
               dAlpha = 1. - oldDamage;
             }
 
-            auto Iep = Smati.sub<3,3>({0,1,2},{0,1,2});
+            auto Iep = Smati({0,1,2},{0,1,2});
             status->letTempIepBe(Iep);
 
             FloatArrayF<3> alpha_v = {

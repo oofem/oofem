@@ -175,13 +175,12 @@ public:
 class RCM2Material : public StructuralMaterial
 {
 protected:
-    LinearElasticMaterial *linearElasticMaterial;
-    double Gf, Ft;
-    //double beta;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
+    double Gf = 0., Ft = 0.;
+    //double beta = 0.;
 
 public:
     RCM2Material(int n, Domain * d);
-    virtual ~RCM2Material();
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
@@ -218,8 +217,8 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new RCM2MaterialStatus(gp); }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
-    { linearElasticMaterial->giveThermalDilatationVector(answer, gp, tStep); }
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override
+    { return linearElasticMaterial->giveThermalDilatationVector(gp, tStep); }
 
 protected:
 
@@ -265,21 +264,11 @@ protected:
     double giveResidualStrength() { return 0.01 * this->Ft; }
 
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
-    void give2dBeamLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlateLayerStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                 GaussPoint *gp,
-                                 TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 };
 } // end namespace oofem
 #endif // rcm2_h

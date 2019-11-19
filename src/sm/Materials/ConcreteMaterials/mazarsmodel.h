@@ -63,7 +63,7 @@ class MazarsMaterialStatus : public IsotropicDamageMaterial1Status
 {
 protected:
     /// Characteristic element length for compression, fixed as square from element size (for 2d).
-    double lec;
+    double lec = 0.;
 
 public:
     /// Constructor.
@@ -93,13 +93,13 @@ class MazarsMaterial : public IsotropicDamageMaterial1
 {
 protected:
     /// Elastic parameters.
-    double E, nu;
+    double E = 0., nu = 0.;
     /// Model parameters related to the shape of uniaxial stress-strain diagrams.
-    double At, Bt, Ac, Bc;
+    double At = 0., Bt = 0., Ac = 0., Bc = 0.;
     /// Reference elem-length for objectivity.
-    double hReft, hRefc;
+    double hReft = 0., hRefc = 0.;
     /// Beta coefficient reducing the effect of shear; default val = 1.06.
-    double beta;
+    double beta = 0.;
 
     /// Model variants.
     enum mazarsModelVariant { maz_original, maz_modTension } modelVersion;

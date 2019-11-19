@@ -54,7 +54,6 @@ class Steel1 : public PerfectlyPlasticMaterial
 {
 public:
     Steel1(int n, Domain * d);
-    virtual ~Steel1() { }
 
     void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_Steel1_Name; }

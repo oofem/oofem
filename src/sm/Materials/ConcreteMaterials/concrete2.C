@@ -50,8 +50,6 @@ Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d),
 { }
 
 
-Concrete2 :: ~Concrete2() { }
-
 void
 Concrete2 :: initializeFrom(InputRecord &ir)
 {
@@ -1219,11 +1217,10 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeSte
 
 
 
-void
-Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                     MatResponseMode rMode,
+FloatMatrixF<5,5>
+Concrete2 :: givePlateLayerStiffMtrx(MatResponseMode rMode,
                                      GaussPoint *gp,
-                                     TimeStep *tStep)
+                                     TimeStep *tStep) const
 //
 // This material is currently unable compute material stiffness
 // so it uses slave material (linearElasticMaterial ) to perform this work
@@ -1232,7 +1229,7 @@ Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 //
 {
     // error ("givePlateLayerStiffMtrx: unable to compute");
-    linearElasticMaterial.givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
+    return linearElasticMaterial.givePlateLayerStiffMtrx( rMode, gp, tStep);
 }
 
 
@@ -1245,10 +1242,8 @@ Concrete2 :: CreateStatus(GaussPoint *gp) const
 
 
 Concrete2MaterialStatus :: Concrete2MaterialStatus(GaussPoint *g) :
-    StructuralMaterialStatus(g), plasticStrainVector(), plasticStrainIncrementVector()
+    StructuralMaterialStatus(g)
 {
-    SCCM = EPM = E0PM = SRF = SEZ = 0.0;
-    SCTM = -1.0;     // init status if SCTM < 0.;
 }
 
 

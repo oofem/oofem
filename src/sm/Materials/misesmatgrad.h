@@ -52,11 +52,10 @@ namespace oofem {
 class MisesMatGradStatus : public MisesMatStatus, GradientDamageMaterialStatusExtensionInterface
 {
 protected:
-    double localCumPlastStrainForAverage;
+    double localCumPlastStrainForAverage = 0.;
 
 public:
     MisesMatGradStatus(GaussPoint *g);
-    virtual ~MisesMatGradStatus();
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -77,12 +76,11 @@ public:
 class MisesMatGrad : public MisesMat, GradientDamageMaterialExtensionInterface
 {
 protected:
-    double L;
-    double mParam;
+    double L = 0.;
+    double mParam = 0.;
 
 public:
     MisesMatGrad(int n, Domain *d);
-    virtual ~MisesMatGrad();
 
     // definition
     const char *giveInputRecordName() const override { return _IFT_MisesMatGrad_Name; }
@@ -101,8 +99,8 @@ public:
 
     void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
 
-    void give1dStressStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
     void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep) override;
 
     void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
@@ -127,7 +125,7 @@ public:
     void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) override;
     void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
 
-    void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const override;
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
     //    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 

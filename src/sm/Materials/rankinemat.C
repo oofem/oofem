@@ -52,19 +52,6 @@ REGISTER_Material(RankineMat);
 RankineMat :: RankineMat(int n, Domain *d) : StructuralMaterial(n, d)
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
-    E = 0.;
-    nu = 0.;
-    H0 = 0.;
-    sig0 = 0.;
-    delSigY = 0.;
-    ep = 0.;
-    md = 0.;
-    damlaw = 1;
-    param1 = 0.;
-    param2 = 0.;
-    param3 = 0.;
-    param4 = 0.;
-    param5 = 0.;
 }
 
 
@@ -222,14 +209,14 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
 
 
 double
-RankineMat :: evalYieldFunction(const FloatArray &sigPrinc, const double kappa)
+RankineMat :: evalYieldFunction(const FloatArray &sigPrinc, const double kappa) const
 {
     return sigPrinc.at(1) - evalYieldStress(kappa);
 }
 
 
 double
-RankineMat :: evalYieldStress(const double kappa)
+RankineMat :: evalYieldStress(const double kappa) const
 {
     double yieldStress = 0.;
     if ( plasthardtype == 0 ) { // linear hardening
@@ -252,7 +239,7 @@ RankineMat :: evalYieldStress(const double kappa)
 }
 
 double
-RankineMat :: evalPlasticModulus(const double kappa)
+RankineMat :: evalPlasticModulus(const double kappa) const
 {
     double plasticModulus = 0.;
     if ( plasthardtype == 0 ) { // linear hardening
@@ -274,7 +261,7 @@ RankineMat :: evalPlasticModulus(const double kappa)
 // computes the stress according to elastoplasticity
 // (return of trial stress to the yield surface)
 void
-RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
+RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain) const
 {
     double kappa, tempKappa, H;
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
@@ -427,7 +414,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
 }
 
 double
-RankineMat :: computeDamageParam(double tempKappa)
+RankineMat :: computeDamageParam(double tempKappa) const
 {
     double tempDam = 0.;
     if ( tempKappa > 0. ) {
@@ -446,7 +433,7 @@ RankineMat :: computeDamageParam(double tempKappa)
 }
 
 double
-RankineMat :: computeDamageParamPrime(double tempKappa)
+RankineMat :: computeDamageParamPrime(double tempKappa) const
 {
     double tempDam = 0.;
     if ( tempKappa >= 0. ) {
@@ -465,12 +452,11 @@ RankineMat :: computeDamageParamPrime(double tempKappa)
 }
 
 double
-RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
+RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *tStep) const
 {
-    double tempKappa, dam;
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-    dam = status->giveDamage();
-    computeCumPlastStrain(tempKappa, gp, tStep);
+    auto status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
+    double dam = status->giveDamage();
+    double tempKappa = computeCumPlastStrain(gp, tStep);
     double tempDam = computeDamageParam(tempKappa);
     if ( dam > tempDam ) {
         tempDam = dam;
@@ -479,76 +465,71 @@ RankineMat :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
     return tempDam;
 }
 
-void RankineMat :: computeCumPlastStrain(double &tempKappa, GaussPoint *gp, TimeStep *tStep)
+double RankineMat :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-    tempKappa = status->giveTempCumulativePlasticStrain();
+    return status->giveTempCumulativePlasticStrain();
 }
 
 // returns the consistent (algorithmic) stiffness matrix
-void
-RankineMat :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                       MatResponseMode mode,
+FloatMatrixF<3,3>
+RankineMat :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                        GaussPoint *gp,
-                                       TimeStep *tStep)
+                                       TimeStep *tStep) const
 {
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double gprime = computeDamageParamPrime(tempKappa);
-    evaluatePlaneStressStiffMtrx(answer, mode, gp, tStep, gprime);
+    return evaluatePlaneStressStiffMtrx(mode, gp, tStep, gprime);
 }
 
-void
-RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<1,1>
+RankineMat :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-    answer.resize(1, 1);
-    answer.at(1, 1) = this->E;
     if ( mode == ElasticStiffness ) {
+        return {E};
     } else if ( mode == SecantStiffness ) {
+        auto status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
         double om = status->giveTempDamage();
-        answer.times(1.0 - om);
+        return {E * (1.0 - om)};
     } else {
         OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)");
+        return {0.};
     }
 }
 
 // this method is also used by the gradient version,
 // with gprime replaced by gprime*m and evaluated for kappa hat
-void
-RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
-                                           MatResponseMode mode,
+FloatMatrixF<3,3>
+RankineMat :: evaluatePlaneStressStiffMtrx(MatResponseMode mode,
                                            GaussPoint *gp,
-                                           TimeStep *tStep, double gprime)
+                                           TimeStep *tStep, double gprime) const
 {
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness || mode == SecantStiffness ) {
         // start from the elastic stiffness
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        auto d = this->linearElasticMaterial->givePlaneStressStiffMtrx(mode, gp, tStep);
         if ( mode == SecantStiffness ) {
             // transform to secant stiffness
             double damage = status->giveTempDamage();
-            answer.times(1. - damage);
+            d *= 1. - damage;
         }
-
-        return;
+        return d;
     }
 
     // check the unloading condition
     double kappa = status->giveCumulativePlasticStrain();
     double tempKappa = status->giveTempCumulativePlasticStrain();
     if ( tempKappa <= kappa ) { // tangent matrix requested, but unloading takes place - use secant
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        auto d = this->linearElasticMaterial->givePlaneStressStiffMtrx(mode, gp, tStep);
         double damage = status->giveTempDamage();
-        answer.times(1. - damage);
-        return;
+        return d * (1. - damage);
     }
 
     // tangent stiffness requested, loading
 
     // elastoplastic tangent matrix in principal stress coordinates
-    answer.resize(3, 3);
-    answer.zero(); // just to be sure (components 13,23,31,32 must be zero)
+    FloatMatrixF<3,3> answer;
 
     double eta1, eta2, dkap2;
     double dkap1 = status->giveDKappa(1);
@@ -581,7 +562,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     // now add the effect of damage
 
     double damage = status->giveTempDamage();
-    answer.times(1. - damage);
+    answer *= 1. - damage;
 
     FloatArray sigPrinc(2);
     FloatMatrix nPrinc(2, 2);
@@ -589,20 +570,18 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
     // sometimes the method is called with gprime=0., then we can save some work
     if ( gprime != 0. ) {
-        FloatMatrix correction(3, 3);
-        correction.zero();
+        FloatMatrixF<3,3> correction;
         correction.at(1, 1) = sigPrinc.at(1) * eta1;
         correction.at(1, 2) = sigPrinc.at(1) * eta2;
         correction.at(2, 1) = sigPrinc.at(2) * eta1;
         correction.at(2, 2) = sigPrinc.at(2) * eta2;
-        correction.times(gprime); // input parameter gprime used here
-        answer.subtract(correction);
+        correction *= gprime; // input parameter gprime used here
+        answer -= correction;
     }
 
     // transform to global coordinates
-    FloatMatrix T;
-    givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
-    answer.rotatedWith(T, 't');
+    auto T = givePlaneStressVectorTranformationMtrx(nPrinc, true);
+    return unrotate(answer, T);
 }
 
 // derivatives of final kappa with respect to final strain
@@ -639,8 +618,7 @@ RankineMat :: computeEta(FloatArray &answer, RankineMatStatus *status)
     StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
-    FloatMatrix T(3, 3);
-    givePlaneStressVectorTranformationMtrx(T, nPrinc, true);
+    FloatMatrix T = givePlaneStressVectorTranformationMtrx(nPrinc, true);
     answer.beProductOf(T, eta);
 }
 

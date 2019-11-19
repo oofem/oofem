@@ -58,7 +58,7 @@ class TimeStep;
 class MixedPressureMaterialExtensionInterface : public Interface
 {
 protected:
-    Domain *dom;
+    Domain *dom = nullptr;
 
 public:
     /**

@@ -72,33 +72,10 @@ IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : Isotrop
 {
     // deleted by parent, where linearElasticMaterial instance declared
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
-    equivStrainType = EST_Unknown;
-    softType = ST_Unknown;
-    k = 0.;
-    md = 1.;
-    damageLaw = 0;
-    e0 = 0.;
-    ef = 0.;
-    wf = 0.;
-    gf = 0.;
-    wk = 0.;
-    sk = 0.;
-    gft = 0.;
-    ek  = 0.;
-    griff_n = 8.;
-    c1 = 3.;  // default value of Hordijk parameter
-    c2 = 6.93; // default value of Hordijk parameter
-    ps_alpha = 0.;
-    ps_H = 0.;
-    ecsMethod = ECSM_Unknown;
-    sourceElemSet = NULL;
 }
 
 
 IsotropicDamageMaterial1 :: ~IsotropicDamageMaterial1()
-//
-// destructor
-//
 {
     if ( sourceElemSet ) {
         delete sourceElemSet;
@@ -575,9 +552,9 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
 
 //Computes derivative of the equivalent strain with regards to strain, used in tangent formulation
 void
-IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    LinearElasticMaterial *lmat = this->linearElasticMaterial;
 
     if ( strain.isEmpty() ) {
         answer.zero();
@@ -1011,11 +988,11 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 }
 
 double
-IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
+IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp) const
 {
     const double e0 = this->give(e0_ID, gp);
     double ef = 0.;
-    const double E = this->giveLinearElasticMaterial()->give('E', gp);
+    const double E = this->linearElasticMaterial->give('E', gp);
     IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
     const double Le = status->giveLe();
 

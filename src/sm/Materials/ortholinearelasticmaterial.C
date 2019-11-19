@@ -38,6 +38,8 @@
 #include "material.h"
 #include "sm/Materials/structuralms.h"
 #include "floatmatrix.h"
+#include "floatarrayf.h"
+#include "floatmatrixf.h"
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -128,31 +130,31 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
         cs_type = localCS;
         double n1 = 0.0, n2 = 0.0;
 
-        localCoordinateSystem = std::make_unique<FloatMatrix>(3, 3);
+        localCoordinateSystem = FloatMatrixF<3,3>();
         for ( int j = 1; j <= 3; j++ ) {
-            localCoordinateSystem->at(j, 1) = triplets.at(j);
+            localCoordinateSystem.at(j, 1) = triplets.at(j);
             n1 += triplets.at(j) * triplets.at(j);
-            localCoordinateSystem->at(j, 2) = triplets.at(j + 3);
+            localCoordinateSystem.at(j, 2) = triplets.at(j + 3);
             n2 += triplets.at(j + 3) * triplets.at(j + 3);
         }
 
         n1 = sqrt(n1);
         n2 = sqrt(n2);
         for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
-            localCoordinateSystem->at(j, 1) /= n1;
-            localCoordinateSystem->at(j, 2) /= n2;
+            localCoordinateSystem.at(j, 1) /= n1;
+            localCoordinateSystem.at(j, 2) /= n2;
         }
 
         // vector e3' computed from vector product of e1', e2'
-        localCoordinateSystem->at(1, 3) =
-            ( localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(3, 2) -
-              localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(2, 2) );
-        localCoordinateSystem->at(2, 3) =
-            ( localCoordinateSystem->at(3, 1) * localCoordinateSystem->at(1, 2) -
-              localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(3, 2) );
-        localCoordinateSystem->at(3, 3) =
-            ( localCoordinateSystem->at(1, 1) * localCoordinateSystem->at(2, 2) -
-              localCoordinateSystem->at(2, 1) * localCoordinateSystem->at(1, 2) );
+        localCoordinateSystem.at(1, 3) =
+            ( localCoordinateSystem.at(2, 1) * localCoordinateSystem.at(3, 2) -
+              localCoordinateSystem.at(3, 1) * localCoordinateSystem.at(2, 2) );
+        localCoordinateSystem.at(2, 3) =
+            ( localCoordinateSystem.at(3, 1) * localCoordinateSystem.at(1, 2) -
+              localCoordinateSystem.at(1, 1) * localCoordinateSystem.at(3, 2) );
+        localCoordinateSystem.at(3, 3) =
+            ( localCoordinateSystem.at(1, 1) * localCoordinateSystem.at(2, 2) -
+              localCoordinateSystem.at(2, 1) * localCoordinateSystem.at(1, 2) );
     }
 
     // try to read ElementCS section
@@ -177,7 +179,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
         if ( size == 3 ) {
             cs_type = shellCS;
             triplets.normalize();
-            helpPlaneNormal = std::make_unique<FloatArray>(triplets);
+            helpPlaneNormal = triplets;
 
             //
             // store normal defining help plane into row matrix
@@ -191,8 +193,7 @@ OrthotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
         // if no cs defined assume global one
         //
         cs_type = localCS;
-        localCoordinateSystem = std::make_unique<FloatMatrix>(3, 3);
-        localCoordinateSystem->beUnitMatrix();
+        localCoordinateSystem = eye<3>();
     }
 
     {
@@ -278,35 +279,34 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
                                                                   GaussPoint *gp,
                                                                   TimeStep *tStep)
 {
-    answer = tangent;
+    auto t = tangent;
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+        t *= 1. - this->preCastStiffnessReduction;
     }
 
-    FloatMatrix rotationMatrix;
-    this->giveRotationMatrix(rotationMatrix, gp);
-    answer.rotatedWith(rotationMatrix);
+    auto rotationMatrix = this->giveRotationMatrix(gp);
+    answer = rotate(t, rotationMatrix);
 }
 
 
-void
-OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
+FloatMatrixF<3,3>
+OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(GaussPoint *gp) const
 //
 // returns [3,3] rotation matrix from local principal axes of material
 // to local axes used at gp (element) level
 //
 {
-    int elementCsFlag;
-    FloatMatrix elementCs;
-    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-
     if ( gp->giveMaterialMode() == _1dMat ) { //do not rotate 1D materials on trusses and beams
-        answer.resize(3, 3);
-        answer.beUnitMatrix();
-        return;
+        return eye<3>();
     }
 
-    elementCsFlag = element->giveLocalCoordinateSystem(elementCs);
+    auto element = static_cast< StructuralElement * >( gp->giveElement() );
+    FloatMatrix elementCs_;
+    int elementCsFlag = element->giveLocalCoordinateSystem(elementCs_);
+    FloatMatrixF<3,3> elementCs;
+    if (elementCsFlag) {
+        elementCs = elementCs_;
+    }
     //
     // in localCoordinateSystem the directional cosines are stored columwise (exception)
     // in elementCs rowwise.
@@ -316,23 +316,22 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
         // in localCoordinateSystem are stored directional cosines
         //
         if ( elementCsFlag ) {
-            answer.beProductOf(elementCs, * this->localCoordinateSystem);
+            return dot(elementCs, this->localCoordinateSystem);
         } else {
-            answer = * this->localCoordinateSystem;
+            return this->localCoordinateSystem;
         }
     } else if ( this->cs_type == shellCS ) {
-        FloatArray elementNormal, helpx, helpy;
-        FloatMatrix cs(3, 3);
-
+        FloatArray elementNormal;
         element->computeMidPlaneNormal(elementNormal, gp);
-        helpx.beVectorProductOf(* ( this->helpPlaneNormal ), elementNormal);
+        auto helpx = cross(this->helpPlaneNormal, elementNormal);
         // test if localCoordinateSystem is uniquely
         // defined by elementNormal and helpPlaneNormal
-        if ( helpx.computeNorm() < ZERO_LENGTH ) {
+        if ( norm(helpx) < ZERO_LENGTH ) {
             OOFEM_ERROR("element normal parallel to plane normal encountered");
         }
 
-        helpy.beVectorProductOf(elementNormal, helpx);
+        auto helpy = cross(elementNormal, helpx);
+        FloatMatrixF<3,3> cs;
         for ( int i = 1; i < 4; i++ ) {
             cs.at(i, 1) = helpx.at(i);
             cs.at(i, 2) = helpy.at(i);
@@ -349,23 +348,23 @@ OrthotropicLinearElasticMaterial :: giveTensorRotationMatrix(FloatMatrix &answer
          * //
          * zRotMtrx = GiveZRotationMtrx (rotAngle); // rotAngle supplied by user
          * rotatedLocalCoordinateSystem = localCoordinateSystem->Times (zRotMtrx);
-         * delete localCoordinateSystem;
          * localCoordinateSystem = rotatedLocalCoordinateSystem;
          */
         if ( elementCsFlag ) {
-            answer.beProductOf(elementCs, cs);
+            return dot(elementCs, cs);
         } else {
-            answer = cs;
+            return cs;
         }
     } else {
         OOFEM_ERROR("internal error no cs defined");
+        return eye<3>();
     }
     // t at (i,j) contains cosine of angle between elementAxis(i) and localMaterialAxis(j).
 }
 
 
-void
-OrthotropicLinearElasticMaterial :: giveRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
+FloatMatrixF<6,6>
+OrthotropicLinearElasticMaterial :: giveRotationMatrix(GaussPoint *gp) const
 //
 // returns [6,6] rotation matrix from local principal axes of material
 // to local axes used at the gp (element) level for beams and trusses
@@ -373,19 +372,15 @@ OrthotropicLinearElasticMaterial :: giveRotationMatrix(FloatMatrix &answer, Gaus
 //
 //
 {
-    FloatMatrix t;
-    this->giveTensorRotationMatrix(t, gp);
-    this->giveStrainVectorTranformationMtrx(answer, t);
+    auto t = this->giveTensorRotationMatrix(gp);
+    return this->giveStrainVectorTranformationMtrx(t);
 }
 
 
-void
-OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer,
-                                                                GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+OrthotropicLinearElasticMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix transf;
-    FloatArray help = alpha;
-    this->giveRotationMatrix(transf, gp);
-    answer.beProductOf(transf, help);
+    auto transf = this->giveRotationMatrix(gp);
+    return dot(transf, alpha);
 }
 } // end namespace oofem

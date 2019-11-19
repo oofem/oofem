@@ -1,0 +1,16 @@
+con2dpm8.out
+Test of thermal strain for 1D CDPM2
+StaticStructural nsteps 1 initialguess 1 rtolf 1.e-3 stiffMode 2 maxiter 1000 nmodules 0
+#errorcheck
+domain 1DTruss
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nltf 1 nic 0 nset 1
+node 1 coords 3 0.0 0.0 0.0 bc 1 1
+node 2 coords 3 0.25000 0.0 0.0 bc 1 1
+truss1d 1 nodes 2 1 2 mat 1 crossSect 1 
+SimpleCS 1 thick 1.0 width 0.10
+con2dpm 1 d 0 E 20.e9 n 0.2 talpha 0.0001 wf 800.e-6  fc 35e6 ft 2.e6 hp 0.025 yieldtol 1.e-10 asoft 7. stype 2 isoflag 1
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
+StructTemperatureLoad 2 loadTimeFunction 1 Components 2 -2.0 0.0 set 1
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {1}

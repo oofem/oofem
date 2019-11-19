@@ -63,61 +63,59 @@ class LatticeDamageStatus : public LatticeMaterialStatus
 {
 protected:
     /// scalar measure of the largest strain level ever reached in material
-    double kappa;
+    double kappa = 0.;
 
     /// non-equilibrated scalar measure of the largest strain level
-    double tempKappa;
+    double tempKappa = 0.;
 
     /// scalar measure of the largest strain level ever reached in material
-    double equivStrain;
+    double equivStrain = 0.;
 
     /// non-equilibrated scalar measure of the largest strain level
-    double tempEquivStrain;
+    double tempEquivStrain = 0.;
 
     /// damage level of material
-    double damage;
+    double damage = 0.;
 
     /// non-equilibrated damage level of material
-    double tempDamage;
+    double tempDamage = 0.;
 
     /// random material parameter stored in status, since each gp has a differnet value.
-    double e0;
+    double e0 = 0.;
 
     /// computed biot coefficient
-    double biot;
+    double biot = 0.;
 
 public:
 
     /// Constructor
     LatticeDamageStatus(GaussPoint *g);
-    /// Destructor
-    ~LatticeDamageStatus() {}
 
 
     /// Returns the last equilibrated scalar measure of the largest strain level
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temp scalar measure of the largest strain level to given value
     void   setTempKappa(double newKappa) { tempKappa = newKappa; }
 
     /// Returns the last equilibrated scalar measure of the largest strain level
-    double giveEquivalentStrain() { return equivStrain; }
+    double giveEquivalentStrain() const { return equivStrain; }
     /// Returns the temp. scalar measure of the largest strain level
-    double giveTempEquivalentStrain() { return tempEquivStrain; }
+    double giveTempEquivalentStrain() const { return tempEquivStrain; }
     /// Sets the temp scalar measure of the largest strain level to given value
     void   setTempEquivalentStrain(double newEquivStrain) { tempEquivStrain = newEquivStrain; }
 
 
     /// Returns the last equilibrated damage level
-    double giveDamage() { return damage; }
+    double giveDamage() const { return damage; }
     /// Returns the temp. damage level
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
 
 
-    void printOutputAt(FILE *file, TimeStep *tStep);
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
 
     const char *giveClassName() const override { return "LatticeDamageStatus"; }
@@ -148,35 +146,35 @@ class LatticeDamage : public LatticeLinearElastic
 protected:
 
     /// max effective strain at peak
-    double e0Mean;
+    double e0Mean = 0.;
 
-    double e0OneMean;
+    double e0OneMean = 0.;
 
     /**parameter which determines the typ of the softeningFunction
      * 1 = linear softening
      * 2 = bilinear softening
      * 3 = exponential softening
      **/
-    int softeningType;
+    int softeningType = 0.;
 
     /// determines the softening -> corresponds to crack opening when tension stress vanishes
-    double wf, wfOne;
+    double wf = 0., wfOne = 0.;
 
-    double ultimateFactor;
-
-    //parameter for the elliptic equivalent strain function
-    double coh;
+    double ultimateFactor = 0.;
 
     //parameter for the elliptic equivalent strain function
-    double ec;
+    double coh = 0.;
+
+    //parameter for the elliptic equivalent strain function
+    double ec = 0.;
 
     /// flag which chooses between no distribution (0) and Gaussian distribution (1)
-    double localRandomType;
+    double localRandomType = 0.;
 
-    double biotCoefficient;
+    double biotCoefficient = 0.;
 
     /// Parameter specifying how the biot coefficient changes with the crack opening
-    int biotType;
+    int biotType = 0;
 
 
 public:
@@ -184,29 +182,26 @@ public:
     /// Constructor
     LatticeDamage(int n, Domain *d);
 
-    /// Destructor
-    virtual ~LatticeDamage();
-
     const char *giveInputRecordName() const override { return _IFT_LatticeDamage_Name; }
     const char *giveClassName() const override { return "LatticeDamage"; }
 
-    virtual bool hasAnalyticalTangentStiffness() const override { return true; }
+    bool hasAnalyticalTangentStiffness() const override { return true; }
 
     void initializeFrom(InputRecord &ir) override;
 
-    virtual FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &jump, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    virtual FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
 
 
-    int hasMaterialModeCapability(MaterialMode mode);
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime);
