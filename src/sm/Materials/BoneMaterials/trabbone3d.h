@@ -214,7 +214,7 @@ public:
 
     double computeDamage(GaussPoint *gp, TimeStep *tStep);
 
-    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     void computePlasStrainEnerDensity(GaussPoint *gp, const FloatArrayF<6> &strain, const FloatArrayF<6> &stress) const;
 
@@ -234,9 +234,7 @@ public:
     /// Construct Tensor to adjust Norm.
     FloatMatrixF<6,6> constructNormAdjustTensor() const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode, GaussPoint * gp,
-                                       TimeStep * tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                  const FloatArray &, TimeStep *tStep) override;

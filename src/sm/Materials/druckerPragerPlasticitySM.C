@@ -535,38 +535,37 @@ DruckerPragerPlasticitySM :: computeYieldStressPrime(double kappa, double eM) co
     }
 }
 
-void
-DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+
+FloatMatrixF<6,6>
+DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
     switch ( mode ) {
     case ElasticStiffness:
-        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
         break;
 
     case SecantStiffness:
-        LEMaterial.give3dMaterialStiffnessMatrix(answer,  mode, gp, tStep);
+        return LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
         break;
-
 
     case TangentStiffness:
         switch ( ( static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) ) )
                 ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
-            LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+            return LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Yielding:
             // elasto-plastic stiffness for regular case
             //printf("\nAssembling regular algorithmic stiffness matrix.") ;
-            giveRegAlgorithmicStiffMatrix(answer, mode, gp, tStep);
+            return giveRegAlgorithmicStiffMatrix(mode, gp, tStep);
             break;
         case DruckerPragerPlasticitySMStatus :: DP_Vertex:
             // elasto-plastic stiffness for vertex case
             //printf("\nAssembling vertex case algorithmic stiffness matrix.") ;
-            giveVertexAlgorithmicStiffMatrix(answer, mode, gp, tStep);
+            return giveVertexAlgorithmicStiffMatrix(mode, gp, tStep);
             break;
         default:
             OOFEM_ERROR("Case did not match.");
@@ -579,15 +578,14 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         OOFEM_ERROR("Switch failed: Only elastic and tangent stiffness are supported.");
         break;
     }
+    return FloatMatrixF<6,6>();
 }
 
-void
-DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<6,6>
+DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
-    int i, j;
     DruckerPragerPlasticitySMStatus *status =
         static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
 
@@ -602,10 +600,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     double gM = eM / ( 2. * ( 1. + nu ) );
     double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
-
-
-    FloatArray flowDir = deviatoricStress;
-    flowDir.times(1. / normOfStress);
+    auto flowDir = deviatoricStress / normOfStress;
 
     double kappa = status->giveKappa();
     double tempKappa = status->giveTempKappa();
@@ -624,60 +619,57 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     double d_const = sqrt(2.) * alpha * gM / hStar;
     double e_const = gM / hStar - deltaLambdaStar;
 
-    FloatMatrix A_Matrix(6, 6);
-    A_Matrix.zero();
-    for ( i = 1; i < 7; i++ ) {
+    FloatMatrixF<6,6> A_Matrix;
+
+    for ( int i = 1; i < 7; i++ ) {
         A_Matrix.at(i, i) = a_const;
     }
 
-    for ( i = 1; i < 4; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += b_const;
         }
     }
 
-    for ( i = 1; i < 4; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += c_const * flowDir.at(j);
         }
 
-        for ( j = 4; j < 7; j++ ) {
+        for ( int j = 4; j < 7; j++ ) {
             A_Matrix.at(i, j) += 2. *c_const *flowDir.at(j);
         }
     }
 
-    for ( i = 1; i < 7; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 7; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += d_const * flowDir.at(i);
         }
     }
 
-    for ( i = 1; i < 7; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 7; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += e_const * flowDir.at(i) * flowDir.at(j);
         }
 
         // account for engineering notation
-        for ( j = 4; j < 7; j++ ) {
+        for ( int j = 4; j < 7; j++ ) {
             A_Matrix.at(i, j) += 2. *e_const *flowDir.at(i) * flowDir.at(j);
         }
     }
 
-    FloatMatrix De;
-    LEMaterial.give3dMaterialStiffnessMatrix(De, mode, gp, tStep);
+    auto De = LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
 
     // answer is A_Matrix^-1 * De
-    A_Matrix.solveForRhs(De, answer);
+    return dot(inv(A_Matrix), De);
 }
 
-void
-DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                              MatResponseMode mode,
+FloatMatrixF<6,6>
+DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(MatResponseMode mode,
                                                               GaussPoint *gp,
-                                                              TimeStep *tStep)
+                                                              TimeStep *tStep) const
 {
-    DruckerPragerPlasticitySMStatus *status =
-        static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
 
     double tempKappa = status->giveTempKappa();
     double deltaKappa = tempKappa - status->giveKappa();
@@ -690,7 +682,8 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     if ( deltaKappa <= 0. ) {
         // This case occurs in the first iteration of a step.
         // printf("deltaKappa<=0. for vertex case algorithmic stiffness, i.e. continuum tangent stiffness. Since the continuum tangent stiffness does not exist at the vertex, elastic stiffness is used instead. This will cause the loss of quadratic convergence.\n") ;
-        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return LEMaterial.give3dMaterialStiffnessMatrix( mode, gp, tStep);
+        
     }
 
     double deltaVolumetricPlasticStrain =
@@ -700,8 +693,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     // compute elastic trial strain deviator of latest temp-state
     auto strainDeviator = computeDeviator(status->giveTempStrainVector());
 
-    FloatArray elasticStrainDeviator = strainDeviator;
-    elasticStrainDeviator.subtract( status->givePlasticStrainDeviator() );
+    auto elasticStrainDeviator = strainDeviator - FloatArrayF<6>(status->givePlasticStrainDeviator());
 
     double a_const =
         kM * HBar / ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa );
@@ -711,8 +703,8 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     }
     // compute the algorithmic tangent stiffness
 
-    answer.resize(6, 6);
-    answer.zero();
+
+    FloatMatrixF<6,6> answer;
     for ( int i = 1; i < 4; i++ ) {
         for ( int j = 1; j < 4; j++ ) {
             answer.at(i, j) = deltaVolumetricPlasticStrain;
@@ -729,7 +721,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
         }
     }
 
-    answer.times(a_const);
+    return a_const * answer;
 }
 
 int
@@ -760,7 +752,7 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
 MaterialStatus *
 DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 {
-    return new  DruckerPragerPlasticitySMStatus(gp);
+    return new DruckerPragerPlasticitySMStatus(gp);
 }
 
 

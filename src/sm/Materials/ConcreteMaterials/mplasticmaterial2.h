@@ -205,11 +205,7 @@ public:
         return {alpha, alpha, alpha, 0., 0., 0.};
     }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
-
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &strain, TimeStep *tStep) override;

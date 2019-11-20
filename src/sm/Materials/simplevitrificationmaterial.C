@@ -130,11 +130,11 @@ SimpleVitrificationMaterial :: computeTangent(bool vitr) const
 
 
 
-void SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
-    answer = this->computeTangent(vitr);
+    return this->computeTangent(vitr);
 }
 
 

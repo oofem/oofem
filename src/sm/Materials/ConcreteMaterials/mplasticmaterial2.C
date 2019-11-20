@@ -1668,11 +1668,10 @@ MPlasticMaterial2 :: computeReducedElasticModuli(FloatMatrix &answer,
 
 // overloaded from structural material
 
-void
-MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                   MatResponseMode mode,
+FloatMatrixF<6,6>
+MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                    GaussPoint *gp,
-                                                   TimeStep *tStep)
+                                                   TimeStep *tStep) const
 //
 //
 //
@@ -1689,11 +1688,6 @@ MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 //
 {
-    MaterialMode originalMode = gp->giveMaterialMode();
-    if ( originalMode != _3dMat ) {
-        OOFEM_ERROR("Different stressStrain mode encountered");
-    }
-
     // we can force 3d response, and we obtain correct 3d tangent matrix,
     // but in fact, stress integration algorithm will not work
     // because in stress integration algorithm we are unable to recognize
@@ -1704,12 +1698,12 @@ MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
     if ( mode == TangentStiffness ) {
         if ( rmType == mpm_ClosestPoint ) {
-            answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+            return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
         } else {
-            answer = this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
+            return this->giveElastoPlasticStiffnessMatrix(mode, gp, tStep);
         }
     } else {
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     }
 }
 

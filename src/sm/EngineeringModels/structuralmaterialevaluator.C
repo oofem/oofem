@@ -162,7 +162,7 @@ void StructuralMaterialEvaluator :: solveYourself()
                     break;
                 } else {
                     if ( tangent.giveNumberOfRows() == 0 || !keepTangent ) {
-                        mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                        tangent = mat->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
                     }
 
                     // Pick out the stress-controlled part;

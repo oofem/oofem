@@ -684,8 +684,7 @@ ConcreteDPM2 :: giveRealStressVector_3d(FloatArray &answer,
         }
     }
 
-    FloatMatrix D;
-    this->linearElasticMaterial.give3dMaterialStiffnessMatrix(D, ElasticStiffness, gp, tStep);
+    auto D = this->linearElasticMaterial.give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     // compute elastic strains and trial stress
     FloatArray effectiveStress;
@@ -2604,6 +2603,7 @@ ConcreteDPM2 :: computeHardeningTwoPrime(double kappa) const
     }
 }
 
+
 FloatMatrixF<1,1>
 ConcreteDPM2 :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
@@ -2624,39 +2624,36 @@ ConcreteDPM2 :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, Time
     return {eM};
 }
 
-void
-ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseMode mode,
+
+FloatMatrixF<6,6>
+ConcreteDPM2 :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
+                                              TimeStep *tStep) const
 {
     if ( mode == ElasticStiffness ) {
-        this->linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
     } else if ( mode == SecantStiffness ) {
-        this->compute3dSecantStiffness(answer, gp, tStep);
-    } else if ( mode == TangentStiffness ) {
+        return this->compute3dSecantStiffness(gp, tStep);
+    } else /*if ( mode == TangentStiffness )*/ {
         OOFEM_WARNING("unknown type of stiffness (tangent stiffness not implemented). Elastic stiffness used!");
-        this->linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
     }
 }
 
-void
-ConcreteDPM2 :: compute3dSecantStiffness(FloatMatrix &answer,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep)
+
+FloatMatrixF<6,6>
+ConcreteDPM2 :: compute3dSecantStiffness(GaussPoint *gp, TimeStep *tStep) const 
 {
-    ConcreteDPM2Status *status = static_cast< ConcreteDPM2Status * >( giveStatus(gp) );
+    auto status = static_cast< ConcreteDPM2Status * >( giveStatus(gp) );
 
     //  Damage parameters
     double omegaTension = min(status->giveTempDamageTension(), 0.999999);
 
-    this->linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
+    auto d = this->linearElasticMaterial.give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     if ( isotropicFlag == 1 ) {
-        answer.times(1. - omegaTension);
-        return;
+        return d * (1. - omegaTension);
     }
-
 
     FloatArray effectiveStress;
 
@@ -2673,7 +2670,7 @@ ConcreteDPM2 :: compute3dSecantStiffness(FloatMatrix &answer,
     }
 
     elasticStrain.subtract(tempPlasticStrain);
-    effectiveStress.beProductOf(answer, elasticStrain);
+    effectiveStress.beProductOf(d, elasticStrain);
 
     //Calculate the principal values of the effective stress
     FloatArray principalStress;
@@ -2681,16 +2678,16 @@ ConcreteDPM2 :: compute3dSecantStiffness(FloatMatrix &answer,
 
     //exclude two special cases.
     if ( principalStress.containsOnlyZeroes() ) {
-        return;
+        return d;
     }
 
     for ( int i = 1; i <= 3; i++ ) {
         if ( principalStress.at(i) < -CDPM2_TOL ) {
-            return;
+            return d;
         }
     }
 
-    answer.times(1. - omegaTension);
+    return d * (1. - omegaTension);
 }
 
 

@@ -76,13 +76,11 @@ StructuralMaterialSettable :: giveRealStressVector_3d(FloatArray &answer,
 
 
 // TODO
-void
-StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseMode mode,
-                                                           GaussPoint *gp,
-                                                           TimeStep *atTime)
+FloatMatrixF<6,6>
+StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp,
+                                                            TimeStep *atTime) const
 {
-    isoLE.give3dMaterialStiffnessMatrix(answer, mode, gp, atTime);
+    return isoLE.give3dMaterialStiffnessMatrix(mode, gp, atTime);
 }
 
 MaterialStatus *

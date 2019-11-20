@@ -74,17 +74,15 @@ void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray
 }
 
 
-void
-TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode mode, GaussPoint *gp,
-                                            TimeStep *tStep)
+FloatMatrixF<6,6>
+TrabBone3D :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
     if ( mode == ElasticStiffness ) {
         auto compliance = this->constructAnisoComplTensor();
         auto elasticity = inv(compliance);
-        answer = elasticity;
+        return elasticity;
     } else if ( mode == SecantStiffness ) {
         if ( printflag ) {
             printf("secant\n");
@@ -93,12 +91,13 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         auto compliance = this->constructAnisoComplTensor();
         auto elasticity = inv(compliance);
         auto tempDam = status->giveTempDam();
-        answer = elasticity * (1.0 - tempDam);
-    } else if ( mode == TangentStiffness ) {
+        return elasticity * (1.0 - tempDam);
+    } else /*if ( mode == TangentStiffness )*/ {
         double kappa = status->giveKappa();
         double tempKappa = status->giveTempKappa();
         double tempDam = status->giveTempDam();
 
+        FloatMatrixF<6,6> answer;
         if ( tempKappa > kappa ) {
             // plastic loading
             // Imports
@@ -128,9 +127,9 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         if ( g <= 0. ) {
             double factor = gammaL0 * pow(rho, rL) + gammaP0 *pow(rho, rP) * ( tDens - 1 ) * pow(g, tDens - 2);
             // printf("densification");
-            auto bulk = I6_I6 * factor;
-            answer.add(bulk);
+            answer += I6_I6 * factor;
         }
+        return answer;
     }
 }
 
@@ -519,7 +518,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp, TimeStep *tStep)
 }
 
 
-double TrabBone3D :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
+double TrabBone3D :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     return status->giveTempKappa();

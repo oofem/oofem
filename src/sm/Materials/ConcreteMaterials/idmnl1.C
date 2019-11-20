@@ -803,10 +803,7 @@ IDNLMaterial :: giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
 {
     //
     // return Elastic Stiffness matrix for normal Stresses
-    LinearElasticMaterial *lMat = this->giveLinearElasticMaterial();
-    FloatMatrix de;
-
-    lMat->give3dMaterialStiffnessMatrix(de, rMode, gp, tStep);
+    auto de = linearElasticMaterial->give3dMaterialStiffnessMatrix(rMode, gp, tStep);
     // This isn't used? Do we need one with zeroed entries (below) or the general 3d stiffness (above)?
     //lMat->giveCharacteristicMatrix(de, rMode, gp, tStep);
     //StructuralMaterial :: giveFullSymMatrixForm( de, deRed, gp->giveMaterialMode());

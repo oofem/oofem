@@ -79,9 +79,7 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp,
-                                       TimeStep *tStep) override
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override
     { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
 
 

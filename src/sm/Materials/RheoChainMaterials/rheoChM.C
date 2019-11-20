@@ -459,11 +459,8 @@ RheoChainMaterial :: computeCharTimes()
 }
 
 
-void
-RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                   MatResponseMode mode,
-                                                   GaussPoint *gp,
-                                                   TimeStep *tStep)
+FloatMatrixF<6,6>
+RheoChainMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     //
     // Returns the incremental material stiffness matrix of the receiver
@@ -473,16 +470,13 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // in my opinion ElasticStiffness should return incremental stiffness and not unit stiffness
     // for this purpose use giveUnitStiffnessMatrix
     //
-
     this->giveStatus(gp); // Ensures correct status creation
     if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
-        StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
-        sMat->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-	return;
+        auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
+        return sMat->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     } else {
         double incrStiffness = this->giveEModulus(gp, tStep);
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        answer.times(incrStiffness);
+        return incrStiffness * this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     }
 }
 
@@ -494,7 +488,7 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
 {
     this->giveStatus(gp); // Ensures correct status creation
     if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
-        StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
+        auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
         return sMat->givePlaneStressStiffMtrx(mode, gp, tStep);
     } else {
         double incrStiffness = this->giveEModulus(gp, tStep);

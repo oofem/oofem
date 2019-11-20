@@ -176,7 +176,7 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
             return;
         }
 
-        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
@@ -224,7 +224,7 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer
             return;
         }
 
-        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
@@ -430,7 +430,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(const FloatArrayF<1> &reducedvF
         tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
-	increment_vF.negated();
+        increment_vF.negated();
         vF.assemble(increment_vF, P_control);
     }
 
@@ -642,7 +642,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-        this->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+        answer = this->give3dMaterialStiffnessMatrix(rMode, gp, tStep);
         break;
     case _PlaneStress:
         answer = this->givePlaneStressStiffMtrx(rMode, gp, tStep);
@@ -688,15 +688,7 @@ StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     const auto &vF = status->giveTempFVector();
     const auto &vS = status->giveTempStressVector();
-#if 1
-    /// FIXME: Temporary const-cast; these functions should be made const. 
-    /// This workaround is just to limit the size of a single refactoring.
-    auto self = const_cast<StructuralMaterial*>(this);
-    FloatMatrix dSdE;
-    self->give3dMaterialStiffnessMatrix(dSdE, mode, gp, tStep);
-#else
-    auto dSdE = self->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-#endif
+    auto dSdE = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     return convert_dSdE_2_dPdF_3D(dSdE, vS, vF);
 }
 
@@ -1050,10 +1042,8 @@ StructuralMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 1, 5}, {0, 1, 5}));
 }
 
@@ -1062,10 +1052,7 @@ StructuralMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep) const
 {
-    FloatMatrix tmp;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(tmp, mode, gp, tStep);
-    FloatMatrixF<6,6> m3d = tmp;
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     return m3d({0, 1, 2, 5}, {0, 1, 2, 5});
 }
 
@@ -1074,10 +1061,8 @@ StructuralMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return {1. / c3d.at(1, 1)};
 }
 
@@ -1087,10 +1072,8 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 4}, {0, 4}));
 }
 
@@ -1100,10 +1083,8 @@ StructuralMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 1, 3, 4, 5}, {0, 1, 3, 4, 5}));
 }
 
@@ -1112,10 +1093,8 @@ StructuralMaterial :: giveFiberStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 4, 5}, {0, 4, 5}));
 }
 

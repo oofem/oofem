@@ -168,10 +168,7 @@ public:
      */
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const override;
 
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,

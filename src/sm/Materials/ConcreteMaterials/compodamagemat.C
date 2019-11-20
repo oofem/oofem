@@ -116,15 +116,17 @@ void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
 
 
 //called at the beginning of each time increment (not iteration), no influence of parameter
-void CompoDamageMat :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+CompoDamageMat :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix rotationMatrix;
 
     //already with reduced components
-    this->giveUnrotated3dMaterialStiffnessMatrix(answer, mode, gp);
+    auto d = this->giveUnrotated3dMaterialStiffnessMatrix(mode, gp);
+    FloatMatrixF<6,6> rotationMatrix;
     if ( this->giveMatStiffRotationMatrix(rotationMatrix, gp) ) { //material rotation due to lcs
-        answer.rotatedWith(rotationMatrix);
+        d = rotate(d, rotationMatrix);
     }
+    return d;
 }
 
 //called in each iteration, support for 3D and 1D material mode
@@ -167,7 +169,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
 
         //damage criteria based on stress, assuming same damage parameter for tension/compression
         //determine unequilibrated stress vector
-        this->giveUnrotated3dMaterialStiffnessMatrix(de, SecantStiffness, gp);
+        de = this->giveUnrotated3dMaterialStiffnessMatrix(SecantStiffness, gp);
         tempStressVectorL.beProductOf(de, strainVectorL);
         i_max = 6;
         break;
@@ -316,7 +318,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
     switch ( mMode ) {
     case _3dMat: {
         //already with reduced stiffness components in local c.s.
-        this->giveUnrotated3dMaterialStiffnessMatrix(de, SecantStiffness, gp);
+        de = this->giveUnrotated3dMaterialStiffnessMatrix(SecantStiffness, gp);
         //de.printYourself();
         //in local c.s.
         stressVectorL.beProductOf(de, strainVectorL);
@@ -355,15 +357,14 @@ int CompoDamageMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     return 1;
 }
 
-void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp)
+FloatMatrixF<6,6> CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp) const
 {
     double denom;
     double ex, ey, ez, nxy, nxz, nyz, gyz, gzx, gxy;
     double a, b, c, d, e, f;
     FloatArray tempOmega;
 
-    answer.resize(6, 6);
-    answer.zero();
+    FloatMatrixF<6,6> answer;
 
     CompoDamageMatStatus *st = static_cast< CompoDamageMatStatus * >( this->giveStatus(gp) );
 
@@ -403,10 +404,11 @@ void CompoDamageMat :: giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answe
     answer.at(6, 6) = gxy;
     answer.symmetrized();
     //answer.printYourself();
+    return answer;
 }
 
 //returns material rotation stiffness matrix [6x6]
-int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp)
+int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrixF<6,6> &answer, GaussPoint *gp) const
 {
     FloatMatrix Lt(3, 3);
     StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );

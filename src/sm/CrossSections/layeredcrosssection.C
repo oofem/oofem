@@ -178,7 +178,7 @@ LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMo
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = ( gpnum - 1 ) / gpsperlayer + 1;
         Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
-        static_cast< StructuralMaterial * >(layerMat)->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+        answer = static_cast< StructuralMaterial * >(layerMat)->give3dMaterialStiffnessMatrix(rMode, gp, tStep);
 
         if ( this->layerRots.at(layer) != 0. ) {
             double rot = this->layerRots.at(layer);

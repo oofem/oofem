@@ -500,11 +500,10 @@ PlasticMaterial :: computeReducedElasticModuli(FloatMatrix &answer,
 
 // overloaded from structural material
 
-void
-PlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                 MatResponseMode mode,
+FloatMatrixF<6,6>
+PlasticMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                  GaussPoint *gp,
-                                                 TimeStep *tStep)
+                                                 TimeStep *tStep) const
 //
 //
 //
@@ -521,11 +520,6 @@ PlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 //
 {
-    MaterialMode originalMode = gp->giveMaterialMode();
-    if ( originalMode != _3dMat ) {
-        OOFEM_ERROR("Different stressStrain mode encountered");
-    }
-
     // we can force 3d response, and we obtain correct 3d tangent matrix,
     // but in fact, stress integration algorithm will not work
     // because in stress integration algorithm we are unable to recognize
@@ -535,9 +529,9 @@ PlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // then programming simple inteface function for you stressstrain state
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     } else {
-        answer = this->giveConsistentStiffnessMatrix(mode, gp, tStep);
+        return this->giveConsistentStiffnessMatrix(mode, gp, tStep);
     }
 }
 

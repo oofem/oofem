@@ -377,75 +377,75 @@ protected:
     /**
      * Parameters of the yield surface of the plasticity model. fc is the uniaxial compressive strength, ft the uniaxial tensile strength and ecc controls the out of roundness of the deviatoric section.
      */
-    double fc, ft, ecc;
+    double fc = 0., ft = 0., ecc = 0.;
 
     /// Parameter of the ductilityMeasure of the plasticity model.
-    double AHard;
+    double AHard = 0.;
     /// Parameter of the ductilityMeasure of the plasticity model.
-    double BHard;
+    double BHard = 0.;
     /// Parameter of the ductilityMeasure of the plasticity model.
-    double CHard;
+    double CHard = 0.;
     /// Parameter of the ductilityMeasure of the plasticity model.
-    double DHard;
+    double DHard = 0.;
 
     /// Parameter of the ductilityMeasure of the damage model.
-    double ASoft;
+    double ASoft = 0.;
 
     /// Parameter of the hardening law of the plasticity model.
-    double yieldHardInitial;
+    double yieldHardInitial = 0.;
 
     /// Control parameter for te volumetric plastic flow of the plastic potential.
-    double dilationConst;
+    double dilationConst = 0.;
 
     /// Plastic multiplier of the plasticity model.
-    double deltaLambda;
+    double deltaLambda = 0.;
 
     /// the volumetric stress.
-    double sig;
+    double sig = 0.;
     /// The length of the deviatoric stress.
-    double rho;
+    double rho = 0.;
 
     /// The lode angle of the trial stress.
-    double thetaTrial;
+    double thetaTrial = 0.;
 
     /// The friction parameter of the yield surface.
-    double m;
+    double m = 0.;
 
     /// The dilation parameter of the plastic potential.
-    double mQ;
+    double mQ = 0.;
 
     /// Element size (to be used in fracture energy approach (crack band).
-    double helem;
+    double helem = 0.;
 
     /// Elastic Young's modulus.
-    double eM;
+    double eM = 0.;
     /// Elastic shear modulus.
-    double gM;
+    double gM = 0.;
     /// Elastic bulk modulus.
-    double kM;
+    double kM = 0.;
     /// Elastic Poisson's ration.
-    double nu;
+    double nu = 0.;
 
     /// Hardening variable of plasticity model.
-    double kappaP;
-    double tempKappaP;
+    double kappaP = 0.;
+    double tempKappaP = 0.;
 
     /// Hardening variable of damage model.
-    double kappaD;
-    double tempKappaD;
+    double kappaD = 0.;
+    double tempKappaD = 0.;
 
     /// Damage variable of damage model.
-    double damage;
-    double tempDamage;
+    double damage = 0.;
+    double tempDamage = 0.;
 
     /// Control parameter for the exponential softening law.
-    double ef;
+    double ef = 0.;
 
     /// Yield tolerance for the plasticity model.
-    double yieldTol;
+    double yieldTol = 0.;
 
     /// Maximum number of iterations for stress return.
-    int newtonIter;
+    int newtonIter = 0;
 
     /// Stress and its deviatoric part.
     FloatArray effectiveStress;
@@ -453,14 +453,12 @@ protected:
 #ifdef SOPHISTICATED_SIZEDEPENDENT_ADJUSTMENT
     /// Material parameter of the size-dependent adjustment
     /// (reference element size)
-    double href;
+    double href = 0.;
 #endif
 
 public:
     /// Constructor
     ConcreteDPM(int n, Domain * d);
-    /// Destructor
-    virtual ~ConcreteDPM();
 
     void initializeFrom(InputRecord &ir) override;
 
@@ -717,8 +715,7 @@ public:
     /// Compute the derivative of R with respect to costheta.
     double computeDRDCosTheta(double theta, double ecc) const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 

@@ -96,7 +96,7 @@ public:
 
     Interface *giveInterface(InterfaceType it) override;
 
-    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const override;
 
     /**
      * Computes the local cumulated plastic strain from given strain vector (full form).
@@ -110,7 +110,7 @@ public:
         return TrabBone3D :: computeCumPlastStrain(gp, tStep);
     }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp,  TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
 #ifdef __OOFEG
     // Plots the sparse structure of stiffness contribution.

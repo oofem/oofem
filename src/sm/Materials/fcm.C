@@ -2266,13 +2266,14 @@ FCMMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
     }
 }
 
-void
-FCMMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                             MatResponseMode mode,
+FloatMatrixF<6,6>
+FCMMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                              GaussPoint *gp,
-                                             TimeStep *tStep)
+                                             TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<FCMMaterial*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 

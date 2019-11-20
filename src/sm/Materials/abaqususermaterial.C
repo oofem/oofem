@@ -145,19 +145,18 @@ MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
         // Evaluating the function once, so that the tangent can be obtained.
         FloatArray stress(6), strain(6);
         strain.zero();
-        this->giveRealStressVector_3d(stress, gp, strain, tStep);
+        const_cast<AbaqusUserMaterial*>(this)->giveRealStressVector_3d(stress, gp, strain, tStep);
     }
 
-    answer = ms->giveTempTangent();
-
+    return ms->giveTempTangent();
 #if 0
     double h = 1e-7;
     FloatArray strain, strainh, stress, stressh;

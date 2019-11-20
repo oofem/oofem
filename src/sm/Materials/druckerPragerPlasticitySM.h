@@ -238,8 +238,7 @@ public:
                               const FloatArray &strainVector,
                               TimeStep *tStep) override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     /**
      * Perform a standard local stress return using the function computeYieldValue at the specified Gauss point.
@@ -300,26 +299,20 @@ public:
 
     /**
      * Compute and give back algorithmic stiffness matrix for the regular case (no vertex).
-     * @param answer Consistent stiffness matrix.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
+     * @return Consistent stiffness matrix.
      */
-    void giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
+    FloatMatrixF<6,6> giveRegAlgorithmicStiffMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Compute consistent stiffness matrix for the vertex case.
-     * @param answer Consistent stiffness matrix.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
+     * @return Consistent stiffness matrix.
      */
-    void giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    FloatMatrixF<6,6> giveVertexAlgorithmicStiffMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,

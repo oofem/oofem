@@ -1233,13 +1233,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                 FloatArray n( fe2ms->giveNormal() );
 
                 // Traction part of tangent
-                FloatMatrix C;
-                fe2Mat->give3dMaterialStiffnessMatrix(C, TangentStiffness, gp, tStep);
-
-                FloatMatrix CBulk;
-                if ( mIncludeBulkCorr ) {
-                    bulkMat->give3dMaterialStiffnessMatrix(CBulk, TangentStiffness, bulk_gp, tStep);
-                }
+                auto C = fe2Mat->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
 
                 ////////////////////////////////////////////////////////
                 // Fetch L_s
@@ -1326,6 +1320,8 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                 // Non-standard bulk contribution
 
                 if ( mIncludeBulkCorr ) {
+
+                    auto CBulk = bulkMat->give3dMaterialStiffnessMatrix(TangentStiffness, bulk_gp, tStep);
 
                     tmp.beTranspositionOf(tmp2);
                     answer.add(1.0*dA, tmp);

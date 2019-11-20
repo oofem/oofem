@@ -1131,27 +1131,24 @@ AnisotropicDamageMaterial :: computeCorrectionFactor(FloatMatrix tempDamageTenso
     return factor;
 }
 
-void
-AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<6,6>
+AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *atTime)
+                                                           TimeStep *atTime) const
 //
 // Implementation of the 3D stiffness matrix, according to the equations 56 and 57 of the reference paper.
 {
-    AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
-        linearElasticMaterial.giveStiffnessMatrix(answer, mode, gp, atTime);
+        return linearElasticMaterial.give3dMaterialStiffnessMatrix(mode, gp, atTime);
     } else {
         const FloatArray &totalStrain = status->giveTempStrainVector();
         FloatArray reducedTotalStrainVector;
         this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, atTime, VM_Total);
         //FloatArray totalStrain;
-        FloatMatrix damageTensor, strainTensor;
         // The strain vector is turned into a tensor; for that, the elements that are out of the diagonal
         // must be divided by 2
-        strainTensor.resize(3, 3);
-        strainTensor.zero();
+        FloatMatrix strainTensor(3,3);
         strainTensor.at(1, 1) = reducedTotalStrainVector.at(1);
         strainTensor.at(2, 2) = reducedTotalStrainVector.at(2);
         strainTensor.at(3, 3) = reducedTotalStrainVector.at(3);
@@ -1162,13 +1159,15 @@ AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         strainTensor.at(1, 2) = reducedTotalStrainVector.at(6) / 2.0;
         strainTensor.at(2, 1) = reducedTotalStrainVector.at(6) / 2.0;
         // The damage tensor is read
-        damageTensor = status->giveTempDamage();
+        FloatMatrix answer;
+        FloatMatrix damageTensor = status->giveTempDamage();
         AnisotropicDamageMaterial :: computeSecantOperator(answer, strainTensor, damageTensor, gp);
         for ( int j = 4; j <= 6; j++ ) {
             for ( int i = 1; i <= 6; i++ ) {
                 answer.at(i, j) = answer.at(i, j) / 2.0;
             }
         }
+        return answer;
     }
 }
 

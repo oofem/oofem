@@ -123,9 +123,7 @@ public:
     void giveInputRecord(DynamicInputRecord &input) override;
     double give(int aProperty, GaussPoint *gp) const override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
     FloatMatrixF<3,3> giveTensorRotationMatrix(GaussPoint *gp) const;

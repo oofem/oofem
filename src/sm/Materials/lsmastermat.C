@@ -346,8 +346,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode 
     auto status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
 
-    FloatMatrix stiffness;
-    sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, tStep);
+    auto stiffness = sMat->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     ///////////////////////////////////////////////////////////
     stiffness.at(1, 4) = 2. * stiffness.at(1, 4);
     stiffness.at(4, 1) = 2. * stiffness.at(4, 1);

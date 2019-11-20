@@ -52,17 +52,15 @@ void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, T
 }
 
 
-void
-TrabBoneEmbed :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode, GaussPoint *gp,
-                                               TimeStep *tStep)
+FloatMatrixF<6,6>
+TrabBoneEmbed :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     // 'auto status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
     auto compliance = this->constructIsoComplTensor(eps0, nu0);
     auto elasticity = inv(compliance);
 
-    answer = elasticity;
+    return elasticity;
 }
 
 

@@ -114,19 +114,19 @@ MicroplaneMaterial :: computeStrainVectorComponents(int mnumber,
     return e;
 }
 
-void
-MicroplaneMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                    MatResponseMode mode,
+
+FloatMatrixF<6,6>
+MicroplaneMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                     GaussPoint *gp,
-                                                    TimeStep *tStep)
+                                                    TimeStep *tStep) const
 {
-    answer.resize(6, 6);
-    answer.zero();
+    FloatMatrixF<6,6> answer;
     // elastic stiffness matrix
     answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = E / ( 2. + 2. * nu );
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = E * ( 1. - nu ) / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
     answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) =
-                                                              answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+            answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+    return answer;
 }
 
 void

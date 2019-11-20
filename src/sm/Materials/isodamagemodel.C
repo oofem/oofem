@@ -58,16 +58,15 @@ IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-void
-IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseMode mode,
+FloatMatrixF<6,6>
+IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage;
     if ( mode == ElasticStiffness ) {
         tempDamage = 0.0;
@@ -76,8 +75,8 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         tempDamage = min(tempDamage, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-    answer.times(1.0 - tempDamage);
+    auto d = this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    return d * (1.0 - tempDamage);
     //TODO - correction for tangent mode
 }
 

@@ -119,25 +119,20 @@ M1Material :: giveRealStressVector_3d(FloatArray &answer,
     status->letPlasticStateIndicatorsBe(plState);
 }
 
-void
-M1Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode mode,
+FloatMatrixF<6,6>
+M1Material :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 {
-    answer.resize(6, 6);
-    answer.zero();
     // elastic stiffness matrix
     if ( mode == ElasticStiffness ) {
-        MicroplaneMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        return;
+        return MicroplaneMaterial :: give3dMaterialStiffnessMatrix(mode, gp, tStep);
     }
 
     M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
     IntArray plasticState = status->givePlasticStateIndicators();
     if ( plasticState.giveSize() != numberOfMicroplanes ) {
-        MicroplaneMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        return;
+        return MicroplaneMaterial :: give3dMaterialStiffnessMatrix(mode, gp, tStep);
     }
     // tangent stiffness matrix
     double aux, D11 = 0., D12 = 0., D13 = 0., D14 = 0., D15 = 0., D16 = 0., D22 = 0., D23 = 0., D24 = 0., D25 = 0., D26 = 0., D33 = 0., D34 = 0., D35 = 0., D36 = 0.;
@@ -166,6 +161,7 @@ M1Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         D35 += aux * N [ im ] [ 2 ] * N [ im ] [ 4 ];
         D36 += aux * N [ im ] [ 2 ] * N [ im ] [ 5 ];
     }
+    FloatMatrixF<6,6> answer;
     answer.at(1, 1) = D11;
     answer.at(1, 2) = answer.at(2, 1) = answer.at(6, 6) = D12;
     answer.at(1, 3) = answer.at(3, 1) = answer.at(5, 5) = D13;
@@ -183,8 +179,9 @@ M1Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     answer.at(3, 4) = answer.at(4, 3) = D34;
     answer.at(3, 5) = answer.at(5, 3) = D35;
     answer.at(3, 6) = answer.at(6, 3) = answer.at(4, 5)  = answer.at(5, 4) = D36;
+    answer *= 6.;
 
-    answer.times(6.);
+    return answer;
 }
 
 int
