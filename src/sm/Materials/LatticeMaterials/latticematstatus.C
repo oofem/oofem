@@ -59,7 +59,7 @@ LatticeMaterialStatus :: initTempStatus()
 //
 {
     StructuralMaterialStatus :: initTempStatus();
-    
+
     this->tempNormalStress = this->normalStress;
 
     this->tempDissipation = this->dissipation;

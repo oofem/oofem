@@ -51,8 +51,7 @@ REGISTER_Material(LatticeBondPlasticity);
 
 
 LatticeBondPlasticity :: LatticeBondPlasticity(int n, Domain *d) : LatticeLinearElastic(n, d)
-{
-}
+{}
 
 
 bool
@@ -77,7 +76,6 @@ LatticeBondPlasticity :: computeDHardeningDKappa(double kappa) const
 void
 LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
 {
-
     LatticeLinearElastic :: initializeFrom(ir);
 
     yieldTol = 1.e-6;
@@ -103,7 +101,6 @@ LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
 
     this->ef = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->ef, _IFT_LatticeBondPlasticity_ef);
-
 }
 
 MaterialStatus *
@@ -222,7 +219,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
     /* Compute yield value*/
     transitionFlag = 0;
     double yieldValue = computeYieldValue(stress, tempKappa, transitionFlag, gp);
-    
+
     double transition = computeTransition(tempKappa, gp);
 
     //If shear surface is violated then return to this surface.
@@ -298,7 +295,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
                     tempStrain.add(deltaStrainIncrement);
                     if ( subIncrementCounter > 1 ) {
                         subIncrementFlag = 1;
-                    } else   {
+                    } else {
                         subIncrementFlag = 0;
                     }
                     returnResult = RR_NotConverged;
@@ -313,11 +310,11 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
                     tempStrain.add(deltaStrainIncrement);
                     if ( subIncrementCounter > 1 ) {
                         subIncrementFlag = 1;
-                    } else   {
+                    } else {
                         subIncrementFlag = 0;
                     }
                     returnResult = RR_NotConverged;
-                } else if ( returnResult == RR_Converged && subIncrementFlag == 0 )      {
+                } else if ( returnResult == RR_Converged && subIncrementFlag == 0 ) {
                     status->setTempKappaP(tempKappa);
                 }
             }
@@ -659,7 +656,7 @@ LatticeBondPlasticity :: computeMVector(FloatArray &answer,
         answer.at(2) = 2. * shearNorm;
         if ( stress.at(1) < -shift - yieldTol ) {
             answer.at(3) = sqrt(pow(answer.at(1), 2.) );
-        } else   {
+        } else {
             answer.at(3) = 0;
         }
     }
@@ -699,7 +696,7 @@ LatticeBondPlasticity :: computeDMMatrix(FloatMatrix &answer,
             answer.at(3, 1) = 1. / mVector.at(3) * mVector.at(1) * answer.at(1, 1);
             answer.at(3, 2) = 0.;
             answer.at(3, 3) = 1. / mVector.at(3) * ( mVector.at(1) * answer.at(1, 3) );
-        } else   {
+        } else {
             answer.at(3, 1) = answer.at(3, 2) = answer.at(3, 3) = 0.;
         }
     }
@@ -845,13 +842,12 @@ LatticeBondPlasticity :: computeInverseOfJacobian(FloatMatrix &answer, const Flo
 FloatArrayF< 6 >
 LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *atTime)
 {
+    FloatArray answer;
+    answer.resize(6);
+    answer.zero();
 
-  FloatArray answer;
-  answer.resize(6);
-  answer.zero();
-
-  LatticeBondPlasticityStatus *status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
-  status->initTempStatus();
+    LatticeBondPlasticityStatus *status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
+    status->initTempStatus();
 
     FloatArray reducedStrain;
 
@@ -890,20 +886,20 @@ LatticeBondPlasticityStatus :: initTempStatus()
 {
     LatticeMaterialStatus :: initTempStatus();
 
-    if(this->plasticStrain.giveSize() == 0){
-      this->plasticStrain.resize(6);
-      this->plasticStrain.zero();
-    }      
+    if ( this->plasticStrain.giveSize() == 0 ) {
+        this->plasticStrain.resize(6);
+        this->plasticStrain.zero();
+    }
 
-    if(this->reducedStrain.giveSize() == 0){
-      this->reducedStrain.resize(6);
-      this->reducedStrain.zero();
-    }      
+    if ( this->reducedStrain.giveSize() == 0 ) {
+        this->reducedStrain.resize(6);
+        this->reducedStrain.zero();
+    }
 
     this->oldPlasticStrain = this->plasticStrain;
     this->tempPlasticStrain = this->plasticStrain;
     this->tempReducedStrain = this->reducedStrain;
-    
+
     this->tempKappaP = this->kappaP;
 }
 

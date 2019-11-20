@@ -117,7 +117,7 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
@@ -132,7 +132,7 @@ public:
     Interface *giveInterface(InterfaceType) override;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) override;
-    
+
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 

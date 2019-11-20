@@ -65,7 +65,6 @@ LatticeSlip :: hasMaterialModeCapability(MaterialMode mode) const
 void
 LatticeSlip :: initializeFrom(InputRecord &ir)
 {
-
     LatticeLinearElastic :: initializeFrom(ir);
 
     //Parameter which relates the shear stiffness to the normal stiffness. Default is 1000.
@@ -78,7 +77,6 @@ LatticeSlip :: initializeFrom(InputRecord &ir)
 
     //Parameter which limits the stress in slip direction.
     IR_GIVE_FIELD(ir, tauZero, _IFT_LatticeSlip_t0); // Macro
-
 }
 
 
@@ -94,15 +92,14 @@ LatticeSlip :: CreateStatus(GaussPoint *gp) const
 FloatArrayF< 6 >
 LatticeSlip :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain, GaussPoint *gp, TimeStep *atTime)
 {
+    FloatArray answer;
+    answer.resize(6);
+    answer.zero();
 
-  FloatArray answer;
-  answer.resize(6);
-  answer.zero();
 
-  
     LatticeSlipStatus *status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
     status->initTempStatus();
-    
+
     FloatArray strainVector;
 
     FloatArray tempPlasticStrain = status->givePlasticStrain();
@@ -123,7 +120,7 @@ LatticeSlip :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain, GaussPoi
     }
 
     //Compute the final stress components
-    for ( int i = 2; i <= 6; i++ ) { 
+    for ( int i = 2; i <= 6; i++ ) {
         answer.at(i) =  stiffnessMatrix.at(i, i) * totalStrain.at(i);
     }
 
@@ -167,16 +164,16 @@ LatticeSlipStatus :: initTempStatus()
 {
     LatticeMaterialStatus :: initTempStatus();
     //Only first 3 components are used for plastic strain??
-    if(this->plasticStrain.giveSize() == 0){
-      this->plasticStrain.resize(6);
-      this->plasticStrain.zero();
-    }      
+    if ( this->plasticStrain.giveSize() == 0 ) {
+        this->plasticStrain.resize(6);
+        this->plasticStrain.zero();
+    }
 
     this->tempPlasticStrain = this->plasticStrain;
 }
 
 
-FloatArrayF<6>
+FloatArrayF< 6 >
 LatticeSlip :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
@@ -190,7 +187,9 @@ LatticeSlip :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) cons
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
     alpha += this->cAlpha / length;
 
-    return {alpha, 0., 0., 0., 0., 0.};
+    return {
+               alpha, 0., 0., 0., 0., 0.
+    };
 }
 
 void
@@ -247,7 +246,7 @@ LatticeSlipStatus :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
-    
+
     return;
 }
 
