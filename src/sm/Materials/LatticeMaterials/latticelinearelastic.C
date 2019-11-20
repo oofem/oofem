@@ -264,8 +264,7 @@ LatticeLinearElastic :: give1dLatticeStiffnessMatrix(MatResponseMode mode, Gauss
     answer.resize(1, 1);
     answer.zero();
 
-    //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
-    //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
+    answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
 
     return answer;
 }

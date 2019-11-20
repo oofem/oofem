@@ -222,7 +222,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
     /* Compute yield value*/
     transitionFlag = 0;
     double yieldValue = computeYieldValue(stress, tempKappa, transitionFlag, gp);
-
+    
     double transition = computeTransition(tempKappa, gp);
 
     //If shear surface is violated then return to this surface.
@@ -328,7 +328,6 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-
     status->letTempPlasticStrainBe(tempPlasticStrain);
     status->letTempStressVectorBe(stress);
     status->setSurfaceValue(surfaceType);
@@ -351,8 +350,8 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
     deltaIncrement.zero();
     FloatArray deltaIncrementTemp(3);
     deltaIncrementTemp.zero();
-    FloatArray tempPlasticStrain;
-    FloatArray plasticStrain;
+    FloatArray tempPlasticStrain(3);
+    FloatArray plasticStrain(3);
     double deltaLambda = 0.;
     double normOfResiduals = 0.;
     int iterationCount = 0;
@@ -843,18 +842,20 @@ LatticeBondPlasticity :: computeInverseOfJacobian(FloatMatrix &answer, const Flo
 }
 
 
-
-void
-LatticeBondPlasticity :: giveRealStressVector(FloatArray &answer,
-                                              GaussPoint *gp,
-                                              const FloatArray &originalStrain,
-                                              TimeStep *atTime)
+FloatArrayF< 6 >
+LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *atTime)
 {
-    LatticeBondPlasticityStatus *status = ( LatticeBondPlasticityStatus * ) this->giveStatus(gp);
+
+  FloatArray answer;
+  answer.resize(6);
+  answer.zero();
+
+  LatticeBondPlasticityStatus *status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
+  status->initTempStatus();
+
     FloatArray reducedStrain;
 
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, originalStrain, atTime, VM_Total);
-
 
 
     FloatArray strain(3);
@@ -874,7 +875,7 @@ LatticeBondPlasticity :: giveRealStressVector(FloatArray &answer,
     status->letTempReducedStrainBe(reducedStrain);
     status->letTempStressVectorBe(answer);
 
-    return;
+    return answer;
 }
 
 
@@ -889,6 +890,20 @@ LatticeBondPlasticityStatus :: initTempStatus()
 {
     LatticeMaterialStatus :: initTempStatus();
 
+    if(this->plasticStrain.giveSize() == 0){
+      this->plasticStrain.resize(6);
+      this->plasticStrain.zero();
+    }      
+
+    if(this->reducedStrain.giveSize() == 0){
+      this->reducedStrain.resize(6);
+      this->reducedStrain.zero();
+    }      
+
+    this->oldPlasticStrain = this->plasticStrain;
+    this->tempPlasticStrain = this->plasticStrain;
+    this->tempReducedStrain = this->reducedStrain;
+    
     this->tempKappaP = this->kappaP;
 }
 
@@ -898,8 +913,8 @@ LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf(file, "plasticStrains ");
-    for ( int k = 1; k <= plasticStrain.giveSize(); k++ ) {
-        fprintf(file, "% .8e ", plasticStrain.at(k) );
+    for ( int k = 1; k <= this->plasticStrain.giveSize(); k++ ) {
+        fprintf(file, "% .8e ", this->plasticStrain.at(k) );
     }
 
     fprintf(file, "\n \t");
