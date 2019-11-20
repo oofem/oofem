@@ -78,10 +78,13 @@ protected:
     /// Non-equilibrated increment of dissipation
     double tempDeltaDissipation = 0.;
 
+    /// plasticStrain;
     FloatArray plasticStrain;
 
+    /// tempPlasticStrain;
     FloatArray tempPlasticStrain;
 
+    /// oldPlasticStrain;
     FloatArray oldPlasticStrain;
 
     /// Characteristic length

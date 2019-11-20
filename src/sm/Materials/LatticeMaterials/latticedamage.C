@@ -837,6 +837,20 @@ LatticeDamageStatus :: initTempStatus()
 //
 {
     LatticeMaterialStatus :: initTempStatus();
+
+    int rsize =0;
+    if(gp->giveMaterialMode()==_3dLattice){
+      rsize = 6;
+    }
+    else if(gp->giveMaterialMode()==_2dLattice){
+      rsize = 3;
+    }
+    
+    if(this->reducedStrain.giveSize() == 0){
+      this->reducedStrain.resize(rsize);
+      this->reducedStrain.zero();
+    }      
+    
     this->tempKappa = this->kappa;
     this->tempEquivStrain = this->equivStrain;
     this->tempDamage = this->damage;
