@@ -58,8 +58,6 @@ namespace oofem {
 class LatticeBondPlasticityStatus : public LatticeMaterialStatus
 {
 protected:
-    /* FloatArray plasticStrain; */
-    /* FloatArray tempPlasticStrain; */
 
     double kappaP = 0.;
     double tempKappaP = 0.;
@@ -217,11 +215,9 @@ public:
                          int transitionFlag,
                          GaussPoint *gp);
 
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
-
-
+    
     void performPlasticityReturn(FloatArray &answer,
                                  GaussPoint *gp,
                                  const FloatArray &totalStrain, TimeStep *);

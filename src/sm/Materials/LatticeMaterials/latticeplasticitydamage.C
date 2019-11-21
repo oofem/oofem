@@ -396,11 +396,10 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
     double tempKappa = 0.;
     //Get tempKappa from the status
     tempKappa = status->giveTempKappaP();
+
     /* Get plastic strain vector from status*/
-    FloatArray tempPlasticStrain;
-
-    tempPlasticStrain = status->giveTempPlasticStrain();
-
+    FloatArray tempPlasticStrain  = status->giveTempPlasticStrain();
+    
     /* Compute trial stress*/
     stress.resize(3);
     stress.zero();
@@ -502,15 +501,15 @@ LatticePlasticityDamage :: performRegularReturn(FloatArray &stress,
     FloatMatrix jacobian(4, 4), inverseOfJacobian(4, 4);
     FloatArray rVector(3), helpVector(3), helpVector2(3);
 
-    MaterialMode matMode = gp->giveMaterialMode();
+    //    MaterialMode matMode = gp->giveMaterialMode();
 
     FloatMatrix aMatrix(3, 3), aMatrixInv(3, 3);
     FloatArray deltaIncrement(3);
     deltaIncrement.zero();
     FloatArray deltaIncrementTemp(3);
     deltaIncrementTemp.zero();
-    FloatArray tempPlasticStrain(matMode);
-    FloatArray plasticStrain(matMode);
+    FloatArray tempPlasticStrain(3);
+    FloatArray plasticStrain(3);
     double deltaLambda = 0.;
     double normOfResiduals = 0.;
     int iterationCount = 0;
@@ -761,8 +760,9 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
     answer.resize(6);
     answer.zero();
 
-
     LatticePlasticityDamageStatus *status = ( LatticePlasticityDamageStatus * ) this->giveStatus(gp);
+    status->initTempStatus();    
+
     FloatArray reducedStrain;
 
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, originalStrain, tStep, VM_Total);
@@ -770,7 +770,7 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
     gp->giveMaterialMode();
 
     //Subset of reduced strain.
-    //Rotational components are not used
+    //Rotational components are not used for plasticity return
     FloatArray strain;
     strain.resize(3);
     strain.zero();
@@ -836,8 +836,7 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArray &r
     double kappaP = status->giveKappaP();
     double deltaKappaP = tempKappaP - kappaP;
     double hardening = computeHardening(tempKappaP, gp);
-    //    FloatArray elasticStrain;
-    //    FloatArray deltaElasticStrain;
+
 
     double crackWidth = 0.;
 
@@ -1105,7 +1104,36 @@ LatticePlasticityDamageStatus :: initTempStatus()
 //
 {
     LatticeMaterialStatus :: initTempStatus();
+
+    // int rSize = 0;
+    // if(gp->giveMaterialMode() == _3dLattice){
+    //   rSize = 6;
+    // }
+    // else if (gp->giveMaterialMode() == _2dLattice){
+    //   rSize = 3;
+    // }
+    // else if (gp->giveMaterialMode() == _1dLattice){
+    //   rSize = 1;
+    // }
+    // else {
+    //   OOFEM_ERROR("this lattice material mode does not exist\n");
+    // }
+    
+    //Only first 3 components are used for plastic strain??
+    if(this->plasticStrain.giveSize() == 0){
+      this->plasticStrain.resize(6);
+      this->plasticStrain.zero();
+    }      
+
+    if(this->reducedStrain.giveSize() == 0){
+      this->reducedStrain.resize(6);
+      this->reducedStrain.zero();
+    }      
+
+    this->oldPlasticStrain = this->plasticStrain;
     this->tempPlasticStrain = this->plasticStrain;
+    this->tempReducedStrain = this->reducedStrain;
+
     this->tempKappaP = this->kappaP;
     this->tempKappaDOne = this->kappaDOne;
     this->tempKappaDTwo = this->kappaDTwo;
