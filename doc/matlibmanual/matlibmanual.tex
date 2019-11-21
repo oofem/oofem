@@ -4990,7 +4990,7 @@ Supported modes& \_2dInterface, \_3dInterface\\
 
 \subsection{Material models for lattice elements}
 
-Lattice elements have to be used with material models describing the constitutive behavior in the form of vector of tractions and strains determined from displacement jumps smeared out over the element length.
+Lattice elements have to be used with material models describing the constitutive behavior in the form of vector of tractions and rotational stress components, and strains and rotational strain components determined from displacement jumps smeared out over the element length. 
 
 \subsubsection{Latticedamage}
 This is a damage lattice material used together with lattice elements.
@@ -4998,7 +4998,7 @@ It uses a scalar damage relationship of the form
 \begin{equation}
 \boldsymbol{\sigma} = \left(1-\omega\right) \mathbf{D}_{\rm e} \boldsymbol{\varepsilon}
 \end{equation}
-where $\boldsymbol{\sigma}$ is a vector of tractions and $\boldsymbol{\varepsilon}$ is a vector of strains obtained from displacement jumps smeared over the element length.
+where $\boldsymbol{\sigma}$ is a vector of tractions and rotational components, and $\boldsymbol{\varepsilon}$ is a vector of strains obtained from displacement jumps smeared over the element length and rotational components.
 Furthermore, $\omega$ is the damage variable varying from 0 (undamaged) to 1 (fully damaged). 
 Also, $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix which is based on the elastic modulus of the lattice material $E$, and a parameter $\gamma$ which is the ratio of the modulus of the shear and normal direction.
 The strength envelope (onset of damage) is elliptic and determined by three  parameters, $f_{\rm t}$, $f_{\rm q}$ and $f_{\rm c}$. The evolution of the damage variable $\omega$ is controlled by normal stress-normal crack opening law. The three possible laws are linear, bilinear and exponential.
@@ -5031,6 +5031,42 @@ Supported modes& 1dlattice, 2dlattice, 3dlattice\\
 \label{latticedamage_table}
 %\end{center}
 \end{table}
+
+\subsubsection{Latticeplasticitydamage}
+
+This combined plasticity damage model for lattice elements has been developed to describe the failure process of geomaterials such as concrete and rock. The plasticity part is based on the effective stress and damage is evaluated by the plastic strain.
+The model is described first in \textit{P. Grassl and T. Davies. "Lattice modelling of corrosion induced cracking and bond in reinforced concrete". Cement and Concrete Composites, Volume 33, pp. 918-924, 2011.} and then later in more detail in \textit{I. Athanasiadis, S. Wheeler and P. Grassl. "Hydro-mechanical network modelling of particulate composites", International Journal of Solids and Structures. Vol. 130-131, Pages 49-60, 2018}.
+
+The model parameters are summarised in Tab.~\ref{latticeplastdam_table}.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & Combined plasticity damage model for lattice elements \\
+\hline
+Record Format & \descitem{latticeplastdam} \elemparam{}{in} 
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn} \elemparam{ft}{rn}  \elemparam{fc}{rn} \optelemparam{angle1}{rn}  \optelemparam{angle1}{rn} \optelemparam{flow}{rn} \optelemparam{stype}{rn} \optelemparam{wf}{rn} \optelemparam{ft1}{rn} \optelemparam{wf1}{rn}  \optelemparam{ahard}{rn} \optelemparam{damage}{in}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \param{talpha} Thermal exansion coefficient\\
+&- \param{e} normal modulus of lattice material\\
+&- \param{a1} ratio of shear and normal modulus\\
+&- \param{a2} ratio of rotational and normal modulus. Optional parameter. Default is 1.\\
+&- \param{e0} strain at tensile strength: $f_{\rm t}/E$\\
+&- \param{coh} ratio of shear and tensile strength: $f_{\rm q}/f_{\rm t}$\\
+&- \param{ec} ratio of compressive and tensile strength: $f_{\rm c}/f_{\rm t}$\\
+&- \param{stype} softening types: 1-linear, 2-bilinear and 3-exponential\\
+&- \param{wf} displacement threshold related to fracture energy used in all three softening types.\\
+
+Supported modes& 3dlattice\\
+\hline
+\end{mmt}
+\caption{Plasticity damage model for lattice elements -- summary.}
+\label{latticeplastdam_table}
+%\end{center}
+\end{table}
+
 
 \subsubsection{Latticslip}
 This is a elasto-plastic model for slip between lattice elements used together with lattice link elements.
