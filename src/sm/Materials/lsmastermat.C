@@ -74,8 +74,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF
     auto status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
 
-    auto sMat_ = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
-    auto sMat = const_cast< StructuralMaterial * > ( sMat_ );
+    auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
 
     //store of deformation gradient into 3x3 matrix
     auto F = from_voigt_form(vF);
@@ -110,7 +109,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF
 
     auto SethHillStrainVector = to_voigt_strain(SethHillStrain);
     FloatArray stressVector;
-    sMat->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
+    const_cast< StructuralMaterial * >(sMat)->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
 
     auto T = this->constructTransformationMatrix(eVecs);
     stressVector.at(4) = 2;

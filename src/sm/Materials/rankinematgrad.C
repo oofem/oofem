@@ -128,7 +128,7 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatR
                 gprime *= ( 1. - mParam );
             }
 
-            evaluatePlaneStressStiffMtrx(answer, mode, gp, tStep, gprime);
+            answer = evaluatePlaneStressStiffMtrx(mode, gp, tStep, gprime);
         }
         break;
     default:
@@ -486,8 +486,8 @@ RankineMatGrad :: giveGradientDamageStiffnessMatrix_dd_BN(FloatMatrix &answer, M
     }
 }
 
-void
-RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+RankineMatGrad :: givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     double tempDamage = status->giveTempDamage();
@@ -512,7 +512,7 @@ RankineMatGrad :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode 
         gprime *= ( 1. - mParam );
     }
 
-    evaluatePlaneStressStiffMtrx(answer, mode, gp, tStep, gprime);
+    return evaluatePlaneStressStiffMtrx(mode, gp, tStep, gprime);
 }
 
 void
@@ -587,19 +587,19 @@ RankineMatGrad :: giveRealStressVectorGradientDamage(FloatArray &answer1, double
     status->setKappa_hat(khat);
 }
 
-void
-RankineMatGrad :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
+double
+RankineMatGrad :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
-    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempCumulativePlasticStrain();
     double nlCumPlastStrain = status->giveNonlocalCumulatedStrain();
-    kappa = mParam * nlCumPlastStrain + ( 1. - mParam ) * localCumPlastStrain;
+    return mParam * nlCumPlastStrain + ( 1. - mParam ) * localCumPlastStrain;
 }
 
 double
 RankineMatGrad :: giveNonlocalCumPlasticStrain(GaussPoint *gp)
 {
-    RankineMatGradStatus *status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RankineMatGradStatus * >( this->giveStatus(gp) );
     return status->giveNonlocalCumulatedStrain();
 }
 
@@ -613,7 +613,7 @@ RankineMatGrad :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         return 1;
     } else if ( type == IST_MaxEquivalentStrainLevel ) {
         answer.resize(1);
-        computeCumPlastStrain(answer.at(1), gp, tStep);
+        answer.at(1) = computeCumPlastStrain(gp, tStep);
         return 1;
     } else {
         return RankineMat :: giveIPValue(answer, gp, type, tStep);

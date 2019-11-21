@@ -61,22 +61,18 @@ double TrabBoneMaterial :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep
 }
 
 
-void
-TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode, GaussPoint *gp,
-                                          TimeStep *tStep)
+FloatMatrixF<1,1>
+TrabBoneMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
     if ( mode == ElasticStiffness ) {
-        answer.resize(1, 1);
-        answer.at(1, 1) = E0;
+        return {E0};
     } else if ( mode == SecantStiffness ) {
         double dam = status->giveTempDam();
         double matconstc = status->giveMatConstC();
 
-        answer.resize(1, 1);
-        answer.at(1, 1) = ( 1.0 - dam ) * E0 + matconstc;
+        return {( 1.0 - dam ) * E0 + matconstc};
     } else {
         double epsnew = status->giveTempStrainVector().at(1);
         auto &epsnewArray = status->giveTempStrainVector();
@@ -86,13 +82,13 @@ TrabBoneMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
         double dam = status->giveTempDam();
         double matconstc = status->giveMatConstC();
 
+        /// FIXME: this function call modifies the material state (this should never happen in a tangent computation):
         computeDensification(gp, epsnewArray);
-        answer.resize(1, 1);
         if ( depsp != 0.0 ) {
-            answer.at(1, 1) = ( 1.0 - dam ) * ( E0 * ( Eil + Ek ) ) / ( E0 + Eil + Ek )
-                              - E0 * E0 * ( epsnew - epsp ) / ( E0 + Eil + Ek ) * adam * exp(-adam * alpha) * depsp / fabs(depsp) + matconstc;
+            return {( 1.0 - dam ) * ( E0 * ( Eil + Ek ) ) / ( E0 + Eil + Ek )
+                    - E0 * E0 * ( epsnew - epsp ) / ( E0 + Eil + Ek ) * adam * exp(-adam * alpha) * depsp / fabs(depsp) + matconstc};
         } else {
-            answer.at(1, 1) = ( 1.0 - dam ) * E0 + matconstc;
+            return {( 1.0 - dam ) * E0 + matconstc};
         }
     }
 }
@@ -143,7 +139,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
 
 
 void
-TrabBoneMaterial :: computeDensification(GaussPoint *gp, const FloatArray &totalStrain)
+TrabBoneMaterial :: computeDensification(GaussPoint *gp, const FloatArray &totalStrain) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     double epsnew = totalStrain.at(1);

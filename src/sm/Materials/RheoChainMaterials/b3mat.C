@@ -235,7 +235,7 @@ void
 B3Material :: giveShrinkageStrainVector(FloatArray &answer,
                                         GaussPoint *gp,
                                         TimeStep *tStep,
-                                        ValueModeType mode)
+                                        ValueModeType mode) const
 {
     if ( this->shMode == B3_NoShrinkage ) {
         answer.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
@@ -261,7 +261,7 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
 }
 
 void
-B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * returns average shrinkage strain vector of cross-section at drying
@@ -313,7 +313,7 @@ B3Material :: computeTotalAverageShrinkageStrainVector(FloatArray &answer, Gauss
 }
 
 void
-B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     // additional material parameters required:
     //  es0     - final shrinkage at material point

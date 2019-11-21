@@ -212,7 +212,7 @@ public:
     void computePrincValDir2D(double &D1, double &D2, double &c, double &s, double Dx, double Dy, double Dxy);
     bool checkPrincVal2D(double Dx, double Dy, double Dxy);
     void computeDamage(FloatMatrix &tempDamage, const FloatMatrix &damage, double kappa, double eps1, double eps2, double ceps, double seps, double epsZ);
-    double computeTraceD(double equivStrain);
+    double computeTraceD(double equivStrain) const;
     double computeOutOfPlaneStrain(const FloatArray &inplaneStrain, const FloatMatrix &dam, bool tens_flag);
     double computeDimensionlessOutOfPlaneStress(const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
     void computeInplaneStress(FloatArray &inplaneStress, const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
@@ -228,7 +228,7 @@ public:
 
     void correctBigValues(FloatMatrix &matrix);
 
-    double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
+    double computeTraceD(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp) const;
 
     double computeCorrectionFactor(FloatMatrix tempDamageTensor, FloatMatrix strainTensor, GaussPoint *gp);
 
@@ -271,21 +271,13 @@ public:
 
 protected:
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain, GaussPoint *gp,
-                                  TimeStep *atTime);
+                                  TimeStep *atTime) const;
     void computePlaneStressSigmaZ(double &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector,
-                                  double epsZ, GaussPoint *gp, TimeStep *atTime);
+                                  double epsZ, GaussPoint *gp, TimeStep *atTime) const;
 
 #if 0
     void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
@@ -294,7 +286,7 @@ protected:
 #endif
 
     virtual void computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor,
-                                       FloatMatrix damageTensor, GaussPoint *gp);
+                                       FloatMatrix damageTensor, GaussPoint *gp) const;
 
     double computeK(GaussPoint *gp);
 

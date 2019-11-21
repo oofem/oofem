@@ -94,9 +94,9 @@ NonlocalMaterialExtensionInterface :: NonlocalMaterialExtensionInterface(Domain 
 }
 
 void
-NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *tStep)
+NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *tStep) const
 {
-    Domain *d = this->giveDomain();
+    Domain *d = this->domain;
 
     if ( d->giveNonlocalUpdateStateCounter() == tStep->giveSolutionStateCounter() ) {
         return; // already updated
@@ -112,7 +112,7 @@ NonlocalMaterialExtensionInterface :: updateDomainBeforeNonlocAverage(TimeStep *
 }
 
 void
-NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
+NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp) const
 {
     double elemVolume, integrationVolume = 0.;
 
@@ -163,16 +163,16 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
         // ask domain spatial localizer for list of elements with IP within this zone
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-        this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, shiftedGpCoords, suprad);
+        this->domain->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, shiftedGpCoords, suprad);
         // insert element containing given gp
         elemSet.insert( gp->giveElement()->giveNumber() );
 #else
-        this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, shiftedGpCoords, suprad);
+        this->domain->giveSpatialLocalizer()->giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, shiftedGpCoords, suprad);
 #endif
         // initialize iList
         iList->reserve(elemSet.giveSize());
         for ( auto elindx : elemSet ) {
-            Element *ielem = this->giveDomain()->giveElement(elindx);
+            Element *ielem = this->domain->giveElement(elindx);
             if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
                 for ( auto &jGp : *ielem->giveDefaultIntegrationRulePtr() ) {
                     if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
@@ -560,7 +560,7 @@ NonlocalMaterialExtensionInterface :: computeDistanceModifier(double damage)
 }
 
 std :: vector< localIntegrationRecord > *
-NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
+NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp) const
 {
     NonlocalMaterialStatusExtensionInterface *statusExt =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
@@ -594,7 +594,7 @@ NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
 }
 
 double
-NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
+NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance) const
 {
     if ( weightFun == WFT_UniformOverElement ) { // uniform function over one element
         return 1.;
@@ -651,13 +651,13 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
 }
 
 double
-NonlocalMaterialExtensionInterface :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
+NonlocalMaterialExtensionInterface :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
 {
     return computeWeightFunction( distance(src, coord) );
 }
 
 double
-NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spatial_dimension)
+NonlocalMaterialExtensionInterface :: giveIntegralOfWeightFunction(const int spatial_dimension) const
 {
     const double pi = M_PI;
     switch ( weightFun ) {
@@ -718,7 +718,7 @@ NonlocalMaterialExtensionInterface :: maxValueOfWeightFunction()
 }
 
 double
-NonlocalMaterialExtensionInterface :: evaluateSupportRadius()
+NonlocalMaterialExtensionInterface :: evaluateSupportRadius() const
 {
     switch ( weightFun ) {
     case WFT_Bell:  return cl;
@@ -898,13 +898,13 @@ void NonlocalMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &i
  */
 
 void
-NonlocalMaterialExtensionInterface :: applyBarrierConstraints(const FloatArray &gpCoords, const FloatArray &jGpCoords, double &weight)
+NonlocalMaterialExtensionInterface :: applyBarrierConstraints(const FloatArray &gpCoords, const FloatArray &jGpCoords, double &weight) const
 {
     int ib, nbarrier = domain->giveNumberOfNonlocalBarriers();
     bool shieldFlag = false;
 
     for ( ib = 1; ib <= nbarrier; ib++ ) {
-        domain->giveNonlocalBarrier(ib)->applyConstraint(gpCoords, jGpCoords, weight, shieldFlag, this);
+        domain->giveNonlocalBarrier(ib)->applyConstraint(gpCoords, jGpCoords, weight, shieldFlag, *this);
         if ( shieldFlag ) {
             weight = 0.0;
             return;
@@ -913,7 +913,7 @@ NonlocalMaterialExtensionInterface :: applyBarrierConstraints(const FloatArray &
 }
 
 void
-NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp)
+NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoint *gp, GaussPoint *jGp) const
 {
     Element *ielem = jGp->giveElement();
     IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
@@ -927,7 +927,7 @@ NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoin
 
 
 double
-NonlocalMaterialExtensionInterface :: giveDistanceBasedInteractionRadius(const FloatArray &gpCoords)
+NonlocalMaterialExtensionInterface :: giveDistanceBasedInteractionRadius(const FloatArray &gpCoords) const
 {
     double distance = 1.e10; // Initially distance from the boundary is set to the maximum value
     double temp;
