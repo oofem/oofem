@@ -171,6 +171,7 @@ protected:
     /// flag which chooses between no distribution (0) and Gaussian distribution (1)
     double localRandomType = 0.;
 
+    /// Biot's coefficient
     double biotCoefficient = 0.;
 
     /// Parameter specifying how the biot coefficient changes with the crack opening
