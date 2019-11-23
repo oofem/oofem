@@ -67,7 +67,7 @@ LatticeSlip :: initializeFrom(InputRecord &ir)
 {
     LatticeLinearElastic :: initializeFrom(ir);
 
-    //Parameter which relates the shear stiffness to the normal stiffness. Default is 1000.
+    //Parameter which relates the shear stiffness to the normal stiffness. Default is 1000. Reread this again, because the
     alphaOne = 1000.;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeSlip_a1); // Macro
 

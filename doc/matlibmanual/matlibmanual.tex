@@ -5007,16 +5007,15 @@ Furthermore, $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix which is based
 Description & Linear elastic model for lattice elements \\
 \hline
 Record Format & \descitem{latticelinearelastic} \elemparam{}{in} 
-\elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \elemparam{a1}{rn} \elemparam{a2}{rn}\\
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn}\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
-&- \optparam{talpha} Thermal strain expansion coefficient. Optional parameter. Default is 0.\\
-&- \optparam{calpha} Thermal displacement expansion coefficient. Optional parameter. Default is 0.\\
+&- \optparam{talpha} Thermal strain expansion coefficient. Default is 0.\\
+&- \optparam{calpha} Thermal displacement expansion coefficient. Default is 0.\\
 &- \param{e} Young's modulus of the equivalent lattice material\\
-&- \optparam{a1} ratio of shear and normal modulus. Optional parameter. Default is 1.\\
-&- \optparam{a2} ratio of rotational and normal modulus. Optional parameter. Default is 1.\\
-&-
-Supported modes& 2dlattice, 3dlattice\\
+&- \optparam{a1} ratio of shear and normal modulus. Default is 1.\\
+&- \optparam{a2} ratio of rotational and normal modulus. Default is 1.\\
+Supported modes & 2dlattice, 3dlattice\\
 \hline
 \end{mmt}
 \caption{Linear elastic material model for lattice elements -- summary.}
@@ -5047,18 +5046,18 @@ Record Format & \descitem{latticedamage} \elemparam{}{in}
 \elemparam{d}{rn} \optelemparam{talpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn} \optelemparam{e0}{rn}  \optelemparam{coh}{rn} \optelemparam{ec}{rn} \optelemparam{stype}{rn} \optelemparam{wf}{rn} \optelemparam{wf1}{rn} \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
-&- \optparam{talpha} Thermal strain expansion coefficient. Optional parameter. Default i 0.\\
-&- \optparam{calpha} thermal displacement expansion coefficient. Optional parameter. Default is 0.\\
+&- \optparam{talpha} Thermal strain expansion coefficient. Default i 0.\\
+&- \optparam{calpha} thermal displacement expansion coefficient. Default is 0.\\
 &- \param{e} normal modulus of lattice material\\
-&- \optparam{a1} ratio of shear and normal modulus. Optional parameter. Default is 1.\\
-&- \optparam{a2} ratio of rotational and normal modulus. Optional parameter. Default is 1.\\
+&- \optparam{a1} ratio of shear and normal modulus. Default is 1.\\
+&- \optparam{a2} ratio of rotational and normal modulus. Default is 1.\\
 &- \param{e0} strain at tensile strength: $f_{\rm t}/E$\\
 &- \param{coh} ratio of shear and tensile strength: $f_{\rm q}/f_{\rm t}$\\
 &- \param{ec} ratio of compressive and tensile strength: $f_{\rm c}/f_{\rm t}$\\
-&- \optparam{stype} softening types: 1-linear, 2-bilinear and 3-exponential. Optional parameter. Default is 1.\\
+&- \optparam{stype} softening types: 1-linear, 2-bilinear and 3-exponential. Default is 1.\\
 &- \param{wf} displacement threshold related to fracture energy used in all three softening types.\\
-&- \optparam{wf1} displacement threshold related to softening type 2. Optional parameter. Default is wf1=0.15 wf.\\
-&- \optparam{e01} strain threshold related to softening type 2. Optional parameter. Default is wf1=0.15 wf\\
+&- \optparam{wf1} displacement threshold related to softening type 2. Default is wf1=0.15 wf.\\
+&- \optparam{e01} strain threshold related to softening type 2. Default is wf1=0.15 wf\\
 &- \optparam{bio} Biot's coefficient.\\
 &- \optparam{btype} Type to consider how Biot's coefficient changes with crack opening.\\
 
@@ -5075,13 +5074,11 @@ Supported modes& 2dlattice, 3dlattice\\
 This combined plasticity damage model for lattice elements has been developed to describe the failure process of geomaterials such as concrete and rock. The plasticity part is based on the effective stress and damage is evaluated by the plastic strain.
 The main stress-strain law has the form
 \begin{equation}
-\boldsymbol{\sigma} = \left(1-\omega\right) \mathbf{D}_{\rm e} \left(\boldsymbol{\varepsilon}-\boldsymbol{\varepsilon}_{\rm p}
+\boldsymbol{\sigma} = \left(1-\omega\right) \mathbf{D}_{\rm e} \left(\boldsymbol{\varepsilon}-\boldsymbol{\varepsilon}_{\rm p} \right)
 \end{equation}
 where $\boldsymbol{\sigma}$ is a vector of tractions and rotational components, $\omega$ is the damage variable and $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix, $\boldsymbol{\varepsilon}$ is a vector of strains obtained from displacement jumps smeared over the element length and rotational components and $\boldsymbol{\varepsilon}_{\rm p}$ are the plastic strains.
 
-The model is described first in \textit{P. Grassl and T. Davies. "Lattice modelling of corrosion induced cracking and bond in reinforced concrete". Cement and Concrete Composites, Volume 33, pp. 918-924, 2011.} and then later in more detail in \textit{I. Athanasiadis, S. Wheeler and P. Grassl. "Hydro-mechanical network modelling of particulate composites", International Journal of Solids and Structures. Vol. 130-131, Pages 49-60, 2018}.
-
-The model parameters are summarised in Tab.~\ref{latticeplastdam_table}.
+The model is described first in \textit{P. Grassl and T. Davies. "Lattice modelling of corrosion induced cracking and bond in reinforced concrete". Cement and Concrete Composites, Volume 33, pp. 918-924, 2011.} and then later in more detail in \textit{I. Athanasiadis, S. Wheeler and P. Grassl. "Hydro-mechanical network modelling of particulate composites", International Journal of Solids and Structures. Vol. 130-131, Pages 49-60, 2018}. The model parameters are summarised in Tab.~\ref{latticeplastdam_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -5123,14 +5120,74 @@ Supported modes& 3dlattice\\
 
 
 \subsubsection{Slip lattice model}
-This is an elasto-plastic model for slip between fibres modelled three-dimensional beam elements and lattice link elements.
+This is an elasto-plastic model for slip between fibres modelled three-dimensional beam elements and lattice link elements. The theory of the model is described in the paper \textit{P. Grassl and A. Antonelli. "3D network modelling of fracture processes in fibre-reinforced geomaterials", International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.} The model parameters are summarised in Tab.~\ref{latticeslip_table}.
 
-The theory of the model is described in the paper \textit{P. Grassl and A. Antonelli. "3D network modelling of fracture processes in fibre-reinforced geomaterials", International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.}
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Slip model for lattice elements \\
+\hline
+Record Format & \descitem{latticeslip} \elemparam{}{in} 
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn} \elemparam{t0}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal expansion coefficient. Default is 0.\\
+&- \optparam{calpha} thermal displacement expansion coefficient. Optional parameter. Default is 0.\\
+&- \param{e} modulus of the equivalent lattice material\\
+&- \optparam{a1} ratio of shear and normal modulus. Default is 1000.\\
+&- \optparam{a2} ratio of rotational and normal modulus. Default is 1000.\\
+&- \param{t0} limit of stress in slip direction\\
+
+Supported modes & 3dlattice\\
+\hline
+\end{mmt}
+\caption{Slip model for lattice elements -- summary.}
+\label{latticeslip_table}
+%\end{center}
+\end{table}
+
 
 \subsubsection{Bond lattice model}
-This is an elasto-plastic-damage model for modelling the bond between two parts modelled with lattice elements.
+This is an elasto-plastic model for modelling the bond between two parts modelled with three dimensional lattice elements.
+The stress-strain law has the form
+\begin{equation}
+\boldsymbol{\sigma} = \mathbf{D}_{\rm e} \left(\boldsymbol{\varepsilon}-\boldsymbol{\varepsilon}_{\rm p} \right)
+\end{equation}
+where $\boldsymbol{\sigma}$ is a vector of tractions and rotational components, $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix, $\boldsymbol{\varepsilon}$ is a vector of strains obtained from displacement jumps smeared over the element length and rotational components and $\boldsymbol{\varepsilon}_{\rm p}$ are the plastic strains.
 
 The theory of the model is described in the paper \textit{P. Grassl and T. Davies. "Lattice modelling of corrosion induced cracking and bond in reinforced concrete". Cement and Concrete Composites, Volume 33, pp. 918-924, 2011}.
+
+The model parameters are summarised in Tab.~\ref{latticebond_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Bond model for lattice elements \\
+\hline
+Record Format & \descitem{latticebondplast} \elemparam{}{in} 
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn} \elemparam{fc}{rn} \elemparam{angle1}{rn} \elemparam{ef}{rn} \elemparam{sub}{in} \elemparam{iter}{in} \elemparam{tol}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal expansion coefficient. Default is 0.\\
+&- \optparam{calpha} thermal displacement expansion coefficient. Optional parameter. Default is 0.\\
+&- \param{e} modulus of the equivalent lattice material\\
+&- \optparam{a1} ratio of shear and normal modulus. Default is 1.\\
+&- \optparam{a2} ratio of rotational and normal modulus. Default is 1.\\
+&- \param{fc} compressive strength\\
+&- \param{angle1} friction angle\\
+&- \optparam{ef} strain threshold to control hardening\\
+&- \optparam{sub} maximum number of subincrementations\\
+&- \optparam{iter} maximum number of newton iterations\\
+&- \optparam{tol} tolerance for newton method\\
+
+Supported modes & 3dlattice\\
+\hline
+\end{mmt}
+\caption{Bond plasticity model for lattice elements -- summary.}
+\label{latticebond_table}
+%\end{center}
+\end{table}
+
 
 
 \subsection{Material models for steel relaxation}

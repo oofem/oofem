@@ -78,13 +78,13 @@ LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
 {
     LatticeLinearElastic :: initializeFrom(ir);
 
-    yieldTol = 1.e-6;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_LatticeBondPlasticity_tol);
+    this->yieldTol = 1.e-6;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->yieldTol, _IFT_LatticeBondPlasticity_tol);
 
     newtonIter = 100;
     IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_LatticeBondPlasticity_iter);
 
-    numberOfSubIncrements = 64;
+    numberOfSubIncrements = 10;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfSubIncrements, _IFT_LatticeBondPlasticity_sub);
 
     IR_GIVE_FIELD(ir, this->fc, _IFT_LatticeBondPlasticity_fc);
@@ -93,11 +93,8 @@ LatticeBondPlasticity :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->frictionAngleOne, _IFT_LatticeBondPlasticity_angle1);
 
     this->frictionAngleTwo = this->frictionAngleOne;
-    //    IR_GIVE_OPTIONAL_FIELD(ir, this->frictionAngleTwo, _IFT_LatticeBondPlasticity_angle2);
 
     this->flowAngle = this->frictionAngleOne;
-    //    IR_GIVE_OPTIONAL_FIELD(ir, this->flowAngle, _IFT_LatticeBondPlasticity_flow);
-
 
     this->ef = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->ef, _IFT_LatticeBondPlasticity_ef);
@@ -225,7 +222,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
     //If shear surface is violated then return to this surface.
     //No need to check situation with ellipse
     //If only ellipse is violated then try this.
-    if ( yieldValue < yieldTol && stress.at(1) < transition - yieldTol ) {
+    if ( yieldValue < this->yieldTol && stress.at(1) < transition - this->yieldTol ) {
         transitionFlag = 1;
         yieldValue = computeYieldValue(stress, tempKappa, 1, gp);
     }
@@ -242,7 +239,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
         error = yieldValue / pow(fc, 2.);
     }
 
-    if ( error > yieldTol ) {
+    if ( error > this->yieldTol ) {
         if ( checkForVertexCase(stress, gp) ) {
             performVertexReturn(stress, gp);
             surfaceType = ST_Vertex;
@@ -397,7 +394,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
         residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
     }
 
-    if ( residualsNorm.at(4) < yieldTol ) {//regular return not needed
+    if ( residualsNorm.at(4) < this->yieldTol ) {//regular return not needed
         returnResult = RR_Elastic;
         return kappa;
     }
@@ -405,7 +402,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
     normOfResiduals = residualsNorm.computeNorm();
     //    normOfResiduals  = 1.; //just to get into the loop
 
-    while ( normOfResiduals > yieldTol ) {
+    while ( normOfResiduals > this->yieldTol ) {
         iterationCount++;
         if ( iterationCount == newtonIter ) {
             returnResult = RR_NotConverged;
@@ -428,7 +425,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
             return kappa;
         }
 
-        if ( normOfResiduals > yieldTol ) {
+        if ( normOfResiduals > this->yieldTol ) {
             computeJacobian(jacobian, tempStress, tempKappa, deltaLambda, transitionFlag, gp);
 
             if ( computeInverseOfJacobian(inverseOfJacobian, jacobian) ) {
@@ -482,7 +479,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
             double transition = computeTransition(tempKappa, gp);
             if ( transitionFlag == 0 ) {
                 //Check if the stress is on the correct side
-                if ( tempStress.at(1) < transition - yieldTol ) {
+                if ( tempStress.at(1) < transition - this->yieldTol ) {
                     transitionFlag = 1;
                     tempKappa = kappa;
                     deltaLambda = 0.;
@@ -505,7 +502,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
                     returnResult = RR_Converged;
                 }
             } else if ( transitionFlag == 1 ) {
-                if ( tempStress.at(1) > transition + yieldTol ) {
+                if ( tempStress.at(1) > transition + this->yieldTol ) {
                     returnResult = RR_NotConverged;
                     return kappa;
                 } else {  //accept stress return
@@ -654,7 +651,7 @@ LatticeBondPlasticity :: computeMVector(FloatArray &answer,
     } else {
         answer.at(1) = 2. * ( stress.at(1) + shift ) / pow(this->frictionAngleTwo, 2.);
         answer.at(2) = 2. * shearNorm;
-        if ( stress.at(1) < -shift - yieldTol ) {
+        if ( stress.at(1) < -shift - this->yieldTol ) {
             answer.at(3) = sqrt(pow(answer.at(1), 2.) );
         } else {
             answer.at(3) = 0;
@@ -692,7 +689,7 @@ LatticeBondPlasticity :: computeDMMatrix(FloatMatrix &answer,
         answer.at(2, 3) = 0;
 
         //Derivates of evolution law
-        if ( stress.at(1) < -shift - yieldTol ) {
+        if ( stress.at(1) < -shift - this->yieldTol ) {
             answer.at(3, 1) = 1. / mVector.at(3) * mVector.at(1) * answer.at(1, 1);
             answer.at(3, 2) = 0.;
             answer.at(3, 3) = 1. / mVector.at(3) * ( mVector.at(1) * answer.at(1, 3) );
