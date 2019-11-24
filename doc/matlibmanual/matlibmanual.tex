@@ -4132,19 +4132,23 @@ and $A_{\rm s}$ is a model parameter.
  
 \noindent\textbf{Strain rate:}
 
-Concrete is strongly rate dependent. If the loading rate is increased, the tensile and compressive strength increase and are more prominent in tension then in compression. The dependency is taken into account by an additional variable $alpha_{\rm r}$. The rate dependency is included by scaling both the equivalent strain rate and the inelastic strain. The rate parameter is defined by
+Concrete is strongly rate dependent. If the loading rate is increased, the tensile and compressive strength increase and are more prominent in tension then in compression. The dependency of the stress-strain response on the dynamic increase factor is taken into account by an additional variable $alpha_{\rm r}$. The rate dependency is included by scaling both the equivalent strain rate and the inelastic strain. The rate parameter is defined by
 \begin{equation}
 \alpha_{\rm r}=(1-X) \alpha_{\rm rt} + X  \alpha_{\rm rc}
 \end{equation}
 where $X$ is the continuous compression measure (= 1 means only compression, = 0 means only tension).
+The dynamic increase factor (DIF) for strength is computed according to Model Code 2010.  
 
-\begin{table}[!htb]
+\begin{htmlonly}
+\begin{longtable}{|l|l|}
+\end{htmlonly}
+\begin{longtable}{|l|p{9cm}|}
 %\begin{center}
-\begin{mmt}
+%\begin{mmt}
 \hline
 Description & CDPM2\\
 \hline
-Record Format & \descitem{con2dpm}  \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn} \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} [\elemparam{stype}{in}] [\elemparam{ft1}{rn}] [\elemparam{wf1}{rn}] [\elemparam{efc}{rn}] [\elemparam{ecc}{rn}] [\elemparam{kinit}{rn}] [\elemparam{Ahard}{rn}] [\elemparam{Bhard}{rn}] [\elemparam{Chard}{rn}] [\elemparam{Dhard}{rn}] [\elemparam{Asoft}{rn}] [\elemparam{helem}{rn}] [\elemparam{dilation}{rn}] [\elemparam{hp}{rn}] [\elemparam{isoflag}{in}] [\elemparam{rateflag}{in}] \elemparam{fcZero}{in} [\elemparam{yieldtol}{rn}] [\elemparam{newtoniter}{in}] \\
+Record Format & \descitem{con2dpm}  \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn} \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} [\elemparam{stype}{in}] [\elemparam{ft1}{rn}] [\elemparam{wf1}{rn}] [\elemparam{efc}{rn}] [\elemparam{ecc}{rn}] [\elemparam{kinit}{rn}] [\elemparam{Ahard}{rn}] [\elemparam{Bhard}{rn}] [\elemparam{Chard}{rn}] [\elemparam{Dhard}{rn}] [\elemparam{Asoft}{rn}] [\elemparam{helem}{rn}] [\elemparam{dilation}{rn}] [\elemparam{hp}{rn}] [\elemparam{isoflag}{in}] [\elemparam{sratetype}{in}] \elemparam{eratetype}{in} [\elemparam{yieldtol}{rn}] [\elemparam{newtoniter}{in}] \\
 Parameters &- \param{d} material density\\
 &- \param{E} Young modulus\\
 &- \param{n} Poisson ratio\\
@@ -4172,21 +4176,27 @@ Parameters &- \param{d} material density\\
 &- \param{dilation} dilation factor, optional, default value 0.85\\
 &- \param{hp} hardening modulus, optional, default value 0.5\\
 &- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
-&- \param{rateflag} flag which allows for the consideration of the effect of strain rates (using CEB-FIP Model code 2010) if set to 1, 2 or 3. Default value 0 which corresponds to no strain rate effect.\\
+&- \param{sratetype}  Dynamic increase factor (DIF) for strength
 \begin{itemize}\setlength{\itemsep}{-3pt}
-\item[1 -] CEB-Model code 2010 rate factor for strength and square rate factor for fracture energy  
-\item[2 -] CEB-Model code 2010 rate factor for strength and fracture energy
-\item[3 -] CEB-Model code 2010 rate factor for strength and no rate factor for fracture energy
+\item[0 -] DIF = 1  
+\item[1 -] First branch of Model Code 2010 DIF for strength.
+\item[2 -] First and second branch of Model Code 2010 DIF for strength
+\end{itemize}\\
+&- \param{eratetype} Dynamic increase factor (DIF) for fracture energy. Only used if sratetype is not equal to 0. 
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] DIF = 1
+\item[1 -] DIF from sratetype  
+\item[2 -] DIF squared from sratetype
 \end{itemize}\\
 &- \param{yieldtol} tolerance for the implicit stress return algorithm, optional, default value $1 \times 10^{-6}$\\
 &- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
-Supported modes& 3dMat, PlaneStrain\\
+Supported modes& 3dMat, PlaneStrain, 1dMat\\
 \hline
-\end{mmt}
+%\end{mmt}
 \caption{CDPM2 -- summary.}
 \label{cdpm2_table}
 %\end{center}
-\end{table}
+\end{longtable}
 
 
 \subsubsection{Fixed crack model for concrete - ConcreteFCM}

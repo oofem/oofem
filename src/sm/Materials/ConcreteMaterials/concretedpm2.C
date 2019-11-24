@@ -465,55 +465,55 @@ ConcreteDPM2 :: initializeFrom(InputRecord &ir)
     linearElasticMaterial.initializeFrom(ir);
 
     //isotropic flag
-    isotropicFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, isotropicFlag, _IFT_ConcreteDPM2_isoflag);
+    this->isotropicFlag = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->isotropicFlag, _IFT_ConcreteDPM2_isoflag);
 
 
     // elastic parameters
-    IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e)
-    IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
-    propertyDictionary.add('E', eM);
-    propertyDictionary.add('n', nu);
+    IR_GIVE_FIELD(ir, this->eM, _IFT_IsotropicLinearElasticMaterial_e)
+    IR_GIVE_FIELD(ir, this->nu, _IFT_IsotropicLinearElasticMaterial_n);
+    propertyDictionary.add('E', this->eM);
+    propertyDictionary.add('n', this->nu);
 
-    gM = eM / ( 2. * ( 1. + nu ) );
-    kM = eM / ( 3. * ( 1. - 2. * nu ) );
+    this->gM = this->eM / ( 2. * ( 1. + this->nu ) );
+    this->kM = this->eM / ( 3. * ( 1. - 2. * this->nu ) );
 
-    IR_GIVE_FIELD(ir, fc, _IFT_ConcreteDPM2_fc);
-    IR_GIVE_FIELD(ir, ft, _IFT_ConcreteDPM2_ft);
+    IR_GIVE_FIELD(ir, this->fc, _IFT_ConcreteDPM2_fc);
+    IR_GIVE_FIELD(ir, this->ft, _IFT_ConcreteDPM2_ft);
 
     this->e0 = this->ft / this->eM;
 
     // default parameters
     this->ecc = 0.525;
-    IR_GIVE_OPTIONAL_FIELD(ir, ecc, _IFT_ConcreteDPM2_ecc);
-    yieldHardInitial = 0.3;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardInitial, _IFT_ConcreteDPM2_kinit);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->ecc, _IFT_ConcreteDPM2_ecc);
+    this->yieldHardInitial = 0.3;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->yieldHardInitial, _IFT_ConcreteDPM2_kinit);
 
     //Inclination at transition point
-    yieldHardPrimePeak = 0.5;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldHardPrimePeak, _IFT_ConcreteDPM2_hp);
+    this->yieldHardPrimePeak = 0.5;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->yieldHardPrimePeak, _IFT_ConcreteDPM2_hp);
 
-    if ( yieldHardPrimePeak < 0 ) {
-        yieldHardPrimePeak = 0.;
+    if ( this->yieldHardPrimePeak < 0 ) {
+        this->yieldHardPrimePeak = 0.;
         OOFEM_WARNING("kPrimePeak cannot be less than zero");
-    } else if ( yieldHardPrimePeak > ( 1. - yieldHardInitial ) ) {
-        yieldHardPrimePeak = 1. - yieldHardInitial;
+    } else if ( this->yieldHardPrimePeak > ( 1. - this->yieldHardInitial ) ) {
+        this->yieldHardPrimePeak = 1. - this->yieldHardInitial;
         OOFEM_WARNING("kPrimePeak cannot be greater than 1.-kinit");
     }
 
-    AHard = 8.e-2;
-    IR_GIVE_OPTIONAL_FIELD(ir, AHard, _IFT_ConcreteDPM2_ahard);
-    BHard = 3.e-3;
-    IR_GIVE_OPTIONAL_FIELD(ir, BHard, _IFT_ConcreteDPM2_bhard);
-    CHard = 2.;
-    IR_GIVE_OPTIONAL_FIELD(ir, CHard, _IFT_ConcreteDPM2_chard);
-    DHard = 1.e-6;
-    IR_GIVE_OPTIONAL_FIELD(ir, DHard, _IFT_ConcreteDPM2_dhard);
-    dilationConst = 0.85;
-    IR_GIVE_OPTIONAL_FIELD(ir, dilationConst, _IFT_ConcreteDPM2_dilation);
+    this->AHard = 8.e-2;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->AHard, _IFT_ConcreteDPM2_ahard);
+    this->BHard = 3.e-3;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->BHard, _IFT_ConcreteDPM2_bhard);
+    this->CHard = 2.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->CHard, _IFT_ConcreteDPM2_chard);
+    this->DHard = 1.e-6;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->DHard, _IFT_ConcreteDPM2_dhard);
+    this->dilationConst = 0.85;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->dilationConst, _IFT_ConcreteDPM2_dilation);
 
-    softeningType = 1; //0-Linear softening; 1-Bilinear softening; 2-Exponential
-    IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
+    this->softeningType = 1; //0-Linear softening; 1-Bilinear softening; 2-Exponential
+    IR_GIVE_OPTIONAL_FIELD(ir, this->softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 2 ) {
         throw ValueInputException(ir, _IFT_ConcreteDPM2_softeningType, "softening type not implemented");
@@ -521,9 +521,9 @@ ConcreteDPM2 :: initializeFrom(InputRecord &ir)
 
     IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);
 
-    if ( softeningType == 1 ) {
+    if ( this->softeningType == 1 ) {
         this->ftOne = 0.3 * this->ft;
-        IR_GIVE_OPTIONAL_FIELD(ir, ftOne, _IFT_ConcreteDPM2_ftOne);
+        IR_GIVE_OPTIONAL_FIELD(ir, this->ftOne, _IFT_ConcreteDPM2_ftOne);
         this->wfOne = 0.15 * this->wf;
         IR_GIVE_OPTIONAL_FIELD(ir, this->wfOne, _IFT_ConcreteDPM2_wfOne);
     }
@@ -532,35 +532,37 @@ ConcreteDPM2 :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->efCompression, _IFT_ConcreteDPM2_efc);
 
     this->ASoft = 15;
-    IR_GIVE_OPTIONAL_FIELD(ir, ASoft, _IFT_ConcreteDPM2_asoft);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->ASoft, _IFT_ConcreteDPM2_asoft);
 
-    helem = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, helem, _IFT_ConcreteDPM2_helem);
+    this->helem = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->helem, _IFT_ConcreteDPM2_helem);
 
 
     //Compute m
-    m = 3. * ( pow(fc, 2.) - pow(ft, 2.) ) / ( fc * ft ) * ecc / ( ecc + 1. );
+    m = 3. * ( pow(this->fc, 2.) - pow(this->ft, 2.) ) / ( this->fc * this->ft ) * this->ecc / ( this->ecc + 1. );
 
     //Compute default value of dilationConst
-    yieldTol = 1.e-6;
-    IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_ConcreteDPM2_yieldtol);
+    this->yieldTol = 1.e-6;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->yieldTol, _IFT_ConcreteDPM2_yieldtol);
 
-    yieldTolDamage = yieldTol * 10.;
+    this->yieldTolDamage = this->yieldTol * 10.;
 
-    newtonIter = 100;
-    IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_ConcreteDPM2_newtoniter);
+    this->newtonIter = 100;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->newtonIter, _IFT_ConcreteDPM2_newtoniter);
 
-
-    strainRateFlag = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, strainRateFlag, _IFT_ConcreteDPM2_rateFlag);
-    if ( strainRateFlag < 0 || strainRateFlag > 4 ) {
-        OOFEM_ERROR("strain rate type not implemented. Must be between 0 and 3\n");
+    this->strengthRateType = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->strengthRateType, _IFT_ConcreteDPM2_strengthratetype);
+    if ( this->strengthRateType < 0 || this->strengthRateType > 2 ) {
+        OOFEM_ERROR("strength rate type not implemented. Must be 0, 1 or 2\n");
+    }
+    
+    this->deltaTime = -1.;
+    this->energyRateType = 0;
+    if ( this->strengthRateType > 0 ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, this->deltaTime, _IFT_ConcreteDPM2_deltatime);
+	IR_GIVE_OPTIONAL_FIELD(ir, this->energyRateType, _IFT_ConcreteDPM2_energyratetype);
     }
 
-    deltaTime = -1.;
-    if ( strainRateFlag > 0 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, deltaTime, _IFT_ConcreteDPM2_deltatime);
-    }
 }
 
 #if 0
@@ -923,7 +925,7 @@ ConcreteDPM2 :: computeRateFactor(double alpha,
                                   GaussPoint *gp,
                                   TimeStep *tStep) const
 {
-    if ( strainRateFlag == 0 ) {
+    if ( this->strengthRateType == 0 ) {
         return 1;
     }
 
@@ -959,30 +961,49 @@ ConcreteDPM2 :: computeRateFactor(double alpha,
     }
 
     //Tension
-    //For tension according to CEB-FIP Model Code 2010
+    //For tension according to Model Code 2010
     double rateFactorTension = 1.;
     double strainRateRatioTension = strainRate / 1.e-6;
-    if ( strainRate < 1.e-6 ) {
+
+    if(this->strengthRateType == 1){
+      if ( strainRate < 1.e-6 ) {
         rateFactorTension = 1.;
-    } else if ( 1.e-6 < strainRate && strainRate < 10 ) {
+      } else if ( 1.e-6 < strainRate ) {
         rateFactorTension = pow(strainRateRatioTension, 0.018);
-    } else {
+      }
+    }      
+    else if(this->strengthRateType == 2){
+      if ( strainRate < 1.e-6 ) {
+        rateFactorTension = 1.;
+      } else if ( 1.e-6 < strainRate && strainRate < 10 ) {
+        rateFactorTension = pow(strainRateRatioTension, 0.018);
+      } else {
         rateFactorTension =  0.0062 * pow(strainRateRatioTension, 1. / 3.);
+      }
     }
 
-    //For compression according to CEB-FIP Model Code 2010
+    //For compression according to Model Code 2010
     double rateFactorCompression = 1.;
     double strainRateRatioCompression = strainRate / ( -30.e-6 );
-    if ( strainRate > -30.e-6 ) {
+    if(this->strengthRateType == 1){
+       if ( strainRate > -30.e-6 ) {
         rateFactorCompression = 1.;
-    } else if ( -30.e-6 > strainRate && strainRate > -30 ) {
-        rateFactorCompression = pow(strainRateRatioCompression, 0.014);
-    } else {
-        rateFactorCompression =  0.012 * pow(strainRateRatioCompression, 0.333);
+       } else if ( -30.e-6 > strainRate ) {
+	 rateFactorCompression = pow(strainRateRatioCompression, 0.014);
+       }
     }
+    else if(this->strengthRateType == 2){
+      if ( strainRate > -30.e-6 ) {
+        rateFactorCompression = 1.;
+      } else if ( -30.e-6 > strainRate && strainRate > -30 ) {
+        rateFactorCompression = pow(strainRateRatioCompression, 0.014);
+      } else if ( -30 > strainRate && strengthRateType == 2){
+        rateFactorCompression =  0.012 * pow(strainRateRatioCompression, 0.333);
+      }
+    }     
 
     double rateFactor = ( 1. - alpha ) * rateFactorTension + alpha * rateFactorCompression;
-
+    
     return rateFactor;
 }
 
@@ -1084,12 +1105,14 @@ ConcreteDPM2 :: computeDamageParamTension(double equivStrain, double kappaOne, d
     double wfMod = this->wf;
     double wfOneMod = this->wfOne;
 
-    if ( this->strainRateFlag == 2 ) {
-        wfMod /= rateFactor;
-        wfOneMod /= rateFactor;
-    } else if ( this->strainRateFlag == 3 ) {
+    if ( this->strengthRateType > 0 ) {
+      if ( this->energyRateType == 0 ) {
         wfMod /= pow(rateFactor, 2.);
         wfOneMod /= pow(rateFactor, 2.);
+      } else if ( this->energyRateType == 1 ) {
+        wfMod /= rateFactor;
+        wfOneMod /= rateFactor;
+      }
     }
 
     double help;
@@ -1159,10 +1182,12 @@ ConcreteDPM2 :: computeDamageParamCompression(double equivStrain, double kappaOn
     double ftTemp = this->ft * ( 1. - yieldTolDamage );
     double efCompressionMod = this->efCompression;
 
-    if ( this->strainRateFlag == 2 ) {
-        efCompressionMod /= rateFactor;
-    } else if ( this->strainRateFlag == 3 )      {
+    if( this->strengthRateType > 0) {
+      if ( this->energyRateType == 0 ) {
         efCompressionMod /= pow(rateFactor, 2.);
+      } else if ( this->energyRateType == 1 )      {
+        efCompressionMod /= rateFactor;
+      }
     }
 
     double omega = 1.;
