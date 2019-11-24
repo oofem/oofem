@@ -62,17 +62,13 @@ M1Material :: initializeFrom(InputRecord &ir)
     ENtan = EN * HN / ( EN + HN );
 }
 
-void
-M1Material :: giveRealStressVector_3d(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &totalStrain,
-                                      TimeStep *tStep)
+FloatArrayF<6>
+M1Material :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                      TimeStep *tStep) const
 {
-    answer.resize(6);
-    answer.zero();
+    auto status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
 
     // get the status at the beginning
-    M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
     // prepare status at the end
     this->initTempStatus(gp);
     // get the initial values of plastic strains on microplanes (set to zero in the first step)
@@ -82,11 +78,13 @@ M1Material :: giveRealStressVector_3d(FloatArray &answer,
         epspN.zero();
     }
 
+    FloatArrayF<6> stress;
+
     // loop over microplanes
     FloatArray sigN(numberOfMicroplanes);
     IntArray plState(numberOfMicroplanes);
     for ( int imp = 1; imp <= numberOfMicroplanes; imp++ ) {
-        double epsN = computeNormalStrainComponent(imp, totalStrain);
+        double epsN = computeNormalStrainComponent(imp, strain);
         // evaluate trial stress on the microplane
         double sigTrial = EN * ( epsN - epspN.at(imp) );
         // evaluate the yield stress (from total microplane strain, not from its plastic part)
@@ -105,18 +103,19 @@ M1Material :: giveRealStressVector_3d(FloatArray &answer,
         }
         // add the contribution of the microplane to macroscopic stresses
         for ( int i = 1; i <= 6; i++ ) {
-            answer.at(i) += N [ imp - 1 ] [ i - 1 ] * sigN.at(imp) * microplaneWeights [ imp - 1 ];
+            stress.at(i) += N [ imp - 1 ] [ i - 1 ] * sigN.at(imp) * microplaneWeights [ imp - 1 ];
         }
     }
     // multiply the integral over unit hemisphere by 6
-    answer.times(6);
+    stress *= 6;
 
     // update status
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
     status->letTempNormalMplaneStressesBe(sigN);
     status->letTempNormalMplanePlasticStrainsBe(epspN);
     status->letPlasticStateIndicatorsBe(plState);
+    return stress;
 }
 
 FloatMatrixF<6,6>

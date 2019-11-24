@@ -132,7 +132,7 @@ public:
      * @param gp integration point to update.
      * @param tStep solution step indicating time of update.
      */
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
     int hasBoundedSupport() const override { return 1; }

@@ -316,8 +316,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
         void giveRealStressVector (oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedStrain, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector, std::ref(answer), gp, reducedStrain, tStep); 
         }
-        void giveRealStressVector_3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_3d, std::ref(answer), gp, reducedE, tStep); 
+        FloatArrayF<6> giveRealStressVector_3d(const oofem::FloatArrayF<6> &strain, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_3d, strain, gp, tStep); 
         }
         /// Default implementation relies on giveRealStressVector_3d
         void giveRealStressVector_PlaneStrain(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {

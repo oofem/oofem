@@ -968,13 +968,10 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                         OOFEM_ERROR("Failed to cast StructuralElement.")
                     }
 
-                    FloatArray stressVec;
-
-                    fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
+                    auto stressVec = fe2Mat->giveRealStressVector_3d(smearedJumpStrain, gp, tStep);
                     //printf("stressVec: "); stressVec.printYourself();
 
-
-                    FloatArray trac = {stressVec(0)*crackNormal(0)+stressVec(5)*crackNormal(1), stressVec(5)*crackNormal(0)+stressVec(1)*crackNormal(1)};
+                    FloatArray trac = {stressVec[0]*crackNormal[0]+stressVec[5]*crackNormal[1], stressVec[5]*crackNormal[0]+stressVec[1]*crackNormal[1]};
 
                     ////////////////////////////////////////////////////////
                     // Standard part
@@ -989,12 +986,11 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                     answer.add(dA, NTimesT);
 
                     if ( mIncludeBulkCorr ) {
-                        FloatArray stressVecBulk;
-                        bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
+                        auto stressVecBulk = bulkMat->giveRealStressVector_3d(smearedBulkStrain, bulk_gp, tStep);
 
                         ////////////////////////////////////////////////////////
                         // Non-standard jump part
-                        FloatArray stressV4 = {stressVec(0)-stressVecBulk(0), stressVec(1)-stressVecBulk(1), stressVec(2)-stressVecBulk(2), stressVec(5)-stressVecBulk(5)};
+                        FloatArray stressV4 = {stressVec[0]-stressVecBulk[0], stressVec[1]-stressVecBulk[1], stressVec[2]-stressVecBulk[2], stressVec[5]-stressVecBulk[5]};
                         FloatArray BTimesT;
                         BTimesT.beTProductOf(BAvg, stressV4);
                         answer.add(1.0*dA*l_s, BTimesT);

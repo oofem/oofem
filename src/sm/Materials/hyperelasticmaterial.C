@@ -98,12 +98,10 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode, GaussPoin
 }
 
 
-void
-HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+HyperElasticMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    
-    FloatArrayF<6> strain = totalStrain;
     
     auto thermalStrain = computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
     auto elasticStrain = strain - thermalStrain;
@@ -132,7 +130,7 @@ HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(stress);
     
-    answer = stress;
+    return stress;
 }
 
 

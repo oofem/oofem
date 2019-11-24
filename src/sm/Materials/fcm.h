@@ -220,8 +220,12 @@ public:
 
     virtual void initializeCrack(GaussPoint *gp, TimeStep *tStep, FloatMatrix &base, int nCrack);
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<FCMMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
     void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override

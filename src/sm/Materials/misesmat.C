@@ -142,30 +142,23 @@ MisesMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
 }
 
 
-void
-MisesMat :: giveRealStressVector_3d(FloatArray &answer,
-                                    GaussPoint *gp,
-                                    const FloatArray &totalStrain,
-                                    TimeStep *tStep)
+FloatArrayF<6>
+MisesMat :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                    TimeStep *tStep) const
 {
     auto status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     // subtract stress independent part
     FloatArray strainR(6);
-    this->giveStressDependentPartOfStrainVector(strainR, gp, totalStrain,
-                                                tStep, VM_Total);
+    this->giveStressDependentPartOfStrainVector(strainR, gp, strain, tStep, VM_Total);
 
     this->performPlasticityReturn(gp, strainR, tStep);
     double omega = computeDamage(gp, tStep);
-    answer = status->giveTempEffectiveStress();
-    answer.times(1 - omega);
+    auto stress = status->giveTempEffectiveStress() * (1 - omega);
     status->setTempDamage(omega);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
+    return stress;
 }
-
-
-
-
 
 
 void

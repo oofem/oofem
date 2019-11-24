@@ -150,8 +150,8 @@ public:
     FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp,
                                        TimeStep *tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const override;
 
     FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp,
                                               TimeStep *tStep) const override;

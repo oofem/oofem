@@ -89,8 +89,8 @@ public:
                                             GaussPoint * gp,
                                             TimeStep * tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *) override
-    { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &, GaussPoint *, TimeStep *) const override
+    { OOFEM_ERROR("not implemented, this material is designed for large strains only"); return zeros<6>(); }
     FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// transformation matrices

@@ -117,28 +117,28 @@ public:
     /**
      * Computes the length of normal strain vector on given microplane.
      */
-    double computeNormalStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeNormalStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the normal volumetric component of macro strain on given microplane.
      */
-    double computeNormalVolumetricStrainComponent(const FloatArray &macroStrain);
+    double computeNormalVolumetricStrainComponent(const FloatArray &macroStrain) const;
     /**
      * Computes the normal deviatoric component of macro strain on given microplane.
      */
-    double computeNormalDeviatoricStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeNormalDeviatoricStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the shear component (in m direction) of macro strain on given microplane.
      */
-    double computeShearMStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeShearMStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the shear component (in l direction) of macro strain on given microplane.
      */
-    double computeShearLStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeShearLStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the vector of all micro stress components (Ev, En, Em, El) of macro strain
      * vector on given microplane.
      */
-    MicroplaneState computeStrainVectorComponents(int mnumber, const FloatArray &macroStrain);
+    MicroplaneState computeStrainVectorComponents(int mnumber, const FloatArray &macroStrain) const;
 
 
     /**
@@ -146,7 +146,7 @@ public:
      * @param mplane Microplane.
      * @return Integration weight of given microplane.
      */
-    double giveMicroplaneIntegrationWeight(int mnumber);
+    double giveMicroplaneIntegrationWeight(int mnumber) const;
 
     /**
      * Initializes internal data (integration weights,

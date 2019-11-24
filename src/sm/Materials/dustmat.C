@@ -216,15 +216,11 @@ DustMaterial :: initializeFrom(InputRecord &ir)
     solveQ0(q0);
 }
 
-void
-DustMaterial :: giveRealStressVector_3d(FloatArray &answer,
-                                     GaussPoint *gp,
-                                     const FloatArray &totalStrain,
-                                     TimeStep *tStep)
+FloatArrayF<6>
+DustMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain,
+                                        GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< DustMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArrayF<6> strain = totalStrain;
 
     // Initialize temp variables for this Gauss point
     this->initTempStatus(gp);
@@ -240,7 +236,7 @@ DustMaterial :: giveRealStressVector_3d(FloatArray &answer,
     status->letTempStrainVectorBe(strain);
 
     // pass the correct form of stressVector to giveRealStressVector
-    answer = status->giveTempStressVector();
+    return status->giveTempStressVector();
 }
 
 void

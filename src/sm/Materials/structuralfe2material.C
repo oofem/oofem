@@ -100,9 +100,8 @@ StructuralFE2Material :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+StructuralFE2Material :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     auto ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
 
@@ -115,13 +114,14 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
 
     ms->setTimeStep(tStep);
     // Set input
-    ms->giveBC()->setPrescribedGradientVoigt(totalStrain);
+    ms->giveBC()->setPrescribedGradientVoigt(strain);
     // Solve subscale problem
     ms->giveRVE()->solveYourselfAt(tStep);
     // Post-process the stress
     FloatArray stress;
     ms->giveBC()->computeField(stress, tStep);
 
+    FloatArrayF<6> answer;
     if ( stress.giveSize() == 6 ) {
         answer = stress;
     } else if ( stress.giveSize() == 9 ) {
@@ -132,13 +132,14 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
         // This needs to be cleared up and made consistent, to take out the guesswork on what computeField() actually computes.
         answer = {stress[0], stress[1], 0., 0., 0., 0.5*(stress[2]+stress[3])};
     } else {
-        StructuralMaterial::giveFullSymVectorForm(answer, stress, gp->giveMaterialMode() );
+        answer = {stress[0], 0., 0., 0., 0., 0.};
     }
 
     // Update the material status variables
     ms->letTempStressVectorBe(answer);
-    ms->letTempStrainVectorBe(totalStrain);
+    ms->letTempStrainVectorBe(strain);
     ms->markOldTangent(); // Mark this so that tangent is reevaluated if they are needed.
+    return answer;
 }
 
 
@@ -154,16 +155,15 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(MatResponseMode mode, Gau
         FloatArrayF<6> sig = status->giveTempStressVector();
 
         FloatMatrixF<6,6> answer;
-        FloatArray sigPert(6);
         for(int i = 0; i < 6; i++) {
             // Add a small perturbation to the strain
             auto epsPert = eps;
             epsPert[i] += h;
 
-            const_cast<StructuralFE2Material*>(this)->giveRealStressVector_3d(sigPert, gp, epsPert, tStep);
-            answer.setColumn((FloatArrayF<6>(sigPert) - sig) / h, i);
+            auto sigPert = const_cast<StructuralFE2Material*>(this)->giveRealStressVector_3d(epsPert, gp, tStep);
+            answer.setColumn((sigPert - sig) / h, i);
         }
-        const_cast<StructuralFE2Material*>(this)->giveRealStressVector_3d(sigPert, gp, eps, tStep);
+        const_cast<StructuralFE2Material*>(this)->giveRealStressVector_3d(eps, gp, tStep);
         return answer;
 
     } else {

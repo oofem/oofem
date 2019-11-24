@@ -42,14 +42,14 @@
 namespace oofem {
 
 double
-MicroplaneMaterial :: giveMicroplaneIntegrationWeight(int mnumber)
+MicroplaneMaterial :: giveMicroplaneIntegrationWeight(int mnumber) const
 {
     return microplaneWeights [ mnumber - 1 ];
 }
 
 double
 MicroplaneMaterial :: computeNormalStrainComponent(int mnumber,
-                                                   const FloatArray &macroStrain)
+                                                   const FloatArray &macroStrain) const
 {
     double en = 0.0;
     for ( int i = 0; i < 6; i++ ) {
@@ -60,14 +60,14 @@ MicroplaneMaterial :: computeNormalStrainComponent(int mnumber,
 }
 
 double
-MicroplaneMaterial :: computeNormalVolumetricStrainComponent(const FloatArray &macroStrain)
+MicroplaneMaterial :: computeNormalVolumetricStrainComponent(const FloatArray &macroStrain) const
 {
     return ( macroStrain.at(1) + macroStrain.at(2) + macroStrain.at(3) ) / 3.0;
 }
 
 double
 MicroplaneMaterial :: computeNormalDeviatoricStrainComponent(int mnumber,
-                                                             const FloatArray &macroStrain)
+                                                             const FloatArray &macroStrain) const
 {
     return this->computeNormalStrainComponent(mnumber, macroStrain) -
            this->computeNormalVolumetricStrainComponent(macroStrain);
@@ -75,7 +75,7 @@ MicroplaneMaterial :: computeNormalDeviatoricStrainComponent(int mnumber,
 
 double
 MicroplaneMaterial :: computeShearMStrainComponent(int mnumber,
-                                                   const FloatArray &macroStrain)
+                                                   const FloatArray &macroStrain) const
 {
     double em = 0.0;
     for ( int i = 0; i < 6; i++ ) {
@@ -87,7 +87,7 @@ MicroplaneMaterial :: computeShearMStrainComponent(int mnumber,
 
 double
 MicroplaneMaterial :: computeShearLStrainComponent(int mnumber,
-                                                   const FloatArray &macroStrain)
+                                                   const FloatArray &macroStrain) const
 {
     double el = 0.0;
 
@@ -100,7 +100,7 @@ MicroplaneMaterial :: computeShearLStrainComponent(int mnumber,
 
 MicroplaneState
 MicroplaneMaterial :: computeStrainVectorComponents(int mnumber,
-                                                    const FloatArray &macroStrain)
+                                                    const FloatArray &macroStrain) const
 {
     MicroplaneState e;
 

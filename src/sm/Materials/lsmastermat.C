@@ -108,8 +108,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF
     }
 
     auto SethHillStrainVector = to_voigt_strain(SethHillStrain);
-    FloatArray stressVector;
-    const_cast< StructuralMaterial * >(sMat)->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
+    auto stressVector = sMat->giveRealStressVector_3d(SethHillStrainVector, gp, tStep);
 
     auto T = this->constructTransformationMatrix(eVecs);
     stressVector.at(4) = 2;

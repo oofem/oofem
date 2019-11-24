@@ -151,9 +151,7 @@ AbaqusUserMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussP
     auto ms = dynamic_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     if ( !ms->hasTangent() ) { ///@todo Make this hack fit more nicely into OOFEM in general;
         // Evaluating the function once, so that the tangent can be obtained.
-        FloatArray stress(6), strain(6);
-        strain.zero();
-        const_cast<AbaqusUserMaterial*>(this)->giveRealStressVector_3d(stress, gp, strain, tStep);
+        const_cast<AbaqusUserMaterial*>(this)->giveRealStressVector_3d(zeros<6>(), gp, tStep);
     }
 
     return ms->giveTempTangent();
@@ -245,8 +243,9 @@ AbaqusUserMaterial :: givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, Gauss
     return dPdF3D({0, 1, 2, 5, 8}, {0, 1, 2, 5, 8});
 }
 
-void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<6>
+AbaqusUserMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                              TimeStep *tStep) const
 {
     auto ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
     /* User-defined material name, left justified. Some internal material models are given names starting with
@@ -261,7 +260,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     int ntens = ndi + nshr;
     FloatArrayF<6> old_strain = ms->giveStrainVector();
     FloatArrayF<6> old_stress = initialStress + ms->giveStressVector();
-    auto strainIncrement = FloatArrayF<6>(strain) - old_strain;
+    auto strainIncrement = strain - old_strain;
     auto state = ms->giveStateVector();
     FloatMatrixF<6,6> abq_jacobian;
     int numProperties = this->properties.giveSize();
@@ -358,12 +357,12 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
                & dtemp, // DTEMP
                & predef, // PREDEF
                & dpred, // DPRED
-               this->cmname, // CMNAME
+               const_cast<AbaqusUserMaterial*>(this)->cmname, // CMNAME
                & ndi, // NDI
                & nshr, // NSHR
                & ntens, // NTENS
-               & numState, // NSTATV
-               properties.givePointer(), // PROPS
+               const_cast<int*>(& numState), // NSTATV
+               const_cast<AbaqusUserMaterial*>(this)->properties.givePointer(), // PROPS
                & numProperties, // NPROPS
                coords.givePointer(), // COORDS
                drot.givePointer(), // DROT
@@ -387,7 +386,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     ms->letTempStressVectorBe(stress);
     ms->letTempStateVectorBe(state);
     ms->letTempTangentBe(jacobian);
-    answer = stress;
+    return stress;
 }
 
 

@@ -174,8 +174,12 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep) override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<MPlasticMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
     void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override

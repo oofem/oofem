@@ -172,7 +172,7 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_3d
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·

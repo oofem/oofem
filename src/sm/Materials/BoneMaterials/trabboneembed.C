@@ -46,9 +46,9 @@ TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
 { }
 
 
-void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *tStep)
+double TrabBoneEmbed :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
-    tempAlpha = 0.;
+    return 0.;
 }
 
 
@@ -65,7 +65,7 @@ TrabBoneEmbed :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint 
 
 
 void
-TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
+TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &totalStrain) const
 {
     auto status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
 
@@ -75,7 +75,7 @@ TrabBoneEmbed :: performPlasticityReturn(GaussPoint *gp, const FloatArray &total
 
 
 double
-TrabBoneEmbed :: computeDamageParam(double alpha, GaussPoint *gp)
+TrabBoneEmbed :: computeDamageParam(double alpha, GaussPoint *gp) const
 {
     double tempDam = 0.0;
 
@@ -84,12 +84,9 @@ TrabBoneEmbed :: computeDamageParam(double alpha, GaussPoint *gp)
 
 
 double
-TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
+TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *tStep) const
 {
-    double tempAlpha;
-
-    computeCumPlastStrain(tempAlpha, gp, tStep);
-
+    double tempAlpha = computeCumPlastStrain(gp, tStep);
     double tempDam = computeDamageParam(tempAlpha, gp);
 
     //  double dam=0.0;
@@ -98,14 +95,11 @@ TrabBoneEmbed :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 }
 
 
-void
-TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &totalStrain,
-                                         TimeStep *tStep)
+FloatArrayF<6>
+TrabBoneEmbed :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                         TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
-
-    FloatArrayF<6> strain = totalStrain;
 
     auto compliance = this->constructIsoComplTensor(eps0, nu0);
     auto elasticity = inv(compliance);
@@ -121,11 +115,11 @@ TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
 
     double tempTSED = 0.5 * dot(strain, stress);
 
-    answer = stress;
     status->setTempDam(tempDam);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
     status->setTempTSED(tempTSED);
+    return stress;
 }
 
 

@@ -57,8 +57,8 @@ public:
      */
     MicroplaneMaterial_Bazant(int n, Domain * d);
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const override;
 
     /**
     * Computes stress on given microplane (volumetric, deviatoric normal stresses and shead stresses)

@@ -108,7 +108,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     //crossSection->giveFullCharacteristicVector(totalStrainVector, gp, reducedTotalStrainVector);
 
     // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, tStep);
+    equivStrain = this->computeEquivalentStrain(reducedTotalStrainVector, gp, tStep);
 
     if ( llcriteria == idm_strainLevelCR ) {
         // compute value of loading function if strainLevel crit apply
@@ -123,13 +123,13 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
             tempKappa = equivStrain;
             this->initDamaged(tempKappa, reducedTotalStrainVector, gp);
             // evaluate damage parameter
-            this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
+            omega = this->computeDamageParam(tempKappa, reducedTotalStrainVector, gp);
         }
     } else if ( llcriteria == idm_damageLevelCR ) {
         // evaluate damage parameter first
         tempKappa = equivStrain;
         this->initDamaged(tempKappa, reducedTotalStrainVector, gp);
-        this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
+        omega = this->computeDamageParam(tempKappa, reducedTotalStrainVector, gp);
         if ( omega < status->giveDamage() ) {
             // unloading takes place
             omega = status->giveDamage();

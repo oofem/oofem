@@ -150,7 +150,7 @@ void StructuralMaterialEvaluator :: solveYourself()
 #endif
 
                 strain.printYourself("Macro strain guess");
-                mat->giveRealStressVector_3d(stress, gp, strain, tStep);
+                stress = mat->giveRealStressVector_3d(strain, gp, tStep);
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressC.at(j) - stress.at( sControl.at(j) );
                 }

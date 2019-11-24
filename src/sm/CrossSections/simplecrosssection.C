@@ -53,8 +53,8 @@ REGISTER_CrossSection(SimpleCrossSection);
 void
 SimpleCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->giveRealStressVector_3d(answer, gp, strain, tStep);
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->giveRealStressVector_3d(strain, gp, tStep);
 }
 
 void

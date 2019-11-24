@@ -98,28 +98,29 @@ LinearElasticMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *t
 }
 
 
-void
-LinearElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain_, TimeStep *tStep)
+FloatArrayF<6>
+LinearElasticMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    FloatArrayF<6> strain = strain_;
 
     auto d = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
 
+    FloatArrayF<6> stress;
     if ( this->castingTime < 0. ) { // no changes in material stiffness ->> total formulation
         auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
         auto strainVector = strain - thermalStrain;
-        answer = dot(d, strainVector);
+        stress = dot(d, strainVector);
     } else { // changes in material stiffness ->> incremental formulation
         auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Incremental);
         auto strainIncrement = strain - thermalStrain - FloatArrayF<6>(status->giveStrainVector());
 
-        answer = dot(d, strainIncrement) + status->giveStressVector();
+        stress = dot(d, strainIncrement) + status->giveStressVector();
     }
 
     // update gp
     status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStressVectorBe(stress);
+    return stress;
 }
 
 

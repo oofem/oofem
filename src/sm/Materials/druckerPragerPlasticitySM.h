@@ -233,10 +233,8 @@ public:
     const char *giveClassName() const override { return "DruckerPragerPlasticitySM"; }
     const char *giveInputRecordName() const override { return _IFT_DruckerPragerPlasticitySM_Name; }
 
-    void giveRealStressVector_3d(FloatArray &answer,
-                              GaussPoint *gp,
-                              const FloatArray &strainVector,
-                              TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const override;
 
     FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
@@ -246,7 +244,7 @@ public:
      * @param gp Gauss point.
      * @param strain Strain vector of this Gauss point.
      */
-    void performLocalStressReturn(GaussPoint *gp, const FloatArray &strain);
+    void performLocalStressReturn(GaussPoint *gp, const FloatArrayF<6> &strain) const;
     /**
      * Check if the trial stress state falls within the vertex region.
      * @param eM Elasticity modulus.
@@ -254,21 +252,21 @@ public:
      * @param kM Bulk modulus.
      * @return True for vertex case and false if regular stress return has to be used.
      */
-    bool checkForVertexCase(double eM, double gM, double kM, double trialStressJTwo, double volumetricStress, double tempKappa);
+    bool checkForVertexCase(double eM, double gM, double kM, double trialStressJTwo, double volumetricStress, double tempKappa) const;
     /**
      * Perform stress return for regular case, i.e. if the trial stress state does not lie within the vertex region.
      * @param eM Elasticity modulus.
      * @param gM Shear modulus.
      * @param kM Bulk modulus.
      */
-    void performRegularReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa);
+    void performRegularReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArrayF<6> &stressDeviator, double &volumetricStress, double &tempKappa) const;
     /**
      * Perform stress return for vertex case, i.e. if the trial stress state lies within the vertex region.
      * @param eM Elasticity modulus.
      * @param gM Shear modulus.
      * @param kM Bulk modulus.
      */
-    void performVertexReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa, double volumetricElasticTrialStrain, double kappa);
+    void performVertexReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArrayF<6> &stressDeviator, double &volumetricStress, double &tempKappa, double volumetricElasticTrialStrain, double kappa) const;
     /**
      * Compute the yield value based on stress and hardening variable.
      * @param meanStress 1/3 of trace of sigma.

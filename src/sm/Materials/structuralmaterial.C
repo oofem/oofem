@@ -82,9 +82,9 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     ///@todo Move this to StructuralCrossSection ?
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
-        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_3d(reducedStrain, gp, tStep);
     } else if ( mode == _3dDegeneratedShell ) {
-        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_3d(reducedStrain, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
         this->giveRealStressVector_PlaneStrain(answer, gp, reducedStrain, tStep);
     } else if ( mode == _PlaneStress ) {
@@ -111,8 +111,8 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<6>
+StructuralMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("3d mode not supported");
 }
@@ -130,7 +130,7 @@ StructuralMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, Gauss
 {
     FloatArray vE, vS;
     StructuralMaterial :: giveFullSymVectorForm(vE, reducedStrain, _PlaneStrain);
-    this->giveRealStressVector_3d(vS, gp, vE, tStep);
+    vS = this->giveRealStressVector_3d(vE, gp, tStep);
     StructuralMaterial :: giveReducedSymVectorForm(answer, vS, _PlaneStrain);
 }
 
@@ -160,15 +160,15 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     }
 
     // Iterate to find full vE.
-    for ( int k = 0; k < 10; k++ ) { // Allow for a generous 100 iterations.
-        this->giveRealStressVector_3d(vS, gp, vE, tStep);
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        vS = this->giveRealStressVector_3d(vE, gp, tStep);
         // For debugging the iterations:
         //vE.printYourself("vE");
         //vS.printYourself("vS");
         reducedvS.beSubArrayOf(vS, stressControl);
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( reducedvS.computeNorm() <= 1e-6 * vS.computeNorm() && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
@@ -181,9 +181,10 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
         vE.assemble(increment_vE, stressControl);
+        //vE.printYourself("vE");
     }
 
-    OOFEM_WARNING("Iteration did not converge");
+    OOFEM_ERROR("Iteration did not converge");
     answer.clear();
 }
 
@@ -216,7 +217,7 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer
 
     // Iterate to find full vE.
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        this->giveRealStressVector_3d(answer, gp, vE, tStep);
+        answer = this->giveRealStressVector_3d(vE, gp, tStep);
         // step 0: answer = full stress vector
         // step n: answer = {., ., ->0, ., ., .}
         reducedvS.beSubArrayOf(answer, stressControl);
@@ -320,17 +321,7 @@ StructuralMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, Gauss
     auto F = from_voigt_form(vF);
     auto E = 0.5 * (Tdot(F, F) - eye<3>());
     auto vE = to_voigt_strain(E);
-
-#if 1
-    /// FIXME: Temporary const-cast; these functions should be made const. 
-    /// This workaround is just to limit the size of a single refactoring.
-    auto self = const_cast<StructuralMaterial*>(this);
-    FloatArray s;
-    self->giveRealStressVector_3d(s, gp, vE, tStep);
-    FloatArrayF<6> vS = s;
-#else
     auto vS = this->giveRealStressVector_3d(vE, gp, tStep);
-#endif
 
     // Compute first PK stress from second PK stress
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );

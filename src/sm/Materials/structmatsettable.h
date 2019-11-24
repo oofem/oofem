@@ -67,7 +67,7 @@ public:
     const char *giveClassName() const override { return "StructuralMaterialSettable"; }
     const char *giveInputRecordName() const override { return _IFT_StructuralMaterialSettable_Name; }
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 

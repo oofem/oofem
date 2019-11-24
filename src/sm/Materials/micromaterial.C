@@ -107,7 +107,7 @@ void MicroMaterial :: initializeFrom(InputRecord &ir)
 
 //original pure virtual function has to be declared here
 //this function should not be used, internal forces are calculated based on reactions not stresses in GPs
-void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6> MicroMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     //perform average over microproblem
     //     int index;
@@ -120,6 +120,7 @@ void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
     //     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     OOFEM_ERROR("Should not be called, use giveInternalForcesVector instead");
+    return zeros<6>();
 
     //     int nelem = microDomain->giveNumberOfElements();
     //     //int nnodes = microDomain->giveNumberOfDofManagers();

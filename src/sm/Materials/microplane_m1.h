@@ -99,8 +99,7 @@ public:
      */
     M1Material(int n, Domain *d);
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "M1Material"; }

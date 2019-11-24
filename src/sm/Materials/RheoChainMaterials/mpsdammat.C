@@ -311,6 +311,7 @@ MPSDamMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, const
         status->setTempDamage(0.);
 #endif
 
+        answer = tempEffectiveStress;
         return;
     }
 

@@ -96,7 +96,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_MicroMaterial_Name; }
     const char *giveClassName() const override { return "MicroMaterial"; }
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

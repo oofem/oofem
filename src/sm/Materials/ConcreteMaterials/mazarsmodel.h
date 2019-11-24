@@ -113,8 +113,8 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
-    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
+    double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
+    double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsMaterialStatus(gp); }
 
@@ -127,7 +127,7 @@ protected:
      *  @param totalStrainVector Current total strain vector,
      *  @param gp Integration point,
      */
-    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const override;
     /*
      * Computes elastic stiffness for normal stress components.
      * @param answer Result of size (3,3).
@@ -141,10 +141,10 @@ protected:
      *                                    GaussPoint *gp, TimeStep *tStep);
      */
 
-    int giveNumberOfSpatialDimensions(GaussPoint *gp);
-    void giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp);
-    double computeGt(double kappa, GaussPoint *gp);
-    double computeGc(double kappa, GaussPoint *gp);
+    int giveNumberOfSpatialDimensions(GaussPoint *gp) const;
+    void giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp) const;
+    double computeGt(double kappa, GaussPoint *gp) const;
+    double computeGc(double kappa, GaussPoint *gp) const;
 };
 } // end namespace oofem
 #endif // mazarsmodel_h

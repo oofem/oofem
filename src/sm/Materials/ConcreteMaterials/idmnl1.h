@@ -117,7 +117,7 @@ public:
 
     Interface *giveInterface(InterfaceType it) override;
 
-    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
     /**
      * Function used in the Stress based nonlocal variation.In this function the ratio of the first two
      * eigenvalues is and the angle of the first eigenvector with respect to the horizontal axis is calculated
@@ -127,7 +127,7 @@ public:
      * @param gp Gauss Point whose nonlocal interactions domain is modified
      * @param flag showing whether stress based averaging is activated (flag=true).For zero strain states the stress-based averaging is deactivated (flag=false)
      */
-    void computeAngleAndSigmaRatio(double &nx, double &ny, double &ratio, GaussPoint *gp, bool &flag);
+    void computeAngleAndSigmaRatio(double &nx, double &ny, double &ratio, GaussPoint *gp, bool &flag) const;
     /**
      * Function used to compute the new weight based on stress-based averaging.
      * @param nx x-component of the first eigenvector of effective stress.
@@ -138,16 +138,16 @@ public:
      * @param weight Original weight.
      * @return New weight based on stress-based averaging.
      */
-    double computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight);
-    double computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp);
+    double computeStressBasedWeight(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp, double weight) const;
+    double computeStressBasedWeightForPeriodicCell(double &nx, double &ny, double &ratio, GaussPoint *gp, GaussPoint *jGp) const;
 
-    void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-    { IsotropicDamageMaterial1 :: computeEquivalentStrain(kappa, strain, gp, tStep); }
+    double computeLocalEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
+    { return IsotropicDamageMaterial1 :: computeEquivalentStrain(strain, gp, tStep); }
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
-    double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
+    double giveNonlocalMetricModifierAt(GaussPoint *gp) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -156,7 +156,7 @@ public:
     void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep) override;
 #endif
 
-    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
+    double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const override;
 
     /**@name Services required by NonlocalMaterialStiffnessInterface and related ones to support Nonlocal Stiffness*/
     //@{
@@ -210,7 +210,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IDNLMaterialStatus(gp); }
 
 protected:
-    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override { }
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const override { }
 };
 } // end namespace oofem
 #endif // idmnl1_h

@@ -110,15 +110,14 @@ MazarsMaterial :: initializeFrom(InputRecord &ir)
 }
 
 
-void
-MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+double
+MazarsMaterial :: computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     double posNorm = 0.0;
     FloatArray principalStrains, strainb;
 
     if ( strain.isEmpty() ) {
-        kappa = 0.;
-        return;
+        return 0.;
     }
 
     StructuralMaterial :: giveFullSymVectorForm( strainb, strain, gp->giveMaterialMode() );
@@ -157,7 +156,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
         }
     }
 
-    kappa = sqrt(posNorm);
+    return sqrt(posNorm);
 }
 
 /*
@@ -184,7 +183,7 @@ MazarsMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strai
  */
 
 int
-MazarsMaterial :: giveNumberOfSpatialDimensions(GaussPoint *gp)
+MazarsMaterial :: giveNumberOfSpatialDimensions(GaussPoint *gp) const
 {
     if ( gp->giveMaterialMode() == _1dMat ) {
         return 1;
@@ -196,7 +195,7 @@ MazarsMaterial :: giveNumberOfSpatialDimensions(GaussPoint *gp)
 }
 
 void
-MazarsMaterial :: giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp)
+MazarsMaterial :: giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp) const
 {
     int ndim = giveNumberOfSpatialDimensions(gp);
     answer.resize(ndim, ndim);
@@ -211,8 +210,8 @@ MazarsMaterial :: giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussP
     }
 }
 
-void
-MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
+double
+MazarsMaterial :: computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const
 {
     // positive_flag = 0, negat_count = 0;
     FloatMatrix de, ce;
@@ -220,8 +219,7 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
     double gt, gc, alpha_t, alpha_c, alpha, eqStrain2;
 
     if ( kappa <= this->e0 ) { // strain below damage threshold
-        omega = 0.0;
-        return;
+        return 0.0;
     }
 
     // strain above damage threshold
@@ -338,14 +336,15 @@ MazarsMaterial :: computeDamageParam(double &omega, double kappa, const FloatArr
         alpha_c = 0.;
     }
 
-    omega = alpha_t * gt + alpha_c * gc;
+    auto omega = alpha_t * gt + alpha_c * gc;
     if ( omega > 1.0 ) {
         omega = 1.0;
     }
+    return omega;
 }
 
 // evaluation of tensile damage
-double MazarsMaterial :: computeGt(double kappa, GaussPoint *gp)
+double MazarsMaterial :: computeGt(double kappa, GaussPoint *gp) const
 {
     double gt;
     if ( hReft <= 0. ) { // material law considered as independent of element size
@@ -393,7 +392,7 @@ double MazarsMaterial :: computeGt(double kappa, GaussPoint *gp)
 }
 
 // evaluation of compression damage
-double MazarsMaterial :: computeGc(double kappa, GaussPoint *gp)
+double MazarsMaterial :: computeGc(double kappa, GaussPoint *gp) const
 {
     double gc;
     if ( hRefc <= 0. ) { // material law considered as independent of element size
@@ -425,7 +424,7 @@ double MazarsMaterial :: computeGc(double kappa, GaussPoint *gp)
 }
 
 void
-MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp)
+MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const
 {
     int indmin = 1, indmax = 1;
     double le;

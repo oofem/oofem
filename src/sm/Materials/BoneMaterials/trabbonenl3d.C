@@ -59,7 +59,7 @@ TrabBoneNL3D :: TrabBoneNL3D(int n, Domain *d) : TrabBone3D(n, d), StructuralNon
 
 
 void
-TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     FloatArray SDstrainVector;
@@ -244,15 +244,13 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 }
 
 
-void
-TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                        const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+TrabBoneNL3D :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                        TimeStep *tStep) const
 {
     auto nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-
-    FloatArrayF<6> strain = totalStrain;
 
     performPlasticityReturn(gp, strain, tStep);
     auto tempDam = computeDamage(gp, tStep);
@@ -272,10 +270,10 @@ TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
         stress += computeDensificationStress(gp, strain, tStep);
     }
 
-    answer = stress;
     nlStatus->setTempDam(tempDam);
-    nlStatus->letTempStrainVectorBe(totalStrain);
-    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->letTempStrainVectorBe(strain);
+    nlStatus->letTempStressVectorBe(stress);
+    return stress;
 }
 
 
