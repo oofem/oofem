@@ -74,8 +74,8 @@ protected:
     double tempVolumetricPlasticStrain = 0.;
 
     /// Deviatoric of plastic strain.
-    FloatArray plasticStrainDeviator;
-    FloatArray tempPlasticStrainDeviator;
+    FloatArrayF<6> plasticStrainDeviator;
+    FloatArrayF<6> tempPlasticStrainDeviator;
 
     /// Hardening variable.
     double kappa = 0.;
@@ -102,18 +102,19 @@ public:
      * Get the full plastic strain vector from the material status.
      * @param answer Plastic strain vector.
      */
-    void  givePlasticStrainVector(FloatArray &answer) const
+    FloatArrayF<6> givePlasticStrainVector() const
     {
-        answer = plasticStrainDeviator;
-        answer[0] += volumetricPlasticStrain;
-        answer[1] += volumetricPlasticStrain;
-        answer[2] += volumetricPlasticStrain;
+        auto plasticStrain = plasticStrainDeviator;
+        plasticStrain[0] += volumetricPlasticStrain;
+        plasticStrain[1] += volumetricPlasticStrain;
+        plasticStrain[2] += volumetricPlasticStrain;
+        return plasticStrain;
     }
     /**
      * Get the plastic strain deviator from the material status.
      * @return Plastic strain deviator.
      */
-    const FloatArray &givePlasticStrainDeviator() const { return plasticStrainDeviator; }
+    const FloatArrayF<6> &givePlasticStrainDeviator() const { return plasticStrainDeviator; }
     /**
      * Get the volumetric plastic strain from the material status.
      * @return Volumetric plastic strain.
@@ -134,18 +135,19 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @param answer Temp value of plastic strain vector.
      */
-    void giveTempPlasticStrainVector(FloatArray &answer) const
+    FloatArrayF<6> giveTempPlasticStrainVector() const
     {
-        answer = tempPlasticStrainDeviator;
-        answer[0] += tempVolumetricPlasticStrain;
-        answer[1] += tempVolumetricPlasticStrain;
-        answer[2] += tempVolumetricPlasticStrain;
+        auto plasticStrain = tempPlasticStrainDeviator;
+        plasticStrain[0] += tempVolumetricPlasticStrain;
+        plasticStrain[1] += tempVolumetricPlasticStrain;
+        plasticStrain[2] += tempVolumetricPlasticStrain;
+        return plasticStrain;
     }
     /**
      * Get the temp value of the plastic strain deviator from the material status.
      * @param answer Temp value of plastic strain deviator.
      */
-    const FloatArray &giveTempPlasticStrainDeviator() const { return tempPlasticStrainDeviator; }
+    const FloatArrayF<6> &giveTempPlasticStrainDeviator() const { return tempPlasticStrainDeviator; }
     /**
      * Get the temp value of the volumetric strain deviator from the material status.
      * @return Temp value of volumetric plastic strain
@@ -166,7 +168,7 @@ public:
      * Assign the temp value of deviatoric plastic strain.
      * @param v New temp value of deviatoric plastic strain.
      */
-    void letTempPlasticStrainDeviatorBe(const FloatArray &v) { tempPlasticStrainDeviator = v; }
+    void letTempPlasticStrainDeviatorBe(const FloatArrayF<6> &v) { tempPlasticStrainDeviator = v; }
     /**
      * Assign the temp value of volumetric plastic strain.
      * @param v New temp value of volumetric plastic strain.
