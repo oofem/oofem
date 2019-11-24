@@ -992,11 +992,10 @@ ConcreteDPM2 :: computeDeltaPlasticStrainNormTension(double tempKappaD, double k
 {
     auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    const FloatArray &tempPlasticStrain = status->giveTempPlasticStrain();
-    const FloatArray &plasticStrain = status->givePlasticStrain();
+    const auto &tempPlasticStrain = status->giveTempPlasticStrain();
+    const auto &plasticStrain = status->givePlasticStrain();
 
-    FloatArray deltaPlasticStrain = tempPlasticStrain;
-    deltaPlasticStrain.subtract(plasticStrain);
+    auto deltaPlasticStrain = tempPlasticStrain - plasticStrain;
 
     double deltaPlasticStrainNorm = 0;
 
@@ -1007,10 +1006,10 @@ ConcreteDPM2 :: computeDeltaPlasticStrainNormTension(double tempKappaD, double k
         deltaPlasticStrainNorm = 0.;
     } else if ( tempKappaD > e0 * ( 1. - yieldTolDamage ) && kappaD < e0  * ( 1. - yieldTolDamage ) ) {
         factor = ( 1. - ( e0 - kappaD ) / ( tempKappaD - kappaD ) );
-        deltaPlasticStrain.times(factor);
-        deltaPlasticStrainNorm = deltaPlasticStrain.computeNorm();
+        deltaPlasticStrain *= factor;
+        deltaPlasticStrainNorm = norm(deltaPlasticStrain);
     } else {
-        deltaPlasticStrainNorm = deltaPlasticStrain.computeNorm();
+        deltaPlasticStrainNorm = norm(deltaPlasticStrain);
     }
 
     return deltaPlasticStrainNorm;
@@ -1022,15 +1021,10 @@ ConcreteDPM2 :: computeDeltaPlasticStrainNormCompression(double tempAlpha, doubl
 {
     auto status = static_cast< ConcreteDPM2Status * >( this->giveStatus(gp) );
 
-    const FloatArray &tempPlasticStrain = status->giveTempPlasticStrain();
-    const FloatArray &plasticStrain = status->givePlasticStrain();
+    const auto &tempPlasticStrain = status->giveTempPlasticStrain();
+    const auto &plasticStrain = status->givePlasticStrain();
 
-    FloatArray deltaPlasticStrain;
-    deltaPlasticStrain.add(tempAlpha, tempPlasticStrain);
-    for ( int i = 1; i <= deltaPlasticStrain.giveSize(); ++i ) {
-        deltaPlasticStrain.at(i) -= tempAlpha * plasticStrain.at(i);
-    }
-    //deltaPlasticStrain.add(-tempAlpha, plasticStrain);
+    auto deltaPlasticStrain = tempAlpha * (tempPlasticStrain - plasticStrain);
 
     double deltaPlasticStrainNorm = 0;
 
@@ -1039,10 +1033,10 @@ ConcreteDPM2 :: computeDeltaPlasticStrainNormCompression(double tempAlpha, doubl
         deltaPlasticStrainNorm = 0.;
     } else if ( tempKappaD > e0 * ( 1. - yieldTolDamage ) && kappaD < e0 * ( 1. - yieldTolDamage ) ) {
         double factor = ( 1. - ( e0 - kappaD ) / ( tempKappaD - kappaD ) );
-        deltaPlasticStrain.times(factor);
-        deltaPlasticStrainNorm = deltaPlasticStrain.computeNorm();
+        deltaPlasticStrain *= factor;
+        deltaPlasticStrainNorm = norm(deltaPlasticStrain);
     } else {
-        deltaPlasticStrainNorm = deltaPlasticStrain.computeNorm();
+        deltaPlasticStrainNorm = norm(deltaPlasticStrain);
     }
 
     double tempKappaP = status->giveTempKappaP();
@@ -1511,9 +1505,7 @@ ConcreteDPM2 :: computeTempKappa(double kappaInitial,
                                  double sig) const
 {
     //This function is called, if stress state is in vertex case
-    double equivalentDeltaPlasticStrain;
-
-    equivalentDeltaPlasticStrain = sqrt(1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
+    double equivalentDeltaPlasticStrain = sqrt(1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
                                         pow(rhoTrial / ( 2. * gM ), 2.) );
 
     double thetaVertex = M_PI / 3.;
@@ -2365,10 +2357,7 @@ ConcreteDPM2 :: computeAlpha(FloatArrayF<6> &effectiveStressTension,
 
     //Determine the two factors from the stress
 
-    double squareNormOfPrincipalStress = 0.;
-    for ( int i = 1; i <= principalStress.giveSize(); i++ ) {
-        squareNormOfPrincipalStress += pow(principalStress.at(i), 2.);
-    }
+    double squareNormOfPrincipalStress = norm_squared(principalStress);
 
     double alphaTension = 0.;
 
