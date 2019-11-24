@@ -60,7 +60,7 @@ MazarsNLMaterial :: giveInterface(InterfaceType type)
 
 
 void
-MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     /*  Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -68,9 +68,9 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
      * computation. It is therefore necessary only to store local strain in corresponding status.
      * This service is declared at StructuralNonlocalMaterial level.
      */
+    auto nlstatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
     FloatArray SDstrainVector;
     double equivStrain;
-    MazarsNLMaterialStatus *nlstatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
 
@@ -80,26 +80,26 @@ MazarsNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Ga
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     // compute equivalent strain
-    this->computeLocalEquivalentStrain(equivStrain, SDstrainVector, gp, tStep);
+    equivStrain = this->computeLocalEquivalentStrain(SDstrainVector, gp, tStep);
 
     nlstatus->setLocalEquivalentStrainForAverage(equivStrain);
 }
 
 
 
-void
-MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+double
+MazarsNLMaterial :: computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    double nonlocalContribution, nonlocalEquivalentStrain = 0.0;
-    MazarsNLMaterialStatus *nonlocStatus, *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(gp) );
+    double nonlocalEquivalentStrain = 0.0;
 
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(tStep);
 
     // compute nonlocal strain increment first
     for ( auto &lir: *this->giveIPIntegrationList(gp) ) {
-        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(lir.nearGp) );
-        nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
+        auto nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(lir.nearGp) );
+        auto nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
         nonlocalContribution *= lir.weight;
 
         nonlocalEquivalentStrain += nonlocalContribution;
@@ -107,7 +107,7 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
 
     nonlocalEquivalentStrain *= 1. / status->giveIntegrationScale();
     this->endIPNonlocalAverage(gp);  // !
-    kappa = nonlocalEquivalentStrain;
+    return nonlocalEquivalentStrain;
 }
 
 void
@@ -142,7 +142,7 @@ MazarsNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArra
 
 
 void
-MazarsNLMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp)
+MazarsNLMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const
 {
     /*
      * Perfoms initialization, when damage first appear. The Le characteristic length is

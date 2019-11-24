@@ -434,8 +434,8 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    IsotropicGradientDamageMaterialStatus *status = static_cast< IsotropicGradientDamageMaterialStatus * >( this->giveStatus(gp) );
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    auto status = static_cast< IsotropicGradientDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto lmat = this->giveLinearElasticMaterial();
     FloatArray reducedTotalStrainVector, strain;
 
     FloatMatrix de;
@@ -450,7 +450,7 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
 
 
     // compute equivalent strain
-    this->computeEquivalentStrain(localDamageDrivingVariable, reducedTotalStrainVector, gp, tStep);
+    localDamageDrivingVariable = this->computeEquivalentStrain(reducedTotalStrainVector, gp, tStep);
 
     if ( llcriteria == idm_strainLevelCR ) {
         // compute value of loading function if strainLevel crit apply
@@ -458,19 +458,19 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
         if ( f <= 0.0 ) {
             // damage does not grow
             tempKappa = status->giveKappa();
-            damage     = status->giveDamage();
+            damage    = status->giveDamage();
         } else {
             // damage grow
             tempKappa = nonlocalDamageDrivingVariable;
             this->initDamaged(nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
             // evaluate damage parameter
-            this->computeDamageParam(damage, nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
+            damage = this->computeDamageParam(nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
         }
     } else if ( llcriteria == idm_damageLevelCR ) {
         // evaluate damage parameter first
         tempKappa = nonlocalDamageDrivingVariable;
         this->initDamaged(nonlocalDamageDrivingVariable, strain, gp);
-        this->computeDamageParam(damage, nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
+        damage = this->computeDamageParam(nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
         if ( damage < status->giveDamage() ) {
             // unloading takes place
             damage = status->giveDamage();

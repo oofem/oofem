@@ -109,7 +109,7 @@ public:
     void initializeFrom(InputRecord &ir) override;
     Interface *giveInterface(InterfaceType it) override;
 
-    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
     /**
      * Computes the equivalent local strain measure from given strain vector (full form).
      * @param[out] kappa Return parameter, containing the corresponding equivalent strain
@@ -117,16 +117,16 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    void computeLocalEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-    { MazarsMaterial :: computeEquivalentStrain(kappa, strain, gp, tStep); }
+    double computeLocalEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
+    { return MazarsMaterial :: computeEquivalentStrain(strain, gp, tStep); }
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
     double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
     int hasBoundedSupport() const override { return 1; }
     /**
      * Determines the width (radius) of limited support of weighting function
      */
-    virtual void giveSupportRadius(double &radius) { radius = this->R; }
+    virtual double giveSupportRadius() const { return this->R; }
 
     int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override;
@@ -135,7 +135,7 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsNLMaterialStatus(gp); }
 
 protected:
-    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // mazarsmodelnl_h

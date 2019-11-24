@@ -74,17 +74,15 @@ void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray
 }
 
 
-void
-TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode mode, GaussPoint *gp,
-                                            TimeStep *tStep)
+FloatMatrixF<6,6>
+TrabBone3D :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
     if ( mode == ElasticStiffness ) {
         auto compliance = this->constructAnisoComplTensor();
         auto elasticity = inv(compliance);
-        answer = elasticity;
+        return elasticity;
     } else if ( mode == SecantStiffness ) {
         if ( printflag ) {
             printf("secant\n");
@@ -93,12 +91,13 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         auto compliance = this->constructAnisoComplTensor();
         auto elasticity = inv(compliance);
         auto tempDam = status->giveTempDam();
-        answer = elasticity * (1.0 - tempDam);
-    } else if ( mode == TangentStiffness ) {
+        return elasticity * (1.0 - tempDam);
+    } else /*if ( mode == TangentStiffness )*/ {
         double kappa = status->giveKappa();
         double tempKappa = status->giveTempKappa();
         double tempDam = status->giveTempDam();
 
+        FloatMatrixF<6,6> answer;
         if ( tempKappa > kappa ) {
             // plastic loading
             // Imports
@@ -128,9 +127,9 @@ TrabBone3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         if ( g <= 0. ) {
             double factor = gammaL0 * pow(rho, rL) + gammaP0 *pow(rho, rP) * ( tDens - 1 ) * pow(g, tDens - 2);
             // printf("densification");
-            auto bulk = I6_I6 * factor;
-            answer.add(bulk);
+            answer += I6_I6 * factor;
         }
+        return answer;
     }
 }
 
@@ -173,7 +172,7 @@ TrabBone3D :: evaluateCurrentViscousModulus(double deltaKappa, TimeStep *tStep) 
 
 
 void
-TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &strain, TimeStep *tStep)
+TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &strain, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
 
@@ -219,7 +218,7 @@ TrabBone3D :: performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &stra
 
 
 bool
-TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArrayF<6> &tempEffectiveStress, FloatArrayF<6> &tempPlasDef, const FloatArrayF<6> &trialEffectiveStress, const FloatMatrixF<6,6> &elasticity, const FloatMatrixF<6,6> &compliance, TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag)
+TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArrayF<6> &tempEffectiveStress, FloatArrayF<6> &tempPlasDef, const FloatArrayF<6> &trialEffectiveStress, const FloatMatrixF<6,6> &elasticity, const FloatMatrixF<6,6> &compliance, TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag) const
 {
     bool convergence;
 
@@ -231,6 +230,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArrayF<6> &tempEffec
     auto SFS = sqrt( dot(trialEffectiveStress, tempTensor2) );
     auto plasCriterion = SFS + FS - this->evaluateCurrentYieldStress(tempKappa);
 
+    int current_max_num_iter = this->max_num_iter;
     if ( plasCriterion < rel_yield_tol ) {
         // trial stress in elastic domain
         convergence = true;
@@ -309,7 +309,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArrayF<6> &tempEffec
             auto incTempEffectiveStress = dot(SSaTensor, plasFlowDirec * incKappa + toSolveTensor);
 
             if ( lineSearchFlag == 1 ) {
-                max_num_iter = 4000;
+                current_max_num_iter = 4000;
                 double eta = 0.1;
                 beta = 25.e-4;
                 int jMax = 10;
@@ -393,7 +393,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArrayF<6> &tempEffec
 
             flagLoop++;
             convergence = ( fabs(errorF) < rel_yield_tol && errorR < strain_tol );
-        } while ( flagLoop <= max_num_iter && !convergence );
+        } while ( flagLoop <= current_max_num_iter && !convergence );
 
         if ( convergence ) {
             auto plasModulus = evaluateCurrentPlasticModulus(tempKappa + deltaKappa);
@@ -507,7 +507,7 @@ TrabBone3D :: computeDamageParamPrime(double tempKappa) const
 //
 
 double
-TrabBone3D :: computeDamage(GaussPoint *gp, TimeStep *tStep)
+TrabBone3D :: computeDamage(GaussPoint *gp, TimeStep *tStep) const
 {
     double tempKappa = computeCumPlastStrain( gp, tStep);
     double tempDam = computeDamageParam(tempKappa);
@@ -519,7 +519,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp, TimeStep *tStep)
 }
 
 
-double TrabBone3D :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
+double TrabBone3D :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
     return status->giveTempKappa();
@@ -543,13 +543,11 @@ FloatArrayF<6> TrabBone3D :: computeDensificationStress(GaussPoint *gp, const Fl
 }
 
 
-void
-TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+TrabBone3D :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                      TimeStep *tStep) const
 {
     auto status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
-
-    FloatArrayF<6> strain = totalStrain;
 
     this->initTempStatus(gp);
     // compute effective stress using the plasticity model
@@ -572,9 +570,9 @@ TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
 
     // store final damage, strain and stress in status
     status->setTempDam(tempDam);
-    status->letTempStrainVectorBe(totalStrain);
-    answer = stress;
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
+    return stress;
 }
 
 

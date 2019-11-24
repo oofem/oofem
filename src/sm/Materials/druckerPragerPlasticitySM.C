@@ -50,9 +50,7 @@ namespace oofem {
 REGISTER_Material(DruckerPragerPlasticitySM);
 
 DruckerPragerPlasticitySMStatus :: DruckerPragerPlasticitySMStatus(GaussPoint *gp) :
-    StructuralMaterialStatus(gp),
-    plasticStrainDeviator( 6 ),
-    tempPlasticStrainDeviator( 6 )
+    StructuralMaterialStatus(gp)
 {
     stressVector.resize(6);
     strainVector.resize(6);
@@ -110,8 +108,7 @@ DruckerPragerPlasticitySMStatus :: printOutputAt(FILE *file, TimeStep *tStep) co
     }
 
     // print plastic strain vector
-    FloatArray plasticStrainVector;
-    givePlasticStrainVector(plasticStrainVector);
+    auto plasticStrainVector = givePlasticStrainVector();
 
     fprintf(file, "plasticStrains ");
     for ( auto &val : plasticStrainVector ) {
@@ -225,39 +222,35 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, newtonIter, _IFT_DruckerPragerPlasticitySM_newtoniter);
 }
 
-void
-DruckerPragerPlasticitySM :: giveRealStressVector_3d(FloatArray &answer,
-                                                  GaussPoint *gp,
-                                                  const FloatArray &totalStrain,
-                                                  TimeStep *tStep)
+FloatArrayF<6>
+DruckerPragerPlasticitySM :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                                  TimeStep *tStep) const
 {
     auto status = static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
 
     // Initialize temp variables for this gauss point
-    initTempStatus(gp);
+    const_cast<DruckerPragerPlasticitySM*>(this)->initTempStatus(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value
     auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
-    FloatArray strainVectorR = totalStrain - thermalStrain;
+    auto strainVectorR = strain - thermalStrain;
 
     // perform the local stress return and update the history variables
     performLocalStressReturn(gp, strainVectorR);
 
     // copy total strain vector to the temp status
-    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStrainVectorBe(strain);
 
     // give back correct form of stressVector to giveRealStressVector
-    answer = status->giveTempStressVector();
+    return status->giveTempStressVector();
 }
 
 void
-DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
-                                                      const FloatArray &strain)
+DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp, const FloatArrayF<6> &strain) const
 {
-    DruckerPragerPlasticitySMStatus *status =
-        static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
+    auto status = static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
 
     // split total strains in volumetric and deviatoric part
     // elastic constants
@@ -272,15 +265,13 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     auto volumetricStrain = tmp.second;
 
     // compute trial elastic strains
-    double volumetricElasticTrialStrain =
-        volumetricStrain - status->giveVolumetricPlasticStrain();
-    FloatArray plasticStrainDeviator = status->givePlasticStrainDeviator();
-    FloatArray elasticStrainDeviator = strainDeviator;
-    elasticStrainDeviator.subtract(plasticStrainDeviator);
+    double volumetricElasticTrialStrain = volumetricStrain - status->giveVolumetricPlasticStrain();
+    auto plasticStrainDeviator = status->givePlasticStrainDeviator();
+    auto elasticStrainDeviator = strainDeviator - plasticStrainDeviator;
 
     // compute trial stresses
     double volumetricStress = 3. * kM * volumetricElasticTrialStrain;
-    FloatArray stressDeviator = applyDeviatoricElasticStiffness(elasticStrainDeviator, gM);
+    auto stressDeviator = applyDeviatoricElasticStiffness(elasticStrainDeviator, gM);
     // norm of trial stress deviator
     double trialStressJTwo = computeSecondStressInvariant(stressDeviator);
 
@@ -313,19 +304,18 @@ DruckerPragerPlasticitySM :: performLocalStressReturn(GaussPoint *gp,
     status->letTempKappaBe(tempKappa);
 
     // compute full stresses from deviatoric and volumetric part and store them
-    FloatArray stress = computeDeviatoricVolumetricSum(stressDeviator, volumetricStress);
+    auto stress = computeDeviatoricVolumetricSum(stressDeviator, volumetricStress);
     status->letTempStressVectorBe(stress);
 
     // compute and update plastic strains, volumetric and deviatoric part
     elasticStrainDeviator = applyDeviatoricElasticCompliance(stressDeviator, gM);
-    plasticStrainDeviator = strainDeviator;
-    plasticStrainDeviator.subtract(elasticStrainDeviator);
+    plasticStrainDeviator = strainDeviator - elasticStrainDeviator;
     status->letTempPlasticStrainDeviatorBe(plasticStrainDeviator);
     status->letTempVolumetricPlasticStrainBe(volumetricStrain - volumetricStress / 3. / kM);
 }
 
 bool
-DruckerPragerPlasticitySM :: checkForVertexCase(double eM, double gM, double kM, double trialStressJTwo, double volumetricStress, double tempKappa)
+DruckerPragerPlasticitySM :: checkForVertexCase(double eM, double gM, double kM, double trialStressJTwo, double volumetricStress, double tempKappa) const
 {
     // delta lambda max corresponds to the maximum value
     // of the rate of the plastic multiplier for regular plastic flow
@@ -347,7 +337,7 @@ DruckerPragerPlasticitySM :: checkForVertexCase(double eM, double gM, double kM,
 }
 
 void
-DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa)
+DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArrayF<6> &stressDeviator, double &volumetricStress, double &tempKappa) const
 {
     // delta lambda max controls the maximum plastic flow, see below
     double deltaLambdaMax = sqrt(trialStressJTwo) / gM;
@@ -358,16 +348,9 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
     // yield value prime is derivative of yield value with respect to deltaLambda
     double yieldValuePrimeZero = -9. * alpha * alphaPsi * kM - gM;
 
-    FloatArray flowDir = stressDeviator;
-    flowDir.times( 1. / sqrt(2. * trialStressJTwo) );
-
-
-    // some variables needed for iteration
-    double yieldValuePrime;
-    FloatArray plasticFlow;
+    auto flowDir = stressDeviator * ( 1. / sqrt(2. * trialStressJTwo) );
 
     // initialize Newton iteration
-    double tempJTwo;
     int iterationCount = 0;
     double deltaLambda = 0.;
     double deltaLambdaIncrement = 0.;
@@ -380,7 +363,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
             OOFEM_ERROR("Newton iteration for deltaLambda (regular stress return) did not converge after newtonIter iterations. You might want to try increasing the optional parameter newtoniter or yieldtol in the material record of your input file.");
         }
 
-        yieldValuePrime = yieldValuePrimeZero - kFactor *computeYieldStressPrime(tempKappa, eM);
+        double yieldValuePrime = yieldValuePrimeZero - kFactor *computeYieldStressPrime(tempKappa, eM);
         deltaLambdaIncrement = -yieldValue / yieldValuePrime;
 
         // deltaLambdaMax may be exceeded if the yield stress has almost vanished
@@ -396,12 +379,11 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
         tempKappa += kFactor * deltaLambdaIncrement;
         volumetricStress -= volConstant * deltaLambdaIncrement;
 
-        // plasticFlow = flowDir ;
-        //plasticFlow.times( devConstant * deltaLambdaIncrement ) ;
-        //stressDeviator.subtract( plasticFlow ) ;
+        // auto plasticFlow = flowDir * (devConstant * deltaLambdaIncrement)
+        //stressDeviator -= plasticFlow;
 
-        stressDeviator.add(-devConstant * deltaLambdaIncrement, flowDir);
-        tempJTwo = computeSecondStressInvariant(stressDeviator);
+        stressDeviator += (-devConstant * deltaLambdaIncrement) * flowDir;
+        double tempJTwo = computeSecondStressInvariant(stressDeviator);
         yieldValue = computeYieldValue(volumetricStress, tempJTwo, tempKappa, eM);
         newtonError = fabs(yieldValue / eM);
         //printf("newtonError = %e\n", newtonError) ;
@@ -415,7 +397,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
 }
 
 void
-DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa, double volumetricElasticTrialStrain, double kappa)
+DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArrayF<6> &stressDeviator, double &volumetricStress, double &tempKappa, double volumetricElasticTrialStrain, double kappa) const
 {
     // declare some constants for faster use
     // yield value prime is derivative of yield value with respect to deltaLambda
@@ -423,11 +405,8 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
     // contribution of deviatoric strain to hardening
     double deviatorContribution = trialStressJTwo / 3. / gM / gM;
     // in the vertex case, deviatoric stresses are zero
-    stressDeviator.zero();
+    stressDeviator = zeros<6>();
     volumetricStress = 3. * kM * volumetricElasticTrialStrain;
-
-    // needed for iteration
-    double yieldValuePrime;
 
     // initialize Newton iteration
     int iterationCount = 0;
@@ -445,6 +424,7 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
         }
 
         // exclude division by zero
+        double yieldValuePrime;
         if ( deltaKappa == 0. ) {
             yieldValuePrime = yieldValuePrimeZero
                               - sqrt(2.) / 3. / kM *computeYieldStressPrime(tempKappa, eM);
@@ -492,21 +472,14 @@ DruckerPragerPlasticitySM :: computeYieldStressInShear(double kappa, double eM) 
             yieldStress = 0.;
             //printf("Yield stress zero reached in computeYieldStressInShear.\n") ;
         }
-
-        break;
+        return yieldStress;
     case 2:     // exponential hardening
-        yieldStress =
-            limitYieldStress - ( limitYieldStress - initialYieldStress ) * exp(-kappa / kappaC);
-        break;
+        return limitYieldStress - ( limitYieldStress - initialYieldStress ) * exp(-kappa / kappaC);
     default:
         //StructuralMaterial :: OOFEM_ERROR( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
         OOFEM_ERROR("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
         return 0.;
-
-        break;
     }
-
-    return yieldStress;
 }
 
 double
@@ -520,57 +493,44 @@ DruckerPragerPlasticitySM :: computeYieldStressPrime(double kappa, double eM) co
         } else {
             return eM * hardeningModulus;
         }
-
-        break;
     case 2:             // exponential hardening
         return ( limitYieldStress - initialYieldStress ) / kappaC *exp(-kappa / kappaC);
-
-        break;
     default:
         //StructuralMaterial :: OOFEM_ERROR( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
         OOFEM_ERROR("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
         return 0.;
-
-        break;
     }
 }
 
-void
-DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+
+FloatMatrixF<6,6>
+DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
     switch ( mode ) {
     case ElasticStiffness:
-        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        break;
+        return LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
 
     case SecantStiffness:
-        LEMaterial.give3dMaterialStiffnessMatrix(answer,  mode, gp, tStep);
-        break;
-
+        return LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
 
     case TangentStiffness:
         switch ( ( static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) ) )
                 ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
-            LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-            break;
+            return LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
         case DruckerPragerPlasticitySMStatus :: DP_Yielding:
             // elasto-plastic stiffness for regular case
             //printf("\nAssembling regular algorithmic stiffness matrix.") ;
-            giveRegAlgorithmicStiffMatrix(answer, mode, gp, tStep);
-            break;
+            return giveRegAlgorithmicStiffMatrix(mode, gp, tStep);
         case DruckerPragerPlasticitySMStatus :: DP_Vertex:
             // elasto-plastic stiffness for vertex case
             //printf("\nAssembling vertex case algorithmic stiffness matrix.") ;
-            giveVertexAlgorithmicStiffMatrix(answer, mode, gp, tStep);
-            break;
+            return giveVertexAlgorithmicStiffMatrix(mode, gp, tStep);
         default:
             OOFEM_ERROR("Case did not match.");
-            break;
         }
 
         break;
@@ -579,17 +539,15 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         OOFEM_ERROR("Switch failed: Only elastic and tangent stiffness are supported.");
         break;
     }
+    return FloatMatrixF<6,6>();
 }
 
-void
-DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<6,6>
+DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
-    int i, j;
-    DruckerPragerPlasticitySMStatus *status =
-        static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
 
     const auto &stressVector = status->giveTempStressVector();
 
@@ -602,10 +560,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     double gM = eM / ( 2. * ( 1. + nu ) );
     double kM = eM / ( 3. * ( 1. - 2. * nu ) );
 
-
-
-    FloatArray flowDir = deviatoricStress;
-    flowDir.times(1. / normOfStress);
+    auto flowDir = deviatoricStress / normOfStress;
 
     double kappa = status->giveKappa();
     double tempKappa = status->giveTempKappa();
@@ -624,60 +579,57 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
     double d_const = sqrt(2.) * alpha * gM / hStar;
     double e_const = gM / hStar - deltaLambdaStar;
 
-    FloatMatrix A_Matrix(6, 6);
-    A_Matrix.zero();
-    for ( i = 1; i < 7; i++ ) {
+    FloatMatrixF<6,6> A_Matrix;
+
+    for ( int i = 1; i < 7; i++ ) {
         A_Matrix.at(i, i) = a_const;
     }
 
-    for ( i = 1; i < 4; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += b_const;
         }
     }
 
-    for ( i = 1; i < 4; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 4; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += c_const * flowDir.at(j);
         }
 
-        for ( j = 4; j < 7; j++ ) {
+        for ( int j = 4; j < 7; j++ ) {
             A_Matrix.at(i, j) += 2. *c_const *flowDir.at(j);
         }
     }
 
-    for ( i = 1; i < 7; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 7; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += d_const * flowDir.at(i);
         }
     }
 
-    for ( i = 1; i < 7; i++ ) {
-        for ( j = 1; j < 4; j++ ) {
+    for ( int i = 1; i < 7; i++ ) {
+        for ( int j = 1; j < 4; j++ ) {
             A_Matrix.at(i, j) += e_const * flowDir.at(i) * flowDir.at(j);
         }
 
         // account for engineering notation
-        for ( j = 4; j < 7; j++ ) {
+        for ( int j = 4; j < 7; j++ ) {
             A_Matrix.at(i, j) += 2. *e_const *flowDir.at(i) * flowDir.at(j);
         }
     }
 
-    FloatMatrix De;
-    LEMaterial.give3dMaterialStiffnessMatrix(De, mode, gp, tStep);
+    auto De = LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
 
     // answer is A_Matrix^-1 * De
-    A_Matrix.solveForRhs(De, answer);
+    return dot(inv(A_Matrix), De);
 }
 
-void
-DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                                              MatResponseMode mode,
+FloatMatrixF<6,6>
+DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(MatResponseMode mode,
                                                               GaussPoint *gp,
-                                                              TimeStep *tStep)
+                                                              TimeStep *tStep) const
 {
-    DruckerPragerPlasticitySMStatus *status =
-        static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) );
 
     double tempKappa = status->giveTempKappa();
     double deltaKappa = tempKappa - status->giveKappa();
@@ -690,7 +642,8 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     if ( deltaKappa <= 0. ) {
         // This case occurs in the first iteration of a step.
         // printf("deltaKappa<=0. for vertex case algorithmic stiffness, i.e. continuum tangent stiffness. Since the continuum tangent stiffness does not exist at the vertex, elastic stiffness is used instead. This will cause the loss of quadratic convergence.\n") ;
-        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return LEMaterial.give3dMaterialStiffnessMatrix( mode, gp, tStep);
+        
     }
 
     double deltaVolumetricPlasticStrain =
@@ -700,8 +653,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     // compute elastic trial strain deviator of latest temp-state
     auto strainDeviator = computeDeviator(status->giveTempStrainVector());
 
-    FloatArray elasticStrainDeviator = strainDeviator;
-    elasticStrainDeviator.subtract( status->givePlasticStrainDeviator() );
+    auto elasticStrainDeviator = strainDeviator - FloatArrayF<6>(status->givePlasticStrainDeviator());
 
     double a_const =
         kM * HBar / ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa );
@@ -711,8 +663,8 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
     }
     // compute the algorithmic tangent stiffness
 
-    answer.resize(6, 6);
-    answer.zero();
+
+    FloatMatrixF<6,6> answer;
     for ( int i = 1; i < 4; i++ ) {
         for ( int j = 1; j < 4; j++ ) {
             answer.at(i, j) = deltaVolumetricPlasticStrain;
@@ -729,7 +681,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
         }
     }
 
-    answer.times(a_const);
+    return a_const * answer;
 }
 
 int
@@ -738,12 +690,11 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
                                          InternalStateType type,
                                          TimeStep *tStep)
 {
-    const DruckerPragerPlasticitySMStatus *status =
-        static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
+    const auto status = static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
 
     switch ( type ) {
     case IST_PlasticStrainTensor:
-        status->givePlasticStrainVector(answer);
+        answer = status->givePlasticStrainVector();
         return 1;
 
     case IST_DamageTensor:
@@ -760,15 +711,14 @@ DruckerPragerPlasticitySM :: giveIPValue(FloatArray &answer,
 MaterialStatus *
 DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 {
-    return new  DruckerPragerPlasticitySMStatus(gp);
+    return new DruckerPragerPlasticitySMStatus(gp);
 }
 
 
 double
 DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
 {
-    DruckerPragerPlasticitySMStatus *status =
-        static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
+    auto status = static_cast< DruckerPragerPlasticitySMStatus * >( giveStatus(gp) );
     int state_flag = status->giveStateFlag();
 
     if ( ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Vertex ) ||

@@ -108,8 +108,7 @@ LargeStrainMasterMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF
     }
 
     auto SethHillStrainVector = to_voigt_strain(SethHillStrain);
-    FloatArray stressVector;
-    const_cast< StructuralMaterial * >(sMat)->giveRealStressVector_3d(stressVector, gp, SethHillStrainVector, tStep);
+    auto stressVector = sMat->giveRealStressVector_3d(SethHillStrainVector, gp, tStep);
 
     auto T = this->constructTransformationMatrix(eVecs);
     stressVector.at(4) = 2;
@@ -346,8 +345,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode 
     auto status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(slaveMat) );
 
-    FloatMatrix stiffness;
-    sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, tStep);
+    auto stiffness = sMat->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     ///////////////////////////////////////////////////////////
     stiffness.at(1, 4) = 2. * stiffness.at(1, 4);
     stiffness.at(4, 1) = 2. * stiffness.at(4, 1);

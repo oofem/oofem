@@ -54,7 +54,7 @@ TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-double TrabBoneMaterial :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
+double TrabBoneMaterial :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     return status->giveTempAlpha();
@@ -95,7 +95,7 @@ TrabBoneMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, 
 
 
 void
-TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
+TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
@@ -158,7 +158,7 @@ TrabBoneMaterial :: computeDensification(GaussPoint *gp, const FloatArray &total
 
 
 double
-TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
+TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp) const
 {
     double dam;
     if ( alpha > 0. ) {
@@ -177,7 +177,7 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
 
 
 double
-TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
+TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep) const
 {
     double alpha = computeCumPlastStrain(gp, tStep);
     return computeDamageParam(alpha, gp);

@@ -66,8 +66,7 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
             double c = cos(rot * M_PI / 180.);
             double s = sin(rot * M_PI / 180.);
 
-            FloatArray rotStress;
-            FloatArray rotStrain(6);
+            FloatArrayF<6> rotStrain;
             rotStrain.at(1) = c * c * strain.at(1) - c *s *strain.at(6) + s *s *strain.at(2);
             rotStrain.at(2) = c * c * strain.at(2) + c *s *strain.at(6) + s *s *strain.at(1);
             rotStrain.at(3) = strain.at(3);
@@ -75,7 +74,7 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
             rotStrain.at(5) = c * strain.at(5) - s *strain.at(4);
             rotStrain.at(6) = ( c * c - s * s ) * strain.at(6) + 2 * c * s * ( strain.at(1) - strain.at(2) );
 
-            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(rotStress, gp, rotStrain, tStep);
+            auto rotStress = static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(rotStrain, gp, tStep);
 
             answer = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(6) + s * s * rotStress.at(2),
@@ -86,7 +85,7 @@ LayeredCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, con
                 ( c * c - s * s ) * rotStress.at(6) - c * s * ( rotStress.at(1) - rotStress.at(2) ),
             };
         } else {
-            static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(answer, gp, strain, tStep);
+            answer = static_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_3d(strain, gp, tStep);
         }
     } else {
         OOFEM_ERROR("Only cubes and wedges are meaningful for layered cross-sections");
@@ -178,7 +177,7 @@ LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMo
         int gpsperlayer = ngps / this->numberOfLayers;
         int layer = ( gpnum - 1 ) / gpsperlayer + 1;
         Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
-        static_cast< StructuralMaterial * >(layerMat)->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+        answer = static_cast< StructuralMaterial * >(layerMat)->give3dMaterialStiffnessMatrix(rMode, gp, tStep);
 
         if ( this->layerRots.at(layer) != 0. ) {
             double rot = this->layerRots.at(layer);

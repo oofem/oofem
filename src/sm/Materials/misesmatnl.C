@@ -53,11 +53,11 @@ MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalM
 }
 
 
-void
-MisesMatNl :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+MisesMatNl :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("3D mode not supported");
+    return zeros<6>();
 }
 
 
@@ -109,7 +109,7 @@ MisesMatNl :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeSt
 
 
 void
-MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     /* Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -134,7 +134,7 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 
 
 void
-MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
+MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp) const
 {
     MisesMatNlStatus *nonlocStatus, *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     auto list = this->giveIPIntegrationList(gp);
@@ -212,7 +212,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 }
 
 double
-MisesMatNl :: computeDistanceModifier(double damage)
+MisesMatNl :: computeDistanceModifier(double damage) const
 {
     switch ( averType ) {
     case 2: return 1. / ( Rf / cl + ( 1. - Rf / cl ) * pow(1. - damage, exponent) );
@@ -325,7 +325,7 @@ MisesMatNl :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep)
+MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     double nlKappa = this->computeCumPlasticStrain(gp, tStep);

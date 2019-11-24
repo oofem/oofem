@@ -191,16 +191,17 @@ public:
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector(FloatArray &answer,  GaussPoint *gp,
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<IsotropicDamageMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
     void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep) override
@@ -213,7 +214,7 @@ public:
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
-    virtual double evaluatePermanentStrain(double kappa, double omega) { return 0.; }
+    virtual double evaluatePermanentStrain(double kappa, double omega) const { return 0.; }
 
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
@@ -231,7 +232,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**Computes derivative of the equivalent strain with regards to strain
      * @param[out] answer Contains the resulting derivative.
      * @param strain Strain vector.
@@ -246,7 +247,7 @@ public:
      * @param strain Total strain in full form.
      * @param gp Integration point.
      */
-    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) = 0;
+    virtual double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const = 0;
 
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
@@ -263,7 +264,7 @@ protected:
      * @param totalStrainVector Current total strain vector.
      * @param gp Integration point.
      */
-    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
+    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const { }
 
     /**
      * Returns the value of derivative of damage function

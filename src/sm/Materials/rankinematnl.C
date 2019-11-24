@@ -129,7 +129,7 @@ RankineMatNl :: givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, T
 }
 
 void
-RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     /* Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -146,12 +146,12 @@ RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);
     // influence of damage on weight function
     if ( averType >= 2 && averType <= 6 ) {
-      this->modifyNonlocalWeightFunctionAround(gp);
+        this->modifyNonlocalWeightFunctionAround(gp);
     }
 }
 
 double
-RankineMatNl :: giveNonlocalMetricModifierAt(GaussPoint *gp)
+RankineMatNl :: giveNonlocalMetricModifierAt(GaussPoint *gp) const
 {
     auto status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     double damage = status->giveTempDamage();
@@ -209,7 +209,7 @@ RankineMatNl :: giveInterface(InterfaceType type)
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
         return static_cast< NonlocalMaterialStiffnessInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -232,7 +232,7 @@ RankineMatNl :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep)
+RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     double nlKappa = this->computeCumPlasticStrain(gp, tStep);

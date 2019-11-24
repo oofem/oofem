@@ -76,13 +76,10 @@ TutorialMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &totalStrain_, TimeStep *tStep)
+FloatArrayF<6>
+TutorialMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArrayF<6> totalStrain = totalStrain_;
 
     // subtract stress thermal expansion
     auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
@@ -106,8 +103,9 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     double k = status->giveK();
     double phiTrial = effectiveTrialStress - ( this->sig0 +  H * k );
 
+    FloatArrayF<6> stress;
     if ( phiTrial < 0.0 ) { // elastic
-        answer = trialStress;
+        stress = trialStress;
 
         status->letTempPlasticStrainBe(status->givePlasticStrain());
     } else { // plastic loading
@@ -115,8 +113,7 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
         double mu = phiTrial / ( 3.0 * G + H ); // plastic multiplier
         // radial return
         auto devStress = ( 1.0 - 3.0*G*mu/effectiveTrialStress) * devTrialStress;
-        auto stress = computeDeviatoricVolumetricSum(devStress, meanTrialStress);
-        answer = stress;
+        stress = computeDeviatoricVolumetricSum(devStress, meanTrialStress);
         k += mu;
 
         auto plasticStrain = status->givePlasticStrain();
@@ -127,14 +124,15 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
 
     // Store the temporary values for the given iteration
     status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStressVectorBe(stress);
     status->letTempKBe(k);
     status->letTempDevTrialStressBe(devTrialStress);
+    return stress;
 }
 
 
-void
-TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+TutorialMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
     const auto &devTrialStress = status->giveTempDevTrialStress();
@@ -149,7 +147,7 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
     const auto &elasticStiffness = D.giveTangent();
     
     if ( phiTrial < 0.0 ) { // elastic
-        answer = elasticStiffness;
+        return elasticStiffness;
     } else { // plastic loading
         double G = D.giveShearModulus();
         // E_t = elasticStiffness - correction
@@ -161,7 +159,7 @@ TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRespon
         auto correction = dyad(nu, nu) * (2.0 * G / h * ( this->sig0 + H * k ));
         correction += (mu * 3.0 * G) * I_dev6;
         correction *= 2.0 * G / effectiveTrialStress;
-        answer = elasticStiffness - correction;
+        return elasticStiffness - correction;
     }
 }
 

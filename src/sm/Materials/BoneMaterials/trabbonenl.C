@@ -69,7 +69,7 @@ TrabBoneNL :: TrabBoneNL(int n, Domain *d) : TrabBoneMaterial(n, d), StructuralN
 // update local values of accumulated pastic strain
 
 void
-TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlstatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
@@ -126,7 +126,7 @@ TrabBoneNL :: giveRealStressVector_1d(FloatArray &answer,
 //
 
 double
-TrabBoneNL :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
+TrabBoneNL :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 

@@ -417,17 +417,16 @@ IsotropicDamageMaterial1 :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-void
-IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+double
+IsotropicDamageMaterial1 :: computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
-    FloatArray fullStrain;
+    auto lmat = this->linearElasticMaterial;
 
     if ( strain.isEmpty() ) {
-        kappa = 0.;
-        return;
+        return 0.;
     }
 
+    FloatArray fullStrain;
     StructuralMaterial :: giveFullSymVectorForm( fullStrain, strain, gp->giveMaterialMode() );
     // if plane stress mode -> compute strain in z-direction from condition of zero stress in corresponding direction
     if ( gp->giveMaterialMode() == _PlaneStress ) {
@@ -451,7 +450,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             }
         }
 
-        kappa = sqrt(posNorm);
+        return sqrt(posNorm);
     } else if ( ( this->equivStrainType == EST_Rankine_Smooth ) || ( this->equivStrainType == EST_Rankine_Standard ) ) {
         // EST_Rankine equiv strain measure
         double sum = 0.;
@@ -478,7 +477,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             sum = sqrt(sum);
         }
 
-        kappa = sum / lmat->give('E', gp);
+        return sum / lmat->give('E', gp);
     } else if ( ( this->equivStrainType == EST_ElasticEnergy ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStress ) || ( this->equivStrainType == EST_ElasticEnergyPositiveStrain ) ) {
         // equivalent strain expressions based on elastic energy
         FloatMatrix de;
@@ -505,7 +504,7 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished");
         }
 
-        kappa = sqrt( sum / lmat->give('E', gp) );
+        return sqrt( sum / lmat->give('E', gp) );
     } else if ( this->equivStrainType == EST_Mises ) {
         double nu = lmat->give(NYxz, NULL);
         FloatArray principalStrains;
@@ -517,9 +516,8 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         a = ( k - 1 ) * I1e / ( 2 * k * ( 1 - 2 * nu ) );
         b = ( k - 1 ) * ( k - 1 ) * I1e * I1e / ( ( 1 - 2 * nu ) * ( 1 - 2 * nu ) );
         c = 12 * k * J2e / ( ( 1 + nu ) * ( 1 + nu ) );
-        kappa = a + 1 / ( 2 * k ) * sqrt(b + c);
+        return a + 1 / ( 2 * k ) * sqrt(b + c);
     } else if ( this->equivStrainType == EST_Griffith ) {
-        kappa = 0.0;
         double kappa1 = 0.0, kappa2 = 0.0;
         FloatArray stress, fullStress, principalStress;
         FloatMatrix de;
@@ -543,10 +541,10 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
         } else if ( principalStress.at(1) / principalStress.at(3) >= -0.33333 ) {
             kappa2 = -( principalStress.at(1) - principalStress.at(3) ) * ( principalStress.at(1) - principalStress.at(3) ) / this->griff_n / ( principalStress.at(1) + principalStress.at(3) ) / lmat->give('E', gp);
         }
-        kappa = max(kappa1, 0.0);
-        kappa = max(kappa, kappa2);
+        return max(max(kappa1, 0.0), kappa2);
     } else {
         OOFEM_ERROR("unknown EquivStrainType");
+        return 0.;
     }
 }
 
@@ -779,27 +777,26 @@ IsotropicDamageMaterial1 :: computeStrainInvariants(const FloatArray &strainVect
     J2e = 1. / 2. * ( s1 + s2 + s3 ) - 1. / 6. * ( I1e * I1e );
 }
 
-void
-IsotropicDamageMaterial1 :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
+double
+IsotropicDamageMaterial1 :: computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const
 {
     if ( this->softType == ST_Disable_Damage ) { //dummy material with no damage
-        omega = 0.;
+        return 0.;
     } else if ( isCrackBandApproachUsed() ) { // adjustment of softening law according to the element size, given crack opening or fracture energy
-        computeDamageParamForCohesiveCrack(omega, kappa, gp);
+        return computeDamageParamForCohesiveCrack(kappa, gp);
     } else { // no adjustment according to element size, given fracturing strain
-        omega = damageFunction(kappa, gp);
+        return damageFunction(kappa, gp);
     }
 }
 
-void
-IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, double kappa, GaussPoint *gp)
+double
+IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double kappa, GaussPoint *gp) const
 {
     const double e0 = this->give(e0_ID, gp);  // e0 is the strain at the peak stress
-    const double E = this->giveLinearElasticMaterial()->give('E', gp);
+    const double E = this->linearElasticMaterial->give('E', gp);
     const double gf = this->give(gf_ID, gp);
     double wf = this->give(wf_ID, gp);     // wf is the crack opening
-    double Le;
-    omega = 0.0;
+    double omega = 0.0;
 
     if ( kappa > e0 ) {
         if ( this->gf != 0. ) { //cohesive crack model
@@ -815,9 +812,9 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
         }
 
 
-        IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
-        Le = status->giveLe();
-        ef = wf / Le;    //ef is the fracturing strain
+        auto status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
+        double Le = status->giveLe();
+        double ef = wf / Le;    //ef is the fracturing strain /// FIXME CHANGES BEHAVIOR!
         if ( ef < e0 ) { //check that no snapback occurs
             double minGf = 0.;
             OOFEM_WARNING("ef %e < e0 %e, this leads to material snapback in element %d, characteristic length %f", ef, e0, gp->giveElement()->giveNumber(), Le);
@@ -915,9 +912,12 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             }
         }
     }
+    return omega;
 }
+
+
 double
-IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
+IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp) const
 {
     const double e0 = this->give(e0_ID, gp);
     double ef = 0.;
@@ -1075,14 +1075,14 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp) co
 }
 
 double
-IsotropicDamageMaterial1 :: complianceFunction(double kappa, GaussPoint *gp)
+IsotropicDamageMaterial1 :: complianceFunction(double kappa, GaussPoint *gp) const
 {
     double om = damageFunction(kappa, gp);
     return om / ( 1. - om );
 }
 
 double
-IsotropicDamageMaterial1 :: evaluatePermanentStrain(double kappa, double omega)
+IsotropicDamageMaterial1 :: evaluatePermanentStrain(double kappa, double omega) const
 {
     switch ( permStrain ) {
     case 1:
@@ -1109,14 +1109,14 @@ IsotropicDamageMaterial1 :: evaluatePermanentStrain(double kappa, double omega)
 
 
 void
-IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
+IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp) const
 {
+    auto status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
     int indx = 1;
     double le = 0.;
-    double E = this->giveLinearElasticMaterial()->give('E', gp);
+    double E = this->linearElasticMaterial->give('E', gp);
     FloatArray principalStrains, crackPlaneNormal, fullStrain, crackVect;
     FloatMatrix principalDir;
-    IsotropicDamageMaterial1Status *status = static_cast< IsotropicDamageMaterial1Status * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp);
     const double ef = this->give(ef_ID, gp);
@@ -1167,7 +1167,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         if ( this->equivStrainType == EST_Griffith ) {
             FloatArray stress, fullStress, principalStress, crackV(3), crackPlaneN(3);
             FloatMatrix de;
-            LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+            LinearElasticMaterial *lmat = this->linearElasticMaterial;
             lmat->giveStiffnessMatrix( de, SecantStiffness, gp, domain->giveEngngModel()->giveCurrentStep() );
             stress.beProductOf(de, strainVector);
             StructuralMaterial :: giveFullSymVectorForm( fullStress, stress, gp->giveMaterialMode() );

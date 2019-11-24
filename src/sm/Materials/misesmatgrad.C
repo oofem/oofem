@@ -83,7 +83,7 @@ MisesMatGrad :: giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatRes
         answer = givePlaneStrainStiffMtrx(mode, gp, tStep);
         break;
     case _3dMat:
-        give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        answer = give3dMaterialStiffnessMatrix(mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -243,14 +243,14 @@ MisesMatGrad :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, T
 }
 
 
-void
-MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+MisesMatGrad :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
-    this->linearElasticMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    auto status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
+    auto d = this->linearElasticMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
     // start from the elastic stiffness
     if ( mode != TangentStiffness ) {
-        return;
+        return d;
     }
 
     double tempKappa = status->giveTempCumulativePlasticStrain();
@@ -262,36 +262,29 @@ MisesMatGrad :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMo
         double damage = status->giveDamage();
         double sigmaY = this->give('s', gp, tStep) + H * kappa;
         // trial deviatoric stress and its norm
-        const FloatArray &trialStressDev = status->giveTrialStressDev();
+        const FloatArrayF<6> trialStressDev = status->giveTrialStressDev();
         /*****************************************************/
         //double trialStressVol = status->giveTrialStressVol();
         /****************************************************/
         double trialS = computeStressNorm(trialStressDev);
         // one correction term
-        FloatMatrix stiffnessCorrection(6, 6);
-        stiffnessCorrection.beDyadicProductOf(trialStressDev, trialStressDev);
         double factor = -2. * sqrt(6.) * G * G / trialS;
         double factor1 = factor * sigmaY / ( ( H + 3. * G ) * trialS * trialS );
-        stiffnessCorrection.times(factor1);
-        answer.add(stiffnessCorrection);
+        d += factor1 * dyad(trialStressDev, trialStressDev);
         // another correction term
-        stiffnessCorrection.bePinvID();
-        double factor2 = factor * dKappa;
-        stiffnessCorrection.times(factor2);
-        answer.add(stiffnessCorrection);
+        d += factor * dKappa * I_dev6;
         //influence of damage
-        answer.times(1. - tempDamage);
+        d *= (1. - tempDamage);
         if ( tempDamage > damage ) {
-            const FloatArray &effStress = status->giveTempEffectiveStress();
-            double nlKappa =  status->giveNonlocalCumulatedStrain();
+            const FloatArrayF<6> effStress = status->giveTempEffectiveStress();
+            double nlKappa = status->giveNonlocalCumulatedStrain();
             kappa = mParam * nlKappa + ( 1. - mParam ) * tempKappa;
             double omegaPrime = computeDamageParamPrime(kappa);
             double scalar = -omegaPrime *sqrt(6.) * G / ( 3. * G + H ) / trialS;
-            stiffnessCorrection.beDyadicProductOf(effStress, trialStressDev);
-            stiffnessCorrection.times( scalar * ( 1. - mParam ) );
-            answer.add(stiffnessCorrection);
+            d += scalar * ( 1. - mParam ) * dyad(effStress, trialStressDev);
         }
     }
+    return d;
 }
 
 

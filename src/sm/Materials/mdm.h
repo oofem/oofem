@@ -162,33 +162,33 @@ public:
     enum MDMModeType { mdm_3d, mdm_2d };
 
 protected:
-    int ndc; ///< Number of damage components.
-    int nsd; ///< Number of spatial dimensions.
-    int type_dam;
-    int type_soft;
+    int ndc = 0; ///< Number of damage components.
+    int nsd = 0; ///< Number of spatial dimensions.
+    int type_dam = 0;
+    int type_soft = 0;
 
     /// Parameter controlling the elastic limit.
-    double mdm_Ep;
+    mutable double mdm_Ep = 0.;
     /// Prescribed value of ef-ep.
-    double mdm_Efp;
-    double ParMd; ///< (m/E*Ep)
-    double tempDillatCoeff; ///< Temperature dilatation coeff.
+    mutable double mdm_Efp = 0.; /// THREAD UNSAFE. These are modified when evaluating the material. Why? This must be avoided at all cost.
+    double ParMd = 0.; ///< (m/E*Ep)
+    double tempDillatCoeff = 0.; ///< Temperature dilatation coeff.
 
     /// Fracture energy (necessary to determine Ep and Efp if not given).
-    double Gf;
+    double Gf = 0.;
     /// Macroscopic tensile strength (necessary to determine Ep and Efp if not given).
-    double Ft;
+    double Ft = 0.;
 
-    MDMFormulatrionType formulation;
-    MDMModeType mdmMode;
+    MDMFormulatrionType formulation = COMPLIANCE_DAMAGE;
+    MDMModeType mdmMode = mdm_3d;
 
     /// Reference to bulk (undamaged) material.
     IsotropicLinearElasticMaterial linearElasticMaterial;
 
     /// Flag indicating local or nonlocal mode.
-    int nonlocal;
+    int nonlocal = 0;
     /// Interaction radius, related to the nonlocal characteristic length of material.
-    double R;
+    double R = 0.;
 
     ///cached source element set used to map internal variables (adaptivity), created on demand
     std::unique_ptr<Set> sourceElemSet;
@@ -200,7 +200,7 @@ protected:
 
     // determines the mapping algorithm to be used
     enum MDMMapperType { mdm_cpt=0, mdm_sft=1, mdm_lst=2 };
-    MDMMapperType mapperType;
+    MDMMapperType mapperType = mdm_cpt;
 #else
 
  #ifdef MDM_USE_MMAClosestIPTransfer
@@ -231,30 +231,26 @@ public:
         MaterialModelMapperInterface(),
         linearElasticMaterial(n, d)
     {
-        nonlocal = 0;
-        type_dam = 0;
-        type_soft = 0;
         mdm_Ep = mdm_Efp = -1.0;
     }
-    /// Destructor.
-    virtual ~MDM() { }
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<MDM*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
     void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -268,7 +264,7 @@ public:
 
     void initializeData(int numberOfMicroplanes) override;
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
 
@@ -294,33 +290,33 @@ public:
 
 protected:
     void computeDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,
-                             GaussPoint *gp, TimeStep *tStep);
+                             GaussPoint *gp, TimeStep *tStep) const;
     void computeLocalDamageTensor(FloatMatrix &tempDamageTensor, const FloatArray &totalStrain,
-                                  GaussPoint *gp, TimeStep *tStep);
-    double computeDamageOnPlane(GaussPoint *gp, int mnumber, const FloatArray &strain);
+                                  GaussPoint *gp, TimeStep *tStep) const;
+    double computeDamageOnPlane(GaussPoint *gp, int mnumber, const FloatArray &strain) const;
     void computePDC(FloatMatrix &tempDamageTensor, FloatArray &tempDamageTensorEigenVals,
-                    FloatMatrix &tempDamageTensorEigenVec);
+                    FloatMatrix &tempDamageTensorEigenVec) const;
     void transformStrainToPDC(FloatArray &answer, FloatArray &strain,
-                              FloatMatrix &t, GaussPoint *gp);
-    void applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDamageTensorEigenVals);
-    void transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, const FloatMatrix &t, GaussPoint *gp);
+                              FloatMatrix &t, GaussPoint *gp) const;
+    void applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDamageTensorEigenVals) const;
+    void transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, const FloatMatrix &t, GaussPoint *gp) const;
     void computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC,
-                                GaussPoint *gp, TimeStep *tStep);
+                                GaussPoint *gp, TimeStep *tStep) const;
     void giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                      MatResponseMode mode, GaussPoint *gp,
-                                     TimeStep *tStep);
-    void applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp);
-    void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t);
+                                     TimeStep *tStep) const;
+    void applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp) const;
+    void transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t) const;
 
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t);
-    void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n);
+    void rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t) const;
+    void formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n) const;
 
     //double giveParameterEfp(const FloatArray &reducedStrain, GaussPoint *gp);
-    void giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedStrain, GaussPoint *gp);
+    void giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedStrain, GaussPoint *gp) const;
 };
 } // end namespace oofem
 #endif // mdm_h
