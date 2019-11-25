@@ -188,7 +188,7 @@ public:
       return this->computeVolumeAround(gp);
     }
     */
-    void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix& answer) override;
+    FloatMatrixF<6,6> B3SSMI_getUnknownsGtoLRotationMatrix() const override;
 
     void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
 

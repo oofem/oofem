@@ -277,8 +277,8 @@ SimpleCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, Gaus
 void
 SimpleCrossSection :: giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    return mat->giveRealStressVector_2dPlateSubSoil(answer, gp, generalizedStrain, tStep);
+    auto mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->giveRealStressVector_2dPlateSubSoil(generalizedStrain, gp, tStep);
 }
 
 
@@ -454,7 +454,7 @@ void
 SimpleCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->give2dPlateSubSoilStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    answer = mat->give2dPlateSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
 }
 
 

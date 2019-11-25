@@ -332,22 +332,22 @@ Beam3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 
-void
-Beam3d :: B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix &answer)
+FloatMatrixF<6,6>
+Beam3d :: B3SSMI_getUnknownsGtoLRotationMatrix() const
 // Returns the rotation matrix for element unknowns
 {
     FloatMatrix lcs;
 
-    answer.resize(6, 6);
-    answer.zero();
+    FloatMatrixF<6,6> answer;
 
-    this->giveLocalCoordinateSystem(lcs);
+    const_cast<Beam3d*>(this)->giveLocalCoordinateSystem(lcs);
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             answer.at(i, j) = lcs.at(i, j);
             answer.at(i + 3, j + 3) = lcs.at(i, j);
         }
     }
+    return answer;
 }
 
 double
@@ -969,7 +969,7 @@ Beam3d :: computeSubSoilStiffnessMatrix(FloatMatrix &answer,
     answer.clear();
     for ( GaussPoint *gp : *this->giveDefaultIntegrationRulePtr() ) {
         this->computeSubSoilNMatrixAt(gp, N);
-        ( ( StructuralMaterial * ) this->domain->giveMaterial(subsoilMat) )->give3dBeamSubSoilStiffMtrx(d, rMode, gp, tStep);
+        d = static_cast<StructuralMaterial *>(this->domain->giveMaterial(subsoilMat))->give3dBeamSubSoilStiffMtrx(rMode, gp, tStep);
         double dV = gp->giveWeight() * 0.5 * l;
         DN.beProductOf(d, N);
         answer.plusProductSymmUpper(N, DN, dV);
@@ -1258,7 +1258,7 @@ Beam3d :: giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray
             FloatMatrix Tgl, n;
             FloatArray d(3);
 
-            this->B3SSMI_getUnknownsGtoLRotationMatrix(Tgl);
+            Tgl = this->B3SSMI_getUnknownsGtoLRotationMatrix();
             for ( int nN = 1; nN <= nNodes; nN++ ) {
                 FloatArray u, dl, dg;
                 this->computeVectorOf(VM_Total, tStep, u);

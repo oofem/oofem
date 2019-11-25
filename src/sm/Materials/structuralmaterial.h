@@ -196,8 +196,9 @@ public:
     virtual void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation is not provided
-    virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    virtual void giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    
+    virtual FloatArrayF<3> giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<6> giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * @name Methods associated with the First PK stress tensor.
@@ -612,25 +613,21 @@ public:
     /**
      * Method for computing stiffness matrix of plate subsoil model.
      * Default method is emty; the implementation should be provided by the particular model.
-     * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     * @return Stiffness matrix.
      */
-    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mmode, GaussPoint *gp,
-                                             TimeStep *tStep);
+    virtual FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing stiffness matrix of beam3d subsoil model.
      * Default method is emty; the implementation should be provided by the particular model.
-     * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     * @return Stiffness matrix.
      */
-    virtual void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
-                                            MatResponseMode mmode, GaussPoint *gp,
-                                            TimeStep *tStep);
+    virtual FloatMatrixF<6,6> give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector

@@ -104,9 +104,9 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     } else if ( mode == _3dLattice ) {
         this->giveRealStressVector_Lattice3d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _2dPlateSubSoil ) {
-        this->giveRealStressVector_2dPlateSubSoil(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_2dPlateSubSoil(reducedStrain, gp, tStep);
     } else if ( mode == _3dBeamSubSoil ) {
-        this->giveRealStressVector_3dBeamSubSoil(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_3dBeamSubSoil(reducedStrain, gp, tStep);
     }
 }
 
@@ -297,14 +297,14 @@ StructuralMaterial :: giveRealStressVector_Lattice3d(FloatArray &answer, GaussPo
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<3>
+StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("2dPlateSubSoil mode not supported");
 }
 
-void
-StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<6>
+StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("3dBeamSubSoil mode not supported");
 }
@@ -1126,20 +1126,18 @@ StructuralMaterial :: give3dLatticeStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-StructuralMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-                                                  MatResponseMode mmode, GaussPoint *gp,
-                                                  TimeStep *tStep)
+FloatMatrixF<3,3>
+StructuralMaterial :: give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
+    return FloatMatrixF<3,3>();
 }
 
-void
-StructuralMaterial :: give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
-                                                 MatResponseMode mmode, GaussPoint *gp,
-                                                 TimeStep *tStep)
+FloatMatrixF<6,6>
+StructuralMaterial :: give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
+    return FloatMatrixF<6,6>();
 }
 
 
