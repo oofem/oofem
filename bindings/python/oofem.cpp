@@ -316,43 +316,43 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
         void giveRealStressVector (oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedStrain, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector, std::ref(answer), gp, reducedStrain, tStep); 
         }
-        FloatArrayF<6> giveRealStressVector_3d(const oofem::FloatArrayF<6> &strain, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+        oofem::FloatArrayF<6> giveRealStressVector_3d(const oofem::FloatArrayF<6> &strain, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_3d, strain, gp, tStep); 
         }
         /// Default implementation relies on giveRealStressVector_3d
-        void giveRealStressVector_PlaneStrain(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_PlaneStrain, std::ref(answer), gp, reducedE, tStep); 
+        oofem::FloatArrayF<4> giveRealStressVector_PlaneStrain(const oofem::FloatArrayF<4> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_PlaneStrain, reducedE, gp, tStep);
         }
         /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
-        void giveRealStressVector_StressControl(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, const oofem::IntArray &strainControl, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_StressControl, std::ref(answer), gp, reducedE, strainControl, tStep); 
+        oofem::FloatArray giveRealStressVector_StressControl(const oofem::FloatArray &reducedE, const oofem::IntArray &strainControl, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_StressControl, reducedE, strainControl, gp, tStep); 
         }
-        void giveRealStressVector_ShellStressControl(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, const oofem::IntArray &strainControl, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_ShellStressControl, std::ref(answer), gp, reducedE, strainControl, tStep); 
+        oofem::FloatArray giveRealStressVector_ShellStressControl(const oofem::FloatArray &reducedE, const oofem::IntArray &strainControl, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_ShellStressControl, reducedE, strainControl, gp, tStep); 
         }    
         /// Default implementation relies on giveRealStressVector_StressControl
-        void giveRealStressVector_PlaneStress(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_PlaneStress, std::ref(answer), gp, reducedE, tStep); 
+        oofem::FloatArrayF<3> giveRealStressVector_PlaneStress(const oofem::FloatArrayF<3> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_PlaneStress, reducedE, gp, tStep); 
         }
         /// Default implementation relies on giveRealStressVector_StressControl
-        void giveRealStressVector_1d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_1d, std::ref(answer), gp, reducedE, tStep); 
+        oofem::FloatArrayF<1> giveRealStressVector_1d(const oofem::FloatArrayF<1> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_1d, reducedE, gp, tStep); 
         }
         /// Default implementation relies on giveRealStressVector_StressControl
-        void giveRealStressVector_Warping(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Warping, std::ref(answer), gp, reducedE, tStep); 
+        oofem::FloatArrayF<2> giveRealStressVector_Warping(const oofem::FloatArrayF<2> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_Warping, reducedE, gp, tStep); 
         }
         /// Default implementation relies on giveRealStressVector_StressControl
-        void giveRealStressVector_2dBeamLayer(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_2dBeamLayer, std::ref(answer), gp, reducedE, tStep); 
+        oofem::FloatArrayF<2> giveRealStressVector_2dBeamLayer(const oofem::FloatArrayF<2> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_2dBeamLayer, reducedE, gp, tStep); 
         }
         /// Default implementation relies on giveRealStressVector_StressControl
-        void giveRealStressVector_PlateLayer(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_PlateLayer, std::ref(answer), gp, reducedE, tStep); 
+        oofem::FloatArrayF<5> giveRealStressVector_PlateLayer(const oofem::FloatArrayF<5> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_PlateLayer, reducedE, gp, tStep); 
         }
         /// Default implementation relies on giveRealStressVector_StressControl
-        void giveRealStressVector_Fiber(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Fiber, std::ref(answer), gp, reducedE, tStep); 
+        oofem::FloatArrayF<3> giveRealStressVector_Fiber(const oofem::FloatArrayF<3> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_Fiber, reducedE, gp, tStep); 
         }
         void giveRealStressVector_Lattice2d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
             PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Lattice2d, std::ref(answer), gp, reducedE, tStep); 

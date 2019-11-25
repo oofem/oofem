@@ -87,58 +87,54 @@ MisesMat :: CreateStatus(GaussPoint *gp) const
     return new MisesMatStatus(gp);
 }
 
-void
-MisesMat :: giveRealStressVector_1d(FloatArray &answer,
+FloatArrayF<1>
+MisesMat :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain,
                                     GaussPoint *gp,
-                                    const FloatArray &totalStrain,
-                                    TimeStep *tStep)
+                                    TimeStep *tStep) const
 {
     /// @note: One should obtain the same answer using the iterations in the default implementation (this is verified for this model).
 #if 1
     auto status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
-    FloatArray strainR;
 
     // subtract stress independent part
-    this->giveStressDependentPartOfStrainVector(strainR, gp, totalStrain,
-                                                tStep, VM_Total);
-    this->performPlasticityReturn(gp, strainR, tStep);
+    FloatArray strainR;
+    this->giveStressDependentPartOfStrainVector(strainR, gp, totalStrain, tStep, VM_Total);
+    this->performPlasticityReturn(strainR, gp, tStep);
     double omega = computeDamage(gp, tStep);
-    answer = status->giveTempEffectiveStress();
-    answer.times(1 - omega);
+    FloatArrayF<6> stress = status->giveTempEffectiveStress() * (1 - omega);
 
     // Compute the other components of the strain:
     double E = linearElasticMaterial.give('E', gp), nu = linearElasticMaterial.give('n', gp);
 
-    FloatArray strain = status->getTempPlasticStrain();
+    auto strain = status->getTempPlasticStrain();
     strain [ 0 ] = totalStrain [ 0 ];
     strain [ 1 ] -= nu / E *status->giveTempEffectiveStress() [ 0 ];
     strain [ 2 ] -= nu / E *status->giveTempEffectiveStress() [ 0 ];
 
     status->letTempStrainVectorBe(strain);
     status->setTempDamage(omega);
-    status->letTempStressVectorBe(answer);
+    status->letTempStressVectorBe(stress);
+    return stress[{0}];
 #else
-    StructuralMaterial :: giveRealStressVector_1d(answer, gp, totalStrain, tStep);
+    return StructuralMaterial :: giveRealStressVector_1d(totalStrain, gp, tStep);
 #endif
 }
 
 
-void
-MisesMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
-                                             GaussPoint *gp,
-                                             const FloatArray &totalStrain,
-                                             TimeStep *tStep)
+FloatArrayF<3>
+MisesMat :: giveRealStressVector_PlaneStress(const FloatArrayF<3> &totalStrain,
+                                             GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     // initialization
-    this->initTempStatus(gp);
-    this->performPlasticityReturn_PlaneStress(gp, totalStrain, tStep);
+    const_cast<MisesMat*>(this)->initTempStatus(gp);
+    this->performPlasticityReturn_PlaneStress(totalStrain, gp, tStep);
     double omega = computeDamage(gp, tStep);
-    answer = status->giveTempEffectiveStress();
-    answer.times(1 - omega);
+    FloatArrayF<3> stress = status->giveTempEffectiveStress() * (1 - omega);
     status->setTempDamage(omega);
     status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStressVectorBe(stress);
+    return stress;
 }
 
 
@@ -151,7 +147,7 @@ MisesMat :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp
     FloatArray strainR(6);
     this->giveStressDependentPartOfStrainVector(strainR, gp, strain, tStep, VM_Total);
 
-    this->performPlasticityReturn(gp, strainR, tStep);
+    this->performPlasticityReturn(strainR, gp, tStep);
     double omega = computeDamage(gp, tStep);
     auto stress = status->giveTempEffectiveStress() * (1 - omega);
     status->setTempDamage(omega);
@@ -162,7 +158,7 @@ MisesMat :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp
 
 
 void
-MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) const
+MisesMat :: performPlasticityReturn(const FloatArray &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     double kappa;
@@ -235,7 +231,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
 }
 
 void
-MisesMat :: performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+MisesMat :: performPlasticityReturn_PlaneStress(const FloatArrayF<3> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     double E = linearElasticMaterial.give('E', gp);
     double nu = linearElasticMaterial.give('n', gp);

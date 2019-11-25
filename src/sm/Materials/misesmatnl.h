@@ -152,7 +152,7 @@ public:
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
-    void giveRealStressVector_1d(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 

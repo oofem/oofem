@@ -94,11 +94,9 @@ TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 // BEGIN: SUBROUTINE FOR EVALUATION OF TOTAL STRESS
 //
 
-void
-TrabBoneNL :: giveRealStressVector_1d(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &strainVector,
-                                      TimeStep *tStep)
+FloatArrayF<1>
+TrabBoneNL :: giveRealStressVector_1d(const FloatArrayF<1> &strainVector,
+                                      GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
@@ -108,12 +106,12 @@ TrabBoneNL :: giveRealStressVector_1d(FloatArray &answer,
     double effStress = E0 * elasStrain;
     double sigc = nlStatus->giveSigC();
 
-    answer.resize(1);
-    answer.at(1) = ( 1. - tempDamage ) * effStress + sigc;
+    FloatArrayF<1> stress = {( 1. - tempDamage ) * effStress + sigc};
 
     nlStatus->setTempDam(tempDamage);
     nlStatus->letTempStrainVectorBe(strainVector);
-    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->letTempStressVectorBe(stress);
+    return stress;
 }
 
 //

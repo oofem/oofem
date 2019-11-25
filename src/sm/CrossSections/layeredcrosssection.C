@@ -119,35 +119,32 @@ LayeredCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint
     answer.resize(3);
     answer.zero();
     
-    double layerThick, layerZCoord, top, bottom, layerZeta;
     FloatArray layerStrain, reducedLayerStress;
    
-    bottom = this->give(CS_BottomZCoord, masterGp);
-    top = this->give(CS_TopZCoord, masterGp);
+    double bottom = this->give(CS_BottomZCoord, masterGp);
+    double top = this->give(CS_TopZCoord, masterGp);
     
-    StructuralElement *element = dynamic_cast< StructuralElement * >( masterGp->giveElement() );
-    
+    auto element = dynamic_cast< StructuralElement * >( masterGp->giveElement() );
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        GaussPoint *layerGp = this->giveSlaveGaussPoint(masterGp, layer - 1);
-        Material *layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
-        LayeredCrossSectionInterface *interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
+        auto layerGp = this->giveSlaveGaussPoint(masterGp, layer - 1);
+        auto layerMat = this->domain->giveMaterial( this->giveLayerMaterial(layer) );
+        auto interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
         
         // resolve current layer z-coordinate
-        layerThick = this->layerThicks.at(layer);
-        layerZeta = layerGp->giveNaturalCoordinate(3);
-        layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+        double layerThick = this->layerThicks.at(layer);
+        double layerZeta = layerGp->giveNaturalCoordinate(3);
+        double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, masterGp, layerGp, tStep);
-        dynamic_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlaneStress(reducedLayerStress, layerGp, layerStrain, tStep);
+        reducedLayerStress = dynamic_cast< StructuralMaterial * >(layerMat)->giveRealStressVector_PlaneStress(layerStrain, layerGp, tStep);
         answer.at(1) += reducedLayerStress.at(1) * layerThick;
         answer.at(2) += reducedLayerStress.at(2) * layerThick * layerZCoord;
         answer.at(3) += reducedLayerStress.at(3) * layerThick * ( 5. / 6. );
     }
     
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
-                                       ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(masterGp) );
+    auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(masterGp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -237,31 +234,30 @@ LayeredCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMo
 void
 LayeredCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     FloatArray layerStrain, reducedLayerStress;
-    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-    LayeredCrossSectionInterface *interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
+    auto element = static_cast< StructuralElement * >( gp->giveElement() );
+    auto interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
 
     answer.resize(3);
     answer.zero();
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord, gp);
-    top = this->give(CS_TopZCoord, gp);
+    double bottom = this->give(CS_BottomZCoord, gp);
+    double top = this->give(CS_TopZCoord, gp);
 
-    if ( interface == NULL ) {
+    if ( interface == nullptr ) {
         OOFEM_ERROR("element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
-        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
+        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+        auto layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
 
         // resolve current layer z-coordinate
-        layerThick = this->layerThicks.at(layer);
-        layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveNaturalCoordinate(3);
-        layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+        double layerThick = this->layerThicks.at(layer);
+        double layerWidth = this->layerWidths.at(layer);
+        double layerZeta = layerGp->giveNaturalCoordinate(3);
+        double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
@@ -269,7 +265,7 @@ LayeredCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoi
         if ( this->layerRots.at(layer) != 0. ) {
             OOFEM_ERROR("Rotation not supported for beams");
         } else {
-            layerMat->giveRealStressVector_2dBeamLayer(reducedLayerStress, layerGp, layerStrain, tStep);
+            reducedLayerStress = layerMat->giveRealStressVector_2dBeamLayer(layerStrain, layerGp, tStep);
         }
 
         answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick; //Nx
@@ -281,8 +277,7 @@ LayeredCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoi
     ///@todo This should be replaced with a general "CrossSectionStatus"
     //CrossSectionStatus *status = new CrossSectionStatus(gp);
     //gp->setMaterialStatus(status);
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
-                                       ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -298,31 +293,30 @@ LayeredCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
 void
 LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     FloatArray layerStrain, reducedLayerStress;
-    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-    LayeredCrossSectionInterface *interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
+    auto element = static_cast< StructuralElement * >( gp->giveElement() );
+    auto interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
 
     answer.resize(5);
     answer.zero();
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord, gp);
-    top = this->give(CS_TopZCoord, gp);
+    double bottom = this->give(CS_BottomZCoord, gp);
+    double top = this->give(CS_TopZCoord, gp);
 
-    if ( interface == NULL ) {
+    if ( interface == nullptr ) {
         OOFEM_ERROR("element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
-        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
+        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+        auto layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
 
         // resolve current layer z-coordinate
-        layerThick = this->layerThicks.at(layer);
-        layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveNaturalCoordinate(3);
-        layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+        double layerThick = this->layerThicks.at(layer);
+        double layerWidth = this->layerWidths.at(layer);
+        double layerZeta = layerGp->giveNaturalCoordinate(3);
+        double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
@@ -332,16 +326,15 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
             double c = cos(rot * M_PI / 180.);
             double s = sin(rot * M_PI / 180.);
 
-            FloatArray rotStress;
-	    FloatArray rotStrain = {
-	        c *c * layerStrain.at(1) - c * s * layerStrain.at(5) + s * s * layerStrain.at(2),
+            FloatArrayF<5> rotStrain = {
+                c *c * layerStrain.at(1) - c * s * layerStrain.at(5) + s * s * layerStrain.at(2),
                 c * c * layerStrain.at(2) + c * s * layerStrain.at(5) + s * s * layerStrain.at(1),
                 c * layerStrain.at(3) + s * layerStrain.at(4),
                 c * layerStrain.at(4) - s * layerStrain.at(3),
                 ( c * c - s * s ) * layerStrain.at(5) + c * s * ( layerStrain.at(1) - layerStrain.at(2) ),
             }; 
 
-            layerMat->giveRealStressVector_PlateLayer(rotStress, layerGp, rotStrain, tStep);
+            auto rotStress = layerMat->giveRealStressVector_PlateLayer(rotStrain, layerGp, tStep);
 
             reducedLayerStress = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),
@@ -351,7 +344,7 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
                 ( c * c - s * s ) * rotStress.at(5) - c * s * ( rotStress.at(1) - rotStress.at(2) ),
             };
         } else {
-            layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
+            reducedLayerStress = layerMat->giveRealStressVector_PlateLayer(layerStrain, layerGp, tStep);
         }
 
         answer.at(1) += reducedLayerStress.at(1) * layerWidth * layerThick * layerZCoord;
@@ -366,8 +359,7 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
     ///@todo This should be replaced with a general "CrossSectionStatus"
     //CrossSectionStatus *status = new CrossSectionStatus(gp);
     //gp->setMaterialStatus(status);
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
-                                       ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }
@@ -376,31 +368,30 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
 void
 LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    double layerThick, layerWidth, layerZCoord, top, bottom, layerZeta;
     FloatArray layerStrain, reducedLayerStress;
-    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-    LayeredCrossSectionInterface *interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
+    auto element = static_cast< StructuralElement * >( gp->giveElement() );
+    auto interface = static_cast< LayeredCrossSectionInterface * >( element->giveInterface(LayeredCrossSectionInterfaceType) );
 
     answer.resize(8);
     answer.zero();
 
     // perform integration over layers
-    bottom = this->give(CS_BottomZCoord, gp);
-    top = this->give(CS_TopZCoord, gp);
+    double bottom = this->give(CS_BottomZCoord, gp);
+    double top = this->give(CS_TopZCoord, gp);
 
     if ( interface == NULL ) {
         OOFEM_ERROR("element with no layer support encountered");
     }
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        GaussPoint *layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
-        StructuralMaterial *layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
+        auto layerGp = this->giveSlaveGaussPoint(gp, layer - 1);
+        auto layerMat = static_cast< StructuralMaterial * >( domain->giveMaterial( layerMaterials.at(layer) ) );
 
         // resolve current layer z-coordinate
-        layerThick = this->layerThicks.at(layer);
-        layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveNaturalCoordinate(3);
-        layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
+        double layerThick = this->layerThicks.at(layer);
+        double layerWidth = this->layerWidths.at(layer);
+        double layerZeta = layerGp->giveNaturalCoordinate(3);
+        double layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
         interface->computeStrainVectorInLayer(layerStrain, strain, gp, layerGp, tStep);
@@ -410,8 +401,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
             double c = cos(rot * M_PI / 180.);
             double s = sin(rot * M_PI / 180.);
 
-            FloatArray rotStress;
-            FloatArray rotStrain = {
+            FloatArrayF<5> rotStrain = {
                 c *c * layerStrain.at(1) - c * s * layerStrain.at(5) + s * s * layerStrain.at(2),
                 c * c * layerStrain.at(2) + c * s * layerStrain.at(5) + s * s * layerStrain.at(1),
                 c * layerStrain.at(3) + s * layerStrain.at(4),
@@ -419,7 +409,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
                 ( c * c - s * s ) * layerStrain.at(5) + c * s * ( layerStrain.at(1) - layerStrain.at(2) ),
             };
 
-            layerMat->giveRealStressVector_PlateLayer(rotStress, layerGp, rotStrain, tStep);
+            auto rotStress = layerMat->giveRealStressVector_PlateLayer(rotStrain, layerGp, tStep);
 
             reducedLayerStress = {
                 c *c * rotStress.at(1) + 2 * c * s * rotStress.at(5) + s * s * rotStress.at(2),
@@ -429,7 +419,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
                 ( c * c - s * s ) * rotStress.at(5) - c * s * ( rotStress.at(1) - rotStress.at(2) ),
             };
         } else {
-            layerMat->giveRealStressVector_PlateLayer(reducedLayerStress, layerGp, layerStrain, tStep);
+            reducedLayerStress = layerMat->giveRealStressVector_PlateLayer(layerStrain, layerGp, tStep);
         }
 
         // 1) membrane terms sx, sy, sxy
@@ -450,8 +440,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
     //CrossSectionStatus *status = new CrossSectionStatus(gp);
     //gp->setMaterialStatus(status);
     // Create material status according to the first layer material
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
-                                       ( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( layerMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }

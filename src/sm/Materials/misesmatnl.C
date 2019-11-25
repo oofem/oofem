@@ -61,19 +61,18 @@ MisesMatNl :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *
 }
 
 
-void
-MisesMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<1>
+MisesMatNl :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
-    MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
+    auto nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     
-    double tempDam;
-    performPlasticityReturn(gp, totalStrain, tStep);
-    tempDam = this->computeDamage(gp, tStep);
-    answer.beScaled(1.0 - tempDam, nlStatus->giveTempEffectiveStress());
+    performPlasticityReturn(totalStrain, gp, tStep);
+    double tempDam = this->computeDamage(gp, tStep);
+    FloatArrayF<6> stress = (1.0 - tempDam) * nlStatus->giveTempEffectiveStress();
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
-    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->letTempStressVectorBe(stress);
+    return stress[{0}];
 }
 
 
@@ -121,7 +120,7 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
     auto nlstatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    this->performPlasticityReturn(gp, strainVector, tStep);
+    this->performPlasticityReturn(strainVector, gp, tStep);
     double cumPlasticStrain = this->computeLocalCumPlasticStrain(gp, tStep);
     // standard formulation based on averaging of equivalent strain
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);

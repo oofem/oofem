@@ -245,10 +245,18 @@ public:
         const_cast<MDM*>(this)->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
-    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<4> giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<MDM*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<MDM*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
 
     FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 

@@ -126,8 +126,12 @@ protected:
 public:
     SteelRelaxMat(int n, Domain *d);
 
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedE, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<SteelRelaxMat*>(this)->giveRealStressVector(answer, gp, reducedE, tStep);
+        return answer;
+    }
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 

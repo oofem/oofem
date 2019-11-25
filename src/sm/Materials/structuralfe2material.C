@@ -248,16 +248,15 @@ StructuralFE2Material :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoi
         
 
         FloatMatrixF<4,4> answer;
-        FloatArray sigPert;
         for(int i = 0; i < 4; i++) {
             // Add a small perturbation to the strain
             auto epsPert = eps;
             epsPert[i] += h;
 
-            const_cast<StructuralFE2Material*>(this)->giveRealStressVector_PlaneStrain(sigPert, gp, epsPert, tStep);
-            answer.setColumn((FloatArrayF<4>(sigPert) - sig) / h, i);
+            auto sigPert = this->giveRealStressVector_PlaneStrain(epsPert, gp, tStep);
+            answer.setColumn((sigPert - sig) / h, i);
         }
-        const_cast<StructuralFE2Material*>(this)->giveRealStressVector_PlaneStrain(sigPert, gp, eps, tStep);
+        this->giveRealStressVector_PlaneStrain(eps, gp, tStep);
         return answer;
 
     } else {

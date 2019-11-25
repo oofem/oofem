@@ -142,21 +142,18 @@ RankineMat :: initializeFrom(InputRecord &ir)
 }
 
 
-// creates a new material status  corresponding to this class
 MaterialStatus *
 RankineMat :: CreateStatus(GaussPoint *gp) const
 {
-    RankineMatStatus *status;
-    status = new RankineMatStatus(gp);
-    return status;
+    return new RankineMatStatus(gp);
 }
 
 
 // computes the stress vector corresponding to given (final) strain
-void
-RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<1>
+RankineMat :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
 
     // initialization
     this->initTempStatus(gp);
@@ -166,6 +163,7 @@ RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const 
 
     // damage
     double omega = computeDamage(gp, tStep);
+    FloatArray answer;
     answer.beScaled(1. - omega, status->giveTempEffectiveStress());
 
     // store variables in status
@@ -176,16 +174,15 @@ RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const 
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
     status->computeWork_1d(gp, gf);
 #endif
+    return answer;
 }
 
 
-void
-RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
-                                               GaussPoint *gp,
-                                               const FloatArray &totalStrain,
-                                               TimeStep *tStep)
+FloatArrayF<3>
+RankineMat :: giveRealStressVector_PlaneStress(const FloatArrayF<3> &totalStrain,
+                                               GaussPoint *gp, TimeStep *tStep) const
 {
-    RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
 
     // initialization
     this->initTempStatus(gp);
@@ -195,6 +192,7 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
 
     // damage
     double omega = computeDamage(gp, tStep);
+    FloatArray answer;
     answer.beScaled(1. - omega, status->giveTempEffectiveStress());
 
     // store variables in status
@@ -205,6 +203,7 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
     status->computeWork_PlaneStress(gp, gf);
 #endif
+    return answer;
 }
 
 

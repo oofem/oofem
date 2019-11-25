@@ -137,8 +137,7 @@ public:
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
                                TimeStep *tStep) const override;
 
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool hasMaterialModeCapability(MaterialMode) const override;
 

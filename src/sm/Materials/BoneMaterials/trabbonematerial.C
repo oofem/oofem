@@ -184,10 +184,9 @@ TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep) const
 }
 
 
-void
-TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                            const FloatArray &totalStrain,
-                                            TimeStep *tStep)
+FloatArrayF<1>
+TrabBoneMaterial :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain,
+                                            GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
@@ -203,11 +202,12 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
     double sigc = status->giveSigC();
     double sig = ( 1 - dam ) * E0 * ( epsnew - epsp ) + sigc;
 
-    answer.resize(1);
-    answer.at(1) = sig;
+    FloatArrayF<1> answer = {sig};
     status->setTempDam(dam);
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
+    
+    return answer;
 }
 
 

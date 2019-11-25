@@ -60,43 +60,43 @@ SimpleCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, cons
 void
 SimpleCrossSection :: giveRealStress_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     IntArray strainControl = {
         1, 2, 4, 5, 6
     };
-    mat->giveRealStressVector_ShellStressControl(answer, gp, strain, strainControl, tStep);
+    answer = mat->giveRealStressVector_ShellStressControl(strain, strainControl, gp, tStep);
 }
 
 
 void
 SimpleCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->giveRealStressVector_PlaneStrain(answer, gp, strain, tStep);
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->giveRealStressVector_PlaneStrain(strain, gp, tStep);
 }
 
 
 void
 SimpleCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->giveRealStressVector_PlaneStress(answer, gp, strain, tStep);
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->giveRealStressVector_PlaneStress(strain, gp, tStep);
 }
 
 
 void
 SimpleCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->giveRealStressVector_1d(answer, gp, strain, tStep);
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->giveRealStressVector_1d(strain, gp, tStep);
 }
 
 
 void
 SimpleCrossSection :: giveRealStress_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->giveRealStressVector_Warping(answer, gp, strain, tStep);
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->giveRealStressVector_Warping(strain, gp, tStep);
 }
 
 

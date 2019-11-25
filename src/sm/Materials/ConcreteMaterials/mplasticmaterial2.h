@@ -216,12 +216,24 @@ public:
         const_cast<MPlasticMaterial2*>(this)->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
-    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<4> giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<MPlasticMaterial2*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<MPlasticMaterial2*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<MPlasticMaterial2*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
 
     virtual double computeDamage(GaussPoint *gp, const FloatArray &strainSpaceHardeningVariables, TimeStep *tStep);
 

@@ -121,12 +121,11 @@ FiberedCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoi
 void
 FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    double fiberThick, fiberWidth, fiberZCoord, fiberYCoord;
     FloatArray fiberStrain, reducedFiberStress;
-    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
-    FiberedCrossSectionInterface *interface;
+    auto element = static_cast< StructuralElement * >( gp->giveElement() );
+    auto interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) );
 
-    if ( ( interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) ) ) == NULL ) {
+    if ( interface == nullptr ) {
         OOFEM_ERROR("element with no fiber support encountered");
     }
 
@@ -134,8 +133,8 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
     answer.zero();
 
     for ( int i = 1; i <= this->fiberMaterials.giveSize(); i++ ) {
-        GaussPoint *fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
-        StructuralMaterial *fiberMat = static_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
+        auto fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
+        auto fiberMat = static_cast< StructuralMaterial * >( domain->giveMaterial( fiberMaterials.at(i) ) );
         // the question is whether this function should exist ?
         // if yes the element details will be hidden.
         // good idea also should be existence of element::GiveBmatrixOfLayer
@@ -144,14 +143,14 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
         // another approach - use several functions with assumed kinematic constraints
 
         // resolve current layer z-coordinate
-        fiberThick  = this->fiberThicks.at(i);
-        fiberWidth  = this->fiberWidths.at(i);
-        fiberYCoord = fiberGp->giveNaturalCoordinate(1);
-        fiberZCoord = fiberGp->giveNaturalCoordinate(2);
+        double fiberThick  = this->fiberThicks.at(i);
+        double fiberWidth  = this->fiberWidths.at(i);
+        double fiberYCoord = fiberGp->giveNaturalCoordinate(1);
+        double fiberZCoord = fiberGp->giveNaturalCoordinate(2);
 
         interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, strain, fiberGp, tStep);
 
-        fiberMat->giveRealStressVector_Fiber(reducedFiberStress, fiberGp, fiberStrain, tStep);
+        reducedFiberStress = fiberMat->giveRealStressVector_Fiber(fiberStrain, fiberGp, tStep);
 
         // perform integration
         // 1) membrane terms N, Qz, Qy
@@ -166,8 +165,7 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
     }
 
     // now we must update master gp ///@ todo simply chosen the first fiber material as master material /JB
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >
-                                       ( domain->giveMaterial( fiberMaterials.at(1) )->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( fiberMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
 }

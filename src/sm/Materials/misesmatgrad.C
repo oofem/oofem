@@ -439,16 +439,14 @@ MisesMatGrad :: giveInternalLength(FloatMatrix &answer, MatResponseMode mode, Ga
 void
 MisesMatGrad :: giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep)
 {
-    MisesMatGradStatus *status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< MisesMatGradStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
 
-    double tempDamage;
-
-    MisesMat :: performPlasticityReturn(gp, totalStrain, tStep);
+    MisesMat :: performPlasticityReturn(totalStrain, gp, tStep);
     status->letTempStrainVectorBe(totalStrain);
-    tempDamage = computeDamage(gp, tStep);
-    const FloatArray &tempEffStress = status->giveTempEffectiveStress();
+    double tempDamage = computeDamage(gp, tStep);
+    const auto &tempEffStress = status->giveTempEffectiveStress();
     answer1.beScaled(1.0 - tempDamage, tempEffStress);
     answer2 = status->giveTempCumulativePlasticStrain();
 

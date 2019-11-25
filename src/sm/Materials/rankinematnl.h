@@ -160,10 +160,10 @@ public:
     // @param tStep time step
     //  void giveNormalElasticStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, GaussPoint*gp, TimeStep* tStep) ;
 
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     // Computes 1D stress
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 

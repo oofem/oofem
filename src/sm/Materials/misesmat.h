@@ -99,8 +99,8 @@ protected:
 public:
     MisesMat(int n, Domain *d);
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) const;
-    void performPlasticityReturn_PlaneStress(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
+    void performPlasticityReturn(const FloatArray &totalStrain, GaussPoint *gp, TimeStep *tStep) const;
+    void performPlasticityReturn_PlaneStress(const FloatArrayF<3> &totalStrain, GaussPoint *gp, TimeStep *tStep) const;
 
     double computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep) const;
     double computeYieldStressPrime(double kappa) const;
@@ -127,10 +127,9 @@ public:
 
     FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &totalStrain, GaussPoint *gp,TimeStep *tStep) const override;
 
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
-
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
 
     double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
     double giveTemperature(GaussPoint *gp, TimeStep *tStep) const;
