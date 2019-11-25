@@ -48,7 +48,7 @@
 #include "datastream.h"
 #include "classfactory.h"
 #include "../sm/Materials/structuralmaterial.h"
-#include "sm/CrossSections/structuralcrosssection.h"
+#include "sm/CrossSections/latticecrosssection.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -279,7 +279,6 @@ LatticeLink3d :: initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, this->directionVector, _IFT_LatticeLink3d_dirvector);
 
     IR_GIVE_FIELD(ir, this->bondEndLength, _IFT_LatticeLink3d_l_end);
-
 }
 
 
@@ -472,13 +471,13 @@ LatticeLink3d :: giveLength()
 void
 LatticeLink3d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->give3dStiffnessMatrix(rMode, gp, tStep);
 }
 
 void
 LatticeLink3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
+    answer = static_cast< LatticeCrossSection * >( this->giveCrossSection() )->giveLatticeStress3d(strain, gp, tStep);
 }
 
 

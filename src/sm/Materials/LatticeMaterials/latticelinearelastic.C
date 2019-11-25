@@ -58,8 +58,7 @@ LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double
     eNormalMean(e0),
     alphaOne(a1),
     alphaTwo(a2)
-{
-}
+{}
 
 
 bool
@@ -72,46 +71,36 @@ LatticeLinearElastic :: hasMaterialModeCapability(MaterialMode mode) const
 void
 LatticeLinearElastic :: initializeFrom(InputRecord &ir)
 {
-
     LatticeStructuralMaterial :: initializeFrom(ir);
     RandomMaterialExtensionInterface :: initializeFrom(ir);
 
     //Young's modulus of the material that the network element is made of
-    IR_GIVE_FIELD(ir, this->eNormalMean, _IFT_LatticeLinearElastic_eNormal); // Macro
-
-    //Poisson's ratio (Only needed for 3D Bernoulli beam)
-    this->nu = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->nu, _IFT_LatticeLinearElastic_nu); // Macro
-
+    IR_GIVE_FIELD(ir, this->eNormalMean, _IFT_LatticeLinearElastic_e); // Macro
 
     //Parameter which relates the shear stiffness to the normal stiffness. Default is 1
     alphaOne = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeLinearElastic_alphaOne); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeLinearElastic_a1); // Macro
 
     //Parameter which is used for the definition of bending stiffness. Default is 1.
     alphaTwo = 1.;
-    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LatticeLinearElastic_alphaTwo); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LatticeLinearElastic_a2); // Macro
 
     localRandomType = 0; //Default: No local random field
     IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, _IFT_LatticeLinearElastic_localrandomtype); // Macro
     if ( localRandomType == 1 ) { //Gaussian random generator
         coefficientOfVariation = 0.;
-        IR_GIVE_FIELD(ir, coefficientOfVariation, _IFT_LatticeLinearElastic_coefficientOfVariation); // Macro
+        IR_GIVE_FIELD(ir, coefficientOfVariation, _IFT_LatticeLinearElastic_cov); // Macro
     }
 
-
-    double value = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_LatticeLinearElastic_talpha);
-    if ( !propertyDictionary.includes(tAlpha) ) {
-        //    if (alpha > 0.0 && !propertyDictionary.includes(tAlpha)) {
-        // put isotropic thermal expansion coeff into dictionary, if provided
-        // and not previosly defined
-        propertyDictionary.add(tAlpha, value);
-    }
+    // double value = 0.;
+    // IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_LatticeLinearElastic_talpha);
+    // if ( !propertyDictionary.includes(tAlpha) ) {
+    //   // and not previously defined
+    //     propertyDictionary.add(tAlpha, value);
+    // }
 
     this->cAlpha = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cAlpha, _IFT_LatticeLinearElastic_calpha);
-
 }
 
 MaterialStatus *
@@ -264,8 +253,7 @@ LatticeLinearElastic :: give1dLatticeStiffnessMatrix(MatResponseMode mode, Gauss
     answer.resize(1, 1);
     answer.zero();
 
-    //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
-    //  answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
+    answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
 
     return answer;
 }
@@ -310,7 +298,7 @@ LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gaus
 
 
 
-FloatArrayF<6>
+FloatArrayF< 6 >
 LatticeLinearElastic :: giveThermalDilatationVector(GaussPoint *gp,  TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
@@ -324,7 +312,9 @@ LatticeLinearElastic :: giveThermalDilatationVector(GaussPoint *gp,  TimeStep *t
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
     alpha += this->cAlpha / length;
 
-    return {alpha, 0., 0., 0., 0., 0.};
+    return {
+               alpha, 0., 0., 0., 0., 0.
+    };
 }
 
 
@@ -343,8 +333,6 @@ LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
         return 1.;
     } else if ( aProperty == 'E' ) {
         return this->eNormalMean;
-    } else if ( aProperty == 'n' ) {
-        return this->nu;
     } else {
         return LatticeStructuralMaterial :: give(aProperty, gp);
     }

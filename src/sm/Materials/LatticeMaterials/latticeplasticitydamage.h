@@ -66,10 +66,6 @@ class LatticePlasticityDamageStatus : public LatticeMaterialStatus
 {
 protected:
 
-    FloatArray elasticStrain;
-
-    FloatArray tempElasticStrain;
-
     double kappaP = 0.;
 
     double tempKappaP = 0.;
@@ -100,19 +96,9 @@ public:
     //   double giveKappaDThree() { return kappaDThree; }
     double giveTempKappaDOne() const { return tempKappaDOne; }
     double giveTempKappaDTwo() const { return tempKappaDTwo; }
-    //double giveTempKappaDThree() { return tempKappaDThree; }
-
-    void  giveTempElasticStrain(FloatArray &answer) const
-    { answer = tempElasticStrain; }
-
-    void  giveElasticStrain(FloatArray &answer) const
-    { answer = elasticStrain; }
 
     void  letTempPlasticStrainBe(const FloatArray &v)
     { tempPlasticStrain = v; }
-
-    void  letTempElasticStrainBe(const FloatArray &v)
-    { tempElasticStrain = v; }
 
     void   setTempKappaP(double newKappa) { tempKappaP = newKappa; }
 
@@ -185,13 +171,6 @@ protected:
 
     ///hardening parameter
     double aHard = 0.;
-
-    /// first parameter for thermal expansion
-    //double tAlphaOne;
-    /// second parameter for thermal expansion
-    //double tAlphaTwo;
-    /// third parameter for thermal expansion
-    //double tAlphaThree;
 
     /// yield tolerance
     double yieldTol = 0.;

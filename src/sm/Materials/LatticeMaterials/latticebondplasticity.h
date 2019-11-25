@@ -46,8 +46,6 @@
 #define _IFT_LatticeBondPlasticity_sub "sub"
 #define _IFT_LatticeBondPlasticity_fc "fc"
 #define _IFT_LatticeBondPlasticity_angle1 "angle1"
-//#define _IFT_LatticeBondPlasticity_angle2 "angle2"
-//#define _IFT_LatticeBondPlasticity_flow "flow"
 #define _IFT_LatticeBondPlasticity_ef "ef"
 //@}
 
@@ -58,8 +56,6 @@ namespace oofem {
 class LatticeBondPlasticityStatus : public LatticeMaterialStatus
 {
 protected:
-    /* FloatArray plasticStrain; */
-    /* FloatArray tempPlasticStrain; */
 
     double kappaP = 0.;
     double tempKappaP = 0.;
@@ -114,23 +110,15 @@ protected:
     enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic };
     LatticeBondPlasticity_ReturnResult returnResult;
 
-    double initialYieldStress = 0.;
 
     /// compressive strength
     double fc = 0.;
+
     /// frictional angle of the yield surface
     double frictionAngleOne = 0.;
     double frictionAngleTwo = 0.;
 
-    double hardeningLimit = 0.;
-
-    /// frictional angle of the plastic potential
     double flowAngle = 0.;
-
-    /// determines the softening -> corresponds to crack opening (not strain) when tension stress vanishes
-    double wf = 0.;
-
-    int oldApproachFlag = 0;
 
     /// yield tolerance
     double yieldTol = 0.;
@@ -217,9 +205,7 @@ public:
                          int transitionFlag,
                          GaussPoint *gp);
 
-
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
 
     void performPlasticityReturn(FloatArray &answer,

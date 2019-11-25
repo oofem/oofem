@@ -41,18 +41,6 @@
 namespace oofem {
 LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedStrain(), tempReducedStrain(), plasticStrain(), tempPlasticStrain(), oldPlasticStrain()
 {
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
-    plasticStrain.resize(rsize);
-    plasticStrain.zero();
-    tempPlasticStrain.resize(rsize);
-    tempPlasticStrain.zero();
-    reducedStrain.resize(rsize);
-    reducedStrain.zero();
-    oldPlasticStrain.resize(rsize);
-    oldPlasticStrain.zero();
-    tempReducedStrain.resize(rsize);
-    tempReducedStrain.zero();
-
     normalStress = tempNormalStress = 0;
 
     le = 0.0;
@@ -71,12 +59,6 @@ LatticeMaterialStatus :: initTempStatus()
 //
 {
     StructuralMaterialStatus :: initTempStatus();
-
-    this->oldPlasticStrain = this->plasticStrain;
-
-    this->tempPlasticStrain = this->plasticStrain;
-
-    this->tempReducedStrain = this->reducedStrain;
 
     this->tempNormalStress = this->normalStress;
 
