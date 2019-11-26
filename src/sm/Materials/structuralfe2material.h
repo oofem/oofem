@@ -57,7 +57,7 @@ protected:
     /// The RVE
     std :: unique_ptr< EngngModel > rve;
     /// Boundary condition in RVE that performs the computational homogenization.
-    PrescribedGradientHomogenization *bc;
+    PrescribedGradientHomogenization *bc = nullptr;
 
     FloatMatrix tangent;
     bool oldTangent = true;
@@ -134,8 +134,9 @@ public:
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 };
 
 } // end namespace oofem

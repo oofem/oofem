@@ -130,20 +130,18 @@ SimpleVitrificationMaterial :: computeTangent(bool vitr) const
 
 
 
-void SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
-    answer = this->computeTangent(vitr);
+    return this->computeTangent(vitr);
 }
 
 
-void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                            const FloatArray &strain_, TimeStep *tStep)
+FloatArrayF<6>
+SimpleVitrificationMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = dynamic_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArrayF<6> strain = strain_;
     
     auto thermalStrain = computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
     auto deltaStrain = strain - thermalStrain - FloatArrayF<6>(status->giveStrainVector());
@@ -159,7 +157,7 @@ void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, 
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(stress);
     
-    answer = stress;
+    return stress;
 }
 
 

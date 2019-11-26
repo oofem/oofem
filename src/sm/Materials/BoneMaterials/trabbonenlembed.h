@@ -100,16 +100,16 @@ public:
 
     Interface *giveInterface(InterfaceType) override;
 
-    void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void computeLocalCumPlastStrain(double &alpha, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    double computeLocalCumPlastStrain(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
     {
-        TrabBoneEmbed :: computeCumPlastStrain(alpha, gp, tStep);
+        return TrabBoneEmbed :: computeCumPlastStrain(gp, tStep);
     }
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
     double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
 
     int hasBoundedSupport() const override { return 1; }

@@ -279,10 +279,8 @@ public:
     virtual double computeTensileStrength(double equivalentTime) const;
     virtual double computeFractureEnergy(double equivalentTime) const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp,
+                                                    TimeStep *tStep) const override;
 
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
                                                TimeStep *tStep) const override;

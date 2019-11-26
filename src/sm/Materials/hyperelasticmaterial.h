@@ -61,12 +61,9 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

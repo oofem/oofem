@@ -52,8 +52,7 @@ namespace oofem {
 REGISTER_Material(LatticePlasticityDamage);
 
 LatticePlasticityDamage :: LatticePlasticityDamage(int n, Domain *d) : LatticeLinearElastic(n, d)
-{
-}
+{}
 
 
 bool
@@ -65,7 +64,6 @@ LatticePlasticityDamage :: hasMaterialModeCapability(MaterialMode mode) const
 void
 LatticePlasticityDamage :: initializeFrom(InputRecord &ir)
 {
-
     LatticeLinearElastic :: initializeFrom(ir);
 
     yieldTol = 1.e-6;
@@ -111,7 +109,6 @@ LatticePlasticityDamage :: initializeFrom(InputRecord &ir)
 
     this->damageFlag = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, damageFlag, _IFT_LatticePlasticityDamage_damage);
-
 }
 
 void
@@ -399,7 +396,7 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
 
     /* Get plastic strain vector from status*/
     FloatArray tempPlasticStrain  = status->giveTempPlasticStrain();
-    
+
     /* Compute trial stress*/
     stress.resize(3);
     stress.zero();
@@ -761,7 +758,7 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
     answer.zero();
 
     LatticePlasticityDamageStatus *status = ( LatticePlasticityDamageStatus * ) this->giveStatus(gp);
-    status->initTempStatus();    
+    status->initTempStatus();
 
     FloatArray reducedStrain;
 
@@ -1118,17 +1115,17 @@ LatticePlasticityDamageStatus :: initTempStatus()
     // else {
     //   OOFEM_ERROR("this lattice material mode does not exist\n");
     // }
-    
-    //Only first 3 components are used for plastic strain??
-    if(this->plasticStrain.giveSize() == 0){
-      this->plasticStrain.resize(6);
-      this->plasticStrain.zero();
-    }      
 
-    if(this->reducedStrain.giveSize() == 0){
-      this->reducedStrain.resize(6);
-      this->reducedStrain.zero();
-    }      
+    //Only first 3 components are used for plastic strain??
+    if ( this->plasticStrain.giveSize() == 0 ) {
+        this->plasticStrain.resize(6);
+        this->plasticStrain.zero();
+    }
+
+    if ( this->reducedStrain.giveSize() == 0 ) {
+        this->reducedStrain.resize(6);
+        this->reducedStrain.zero();
+    }
 
     this->oldPlasticStrain = this->plasticStrain;
     this->tempPlasticStrain = this->plasticStrain;

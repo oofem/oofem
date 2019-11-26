@@ -164,12 +164,13 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
-                                          const FloatArray &reducesStrain, TimeStep *tStep) override;
-    void  giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
-protected:
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &reducesStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPoint *gp, TimeStep *tStep) const override;
+
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+
+protected:
     /**
      * Executive method used by local and gradient version.
      * (with different parameters gprime)

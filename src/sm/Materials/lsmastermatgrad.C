@@ -85,7 +85,7 @@ LargeStrainMasterMaterialGrad :: giveGradientDamageStiffnessMatrix_uu(FloatMatri
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-        LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        answer = LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );

@@ -130,16 +130,15 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 void
 StructuralCrossSection :: giveGeneralizedStress_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep)
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    return mat->giveRealStressVector_3dBeamSubSoil(answer, gp, generalizedStrain, tStep);
+    auto mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->giveRealStressVector_3dBeamSubSoil(generalizedStrain, gp, tStep);
 }
 
 void
 StructuralCrossSection :: give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralMaterial *mat;
-    mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->give3dBeamSubSoilStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    answer = mat->give3dBeamSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
 }
 
   

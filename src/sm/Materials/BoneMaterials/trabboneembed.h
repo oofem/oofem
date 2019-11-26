@@ -102,23 +102,21 @@ protected:
 public:
     TrabBoneEmbed(int n, Domain * d);
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &totalStrain) const;
 
-    double computeDamageParam(double alpha, GaussPoint *gp);
+    double computeDamageParam(double alpha, GaussPoint *gp) const;
 
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Constructs the anisotropic compliance tensor.
     static FloatMatrixF<6,6> constructIsoComplTensor(double eps0, double nu0);
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_TrabBoneEmbed_Name; }
     const char *giveClassName() const override { return "TrabBoneEmbed"; }

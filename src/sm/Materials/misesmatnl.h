@@ -111,9 +111,9 @@ public:
      * @param tStep Time step.
      */
     virtual double computeCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const;
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
-    void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
-    double computeDistanceModifier(double damage);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
+    void modifyNonlocalWeightFunctionAround(GaussPoint *gp) const;
+    double computeDistanceModifier(double damage) const;
     double computeLocalCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const
     {
         return MisesMat :: computeCumPlastStrain(gp, tStep);
@@ -151,10 +151,10 @@ public:
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
-    void giveRealStressVector_3d(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
-    void giveRealStressVector_1d(FloatArray &answer,  GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     int hasBoundedSupport() const override { return 1; }
 

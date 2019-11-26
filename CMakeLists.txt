@@ -7,6 +7,12 @@ include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (ProcessorCount)
 
+# Use ccache if available. Needs to be performed early for it to work with cmake.
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
 set (oofem_VERSION_MINOR 6)

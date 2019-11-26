@@ -58,16 +58,15 @@ IsotropicDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-void
-IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseMode mode,
+FloatMatrixF<6,6>
+IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 //
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    IsotropicDamageMaterialStatus *status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< IsotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double tempDamage;
     if ( mode == ElasticStiffness ) {
         tempDamage = 0.0;
@@ -76,8 +75,8 @@ IsotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         tempDamage = min(tempDamage, maxOmega);
     }
 
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-    answer.times(1.0 - tempDamage);
+    auto d = this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    return d * (1.0 - tempDamage);
     //TODO - correction for tangent mode
 }
 
@@ -109,7 +108,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     //crossSection->giveFullCharacteristicVector(totalStrainVector, gp, reducedTotalStrainVector);
 
     // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, tStep);
+    equivStrain = this->computeEquivalentStrain(reducedTotalStrainVector, gp, tStep);
 
     if ( llcriteria == idm_strainLevelCR ) {
         // compute value of loading function if strainLevel crit apply
@@ -124,13 +123,13 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
             tempKappa = equivStrain;
             this->initDamaged(tempKappa, reducedTotalStrainVector, gp);
             // evaluate damage parameter
-            this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
+            omega = this->computeDamageParam(tempKappa, reducedTotalStrainVector, gp);
         }
     } else if ( llcriteria == idm_damageLevelCR ) {
         // evaluate damage parameter first
         tempKappa = equivStrain;
         this->initDamaged(tempKappa, reducedTotalStrainVector, gp);
-        this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
+        omega = this->computeDamageParam(tempKappa, reducedTotalStrainVector, gp);
         if ( omega < status->giveDamage() ) {
             // unloading takes place
             omega = status->giveDamage();

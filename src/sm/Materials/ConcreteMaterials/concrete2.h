@@ -177,8 +177,7 @@ private:
 public:
     Concrete2(int n, Domain * d);
 
-    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp,
-                                         const FloatArray &, TimeStep *tStep) override;
+    FloatArrayF<5> giveRealStressVector_PlateLayer(const FloatArrayF<5> &strain, GaussPoint *gp,TimeStep *tStep) const override;
 
     FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
@@ -192,17 +191,17 @@ public:
 
 protected:
     void dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
-              double SCC, double SCT, int *ifplas);
+              double SCC, double SCT, int *ifplas) const;
     void dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
-              double SCC, double SCT, int *ifplas);
-    void stirr(double dez, double srf);
+              double SCC, double SCT, int *ifplas) const;
+    void stirr(double dez, double srf) const;
     void strsoft(GaussPoint *gp, double epsult, FloatArray &ep, double &ep1,
-                 double &ep2, double &ep3, double SCC, double SCT, int &ifupd);
+                 double &ep2, double &ep3, double SCC, double SCT, int &ifupd) const;
 
     // two functions used to initialize and updating temporary variables in
     // gp's status. These variables are used to control process, when
     // we try to find equilibrium state.
-    void updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep);
+    void updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep) const;
 };
 } // end namespace oofem
 #endif // concrete2_h

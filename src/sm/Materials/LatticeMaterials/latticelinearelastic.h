@@ -46,12 +46,12 @@
 //@{
 #define _IFT_LatticeLinearElastic_Name "latticelinearelastic"
 #define _IFT_LatticeLinearElastic_talpha "talpha"
-#define _IFT_LatticeLinearElastic_eNormal "e"
-#define _IFT_LatticeLinearElastic_nu "n"
-#define _IFT_LatticeLinearElastic_alphaOne "a1"
-#define _IFT_LatticeLinearElastic_alphaTwo "a2"
+#define _IFT_LatticeLinearElastic_e "e"
+#define _IFT_LatticeLinearElastic_n "n"
+#define _IFT_LatticeLinearElastic_a1 "a1"
+#define _IFT_LatticeLinearElastic_a2 "a2"
 #define _IFT_LatticeLinearElastic_localrandomtype "randomtype"
-#define _IFT_LatticeLinearElastic_coefficientOfVariation "cov"
+#define _IFT_LatticeLinearElastic_cov "cov"
 #define _IFT_LatticeLinearElastic_calpha "calpha"
 //@}
 
@@ -66,12 +66,12 @@ protected:
 
     ///Normal modulus
     double eNormalMean = 0.;
+
     ///Ratio of shear and normal modulus
     double alphaOne = 0.;
+
     ///Ratio of torsion and normal modulus
     double alphaTwo = 0.;
-
-    double nu = 0.;
 
     /// coefficient variation of the Gaussian distribution
     double coefficientOfVariation = 0.;
@@ -79,9 +79,8 @@ protected:
     /// flag which chooses between no distribution (0) and Gaussian distribution (1)
     double localRandomType = 0.;
 
+    /// parameter which allows to prescribed thermal displacement
     double cAlpha = 0.;
-
-    double tAlphaMean = 0.;
 
 public:
 
@@ -92,12 +91,13 @@ public:
     LatticeLinearElastic(int n, Domain *d, double eNormalMean, double alphaOne, double alphaTwo);
 
     const char *giveInputRecordName() const override { return _IFT_LatticeLinearElastic_Name; }
+
     const char *giveClassName() const override { return "LatticeLinearElastic"; }
 
     void initializeFrom(InputRecord &ir) override;
 
 
-    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }

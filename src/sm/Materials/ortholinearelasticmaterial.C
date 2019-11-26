@@ -273,11 +273,10 @@ OrthotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-void
-OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                                  MatResponseMode mode,
+FloatMatrixF<6,6>
+OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                                   GaussPoint *gp,
-                                                                  TimeStep *tStep)
+                                                                  TimeStep *tStep) const
 {
     auto t = tangent;
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
@@ -285,7 +284,7 @@ OrthotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
     }
 
     auto rotationMatrix = this->giveRotationMatrix(gp);
-    answer = rotate(t, rotationMatrix);
+    return rotate(t, rotationMatrix);
 }
 
 

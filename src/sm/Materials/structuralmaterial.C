@@ -82,21 +82,21 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     ///@todo Move this to StructuralCrossSection ?
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _3dMat ) {
-        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_3d(reducedStrain, gp, tStep);
     } else if ( mode == _3dDegeneratedShell ) {
-        this->giveRealStressVector_3d(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_3d(reducedStrain, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
-        this->giveRealStressVector_PlaneStrain(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_PlaneStrain(reducedStrain, gp, tStep);
     } else if ( mode == _PlaneStress ) {
-        this->giveRealStressVector_PlaneStress(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_PlaneStress(reducedStrain, gp, tStep);
     } else if ( mode == _1dMat ) {
-        this->giveRealStressVector_1d(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_1d(reducedStrain, gp, tStep);
     } else if ( mode == _2dBeamLayer ) {
-        this->giveRealStressVector_2dBeamLayer(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_2dBeamLayer(reducedStrain, gp, tStep);
     } else if ( mode == _PlateLayer ) {
-        this->giveRealStressVector_PlateLayer(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_PlateLayer(reducedStrain, gp, tStep);
     } else if ( mode == _Fiber ) {
-        this->giveRealStressVector_Fiber(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_Fiber(reducedStrain, gp, tStep);
     } else if ( mode == _1dLattice ) {
         this->giveRealStressVector_Lattice1d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _2dLattice ) {
@@ -104,41 +104,39 @@ StructuralMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     } else if ( mode == _3dLattice ) {
         this->giveRealStressVector_Lattice3d(answer, gp, reducedStrain, tStep);
     } else if ( mode == _2dPlateSubSoil ) {
-        this->giveRealStressVector_2dPlateSubSoil(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_2dPlateSubSoil(reducedStrain, gp, tStep);
     } else if ( mode == _3dBeamSubSoil ) {
-        this->giveRealStressVector_3dBeamSubSoil(answer, gp, reducedStrain, tStep);
+        answer = this->giveRealStressVector_3dBeamSubSoil(reducedStrain, gp, tStep);
     }
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<6>
+StructuralMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("3d mode not supported");
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<2>
+StructuralMaterial :: giveRealStressVector_Warping(const FloatArrayF<2> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Warping mode not supported");
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<4>
+StructuralMaterial :: giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatArray vE, vS;
-    StructuralMaterial :: giveFullSymVectorForm(vE, reducedStrain, _PlaneStrain);
-    this->giveRealStressVector_3d(vS, gp, vE, tStep);
-    StructuralMaterial :: giveReducedSymVectorForm(answer, vS, _PlaneStrain);
+    auto vS = this->giveRealStressVector_3d(assemble<6>(strain, {0, 1, 2, 5}), gp, tStep);
+    return vS[{0, 1, 2, 5}];
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, const IntArray &strainControl, TimeStep *tStep)
+FloatArray
+StructuralMaterial :: giveRealStressVector_StressControl(const FloatArray &reducedStrain, const IntArray &strainControl, GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray stressControl;
     FloatArray vE, increment_vE, vS, reducedvS;
@@ -160,40 +158,42 @@ StructuralMaterial :: giveRealStressVector_StressControl(FloatArray &answer, Gau
     }
 
     // Iterate to find full vE.
-    for ( int k = 0; k < 10; k++ ) { // Allow for a generous 100 iterations.
-        this->giveRealStressVector_3d(vS, gp, vE, tStep);
+    FloatArray answer;
+    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
+        vS = this->giveRealStressVector_3d(vE, gp, tStep);
         // For debugging the iterations:
         //vE.printYourself("vE");
         //vS.printYourself("vS");
         reducedvS.beSubArrayOf(vS, stressControl);
         // Pick out the (response) stresses for the controlled strains
         answer.beSubArrayOf(vS, strainControl);
-        if ( reducedvS.computeNorm() <= 1e0 && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
+        if ( reducedvS.computeNorm() <= 1e-6 * vS.computeNorm() && k >= 1 ) { // Absolute tolerance right now (with at least one iteration)
             ///@todo We need a relative tolerance here!
             /// A relative tolerance like this could work, but if a really small increment is performed it won't work
             /// (it will be limited by machine precision)
             //if ( reducedvS.computeNorm() <= 1e-6 * answer.computeNorm() ) {
-            return;
+            return answer;
         }
 
-        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
         vE.assemble(increment_vE, stressControl);
+        //vE.printYourself("vE");
     }
 
-    OOFEM_WARNING("Iteration did not converge");
-    answer.clear();
+    OOFEM_ERROR("Iteration did not converge");
+    return FloatArray();
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, const IntArray &strainControl, TimeStep *tStep)
+FloatArray
+StructuralMaterial :: giveRealStressVector_ShellStressControl(const FloatArray &strain, const IntArray &strainControl, GaussPoint *gp, TimeStep *tStep) const
 // calculates stress vector (6 components) with assumption of sigma_z = 0
 // used by MITC4Shell
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     IntArray stressControl;
     FloatArray vE, increment_vE, vS, reducedvS;
@@ -215,16 +215,17 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer
     // step n: vE = {., ., sum(ve(n)), ., ., .}
 
     // Iterate to find full vE.
+    FloatArray answer;
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        this->giveRealStressVector_3d(answer, gp, vE, tStep);
+        answer = this->giveRealStressVector_3d(vE, gp, tStep);
         // step 0: answer = full stress vector
         // step n: answer = {., ., ->0, ., ., .}
         reducedvS.beSubArrayOf(answer, stressControl);
         if ( reducedvS.computeNorm() < 1e-6 ) {
-            return;
+            return answer;
         }
 
-        this->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+        tangent = this->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
         reducedTangent.beSubMatrixOf(tangent, stressControl, stressControl);
         reducedTangent.solveForRhs(reducedvS, increment_vE);
         increment_vE.negated();
@@ -232,54 +233,54 @@ StructuralMaterial :: giveRealStressVector_ShellStressControl(FloatArray &answer
     }
 
     OOFEM_WARNING("Iteration did not converge");
-    answer.clear();
+    return FloatArray();
 }
 
 
 
 
-void
-StructuralMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<3>
+StructuralMaterial :: giveRealStressVector_PlaneStress(const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     IntArray strainControl;
     StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _PlaneStress);
-    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+    return this->giveRealStressVector_StressControl(reducedStrain, strainControl, gp, tStep);
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<1>
+StructuralMaterial :: giveRealStressVector_1d(const FloatArrayF<1> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     IntArray strainControl;
     StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _1dMat);
-    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+    return this->giveRealStressVector_StressControl(reducedStrain, strainControl, gp, tStep);
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<2>
+StructuralMaterial :: giveRealStressVector_2dBeamLayer(const FloatArrayF<2> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     IntArray strainControl;
     StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _2dBeamLayer);
-    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+    return this->giveRealStressVector_StressControl(reducedStrain, strainControl, gp, tStep);
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<5>
+StructuralMaterial :: giveRealStressVector_PlateLayer(const FloatArrayF<5> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     IntArray strainControl;
     StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _PlateLayer);
-    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+    return this->giveRealStressVector_StressControl(reducedStrain, strainControl, gp, tStep);
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<3>
+StructuralMaterial :: giveRealStressVector_Fiber(const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     IntArray strainControl;
     StructuralMaterial :: giveVoigtSymVectorMask(strainControl, _Fiber);
-    this->giveRealStressVector_StressControl(answer, gp, reducedStrain, strainControl, tStep);
+    return this->giveRealStressVector_StressControl(reducedStrain, strainControl, gp, tStep);
 }
 
 
@@ -296,14 +297,14 @@ StructuralMaterial :: giveRealStressVector_Lattice3d(FloatArray &answer, GaussPo
 }
 
 
-void
-StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<3>
+StructuralMaterial :: giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("2dPlateSubSoil mode not supported");
 }
 
-void
-StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+FloatArrayF<6>
+StructuralMaterial :: giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("3dBeamSubSoil mode not supported");
 }
@@ -320,17 +321,7 @@ StructuralMaterial :: giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, Gauss
     auto F = from_voigt_form(vF);
     auto E = 0.5 * (Tdot(F, F) - eye<3>());
     auto vE = to_voigt_strain(E);
-
-#if 1
-    /// FIXME: Temporary const-cast; these functions should be made const. 
-    /// This workaround is just to limit the size of a single refactoring.
-    auto self = const_cast<StructuralMaterial*>(this);
-    FloatArray s;
-    self->giveRealStressVector_3d(s, gp, vE, tStep);
-    FloatArrayF<6> vS = s;
-#else
     auto vS = this->giveRealStressVector_3d(vE, gp, tStep);
-#endif
 
     // Compute first PK stress from second PK stress
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
@@ -430,7 +421,7 @@ StructuralMaterial :: giveFirstPKStressVector_1d(const FloatArrayF<1> &reducedvF
         tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
         tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
         tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
-	increment_vF.negated();
+        increment_vF.negated();
         vF.assemble(increment_vF, P_control);
     }
 
@@ -642,7 +633,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-        this->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+        answer = this->give3dMaterialStiffnessMatrix(rMode, gp, tStep);
         break;
     case _PlaneStress:
         answer = this->givePlaneStressStiffMtrx(rMode, gp, tStep);
@@ -688,15 +679,7 @@ StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     const auto &vF = status->giveTempFVector();
     const auto &vS = status->giveTempStressVector();
-#if 1
-    /// FIXME: Temporary const-cast; these functions should be made const. 
-    /// This workaround is just to limit the size of a single refactoring.
-    auto self = const_cast<StructuralMaterial*>(this);
-    FloatMatrix dSdE;
-    self->give3dMaterialStiffnessMatrix(dSdE, mode, gp, tStep);
-#else
-    auto dSdE = self->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-#endif
+    auto dSdE = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     return convert_dSdE_2_dPdF_3D(dSdE, vS, vF);
 }
 
@@ -1050,10 +1033,8 @@ StructuralMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 1, 5}, {0, 1, 5}));
 }
 
@@ -1062,10 +1043,7 @@ StructuralMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep) const
 {
-    FloatMatrix tmp;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(tmp, mode, gp, tStep);
-    FloatMatrixF<6,6> m3d = tmp;
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     return m3d({0, 1, 2, 5}, {0, 1, 2, 5});
 }
 
@@ -1074,10 +1052,8 @@ StructuralMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                             GaussPoint *gp,
                                             TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    // FIXME: temporary const workaround to limit size of migration: Remove when 3D version is const.
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return {1. / c3d.at(1, 1)};
 }
 
@@ -1087,10 +1063,8 @@ StructuralMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 4}, {0, 4}));
 }
 
@@ -1100,10 +1074,8 @@ StructuralMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
                                               TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 1, 3, 4, 5}, {0, 1, 3, 4, 5}));
 }
 
@@ -1112,10 +1084,8 @@ StructuralMaterial :: giveFiberStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
                                          TimeStep *tStep) const
 {
-    FloatMatrix m3d;
-    const_cast<StructuralMaterial*>(this)->give3dMaterialStiffnessMatrix(m3d, mode, gp, tStep);
-    //auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
-    auto c3d = inv(FloatMatrixF<6,6>(m3d));
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
     return inv(c3d({0, 4, 5}, {0, 4, 5}));
 }
 
@@ -1156,20 +1126,18 @@ StructuralMaterial :: give3dLatticeStiffMtrx(FloatMatrix &answer,
 }
 
 
-void
-StructuralMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-                                                  MatResponseMode mmode, GaussPoint *gp,
-                                                  TimeStep *tStep)
+FloatMatrixF<3,3>
+StructuralMaterial :: give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
+    return FloatMatrixF<3,3>();
 }
 
-void
-StructuralMaterial :: give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
-                                                 MatResponseMode mmode, GaussPoint *gp,
-                                                 TimeStep *tStep)
+FloatMatrixF<6,6>
+StructuralMaterial :: give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("No general implementation provided");
+    return FloatMatrixF<6,6>();
 }
 
 

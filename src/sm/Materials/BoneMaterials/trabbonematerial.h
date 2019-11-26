@@ -124,21 +124,20 @@ protected:
 public:
     TrabBoneMaterial(int n, Domain * d);
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain) const;
 
     void computeDensification(GaussPoint *gp, const FloatArray &totalStrain) const;
 
-    double computeDamageParam(double alpha, GaussPoint *gp);
+    double computeDamageParam(double alpha, GaussPoint *gp) const;
 
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
                                TimeStep *tStep) const override;
 
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool hasMaterialModeCapability(MaterialMode) const override;
 

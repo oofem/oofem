@@ -84,11 +84,11 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
-    void giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
+    FloatArrayF<3> giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<6> giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
-    void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<6,6> give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     MaterialStatus * CreateStatus(GaussPoint *gp) const override;
 };
 
@@ -104,7 +104,7 @@ public:
     virtual ~Beam3dSubsoilMaterialInterface() { }
 
     /// Evaluate transformation matrix for reciver unknowns
-    virtual void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix &answer) = 0;
+    virtual FloatMatrixF<6,6> B3SSMI_getUnknownsGtoLRotationMatrix() const = 0;
 };
 
  

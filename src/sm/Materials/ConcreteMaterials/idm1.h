@@ -260,11 +260,11 @@ public:
      */
     static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
 
-    bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->gf != 0. ); }
-    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
+    bool isCrackBandApproachUsed() const { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->gf != 0. ); }
+    double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
-    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
+    double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const override;
     /**
      * computes the value of damage parameter omega,
      * based on a given value of equivalent strain,
@@ -274,7 +274,7 @@ public:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-    void computeDamageParamForCohesiveCrack(double &omega, double kappa, GaussPoint *gp);
+    double computeDamageParamForCohesiveCrack(double kappa, GaussPoint *gp) const;
     /**
      * Returns the value of damage parameter
      * corresponding to a given value
@@ -284,7 +284,7 @@ public:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-    double damageFunction(double kappa, GaussPoint *gp);
+    double damageFunction(double kappa, GaussPoint *gp) const;
     /**
      * Returns the value of compliance parameter
      * corresponding to a given value
@@ -318,9 +318,9 @@ public:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-    double complianceFunction(double kappa, GaussPoint *gp);
+    double complianceFunction(double kappa, GaussPoint *gp) const;
 
-    double evaluatePermanentStrain(double kappa, double omega) override;
+    double evaluatePermanentStrain(double kappa, double omega) const override;
 
     Interface *giveInterface(InterfaceType it) override;
 
@@ -344,7 +344,7 @@ protected:
      * @param totalStrainVector Current total strain vector.
      * @param gp Integration point.
      */
-    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const override;
 };
 } // end namespace oofem
 #endif // idm1_h

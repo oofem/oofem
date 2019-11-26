@@ -172,30 +172,33 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_3d
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<4> giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const;
     /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
-    virtual void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep);
-    virtual void giveRealStressVector_ShellStressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep);
+    virtual FloatArray giveRealStressVector_StressControl(const FloatArray &reducedE, const IntArray &strainControl, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArray giveRealStressVector_ShellStressControl(const FloatArray &reducedE, const IntArray &strainControl, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual void giveRealStressVector_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<2> giveRealStressVector_Warping(const FloatArrayF<2> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<2> giveRealStressVector_2dBeamLayer(const FloatArrayF<2> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<5> giveRealStressVector_PlateLayer(const FloatArrayF<5> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    virtual FloatArrayF<3> giveRealStressVector_Fiber(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+
     virtual void giveRealStressVector_Lattice1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) {};
     virtual void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation is not provided
-    virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    virtual void giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    
+    virtual FloatArrayF<3> giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<6> giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * @name Methods associated with the First PK stress tensor.
@@ -367,10 +370,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                               MatResponseMode mode,
-                                               GaussPoint *gp,
-                                               TimeStep *tStep)
+    virtual FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
     { OOFEM_ERROR("not implemented "); }
 
 
@@ -613,25 +613,21 @@ public:
     /**
      * Method for computing stiffness matrix of plate subsoil model.
      * Default method is emty; the implementation should be provided by the particular model.
-     * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     * @return Stiffness matrix.
      */
-    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-                                             MatResponseMode mmode, GaussPoint *gp,
-                                             TimeStep *tStep);
+    virtual FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing stiffness matrix of beam3d subsoil model.
      * Default method is emty; the implementation should be provided by the particular model.
-     * @param answer Stiffness matrix.
      * @param mmode Material response mode.
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     * @return Stiffness matrix.
      */
-    virtual void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer,
-                                            MatResponseMode mmode, GaussPoint *gp,
-                                            TimeStep *tStep);
+    virtual FloatMatrixF<6,6> give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector

@@ -1398,7 +1398,7 @@ FloatMatrixF<N,M> solve(FloatMatrixF<N,N> mtrx, const FloatMatrixF<N,M> &B)
         // find the suitable row and pivot
         double piv = fabs( mtrx(i, i) );
         std::size_t pivRow = i;
-        for ( int j = i + 1; j < N; j++ ) {
+        for ( std::size_t j = i + 1; j < N; j++ ) {
             if ( fabs( mtrx(j, i) ) > piv ) {
                 pivRow = j;
                 piv = fabs( mtrx(j, i) );

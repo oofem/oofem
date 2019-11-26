@@ -350,11 +350,10 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 }
 
 
-void
-PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseMode mode,
+FloatMatrixF<6,6>
+PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                           GaussPoint *gp,
-                                                          TimeStep *tStep)
+                                                          TimeStep *tStep) const
 //
 //
 //
@@ -370,11 +369,6 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 //
 {
-    MaterialMode originalMode = gp->giveMaterialMode();
-    if ( originalMode != _3dMat ) {
-        OOFEM_ERROR("Different stressStrain mode encountered");
-    }
-
     // we can force 3d response, and we obtain correct 3d tangent matrix,
     // but in fact, stress integration algorithm will not work
     // because in stress integration algorithm we are unable to recognize
@@ -385,9 +379,11 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
 
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        FloatMatrix answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return answer;
     }
 }
 

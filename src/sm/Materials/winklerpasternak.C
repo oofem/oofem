@@ -74,29 +74,24 @@ WinklerPasternakMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-void 
-WinklerPasternakMaterial::giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+FloatArrayF<3>
+WinklerPasternakMaterial::giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix tangent;
-    this->give2dPlateSubSoilStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-    answer.beProductOf(tangent, reducedE);
+    auto tangent = this->give2dPlateSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
+    auto answer = dot(tangent, reducedE);
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+
     status->letTempStrainVectorBe(reducedE);
     status->letTempStressVectorBe(answer);
+    return answer;
 }
 
 
-void
-WinklerPasternakMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+WinklerPasternakMaterial :: give2dPlateSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    answer.resize(3, 3);
-    answer.zero();
-
-    answer.at(1, 1) = c1;
-    answer.at(2, 2) = c2x;
-    answer.at(3, 3) = c2y;
+    return diag<3>({c1, c2x, c2y});
 }
 
 

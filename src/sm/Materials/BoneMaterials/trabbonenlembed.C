@@ -56,32 +56,28 @@ TrabBoneNLEmbed :: TrabBoneNLEmbed(int n, Domain *d) : TrabBoneEmbed(n, d), Stru
 }
 
 void
-TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlstatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
-    FloatArray SDstrainVector;
-    double cumPlastStrain;
 
     this->initTempStatus(gp);
+
+    FloatArray SDstrainVector;
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlstatus->letTempStrainVectorBe(strainVector);
 
     this->performPlasticityReturn(gp, strainVector);
-    this->computeLocalCumPlastStrain(cumPlastStrain, strainVector, gp, tStep);
+    double cumPlastStrain = this->computeLocalCumPlastStrain(strainVector, gp, tStep);
 
     nlstatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
 
-void
-TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
-                                           GaussPoint *gp,
-                                           const FloatArray &strainVector,
-                                           TimeStep *tStep)
+FloatArrayF<6>
+TrabBoneNLEmbed :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const
 {
     auto nlStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
-
-    FloatArrayF<6> strain = strainVector;
     
     auto compliance = this->constructIsoComplTensor(eps0, nu0);
     auto elasticity = inv(compliance);
@@ -94,16 +90,15 @@ TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
 
     double tempTSED = 0.5 * dot(strain, totalStress);
 
-    answer = totalStress;
-
     nlStatus->setTempDam(tempDam);
-    nlStatus->letTempStrainVectorBe(strainVector);
-    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->letTempStrainVectorBe(strain);
+    nlStatus->letTempStressVectorBe(totalStress);
     nlStatus->setTempTSED(tempTSED);
+    return totalStress;
 }
 
-void
-TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep)
+double
+TrabBoneNLEmbed :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
@@ -124,7 +119,7 @@ TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep
 
     //  double localCumPlastStrain = status->giveLocalCumPlastStrainForAverage();
     //  alpha = mParam*nonlocalCumPlastStrain +(1-mParam)*localCumPlastStrain ;
-    alpha = 0.;
+    return 0.;
 }
 
 Interface *

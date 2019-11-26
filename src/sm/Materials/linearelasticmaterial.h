@@ -91,21 +91,18 @@ public:
      */
     void computesSubTangents();
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep) override;
-    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
     ///@todo Should this be virtual? It's never used. It's not part of the base class.
-    virtual void giveRealStressVector_3dDegeneratedShell(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
-    void giveRealStressVector_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
-    void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
-    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
-    void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
+    virtual FloatArrayF<6> giveRealStressVector_3dDegeneratedShell(const FloatArrayF<6> &reducedF, GaussPoint *gp, TimeStep *tStep) const;
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const  override;
+    FloatArrayF<2> giveRealStressVector_Warping(const FloatArrayF<2> &reducedStrain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<2> giveRealStressVector_2dBeamLayer(const FloatArrayF<2> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<5> giveRealStressVector_PlateLayer(const FloatArrayF<5> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<3> giveRealStressVector_Fiber(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep) override;
     double giveEnergyDensity(GaussPoint *gp, TimeStep *tStep);

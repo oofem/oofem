@@ -107,9 +107,9 @@ public:
      * @param tStep time step.
      */
     virtual double computeCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const;
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
     //void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
-    double computeDistanceModifier(double damage);
+    double computeDistanceModifier(double damage) const;
     double computeLocalCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const
     {
         return RankineMat :: computeCumPlastStrain(gp, tStep);
@@ -160,15 +160,15 @@ public:
     // @param tStep time step
     //  void giveNormalElasticStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, GaussPoint*gp, TimeStep* tStep) ;
 
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     // Computes 1D stress
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
-    double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
+    double giveNonlocalMetricModifierAt(GaussPoint *gp) const override;
 
     int hasBoundedSupport() const override { return 1; }
 

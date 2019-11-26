@@ -260,7 +260,7 @@ FloatArrayF<N> operator / ( const FloatArrayF<N> & x, double a )
 {
     FloatArrayF<N> out;
     for ( std::size_t i = 0; i < N; ++i ) {
-        out[i] = x[i] * a;
+        out[i] = x[i] / a;
     }
     return out;
 }

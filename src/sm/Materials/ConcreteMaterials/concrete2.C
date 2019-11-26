@@ -84,8 +84,6 @@ Concrete2 :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
-    double value;
-
     switch ( aProperty ) {
     case c2_SCCC:
         return this->SCCC;
@@ -140,8 +138,7 @@ Concrete2 :: give(int aProperty, GaussPoint *gp) const
 
     default:
         if ( propertyDictionary.includes(aProperty) ) {
-            value = propertyDictionary.at(aProperty);
-            return value;
+            return propertyDictionary.at(aProperty);
         } else {
             return this->linearElasticMaterial.give(aProperty, gp);
             // error ("give: property not defined");
@@ -150,11 +147,9 @@ Concrete2 :: give(int aProperty, GaussPoint *gp) const
 }
 
 
-void
-Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
-                                             GaussPoint *gp,
-                                             const FloatArray &totalStrain,
-                                             TimeStep *tStep)
+FloatArrayF<5>
+Concrete2 :: giveRealStressVector_PlateLayer(const FloatArrayF<5> &totalStrain,
+                                             GaussPoint *gp, TimeStep *tStep) const
 //
 // returns total stress vector of receiver according to
 // previous level of stress and current
@@ -314,8 +309,9 @@ Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
         //   plasticStrain->negated()->add (status->givePlasticStrainVector());
         //      status->givePlasticStrainIncrementVector()-> add(plasticStrain);
 
+        FloatArray answer;
         StructuralMaterial :: giveReducedSymVectorForm( answer, currentStress, gp->giveMaterialMode() );
-        return;
+        return answer;
     }
 
     //
@@ -636,13 +632,15 @@ label18:
     //plasticStrain->negated()->add (status->givePlasticStrainVector());
     //status->givePlasticStrainIncrementVector()-> add(plasticStrain);
 
+    FloatArray answer;
     StructuralMaterial :: giveFullSymVectorForm( answer, currentStress, gp->giveMaterialMode() );
+    return answer;
 }
 
 
 void
 Concrete2 :: dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
-                  double SCC, double SCT, int *ifplas)
+                  double SCC, double SCT, int *ifplas) const
 //
 // DEFORMATION THEORY OF PLASTICITY, PRNCIPAL STRESSES
 // CONDITION OF PLASTICITY.
@@ -845,7 +843,7 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
 
 void
 Concrete2 :: dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
-                  double SCC, double SCT, int *ifplas)
+                  double SCC, double SCT, int *ifplas) const
 //
 // DEFORMATION THEORY OF PLASTICITY, PRNCIPAL STRESSES
 // CONDITION OF PLASTICITY. - PLANE STRESS
@@ -993,7 +991,7 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
 
 void
 Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray &ep, double &ep1, double &ep2, double &ep3,
-                     double SCC, double SCT, int &ifupd)
+                     double SCC, double SCT, int &ifupd) const
 // material constant of concrete
 // stored in this.propertyDictionary
 //
@@ -1158,7 +1156,7 @@ label14:
 
 
 void
-Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep)
+Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep) const
 // stirr (double dez, double srf)
 //
 //
