@@ -311,7 +311,7 @@ PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &
 void
 PlaneStressElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -417,7 +417,7 @@ PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &
 void
 PlaneStrainElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -605,7 +605,7 @@ AxisymElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
                                              MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;

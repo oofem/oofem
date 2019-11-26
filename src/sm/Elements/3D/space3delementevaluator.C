@@ -105,6 +105,6 @@ void Space3dStructuralElementEvaluator :: computeStressVector(FloatArray &answer
 
 void Space3dStructuralElementEvaluator :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+    answer = static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveStiffnessMatrix_3d(rMode, gp, tStep);
 }
 } // end namespace oofem

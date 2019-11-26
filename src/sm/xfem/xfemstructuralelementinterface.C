@@ -742,9 +742,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
                 if ( structCS != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        structCS->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
                     } else {
-                        structCS->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
                     }
                     return;
                 } else {
@@ -756,11 +756,11 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
     // If no enrichment modifies the material,
     // compute stiffness based on the bulk material.
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    auto cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( mUsePlaneStrain ) {
-        cs->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
     } else {
-        cs->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
     }
 }
 

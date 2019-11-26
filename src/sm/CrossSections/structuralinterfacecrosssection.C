@@ -168,7 +168,7 @@ StructuralInterfaceCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *i
 }
 
 
-Material *StructuralInterfaceCrossSection :: giveMaterial(IntegrationPoint *ip)
+Material *StructuralInterfaceCrossSection :: giveMaterial(IntegrationPoint *ip) const
 {
     if ( this->giveMaterialNumber() ) {
         return this->giveDomain()->giveMaterial( this->giveMaterialNumber() );

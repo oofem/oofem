@@ -122,8 +122,8 @@ public:
     const char *giveClassName() const override { return "VariableCrossSection"; }
     const char *giveInputRecordName() const override { return _IFT_VariableCrossSection_Name; }
 
-    double give(CrossSectionProperty a, GaussPoint *gp) override;
-    double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local) override;
+    double give(CrossSectionProperty a, GaussPoint *gp) const override;
+    double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local) const override;
 
 protected:
     void giveExpression(const ScalarFunction **expr, CrossSectionProperty aProperty) const;

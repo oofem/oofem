@@ -134,11 +134,11 @@ StructuralCrossSection :: giveGeneralizedStress_3dBeamSubSoil(FloatArray &answer
     answer = mat->giveRealStressVector_3dBeamSubSoil(generalizedStrain, gp, tStep);
 }
 
-void
-StructuralCrossSection :: give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+StructuralCrossSection :: give3dBeamSubSoilStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    answer = mat->give3dBeamSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
+    return mat->give3dBeamSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
 }
 
   

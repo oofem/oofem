@@ -81,8 +81,6 @@ public:
      * @param d Domain to which new cross section will belong.
      */
     StructuralCrossSection(int n, Domain *d) : CrossSection(n, d)  { }
-    /// Destructor.
-    virtual ~StructuralCrossSection() { }
 
     /**
      * Computes the real stress vector for given strain and integration point.
@@ -116,10 +114,10 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
-    virtual void giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
-    virtual void giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
-    virtual void giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatMatrixF<6,6> giveStiffnessMatrix_3d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF<3,3> giveStiffnessMatrix_PlaneStress(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF<4,4> giveStiffnessMatrix_PlaneStrain(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
+    virtual FloatMatrixF<1,1> giveStiffnessMatrix_1d(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     //@}
 
     /**
@@ -230,7 +228,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatMatrixF<3,3> give2dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Computes the stiffness matrix for 2d beams.
      * @param answer The requested matrix.
@@ -238,7 +236,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatMatrixF<6,6> give3dBeamStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing subsoil stiffness matrix for 2d beams.
      * @param answer Stiffness matrix.
@@ -246,7 +244,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual FloatMatrixF<6,6> give3dBeamSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Method for computing 2d plate stiffness matrix.
@@ -255,7 +253,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatMatrixF<5,5> give2dPlateStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing 3d shell stiffness matrix.
      * @param answer Stiffness matrix.
@@ -263,7 +261,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatMatrixF<8,8> give3dShellStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing 3d shell stiffness matrix on degenerated shell elements.
      * @param answer Stiffness matrix.
@@ -271,7 +269,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give3dDegeneratedShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) { OOFEM_ERROR("Implemented in inherited classes"); };
+    virtual FloatMatrixF<6,6> give3dDegeneratedShellStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const { OOFEM_ERROR("Implemented in inherited classes"); };
     /**
      * Method for computing membrane stiffness matrix with added drilling stiffness.
      * @param answer Stiffness matrix.
@@ -279,7 +277,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatMatrixF<4,4> giveMembraneRotStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Method for computing subsoil stiffness matrix for plates.
      * @param answer Stiffness matrix.
@@ -287,7 +285,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**
      * Returns modified gradient of stress vector, which is used to
      * bring stresses back to yield surface.
@@ -315,13 +313,13 @@ public:
     int testCrossSectionExtension(CrossSectExtension ext) override { return ( ( ext == CS_StructuralCapability ) ? 1 : 0 ); }
 
     ///@todo This shouldn't  be optional
-    Material *giveMaterial(IntegrationPoint *ip) override { OOFEM_ERROR("Missing implementation"); return nullptr; }
+    Material *giveMaterial(IntegrationPoint *ip) const override { OOFEM_ERROR("Missing implementation"); return nullptr; }
     virtual Interface *giveMaterialInterface(InterfaceType t, IntegrationPoint *ip) { return nullptr; }
 
     virtual void createMaterialStatus(GaussPoint &iGP) = 0;
 
     int checkConsistency() override = 0;
-    bool isCharacteristicMtrxSymmetric(MatResponseMode mode) override = 0;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode mode) const override = 0;
 };
 } // end namespace oofem
 #endif // structuralcrosssection_h
