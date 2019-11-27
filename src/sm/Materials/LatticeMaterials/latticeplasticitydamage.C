@@ -453,7 +453,6 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
                 tempStrain = convergedStrain;
                 tempStrain.add(deltaStrain);
             } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
-                //	printf("Subincrementation sucessful\n");
 
                 tempPlasticStrain.at(1) = tempStrain.at(1) - stress.at(1) / eNormalMean;
                 tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
@@ -483,8 +482,6 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
     status->letTempPlasticStrainBe(tempPlasticStrain);
     status->letTempStressVectorBe(stress);
 
-    printf("plastic strain =\n");
-    tempPlasticStrain.printYourself();
 }
 
 
@@ -815,10 +812,6 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArray &r
 
     FloatArray tempPlasticStrain = status->giveTempPlasticStrain();
 
-    printf("plastic strain in damage =\n");
-    tempPlasticStrain.printYourself();
-
-
     FloatArray plasticStrain = status->givePlasticStrain();
     FloatArray deltaPlasticStrain;
     deltaPlasticStrain = tempPlasticStrain;
@@ -889,8 +882,6 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArray &r
     status->setTempKappaDTwo(tempKappaDTwo);
     status->setTempDamage(omega);
     status->setTempCrackWidth(crackWidth);
-
-    printf("damage = %e\n", omega);
 
     return;
 }
