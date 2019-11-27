@@ -72,31 +72,31 @@ public:
 
     double giveLength() override;
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer) override;
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
-    virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
+    int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
 
-    virtual double giveBondLength() override;
+    double giveBondLength() override;
 
-    virtual double giveBondDiameter() override;
+    double giveBondDiameter() override;
 
-    virtual double giveBondEndLength() override;
+    double giveBondEndLength() override;
 
-    virtual int computeNumberOfDofs() override { return 12; }
+    int computeNumberOfDofs() override { return 12; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const override;
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
     virtual void giveGPCoordinates(FloatArray &coords);
 
     virtual void computeGeometryProperties();
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
-    virtual const char *giveInputRecordName() const override { return _IFT_LatticeLink3d_Name; }
-    virtual const char *giveClassName()  const override { return "LatticeLink3d"; }
-    virtual void initializeFrom(InputRecord &ir) override;
+    const char *giveInputRecordName() const override { return _IFT_LatticeLink3d_Name; }
+    const char *giveClassName()  const override { return "LatticeLink3d"; }
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
 
@@ -104,15 +104,15 @@ public:
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
-    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
+    void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
 #endif
 
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &) override;
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
@@ -122,8 +122,8 @@ protected:
      */
     void computePropertiesOfCrossSection();
 
-    virtual void computeGaussPoints() override;
-    virtual integrationDomain  giveIntegrationDomain() const override { return _Line; }
+    void computeGaussPoints() override;
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
 };
 } // end namespace oofem
 #endif
