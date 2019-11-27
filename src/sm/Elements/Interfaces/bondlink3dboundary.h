@@ -64,36 +64,36 @@ public:
     BondLink3dBoundary(int n, Domain *);
     virtual ~BondLink3dBoundary();
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer) override;
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
-    virtual int computeNumberOfDofs() override { return 18; }
+    int computeNumberOfDofs() override { return 18; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const override;
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
-    virtual void computeGeometryProperties() override;
+    void computeGeometryProperties() override;
 
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) override;
 
-    virtual const char *giveInputRecordName() const override { return _IFT_BondLink3dBoundary_Name; }
-    virtual const char *giveClassName()  const override { return "BondLink3dBoundary"; }
-    virtual void initializeFrom(InputRecord &ir) override;
+    const char *giveInputRecordName() const override { return _IFT_BondLink3dBoundary_Name; }
+    const char *giveClassName()  const override { return "BondLink3dBoundary"; }
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
-    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+    void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
+    void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
 #endif
 
 
 protected:
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &) override;
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
     void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
     void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
 
@@ -105,7 +105,7 @@ protected:
      */
     void computePropertiesOfCrossSection();
 
-    virtual integrationDomain  giveIntegrationDomain() const override { return _Line; }
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
 };
 } // end namespace oofem
 #endif //bondlink3dboundary_h

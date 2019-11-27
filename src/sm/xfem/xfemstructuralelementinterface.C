@@ -742,9 +742,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
                 if ( structCS != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        structCS->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
                     } else {
-                        structCS->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
                     }
                     return;
                 } else {
@@ -756,17 +756,17 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
     // If no enrichment modifies the material,
     // compute stiffness based on the bulk material.
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    auto cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( mUsePlaneStrain ) {
-        cs->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
     } else {
-        cs->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
     }
 }
 
 void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    auto cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == nullptr ) {
         OOFEM_ERROR("cs == nullptr.");
     }
@@ -781,13 +781,13 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
             EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(materialModifyingEnrItemIndices [ i ]) );
 
             if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
-                StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
+                auto structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
                 if ( structCSInclusion != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        structCSInclusion->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStrain(strain, gp, tStep);
                     } else {
-                        structCSInclusion->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStress(strain, gp, tStep);
                     }
 
                     return;
@@ -800,9 +800,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
     // If no enrichment modifies the material:
     if ( mUsePlaneStrain ) {
-        cs->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+        answer = cs->giveRealStress_PlaneStrain(strain, gp, tStep);
     } else {
-        cs->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+        answer = cs->giveRealStress_PlaneStress(strain, gp, tStep);
     }
 }
 

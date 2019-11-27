@@ -42,8 +42,6 @@ REGISTER_CrossSection(SimpleTransportCrossSection);
 
 SimpleTransportCrossSection :: SimpleTransportCrossSection(int n, Domain *d) : TransportCrossSection(n, d) { }
 
-SimpleTransportCrossSection :: ~SimpleTransportCrossSection() { }
-
 
 void
 SimpleTransportCrossSection :: initializeFrom(InputRecord &ir)
@@ -81,13 +79,13 @@ SimpleTransportCrossSection :: checkConsistency()
 
 
 TransportMaterial *
-SimpleTransportCrossSection :: giveMaterial()
+SimpleTransportCrossSection :: giveMaterial() const
 {
     return dynamic_cast< TransportMaterial * >( this->domain->giveMaterial(this->matNumber) );
 }
 
 Material *
-SimpleTransportCrossSection :: giveMaterial(IntegrationPoint *ip)
+SimpleTransportCrossSection :: giveMaterial(IntegrationPoint *ip) const
 {
     return this->domain->giveMaterial(this->matNumber);
 }
@@ -101,7 +99,7 @@ SimpleTransportCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, I
 
 
 bool
-SimpleTransportCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
+SimpleTransportCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode) const
 {
     return this->domain->giveMaterial(this->matNumber)->isCharacteristicMtrxSymmetric(rMode);
 }

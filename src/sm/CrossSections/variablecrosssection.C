@@ -180,14 +180,14 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx)
+VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx) const
 {
     return this->give(aProperty, gpx->giveNaturalCoordinates(), gpx->giveElement(), true);
 }
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
+VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local) const
 {
     double value = 0.0;
     const ScalarFunction *expr;

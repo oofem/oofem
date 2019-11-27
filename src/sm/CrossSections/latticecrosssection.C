@@ -139,7 +139,7 @@ LatticeCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalS
 }
 
 
-Material *LatticeCrossSection :: giveMaterial(IntegrationPoint *ip)
+Material *LatticeCrossSection :: giveMaterial(IntegrationPoint *ip) const
 {
     if ( this->giveMaterialNumber() ) {
         return this->giveDomain()->giveMaterial(this->giveMaterialNumber() );

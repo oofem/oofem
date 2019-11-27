@@ -583,16 +583,16 @@ TrPlaneStrRot :: initializeFrom(InputRecord &ir)
 void
 TrPlaneStrRot :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveMembraneRotStiffMtrx(answer, rMode, gp, tStep);
+    auto cs = this->giveStructuralCrossSection();
+    answer = cs->giveMembraneRotStiffMtrx(rMode, gp, tStep);
 }
 
 
 void
 TrPlaneStrRot :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveGeneralizedStress_MembraneRot(answer, gp, strain, tStep);
+    auto cs = this->giveStructuralCrossSection();
+    answer = cs->giveGeneralizedStress_MembraneRot(strain, gp, tStep);
 }
 
 

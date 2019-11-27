@@ -52,10 +52,8 @@ public:
      * @param d Domain for cross section.
      */
     EmptyCS(int n, Domain * d);
-    /// Destructor.
-    virtual ~EmptyCS();
 
-    Material *giveMaterial(IntegrationPoint *ip) override;
+    Material *giveMaterial(IntegrationPoint *ip) const override;
     int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override { return 1; }
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) override { return 1; }
     int estimatePackSize(DataStream &buff, GaussPoint *ip) override { return 0; }

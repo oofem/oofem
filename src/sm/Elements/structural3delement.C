@@ -217,36 +217,35 @@ Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray 
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y, z;
-        FloatArray rotStrain, s;
 
         this->giveMaterialOrientationAt( x, y, z, gp->giveNaturalCoordinates() );
         // Transform from global c.s. to material c.s.
-        rotStrain = {
-            e(0) * x(0) * x(0) + e(5) * x(0) * x(1) + e(1) * x(1) * x(1) + e(4) * x(0) * x(2) + e(3) * x(1) * x(2) + e(2) * x(2) * x(2),
-            e(0) * y(0) * y(0) + e(5) * y(0) * y(1) + e(1) * y(1) * y(1) + e(4) * y(0) * y(2) + e(3) * y(1) * y(2) + e(2) * y(2) * y(2),
-            e(0) * z(0) * z(0) + e(5) * z(0) * z(1) + e(1) * z(1) * z(1) + e(4) * z(0) * z(2) + e(3) * z(1) * z(2) + e(2) * z(2) * z(2),
-            2 * e(0) * y(0) * z(0) + e(4) * y(2) * z(0) + 2 * e(1) * y(1) * z(1) + e(3) * y(2) * z(1) + e(5) * ( y(1) * z(0) + y(0) * z(1) ) + ( e(4) * y(0) + e(3) * y(1) + 2 * e(2) * y(2) ) * z(2),
-            2 * e(0) * x(0) * z(0) + e(4) * x(2) * z(0) + 2 * e(1) * x(1) * z(1) + e(3) * x(2) * z(1) + e(5) * ( x(1) * z(0) + x(0) * z(1) ) + ( e(4) * x(0) + e(3) * x(1) + 2 * e(2) * x(2) ) * z(2),
-            2 * e(0) * x(0) * y(0) + e(4) * x(2) * y(0) + 2 * e(1) * x(1) * y(1) + e(3) * x(2) * y(1) + e(5) * ( x(1) * y(0) + x(0) * y(1) ) + ( e(4) * x(0) + e(3) * x(1) + 2 * e(2) * x(2) ) * y(2)
+        FloatArrayF<6> rotStrain = {
+            e[0] * x[0] * x[0] + e[5] * x[0] * x[1] + e[1] * x[1] * x[1] + e[4] * x[0] * x[2] + e[3] * x[1] * x[2] + e[2] * x[2] * x[2],
+            e[0] * y[0] * y[0] + e[5] * y[0] * y[1] + e[1] * y[1] * y[1] + e[4] * y[0] * y[2] + e[3] * y[1] * y[2] + e[2] * y[2] * y[2],
+            e[0] * z[0] * z[0] + e[5] * z[0] * z[1] + e[1] * z[1] * z[1] + e[4] * z[0] * z[2] + e[3] * z[1] * z[2] + e[2] * z[2] * z[2],
+            2 * e[0] * y[0] * z[0] + e[4] * y[2] * z[0] + 2 * e[1] * y[1] * z[1] + e[3] * y[2] * z[1] + e[5] * ( y[1] * z[0] + y[0] * z[1] ) + ( e[4] * y[0] + e[3] * y[1] + 2 * e[2] * y[2] ) * z[2],
+            2 * e[0] * x[0] * z[0] + e[4] * x[2] * z[0] + 2 * e[1] * x[1] * z[1] + e[3] * x[2] * z[1] + e[5] * ( x[1] * z[0] + x[0] * z[1] ) + ( e[4] * x[0] + e[3] * x[1] + 2 * e[2] * x[2] ) * z[2],
+            2 * e[0] * x[0] * y[0] + e[4] * x[2] * y[0] + 2 * e[1] * x[1] * y[1] + e[3] * x[2] * y[1] + e[5] * ( x[1] * y[0] + x[0] * y[1] ) + ( e[4] * x[0] + e[3] * x[1] + 2 * e[2] * x[2] ) * y[2]
         };
-        this->giveStructuralCrossSection()->giveRealStress_3d(s, gp, rotStrain, tStep);
+        auto s = this->giveStructuralCrossSection()->giveRealStress_3d(rotStrain, gp, tStep);
         answer = {
-            s(0) * x(0) * x(0) + 2 * s(5) * x(0) * y(0) + s(1) * y(0) * y(0) + 2 * ( s(4) * x(0) + s(3) * y(0) ) * z(0) + s(2) * z(0) * z(0),
-            s(0) * x(1) * x(1) + 2 * s(5) * x(1) * y(1) + s(1) * y(1) * y(1) + 2 * ( s(4) * x(1) + s(3) * y(1) ) * z(1) + s(2) * z(1) * z(1),
-            s(0) * x(2) * x(2) + 2 * s(5) * x(2) * y(2) + s(1) * y(2) * y(2) + 2 * ( s(4) * x(2) + s(3) * y(2) ) * z(2) + s(2) * z(2) * z(2),
-            y(2) * ( s(5) * x(1) + s(1) * y(1) + s(3) * z(1) ) + x(2) * ( s(0) * x(1) + s(5) * y(1) + s(4) * z(1) ) + ( s(4) * x(1) + s(3) * y(1) + s(2) * z(1) ) * z(2),
-            y(2) * ( s(5) * x(0) + s(1) * y(0) + s(3) * z(0) ) + x(2) * ( s(0) * x(0) + s(5) * y(0) + s(4) * z(0) ) + ( s(4) * x(0) + s(3) * y(0) + s(2) * z(0) ) * z(2),
-            y(1) * ( s(5) * x(0) + s(1) * y(0) + s(3) * z(0) ) + x(1) * ( s(0) * x(0) + s(5) * y(0) + s(4) * z(0) ) + ( s(4) * x(0) + s(3) * y(0) + s(2) * z(0) ) * z(1)
+            s[0] * x[0] * x[0] + 2 * s[5] * x[0] * y[0] + s[1] * y[0] * y[0] + 2 * ( s[4] * x[0] + s[3] * y[0] ) * z[0] + s[2] * z[0] * z[0],
+            s[0] * x[1] * x[1] + 2 * s[5] * x[1] * y[1] + s[1] * y[1] * y[1] + 2 * ( s[4] * x[1] + s[3] * y[1] ) * z[1] + s[2] * z[1] * z[1],
+            s[0] * x[2] * x[2] + 2 * s[5] * x[2] * y[2] + s[1] * y[2] * y[2] + 2 * ( s[4] * x[2] + s[3] * y[2] ) * z[2] + s[2] * z[2] * z[2],
+            y[2] * ( s[5] * x[1] + s[1] * y[1] + s[3] * z[1] ) + x[2] * ( s[0] * x[1] + s[5] * y[1] + s[4] * z[1] ) + ( s[4] * x[1] + s[3] * y[1] + s[2] * z[1] ) * z[2],
+            y[2] * ( s[5] * x[0] + s[1] * y[0] + s[3] * z[0] ) + x[2] * ( s[0] * x[0] + s[5] * y[0] + s[4] * z[0] ) + ( s[4] * x[0] + s[3] * y[0] + s[2] * z[0] ) * z[2],
+            y[1] * ( s[5] * x[0] + s[1] * y[0] + s[3] * z[0] ) + x[1] * ( s[0] * x[0] + s[5] * y[0] + s[4] * z[0] ) + ( s[4] * x[0] + s[3] * y[0] + s[2] * z[0] ) * z[1]
         };
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, e, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_3d(e, gp, tStep);
     }
 }
 
 void
 Structural3DElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y, z;
         FloatMatrix Q;
