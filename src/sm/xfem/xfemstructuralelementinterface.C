@@ -766,7 +766,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
 void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    auto cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == nullptr ) {
         OOFEM_ERROR("cs == nullptr.");
     }
@@ -781,13 +781,13 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
             EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(materialModifyingEnrItemIndices [ i ]) );
 
             if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
-                StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
+                auto structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
                 if ( structCSInclusion != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        structCSInclusion->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStrain(strain, gp, tStep);
                     } else {
-                        structCSInclusion->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStress(strain, gp, tStep);
                     }
 
                     return;
@@ -800,9 +800,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
     // If no enrichment modifies the material:
     if ( mUsePlaneStrain ) {
-        cs->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+        answer = cs->giveRealStress_PlaneStrain(strain, gp, tStep);
     } else {
-        cs->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+        answer = cs->giveRealStress_PlaneStress(strain, gp, tStep);
     }
 }
 

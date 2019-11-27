@@ -127,7 +127,7 @@ LIBeam2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 LIBeam2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(strain, gp, tStep);
 }
 
 

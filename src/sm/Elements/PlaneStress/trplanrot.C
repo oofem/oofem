@@ -591,8 +591,8 @@ TrPlaneStrRot :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMod
 void
 TrPlaneStrRot :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveGeneralizedStress_MembraneRot(answer, gp, strain, tStep);
+    auto cs = this->giveStructuralCrossSection();
+    answer = cs->giveGeneralizedStress_MembraneRot(strain, gp, tStep);
 }
 
 

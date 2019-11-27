@@ -972,7 +972,7 @@ MITC4Shell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 void
 MITC4Shell :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(strain, gp, tStep);
 }
 
 
@@ -980,43 +980,24 @@ void
 MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep)
 // returns characteristic tensor of the receiver at given gp and tStep
 {
-    answer.resize(3, 3);
-    answer.zero();
     this->computeGtoLRotationMatrix();
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
 
     if ( type == GlobalForceTensor ) {
         FloatArray localStress, localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         this->computeStressVector(localStress, localStrain, gp, tStep);
         auto stress = mat->transformStressVectorTo(GtoLRotationMatrix, localStress, false);
-
-        answer.at(1, 1) = stress.at(1);
-        answer.at(2, 2) = stress.at(2);
-        answer.at(3, 3) = stress.at(3);
-        answer.at(2, 3) = stress.at(4);
-        answer.at(3, 2) = stress.at(4);
-        answer.at(1, 3) = stress.at(5);
-        answer.at(3, 1) = stress.at(5);
-        answer.at(1, 2) = stress.at(6);
-        answer.at(2, 1) = stress.at(6);
+        answer = from_voigt_stress(stress);
     } else if ( type == GlobalStrainTensor ) {
         FloatArray localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         auto strain = mat->transformStrainVectorTo(GtoLRotationMatrix, localStrain, false);
-
-        answer.at(1, 1) = strain.at(1);
-        answer.at(2, 2) = strain.at(2);
-        answer.at(3, 3) = strain.at(3);
-        answer.at(2, 3) = strain.at(4) / 2.;
-        answer.at(3, 2) = strain.at(4) / 2.;
-        answer.at(1, 3) = strain.at(5) / 2.;
-        answer.at(3, 1) = strain.at(5) / 2.;
-        answer.at(1, 2) = strain.at(6) / 2.;
-        answer.at(2, 1) = strain.at(6) / 2.;
+        answer = from_voigt_strain(strain);
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
+        answer.resize(3, 3);
+        answer.zero();
     }
 }
 

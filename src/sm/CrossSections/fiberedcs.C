@@ -46,38 +46,43 @@
 namespace oofem {
 REGISTER_CrossSection(FiberedCrossSection);
 
-void
-FiberedCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<6>
+FiberedCrossSection :: giveRealStress_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
+    return zeros<6>();
 }
 
 
-void
-FiberedCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<4>
+FiberedCrossSection :: giveRealStress_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
+    return zeros<4>();
 }
 
 
-void
-FiberedCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<3>
+FiberedCrossSection :: giveRealStress_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
+    return zeros<3>();
 }
 
 
-void
-FiberedCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<1>
+FiberedCrossSection :: giveRealStress_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
+    return zeros<1>();
 }
 
 
-void
-FiberedCrossSection :: giveRealStress_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<2>
+FiberedCrossSection :: giveRealStress_Warping(const FloatArrayF<2> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported\n");
+    return zeros<2>();
 }
 
 
@@ -113,19 +118,18 @@ FiberedCrossSection :: giveStiffnessMatrix_1d(MatResponseMode rMode, GaussPoint 
 }
 
 
-
-
-void
-FiberedCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<3>
+FiberedCrossSection :: giveGeneralizedStress_Beam2d(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
+    return zeros<3>();
 }
 
 
-void
-FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<6>
+FiberedCrossSection :: giveGeneralizedStress_Beam3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatArray fiberStrain, reducedFiberStress;
+    FloatArray fiberStrain;
     auto element = static_cast< StructuralElement * >( gp->giveElement() );
     auto interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) );
 
@@ -133,8 +137,7 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
         OOFEM_ERROR("element with no fiber support encountered");
     }
 
-    answer.resize(6);
-    answer.zero();
+    FloatArrayF<6> answer;
 
     for ( int i = 1; i <= this->fiberMaterials.giveSize(); i++ ) {
         auto fiberGp = this->giveSlaveGaussPoint(gp, i - 1);
@@ -154,7 +157,7 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
 
         interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, strain, fiberGp, tStep);
 
-        reducedFiberStress = fiberMat->giveRealStressVector_Fiber(fiberStrain, fiberGp, tStep);
+        auto reducedFiberStress = fiberMat->giveRealStressVector_Fiber(fiberStrain, fiberGp, tStep);
 
         // perform integration
         // 1) membrane terms N, Qz, Qy
@@ -172,33 +175,39 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
     auto status = static_cast< StructuralMaterialStatus * >( domain->giveMaterial( fiberMaterials.at(1) )->giveStatus(gp) );
     status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
+
+    return answer;
 }
 
 
-void
-FiberedCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<5>
+FiberedCrossSection :: giveGeneralizedStress_Plate(const FloatArrayF<5> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
+    return zeros<5>();
 }
 
 
-void
-FiberedCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<8>
+FiberedCrossSection :: giveGeneralizedStress_Shell(const FloatArrayF<8> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported");
+    return zeros<8>();
 }
 
 
-void
-FiberedCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<4>
+FiberedCrossSection :: giveGeneralizedStress_MembraneRot(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("Not supported in given cross-section (yet).");
+    return zeros<4>();
 }
 
-void
-FiberedCrossSection :: giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArrayF<3>
+FiberedCrossSection :: giveGeneralizedStress_PlateSubSoil(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-  OOFEM_ERROR("Not supported in given cross-section.");
+    OOFEM_ERROR("Not supported in given cross-section.");
+    return zeros<3>();
 }
 
 void

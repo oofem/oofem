@@ -393,7 +393,7 @@ LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 void
 LIBeam2dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(strain, gp, tStep);
 }
 
 

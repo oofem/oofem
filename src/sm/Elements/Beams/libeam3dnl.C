@@ -515,7 +515,7 @@ LIBeam3dNL :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode r
 void
 LIBeam3dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
 }
 
 

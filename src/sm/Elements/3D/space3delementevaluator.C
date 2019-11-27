@@ -99,7 +99,7 @@ double Space3dStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp)
 
 void Space3dStructuralElementEvaluator :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStress_3d(answer, gp, strain, tStep);
+    answer = static_cast< StructuralCrossSection * >( this->giveElement()->giveCrossSection() )->giveRealStress_3d(strain, gp, tStep);
 }
 
 

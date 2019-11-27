@@ -285,25 +285,23 @@ PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
-        FloatArray rotStrain, s;
-
         this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        rotStrain = {
-            e(0) * x(0) * x(0) + e(2) * x(0) * x(1) + e(1) * x(1) * x(1),
-            e(0) * y(0) * y(0) + e(2) * y(0) * y(1) + e(1) * y(1) * y(1),
-            2 * e(0) * x(0) * y(0) + 2 * e(1) * x(1) * y(1) + e(2) * ( x(1) * y(0) + x(0) * y(1) )
+        FloatArrayF<3> rotStrain = {
+            e[0] * x[0] * x[0] + e[2] * x[0] * x[1] + e[1] * x[1] * x[1],
+            e[0] * y[0] * y[0] + e[2] * y[0] * y[1] + e[1] * y[1] * y[1],
+            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[2] * ( x[1] * y[0] + x[0] * y[1] )
         };
 
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStress(s, gp, rotStrain, tStep);
+        auto s = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(rotStrain, gp, tStep);
 
         answer = {
-            s(0) * x(0) * x(0) + 2 * s(2) * x(0) * y(0) + s(1) * y(0) * y(0),
-            s(0) * x(1) * x(1) + 2 * s(2) * x(1) * y(1) + s(1) * y(1) * y(1),
-            s(1) * y(0) * y(1) + s(0) * x(0) * x(1) + s(2) * ( x(1) * y(0) + x(0) * y(1) )
+            s[0] * x[0] * x[0] + 2 * s[2] * x[0] * y[0] + s[1] * y[0] * y[0],
+            s[0] * x[1] * x[1] + 2 * s[2] * x[1] * y[1] + s[1] * y[1] * y[1],
+            s[1] * y[0] * y[1] + s[0] * x[0] * x[1] + s[2] * ( x[1] * y[0] + x[0] * y[1] )
         };
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStress(answer, gp, e, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(e, gp, tStep);
     }
 }
 
@@ -391,25 +389,24 @@ PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
-        FloatArray rotStrain, s;
 
         this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        rotStrain = {
-            e(0) * x(0) * x(0) + e(3) * x(0) * x(1) + e(1) * x(1) * x(1),
-            e(0) * y(0) * y(0) + e(3) * y(0) * y(1) + e(1) * y(1) * y(1),
-            e(2),
-            2 * e(0) * x(0) * y(0) + 2 * e(1) * x(1) * y(1) + e(3) * ( x(1) * y(0) + x(0) * y(1) )
+        FloatArrayF<4> rotStrain = {
+            e[0] * x[0] * x[0] + e[3] * x[0] * x[1] + e[1] * x[1] * x[1],
+            e[0] * y[0] * y[0] + e[3] * y[0] * y[1] + e[1] * y[1] * y[1],
+            e[2],
+            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[3] * ( x[1] * y[0] + x[0] * y[1] )
         };
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(s, gp, rotStrain, tStep);
+        auto s = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(rotStrain, gp, tStep);
         answer = {
-            s(0) * x(0) * x(0) + 2 * s(3) * x(0) * y(0) + s(1) * y(0) * y(0),
-            s(0) * x(1) * x(1) + 2 * s(3) * x(1) * y(1) + s(1) * y(1) * y(1),
-            s(2),
-            y(1) * ( s(3) * x(0) + s(1) * y(0) ) + x(1) * ( s(0) * x(0) + s(3) * y(0) )
+            s[0] * x[0] * x[0] + 2 * s[3] * x[0] * y[0] + s[1] * y[0] * y[0],
+            s[0] * x[1] * x[1] + 2 * s[3] * x[1] * y[1] + s[1] * y[1] * y[1],
+            s[2],
+            y[1] * ( s[3] * x[0] + s[1] * y[0] ) + x[1] * ( s[0] * x[0] + s[3] * y[0] )
         };
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(answer, gp, e, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(e, gp, tStep);
     }
 }
 
@@ -574,29 +571,28 @@ AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &e, Ga
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
-        FloatArray rotStrain, s;
 
         this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        rotStrain = {
-            e(0) * x(0) * x(0) + e(5) * x(0) * x(1) + e(1) * x(1) * x(1),
-            e(0) * y(0) * y(0) + e(5) * y(0) * y(1) + e(1) * y(1) * y(1),
-            e(2),
-            e(4) * y(0) + e(3) * y(1),
-            e(4) * x(0) + e(3) * x(1),
-            2 * e(0) * x(0) * y(0) + 2 * e(1) * x(1) * y(1) + e(5) * ( x(1) * y(0) + x(0) * y(1) )
+        FloatArrayF<6> rotStrain = {
+            e[0] * x[0] * x[0] + e[5] * x[0] * x[1] + e[1] * x[1] * x[1],
+            e[0] * y[0] * y[0] + e[5] * y[0] * y[1] + e[1] * y[1] * y[1],
+            e[2],
+            e[4] * y[0] + e[3] * y[1],
+            e[4] * x[0] + e[3] * x[1],
+            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[5] * ( x[1] * y[0] + x[0] * y[1] )
         };
-        this->giveStructuralCrossSection()->giveRealStress_3d(s, gp, rotStrain, tStep);
+        auto s = this->giveStructuralCrossSection()->giveRealStress_3d(rotStrain, gp, tStep);
         answer = {
-            s(0) * x(0) * x(0) + 2 * s(5) * x(0) * y(0) + s(1) * y(0) * y(0),
-            s(0) * x(1) * x(1) + 2 * s(5) * x(1) * y(1) + s(1) * y(1) * y(1),
-            s(2),
-            s(4) * x(1) + s(3) * y(1),
-            s(4) * x(0) + s(3) * y(0),
-            y(1) * ( s(5) * x(0) + s(1) * y(0) ) + x(1) * ( s(0) * x(0) + s(5) * y(0) )
+            s[0] * x[0] * x[0] + 2 * s[5] * x[0] * y[0] + s[1] * y[0] * y[0],
+            s[0] * x[1] * x[1] + 2 * s[5] * x[1] * y[1] + s[1] * y[1] * y[1],
+            s[2],
+            s[4] * x[1] + s[3] * y[1],
+            s[4] * x[0] + s[3] * y[0],
+            y[1] * ( s[5] * x[0] + s[1] * y[0] ) + x[1] * ( s[0] * x[0] + s[5] * y[0] )
         };
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, e, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_3d(e, gp, tStep);
     }
 }
 

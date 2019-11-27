@@ -383,7 +383,7 @@ BondLink3dBoundary :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespon
 void
 BondLink3dBoundary :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStresses(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStresses(strain, gp, tStep);
 }
 
 

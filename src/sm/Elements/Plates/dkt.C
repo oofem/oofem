@@ -311,7 +311,7 @@ DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 void
 DKTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(strain, gp, tStep);
 }
 
 
@@ -761,7 +761,7 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         vgp->setNaturalCoordinates(coords [ i - 1 ]);
         this->computeStrainVector(eps, vgp, tStep);
-        this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(m, vgp, eps, tStep);
+        m = this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(eps, vgp, tStep);
         answer.setColumn(m, i);
     }
 

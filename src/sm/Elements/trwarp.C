@@ -104,7 +104,7 @@ Tr_Warp :: initializeFrom(InputRecord &ir)
 void
 Tr_Warp :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Warping(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_Warping(strain, gp, tStep);
 }
 
 
