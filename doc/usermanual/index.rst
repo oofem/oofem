@@ -12,6 +12,8 @@ Welcome to OOFEM User Manual!
 
    introduction
    installation
+   gettingstarted
+   understandinginput 
    
 
   

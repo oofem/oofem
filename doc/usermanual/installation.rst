@@ -1,3 +1,5 @@
+.. _installation:
+
 Installation
 ============
 
@@ -7,6 +9,7 @@ Installation options
     * Usually 12M release cycle
     * Binary packages for Windows (AMD64 version only) and Linux (x86_64 version, Debian package)
     * Source package (requires compilation)
+
 • Development version
     * Manual installation from OOFEM GitHub repository (https://github.com/oofem/oofem.git)
 
@@ -66,7 +69,7 @@ Requirements
 * C++ compiler (g++, Visual Studio, MinGW, ...)
 * CMake build tools (https://cmake.org/)
 * Controls software compilation process by using platform independent configuration and generate native makefiles or projects
-* To generate platform makefile or project configuration, use cmake (or any user friendly based GUI, such as ccmake or cmake-gui)
+* To generate platform makefile or project configuration, use ``cmake`` (or any user friendly based GUI, such as ccmake or cmake-gui)
 
 Instalation from source - Linux
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -84,6 +87,7 @@ Requirements:
 
 * C++ compiler (Visual Studio, MinGW)
 * CMake build tools (https://cmake.org/)
+
 Procedure:
 
 * Clone oofem git repository
@@ -92,6 +96,7 @@ Procedure:
         :scale: 10 %
         :alt: screenshot of cmake gui
         :align: right
+
     * Select compiler
     * Set source directory
     * Set build directory
