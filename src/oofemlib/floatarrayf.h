@@ -392,6 +392,13 @@ double norm( const FloatArrayF<N> & x )
     return std::sqrt(norm_squared(x));
 }
 
+/// Normalizes vector (L2 norm)
+template<std::size_t N>
+FloatArrayF<N> normalize( const FloatArrayF<N> & x )
+{
+    return x / norm(x);
+}
+
 /// Computes the sum of x
 template<std::size_t N>
 double sum( const FloatArrayF<N> & x )

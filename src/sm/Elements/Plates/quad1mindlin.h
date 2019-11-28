@@ -68,11 +68,10 @@ public SPRNodalRecoveryModelInterface
 protected:
     static FEI2dQuadLin interp_lin;
     /// Flag controlling reduced (one - point) integration for shear
-    bool reducedIntegrationFlag;
+    bool reducedIntegrationFlag = false;
 
 public:
     Quad1Mindlin(int n, Domain * d);
-    virtual ~Quad1Mindlin() { }
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;

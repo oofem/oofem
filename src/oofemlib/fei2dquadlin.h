@@ -56,7 +56,12 @@ public:
     double giveArea(const FEICellGeometry &cellgeo) const override;
 
     // Bulk
+    static FloatArrayF<4> evalN(const FloatArrayF<2> &lcoords);
+    static FloatMatrixF<2,4> evaldNdxi(const FloatArrayF<2> &lcoords);
+    std::pair<double, FloatMatrixF<2,4>> evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &cellgeo) const;
+
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
+    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     int global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -74,8 +79,6 @@ public:
     double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) override;
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
-
-    void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
