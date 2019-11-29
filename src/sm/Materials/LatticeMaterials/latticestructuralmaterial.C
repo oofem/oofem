@@ -64,39 +64,42 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 
 int
 LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
-					 GaussPoint *gp,
-					 InternalStateType type,
-					 TimeStep *atTime)
+                                         GaussPoint *gp,
+                                         InternalStateType type,
+                                         TimeStep *atTime)
 {
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
-    if( type == IST_LatticeStress ) {
-      answer.resize(6);
-      answer.zero();
-      status->giveLatticeStress();
-    }
-    else if  (type == IST_LatticeStrain ) {
-      answer.resize(6);
-      answer.zero();
-      status->giveLatticeStrain();
-    }
-    else {
-      return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+    if ( type == IST_LatticeStress ) {
+        answer.resize(6);
+        answer.zero();
+        status->giveLatticeStress();
+    } else if  ( type == IST_LatticeStrain ) {
+        answer.resize(6);
+        answer.zero();
+        status->giveLatticeStrain();
+    } else {
+        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
 
 
-  
+
+
 double
 LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("1dLattice mode not supported");
+    FloatArrayF< 6 >tempStrain;
+    tempStrain [ 0 ] = strain;
+    auto answer = giveLatticeStress3d(tempStrain, gp, tStep);
+    return answer [ { 0 } ];
 }
 
 FloatArrayF< 3 >
 LatticeStructuralMaterial :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("2dLattice mode not supported");
+    auto answer = giveLatticeStress3d(assemble< 6 >(strain, { 0, 1, 5 }), gp, tStep);
+    return answer [ { 0, 1, 5 } ];
 }
 
 FloatArrayF< 6 >

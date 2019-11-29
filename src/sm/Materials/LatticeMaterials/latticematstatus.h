@@ -38,6 +38,7 @@
 
 #include "../structuralms.h"
 #include "randommaterialext.h"
+#include "floatarrayf.h"
 
 namespace oofem {
 class GaussPoint;
@@ -54,23 +55,28 @@ class LatticeMaterialStatus : public MaterialStatus, public RandomMaterialStatus
 {
 protected:
 
-    FloatArray latticeStrain;
-    FloatArray tempLatticeStrain;
+    FloatArrayF< 6 >latticeStrain;
+    FloatArrayF< 6 >tempLatticeStrain;
 
-    FloatArray latticeStress;
-    FloatArray tempLatticeStress;
+    FloatArrayF< 6 >latticeStress;
+    FloatArrayF< 6 >tempLatticeStress;
+
+    /// Equilibriated reduced strain, which is free of thermal strain
+    FloatArrayF< 6 >reducedLatticeStrain;
+    /// Non-equilibrated reduced strain, which is free of thermal strain
+    FloatArrayF< 6 >tempReducedLatticeStrain;
+    /// Equilibriated plastic strain
+    FloatArrayF< 6 >plasticLatticeStrain;
+    /// Non-equilibrated plastic strain
+    FloatArrayF< 6 >tempPlasticLatticeStrain;
+    /// Non-equilibrated plastic strain
+    FloatArrayF< 6 >oldPlasticLatticeStrain;
 
     /// Equilibrated normal stress
-    double normalStress = 0.;
+    double normalLatticeStress = 0.;
 
     /// Non-equilibrated normal stress
-    double tempNormalStress = 0.;
-
-    /// Reduced strain, which is temperature free
-    FloatArray reducedStrain;
-
-    /// Non-equilibrated reduced strain, which is temperature free
-    FloatArray tempReducedStrain;
+    double tempNormalLatticeStress = 0.;
 
     /// dissipation
     double dissipation = 0.;
@@ -83,15 +89,6 @@ protected:
 
     /// Non-equilibrated increment of dissipation
     double tempDeltaDissipation = 0.;
-
-    /// plasticStrain;
-    FloatArray plasticStrain;
-
-    /// tempPlasticStrain;
-    FloatArray tempPlasticStrain;
-
-    /// oldPlasticStrain;
-    FloatArray oldPlasticStrain;
 
     /// Characteristic length
     double le = 0.;
@@ -129,70 +126,61 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
+    /// Returns lattice strain.
+    const FloatArrayF< 6 > &giveLatticeStrain() const { return this->latticeStrain; }
+    /// Returns lattice strain.
+    const FloatArrayF< 6 > &giveTempLatticeStrain() const { return this->tempLatticeStress; }
 
-    /*
-     * Assign the temp value of reduced strain.
-     * @v new temp value of reduced strain
-     */
-    virtual void  letTempReducedStrainBe(const FloatArray &v) { tempReducedStrain = v; }
+    /// Returns reduced lattice strain.
+    const FloatArrayF< 6 > &giveReducedLatticeStrain() const { return reducedLatticeStrain; }
 
-    /// Gives the temp value of reduced strain.
-    virtual const FloatArray &giveTempReducedStrain() const { return tempReducedStrain; }
+    /// Returns temp reduced lattice strain.
+    const FloatArrayF< 6 > &giveTempReducedLatticeStrain() const { return tempReducedLatticeStrain; }
 
-    /// Gives the old equilibrated value of reduced strain.
-    virtual const FloatArray &giveReducedStrain() const { return reducedStrain; }
+    /// Returns plastic lattice strain.
+    const FloatArrayF< 6 > &givePlasticLatticeStrain() const { return this->plasticLatticeStrain; }
 
+    /// Returns temp plastic lattice strain.
+    const FloatArrayF< 6 > &giveTempPlasticLatticeStrain() const { return this->tempPlasticLatticeStrain; }
 
-
-    /// Sets the temp normalStress
-    virtual void setTempNormalStress(double val) { tempNormalStress = val; }
-
-    /// Gives the last equilibrated normal stress
-    virtual double giveNormalStress() { return tempNormalStress; }
-
-    /// Gives the last equilibrated normal stress
-    virtual double giveOldNormalStress() { return normalStress; }
-
-    ///Sets the temp_crack_flag
-    virtual void setTempCrackFlag(int val) { tempCrackFlag = val; }
-
-    ///Sets the temp_crack_width
-    void setTempCrackWidth(double val) { tempCrackWidth = val; }
-
-    virtual const FloatArray &givePlasticStrain() const
-    { return this->plasticStrain; }
+    /// Returns plastic lattice strain.
+    const FloatArrayF< 6 > &giveOldPlasticLatticeStrain() const { return this->oldPlasticLatticeStrain; }
 
 
-    virtual const FloatArray &giveLatticeStrain() const
-    { return this->latticeStrain; }
+    /// Returns lattice stress.
+    const FloatArrayF< 6 > &giveLatticeStress() const { return this->latticeStress; }
+    /// Returns temp lattice stress.
+    const FloatArrayF< 6 > &giveTempLatticeStress() const { return this->tempLatticeStress; }
 
+    /// Assigns the temp value of lattice strain.
+    void letTempLatticeStrainBe(const FloatArrayF< 6 >v) { this->tempLatticeStrain = v; }
 
-    virtual void  letTempLatticeStrainBe(const FloatArray &v)
-    { this->tempLatticeStrain = v; }
+    /// Assigns the temp value of lattice strain.
+    void letTempReducedLatticeStrainBe(const FloatArrayF< 6 >v) { this->tempReducedLatticeStrain = v; }
 
+    /// Assigns the temp value of lattice strain.
+    void letTempPlasticLatticeStrainBe(const FloatArrayF< 6 >v) { this->tempPlasticLatticeStrain = v; }
 
-    virtual FloatArray &giveTempLatticeStrain()
-    { return this->tempLatticeStrain; }
-
-
-    virtual FloatArray &giveLatticeStress()
-    { return this->latticeStress; }
-
-
-    virtual void  letTempLatticeStressBe(const FloatArray &v)
+    /// Assigns the temp value of lattice stress.
+    void letTempLatticeStressBe(const FloatArrayF< 6 >v)
     { this->tempLatticeStress = v; }
 
 
-    virtual FloatArray &giveTempLatticeStress()
-    { return this->tempLatticeStress; }
+    /// Sets the temp normalStress
+    void setTempNormalLatticeStress(double val) { this->tempNormalLatticeStress = val; }
+
+    /// Gives the last equilibrated normal stress
+    double giveNormalLatticeStress() { return this->normalLatticeStress; }
+
+    /// Gives the last equilibrated normal stress
+    double giveTempNormalLatticeStress() { return this->tempNormalLatticeStress; }
 
 
-    virtual FloatArray &giveTempPlasticStrain()
-    { return this->tempPlasticStrain; }
+    ///Sets the temp_crack_flag
+    void setTempCrackFlag(int val) { tempCrackFlag = val; }
 
-    virtual FloatArray &giveOldPlasticStrain()
-    { return this->oldPlasticStrain; }
-
+    ///Sets the temp_crack_width
+    void setTempCrackWidth(double val) { tempCrackWidth = val; }
 
     /**
      * Returns the crack flag

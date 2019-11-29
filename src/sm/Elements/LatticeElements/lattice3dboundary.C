@@ -445,7 +445,7 @@ Lattice3dBoundary ::   giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode == 3 ) {
         answer = { E_xx, E_yy, E_zz, G_yz, G_xz, G_xy };
-    } else   {
+    } else {
         answer = { D_u, D_v, D_w, R_u, R_v, R_w };
     }
 }
@@ -457,7 +457,6 @@ Lattice3dBoundary :: initializeFrom(InputRecord &ir)
 
     this->location.resize(2);
     IR_GIVE_FIELD(ir, location, _IFT_Lattice3dBoundary_location); // Macro
-
 }
 
 
@@ -486,7 +485,7 @@ Lattice3dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     bt.beTranspositionOf(b);
     if ( useUpdatedGpRecord == 1 ) {
         TotalStressVector = ( ( LatticeMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
-	  ->giveLatticeStress();
+                            ->giveLatticeStress();
     } else
     if ( !this->isActivated(tStep) ) {
         strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );

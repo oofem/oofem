@@ -107,7 +107,7 @@ LatticePlasticityDamageViscoelastic :: giveReducedStrain(FloatArray &answer,
 
 
     FloatArray oldPlasticStrain;
-    oldPlasticStrain = status->givePlasticStrain();
+    oldPlasticStrain = status->givePlasticLatticeStrain();
 
     for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
         answer.at(i) /= elasticStiffnessMatrix.at(i, i);
@@ -176,7 +176,7 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
         // must subtract not only temperature but also increment of plastic deformation
         this->giveStressDependentPartOfStrainVector(reducedStrainForViscoMat, gp, totalStrain, tStep, VM_Total);
 
-        tempPlasticStrain = status->giveTempPlasticStrain();
+        tempPlasticStrain = status->giveTempPlasticLatticeStrain();
 
         for ( int i = 1; i <= 3; i++ ) {
             reducedStrainForViscoMat.at(i) -= tempPlasticStrain.at(i);
@@ -216,7 +216,7 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
     strain = reducedStrainForViscoMat;
     strain.subtract(shrinkageStrain);
     strain.resizeWithValues(3);
-    tempPlasticStrain = status->giveTempPlasticStrain();
+    tempPlasticStrain = status->giveTempPlasticLatticeStrain();
     strain.add(tempPlasticStrain);
 
     // strain is passed only to compute crack width, nothing else
@@ -234,7 +234,7 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
     answer.at(6) = ( 1. - omega ) * quasiElasticStrain.at(6) * this->alphaTwo * this->eNormalMean;
 
     status->letTempLatticeStrainBe(totalStrain);
-    status->letTempReducedStrainBe(reducedStrain);
+    status->letTempReducedLatticeStrainBe(reducedStrain);
     status->letTempLatticeStressBe(answer);
 
     return;

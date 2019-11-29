@@ -98,7 +98,7 @@ public:
     double giveTempKappaDTwo() const { return tempKappaDTwo; }
 
     void  letTempPlasticStrainBe(const FloatArray &v)
-    { tempPlasticStrain = v; }
+    { tempPlasticLatticeStrain = v; }
 
     void   setTempKappaP(double newKappa) { tempKappaP = newKappa; }
 

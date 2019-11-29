@@ -436,7 +436,7 @@ double Lattice2dBoundary :: givePitch()
 void
 Lattice2dBoundary :: initializeFrom(InputRecord &ir)
 {
-        // first call parent
+    // first call parent
     Lattice2d :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, location, _IFT_Lattice2dBoundary_location); // Macro
 

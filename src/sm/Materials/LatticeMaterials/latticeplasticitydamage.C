@@ -376,7 +376,7 @@ LatticePlasticityDamage :: giveReducedStrain(FloatArray &answer,
                                              TimeStep *tStep)
 {
     LatticePlasticityDamageStatus *status = ( LatticePlasticityDamageStatus * ) ( this->giveStatus(gp) );
-    answer = status->giveReducedStrain();
+    answer = status->giveReducedLatticeStrain();
 }
 
 
@@ -395,7 +395,7 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
     tempKappa = status->giveTempKappaP();
 
     /* Get plastic strain vector from status*/
-    FloatArray tempPlasticStrain  = status->giveTempPlasticStrain();
+    FloatArray tempPlasticStrain  = status->giveTempPlasticLatticeStrain();
 
     /* Compute trial stress*/
     stress.resize(3);
@@ -478,8 +478,8 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-    status->letTempPlasticStrainBe(tempPlasticStrain);
-    status->letTempLatticeStressBe(stress);
+    status->letTempPlasticStrainBe({ tempPlasticStrain [ 0 ], tempPlasticStrain [ 1 ], tempPlasticStrain [ 2 ], 0., 0., 0. });
+    status->letTempLatticeStressBe({ stress [ 0 ], stress [ 1 ], stress [ 2 ], 0., 0., 0. });
 }
 
 
@@ -521,7 +521,7 @@ LatticePlasticityDamage :: performRegularReturn(FloatArray &stress,
 
     double tempShearStressNorm = trialShearStressNorm;
 
-    plasticStrain = status->givePlasticStrain();
+    plasticStrain = status->givePlasticLatticeStrain();
     tempPlasticStrain = plasticStrain;
 
     double thetaTrial;
@@ -790,7 +790,7 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
     answer.at(6) = ( 1. - omega ) * reducedStrain.at(6) * this->alphaTwo * this->eNormalMean;
 
     status->letTempLatticeStrainBe(originalStrain);
-    status->letTempReducedStrainBe(reducedStrain);
+    status->letTempReducedLatticeStrainBe(reducedStrain);
     status->letTempLatticeStressBe(answer);
 
     return answer;
@@ -808,9 +808,9 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArray &r
 
     double le = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
 
-    FloatArray tempPlasticStrain = status->giveTempPlasticStrain();
+    FloatArray tempPlasticStrain = status->giveTempPlasticLatticeStrain();
 
-    FloatArray plasticStrain = status->givePlasticStrain();
+    FloatArray plasticStrain = status->givePlasticLatticeStrain();
     FloatArray deltaPlasticStrain;
     deltaPlasticStrain = tempPlasticStrain;
     deltaPlasticStrain.subtract(plasticStrain);
@@ -1084,42 +1084,8 @@ LatticePlasticityDamageStatus :: LatticePlasticityDamageStatus(int n, Domain *d,
 
 void
 LatticePlasticityDamageStatus :: initTempStatus()
-//
-// initializes temp variables according to variables form previous equlibrium state.
-// builds new crackMap
-//
 {
     LatticeMaterialStatus :: initTempStatus();
-
-    // int rSize = 0;
-    // if(gp->giveMaterialMode() == _3dLattice){
-    //   rSize = 6;
-    // }
-    // else if (gp->giveMaterialMode() == _2dLattice){
-    //   rSize = 3;
-    // }
-    // else if (gp->giveMaterialMode() == _1dLattice){
-    //   rSize = 1;
-    // }
-    // else {
-    //   OOFEM_ERROR("this lattice material mode does not exist\n");
-    // }
-
-    //Only first 3 components are used for plastic strain??
-    if ( this->plasticStrain.giveSize() == 0 ) {
-        this->plasticStrain.resize(6);
-        this->plasticStrain.zero();
-    }
-
-    if ( this->reducedStrain.giveSize() == 0 ) {
-        this->reducedStrain.resize(6);
-        this->reducedStrain.zero();
-    }
-
-    this->oldPlasticStrain = this->plasticStrain;
-    this->tempPlasticStrain = this->plasticStrain;
-    this->tempReducedStrain = this->reducedStrain;
-
     this->tempKappaP = this->kappaP;
     this->tempKappaDOne = this->kappaDOne;
     this->tempKappaDTwo = this->kappaDTwo;
@@ -1132,8 +1098,8 @@ LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) cons
     LatticeMaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "plasticStrains ");
-    for ( int k = 1; k <= plasticStrain.giveSize(); k++ ) {
-        fprintf(file, "% .8e ", plasticStrain.at(k) );
+    for ( int k = 1; k <= 6; k++ ) {
+        fprintf(file, "% .8e ", this->plasticLatticeStrain.at(k) );
     }
 
     fprintf(file, "\n \t");
@@ -1151,7 +1117,7 @@ LatticePlasticityDamageStatus :: updateYourself(TimeStep *atTime)
 //
 {
     LatticeMaterialStatus :: updateYourself(atTime);
-    this->plasticStrain = this->tempPlasticStrain;
+    this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
     this->kappaP = this->tempKappaP;
     this->kappaDOne = this->tempKappaDOne;
     this->kappaDTwo = this->tempKappaDTwo;
@@ -1171,7 +1137,7 @@ LatticePlasticityDamageStatus :: saveContext(DataStream &stream, ContextMode mod
     LatticeMaterialStatus :: saveContext(stream, mode);
 
 
-    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1201,7 +1167,7 @@ LatticePlasticityDamageStatus :: restoreContext(DataStream &stream, ContextMode 
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
     //FloatArrays
-    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

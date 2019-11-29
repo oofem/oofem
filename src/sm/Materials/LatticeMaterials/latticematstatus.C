@@ -39,9 +39,9 @@
 #include "gausspoint.h"
 
 namespace oofem {
-LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : MaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedStrain(), tempReducedStrain(), plasticStrain(), tempPlasticStrain(), oldPlasticStrain()
+LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : MaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedLatticeStrain(), tempReducedLatticeStrain(), plasticLatticeStrain(), tempPlasticLatticeStrain(), oldPlasticLatticeStrain()
 {
-    normalStress = tempNormalStress = 0;
+    normalLatticeStress = tempNormalLatticeStress = 0;
 
     le = 0.0;
     crackFlag = tempCrackFlag = 0;
@@ -64,11 +64,11 @@ LatticeMaterialStatus :: initTempStatus()
 
     this->tempLatticeStress = this->latticeStress;
 
-    this->tempReducedStrain = this->reducedStrain;
+    this->tempReducedLatticeStrain = this->reducedLatticeStrain;
 
-    this->tempNormalStress = this->normalStress;
+    this->tempNormalLatticeStress = this->normalLatticeStress;
 
-    this->tempPlasticStrain = this->plasticStrain;
+    this->tempPlasticLatticeStrain = this->plasticLatticeStrain;
 
     this->tempDissipation = this->dissipation;
     this->tempDeltaDissipation = this->deltaDissipation;
@@ -87,10 +87,10 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
     this->latticeStress = this->tempLatticeStress;
 
     this->latticeStrain = this->tempLatticeStrain;
-    
-    this->plasticStrain = this->tempPlasticStrain;
 
-    this->reducedStrain = this->tempReducedStrain;
+    this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
+
+    this->reducedLatticeStrain = this->tempReducedLatticeStrain;
 
     this->dissipation = this->tempDissipation;
 
@@ -108,26 +108,26 @@ LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus :: printOutputAt(file, tStep);
 
-      fprintf(file, "lattice strains ");
-      int rSize = this->latticeStrain.giveSize();
-      for ( int k = 1; k <= rSize; k++ ) {
-	fprintf(file, "% .4e ", this->latticeStrain.at(k) );
-      }
-      fprintf(file, "\n");
-      
-      fprintf(file, "lattice stress ");
-      rSize = this->latticeStress.giveSize();
-      for ( int k = 1; k <= rSize; k++ ) {
-	fprintf(file, "% .4e ", this->latticeStress.at(k) );
-      }
-      fprintf(file, "\n");
-      
-      fprintf(file, "reduced lattice strains ");
-      rSize = reducedStrain.giveSize();
-      for ( int k = 1; k <= rSize; k++ ) {
-	fprintf(file, "% .4e ", reducedStrain.at(k) );
-      }
-      fprintf(file, "\n");
+    fprintf(file, "lattice strains ");
+    int rSize = this->latticeStrain.giveSize();
+    for ( int k = 1; k <= rSize; k++ ) {
+        fprintf(file, "% .4e ", this->latticeStrain.at(k) );
+    }
+    fprintf(file, "\n");
+
+    fprintf(file, "lattice stress ");
+    rSize = this->latticeStress.giveSize();
+    for ( int k = 1; k <= rSize; k++ ) {
+        fprintf(file, "% .4e ", this->latticeStress.at(k) );
+    }
+    fprintf(file, "\n");
+
+    fprintf(file, "reduced lattice strains ");
+    rSize = reducedLatticeStrain.giveSize();
+    for ( int k = 1; k <= rSize; k++ ) {
+        fprintf(file, "% .4e ", this->reducedLatticeStrain.at(k) );
+    }
+    fprintf(file, "\n");
 }
 
 Interface *
@@ -152,12 +152,12 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
     contextIOResultType iores;
 
     // write a raw data
-    if ( ( iores = reducedStrain.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = reducedLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // write a raw data
-    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -188,11 +188,11 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
     contextIOResultType iores;
 
-    if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = reducedLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
