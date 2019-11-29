@@ -151,12 +151,18 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 
     contextIOResultType iores;
 
-    // write a raw data
+    if ( ( iores = latticeStress.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = latticeStrain.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
     if ( ( iores = reducedLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // write a raw data
     if ( ( iores = plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
@@ -187,6 +193,14 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     MaterialStatus :: saveContext(stream, mode);
 
     contextIOResultType iores;
+
+    if ( ( iores = latticeStress.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = latticeStrain.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
     if ( ( iores = reducedLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);

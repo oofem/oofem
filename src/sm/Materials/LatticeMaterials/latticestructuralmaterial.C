@@ -71,13 +71,9 @@ LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
     if ( type == IST_LatticeStress ) {
-        answer.resize(6);
-        answer.zero();
-        status->giveLatticeStress();
+        answer = status->giveLatticeStress();
     } else if  ( type == IST_LatticeStrain ) {
-        answer.resize(6);
-        answer.zero();
-        status->giveLatticeStrain();
+        answer = status->giveLatticeStrain();
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }

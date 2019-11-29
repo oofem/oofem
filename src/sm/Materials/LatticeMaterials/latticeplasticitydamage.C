@@ -1117,7 +1117,6 @@ LatticePlasticityDamageStatus :: updateYourself(TimeStep *atTime)
 //
 {
     LatticeMaterialStatus :: updateYourself(atTime);
-    this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
     this->kappaP = this->tempKappaP;
     this->kappaDOne = this->tempKappaDOne;
     this->kappaDTwo = this->tempKappaDTwo;
@@ -1132,14 +1131,7 @@ LatticePlasticityDamageStatus :: saveContext(DataStream &stream, ContextMode mod
 // no temp variables stored
 //
 {
-    contextIOResultType iores;
-    // save parent class status
     LatticeMaterialStatus :: saveContext(stream, mode);
-
-
-    if ( ( iores = plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
 
     if ( !stream.write(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -1162,16 +1154,8 @@ LatticePlasticityDamageStatus :: restoreContext(DataStream &stream, ContextMode 
 // restores full information stored in stream to this Status
 //
 {
-    contextIOResultType iores;
-    // read parent class status
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
-    //FloatArrays
-    if ( ( iores = plasticLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
-
-    // read raw data
     if ( !stream.read(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }

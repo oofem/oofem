@@ -914,12 +914,8 @@ void
 LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores;
-    // save parent class status
-    LatticeMaterialStatus :: saveContext(stream, mode);
 
-    if ( ( iores = plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    LatticeMaterialStatus :: saveContext(stream, mode);
 
     if ( !stream.write(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -934,10 +930,6 @@ LatticeBondPlasticityStatus :: restoreContext(DataStream &stream, ContextMode mo
     contextIOResultType iores;
 
     LatticeMaterialStatus :: restoreContext(stream, mode);
-
-    if ( ( iores = plasticLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
 
     if ( !stream.read(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
