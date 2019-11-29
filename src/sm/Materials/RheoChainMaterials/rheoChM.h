@@ -82,8 +82,8 @@ protected:
      */
     FloatArray shrinkageStrain;
 
-    /** Internal variable with the meaning of the solution time 
-     * essential when giveRealStressVector of the viscoelastic material is called 
+    /** Internal variable with the meaning of the solution time
+     * essential when giveRealStressVector of the viscoelastic material is called
      * more than once in one time step and at one time step.
      */
     double currentTime = 0.;
@@ -111,7 +111,7 @@ public:
     /// Returns current time - see explanation near initTempStatus in giveRealStressVector
     double giveCurrentTime() { return currentTime; }
     /// Stores current time
-    void setCurrentTime(double src) { currentTime = src; }    
+    void setCurrentTime(double src) { currentTime = src; }
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -182,44 +182,44 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    FloatArrayF< 6 >giveRealStressVector_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
         FloatArray answer;
-        const_cast<RheoChainMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        const_cast< RheoChainMaterial * >( this )->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
-    FloatArrayF<4> giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    FloatArrayF< 4 >giveRealStressVector_PlaneStrain(const FloatArrayF< 4 > &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
         FloatArray answer;
-        const_cast<RheoChainMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        const_cast< RheoChainMaterial * >( this )->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
-    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    FloatArrayF< 3 >giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
         FloatArray answer;
-        const_cast<RheoChainMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        const_cast< RheoChainMaterial * >( this )->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
-    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    FloatArrayF< 1 >giveRealStressVector_1d(const FloatArrayF< 1 > &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
         FloatArray answer;
-        const_cast<RheoChainMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        const_cast< RheoChainMaterial * >( this )->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
-    FloatArrayF<2> giveRealStressVector_2dBeamLayer(const FloatArrayF<2> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    FloatArrayF< 2 >giveRealStressVector_2dBeamLayer(const FloatArrayF< 2 > &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
         FloatArray answer;
-        const_cast<RheoChainMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        const_cast< RheoChainMaterial * >( this )->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
-    FloatArrayF<5> giveRealStressVector_PlateLayer(const FloatArrayF<5> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    FloatArrayF< 5 >giveRealStressVector_PlateLayer(const FloatArrayF< 5 > &strain, GaussPoint *gp, TimeStep *tStep) const override
     {
         FloatArray answer;
-        const_cast<RheoChainMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        const_cast< RheoChainMaterial * >( this )->giveRealStressVector(answer, gp, strain, tStep);
         return answer;
     }
 
-    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     /*    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
      *    { answer.clear(); }*/
@@ -252,20 +252,20 @@ public:
     void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
     void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
-    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
-    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 3, 3 >givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 4, 4 >givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 1, 1 >give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode mmode,
-                                GaussPoint *gp,
-                                TimeStep *tStep) override;
+    /* void give2dLatticeStiffMtrx(FloatMatrix &answer, */
+    /*                             MatResponseMode mmode, */
+    /*                             GaussPoint *gp, */
+    /*                             TimeStep *tStep) override; */
 
-    void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode mmode,
-                                GaussPoint *gp,
-                                TimeStep *tStep) override;
+    /* void give3dLatticeStiffMtrx(FloatMatrix &answer, */
+    /*                             MatResponseMode mmode, */
+    /*                             GaussPoint *gp, */
+    /*                             TimeStep *tStep) override; */
 
     void computeStressIndependentStrainVector(FloatArray &answer,
                                               GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
@@ -301,7 +301,7 @@ public:
     double giveAlphaTwo() const { return this->alphaTwo; }
 
     /// Returns Poisson's ratio.
-    double givePoissonsRatio() const { return nu; }    
+    double givePoissonsRatio() const { return nu; }
 
     /// Evaluation of the creep compliance function at time t when loading is acting from time t_prime
     virtual double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const = 0;
@@ -317,7 +317,7 @@ public:
 
     /// By default returns equivalent time in the middle of the time step
     virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const
-    { return ( tStep->giveTargetTime() - tStep->giveTimeIncrement()/2 ); }
+    { return ( tStep->giveTargetTime() - tStep->giveTimeIncrement() / 2 ); }
 
 
 protected:

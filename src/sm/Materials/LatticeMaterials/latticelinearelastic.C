@@ -261,7 +261,7 @@ LatticeLinearElastic :: give1dLatticeStiffnessMatrix(MatResponseMode mode, Gauss
 FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    /* Returns elastic moduli in reduced stress-strain space*/
+
     FloatMatrix answer;
     answer.resize(3, 3);
     answer.zero();
@@ -279,7 +279,6 @@ LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode mode, Gauss
 FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    /* Returns elastic moduli in reduced stress-strain space*/
     FloatMatrix answer;
     answer.resize(6, 6);
     answer.zero();
