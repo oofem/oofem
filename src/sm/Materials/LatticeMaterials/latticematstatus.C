@@ -39,7 +39,7 @@
 #include "gausspoint.h"
 
 namespace oofem {
-LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedStrain(), tempReducedStrain(), plasticStrain(), tempPlasticStrain(), oldPlasticStrain()
+LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : MaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedStrain(), tempReducedStrain(), plasticStrain(), tempPlasticStrain(), oldPlasticStrain()
 {
     normalStress = tempNormalStress = 0;
 
@@ -58,9 +58,17 @@ LatticeMaterialStatus :: initTempStatus()
 // builds new crackMap
 //
 {
-    StructuralMaterialStatus :: initTempStatus();
+    MaterialStatus :: initTempStatus();
+
+    this->tempLatticeStrain = this->latticeStrain;
+
+    this->tempLatticeStress = this->latticeStress;
+
+    this->tempReducedStrain = this->reducedStrain;
 
     this->tempNormalStress = this->normalStress;
+
+    this->tempPlasticStrain = this->plasticStrain;
 
     this->tempDissipation = this->dissipation;
     this->tempDeltaDissipation = this->deltaDissipation;
@@ -74,7 +82,7 @@ LatticeMaterialStatus :: initTempStatus()
 void
 LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    MaterialStatus :: updateYourself(atTime);
 
     this->plasticStrain = this->tempPlasticStrain;
 
@@ -95,7 +103,7 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
 void
 LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    MaterialStatus :: printOutputAt(file, tStep);
 
     // print only if reducedStrains are not empty
     if ( !reducedStrain.containsOnlyZeroes() ) {
@@ -124,7 +132,7 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 // no temp variables stored
 //
 {
-    StructuralMaterialStatus :: saveContext(stream, mode);
+    MaterialStatus :: saveContext(stream, mode);
 
     contextIOResultType iores;
 
@@ -161,7 +169,7 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 // restores full information stored in stream to this Status
 //
 {
-    StructuralMaterialStatus :: saveContext(stream, mode);
+    MaterialStatus :: saveContext(stream, mode);
 
     contextIOResultType iores;
 

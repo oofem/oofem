@@ -126,8 +126,8 @@ LatticeSlip :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain, GaussPoi
 
     //Set temp values in status needed for dissipation
     status->letTempPlasticStrainBe(tempPlasticStrain);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStrainBe(totalStrain);
+    status->letTempLatticeStressBe(answer);
 
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation;
@@ -208,7 +208,7 @@ LatticeSlip :: computeDeltaDissipation(GaussPoint *gp,
 
     FloatArray plasticStrain = status->givePlasticStrain();
     FloatArray tempPlasticStrain = status->giveTempPlasticStrain();
-    FloatArray tempStress = status->giveTempStressVector();
+    FloatArray tempStress = status->giveTempLatticeStress();
 
     double tempDeltaDissipation =  tempStress.at(1) * ( tempPlasticStrain.at(1) - plasticStrain.at(1) );
     return tempDeltaDissipation;

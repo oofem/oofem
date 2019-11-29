@@ -323,7 +323,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
     status->letTempPlasticStrainBe(tempPlasticStrain);
-    status->letTempStressVectorBe(stress);
+    status->letTempLatticeStressBe(stress);
     status->setSurfaceValue(surfaceType);
 }
 
@@ -864,9 +864,9 @@ LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
     answer.at(5) = reducedStrain.at(5) * this->alphaTwo * this->eNormalMean;
     answer.at(6) = reducedStrain.at(6) * this->alphaTwo * this->eNormalMean;
 
-    status->letTempStrainVectorBe(originalStrain);
+    status->letTempLatticeStrainBe(originalStrain);
     status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStressBe(answer);
 
     return answer;
 }

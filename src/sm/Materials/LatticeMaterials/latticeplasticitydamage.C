@@ -453,7 +453,6 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
                 tempStrain = convergedStrain;
                 tempStrain.add(deltaStrain);
             } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
-
                 tempPlasticStrain.at(1) = tempStrain.at(1) - stress.at(1) / eNormalMean;
                 tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
                 tempPlasticStrain.at(3) = tempStrain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
@@ -480,8 +479,7 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
     status->letTempPlasticStrainBe(tempPlasticStrain);
-    status->letTempStressVectorBe(stress);
-
+    status->letTempLatticeStressBe(stress);
 }
 
 
@@ -791,9 +789,9 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
     answer.at(5) = ( 1. - omega ) * reducedStrain.at(5) * this->alphaTwo * this->eNormalMean;
     answer.at(6) = ( 1. - omega ) * reducedStrain.at(6) * this->alphaTwo * this->eNormalMean;
 
-    status->letTempStrainVectorBe(originalStrain);
+    status->letTempLatticeStrainBe(originalStrain);
     status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStressBe(answer);
 
     return answer;
 }

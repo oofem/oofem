@@ -65,9 +65,8 @@ LatticeDamage :: hasMaterialModeCapability(MaterialMode mode) const
 void
 LatticeDamage :: initializeFrom(InputRecord &ir)
 {
-
     LatticeLinearElastic :: initializeFrom(ir);
-  
+
     softeningType = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_LatticeDamage_softeningType); // Macro
 
@@ -94,8 +93,6 @@ LatticeDamage :: initializeFrom(InputRecord &ir)
 
     this->biotType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage_btype);
-
-   
 }
 
 
@@ -305,7 +302,7 @@ LatticeDamage :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint 
 
     this->initTempStatus(gp);
 
-    FloatArray testStrainOld(status->giveStrainVector() );
+    FloatArray testStrainOld(status->giveLatticeStrain() );
 
     // substract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
@@ -390,9 +387,9 @@ LatticeDamage :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint 
     status->setTempDeltaDissipation(tempDeltaDissipation);
 
     status->setTempEquivalentStrain(equivStrain);
-    status->letTempStrainVectorBe(strain);
+    status->letTempLatticeStrainBe(strain);
     status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStressBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
 
@@ -422,7 +419,7 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
 
     this->initTempStatus(gp);
 
-    FloatArray testStrainOld(status->giveStrainVector() );
+    FloatArray testStrainOld(status->giveLatticeStrain() );
 
     // substract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
@@ -506,9 +503,9 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
     status->setTempDeltaDissipation(tempDeltaDissipation);
 
     status->setTempEquivalentStrain(equivStrain);
-    status->letTempStrainVectorBe(strain);
+    status->letTempLatticeStrainBe(strain);
     status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStressBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
 
@@ -566,7 +563,7 @@ LatticeDamage :: computeDeltaDissipation2d(double omega,
     FloatArray crackOpeningOld(3);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld(status->giveStressVector() );
+    FloatArray stressOld(status->giveLatticeStress() );
     FloatArray intermediateStrain(3);
 
     double tempDeltaDissipation = 0.;
@@ -666,7 +663,7 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
     FloatArray crackOpeningOld(6);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld(status->giveStressVector() );
+    FloatArray stressOld(status->giveLatticeStress() );
     FloatArray intermediateStrain(6);
 
     double tempDeltaDissipation = 0.;
@@ -838,19 +835,18 @@ LatticeDamageStatus :: initTempStatus()
 {
     LatticeMaterialStatus :: initTempStatus();
 
-    int rsize =0;
-    if(gp->giveMaterialMode()==_3dLattice){
-      rsize = 6;
+    int rsize = 0;
+    if ( gp->giveMaterialMode() == _3dLattice ) {
+        rsize = 6;
+    } else if ( gp->giveMaterialMode() == _2dLattice )        {
+        rsize = 3;
     }
-    else if(gp->giveMaterialMode()==_2dLattice){
-      rsize = 3;
+
+    if ( this->reducedStrain.giveSize() == 0 ) {
+        this->reducedStrain.resize(rsize);
+        this->reducedStrain.zero();
     }
-    
-    if(this->reducedStrain.giveSize() == 0){
-      this->reducedStrain.resize(rsize);
-      this->reducedStrain.zero();
-    }      
-    
+
     this->tempKappa = this->kappa;
     this->tempEquivStrain = this->equivStrain;
     this->tempDamage = this->damage;

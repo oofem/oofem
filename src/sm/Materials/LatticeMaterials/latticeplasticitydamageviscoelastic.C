@@ -100,7 +100,7 @@ LatticePlasticityDamageViscoelastic :: giveReducedStrain(FloatArray &answer,
 
     FloatMatrix elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    answer = status->giveStressVector();
+    answer = status->giveLatticeStress();
 
     double omega = status->giveDamage();
     answer.times(1. / ( 1. - omega ) );
@@ -233,9 +233,9 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
     answer.at(5) = ( 1. - omega ) * quasiElasticStrain.at(5) * this->alphaTwo * this->eNormalMean;
     answer.at(6) = ( 1. - omega ) * quasiElasticStrain.at(6) * this->alphaTwo * this->eNormalMean;
 
-    status->letTempStrainVectorBe(totalStrain);
+    status->letTempLatticeStrainBe(totalStrain);
     status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStressBe(answer);
 
     return;
 }

@@ -50,9 +50,15 @@ class NonlocalMaterialStatusExtension;
  * In this class services are defined that are used by other
  * lattice material statuses.
  */
-class LatticeMaterialStatus : public StructuralMaterialStatus, public RandomMaterialStatusExtensionInterface
+class LatticeMaterialStatus : public MaterialStatus, public RandomMaterialStatusExtensionInterface
 {
 protected:
+
+    FloatArray latticeStrain;
+    FloatArray tempLatticeStrain;
+
+    FloatArray latticeStress;
+    FloatArray tempLatticeStress;
 
     /// Equilibrated normal stress
     double normalStress = 0.;
@@ -155,6 +161,31 @@ public:
 
     virtual FloatArray &givePlasticStrain()
     { return this->plasticStrain; }
+
+
+    virtual FloatArray &giveLatticeStrain()
+    { return this->latticeStrain; }
+
+
+    virtual void  letTempLatticeStrainBe(const FloatArray &v)
+    { this->tempLatticeStrain = v; }
+
+
+    virtual FloatArray &giveTempLatticeStrain()
+    { return this->tempLatticeStrain; }
+
+
+    virtual FloatArray &giveLatticeStress()
+    { return this->latticeStress; }
+
+
+    virtual void  letTempLatticeStressBe(const FloatArray &v)
+    { this->tempLatticeStress = v; }
+
+
+    virtual FloatArray &giveTempLatticeStress()
+    { return this->tempLatticeStress; }
+
 
     virtual FloatArray &giveTempPlasticStrain()
     { return this->tempPlasticStrain; }

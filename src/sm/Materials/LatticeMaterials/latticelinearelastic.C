@@ -168,8 +168,8 @@ LatticeLinearElastic :: giveLatticeStress2d(const FloatArrayF< 3 > &strain,
     answer.at(1) += waterPressure;
 
     //Set all temp values
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStrainBe(strain);
+    status->letTempLatticeStressBe(answer);
 
     return answer;
 }
@@ -216,8 +216,8 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
     answer.at(1) += waterPressure;
 
     //Set all temp values
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStrainBe(strain);
+    status->letTempLatticeStressBe(answer);
 
     return answer;
 }
@@ -261,7 +261,6 @@ LatticeLinearElastic :: give1dLatticeStiffnessMatrix(MatResponseMode mode, Gauss
 FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-
     FloatMatrix answer;
     answer.resize(3, 3);
     answer.zero();
