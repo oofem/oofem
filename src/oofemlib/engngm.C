@@ -867,7 +867,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                     ma.matrixFromSurfaceLoad(mat, *element, sLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
-                        element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                        bNodes = element->giveInterpolation()->boundaryGiveNodes(boundary);
                         if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                             mat.rotatedWith(R);
                         }
@@ -885,7 +885,7 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                     ma.matrixFromEdgeLoad(mat, *element, eLoad, boundary, tStep);
 
                     if ( mat.isNotEmpty() ) {
-                        element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                        bNodes = element->giveInterpolation()->boundaryEdgeGiveNodes(boundary);
                         if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                             mat.rotatedWith(R);
                         }
@@ -1069,7 +1069,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
             va.assembleFromActiveBC(answer, *abc, tStep, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
             // Now we assemble the corresponding load type fo the respective components in the set:
-            IntArray dofids, loc, bNodes;
+            IntArray dofids, loc;
             FloatArray charVec;
             FloatMatrix R;
             BodyLoad *bodyLoad;
@@ -1113,7 +1113,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 
                         if ( charVec.isNotEmpty() ) {
                             //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                            element->giveBoundarySurfaceNodes(bNodes, boundary);
+                            auto bNodes = element->giveBoundarySurfaceNodes(boundary);
                             if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                                 charVec.rotatedWith(R, 't');
                             }
@@ -1138,7 +1138,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
 
                         if ( charVec.isNotEmpty() ) {
                             //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
-                            element->giveBoundaryEdgeNodes(bNodes, boundary);
+                            auto bNodes = element->giveBoundaryEdgeNodes(boundary);
                             if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                                 charVec.rotatedWith(R, 't');
                             }
@@ -1192,8 +1192,6 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     FloatMatrix R;
     FloatArray charVec;
     int nelem = domain->giveNumberOfElements();
-    bool assembleFlag = false;
-
 
     ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way.
     /// For now, this is the best we can do.
@@ -1308,60 +1306,57 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
         // obtain from element its boundaryloads (surface+edge)
         const IntArray& list2 = element->giveBoundaryLoadList();
-        IntArray bNodes;
-        assembleFlag = false;
-        if (!list2.isEmpty()) {
-          for (int j=1; j<=list2.giveSize()/2; j++) { // loop over boundary loads
+
+        for (int j=1; j<=list2.giveSize()/2; j++) { // loop over boundary loads
             int iload = list2.at(j * 2 - 1) ;
             int boundary = list2.at(j * 2);
             SurfaceLoad *sLoad;
             EdgeLoad *eLoad;
+            bool assembleFlag = false;
+            IntArray bNodes;
 
             if ((eLoad = dynamic_cast< EdgeLoad * >(domain->giveLoad(iload)))) {
-              charVec.clear();
-              va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
-              
-              if ( charVec.isNotEmpty() ) {
-                //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
-                element->giveBoundaryEdgeNodes(bNodes, boundary);
-                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-                  charVec.rotatedWith(R, 't');
+                charVec.clear();
+                va.vectorFromEdgeLoad(charVec, *element, eLoad, boundary, tStep, mode);
+            
+                if ( charVec.isNotEmpty() ) {
+                    //element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+                    bNodes = element->giveBoundaryEdgeNodes(boundary);
+                    if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                        charVec.rotatedWith(R, 't');
+                    }
+                    assembleFlag = true;
                 }
-                assembleFlag = true;               
-              }
             } else if ((sLoad = dynamic_cast< SurfaceLoad * >(domain->giveLoad(iload)))) {
-              charVec.clear();
-              va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
-              
-              if ( charVec.isNotEmpty() ) {
-                //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                element->giveBoundarySurfaceNodes(bNodes, boundary);
-                if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
-                  charVec.rotatedWith(R, 't');
+                charVec.clear();
+                va.vectorFromSurfaceLoad(charVec, *element, sLoad, boundary, tStep, mode);
+            
+                if ( charVec.isNotEmpty() ) {
+                    //element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                    bNodes = element->giveBoundarySurfaceNodes(boundary);
+                    if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
+                        charVec.rotatedWith(R, 't');
+                    }
+                    assembleFlag = true;
                 }
-                assembleFlag = true;
-              }
             } else {
-              OOFEM_ERROR ("Unsupported element boundary load type");
+                OOFEM_ERROR ("Unsupported element boundary load type");
             }
 
             if ( assembleFlag ) {
-              // assemble the contribution
-              va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+                // assemble the contribution
+                va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
 #ifdef _OPENMP
 #pragma omp critical
 #endif
-              {
-                answer.assemble(charVec, loc);
-                if ( eNorms ) {
-                  eNorms->assembleSquared(charVec, dofids);
+                {
+                    answer.assemble(charVec, loc);
+                    if ( eNorms ) {
+                        eNorms->assembleSquared(charVec, dofids);
+                    }
                 }
-                assembleFlag = false;
-              }
-            } // end assembleFlag
-  
-          } // end loop over lement boundary loads
-        } 
+            } // end loop over lement boundary loads
+        }
 
     } // end loop over elements
 

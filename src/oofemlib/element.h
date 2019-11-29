@@ -556,13 +556,13 @@ public:
      * @param bNodes list of boundary edge nodes 
      * @param boundary edge id
      */
-    virtual void giveBoundaryEdgeNodes(IntArray& bNodes, int boundary);
+    virtual IntArray giveBoundaryEdgeNodes(int boundary) const;
     /**
      * Returns list of receiver boundary nodes for given surface
      * @param bNodes list of boundary surface nodes 
      * @param boundary surface id
      */
-    virtual void giveBoundarySurfaceNodes(IntArray& bNodes, int boundary);
+    virtual IntArray giveBoundarySurfaceNodes(int boundary) const;
     /**
      * Returns boundary edge integration rule
      * @param order approximation order to integrate 

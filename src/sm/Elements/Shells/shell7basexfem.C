@@ -1637,8 +1637,7 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const
 
     FloatArray solVecEdge;
     FloatMatrix B;
-    IntArray edgeNodes;
-    this->fei->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iedge);
     this->edgeComputeEnrichedBmatrixAt(lcoords, B, ei, iedge);
     this->edgeGiveUpdatedSolutionVector(solVecEdge, iedge, tStep);
 

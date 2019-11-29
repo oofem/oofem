@@ -388,15 +388,13 @@ void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answ
             answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
         } else if ( node <= 20 ) { // Edge nodes
             // Edges are numbered consistently with edge nodes, so node number - 8 = edge number
-            IntArray eNodes;
-            this->interpolation_quad.computeLocalEdgeMapping(eNodes, node - 8);
+            const auto &eNodes = this->interpolation_quad.computeLocalEdgeMapping(node - 8);
             answer.at(1) = 0.5 * (
                 this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
                 this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         } else if ( node <= 26 ) { // Face nodes
             // Faces are numbered consistently with edge nodes, so node number - 12 = face number
-            IntArray fNodes;
-            this->interpolation_quad.computeLocalSurfaceMapping(fNodes, node - 20);
+            const auto &fNodes = this->interpolation_quad.computeLocalSurfaceMapping(node - 20);
             answer.at(1) = 0.25 * (
                 this->giveNode( fNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
                 this->giveNode( fNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +

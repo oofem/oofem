@@ -253,8 +253,7 @@ Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(const FloatArray &lcoords, const
     double zeta = 0.0;     // no variation i z (yet)
     FloatArray M, dNdxi, nodeCoords;
 
-    IntArray edgeNodes;
-    this->fei->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iedge);
     this->fei->edgeEvaldNdxi( dNdxi, iedge, lcoords, FEIElementGeometryWrapper(this) );
 
     // Base vector along edge
@@ -310,8 +309,7 @@ Shell7Base :: edgeEvalInitialDirectorAt(const FloatArray &lcoords, FloatArray &a
     // Interpolates between the node directors along an edge
 
     FloatArray N;
-    IntArray edgeNodes;
-    this->fei->computeLocalEdgeMapping(edgeNodes, iEdge);
+    const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iEdge);
     this->fei->edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
 
     answer.clear();
@@ -387,8 +385,7 @@ Shell7Base :: edgeEvalCovarBaseVectorsAt(const FloatArray &lcoords, const int ie
 
     FloatArray solVecEdge;
     FloatMatrix B;
-    IntArray edgeNodes;
-    this->fei->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iedge);
     this->edgeComputeBmatrixAt(lcoords, B, 1, ALL_STRAINS);
     this->edgeGiveUpdatedSolutionVector(solVecEdge, iedge, tStep);
 
@@ -1489,8 +1486,7 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
     // Routine to extract vector given an array of dofid items
     // If a certain dofId does not exist a zero is used as value
 
-    IntArray bNodes;
-    this->fei->computeLocalEdgeMapping(bNodes, boundary);
+    const auto &bNodes = this->fei->computeLocalEdgeMapping(boundary);
     this->computeBoundaryVectorOf(bNodes, dofIdArray, u, tStep, answer); ///@todo uses new standard method
 
     //answer.resize( dofIdArray.giveSize() * bNodes.giveSize() );
@@ -1572,8 +1568,7 @@ Shell7Base :: setupInitialEdgeSolutionVector()
         FloatArray &solVec = this->initialEdgeSolutionVectors[iEdge-1];
         solVec.resize( this->giveNumberOfEdgeDofs() );
         solVec.zero();
-        IntArray edgeNodes;
-        this->fei->computeLocalEdgeMapping(edgeNodes, iEdge);
+        const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iEdge);
         int ndofs_x = 3 * edgeNodes.giveSize();
         for ( int i = 1, j = 0; i <= edgeNodes.giveSize(); i++, j += 3 ) {
             FloatArray *Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();

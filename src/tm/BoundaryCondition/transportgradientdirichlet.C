@@ -447,8 +447,7 @@ void TransportGradientDirichlet :: computeXi()
             FloatArray b;
             
             FEInterpolation3d *interp = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
-            IntArray bNodes;
-            interp->boundaryEdgeGiveNodes(bNodes, edge);
+            const auto &bNodes = interp->boundaryEdgeGiveNodes(edge);
             int order = interp->giveInterpolationOrder();
             std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryEdgeIntegrationRule(order, edge) );
             static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
@@ -587,8 +586,7 @@ void TransportGradientDirichlet :: computeXi()
             }
             Ke.symmetrized();
 
-            IntArray bNodes;
-            interp->boundaryGiveNodes(bNodes, surf);
+            const auto &bNodes = interp->boundaryGiveNodes(surf);
             IntArray loc(bNodes.giveSize());
             FloatMatrix cvec(bNodes.giveSize(), 3);
             for ( int i = 1; i <= bNodes.giveSize(); ++i ) {

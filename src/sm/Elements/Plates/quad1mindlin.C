@@ -291,8 +291,7 @@ Quad1Mindlin :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 int
 Quad1Mindlin :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
-    IntArray edgeNodes;
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
+    const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
     auto nodeA = this->giveNode( edgeNodes.at(1) );
     auto nodeB = this->giveNode( edgeNodes.at(2) );

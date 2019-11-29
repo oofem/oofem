@@ -423,14 +423,13 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     OOFEM_ERROR("Function obsolete");
 
     FloatArray gcoords;
-    IntArray bnodes;
 
     FEInterpolation *geoInterpolation = e->giveInterpolation();
 
     // Use correct interpolation for the dofid on which the condition is applied
     FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofids[0] );
 
-    interpolation->boundaryGiveNodes(bnodes, boundary);
+    auto bnodes = interpolation->boundaryGiveNodes(boundary);
 
     B.resize(bnodes.giveSize(), ndof);
     B.zero();
@@ -502,12 +501,10 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
             IntArray r_sideLoc, c_sideLoc;
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes;
-
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-            interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+            auto bNodes = interpolation->boundaryGiveNodes(side [ thisSide ].at(ielement));
 
             thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, r_s);
             thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, c_s);
@@ -517,8 +514,8 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
 
             std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
 
-            for ( GaussPoint *gp: *iRule ) {
-                FloatArray lcoords = gp->giveNaturalCoordinates();
+            for ( auto &gp: *iRule ) {
+                auto const &lcoords = gp->giveNaturalCoordinates();
                 FloatArray N, gcoords;
 
                 geoInterpolation->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(thisElement));
@@ -683,12 +680,10 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
             int boundary = side [ thisSide ].at(ielement);
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes;
-
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-            interpolation->boundaryGiveNodes( bNodes, boundary );
+            auto bNodes = interpolation->boundaryGiveNodes(boundary);
 
             thisElement->giveBoundaryLocationArray(sideLocation, bNodes, dofids, s, &masterDofIDs);
             thisElement->computeBoundaryVectorOf(bNodes, dofids, VM_Total, tStep, a);

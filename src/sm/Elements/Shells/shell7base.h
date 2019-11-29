@@ -106,7 +106,7 @@ protected:
     Interface *giveInterface(InterfaceType it) override;
     LayeredCrossSection *layeredCS;
 
-    static FEI3dTrQuad  interpolationForCZExport;
+    static FEI3dTrQuad interpolationForCZExport;
     static FEI3dWedgeQuad interpolationForExport;
 
     FEInterpolation3d *fei;

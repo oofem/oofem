@@ -45,9 +45,9 @@ void FEInterpolation1d :: boundaryEvalN(FloatArray &answer, int boundary, const 
     answer.at(1) = 1.;
 }
 
-void FEInterpolation1d :: boundaryGiveNodes(IntArray &answer, int boundary)
+IntArray FEInterpolation1d :: boundaryGiveNodes(int boundary) const
 {
-    OOFEM_ERROR("Not implemented");
+    throw std::runtime_error("Not implemented");
 }
 
 double FEInterpolation1d :: boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

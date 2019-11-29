@@ -338,11 +338,9 @@ Structural3DElement :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, G
 void
 Structural3DElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
-    IntArray nodes;
     const int ndofsn = 3;
 
-    static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
-    computeLocalSurfaceMapping(nodes, iSurf);
+    const auto &nodes = static_cast< FEInterpolation3d * >( this->giveInterpolation() )->computeLocalSurfaceMapping(iSurf);
 
     answer.resize(nodes.giveSize() * 3);
 
@@ -356,14 +354,11 @@ Structural3DElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 double
 Structural3DElement :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double determinant, weight, volume;
-    determinant = fabs( static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
+    double determinant = fabs( static_cast< FEInterpolation3d * >( this->giveInterpolation() )->
                         surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-
-    return volume;
+    double weight = gp->giveWeight();
+    return determinant * weight;
 }
 
 
@@ -384,8 +379,7 @@ Structural3DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
      * to global element dofs
      */
-    IntArray eNodes;
-    static_cast< FEInterpolation3d * >( this->giveInterpolation() )->computeLocalEdgeMapping(eNodes,  iEdge);
+    const auto &eNodes = static_cast< FEInterpolation3d * >( this->giveInterpolation() )->computeLocalEdgeMapping(iEdge);
 
     answer.resize(eNodes.giveSize() * 3);
     for ( int i = 1; i <= eNodes.giveSize(); i++ ) {

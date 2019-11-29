@@ -178,7 +178,6 @@ FEI3dHexaTriQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray
 double
 FEI3dHexaTriQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray snodes;
     FloatArray e1, e2, dNdu(9), dNdv(9);
 
     double u = lcoords.at(1);
@@ -223,7 +222,7 @@ FEI3dHexaTriQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const Float
     dNdv.at(6) = a [ 1 ] * db [ 2 ];
     dNdv.at(9) = a [ 2 ] * db [ 2 ];
 
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
     for ( int i = 1; i <= 9; ++i ) {
         e1.add( dNdu.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
         e2.add( dNdv.at(i), cellgeo.giveVertexCoordinates( snodes.at(i) ) );
@@ -234,23 +233,23 @@ FEI3dHexaTriQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const Float
 }
 
 
-void
-FEI3dHexaTriQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
+IntArray
+FEI3dHexaTriQuad :: computeLocalSurfaceMapping(int isurf) const
 {
     if ( isurf == 1 ) {
-        nodes = { 2, 1, 4, 3,  9, 12, 11, 10, 21};
+        return { 2, 1, 4, 3,  9, 12, 11, 10, 21};
     } else if ( isurf == 2 ) {
-        nodes = { 5, 6, 7, 8, 13, 14, 15, 16, 22};
+        return { 5, 6, 7, 8, 13, 14, 15, 16, 22};
     } else if ( isurf == 3 ) {
-        nodes = { 1, 2, 6, 5,  9, 18, 13, 17, 23};
+        return { 1, 2, 6, 5,  9, 18, 13, 17, 23};
     } else if ( isurf == 4 ) {
-        nodes = { 2, 3, 7, 6, 10, 19, 14, 18, 24};
+        return { 2, 3, 7, 6, 10, 19, 14, 18, 24};
     } else if ( isurf == 5 ) {
-        nodes = { 3, 4, 8, 7, 11, 20, 15, 19, 25};
+        return { 3, 4, 8, 7, 11, 20, 15, 19, 25};
     } else if ( isurf == 6 ) {
-        nodes = { 4, 1, 5, 8, 12, 17, 16, 20, 26};
+        return { 4, 1, 5, 8, 12, 17, 16, 20, 26};
     } else {
-        OOFEM_ERROR("wrong surface number (%d)", isurf);
+        throw std::range_error("invalid surface number");
     }
 }
 
@@ -476,18 +475,17 @@ FEI3dHexaTriQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, con
 double
 FEI3dHexaTriQuad :: evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo)
 {
-    IntArray fNodes;
-    this->computeLocalSurfaceMapping(fNodes, iSurf);
+    const auto &fNodes = this->computeLocalSurfaceMapping(iSurf);
 
-    const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
-    const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
-    const FloatArray &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
-    const FloatArray &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
-    const FloatArray &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
-    const FloatArray &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
-    const FloatArray &c7 = cellgeo.giveVertexCoordinates( fNodes.at(7) );
-    const FloatArray &c8 = cellgeo.giveVertexCoordinates( fNodes.at(8) );
-    const FloatArray &c9 = cellgeo.giveVertexCoordinates( fNodes.at(9) );
+    const auto &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const auto &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const auto &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const auto &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
+    const auto &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
+    const auto &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
+    const auto &c7 = cellgeo.giveVertexCoordinates( fNodes.at(7) );
+    const auto &c8 = cellgeo.giveVertexCoordinates( fNodes.at(8) );
+    const auto &c9 = cellgeo.giveVertexCoordinates( fNodes.at(9) );
 
     // Generated with Mathematica (rather unwieldy expression, tried to simplify it as good as possible, but it could probably be better)
     return (

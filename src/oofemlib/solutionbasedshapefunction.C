@@ -156,10 +156,10 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 
         Element *thisElement = model.giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
-        IntArray bnodes, zNodes, pNodes, mNodes;
+        IntArray zNodes, pNodes, mNodes;
         FloatMatrix nodeValues;
 
-        geoInterpolation->boundaryGiveNodes(bnodes, Boundary);
+        auto bnodes = geoInterpolation->boundaryGiveNodes(Boundary);
 
         nodeValues.resize( this->dofs.giveSize(), bnodes.giveSize() );
         nodeValues.zero();
@@ -643,12 +643,10 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct &mode)
         FEInterpolation *geoInterpolation = e->giveInterpolation();
 
         // Check all sides of element
-        IntArray bnodes;
-
 #define usePoints 1
 #if usePoints == 1
         // Check if all nodes are on the boundary
-        geoInterpolation->boundaryGiveNodes(bnodes, Boundary);
+        auto bnodes = geoInterpolation->boundaryGiveNodes(Boundary);
         for ( int k = 1; k <= bnodes.giveSize(); k++ ) {
             DofManager *dman = e->giveDofManager( bnodes.at(k) );
             for ( int l = 1; l <= dman->giveCoordinates()->giveSize(); l++ ) {

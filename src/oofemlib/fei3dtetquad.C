@@ -411,8 +411,7 @@ void
 FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                              const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
 }
@@ -421,9 +420,8 @@ void
 FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray N;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
     answer.clear();
@@ -436,50 +434,36 @@ FEI3dTetQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
     return -1;
 }
 
 
-void
-FEI3dTetQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dTetQuad :: computeLocalEdgeMapping(int iedge) const
 {
-    edgeNodes.resize(3);
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        edgeNodes[0] = 1;
-        edgeNodes[1] = 2;
-        edgeNodes[2] = 5;
+        return {1, 2, 5};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        edgeNodes[0] = 2;
-        edgeNodes[1] = 3;
-        edgeNodes[2] = 6;
+        return {2, 3, 6};
     } else if ( iedge == 3 ) { // edge between nodes 3 1
-        edgeNodes[0] = 3;
-        edgeNodes[1] = 1;
-        edgeNodes[2] = 7;
+        return {3, 1, 7};
     } else if ( iedge == 4 ) { // edge between nodes 1 4
-        edgeNodes[0] = 1;
-        edgeNodes[1] = 4;
-        edgeNodes[2] = 8;
+        return {1, 4, 8};
     } else if ( iedge == 5 ) { // edge between nodes 2 4
-        edgeNodes[0] = 2;
-        edgeNodes[1] = 4;
-        edgeNodes[2] = 9;
+        return {2, 4, 9};
     } else if ( iedge == 6 ) { // edge between nodes 3 4
-        edgeNodes[0] = 3;
-        edgeNodes[1] = 4;
-        edgeNodes[2] = 10;
+        return {3, 4, 10};
     } else {
-        OOFEM_ERROR("wrong edge number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
 }
 
 double
-FEI3dTetQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI3dTetQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
@@ -507,9 +491,8 @@ void
 FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray nodes;
     FloatArray N;
-    this->computeLocalSurfaceMapping(nodes, isurf);
+    const auto &nodes = this->computeLocalSurfaceMapping(isurf);
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
     answer.clear();
@@ -521,8 +504,7 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 void
 FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray snodes;
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
     FloatArray lcoords_tet(4);
     lcoords_tet.at(snodes.at(1)) = lcoords.at(1);
@@ -542,9 +524,8 @@ FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray
 double
 FEI3dTetQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray snodes(3);
     FloatArray a, b;
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
     double l1, l2, l3;
     l1 = lcoords.at(1);
@@ -583,11 +564,10 @@ FEI3dTetQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
     return this->surfaceEvalNormal(normal, isurf, lcoords, cellgeo);
 }
 
-void
-FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
+IntArray
+FEI3dTetQuad :: computeLocalSurfaceMapping(int isurf) const
 {
     int aNode = 0, bNode = 0, cNode = 0, dNode = 0, eNode = 0, fNode = 0;
-    surfNodes.resize(6);
 
     if ( isurf == 1 ) {
         aNode = 1;
@@ -621,25 +601,26 @@ FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 
-    surfNodes.at(1) = aNode;
-    surfNodes.at(2) = bNode;
-    surfNodes.at(3) = cNode;
-    surfNodes.at(4) = dNode;
-    surfNodes.at(5) = eNode;
-    surfNodes.at(6) = fNode;
+    return {
+        aNode,
+        bNode,
+        cNode,
+        dNode,
+        eNode,
+        fNode,
+    };
 }
 
 double FEI3dTetQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    IntArray fNodes;
-    this->computeLocalSurfaceMapping(fNodes, iEdge);
+    const auto &fNodes = this->computeLocalSurfaceMapping(iEdge);
 
-    const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
-    const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
-    const FloatArray &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
-    const FloatArray &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
-    const FloatArray &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
-    const FloatArray &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
+    const auto &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const auto &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const auto &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const auto &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
+    const auto &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
+    const auto &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
 
     // Expression derived in Mathematica:
     return (

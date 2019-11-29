@@ -147,13 +147,13 @@ FEI3dLineLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoo
 }
 
 
-void
-FEI3dLineLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dLineLin :: computeLocalEdgeMapping(int iedge) const
 {
     if ( iedge != 1 ) {
         OOFEM_ERROR("wrong edge number (%d)", iedge);
     }
-    edgeNodes = {1, 2};
+    return {1, 2};
 }
 
 void
@@ -184,10 +184,11 @@ FEI3dLineLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
     return 0.0;
 }
 
-void
-FEI3dLineLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
+IntArray
+FEI3dLineLin :: computeLocalSurfaceMapping(int isurf) const
 {
     OOFEM_ERROR("no surfaces available");
+    return {};
 }
 
 

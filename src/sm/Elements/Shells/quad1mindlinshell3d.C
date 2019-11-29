@@ -589,8 +589,7 @@ Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint 
 int
 Quad1MindlinShell3D :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
-    IntArray edgeNodes;
-    this->interp.computeLocalEdgeMapping(edgeNodes, iEdge);
+    const auto &edgeNodes = this->interp.computeLocalEdgeMapping(iEdge);
 
     auto nodeA = this->giveNode( edgeNodes.at(1) );
     auto nodeB = this->giveNode( edgeNodes.at(2) );

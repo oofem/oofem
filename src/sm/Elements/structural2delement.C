@@ -176,8 +176,7 @@ Structural2DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
      * to global element dofs
      */
-    IntArray eNodes;
-    static_cast< FEInterpolation2d * >( this->giveInterpolation() )->computeLocalEdgeMapping(eNodes,  iEdge);
+    const auto &eNodes = static_cast< FEInterpolation2d * >( this->giveInterpolation() )->computeLocalEdgeMapping(iEdge);
 
     answer.resize(eNodes.giveSize() * 2);
     for ( int i = 1; i <= eNodes.giveSize(); i++ ) {

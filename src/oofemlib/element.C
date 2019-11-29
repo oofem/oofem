@@ -839,16 +839,16 @@ Element :: initForNewStep()
 }
 
 
-void
-Element::giveBoundaryEdgeNodes(IntArray& bNodes, int boundary)
+IntArray
+Element::giveBoundaryEdgeNodes(int boundary) const
 {
-    this->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary);
 }
 
-void
-Element::giveBoundarySurfaceNodes(IntArray& bNodes, int boundary)
+IntArray
+Element::giveBoundarySurfaceNodes(int boundary) const
 {
-    this->giveInterpolation()->boundarySurfaceGiveNodes(bNodes, boundary);
+    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary);
 }
 
 std::unique_ptr<IntegrationRule>

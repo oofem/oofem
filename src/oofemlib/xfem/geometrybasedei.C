@@ -287,8 +287,7 @@ void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
             int numEdges = el->giveInterpolation()->giveNumberOfEdges(); //JIM
 
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-                IntArray bNodes;
-                el->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
+                const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(edgeIndex);
 
                 int niLoc = bNodes.at(1);
                 int niGlob = el->giveNode(niLoc)->giveGlobalNumber();
@@ -613,8 +612,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
         int numEdges = element->giveInterpolation()->giveNumberOfEdges();
 
         for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-            IntArray bNodes;
-            element->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
+            const auto &bNodes = element->giveInterpolation()->boundaryGiveNodes(edgeIndex);
 
             int nsLoc = bNodes.at(1);
             int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();

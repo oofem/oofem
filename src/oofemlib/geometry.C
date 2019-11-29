@@ -272,8 +272,7 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     const int numEdges = element->giveInterpolation()->giveNumberOfEdges();
 
     for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-        IntArray bNodes;
-        element->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
+        auto bNodes = element->giveInterpolation()->boundaryGiveNodes(edgeIndex);
 
         const int nsLoc = bNodes.at(1);
         const int neLoc = bNodes.at( bNodes.giveSize() );

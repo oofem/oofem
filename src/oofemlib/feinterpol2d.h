@@ -81,12 +81,12 @@ public:
        than the interpolation represents
     */
     //@{
-    void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundaryEdgeGiveNodes(int boundary) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
-    void boundaryGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundaryGiveNodes(int boundary) const override;
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -100,13 +100,13 @@ public:
     double boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void boundarySurfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void boundarySurfaceGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundarySurfaceGiveNodes(int boundary) const override;
     //@}
 
     /**@name Edge interpolation services. */
     //@{
-    virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
-    void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
+    virtual IntArray computeLocalEdgeMapping(int iedge) const = 0;
+    IntArray computeEdgeMapping(const IntArray &elemNodes, int iedge) const;
     /**
      * Evaluates the array of edge interpolation functions (shape functions) at given point.
      * @param answer Contains resulting array of evaluated interpolation functions.

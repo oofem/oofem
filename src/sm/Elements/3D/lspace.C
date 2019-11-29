@@ -699,11 +699,10 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
      */
     FloatArray gc(3);
     FloatArray h1(3), h2(3), nn(3), n(3);
-    IntArray snodes(4);
 
     answer.resize(3, 3);
 
-    this->interpolation.computeSurfaceMapping(snodes, dofManArray, isurf);
+    const auto &snodes = this->interpolation.computeSurfaceMapping(dofManArray, isurf);
     for ( int i = 1; i <= 4; i++ ) {
         gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }
@@ -714,10 +713,10 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
         int j = ( i ) % 4 + 1;
         h1 = * domain->giveNode( snodes.at(i) )->giveCoordinates();
         h1.subtract(gc);
-	h1.normalize();
+        h1.normalize();
         h2 = * domain->giveNode( snodes.at(j) )->giveCoordinates();
         h2.subtract(gc);
-	h2.normalize();	
+        h2.normalize();	
         n.beVectorProductOf(h1, h2);
 
         nn.add(n);

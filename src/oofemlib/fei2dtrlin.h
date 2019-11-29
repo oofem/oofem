@@ -68,7 +68,7 @@ public:
     bool inside(const FloatArray &lcoords) const override;
 
     // Edge
-    void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) override;
+    IntArray computeLocalEdgeMapping(int iedge) const override;
     int giveNumberOfEdges() const override { return 3; }
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -79,7 +79,7 @@ public:
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 
 protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
+    double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
 };
 
 /**

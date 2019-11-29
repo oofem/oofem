@@ -94,12 +94,11 @@ Q27Space :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, Gauss
      */
     FloatArray gc(3);
     FloatArray h1(3), h2(3), nn(3), n(3);
-    IntArray snodes(4);
 
     answer.resize(3, 3);
     answer.zero();
 
-    this->interpolation.computeSurfaceMapping(snodes, dofManArray, iSurf);
+    const auto &snodes = this->interpolation.computeSurfaceMapping(dofManArray, iSurf);
     for ( int i = 1; i <= 4; i++ ) {
         gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }

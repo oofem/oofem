@@ -1419,8 +1419,7 @@ MITC4Shell :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     FloatArray e1, e2, e3, xl, yl;
     this->computeLocalBaseVectors(e1, e2, e3);
 
-    IntArray edgeNodes;
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
+    const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
     xl.beDifferenceOf( * this->giveNode( edgeNodes.at(2) )->giveCoordinates(), * this->giveNode( edgeNodes.at(1) )->giveCoordinates() );
 

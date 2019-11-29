@@ -667,22 +667,17 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    double dx, dy, length;
-    IntArray edgeNodes;
-    Node *nodeA, *nodeB;
+    const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
+
+    auto nodeA = this->giveNode( edgeNodes.at(1) );
+    auto nodeB = this->giveNode( edgeNodes.at(2) );
+
+    double dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
+    double dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
+    double length = sqrt(dx * dx + dy * dy);
 
     answer.resize(3, 3);
     answer.zero();
-
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
-
-    nodeA = this->giveNode( edgeNodes.at(1) );
-    nodeB = this->giveNode( edgeNodes.at(2) );
-
-    dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-
     answer.at(1, 1) = 1.0;
     answer.at(2, 2) = dx / length;
     answer.at(2, 3) = -dy / length;

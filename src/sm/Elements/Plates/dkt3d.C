@@ -436,26 +436,22 @@ DKTPlate3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    double dx, dy, length;
-    IntArray edgeNodes;
-    Node *nodeA, *nodeB;
 
-    answer.resize(3, 3);
-    answer.zero();
+    const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
-
-    nodeA = this->giveNode( edgeNodes.at(1) );
-    nodeB = this->giveNode( edgeNodes.at(2) );
+    auto nodeA = this->giveNode( edgeNodes.at(1) );
+    auto nodeB = this->giveNode( edgeNodes.at(2) );
 
     FloatArray cb(3), ca(3);
     this->giveLocalCoordinates (ca, * (nodeA->giveCoordinates() ) );
     this->giveLocalCoordinates (cb, * (nodeB->giveCoordinates() ) );
 
-    dx = cb.at(1) - ca.at(1);
-    dy = cb.at(2) - ca.at(2);
-    length = sqrt(dx * dx + dy * dy);
+    double dx = cb.at(1) - ca.at(1);
+    double dy = cb.at(2) - ca.at(2);
+    double length = sqrt(dx * dx + dy * dy);
 
+    answer.resize(3, 3);
+    answer.zero();
     answer.at(1, 1) = 1.0;
     answer.at(2, 2) = dx / length;
     answer.at(2, 3) = -dy / length;

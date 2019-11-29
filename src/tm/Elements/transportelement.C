@@ -292,9 +292,9 @@ TransportElement :: giveEdgeDofMapping(IntArray &answer, int iEdge)
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation2d * >(interp) ) {
-        dynamic_cast< FEInterpolation2d * >(interp)->computeLocalEdgeMapping(answer, iEdge);
+        answer = dynamic_cast< FEInterpolation2d * >(interp)->computeLocalEdgeMapping(iEdge);
     } else if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->computeLocalEdgeMapping(answer, iEdge);
+        answer = dynamic_cast< FEInterpolation3d * >(interp)->computeLocalEdgeMapping(iEdge);
     }
 }
 
@@ -313,7 +313,7 @@ TransportElement :: giveSurfaceDofMapping(IntArray &answer, int iSurf)
 {
     FEInterpolation *interp = this->giveInterpolation();
     if ( dynamic_cast< FEInterpolation3d * >(interp) ) {
-        dynamic_cast< FEInterpolation3d * >(interp)->computeLocalSurfaceMapping(answer, iSurf);
+        answer = dynamic_cast< FEInterpolation3d * >(interp)->computeLocalSurfaceMapping(iSurf);
     }
 }
 
@@ -621,8 +621,7 @@ TransportElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, Boundar
     std :: unique_ptr< IntegrationRule > iRule( this->giveBoundarySurfaceIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
-        IntArray bNodes;
-        interp->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = interp->boundaryGiveNodes(boundary);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
 
@@ -695,8 +694,8 @@ TransportElement :: computeTangentFromSurfaceLoad(FloatMatrix &answer, SurfaceLo
         if ( unknownsPerNode != 1 ) {
             OOFEM_ERROR("Load property multexpr not implemented for coupled fields");
         }
-        IntArray dofid, bNodes;
-        interp->boundaryGiveNodes(bNodes, boundary);
+        IntArray dofid;
+        const auto &bNodes = interp->boundaryGiveNodes(boundary);
         this->giveElementDofIDMask(dofid);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
@@ -743,9 +742,9 @@ TransportElement :: computeTangentFromEdgeLoad(FloatMatrix &answer, EdgeLoad *lo
     std :: unique_ptr< IntegrationRule > iRule( this->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + interp->giveInterpolationOrder(), boundary) );
 
     if ( load->propertyMultExpr.isDefined() ) {
-        IntArray bNodes, dofid;
+        IntArray dofid;
         this->giveElementDofIDMask(dofid);
-        interp->boundaryEdgeGiveNodes(bNodes, boundary);
+        const auto &bNodes = interp->boundaryEdgeGiveNodes(boundary);
         this->giveElementDofIDMask(dofid);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
@@ -805,9 +804,9 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
     // get solution vector for InternalForcesVector (Convention or radiation)
     if ( load->giveType() == ConvectionBC || load->giveType() == RadiationBC ) {
-        IntArray bNodes, dofid;
+        IntArray dofid;
         this->giveElementDofIDMask(dofid);
-        interp->boundaryEdgeGiveNodes(bNodes, boundary);
+        const auto &bNodes = interp->boundaryEdgeGiveNodes(boundary);
         this->computeBoundaryVectorOf(bNodes, dofid, VM_TotalIntrinsic, tStep, unknowns);
     }
 

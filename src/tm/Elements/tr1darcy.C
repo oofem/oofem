@@ -182,7 +182,6 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         FloatArray N, loadValue, reducedAnswer(3);
-        IntArray mask;
 
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
@@ -202,7 +201,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
             reducedAnswer.add(loadValue.at(1) * dV, N);
         }
 
-        this->interpolation_lin.computeLocalEdgeMapping(mask, iEdge);
+        const auto &mask = this->interpolation_lin.computeLocalEdgeMapping(iEdge);
         answer.assemble(reducedAnswer, mask);
     }
 }

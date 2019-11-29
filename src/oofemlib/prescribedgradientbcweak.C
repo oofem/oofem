@@ -1748,7 +1748,6 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
 {
     Set *setPointer = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = setPointer->giveBoundaryList();
-    IntArray bNodes;
 
     // Loop over boundary nodes and check how many times they occur:
     // 1 -> at the edge of an inclusion, therefore must be retained
@@ -1760,7 +1759,7 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
     	int elIndex = boundaries.at(pos * 2 - 1);
         Element *e = this->giveDomain()->giveElement( elIndex );
         int boundary = boundaries.at(pos * 2);
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
         DofManager *startNode   = e->giveDofManager(bNodes [ 0 ]);
         int startNodeInd = startNode->giveNumber();
         DofManager *endNode     = e->giveDofManager(bNodes [ 1 ]);
@@ -1812,13 +1811,12 @@ void PrescribedGradientBCWeak :: findCrackBndIntersecCoord(std::vector<FloatArra
 {
     Set *setPointer = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = setPointer->giveBoundaryList();
-    IntArray bNodes;
 
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
 
         // Add the start and end nodes of the segment
         DofManager *startNode = e->giveDofManager(bNodes [ 0 ]);

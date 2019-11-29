@@ -542,8 +542,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             // Divide into subdomains
             int triPassed = 0;
             for ( int i = 1; i <= nEdges; i++ ) {
-                IntArray bNodes;
-                this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
+                const auto &bNodes = this->element->giveInterpolation()->boundaryGiveNodes(i);
 
                 if ( bNodes.giveSize() == 2 ) {
 
@@ -854,12 +853,11 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
     FEInterpolation *interp = element->giveInterpolation(); // Geometry interpolation
-    IntArray edgeNodes;
     FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
     if ( interp2d == nullptr ) {
         OOFEM_ERROR("In XfemElementInterface :: partitionEdgeSegment: failed to cast to FEInterpolation2d.\n")
     }
-    interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
+    const auto &edgeNodes = interp2d->computeLocalEdgeMapping(iBndIndex);
 
     // Fetch start and end points.
     const FloatArray &xS = * ( element->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );

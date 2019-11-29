@@ -284,18 +284,16 @@ void
 FEI3dTetLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                             const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double coeff, l, x1, x2, y1, y2, z1, z2;
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    l = this->edgeComputeLength(edgeNodes, cellgeo);
-    coeff = 1.0 / l / l;
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    double l = this->edgeComputeLength(edgeNodes, cellgeo);
+    double coeff = 1.0 / l / l;
 
-    x1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(1);
-    y1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(2);
-    z1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(3);
-    x2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(1);
-    y2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(2);
-    z2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(3);
+    double x1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(1);
+    double y1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(2);
+    double z1 = cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(3);
+    double x2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(1);
+    double y2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(2);
+    double z2 = cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(3);
 
     answer.resize(2, 3);
     answer.at(1, 1) = ( x1 - x2 ) * coeff;
@@ -311,9 +309,8 @@ void
 FEI3dTetLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(3);
@@ -329,46 +326,34 @@ FEI3dTetLin :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTetLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     return 0.5 * this->edgeComputeLength(edgeNodes, cellgeo);
 }
 
 
-void
-FEI3dTetLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dTetLin :: computeLocalEdgeMapping(int iedge) const
 {
-    int aNode = 0, bNode = 0;
-    edgeNodes.resize(2);
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
+        return {1, 2};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
+        return {2, 3};
     } else if ( iedge == 3 ) { // edge between nodes 3 1
-        aNode = 3;
-        bNode = 1;
+        return {3, 1};
     } else if ( iedge == 4 ) { // edge between nodes 1 4
-        aNode = 1;
-        bNode = 4;
+        return {1, 4};
     } else if ( iedge == 5 ) { // edge between nodes 2 4
-        aNode = 2;
-        bNode = 4;
+        return {2, 4};
     } else if ( iedge == 6 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
+        return {3, 4};
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
-
-    edgeNodes.at(1) = ( aNode );
-    edgeNodes.at(2) = ( bNode );
 }
 
 double
-FEI3dTetLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI3dTetLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     return distance(cellgeo.giveVertexCoordinates( edgeNodes.at(2) ), cellgeo.giveVertexCoordinates( edgeNodes.at(1) ));
 }
@@ -387,9 +372,7 @@ void
 FEI3dTetLin :: surfaceLocal2global(FloatArray &answer, int iedge,
                                    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray nodes(3);
-
-    computeLocalSurfaceMapping(nodes, iedge);
+    const auto &nodes = computeLocalSurfaceMapping(iedge);
 
     double l1 = lcoords.at(1);
     double l2 = lcoords.at(2);
@@ -411,8 +394,7 @@ void
 FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Note, this must be in correct order, not just the correct nodes, therefore we must use snodes;
-    IntArray snodes;
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
     FloatArray lcoords_tet(4);
     lcoords_tet.at(snodes.at(1)) = lcoords.at(1);
@@ -432,10 +414,9 @@ FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray 
 double
 FEI3dTetLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray a, b;
-    IntArray snodes(3);
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
+    FloatArray a, b;
     a.beDifferenceOf( cellgeo.giveVertexCoordinates( snodes.at(2) ), cellgeo.giveVertexCoordinates( snodes.at(1) ) );
     b.beDifferenceOf( cellgeo.giveVertexCoordinates( snodes.at(3) ), cellgeo.giveVertexCoordinates( snodes.at(1) ) );
     answer.beVectorProductOf(a, b);
@@ -451,11 +432,10 @@ FEI3dTetLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lc
     return this->surfaceEvalNormal(c, isurf, lcoords, cellgeo);
 }
 
-void
-FEI3dTetLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
+IntArray
+FEI3dTetLin :: computeLocalSurfaceMapping(int isurf) const
 {
     int aNode = 0, bNode = 0, cNode = 0;
-    surfNodes.resize(3);
 
     if ( isurf == 1 ) { // surface 1 - nodes 1 3 2
         aNode = 1;
@@ -477,16 +457,13 @@ FEI3dTetLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 
-    surfNodes.at(1) = ( aNode );
-    surfNodes.at(2) = ( bNode );
-    surfNodes.at(3) = ( cNode );
+    return {aNode, bNode, cNode};
 }
 
 double
 FEI3dTetLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    IntArray fNodes;
-    this->computeLocalSurfaceMapping(fNodes, iEdge);
+    auto fNodes = this->computeLocalSurfaceMapping(iEdge);
 
     const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
     const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );

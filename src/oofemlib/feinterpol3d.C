@@ -43,9 +43,9 @@ double FEInterpolation3d :: giveVolume(const FEICellGeometry &cellgeo) const
     return 0;
 }
 
-void FEInterpolation3d :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+IntArray FEInterpolation3d :: boundaryEdgeGiveNodes(int boundary) const
 {
-    this->computeLocalEdgeMapping(answer, boundary);
+    return this->computeLocalEdgeMapping(boundary);
 }
 
 void FEInterpolation3d :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -63,9 +63,9 @@ void FEInterpolation3d :: boundaryEdgeLocal2Global(FloatArray &answer, int bound
     this->edgeLocal2global(answer, boundary, lcoords, cellgeo);
 }
 
-void FEInterpolation3d :: boundaryGiveNodes(IntArray &answer, int boundary)
+IntArray FEInterpolation3d :: boundaryGiveNodes(int boundary) const
 {
-    this->computeLocalSurfaceMapping(answer, boundary);
+    return this->computeLocalSurfaceMapping(boundary);
 }
 
 void FEInterpolation3d :: boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -88,28 +88,26 @@ void FEInterpolation3d :: boundaryLocal2Global(FloatArray &answer, int boundary,
     return this->surfaceLocal2global(answer, boundary, lcoords, cellgeo);
 }
 
-void FEInterpolation3d :: computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge)
+IntArray FEInterpolation3d :: computeEdgeMapping(const IntArray &elemNodes, int iedge) const
 {
-    int size;
-    IntArray ln;
-    this->computeLocalEdgeMapping(ln, iedge);
-    size = ln.giveSize();
-    edgeNodes.resize(size);
+    const auto &ln = this->computeLocalEdgeMapping(iedge);
+    int size = ln.giveSize();
+    IntArray edgeNodes(size);
     for ( int i = 1; i <= size; i++ ) {
         edgeNodes.at(i) = elemNodes.at( ln.at(i) );
     }
+    return edgeNodes;
 }
 
-void FEInterpolation3d :: computeSurfaceMapping(IntArray &surfNodes, IntArray &elemNodes, int isurf)
+IntArray FEInterpolation3d :: computeSurfaceMapping(const IntArray &elemNodes, int isurf) const
 {
-    int size;
-    IntArray ln;
-    this->computeLocalSurfaceMapping(ln, isurf);
-    size = ln.giveSize();
-    surfNodes.resize(size);
+    const auto &ln = this->computeLocalSurfaceMapping(isurf);
+    int size = ln.giveSize();
+    IntArray surfNodes(size);
     for ( int i = 1; i <= size; i++ ) {
         surfNodes.at(i) = elemNodes.at( ln.at(i) );
     }
+    return surfNodes;
 }
 
 std::unique_ptr<IntegrationRule> FEInterpolation3d :: giveBoundaryEdgeIntegrationRule(int order, int boundary)
@@ -136,9 +134,9 @@ double FEInterpolation3d :: surfaceEvalNormal(FloatArray &answer, int isurf, con
     return -1.0;
 }
 
-void FEInterpolation3d::boundarySurfaceGiveNodes(IntArray &answer, int boundary)
+IntArray FEInterpolation3d::boundarySurfaceGiveNodes(int boundary) const
 {
-  this->computeLocalSurfaceMapping(answer, boundary);
+    return this->computeLocalSurfaceMapping(boundary);
 }
   
 } // end namespace oofem
