@@ -33,6 +33,7 @@
  */
 
 #include "sm/Materials/LatticeMaterials/latticestructuralmaterial.h"
+#include "sm/Materials/LatticeMaterials/latticematstatus.h"
 #include "domain.h"
 #include "verbose.h"
 #include "sm/Materials/structuralms.h"
@@ -61,7 +62,31 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
     return mode == _3dLattice || mode == _2dLattice || mode == _1dLattice;
 }
 
+int
+LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
+					 GaussPoint *gp,
+					 InternalStateType type,
+					 TimeStep *atTime)
+{
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
+    if( type == IST_LatticeStress ) {
+      answer.resize(6);
+      answer.zero();
+      status->giveLatticeStress();
+    }
+    else if  (type == IST_LatticeStrain ) {
+      answer.resize(6);
+      answer.zero();
+      status->giveLatticeStrain();
+    }
+    else {
+      return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+    }
+}
+
+
+  
 double
 LatticeStructuralMaterial :: giveLatticeStress1d(double strain, GaussPoint *gp, TimeStep *tStep)
 {

@@ -408,12 +408,12 @@ LatticeLink3d :: giveInternalForcesVector(FloatArray &answer,
     answer.clear();
 
     for ( GaussPoint *gp: * this->giveDefaultIntegrationRulePtr() ) {
-        StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
+        LatticeMaterialStatus *matStat = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
         bt.beTranspositionOf(b);
 
         if ( useUpdatedGpRecord == 1 ) {
-            stress = matStat->giveStressVector();
+            stress = matStat->giveLatticeStress();
         } else {
             if ( !this->isActivated(tStep) ) {
                 strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() ) );

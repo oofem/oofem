@@ -901,6 +901,25 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         };
         return 3;
 
+
+    case _1dLattice:
+        answer = {
+            1
+        };
+        return 1;
+
+    case _2dLattice:
+        answer = {
+	  1, 2, 6
+        };
+        return 3;
+
+    case _3dLattice:
+        answer = {
+	  1, 2, 3, 4, 5, 6
+        };
+        return 6;
+	
     case _2dPlateSubSoil:
         answer = {
             3, 5, 4

@@ -1068,7 +1068,7 @@ LatticePlasticityDamage :: giveIPValue(FloatArray &answer,
         answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
         return 1;
     } else {
-        return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
+        return LatticeLinearElastic :: giveIPValue(answer, gp, type, atTime);
     }
 }
 

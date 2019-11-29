@@ -159,11 +159,11 @@ public:
     ///Sets the temp_crack_width
     void setTempCrackWidth(double val) { tempCrackWidth = val; }
 
-    virtual FloatArray &givePlasticStrain()
+    virtual const FloatArray &givePlasticStrain() const
     { return this->plasticStrain; }
 
 
-    virtual FloatArray &giveLatticeStrain()
+    virtual const FloatArray &giveLatticeStrain() const
     { return this->latticeStrain; }
 
 

@@ -344,7 +344,7 @@ LatticeLinearElastic :: giveIPValue(FloatArray &answer,
                                     TimeStep *atTime)
 {
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
-
+ 
     if ( type == IST_CharacteristicLength ) {
         answer.resize(1);
         answer.zero();

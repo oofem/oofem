@@ -84,6 +84,10 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
 {
     MaterialStatus :: updateYourself(atTime);
 
+    this->latticeStress = this->tempLatticeStress;
+
+    this->latticeStrain = this->tempLatticeStrain;
+    
     this->plasticStrain = this->tempPlasticStrain;
 
     this->reducedStrain = this->tempReducedStrain;
@@ -91,7 +95,6 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
     this->dissipation = this->tempDissipation;
 
     this->deltaDissipation = this->tempDeltaDissipation;
-
 
     this->crackFlag = this->tempCrackFlag;
 
@@ -105,14 +108,26 @@ LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus :: printOutputAt(file, tStep);
 
-    // print only if reducedStrains are not empty
-    if ( !reducedStrain.containsOnlyZeroes() ) {
-        fprintf(file, "reduced strains ");
-        int rSize = reducedStrain.giveSize();
-        for ( int k = 1; k <= rSize; k++ ) {
-            fprintf(file, "% .4e ", reducedStrain.at(k) );
-        }
-    }
+      fprintf(file, "lattice strains ");
+      int rSize = this->latticeStrain.giveSize();
+      for ( int k = 1; k <= rSize; k++ ) {
+	fprintf(file, "% .4e ", this->latticeStrain.at(k) );
+      }
+      fprintf(file, "\n");
+      
+      fprintf(file, "lattice stress ");
+      rSize = this->latticeStress.giveSize();
+      for ( int k = 1; k <= rSize; k++ ) {
+	fprintf(file, "% .4e ", this->latticeStress.at(k) );
+      }
+      fprintf(file, "\n");
+      
+      fprintf(file, "reduced lattice strains ");
+      rSize = reducedStrain.giveSize();
+      for ( int k = 1; k <= rSize; k++ ) {
+	fprintf(file, "% .4e ", reducedStrain.at(k) );
+      }
+      fprintf(file, "\n");
 }
 
 Interface *

@@ -302,7 +302,7 @@ LatticeDamage :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint 
 
     this->initTempStatus(gp);
 
-    FloatArray testStrainOld(status->giveLatticeStrain() );
+    FloatArray testStrainOld = status->giveLatticeStrain();
 
     // substract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
@@ -419,7 +419,8 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
 
     this->initTempStatus(gp);
 
-    FloatArray testStrainOld(status->giveLatticeStrain() );
+    FloatArray testStrainOld(6);
+    testStrainOld= status->giveLatticeStrain();
 
     // substract stress independent part
     this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
@@ -563,7 +564,7 @@ LatticeDamage :: computeDeltaDissipation2d(double omega,
     FloatArray crackOpeningOld(3);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld(status->giveLatticeStress() );
+    FloatArray stressOld = status->giveLatticeStress();
     FloatArray intermediateStrain(3);
 
     double tempDeltaDissipation = 0.;
@@ -663,7 +664,7 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
     FloatArray crackOpeningOld(6);
     crackOpeningOld.times(omegaOld);
     crackOpeningOld.times(length);
-    FloatArray stressOld(status->giveLatticeStress() );
+    FloatArray stressOld = status->giveLatticeStress();
     FloatArray intermediateStrain(6);
 
     double tempDeltaDissipation = 0.;
@@ -847,6 +848,17 @@ LatticeDamageStatus :: initTempStatus()
         this->reducedStrain.zero();
     }
 
+    if ( this->latticeStrain.giveSize() == 0 ) {
+        this->latticeStrain.resize(rsize);
+        this->latticeStrain.zero();
+    }
+
+    if ( this->latticeStress.giveSize() == 0 ) {
+        this->latticeStress.resize(rsize);
+        this->latticeStress.zero();
+    }
+
+    
     this->tempKappa = this->kappa;
     this->tempEquivStrain = this->equivStrain;
     this->tempDamage = this->damage;
@@ -856,7 +868,7 @@ void
 LatticeDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
-    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crackFlag %d\n", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crackFlag);
+fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crackFlag %d\n", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crackFlag);
 }
 
 

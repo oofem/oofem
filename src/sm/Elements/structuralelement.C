@@ -37,6 +37,7 @@
 #include "sm/Materials/structuralmaterial.h"
 #include "sm/Materials/structuralms.h"
 #include "sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "sm/Materials/LatticeMaterials/latticematstatus.h"
 #include "Loads/structtemperatureload.h"
 #include "sm/Materials/structuralnonlocalmaterialext.h"
 #include "Loads/structeigenstrainload.h"
@@ -759,14 +760,21 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         this->computeBmatrixAt(gp, b);
 
         if ( useUpdatedGpRecord == 1 ) {
-            auto status = gp->giveMaterialStatus();
-            StructuralMaterialStatus *matStat = dynamic_cast< StructuralMaterialStatus * >( status );
-            if ( matStat )
-                stress = matStat->giveStressVector();
-            else {
-                StructuralInterfaceMaterialStatus *ms = static_cast< StructuralInterfaceMaterialStatus * >( status );
-                stress = ms->giveTraction();
-            }
+	  auto status = gp->giveMaterialStatus();
+	  StructuralMaterialStatus *matStat = dynamic_cast< StructuralMaterialStatus * >( status );
+	  if ( matStat ) {
+	      stress = matStat->giveStressVector();
+	  }
+	  else{
+	    LatticeMaterialStatus *lmatStat = dynamic_cast< LatticeMaterialStatus * >( status );
+	    if( lmatStat ) {
+	      stress = lmatStat->giveLatticeStress();
+	    }
+	    else{
+	      StructuralInterfaceMaterialStatus *ms = static_cast< StructuralInterfaceMaterialStatus * >( status );
+	    stress = ms->giveTraction();
+	    }
+	  }
         } else {
             if ( !this->isActivated(tStep) ) {
                 strain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );

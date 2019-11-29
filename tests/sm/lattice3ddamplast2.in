@@ -18,8 +18,8 @@ ConstantFunction 1 f(t) 1.
 PiecewiseLinFunction 2 nPoints 4 t 4  0. 0.1 0.2 3. f(t) 4 1. 1. 0. 0.
 PiecewiseLinFunction 3 nPoints 4 t 4  0. 0.1 0.2 3. f(t) 4 0. 0. 0. 10.
 #%BEGIN_CHECK% 
-#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 0.0 tolerance 1.e-5
-#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 0.0 tolerance 1.e-5 
-#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value -3.41108968e+05 tolerance 1.e-3
-#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 3  value 1.06691367e+07 tolerance 1.e-1
+#ELEMENT tStep 1 number 1 gp 1 keyword 138 component 1  value 0.0 tolerance 1.e-5
+#ELEMENT tStep 1 number 1 gp 1 keyword 139 component 1  value 0.0 tolerance 1.e-5 
+##ELEMENT tStep 2 number 1 gp 1 keyword 139 component 1  value -3.41108968e+05 tolerance 1.e-3
+##ELEMENT tStep 2 number 1 gp 1 keyword 139 component 3  value 1.06691367e+07 tolerance 1.e-1
 #%END_CHECK%
