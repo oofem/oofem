@@ -913,7 +913,6 @@ LatticeBondPlasticityStatus :: updateYourself(TimeStep *atTime)
 void
 LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
 
     LatticeMaterialStatus :: saveContext(stream, mode);
 
@@ -927,7 +926,6 @@ LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 void
 LatticeBondPlasticityStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
 
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
