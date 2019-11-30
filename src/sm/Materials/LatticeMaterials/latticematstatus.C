@@ -39,9 +39,9 @@
 #include "gausspoint.h"
 
 namespace oofem {
-LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : StructuralMaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedStrain(), tempReducedStrain(), plasticStrain(), tempPlasticStrain(), oldPlasticStrain()
+LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : MaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedLatticeStrain(), tempReducedLatticeStrain(), plasticLatticeStrain(), tempPlasticLatticeStrain(), oldPlasticLatticeStrain()
 {
-    normalStress = tempNormalStress = 0;
+    normalLatticeStress = tempNormalLatticeStress = 0;
 
     le = 0.0;
     crackFlag = tempCrackFlag = 0;
@@ -58,9 +58,17 @@ LatticeMaterialStatus :: initTempStatus()
 // builds new crackMap
 //
 {
-    StructuralMaterialStatus :: initTempStatus();
+    MaterialStatus :: initTempStatus();
 
-    this->tempNormalStress = this->normalStress;
+    this->tempLatticeStrain = this->latticeStrain;
+
+    this->tempLatticeStress = this->latticeStress;
+
+    this->tempReducedLatticeStrain = this->reducedLatticeStrain;
+
+    this->tempNormalLatticeStress = this->normalLatticeStress;
+
+    this->tempPlasticLatticeStrain = this->plasticLatticeStrain;
 
     this->tempDissipation = this->dissipation;
     this->tempDeltaDissipation = this->deltaDissipation;
@@ -74,16 +82,19 @@ LatticeMaterialStatus :: initTempStatus()
 void
 LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
 {
-    StructuralMaterialStatus :: updateYourself(atTime);
+    MaterialStatus :: updateYourself(atTime);
 
-    this->plasticStrain = this->tempPlasticStrain;
+    this->latticeStress = this->tempLatticeStress;
 
-    this->reducedStrain = this->tempReducedStrain;
+    this->latticeStrain = this->tempLatticeStrain;
+
+    this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
+
+    this->reducedLatticeStrain = this->tempReducedLatticeStrain;
 
     this->dissipation = this->tempDissipation;
 
     this->deltaDissipation = this->tempDeltaDissipation;
-
 
     this->crackFlag = this->tempCrackFlag;
 
@@ -95,16 +106,28 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
 void
 LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    MaterialStatus :: printOutputAt(file, tStep);
 
-    // print only if reducedStrains are not empty
-    if ( !reducedStrain.containsOnlyZeroes() ) {
-        fprintf(file, "reduced strains ");
-        int rSize = reducedStrain.giveSize();
-        for ( int k = 1; k <= rSize; k++ ) {
-            fprintf(file, "% .4e ", reducedStrain.at(k) );
-        }
+    fprintf(file, "lattice strains ");
+    int rSize = this->latticeStrain.giveSize();
+    for ( int k = 1; k <= rSize; k++ ) {
+        fprintf(file, "% .4e ", this->latticeStrain.at(k) );
     }
+    fprintf(file, "\n");
+
+    fprintf(file, "lattice stress ");
+    rSize = this->latticeStress.giveSize();
+    for ( int k = 1; k <= rSize; k++ ) {
+        fprintf(file, "% .4e ", this->latticeStress.at(k) );
+    }
+    fprintf(file, "\n");
+
+    fprintf(file, "reduced lattice strains ");
+    rSize = reducedLatticeStrain.giveSize();
+    for ( int k = 1; k <= rSize; k++ ) {
+        fprintf(file, "% .4e ", this->reducedLatticeStrain.at(k) );
+    }
+    fprintf(file, "\n");
 }
 
 Interface *
@@ -124,17 +147,23 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 // no temp variables stored
 //
 {
-    StructuralMaterialStatus :: saveContext(stream, mode);
+    MaterialStatus :: saveContext(stream, mode);
 
     contextIOResultType iores;
 
-    // write a raw data
-    if ( ( iores = reducedStrain.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = latticeStress.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    // write a raw data
-    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = latticeStrain.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = reducedLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -161,15 +190,23 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 // restores full information stored in stream to this Status
 //
 {
-    StructuralMaterialStatus :: saveContext(stream, mode);
+    MaterialStatus :: saveContext(stream, mode);
 
     contextIOResultType iores;
 
-    if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = latticeStress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = latticeStrain.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = reducedLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( iores = plasticLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

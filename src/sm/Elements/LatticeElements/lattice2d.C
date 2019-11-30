@@ -275,20 +275,9 @@ double Lattice2d :: givePitch()
     return pitch;
 }
 
+
 double
 Lattice2d :: giveNormalStress()
-{
-    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
-    double normalStress = 0;
-    normalStress = status->giveNormalStress();
-
-    return normalStress;
-}
-
-
-double
-Lattice2d :: giveOldNormalStress()
 {
     LatticeMaterialStatus *status;
 
@@ -296,7 +285,7 @@ Lattice2d :: giveOldNormalStress()
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double normalStress = 0;
-    normalStress = status->giveOldNormalStress();
+    normalStress = status->giveNormalLatticeStress();
 
     return normalStress;
 }

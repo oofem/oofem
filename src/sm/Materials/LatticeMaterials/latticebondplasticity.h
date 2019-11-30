@@ -71,10 +71,9 @@ public:
     double giveKappaP() const { return kappaP; }
     /// Returns the temp. scalar measure of the largest strain level
     double giveTempKappaP() const { return tempKappaP; }
-    void  letTempPlasticStrainBe(const FloatArray &v)
-    { tempPlasticStrain = v; }
     /// Sets the temp scalar measure of the largest strain level to given value
     void setTempKappaP(double newKappa) { tempKappaP = newKappa; }
+
     void setSurfaceValue(int val)
     {
         surfaceValue = val;

@@ -59,7 +59,7 @@ public:
     LatticeSlipStatus(GaussPoint *g);
 
     void  letTempPlasticStrainBe(const FloatArray &v)
-    { tempPlasticStrain = v; }
+    { tempPlasticLatticeStrain = v; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 

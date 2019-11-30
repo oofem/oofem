@@ -102,7 +102,7 @@ LatticeSlip :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain, GaussPoi
 
     FloatArray strainVector;
 
-    FloatArray tempPlasticStrain = status->givePlasticStrain();
+    FloatArray tempPlasticStrain = status->givePlasticLatticeStrain();
 
     FloatMatrix stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, atTime);
 
@@ -126,8 +126,8 @@ LatticeSlip :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain, GaussPoi
 
     //Set temp values in status needed for dissipation
     status->letTempPlasticStrainBe(tempPlasticStrain);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStrainBe(totalStrain);
+    status->letTempLatticeStressBe(answer);
 
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation;
@@ -157,19 +157,9 @@ LatticeSlipStatus :: LatticeSlipStatus(GaussPoint *g) :  LatticeMaterialStatus(g
 
 void
 LatticeSlipStatus :: initTempStatus()
-//
-// initializes temp variables according to variables form previous equlibrium state.
-// builds new crackMap
-//
 {
     LatticeMaterialStatus :: initTempStatus();
-    //Only first 3 components are used for plastic strain??
-    if ( this->plasticStrain.giveSize() == 0 ) {
-        this->plasticStrain.resize(6);
-        this->plasticStrain.zero();
-    }
-
-    this->tempPlasticStrain = this->plasticStrain;
+    this->tempPlasticLatticeStrain = this->plasticLatticeStrain;
 }
 
 
@@ -196,7 +186,7 @@ void
 LatticeSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
-    fprintf(file, "plasticStrain %.8e, dissipation %f, deltaDissipation %f, crackFlag %d\n", this->plasticStrain.at(1), this->dissipation, this->deltaDissipation, this->crackFlag);
+    fprintf(file, "plasticStrain %.8e, dissipation %f, deltaDissipation %f, crackFlag %d\n", this->plasticLatticeStrain.at(1), this->dissipation, this->deltaDissipation, this->crackFlag);
 }
 
 
@@ -206,9 +196,9 @@ LatticeSlip :: computeDeltaDissipation(GaussPoint *gp,
 {
     LatticeSlipStatus *status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
 
-    FloatArray plasticStrain = status->givePlasticStrain();
-    FloatArray tempPlasticStrain = status->giveTempPlasticStrain();
-    FloatArray tempStress = status->giveTempStressVector();
+    FloatArray plasticStrain = status->givePlasticLatticeStrain();
+    FloatArray tempPlasticStrain = status->giveTempPlasticLatticeStrain();
+    FloatArray tempStress = status->giveTempLatticeStress();
 
     double tempDeltaDissipation =  tempStress.at(1) * ( tempPlasticStrain.at(1) - plasticStrain.at(1) );
     return tempDeltaDissipation;
@@ -226,7 +216,7 @@ LatticeSlipStatus :: saveContext(DataStream &stream, ContextMode mode)
     // save parent class status
     LatticeMaterialStatus :: saveContext(stream, mode);
 
-    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = this->plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -242,7 +232,7 @@ LatticeSlipStatus :: restoreContext(DataStream &stream, ContextMode mode)
 
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
-    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = this->plasticLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -254,7 +244,7 @@ void
 LatticeSlipStatus :: updateYourself(TimeStep *atTime)
 {
     LatticeMaterialStatus :: updateYourself(atTime);
-    this->plasticStrain = this->tempPlasticStrain;
+    this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
 }
 
 

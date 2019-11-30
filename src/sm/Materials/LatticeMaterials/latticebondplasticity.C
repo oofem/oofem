@@ -168,7 +168,7 @@ LatticeBondPlasticity :: giveReducedStrain(FloatArray &answer,
                                            TimeStep *tStep)
 {
     LatticeBondPlasticityStatus *status = ( LatticeBondPlasticityStatus * ) ( this->giveStatus(gp) );
-    answer = status->giveReducedStrain();
+    answer = status->giveReducedLatticeStrain();
 }
 
 void
@@ -188,7 +188,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
 
     int transitionFlag;
 
-    tempPlasticStrain = status->giveTempPlasticStrain();
+    tempPlasticStrain = status->giveTempPlasticLatticeStrain();
 
     /* Compute trial stress*/
     stress.resize(3);
@@ -276,7 +276,7 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
                     tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
                     tempPlasticStrain.at(3) = tempStrain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-                    status->letTempPlasticStrainBe(tempPlasticStrain);
+                    status->letTempPlasticLatticeStrainBe(tempPlasticStrain);
 
                     status->setTempKappaP(tempKappa);
 
@@ -322,8 +322,9 @@ LatticeBondPlasticity :: performPlasticityReturn(FloatArray &stress,
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-    status->letTempPlasticStrainBe(tempPlasticStrain);
-    status->letTempStressVectorBe(stress);
+
+    status->letTempPlasticLatticeStrainBe({ tempPlasticStrain [ 0 ], tempPlasticStrain [ 1 ], tempPlasticStrain [ 2 ], 0., 0., 0. });
+    status->letTempLatticeStressBe({ stress [ 0 ], stress [ 1 ], stress [ 2 ], 0., 0., 0. });
     status->setSurfaceValue(surfaceType);
 }
 
@@ -365,7 +366,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArray &stress,
 
     double tempShearStressNorm = trialShearStressNorm;
 
-    plasticStrain = status->givePlasticStrain();
+    plasticStrain = status->givePlasticLatticeStrain();
     tempPlasticStrain = plasticStrain;
 
     double thetaTrial;
@@ -864,9 +865,9 @@ LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
     answer.at(5) = reducedStrain.at(5) * this->alphaTwo * this->eNormalMean;
     answer.at(6) = reducedStrain.at(6) * this->alphaTwo * this->eNormalMean;
 
-    status->letTempStrainVectorBe(originalStrain);
-    status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStrainBe(originalStrain);
+    status->letTempReducedLatticeStrainBe(reducedStrain);
+    status->letTempLatticeStressBe(answer);
 
     return answer;
 }
@@ -882,21 +883,6 @@ void
 LatticeBondPlasticityStatus :: initTempStatus()
 {
     LatticeMaterialStatus :: initTempStatus();
-
-    if ( this->plasticStrain.giveSize() == 0 ) {
-        this->plasticStrain.resize(6);
-        this->plasticStrain.zero();
-    }
-
-    if ( this->reducedStrain.giveSize() == 0 ) {
-        this->reducedStrain.resize(6);
-        this->reducedStrain.zero();
-    }
-
-    this->oldPlasticStrain = this->plasticStrain;
-    this->tempPlasticStrain = this->plasticStrain;
-    this->tempReducedStrain = this->reducedStrain;
-
     this->tempKappaP = this->kappaP;
 }
 
@@ -906,8 +892,8 @@ LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf(file, "plasticStrains ");
-    for ( int k = 1; k <= this->plasticStrain.giveSize(); k++ ) {
-        fprintf(file, "% .8e ", this->plasticStrain.at(k) );
+    for ( int k = 1; k <= this->plasticLatticeStrain.giveSize(); k++ ) {
+        fprintf(file, "% .8e ", this->plasticLatticeStrain.at(k) );
     }
 
     fprintf(file, "\n \t");
@@ -927,13 +913,8 @@ LatticeBondPlasticityStatus :: updateYourself(TimeStep *atTime)
 void
 LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
-    // save parent class status
-    LatticeMaterialStatus :: saveContext(stream, mode);
 
-    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
+    LatticeMaterialStatus :: saveContext(stream, mode);
 
     if ( !stream.write(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -945,13 +926,8 @@ LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 void
 LatticeBondPlasticityStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-    contextIOResultType iores;
 
     LatticeMaterialStatus :: restoreContext(stream, mode);
-
-    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
-        THROW_CIOERR(iores);
-    }
 
     if ( !stream.read(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
