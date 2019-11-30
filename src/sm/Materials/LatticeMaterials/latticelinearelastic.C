@@ -178,8 +178,6 @@ void LatticeLinearElastic :: giveRandomParameters(FloatArray &param)
     } else {
         OOFEM_ERROR("Error: Unknown local random type:\n randomtype 1 = Gaussian\n");
     }
-
-    return;
 }
 
 

@@ -54,7 +54,6 @@ class NonlocalMaterialStatusExtension;
 class LatticeMaterialStatus : public MaterialStatus, public RandomMaterialStatusExtensionInterface
 {
 protected:
-
     FloatArrayF< 6 >latticeStrain;
     FloatArrayF< 6 >tempLatticeStrain;
 
@@ -112,10 +111,7 @@ protected:
 
     int updateFlag = 0;
 
-
 public:
-
-    /// Constructor
     LatticeMaterialStatus(GaussPoint *g);
 
     const char *giveClassName() const override { return "LatticeMaterialStatus"; }
@@ -153,27 +149,26 @@ public:
     const FloatArrayF< 6 > &giveTempLatticeStress() const { return this->tempLatticeStress; }
 
     /// Assigns the temp value of lattice strain.
-    void letTempLatticeStrainBe(const FloatArrayF< 6 >v) { this->tempLatticeStrain = v; }
+    void letTempLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempLatticeStrain = v; }
 
     /// Assigns the temp value of lattice strain.
-    void letTempReducedLatticeStrainBe(const FloatArrayF< 6 >v) { this->tempReducedLatticeStrain = v; }
+    void letTempReducedLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempReducedLatticeStrain = v; }
 
     /// Assigns the temp value of lattice strain.
-    void letTempPlasticLatticeStrainBe(const FloatArrayF< 6 >v) { this->tempPlasticLatticeStrain = v; }
+    void letTempPlasticLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempPlasticLatticeStrain = v; }
 
     /// Assigns the temp value of lattice stress.
-    void letTempLatticeStressBe(const FloatArrayF< 6 >v)
-    { this->tempLatticeStress = v; }
+    void letTempLatticeStressBe(const FloatArrayF< 6 > &v) { this->tempLatticeStress = v; }
 
 
     /// Sets the temp normalStress
     void setTempNormalLatticeStress(double val) { this->tempNormalLatticeStress = val; }
 
     /// Gives the last equilibrated normal stress
-    double giveNormalLatticeStress() { return this->normalLatticeStress; }
+    double giveNormalLatticeStress() const { return this->normalLatticeStress; }
 
     /// Gives the last equilibrated normal stress
-    double giveTempNormalLatticeStress() { return this->tempNormalLatticeStress; }
+    double giveTempNormalLatticeStress() const { return this->tempNormalLatticeStress; }
 
 
     ///Sets the temp_crack_flag
@@ -186,29 +181,29 @@ public:
      * Returns the crack flag
      * @return crack flag
      */
-    virtual int giveCrackFlag() { return this->crackFlag; }
+    virtual int giveCrackFlag() const { return this->crackFlag; }
 
     /**
      * @return crack width
      */
-    virtual double giveCrackWidth() { return this->crackWidth; }
+    virtual double giveCrackWidth() const { return this->crackWidth; }
 
 
     /// Returns characteristic length stored in receiver
     double giveLe() const { return le; }
 
     /// Sets characteristic length to given value
-    void   setLe(double ls) { le = ls; }
+    void setLe(double ls) { le = ls; }
 
-    virtual int hasBeenUpdated() { return this->updateFlag; }
+    virtual int hasBeenUpdated() const { return this->updateFlag; }
 
     /**
      * Returns the energy dissipation computed at the GaussPoint of the element.
      * This function is used for the lattice specific vtk export.
      * @return dissipation
      */
-    virtual double giveDissipation() { return dissipation; }
-    double giveTempDissipation() { return tempDissipation; }
+    virtual double giveDissipation() const { return dissipation; }
+    double giveTempDissipation() const { return tempDissipation; }
     void setTempDissipation(double newDiss) { tempDissipation = newDiss; }
 
     /**
@@ -216,8 +211,8 @@ public:
      * This function is used for the lattice specific vtk export.
      * @return increment of dissipation
      */
-    virtual double giveDeltaDissipation() { return deltaDissipation; }
-    double giveTempDeltaDissipation() { return tempDeltaDissipation; }
+    virtual double giveDeltaDissipation() const { return deltaDissipation; }
+    double giveTempDeltaDissipation() const { return tempDeltaDissipation; }
     void setTempDeltaDissipation(double newDiss) { tempDeltaDissipation = newDiss; }
 
     Interface *giveInterface(InterfaceType) override;

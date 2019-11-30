@@ -39,16 +39,8 @@
 #include "gausspoint.h"
 
 namespace oofem {
-LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : MaterialStatus(g), RandomMaterialStatusExtensionInterface(), reducedLatticeStrain(), tempReducedLatticeStrain(), plasticLatticeStrain(), tempPlasticLatticeStrain(), oldPlasticLatticeStrain()
-{
-    normalLatticeStress = tempNormalLatticeStress = 0;
-
-    le = 0.0;
-    crackFlag = tempCrackFlag = 0;
-    crackWidth = tempCrackWidth = 0;
-    dissipation = tempDissipation = 0.;
-    deltaDissipation = tempDeltaDissipation = 0.;
-}
+LatticeMaterialStatus :: LatticeMaterialStatus(GaussPoint *g) : MaterialStatus(g), RandomMaterialStatusExtensionInterface()
+{ }
 
 
 void
@@ -103,32 +95,31 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
     this->updateFlag = 1;
 }
 
+
 void
 LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus :: printOutputAt(file, tStep);
 
     fprintf(file, "lattice strains ");
-    int rSize = this->latticeStrain.giveSize();
-    for ( int k = 1; k <= rSize; k++ ) {
-        fprintf(file, "% .4e ", this->latticeStrain.at(k) );
+    for ( double s : this->latticeStrain ) {
+        fprintf(file, "% .4e ", s );
     }
     fprintf(file, "\n");
 
     fprintf(file, "lattice stress ");
-    rSize = this->latticeStress.giveSize();
-    for ( int k = 1; k <= rSize; k++ ) {
-        fprintf(file, "% .4e ", this->latticeStress.at(k) );
+    for ( double s : this->latticeStress ) {
+        fprintf(file, "% .4e ", s );
     }
     fprintf(file, "\n");
 
     fprintf(file, "reduced lattice strains ");
-    rSize = reducedLatticeStrain.giveSize();
-    for ( int k = 1; k <= rSize; k++ ) {
-        fprintf(file, "% .4e ", this->reducedLatticeStrain.at(k) );
+    for ( double s : this->reducedLatticeStrain ) {
+        fprintf(file, "% .4e ", s );
     }
     fprintf(file, "\n");
 }
+
 
 Interface *
 LatticeMaterialStatus :: giveInterface(InterfaceType type)
@@ -139,6 +130,7 @@ LatticeMaterialStatus :: giveInterface(InterfaceType type)
         return nullptr;
     }
 }
+
 
 void
 LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
@@ -183,6 +175,7 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 }
+
 
 void
 LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
