@@ -64,7 +64,7 @@ LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double
 bool
 LatticeLinearElastic :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    return ( mode == _2dLattice ) || ( mode == _3dLattice ) || ( mode == _1dLattice );
+    return ( mode == _3dLattice );
 }
 
 
@@ -127,54 +127,6 @@ LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
 }
 
 
-FloatArrayF< 3 >
-LatticeLinearElastic :: giveLatticeStress2d(const FloatArrayF< 3 > &strain,
-                                            GaussPoint *gp,
-                                            TimeStep *tStep)
-{
-    FloatArray answer;
-    answer.resize(3);
-    answer.zero();
-
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArray reducedStrain;
-
-    this->initTempStatus(gp);
-
-    // subtract stress independent part
-    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
-
-    FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(3, 3);
-    stiffnessMatrix.zero();
-    stiffnessMatrix = this->give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-
-    for ( int i = 1; i <= 3; i++ ) { // only diagonal terms matter
-        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i);
-    }
-
-    //Read in fluid pressures from structural element if this is not a slave problem
-    FloatArray pressures;
-    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
-        static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
-    }
-
-    double waterPressure = 0.;
-    for ( int i = 0; i < pressures.giveSize(); i++ ) {
-        waterPressure += 1. / pressures.giveSize() * pressures.at(i + 1);
-    }
-
-    answer.at(1) += waterPressure;
-
-    //Set all temp values
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
-
-    return answer;
-}
-
-
 FloatArrayF< 6 >
 LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
                                             GaussPoint *gp,
@@ -216,8 +168,8 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
     answer.at(1) += waterPressure;
 
     //Set all temp values
-    status->letTempStrainVectorBe(strain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStrainBe(strain);
+    status->letTempLatticeStressBe(answer);
 
     return answer;
 }
@@ -245,41 +197,10 @@ LatticeLinearElastic :: giveInterface(InterfaceType type)
     return NULL;
 }
 
-FloatMatrixF< 1, 1 >
-LatticeLinearElastic :: give1dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
-{
-    /* Returns elastic moduli in reduced stress-strain space*/
-    FloatMatrix answer;
-    answer.resize(1, 1);
-    answer.zero();
-
-    answer.at(1, 1) = this->give(eNormal_ID, gp) * this->eNormalMean;
-
-    return answer;
-}
-
-FloatMatrixF< 3, 3 >
-LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
-{
-    /* Returns elastic moduli in reduced stress-strain space*/
-    FloatMatrix answer;
-    answer.resize(3, 3);
-    answer.zero();
-
-    answer.at(1, 1) = 1.;
-    answer.at(2, 2) = this->alphaOne; // shear
-    answer.at(3, 3) = this->alphaTwo; // torsion
-
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-
-    return answer;
-}
-
 
 FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    /* Returns elastic moduli in reduced stress-strain space*/
     FloatMatrix answer;
     answer.resize(6, 6);
     answer.zero();
@@ -295,6 +216,24 @@ LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gaus
 
     return answer;
 }
+
+
+FloatMatrixF< 3, 3 >
+LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
+{
+    FloatMatrix answer;
+    answer.resize(3, 3);
+    answer.zero();
+
+    answer.at(1, 1) = 1.;
+    answer.at(2, 2) = this->alphaOne; // shear
+    answer.at(3, 3) = this->alphaTwo; // torsion
+
+    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
+
+    return answer;
+}
+
 
 
 

@@ -362,12 +362,6 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
             oofem::FloatArray strain = reducedE;
             PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_Fiber, strain, gp, tStep);
         }
-        void giveRealStressVector_Lattice2d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Lattice2d, std::ref(answer), gp, reducedE, tStep); 
-        }
-        void giveRealStressVector_Lattice3d(oofem::FloatArray &answer, oofem::GaussPoint *gp, const oofem::FloatArray &reducedE, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, giveRealStressVector_Lattice3d, std::ref(answer), gp, reducedE, tStep); 
-        }
         oofem::FloatArrayF<3> giveRealStressVector_2dPlateSubSoil(const oofem::FloatArrayF<3> &reducedE, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             oofem::FloatArray strain = reducedE;
             PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveRealStressVector_2dPlateSubSoil, strain, gp, tStep); 
@@ -461,12 +455,6 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
         oofem::FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give2dBeamLayerStiffMtrx, mmode, gp, tStep);   
-        }
-        void give2dLatticeStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give2dLatticeStiffMtrx, std::ref(answer), mmode, gp, tStep);   
-        }
-        void give3dLatticeStiffMtrx(oofem::FloatMatrix &answer, oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, give3dLatticeStiffMtrx, std::ref(answer), mmode, gp, tStep);   
         }
         oofem::FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(oofem::MatResponseMode mmode, oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatMatrix, StructuralMaterialBase, give2dPlateSubSoilStiffMtrx, mmode, gp, tStep);   

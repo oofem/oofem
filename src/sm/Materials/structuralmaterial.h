@@ -172,33 +172,29 @@ public:
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
-    virtual FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 6 >giveRealStressVector_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_3d
-    virtual FloatArrayF<4> giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 4 >giveRealStressVector_PlaneStrain(const FloatArrayF< 4 > &strain, GaussPoint *gp, TimeStep *tStep) const;
     /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
     virtual FloatArray giveRealStressVector_StressControl(const FloatArray &reducedE, const IntArray &strainControl, GaussPoint *gp, TimeStep *tStep) const;
     virtual FloatArray giveRealStressVector_ShellStressControl(const FloatArray &reducedE, const IntArray &strainControl, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 3 >giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 1 >giveRealStressVector_1d(const FloatArrayF< 1 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
 
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual FloatArrayF<2> giveRealStressVector_Warping(const FloatArrayF<2> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 2 >giveRealStressVector_Warping(const FloatArrayF< 2 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual FloatArrayF<2> giveRealStressVector_2dBeamLayer(const FloatArrayF<2> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 2 >giveRealStressVector_2dBeamLayer(const FloatArrayF< 2 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual FloatArrayF<5> giveRealStressVector_PlateLayer(const FloatArrayF<5> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 5 >giveRealStressVector_PlateLayer(const FloatArrayF< 5 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveRealStressVector_StressControl
-    virtual FloatArrayF<3> giveRealStressVector_Fiber(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 3 >giveRealStressVector_Fiber(const FloatArrayF< 3 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual void giveRealStressVector_Lattice1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) {};
-    virtual void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-    virtual void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation is not provided
-    
-    virtual FloatArrayF<3> giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatArrayF<6> giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 3 >giveRealStressVector_2dPlateSubSoil(const FloatArrayF< 3 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 6 >giveRealStressVector_3dBeamSubSoil(const FloatArrayF< 6 > &reducedE, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * @name Methods associated with the First PK stress tensor.
@@ -219,13 +215,13 @@ public:
      */
     //@{
     /// Default implementation relies on giveRealStressVector for second Piola-Kirchoff stress
-    virtual FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 9 >giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveFirstPKStressVector_3d
-    virtual FloatArrayF<5> giveFirstPKStressVector_PlaneStrain(const FloatArrayF<5> &vF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 5 >giveFirstPKStressVector_PlaneStrain(const FloatArrayF< 5 > &vF, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveFirstPKStressVector_3d
-    virtual FloatArrayF<4> giveFirstPKStressVector_PlaneStress(const FloatArrayF<4> &vF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 4 >giveFirstPKStressVector_PlaneStress(const FloatArrayF< 4 > &vF, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveFirstPKStressVector_3d
-    virtual FloatArrayF<1> giveFirstPKStressVector_1d(const FloatArrayF<1> &vF, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 1 >giveFirstPKStressVector_1d(const FloatArrayF< 1 > &vF, GaussPoint *gp, TimeStep *tStep) const;
     //@}
 
     /**
@@ -262,10 +258,10 @@ public:
      */
     virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
 
-    static FloatMatrixF<9,9> convert_dSdE_2_dPdF_3D(const FloatMatrixF<6,6> &dSdE, const FloatArrayF<6> &S, const FloatArrayF<9> &F);
-    static FloatMatrixF<5,5> convert_dSdE_2_dPdF_PlaneStrain(const FloatMatrixF<4,4> &dSdE, const FloatArrayF<4> &S, const FloatArrayF<5> &F);
-    static FloatMatrixF<4,4> convert_dSdE_2_dPdF_PlaneStress(const FloatMatrixF<3,3> &dSdE, const FloatArrayF<3> &S, const FloatArrayF<4> &F);
-    static FloatMatrixF<1,1> convert_dSdE_2_dPdF_1D(const FloatMatrixF<1,1> &dSdE, const FloatArrayF<1> &S, const FloatArrayF<1> &F);
+    static FloatMatrixF< 9, 9 >convert_dSdE_2_dPdF_3D(const FloatMatrixF< 6, 6 > &dSdE, const FloatArrayF< 6 > &S, const FloatArrayF< 9 > &F);
+    static FloatMatrixF< 5, 5 >convert_dSdE_2_dPdF_PlaneStrain(const FloatMatrixF< 4, 4 > &dSdE, const FloatArrayF< 4 > &S, const FloatArrayF< 5 > &F);
+    static FloatMatrixF< 4, 4 >convert_dSdE_2_dPdF_PlaneStress(const FloatMatrixF< 3, 3 > &dSdE, const FloatArrayF< 3 > &S, const FloatArrayF< 4 > &F);
+    static FloatMatrixF< 1, 1 >convert_dSdE_2_dPdF_1D(const FloatMatrixF< 1, 1 > &dSdE, const FloatArrayF< 1 > &S, const FloatArrayF< 1 > &F);
 
     /**
      * Returns a vector of coefficients of thermal dilatation in direction of each material principal (local) axis.
@@ -273,7 +269,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 6 >giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Returns the reference temperature of receiver.
      */
@@ -290,7 +286,7 @@ public:
      */
     virtual void computeStressIndependentStrainVector(FloatArray &answer,
                                                       GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
-    FloatArrayF<6> computeStressIndependentStrainVector_3d(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
+    FloatArrayF< 6 >computeStressIndependentStrainVector_3d(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     /// Common functions for convenience
     //@{
     /**
@@ -306,8 +302,8 @@ public:
      * @param s Symmetric matrix.
      * @return Sorted eigenvalues.
      */
-    static FloatArrayF<3> computePrincipalValues(const FloatMatrixF<3,3> &s);
-    
+    static FloatArrayF< 3 >computePrincipalValues(const FloatMatrixF< 3, 3 > &s);
+
     /**
      * Compute principal values from invariants.
      * @param I1 First invariant
@@ -315,7 +311,7 @@ public:
      * @param I3 Third invariant
      * @return Sorted list of principal values.
      */
-    static FloatArrayF<3> computePrincipalValues(double I1, double I2, double I3);
+    static FloatArrayF< 3 >computePrincipalValues(double I1, double I2, double I3);
     /**
      * Computes principal values and directions of stress or strain vector.
      * @param answer Computed principal values.
@@ -330,7 +326,7 @@ public:
      * @param s Stress/strain matrix.
      * @return Computed principal values.
      */
-    static std::pair<FloatArrayF<3>, FloatMatrixF<3,3>> computePrincipalValDir(const FloatMatrixF<3,3> &s);
+    static std :: pair< FloatArrayF< 3 >, FloatMatrixF< 3, 3 > >computePrincipalValDir(const FloatMatrixF< 3, 3 > &s);
 
     /**
      * Computes split of receiver into deviatoric and volumetric part.
@@ -338,28 +334,28 @@ public:
      * @param s Input vector
      * @return Volumetric part (diagonal components divided by 3).
      */
-    static FloatArrayF<6> computeDeviator(const FloatArrayF<6> &s);
-    static std::pair<FloatArrayF<6>, double> computeDeviatoricVolumetricSplit(const FloatArrayF<6> &s);
-    static FloatArrayF<6> computeDeviatoricVolumetricSum(const FloatArrayF<6> &dev, double mean);
+    static FloatArrayF< 6 >computeDeviator(const FloatArrayF< 6 > &s);
+    static std :: pair< FloatArrayF< 6 >, double >computeDeviatoricVolumetricSplit(const FloatArrayF< 6 > &s);
+    static FloatArrayF< 6 >computeDeviatoricVolumetricSum(const FloatArrayF< 6 > &dev, double mean);
 
-    static FloatArrayF<6> applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu);
-    static FloatArrayF<6> applyDeviatoricElasticCompliance(const FloatArrayF<6> &stress, double GModulus);
+    static FloatArrayF< 6 >applyDeviatoricElasticCompliance(const FloatArrayF< 6 > &stress, double EModulus, double nu);
+    static FloatArrayF< 6 >applyDeviatoricElasticCompliance(const FloatArrayF< 6 > &stress, double GModulus);
 
-    static FloatArrayF<6> applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu);
-    static FloatArrayF<6> applyDeviatoricElasticStiffness(const FloatArrayF<6> &strain, double GModulus);
+    static FloatArrayF< 6 >applyDeviatoricElasticStiffness(const FloatArrayF< 6 > &strain, double EModulus, double nu);
+    static FloatArrayF< 6 >applyDeviatoricElasticStiffness(const FloatArrayF< 6 > &strain, double GModulus);
 
-    static FloatArrayF<6> applyElasticStiffness(const FloatArrayF<6> &strain, double EModulus, double nu);
-    static FloatArrayF<6> applyElasticCompliance(const FloatArrayF<6> &stress, double EModulus, double nu);
+    static FloatArrayF< 6 >applyElasticStiffness(const FloatArrayF< 6 > &strain, double EModulus, double nu);
+    static FloatArrayF< 6 >applyElasticCompliance(const FloatArrayF< 6 > &stress, double EModulus, double nu);
 
-    static double computeStressNorm(const FloatArrayF<6> &stress);
+    static double computeStressNorm(const FloatArrayF< 6 > &stress);
 
-    static double computeFirstInvariant(const FloatArrayF<6> &s);
-    static double computeSecondStressInvariant(const FloatArrayF<6> &s);
-    static double computeThirdStressInvariant(const FloatArrayF<6> &s);
+    static double computeFirstInvariant(const FloatArrayF< 6 > &s);
+    static double computeSecondStressInvariant(const FloatArrayF< 6 > &s);
+    static double computeThirdStressInvariant(const FloatArrayF< 6 > &s);
 
-    static double computeFirstCoordinate(const FloatArrayF<6> &s);
-    static double computeSecondCoordinate(const FloatArrayF<6> &s);
-    static double computeThirdCoordinate(const FloatArrayF<6> &s);
+    static double computeFirstCoordinate(const FloatArrayF< 6 > &s);
+    static double computeSecondCoordinate(const FloatArrayF< 6 > &s);
+    static double computeThirdCoordinate(const FloatArrayF< 6 > &s);
     //@}
 
     /**
@@ -370,12 +366,12 @@ public:
      * @param gp Integration point.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+    virtual FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
     { OOFEM_ERROR("not implemented "); }
 
 
-    virtual FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
-                                                    GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 9, 9 >give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
+                                                                   GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void give3dMaterialStiffnessMatrix_dCde(FloatMatrix &answer,
                                                     MatResponseMode mode,
@@ -480,8 +476,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<4,4> givePlaneStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 3, 3 >givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 4, 4 >givePlaneStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void givePlaneStressStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
@@ -506,8 +502,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     //@{
-    virtual FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<5,5> givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 4, 4 >givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 5, 5 >givePlaneStrainStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void givePlaneStrainStiffMtrx_dCde(FloatMatrix &answer,
                                                MatResponseMode mmode, GaussPoint *gp,
@@ -527,8 +523,8 @@ public:
      * @return Stiffness matrix.
      */
     //@{
-    virtual FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
-    virtual FloatMatrixF<1,1> give1dStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 1, 1 >give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 1, 1 >give1dStressStiffMtrx_dPdF(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     virtual void give1dStressStiffMtrx_dCde(FloatMatrix &answer,
                                             MatResponseMode mmode, GaussPoint *gp,
@@ -547,7 +543,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 2, 2 >give2dBeamLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing 2d plate layer stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -560,7 +556,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 5, 5 >givePlateLayerStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing 1d fiber stiffness matrix of receiver.
      * Default implementation computes 3d stiffness matrix using give3dMaterialStiffnessMatrix and
@@ -573,42 +569,7 @@ public:
      * @param gp Integration point, which load history is used.
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
-    virtual FloatMatrixF<3,3> giveFiberStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
-
-    /**
-     * Method for computing 2d lattice stiffness matrix of receiver.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep);
-
-    /**
-     * Method for computing 2d lattice stiffness matrix of receiver.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep);
-
-
-    /**
-     * Method for computing 3d lattice stiffness matrix of receiver.
-     * @param answer Stiffness matrix.
-     * @param mmode Material response mode.
-     * @param gp Integration point, which load history is used.
-     * @param tStep Time step (most models are able to respond only when tStep is current time step).
-     */
-    virtual void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mmode, GaussPoint *gp,
-                                        TimeStep *tStep);
-
+    virtual FloatMatrixF< 3, 3 >giveFiberStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
 
     /**
      * Method for computing stiffness matrix of plate subsoil model.
@@ -618,7 +579,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      * @return Stiffness matrix.
      */
-    virtual FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 3, 3 >give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Method for computing stiffness matrix of beam3d subsoil model.
      * Default method is emty; the implementation should be provided by the particular model.
@@ -627,7 +588,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      * @return Stiffness matrix.
      */
-    virtual FloatMatrixF<6,6> give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatMatrixF< 6, 6 >give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector
@@ -637,8 +598,8 @@ public:
      * @param strainVector 3d strain.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    static FloatArrayF<6> transformStrainVectorTo(const FloatMatrixF<3,3> &base,
-                                                  const FloatArrayF<6> &strain, bool transpose = false);
+    static FloatArrayF< 6 >transformStrainVectorTo(const FloatMatrixF< 3, 3 > &base,
+                                                   const FloatArrayF< 6 > &strain, bool transpose = false);
     /**
      * Transforms 3d stress vector into another coordinate system.
      * @param answer Transformed stress vector.
@@ -648,15 +609,15 @@ public:
      * @param stressVector Transformed 3d strain.
      * @param transpose Determines if we transpose matrix before transforming.
      */
-    static FloatArrayF<6> transformStressVectorTo(const FloatMatrixF<3,3> &base,
-                                                  const FloatArrayF<6> &stress, bool transpose = false);
+    static FloatArrayF< 6 >transformStressVectorTo(const FloatMatrixF< 3, 3 > &base,
+                                                   const FloatArrayF< 6 > &stress, bool transpose = false);
     /**
      * Computes equivalent of von Mises stress. Returns 0 if six stress components do not exist on the material.
      * @param currentStress Stress vector given by 6 components.
      */
     static double computeVonMisesStress(const FloatArray &currentStress);
-    static double computeVonMisesStress_3D(const FloatArrayF<6> &stress);
-    static double computeVonMisesStress_PlaneStress(const FloatArrayF<3> &stress);
+    static double computeVonMisesStress_3D(const FloatArrayF< 6 > &stress);
+    static double computeVonMisesStress_PlaneStress(const FloatArrayF< 3 > &stress);
 
     /**
      * Computes 3d strain vector transformation matrix from standard vector transformation matrix.
@@ -665,7 +626,7 @@ public:
      * @param transpose Determines if we transpose matrix before transforming.
      * @returns Transformation matrix for strain vector.
      */
-    static FloatMatrixF<6,6> giveStrainVectorTranformationMtrx(const FloatMatrixF<3,3> &base, bool transpose = false);
+    static FloatMatrixF< 6, 6 >giveStrainVectorTranformationMtrx(const FloatMatrixF< 3, 3 > &base, bool transpose = false);
 
     /**
      * Computes 2d strain vector transformation matrix from standard vector transformation matrix.
@@ -674,7 +635,7 @@ public:
      * @param transpose Determines if we transpose matrix before transforming.
      * @returns Transformation matrix for strain vector.
      */
-    static FloatMatrixF<3,3> give2DStrainVectorTranformationMtrx(const FloatMatrixF<2,2> &base, bool transpose = false);
+    static FloatMatrixF< 3, 3 >give2DStrainVectorTranformationMtrx(const FloatMatrixF< 2, 2 > &base, bool transpose = false);
 
     /**
      * Computes 3d stress vector transformation matrix from standard vector transformation matrix.
@@ -683,7 +644,7 @@ public:
      * @param transpose Determines if we transpose matrix before transforming.
      * @returns Transformation matrix for stress vector.
      */
-    static FloatMatrixF<6,6> giveStressVectorTranformationMtrx(const FloatMatrixF<3,3> &base, bool transpose = false);
+    static FloatMatrixF< 6, 6 >giveStressVectorTranformationMtrx(const FloatMatrixF< 3, 3 > &base, bool transpose = false);
     /**
      * Computes 2d stress vector transformation matrix from standard vector transformation matrix.
      * @param base A (2,2) matrix, where on each column are stored unit direction vectors of
@@ -691,7 +652,7 @@ public:
      * @param transpose Determines if we transpose matrix before transforming.
      * @return Transformation matrix for stress vector.
      */
-    static FloatMatrixF<3,3> givePlaneStressVectorTranformationMtrx(const FloatMatrixF<2,2> &base, bool transpose = false);
+    static FloatMatrixF< 3, 3 >givePlaneStressVectorTranformationMtrx(const FloatMatrixF< 2, 2 > &base, bool transpose = false);
     /**
      * Method for sorting newly computed principal values (pVal) and
      * corresponding principal directions (pDir) to be closed

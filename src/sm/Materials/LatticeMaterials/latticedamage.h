@@ -190,13 +190,13 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    FloatArrayF< 3 >giveLatticeStress2d(const FloatArrayF< 3 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
+
     FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 

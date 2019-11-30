@@ -436,7 +436,7 @@ double Lattice2dBoundary :: givePitch()
 void
 Lattice2dBoundary :: initializeFrom(InputRecord &ir)
 {
-        // first call parent
+    // first call parent
     Lattice2d :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, location, _IFT_Lattice2dBoundary_location); // Macro
 
@@ -471,8 +471,8 @@ Lattice2dBoundary :: giveInternalForcesVector(FloatArray &answer, TimeStep *tSte
     bt.beTranspositionOf(b);
     // TotalStressVector = gp->giveStressVector() ;
     if ( useUpdatedGpRecord == 1 ) {
-        TotalStressVector = ( ( StructuralMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
-                            ->giveStressVector();
+        TotalStressVector = ( ( LatticeMaterialStatus * ) mat->giveStatus(integrationRulesArray [ 0 ]->getIntegrationPoint(0) ) )
+                            ->giveLatticeStress();
     } else
     if ( !this->isActivated(tStep) ) {
         strain.resize(StructuralMaterial :: giveSizeOfVoigtSymVector(integrationRulesArray [ 0 ]->getIntegrationPoint(0)->giveMaterialMode() ) );

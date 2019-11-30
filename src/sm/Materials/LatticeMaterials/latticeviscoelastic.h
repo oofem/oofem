@@ -70,7 +70,7 @@ public:
 
     void initTempStatus() override;
 
-    void updateYourself(TimeStep *) override; 
+    void updateYourself(TimeStep *) override;
 
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -110,22 +110,17 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
-    void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
-    void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
+                                                     GaussPoint *gp,
+                                                     TimeStep *atTime) const override;
 
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep) const;
 
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

@@ -19,8 +19,8 @@ PiecewiseLinFunction 2 nPoints 2 t 2 0. 3. f(t) 2 0. 1.
 ##ELEMENT number 1 gp 1 record 1 keyword stresses component 1
 ##%END_CHECK%
 #%BEGIN_CHECK% 
-#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 0.0 tolerance 1.e-5
-#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 0.0 tolerance 1.e-5
-#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 1  value -3.33333333e-2 tolerance 1.e-6
-#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value -7.95057558e8 tolerance 1.
+#ELEMENT tStep 1 number 1 gp 1 keyword 138 component 1  value 0.0 tolerance 1.e-5
+#ELEMENT tStep 1 number 1 gp 1 keyword 139 component 1  value 0.0 tolerance 1.e-5
+#ELEMENT tStep 2 number 1 gp 1 keyword 138 component 1  value -3.33333333e-2 tolerance 1.e-6
+#ELEMENT tStep 2 number 1 gp 1 keyword 139 component 1  value -7.95057558e8 tolerance 1.
 #%END_CHECK%
