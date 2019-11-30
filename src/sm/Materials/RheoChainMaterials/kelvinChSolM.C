@@ -166,7 +166,7 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
      * Updates hidden variables used to effectively trace the load history
      */
 
-    FloatArray help, SigmaVMu, deltaEps0, deltaSigma;
+    FloatArray help, SigmaVMu, deltaSigma;
     FloatMatrix D;
     KelvinChainSolidMaterialStatus *status = static_cast< KelvinChainSolidMaterialStatus * >( this->giveStatus(gp) );
 
@@ -186,7 +186,7 @@ KelvinChainSolidMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     help.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
     // Subtract the stress-independent part of strain
-    this->computeStressIndependentStrainVector(deltaEps0, gp, tStep, VM_Incremental);
+    auto deltaEps0 = this->computeStressIndependentStrainVector(gp, tStep, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
         help.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }

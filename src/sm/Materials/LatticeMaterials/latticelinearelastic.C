@@ -106,18 +106,18 @@ LatticeLinearElastic :: initializeFrom(InputRecord &ir)
 MaterialStatus *
 LatticeLinearElastic :: CreateStatus(GaussPoint *gp) const
 {
-    return new LatticeLinearElasticMaterialStatus(gp);
+    return new LatticeMaterialStatus(gp);
 }
 
 MaterialStatus *
 LatticeLinearElastic :: giveStatus(GaussPoint *gp) const
 {
     MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
-    if ( status == NULL ) {
+    if ( !status ) {
         // create a new one
         status = this->CreateStatus(gp);
 
-        if ( status != NULL ) {
+        if ( status ) {
             gp->setMaterialStatus(status);
             this->_generateStatusVariables(gp);
         }
@@ -132,27 +132,19 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
                                             GaussPoint *gp,
                                             TimeStep *tStep)
 {
-    FloatArray answer;
-    answer.resize(6);
-    answer.zero();
-
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArray reducedStrain;
+    auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
 
     // subtract stress independent part
-    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
-
-    FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(6, 6);
-    stiffnessMatrix.zero();
-    stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-
-    for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
-        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i);
+    auto reducedStrain = strain;
+    FloatArray indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
+    if ( indepStrain.giveSize() > 0 ) {
+        reducedStrain -= FloatArrayF<6>(indepStrain);
     }
+
+    auto stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto stress = dot(stiffnessMatrix, reducedStrain);
 
     //Read in fluid pressures from structural element if this is not a slave problem
     FloatArray pressures;
@@ -162,16 +154,16 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
 
     double waterPressure = 0.;
     for ( int i = 0; i < pressures.giveSize(); i++ ) {
-        waterPressure += 1. / pressures.giveSize() * pressures.at(i + 1);
+        waterPressure += 1. / pressures.giveSize() * pressures[i];
     }
 
-    answer.at(1) += waterPressure;
+    stress.at(1) += waterPressure;
 
     //Set all temp values
     status->letTempLatticeStrainBe(strain);
-    status->letTempLatticeStressBe(answer);
+    status->letTempLatticeStressBe(stress);
 
-    return answer;
+    return stress;
 }
 
 
@@ -194,47 +186,37 @@ void LatticeLinearElastic :: giveRandomParameters(FloatArray &param)
 Interface *
 LatticeLinearElastic :: giveInterface(InterfaceType type)
 {
-    return NULL;
+    return nullptr;
 }
 
 
 FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    FloatMatrix answer;
-    answer.resize(6, 6);
-    answer.zero();
+    FloatArrayF<6> d = {
+        1.,
+        this->alphaOne, // shear
+        this->alphaOne, // shear
+        this->alphaTwo, // torsion
+        this->alphaTwo, // torsion
+        this->alphaTwo, // torsion
+    };
 
-    answer.at(1, 1) = 1.;
-    answer.at(2, 2) = this->alphaOne; // shear
-    answer.at(3, 3) = this->alphaOne; // shear
-    answer.at(4, 4) = this->alphaTwo; // torsion
-    answer.at(5, 5) = this->alphaTwo; // torsion
-    answer.at(6, 6) = this->alphaTwo; // torsion
-
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-
-    return answer;
+    return diag(d * this->give(eNormal_ID, gp) * this->eNormalMean);
 }
 
 
 FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    FloatMatrix answer;
-    answer.resize(3, 3);
-    answer.zero();
+    FloatArrayF<3> d = {
+        1.,
+        this->alphaOne, // shear
+        this->alphaTwo, // torsion
+    };
 
-    answer.at(1, 1) = 1.;
-    answer.at(2, 2) = this->alphaOne; // shear
-    answer.at(3, 3) = this->alphaTwo; // torsion
-
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-
-    return answer;
+    return diag(d * this->give(eNormal_ID, gp) * this->eNormalMean);
 }
-
-
 
 
 FloatArrayF< 6 >
@@ -284,7 +266,7 @@ LatticeLinearElastic :: giveIPValue(FloatArray &answer,
                                     InternalStateType type,
                                     TimeStep *atTime)
 {
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
     if ( type == IST_CharacteristicLength ) {
         answer.resize(1);
@@ -316,28 +298,4 @@ LatticeLinearElastic :: giveIPValue(FloatArray &answer,
     }
 }
 
-
-//Status
-
-LatticeLinearElasticMaterialStatus :: LatticeLinearElasticMaterialStatus(GaussPoint *g) : LatticeMaterialStatus(g)
-{}
-
-
-
-void
-LatticeLinearElasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
-{
-    FloatArray forces;
-
-    if ( strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3d") == 0 ) {
-        static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces, tStep, 0);
-        fprintf(file, "LatticeBeam forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
-    } else if ( strcmp(this->gp->giveElement()->giveClassName(), "LatticeBeam3dBoundary") == 0 ) {
-        static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveInternalForcesVector(forces, tStep, 0);
-        fprintf(file, "LatticeBeam3dBounday forces = %e %e %e %e %e %e.\n", forces.at(7), forces.at(8), forces.at(9), forces.at(10), forces.at(11), forces.at(12) );
-    } else {
-        LatticeMaterialStatus :: printOutputAt(file, tStep);
-    }
-    return;
-}
 }

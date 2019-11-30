@@ -60,10 +60,8 @@ namespace oofem {
  * This class implements a local random linear elastic model for lattice elements.
  */
 class LatticeLinearElastic : public LatticeStructuralMaterial, public RandomMaterialExtensionInterface
-    //
 {
 protected:
-
     ///Normal modulus
     double eNormalMean = 0.;
 
@@ -83,8 +81,6 @@ protected:
     double cAlpha = 0.;
 
 public:
-
-    /// Constructor
     LatticeLinearElastic(int n, Domain *d) : LatticeStructuralMaterial(n, d), RandomMaterialExtensionInterface() { };
 
 
@@ -128,20 +124,6 @@ protected:
                     TimeStep *atTime) override;
 };
 
-
-class LatticeLinearElasticMaterialStatus : public LatticeMaterialStatus
-{
-protected:
-
-public:
-
-    /// Constructor
-    LatticeLinearElasticMaterialStatus(GaussPoint *g);
-
-    void printOutputAt(FILE *file, TimeStep *tStep) const override;
-
-    const char *giveClassName() const override { return "LatticeLinearElasticMaterialStatus"; }
-};
 } // end namespace oofem
 
 #endif

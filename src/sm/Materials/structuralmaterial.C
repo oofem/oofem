@@ -740,10 +740,8 @@ StructuralMaterial :: giveStressDependentPartOfStrainVector(FloatArray &answer, 
      * This functions subtract from reducedStrainVector its stress independent part
      * caused by temperature, shrinkage and possibly by other phenomena.
      */
-    FloatArray epsilonTemperature;
-
     answer = reducedStrainVector;
-    this->computeStressIndependentStrainVector(epsilonTemperature, gp, tStep, mode);
+    auto epsilonTemperature = this->computeStressIndependentStrainVector(gp, tStep, mode);
     if ( epsilonTemperature.giveSize() ) {
         answer.subtract(epsilonTemperature);
     }
@@ -2134,23 +2132,20 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     }
 }
 
-void
-StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                           GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
+FloatArray
+StructuralMaterial :: computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
     FloatArray et, eigenstrain;
     if ( gp->giveIntegrationRule() == NULL ) {
         ///@todo Hack for loose gausspoints. We shouldn't ask for "gp->giveElement()". FIXME
-        answer.clear();
-        return;
+        return FloatArray();
     }
     Element *elem = gp->giveElement();
     StructuralElement *selem = dynamic_cast< StructuralElement * >( gp->giveElement() );
 
-    answer.clear();
 
     if ( tStep->giveIntrinsicTime() < this->castingTime ) {
-        return;
+        return FloatArray();
     }
 
     //sum up all prescribed temperatures over an element
@@ -2190,7 +2185,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
         }
     }
 
-
+    FloatArray answer;
     if ( et.giveSize() ) { //found temperature boundary conditions or prescribed field
         auto e0 = this->giveThermalDilatationVector(gp, tStep);
 
@@ -2214,6 +2209,7 @@ StructuralMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
             answer = eigenstrain;
         }
     }
+    return answer;
 }
 
 

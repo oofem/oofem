@@ -54,9 +54,10 @@ class LatticeStructuralElement : public StructuralElement
 {
 public:
     LatticeStructuralElement(int n, Domain *d);
-    virtual ~LatticeStructuralElement();
 
     void initializeFrom(InputRecord &ir) override;
+    
+    void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /**
      * Returns the cross-sectional area of the lattice element.

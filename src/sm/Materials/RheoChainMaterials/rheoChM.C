@@ -349,13 +349,11 @@ RheoChainMaterial :: computeTrueStressIndependentStrainVector(FloatArray &answer
         return;
     }
 
-    FloatArray e0;
-
     // shrinkage strain
     this->giveShrinkageStrainVector(answer, gp, tStep, mode);
 
     // thermally induced strain
-    StructuralMaterial :: computeStressIndependentStrainVector(e0, gp, tStep, mode);
+    auto e0 = StructuralMaterial :: computeStressIndependentStrainVector(gp, tStep, mode);
     answer.add(e0);
 
     if ( e0.giveSize() ) {
@@ -367,9 +365,8 @@ RheoChainMaterial :: computeTrueStressIndependentStrainVector(FloatArray &answer
 }
 
 
-void
-RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
-                                                          GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
+FloatArray
+RheoChainMaterial :: computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 //
 // computes the strain due to temperature, shrinkage and creep effects
 // (it is the strain which would occur at the end of the step if the stress
@@ -380,6 +377,7 @@ RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
 //
 {
     // strain due to temperature changes and shrinkage
+    FloatArray answer;
     this->computeTrueStressIndependentStrainVector(answer, gp, tStep, mode);
     // strain due to creep
     if ( Material :: isActivated(tStep) ) {
@@ -389,6 +387,7 @@ RheoChainMaterial :: computeStressIndependentStrainVector(FloatArray &answer,
             answer.add(e0);
         }
     }
+    return answer;
 }
 
 

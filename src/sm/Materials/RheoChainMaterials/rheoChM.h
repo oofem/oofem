@@ -267,8 +267,7 @@ public:
     /*                             GaussPoint *gp, */
     /*                             TimeStep *tStep) override; */
 
-    void computeStressIndependentStrainVector(FloatArray &answer,
-                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
+    FloatArray computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     /**
      * Computes, for the given integration point,

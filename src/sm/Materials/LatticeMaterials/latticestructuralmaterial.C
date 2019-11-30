@@ -62,24 +62,25 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
     return mode == _3dLattice || mode == _2dLattice || mode == _1dLattice;
 }
 
+
 int
 LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,
                                          GaussPoint *gp,
                                          InternalStateType type,
                                          TimeStep *atTime)
 {
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
     if ( type == IST_LatticeStress ) {
         answer = status->giveLatticeStress();
+        return 1;
     } else if  ( type == IST_LatticeStrain ) {
         answer = status->giveLatticeStrain();
+        return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, atTime);
     }
 }
-
-
 
 
 double

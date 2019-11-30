@@ -284,8 +284,7 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      * @param mode Determines response mode (Total or incremental).
      */
-    virtual void computeStressIndependentStrainVector(FloatArray &answer,
-                                                      GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
+    virtual FloatArray computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     FloatArrayF< 6 >computeStressIndependentStrainVector_3d(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     /// Common functions for convenience
     //@{

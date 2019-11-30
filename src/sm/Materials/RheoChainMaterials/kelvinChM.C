@@ -214,7 +214,7 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
 
     // !!! chartime exponents are assumed to be equal to 1 !!!
 
-    FloatArray help, deltaEps0, delta_sigma;
+    FloatArray help, delta_sigma;
     KelvinChainMaterialStatus *status = static_cast< KelvinChainMaterialStatus * >( this->giveStatus(gp) );
 
     // goes there if the viscoelastic material does not exist yet
@@ -231,7 +231,7 @@ KelvinChainMaterial :: computeHiddenVars(GaussPoint *gp, TimeStep *tStep)
     delta_sigma.subtract( status->giveStrainVector() ); // strain increment in current time-step
 
     // Subtract the stress-independent part of strain
-    this->computeStressIndependentStrainVector(deltaEps0, gp, tStep, VM_Incremental);
+    auto deltaEps0 = this->computeStressIndependentStrainVector(gp, tStep, VM_Incremental);
     if ( deltaEps0.giveSize() ) {
         delta_sigma.subtract(deltaEps0); // should be equal to zero if there is no stress change during the time-step
     }

@@ -402,8 +402,8 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
         oofem::FloatArrayF<6> giveThermalDilatationVector(oofem::GaussPoint *gp, oofem::TimeStep *tStep) const override {
             PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, giveThermalDilatationVector, gp, tStep);   
         }
-        void computeStressIndependentStrainVector(oofem::FloatArray &answer, oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) const override {
-            PYBIND11_OVERLOAD(void, StructuralMaterialBase, computeStressIndependentStrainVector, std::ref(answer), gp, tStep, mode);   
+        oofem::FloatArray computeStressIndependentStrainVector(oofem::GaussPoint *gp, oofem::TimeStep *tStep, oofem::ValueModeType mode) const override {
+            PYBIND11_OVERLOAD(oofem::FloatArray, StructuralMaterialBase, computeStressIndependentStrainVector, gp, tStep, mode);   
         }
 #if 0
         // I don't think this method ought to be overloaded / Mikael
