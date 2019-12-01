@@ -481,7 +481,7 @@ template<std::size_t N>
 FloatArrayF<N> max(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     FloatArrayF<N> out;
-    for (std::size_t i; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         out[i] = std::max(a[i], b[i]);
     }
     return out;
@@ -491,7 +491,7 @@ template<std::size_t N>
 FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     FloatArrayF<N> out;
-    for (std::size_t i; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         out[i] = std::min(a[i], b[i]);
     }
     return out;
