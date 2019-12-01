@@ -55,11 +55,7 @@ protected:
 
 
 public:
-    /// Constructor
     LatticeSlipStatus(GaussPoint *g);
-
-    void  letTempPlasticStrainBe(const FloatArray &v)
-    { tempPlasticLatticeStrain = v; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -123,8 +119,7 @@ public:
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
 
-    double computeDeltaDissipation(GaussPoint *gp,
-                                   TimeStep *atTime);
+    double computeDeltaDissipation(GaussPoint *gp, TimeStep *atTime) const;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
