@@ -214,10 +214,6 @@ public:
     FloatMatrixF<4,4> computeJacobian(const FloatArrayF<3> &sigma, const double tempKappa,
                          const double deltaLambda, GaussPoint *gp) const;
 
-    int computeInverseOfJacobian(FloatMatrix &answer,
-                                 const FloatMatrix &src) const;
-
-
     virtual double computeDamageParam(double kappaOne, double kappaTwo, GaussPoint *gp) const;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;

@@ -423,18 +423,8 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF<3> &stress,
                                                 GaussPoint *gp) const
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
-    FloatArray residuals(4), residualsNorm(4);
-    FloatMatrix jacobian(4, 4), inverseOfJacobian(4, 4);
 
-    FloatArray deltaIncrement(3);
     double deltaLambda = 0.;
-    double normOfResiduals = 0.;
-    int iterationCount = 0;
-
-    FloatArray unknownsTrial;
-    FloatArray deltaUnknowns;
-    FloatArray jacobianTimesDeltaUnknowns;
-    FloatArray unknowns(4);
 
     auto trialStress = stress;
     auto tempStress = trialStress;
@@ -450,6 +440,7 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF<3> &stress,
     double tempKappa = kappa;
 
     //initialise unknowns
+    FloatArrayF<4> unknowns;
     unknowns.at(1) = trialStress.at(1);
     unknowns.at(2) = trialShearStressNorm;
     unknowns.at(3) = tempKappa;
@@ -459,11 +450,12 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF<3> &stress,
     yieldValue = computeYieldValue(tempStress, tempKappa, gp);
 
     //initiate residuals
-    residuals.zero();
+    FloatArrayF<4> residuals;
     residuals.at(4) = yieldValue;
 
-    normOfResiduals  = 1.; //just to get into the loop
+    double normOfResiduals  = 1.; //just to get into the loop
 
+    int iterationCount = 0;
     while ( normOfResiduals > yieldTol ) {
         iterationCount++;
         if ( iterationCount == newtonIter ) {
@@ -472,12 +464,13 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF<3> &stress,
         }
 
         //Normalize residuals. Think about it more.
+        FloatArrayF<4> residualsNorm;
         residualsNorm.at(1) = residuals.at(1) / this->fc;
         residualsNorm.at(2) = residuals.at(2) / this->fc;
         residualsNorm.at(3) = residuals.at(3);
         residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
 
-        normOfResiduals = residualsNorm.computeNorm();
+        normOfResiduals = norm(residualsNorm);
 
         //First check if return has failed
         if ( isnan(normOfResiduals) ) {
@@ -488,34 +481,23 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF<3> &stress,
 
         if ( normOfResiduals > yieldTol ) {
             // Test to run newton iteration using inverse of Jacobian
-            jacobian = computeJacobian(tempStress, tempKappa, deltaLambda, gp);
+            auto jacobian = computeJacobian(tempStress, tempKappa, deltaLambda, gp);
 
-            if ( computeInverseOfJacobian(inverseOfJacobian, jacobian) ) {
+            auto solution = solve_check(jacobian, residuals);
+            if ( solution.first ) {
+                unknowns -= solution.second;
+            } else {
                 returnResult = RR_NotConverged;
-                return 0.;
+                return kappa;
             }
 
-            deltaIncrement.beProductOf(inverseOfJacobian, residuals);
-            deltaIncrement.times(-1.);
-
-            //compute Unknowns
-            for ( int i = 0; i < 4; i++ ) {
-                unknowns(i) += deltaIncrement(i);
-            }
-            if ( unknowns.at(4) <= 0. ) { //Keep deltaLambda greater than zero!
-                unknowns.at(4) = 0.;
-            }
-            if ( unknowns.at(2) <= 0. ) { //Keep rho greater than zero!
-                unknowns.at(2) = 0.;
-            }
-            if ( unknowns.at(3) - kappa <= 0. ) { //Keep deltaKappa greater than zero!
-                unknowns.at(3) = kappa;
-            }
-
+            unknowns.at(2) = max(unknowns.at(2), 0.); //Keep rho greater than zero!
+            unknowns.at(3) = max(unknowns.at(3), kappa); //Keep deltaKappa greater than zero!
+            unknowns.at(4) = max(unknowns.at(4), 0.); //Keep deltaLambda greater than zero!
 
             /* Update increments final values and DeltaLambda*/
             tempStress.at(1) = unknowns.at(1);
-            tempShearStressNorm  = unknowns.at(2);
+            tempShearStressNorm = unknowns.at(2);
 
             tempStress.at(2) = tempShearStressNorm * cos(thetaTrial);
             tempStress.at(3) = tempShearStressNorm * sin(thetaTrial);
@@ -580,75 +562,6 @@ LatticePlasticityDamage :: computeJacobian(const FloatArrayF<3> &stress,
 }
 
 
-
-int
-LatticePlasticityDamage :: computeInverseOfJacobian(FloatMatrix &answer, const FloatMatrix &src) const
-// Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
-{
-#  ifdef DEBUG
-    if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::beInverseOf : cannot inverse matrix since it is not square");
-    }
-#  endif
-
-    int nRows = src.giveNumberOfRows();
-
-    //gaussian elimination - slow but safe
-    //
-    int i, j, k;
-    double piv, linkomb;
-    FloatMatrix tmp = src;
-    answer.zero();
-    // initialize answer to be unity matrix;
-    for ( i = 1; i <= nRows; i++ ) {
-        answer.at(i, i) = 1.0;
-    }
-
-    // lower triangle elimination by columns
-    for ( i = 1; i < nRows; i++ ) {
-        piv = tmp.at(i, i);
-        if ( fabs(piv) < 1.e-20 ) {
-            //indication that return does not converge. Output flag for subincrementing
-            return 1;
-        }
-
-        for ( j = i + 1; j <= nRows; j++ ) {
-            linkomb = tmp.at(j, i) / tmp.at(i, i);
-            for ( k = i; k <= nRows; k++ ) {
-                tmp.at(j, k) -= tmp.at(i, k) * linkomb;
-            }
-
-            for ( k = 1; k <= nRows; k++ ) {
-                answer.at(j, k) -= answer.at(i, k) * linkomb;
-            }
-        }
-    }
-
-    // upper triangle elimination by columns
-    for ( i = nRows; i > 1; i-- ) {
-        piv = tmp.at(i, i);
-        for ( j = i - 1; j > 0; j-- ) {
-            linkomb = tmp.at(j, i) / tmp.at(i, i);
-            for ( k = i; k > 0; k-- ) {
-                tmp.at(j, k) -= tmp.at(i, k) * linkomb;
-            }
-
-            for ( k = nRows; k > 0; k-- ) {
-                answer.at(j, k) -= answer.at(i, k) * linkomb;
-            }
-        }
-    }
-
-    // diagonal scaling
-    for ( i = 1; i <= nRows; i++ ) {
-        for ( j = 1; j <= nRows; j++ ) {
-            answer.at(i, j) /= tmp.at(i, i);
-        }
-    }
-
-    return 0;
-}
-
 FloatArrayF< 6 >
 LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *tStep)
 {
@@ -694,21 +607,17 @@ void
 LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF<3> &reducedStrain) const
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
-    // FloatArray tempStress, tempEffectiveStress;
-    double tempKappaDOne, tempKappaDTwo, omega = 0.;
 
     double le = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
 
-    FloatArray tempPlasticStrain = status->giveTempPlasticLatticeStrain();
-
-    FloatArray plasticStrain = status->givePlasticLatticeStrain();
-    FloatArray deltaPlasticStrain;
-    deltaPlasticStrain = tempPlasticStrain;
-    deltaPlasticStrain.subtract(plasticStrain);
+    auto tempPlasticStrain = status->giveTempPlasticLatticeStrain()[{0, 1, 2}];
+    auto plasticStrain = status->givePlasticLatticeStrain()[{0, 1, 2}];
+    auto deltaPlasticStrain = tempPlasticStrain - plasticStrain;
 
     //Compute the damage history variable
-    tempKappaDOne = status->giveKappaDOne();
-    tempKappaDTwo = status->giveKappaDTwo();
+    double omega = status->giveDamage();
+    double tempKappaDOne = status->giveKappaDOne();
+    double tempKappaDTwo = status->giveKappaDTwo();
 
     // Compute deltaKappaP from the plastic Strain
     double tempKappaP = status->giveTempKappaP();
@@ -717,7 +626,6 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF<3
     double hardening = computeHardening(tempKappaP, gp);
 
 
-    double crackWidth = 0.;
 
     double strength = ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( 1 + this->frictionAngleOne * this->frictionAngleTwo );
 
@@ -757,9 +665,7 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF<3
         }
     }
 
-    crackWidth = sqrt(pow(tempPlasticStrain.at(1) + omega * ( reducedStrain.at(1) - tempPlasticStrain.at(1) ), 2.) +
-                      pow(tempPlasticStrain.at(2) + omega * ( reducedStrain.at(2) - tempPlasticStrain.at(2) ), 2.) +
-                      pow(tempPlasticStrain.at(3) + omega * ( reducedStrain.at(3) - tempPlasticStrain.at(3) ), 2.) ) * le;
+    double crackWidth = norm(tempPlasticStrain + omega * ( reducedStrain - tempPlasticStrain )) * le;
 
     //TODO: Compute dissipation
     // double tempDissipation = status->giveDissipation();
@@ -771,8 +677,6 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF<3
     status->setTempKappaDTwo(tempKappaDTwo);
     status->setTempDamage(omega);
     status->setTempCrackWidth(crackWidth);
-
-    return;
 }
 
 /*double LatticePlasticityDamage :: giveMaterialParameter()

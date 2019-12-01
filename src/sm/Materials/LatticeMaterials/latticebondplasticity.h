@@ -179,9 +179,6 @@ public:
                          int transitionFlag,
                          GaussPoint *gp) const;
 
-    int computeInverseOfJacobian(FloatMatrix &answer,
-                                 const FloatMatrix &src) const;
-
     FloatArrayF<3> computeFVector(const FloatArrayF<3> &sigma,
                         const double kappa,
                         int transitionFlag,

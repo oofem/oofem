@@ -132,7 +132,6 @@ LatticeBondPlasticity :: computeParamA(const double kappa) const
 }
 
 
-
 double
 LatticeBondPlasticity :: computeDShiftDKappa(const double kappa) const
 {
@@ -180,13 +179,12 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
     double tempKappa = status->giveTempKappaP();
 
     /* Get plastic strain vector from status*/
-    auto tempPlasticStrain = status->giveTempPlasticLatticeStrain();
+    auto tempPlasticStrain = status->giveTempPlasticLatticeStrain()[{0, 1, 2}];
+
+    FloatArrayF<3> tangent = {this->eNormalMean, this->alphaOne * this->eNormalMean, this->alphaOne * this->eNormalMean};
 
     /* Compute trial stress*/
-    FloatArrayF<3> stress;
-    stress.at(1) = ( strain.at(1) - tempPlasticStrain.at(1) ) * this->eNormalMean;
-    stress.at(2) = ( strain.at(2) - tempPlasticStrain.at(2) ) * this->alphaOne * this->eNormalMean;
-    stress.at(3) = ( strain.at(3) - tempPlasticStrain.at(3) ) * this->alphaOne * this->eNormalMean;
+    auto stress = mult(tangent, strain - tempPlasticStrain);
 
     //Introduce variables for subincrementation
     auto oldStrain = this->giveReducedStrain(gp, tStep)[{0, 1, 2}];
@@ -205,10 +203,6 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
         yieldValue = computeYieldValue(stress, tempKappa, 1, gp);
     }
 
-    // introduce subincrementation flag
-    int subIncrementFlag = 0;
-    double subIncrementCounter = 1;
-
     /* Compute yield value*/
     double error = 0.;
     if ( transitionFlag == 0 ) {
@@ -222,17 +216,15 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
             performVertexReturn(stress, gp);
             surfaceType = ST_Vertex;
         } else {
-            subIncrementFlag = 0;
+            int subIncrementFlag = 0;
+            double subIncrementCounter = 1;
             auto convergedStrain = oldStrain;
             auto tempStrain = strain;
             auto deltaStrain = strain - oldStrain;
             //To get into the loop
             returnResult = RR_NotConverged;
             while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
-                stress.at(1) = ( tempStrain.at(1) - tempPlasticStrain.at(1) ) * eNormalMean;
-                stress.at(2) = ( tempStrain.at(2) - tempPlasticStrain.at(2) ) * ( this->alphaOne * eNormalMean );
-                stress.at(3) = ( tempStrain.at(3) - tempPlasticStrain.at(3) ) * ( this->alphaOne * eNormalMean );
-
+                stress = mult(tangent, tempStrain - tempPlasticStrain);
                 tempKappa = performRegularReturn(stress, yieldValue, transitionFlag, gp);
 
                 if ( returnResult == RR_NotConverged ) {
@@ -251,7 +243,7 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
                     tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
                     tempPlasticStrain.at(3) = tempStrain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-                    status->letTempPlasticLatticeStrainBe(tempPlasticStrain);
+                    status->letTempPlasticLatticeStrainBe(assemble<6>(tempPlasticStrain, {0, 1, 2}));
 
                     status->setTempKappaP(tempKappa);
 
@@ -289,8 +281,7 @@ LatticeBondPlasticity :: performPlasticityReturn(GaussPoint *gp,
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-
-    status->letTempPlasticLatticeStrainBe({ tempPlasticStrain [ 0 ], tempPlasticStrain [ 1 ], tempPlasticStrain [ 2 ], 0., 0., 0. });
+    status->letTempPlasticLatticeStrainBe(assemble<6>(tempPlasticStrain, {0, 1, 2}));
     status->letTempLatticeStressBe(assemble<6>(stress, {0, 1, 2}));
     status->setSurfaceValue(surfaceType);
     
@@ -305,36 +296,19 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF<3> &stress,
                                               GaussPoint *gp) const
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
-    FloatArray trialStress(3), tempStress(3), residuals(4), residualsNorm(4);
-    FloatMatrix jacobian(4, 4), inverseOfJacobian(4, 4);
-    FloatArray rVector(3), helpVector(3), helpVector2(3);
 
-    FloatArray deltaIncrement(3);
-    FloatArray tempPlasticStrain(3);
-    FloatArray plasticStrain(3);
     double deltaLambda = 0.;
-    double normOfResiduals = 0.;
-    int iterationCount = 0;
 
-    FloatArray jacobianTimesAnswerIncrement;
-    FloatArray unknownsTrial;
-    FloatArray residualsTrial;
-    FloatArray deltaUnknowns;
-    FloatArray jacobianTimesDeltaUnknowns;
-    FloatArray unknowns(4);
-
-    trialStress = stress;
-    tempStress = trialStress;
+    auto trialStress = stress;
+    auto tempStress = trialStress;
 
     double trialShearStressNorm = norm(trialStress[{1, 2}]);
-
     double tempShearStressNorm = trialShearStressNorm;
 
-    plasticStrain = status->givePlasticLatticeStrain();
-    tempPlasticStrain = plasticStrain;
+    auto plasticStrain = status->givePlasticLatticeStrain()[{0, 1, 2}];
+    auto tempPlasticStrain = plasticStrain;
 
-    double thetaTrial;
-    thetaTrial = atan2(stress.at(3), stress.at(2) );
+    double thetaTrial = atan2(stress.at(3), stress.at(2) );
 
     // Do the same for kappa
     double kappa = status->giveTempKappaP();
@@ -342,6 +316,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF<3> &stress,
 
 
     //initialise unknowns
+    FloatArrayF<4> unknowns;
     unknowns.at(1) = trialStress.at(1);
     unknowns.at(2) = trialShearStressNorm;
     unknowns.at(3) = tempKappa;
@@ -350,23 +325,12 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF<3> &stress,
     yieldValue = computeYieldValue(tempStress, tempKappa, transitionFlag, gp);
 
     //initiate residuals
-    residuals.zero();
+    FloatArrayF<4> residuals;
     residuals.at(4) = yieldValue;
 
-    if ( transitionFlag == 0 ) {
-        residualsNorm.at(4) = residuals.at(4) / this->fc;
-    } else {
-        residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
-    }
+    double normOfResiduals = this->yieldTol * 2 + 1.; //just to get into the loop
 
-    if ( residualsNorm.at(4) < this->yieldTol ) {//regular return not needed
-        returnResult = RR_Elastic;
-        return kappa;
-    }
-
-    normOfResiduals = residualsNorm.computeNorm();
-    //    normOfResiduals  = 1.; //just to get into the loop
-
+    int iterationCount = 0;
     while ( normOfResiduals > this->yieldTol ) {
         iterationCount++;
         if ( iterationCount == newtonIter ) {
@@ -374,6 +338,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF<3> &stress,
             return kappa;
         }
 
+        FloatArrayF<4> residualsNorm;
         residualsNorm.at(1) = residuals.at(1) / this->fc;
         residualsNorm.at(2) = residuals.at(2) / this->fc;
         residualsNorm.at(3) = residuals.at(3);
@@ -383,7 +348,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF<3> &stress,
             residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
         }
 
-        normOfResiduals = residualsNorm.computeNorm();
+        normOfResiduals = norm(residualsNorm);
 
         if ( isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
@@ -391,44 +356,25 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF<3> &stress,
         }
 
         if ( normOfResiduals > this->yieldTol ) {
-            jacobian = computeJacobian(tempStress, tempKappa, deltaLambda, transitionFlag, gp);
+            auto jacobian = computeJacobian(tempStress, tempKappa, deltaLambda, transitionFlag, gp);
 
-            if ( computeInverseOfJacobian(inverseOfJacobian, jacobian) ) {
+            auto solution = solve_check(jacobian, residuals);
+            if ( solution.first ) {
+                unknowns -= solution.second;
+            } else {
                 returnResult = RR_NotConverged;
                 return kappa;
             }
 
-
-            deltaIncrement.beProductOf(inverseOfJacobian, residuals);
-            deltaIncrement.times(-1.);
-
-
-            //compute trial values
-            unknownsTrial = unknowns;
-            residualsTrial = residuals;
-
-            //compute Unknowns
-            for ( int i = 0; i < 4; i++ ) {
-                unknowns(i) = unknownsTrial(i) + deltaIncrement(i);
-            }
-            if ( unknowns.at(4) <= 0. ) { //Keep deltaLambda greater than zero!
-                unknowns.at(4) = 0.;
-            }
-            if ( unknowns.at(2) <= 0. ) { //Keep rho greater than zero!
-                unknowns.at(2) = 0.;
-            }
-            if ( unknowns.at(3) - kappa <= 0. ) { //Keep deltaKappa greater than zero!
-                unknowns.at(3) = kappa;
-            }
-
+            unknowns.at(2) = max(unknowns.at(2), 0.); //Keep rho greater than zero!
+            unknowns.at(3) = max(unknowns.at(3), kappa); //Keep deltaKappa greater than zero!
+            unknowns.at(4) = max(unknowns.at(4), 0.); //Keep deltaLambda greater than zero!
 
             /* Update increments final values and DeltaLambda*/
             tempStress.at(1) = unknowns.at(1);
-            tempShearStressNorm  = unknowns.at(2);
-
+            tempShearStressNorm = unknowns.at(2);
             tempStress.at(2) = tempShearStressNorm * cos(thetaTrial);
             tempStress.at(3) = tempShearStressNorm * sin(thetaTrial);
-
             tempKappa = unknowns.at(3);
             deltaLambda = unknowns.at(4);
 
@@ -449,14 +395,14 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF<3> &stress,
                     tempKappa = kappa;
                     deltaLambda = 0.;
                     tempStress = trialStress;
-                    tempShearStressNorm = sqrt(pow(trialStress.at(2), 2.) + pow(trialStress.at(3), 2.) );
+                    tempShearStressNorm = norm(trialStress[{1, 2}]);
 
                     unknowns.at(1) = trialStress.at(1);
                     unknowns.at(2) = trialShearStressNorm;
                     unknowns.at(3) = tempKappa;
                     unknowns.at(4) = 0.;
 
-                    residuals.zero();
+                    residuals = zeros<4>();
                     residuals.at(4) = computeYieldValue(tempStress, tempKappa, transitionFlag, gp);
                     normOfResiduals = 1;
 
@@ -527,20 +473,16 @@ LatticeBondPlasticity :: computeYieldValue(const FloatArrayF<3> &stress,
                                            const int transitionFlag,
                                            GaussPoint *gp) const
 {
-    double yieldValue = 0;
-
     double shift = computeShift(kappa);
     double paramA = computeParamA(kappa);
 
     double shearNorm = norm(stress[{1, 2}]);
 
-    if ( transitionFlag == 0 ) {//friction
-        yieldValue = shearNorm + this->frictionAngleOne * stress.at(1);
+    if ( transitionFlag == 0 ) { //friction
+        return shearNorm + this->frictionAngleOne * stress.at(1);
     } else {
-        yieldValue = pow(shearNorm, 2.) + pow(stress.at(1) + shift, 2.) / pow(this->frictionAngleTwo, 2.) - pow(paramA, 2.) / pow(this->frictionAngleTwo, 2.);
+        return pow(shearNorm, 2.) + pow(stress.at(1) + shift, 2.) / pow(this->frictionAngleTwo, 2.) - pow(paramA, 2.) / pow(this->frictionAngleTwo, 2.);
     }
-
-    return yieldValue;
 }
 
 
@@ -717,90 +659,20 @@ LatticeBondPlasticity :: performVertexReturn(FloatArrayF<3> &stress, GaussPoint 
     status->setTempKappaP(tempKappa);
 }
 
-int
-LatticeBondPlasticity :: computeInverseOfJacobian(FloatMatrix &answer, const FloatMatrix &src) const
-// Receiver becomes inverse of given parameter src. If necessary, size is adjusted.
-{
-#  ifdef DEBUG
-    if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::beInverseOf : cannot inverse matrix since it is not square");
-    }
-#  endif
-
-    int nRows = src.giveNumberOfRows();
-
-    //gaussian elimination - slow but safe
-    //
-    int i, j, k;
-    double piv, linkomb;
-    FloatMatrix tmp = src;
-    answer.zero();
-    // initialize answer to be unity matrix;
-    for ( i = 1; i <= nRows; i++ ) {
-        answer.at(i, i) = 1.0;
-    }
-
-    // lower triangle elimination by columns
-    for ( i = 1; i < nRows; i++ ) {
-        piv = tmp.at(i, i);
-        if ( fabs(piv) < 1.e-20 ) {
-            //indication that return does not converge. Output flag for subincrementing
-            return 1;
-        }
-
-        for ( j = i + 1; j <= nRows; j++ ) {
-            linkomb = tmp.at(j, i) / tmp.at(i, i);
-            for ( k = i; k <= nRows; k++ ) {
-                tmp.at(j, k) -= tmp.at(i, k) * linkomb;
-            }
-
-            for ( k = 1; k <= nRows; k++ ) {
-                answer.at(j, k) -= answer.at(i, k) * linkomb;
-            }
-        }
-    }
-
-    // upper triangle elimination by columns
-    for ( i = nRows; i > 1; i-- ) {
-        piv = tmp.at(i, i);
-        for ( j = i - 1; j > 0; j-- ) {
-            linkomb = tmp.at(j, i) / tmp.at(i, i);
-            for ( k = i; k > 0; k-- ) {
-                tmp.at(j, k) -= tmp.at(i, k) * linkomb;
-            }
-
-            for ( k = nRows; k > 0; k-- ) {
-                answer.at(j, k) -= answer.at(i, k) * linkomb;
-            }
-        }
-    }
-
-    // diagonal scaling
-    for ( i = 1; i <= nRows; i++ ) {
-        for ( j = 1; j <= nRows; j++ ) {
-            answer.at(i, j) /= tmp.at(i, i);
-        }
-    }
-
-    return 0;
-}
-
 
 FloatArrayF< 6 >
-LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *atTime)
+LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *tStep)
 {
     auto status = static_cast< LatticeBondPlasticityStatus * >( this->giveStatus(gp) );
     status->initTempStatus();
 
-    FloatArray reducedStrain;
-    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, originalStrain, atTime, VM_Total);
+    auto reducedStrain = originalStrain;
+    auto thermalStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
+    if ( thermalStrain.giveSize() ) {
+        reducedStrain -= FloatArrayF<6>(thermalStrain);
+    }
 
-    FloatArrayF<3> strain;
-    strain.at(1) = reducedStrain.at(1);
-    strain.at(2) = reducedStrain.at(2);
-    strain.at(3) = reducedStrain.at(3);
-
-    auto stress3 = this->performPlasticityReturn(gp, strain, atTime);
+    auto stress3 = this->performPlasticityReturn(gp, reducedStrain[{0, 1, 2}], tStep);
 
     auto stress = assemble<6>(stress3, {0, 1, 2});
     stress.at(4) = reducedStrain.at(4) * this->alphaTwo * this->eNormalMean;
@@ -817,9 +689,8 @@ LatticeBondPlasticity :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStr
 
 LatticeBondPlasticityStatus :: LatticeBondPlasticityStatus(int n, Domain *d, GaussPoint *gp)
     : LatticeMaterialStatus(gp)
-{
-    kappaP = tempKappaP = 0.;
-}
+{ }
+
 
 void
 LatticeBondPlasticityStatus :: initTempStatus()
@@ -834,14 +705,13 @@ LatticeBondPlasticityStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     fprintf(file, "plasticStrains ");
-    for ( int k = 1; k <= this->plasticLatticeStrain.giveSize(); k++ ) {
-        fprintf(file, "% .8e ", this->plasticLatticeStrain.at(k) );
+    for ( double s : this->plasticLatticeStrain ) {
+        fprintf(file, "% .8e ", s );
     }
 
     fprintf(file, "\n \t");
     fprintf(file, " kappaP %.8e, surfaceType %d\n", this->kappaP, this->surfaceValue);
     fprintf(file, "}\n");
-    return;
 }
 
 
@@ -852,10 +722,10 @@ LatticeBondPlasticityStatus :: updateYourself(TimeStep *atTime)
     this->kappaP = this->tempKappaP;
 }
 
+
 void
 LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
-
     LatticeMaterialStatus :: saveContext(stream, mode);
 
     if ( !stream.write(& kappaP, 1) ) {
@@ -864,11 +734,9 @@ LatticeBondPlasticityStatus :: saveContext(DataStream &stream, ContextMode mode)
 }
 
 
-
 void
 LatticeBondPlasticityStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
-
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
     if ( !stream.read(& kappaP, 1) ) {
