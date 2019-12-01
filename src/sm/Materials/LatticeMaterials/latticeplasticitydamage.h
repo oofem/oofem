@@ -253,7 +253,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF<6> giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
 
 
 protected:

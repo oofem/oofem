@@ -336,15 +336,12 @@ LatticePlasticityDamage :: computeAMatrix(const FloatArrayF<3> &stress,
 }
 
 
-void
-LatticePlasticityDamage :: giveReducedStrain(FloatArray &answer,
-                                             GaussPoint *gp,
-                                             TimeStep *tStep) const
+FloatArrayF<6>
+LatticePlasticityDamage :: giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
-    answer = status->giveReducedLatticeStrain();
+    return status->giveReducedLatticeStrain();
 }
-
 
 
 void
@@ -374,10 +371,9 @@ LatticePlasticityDamage :: performPlasticityReturn(FloatArray &stress,
 
     FloatArray convergedStrain(3);
 
-    FloatArray oldReducedStrain(6);
     FloatArray oldStrain(3);
 
-    this->giveReducedStrain(oldReducedStrain, gp, tStep);
+    auto oldReducedStrain = this->giveReducedStrain(gp, tStep);
 
     for ( int i = 1; i <= 3; i++ ) {
         oldStrain.at(i) = oldReducedStrain.at(i);

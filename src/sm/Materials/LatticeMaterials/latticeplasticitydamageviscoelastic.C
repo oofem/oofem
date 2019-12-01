@@ -90,31 +90,27 @@ LatticePlasticityDamageViscoelastic :: CreateStatus(GaussPoint *gp) const
     return new LatticePlasticityDamageViscoelasticStatus(1, LatticePlasticityDamageViscoelastic :: domain, gp, slaveMat);
 }
 
-void
-LatticePlasticityDamageViscoelastic :: giveReducedStrain(FloatArray &answer,
-                                                         GaussPoint *gp,
+FloatArrayF<6>
+LatticePlasticityDamageViscoelastic :: giveReducedStrain(GaussPoint *gp,
                                                          TimeStep *tStep) const
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
     auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    answer = status->giveLatticeStress();
-
     double omega = status->giveDamage();
-    answer.times(1. / ( 1. - omega ) );
+    auto strain = status->giveLatticeStress() * (1. / ( 1. - omega ) );
 
-
-    FloatArray oldPlasticStrain;
-    oldPlasticStrain = status->givePlasticLatticeStrain();
 
     for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
-        answer.at(i) /= elasticStiffnessMatrix.at(i, i);
+        strain.at(i) /= elasticStiffnessMatrix.at(i, i);
     }
 
+    const auto &oldPlasticStrain = status->givePlasticLatticeStrain();
     for ( int i = 1; i <= 3; i++ ) {
-        answer.at(i) += oldPlasticStrain.at(i);
+        strain.at(i) += oldPlasticStrain.at(i);
     }
+    return strain;
 }
 
 void
@@ -130,7 +126,7 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
 {
     double tol = 1.e-12;
 
-    LatticePlasticityDamageViscoelasticStatus *status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
 
     //    this->initGpForNewStep(gp);
 
