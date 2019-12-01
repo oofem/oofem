@@ -157,7 +157,16 @@ public:
         }
         return x;
     }
-    
+
+    /// Assign x into self.
+    template<size_t M>
+    inline void assign(const FloatArrayF<M> &x, int const (&c)[M] )
+    {
+        for ( std::size_t i = 0; i < M; ++i ) {
+            (*this)[c[i]] = x[i];
+        }
+    }
+
     /// Assemble x into self.
     template<size_t M>
     inline void assemble(const FloatArrayF<M> &x, int const (&c)[M] )
@@ -366,8 +375,8 @@ FloatArrayF<N> operator ^= ( FloatArrayF<N> & x, double a)
 template<std::size_t N>
 bool iszero(const FloatArrayF<N> &x)
 {
-    for ( auto &x : x ) {
-        if ( x != 0. ) {
+    for ( auto &v : x ) {
+        if ( v != 0. ) {
             return false;
         }
     }
