@@ -76,13 +76,13 @@ public:
      * @note The syntax {{x,y,z},{...}} can be achieved by nested initializer_list, but 
      */
     template< typename... V, class = typename std::enable_if_t<sizeof...(V) == N*M> >
-    FloatMatrixF(V... x) : values{x...} { }
+    FloatMatrixF(V... x) noexcept : values{x...} { }
     /**
      * Empty ctor, initializes to zero.
      */
-    FloatMatrixF() : values{} { }
+    FloatMatrixF() noexcept : values{} { }
     /// Copy constructor.
-    FloatMatrixF(const FloatMatrixF<N,M> &mat) : values(mat.values) {}
+    FloatMatrixF(const FloatMatrixF<N,M> &mat) noexcept : values(mat.values) {}
     /// FloatMatrix conversion constructor.
     FloatMatrixF(const FloatMatrix &mat)
     {
@@ -95,7 +95,7 @@ public:
 #endif
         std::copy_n(mat.begin(), N*M, values.begin());
     }
-    template<typename... V> FloatMatrixF(const std::array<const FloatArrayF<N>,M> &x)
+    template<typename... V> FloatMatrixF(const std::array<const FloatArrayF<N>,M> &x) noexcept
     {
         for (std::size_t i = 0; i < N; ++i) {
             for (std::size_t j = 0; j < M; ++j) {
@@ -1235,7 +1235,6 @@ std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(const FloatMatrixF<N,N> &mat, i
                     m(i, j) = 0.0;
                 } else {
                     /* ---- A(I,J) MADE ZERO BY ROTATION ------------- */
-                    ;
                 }
             }
         }

@@ -16,7 +16,7 @@
 
 using namespace oofem;
 
-#if 0
+#if 1
 static void PrincipalValuesDyn(benchmark::State& state) {
     FloatArray s = {1., 4., 6., 5., 3., 2.};
     FloatArray v(3);
@@ -140,7 +140,7 @@ BENCHMARK(SolDyn);
 
 
 static void SolFix(benchmark::State& state) {
-#if 0
+#if 1
     FloatMatrixF<4,4> D = {
         1., 2., 3., 7.,
         2., -4., 5., 0.,
