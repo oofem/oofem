@@ -87,18 +87,17 @@ LatticePlasticityDamageViscoelastic :: initializeFrom(InputRecord &ir)
 MaterialStatus *
 LatticePlasticityDamageViscoelastic :: CreateStatus(GaussPoint *gp) const
 {
-    LatticePlasticityDamageViscoelasticStatus *answer = new LatticePlasticityDamageViscoelasticStatus(1, LatticePlasticityDamageViscoelastic :: domain, gp, slaveMat);
-    return answer;
+    return new LatticePlasticityDamageViscoelasticStatus(1, LatticePlasticityDamageViscoelastic :: domain, gp, slaveMat);
 }
 
 void
 LatticePlasticityDamageViscoelastic :: giveReducedStrain(FloatArray &answer,
                                                          GaussPoint *gp,
-                                                         TimeStep *tStep)
+                                                         TimeStep *tStep) const
 {
-    LatticePlasticityDamageStatus *status = ( LatticePlasticityDamageStatus * ) ( this->giveStatus(gp) );
+    auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
-    FloatMatrix elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     answer = status->giveLatticeStress();
 
@@ -236,18 +235,13 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
     status->letTempLatticeStrainBe(totalStrain);
     status->letTempReducedLatticeStrainBe(reducedStrain);
     status->letTempLatticeStressBe(answer);
-
-    return;
 }
 
 RheoChainMaterial *
-LatticePlasticityDamageViscoelastic :: giveViscoelasticMaterial() {
-    Material *mat;
-    RheoChainMaterial *rChMat;
-    mat = domain->giveMaterial(slaveMat);
-
-    rChMat = dynamic_cast< RheoChainMaterial * >( mat );
-
+LatticePlasticityDamageViscoelastic :: giveViscoelasticMaterial()
+{
+    auto mat = domain->giveMaterial(slaveMat);
+    auto rChMat = dynamic_cast< RheoChainMaterial * >( mat );
     return rChMat;
 }
 
@@ -261,9 +255,7 @@ LatticePlasticityDamageViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseM
 FloatMatrixF< 6, 6 >
 LatticePlasticityDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix answer;
-    answer.resize(6, 6);
-    answer.zero();
+    FloatMatrixF<6,6> tangent;
 
     //@todo: this has to be rewritten for the 3d case
     // LatticePlasticityDamageViscoelasticStatus *status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
@@ -280,7 +272,7 @@ LatticePlasticityDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseM
 
     // answer.times(Eincr / this->eNormalMean);
 
-    return answer;
+    return tangent;
 }
 
 int
@@ -323,7 +315,8 @@ LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep 
 }
 
 MaterialStatus *
-LatticePlasticityDamageViscoelasticStatus :: giveViscoelasticMatStatus() const {
+LatticePlasticityDamageViscoelasticStatus :: giveViscoelasticMatStatus() const
+{
     //    Material *mat;
     //    RheoChainMaterial *rChMat;
     //    GaussPoint *rChGP;
@@ -336,7 +329,7 @@ LatticePlasticityDamageViscoelasticStatus :: giveViscoelasticMatStatus() const {
 
     //  MaterialStatus *mS = rChMat->giveStatus(rChGP);
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -363,10 +356,7 @@ LatticePlasticityDamageViscoelasticStatus :: saveContext(DataStream &stream, Con
 {
     LatticePlasticityDamageStatus :: saveContext(stream, mode);
 
-
     this->giveViscoelasticMatStatus()->saveContext(stream, mode);
-
-    return;
 }
 
 void

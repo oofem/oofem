@@ -78,7 +78,7 @@ protected:
 
     double tempDamage = 0.;
 
-    //double e0;
+    //double e0 = 0.;
 
     int compressionFlag = 0;
 
@@ -96,9 +96,6 @@ public:
     //   double giveKappaDThree() { return kappaDThree; }
     double giveTempKappaDOne() const { return tempKappaDOne; }
     double giveTempKappaDTwo() const { return tempKappaDTwo; }
-
-    void  letTempPlasticStrainBe(const FloatArray &v)
-    { tempPlasticLatticeStrain = v; }
 
     void   setTempKappaP(double newKappa) { tempKappaP = newKappa; }
 
@@ -139,7 +136,7 @@ class LatticePlasticityDamage : public LatticeLinearElastic
 protected:
 
     enum LatticePlasticityDamage_ReturnResult { RR_NotConverged, RR_Converged };
-    LatticePlasticityDamage_ReturnResult returnResult = RR_NotConverged;
+    mutable LatticePlasticityDamage_ReturnResult returnResult = RR_NotConverged; /// FIXME: This must be removed. Not thread safe. Shouldn't be stored at all.
 
     double initialYieldStress = 0.;
 
@@ -200,77 +197,76 @@ public:
 
     void computeBMatrix(FloatMatrix &answer,
                         const FloatArray &sigma,
-                        const double deltaLambda);
+                        const double deltaLambda) const;
 
     void computeAMatrix(FloatMatrix &answer,
                         const FloatArray &sigma,
                         const double tempKappa,
                         const double deltaLambda,
-                        GaussPoint *gp);
+                        GaussPoint *gp) const;
 
     void computeFVector(FloatArray &answer,
                         const FloatArray &sigma,
                         const double deltaLambda,
-                        GaussPoint *gp);
+                        GaussPoint *gp) const;
 
     void computeMVector(FloatArray &answer,
                         const FloatArray &sigma,
                         const double deltaLambda,
-                        GaussPoint *gp);
+                        GaussPoint *gp) const;
 
     void computeDMMatrix(FloatMatrix &answer,
                          const FloatArray &sigma,
                          const double deltaLambda,
-                         GaussPoint *gp);
+                         GaussPoint *gp) const;
 
 
     void computeJacobian(FloatMatrix &answer,
                          const FloatArray &sigma,
                          const double tempKappa,
                          const double deltaLambda,
-                         GaussPoint *gp);
+                         GaussPoint *gp) const;
 
     int computeInverseOfJacobian(FloatMatrix &answer,
-                                 const FloatMatrix &src);
+                                 const FloatMatrix &src) const;
 
 
-    virtual void computeDamageParam(double &omega, double kappaOne, double kappaTwo, GaussPoint *gp);
+    virtual double computeDamageParam(double kappaOne, double kappaTwo, GaussPoint *gp) const;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
     void performPlasticityReturn(FloatArray &stress,
                                  GaussPoint *gp,
                                  const FloatArray &totalStrain,
-                                 TimeStep *tStep);
+                                 TimeStep *tStep) const;
 
     void performDamageEvaluation(GaussPoint *gp,
-                                 FloatArray &reducedStrain);
+                                 FloatArray &reducedStrain) const;
 
-    double performRegularReturn(FloatArray &stress, double yieldValue, GaussPoint *gp);
+    double performRegularReturn(FloatArray &stress, double yieldValue, GaussPoint *gp) const;
 
     double computeYieldValue(const FloatArray &sigma,
                              const double tempKappa,
-                             GaussPoint *gp);
+                             GaussPoint *gp) const;
 
     double computeHardening(const double kappa,
-                            GaussPoint *gp);
+                            GaussPoint *gp) const;
 
 
     double computeDHardeningDKappa(const double kappa,
-                                   GaussPoint *gp);
+                                   GaussPoint *gp) const;
     double computeDDHardeningDDKappa(const double kappa,
-                                     GaussPoint *gp);
+                                     GaussPoint *gp) const;
 
-    double computeDuctilityMeasure(FloatArray &stress, double ductilityParameter);
+    double computeDuctilityMeasure(FloatArray &stress, double ductilityParameter) const;
 
-    double computeYieldStress(double kappaP,
-                              GaussPoint *gp);
+    double computeYieldStress(double kappaP, GaussPoint *gp); const
 
-    double computeEquivalentStress(const FloatArray &tempSigma);
+    double computeEquivalentStress(const FloatArray &tempSigma) const;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
 
 
 protected:

@@ -131,7 +131,7 @@ public:
 
     RheoChainMaterial *giveViscoelasticMaterial();
 
-    void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
 
