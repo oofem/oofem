@@ -146,17 +146,18 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
 
     GaussPoint *rChGP = status->giveViscoelasticGaussPoint();
 
-    FloatArray tempPlasticStrain;
+    FloatArrayF<6> tempPlasticStrain;
 
-    FloatMatrix elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    FloatArray strain(3);
+    FloatArrayF<3> strain;
 
     int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
 
     int itercount = 0;
     double prevIterKappaP = 0.;
 
+    FloatArrayF<3> stress3;
     while ( ( fabs(status->giveTempKappaP() - prevIterKappaP) >= tol ) || ( itercount == 0 ) ) {
         itercount++;
 
@@ -193,7 +194,7 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
 
         // this (parent) method needs a total, temperature-free strain (with plastic strain)
         // from now on new = updated plastic strain
-        this->performPlasticityReturn(answer, gp, strain, tStep);
+        stress3 = this->performPlasticityReturn(gp, strain, tStep);
     } // end while loop
 
     reducedStrain = quasiElasticStrain;
@@ -208,29 +209,24 @@ LatticePlasticityDamageViscoelastic :: giveRealStressVector(FloatArray &answer,
     FloatArray shrinkageStrain;
     rChM->giveShrinkageStrainVector(shrinkageStrain, rChGP, tStep, VM_Total);
 
-    strain = reducedStrainForViscoMat;
-    strain.subtract(shrinkageStrain);
-    strain.resizeWithValues(3);
-    tempPlasticStrain = status->giveTempPlasticLatticeStrain();
-    strain.add(tempPlasticStrain);
+    strain = reducedStrainForViscoMat - FloatArrayF<3>(shrinkageStrain) + status->giveTempPlasticLatticeStrain()[{0, 1, 2}];
 
     // strain is passed only to compute crack width, nothing else
     this->performDamageEvaluation(gp, strain);
 
-    double omega;
-    omega = status->giveTempDamage();
+    double omega = status->giveTempDamage();
 
-    answer.resizeWithValues(6);
-    answer.at(1) = ( 1. - omega ) * answer.at(1);
-    answer.at(2) = ( 1. - omega ) * answer.at(2);
-    answer.at(3) = ( 1. - omega ) * answer.at(3);
-    answer.at(4) = ( 1. - omega ) * quasiElasticStrain.at(4) * this->alphaTwo * this->eNormalMean;
-    answer.at(5) = ( 1. - omega ) * quasiElasticStrain.at(5) * this->alphaTwo * this->eNormalMean;
-    answer.at(6) = ( 1. - omega ) * quasiElasticStrain.at(6) * this->alphaTwo * this->eNormalMean;
+    FloatArrayF<6> stress;
+    stress.at(1) = ( 1. - omega ) * stress3.at(1);
+    stress.at(2) = ( 1. - omega ) * stress3.at(2);
+    stress.at(3) = ( 1. - omega ) * stress3.at(3);
+    stress.at(4) = ( 1. - omega ) * quasiElasticStrain.at(4) * this->alphaTwo * this->eNormalMean;
+    stress.at(5) = ( 1. - omega ) * quasiElasticStrain.at(5) * this->alphaTwo * this->eNormalMean;
+    stress.at(6) = ( 1. - omega ) * quasiElasticStrain.at(6) * this->alphaTwo * this->eNormalMean;
 
     status->letTempLatticeStrainBe(totalStrain);
     status->letTempReducedLatticeStrainBe(reducedStrain);
-    status->letTempLatticeStressBe(answer);
+    status->letTempLatticeStressBe(stress);
 }
 
 RheoChainMaterial *

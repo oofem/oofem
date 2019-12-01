@@ -222,15 +222,14 @@ public:
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
-    void performPlasticityReturn(FloatArray &stress,
-                                 GaussPoint *gp,
-                                 const FloatArray &totalStrain,
+    FloatArrayF<3> performPlasticityReturn(GaussPoint *gp,
+                                 const FloatArrayF<3> &totalStrain,
                                  TimeStep *tStep) const;
 
     void performDamageEvaluation(GaussPoint *gp,
-                                 FloatArray &reducedStrain) const;
+                                 FloatArrayF<3> &reducedStrain) const;
 
-    double performRegularReturn(FloatArray &stress, double yieldValue, GaussPoint *gp) const;
+    double performRegularReturn(FloatArrayF<3> &stress, double yieldValue, GaussPoint *gp) const;
 
     double computeYieldValue(const FloatArrayF<3> &sigma,
                              const double tempKappa,
