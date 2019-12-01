@@ -149,7 +149,7 @@ public:
      * @param c Position of coefficient in array.
      */
     template<std::size_t M>
-    inline FloatArrayF<M> operator[] (int const (&c)[M])
+    inline FloatArrayF<M> operator[] (int const (&c)[M]) const
     {
         FloatArrayF<M> x;
         for ( std::size_t i = 0; i < M; ++i ) {
@@ -254,6 +254,18 @@ FloatArrayF<N> operator * ( const FloatArrayF<N> & x, double a )
 {
     return a*x;
 }
+
+/// Element-wise multiplication
+template<std::size_t N>
+FloatArrayF<N> mult ( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
+{
+    FloatArrayF<N> out;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        out[i] = x[i] * y[i];
+    }
+    return out;
+}
+
 
 template<std::size_t N>
 FloatArrayF<N> operator / ( const FloatArrayF<N> & x, double a )

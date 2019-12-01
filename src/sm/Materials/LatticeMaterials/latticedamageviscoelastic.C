@@ -91,8 +91,7 @@ LatticeDamageViscoelastic :: initializeFrom(InputRecord &ir)
 MaterialStatus *
 LatticeDamageViscoelastic :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeDamageViscoelasticStatus *answer = new LatticeDamageViscoelasticStatus(1, LatticeDamageViscoelastic :: domain, gp, slaveMat);
-    return answer;
+    return  new LatticeDamageViscoelasticStatus(1, LatticeDamageViscoelastic :: domain, gp, slaveMat);
 }
 
 
@@ -101,10 +100,7 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
                                                  GaussPoint *gp,
                                                  TimeStep *tStep) const
 {
-    FloatArray answer;
-    answer.resize(6);
-    answer.zero();
-
+    FloatArrayF<6> stress;
 
     //@todo: This needs to be completely rewritten for the 3d case only
 
@@ -221,19 +217,16 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
     // status->setTempCrackWidth(crackWidth);
 
 
-    return answer;
+    return stress;
 }
 
 
 
 RheoChainMaterial *
-LatticeDamageViscoelastic :: giveViscoelasticMaterial() {
-    Material *mat;
-    RheoChainMaterial *rChMat;
-    mat = domain->giveMaterial(slaveMat);
-
-    rChMat = dynamic_cast< RheoChainMaterial * >( mat );
-
+LatticeDamageViscoelastic :: giveViscoelasticMaterial()
+{
+    auto mat = domain->giveMaterial(slaveMat);
+    auto rChMat = dynamic_cast< RheoChainMaterial * >( mat );
     return rChMat;
 }
 
@@ -242,9 +235,7 @@ LatticeDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                           GaussPoint *gp,
                                                           TimeStep *atTime) const
 {
-    FloatMatrix answer;
-    answer.resize(6, 6);
-    answer.zero();
+    FloatMatrixF<6,6> tangent;
 
     //@todo: This has to be rewritten for the 3d case
     // LatticeDamageViscoelasticStatus *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
@@ -261,7 +252,7 @@ LatticeDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode,
 
     // answer.times(Eincr / this->eNormalMean);
 
-    return answer;
+    return tangent;
 }
 
 int
@@ -280,6 +271,7 @@ LatticeDamageViscoelasticStatus :: LatticeDamageViscoelasticStatus(int n, Domain
     viscoelasticGP = new GaussPoint(g->giveIntegrationRule(), g->giveNumber(), g->giveNaturalCoordinates(), g->giveWeight(), g->giveMaterialMode() );
 }
 
+
 void
 LatticeDamageViscoelasticStatus :: initTempStatus()
 //
@@ -289,6 +281,7 @@ LatticeDamageViscoelasticStatus :: initTempStatus()
 {
     LatticeDamageStatus :: initTempStatus();
 }
+
 
 void
 LatticeDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
@@ -303,8 +296,10 @@ LatticeDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) co
     fprintf(file, "\n");
 }
 
+
 MaterialStatus *
-LatticeDamageViscoelasticStatus :: giveViscoelasticMatStatus() const {
+LatticeDamageViscoelasticStatus :: giveViscoelasticMatStatus() const
+{
     //    Material *mat;
     //    RheoChainMaterial *rChMat;
     //    GaussPoint *rChGP;
@@ -317,7 +312,7 @@ LatticeDamageViscoelasticStatus :: giveViscoelasticMatStatus() const {
 
     //    MaterialStatus *mS = rChMat->giveStatus(rChGP);
 
-    return NULL;
+    return nullptr;
 }
 
 
