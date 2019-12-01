@@ -18,3 +18,25 @@ General Features
 * Direct & iterative solvers (IML, Spooles, PETSc, SuperLU, Pardisso)
 * Full restart capability, support for adaptive and staggered analyses
 * Postprocessing: X-Windows post-processing, export to VTK
+* Python bindings allowing to script oofem and implement new components in Python
+
+
+Documentation
+---------------------
+The extensive documentation is available on `OOFEM web pages <http://www.oofem.org>`_: 
+
+* Input manual, available in [`html <http://www.oofem.org/resources/doc/oofemInput/html/oofemInput.html>`_] and [`PDF <http://www.oofem.org/resources/doc/oofemInput/html/oofemInput.pdf>`_].
+* Element Library Manual, available in [`html <http://www.oofem.org/resources/doc/elementlibmanual/html/elementlibmanual.html>`_] and [`PDF <http://www.oofem.org/resources/doc/elementlibmanual/elementlibmanual.pdf>`_] 
+* Material Model Library Manual, available in [`html <http://www.oofem.org/resources/doc/matlibmanual/html/matlibmanual.html>`_] and [`PDF <http://www.oofem.org/resources/doc/matlibmanual/matlibmanual.pdf>`_] 
+
+* Programmer's manual, available in [`html <http://www.oofem.org/resources/doc/programmer/html/programmer.html>`_] and [`PDF <http://www.oofem.org/resources/doc/programmer/programmer.pdf>`_].
+* The [`Reference manual <http://www.oofem.org/resources/doc/oofemrefman/index.html>`_] 
+* Python bindings documentation , available in [`html <http://www.oofem.org/resources/doc/python/html/index.html>`_] and [`PDF <http://www.oofem.org/resources/doc/python/oofempythonbindings.pdf>`_]
+
+
+OOFEM Ecosystem
+---------------------
+
+* `OOFEM forum <http://www.oofem.org/forum>`_ is the best place to ask questions and get support from developpers and user community.
+* `OOFEM wiki <http://www.oofem.org/wiki>`_ contains many useful resources, gallery of results and tutorials.
+* `OOFEM gitHub repository <https://github.com/oofem/oofem>`_.
