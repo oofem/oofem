@@ -195,37 +195,24 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    void computeBMatrix(FloatMatrix &answer,
-                        const FloatArray &sigma,
-                        const double deltaLambda) const;
+    // Doesn't exist? old code:
+    //FloatMatrix<X,X> computeBMatrix(const FloatArrayF<3> &sigma, const double deltaLambda) const;
 
-    void computeAMatrix(FloatMatrix &answer,
-                        const FloatArray &sigma,
-                        const double tempKappa,
-                        const double deltaLambda,
+    FloatMatrixF<3,3> computeAMatrix(const FloatArrayF<3> &sigma, const double tempKappa,
+                        const double deltaLambda, GaussPoint *gp) const;
+
+    FloatArrayF<3> computeFVector(const FloatArrayF<3> &sigma, const double deltaLambda,
                         GaussPoint *gp) const;
 
-    void computeFVector(FloatArray &answer,
-                        const FloatArray &sigma,
-                        const double deltaLambda,
+    FloatArrayF<3> computeMVector(const FloatArrayF<3> &sigma, const double deltaLambda,
                         GaussPoint *gp) const;
 
-    void computeMVector(FloatArray &answer,
-                        const FloatArray &sigma,
-                        const double deltaLambda,
-                        GaussPoint *gp) const;
-
-    void computeDMMatrix(FloatMatrix &answer,
-                         const FloatArray &sigma,
-                         const double deltaLambda,
+    FloatMatrixF<3,3> computeDMMatrix(const FloatArrayF<3> &sigma, const double deltaLambda,
                          GaussPoint *gp) const;
 
 
-    void computeJacobian(FloatMatrix &answer,
-                         const FloatArray &sigma,
-                         const double tempKappa,
-                         const double deltaLambda,
-                         GaussPoint *gp) const;
+    FloatMatrixF<4,4> computeJacobian(const FloatArrayF<3> &sigma, const double tempKappa,
+                         const double deltaLambda, GaussPoint *gp) const;
 
     int computeInverseOfJacobian(FloatMatrix &answer,
                                  const FloatMatrix &src) const;
@@ -245,7 +232,7 @@ public:
 
     double performRegularReturn(FloatArray &stress, double yieldValue, GaussPoint *gp) const;
 
-    double computeYieldValue(const FloatArray &sigma,
+    double computeYieldValue(const FloatArrayF<3> &sigma,
                              const double tempKappa,
                              GaussPoint *gp) const;
 
