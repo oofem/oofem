@@ -1048,7 +1048,7 @@ inline double det(const FloatMatrixF<3,3> &mat)
 
 /// Computes the inverse
 template<std::size_t N>
-FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat)
+FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat, double zeropiv=1e-24)
 {
     // gaussian elimination - slow but safe
     auto tmp = mat;
@@ -1057,8 +1057,8 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat)
     // lower triangle elimination by columns
     for ( std::size_t  i = 1; i < N; i++ ) {
         double piv = tmp.at(i, i);
-        if ( std::abs(piv) < 1.e-24 ) {
-            OOFEM_ERROR("pivot (%d,%d) to close to small (< 1.e-24)", i, i);
+        if ( std::abs(piv) <= zeropiv ) {
+            OOFEM_ERROR("pivot (%d,%d) to close to small", i, i);
         }
         for ( std::size_t j = i + 1; j <= N; j++ ) {
             double linkomb = tmp.at(j, i) / tmp.at(i, i);
@@ -1094,7 +1094,7 @@ FloatMatrixF<N,N> inv(const FloatMatrixF<N,N> &mat)
 
 /// Computes the inverse
 template<>
-inline FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat)
+inline FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat, double /*zeropiv*/)
 {
     FloatMatrixF<2,2> out;
     double d = det(mat);
@@ -1107,7 +1107,7 @@ inline FloatMatrixF<2,2> inv(const FloatMatrixF<2,2> &mat)
 
 /// Computes the inverse
 template<>
-inline FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat)
+inline FloatMatrixF<3,3> inv(const FloatMatrixF<3,3> &mat, double /*zeropiv*/)
 {
     FloatMatrixF<3,3> out;
     double d = det(mat);
@@ -1186,12 +1186,12 @@ std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(const FloatMatrixF<N,N> &mat, i
                      */
                     // ---- MODIFY "I" AND "J" COLUMNS OF "A" AND "V"
                     for ( std::size_t k = 0; k < i; ++k ) {
-                        double tt = m(k, i);
-                        m(k, i) = co * tt + si * m(k, j);
-                        m(k, j) = -si * tt + co * m(k, j);
-                        tt = v(k, i);
-                        v(k, i) = co * tt + si * v(k, j);
-                        v(k, j) = -si * tt + co * v(k, j);
+                        double tt2 = m(k, i);
+                        m(k, i) = co * tt2 + si * m(k, j);
+                        m(k, j) = -si * tt2 + co * m(k, j);
+                        tt2 = v(k, i);
+                        v(k, i) = co * tt2 + si * v(k, j);
+                        v(k, j) = -si * tt2 + co * v(k, j);
                     }
 
                     // diagonal term (i,i)
@@ -1203,12 +1203,12 @@ std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(const FloatMatrixF<N,N> &mat, i
                     v(i, j) = -si * tt + co * v(i, j);
 
                     for ( std::size_t k = i + 1; k < j; ++k ) {
-                        double tt = m(i, k);
-                        m(i, k) = co * tt + si * m(k, j);
-                        m(k, j) = -si * tt + co * m(k, j);
-                        tt = v(k, i);
-                        v(k, i) = co * tt + si * v(k, j);
-                        v(k, j) = -si * tt + co * v(k, j);
+                        double tt2 = m(i, k);
+                        m(i, k) = co * tt2 + si * m(k, j);
+                        m(k, j) = -si * tt2 + co * m(k, j);
+                        tt2 = v(k, i);
+                        v(k, i) = co * tt2 + si * v(k, j);
+                        v(k, j) = -si * tt2 + co * v(k, j);
                     }
 
                     // diagonal term (j,j)
@@ -1221,12 +1221,12 @@ std::pair<FloatArrayF<N>, FloatMatrixF<N,N>> eig(const FloatMatrixF<N,N> &mat, i
                     v(j, j) = -si * tt + co * v(j, j);
                     //
                     for ( std::size_t k = j + 1; k < N; ++k ) {
-                        double tt = m(i, k);
-                        m(i, k) = co * tt + si * m(j, k);
-                        m(j, k) = -si * tt + co * m(j, k);
-                        tt = v(k, i);
-                        v(k, i) = co * tt + si * v(k, j);
-                        v(k, j) = -si * tt + co * v(k, j);
+                        double tt2 = m(i, k);
+                        m(i, k) = co * tt2 + si * m(j, k);
+                        m(j, k) = -si * tt2 + co * m(j, k);
+                        tt2 = v(k, i);
+                        v(k, i) = co * tt2 + si * v(k, j);
+                        v(k, j) = -si * tt2 + co * v(k, j);
                     }
 
                     // ---- MODIFY DIAGONAL TERMS --------------------
@@ -1327,7 +1327,7 @@ inline std::pair<FloatArrayF<2>, FloatMatrixF<2,2>> eig(const FloatMatrixF<2,2> 
  * @return Solution of linear equations.
  */
 template<std::size_t N>
-FloatArrayF<N> solve(FloatMatrixF<N,N> mtrx, const FloatArrayF<N> &b)
+std::pair<bool, FloatArrayF<N>> solve_check(FloatMatrixF<N,N> mtrx, const FloatArrayF<N> &b, double zeropiv = 1e-20)
 {
     auto answer = b;
     // initialize answer to be unity matrix;
@@ -1343,8 +1343,8 @@ FloatArrayF<N> solve(FloatMatrixF<N,N> mtrx, const FloatArrayF<N> &b)
             }
         }
 
-        if ( piv < 1.e-20 ) {
-            throw std::runtime_error("Singular pivot encountered");
+        if ( piv <= zeropiv ) {
+            return {false, zeros<N>()};
         }
 
         // exchange rows
@@ -1378,7 +1378,25 @@ FloatArrayF<N> solve(FloatMatrixF<N,N> mtrx, const FloatArrayF<N> &b)
 
         answer[i] = ( answer[i] - help ) / mtrx(i, i);
     }
-    return answer;
+    return {true, answer};
+}
+
+
+/**
+ * Solves the  system of linear equations @f$ K\cdot a = b @f$ .
+ * Uses Gaussian elimination with pivoting directly on receiver.
+ * @param b RHS of linear system.
+ * @return Solution of linear equations.
+ */
+template<std::size_t N>
+FloatArrayF<N> solve(FloatMatrixF<N,N> mtrx, const FloatArrayF<N> &b, double zeropiv=1e-20)
+{
+    auto tmp = solve_check(mtrx, b, zeropiv);
+    if ( tmp.first ) {
+        return tmp.second;
+    } else {
+        throw std::runtime_error("Singular pivot encountered");
+    }
 }
 
 /**
@@ -1388,7 +1406,7 @@ FloatArrayF<N> solve(FloatMatrixF<N,N> mtrx, const FloatArrayF<N> &b)
  * @return Solution of linear equations, each column corresponding to columns in B.
  */
 template<std::size_t N, std::size_t M>
-FloatMatrixF<N,M> solve(FloatMatrixF<N,N> mtrx, const FloatMatrixF<N,M> &B)
+FloatMatrixF<N,M> solve(FloatMatrixF<N,N> mtrx, const FloatMatrixF<N,M> &B, double zeropiv=1e-20)
 {
     auto answer = B;
     // initialize answer to be unity matrix;
@@ -1404,7 +1422,7 @@ FloatMatrixF<N,M> solve(FloatMatrixF<N,N> mtrx, const FloatMatrixF<N,M> &B)
             }
         }
 
-        if ( fabs(piv) < 1.e-20 ) {
+        if ( fabs(piv) < zeropiv ) {
             throw std::runtime_error("pivot too small, matrix problem could not be solved");
         }
 
