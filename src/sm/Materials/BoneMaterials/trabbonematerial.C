@@ -54,7 +54,7 @@ TrabBoneMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 }
 
 
-double TrabBoneMaterial :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
+double TrabBoneMaterial :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
     return status->giveTempAlpha();
@@ -95,7 +95,7 @@ TrabBoneMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, 
 
 
 void
-TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
+TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
@@ -158,7 +158,7 @@ TrabBoneMaterial :: computeDensification(GaussPoint *gp, const FloatArray &total
 
 
 double
-TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
+TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp) const
 {
     double dam;
     if ( alpha > 0. ) {
@@ -177,17 +177,16 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
 
 
 double
-TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
+TrabBoneMaterial :: computeDamage(GaussPoint *gp,  TimeStep *tStep) const
 {
     double alpha = computeCumPlastStrain(gp, tStep);
     return computeDamageParam(alpha, gp);
 }
 
 
-void
-TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                            const FloatArray &totalStrain,
-                                            TimeStep *tStep)
+FloatArrayF<1>
+TrabBoneMaterial :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain,
+                                            GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneMaterialStatus * >( this->giveStatus(gp) );
 
@@ -203,11 +202,12 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
     double sigc = status->giveSigC();
     double sig = ( 1 - dam ) * E0 * ( epsnew - epsp ) + sigc;
 
-    answer.resize(1);
-    answer.at(1) = sig;
+    FloatArrayF<1> answer = {sig};
     status->setTempDam(dam);
     status->letTempStrainVectorBe(totalStrain);
     status->letTempStressVectorBe(answer);
+    
+    return answer;
 }
 
 

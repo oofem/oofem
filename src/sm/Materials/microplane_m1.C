@@ -62,17 +62,13 @@ M1Material :: initializeFrom(InputRecord &ir)
     ENtan = EN * HN / ( EN + HN );
 }
 
-void
-M1Material :: giveRealStressVector_3d(FloatArray &answer,
-                                      GaussPoint *gp,
-                                      const FloatArray &totalStrain,
-                                      TimeStep *tStep)
+FloatArrayF<6>
+M1Material :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                      TimeStep *tStep) const
 {
-    answer.resize(6);
-    answer.zero();
+    auto status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
 
     // get the status at the beginning
-    M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
     // prepare status at the end
     this->initTempStatus(gp);
     // get the initial values of plastic strains on microplanes (set to zero in the first step)
@@ -82,11 +78,13 @@ M1Material :: giveRealStressVector_3d(FloatArray &answer,
         epspN.zero();
     }
 
+    FloatArrayF<6> stress;
+
     // loop over microplanes
     FloatArray sigN(numberOfMicroplanes);
     IntArray plState(numberOfMicroplanes);
     for ( int imp = 1; imp <= numberOfMicroplanes; imp++ ) {
-        double epsN = computeNormalStrainComponent(imp, totalStrain);
+        double epsN = computeNormalStrainComponent(imp, strain);
         // evaluate trial stress on the microplane
         double sigTrial = EN * ( epsN - epspN.at(imp) );
         // evaluate the yield stress (from total microplane strain, not from its plastic part)
@@ -105,39 +103,35 @@ M1Material :: giveRealStressVector_3d(FloatArray &answer,
         }
         // add the contribution of the microplane to macroscopic stresses
         for ( int i = 1; i <= 6; i++ ) {
-            answer.at(i) += N [ imp - 1 ] [ i - 1 ] * sigN.at(imp) * microplaneWeights [ imp - 1 ];
+            stress.at(i) += N [ imp - 1 ] [ i - 1 ] * sigN.at(imp) * microplaneWeights [ imp - 1 ];
         }
     }
     // multiply the integral over unit hemisphere by 6
-    answer.times(6);
+    stress *= 6;
 
     // update status
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
     status->letTempNormalMplaneStressesBe(sigN);
     status->letTempNormalMplanePlasticStrainsBe(epspN);
     status->letPlasticStateIndicatorsBe(plState);
+    return stress;
 }
 
-void
-M1Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                            MatResponseMode mode,
+FloatMatrixF<6,6>
+M1Material :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 {
-    answer.resize(6, 6);
-    answer.zero();
     // elastic stiffness matrix
     if ( mode == ElasticStiffness ) {
-        MicroplaneMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        return;
+        return MicroplaneMaterial :: give3dMaterialStiffnessMatrix(mode, gp, tStep);
     }
 
     M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
     IntArray plasticState = status->givePlasticStateIndicators();
     if ( plasticState.giveSize() != numberOfMicroplanes ) {
-        MicroplaneMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        return;
+        return MicroplaneMaterial :: give3dMaterialStiffnessMatrix(mode, gp, tStep);
     }
     // tangent stiffness matrix
     double aux, D11 = 0., D12 = 0., D13 = 0., D14 = 0., D15 = 0., D16 = 0., D22 = 0., D23 = 0., D24 = 0., D25 = 0., D26 = 0., D33 = 0., D34 = 0., D35 = 0., D36 = 0.;
@@ -166,6 +160,7 @@ M1Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         D35 += aux * N [ im ] [ 2 ] * N [ im ] [ 4 ];
         D36 += aux * N [ im ] [ 2 ] * N [ im ] [ 5 ];
     }
+    FloatMatrixF<6,6> answer;
     answer.at(1, 1) = D11;
     answer.at(1, 2) = answer.at(2, 1) = answer.at(6, 6) = D12;
     answer.at(1, 3) = answer.at(3, 1) = answer.at(5, 5) = D13;
@@ -183,8 +178,9 @@ M1Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     answer.at(3, 4) = answer.at(4, 3) = D34;
     answer.at(3, 5) = answer.at(5, 3) = D35;
     answer.at(3, 6) = answer.at(6, 3) = answer.at(4, 5)  = answer.at(5, 4) = D36;
+    answer *= 6.;
 
-    answer.times(6.);
+    return answer;
 }
 
 int

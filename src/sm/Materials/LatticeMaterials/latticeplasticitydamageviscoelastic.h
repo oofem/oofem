@@ -72,7 +72,7 @@ public:
 
     void initTempStatus() override;
 
-    void updateYourself(TimeStep *) override; 
+    void updateYourself(TimeStep *) override;
 
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -107,22 +107,18 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamageViscoelastic_Name; }
     const char *giveClassName() const override { return "LatticePlasticityDamageViscoelastic"; }
 
-    
+
     void initializeFrom(InputRecord &ir) override;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
+    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rmode,
+                                                     GaussPoint *gp,
+                                                     TimeStep *atTime) const override;
 
-    void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
-    void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
+                                                     GaussPoint *gp,
+                                                     TimeStep *atTime) const override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
@@ -135,7 +131,7 @@ public:
 
     RheoChainMaterial *giveViscoelasticMaterial();
 
-    void giveReducedStrain(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
 

@@ -234,7 +234,7 @@ Lattice3d :: givePlasticStrain(FloatArray &plasticStrain)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
-    plasticStrain = status->givePlasticStrain();
+    plasticStrain = status->givePlasticLatticeStrain();
     return;
 }
 
@@ -243,7 +243,7 @@ Lattice3d :: giveOldPlasticStrain(FloatArray &plasticStrain)
 {
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveMaterial()->giveStatus(gp) );
-    plasticStrain = status->giveOldPlasticStrain();
+    plasticStrain = status->giveOldPlasticLatticeStrain();
     return;
 }
 
@@ -332,7 +332,7 @@ Lattice3d :: giveNormalStress()
     GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double normalStress = 0;
-    normalStress = status->giveNormalStress();
+    normalStress = status->giveNormalLatticeStress();
 
     return normalStress;
 }
@@ -372,7 +372,6 @@ Lattice3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Lattice3d :: initializeFrom(InputRecord &ir)
 {
-  
     LatticeStructuralElement :: initializeFrom(ir);
 
     minLength = 1.e-20;
@@ -390,7 +389,6 @@ Lattice3d :: initializeFrom(InputRecord &ir)
     pressures.resize(numberOfPolygonVertices);
     pressures.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, pressures, _IFT_Lattice3d_pressures);
-
 }
 
 

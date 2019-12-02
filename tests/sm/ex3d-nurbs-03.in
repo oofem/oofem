@@ -5,15 +5,15 @@ errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 5 nic 0 nltf 1 nset 5
-node 1 coords 4 0 0 0 1
-node 2 coords 4 4 0 0 1
-node 3 coords 4 0 3 0 1
-node 4 coords 4 4 3 0 1
-node 5 coords 4 0 0 5 1
-node 6 coords 4 4 0 5 1
-node 7 coords 4 0 3 5 1
-node 8 coords 4 4 3 5 1 lcs 6 0 0 1 0 1 0
-nurbs3delement 1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 knotvectoru 2 0 1 knotmultiplicityu 2 2 2 knotvectorv 2 0 1 knotmultiplicityv 2 2 2 knotvectorw 2 0 1 knotmultiplicityw 2 2 2 degree 3 1 1 1 nip 8
+node 1 coords 3 0 0 0 
+node 2 coords 3 4 0 0 
+node 3 coords 3 0 3 0 
+node 4 coords 3 4 3 0 
+node 5 coords 3 0 0 5 
+node 6 coords 3 4 0 5 
+node 7 coords 3 0 3 5 
+node 8 coords 3 4 3 5 lcs 6 0 0 1 0 1 0
+nurbs3delement 1 crossSect 1 nodes 8 1 2 3 4 5 6 7 8 weights 8 1 1 1 1 1 1 1 1 knotvectoru 2 0 1 knotmultiplicityu 2 2 2 knotvectorv 2 0 1 knotmultiplicityv 2 2 2 knotvectorw 2 0 1 knotmultiplicityw 2 2 2 degree 3 1 1 1 nip 8
 #
 SimpleCS 1 material 1
 #

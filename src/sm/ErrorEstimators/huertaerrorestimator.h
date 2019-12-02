@@ -250,7 +250,7 @@ protected:
     void setupRefinedElementProblem1D(Element *element, RefinedElement *refinedElement,
                                       int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
-                                      FloatArray **corner, FloatArray &midNode,
+                                      FloatArray *corner, FloatArray &midNode,
                                       int &localNodeId, int &localElemId, int &localBcId,
                                       IntArray &controlNode, IntArray &controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *edgetype);
@@ -258,7 +258,7 @@ protected:
     void setupRefinedElementProblem2D(Element *element, RefinedElement *refinedElement,
                                       int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
-                                      FloatArray **corner, FloatArray *midSide, FloatArray &midNode,
+                                      FloatArray *corner, FloatArray *midSide, FloatArray &midNode,
                                       int &localNodeId, int &localElemId, int &localBcId,
                                       IntArray &controlNode, IntArray &controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *quadtype);
@@ -266,7 +266,7 @@ protected:
     void setupRefinedElementProblem3D(Element *element, RefinedElement *refinedElement,
                                       int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
-                                      FloatArray **corner, FloatArray *midSide, FloatArray *midFace, FloatArray &midNode,
+                                      FloatArray *corner, FloatArray *midSide, FloatArray *midFace, FloatArray &midNode,
                                       int &localNodeId, int &localElemId, int &localBcId,
                                       int hexaSideNode [ 1 ] [ 3 ], int hexaFaceNode [ 1 ] [ 3 ],
                                       IntArray &controlNode, IntArray &controlDof,

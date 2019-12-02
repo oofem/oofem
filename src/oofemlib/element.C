@@ -839,16 +839,16 @@ Element :: initForNewStep()
 }
 
 
-void
-Element::giveBoundaryEdgeNodes(IntArray& bNodes, int boundary)
+IntArray
+Element::giveBoundaryEdgeNodes(int boundary) const
 {
-    this->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary);
 }
 
-void
-Element::giveBoundarySurfaceNodes(IntArray& bNodes, int boundary)
+IntArray
+Element::giveBoundarySurfaceNodes(int boundary) const
 {
-    this->giveInterpolation()->boundarySurfaceGiveNodes(bNodes, boundary);
+    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary);
 }
 
 std::unique_ptr<IntegrationRule>
@@ -1115,11 +1115,11 @@ Element :: giveLengthInDir(const FloatArray &normalToCrackPlane)
     double maxDis, minDis;
     int nnode = giveNumberOfNodes();
 
-    const auto &coords = *this->giveNode(1)->giveCoordinates();
+    const auto &coords = this->giveNode(1)->giveCoordinates();
     minDis = maxDis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
 
     for ( int i = 2; i <= nnode; i++ ) {
-        const auto &coords = *this->giveNode(i)->giveCoordinates();
+        const auto &coords = this->giveNode(i)->giveCoordinates();
         double dis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
         if ( dis > maxDis ) {
             maxDis = dis;

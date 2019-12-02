@@ -56,11 +56,8 @@ public:
      */
     TransportCrossSection(int n, Domain * d) : CrossSection(n, d) { }
 
-    /// Destructor.
-    virtual ~TransportCrossSection() { }
-
     /// @todo Temporary function that hands out the material. Must be removed for future layered support, but input files will still look the same.
-    virtual TransportMaterial *giveMaterial() = 0;
+    virtual TransportMaterial *giveMaterial() const = 0;
 };
 } // end namespace oofem
 #endif // transportcrosssection_h

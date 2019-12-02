@@ -330,9 +330,9 @@ TrPlaneStrRot :: giveArea()
 void
 TrPlaneStrRot :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
 {
-    const auto &nc1 = *this->giveNode(1)->giveCoordinates();
-    const auto &nc2 = *this->giveNode(2)->giveCoordinates();
-    const auto &nc3 = *this->giveNode(3)->giveCoordinates();
+    const auto &nc1 = this->giveNode(1)->giveCoordinates();
+    const auto &nc2 = this->giveNode(2)->giveCoordinates();
+    const auto &nc3 = this->giveNode(3)->giveCoordinates();
 
     x.at(1) = nc1.at(1);
     x.at(2) = nc2.at(1);
@@ -583,16 +583,16 @@ TrPlaneStrRot :: initializeFrom(InputRecord &ir)
 void
 TrPlaneStrRot :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveMembraneRotStiffMtrx(answer, rMode, gp, tStep);
+    auto cs = this->giveStructuralCrossSection();
+    answer = cs->giveMembraneRotStiffMtrx(rMode, gp, tStep);
 }
 
 
 void
 TrPlaneStrRot :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveGeneralizedStress_MembraneRot(answer, gp, strain, tStep);
+    auto cs = this->giveStructuralCrossSection();
+    answer = cs->giveGeneralizedStress_MembraneRot(strain, gp, tStep);
 }
 
 

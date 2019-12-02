@@ -77,7 +77,6 @@ public:
     double giveLength() override;
 
     double giveNormalStress() override;
-    double giveOldNormalStress() override;
 
     int hasBeenUpdated() override;
 

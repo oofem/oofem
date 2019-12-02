@@ -71,7 +71,7 @@ public:
     void edgeEvaldNdxi(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) override;
+    IntArray computeLocalEdgeMapping(int iedge) const override;
 
     // Surface
     void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -79,7 +79,7 @@ public:
     void surfaceLocal2global(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void computeLocalSurfaceMapping(IntArray &edgeNodes, int iedge) override;
+    IntArray computeLocalSurfaceMapping(int iedge) const override;
 
     void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo) override;
@@ -88,7 +88,7 @@ public:
     std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;
 
 protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
+    double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
 };
 } // end namespace oofem
 #endif //  fei3dhexalin_h

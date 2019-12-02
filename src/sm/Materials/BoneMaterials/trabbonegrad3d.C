@@ -70,7 +70,7 @@ TrabBoneGrad3D :: giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatR
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-        give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        answer = give3dMaterialStiffnessMatrix(mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -139,11 +139,11 @@ TrabBoneGrad3D :: computeLocalDamageDrivingVariable(double &answer, GaussPoint *
 }
 
 
-void
-TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
-
+    FloatMatrixF<6,6> answer;
     if ( mode == ElasticStiffness ) {
         auto compliance = this->constructAnisoComplTensor();
         auto elasticity = inv(compliance);
@@ -197,8 +197,9 @@ TrabBoneGrad3D :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponse
     double g = status->giveDensG();
     if ( g <= 0 ) {
         double factor = gammaL0 * pow(rho, rL) + gammaP0 *pow(rho, rP) * ( tDens - 1 ) * pow(g, tDens - 2);
-        answer.add(I6_I6 * factor);
+        answer += I6_I6 * factor;
     }
+    return answer;
 }
 
 
@@ -293,7 +294,7 @@ TrabBoneGrad3D :: giveRealStressVectorGradientDamage(FloatArray &answer1, double
 
 
 double
-TrabBoneGrad3D :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep)
+TrabBoneGrad3D :: computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< TrabBoneGrad3DStatus * >( this->giveStatus(gp) );
     double localCumPlastStrain = status->giveTempKappa();

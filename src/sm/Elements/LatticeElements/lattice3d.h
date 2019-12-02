@@ -129,9 +129,9 @@ public:
 
 #ifdef __OOFEG
     void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
-    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
+    void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
     void drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
+    void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
 #endif
 
 
@@ -148,7 +148,7 @@ protected:
     void computePropertiesOfCrossSection();
 
     void computeGaussPoints() override;
-    virtual integrationDomain  giveIntegrationDomain() const override { return _Line; }
+    integrationDomain giveIntegrationDomain() const override { return _Line; }
 };
 } // end namespace oofem
 #endif

@@ -69,7 +69,7 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: unordered_map< in
 
     for ( int i = 1; i <= nNodes; i++ ) {
         DofManager *dMan = d->giveDofManager(i);
-        const auto &nodePos = * ( dMan->giveCoordinates() );
+        const auto &nodePos = dMan->giveCoordinates();
 
         double radius2 = distance_square(iTipInfo.mGlobalCoord, nodePos);
 

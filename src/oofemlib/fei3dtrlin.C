@@ -138,9 +138,8 @@ void
 FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray N;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
     answer.resize(0);
@@ -153,35 +152,30 @@ FEI3dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTrLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     ///@todo Implement this
     OOFEM_ERROR("FEI3dTrLin :: edgeGiveTransformationJacobian - Not supported");
     return -1;
 }
 
 
-void
-FEI3dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dTrLin :: computeLocalEdgeMapping(int iedge) const
 {
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        edgeNodes = { 1, 2 };
-
+        return { 1, 2 };
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        edgeNodes = { 2, 3 };
-
+        return { 2, 3 };
     } else if ( iedge == 3 ) { // edge between nodes 2 3
-        edgeNodes = { 3, 1 };
-
+        return { 3, 1 };
     } else {
-        OOFEM_ERROR("Wrong edge number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
-
 }
 
 double
-FEI3dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI3dTrLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     ///@todo Implement this
     OOFEM_ERROR("FEI3dTrLin :: edgeComputeLength - Not supported");
@@ -289,11 +283,11 @@ FEI3dTrLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lco
     return 0;
 }
 
-void
-FEI3dTrLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
+IntArray
+FEI3dTrLin :: computeLocalSurfaceMapping(int isurf) const
 {
     //surfNodes.setValues(3, 1, 2, 3);
-    computeLocalEdgeMapping(surfNodes, isurf);
+    return computeLocalEdgeMapping(isurf);
 
 }
 

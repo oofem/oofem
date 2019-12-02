@@ -216,15 +216,11 @@ DustMaterial :: initializeFrom(InputRecord &ir)
     solveQ0(q0);
 }
 
-void
-DustMaterial :: giveRealStressVector_3d(FloatArray &answer,
-                                     GaussPoint *gp,
-                                     const FloatArray &totalStrain,
-                                     TimeStep *tStep)
+FloatArrayF<6>
+DustMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain,
+                                        GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< DustMaterialStatus * >( this->giveStatus(gp) );
-
-    FloatArrayF<6> strain = totalStrain;
 
     // Initialize temp variables for this Gauss point
     this->initTempStatus(gp);
@@ -240,7 +236,7 @@ DustMaterial :: giveRealStressVector_3d(FloatArray &answer,
     status->letTempStrainVectorBe(strain);
 
     // pass the correct form of stressVector to giveRealStressVector
-    answer = status->giveTempStressVector();
+    return status->giveTempStressVector();
 }
 
 void
@@ -461,21 +457,19 @@ DustMaterial :: computeQFromPlastVolEps(double &answer, double q, double deltaVo
     OOFEM_ERROR("Newton's method did not converge");
 }
 
-void
-DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseMode mode,
+FloatMatrixF<6,6>
+DustMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
+                                              TimeStep *tStep) const
 {
     auto status = static_cast< DustMaterialStatus * >( giveStatus(gp) );
     double ym0 = LEMaterial.giveYoungsModulus();
     double ym = status->giveYoungsModulus();
     double coeff = status->giveVolumetricPlasticStrain() < 0 ? ym / ym0 : 1.0;
     if ( mode == ElasticStiffness ) {
-        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
     } else if ( mode == SecantStiffness || mode == TangentStiffness ) {
-        LEMaterial.give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
-        answer.times(coeff);
+        return coeff * LEMaterial.give3dMaterialStiffnessMatrix(mode, gp, tStep);
     } else {
         OOFEM_ERROR("Unsupported MatResponseMode");
     }

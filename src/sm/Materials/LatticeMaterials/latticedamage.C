@@ -54,20 +54,18 @@ LatticeDamage :: LatticeDamage(int n, Domain *d) : LatticeLinearElastic(n, d)
 {}
 
 
-
 bool
 LatticeDamage :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    return ( mode == _2dLattice ) || ( mode == _3dLattice );
+    return ( mode == _3dLattice );
 }
 
 
 void
 LatticeDamage :: initializeFrom(InputRecord &ir)
 {
-
     LatticeLinearElastic :: initializeFrom(ir);
-  
+
     softeningType = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_LatticeDamage_softeningType); // Macro
 
@@ -94,51 +92,28 @@ LatticeDamage :: initializeFrom(InputRecord &ir)
 
     this->biotType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage_btype);
-
-   
 }
 
 
-void
-LatticeDamage :: computeEquivalentStrain(double &tempEquivStrain, const FloatArray &strain, GaussPoint *gp, TimeStep *atTime)
+double
+LatticeDamage :: computeEquivalentStrain(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *atTime) const
 {
-    if ( strain.isEmpty() ) {
-        tempEquivStrain = 0.;
-        return;
-    }
-
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
-    double paramA, paramB, paramC;
-    double shearNorm;
+    double paramA = 0.5 * ( e0 + ec * e0 );
+    double paramB = ( coh * e0 ) / sqrt(1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
+    double paramC = 0.5 * ( this->ec * e0 - e0 );
 
-    paramA = 0.5 * ( e0 + ec * e0 );
-    paramB = ( coh * e0 ) / sqrt(1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
-    paramC = 0.5 * ( this->ec * e0 - e0 );
-
-
-    if ( gp->giveMaterialMode() == _2dLattice ) {
-        shearNorm = strain.at(2);
-    } else {
-        shearNorm = sqrt(pow(strain.at(2), 2.) + pow(strain.at(3), 2.) );
-    }
-
-    tempEquivStrain =  sqrt(pow(this->alphaOne * shearNorm / paramB, 2.) + pow( ( strain.at(1) + paramC ) / paramA, 2. ) ) * paramA - paramC;
-
-    return;
+    double shearNorm = norm(strain[{1,2}]);
+    return norm({this->alphaOne * shearNorm / paramB, ( strain.at(1) + paramC ) / paramA}) * paramA - paramC;
 }
 
 
-void
-LatticeDamage :: computeDamageParam(double &omega, double tempKappa, GaussPoint *gp)
+double
+LatticeDamage :: computeDamageParam(double tempKappa, GaussPoint *gp) const
 {
     double le = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
-
-    omega = 0.0;
-
-    int nite = 0;
-    double R, Lhs, Ft, help;
 
     if ( softeningType == 1 ) { //linear
         if ( tempKappa >= e0 && tempKappa < this->wf / le ) {
@@ -148,15 +123,13 @@ LatticeDamage :: computeDamageParam(double &omega, double tempKappa, GaussPoint 
                 OOFEM_ERROR("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size\n");
             }
 
-            omega = ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / le ) );
+            return ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / le ) );
         } else if ( tempKappa >= this->wf / le ) {
-            omega = 1.;
+            return 1.;
         } else {
-            omega = 0.;
+            return 0.;
         }
     } else if ( softeningType == 2 ) {      //bilinear softening
-        double helpStrain = 0.3 * e0;
-
         //Check if input parameter make sense
         if ( e0 > wfOne / le ) {
             OOFEM_ERROR("parameter wf1 is too small");
@@ -164,44 +137,40 @@ LatticeDamage :: computeDamageParam(double &omega, double tempKappa, GaussPoint 
             OOFEM_ERROR("parameter wf is too small");
         }
 
-        //
         if ( tempKappa > e0 ) {
-            omega = ( 1 - e0 / tempKappa ) / ( ( helpStrain - e0 ) / this->wfOne * le + 1. );
+            double helpStrain = 0.3 * e0;
+            double omega = ( 1 - e0 / tempKappa ) / ( ( helpStrain - e0 ) / this->wfOne * le + 1. );
 
             if ( omega * tempKappa * le > 0 && omega * tempKappa * le < this->wfOne ) {
-                return;
+                return omega;
             } else {
                 omega = ( 1. - helpStrain / tempKappa - helpStrain * this->wfOne / ( tempKappa * ( this->wf - this->wfOne ) ) ) / ( 1. - helpStrain * le / ( this->wf - this->wfOne ) );
 
                 if ( omega * tempKappa * le >= this->wfOne  && omega * tempKappa * le < this->wf  ) {
-                    return;
+                    return omega;
                 }
             }
 
-            if ( omega > 1. ) {
-                omega = 1.;
-            } else if ( omega < 0 ) {
-                omega = 0;
-            }
+            return clamp(omega, 0., 1.);
         } else {
-            omega = 0.;
+            return 0.;
         }
     } else if ( softeningType == 3 ) {
         //exponential softening
         //  iteration to achieve objectivity
         //   we are finding state, where elastic stress is equal to
         //   stress from crack-opening relation (wf = wf characterizes the carc opening diagram)
-
         if ( tempKappa <= e0 ) {
-            omega = 0.0;
+            return 0.0;
         } else {
-            omega = 0.0;
-            Ft = eNormal * e0;
+            int nite = 0;
+            double R = 0., omega = 0.;
+            double Ft = eNormal * e0;
             do {
                 nite++;
-                help = le * omega * tempKappa / this->wf;
+                double help = le * omega * tempKappa / this->wf;
+                double Lhs = eNormal * tempKappa - Ft * exp(-help) * le * tempKappa / this->wf;
                 R = ( 1. - omega ) * eNormal * tempKappa - Ft * exp(-help);
-                Lhs = eNormal * tempKappa - Ft * exp(-help) * le * tempKappa / this->wf;
                 omega += R / Lhs;
                 if ( nite > 40 ) {
                     OOFEM_ERROR("computeDamageParam: algorithm not converging");
@@ -211,12 +180,12 @@ LatticeDamage :: computeDamageParam(double &omega, double tempKappa, GaussPoint 
             if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
                 OOFEM_ERROR("computeDamageParam: internal error\n");
             }
+            return omega;
         }
     } else {
         OOFEM_ERROR("computeDamageParam: unknown softening type");
     }
 }
-
 
 
 MaterialStatus *
@@ -225,214 +194,79 @@ LatticeDamage :: CreateStatus(GaussPoint *gp) const
     return new LatticeDamageStatus(gp);
 }
 
-FloatMatrixF< 3, 3 >
-LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
-//
-// return material stiffness matrix for 2dlattice
-//
-{
-    FloatMatrix answer;
-    answer.resize(3, 3);
-    answer.zero();
-
-    answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(mode, gp, tStep);
-
-    if ( mode == ElasticStiffness ) {
-        return answer;
-    } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
-        LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-        double omega = status->giveTempDamage();
-
-        if ( omega > 0.99999 ) {
-            omega = 0.99999;
-        }
-
-        answer.times(1. - omega);
-
-        return answer;
-    } else {
-        OOFEM_ERROR("Unsupported stiffness mode\n");
-    }
-    //Should never reach this point
-    return answer;
-}
 
 FloatMatrixF< 6, 6 >
 LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix answer;
-    answer.resize(6, 6);
-    answer.zero();
-
-    answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(mode, gp, tStep);
+    auto elastic = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(mode, gp, tStep);
 
     if ( mode == ElasticStiffness ) {
-        return answer;
+        return elastic;
     } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
-        LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+        auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
         double omega = status->giveTempDamage();
 
         if ( omega > 0.99999 ) {
             omega = 0.99999;
         }
 
-        answer.times(1. - omega);
-
-        return answer;
+        return elastic * (1. - omega);
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
+        return elastic;
     }
-
-    //Should never reach this point
-    return answer;
 }
 
-FloatArrayF< 3 >
-LatticeDamage :: giveLatticeStress2d(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep)
+
+FloatMatrixF< 3, 3 >
+LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatArray answer;
-    answer.resize(3);
-    answer.zero();
+    auto elastic = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(mode, gp, tStep);
 
-    LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+    if ( mode == ElasticStiffness ) {
+        return elastic;
+    } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
+        auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+        double omega = status->giveTempDamage();
 
-    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
-
-    status->setE0(e0);
-    FloatArray reducedStrain, reducedStrainOld;
-
-    double f, equivStrain, tempKappa, omega = 0.;
-
-    this->initTempStatus(gp);
-
-    FloatArray testStrainOld(status->giveStrainVector() );
-
-    // substract stress independent part
-    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
-
-    // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedStrain, gp, tStep);
-
-    // compute value of loading function if strainLevel crit apply
-    f = equivStrain - status->giveKappa();
-
-    if ( f <= 0.0 ) {
-        // damage does not grow
-        tempKappa = status->giveKappa();
-        omega = status->giveDamage();
-        if ( status->giveCrackFlag() != 0 ) {
-            status->setTempCrackFlag(2);
-        } else {
-            status->setTempCrackFlag(0);
+        if ( omega > 0.99999 ) {
+            omega = 0.99999;
         }
+
+        return elastic * (1. - omega);
     } else {
-        // damage grows
-        tempKappa = equivStrain;
-
-        // evaluate damage parameter
-
-        this->computeDamageParam(omega, tempKappa, gp);
-        if ( omega > 0 ) {
-            status->setTempCrackFlag(1);
-        }
+        OOFEM_ERROR("Unsupported stiffness mode\n");
+        return elastic;
     }
-
-
-    FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(3, 3);
-    stiffnessMatrix.zero();
-
-    stiffnessMatrix = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-
-    for ( int i = 1; i <= 3; i++ ) { // only diagonal terms matter
-        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
-    }
-
-
-    //Compute crack width
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
-
-
-    double crackWidth;
-    crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
-
-
-
-
-    double waterPressure = 0.;
-
-    IntArray coupledModels;
-
-    //Calculate the the bio coefficient;
-    double biot = 0.;
-    if ( this->biotType == 0 ) {
-        biot = this->biotCoefficient;
-    } else if ( this->biotType == 1 ) {
-        biot = computeBiot(omega, tempKappa, length);
-    } else {
-        OOFEM_ERROR("Unknown biot type\n");
-    }
-
-    answer.at(1) = answer.at(1) + biot * waterPressure;
-
-    status->setBiotCoefficientInStatus(biot);
-
-
-    double tempDissipation = status->giveDissipation();
-    double tempDeltaDissipation;
-
-    tempDeltaDissipation = computeDeltaDissipation2d(omega, reducedStrain, gp, tStep);
-
-    tempDissipation += tempDeltaDissipation;
-
-    //Set all temp values
-    status->setTempDissipation(tempDissipation);
-    status->setTempDeltaDissipation(tempDeltaDissipation);
-
-    status->setTempEquivalentStrain(equivStrain);
-    status->letTempStrainVectorBe(strain);
-    status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
-    status->setTempKappa(tempKappa);
-    status->setTempDamage(omega);
-
-    status->setTempNormalStress(answer.at(1) );
-    status->setTempCrackWidth(crackWidth);
-
-    return answer;
 }
-
 
 
 FloatArrayF< 6 >
 LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray answer;
-    answer.resize(6);
-    answer.zero();
-
-    LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
 
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
     status->setE0(e0);
-    FloatArray reducedStrain, reducedStrainOld;
-
-    double f, equivStrain, tempKappa, omega = 0.;
-
     this->initTempStatus(gp);
 
-    FloatArray testStrainOld(status->giveStrainVector() );
+    //const auto &testStrainOld = status->giveLatticeStrain(); // unused?
 
     // substract stress independent part
-    this->giveStressDependentPartOfStrainVector(reducedStrain, gp, strain, tStep, VM_Total);
+    auto reducedStrain = strain;
+    auto thermalStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
+    if ( thermalStrain.giveSize() ) {
+        reducedStrain -= FloatArrayF<6>(thermalStrain);
+    }
 
     // compute equivalent strain
-    this->computeEquivalentStrain(equivStrain, reducedStrain, gp, tStep);
+    double equivStrain = this->computeEquivalentStrain(reducedStrain, gp, tStep);
 
     // compute value of loading function if strainLevel crit apply
-    f = equivStrain - status->giveKappa();
+    double f = equivStrain - status->giveKappa();
 
+    double tempKappa, omega = 0.;
     if ( f <= 0.0 ) {
         // damage does not grow
         tempKappa = status->giveKappa();
@@ -448,303 +282,202 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
 
         // evaluate damage parameter
 
-        this->computeDamageParam(omega, tempKappa, gp);
+        omega = this->computeDamageParam(tempKappa, gp);
         if ( omega > 0 ) {
             status->setTempCrackFlag(1);
         }
     }
 
+    auto stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    FloatMatrix stiffnessMatrix;
-    stiffnessMatrix.resize(6, 6);
-    stiffnessMatrix.zero();
-
-    stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-
+    FloatArrayF<6> answer;
     for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
         answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
     }
 
-
-
     //Compute crack width
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    double crackWidth = omega * norm(reducedStrain[{0, 1, 2}]) * length;
 
-
-    double crackWidth;
-    crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
-
-
-
-    // todo - resolve and unify !!!
-
-    double waterPressure = 0.;
     //Read in fluid pressures from structural element if this is not a slave problem
     FloatArray pressures;
     if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
         static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
     }
 
-    waterPressure = 0.;
+    double waterPressure = 0.;
     for ( int i = 0; i < pressures.giveSize(); i++ ) {
-        waterPressure += 1. / pressures.giveSize() * pressures.at(i + 1);
+        waterPressure += 1. / pressures.giveSize() * pressures[i];
     }
-
     answer.at(1) += waterPressure;
 
-
-    double tempDissipation = status->giveDissipation();
-    double tempDeltaDissipation;
-
-
-    tempDeltaDissipation = computeDeltaDissipation3d(omega, reducedStrain, gp, tStep);
-
-    tempDissipation += tempDeltaDissipation;
+    double tempDeltaDissipation = computeDeltaDissipation3d(omega, reducedStrain, gp, tStep);
+    double tempDissipation = status->giveDissipation() + tempDeltaDissipation;
 
     //Set all temp values
     status->setTempDissipation(tempDissipation);
     status->setTempDeltaDissipation(tempDeltaDissipation);
 
     status->setTempEquivalentStrain(equivStrain);
-    status->letTempStrainVectorBe(strain);
-    status->letTempReducedStrainBe(reducedStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempLatticeStrainBe(strain);
+    status->letTempReducedLatticeStrainBe(reducedStrain);
+    status->letTempLatticeStressBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
 
-    status->setTempNormalStress(answer.at(1) );
+    status->setTempNormalLatticeStress(answer.at(1) );
     status->setTempCrackWidth(crackWidth);
 
     return answer;
 }
 
-double
-LatticeDamage :: computeBiot(double omega,
-                             double kappa,
-                             double le)
-{
-    double biot = 0.;
 
+double
+LatticeDamage :: computeBiot(double omega, double kappa, double le) const
+{
     if ( this->softeningType == 1 || this->softeningType == 3 ) {
         if ( omega == 0 ) {
-            biot = this->biotCoefficient;
+            return this->biotCoefficient;
         } else if ( omega * kappa * le > 0 && omega * kappa * le < this->wf ) {
-            biot = this->biotCoefficient + ( 1. - biotCoefficient ) * omega * kappa * le / this->wf;
+            return this->biotCoefficient + ( 1. - biotCoefficient ) * omega * kappa * le / this->wf;
         } else {
-            biot = 1.;
+            return 1.;
         }
     } else {
         OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
+        return 0.;
     }
 
-    return biot;
 }
 
+
+double
+LatticeDamage :: computeReferenceGf(GaussPoint *gp) const
+{
+    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
+    const double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
+    if ( softeningType == 1 ) {
+        return e0 * eNormal * this->wf / 2.;
+    } else {   //This is for the exponential law. Should also implement it for the bilinear one.
+        return e0 * eNormal * this->wf;
+    }
+}
+
+
+double
+LatticeDamage :: computeIntervals(double testDissipation, double referenceGf) const
+{
+    if ( testDissipation / ( referenceGf ) > 0.01 ) {
+        return 1000. * min(testDissipation / referenceGf, 1.);
+    } else {
+        return 1.;
+    }
+}
 
 
 double
 LatticeDamage :: computeDeltaDissipation2d(double omega,
-                                           FloatArray &reducedStrain,
+                                           const FloatArrayF<3> &reducedStrain,
                                            GaussPoint *gp,
-                                           TimeStep *tStep)
+                                           TimeStep *tStep) const
 {
-    LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
-    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
-    double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
+    auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+    const double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    const double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
+    const double eShear = this->alphaOne * eNormal;
+    const double eTorsion = this->alphaTwo * eNormal;
+    const FloatArrayF<3> tangent = {eNormal, eShear, eTorsion};
 
-    const double eShear =  this->alphaOne * eNormal;
-    const double eTorsion =  this->alphaTwo * eNormal;
+    const auto reducedStrainOld = status->giveReducedLatticeStrain()[{0, 1, 5}];
+    const double omegaOld = status->giveDamage();
 
-
-    FloatArray reducedStrainOld;
-
-    reducedStrainOld = status->giveReducedStrain();
-    double omegaOld = status->giveDamage();
-    double deltaOmega;
-
-    FloatArray crackOpeningOld(3);
-    crackOpeningOld.times(omegaOld);
-    crackOpeningOld.times(length);
-    FloatArray stressOld(status->giveStressVector() );
-    FloatArray intermediateStrain(3);
-
-    double tempDeltaDissipation = 0.;
-    double deltaTempDeltaDissipation = 0.;
-
-    double intermediateOmega = 0;
-    FloatArray oldIntermediateStrain(3);
-    oldIntermediateStrain = reducedStrainOld;
+    auto oldIntermediateStrain = reducedStrainOld;
     double oldIntermediateOmega = omegaOld;
-    deltaOmega = ( omega - omegaOld );
-    double testDissipation =
-        0.5 * length * ( pow( ( reducedStrain(0) + reducedStrainOld(0) ) / 2., 2. ) * eNormal +
-                         pow( ( reducedStrain(1) + reducedStrainOld(1) ) / 2., 2. ) * eShear +
-                         pow( ( reducedStrain(2) + reducedStrainOld(2) ) / 2., 2. ) * eTorsion ) * deltaOmega;
+    double deltaOmega = ( omega - omegaOld );
+    auto testStrain = (reducedStrain + reducedStrainOld) * 0.5;
+    auto testStress = mult(tangent, testStrain);
+    double testDissipation = 0.5 * length * norm(testStress) * deltaOmega;
 
-
-    double intervals = 0.;
-
-    double referenceGf = 0;
-
-    if ( softeningType == 1 ) {
-        referenceGf = e0 * eNormal * this->wf / 2.;
-    } else {   //This is for the exponential law. Should also implement it for the bilinear one.
-        referenceGf = e0 * eNormal * this->wf;
-    }
-
-    if ( testDissipation / ( referenceGf ) > 0.01 ) {
-        intervals = 1000. * testDissipation / referenceGf;
-    } else {
-        intervals = 1.;
-    }
-
-    if ( intervals > 1000. ) {
-        intervals = 1000.;
-    }
+    double referenceGf = computeReferenceGf(gp);
+    double intervals = computeIntervals(testDissipation, referenceGf);
 
     double oldKappa = status->giveKappa();
-    double f, equivStrain;
     if ( deltaOmega > 0 ) {
+        double tempDeltaDissipation = 0.;
         for ( int k = 0; k < intervals; k++ ) {
-            intermediateStrain(0) = reducedStrainOld(0) + ( k + 1 ) / intervals * ( reducedStrain(0) - reducedStrainOld(0) );
-            intermediateStrain(1) = reducedStrainOld(1) + ( k + 1 ) / intervals * ( reducedStrain(1) - reducedStrainOld(1) );
-            intermediateStrain(2) = reducedStrainOld(2) + ( k + 1 ) / intervals * ( reducedStrain(2) - reducedStrainOld(2) );
-            this->computeEquivalentStrain(equivStrain, intermediateStrain, gp, tStep);
-            f = equivStrain - oldKappa;
+            auto intermediateStrain = reducedStrainOld + ( k + 1 ) / intervals * ( reducedStrain - reducedStrainOld );
+            double equivStrain = this->computeEquivalentStrain(assemble<6>(intermediateStrain, {0, 1, 5}), gp, tStep);
+            double f = equivStrain - oldKappa;
             if ( f > 0 ) {
-                this->computeDamageParam(intermediateOmega, equivStrain, gp);
-                deltaOmega = ( intermediateOmega - oldIntermediateOmega );
-                deltaTempDeltaDissipation =
-                    0.5 * length * ( pow( ( intermediateStrain(0) + oldIntermediateStrain(0) ) / 2., 2. ) * eNormal +
-                                     pow( ( intermediateStrain(1) + oldIntermediateStrain(1) ) / 2., 2. ) * eShear +
-                                     pow( ( intermediateStrain(2) + oldIntermediateStrain(2) ) / 2., 2. ) * eTorsion ) * deltaOmega;
-
+                auto  intermediateOmega = this->computeDamageParam(equivStrain, gp);
+                auto deltaOmega = ( intermediateOmega - oldIntermediateOmega );
+                auto midStrain = ( intermediateStrain + oldIntermediateStrain ) / 2.;
+                auto midStress = mult(tangent, midStrain);
+                auto deltaTempDeltaDissipation = 0.5 * length * norm(midStress) * deltaOmega;
                 oldKappa = equivStrain;
                 oldIntermediateOmega = intermediateOmega;
-            } else {
-                deltaTempDeltaDissipation = 0.;
+                tempDeltaDissipation += deltaTempDeltaDissipation;
             }
 
-            tempDeltaDissipation += deltaTempDeltaDissipation;
             oldIntermediateStrain = intermediateStrain;
         }
+        return max(tempDeltaDissipation, 2. * referenceGf);
     } else {
-        tempDeltaDissipation = 0.;
+        return 0.;
     }
-
-    if ( tempDeltaDissipation >= 2. * referenceGf ) {
-        tempDeltaDissipation = 2. * referenceGf;
-    }
-
-    return tempDeltaDissipation;
 }
-
 
 
 double
 LatticeDamage :: computeDeltaDissipation3d(double omega,
-                                           FloatArray &reducedStrain,
+                                           const FloatArrayF<6> &reducedStrain,
                                            GaussPoint *gp,
-                                           TimeStep *atTime)
+                                           TimeStep *atTime) const
 {
-    LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
-    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
-    double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
+    auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+    const double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    const double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
+    const double eShear = this->alphaOne * eNormal;
+    const double eTorsion = this->alphaTwo * eNormal;
+    const FloatArrayF<6> tangent = {eNormal, eShear, eShear, eTorsion, eTorsion, eTorsion};
 
-    const double eShear =  this->alphaOne * eNormal;
+    const auto &reducedStrainOld = status->giveReducedLatticeStrain();
+    const double omegaOld = status->giveDamage();
 
-    const double eTorsion =  this->alphaTwo * eNormal;
-
-    FloatArray reducedStrainOld;
-
-    reducedStrainOld = status->giveReducedStrain();
-    double omegaOld = status->giveDamage();
-    double deltaOmega;
-
-    FloatArray crackOpeningOld(6);
-    crackOpeningOld.times(omegaOld);
-    crackOpeningOld.times(length);
-    FloatArray stressOld(status->giveStressVector() );
-    FloatArray intermediateStrain(6);
-
-    double tempDeltaDissipation = 0.;
-    double deltaTempDeltaDissipation = 0.;
-
-    double intermediateOmega = 0;
-    FloatArray oldIntermediateStrain(6);
-    oldIntermediateStrain = reducedStrainOld;
+    auto oldIntermediateStrain = reducedStrainOld;
     double oldIntermediateOmega = omegaOld;
-    deltaOmega = ( omega - omegaOld );
-    double testDissipation  = 0.5 * length * ( pow( ( reducedStrain.at(1) + reducedStrainOld.at(1) ) / 2., 2. ) * eNormal +
-                                               pow( ( reducedStrain.at(2) + reducedStrainOld.at(2) ) / 2., 2. ) * eShear +
-                                               pow( ( reducedStrain.at(3) + reducedStrainOld.at(3) ) / 2., 2. ) * eShear +
-                                               pow( ( reducedStrain.at(4) + reducedStrainOld.at(4) ) / 2., 2. ) * eTorsion +
-                                               pow( ( reducedStrain.at(5) + reducedStrainOld.at(5) ) / 2., 2. ) * eTorsion +
-                                               pow( ( reducedStrain.at(6) + reducedStrainOld.at(6) ) / 2., 2. ) * eTorsion ) * deltaOmega;
-    double intervals = 0.;
+    double deltaOmega = ( omega - omegaOld );
+    auto testStrain = (reducedStrain + reducedStrainOld) * 0.5;
+    auto testStress = mult(tangent, testStrain);
+    double testDissipation = 0.5 * length * norm(testStress) * deltaOmega;
 
-    double referenceGf = 0;
-
-    if ( softeningType == 1 ) {
-        referenceGf = e0 * eNormal * this->wf / 2.;
-    } else {   //This is for the exponential law. Should also implement it for the bilinear one.
-        referenceGf = e0 * eNormal * this->wf;
-    }
-
-    if ( testDissipation / ( referenceGf ) > 0.001 ) {
-        intervals = 1000. * testDissipation / referenceGf;
-    } else {
-        intervals = 1.;
-    }
-
-    if ( intervals > 1000. ) {
-        intervals = 1000.;
-    }
+    double referenceGf = computeReferenceGf(gp);
+    double intervals = computeIntervals(testDissipation, referenceGf);
 
     double oldKappa = status->giveKappa();
-    double f, equivStrain;
     if ( deltaOmega > 0 ) {
+        double tempDeltaDissipation = 0.;
         for ( int k = 0; k < intervals; k++ ) {
-            intermediateStrain(0) = reducedStrainOld(0) + ( k + 1 ) / intervals * ( reducedStrain(0) - reducedStrainOld(0) );
-            intermediateStrain(1) = reducedStrainOld(1) + ( k + 1 ) / intervals * ( reducedStrain(1) - reducedStrainOld(1) );
-            intermediateStrain(2) = reducedStrainOld(2) + ( k + 1 ) / intervals * ( reducedStrain(2) - reducedStrainOld(2) );
-            intermediateStrain(3) = reducedStrainOld(3) + ( k + 1 ) / intervals * ( reducedStrain(3) - reducedStrainOld(3) );
-            intermediateStrain(4) = reducedStrainOld(4) + ( k + 1 ) / intervals * ( reducedStrain(4) - reducedStrainOld(4) );
-            intermediateStrain(5) = reducedStrainOld(5) + ( k + 1 ) / intervals * ( reducedStrain(5) - reducedStrainOld(5) );
-
-            this->computeEquivalentStrain(equivStrain, intermediateStrain, gp, atTime);
-            f = equivStrain - oldKappa;
+            auto intermediateStrain = reducedStrainOld + ( k + 1 ) / intervals * ( reducedStrain - reducedStrainOld );
+            double equivStrain = this->computeEquivalentStrain(intermediateStrain, gp, atTime);
+            double f = equivStrain - oldKappa;
             if ( f > 0 ) {
-                this->computeDamageParam(intermediateOmega, equivStrain, gp);
-                deltaOmega = ( intermediateOmega - oldIntermediateOmega );
-                deltaTempDeltaDissipation =
-                    0.5 * length * ( pow( ( intermediateStrain(0) + oldIntermediateStrain(0) ) / 2., 2. ) * eNormal +
-                                     pow( ( intermediateStrain(1) + oldIntermediateStrain(1) ) / 2., 2. ) * eShear +
-                                     pow( ( intermediateStrain(2) + oldIntermediateStrain(2) ) / 2., 2. ) * eShear +
-                                     pow( ( intermediateStrain(3) + oldIntermediateStrain(3) ) / 2., 2. ) * eTorsion +
-                                     pow( ( intermediateStrain(4) + oldIntermediateStrain(4) ) / 2., 2. ) * eTorsion +
-                                     pow( ( intermediateStrain(5) + oldIntermediateStrain(5) ) / 2., 2. ) * eTorsion ) * deltaOmega;
-
+                auto intermediateOmega = this->computeDamageParam(equivStrain, gp);
+                auto deltaOmega = ( intermediateOmega - oldIntermediateOmega );
+                auto midStrain = ( intermediateStrain + oldIntermediateStrain ) / 2.;
+                auto midStress = mult(tangent, midStrain);
+                auto deltaTempDeltaDissipation = 0.5 * length * norm(midStress) * deltaOmega;
                 oldKappa = equivStrain;
                 oldIntermediateOmega = intermediateOmega;
-            } else {
-                deltaTempDeltaDissipation = 0.;
+                tempDeltaDissipation += deltaTempDeltaDissipation;
             }
 
-            tempDeltaDissipation += deltaTempDeltaDissipation;
             oldIntermediateStrain = intermediateStrain;
         }
+        return max(tempDeltaDissipation, 2. * referenceGf);
     } else {
-        tempDeltaDissipation = 0.;
+        return 0.;
     }
-
-    if ( tempDeltaDissipation >= 2. * referenceGf ) {
-        tempDeltaDissipation = 2. * referenceGf;
-    }
-
-    return tempDeltaDissipation;
 }
 
 
@@ -808,7 +541,7 @@ LatticeDamage :: giveIPValue(FloatArray &answer,
     } else if ( type == IST_NormalStress ) {
         answer.resize(1);
         answer.zero();
-        answer.at(1) = status->giveNormalStress();
+        answer.at(1) = status->giveNormalLatticeStress();
         return 1;
     } else if ( type == IST_CharacteristicLength ) {
         answer.resize(1);
@@ -822,21 +555,13 @@ LatticeDamage :: giveIPValue(FloatArray &answer,
 
 LatticeDamageStatus :: LatticeDamageStatus(GaussPoint *g) :
     LatticeMaterialStatus(g)
-{
-    e0 = 0.;
-    damage = tempDamage = 0.;
-    equivStrain = tempEquivStrain = 0.;
-    kappa = tempKappa = 0.;
-}
+{ }
 
 void
 LatticeDamageStatus :: initTempStatus()
-//
-// initializes temp variables according to variables form previous equlibrium state.
-// builds new crackMap
-//
 {
     LatticeMaterialStatus :: initTempStatus();
+
     this->tempKappa = this->kappa;
     this->tempEquivStrain = this->equivStrain;
     this->tempDamage = this->damage;
@@ -925,4 +650,5 @@ LatticeDamageStatus :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 }
-}     // end namespace oofem
+
+} // end namespace oofem

@@ -300,33 +300,33 @@ public:
      * a <em>complete</em> list of elements contributing to receiver. If equal to NULL
      * existing list is cleared and  buildNonlocalPointTable service is invoked.
      */
-    void rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems);
+    void rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems) const;
 
     /**
      * Recompute the nonlocal interaction weights based on the current solution (e.g., on the damage field).
      * This method is used e.g. by eikonal nonlocal damage models.
      */
-    void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
-    void modifyNonlocalWeightFunction_1D_Around(GaussPoint *gp);
+    void modifyNonlocalWeightFunctionAround(GaussPoint *gp) const;
+    void modifyNonlocalWeightFunction_1D_Around(GaussPoint *gp) const;
 
     /**
      * Provide the current value of the variable that affects nonlocal interaction (e.g., of damage)
      * This method is used e.g. by eikonal nonlocal damage models.
      */
-    virtual double giveNonlocalMetricModifierAt(GaussPoint *gp) { return 1.; }
+    virtual double giveNonlocalMetricModifierAt(GaussPoint *gp) const { return 1.; }
 
     /**
      * Compute the factor that specifies how the interaction length should be modified,
      * based on the current solution (e.g., on the damage field).
      * This method is used e.g. by eikonal nonlocal damage models.
      */
-    double computeDistanceModifier(double damage);
+    double computeDistanceModifier(double damage) const;
 
     /**
      * Compute the modified interaction length based on the current solution (e.g., on the damage field).
      * This method is used e.g. by eikonal nonlocal damage models.
      */
-    double computeModifiedLength(double length, double dam1, double dam2);
+    double computeModifiedLength(double length, double dam1, double dam2) const;
 
     /**
      * Returns integration list corresponding to given integration point.
@@ -410,7 +410,7 @@ public:
      * This can save significant memory, since nonlocal tables are not stored, but every time computed when needed,
      * but on the other hand computational time may significantly grow.
      */
-    void endIPNonlocalAverage(GaussPoint *gp);
+    void endIPNonlocalAverage(GaussPoint *gp) const;
 
 protected:
     /*
@@ -445,9 +445,9 @@ protected:
      */
     double giveDistanceBasedInteractionRadius(const FloatArray &gpCoords) const;
 
-    int  mapToGridPoint(double x, double x0) { return 1 + gridSize + ( int ) ceil(gridSize * ( x - x0 ) / suprad - 0.5); }
-    double mapToGridCoord(double x, double x0) { return 1. + gridSize + gridSize * ( x - x0 ) / suprad; }
-    double dist2FromGridNode(double x, double y, int j, int i) { return ( ( x - j ) * ( x - j ) + ( y - i ) * ( y - i ) ); }
+    int mapToGridPoint(double x, double x0) const { return 1 + gridSize + ( int ) ceil(gridSize * ( x - x0 ) / suprad - 0.5); }
+    double mapToGridCoord(double x, double x0) const { return 1. + gridSize + gridSize * ( x - x0 ) / suprad; }
+    double dist2FromGridNode(double x, double y, int j, int i) const { return ( ( x - j ) * ( x - j ) + ( y - i ) * ( y - i ) ); }
 };
 } // end namespace oofem
 #endif // nonlocalmaterialext_h

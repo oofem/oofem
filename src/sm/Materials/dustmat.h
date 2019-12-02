@@ -452,11 +452,9 @@ public:
     const char *giveClassName() const override { return "DustMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_DustMaterial_Name; }
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int setIPValue(const FloatArray &value, GaussPoint *gp, InternalStateType type) override;
 

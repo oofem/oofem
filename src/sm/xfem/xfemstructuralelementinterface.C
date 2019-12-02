@@ -742,9 +742,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
                 if ( structCS != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        structCS->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
                     } else {
-                        structCS->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+                        answer = structCS->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
                     }
                     return;
                 } else {
@@ -756,17 +756,17 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveM
 
     // If no enrichment modifies the material,
     // compute stiffness based on the bulk material.
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    auto cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( mUsePlaneStrain ) {
-        cs->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
     } else {
-        cs->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+        answer = cs->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
     }
 }
 
 void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
+    auto cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == nullptr ) {
         OOFEM_ERROR("cs == nullptr.");
     }
@@ -781,13 +781,13 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
             EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(materialModifyingEnrItemIndices [ i ]) );
 
             if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
-                StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
+                auto structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 
                 if ( structCSInclusion != nullptr ) {
                     if ( mUsePlaneStrain ) {
-                        structCSInclusion->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStrain(strain, gp, tStep);
                     } else {
-                        structCSInclusion->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+                        answer = structCSInclusion->giveRealStress_PlaneStress(strain, gp, tStep);
                     }
 
                     return;
@@ -800,9 +800,9 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
     // If no enrichment modifies the material:
     if ( mUsePlaneStrain ) {
-        cs->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+        answer = cs->giveRealStress_PlaneStrain(strain, gp, tStep);
     } else {
-        cs->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+        answer = cs->giveRealStress_PlaneStress(strain, gp, tStep);
     }
 }
 
@@ -968,13 +968,10 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                         OOFEM_ERROR("Failed to cast StructuralElement.")
                     }
 
-                    FloatArray stressVec;
-
-                    fe2Mat->giveRealStressVector_3d(stressVec, gp, smearedJumpStrain, tStep);
+                    auto stressVec = fe2Mat->giveRealStressVector_3d(smearedJumpStrain, gp, tStep);
                     //printf("stressVec: "); stressVec.printYourself();
 
-
-                    FloatArray trac = {stressVec(0)*crackNormal(0)+stressVec(5)*crackNormal(1), stressVec(5)*crackNormal(0)+stressVec(1)*crackNormal(1)};
+                    FloatArray trac = {stressVec[0]*crackNormal[0]+stressVec[5]*crackNormal[1], stressVec[5]*crackNormal[0]+stressVec[1]*crackNormal[1]};
 
                     ////////////////////////////////////////////////////////
                     // Standard part
@@ -989,12 +986,11 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                     answer.add(dA, NTimesT);
 
                     if ( mIncludeBulkCorr ) {
-                        FloatArray stressVecBulk;
-                        bulkMat->giveRealStressVector_3d(stressVecBulk, bulk_gp, smearedBulkStrain, tStep);
+                        auto stressVecBulk = bulkMat->giveRealStressVector_3d(smearedBulkStrain, bulk_gp, tStep);
 
                         ////////////////////////////////////////////////////////
                         // Non-standard jump part
-                        FloatArray stressV4 = {stressVec(0)-stressVecBulk(0), stressVec(1)-stressVecBulk(1), stressVec(2)-stressVecBulk(2), stressVec(5)-stressVecBulk(5)};
+                        FloatArray stressV4 = {stressVec[0]-stressVecBulk[0], stressVec[1]-stressVecBulk[1], stressVec[2]-stressVecBulk[2], stressVec[5]-stressVecBulk[5]};
                         FloatArray BTimesT;
                         BTimesT.beTProductOf(BAvg, stressV4);
                         answer.add(1.0*dA*l_s, BTimesT);
@@ -1233,13 +1229,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                 FloatArray n( fe2ms->giveNormal() );
 
                 // Traction part of tangent
-                FloatMatrix C;
-                fe2Mat->give3dMaterialStiffnessMatrix(C, TangentStiffness, gp, tStep);
-
-                FloatMatrix CBulk;
-                if ( mIncludeBulkCorr ) {
-                    bulkMat->give3dMaterialStiffnessMatrix(CBulk, TangentStiffness, bulk_gp, tStep);
-                }
+                auto C = fe2Mat->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
 
                 ////////////////////////////////////////////////////////
                 // Fetch L_s
@@ -1326,6 +1316,8 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                 // Non-standard bulk contribution
 
                 if ( mIncludeBulkCorr ) {
+
+                    auto CBulk = bulkMat->give3dMaterialStiffnessMatrix(TangentStiffness, bulk_gp, tStep);
 
                     tmp.beTranspositionOf(tmp2);
                     answer.add(1.0*dA, tmp);
@@ -1718,7 +1710,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         bool evaluationSucceeded = true;
                         for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            const auto &nodeCoord = dMan->giveCoordinates();
 
                             if ( !ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord) ) {
                                 evaluationSucceeded = false;
@@ -1863,7 +1855,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            const auto &nodeCoord = dMan->giveCoordinates();
                             ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord);
 
                             levelSet += N.at(elNodeInd) * levelSetInNode;
@@ -1879,7 +1871,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            const auto &nodeCoord = dMan->giveCoordinates();
                             ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord);
 
                             levelSet += N.at(elNodeInd) * levelSetInNode;

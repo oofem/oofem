@@ -54,12 +54,12 @@ SpatialLocalizerInterface :: SpatialLocalizerI_containsPoint(const FloatArray &c
 void
 SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
-    bb1 = bb0 = * element->giveNode(1)->giveCoordinates();
+    bb1 = bb0 = element->giveNode(1)->giveCoordinates();
 
     for ( int i = 2; i <= element->giveNumberOfNodes(); ++i ) {
-        FloatArray *coordinates = element->giveNode(i)->giveCoordinates();
-        bb0.beMinOf(bb0, * coordinates);
-        bb1.beMaxOf(bb1, * coordinates);
+        const auto &coordinates = element->giveNode(i)->giveCoordinates();
+        bb0.beMinOf(bb0, coordinates);
+        bb1.beMaxOf(bb1, coordinates);
     }
 }
 

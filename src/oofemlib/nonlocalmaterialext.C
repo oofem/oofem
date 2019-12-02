@@ -207,7 +207,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp) co
 }
 
 void
-NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems)
+NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, IntArray *contributingElems) const
 {
     double weight, elemVolume, integrationVolume = 0.;
 
@@ -243,7 +243,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
         // initialize iList
         iList->reserve(_size);
         for ( int _e = 1; _e <= _size; _e++ ) {
-            Element *ielem = this->giveDomain()->giveElement( contributingElems->at(_e) );
+            Element *ielem = const_cast<NonlocalMaterialExtensionInterface*>(this)->giveDomain()->giveElement( contributingElems->at(_e) );
             if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
                 for ( auto &jGp : *ielem->giveDefaultIntegrationRulePtr() ) {
                     if ( ielem->computeGlobalCoordinates( jGpCoords, jGp->giveNaturalCoordinates() ) ) {
@@ -289,7 +289,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 // This is the method used by eikonal nonlocal models to adjust the nonlocal interaction
 // depending on the evolution of some internal variables such as damage
 void
-NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
+NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPoint *gp) const
 {
     Element *elem = gp->giveElement();
     FloatArray coords;
@@ -423,7 +423,7 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunctionAround(GaussPo
 
 // Simple algorithm, limited to 1D, can be used for comparison
 void
-NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunction_1D_Around(GaussPoint *gp)
+NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunction_1D_Around(GaussPoint *gp) const
 {
     auto *list = this->giveIPIntegrationList(gp);
     std :: vector< localIntegrationRecord > :: iterator postarget;
@@ -527,7 +527,7 @@ NonlocalMaterialExtensionInterface :: modifyNonlocalWeightFunction_1D_Around(Gau
 }
 
 double
-NonlocalMaterialExtensionInterface :: computeModifiedLength(double length, double dam1, double dam2)
+NonlocalMaterialExtensionInterface :: computeModifiedLength(double length, double dam1, double dam2) const
 {
     if ( averType == 6 ) { // different (improved) integration scheme
         return length * 2. / ( 1. / computeDistanceModifier(dam1) + 1. / computeDistanceModifier(dam2) );
@@ -538,7 +538,7 @@ NonlocalMaterialExtensionInterface :: computeModifiedLength(double length, doubl
 }
 
 double
-NonlocalMaterialExtensionInterface :: computeDistanceModifier(double damage)
+NonlocalMaterialExtensionInterface :: computeDistanceModifier(double damage) const
 {
     switch ( averType ) {
     case 2: return 1. / ( Rf / cl + ( 1. - Rf / cl ) * pow(1. - damage, exponent) );
@@ -578,10 +578,9 @@ NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp) cons
 }
 
 void
-NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
+NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp) const
 {
-    NonlocalMaterialStatusExtensionInterface *statusExt =
-        static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
+    auto statusExt = static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
                                                                    giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {

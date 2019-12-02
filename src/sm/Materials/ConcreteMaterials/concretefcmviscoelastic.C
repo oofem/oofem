@@ -119,22 +119,20 @@ ConcreteFCMViscoElastic :: giveRealStressVector(FloatArray &answer, GaussPoint *
   return;
 }
 
-void
-ConcreteFCMViscoElastic :: computeStressIndependentStrainVector(FloatArray &answer,
-                                GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
+FloatArray
+ConcreteFCMViscoElastic :: computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 {
-  // temperature strain is treated ONLY by the rheoMat
+    // temperature strain is treated ONLY by the rheoMat
 
-  if ( !this->isActivated(tStep) ) {
-    return;
-  }
-    
-  ConcreteFCMViscoElasticStatus *status = static_cast< ConcreteFCMViscoElasticStatus * > ( gp->giveMaterialStatus() );
-    
-  RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
-    
-  rheoMat->computeStressIndependentStrainVector(answer, status->giveSlaveGaussPointVisco(), tStep, mode);
-
+    if ( !this->isActivated(tStep) ) {
+        return FloatArray();
+    }
+        
+    ConcreteFCMViscoElasticStatus *status = static_cast< ConcreteFCMViscoElasticStatus * > ( gp->giveMaterialStatus() );
+        
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+        
+    return rheoMat->computeStressIndependentStrainVector(status->giveSlaveGaussPointVisco(), tStep, mode);
 }
 
   

@@ -251,7 +251,7 @@ InterfaceElem1d :: computeGaussPoints()
 int
 InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    answer = *this->giveNode(1)->giveCoordinates();
+    answer = this->giveNode(1)->giveCoordinates();
 
     return 1;
 }

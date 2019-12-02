@@ -3404,7 +3404,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     // all nodes (including remote which are not needed) are imported to ensure consistency between
     // node number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
     for ( int i = 1; i <= nnodes; i++ ) {
-        _node = new Subdivision :: RS_Node( i, mesh, i, * ( domain->giveNode ( i )->giveCoordinates() ),
+        _node = new Subdivision :: RS_Node( i, mesh, i, domain->giveNode ( i )->giveCoordinates(),
                                            domain->giveErrorEstimator ( )->giveRemeshingCrit ( )->giveRequiredDofManDensity ( i, tStep ),
                                            domain->giveNode ( i )->isBoundary() );
         _node->setGlobalNumber( domain->giveNode(i)->giveGlobalNumber() );

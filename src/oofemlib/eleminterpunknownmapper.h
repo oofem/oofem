@@ -58,7 +58,7 @@ public:
     int mapAndUpdate(FloatArray &answer, ValueModeType mode,
                      Domain *oldd, Domain *newd,  TimeStep *tStep) override;
     int evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
-                   Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep) override;
+                   Domain *oldd, const FloatArray &coords, IntArray &regList, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // eleminterpunknownmapper_h

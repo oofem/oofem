@@ -130,11 +130,6 @@ void LatticeNeumannCouplingNode :: printYourself()
 void
 LatticeNeumannCouplingNode :: computeLoadCouplingContribution(FloatArray &answer, TimeStep *stepN) {
     int nCouplingNodes = couplingNodes.giveSize();
-    FloatArray couplingCoords;
-
-    double waterPressure = 0.;
-    double distance = 0.;
-    double factor = 0.;
 
     FloatArray contribution;
     answer.resize(this->directionVector.giveSize() );
@@ -146,9 +141,8 @@ LatticeNeumannCouplingNode :: computeLoadCouplingContribution(FloatArray &answer
         ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
         if ( coupledModels.at(2) != 0 && !( stepN->giveNumber() <= domain->giveEngngModel()->giveNumberOfFirstStep() ) ) {
             for ( int k = 0; k < nCouplingNodes; k++ ) {
-                Node *coupledNode;
-                coupledNode  =  domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem(coupledModels.at(2) )->giveDomain(1)->giveNode(couplingNodes(k) );
-                couplingCoords = * ( coupledNode->giveCoordinates() );
+                Node *coupledNode = domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem(coupledModels.at(2) )->giveDomain(1)->giveNode(couplingNodes(k) );
+                const auto &couplingCoords = coupledNode->giveCoordinates();
                 TimeStep *previousStep = domain->giveEngngModel()->giveMasterEngngModel()->givePreviousStep();
 
                 waterPressureNew = coupledNode->giveDofWithID(P_f)->giveUnknown(VM_Total, stepN);
@@ -158,9 +152,9 @@ LatticeNeumannCouplingNode :: computeLoadCouplingContribution(FloatArray &answer
                     waterPressureOld = 0.;
                 }
 
-                waterPressure = waterPressureNew - waterPressureOld;
-                distance = sqrt(pow(couplingCoords.at(1) - coordinates.at(1), 2.) + pow(couplingCoords.at(2) - coordinates.at(2), 2.) );
-                factor = waterPressure * distance;
+                double waterPressure = waterPressureNew - waterPressureOld;
+                double dist = distance(couplingCoords, coordinates);
+                double factor = waterPressure * dist;
                 contribution = this->directionVector;
                 contribution.times(factor);
                 answer.add(contribution);

@@ -105,7 +105,6 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
 
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
-    FloatArray *coords;
 
     int nnodes = d->giveNumberOfDofManagers();
 
@@ -124,8 +123,8 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
         vtkPiece.setNumberOfNodes(numNodes);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             if ( mapL2G.at(inode) <= nnodes && mapL2G.at(inode) != 0 ) { //DofManagers in domain (input file)
-                coords = d->giveNode(mapL2G.at(inode) )->giveCoordinates();
-                vtkPiece.setNodeCoords(inode, * coords);
+                const auto &coords = d->giveNode(mapL2G.at(inode) )->giveCoordinates();
+                vtkPiece.setNodeCoords(inode, coords);
             } else if ( mapL2G.at(inode) > nnodes && mapL2G.at(inode) <= numNodes && mapL2G.at(inode) != 0 ) { //extra image nodes
                 FloatArray helpArray(3);
                 helpArray.at(1) = uniqueNodeTable.at(mapL2G.at(inode), 1);
@@ -460,8 +459,7 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
     }
 
     //Get unit cell size
-    FloatArray unitCellSize(3);
-    unitCellSize = * controlNode->giveCoordinates();
+    const auto unitCellSize = controlNode->giveCoordinates();
 
     for ( int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);

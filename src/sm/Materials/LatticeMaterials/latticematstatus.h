@@ -38,6 +38,7 @@
 
 #include "../structuralms.h"
 #include "randommaterialext.h"
+#include "floatarrayf.h"
 
 namespace oofem {
 class GaussPoint;
@@ -50,21 +51,31 @@ class NonlocalMaterialStatusExtension;
  * In this class services are defined that are used by other
  * lattice material statuses.
  */
-class LatticeMaterialStatus : public StructuralMaterialStatus, public RandomMaterialStatusExtensionInterface
+class LatticeMaterialStatus : public MaterialStatus, public RandomMaterialStatusExtensionInterface
 {
 protected:
+    FloatArrayF< 6 >latticeStrain;
+    FloatArrayF< 6 >tempLatticeStrain;
+
+    FloatArrayF< 6 >latticeStress;
+    FloatArrayF< 6 >tempLatticeStress;
+
+    /// Equilibriated reduced strain, which is free of thermal strain
+    FloatArrayF< 6 >reducedLatticeStrain;
+    /// Non-equilibrated reduced strain, which is free of thermal strain
+    FloatArrayF< 6 >tempReducedLatticeStrain;
+    /// Equilibriated plastic strain
+    FloatArrayF< 6 >plasticLatticeStrain;
+    /// Non-equilibrated plastic strain
+    FloatArrayF< 6 >tempPlasticLatticeStrain;
+    /// Non-equilibrated plastic strain
+    FloatArrayF< 6 >oldPlasticLatticeStrain;
 
     /// Equilibrated normal stress
-    double normalStress = 0.;
+    double normalLatticeStress = 0.;
 
     /// Non-equilibrated normal stress
-    double tempNormalStress = 0.;
-
-    /// Reduced strain, which is temperature free
-    FloatArray reducedStrain;
-
-    /// Non-equilibrated reduced strain, which is temperature free
-    FloatArray tempReducedStrain;
+    double tempNormalLatticeStress = 0.;
 
     /// dissipation
     double dissipation = 0.;
@@ -77,12 +88,6 @@ protected:
 
     /// Non-equilibrated increment of dissipation
     double tempDeltaDissipation = 0.;
-
-    FloatArray plasticStrain;
-
-    FloatArray tempPlasticStrain;
-
-    FloatArray oldPlasticStrain;
 
     /// Characteristic length
     double le = 0.;
@@ -106,10 +111,7 @@ protected:
 
     int updateFlag = 0;
 
-
 public:
-
-    /// Constructor
     LatticeMaterialStatus(GaussPoint *g);
 
     const char *giveClassName() const override { return "LatticeMaterialStatus"; }
@@ -120,73 +122,88 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
+    /// Returns lattice strain.
+    const FloatArrayF< 6 > &giveLatticeStrain() const { return this->latticeStrain; }
+    /// Returns lattice strain.
+    const FloatArrayF< 6 > &giveTempLatticeStrain() const { return this->tempLatticeStress; }
 
-    /*
-     * Assign the temp value of reduced strain.
-     * @v new temp value of reduced strain
-     */
-    virtual void  letTempReducedStrainBe(const FloatArray &v) { tempReducedStrain = v; }
+    /// Returns reduced lattice strain.
+    const FloatArrayF< 6 > &giveReducedLatticeStrain() const { return reducedLatticeStrain; }
 
-    /// Gives the temp value of reduced strain.
-    virtual const FloatArray &giveTempReducedStrain() const { return tempReducedStrain; }
+    /// Returns temp reduced lattice strain.
+    const FloatArrayF< 6 > &giveTempReducedLatticeStrain() const { return tempReducedLatticeStrain; }
 
-    /// Gives the old equilibrated value of reduced strain.
-    virtual const FloatArray &giveReducedStrain() const { return reducedStrain; }
+    /// Returns plastic lattice strain.
+    const FloatArrayF< 6 > &givePlasticLatticeStrain() const { return this->plasticLatticeStrain; }
 
+    /// Returns temp plastic lattice strain.
+    const FloatArrayF< 6 > &giveTempPlasticLatticeStrain() const { return this->tempPlasticLatticeStrain; }
+
+    /// Returns plastic lattice strain.
+    const FloatArrayF< 6 > &giveOldPlasticLatticeStrain() const { return this->oldPlasticLatticeStrain; }
+
+
+    /// Returns lattice stress.
+    const FloatArrayF< 6 > &giveLatticeStress() const { return this->latticeStress; }
+    /// Returns temp lattice stress.
+    const FloatArrayF< 6 > &giveTempLatticeStress() const { return this->tempLatticeStress; }
+
+    /// Assigns the temp value of lattice strain.
+    void letTempLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempLatticeStrain = v; }
+
+    /// Assigns the temp value of lattice strain.
+    void letTempReducedLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempReducedLatticeStrain = v; }
+
+    /// Assigns the temp value of lattice strain.
+    void letTempPlasticLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempPlasticLatticeStrain = v; }
+
+    /// Assigns the temp value of lattice stress.
+    void letTempLatticeStressBe(const FloatArrayF< 6 > &v) { this->tempLatticeStress = v; }
 
 
     /// Sets the temp normalStress
-    virtual void setTempNormalStress(double val) { tempNormalStress = val; }
+    void setTempNormalLatticeStress(double val) { this->tempNormalLatticeStress = val; }
 
     /// Gives the last equilibrated normal stress
-    virtual double giveNormalStress() { return tempNormalStress; }
+    double giveNormalLatticeStress() const { return this->normalLatticeStress; }
 
     /// Gives the last equilibrated normal stress
-    virtual double giveOldNormalStress() { return normalStress; }
+    double giveTempNormalLatticeStress() const { return this->tempNormalLatticeStress; }
+
 
     ///Sets the temp_crack_flag
-    virtual void setTempCrackFlag(int val) { tempCrackFlag = val; }
+    void setTempCrackFlag(int val) { tempCrackFlag = val; }
 
     ///Sets the temp_crack_width
     void setTempCrackWidth(double val) { tempCrackWidth = val; }
-
-    virtual FloatArray &givePlasticStrain()
-    { return this->plasticStrain; }
-
-    virtual FloatArray &giveTempPlasticStrain()
-    { return this->tempPlasticStrain; }
-
-    virtual FloatArray &giveOldPlasticStrain()
-    { return this->oldPlasticStrain; }
-
 
     /**
      * Returns the crack flag
      * @return crack flag
      */
-    virtual int giveCrackFlag() { return this->crackFlag; }
+    virtual int giveCrackFlag() const { return this->crackFlag; }
 
     /**
      * @return crack width
      */
-    virtual double giveCrackWidth() { return this->crackWidth; }
+    virtual double giveCrackWidth() const { return this->crackWidth; }
 
 
     /// Returns characteristic length stored in receiver
     double giveLe() const { return le; }
 
     /// Sets characteristic length to given value
-    void   setLe(double ls) { le = ls; }
+    void setLe(double ls) { le = ls; }
 
-    virtual int hasBeenUpdated() { return this->updateFlag; }
+    virtual int hasBeenUpdated() const { return this->updateFlag; }
 
     /**
      * Returns the energy dissipation computed at the GaussPoint of the element.
      * This function is used for the lattice specific vtk export.
      * @return dissipation
      */
-    virtual double giveDissipation() { return dissipation; }
-    double giveTempDissipation() { return tempDissipation; }
+    virtual double giveDissipation() const { return dissipation; }
+    double giveTempDissipation() const { return tempDissipation; }
     void setTempDissipation(double newDiss) { tempDissipation = newDiss; }
 
     /**
@@ -194,8 +211,8 @@ public:
      * This function is used for the lattice specific vtk export.
      * @return increment of dissipation
      */
-    virtual double giveDeltaDissipation() { return deltaDissipation; }
-    double giveTempDeltaDissipation() { return tempDeltaDissipation; }
+    virtual double giveDeltaDissipation() const { return deltaDissipation; }
+    double giveTempDeltaDissipation() const { return tempDeltaDissipation; }
     void setTempDeltaDissipation(double newDiss) { tempDeltaDissipation = newDiss; }
 
     Interface *giveInterface(InterfaceType) override;

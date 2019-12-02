@@ -94,7 +94,7 @@ public:
     void setOffset(int cellNum, int offset) { this->elOffsets.at(cellNum) = offset; }
     int giveCellOffset(int cellNum) { return this->elOffsets.at(cellNum); }
 
-    void setNodeCoords(int nodeNum, FloatArray &coords);
+    void setNodeCoords(int nodeNum, const FloatArray &coords);
     FloatArray &giveNodeCoords(int nodeNum) { return this->nodeCoords [ nodeNum - 1 ]; }
 
     void setNumberOfPrimaryVarsToExport(int numVars, int numNodes);

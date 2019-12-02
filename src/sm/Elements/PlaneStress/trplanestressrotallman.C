@@ -84,7 +84,7 @@ TrPlanestressRotAllman :: computeLocalNodalCoordinates(std::vector< FloatArray >
 {
     lxy.resize(6);
     for ( int i = 0; i < 3; i++ ) {
-        lxy [ i ] = * this->giveNode(i + 1)->giveCoordinates();
+        lxy [ i ] = this->giveNode(i + 1)->giveCoordinates();
     }
     lxy [ 3 ].resize(2);
     lxy [ 4 ].resize(2);
@@ -259,12 +259,11 @@ TrPlanestressRotAllman :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, G
 {
     std::vector< FloatArray > lxy;
     FloatArray l, n;
-    IntArray en;
     FEI2dTrQuad qi(1, 2);
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
     qi.edgeEvalN( n, iedge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy) );
-    qi.computeLocalEdgeMapping(en, iedge); // get edge mapping
+    const auto &en = qi.computeLocalEdgeMapping(iedge); // get edge mapping
     this->interp.edgeEvalN( l, iedge, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(3, 6);
 

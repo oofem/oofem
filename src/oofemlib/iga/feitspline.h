@@ -49,6 +49,7 @@
 
 ///@name Input fields for TSplineInterpolation
 //@{
+#define _IFT_TSplineInterpolation_weights "weights"
 #define _IFT_TSplineInterpolation_localIndexKnotVectorU "localindexknotvectoru"
 #define _IFT_TSplineInterpolation_localIndexKnotVectorV "localindexknotvectorv"
 #define _IFT_TSplineInterpolation_localIndexKnotVectorW "localindexknotvectorw"
@@ -63,7 +64,8 @@ class OOFEM_EXPORT TSplineInterpolation : public BSplineInterpolation
 protected:
     /// Local index knot vector of the dimensions [totalNumberOfControlPoints][nsd][degree+2].
     std::vector< std::array<IntArray, 3> > localIndexKnotVector;
-    int totalNumberOfControlPoints;
+    int totalNumberOfControlPoints = 0;
+    FloatArray weights;
     /**
      * Temporary open local knot vector to enable use of BSpline algorithms (common for all directions) [3*max_degree+2].
      */

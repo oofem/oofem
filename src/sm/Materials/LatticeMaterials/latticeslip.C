@@ -58,20 +58,16 @@ LatticeSlip :: LatticeSlip(int n, Domain *d) : LatticeLinearElastic(n, d)
 bool
 LatticeSlip :: hasMaterialModeCapability(MaterialMode mode) const
 {
-    return ( mode == _1dLattice ) || ( mode == _2dLattice ) || ( mode == _3dLattice );
+    return ( mode == _3dLattice );
 }
 
 
 void
 LatticeSlip :: initializeFrom(InputRecord &ir)
 {
-
     LatticeLinearElastic :: initializeFrom(ir);
 
-    //eTangential
-    IR_GIVE_FIELD(ir, eNormal, _IFT_LatticeSlip_e); // Macro
-
-    //Parameter which relates the shear stiffness to the normal stiffness. Default is 1000.
+    //Parameter which relates the shear stiffness to the normal stiffness. Default is 1000. Reread this again, because the
     alphaOne = 1000.;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeSlip_a1); // Macro
 
@@ -81,63 +77,49 @@ LatticeSlip :: initializeFrom(InputRecord &ir)
 
     //Parameter which limits the stress in slip direction.
     IR_GIVE_FIELD(ir, tauZero, _IFT_LatticeSlip_t0); // Macro
-
 }
 
 
 MaterialStatus *
 LatticeSlip :: CreateStatus(GaussPoint *gp) const
 {
-    LatticeSlipStatus *answer = new LatticeSlipStatus(gp);
-
-    return answer;
+    return new LatticeSlipStatus(gp);
 }
 
 
-void
-LatticeSlip :: giveRealStressVector(FloatArray &answer,
-                                    GaussPoint *gp,
-                                    const FloatArray &totalStrain,
-                                    TimeStep *atTime)
+FloatArrayF< 6 >
+LatticeSlip :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain, GaussPoint *gp, TimeStep *atTime)
 {
-    LatticeSlipStatus *status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
+    status->initTempStatus();
 
-    //strain has the meanig of slip. Stress is force
+    auto tempPlasticStrain = status->givePlasticLatticeStrain();
 
-    FloatArray strainVector;
-
-    FloatArray tempPlasticStrain = status->givePlasticStrain();
-
-    FloatMatrix stiffnessMatrix;
-    this->giveStiffnessMatrix(stiffnessMatrix, ElasticStiffness, gp, atTime);
-
-    int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector(gp->giveMaterialMode() );
-
-    answer.resize(rsize);
-    answer.zero();
+    auto stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, atTime);
 
     /*First component is the slip one for which the stress should be limited using plasiticity (frictional slip between fibre and matrix). The other components are kept elastic. */
-    answer.at(1) = ( totalStrain.at(1) - tempPlasticStrain.at(1) ) * stiffnessMatrix.at(1, 1);
+    FloatArrayF<6> stress;
 
-    double f = fabs(answer.at(1) ) - tauZero;
+    stress.at(1) = ( totalStrain.at(1) - tempPlasticStrain.at(1) ) * stiffnessMatrix.at(1, 1);
+    double f = fabs(stress.at(1) ) - tauZero;
 
     if ( f > 0 ) {//plastic response.
         //Reduced stress by increasing plastic strain.
-        tempPlasticStrain.at(1) = tempPlasticStrain.at(1) + sgn(answer.at(1) ) * f / stiffnessMatrix.at(1, 1);
-        answer.at(1) = ( totalStrain.at(1) - tempPlasticStrain.at(1) ) * stiffnessMatrix.at(1, 1);
+        tempPlasticStrain.at(1) = tempPlasticStrain.at(1) + sgn(stress.at(1) ) * f / stiffnessMatrix.at(1, 1);
+        stress.at(1) = ( totalStrain.at(1) - tempPlasticStrain.at(1) ) * stiffnessMatrix.at(1, 1);
 
         status->setTempCrackFlag(1);
     }
 
     //Compute the final stress components
-    for ( int i = 2; i <= rsize; i++ ) { // only diagonal terms matter
-        answer.at(i) =  stiffnessMatrix.at(i, i) * totalStrain.at(i);
+    for ( int i = 2; i <= 6; i++ ) {
+        stress.at(i) =  stiffnessMatrix.at(i, i) * totalStrain.at(i);
     }
 
     //Set temp values in status needed for dissipation
-    status->letTempPlasticStrainBe(tempPlasticStrain);
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempPlasticLatticeStrainBe(tempPlasticStrain);
+    status->letTempLatticeStrainBe(totalStrain);
+    status->letTempLatticeStressBe(stress);
 
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation;
@@ -150,80 +132,16 @@ LatticeSlip :: giveRealStressVector(FloatArray &answer,
     status->setTempDissipation(tempDissipation);
     status->setTempDeltaDissipation(tempDeltaDissipation);
 
-    return;
-}
-
-void LatticeSlip :: giveRandomParameters(FloatArray &param)
-{
-    param.resize(3);
-    param.zero();
-    param.at(1) = localRandomType;
-
-    if ( localRandomType == 1 ) { //Gaussian
-        param.at(2) = coefficientOfVariation;
-    } else {
-        OOFEM_ERROR("Error: Unknown local random type:\n randomtype 1 = Gaussian\n");
-    }
-
-    return;
+    return stress;
 }
 
 
 Interface *
 LatticeSlip :: giveInterface(InterfaceType type)
 {
-    return NULL;
+    return nullptr;
 }
 
-
-void
-LatticeSlip :: give1dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
-{
-    /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(1, 1);
-    answer.zero();
-
-    answer.at(1, 1) = 1.;
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-}
-
-
-void
-LatticeSlip :: give2dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
-{
-    /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(3, 3);
-    answer.zero();
-
-    answer.at(1, 1) = 1.;
-    answer.at(2, 2) = this->alphaOne; // shear
-    answer.at(3, 3) = this->alphaTwo; // torsion
-
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-}
-
-
-void
-LatticeSlip :: give3dLatticeStiffMtrx(FloatMatrix &answer, MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime)
-{
-    /* Returns elastic moduli in reduced stress-strain space*/
-    answer.resize(6, 6);
-    answer.zero();
-
-    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray tempStrain(6);
-    tempStrain = status->giveTempStrainVector();
-
-    answer.at(1, 1) = 1.;
-    answer.at(2, 2) = this->alphaOne; // shear
-    answer.at(3, 3) = this->alphaOne; // shear
-    answer.at(4, 4) = this->alphaTwo; // torsion
-    answer.at(5, 5) = this->alphaTwo; // torsion
-    answer.at(6, 6) = this->alphaTwo; // torsion
-
-
-    answer.times(this->give(eNormal_ID, gp) * this->eNormalMean);
-}
 
 LatticeSlipStatus :: LatticeSlipStatus(GaussPoint *g) :  LatticeMaterialStatus(g)
 {}
@@ -231,17 +149,13 @@ LatticeSlipStatus :: LatticeSlipStatus(GaussPoint *g) :  LatticeMaterialStatus(g
 
 void
 LatticeSlipStatus :: initTempStatus()
-//
-// initializes temp variables according to variables form previous equlibrium state.
-// builds new crackMap
-//
 {
     LatticeMaterialStatus :: initTempStatus();
-    this->tempPlasticStrain = this->plasticStrain;
+    this->tempPlasticLatticeStrain = this->plasticLatticeStrain;
 }
 
 
-FloatArrayF<6>
+FloatArrayF< 6 >
 LatticeSlip :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
@@ -252,50 +166,32 @@ LatticeSlip :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) cons
     double alpha = this->give(tAlpha, gp);
 
     //Option to add a eigendisplacement instead of strain
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    double length = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
     alpha += this->cAlpha / length;
 
-    return {alpha, 0., 0., 0., 0., 0.};
+    return {
+               alpha, 0., 0., 0., 0., 0.
+    };
 }
 
 void
 LatticeSlipStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     LatticeMaterialStatus :: printOutputAt(file, tStep);
-    fprintf(file, "plasticStrain %.8e, dissipation %f, deltaDissipation %f, crackFlag %d\n", this->plasticStrain.at(1), this->dissipation, this->deltaDissipation, this->crackFlag);
-}
-
-double
-LatticeSlip :: give(int aProperty, GaussPoint *gp) const
-{
-    double answer;
-    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
-        if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems
-            answer = 0.1;
-        } else if ( answer > 10 ) {
-            answer = 10;
-        }
-        return answer;
-    } else if ( aProperty == eNormal_ID ) {
-        return 1.;
-    } else {
-        return LatticeLinearElastic :: give(aProperty, gp);
-    }
+    fprintf(file, "plasticStrain %.8e, dissipation %f, deltaDissipation %f, crackFlag %d\n", this->plasticLatticeStrain.at(1), this->dissipation, this->deltaDissipation, this->crackFlag);
 }
 
 
 double
-LatticeSlip :: computeDeltaDissipation(GaussPoint *gp,
-                                       TimeStep *atTime)
+LatticeSlip :: computeDeltaDissipation(GaussPoint *gp, TimeStep *atTime) const
 {
-    LatticeSlipStatus *status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
 
-    FloatArray plasticStrain = status->givePlasticStrain();
-    FloatArray tempPlasticStrain = status->giveTempPlasticStrain();
-    FloatArray tempStress = status->giveTempStressVector();
+    const auto &plasticStrain = status->givePlasticLatticeStrain();
+    const auto &tempPlasticStrain = status->giveTempPlasticLatticeStrain();
+    const auto &tempStress = status->giveTempLatticeStress();
 
-    double tempDeltaDissipation =  tempStress.at(1) * ( tempPlasticStrain.at(1) - plasticStrain.at(1) );
-    return tempDeltaDissipation;
+    return tempStress.at(1) * ( tempPlasticStrain.at(1) - plasticStrain.at(1) );
 }
 
 
@@ -310,44 +206,30 @@ LatticeSlipStatus :: saveContext(DataStream &stream, ContextMode mode)
     // save parent class status
     LatticeMaterialStatus :: saveContext(stream, mode);
 
-    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = this->plasticLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-
-    return;
 }
 
 
 void
 LatticeSlipStatus :: restoreContext(DataStream &stream, ContextMode mode)
-//
-// restores full information stored in stream to this Status
-//
 {
     contextIOResultType iores;
 
-    // read parent class status
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
-    //FloatArrays
-    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = this->plasticLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-
-    return;
 }
+
 
 void
 LatticeSlipStatus :: updateYourself(TimeStep *atTime)
-//
-// updates variables (nonTemp variables describing situation at previous equilibrium state)
-// after a new equilibrium state has been reached
-// temporary variables are having values corresponding to newly reached equilibrium.
-//
 {
     LatticeMaterialStatus :: updateYourself(atTime);
-    this->plasticStrain = this->tempPlasticStrain;
+    this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
 }
 
 
@@ -358,7 +240,7 @@ LatticeSlip :: giveIPValue(FloatArray &answer,
                            InternalStateType type,
                            TimeStep *atTime)
 {
-    LatticeSlipStatus *status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< LatticeSlipStatus * >( this->giveStatus(gp) );
 
     if ( type == IST_CrackStatuses ) {
         answer.resize(1);

@@ -138,8 +138,8 @@ bool PLHoopStressCirc :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
                 // crack tip multiplied by a constant factor.
                 // ( This choice implies that we hope that the element has reasonable
                 // aspect ratio.)
-                const auto &x1 = * ( el->giveDofManager(1)->giveCoordinates() );
-                const auto &x2 = * ( el->giveDofManager(2)->giveCoordinates() );
+                const auto &x1 = el->giveDofManager(1)->giveCoordinates();
+                const auto &x2 = el->giveDofManager(2)->giveCoordinates();
                 const double l = 1.0 * distance(x1, x2);
 
                 // Use the octree to get all elements that have

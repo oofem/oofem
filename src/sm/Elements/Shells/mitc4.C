@@ -212,26 +212,25 @@ MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V
         V2.resize(3);
         V3.resize(3);
         V4.resize(3);
-        FloatArray *c1, *c2, *c3, *c4;
-        c1 = this->giveNode(1)->giveCoordinates();
-        c2 = this->giveNode(2)->giveCoordinates();
-        c3 = this->giveNode(3)->giveCoordinates();
-        c4 = this->giveNode(4)->giveCoordinates();
-        V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c1, this, false);
-        V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c1, this, false);
-        V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c1, this, false);
+        const auto &c1 = this->giveNode(1)->giveCoordinates();
+        const auto &c2 = this->giveNode(2)->giveCoordinates();
+        const auto &c3 = this->giveNode(3)->giveCoordinates();
+        const auto &c4 = this->giveNode(4)->giveCoordinates();
+        V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c1, this, false);
+        V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c1, this, false);
+        V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c1, this, false);
 
-        V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c2, this, false);
-        V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c2, this, false);
-        V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c2, this, false);
+        V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c2, this, false);
+        V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c2, this, false);
+        V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c2, this, false);
 
-        V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c3, this, false);
-        V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c3, this, false);
-        V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c3, this, false);
+        V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c3, this, false);
+        V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c3, this, false);
+        V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c3, this, false);
 
-        V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c4, this, false);
-        V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c4, this, false);
-        V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c4, this, false);
+        V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, c4, this, false);
+        V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, c4, this, false);
+        V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, c4, this, false);
 
         V1.normalize();
         V2.normalize();
@@ -332,9 +331,9 @@ MITC4Shell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 void
 MITC4Shell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *scs = dynamic_cast< StructuralCrossSection * >( this->giveCrossSection() );
-    //SimpleCrossSection *cs = dynamic_cast< SimpleCrossSection * >( this->giveCrossSection() );
-    scs->give3dDegeneratedShellStiffMtrx(answer, rMode, gp, tStep);
+    auto scs = dynamic_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    //auto cs = dynamic_cast< SimpleCrossSection * >( this->giveCrossSection() );
+    answer = scs->give3dDegeneratedShellStiffMtrx(rMode, gp, tStep);
 }
 
 
@@ -345,10 +344,10 @@ MITC4Shell :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4
 {
     FloatArray nc1(3), nc2(3), nc3(3), nc4(3);
 
-    this->giveLocalCoordinates( nc1, * ( this->giveNode(1)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc2, * ( this->giveNode(2)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc3, * ( this->giveNode(3)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc4, * ( this->giveNode(4)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nc1, this->giveNode(1)->giveCoordinates() );
+    this->giveLocalCoordinates( nc2, this->giveNode(2)->giveCoordinates() );
+    this->giveLocalCoordinates( nc3, this->giveNode(3)->giveCoordinates() );
+    this->giveLocalCoordinates( nc4, this->giveNode(4)->giveCoordinates() );
 
     x1 = nc1.at(1);
     x2 = nc2.at(1);
@@ -377,7 +376,7 @@ MITC4Shell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     this->computeGtoLRotationMatrix();
 
     FloatArray offset;
-    offset.beDifferenceOf(global, * this->giveNode(1)->giveCoordinates() );
+    offset.beDifferenceOf(global, this->giveNode(1)->giveCoordinates() );
     answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
@@ -762,16 +761,15 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
 void
 MITC4Shell :: giveThickness(double &a1, double &a2, double &a3, double &a4)
 {
-    FloatArray *c1, *c2, *c3, *c4;
-    c1 = this->giveNode(1)->giveCoordinates();
-    c2 = this->giveNode(2)->giveCoordinates();
-    c3 = this->giveNode(3)->giveCoordinates();
-    c4 = this->giveNode(4)->giveCoordinates();
+    const auto &c1 = this->giveNode(1)->giveCoordinates();
+    const auto &c2 = this->giveNode(2)->giveCoordinates();
+    const auto &c3 = this->giveNode(3)->giveCoordinates();
+    const auto &c4 = this->giveNode(4)->giveCoordinates();
 
-    a1 = this->giveCrossSection()->give(CS_Thickness, * c1, this, false);
-    a2 = this->giveCrossSection()->give(CS_Thickness, * c2, this, false);
-    a3 = this->giveCrossSection()->give(CS_Thickness, * c3, this, false);
-    a4 = this->giveCrossSection()->give(CS_Thickness, * c4, this, false);
+    a1 = this->giveCrossSection()->give(CS_Thickness, c1, this, false);
+    a2 = this->giveCrossSection()->give(CS_Thickness, c2, this, false);
+    a3 = this->giveCrossSection()->give(CS_Thickness, c3, this, false);
+    a4 = this->giveCrossSection()->give(CS_Thickness, c4, this, false);
 }
 
 
@@ -812,28 +810,28 @@ MITC4Shell :: computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray
     FloatArray coordA, coordB;
 
     // compute A - (node2+node3)/2
-    coordA.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
+    coordA.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(3)->giveCoordinates() );
     coordA.times(0.5);
-    coordA.add( * this->giveNode(3)->giveCoordinates() );
+    coordA.add( this->giveNode(3)->giveCoordinates() );
 
     // compute B - (node1+node4)/2
-    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(4)->giveCoordinates() );
+    coordB.beDifferenceOf( this->giveNode(1)->giveCoordinates(), this->giveNode(4)->giveCoordinates() );
     coordB.times(0.5);
-    coordB.add( * this->giveNode(4)->giveCoordinates() );
+    coordB.add( this->giveNode(4)->giveCoordinates() );
 
     // compute e1' = [B-A]
     e1.beDifferenceOf(coordB, coordA);
 
 
     // compute A - (node3+node4)/2
-    coordA.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
+    coordA.beDifferenceOf( this->giveNode(4)->giveCoordinates(), this->giveNode(3)->giveCoordinates() );
     coordA.times(0.5);
-    coordA.add( * this->giveNode(3)->giveCoordinates() );
+    coordA.add( this->giveNode(3)->giveCoordinates() );
 
     // compute B - (node2+node1)/2
-    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(2)->giveCoordinates() );
+    coordB.beDifferenceOf( this->giveNode(1)->giveCoordinates(), this->giveNode(2)->giveCoordinates() );
     coordB.times(0.5);
-    coordB.add( * this->giveNode(2)->giveCoordinates() );
+    coordB.add( this->giveNode(2)->giveCoordinates() );
 
     // compute help = [B-A]
     help.beDifferenceOf(coordB, coordA);
@@ -972,7 +970,7 @@ MITC4Shell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 void
 MITC4Shell :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(strain, gp, tStep);
 }
 
 
@@ -980,43 +978,24 @@ void
 MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep)
 // returns characteristic tensor of the receiver at given gp and tStep
 {
-    answer.resize(3, 3);
-    answer.zero();
     this->computeGtoLRotationMatrix();
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
 
     if ( type == GlobalForceTensor ) {
         FloatArray localStress, localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         this->computeStressVector(localStress, localStrain, gp, tStep);
         auto stress = mat->transformStressVectorTo(GtoLRotationMatrix, localStress, false);
-
-        answer.at(1, 1) = stress.at(1);
-        answer.at(2, 2) = stress.at(2);
-        answer.at(3, 3) = stress.at(3);
-        answer.at(2, 3) = stress.at(4);
-        answer.at(3, 2) = stress.at(4);
-        answer.at(1, 3) = stress.at(5);
-        answer.at(3, 1) = stress.at(5);
-        answer.at(1, 2) = stress.at(6);
-        answer.at(2, 1) = stress.at(6);
+        answer = from_voigt_stress(stress);
     } else if ( type == GlobalStrainTensor ) {
         FloatArray localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         auto strain = mat->transformStrainVectorTo(GtoLRotationMatrix, localStrain, false);
-
-        answer.at(1, 1) = strain.at(1);
-        answer.at(2, 2) = strain.at(2);
-        answer.at(3, 3) = strain.at(3);
-        answer.at(2, 3) = strain.at(4) / 2.;
-        answer.at(3, 2) = strain.at(4) / 2.;
-        answer.at(1, 3) = strain.at(5) / 2.;
-        answer.at(3, 1) = strain.at(5) / 2.;
-        answer.at(1, 2) = strain.at(6) / 2.;
-        answer.at(2, 1) = strain.at(6) / 2.;
+        answer = from_voigt_strain(strain);
     } else {
         OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
+        answer.resize(3, 3);
+        answer.zero();
     }
 }
 
@@ -1247,7 +1226,7 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     FloatArray llc;
     this->giveLocalCoordinates( inputCoords_ElCS, coords );
     for ( int _i = 0; _i < 4; _i++ ) {
-        this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
+        this->giveLocalCoordinates( lc [ _i ], this->giveNode(_i + 1)->giveCoordinates() );
     }
     bool inplane = interp_lin.global2local( llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc) ) > 0;
     answer.resize(2);
@@ -1438,10 +1417,9 @@ MITC4Shell :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     FloatArray e1, e2, e3, xl, yl;
     this->computeLocalBaseVectors(e1, e2, e3);
 
-    IntArray edgeNodes;
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
+    const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
-    xl.beDifferenceOf( * this->giveNode( edgeNodes.at(2) )->giveCoordinates(), * this->giveNode( edgeNodes.at(1) )->giveCoordinates() );
+    xl.beDifferenceOf( this->giveNode( edgeNodes.at(2) )->giveCoordinates(), this->giveNode( edgeNodes.at(1) )->giveCoordinates() );
 
     xl.normalize();
     yl.beVectorProductOf(e3, xl);

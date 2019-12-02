@@ -149,7 +149,7 @@ public:
      * @param c Position of coefficient in array.
      */
     template<std::size_t M>
-    inline FloatArrayF<M> operator[] (int const (&c)[M])
+    inline FloatArrayF<M> operator[] (int const (&c)[M]) const
     {
         FloatArrayF<M> x;
         for ( std::size_t i = 0; i < M; ++i ) {
@@ -157,7 +157,16 @@ public:
         }
         return x;
     }
-    
+
+    /// Assign x into self.
+    template<size_t M>
+    inline void assign(const FloatArrayF<M> &x, int const (&c)[M] )
+    {
+        for ( std::size_t i = 0; i < M; ++i ) {
+            (*this)[c[i]] = x[i];
+        }
+    }
+
     /// Assemble x into self.
     template<size_t M>
     inline void assemble(const FloatArrayF<M> &x, int const (&c)[M] )
@@ -255,12 +264,24 @@ FloatArrayF<N> operator * ( const FloatArrayF<N> & x, double a )
     return a*x;
 }
 
+/// Element-wise multiplication
+template<std::size_t N>
+FloatArrayF<N> mult ( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
+{
+    FloatArrayF<N> out;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        out[i] = x[i] * y[i];
+    }
+    return out;
+}
+
+
 template<std::size_t N>
 FloatArrayF<N> operator / ( const FloatArrayF<N> & x, double a )
 {
     FloatArrayF<N> out;
     for ( std::size_t i = 0; i < N; ++i ) {
-        out[i] = x[i] * a;
+        out[i] = x[i] / a;
     }
     return out;
 }
@@ -354,8 +375,8 @@ FloatArrayF<N> operator ^= ( FloatArrayF<N> & x, double a)
 template<std::size_t N>
 bool iszero(const FloatArrayF<N> &x)
 {
-    for ( auto &x : x ) {
-        if ( x != 0. ) {
+    for ( auto &v : x ) {
+        if ( v != 0. ) {
             return false;
         }
     }
@@ -390,6 +411,13 @@ template<std::size_t N>
 double norm( const FloatArrayF<N> & x )
 {
     return std::sqrt(norm_squared(x));
+}
+
+/// Normalizes vector (L2 norm)
+template<std::size_t N>
+FloatArrayF<N> normalize( const FloatArrayF<N> & x )
+{
+    return x / norm(x);
 }
 
 /// Computes the sum of x
@@ -462,7 +490,7 @@ template<std::size_t N>
 FloatArrayF<N> max(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     FloatArrayF<N> out;
-    for (std::size_t i; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         out[i] = std::max(a[i], b[i]);
     }
     return out;
@@ -472,7 +500,7 @@ template<std::size_t N>
 FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     FloatArrayF<N> out;
-    for (std::size_t i; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         out[i] = std::min(a[i], b[i]);
     }
     return out;

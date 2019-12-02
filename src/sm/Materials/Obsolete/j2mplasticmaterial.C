@@ -388,7 +388,7 @@ J2MPlasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                              TimeStep *tStep) const
 {
     /* Returns 3d elastic moduli */
-    this->linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
+    answer = this->linearElasticMaterial->give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
 }
 
 

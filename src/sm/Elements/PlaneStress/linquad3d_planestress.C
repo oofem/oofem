@@ -101,10 +101,9 @@ LinQuad3DPlaneStress :: computeLocalNodalCoordinates(std::vector< FloatArray > &
 
 
     lxy.resize(4);
-    const FloatArray *nc;
     for ( int i = 0; i < 4; i++ ) {
-        nc = this->giveNode(i + 1)->giveCoordinates();
-        lxy[i].beProductOf(* GtoLRotationMatrix, *nc);
+        const auto &nc = this->giveNode(i + 1)->giveCoordinates();
+        lxy[i].beProductOf(* GtoLRotationMatrix, nc);
     }
 }
 
@@ -133,8 +132,8 @@ LinQuad3DPlaneStress :: computeGtoLRotationMatrix()
         FloatArray e1, e2, e3, help;
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
-        e1.beDifferenceOf( * this->giveNode(2)->giveCoordinates(),  * this->giveNode(1)->giveCoordinates() );
-        help.beDifferenceOf( * this->giveNode(3)->giveCoordinates(),  * this->giveNode(1)->giveCoordinates() );
+        e1.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+        help.beDifferenceOf( this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
 
         // let us normalize e1'
         e1.normalize();

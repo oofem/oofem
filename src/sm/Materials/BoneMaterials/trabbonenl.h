@@ -95,22 +95,22 @@ public:
 
     Interface *giveInterface(InterfaceType) override;
 
-    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double computeLocalCumPlastStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    double computeLocalCumPlastStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
     {
         return TrabBoneMaterial :: computeCumPlastStrain(gp, tStep);
     }
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
 
     int hasBoundedSupport() const override { return 1; }
 
-    void giveSupportRadius(double &radius) { radius = this->R; }
+    double giveSupportRadius() const { return this->R; }
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNLStatus(gp); }

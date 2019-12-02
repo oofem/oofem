@@ -70,8 +70,8 @@ public:
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
     // Edge (same as bulk for this type, so they are all ignored) (perhaps do it the other way around?).
-    void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override;
-    void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) override;
+    IntArray boundaryEdgeGiveNodes(int boundary) const override;
+    IntArray computeLocalEdgeMapping(int iedge) const override;
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -83,7 +83,7 @@ public:
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
 
 protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
+    double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
 };
 } // end namespace oofem
 #endif // fei2dlinelin_h

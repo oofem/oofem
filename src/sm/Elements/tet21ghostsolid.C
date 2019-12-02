@@ -206,13 +206,13 @@ tet21ghostsolid :: computeNumericStiffnessMatrixDebug(FloatMatrix &answer, MatRe
 void
 tet21ghostsolid :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_3d(strain, gp, tStep);
 }
 
 void
 tet21ghostsolid :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
 }
 
 void
@@ -1365,8 +1365,7 @@ tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         if ( node <= 4 ) {
             answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
         } else {
-            IntArray eNodes;
-            this->interpolation.computeLocalEdgeMapping(eNodes, node - 4);
+            const auto &eNodes = this->interpolation.computeLocalEdgeMapping(node - 4);
             answer.at(1) = 0.5 * (
                 this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
                 this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );

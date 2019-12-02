@@ -22,13 +22,13 @@ class MyMaterial(oofempy.StructuralMaterial):
         answer = oofempy.FloatMatrix(1,1)
         answer[0,0] = self.k
         return answer;
-    def giveRealStressVector_1d (self, answer, gp, reducedStrain, tStep):
-        answer.resize(1)
+    def giveRealStressVector_1d(self, reducedStrain, gp, tStep):
+        answer = oofempy.FloatArray(1)
         answer[0] = self.k * reducedStrain[0]
         status = self.giveStatus(gp)
         status.letTempStrainVectorBe(reducedStrain);
         status.letTempStressVectorBe(answer);
-        return
+        return answer;
     def giveStatus (self, gp):
         print ("getStatus")
         if (gp.giveMaterialStatus() is None):
@@ -88,7 +88,7 @@ def test_4():
     gp = rule.getIntegrationPoint(0)
     #print(gp)
     #print(mat.giveStatus(gp))
-    domain.giveMaterial(1).giveRealStressVector_1d (ans, rule.getIntegrationPoint(0), a, None)
+    ans = domain.giveMaterial(1).giveRealStressVector_1d(a, rule.getIntegrationPoint(0), None)
     #ans.pY()
     assert (round(ans[0]-1.5, 8) == 0), "Stress value error"
 

@@ -140,7 +140,7 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
     FloatMatrix lcs(3, 3);
     this->computeLCS(lcs);
     for ( int i = 1; i <= 3; i++ ) {
-        lncp[ i - 1 ].beProductOf(lcs, *this->giveNode(i)->giveCoordinates());
+        lncp[ i - 1 ].beProductOf(lcs, this->giveNode(i)->giveCoordinates());
     }
 
     determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );

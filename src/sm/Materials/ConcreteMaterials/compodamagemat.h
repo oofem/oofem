@@ -148,18 +148,23 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new CompoDamageMatStatus(gp); }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mmode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &, TimeStep *tStep) override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<CompoDamageMat*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<CompoDamageMat*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
@@ -178,7 +183,7 @@ protected:
      * @param mode Material mode of stiffness matrix (elastic, secant).
      * @param gp Integration point.
      */
-    void giveUnrotated3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp);
+    FloatMatrixF<6,6> giveUnrotated3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp) const;
     /**
      * Returns [6x6] rotation matrix in the global coordinate system.
      * The matrix relates local c.s. to global c.s. Local c.s. can be specified with 'mcs' flag defined on element.
@@ -186,7 +191,7 @@ protected:
      * @param gp Integration point.
      * @return 0 if no lcs is defined on element, 1 if defined.
      */
-    int giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint *gp);
+    int giveMatStiffRotationMatrix(FloatMatrixF<6,6> &answer, GaussPoint *gp) const;
 
     /// Six stress components of tension components read from the input file.
     FloatArray inputTension;

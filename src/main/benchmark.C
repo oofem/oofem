@@ -1,14 +1,22 @@
 #include <benchmark/benchmark.h>
+
+#include "fei2dtrlin.h"
+#include "fei2dtrquad.h"
+
+#include "fei2dquadlin.h"
+#include "fei2dquadquad.h"
+#include "fei2dquadbiquad.h"
+
 #include "fei3dhexalin.h"
 #include "fei3dhexaquad.h"
-#include "fei2dtrquad.h"
+
 #include "floatarrayf.h"
 #include "floatmatrixf.h"
 #include "sm/Materials/structuralmaterial.h"
 
 using namespace oofem;
 
-
+#if 1
 static void PrincipalValuesDyn(benchmark::State& state) {
     FloatArray s = {1., 4., 6., 5., 3., 2.};
     FloatArray v(3);
@@ -132,7 +140,7 @@ BENCHMARK(SolDyn);
 
 
 static void SolFix(benchmark::State& state) {
-#if 0
+#if 1
     FloatMatrixF<4,4> D = {
         1., 2., 3., 7.,
         2., -4., 5., 0.,
@@ -262,6 +270,7 @@ static void ComputeD(benchmark::State& state) {
     }
 }
 BENCHMARK(ComputeD);
+#endif
 
 #if 0
 const std::vector<FloatArrayF<3>> nodes_6 = {
@@ -287,6 +296,11 @@ const std::vector<FloatArray> nodes_6 = {
     FloatArray{1.,0.,0.},FloatArray{1.,0.6,0.},FloatArray{0.,0.5,0.},
 };
 
+const std::vector<FloatArray> nodes_4 = {
+    FloatArray{0.,0.2,0.}, FloatArray{1.2,0.,0.},
+    FloatArray{1.1,1.1,0.}, FloatArray{0.,1.,0.},
+};
+
 const std::vector<FloatArray> nodes_8 = {
     FloatArray{-1.,-1., 1.},FloatArray{-1.,1., 1.},FloatArray{1.,1., 1.},FloatArray{1.,-1., 1.},
     FloatArray{-1.,-1.,-1.},FloatArray{-1.,1.,-1.},FloatArray{1.,1.,-1.},FloatArray{1.,-1.,-1.},
@@ -302,33 +316,59 @@ const std::vector<FloatArray> nodes_20 = {
 #endif
 
 const FEIVertexListGeometryWrapper tri_6 = nodes_6;
+const FEIVertexListGeometryWrapper quad_4 = nodes_4;
 const FEIVertexListGeometryWrapper cube_8 = nodes_8;
 const FEIVertexListGeometryWrapper cube_20 = nodes_20;
 const FEIVoidCellGeometry void_cell;
 
 
-static void BMatrixLin(benchmark::State& state) {
-    FEI3dHexaLin interp;
-    FloatArray lcoords = {0.2, 0.4, 0.3};
+static void QuadLinN(benchmark::State& state) {
+    FEI2dQuadLin interp(1,2);
+    FloatArray lcoords = {0.2, 0.4};
+    FloatArray x(4);
     for (auto _ : state) {
-        FloatMatrix B;
-        interp.evaldNdx(B, lcoords, cube_8);
-        benchmark::DoNotOptimize(B);
-        benchmark::DoNotOptimize(lcoords);
-    }
-}
-BENCHMARK(BMatrixLin);
-
-static void BMatrixLinFixed(benchmark::State& state) {
-    FEI3dHexaLin interp;
-    FloatArrayF<3> lcoords = {0.2, 0.4, 0.3};
-    for (auto _ : state) {
-        auto x = interp.evaldNdx(lcoords, cube_8);
+        interp.evalN(x, lcoords, void_cell);
         benchmark::DoNotOptimize(x);
         benchmark::DoNotOptimize(lcoords);
     }
 }
-BENCHMARK(BMatrixLinFixed);
+BENCHMARK(QuadLinN);
+
+static void QuadLinNFixed(benchmark::State& state) {
+    FEI2dQuadLin interp(1,2);
+    FloatArrayF<2> lcoords = {0.2, 0.4};
+    for (auto _ : state) {
+        auto x = interp.evalN(lcoords);
+        benchmark::DoNotOptimize(x);
+        benchmark::DoNotOptimize(lcoords);
+    }
+}
+BENCHMARK(QuadLinNFixed);
+
+
+static void QuadLinB(benchmark::State& state) {
+    FEI2dQuadLin interp(1,2);
+    FloatArray lcoords = {0.2, 0.4};
+    FloatMatrix x(4,2);
+    for (auto _ : state) {
+        interp.evaldNdx(x, lcoords, quad_4);
+        benchmark::DoNotOptimize(x);
+        benchmark::DoNotOptimize(lcoords);
+    }
+}
+BENCHMARK(QuadLinB);
+
+static void QuadLinBFixed(benchmark::State& state) {
+    FEI2dQuadLin interp(1,2);
+    FloatArrayF<2> lcoords = {0.2, 0.4};
+    for (auto _ : state) {
+        auto x = interp.evaldNdx(lcoords, quad_4);
+        benchmark::DoNotOptimize(x);
+        benchmark::DoNotOptimize(lcoords);
+    }
+}
+BENCHMARK(QuadLinBFixed);
+
 
 
 static void HexLinN(benchmark::State& state) {
@@ -353,6 +393,29 @@ static void HexLinNFixed(benchmark::State& state) {
     }
 }
 BENCHMARK(HexLinNFixed);
+
+static void HexaLinB(benchmark::State& state) {
+    FEI3dHexaLin interp;
+    FloatArray lcoords = {0.2, 0.4, 0.3};
+    for (auto _ : state) {
+        FloatMatrix B;
+        interp.evaldNdx(B, lcoords, cube_8);
+        benchmark::DoNotOptimize(B);
+        benchmark::DoNotOptimize(lcoords);
+    }
+}
+BENCHMARK(HexaLinB);
+
+static void HexaLinBFixed(benchmark::State& state) {
+    FEI3dHexaLin interp;
+    FloatArrayF<3> lcoords = {0.2, 0.4, 0.3};
+    for (auto _ : state) {
+        auto x = interp.evaldNdx(lcoords, cube_8);
+        benchmark::DoNotOptimize(x);
+        benchmark::DoNotOptimize(lcoords);
+    }
+}
+BENCHMARK(HexaLinBFixed);
 
 
 static void HexQuadB(benchmark::State& state) {
@@ -403,6 +466,28 @@ static void HexQuadNFixed(benchmark::State& state) {
 BENCHMARK(HexQuadNFixed);
 
 
+static void TriQuadN(benchmark::State& state) {
+    FEI2dTrQuad interp(1,2);
+    FloatArray lcoords = {0.2, 0.4};
+    for (auto _ : state) {
+        FloatArray N;
+        interp.evalN(N, lcoords, void_cell);
+        benchmark::DoNotOptimize(N);
+        benchmark::DoNotOptimize(lcoords);
+    }
+}
+BENCHMARK(TriQuadN);
+
+static void TriQuadNFixed(benchmark::State& state) {
+    FEI2dTrQuad interp(1,2);
+    FloatArrayF<2> lcoords = {0.2, 0.4};
+    for (auto _ : state) {
+        auto x = interp.evalN(lcoords);
+        benchmark::DoNotOptimize(x);
+        benchmark::DoNotOptimize(lcoords);
+    }
+}
+BENCHMARK(TriQuadNFixed);
 
 static void TriQuadB(benchmark::State& state) {
     FEI2dTrQuad interp(1,2);
@@ -426,30 +511,6 @@ static void TriQuadBFixed(benchmark::State& state) {
     }
 }
 BENCHMARK(TriQuadBFixed);
-
-
-static void TriQuadN(benchmark::State& state) {
-    FEI2dTrQuad interp(1,2);
-    FloatArray lcoords = {0.2, 0.4};
-    for (auto _ : state) {
-        FloatArray N;
-        interp.evalN(N, lcoords, void_cell);
-        benchmark::DoNotOptimize(N);
-        benchmark::DoNotOptimize(lcoords);
-    }
-}
-BENCHMARK(TriQuadN);
-
-static void TriQuadNFixed(benchmark::State& state) {
-    FEI2dTrQuad interp(1,2);
-    FloatArrayF<2> lcoords = {0.2, 0.4};
-    for (auto _ : state) {
-        auto x = interp.evalN(lcoords);
-        benchmark::DoNotOptimize(x);
-        benchmark::DoNotOptimize(lcoords);
-    }
-}
-BENCHMARK(TriQuadNFixed);
 
 
 BENCHMARK_MAIN();

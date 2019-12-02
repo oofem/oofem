@@ -114,7 +114,7 @@ public:
 
     int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep) override;
 
-    Material *giveMaterial(IntegrationPoint *ip) override;
+    Material *giveMaterial(IntegrationPoint *ip) const override;
     int giveMaterialNumber() const { return this->materialNum; }
     void setMaterialNumber(int matNum) { this->materialNum = matNum; }
 

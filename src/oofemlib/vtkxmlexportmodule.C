@@ -584,7 +584,7 @@ VTKPiece :: setConnectivity(int cellNum, IntArray &nodes)
 }
 
 void
-VTKPiece :: setNodeCoords(int nodeNum, FloatArray &coords)
+VTKPiece :: setNodeCoords(int nodeNum, const FloatArray &coords)
 {
     this->nodeCoords [ nodeNum - 1 ] = coords;
 }
@@ -676,7 +676,6 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
-    FloatArray *coords;
 
     this->giveSmoother(); // make sure smoother is created
 
@@ -691,8 +690,8 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
-            vtkPiece.setNodeCoords(inode, * coords);
+            const auto &coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
+            vtkPiece.setNodeCoords(inode, coords);
         }
 
 
@@ -1123,11 +1122,11 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
     if ( xfemstype == XFEMST_LevelSetPhi ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber(), * ( node->giveCoordinates() ) );
+        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber(), node->giveCoordinates() );
     } else if ( xfemstype == XFEMST_LevelSetGamma ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), * ( node->giveCoordinates() ) );
+        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), node->giveCoordinates() );
     } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
         valueArray.resize(1);
         val = & valueArray;

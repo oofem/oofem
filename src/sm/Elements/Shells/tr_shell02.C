@@ -393,9 +393,9 @@ TR_SHELL02 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
     FloatArray _c;
 
     for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
-        FloatArray *coordinates = this->giveNode(i)->giveCoordinates();
+        const auto &coordinates = this->giveNode(i)->giveCoordinates();
 
-        _c = * coordinates;
+        _c = coordinates;
         _c.add(gt3);
         if ( i == 1 ) {
             bb0 = bb1 = _c;
@@ -404,7 +404,7 @@ TR_SHELL02 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
             bb1.beMaxOf(bb1, _c);
         }
 
-        _c = * coordinates;
+        _c = coordinates;
         _c.subtract(gt3);
         bb0.beMinOf(bb0, _c);
         bb1.beMaxOf(bb1, _c);

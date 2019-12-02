@@ -296,10 +296,9 @@ FEI3dWedgeLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &
 void
 FEI3dWedgeLin :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray nodes;
     FloatArray n;
 
-    this->computeLocalEdgeMapping(nodes, iedge);
+    const auto &nodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.clear();
@@ -309,29 +308,30 @@ FEI3dWedgeLin :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArra
 }
 
 
-void
-FEI3dWedgeLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dWedgeLin :: computeLocalEdgeMapping(int iedge) const
 {
     if ( iedge == 1 ) {
-        edgeNodes = {1, 2};
+        return {1, 2};
     } else if ( iedge == 2 ) {
-        edgeNodes = {2, 3};
+        return {2, 3};
     } else if ( iedge == 3 ) {
-        edgeNodes = {3, 1};
+        return {3, 1};
     } else if ( iedge == 4 ) {
-        edgeNodes = {4, 5};
+        return {4, 5};
     } else if ( iedge == 5 ) {
-        edgeNodes = {5, 6};
+        return {5, 6};
     } else if ( iedge == 6 ) {
-        edgeNodes = {6, 4};
+        return {6, 4};
     } else if ( iedge == 7 ) {
-        edgeNodes = {1, 4};
+        return {1, 4};
     } else if ( iedge == 8 ) {
-        edgeNodes = {2, 5};
+        return {2, 5};
     } else if ( iedge == 9 ) {
-        edgeNodes = {3, 6};
+        return {3, 6};
     } else {
-        OOFEM_ERROR("Edge %d doesn't exist.\n", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
 }
 
@@ -369,10 +369,9 @@ void
 FEI3dWedgeLin :: surfaceLocal2global(FloatArray &answer, int isurf,
                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray nodes;
     FloatArray n;
 
-    this->computeLocalSurfaceMapping(nodes, isurf);
+    const auto &nodes = this->computeLocalSurfaceMapping(isurf);
     this->surfaceEvalN(n, isurf, lcoords, cellgeo);
 
     answer.clear();
@@ -382,21 +381,22 @@ FEI3dWedgeLin :: surfaceLocal2global(FloatArray &answer, int isurf,
 }
 
 
-void
-FEI3dWedgeLin :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
+IntArray
+FEI3dWedgeLin :: computeLocalSurfaceMapping(int isurf) const
 {
     if ( isurf == 1 ) {
-        nodes = {1, 2, 3};
+        return {1, 2, 3};
     } else if ( isurf == 2 ) {
-        nodes = {4, 5, 6};
+        return {4, 5, 6};
     } else if ( isurf == 3 ) {
-        nodes = {1, 2, 5, 4};
+        return {1, 2, 5, 4};
     } else if ( isurf == 4 ) {
-        nodes = {2, 3, 6, 5};
+        return {2, 3, 6, 5};
     } else if ( isurf == 5 ) {
-        nodes = {3, 1, 4, 6};
+        return {3, 1, 4, 6};
     } else {
-        OOFEM_ERROR("Surface %d doesn't exist.\n", isurf);
+        throw std::range_error("invalid surface number");
+        return {};
     }
 }
 

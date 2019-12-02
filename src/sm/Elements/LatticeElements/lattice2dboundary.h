@@ -68,45 +68,45 @@ public:
     Lattice2dBoundary(int, Domain *);                     // constructor
     ~Lattice2dBoundary();                                 // destructor
 
-    virtual void giveInternalForcesVector(FloatArray &answer,
-                                          TimeStep *, int useUpdatedGpRecord = 0) override;
+    void giveInternalForcesVector(FloatArray &answer,
+                                  TimeStep *, int useUpdatedGpRecord = 0) override;
 
     const IntArray giveLocation() override;
 
-    virtual int            computeNumberOfDofs() override { return 9; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const override;
-    virtual double        computeVolumeAround(GaussPoint *) override;
+    int            computeNumberOfDofs() override { return 9; }
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
+    double        computeVolumeAround(GaussPoint *) override;
 
     //
     // definition & identification
     //
-    virtual const char *giveInputRecordName() const override { return _IFT_Lattice2dBoundary_Name; }
-    virtual const char *giveClassName() const override { return "Lattice2dBoundary"; }
-    virtual void initializeFrom(InputRecord &ir) override;
+    const char *giveInputRecordName() const override { return _IFT_Lattice2dBoundary_Name; }
+    const char *giveClassName() const override { return "Lattice2dBoundary"; }
+    void initializeFrom(InputRecord &ir) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
 #ifdef __OOFEG
-    void          drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
-    void          drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
-    void          drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
+    void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
+    void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
+    void drawRawCrossSections(oofegGraphicContext &, TimeStep *tStep);
     void drawDeformedGeometry(oofegGraphicContext &,  TimeStep *tStep, UnknownType) override;
     void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) override;
-    virtual void giveCrossSectionCoordinates(FloatArray &coords);
+    void giveCrossSectionCoordinates(FloatArray &coords);
 #endif
 
 
 protected:
-    void          computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
-    virtual bool           computeGtoLRotationMatrix(FloatMatrix &) override;
+    void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &) override;
 
-    void  computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) override;
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) override;
 
-    virtual double        giveLength() override;
-    double        givePitch();
+    double giveLength() override;
+    double givePitch();
     void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
     void giveSwitches(FloatArray &answer);
 };

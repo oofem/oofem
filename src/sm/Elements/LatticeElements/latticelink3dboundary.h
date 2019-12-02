@@ -62,20 +62,20 @@ public:
     LatticeLink3dBoundary(int n, Domain *);
     virtual ~LatticeLink3dBoundary();
 
-    virtual int giveLocalCoordinateSystem(FloatMatrix &answer) override;
+    int giveLocalCoordinateSystem(FloatMatrix &answer) override;
 
-    virtual int computeNumberOfDofs() override { return 18; }
+    int computeNumberOfDofs() override { return 18; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const override;
+    void giveDofManDofIDMask(int inode, IntArray &) const override;
 
-    virtual void  giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0) override;
-    virtual void computeGeometryProperties() override;
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *, int useUpdatedGpRecord = 0) override;
+    void computeGeometryProperties() override;
 
-    virtual void giveGPCoordinates(FloatArray &coords) override { coords = this->globalCentroid; }
-    virtual const char *giveInputRecordName() const override { return _IFT_LatticeLink3dBoundary_Name; }
-    virtual const char *giveClassName() const override { return "LatticeLink3dBoundary"; }
-    virtual void initializeFrom(InputRecord &ir) override;
-    virtual Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    void giveGPCoordinates(FloatArray &coords) override { coords = this->globalCentroid; }
+    const char *giveInputRecordName() const override { return _IFT_LatticeLink3dBoundary_Name; }
+    const char *giveClassName() const override { return "LatticeLink3dBoundary"; }
+    void initializeFrom(InputRecord &ir) override;
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -84,17 +84,17 @@ public:
     void recalculateCoordinates(int nodeNumber, FloatArray &coords) override;
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
-    virtual void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
-    virtual void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
+    void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
+    void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
 #endif
 
 protected:
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &) override;
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
+    bool computeGtoLRotationMatrix(FloatMatrix &) override;
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
     void giveSwitches(IntArray &answer, int location);
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) override;
+    void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN) override;
 };
 } // end namespace oofem
 #endif

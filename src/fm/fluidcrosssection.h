@@ -66,12 +66,12 @@ public:
 
     int checkConsistency() override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep) override;
 
     virtual double giveDensity(GaussPoint *gp);
     FluidDynamicMaterial *giveFluidMaterial();
-    Material *giveMaterial(IntegrationPoint *ip) override;
+    Material *giveMaterial(IntegrationPoint *ip) const override;
 
     int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp) override;
     int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp) override;

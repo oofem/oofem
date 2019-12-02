@@ -53,27 +53,26 @@ MisesMatNl :: MisesMatNl(int n, Domain *d) : MisesMat(n, d), StructuralNonlocalM
 }
 
 
-void
-MisesMatNl :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+MisesMatNl :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     OOFEM_ERROR("3D mode not supported");
+    return zeros<6>();
 }
 
 
-void
-MisesMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<1>
+MisesMatNl :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
-    MisesMatNlStatus *nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
+    auto nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     
-    double tempDam;
-    performPlasticityReturn(gp, totalStrain, tStep);
-    tempDam = this->computeDamage(gp, tStep);
-    answer.beScaled(1.0 - tempDam, nlStatus->giveTempEffectiveStress());
+    performPlasticityReturn(totalStrain, gp, tStep);
+    double tempDam = this->computeDamage(gp, tStep);
+    FloatArrayF<6> stress = (1.0 - tempDam) * nlStatus->giveTempEffectiveStress();
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
-    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->letTempStressVectorBe(stress);
+    return stress[{0}];
 }
 
 
@@ -109,7 +108,7 @@ MisesMatNl :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeSt
 
 
 void
-MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     /* Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -121,7 +120,7 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
     auto nlstatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    this->performPlasticityReturn(gp, strainVector, tStep);
+    this->performPlasticityReturn(strainVector, gp, tStep);
     double cumPlasticStrain = this->computeLocalCumPlasticStrain(gp, tStep);
     // standard formulation based on averaging of equivalent strain
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);
@@ -134,7 +133,7 @@ MisesMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 
 
 void
-MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
+MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp) const
 {
     MisesMatNlStatus *nonlocStatus, *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     auto list = this->giveIPIntegrationList(gp);
@@ -212,7 +211,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
 }
 
 double
-MisesMatNl :: computeDistanceModifier(double damage)
+MisesMatNl :: computeDistanceModifier(double damage) const
 {
     switch ( averType ) {
     case 2: return 1. / ( Rf / cl + ( 1. - Rf / cl ) * pow(1. - damage, exponent) );
@@ -325,7 +324,7 @@ MisesMatNl :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep)
+MisesMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     double nlKappa = this->computeCumPlasticStrain(gp, tStep);

@@ -55,11 +55,7 @@ protected:
 
 
 public:
-    /// Constructor
     LatticeSlipStatus(GaussPoint *g);
-
-    void  letTempPlasticStrainBe(const FloatArray &v)
-    { tempPlasticStrain = v; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -117,50 +113,22 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
 
-    void give1dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
-    void give2dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
-    void give3dLatticeStiffMtrx(FloatMatrix &answer,
-                                MatResponseMode rmode,
-                                GaussPoint *gp,
-                                TimeStep *atTime) override;
-
-    double computeDeltaDissipation(GaussPoint *gp,
-                                   TimeStep *atTime);
+    double computeDeltaDissipation(GaussPoint *gp, TimeStep *atTime) const;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
     Interface *giveInterface(InterfaceType) override;
 
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
-
-    void giveRealStressVector_Lattice2d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) override { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
-
-    void giveRealStressVector_Lattice3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *atTime) override { this->giveRealStressVector(answer, gp, totalStrain, atTime); }
-
-    void giveRandomParameters(FloatArray &param) override;
-
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-
-
-    double give(int aProperty, GaussPoint *gp) const override;
-
 
 
 protected:

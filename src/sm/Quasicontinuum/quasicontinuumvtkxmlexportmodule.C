@@ -79,7 +79,6 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
 
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
-    FloatArray *coords;
 
     this->giveSmoother(); // make sure smoother is created
 
@@ -94,8 +93,8 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
-            vtkPiece.setNodeCoords(inode, * coords);
+            const auto &coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
+            vtkPiece.setNodeCoords(inode, coords);
         }
 
 

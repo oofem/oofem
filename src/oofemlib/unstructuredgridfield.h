@@ -387,8 +387,8 @@ protected:
   */
   int evaluateAt(FloatArray &answer, DofManager *dman,
                  ValueModeType mode, TimeStep *tStep) override {
-    FloatArray* coords = dman->giveCoordinates();
-    return this->evaluateAt (answer, *coords, mode, tStep);
+    const auto &coords = dman->giveCoordinates();
+    return this->evaluateAt (answer, coords, mode, tStep);
   }
 
   void saveContext(DataStream &stream) override { }

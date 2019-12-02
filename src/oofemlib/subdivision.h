@@ -95,7 +95,7 @@ protected:
         IntArray partitions;
 #endif
 public:
-        RS_Node(int n, Subdivision :: RS_Mesh * m, int parent, FloatArray & c, double rd, bool boundary) {
+        RS_Node(int n, Subdivision :: RS_Mesh * m, int parent, const FloatArray & c, double rd, bool boundary) {
             this->number = n;
             this->mesh = m;
             this->coords = c;

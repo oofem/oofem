@@ -95,7 +95,7 @@ public:
 
     virtual double giveBondEndLength();
 
-    virtual int computeNumberOfDofs() override { return 9; }
+    int computeNumberOfDofs() override { return 9; }
 
     void giveDofManDofIDMask(int inode, IntArray &) const override;
 
@@ -117,9 +117,9 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &context, TimeStep *tStep);
-    void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep);
-    void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType);
+    void drawYourself(oofegGraphicContext &context, TimeStep *tStep) override;
+    void drawRawGeometry(oofegGraphicContext &, TimeStep *tStep) override;
+    void drawDeformedGeometry(oofegGraphicContext &, TimeStep *tStep, UnknownType) override;
 #endif
 
 

@@ -68,61 +68,61 @@ WinklerMaterial :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-void 
-WinklerMaterial::giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+FloatArrayF<3>
+WinklerMaterial::giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix tangent;
-    this->give2dPlateSubSoilStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-    answer.beProductOf(tangent, reducedE);
+    auto tangent = this->give2dPlateSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
+    auto answer = dot(tangent, reducedE);
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     status->letTempStrainVectorBe(reducedE);
     status->letTempStressVectorBe(answer);
+    return answer;
 }
 
-void 
-WinklerMaterial::giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
+FloatArrayF<6>
+WinklerMaterial::giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedE, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix tangent;
-    this->give3dBeamSubSoilStiffMtrx(tangent, ElasticStiffness, gp, tStep);
-    answer.beProductOf(tangent, reducedE);
+    auto tangent = this->give3dBeamSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
+    auto answer = dot(tangent, reducedE);
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     status->letTempStrainVectorBe(reducedE);
     status->letTempStressVectorBe(answer);
+    return answer;
 }
 
 
-void
-WinklerMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+WinklerMaterial :: give2dPlateSubSoilStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    answer.resize(3, 3);
-    answer.zero();
-
+    FloatMatrixF<3,3> answer;
     answer.at(1, 1) = c1.at(1);
     //answer.at(2, 2) = c2;
     //answer.at(3, 3) = c2;
+    return answer;
 }
 
 
-void
-WinklerMaterial::give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+WinklerMaterial::give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const
 {
     if ( this->c1.giveSize() == 6 ) {
-        answer.beDiagonal(this->c1);
+        auto answer = diag(FloatArrayF<6>(this->c1));
 
         if (globalFromulation) {
-            Beam3dSubsoilMaterialInterface *ei = (Beam3dSubsoilMaterialInterface*) gp->giveElement()->giveInterface(Beam3dSubsoilMaterialInterfaceType);
-            FloatMatrix T;
+            auto ei = static_cast<Beam3dSubsoilMaterialInterface*>(gp->giveElement()->giveInterface(Beam3dSubsoilMaterialInterfaceType));
             if (ei) {
-                ei->B3SSMI_getUnknownsGtoLRotationMatrix (T);
-                answer.rotatedWith(T, 't');
+                auto T = ei->B3SSMI_getUnknownsGtoLRotationMatrix();
+                answer = unrotate(answer, T);
             } else {
                 OOFEM_ERROR("Beam3dSubsoilMaterialInterface required from element");
             }
         }
+        return answer;
     } else {
         OOFEM_ERROR ("C1 attribute size error (shouldequal to 6 for 3dBeamSubsoil mode)");
+        return FloatMatrixF<6,6>();
     }
 }
 

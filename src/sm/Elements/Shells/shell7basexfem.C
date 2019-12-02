@@ -1637,8 +1637,7 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const
 
     FloatArray solVecEdge;
     FloatMatrix B;
-    IntArray edgeNodes;
-    this->fei->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iedge);
     this->edgeComputeEnrichedBmatrixAt(lcoords, B, ei, iedge);
     this->edgeGiveUpdatedSolutionVector(solVecEdge, iedge, tStep);
 
@@ -1836,11 +1835,11 @@ Shell7BaseXFEM :: EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei)
     if ( ei->isDofManEnriched(*dMan) ) {
         int globalNodeInd = dMan->giveGlobalNumber(); // global number in order to pick levelset value in that node
         double levelSetNode  = 0.0;
-        ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd, *(dMan->giveCoordinates()) );
+        ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd, dMan->giveCoordinates() );
         std :: vector< double >efNode;
         //const FloatArray &nodePos = * ( dMan->giveCoordinates() );
         // evaluateEnrFuncAt requires coords to be size 2
-        FloatArray nodePos = * ( dMan->giveCoordinates() );
+        FloatArray nodePos = dMan->giveCoordinates();
         nodePos.resizeWithValues(2);
 
         FloatArray localCoord;
@@ -2363,7 +2362,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             valueArray.resize(1);
                             //val = & valueArray;
-                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), node->giveNodeCoordinates() );
+                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), node->giveCoordinates() );
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
                             valueArray.resize(1);
                             //val = & valueArray;

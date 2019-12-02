@@ -66,23 +66,8 @@ namespace oofem {
 REGISTER_DofManager(Node);
 
 Node :: Node(int n, Domain *aDomain) :
-    DofManager(n, aDomain), coordinates()
+    DofManager(n, aDomain)
 { }
-
-
-Node :: ~Node() { }
-
-
-double
-Node :: giveCoordinate(int i)
-// Returns the i-th coordinate of the receiver.
-{
-    if ( i > coordinates.giveSize() ) {
-        return 0.;
-    }
-
-    return coordinates.at(i);
-}
 
 
 void Node :: initializeFrom(InputRecord &ir)

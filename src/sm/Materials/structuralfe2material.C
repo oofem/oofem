@@ -100,12 +100,10 @@ StructuralFE2Material :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+StructuralFE2Material :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatArray stress;
-    StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
+    auto ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
 
 #if 0
     XfemStructureManager *xMan = dynamic_cast<XfemStructureManager*>( ms->giveRVE()->giveDomain(1)->giveXfemManager() );
@@ -116,73 +114,65 @@ StructuralFE2Material :: giveRealStressVector_3d(FloatArray &answer, GaussPoint 
 
     ms->setTimeStep(tStep);
     // Set input
-    ms->giveBC()->setPrescribedGradientVoigt(totalStrain);
+    ms->giveBC()->setPrescribedGradientVoigt(strain);
     // Solve subscale problem
     ms->giveRVE()->solveYourselfAt(tStep);
     // Post-process the stress
+    FloatArray stress;
     ms->giveBC()->computeField(stress, tStep);
 
+    FloatArrayF<6> answer;
     if ( stress.giveSize() == 6 ) {
         answer = stress;
-    } if ( stress.giveSize() == 9 ) {
+    } else if ( stress.giveSize() == 9 ) {
         answer = {stress[0], stress[1], stress[2], 0.5*(stress[3]+stress[6]), 0.5*(stress[4]+stress[7]), 0.5*(stress[5]+stress[8])};
+    } else if ( stress.giveSize() == 4 ) {
+        // 2D mode is a bit wonky in FE2 code right now. It doesn't actually deal with plane strain out-of-plane component correctly.
+        // Instead gives just the 2D state, non-symmetrically.
+        // This needs to be cleared up and made consistent, to take out the guesswork on what computeField() actually computes.
+        answer = {stress[0], stress[1], 0., 0., 0., 0.5*(stress[2]+stress[3])};
     } else {
-        StructuralMaterial::giveFullSymVectorForm(answer, stress, gp->giveMaterialMode() );
+        answer = {stress[0], 0., 0., 0., 0., 0.};
     }
 
     // Update the material status variables
     ms->letTempStressVectorBe(answer);
-    ms->letTempStrainVectorBe(totalStrain);
+    ms->letTempStrainVectorBe(strain);
     ms->markOldTangent(); // Mark this so that tangent is reevaluated if they are needed.
+    return answer;
 }
 
 
-void
-StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+StructuralFE2Material :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
+    auto status = static_cast<StructuralFE2MaterialStatus*>( this->giveStatus( gp ) );
     if ( useNumTangent ) {
         // Numerical tangent
-        StructuralFE2MaterialStatus *status = static_cast<StructuralFE2MaterialStatus*>( this->giveStatus( gp ) );
         double h = 1.0e-9;
 
-        const FloatArray &epsRed = status->giveTempStrainVector();
-        FloatArray eps;
-        StructuralMaterial::giveFullSymVectorForm(eps, epsRed, gp->giveMaterialMode() );
+        FloatArrayF<6> eps = status->giveTempStrainVector();
+        FloatArrayF<6> sig = status->giveTempStressVector();
 
-
-        int dim = eps.giveSize();
-        answer.resize(dim, dim);
-        answer.zero();
-
-        FloatArray sig, sigPert, epsPert;
-
-        for(int i = 1; i <= dim; i++) {
+        FloatMatrixF<6,6> answer;
+        for(int i = 0; i < 6; i++) {
             // Add a small perturbation to the strain
-            epsPert = eps;
-            epsPert.at(i) += h;
+            auto epsPert = eps;
+            epsPert[i] += h;
 
-            giveRealStressVector_3d(sigPert, gp, epsPert, tStep);
-            answer.setColumn(sigPert, i);
+            auto sigPert = const_cast<StructuralFE2Material*>(this)->giveRealStressVector_3d(epsPert, gp, tStep);
+            answer.setColumn((sigPert - sig) / h, i);
         }
-
-        giveRealStressVector_3d(sig, gp, eps, tStep);
-
-        for(int i = 1; i <= dim; i++) {
-            for(int j = 1; j <= dim; j++) {
-                answer.at(j,i) -= sig.at(j);
-                answer.at(j,i) /= h;
-            }
-        }
+        const_cast<StructuralFE2Material*>(this)->giveRealStressVector_3d(eps, gp, tStep);
+        return answer;
 
     } else {
-
-        StructuralFE2MaterialStatus *ms = static_cast< StructuralFE2MaterialStatus * >( this->giveStatus(gp) );
-        ms->computeTangent(tStep);
-        const FloatMatrix &ans9 = ms->giveTangent();
-
+        status->computeTangent(tStep);
+        const auto &ans9 = status->giveTangent();
+        FloatMatrix answer;
         StructuralMaterial::giveReducedSymMatrixForm(answer, ans9, _3dMat);
+        return answer;
 
-//        const FloatMatrix &ans9 = ms->giveTangent();
 //        printf("ans9: "); ans9.printYourself();
 //
 //        // Compute the (minor) symmetrized tangent:
@@ -244,6 +234,37 @@ StructuralFE2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatR
     }
 }
 
+FloatMatrixF<4,4>
+StructuralFE2Material :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+{
+    /// The plane-strain version of the tangent is overloaded primarily for performance when using the numerical tangent.
+    auto status = static_cast<StructuralFE2MaterialStatus*>( this->giveStatus( gp ) );
+    if ( useNumTangent ) {
+        // Numerical tangent
+        double h = 1.0e-9;
+
+        auto eps = FloatArrayF<6>(status->giveTempStrainVector())[{0, 1, 2, 5}];
+        auto sig = FloatArrayF<6>(status->giveTempStressVector())[{0, 1, 2, 5}];
+        
+
+        FloatMatrixF<4,4> answer;
+        for(int i = 0; i < 4; i++) {
+            // Add a small perturbation to the strain
+            auto epsPert = eps;
+            epsPert[i] += h;
+
+            auto sigPert = this->giveRealStressVector_PlaneStrain(epsPert, gp, tStep);
+            answer.setColumn((sigPert - sig) / h, i);
+        }
+        this->giveRealStressVector_PlaneStrain(eps, gp, tStep);
+        return answer;
+
+    } else {
+        status->computeTangent(tStep);
+        return status->giveTangent();
+    }
+}
+
 
 //=============================================================================
 
@@ -255,6 +276,10 @@ StructuralFE2MaterialStatus :: StructuralFE2MaterialStatus(int rank, GaussPoint 
     if ( !this->createRVE(1, inputfile, rank) ) { ///@TODO FIXME createRVE
         OOFEM_ERROR("Couldn't create RVE");
     }
+    stressVector.resize(6);
+    strainVector.resize(6);
+    tempStressVector.resize(6);
+    tempStrainVector.resize(6);
 }
 
 PrescribedGradientHomogenization* StructuralFE2MaterialStatus::giveBC()

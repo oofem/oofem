@@ -201,9 +201,9 @@ public:
     bool projectOnYieldSurface(double &tempKappa, FloatArrayF<6> &tempEffectiveStress, FloatArrayF<6> &tempPlasDef,
                                const FloatArrayF<6> &trialEffectiveStress,
                                const FloatMatrixF<6,6> &elasticity, const FloatMatrixF<6,6> &compliance,
-                               TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag);
+                               TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag) const;
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &strain, TimeStep *tStep);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &strain, TimeStep *tStep) const;
 
     std::pair<FloatArrayF<6>, double> constructPlasFlowDirec(FloatMatrixF<6,6> &fabric, const FloatArrayF<6> &F, const FloatArrayF<6> &S) const;
     FloatMatrixF<6,6> constructDerivativeOfPlasFlowDirec(const FloatMatrixF<6,6> &fabric, const FloatArrayF<6> &F, const FloatArrayF<6> &S) const;
@@ -212,9 +212,9 @@ public:
     double computeDamageParam(double kappa) const;
     double computeDamageParamPrime(double kappa) const;
 
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     void computePlasStrainEnerDensity(GaussPoint *gp, const FloatArrayF<6> &strain, const FloatArrayF<6> &stress) const;
 
@@ -234,12 +234,9 @@ public:
     /// Construct Tensor to adjust Norm.
     FloatMatrixF<6,6> constructNormAdjustTensor() const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode, GaussPoint * gp,
-                                       TimeStep * tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_TrabBone3D_Name; }
     const char *giveClassName() const override { return "TrabBone3D"; }

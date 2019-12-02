@@ -224,7 +224,7 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
     bool hasg2l = this->computeL2GTransformation(TG2L, fullDofMask);
     bool mhasg2l = masterNode->computeL2GTransformation(TMG2L, fullDofMask);
 
-    xyz.beDifferenceOf(*this->giveCoordinates(), *masterNode->giveCoordinates());
+    xyz.beDifferenceOf(this->giveCoordinates(), masterNode->giveCoordinates());
 
     if (xyz.giveSize() < 3) {
       xyz.resizeWithValues(3);

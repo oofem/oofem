@@ -677,12 +677,12 @@ Quasicontinuum :: computeStiffnessTensorOf1Link(FloatMatrix &D1, double &S0, Ele
         OOFEM_ERROR( "Invalid CrossSection of link %d. simpleCS is only supported CS of links in QC simulation. \n", e->giveGlobalNumber() );
     }
 
-    double x1 = e->giveDofManager(1)->giveCoordinates()->at(1);
-    double y1 = e->giveDofManager(1)->giveCoordinates()->at(2);
-    double z1 = e->giveDofManager(1)->giveCoordinates()->at(3);
-    double x2 = e->giveDofManager(2)->giveCoordinates()->at(1);
-    double y2 = e->giveDofManager(2)->giveCoordinates()->at(2);
-    double z2 = e->giveDofManager(2)->giveCoordinates()->at(3);
+    double x1 = e->giveDofManager(1)->giveCoordinate(1);
+    double y1 = e->giveDofManager(1)->giveCoordinate(2);
+    double z1 = e->giveDofManager(1)->giveCoordinate(3);
+    double x2 = e->giveDofManager(2)->giveCoordinate(1);
+    double y2 = e->giveDofManager(2)->giveCoordinate(2);
+    double z2 = e->giveDofManager(2)->giveCoordinate(3);
     double TrussLength = sqrt( ( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 ) + ( z2 - z1 ) * ( z2 - z1 ) );
     double n [ 3 ];
     n [ 0 ] = ( x2 - x1 ) / TrussLength;
@@ -742,12 +742,12 @@ Quasicontinuum :: createGlobalStiffnesMatrix(FloatMatrix &D, double &S0, Domain 
             OOFEM_ERROR( "Invalid CrossSection of link %d. simpleCS is only supported CS of links in QC simulation. \n", d->giveElement(t)->giveGlobalNumber() );
         }
 
-        double x1 = d->giveElement(t)->giveDofManager(1)->giveCoordinates()->at(1);
-        double y1 = d->giveElement(t)->giveDofManager(1)->giveCoordinates()->at(2);
-        double z1 = d->giveElement(t)->giveDofManager(1)->giveCoordinates()->at(3);
-        double x2 = d->giveElement(t)->giveDofManager(2)->giveCoordinates()->at(1);
-        double y2 = d->giveElement(t)->giveDofManager(2)->giveCoordinates()->at(2);
-        double z2 = d->giveElement(t)->giveDofManager(2)->giveCoordinates()->at(3);
+        double x1 = d->giveElement(t)->giveDofManager(1)->giveCoordinate(1);
+        double y1 = d->giveElement(t)->giveDofManager(1)->giveCoordinate(2);
+        double z1 = d->giveElement(t)->giveDofManager(1)->giveCoordinate(3);
+        double x2 = d->giveElement(t)->giveDofManager(2)->giveCoordinate(1);
+        double y2 = d->giveElement(t)->giveDofManager(2)->giveCoordinate(2);
+        double z2 = d->giveElement(t)->giveDofManager(2)->giveCoordinate(3);
         double TrussLength = sqrt( ( x2 - x1 ) * ( x2 - x1 ) + ( y2 - y1 ) * ( y2 - y1 ) + ( z2 - z1 ) * ( z2 - z1 ) );
         n [ 0 ] = ( x2 - x1 ) / TrussLength;
         n [ 1 ] = ( y2 - y1 ) / TrussLength;
@@ -820,7 +820,7 @@ Quasicontinuum :: stiffnessAssignment(std :: vector< FloatMatrix > &individualSt
         // check: is stiff. assigned to all parts of the link?
         // TO DO: the same check is done in "computeIntersectionsOfLinkWith...".
         //        Use only return value here
-        double totalLength = distance(*qn1->giveCoordinates(), *qn2->giveCoordinates());
+        double totalLength = distance(qn1->giveCoordinates(), qn2->giveCoordinates());
         lengths.times(1 / totalLength); // it is better to use relative lengths
         double sumLength = lengths.sum();
         if ( (sumLength < 0.9999) || (sumLength > 1.0001) ) {
@@ -873,8 +873,8 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
     }
 
     // coordinates of ending nodes
-    const auto &X1 = *qn1->giveCoordinates();
-    const auto &X2 = *qn2->giveCoordinates();
+    const auto &X1 = qn1->giveCoordinates();
+    const auto &X2 = qn2->giveCoordinates();
 
     double TotalLength = distance(X2, X1);
 
@@ -888,9 +888,9 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
     int iel = end1;
     FloatArray iLens;
 
-    const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-    const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-    const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
+    const auto &A = d->giveElement(iel)->giveNode(1)->giveCoordinates();
+    const auto &B = d->giveElement(iel)->giveNode(2)->giveCoordinates();
+    const auto &C = d->giveElement(iel)->giveNode(3)->giveCoordinates();
     numberOfIntersected = intersectionTestSegmentTriangle2D(intersectCoords, A, B, C, X1, X2);
 
     switch ( numberOfIntersected ) {
@@ -968,9 +968,9 @@ Quasicontinuum :: computeIntersectionsOfLinkWith2DTringleElements(IntArray &inte
         for ( int k = 1; k <= neighboursList.giveSize(); k++ ) { // testing of neighbouring elements
             iel = neighboursList.at(k);
 
-            const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-            const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-            const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
+            const auto &A = d->giveElement(iel)->giveNode(1)->giveCoordinates();
+            const auto &B = d->giveElement(iel)->giveNode(2)->giveCoordinates();
+            const auto &C = d->giveElement(iel)->giveNode(3)->giveCoordinates();
             numberOfIntersected = intersectionTestSegmentTriangle2D(intersectCoords, A, B, C, X1, X2);
 
             bool breakFor = false; // go to next element?
@@ -1074,8 +1074,8 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
     }
 
     // coordinates of ending nodes
-    const auto &X1 = *qn1->giveCoordinates();
-    const auto &X2 = *qn2->giveCoordinates();
+    const auto &X1 = qn1->giveCoordinates();
+    const auto &X2 = qn2->giveCoordinates();
 
     double TotalLength = distance(X2, X1);
 
@@ -1089,10 +1089,10 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
     int iel = end1;
     FloatArray iLens;
 
-    const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-    const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-    const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
-    const auto &D = *d->giveElement(iel)->giveNode(4)->giveCoordinates();
+    const auto &A = d->giveElement(iel)->giveNode(1)->giveCoordinates();
+    const auto &B = d->giveElement(iel)->giveNode(2)->giveCoordinates();
+    const auto &C = d->giveElement(iel)->giveNode(3)->giveCoordinates();
+    const auto &D = d->giveElement(iel)->giveNode(4)->giveCoordinates();
     numberOfIntersected = intersectionTestSegmentTetrahedra3D(intersectCoords, A, B, C, D, X1, X2);
 
     switch ( numberOfIntersected ) {
@@ -1170,10 +1170,10 @@ Quasicontinuum :: computeIntersectionsOfLinkWith3DTetrahedraElements(IntArray &i
         for ( int k = 1; k <= neighboursList.giveSize(); k++ ) { // testing of neighbouring elements
             int iel = neighboursList.at(k);
 
-            const auto &A = *d->giveElement(iel)->giveNode(1)->giveCoordinates();
-            const auto &B = *d->giveElement(iel)->giveNode(2)->giveCoordinates();
-            const auto &C = *d->giveElement(iel)->giveNode(3)->giveCoordinates();
-            const auto &D = *d->giveElement(iel)->giveNode(4)->giveCoordinates();
+            const auto &A = d->giveElement(iel)->giveNode(1)->giveCoordinates();
+            const auto &B = d->giveElement(iel)->giveNode(2)->giveCoordinates();
+            const auto &C = d->giveElement(iel)->giveNode(3)->giveCoordinates();
+            const auto &D = d->giveElement(iel)->giveNode(4)->giveCoordinates();
             int numberOfIntersected = intersectionTestSegmentTetrahedra3D(intersectCoords, A, B, C, D, X1, X2);
 
 

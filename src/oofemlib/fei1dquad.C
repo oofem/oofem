@@ -162,14 +162,14 @@ FEI1dQuad :: giveLength(const FEICellGeometry &cellgeo) const
 }
 
 
-void FEI1dQuad :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+IntArray FEI1dQuad :: boundaryEdgeGiveNodes(int boundary) const
 {
-  answer={1, 2, 3};
+    return {1, 2, 3};
 }
 
 void FEI1dQuad :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  this->evalN(answer, lcoords, cellgeo);
+    this->evalN(answer, lcoords, cellgeo);
 }
 
 double FEI1dQuad :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

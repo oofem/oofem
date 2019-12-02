@@ -156,12 +156,7 @@ int UniformGridField::evaluateAt(FloatArray &answer, const FloatArray &coords,
 int
 UniformGridField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
-    if ( dman->hasCoordinates()) {
-        int result=evaluateAt(answer,*(dman->giveCoordinates()),mode,tStep);
-        return ( result == 1 );
-    }
-    // failed -> dman without coordinates
-    return 1; 
+    return evaluateAt(answer, dman->giveCoordinates(), mode, tStep) == 1;
 }
 
 

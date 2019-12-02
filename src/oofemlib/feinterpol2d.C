@@ -37,14 +37,14 @@
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-void FEInterpolation2d :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
+IntArray FEInterpolation2d :: boundaryEdgeGiveNodes(int boundary) const
 {
-  this->computeLocalEdgeMapping(answer, boundary);
+    return this->computeLocalEdgeMapping(boundary);
 }
 
 void FEInterpolation2d :: boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  this->edgeEvalN(answer, boundary, lcoords, cellgeo);
+    this->edgeEvalN(answer, boundary, lcoords, cellgeo);
 }
 
 double FEInterpolation2d :: boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -135,9 +135,9 @@ bool FEInterpolation2d ::inside(const FloatArray &lcoords) const
 	OOFEM_ERROR("Not implemented.")
 }
 
-void FEInterpolation2d :: boundaryGiveNodes(IntArray &answer, int boundary)
+IntArray FEInterpolation2d :: boundaryGiveNodes(int boundary) const
 {
-    this->computeLocalEdgeMapping(answer, boundary);
+    return this->computeLocalEdgeMapping(boundary);
 }
 
 void FEInterpolation2d :: boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -160,15 +160,15 @@ void FEInterpolation2d :: boundaryLocal2Global(FloatArray &answer, int boundary,
     return this->edgeLocal2global(answer, boundary, lcoords, cellgeo);
 }
 
-void FEInterpolation2d :: computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge)
+IntArray FEInterpolation2d :: computeEdgeMapping(const IntArray &elemNodes, int iedge) const
 {
-    IntArray ln;
-    this->computeLocalEdgeMapping(ln, iedge);
+    const auto& ln = this->computeLocalEdgeMapping(iedge);
     int size = ln.giveSize();
-    edgeNodes.resize(size);
+    IntArray edgeNodes(size);
     for ( int i = 1; i <= size; i++ ) {
         edgeNodes.at(i) = elemNodes.at( ln.at(i) );
     }
+    return edgeNodes;
 }
 
 double FEInterpolation2d :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -183,37 +183,36 @@ void FEInterpolation2d::boundarySurfaceEvalN(FloatArray &answer, int isurf, cons
 }
 
 void FEInterpolation2d::boundarySurfaceEvaldNdx(FloatMatrix &answer, int isurf,
-					const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
   this->evaldNdx(answer, lcoords, cellgeo);
 }
 
 double FEInterpolation2d::boundarySurfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords,
-					    const FEICellGeometry &cellgeo)
+                            const FEICellGeometry &cellgeo)
 {
-  answer = {0,0,1};
-  return this->giveTransformationJacobian(lcoords, cellgeo);
+    answer = {0, 0, 1};
+    return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
 void FEInterpolation2d::boundarySurfaceLocal2global(FloatArray &answer, int isurf,
-					    const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-  this->local2global(answer, lcoords, cellgeo);
+    this->local2global(answer, lcoords, cellgeo);
 }
 
 double FEInterpolation2d::boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords,
-							    const FEICellGeometry &cellgeo)
+                            const FEICellGeometry &cellgeo)
 {
   return this->giveTransformationJacobian(lcoords, cellgeo);
 }
 
-void FEInterpolation2d::boundarySurfaceGiveNodes(IntArray &answer, int boundary)
+IntArray FEInterpolation2d::boundarySurfaceGiveNodes(int boundary) const
 {
-  int nnode = this->giveNumberOfNodes();
-  answer.resize(nnode);
-  for (int i =1; i<=nnode; i++) {
-    answer.at(i)=i;
-  }
+    int nnode = this->giveNumberOfNodes();
+    IntArray answer(nnode);
+    answer.enumerate(nnode);
+    return answer;
 }
 
   

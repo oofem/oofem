@@ -133,13 +133,13 @@ private:
 
     void splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &boundary, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues);
 
-    void computeBaseFunctionValueAt(FloatArray &answer, FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel);
+    void computeBaseFunctionValueAt(FloatArray &answer, const FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel);
 
     void initializeSurfaceData(modeStruct &mode);
 
     void copyDofManagersToSurfaceData(modeStruct &mode, IntArray nodeList, bool isPlus, bool isMinus, bool isZero);
 
-    void whichBoundary(FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero);
+    void whichBoundary(const FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero);
 
 public:
     SolutionbasedShapeFunction(int n, Domain * d);

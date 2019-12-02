@@ -50,48 +50,46 @@ REGISTER_Material(RankineMatNl);
 RankineMatNl :: RankineMatNl(int n, Domain *d) : RankineMat(n, d), StructuralNonlocalMaterialExtensionInterface(d), NonlocalMaterialStiffnessInterface()
 { }
 
-void
-RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp,
-                                                 const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<3>
+RankineMatNl :: giveRealStressVector_PlaneStress(const FloatArrayF<3> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
-    RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
+    auto nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     
-    double tempDam;
     //mj performPlasticityReturn(gp, totalStrain, mode);
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
     // in the iteration
-    tempDam = this->computeDamage(gp, tStep);
-    answer.beScaled(1.0 - tempDam, nlStatus->giveTempEffectiveStress());
+    double tempDam = this->computeDamage(gp, tStep);
+    FloatArrayF<6> stress = (1.0 - tempDam) * nlStatus->giveTempEffectiveStress();
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
-    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->letTempStressVectorBe(stress);
 #ifdef keep_track_of_dissipated_energy
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
     nlStatus->computeWork_PlaneStress(gp, gf);
 #endif
+    return stress[{0, 1, 5}];
 }
 
-void
-RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
-                                        const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<1>
+RankineMatNl :: giveRealStressVector_1d(const FloatArrayF<1> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
-    RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
+    auto nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
 
-    double tempDam;
     //mj performPlasticityReturn(gp, totalStrain, mode);
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
     // in the iteration
-    tempDam = this->computeDamage(gp, tStep);
-    answer.beScaled(1.0 - tempDam, nlStatus->giveTempEffectiveStress());
+    double tempDam = this->computeDamage(gp, tStep);
+    FloatArrayF<6> stress = (1.0 - tempDam) * nlStatus->giveTempEffectiveStress();
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
-    nlStatus->letTempStressVectorBe(answer);
+    nlStatus->letTempStressVectorBe(stress);
 #ifdef keep_track_of_dissipated_energy
     double gf = sig0 * sig0 / E; // only estimated, but OK for this purpose
     nlStatus->computeWork_1d(gp, gf);
 #endif
+    return stress[{0}];
 }
 
 
@@ -129,7 +127,7 @@ RankineMatNl :: givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, T
 }
 
 void
-RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     /* Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -146,12 +144,12 @@ RankineMatNl :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     nlstatus->setLocalCumPlasticStrainForAverage(cumPlasticStrain);
     // influence of damage on weight function
     if ( averType >= 2 && averType <= 6 ) {
-      this->modifyNonlocalWeightFunctionAround(gp);
+        this->modifyNonlocalWeightFunctionAround(gp);
     }
 }
 
 double
-RankineMatNl :: giveNonlocalMetricModifierAt(GaussPoint *gp)
+RankineMatNl :: giveNonlocalMetricModifierAt(GaussPoint *gp) const
 {
     auto status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     double damage = status->giveTempDamage();
@@ -209,7 +207,7 @@ RankineMatNl :: giveInterface(InterfaceType type)
     } else if ( type == NonlocalMaterialStiffnessInterfaceType ) {
         return static_cast< NonlocalMaterialStiffnessInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
@@ -232,7 +230,7 @@ RankineMatNl :: giveInputRecord(DynamicInputRecord &input)
 
 
 double
-RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep)
+RankineMatNl :: computeDamage(GaussPoint *gp, TimeStep *tStep) const
 {
     auto nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     double nlKappa = this->computeCumPlasticStrain(gp, tStep);

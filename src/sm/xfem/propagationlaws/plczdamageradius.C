@@ -177,10 +177,10 @@ bool PLCZdamageRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
     for ( int i = 1 ; i <= propagationDF.giveSize() ; i++ ) {
         
         Node *iNode = iDomain.giveNode(propagationDF.at(i));
-        const FloatArray gCoords = iNode->giveNodeCoordinates();
+        const auto &gCoords = iNode->giveCoordinates();
         
         std :: list< int > nodeList;
-        localizer->giveAllNodesWithinBox(nodeList,gCoords,mIncrementRadius);
+        localizer->giveAllNodesWithinBox(nodeList, gCoords, mIncrementRadius);
         for ( int jNode : nodeList ) {
             //printf("nodeList node %d \n",jNode);
             oTipProp.mPropagationDofManNumbers.insertSortedOnce(jNode);

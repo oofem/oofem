@@ -354,8 +354,7 @@ SteelRelaxMat :: computeStressRelaxationStrainVector(FloatArray &answer, GaussPo
         temperFreeStrainIncrement.subtract( status->giveStrainVector() ); // result = delta eps tot
 
         // epsilon temperature increment
-        FloatArray deltaEpsTemperature;
-        this->computeStressIndependentStrainVector(deltaEpsTemperature, gp, tStep, VM_Incremental);
+        auto deltaEpsTemperature = this->computeStressIndependentStrainVector(gp, tStep, VM_Incremental);
 
         temperFreeStrainIncrement.subtract(deltaEpsTemperature); // results = delta epsilon stress
 

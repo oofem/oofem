@@ -87,7 +87,6 @@ protected:
 
 public:
     Quad1MindlinShell3D(int n, Domain * d);
-    virtual ~Quad1MindlinShell3D();
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
