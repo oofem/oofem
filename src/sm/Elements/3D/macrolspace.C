@@ -188,7 +188,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     counter = 1;
     for ( auto &DofMan : microDomain->giveDofManagers() ) { //go through all nodes on microDomain
         if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is on boundary
-            this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
+            this->evalInterpolation( n, microMaterial->microMasterCoords, DofMan->giveCoordinates() );
             //n.printYourself();
 
             for ( Dof *dof: *DofMan ) {
@@ -255,7 +255,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
 
         for ( int i = 1; i <= this->microBoundaryDofManager.giveSize() / 3; i++ ) { //Number of DoFManagers stored in triplets
             DofMan = microDomain->giveDofManager( this->microBoundaryDofManager.at(3 * i - 2) );
-            this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
+            this->evalInterpolation( n, microMaterial->microMasterCoords, DofMan->giveCoordinates() );
             for ( int j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) { //3
                 reactionForce = reactions.at(3 * i + j - 3);
                 for ( int k = 1; k <= 8; k++ ) {

@@ -277,9 +277,9 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
         const int nsLoc = bNodes.at(1);
         const int neLoc = bNodes.at( bNodes.giveSize() );
 
-        FloatArray xS = *(element->giveNode(nsLoc)->giveCoordinates() );
+        FloatArray xS = element->giveNode(nsLoc)->giveCoordinates();
         xS.resizeWithValues(2);
-        FloatArray xE = *(element->giveNode(neLoc)->giveCoordinates() );
+        FloatArray xE = element->giveNode(neLoc)->giveCoordinates();
         xE.resizeWithValues(2);
 
         const double dist = BasicGeometry :: computeLineDistance(xS, xE, mVertices[0], mVertices[1]);
@@ -303,10 +303,10 @@ void Line :: computeIntersectionPoints(Element *element, std :: vector< FloatArr
             n2 = 1;
         }
 
-        double lsn1 = computeDistanceTo( *element->giveDofManager(n1)->giveCoordinates() );
-        double lsn2 = computeDistanceTo( *element->giveDofManager(n2)->giveCoordinates() );
-        double lst1 = computeTangentialDistanceToEnd( *element->giveDofManager(n1)->giveCoordinates() );
-        double lst2 = computeTangentialDistanceToEnd( *element->giveDofManager(n2)->giveCoordinates() );
+        double lsn1 = computeDistanceTo( element->giveDofManager(n1)->giveCoordinates() );
+        double lsn2 = computeDistanceTo( element->giveDofManager(n2)->giveCoordinates() );
+        double lst1 = computeTangentialDistanceToEnd( element->giveDofManager(n1)->giveCoordinates() );
+        double lst2 = computeTangentialDistanceToEnd( element->giveDofManager(n2)->giveCoordinates() );
         if ( lsn1 * lsn2 <= 0 && lst1 <= 0 && lst2 <= 0 ) {
             double r = lsn1 / ( lsn1 - lsn2 );
             if ( i <= element->giveNumberOfDofManagers() ) {
@@ -681,7 +681,7 @@ bool Circle :: intersects(Element *element)
 {
     int count = 0;
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        const auto &nodeCoor = *element->giveDofManager(i)->giveCoordinates();
+        const auto &nodeCoor = element->giveDofManager(i)->giveCoordinates();
         // distance from the node to the center of the circle
         double dist = distance(nodeCoor, mVertices [ 0 ]);
         if ( dist > this->radius ) {
@@ -712,7 +712,7 @@ Circle :: isInside(const FloatArray &point)
 bool Circle :: isInside(Element *element)
 {   // condition should maybe be that all nodes should be inside
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        const auto &nodeCoord = *element->giveDofManager(i)->giveCoordinates();
+        const auto &nodeCoord = element->giveDofManager(i)->giveCoordinates();
         if ( isInside(nodeCoord) ) {
             return true;
         }
@@ -729,10 +729,10 @@ void Circle :: computeIntersectionPoints(Element *element, std :: vector< FloatA
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
             std :: vector< FloatArray >oneLineIntersects;
             ///@todo Move semantics or something would be useful here to avoid multiple copies.
-            const auto a = * element->giveDofManager ( i )->giveCoordinates();
-            const auto b = ( i != element->giveNumberOfBoundarySides() ) ? 
-                * element->giveDofManager ( i + 1 )->giveCoordinates() :
-                * element->giveDofManager ( 1 )->giveCoordinates();
+            const auto &a = element->giveDofManager ( i )->giveCoordinates();
+            const auto &b = ( i != element->giveNumberOfBoundarySides() ) ? 
+                element->giveDofManager ( i + 1 )->giveCoordinates() :
+                element->giveDofManager ( 1 )->giveCoordinates();
 
             Line l(a, b);
             computeIntersectionPoints(& l, oneLineIntersects);
@@ -1412,10 +1412,10 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
     for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
         std :: vector< FloatArray > oneLineIntersects;
         ///@todo Move semantics or something would be useful here to avoid multiple copies.
-        const auto &xStart = * element->giveDofManager ( i )->giveCoordinates();
+        const auto &xStart = element->giveDofManager ( i )->giveCoordinates();
         const auto &xEnd = ( i != element->giveNumberOfBoundarySides() ) ?
-            * element->giveDofManager ( i + 1 )->giveCoordinates() :
-            * element->giveDofManager ( 1 )->giveCoordinates();
+            element->giveDofManager ( i + 1 )->giveCoordinates() :
+            element->giveDofManager ( 1 )->giveCoordinates();
 
         computeIntersectionPoints(xStart, xEnd, oneLineIntersects);
 

@@ -359,14 +359,14 @@ Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
         jnode = this->giveNode(j);
         knode = this->giveNode(k);
         lnode = this->giveNode(l);
-        t1.beDifferenceOf(*inode->giveCoordinates(), *jnode->giveCoordinates());
+        t1.beDifferenceOf(inode->giveCoordinates(), jnode->giveCoordinates());
 
-        t2.beDifferenceOf(*knode->giveCoordinates(), *jnode->giveCoordinates());
+        t2.beDifferenceOf(knode->giveCoordinates(), jnode->giveCoordinates());
 
         n.beVectorProductOf(t1, t2);
         n.normalize();
 
-        n3.beDifferenceOf(*lnode->giveCoordinates(), *jnode->giveCoordinates());
+        n3.beDifferenceOf(lnode->giveCoordinates(), jnode->giveCoordinates());
 
         ln = min( ln, sqrt( fabs( n.dotProduct(n3) ) ) );
     }

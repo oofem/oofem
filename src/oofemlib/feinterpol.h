@@ -109,7 +109,7 @@ public:
     int giveNumberOfVertices() const override;
     const FloatArray &giveVertexCoordinates(int i) const override
     {
-        return elem->giveNode(i)->giveNodeCoordinates();
+        return elem->giveNode(i)->giveCoordinates();
     }
 };
 

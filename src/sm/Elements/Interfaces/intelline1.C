@@ -147,19 +147,19 @@ IntElLine1 :: initializeFrom(InputRecord &ir)
     int nodeInd1 = this->giveDofManagerNumber(1);
     int arrayInd1 = domain->giveDofManPlaceInArray(nodeInd1);
     DofManager *node1 = domain->giveDofManager(arrayInd1);
-    const auto &x1 = *(node1->giveCoordinates());
+    const auto &x1 = node1->giveCoordinates();
 
 //    DofManager *node2 = this->giveDofManager(2);
     int nodeInd2 = this->giveDofManagerNumber(2);
     int arrayInd2 = domain->giveDofManPlaceInArray(nodeInd2);
     DofManager *node2 = domain->giveDofManager(arrayInd2);
-    const auto &x2 = *(node2->giveCoordinates());
+    const auto &x2 = node2->giveCoordinates();
 
 //    DofManager *node3 = this->giveDofManager(3);
     int nodeInd3 = this->giveDofManagerNumber(3);
     int arrayInd3 = domain->giveDofManPlaceInArray(nodeInd3);
     DofManager *node3 = domain->giveDofManager(arrayInd3);
-    const auto &x3 = *(node3->giveCoordinates());
+    const auto &x3 = node3->giveCoordinates();
 
 
     double L2 = distance_square(x1, x2);

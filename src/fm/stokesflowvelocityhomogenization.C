@@ -52,14 +52,12 @@ StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, Engn
 double
 StokesFlowVelocityHomogenization :: giveAreaOfRVE()
 {
-    FloatArray min, max;
-
-    min = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
-    max = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
+    auto min = this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
+    auto max = this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
 
     for ( auto &node : this->giveDomain(1)->giveDofManagers() ) {
-        min.beMinOf( min, * node->giveCoordinates() );
-        max.beMaxOf( max, * node->giveCoordinates() );
+        min.beMinOf( min, node->giveCoordinates() );
+        max.beMaxOf( max, node->giveCoordinates() );
     }
 
     max.subtract(min);

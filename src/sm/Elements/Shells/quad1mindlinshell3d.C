@@ -469,8 +469,8 @@ Quad1MindlinShell3D :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Quad1MindlinShell3D :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 {
-    FloatArrayF<3> u = *this->giveNode(2)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
-    FloatArrayF<3> v = *this->giveNode(3)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+    FloatArrayF<3> u = this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
+    FloatArrayF<3> v = this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
 
     auto n = cross(u, v);
     answer = n / norm(n);
@@ -617,8 +617,8 @@ Quad1MindlinShell3D :: computeLCS()
     // compute e1' = [N2-N1]  and  help = [N4-N1]
     //auto e1 = normalize(node(2).coord - node(1).coord);
     //auto help = node(4).coord - node(1).coord;
-    auto e1 = normalize(FloatArrayF<3>(*this->giveNode(2)->giveCoordinates()) - FloatArrayF<3>(*this->giveNode(1)->giveCoordinates()));
-    auto help = FloatArrayF<3>(*this->giveNode(4)->giveCoordinates()) - FloatArrayF<3>(*this->giveNode(1)->giveCoordinates());
+    auto e1 = normalize(FloatArrayF<3>(this->giveNode(2)->giveCoordinates()) - FloatArrayF<3>(this->giveNode(1)->giveCoordinates()));
+    auto help = FloatArrayF<3>(this->giveNode(4)->giveCoordinates()) - FloatArrayF<3>(this->giveNode(1)->giveCoordinates());
     auto e3 = normalize(cross(e1, help));
     auto e2 = cross(e3, e1);
 
@@ -630,7 +630,7 @@ Quad1MindlinShell3D :: computeLCS()
     }
 
     for ( int i = 1; i <= 4; i++ ) {
-        this->lnodes [ i - 1 ].beProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
+        this->lnodes [ i - 1 ].beProductOf( this->lcsMatrix, this->giveNode(i)->giveCoordinates() );
     }
 }
 

@@ -1710,7 +1710,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         bool evaluationSucceeded = true;
                         for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            const auto &nodeCoord = dMan->giveCoordinates();
 
                             if ( !ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord) ) {
                                 evaluationSucceeded = false;
@@ -1855,7 +1855,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            const auto &nodeCoord = dMan->giveCoordinates();
                             ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord);
 
                             levelSet += N.at(elNodeInd) * levelSetInNode;
@@ -1871,7 +1871,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            const auto &nodeCoord = dMan->giveCoordinates();
                             ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord);
 
                             levelSet += N.at(elNodeInd) * levelSetInNode;

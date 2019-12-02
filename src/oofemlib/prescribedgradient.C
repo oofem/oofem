@@ -59,7 +59,7 @@ REGISTER_BoundaryCondition(PrescribedGradient);
 double PrescribedGradient :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
-    const FloatArray &coords = *dof->giveDofManager()->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
 
     double factor = 0;
     if ( mode == VM_Total ) {
@@ -119,7 +119,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     }
 
     for ( auto &n : domain->giveDofManagers() ) {
-        const auto &coords = *n->giveCoordinates();
+        const auto &coords = n->giveCoordinates();
         Dof *d1 = n->giveDofWithID( this->dofs[0] );
         Dof *d2 = n->giveDofWithID( this->dofs[1] );
         int k1 = d1->__givePrescribedEquationNumber();

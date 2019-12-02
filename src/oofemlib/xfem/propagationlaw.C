@@ -152,7 +152,7 @@ bool PLnodeRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFr
         //DofManager *dofMan  = iDomain.giveDofManager(tipInfo.mTipDofManNumbers.at(i));
         //const FloatArray gCoords = dofMan->giveCoordinates();
         Node *iNode = iDomain.giveNode(tipInfo.mTipDofManNumbers.at(i));
-        const FloatArray gCoords = iNode->giveNodeCoordinates();
+        const auto &gCoords = iNode->giveCoordinates();
         
         std :: list< int > nodeList;
         localizer->giveAllNodesWithinBox(nodeList,gCoords,mRadius);

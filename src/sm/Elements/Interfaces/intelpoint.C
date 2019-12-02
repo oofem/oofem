@@ -202,8 +202,8 @@ IntElPoint :: computeGaussPoints()
 int
 IntElPoint :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    answer = *this->giveNode(1)->giveCoordinates();
-    answer.add(*this->giveNode(2)->giveCoordinates());
+    answer = this->giveNode(1)->giveCoordinates();
+    answer.add(this->giveNode(2)->giveCoordinates());
     answer.times(0.5);
     return 1;
 }
@@ -307,12 +307,12 @@ IntElPoint :: computeLocalSlipDir(void)
 {
     if ( this->referenceNode ) {
         // normal
-        normal = *domain->giveNode(this->referenceNode)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+        normal = domain->giveNode(this->referenceNode)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
     } else {
 
       if ( normal.at(1) == 0. && normal.at(2) == 0. && normal.at(3) == 0. ) {
 	// let the element compute the slip direction if the nodes' cooridantes are different
-        normal = *this->giveNode(2)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+        normal = this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
 	
 	// final check
 	if ( normal.at(1) == 0. && normal.at(2) == 0. && normal.at(3) == 0. ) {

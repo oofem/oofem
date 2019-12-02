@@ -786,8 +786,8 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
             std::vector<FloatArray> bndSegNodes;
 
             // Add the start and end nodes of the segment
-            DofManager *startNode   = e->giveDofManager( bNodes[0] );
-            FloatArray xS    = *(startNode->giveCoordinates());
+            DofManager *startNode = e->giveDofManager( bNodes[0] );
+            FloatArray xS = startNode->giveCoordinates();
 
             Dof *dSu = startNode->giveDofWithID(D_u);
             double dU = dSu->giveUnknown(VM_Total, tStep);
@@ -799,8 +799,8 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
             bndSegNodes.push_back(xS);
 
-            DofManager *endNode     = e->giveDofManager( bNodes[1] );
-            FloatArray xE    = *(endNode->giveCoordinates());
+            DofManager *endNode = e->giveDofManager( bNodes[1] );
+            FloatArray xE = endNode->giveCoordinates();
 
             Dof *dEu = endNode->giveDofWithID(D_u);
             dU = dEu->giveUnknown(VM_Total, tStep);
@@ -864,11 +864,11 @@ void GnuplotExportModule::outputMesh(Domain &iDomain)
                 const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(edgeIndex);
 
                 int niLoc = bNodes.at(1);
-                const FloatArray &xS = *(el->giveNode(niLoc)->giveCoordinates() );
+                const auto &xS = el->giveNode(niLoc)->giveCoordinates();
                 points.push_back(xS);
 
                 int njLoc = bNodes.at( bNodes.giveSize() );
-                const FloatArray &xE = *(el->giveNode(njLoc)->giveCoordinates() );
+                const auto &xE = el->giveNode(njLoc)->giveCoordinates();
                 points.push_back(xE);
 
                 pointArray.push_back(points);

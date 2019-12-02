@@ -29,7 +29,7 @@ int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const Float
     FEInterpolation *interp = this->giveInterpolation();
     interp->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
 
-    answer.resize(this->giveDofManager(1)->giveCoordinates()->giveSize());
+    answer.resize(this->giveDofManager(1)->giveCoordinates().giveSize());
     answer.zero();
 
     double xi_0 = 0.;
@@ -39,19 +39,19 @@ int IntElLine1IntPen :: computeGlobalCoordinates(FloatArray &answer, const Float
         xiScaled = {lcoords.at(1)*2. + 1.};
         interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
 
-        const auto &x1 = *(this->giveDofManager(1)->giveCoordinates());
+        const auto &x1 = this->giveDofManager(1)->giveCoordinates();
         answer.add(N.at(1), x1 );
 
-        const FloatArray &x3 = *(this->giveDofManager(3)->giveCoordinates());
+        const FloatArray &x3 = this->giveDofManager(3)->giveCoordinates();
         answer.add(N.at(2), x3 );
     } else {
         xiScaled = {lcoords.at(1)*2. - 1.};
         interp->evalN( N, xiScaled, FEIElementGeometryWrapper(this) );
 
-        const auto &x3 = *(this->giveDofManager(3)->giveCoordinates());
+        const auto &x3 = this->giveDofManager(3)->giveCoordinates();
         answer.add(N.at(1), x3 );
 
-        const auto &x2 = *(this->giveDofManager(2)->giveCoordinates());
+        const auto &x2 = this->giveDofManager(2)->giveCoordinates();
         answer.add(N.at(2), x2 );
     }
 

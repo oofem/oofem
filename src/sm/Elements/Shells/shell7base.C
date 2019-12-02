@@ -170,8 +170,8 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 
     answer.clear();
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        FloatArray &xbar = *this->giveNode(i)->giveCoordinates();
-        const FloatArray &M = this->giveInitialNodeDirector(i);
+        const auto &xbar = this->giveNode(i)->giveCoordinates();
+        const auto &M = this->giveInitialNodeDirector(i);
         answer.add(N.at(i), ( xbar + zeta * M ));
     }
     
@@ -223,7 +223,6 @@ void
 Shell7Base :: evalInitialCovarBaseVectorsAt(const FloatArray &lcoords, FloatMatrix &Gcov)
 {
     double zeta = giveGlobalZcoord( lcoords );
-    FloatArray M;
     FloatMatrix dNdxi;
 
     // In plane base vectors
@@ -231,8 +230,8 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(const FloatArray &lcoords, FloatMatr
 
     FloatArray G1, G2, nodeCoords; 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        FloatArray &xbar = * this->giveNode(i)->giveCoordinates();
-        M = this->giveInitialNodeDirector(i);
+        const auto &xbar = this->giveNode(i)->giveCoordinates();
+        const auto &M = this->giveInitialNodeDirector(i);
         nodeCoords = (xbar + zeta*M);
         G1.add(dNdxi.at(i, 1), nodeCoords);
         G2.add(dNdxi.at(i, 2), nodeCoords);
@@ -259,7 +258,7 @@ Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(const FloatArray &lcoords, const
     // Base vector along edge
     G1.clear();
     for ( int i = 1; i <= edgeNodes.giveSize(); i++ ) {
-        FloatArray &xbar = * this->giveNode(edgeNodes.at(i))->giveCoordinates();
+        const auto &xbar = this->giveNode(edgeNodes.at(i))->giveCoordinates();
         M = this->giveInitialNodeDirector(edgeNodes.at(i));
         nodeCoords = (xbar + zeta*M);
         G1.add(dNdxi.at(i), nodeCoords);
@@ -339,9 +338,9 @@ Shell7Base :: setupInitialNodeDirectors()
         G2.zero();
         // base vectors of the initial surface
         for ( int i = 1; i <= nDofMan; i++ ) {        
-            FloatArray *nodeI = this->giveNode(i)->giveCoordinates();
-            G1.add(dNdxi.at(i, 1), * nodeI);
-            G2.add(dNdxi.at(i, 2), * nodeI);
+            const auto &nodeI = this->giveNode(i)->giveCoordinates();
+            G1.add(dNdxi.at(i, 1), nodeI);
+            G2.add(dNdxi.at(i, 2), nodeI);
         }
 
         M.beVectorProductOf(G1, G2);
@@ -1531,11 +1530,11 @@ Shell7Base :: setupInitialSolutionVector()
 
     // Reference position and directors
     for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
-        FloatArray *Xi = this->giveNode(i)->giveCoordinates();
-        FloatArray Mi  = this->giveInitialNodeDirector(i);
-        this->initialSolutionVector.at(1 + j) = Xi->at(1);
-        this->initialSolutionVector.at(2 + j) = Xi->at(2);
-        this->initialSolutionVector.at(3 + j) = Xi->at(3);
+        const auto &Xi = this->giveNode(i)->giveCoordinates();
+        const auto &Mi = this->giveInitialNodeDirector(i);
+        this->initialSolutionVector.at(1 + j) = Xi.at(1);
+        this->initialSolutionVector.at(2 + j) = Xi.at(2);
+        this->initialSolutionVector.at(3 + j) = Xi.at(3);
         this->initialSolutionVector.at(ndofs_xm + 1 + j) = Mi.at(1);
         this->initialSolutionVector.at(ndofs_xm + 2 + j) = Mi.at(2);
         this->initialSolutionVector.at(ndofs_xm + 3 + j) = Mi.at(3);
@@ -1571,11 +1570,11 @@ Shell7Base :: setupInitialEdgeSolutionVector()
         const auto &edgeNodes = this->fei->computeLocalEdgeMapping(iEdge);
         int ndofs_x = 3 * edgeNodes.giveSize();
         for ( int i = 1, j = 0; i <= edgeNodes.giveSize(); i++, j += 3 ) {
-            FloatArray *Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
-            FloatArray Mi  = this->giveInitialNodeDirector( edgeNodes.at(i) );
-            solVec.at(1 + j) = Xi->at(1);
-            solVec.at(2 + j) = Xi->at(2);
-            solVec.at(3 + j) = Xi->at(3);
+            const auto &Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
+            const auto &Mi = this->giveInitialNodeDirector( edgeNodes.at(i) );
+            solVec.at(1 + j) = Xi.at(1);
+            solVec.at(2 + j) = Xi.at(2);
+            solVec.at(3 + j) = Xi.at(3);
             solVec.at(ndofs_x + 1 + j) = Mi.at(1);
             solVec.at(ndofs_x + 2 + j) = Mi.at(2);
             solVec.at(ndofs_x + 3 + j) = Mi.at(3);
@@ -1801,8 +1800,8 @@ Shell7Base :: vtkEvalInitialGlobalCoordinateAt(const FloatArray &localCoords, in
 
     globalCoords.clear();
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        FloatArray &xbar = *this->giveNode(i)->giveCoordinates();
-        const FloatArray &M = this->giveInitialNodeDirector(i);
+        const auto &xbar = this->giveNode(i)->giveCoordinates();
+        const auto &M = this->giveInitialNodeDirector(i);
         globalCoords.add(N.at(i), ( xbar + zeta * M ));
     }
 
@@ -1817,8 +1816,8 @@ Shell7Base :: vtkEvalInitialGlobalCZCoordinateAt(const FloatArray &localCoords, 
 
     globalCoords.clear();
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        FloatArray &xbar = *this->giveNode(i)->giveCoordinates();
-        const FloatArray &M = this->giveInitialNodeDirector(i);
+        const auto &xbar = this->giveNode(i)->giveCoordinates();
+        const auto &M = this->giveInitialNodeDirector(i);
         globalCoords.add(N.at(i), ( xbar + zeta * M ));
     }
 

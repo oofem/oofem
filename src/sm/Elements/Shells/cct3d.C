@@ -63,7 +63,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     this->computeGtoLRotationMatrix();
 
     FloatArray offset;
-    offset.beDifferenceOf(global, * this->giveNode(1)->giveCoordinates() );
+    offset.beDifferenceOf(global, this->giveNode(1)->giveCoordinates() );
     answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
@@ -75,9 +75,9 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 {
     FloatArray nc1(3), nc2(3), nc3(3);
 
-    this->giveLocalCoordinates( nc1, * ( this->giveNode(1)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc2, * ( this->giveNode(2)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc3, * ( this->giveNode(3)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nc1, this->giveNode(1)->giveCoordinates() );
+    this->giveLocalCoordinates( nc2, this->giveNode(2)->giveCoordinates() );
+    this->giveLocalCoordinates( nc3, this->giveNode(3)->giveCoordinates() );
 
     x1 = nc1.at(1);
     x2 = nc2.at(1);
@@ -113,7 +113,7 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
     FloatArray llc;
     this->giveLocalCoordinates( inputCoords_ElCS, coords );
     for ( int _i = 0; _i < 3; _i++ ) {
-        this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
+        this->giveLocalCoordinates( lc [ _i ], this->giveNode(_i + 1)->giveCoordinates() );
     }
     FEI2dTrLin _interp(1, 2);
     bool inplane = _interp.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc)) > 0;
@@ -159,8 +159,8 @@ CCTPlate3d :: computeGtoLRotationMatrix()
         FloatArray e1, e2, e3, help;
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
-        e1.beDifferenceOf(*this->giveNode(2)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
-        help.beDifferenceOf(*this->giveNode(3)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
+        e1.beDifferenceOf(this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates());
+        help.beDifferenceOf(this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates());
 
         // let us normalize e1'
         e1.normalize();

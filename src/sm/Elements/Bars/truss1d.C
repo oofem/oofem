@@ -172,24 +172,24 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
                                                             IntArray &controlNode, IntArray &controlDof,
                                                             HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    int inode, nodes = 2;
-    FloatArray *corner [ 2 ], midNode, cor [ 2 ];
-    double x = 0.0;
+    int nodes = 2;
 
+    FloatArray corner [ 2 ], midNode, cor [ 2 ];
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
          ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
-        for ( inode = 0; inode < nodes; inode++ ) {
+        double x = 0.0;
+        for ( int inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
-            if ( corner [ inode ]->giveSize() != 3 ) {
+            if ( corner [ inode ].giveSize() != 3 ) {
                 cor [ inode ].resize(3);
-                cor [ inode ].at(1) = corner [ inode ]->at(1);
+                cor [ inode ].at(1) = corner [ inode ].at(1);
                 cor [ inode ].at(2) = 0.0;
                 cor [ inode ].at(3) = 0.0;
 
-                corner [ inode ] = & ( cor [ inode ] );
+                corner [ inode ] = cor [ inode ];
             }
 
-            x += corner [ inode ]->at(1);
+            x += corner [ inode ].at(1);
         }
 
         midNode.resize(3);

@@ -63,7 +63,7 @@ public:
     FEIIGAElementGeometryWrapper(Element *elem, const IntArray *knotSpan=nullptr) : FEICellGeometry(), knotSpan(knotSpan), elem(elem) { }
 
     int giveNumberOfVertices() const override { return elem->giveNumberOfNodes(); }
-    const FloatArray &giveVertexCoordinates(int i) const override { return *elem->giveNode(i)->giveCoordinates(); }
+    const FloatArray &giveVertexCoordinates(int i) const override { return elem->giveNode(i)->giveCoordinates(); }
 };
 
 

@@ -177,7 +177,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
         }
 
         // get node coordinates
-        const auto &x = * ( inode->giveCoordinates() );
+        const auto &x = inode->giveCoordinates();
         // get velocity field v(tn, x(tn)) for dof manager
 
 #if 1

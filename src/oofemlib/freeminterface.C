@@ -140,8 +140,8 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                     }
 
                     // neighbour found, check if smoothing necessary
-                    const auto &neighbourCoords = *jelem->giveNode(k)->giveCoordinates();
-                    double dist = distance(*candNode->giveCoordinates(), neighbourCoords);
+                    const auto &neighbourCoords = jelem->giveNode(k)->giveCoordinates();
+                    double dist = distance(candNode->giveCoordinates(), neighbourCoords);
                     // overshoot criteria
                     if ( ( ( nodalDensities.at(neighbour) / nodalDensities.at(candidate) ) > 1.3 ) &&
                         ( nodalDensities.at(neighbour) > 1.0 * dist ) ) {

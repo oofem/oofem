@@ -523,7 +523,7 @@ SPRNodalRecoveryModel :: determineValuesFromPatch(FloatArray &dofManValues, IntA
     FloatArray P, vals;
 
     for ( int dofMan = 1; dofMan <= ndofMan; dofMan++ ) {
-        const FloatArray &coords = * domain->giveNode( dofManToDetermine.at(dofMan) )->giveCoordinates();
+        const auto &coords = domain->giveNode( dofManToDetermine.at(dofMan) )->giveCoordinates();
         this->computePolynomialTerms(P, coords, type);
         vals.beTProductOf(a, P);
 

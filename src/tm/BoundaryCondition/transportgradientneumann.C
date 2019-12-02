@@ -374,9 +374,9 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     for ( auto &n : domain->giveDofManagers() ) {
         int k1 = n->giveDofWithID( this->dofs[0] )->__giveEquationNumber();
         if ( k1 ) {
-            FloatArray *coords = n->giveCoordinates();
+            const auto &coords = n->giveCoordinates();
             for ( int i = 1; i <= nsd; ++i ) {
-                us.at(k1, i) += -(coords->at(i) - mCenterCoord.at(i));
+                us.at(k1, i) += -(coords.at(i) - mCenterCoord.at(i));
             }
         }
     }

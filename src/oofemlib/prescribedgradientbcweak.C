@@ -1697,12 +1697,12 @@ void PrescribedGradientBCWeak :: computeDomainBoundingBox(Domain &iDomain, Float
     int numNodes = iDomain.giveNumberOfDofManagers();
     int nsd = iDomain.giveNumberOfSpatialDimensions();
 
-    FloatArray lc = * ( iDomain.giveDofManager(1)->giveCoordinates() );
-    FloatArray uc = * ( iDomain.giveDofManager(1)->giveCoordinates() );
+    FloatArray lc = iDomain.giveDofManager(1)->giveCoordinates();
+    FloatArray uc = iDomain.giveDofManager(1)->giveCoordinates();
 
     for ( int i = 1; i <= numNodes; i++ ) {
         DofManager *dMan = iDomain.giveDofManager(i);
-        const auto &coord = * ( dMan->giveCoordinates() );
+        const auto &coord = dMan->giveCoordinates();
 
         for ( int j = 0; j < nsd; j++ ) {
             if ( coord [ j ] < lc [ j ] ) {
@@ -1791,7 +1791,7 @@ void PrescribedGradientBCWeak :: findHoleCoord(std::vector<FloatArray> &oHoleCoo
         }
 
         DofManager *bndNode = domain->giveDofManager(it->first);
-        const FloatArray &x = * ( bndNode->giveCoordinates() );
+        const auto &x = bndNode->giveCoordinates();
         FloatArray xPlus = x;
 
         if ( !boundaryPointIsOnActiveBoundary(x) ) {
@@ -1820,10 +1820,10 @@ void PrescribedGradientBCWeak :: findCrackBndIntersecCoord(std::vector<FloatArra
 
         // Add the start and end nodes of the segment
         DofManager *startNode = e->giveDofManager(bNodes [ 0 ]);
-        const auto &xS = * ( startNode->giveCoordinates() );
+        const auto &xS = startNode->giveCoordinates();
 
         DofManager *endNode = e->giveDofManager(bNodes [ 1 ]);
-        const auto &xE = * ( endNode->giveCoordinates() );
+        const auto &xE = endNode->giveCoordinates();
 
         FloatArray xC;
         xC.beScaled(0.5, xS);

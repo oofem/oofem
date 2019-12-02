@@ -190,8 +190,8 @@ Quad1Mindlin :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Quad1Mindlin :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 {
-    FloatArrayF<3> u = *this->giveNode(2)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
-    FloatArrayF<3> v = *this->giveNode(3)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+    FloatArrayF<3> u = this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
+    FloatArrayF<3> v = this->giveNode(3)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
     
     auto n = cross(u, v);
     answer = n / norm(n);

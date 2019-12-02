@@ -186,7 +186,7 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 {
     FloatArray lx, ly(3), lz;
 
-    lx.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    lx.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
     lx.normalize();
 
     ly(0) = lx(1);

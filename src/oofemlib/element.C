@@ -1115,11 +1115,11 @@ Element :: giveLengthInDir(const FloatArray &normalToCrackPlane)
     double maxDis, minDis;
     int nnode = giveNumberOfNodes();
 
-    const auto &coords = *this->giveNode(1)->giveCoordinates();
+    const auto &coords = this->giveNode(1)->giveCoordinates();
     minDis = maxDis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
 
     for ( int i = 2; i <= nnode; i++ ) {
-        const auto &coords = *this->giveNode(i)->giveCoordinates();
+        const auto &coords = this->giveNode(i)->giveCoordinates();
         double dis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
         if ( dis > maxDis ) {
             maxDis = dis;

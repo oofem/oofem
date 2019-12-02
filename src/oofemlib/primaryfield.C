@@ -359,7 +359,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, DofManager *dman,
             return 0; // ok
         }
     } else {
-        return this->__evaluateAt(answer, * dman->giveCoordinates(),
+        return this->__evaluateAt(answer, dman->giveCoordinates(),
                                   mode, tStep, dofId);
     }
 }

@@ -135,7 +135,7 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
     int ai, bi, ci, h, nroot, _ind = 0;
     double at, bt, ht, a, b, u, cos_fi, sin_fi, _a, _b, _c, r1, r2, r3, t = 0.0, _h;
     bool reg_upd_flag;
-    FloatArray *ac, *bc, *cc, cb, ca;
+    FloatArray cb, ca;
     ConnectivityTable *ct = domain->giveConnectivityTable();
 
 
@@ -169,18 +169,18 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
                 }
 
                 // get nodal coordinates
-                ac = domain->giveNode(ai)->giveCoordinates();
-                bc = domain->giveNode(bi)->giveCoordinates();
-                cc = domain->giveNode(ci)->giveCoordinates();
+                const auto &ac = domain->giveNode(ai)->giveCoordinates();
+                const auto &bc = domain->giveNode(bi)->giveCoordinates();
+                const auto &cc = domain->giveNode(ci)->giveCoordinates();
 
                 // a = distance of BC
-                a = distance(*cc, *bc);
+                a = distance(cc, bc);
                 // b = distance of AC
-                b = distance(*cc, *ac);
+                b = distance(cc, ac);
                 // compute fi angle
-                cb.beDifferenceOf(* bc, * cc);
+                cb.beDifferenceOf(bc, cc);
                 cb.normalize();
-                ca.beDifferenceOf(* ac, * cc);
+                ca.beDifferenceOf(ac, cc);
                 ca.normalize();
                 cos_fi = cb.dotProduct(ca);
                 sin_fi = sqrt(1.0 - cos_fi * cos_fi);

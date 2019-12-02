@@ -379,7 +379,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             OOFEM_ERROR("Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber() );
         }
 
-        this->macroLSpaceElement->evalInterpolation( n, this->microMasterCoords, * DofMan->giveCoordinates() );
+        this->macroLSpaceElement->evalInterpolation( n, this->microMasterCoords, DofMan->giveCoordinates() );
 
         //construct transformation matrix relating displacement of slave boundary nodes to macroelement nodes
         //the answer is returned to macroelement so the columns correspond to x,y,z DOFs of each macroelement node
@@ -448,7 +448,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     this->microMasterCoords.clear();
     this->microMasterCoords.reserve(microMasterNodes.giveSize());
     for ( int nodeNum: microMasterNodes ) { //8 nodes
-        this->microMasterCoords.push_back( * microDomain->giveNode( nodeNum )->giveCoordinates() );
+        this->microMasterCoords.push_back( microDomain->giveNode( nodeNum )->giveCoordinates() );
     }
 
     microEngngModel->giveNextStep(); //set the first time step

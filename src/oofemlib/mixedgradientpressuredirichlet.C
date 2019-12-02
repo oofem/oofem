@@ -132,7 +132,7 @@ Dof *MixedGradientPressureDirichlet :: giveMasterDof(ActiveDof *dof, int mdof)
 void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
 {
     DofIDItem id = dof->giveDofID();
-    const auto &coords = *dof->giveDofManager()->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
 
     FloatArray dx;
     dx.beDifferenceOf(coords, this->centerCoord);
@@ -185,7 +185,7 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
 double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArray &dev, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     DofIDItem id = dof->giveDofID();
-    const auto &coords = *dof->giveDofManager()->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
 
     FloatArray dx;
     dx.beDifferenceOf(coords, this->centerCoord);

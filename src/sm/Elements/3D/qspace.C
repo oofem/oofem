@@ -98,15 +98,15 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
 
     const auto &snodes = this->interpolation.computeSurfaceMapping(dofManArray, iSurf);
     for ( int i = 1; i <= 4; i++ ) {
-        gc.add( * domain->giveNode( snodes.at(i) )->giveCoordinates() );
+        gc.add( domain->giveNode( snodes.at(i) )->giveCoordinates() );
     }
 
     gc.times(1. / 4.);
     // determine "average normal"
     for ( int i = 1; i <= 4; i++ ) {
         int j = ( i ) % 4 + 1;
-        h1.beDifferenceOf(* domain->giveNode( snodes.at(i) )->giveCoordinates(), gc);
-        h2.beDifferenceOf(* domain->giveNode( snodes.at(j) )->giveCoordinates(), gc);
+        h1.beDifferenceOf(domain->giveNode( snodes.at(i) )->giveCoordinates(), gc);
+        h2.beDifferenceOf(domain->giveNode( snodes.at(j) )->giveCoordinates(), gc);
         n.beVectorProductOf(h1, h2);
         if ( n.computeSquaredNorm() > 1.e-6 ) {
             n.normalize();

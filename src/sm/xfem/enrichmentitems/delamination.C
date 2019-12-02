@@ -306,9 +306,9 @@ Delamination :: findInitiationFronts(bool &failureChecked, const IntArray &CSnum
                     for (int iDF : shellElt->giveDofManArray() ) {
                         //printf("element node %d \n",iDF);
                         if ( this->initiationRadius > 0.0 ) {
-                            const FloatArray gCoords = this->giveDomain()->giveNode(iDF)->giveNodeCoordinates();
+                            const auto &gCoords = this->giveDomain()->giveNode(iDF)->giveCoordinates();
                             std :: list< int > nodeList;
-                            localizer->giveAllNodesWithinBox(nodeList,gCoords,initiationRadius);
+                            localizer->giveAllNodesWithinBox(nodeList, gCoords, initiationRadius);
                                 
                             for ( int jNode : nodeList ) {
                                 //printf("nodeList node %d \n",jNode);

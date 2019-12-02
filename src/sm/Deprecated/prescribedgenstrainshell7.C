@@ -57,9 +57,9 @@ REGISTER_BoundaryCondition(PrescribedGenStrainShell7);
 double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
 
-    if ( coords->giveSize() != this->centerCoord.giveSize() ) {
+    if ( coords.giveSize() != this->centerCoord.giveSize() ) {
         OOFEM_ERROR("PrescribedGenStrainShell7 :: give - Size of coordinate system different from center coordinate in b.c.");
     }
 
@@ -76,7 +76,7 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double ti
 
     // Reminder: u_i = F_ij . (x_j - xb_j) = H_ij . dx_j
     FloatArray dx;
-    dx.beDifferenceOf(* coords, this->centerCoord);
+    dx.beDifferenceOf(coords, this->centerCoord);
 
     // Assuming the coordinate system to be local, dx(3) = z
     this->setDeformationGradient( dx.at(3) );

@@ -775,8 +775,6 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
         .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
 
-        .def("hasCoordinates", &oofem::DofManager::hasCoordinates)
-
         .def("giveCoordinates", &oofem::DofManager::giveCoordinates, py::return_value_policy::reference)
         .def("appendDof", &oofem::DofManager::appendDof, py::keep_alive<1, 2>())
         .def("removeDof", &oofem::DofManager::removeDof)

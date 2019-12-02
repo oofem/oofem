@@ -84,7 +84,7 @@ TrPlanestressRotAllman :: computeLocalNodalCoordinates(std::vector< FloatArray >
 {
     lxy.resize(6);
     for ( int i = 0; i < 3; i++ ) {
-        lxy [ i ] = * this->giveNode(i + 1)->giveCoordinates();
+        lxy [ i ] = this->giveNode(i + 1)->giveCoordinates();
     }
     lxy [ 3 ].resize(2);
     lxy [ 4 ].resize(2);

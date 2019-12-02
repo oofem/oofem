@@ -184,9 +184,9 @@ Node2NodeLagrangianMultiplierContact :: computeTangentFromContact(FloatMatrix &a
 void
 Node2NodeLagrangianMultiplierContact :: computeGap(double &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
 {
-    FloatArray xs, xm, uS, uM;
-    xs = * slaveNode->giveCoordinates();
-    xm = * masterNode->giveCoordinates();
+    FloatArray uS, uM;
+    auto xs = slaveNode->giveCoordinates();
+    auto xm = masterNode->giveCoordinates();
     FloatArray normal = xs - xm;
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
@@ -207,10 +207,9 @@ Node2NodeLagrangianMultiplierContact :: computeGap(double &answer, Node *masterN
 void
 Node2NodeLagrangianMultiplierContact :: computeNormalMatrixAt(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *TimeStep)
 {
-    FloatArray xs, xm;
-    xs = * slaveNode->giveCoordinates();
-    xm = * masterNode->giveCoordinates();
-    FloatArray normal = xs - xm;
+    const auto &xs = slaveNode->giveCoordinates();
+    const auto &xm = masterNode->giveCoordinates();
+    auto normal = xs - xm;
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
         OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.", masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );

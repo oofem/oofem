@@ -327,23 +327,21 @@ DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                 double &y1, double &y2, double &y3,
                                 double &z1, double &z2, double &z3)
 {
-    FloatArray *nc1, *nc2, *nc3;
-    nc1 = this->giveNode(1)->giveCoordinates();
-    nc2 = this->giveNode(2)->giveCoordinates();
-    nc3 = this->giveNode(3)->giveCoordinates();
+    const auto &nc1 = this->giveNode(1)->giveCoordinates();
+    const auto &nc2 = this->giveNode(2)->giveCoordinates();
+    const auto &nc3 = this->giveNode(3)->giveCoordinates();
 
-    x1 = nc1->at(1);
-    x2 = nc2->at(1);
-    x3 = nc3->at(1);
+    x1 = nc1.at(1);
+    x2 = nc2.at(1);
+    x3 = nc3.at(1);
 
-    y1 = nc1->at(2);
-    y2 = nc2->at(2);
-    y3 = nc3->at(2);
+    y1 = nc1.at(2);
+    y2 = nc2.at(2);
+    y3 = nc3.at(2);
 
-    z1 = nc1->at(3);
-    z2 = nc2->at(3);
-    z3 = nc3->at(3);
-
+    z1 = nc1.at(3);
+    z2 = nc2.at(3);
+    z3 = nc3.at(3);
 }
 
 
@@ -366,8 +364,8 @@ DKTPlate :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 // returns normal vector to midPlane in GaussPoinr gp of receiver
 {
     FloatArray u, v;
-    u.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    v.beDifferenceOf( * this->giveNode(3)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    u.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    v.beDifferenceOf( this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
 
     answer.beVectorProductOf(u, v);
     answer.normalize();

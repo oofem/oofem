@@ -148,8 +148,8 @@ void
 Quad1PlateSubSoil :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 {
     FloatArray u, v;
-    u.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    v.beDifferenceOf( * this->giveNode(3)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    u.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    v.beDifferenceOf( this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
 
     answer.beVectorProductOf(u, v);
     answer.normalize();

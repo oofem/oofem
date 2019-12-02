@@ -66,10 +66,9 @@ TrPlanestressRotAllman3d :: computeLocalNodalCoordinates(std :: vector< FloatArr
 
 
     lxy.resize(6);
-    const FloatArray *nc;
     for ( int i = 0; i < 3; i++ ) {
-        nc = this->giveNode(i + 1)->giveCoordinates();
-        lxy [ i ].beProductOf(* GtoLRotationMatrix, * nc);
+        const auto &nc = this->giveNode(i + 1)->giveCoordinates();
+        lxy [ i ].beProductOf(* GtoLRotationMatrix, nc);
     }
     lxy [ 3 ].resize(3);
     lxy [ 4 ].resize(3);
@@ -121,8 +120,8 @@ TrPlanestressRotAllman3d :: computeGtoLRotationMatrix()
         FloatArray e1(3), e2(3), e3(3), help(3);
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
-        e1.beDifferenceOf( * this->giveNode(2)->giveCoordinates(),  * this->giveNode(1)->giveCoordinates() );
-        help.beDifferenceOf( * this->giveNode(3)->giveCoordinates(),  * this->giveNode(1)->giveCoordinates() );
+        e1.beDifferenceOf(this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates());
+        help.beDifferenceOf(this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates());
 
         // let us normalize e1'
         e1.normalize();

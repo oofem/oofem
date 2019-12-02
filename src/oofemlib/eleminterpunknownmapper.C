@@ -84,7 +84,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
 
 #endif
         ///@todo Shouldn't we pass a primary field or something to this function?
-        if ( this->evaluateAt(unknownValues, dofidMask, mode, oldd, * node->giveCoordinates(), reglist, tStep) ) {
+        if ( this->evaluateAt(unknownValues, dofidMask, mode, oldd, node->giveCoordinates(), reglist, tStep) ) {
             ///@todo This doesn't respect local coordinate systems in nodes. Supporting that would require major reworking.
             for ( int ii = 1; ii <= dofidMask.giveSize(); ii++ ) {
                 // exclude slaves; they are determined from masters
@@ -109,7 +109,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
 
 int
 EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
-                                     Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep)
+                                     Domain *oldd, const FloatArray &coords, IntArray &regList, TimeStep *tStep)
 {
     Element *oelem;
     SpatialLocalizer *sl = oldd->giveSpatialLocalizer();

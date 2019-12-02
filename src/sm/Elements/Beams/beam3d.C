@@ -486,12 +486,12 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
     nodeA = this->giveNode(1);
     nodeB = this->giveNode(2);
 
-    lx.beDifferenceOf( * nodeB->giveCoordinates(), * nodeA->giveCoordinates() );
+    lx.beDifferenceOf( nodeB->giveCoordinates(), nodeA->giveCoordinates() );
     lx.normalize();
 
     if ( this->referenceNode ) {
         Node *refNode = this->giveDomain()->giveNode(this->referenceNode);
-        help.beDifferenceOf( * refNode->giveCoordinates(), * nodeA->giveCoordinates() );
+        help.beDifferenceOf( refNode->giveCoordinates(), nodeA->giveCoordinates() );
 
         lz.beVectorProductOf(lx, help);
         lz.normalize();
