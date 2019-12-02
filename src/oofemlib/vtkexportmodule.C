@@ -106,7 +106,6 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 
     Domain *d  = emodel->giveDomain(1);
-    FloatArray *coords;
     int inode, nnodes = d->giveNumberOfDofManagers();
     this->giveSmoother(); // make sure smoother is created
 
