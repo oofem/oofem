@@ -2499,22 +2499,19 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     double z = 1.0*scale;
 
     // Triangle coordinates
-    FloatArray g1, g2, g3;
     //g1 = this->allTri[subCell-1].giveVertex(1);
     //g2 = this->allTri[subCell-1].giveVertex(2);
     //g3 = this->allTri[subCell-1].giveVertex(3);
-    g1 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(1);
-    g2 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(2);
-    g3 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(3);
+    auto g1 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(1);
+    auto g2 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(2);
+    auto g3 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(3);
 
-    FloatArray gs1(2), gs2(2), gs3(2);
-    gs1.zero(); gs2.zero(); gs3.zero();
     // Move the triangle nodes slightly towards the center to avoid numerical problems - controlled by 'scale' 
     double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
     g1.resizeWithValues(2); g2.resizeWithValues(2); g3.resizeWithValues(2);
-    gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
-    gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
-    gs3 = alpha2*g1 + alpha3*g2 + alpha1*g3;
+    auto gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
+    auto gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
+    auto gs3 = alpha2*g1 + alpha3*g2 + alpha1*g3;
 
     // Local coordinates for the (scaled) triangle coordinates
     FloatArray loc1, loc2, loc3;
@@ -2523,10 +2520,9 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     this->computeLocalCoordinates(loc3, gs3);
 
     // Compute coordinates for the three mid nodes 
-    FloatArray loc12, loc23, loc31;
-    loc12 = 0.5 * (loc1 + loc2);
-    loc23 = 0.5 * (loc2 + loc3);
-    loc31 = 0.5 * (loc3 + loc1);
+    auto loc12 = 0.5 * (loc1 + loc2);
+    auto loc23 = 0.5 * (loc2 + loc3);
+    auto loc31 = 0.5 * (loc3 + loc1);
     double a = loc1.at(1);
     double b = loc2.at(1);
     double c = loc3.at(1);
@@ -2548,7 +2544,6 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     FloatMatrix localNodeCoordsT;
     localNodeCoordsT = {nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords};
     localNodeCoords.beTranspositionOf(localNodeCoordsT);
-
 }
 
 
