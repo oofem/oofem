@@ -101,7 +101,7 @@ protected:
 
     void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep) override;
 
-    void edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei);
+    FloatMatrixF<3,3> edgeEvalEnrCovarBaseVectorsAt(const FloatArrayF<3> &lCoords, const int iedge, TimeStep *tStep, EnrichmentItem *ei);
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, Delamination *dei, EnrichmentItem *ei_j, EnrichmentItem *ei_k);
 

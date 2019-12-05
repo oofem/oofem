@@ -1269,10 +1269,9 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
 
     FloatMatrix N, B;
-    FloatArray lCoords, solVec, pressure;
-    FloatArray genEps;
+    FloatArray solVec, pressure;
     double xi = pLoad->giveLoadOffset();
-    lCoords = ip->giveNaturalCoordinates();
+    FloatArrayF<3> lCoords = ip->giveNaturalCoordinates();
     lCoords.at(3) = xi;     // local coord where load is applied
     double zeta = this->giveGlobalZcoord( lCoords );
     this->giveUpdatedSolutionVector(solVec, tStep);
@@ -1280,9 +1279,8 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     // compute w1,w2, KC
     this->computeNmatrixAt(lCoords, N);
     this->computeBmatrixAt(lCoords, B);
+    FloatArray genEps;
     genEps.beProductOf(B, solVec);
-
-    FloatMatrix LCC, LCD, LDD;
 
     //(xc+xd)*(g1xg2)=xc*g1xg2 + xd*g1xg2 -> xc*(W2*Dg1 - W1*Dg2) + xd*(W2*Dg1 - W1*Dg2)
     // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
@@ -1298,25 +1296,14 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     auto lambdaGD = this->computeLambdaGMatricesDis(zeta);
     auto lambdaND = this->computeLambdaNMatrixDis(zeta);
 
-    FloatMatrix W2L, W1L;
-    W2L.beProductOf(W2,lambdaGC[0]);
-    W1L.beProductOf(W1,lambdaGC[1]);
-    W2L.subtract(W1L);
-    LCC.beTProductOf(lambdaNC, W2L);
-    LCC.times( -pressure.at(1) );
+    auto W2L = dot(W2,lambdaGC[0]) - dot(W1,lambdaGC[1]);
+    auto LCC =-pressure.at(1) *  Tdot(lambdaNC, W2L);
 
-    W2L.beProductOf(W2,lambdaGD[0]);
-    W1L.beProductOf(W1,lambdaGD[1]);
-    W2L.subtract(W1L);
-    LCD.beTProductOf(lambdaNC, W2L);
-    LCD.times( -pressure.at(1) );
+    W2L = dot(W2,lambdaGD[0]) - dot(W1,lambdaGD[1]);
+    auto LCD = -pressure.at(1) * Tdot(lambdaNC, W2L);
 
-    W2L.beProductOf(W2,lambdaGD[0]);
-    W1L.beProductOf(W1,lambdaGD[1]);
-    W2L.subtract(W1L);
-    LDD.beTProductOf(lambdaND, W2L);
-    LDD.times( -pressure.at(1) );
-
+    W2L = dot(W2,lambdaGD[0]) - dot(W1,lambdaGD[1]);
+    auto LDD = -pressure.at(1) * Tdot(lambdaND, W2L);
 
     FloatMatrix KCCtemp, KCDtemp, KDDtemp;
     this->computeTripleProduct(KCCtemp, N, LCC, B );    ///@todo Fix 090814
@@ -1595,9 +1582,8 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
         if ( coordSystType ==  Load :: CST_UpdatedGlobal ) {
 
             // Updated global coord system
-            FloatMatrix gcov;
-            this->edgeEvalEnrCovarBaseVectorsAt(lCoordsEdge, iEdge, gcov, tStep, ei);
-            Q.beTranspositionOf(gcov);
+            auto gcov = this->edgeEvalEnrCovarBaseVectorsAt(lCoordsEdge, iEdge, tStep, ei);
+            Q = transpose(gcov);
 
             FloatArray distrForces, distrMoments, t1, t2;
             distrForces = { components.at(1), components.at(2), components.at(3) };
@@ -1626,8 +1612,8 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
 #endif
 }
 
-void
-Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei)
+FloatMatrixF<3,3>
+Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArrayF<3> &lcoords, const int iedge, TimeStep *tStep, EnrichmentItem *ei)
 {
     // Evaluates the covariant base vectors in the current configuration for an edge
     double zeta = lcoords.at(3);
@@ -1641,10 +1627,9 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const
     FloatArray genEpsEdge;                 // generalized strain
     genEpsEdge.beProductOf(B, solVecEdge); // [dxdxi, dmdxi, m, dgamdxi, gam]^T
 
-    FloatArray dxdxi, m, dmdxi;
-    dxdxi = { genEpsEdge.at(1), genEpsEdge.at(2), genEpsEdge.at(3) };
-    dmdxi = { genEpsEdge.at(4), genEpsEdge.at(5), genEpsEdge.at(6) };
-    m = { genEpsEdge.at(7), genEpsEdge.at(8), genEpsEdge.at(9) };
+    FloatArrayF<3> dxdxi = { genEpsEdge.at(1), genEpsEdge.at(2), genEpsEdge.at(3) };
+    FloatArrayF<3> dmdxi = { genEpsEdge.at(4), genEpsEdge.at(5), genEpsEdge.at(6) };
+    FloatArrayF<3> m = { genEpsEdge.at(7), genEpsEdge.at(8), genEpsEdge.at(9) };
     double dgamdxi = genEpsEdge.at(10);
     double gam     = genEpsEdge.at(11);
 
@@ -1652,15 +1637,11 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const
     double fac2 = ( 0.5 * zeta * zeta );
     double fac3 = ( 1.0 + zeta * gam );
     
-    FloatArray g1, g2, g3;
-    g2 = dxdxi + fac1*dmdxi + fac2*dgamdxi*m; // base vector along the edge
-    g3 = fac3*m;                              // director field
+    const auto g2 = normalize(dxdxi + fac1*dmdxi + fac2*dgamdxi*m); // base vector along the edge
+    const auto g3 = normalize(fac3*m);                              // director field
+    const auto g1 = normalize(cross(g2, g3));
 
-    g2.normalize();
-    g3.normalize();
-    g1.beVectorProductOf(g2, g3);
-    g1.normalize();
-    gcov = {g1, g2, g3};
+    return FloatMatrixF<3,3>({g1, g2, g3});
 }
 
 
@@ -2579,17 +2560,15 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
     //double z = 1.0*scale;
 
     // Triangle coordinates
-    FloatArray g1, g2, g3;
-    g1 = this->allTri[subCell-1].giveVertex(1);
-    g2 = this->allTri[subCell-1].giveVertex(2);
-    g3 = this->allTri[subCell-1].giveVertex(3);
+    auto g1 = this->allTri[subCell-1].giveVertex(1);
+    auto g2 = this->allTri[subCell-1].giveVertex(2);
+    auto g3 = this->allTri[subCell-1].giveVertex(3);
 
-    FloatArray gs1, gs2, gs3;
     // Move the triangle nodes slightly towards the center to avoid numerical problems - controlled by 'scale' 
     double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
-    gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
-    gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
-    gs3 = alpha2*g1 + alpha3*g2 + alpha1*g3;
+    auto gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
+    auto gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
+    auto gs3 = alpha2*g1 + alpha3*g2 + alpha1*g3;
 
     // Local coordinates for the (scaled) triangle coordinates
     FloatArray loc1, loc2, loc3;
@@ -2598,10 +2577,9 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
     this->computeLocalCoordinates(loc3, gs3);
 
     // Compute coordinates for the three mid nodes 
-    FloatArray loc12, loc23, loc31;
-    loc12 = 0.5 * (loc1 + loc2);
-    loc23 = 0.5 * (loc2 + loc3);
-    loc31 = 0.5 * (loc3 + loc1);
+    auto loc12 = 0.5 * (loc1 + loc2);
+    auto loc23 = 0.5 * (loc2 + loc3);
+    auto loc31 = 0.5 * (loc3 + loc1);
     double a = loc1.at(1);
     double b = loc2.at(1);
     double c = loc3.at(1);
@@ -2623,7 +2601,6 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
     FloatMatrix localNodeCoordsT;
     localNodeCoordsT = {nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords};
     localNodeCoords.beTranspositionOf(localNodeCoordsT);
-
 }
 
 void
