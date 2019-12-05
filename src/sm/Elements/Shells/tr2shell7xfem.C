@@ -257,17 +257,15 @@ Tr2Shell7XFEM :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 double 
 Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp, double xi)
 {
-    FloatArray G1, G2, temp;
-    FloatMatrix Gcov;
-    FloatArray lCoords(3);
+    FloatArrayF<3> lCoords;
     lCoords.at(1) = gp->giveNaturalCoordinate(1);
     lCoords.at(2) = gp->giveNaturalCoordinate(2);
     lCoords.at(3) = xi;
-    this->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
-    G1.beColumnOf(Gcov,1);
-    G2.beColumnOf(Gcov,2);
-    temp.beVectorProductOf(G1, G2);
-    double detJ = temp.computeNorm();
+    auto Gcov = this->evalInitialCovarBaseVectorsAt(lCoords);
+    auto G1 = Gcov.column(0);
+    auto G2 = Gcov.column(1);
+    auto temp = cross(G1, G2);
+    double detJ = norm(temp);
     return detJ *gp->giveWeight();
 }
 
@@ -275,15 +273,11 @@ Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp, double xi)
 double 
 Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
-    double detJ;
-    FloatMatrix Gcov;
-    FloatArray lcoords;
-    lcoords = gp->giveNaturalCoordinates();
-    this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
-    detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
+    const auto &lcoords = gp->giveNaturalCoordinates();
+    auto Gcov = this->evalInitialCovarBaseVectorsAt(lcoords);
+    double detJ = det(Gcov) * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ *gp->giveWeight();
 }
-
 
 
 } // end namespace oofem

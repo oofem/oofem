@@ -214,25 +214,25 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 
-void
-Shell7BaseXFEM :: evalCovarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &gcov, FloatArray &genEpsC, TimeStep *tStep)
+FloatMatrixF<3,3>
+Shell7BaseXFEM :: evalCovarBaseVectorsAt(const FloatArrayF<3> &lCoords, FloatArray &genEpsC, TimeStep *tStep)
 {
     // Continuous part g_c
-    Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, tStep);
+    auto gcov = Shell7Base :: evalCovarBaseVectorsAt(lCoords, genEpsC, tStep);
 
     // Discontinuous part g_d
     FloatArray dGenEps;
-    FloatMatrix gcovd;
     std :: vector< double > ef;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
 
         if ( ei->isElementEnriched(this) ) {
             computeDiscGeneralizedStrainVector(dGenEps, lCoords, ei, tStep);
-            Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps, tStep);
-            gcov.add(gcovd);
+            auto gcovd = Shell7Base :: evalCovarBaseVectorsAt(lCoords, dGenEps, tStep);
+            gcov += gcovd;
         }
     }
+    return gcov;
 }
 
 
@@ -261,15 +261,18 @@ Shell7BaseXFEM :: computeDiscSolutionVector(IntArray &dofIdArray , TimeStep *tSt
     answer.assemble( temp, this->giveOrderingNodes() );
 }
 
-void 
-Shell7BaseXFEM :: computeInterfaceJumpAt(int interf, FloatArray &lCoords, TimeStep *tStep, FloatArray &answer)
+FloatArrayF<3>
+Shell7BaseXFEM :: computeInterfaceJumpAt(int interf, const FloatArrayF<3> &lCoords, TimeStep *tStep)
 {
-    FloatArray temp;
-    lCoords.at(3) += 1.0e-9; // bottom position for plus side + num. perturbation 
-    this->vtkEvalUpdatedGlobalCoordinateAt(lCoords, interf + 1, answer, tStep); // position vector at + side
-    lCoords.at(3) -= 2.0e-9; // top position for minus side - num. perturbation
-    this->vtkEvalUpdatedGlobalCoordinateAt(lCoords, interf, temp, tStep); // position vector at - side
-    answer.subtract(temp); // jump = x(+) - x(-)
+    auto plus = lCoords;
+    plus.at(3) += 1.0e-9; // bottom position for plus side + num. perturbation 
+    auto gplus = this->vtkEvalUpdatedGlobalCoordinateAt(plus, interf + 1, tStep); // position vector at + side
+
+    auto minus = lCoords;
+    minus.at(3) -= 2.0e-9; // top position for minus side - num. perturbation
+    auto gminus = this->vtkEvalUpdatedGlobalCoordinateAt(minus, interf, tStep); // position vector at - side
+
+    return gplus - gminus; // jump = x(+) - x(-)
 }
 
 int
@@ -428,7 +431,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             this->computeEnrichedBmatrixAt(lCoords, BEnr, ei);
             genEps.beProductOf(B, solVec);
             double zeta = giveGlobalZcoord(lCoords);
-            this->computeSectionalForcesAt(Nd, gp, mat, tStep, genEps, zeta);
+            Nd = this->computeSectionalForcesAt(gp, mat, tStep, genEps, zeta);
 
             // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
             ftemp.beTProductOf( BEnr, Nd );
@@ -443,29 +446,28 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 }
 
 
-void
-Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta)
+FloatArray
+Shell7BaseXFEM :: computeSectionalForcesAt(IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta)
 {
     // New, in terms of PK1 stress
     // f = \Lambda_i * P * G^I
-    FloatArray PG1(3), PG2(3), PG3(3);
-    FloatMatrix lambda[3], Gcon, P, PG;
-    this->computeStressMatrix(P, genEps, ip, mat, tStep);
+    auto P = this->computeStressMatrix(genEps, ip, mat, tStep);
 
-    const FloatArray &lCoords = ip->giveNaturalCoordinates();
-    this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
-    PG.beProductOf(P,Gcon);
-    PG1.beColumnOf(PG, 1);
-    PG2.beColumnOf(PG, 2);
-    PG3.beColumnOf(PG, 3);
-    this->computeLambdaGMatricesDis(lambda, zeta); // associated with the variation of the test functions   
+    const auto &lCoords = ip->giveNaturalCoordinates();
+    auto Gcon = this->evalInitialContravarBaseVectorsAt(lCoords);
+    auto PG = dot(P, Gcon);
+    auto PG1 = PG.column(0);
+    auto PG2 = PG.column(1);
+    auto PG3 = PG.column(2);
+
+    auto lambda = this->computeLambdaGMatricesDis(zeta); // associated with the variation of the test functions   
 
     // f = lambda_1^T * P*G^1 + lambda_2^T * P*G^2 + lambda_3^T * P*G^3
-    sectionalForces.clear();
+    FloatArray sectionalForces;
     sectionalForces.plusProduct(lambda[0], PG1, 1.0);
     sectionalForces.plusProduct(lambda[1], PG2, 1.0);
     sectionalForces.plusProduct(lambda[2], PG3, 1.0);
-
+    return sectionalForces;
 }
 
 
@@ -617,13 +619,13 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
             this->computeCohesiveNmatrixAt(lCoords, Ncoh, coupledToEi);
 
             // Compute jump vector
-            this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep, jump); // -> numerical tol. issue -> normal jump = 1e-10  
+            jump = this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep); // -> numerical tol. issue -> normal jump = 1e-10  
 
             genEpsC.beProductOf(B, solVecC);
-            this->computeFAt(lCoords, F, genEpsC, tStep);
+            F = this->computeFAt(lCoords, genEpsC, tStep);
 
             // Transform xd and F to a local coord system
-            this->evalInitialCovarNormalAt(nCov, lCoords); 
+            nCov = this->evalInitialCovarNormalAt(lCoords); 
             Q.beLocalCoordSys(nCov);
             jump.rotatedWith(Q,'n');
             F.rotatedWith(Q,'n');
@@ -636,7 +638,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
             T.rotatedWith(Q,'t'); // transform back to global coord system
 
             double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;       
-            this->computeLambdaNMatrixDis(lambdaD,zeta);
+            lambdaD = this->computeLambdaNMatrixDis(zeta);
             lambdaN.beProductOf(lambdaD, Ncoh);
             Fcoh.beTProductOf(lambdaN, T);
             double dA = this->computeAreaAround(gp,xi);
@@ -727,8 +729,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
      * K_cz = Ncoh_j^t*lambda*t * dT/dj * lambda * Ncoh_k
      * 
      */
-    FloatArray lCoords(3);
-    FloatMatrix answerTemp, Ncoh_j, Ncoh_k, lambda, D, temp, tangent;
+    FloatMatrix answerTemp, Ncoh_j, Ncoh_k, temp, tangent;
     int nDofs = Shell7Base :: giveNumberOfDofs();
     answerTemp.resize(nDofs, nDofs);
     answerTemp.zero();
@@ -740,23 +741,21 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
 
     double xi = dei->giveDelamXiCoord();
 
-    FloatMatrix Q;
-    FloatArray nCov;
     for ( auto &gp: *iRuleL ) {
-        lCoords = { gp->giveNaturalCoordinate(1), gp->giveNaturalCoordinate(2), xi};
+        FloatArrayF<3> lCoords = { gp->giveNaturalCoordinate(1), gp->giveNaturalCoordinate(2), xi};
 
-        D = intMat->give3dStiffnessMatrix_dTdj(TangentStiffness, gp, tStep);
+        auto D = intMat->give3dStiffnessMatrix_dTdj(TangentStiffness, gp, tStep);
 
         //IntMatBilinearCZJanssonStatus *status = static_cast< IntMatBilinearCZJanssonStatus * >( intMat->giveStatus(gp) );
         //double damage = status->giveTempDamage();
         //if ( damage >= 1 ) { printf("Full damage in elt %i \n",damage,this->giveNumber()); }
 
-        this->evalInitialCovarNormalAt(nCov, lCoords);
-        Q.beLocalCoordSys(nCov);
-        D.rotatedWith(Q,'t');   // rotate back to global coord system
+        auto nCov = this->evalInitialCovarNormalAt(lCoords);
+        auto Q = local_cs(nCov);
+        D = unrotate(D, Q); // rotate back to global coord system 
 
         double zeta = giveGlobalZcoord( lCoords);
-        this->computeLambdaNMatrixDis( lambda, zeta );
+        auto lambda = this->computeLambdaNMatrixDis(zeta);
         this->computeCohesiveNmatrixAt(lCoords, Ncoh_j, ei_j);        
         this->computeCohesiveNmatrixAt(lCoords, Ncoh_k, ei_k); 
 
@@ -967,17 +966,16 @@ Shell7BaseXFEM :: discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, Float
     // L_DD = lambdaD_i^T * A_ij * lambdaD_j
     // L_CD = lambdaC_i^T * A_ij * lambdaD_j
     FloatMatrix B;
-    FloatMatrix lambdaC [ 3 ], lambdaD [ 3 ];
 
-    const FloatArray &lCoords = ip->giveNaturalCoordinates();
+    const auto &lCoords = ip->giveNaturalCoordinates();
     FloatArray solVecC, genEpsC;
     Shell7Base :: computeBmatrixAt(lCoords,B);
 
     double zeta = giveGlobalZcoord( lCoords );
     this->giveUpdatedSolutionVector(solVecC, tStep);
     genEpsC.beProductOf(B,solVecC);
-    this->computeLambdaGMatrices(lambdaC, genEpsC, zeta);    
-    this->computeLambdaGMatricesDis(lambdaD, zeta);
+    auto lambdaC = this->computeLambdaGMatrices(genEpsC, zeta);    
+    auto lambdaD = this->computeLambdaGMatricesDis(zeta);
 
     FloatMatrix A_lambdaC(3,18), A_lambdaD(3,18);
     LCC.clear(); LDD.clear(); LDC.clear();
@@ -1018,7 +1016,9 @@ Shell7BaseXFEM :: OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     FloatMatrix A [ 3 ] [ 3 ];
 
     Shell7Base :: computeBulkTangentMatrix(KCC, solVec, tStep );
+
     answer.assemble(KCC, orderingC, orderingC);
+
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
@@ -1043,6 +1043,7 @@ Shell7BaseXFEM :: OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                     this->discComputeBulkTangentMatrix(KCD, gp, NULL, eiM, layer, A, tStep);
                     tempRed.beSubMatrixOf(KCD, activeDofsC, this->activeDofsArrays[m-1]);
                     answer.assemble(tempRed, orderingC, this->orderingArrays[m-1]);
+
                     tempRedT.beTranspositionOf(tempRed);
                     answer.assemble(tempRedT, this->orderingArrays[m-1], orderingC);
 
@@ -1065,7 +1066,6 @@ Shell7BaseXFEM :: OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
 
         }
     }
-
 
 // Cohesive zones
 #if 1
@@ -1153,32 +1153,31 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
 {
 
     FloatMatrix temp, B1, B2;
-    FloatMatrix lambda1 [ 3 ], lambda2 [ 3 ];
+    std::array<FloatMatrixF<3,18>, 3> lambda1, lambda2;
 
-    const FloatArray &lCoords = ip->giveNaturalCoordinates();
+    const auto &lCoords = ip->giveNaturalCoordinates();
     this->computeEnrichedBmatrixAt(lCoords, B1, ei1);
     this->computeEnrichedBmatrixAt(lCoords, B2, ei2);
 
     int eiNum1 = 0, eiNum2 = 0;
     double zeta = giveGlobalZcoord( lCoords );
     if ( ei1 ) {
-        this->computeLambdaGMatricesDis(lambda1, zeta);
+        lambda1 = this->computeLambdaGMatricesDis(zeta);
         eiNum1 = ei1->giveNumber();
     } else {
         FloatArray solVecC, genEpsC;
         this->giveUpdatedSolutionVector(solVecC, tStep);
         genEpsC.beProductOf(B1,solVecC);
-        this->computeLambdaGMatrices(lambda1, genEpsC, zeta);
+        lambda1 = this->computeLambdaGMatrices(genEpsC, zeta);
     }
-
     if ( ei2 ) {
-        this->computeLambdaGMatricesDis(lambda2, zeta);
+        lambda2 = this->computeLambdaGMatricesDis(zeta);
         eiNum2 = ei2->giveNumber();
     } else {
         FloatArray solVecC, genEpsC;
         this->giveUpdatedSolutionVector(solVecC, tStep);
         genEpsC.beProductOf(B2,solVecC);
-        this->computeLambdaGMatrices(lambda2, genEpsC, zeta);
+        lambda2 = this->computeLambdaGMatrices(genEpsC, zeta);
     }
 
     double dV = this->computeVolumeAroundLayer(ip, layer);
@@ -1211,8 +1210,8 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
                 L.add(dV,temp);
             }
         }
-        this->computeTripleProduct(KDDtemp, B1, L, B2 );        
-    } 
+        this->computeTripleProduct(KDDtemp, B1, L, B2 );
+    }
 
     KdIJ.resize(ndofs,ndofs);
     KdIJ.zero();
@@ -1223,8 +1222,8 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
 }
 
 
-void
-Shell7BaseXFEM :: computeLambdaGMatricesDis(FloatMatrix lambda [ 3 ], double zeta)
+std::array<FloatMatrixF<3,18>, 3>
+Shell7BaseXFEM :: computeLambdaGMatricesDis(double zeta)
 {
     // computes the lambda^g matrices associated with the variation and linearization 
     // of the discontinuous base vectors gd_i.
@@ -1233,34 +1232,33 @@ Shell7BaseXFEM :: computeLambdaGMatricesDis(FloatMatrix lambda [ 3 ], double zet
     double a = zeta ;
     double c = 1.0 ;
 
+    std::array<FloatMatrixF<3,18>, 3> lambda;
     // lambda1 =  ( I,   0,  a*I,   0 ,  0,  0 ,  0,  0 )
+    lambda[ 0 ].at(1,1) = lambda[ 0 ].at(2,2) = lambda[ 0 ].at(3,3) = 1.;
+    lambda[ 0 ].at(1,7) = lambda[ 0 ].at(2,8) = lambda[ 0 ].at(3,9) = a;
+
     // lambda2 =  ( 0,   I,   0 ,  a*I,  0,  0 ,  0,  0 )
-    FloatMatrix eye(3,3), aEye(3,3);
-    eye.beUnitMatrix();
-    aEye=eye;  aEye.times(a);
-    lambda[ 0 ].resize(3,18);   lambda[ 0 ].zero();
-    lambda[ 1 ].resize(3,18);   lambda[ 1 ].zero();
-    lambda[ 0 ].setSubMatrix(eye,1,1);  lambda[ 0 ].setSubMatrix(aEye,1,7);
-    lambda[ 1 ].setSubMatrix(eye,1,4);  lambda[ 1 ].setSubMatrix(aEye,1,10);
+    lambda[ 1 ].at(1,4) = lambda[ 1 ].at(2,5) = lambda[ 1 ].at(3,6) = 1.;
+    lambda[ 1 ].at(1,10) = lambda[ 1 ].at(2,11) = lambda[ 1 ].at(3,12) = a;
 
     // lambda3 =  ( 0,  0,  0 ,  0 , c*I , 0 , 0 , 0 )
-    lambda[ 2 ].resize(3,18);   lambda[ 2 ].zero();
     lambda[ 2 ].at(1,13) = lambda[ 2 ].at(2,14) = lambda[ 2 ].at(3,15) = c;
 
+    return lambda;
 }
 
 
-void
-Shell7BaseXFEM :: computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta)
+FloatMatrixF<3,7>
+Shell7BaseXFEM :: computeLambdaNMatrixDis(double zeta)
 {
     // computes the lambda_x matrix associated with the variation and linearization of the 
     // discontinuous position vector x_di. (\delta x_{di} = lambda_{xd}*\delta n_x)
 
     // lambda_x =  ( I, a*I, 0 )
-    lambda_xd.resize(3,7);
-    lambda_xd.zero();
+    FloatMatrixF<3,7> lambda_xd;
     lambda_xd.at(1,1) = lambda_xd.at(2,2) = lambda_xd.at(3,3) = 1.0;
     lambda_xd.at(1,4) = lambda_xd.at(2,5) = lambda_xd.at(3,6) = zeta;
+    return lambda_xd;
 }
 
 
@@ -1270,10 +1268,9 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
 
-    FloatMatrix N, B, gcov, W1, W2;
+    FloatMatrix N, B;
     FloatArray lCoords, solVec, pressure;
-    FloatArray g1, g2, genEps;
-    FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
+    FloatArray genEps;
     double xi = pLoad->giveLoadOffset();
     lCoords = ip->giveNaturalCoordinates();
     lCoords.at(3) = xi;     // local coord where load is applied
@@ -1290,16 +1287,16 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     //(xc+xd)*(g1xg2)=xc*g1xg2 + xd*g1xg2 -> xc*(W2*Dg1 - W1*Dg2) + xd*(W2*Dg1 - W1*Dg2)
     // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
     load->computeValueAt(pressure, tStep, ip->giveNaturalCoordinates(), VM_Total);        // pressure component
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, tStep);
-    g1.beColumnOf(gcov,1);
-    g2.beColumnOf(gcov,2);
-    W1 = this->giveAxialMatrix(g1);
-    W2 = this->giveAxialMatrix(g2);
+    auto gcov = this->evalCovarBaseVectorsAt(lCoords, genEps, tStep);
+    auto g1 = gcov.column(0);
+    auto g2 = gcov.column(1);
+    auto W1 = this->giveAxialMatrix(g1);
+    auto W2 = this->giveAxialMatrix(g2);
 
-    this->computeLambdaGMatrices(lambdaGC, genEps, zeta);
-    this->computeLambdaNMatrix(lambdaNC, genEps, zeta);
-    this->computeLambdaGMatricesDis(lambdaGD, zeta);
-    this->computeLambdaNMatrixDis(lambdaND, zeta);
+    auto lambdaGC = this->computeLambdaGMatrices(genEps, zeta);
+    auto lambdaNC = this->computeLambdaNMatrix(genEps, zeta);
+    auto lambdaGD = this->computeLambdaGMatricesDis(zeta);
+    auto lambdaND = this->computeLambdaNMatrixDis(zeta);
 
     FloatMatrix W2L, W1L;
     W2L.beProductOf(W2,lambdaGC[0]);
@@ -2091,23 +2088,23 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(const FloatArray &lCoords, FloatM
 // Delamination specific
 
 
-void
-Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
+FloatArrayF<3>
+Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArrayF<3> &localCoords, int layer, TimeStep *tStep)
 {
     double zeta = this->giveGlobalZcoord( localCoords );
 
     // Continuous part
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
-    FloatArray xc, mc; double gamc=0;
+    FloatArrayF<3> xc, mc;
+    double gamc = 0;
     Shell7Base :: giveUnknownsAt(localCoords, solVec, xc, mc, gamc, tStep);
     double fac_cont = ( zeta + 0.5 * gamc * zeta * zeta );
-    globalCoords = xc;
-    globalCoords.add(fac_cont,mc);
+    auto globalCoords = xc + fac_cont * mc;
 
 #if 1
     // Discontinuous part
-    FloatArray solVecD, xd, md, xtemp(3);
+    FloatArray solVecD;
     double gamd = 0;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
         EnrichmentItem *ei = this->xMan->giveEnrichmentItem(i);
@@ -2116,19 +2113,20 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords
             IntArray eiDofIdArray;
             ei->giveEIDofIdArray(eiDofIdArray);
             this->computeDiscSolutionVector(eiDofIdArray, tStep, solVecD);
+            FloatArrayF<3> xd, md;
             this->giveDisUnknownsAt(localCoords, ei, solVecD, xd, md, gamd, tStep);
             double fac_disc = ( zeta + 0.5 * gamd * zeta * zeta );
-            xtemp = xd;
-            xtemp.add(fac_disc,md);
-            globalCoords.add(xtemp);
+            auto xtemp = xd + fac_disc * md;
+            globalCoords += xtemp;
         }
     }
 #endif
+    return globalCoords;
 }
 
 
 void
-Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep)
+Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArrayF<3> &lcoords, EnrichmentItem *ei, const FloatArray &solVec, FloatArrayF<3> &x, FloatArrayF<3> &m, double &gam, TimeStep *tStep)
 {
     // returns the unknowns evaluated at a point (xi1, xi2, xi3)
     FloatArray vec;
@@ -2138,7 +2136,6 @@ Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *e
     x = {vec.at(1), vec.at(2), vec.at(3)};
     m = {vec.at(4), vec.at(5), vec.at(6)};
     gam = vec.at(7);
-
 }
 
 
@@ -2193,9 +2190,9 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 
             // Node coordinates
             if ( numSubCells == 1 ) {
-                Shell7Base :: giveFictiousNodeCoordsForExport(nodeCoords, layer);
+                nodeCoords = Shell7Base :: giveFictiousNodeCoordsForExport(layer);
             } else {
-                this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);
+                nodeCoords = this->giveFictiousNodeCoordsForExport(layer, subCell);
             }
 
             for ( int node = 1; node <= numCellNodes; node++ ) {
@@ -2244,13 +2241,10 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
                 if ( type == DisplacementVector ) { // compute displacement as u = x - X
-                    if ( numSubCells == 1 ) {
-                        Shell7Base :: giveFictiousNodeCoordsForExport(nodeCoords, layer);
-                        this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep, 0);
-                    } else {
-                        this->giveFictiousNodeCoordsForExport(nodeCoords, layer, subCell);
-                        this->giveFictiousUpdatedNodeCoordsForExport(updatedNodeCoords, layer, tStep, subCell);
-                    }
+                    auto nodeCoords = numSubCells == 1 ?
+                        Shell7Base :: giveFictiousNodeCoordsForExport(layer) :
+                        this->giveFictiousNodeCoordsForExport(layer, subCell);
+                    auto updatedNodeCoords = this->giveFictiousUpdatedNodeCoordsForExport(layer, tStep, numSubCells == 1 ? 0 : subCell);
                     for ( int j = 1; j <= numCellNodes; j++ ) {
                         u = updatedNodeCoords[j-1];
                         u.subtract(nodeCoords[j-1]);
@@ -2383,8 +2377,8 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 }
 
 
-void 
-Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell)
+std::vector<FloatArray>
+Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(int layer, int subCell)
 {
 
     // compute fictious node coords
@@ -2395,7 +2389,7 @@ Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes
 
     //this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
 
-    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    std::vector<FloatArray> nodes(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray localCoords(3);
         localCoords.at(1) = nodeLocalXi1Coords.at(i);
@@ -2404,35 +2398,34 @@ Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes
         ///@todo Check this Jim, you overwrite "localCoords" the the code above is useless.
         localCoords.beColumnOf(localNodeCoords,i);
 
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, nodes[i-1]);
+        nodes[i-1] = this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer);
     }
-
+    return nodes;
 }
 
 
-void 
-Shell7BaseXFEM :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell)
+std::vector<FloatArray>
+Shell7BaseXFEM :: giveFictiousCZNodeCoordsForExport(int layer, int subCell)
 {
-
     // compute fictious node coords
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
     FloatMatrix localNodeCoords;
     // need to return local coordinates corresponding to the nodes of the sub triangles
     giveLocalCZNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
 
-    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    std::vector<FloatArray> nodes(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray localCoords(3);
         localCoords.beColumnOf(localNodeCoords,i);
 
-        this->vtkEvalInitialGlobalCZCoordinateAt(localCoords, layer, nodes[i-1]);
+        nodes[i-1] = this->vtkEvalInitialGlobalCZCoordinateAt(localCoords, layer);
     }
-
+    return nodes;
 }
 
 
-void 
-Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell)
+std::vector<FloatArray>
+Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(int layer, TimeStep *tStep, int subCell)
 {
     // compute fictious node coords
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
@@ -2446,7 +2439,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
     } else {
         giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, layer, localNodeCoords);
     }
-    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    std::vector<FloatArray> nodes(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray localCoords(3);
         localCoords.beColumnOf(localNodeCoords, i);
@@ -2459,13 +2452,14 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
         double deltaxi = localCoords.at(3) * this->layeredCS->giveLayerThickness(layer) / totalThickness; // distance from layer mid
         localCoords.at(3) = xiMid_i + deltaxi * scaleFactor;
 
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, nodes[i-1], tStep);
+        nodes[i-1] = this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, tStep);
     }
+    return nodes;
 }
 
 
-void
-Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int interface, TimeStep *tStep, int subCell)
+std::vector<FloatArray>
+Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(int interface, TimeStep *tStep, int subCell)
 {
     // compute fictious node coords
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
@@ -2479,7 +2473,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArra
     } else {
         giveLocalCZNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
     }
-    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    std::vector<FloatArray> nodes(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
         FloatArray localCoords(3);
         localCoords.beColumnOf(localNodeCoords, i);
@@ -2492,8 +2486,9 @@ Shell7BaseXFEM :: giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArra
         double deltaxi = localCoords.at(3) * this->layeredCS->giveLayerThickness(interface) / totalThickness; // distance from layer mid
         localCoords.at(3) = xiMid_i + deltaxi * scaleFactor;
 
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, interface, nodes[i-1], tStep);
+        nodes[i-1] = this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, interface, tStep);
     }
+    return nodes;
 }
 
 
@@ -2535,7 +2530,6 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     gs1.zero(); gs2.zero(); gs3.zero();
     // Move the triangle nodes slightly towards the center to avoid numerical problems - controlled by 'scale' 
     double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
-    //g1.printYourself(); g2.printYourself(); g3.printYourself();
     g1.resizeWithValues(2); g2.resizeWithValues(2); g3.resizeWithValues(2);
     gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
     gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
@@ -2651,7 +2645,6 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     vtkPiece.setNumberOfCells(numCells);
     vtkPiece.setNumberOfNodes(numTotalNodes);
 
-    std::vector <FloatArray> nodeCoords;
     int val    = 1;
     int offset = 0;
     int currentCell = 1;
@@ -2664,11 +2657,9 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
             // Node coordinates
-            if ( numSubCells == 1 ) {
-                Shell7Base :: giveFictiousCZNodeCoordsForExport(nodeCoords, layer);
-            } else {
-                this->giveFictiousCZNodeCoordsForExport(nodeCoords, layer, subCell);
-            }
+            auto nodeCoords = numSubCells == 1 ?
+                Shell7Base :: giveFictiousCZNodeCoordsForExport(layer) :
+                this->giveFictiousCZNodeCoordsForExport(layer, subCell);
 
             for ( int node = 1; node <= numCellNodes; node++ ) {
                 vtkPiece.setNodeCoords(nodeNum, nodeCoords[node-1] );
@@ -2695,8 +2686,6 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     // Export nodal variables from primary fields        
     vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
 
-    std::vector<FloatArray> updatedNodeCoords;
-    FloatArray u(3);
     std::vector<FloatArray> values;
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -2706,15 +2695,14 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
                 if ( type == DisplacementVector ) { // compute displacement as u = x - X
-                    if ( numSubCells == 1 ) {
-                        Shell7Base :: giveFictiousCZNodeCoordsForExport(nodeCoords, layer);
-                        this->giveFictiousUpdatedCZNodeCoordsForExport(updatedNodeCoords, layer, tStep, 0);
-                    } else {
-                        this->giveFictiousCZNodeCoordsForExport(nodeCoords, layer, subCell);
-                        this->giveFictiousUpdatedCZNodeCoordsForExport(updatedNodeCoords, layer, tStep, subCell);
-                    }
+                    auto nodeCoords = numSubCells == 1 ?
+                        Shell7Base :: giveFictiousCZNodeCoordsForExport(layer) :
+                        this->giveFictiousCZNodeCoordsForExport(layer, subCell);
+
+                    auto updatedNodeCoords = this->giveFictiousUpdatedCZNodeCoordsForExport(layer, tStep, numSubCells == 1 ? 0 : subCell);
+
                     for ( int j = 1; j <= numCellNodes; j++ ) {
-                        u.beDifferenceOf(updatedNodeCoords[j-1], nodeCoords[j-1]);
+                        auto u = updatedNodeCoords[j-1] - nodeCoords[j-1];
                         vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, u);
                         nodeNum += 1;
                     }
@@ -3015,7 +3003,7 @@ Shell7BaseXFEM :: recoverShearStress(TimeStep *tStep)
                     this->computeEnrichedBmatrixAt(lCoords, B, NULL);   // NULL => Shell7base :: computeBmatrixAt, otherwise include dei
                     FloatArray genEpsC;                        
                     genEpsC.beProductOf(B, solVecC);
-                    this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
+                    nCov = this->evalCovarNormalAt(lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
                     Q.beLocalCoordSys(nCov);
 
 #if 0
@@ -3274,7 +3262,7 @@ Shell7BaseXFEM :: giveFailedInterfaceNumber(IntArray &failedInterfaces, FloatArr
                 this->computeEnrichedBmatrixAt(lCoords, B, NULL);   // NULL => Shell7base :: computeBmatrixAt, otherwise include dei
                 FloatArray genEpsC;                        
                 genEpsC.beProductOf(B, solVecC);
-                this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);  
+                nCov = this->evalCovarNormalAt(lCoords, genEpsC, tStep);  
                 Q.beLocalCoordSys(nCov);
 
                 //if (this->giveGlobalNumber() == 61) {interfaceStresses.printYourself("interfaceStresses global"); lCoords.printYourself("lCoords"); }
@@ -3450,7 +3438,7 @@ Shell7BaseXFEM :: giveRecoveredTransverseInterfaceStress(std::vector<FloatMatrix
                     this->computeEnrichedBmatrixAt(lCoords, B, NULL);   // NULL => Shell7base :: computeBmatrixAt, otherwise include dei
                     FloatArray genEpsC;                        
                     genEpsC.beProductOf(B, solVecC);
-                    this->evalCovarNormalAt(nCov, lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
+                    nCov = this->evalCovarNormalAt(lCoords, genEpsC, tStep);     // Denna verkar ta hänsyn till hoppet, men hur ser jag till att det är normalen ovanför delamineringen?
                     Q.beLocalCoordSys(nCov);
 
 #if 0
