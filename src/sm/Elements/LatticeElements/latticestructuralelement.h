@@ -56,7 +56,7 @@ public:
     LatticeStructuralElement(int n, Domain *d);
 
     void initializeFrom(InputRecord &ir) override;
-    
+
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
     /**
@@ -156,6 +156,11 @@ public:
      */
 
     virtual int giveCouplingFlag() { return 0; }
+
+    /**
+     * This function gives the cross-section coordinates.
+     */
+    virtual void giveCrossSectionCoordinates(FloatArray &coords) {; }
 
     /**
      * Returns the coupling numbers

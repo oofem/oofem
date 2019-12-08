@@ -96,15 +96,15 @@ LatticeDamage :: initializeFrom(InputRecord &ir)
 
 
 double
-LatticeDamage :: computeEquivalentStrain(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *atTime) const
+LatticeDamage :: computeEquivalentStrain(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *atTime) const
 {
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     double paramA = 0.5 * ( e0 + ec * e0 );
     double paramB = ( coh * e0 ) / sqrt(1. - pow( ( ec * e0 - e0 ) / ( e0 + ec * e0 ), 2. ) );
     double paramC = 0.5 * ( this->ec * e0 - e0 );
 
-    double shearNorm = norm(strain[{1,2}]);
-    return norm({this->alphaOne * shearNorm / paramB, ( strain.at(1) + paramC ) / paramA}) * paramA - paramC;
+    double shearNorm = norm(strain [ { 1, 2 } ]);
+    return norm({ this->alphaOne * shearNorm / paramB, ( strain.at(1) + paramC ) / paramA }) * paramA - paramC;
 }
 
 
@@ -210,7 +210,7 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
             omega = 0.99999;
         }
 
-        return elastic * (1. - omega);
+        return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
         return elastic;
@@ -233,7 +233,7 @@ LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
             omega = 0.99999;
         }
 
-        return elastic * (1. - omega);
+        return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
         return elastic;
@@ -257,7 +257,7 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
     auto reducedStrain = strain;
     auto thermalStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
     if ( thermalStrain.giveSize() ) {
-        reducedStrain -= FloatArrayF<6>(thermalStrain);
+        reducedStrain -= FloatArrayF< 6 >(thermalStrain);
     }
 
     // compute equivalent strain
@@ -290,14 +290,14 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
 
     auto stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    FloatArrayF<6> answer;
+    FloatArrayF< 6 >answer;
     for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
         answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
     }
 
     //Compute crack width
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
-    double crackWidth = omega * norm(reducedStrain[{0, 1, 2}]) * length;
+    double crackWidth = omega * norm(reducedStrain [ { 0, 1, 2 } ]) * length;
 
     //Read in fluid pressures from structural element if this is not a slave problem
     FloatArray pressures;
@@ -307,7 +307,7 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
 
     double waterPressure = 0.;
     for ( int i = 0; i < pressures.giveSize(); i++ ) {
-        waterPressure += 1. / pressures.giveSize() * pressures[i];
+        waterPressure += 1. / pressures.giveSize() * pressures [ i ];
     }
     answer.at(1) += waterPressure;
 
@@ -347,7 +347,6 @@ LatticeDamage :: computeBiot(double omega, double kappa, double le) const
         OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
         return 0.;
     }
-
 }
 
 
@@ -377,7 +376,7 @@ LatticeDamage :: computeIntervals(double testDissipation, double referenceGf) co
 
 double
 LatticeDamage :: computeDeltaDissipation2d(double omega,
-                                           const FloatArrayF<3> &reducedStrain,
+                                           const FloatArrayF< 3 > &reducedStrain,
                                            GaussPoint *gp,
                                            TimeStep *tStep) const
 {
@@ -386,15 +385,15 @@ LatticeDamage :: computeDeltaDissipation2d(double omega,
     const double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
     const double eShear = this->alphaOne * eNormal;
     const double eTorsion = this->alphaTwo * eNormal;
-    const FloatArrayF<3> tangent = {eNormal, eShear, eTorsion};
+    const FloatArrayF< 3 >tangent = { eNormal, eShear, eTorsion };
 
-    const auto reducedStrainOld = status->giveReducedLatticeStrain()[{0, 1, 5}];
+    const auto reducedStrainOld = status->giveReducedLatticeStrain() [ { 0, 1, 5 } ];
     const double omegaOld = status->giveDamage();
 
     auto oldIntermediateStrain = reducedStrainOld;
     double oldIntermediateOmega = omegaOld;
     double deltaOmega = ( omega - omegaOld );
-    auto testStrain = (reducedStrain + reducedStrainOld) * 0.5;
+    auto testStrain = ( reducedStrain + reducedStrainOld ) * 0.5;
     auto testStress = mult(tangent, testStrain);
     double testDissipation = 0.5 * length * norm(testStress) * deltaOmega;
 
@@ -406,10 +405,10 @@ LatticeDamage :: computeDeltaDissipation2d(double omega,
         double tempDeltaDissipation = 0.;
         for ( int k = 0; k < intervals; k++ ) {
             auto intermediateStrain = reducedStrainOld + ( k + 1 ) / intervals * ( reducedStrain - reducedStrainOld );
-            double equivStrain = this->computeEquivalentStrain(assemble<6>(intermediateStrain, {0, 1, 5}), gp, tStep);
+            double equivStrain = this->computeEquivalentStrain(assemble< 6 >(intermediateStrain, { 0, 1, 5 }), gp, tStep);
             double f = equivStrain - oldKappa;
             if ( f > 0 ) {
-                auto  intermediateOmega = this->computeDamageParam(equivStrain, gp);
+                auto intermediateOmega = this->computeDamageParam(equivStrain, gp);
                 auto deltaOmega = ( intermediateOmega - oldIntermediateOmega );
                 auto midStrain = ( intermediateStrain + oldIntermediateStrain ) / 2.;
                 auto midStress = mult(tangent, midStrain);
@@ -430,7 +429,7 @@ LatticeDamage :: computeDeltaDissipation2d(double omega,
 
 double
 LatticeDamage :: computeDeltaDissipation3d(double omega,
-                                           const FloatArrayF<6> &reducedStrain,
+                                           const FloatArrayF< 6 > &reducedStrain,
                                            GaussPoint *gp,
                                            TimeStep *atTime) const
 {
@@ -439,7 +438,7 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
     const double eNormal = this->give(eNormal_ID, gp) * this->eNormalMean;
     const double eShear = this->alphaOne * eNormal;
     const double eTorsion = this->alphaTwo * eNormal;
-    const FloatArrayF<6> tangent = {eNormal, eShear, eShear, eTorsion, eTorsion, eTorsion};
+    const FloatArrayF< 6 >tangent = { eNormal, eShear, eShear, eTorsion, eTorsion, eTorsion };
 
     const auto &reducedStrainOld = status->giveReducedLatticeStrain();
     const double omegaOld = status->giveDamage();
@@ -447,7 +446,7 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
     auto oldIntermediateStrain = reducedStrainOld;
     double oldIntermediateOmega = omegaOld;
     double deltaOmega = ( omega - omegaOld );
-    auto testStrain = (reducedStrain + reducedStrainOld) * 0.5;
+    auto testStrain = ( reducedStrain + reducedStrainOld ) * 0.5;
     auto testStress = mult(tangent, testStrain);
     double testDissipation = 0.5 * length * norm(testStress) * deltaOmega;
 
@@ -508,7 +507,7 @@ LatticeDamage :: giveIPValue(FloatArray &answer,
                              TimeStep *atTime)
 {
     LatticeDamageStatus *status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-    if ( type == IST_CrackStatuses ) {
+    if ( type == IST_CrackedFlag ) {
         answer.resize(1);
         answer.zero();
         answer.at(1) = status->giveCrackFlag();
@@ -650,5 +649,4 @@ LatticeDamageStatus :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 }
-
 } // end namespace oofem

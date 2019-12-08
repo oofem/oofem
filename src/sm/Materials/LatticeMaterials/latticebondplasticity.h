@@ -109,6 +109,7 @@ protected:
     enum LatticeBondPlasticity_ReturnResult { RR_NotConverged, RR_Converged, RR_Elastic };
     mutable LatticeBondPlasticity_ReturnResult returnResult; // FIXME: Must be removed. Not thread safe. Shouldn't be stored at all.
 
+    int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
 
     /// compressive strength
     double fc = 0.;
@@ -156,9 +157,9 @@ public:
 
 
 
-    bool checkForVertexCase(FloatArrayF<3> &stress, GaussPoint *gp) const;
+    bool checkForVertexCase(FloatArrayF< 3 > &stress, GaussPoint *gp) const;
 
-    void performVertexReturn(FloatArrayF<3> &stress, GaussPoint *gp) const;
+    void performVertexReturn(FloatArrayF< 3 > &stress, GaussPoint *gp) const;
 
     double computeTransition(const double kappa, GaussPoint *gp) const;
 
@@ -167,42 +168,42 @@ public:
 
     /* Compute the A matrix used for closest point return
      */
-    FloatMatrixF<3,3> computeAMatrix(const FloatArrayF<3> &sigma,
-                        const double tempKappa,
-                        const double deltaLambda,
-                        int transitionFlag,
-                        GaussPoint *gp) const;
+    FloatMatrixF< 3, 3 >computeAMatrix(const FloatArrayF< 3 > &sigma,
+                                       const double tempKappa,
+                                       const double deltaLambda,
+                                       int transitionFlag,
+                                       GaussPoint *gp) const;
 
-    FloatMatrixF<4,4> computeJacobian(const FloatArrayF<3> &sigma,
-                         const double tempKappa,
-                         const double deltaLambda,
-                         int transitionFlag,
-                         GaussPoint *gp) const;
+    FloatMatrixF< 4, 4 >computeJacobian(const FloatArrayF< 3 > &sigma,
+                                        const double tempKappa,
+                                        const double deltaLambda,
+                                        int transitionFlag,
+                                        GaussPoint *gp) const;
 
-    FloatArrayF<3> computeFVector(const FloatArrayF<3> &sigma,
-                        const double kappa,
-                        int transitionFlag,
-                        GaussPoint *gp) const;
-    FloatArrayF<3> computeMVector(const FloatArrayF<3> &sigma,
-                        const double kappa,
-                        int transitionFlag,
-                        GaussPoint *gp) const;
-    FloatMatrixF<3,3> computeDMMatrix(const FloatArrayF<3> &sigma,
-                         const double deltaLambda,
-                         int transitionFlag,
-                         GaussPoint *gp) const;
+    FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma,
+                                   const double kappa,
+                                   int transitionFlag,
+                                   GaussPoint *gp) const;
+    FloatArrayF< 3 >computeMVector(const FloatArrayF< 3 > &sigma,
+                                   const double kappa,
+                                   int transitionFlag,
+                                   GaussPoint *gp) const;
+    FloatMatrixF< 3, 3 >computeDMMatrix(const FloatArrayF< 3 > &sigma,
+                                        const double deltaLambda,
+                                        int transitionFlag,
+                                        GaussPoint *gp) const;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
 
-    FloatArrayF<3> performPlasticityReturn(GaussPoint *gp, const FloatArrayF<3> &totalStrain, TimeStep *) const;
+    FloatArrayF< 3 >performPlasticityReturn(GaussPoint *gp, const FloatArrayF< 3 > &totalStrain, TimeStep *) const;
 
-    double performRegularReturn(FloatArrayF<3> &stress,
+    double performRegularReturn(FloatArrayF< 3 > &stress,
                                 double yieldValue,
                                 int transitionFlag,
                                 GaussPoint *gp) const;
 
-    double computeYieldValue(const FloatArrayF<3> &sigma,
+    double computeYieldValue(const FloatArrayF< 3 > &sigma,
                              const double tempKappa,
                              int transitionFlag,
                              GaussPoint *gp) const;
@@ -210,7 +211,7 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual FloatArrayF<6> giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 6 >giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
 };
 } // end namespace oofem
 #endif
