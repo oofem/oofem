@@ -260,6 +260,32 @@ public:
     }
 
     /**
+     * Extract column from matrix
+     */
+    template<std::size_t C, class = typename std::enable_if_t<C < M>>
+    FloatArrayF<N> column() const
+    {
+        FloatArrayF<N> c;
+        for ( std::size_t i = 0; i < N; i++ ) {
+            c[i] = (*this)(i, C);
+        }
+        return c;
+    }
+
+    /**
+     * Extract row from matrix
+     */
+    template<std::size_t R, class = typename std::enable_if_t<R < N>>
+    FloatArrayF<M> row() const
+    {
+        FloatArrayF<M> r;
+        for ( std::size_t j = 0; j < M; j++ ) {
+            r[j] = (*this)(R, j);
+        }
+        return r;
+    }
+
+    /**
      * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
      * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the
      * upper half of receiver.
