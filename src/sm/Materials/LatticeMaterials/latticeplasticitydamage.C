@@ -369,7 +369,7 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
     /* Compute yield value*/
     double yieldValue = computeYieldValue(stress, tempKappa, gp);
     int subIncrementCounter = 0;
-    
+
     /* Check yield condition, i.e. if the yield value is less than the yield tolerance.
      * If yield condition is valid. Do perform regular return (closest point return)*/
 
@@ -387,21 +387,20 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
             tempKappa = performRegularReturn(stress, yieldValue, gp);
 
             if ( returnResult == RR_NotConverged ) {
-	      subIncrementCounter++;
-	      if(subIncrementCounter >numberOfSubIncrements){
-		OOFEM_LOG_INFO( "Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
-		OOFEM_LOG_INFO( "Yield value %e \n", yieldValue );
-		OOFEM_LOG_INFO( "ConvergedStrain value %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3) );
-		OOFEM_LOG_INFO( "tempStrain value %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3) );
-		OOFEM_LOG_INFO( "deltaStrain value %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3) );
-		OOFEM_LOG_INFO( "targetstrain value %e %e %e\n", strain.at(1), strain.at(2), strain.at(3) );
-		
-		OOFEM_ERROR("LatticePlasticityDamage :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
-		
-	      }
-	      subIncrementFlag = 1;
-	      deltaStrain *= 0.5;
-	      tempStrain = convergedStrain + deltaStrain;
+                subIncrementCounter++;
+                if ( subIncrementCounter > numberOfSubIncrements ) {
+                    OOFEM_LOG_INFO("Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
+                    OOFEM_LOG_INFO("Yield value %e \n", yieldValue);
+                    OOFEM_LOG_INFO("ConvergedStrain value %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3) );
+                    OOFEM_LOG_INFO("tempStrain value %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3) );
+                    OOFEM_LOG_INFO("deltaStrain value %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3) );
+                    OOFEM_LOG_INFO("targetstrain value %e %e %e\n", strain.at(1), strain.at(2), strain.at(3) );
+
+                    OOFEM_ERROR("LatticePlasticityDamage :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
+                }
+                subIncrementFlag = 1;
+                deltaStrain *= 0.5;
+                tempStrain = convergedStrain + deltaStrain;
             } else if ( returnResult == RR_Converged && subIncrementFlag == 1 ) {
                 tempPlasticStrain.at(1) = tempStrain.at(1) - stress.at(1) / eNormalMean;
                 tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
@@ -415,14 +414,14 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
                 convergedStrain = tempStrain;
                 deltaStrain = strain - convergedStrain;
                 tempStrain = strain;
-		subIncrementCounter = 0;
+                subIncrementCounter = 0;
             } else {
                 status->setTempKappaP(tempKappa);
             }
         }
     }
-      
-    
+
+
     tempPlasticStrain.at(1) = strain.at(1) - stress.at(1) / eNormalMean;
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
@@ -872,10 +871,10 @@ LatticePlasticityDamage :: giveIPValue(FloatArray &answer,
         answer.zero();
         answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
         return 1;
-    } else if ( type == IST_PlasticLatticeStrain )   {
+    } else if ( type == IST_PlasticLatticeStrain ) {
         answer = status->givePlasticLatticeStrain();
         return 1;
-    } else   {
+    } else {
         return LatticeLinearElastic :: giveIPValue(answer, gp, type, atTime);
     }
 }
