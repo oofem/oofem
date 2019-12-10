@@ -204,13 +204,10 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
         return elastic;
     } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
         auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-        double omega = status->giveTempDamage();
+	
+        double omega = min(status->giveTempDamage(), 0.99999);
+	return elastic * ( 1. - omega );
 
-        if ( omega > 0.99999 ) {
-            omega = 0.99999;
-        }
-
-        return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
         return elastic;
