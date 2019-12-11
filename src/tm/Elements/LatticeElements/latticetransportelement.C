@@ -45,6 +45,4 @@ LatticeTransportElement :: initializeFrom(InputRecord &ir)
 {
     TransportElement :: initializeFrom(ir);
 }
-
-
 } // end namespace oofem

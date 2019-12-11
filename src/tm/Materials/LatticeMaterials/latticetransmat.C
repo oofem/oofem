@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "tm/Materials/latticetransmat.h"
+#include "tm/Materials/LatticeMaterials/latticetransmat.h"
 #include "domain.h"
 #include "gausspoint.h"
-#include "tm/Elements/latticetransportelement.h"
+#include "tm/Elements/LatticeElements/latticetransportelement.h"
 #include "mathfem.h"
 #include "staggeredproblem.h"
 #include "classfactory.h"
@@ -65,7 +65,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->conType, _IFT_LatticeTransportMaterial_contype);
     this->capacity = 0;
     if ( conType == 0 ) {
-      IR_GIVE_OPTIONAL_FIELD(ir, this->capacity, _IFT_LatticeTransportMaterial_c);  
+        IR_GIVE_OPTIONAL_FIELD(ir, this->capacity, _IFT_LatticeTransportMaterial_c);
     } else if ( conType == 1 ) {
         IR_GIVE_FIELD(ir, this->paramM, _IFT_LatticeTransportMaterial_m);
 
@@ -87,7 +87,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord &ir)
         if ( suctionAirEntry == 0. ) {
             suctionAirEntry = paramA * pow( ( pow( ( thetaS - thetaR ) / ( thetaM - thetaR ), -1. / paramM ) - 1. ), ( 1 - paramM ) );
         } else {
-            thetaM = ( thetaS - thetaR ) * pow(1. + pow( suctionAirEntry / paramA, 1. / ( 1. - paramM ) ), paramM) + thetaR;
+            thetaM = ( thetaS - thetaR ) * pow(1. + pow(suctionAirEntry / paramA, 1. / ( 1. - paramM ) ), paramM) + thetaR;
         }
     } else if ( conType != 0 && conType != 1 ) {
         OOFEM_ERROR("unknown conType mode");
@@ -101,8 +101,8 @@ LatticeTransportMaterial :: initializeFrom(InputRecord &ir)
 }
 
 
-FloatArrayF<3>
-LatticeTransportMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
+FloatArrayF< 3 >
+LatticeTransportMaterial :: computeFlux3D(const FloatArrayF< 3 > &grad, double field, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
     status->setTempGradient(grad);
@@ -165,7 +165,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
         saturation = 1.;
         relativePermeability = 1.;
     } else {
-        partOne = pow( suction / this->paramA, 1. / ( 1. - this->paramM ) );
+        partOne = pow(suction / this->paramA, 1. / ( 1. - this->paramM ) );
 
         saturation = ( this->thetaM - this->thetaR ) / ( this->thetaS - this->thetaR ) * pow(1. + partOne, -this->paramM);
 
@@ -189,22 +189,22 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     //add crack contribution;
     //Read in crack lengths
     FloatArray crackLengths;
-    static_cast< LatticeTransportElement * >( gp->giveElement())->giveCrackLengths(crackLengths);
+    static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCrackLengths(crackLengths);
     FloatArray crackWidths;
-    crackWidths.resize(crackLengths.giveSize());   
+    crackWidths.resize(crackLengths.giveSize() );
 
 #ifdef __SM_MODULE
     IntArray coupledModels;
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
-        (static_cast< StaggeredProblem *>(domain->giveEngngModel()->giveMasterEngngModel()))->giveCoupledModels(coupledModels);
+        ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
         int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
             IntArray couplingNumbers;
-            static_cast< LatticeTransportElement * >( gp->giveElement())->giveCouplingNumbers(couplingNumbers);
-            for (int i = 1; i <= crackLengths.giveSize(); i++) {
+            static_cast< LatticeTransportElement * >( gp->giveElement() )->giveCouplingNumbers(couplingNumbers);
+            for ( int i = 1; i <= crackLengths.giveSize(); i++ ) {
                 if ( couplingNumbers.at(i) != 0 ) {
-                    crackWidths.at(i) = static_cast< LatticeStructuralElement* >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumbers.at(i)))->giveCrackWidth();
+                    crackWidths.at(i) = static_cast< LatticeStructuralElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem(coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumbers.at(i) ) )->giveCrackWidth();
                 } else {
                     crackWidths.at(i) = 0.;
                 }
@@ -219,7 +219,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     //Use crack width and apply cubic law
     double crackContribution = 0.;
 
-    for (int i = 1; i <= crackLengths.giveSize(); i++) {
+    for ( int i = 1; i <= crackLengths.giveSize(); i++ ) {
         if ( crackWidths.at(i) < this->crackLimit || this->crackLimit < 0. ) {
             crackContribution += pow(crackWidths.at(i), 3.) / crackLengths.at(i);
         } else {
@@ -228,7 +228,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
         }
     }
 
-    crackContribution *=  this->crackTortuosity * relativePermeability/ (12. * this->viscosity );
+    crackContribution *=  this->crackTortuosity * relativePermeability / ( 12. * this->viscosity );
     conductivity += crackContribution;
     return density * conductivity;
 }
@@ -244,12 +244,12 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp) cons
     if ( conType == 0 ) {
         cap = this->capacity;
     } else {
-        if ( suction < this->suctionAirEntry) {
+        if ( suction < this->suctionAirEntry ) {
             cap = 0.;
         } else {
             double partOne = this->paramM / ( this->paramA * ( 1. - this->paramM ) );
-            double partTwo = pow( suction / this->paramA, this->paramM / ( 1. - this->paramM ) );
-            double partThree = pow(1. + pow( suction / this->paramA, 1. / ( 1. - this->paramM ) ), -this->paramM - 1.);
+            double partTwo = pow(suction / this->paramA, this->paramM / ( 1. - this->paramM ) );
+            double partThree = pow(1. + pow(suction / this->paramA, 1. / ( 1. - this->paramM ) ), -this->paramM - 1.);
             cap = ( this->thetaM - this->thetaR ) * partOne * partTwo * partThree;
         }
     }

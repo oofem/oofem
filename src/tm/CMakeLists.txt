@@ -23,8 +23,8 @@ set (tm_element
     Elements/qwedge_ht.C
     Elements/tetrah1_ht.C
     Elements/tr1darcy.C
-    Elements/latticetransportelement.C
-    Elements/lattice2d_mt.C
+    Elements/LatticeElements/latticetransportelement.C
+    Elements/LatticeElements/lattice2d_mt.C
     )
 
 set (tm_boundary
@@ -51,7 +51,7 @@ set (tm_material
     Materials/isoheatmat.C
     Materials/isolinmoisturemat.C
     Materials/isomoisturemat.C
-    Materials/latticetransmat.C
+    Materials/LatticeMaterials/latticetransmat.C
     Materials/nlisomoisturemat.C
     Materials/nonlinearmassmat.C
     Materials/rvestokesflow.C
