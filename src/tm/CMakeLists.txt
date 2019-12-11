@@ -25,6 +25,7 @@ set (tm_element
     Elements/tr1darcy.C
     Elements/LatticeElements/latticetransportelement.C
     Elements/LatticeElements/lattice2d_mt.C
+    Elements/LatticeElements/lattice3d_mt.C
     )
 
 set (tm_boundary

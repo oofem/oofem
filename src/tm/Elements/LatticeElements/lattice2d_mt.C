@@ -63,7 +63,6 @@ Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
     numberOfDofMans  = 2;
 }
 
-
 double Lattice2d_mt :: giveLength()
 {
     if ( length == 0. ) {
