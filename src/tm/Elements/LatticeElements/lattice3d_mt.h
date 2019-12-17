@@ -133,11 +133,15 @@ public:
 protected:
     void  computeGaussPoints() override;
 
-    void  computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp);
+    void  computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords) override;
+
+    void computeBmatrixAt(FloatMatrix &answer, const FloatArray &lcoords) override { this->computeGradientMatrixAt(answer, lcoords); }
 
     void  computeNmatrixAt(FloatMatrix &n, const FloatArray &) override;
 
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override { return 0; }
+
+    void computeNSubMatrixAt(FloatMatrix &n, const FloatArray &);
 
     int giveApproxOrder(int unknownIndx) override { return 1; }
 };

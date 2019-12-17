@@ -95,24 +95,27 @@ Lattice3d_mt :: giveArea()
 void
 Lattice3d_mt :: computeNmatrixAt(FloatMatrix &answer, const FloatArray &coords)
 {
-    double ksi, n1, n2;
+    this->computeNSubMatrixAt(answer, coords);
+}
 
-    ksi = coords.at(1);
-    n1  = ( 1. - ksi ) * 0.5;
-    n2  = ( 1. + ksi ) * 0.5;
+
+void
+Lattice3d_mt :: computeNSubMatrixAt(FloatMatrix &answer, const FloatArray &coords)
+{
+    double ksi = coords.at(1);
+    double n1 = ( 1. - ksi ) * 0.5;
+    double n2 = ( 1. + ksi ) * 0.5;
 
     answer.resize(1, 2);
     answer.zero();
 
     answer.at(1, 1) = n1;
     answer.at(1, 2) = n2;
-
-    return;
 }
 
 
 void
-Lattice3d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussPoint)
+Lattice3d_mt :: computeGradientMatrixAt(FloatMatrix &answer, const FloatArray &lcoords)
 {
     double l = giveLength();
 
@@ -122,8 +125,6 @@ Lattice3d_mt :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *aGaussP
     answer.at(1, 2) = 1.;
 
     answer.times(1. / l);
-
-    return;
 }
 
 
