@@ -115,8 +115,9 @@ public:
     void giveCouplingNumbers(IntArray &numbers) override { numbers = this->couplingNumbers; }
     void giveCrackWidths(FloatArray &widths) override { widths = crackWidths; }
     void giveCrackLengths(FloatArray &lengths) override;
-    int giveNumberOfCrossSectionNodes() { return numberOfPolygonVertices; }
-    void giveCrossSectionCoordinates(FloatArray &coords) { coords = polygonCoords; }
+
+    void giveCrossSectionCoordinates(FloatArray &coords) override { coords = polygonCoords; }
+    int giveNumberOfCrossSectionNodes() override { return numberOfPolygonVertices; }
 
     void computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
 

@@ -122,6 +122,16 @@ public:
      * Returns the real volume
      */
     virtual double  computeLatticeVolumeAroundIt() { return 0; }
+    /**
+     * Returns the number of crossSection nodes
+     * @return Number of crosssection nodes.
+     */
+    virtual int giveNumberOfCrossSectionNodes() { return 0; }
+
+    /**
+     * This function gives the cross-section coordinates.
+     */
+    virtual void giveCrossSectionCoordinates(FloatArray &coords) {; }
 };
 } // end namespace oofem
 #endif
