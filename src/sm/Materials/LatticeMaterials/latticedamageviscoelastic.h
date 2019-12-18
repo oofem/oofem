@@ -42,7 +42,7 @@
 ///@name Input fields for LatticeDamage
 //@{
 #define _IFT_LatticeDamageViscoelastic_Name "latticedamageviscoelastic"
-#define _IFT_LatticeDamageViscoelastic_slaveMat "slavemat"
+#define _IFT_LatticeDamageViscoelastic_viscoMat "viscomat"
 
 //@}
 
@@ -55,14 +55,16 @@ class LatticeDamageViscoelasticStatus : public LatticeDamageStatus
 
 {
 protected:
-    GaussPoint *viscoelasticGP = nullptr;
+    std :: unique_ptr< GaussPoint >slaveGpVisco;
+
+    //GaussPoint *viscoelasticGP = nullptr;
     /// 'slave' material model number.
-    int slaveMat = 0;
+    // int slaveMat = 0;
 
 public:
 
     /// Constructor
-    LatticeDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
+    LatticeDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g);
 
     /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
@@ -79,9 +81,9 @@ public:
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    GaussPoint *giveViscoelasticGaussPoint() { return viscoelasticGP; }
+    GaussPoint *giveSlaveGaussPointVisco() const { return this->slaveGpVisco.get(); }
 
-    MaterialStatus *giveViscoelasticMatStatus() const;
+    // MaterialStatus *giveViscoelasticMatStatus() const;
 };
 
 
@@ -94,7 +96,7 @@ class LatticeDamageViscoelastic : public LatticeDamage
 {
 protected:
     /// 'slave' (= viscoelastic) material model number.
-    int slaveMat = 0;
+    int viscoMat = 0;
 
 
 public:
@@ -107,21 +109,17 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
-
 
     FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                      GaussPoint *gp,
                                                      TimeStep *atTime) const override;
 
-
-    bool hasMaterialModeCapability(MaterialMode mode) const override;
-
+    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
                                         GaussPoint *gp,
-                                        TimeStep *tStep) const;
+                                        TimeStep *tStep) override;
 
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
@@ -134,6 +132,8 @@ protected:
                     GaussPoint *gp,
                     InternalStateType type,
                     TimeStep *atTime) override;
+
+    int checkConsistency(void) override;
 };
 } // end namespace oofem
 

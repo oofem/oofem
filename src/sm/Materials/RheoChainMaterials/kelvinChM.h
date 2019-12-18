@@ -44,7 +44,7 @@ namespace oofem {
 class KelvinChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
-    KelvinChainMaterialStatus(GaussPoint * g, int nunits);
+    KelvinChainMaterialStatus(GaussPoint *g, int nunits);
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -66,7 +66,7 @@ public:
 class KelvinChainMaterial : public RheoChainMaterial
 {
 public:
-    KelvinChainMaterial(int n, Domain * d);
+    KelvinChainMaterial(int n, Domain *d);
 
     // identification and auxiliary functions
     const char *giveClassName() const override { return "KelvinChainMaterial"; }
@@ -74,9 +74,9 @@ public:
     void initializeFrom(InputRecord &ir) override;
 
     void giveShrinkageStrainVector(FloatArray &answer,
-                                    GaussPoint *gp,
-                                    TimeStep *tStep,
-                                    ValueModeType mode) const override
+                                   GaussPoint *gp,
+                                   TimeStep *tStep,
+                                   ValueModeType mode) const override
     { answer.clear(); }
 
     void giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
@@ -94,7 +94,7 @@ protected:
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
 
-    LinearElasticMaterial *giveLinearElasticMaterial();
+    //    LinearElasticMaterial *giveLinearElasticMaterial();
 };
 } // end namespace oofem
 #endif // kelvinchm_h

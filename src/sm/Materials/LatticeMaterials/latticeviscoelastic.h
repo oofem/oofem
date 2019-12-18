@@ -43,7 +43,7 @@
 ///@name Input fields for LatticeDamage
 //@{
 #define _IFT_LatticeViscoelastic_Name "latticeviscoelastic"
-#define _IFT_LatticeViscoelastic_slaveMat "slavemat"
+#define _IFT_LatticeViscoelastic_viscoMat "viscomat"
 
 //@}
 
@@ -77,9 +77,7 @@ public:
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    GaussPoint *giveSlaveGaussPointVisco() { return this->slaveGpVisco.get(); }
-
-    MaterialStatus *giveViscoelasticMatStatus() const;
+    GaussPoint *giveSlaveGaussPointVisco() const { return this->slaveGpVisco.get(); }
 };
 
 
@@ -94,7 +92,7 @@ class LatticeViscoelastic : public LatticeLinearElastic
 {
 protected:
     /// 'slave' material model number.
-    int slaveMat = 0;
+    int viscoMat = 0;
 
 
 public:
@@ -108,24 +106,22 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                      GaussPoint *gp,
                                                      TimeStep *atTime) const override;
 
-
-    bool hasMaterialModeCapability(MaterialMode mode) const override;
+    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rmode,
+                                                     GaussPoint *gp,
+                                                     TimeStep *atTime) const override;
 
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
                                         GaussPoint *gp,
-                                        TimeStep *tStep) const;
+                                        TimeStep *tStep) override;
 
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-
-    RheoChainMaterial *giveViscoelasticMaterial();
 
 protected:
 
@@ -133,6 +129,8 @@ protected:
                     GaussPoint *gp,
                     InternalStateType type,
                     TimeStep *atTime) override;
+
+    int checkConsistency(void) override;
 };
 } // end namespace oofem
 
