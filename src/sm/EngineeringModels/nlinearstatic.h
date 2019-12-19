@@ -37,12 +37,14 @@
 
 #include "sm/EngineeringModels/linearstatic.h"
 #include "sparsenonlinsystemnm.h"
+#include "function.h"
 
 ///@name Input fields for NonLinearStatic
 //@{
 #define _IFT_NonLinearStatic_Name "nonlinearstatic"
 #define _IFT_NonLinearStatic_controlmode "controlmode"
 #define _IFT_NonLinearStatic_deltat "deltat"
+#define _IFT_NonLinearStatic_deltatfunction "deltatfunction"
 #define _IFT_NonLinearStatic_stiffmode "stiffmode"
 #define _IFT_NonLinearStatic_refloadmode "refloadmode"
 #define _IFT_NonLinearStatic_keepll "keepll"
@@ -118,6 +120,8 @@ protected:
     NonLinearStatic_controlType controlMode;
     /// Intrinsic time increment.
     double deltaT;
+    /// Associated time function for time step increment.
+    int dtFunction;
 
    /**
      * The following parameter allows to specify how the reference load vector
@@ -137,6 +141,8 @@ public:
     NonLinearStatic(int i, EngngModel *master = nullptr);
     virtual ~NonLinearStatic();
 
+    Function *giveDtFunction();
+    double giveDeltaT(int n);
     void solveYourself() override;
     void solveYourselfAt(TimeStep *tStep) override;
     void terminate(TimeStep *tStep) override;
