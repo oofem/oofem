@@ -77,8 +77,6 @@ LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 
 {
     double tol = 1.e-12; // error in order of Pascals
 
-    MaterialMode mMode = gp->giveMaterialMode();
-
     auto status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
     status->initTempStatus();
 
@@ -93,7 +91,7 @@ LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 
     FloatArrayF< 6 >reducedStrain;
 
     // components 1-3 of the reducedStrain
-    FloatArrayF< 6 >reducedStrain3;
+    FloatArrayF< 6 >quasiTotalStrain;
 
     // temporary value of the plastic strain
     FloatArrayF< 6 >tempPlasticStrain;
@@ -104,13 +102,12 @@ LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 
     FloatArrayF< 6 >tempStress;
 
     // answer from the plasticity stress-return algorithm
-    FloatArrayF< 6 >stress3;
+    FloatArrayF< 6 >stress;
 
     auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     int itercount = 1;
 
-    // same procedure as in latticeviscoelastic - get total thermal strain
     auto indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
 
     double tolerance = 1.;
@@ -121,7 +118,6 @@ LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 
             OOFEM_ERROR("Algorithm not converging");
         }
 
-        // 1) evaluate viscoelastic material, pass (eps_tot - eps_p - eps_T)
         reducedStrainForViscoMat = totalStrain;
 
         if ( indepStrain.giveSize() > 0 ) {
@@ -132,80 +128,20 @@ LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 
         for ( int i = 1; i <= 3; i++ ) {
             reducedStrainForViscoMat.at(i) -= tempPlasticStrain.at(i);
         }
-
-        // compute stress
-        switch ( mMode ) {
-        case _1dLattice:
-            OOFEM_ERROR("mode (%s) not implemented", __MaterialModeToString(mMode) );
-            break;
-        case _2dLattice:
-            rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrainForViscoMat [ { 0, 1, 5 } ], tStep);
-            //      tempStress.assemble<6> ( viscoStress, { 0, 1, 5 });
-            // HELP!!!
-            tempStress.at(1) = viscoStress.at(1);
-            tempStress.at(2) = viscoStress.at(2);
-            tempStress.at(6) = viscoStress.at(3);
-            break;
-        case _3dLattice:
-            rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrainForViscoMat, tStep);
-            tempStress = FloatArrayF< 6 >(viscoStress);
-            break;
-        default:
-            OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-        }
-
-
-        // 2) evaluate plasticity stress-return algorithm,
-        //    pass total quasi-elastic strain  = visco stress / stiffness + plastic strain
+	rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrainForViscoMat, tStep);
+	tempStress = FloatArrayF< 6 >(viscoStress);
         for ( int i = 1; i <= 6; i++ ) {
-            reducedStrain3.at(i) =  tempStress.at(i) / elasticStiffnessMatrix.at(i, i) + tempPlasticStrain.at(i) + indepStrain.at(i);
+            quasiTotalStrain.at(i) =  tempStress.at(i) / elasticStiffnessMatrix.at(i, i) + tempPlasticStrain.at(i) + indepStrain.at(i);
         }
 
-        stress3 = LatticePlasticityDamage :: giveLatticeStress3d(reducedStrain3, gp, tStep);
-        //stress3 = this->performPlasticityReturn(gp, reducedStrain3, tStep);
+        stress = LatticePlasticityDamage :: giveLatticeStress3d(quasiTotalStrain, gp, tStep);
 
-        tolerance = norm(stress3 - tempStress) / this->eNormalMean;
+        tolerance = norm(stress - tempStress) / this->eNormalMean;
 
         itercount++;
     } while ( tolerance >= tol );
 
-
-
-    // 3) once the equilibrium in the plastic material and viscoelastic material is reached
-    //    compute damage
-    // 3.1) first need to reevalute reducedStrain3 with the updated value of tempPlasticStrain
-
-    // tempPlasticStrain = status->giveTempPlasticLatticeStrain();
-    // for ( int i = 1; i <= 3; i++ ) {
-    //   reducedStrain3.at(i) =  tempStress.at(i) / elasticStiffnessMatrix.at(i, i) + tempPlasticStrain.at(i);
-    // }
-
-    // double omega = 0.;
-    // if ( this->damageFlag == 1 ) {
-    //   this->performDamageEvaluation(gp, reducedStrain3);
-    //   omega = status->giveTempDamage();
-    // }
-
-
-    // // 4) construct the entire vector of the reducedStrain
-    // tempPlasticStrain =  status->giveTempPlasticLatticeStrain();
-    //  for ( int i = 1; i <= 6; i++ ) {
-    //     reducedStrain.at(i) =  tempStress.at(i) / elasticStiffnessMatrix.at(i, i) + tempPlasticStrain.at(i);
-    //    }
-
-    // // 5) compute nominal stress
-    // tempStress *= ( 1. - omega );
-
-    /*    stress.at(1) = ( 1. - omega ) * stress3.at(1);
-    *  stress.at(2) = ( 1. - omega ) * stress3.at(2);
-    *  stress.at(3) = ( 1. - omega ) * stress3.at(3);
-    *  stress.at(4) = ( 1. - omega ) * viscoStress.at(4);
-    *  stress.at(5) = ( 1. - omega ) * viscoStress.at(5);
-    *  stress.at(6) = ( 1. - omega ) * viscoStress.at(6);*/
-
     status->letTempLatticeStrainBe(totalStrain);
-    //   status->letTempReducedLatticeStrainBe(reducedStrain);
-    status->letTempLatticeStressBe(tempStress);
 
     return tempStress;
 }

@@ -48,8 +48,7 @@ REGISTER_Material(LatticeDamageViscoelastic);
 
 LatticeDamageViscoelastic :: LatticeDamageViscoelastic(int n, Domain *d) : LatticeDamage(n, d)
 {}
-
-
+  
 void
 LatticeDamageViscoelastic :: initializeFrom(InputRecord &ir)
 {
@@ -71,134 +70,75 @@ LatticeDamageViscoelastic :: initializeFrom(InputRecord &ir)
 MaterialStatus *
 LatticeDamageViscoelastic :: CreateStatus(GaussPoint *gp) const
 {
-    return new LatticeDamageViscoelasticStatus(1, LatticeDamageViscoelastic :: domain, gp);
+    return new LatticeDamageViscoelasticStatus(gp);
 }
 
 
-FloatArrayF< 6 >
-LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
+  FloatArrayF< 6 >
+  LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
                                                  GaussPoint *gp,
                                                  TimeStep *tStep)
 {
-    LatticeDamageViscoelasticStatus *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
+    auto *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
 
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+
+    GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
+    
+    double tol = 1.e-12; // error in order of Pascals
+    
     // the value from the status seems to be unused except for printout
     status->setE0(this->give(e0_ID, gp) * this->e0Mean);
-    status->initTempStatus();
+    //    status->initTempStatus();
 
-    FloatArrayF< 6 >reducedStrain;
-    FloatArrayF< 6 >quasiElasticStrain;
+    FloatArrayF< 6 >reducedStrainForViscoMat;
+    FloatArrayF< 6 >quasiTotalStrain;
 
-    FloatArray viscoStress;
-    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
-    GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
-
-    reducedStrain = totalStrain;
-    // subtract stress independent part = temperature (total temperature)
-    auto indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
-    if ( indepStrain.giveSize() > 0 ) {
-        reducedStrain -= FloatArrayF< 6 >(indepStrain);
-    }
-
-    // size of viscoStress will correspond to the correct material mode: need to correct 2D case!
+    FloatArrayF< 6> stress;
     FloatArrayF< 6 >tempStress;
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _1dLattice:
-        OOFEM_ERROR("mode (%s) not implemented", __MaterialModeToString(mMode) );
-        break;
-    case _2dLattice:
-        rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain [ { 0, 1, 5 } ], tStep);
-        //      tempStress.assemble<6> ( viscoStress, { 0, 1, 5 });
-        // HELP!!!
-        tempStress.at(1) = viscoStress.at(1);
-        tempStress.at(2) = viscoStress.at(2);
-        tempStress.at(6) = viscoStress.at(3);
-        break;
-    case _3dLattice:
-        rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain, tStep);
-        tempStress = FloatArrayF< 6 >(viscoStress);
-        break;
-    default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    FloatArray viscoStress;
 
-    // transform effective stress computed by the viscoelastic model into strain by
-    // dividing it by a stiffness matrix (which is diagonal)
+
+
+
     auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    
+    int itercount = 1;
+    
+    auto indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
+    double tolerance = 1.;
+	
+    do {
+        if ( itercount > 100 ) {
+	  OOFEM_LOG_INFO("In latticedamage viscoelastic. tolerance when stress does not converge = %e\n", tolerance);
+	  OOFEM_ERROR("Algorithm not converging");
+        }
 
-    // loop over only first 3 components?
+    reducedStrainForViscoMat = totalStrain;
+
+    if ( indepStrain.giveSize() > 0 ) {
+        reducedStrainForViscoMat -= FloatArrayF< 6 >(indepStrain);
+    }
+
+    rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrainForViscoMat, tStep);
+    tempStress = FloatArrayF< 6 >(viscoStress);
+  
     for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
-        quasiElasticStrain.at(i) = tempStress.at(i) / elasticStiffnessMatrix.at(i, i);
+      quasiTotalStrain.at(i) = tempStress.at(i) / elasticStiffnessMatrix.at(i, i);
     }
 
-    // compute equivalent strain from "quasielastic" strain
-    auto equivStrain =  this->computeEquivalentStrain(quasiElasticStrain, gp, tStep);
-
-    // compute value of loading function if strainLevel crit apply
-    auto f = equivStrain - status->giveKappa();
-
-    double tempKappa, omega = 0.;
-    if ( f <= 0.0 ) {
-        // damage does not grow
-        tempKappa = status->giveKappa();
-        omega = status->giveDamage();
-        if ( status->giveCrackFlag() != 0 ) {
-            status->setTempCrackFlag(2);
-        } else {
-            status->setTempCrackFlag(0);
-        }
-    } else {
-        // damage grows
-        tempKappa = equivStrain;
-
-        // evaluate damage parameter
-        omega = this->computeDamageParam(tempKappa, gp);
-        if ( omega > 0. ) {
-            status->setTempCrackFlag(1);
-        }
+    if ( indepStrain.giveSize() > 0 ) {
+        quasiTotalStrain += FloatArrayF< 6 >(indepStrain);
     }
+    
+    stress = LatticeDamage :: giveLatticeStress3d(quasiTotalStrain, gp, tStep);
 
-    tempStress *= ( 1. - omega );
+    tolerance = norm(stress - tempStress) / this->eNormalMean;
 
-    //Compute crack width - here it is assumed that also creep strain contributes to the crack width
-    // another option would be to use quasiElasticStrain computed earlier here
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
-    double crackWidth = 0.;
+	        itercount++;
+    } while ( tolerance >= tol );
 
-    FloatArray shrinkageStrain;
-    rheoMat->giveShrinkageStrainVector(shrinkageStrain, rChGP, tStep, VM_Total);
-
-    switch ( mMode ) {
-    case _1dLattice:
-        OOFEM_ERROR("mode (%s) not implemented", __MaterialModeToString(mMode) );
-        break;
-    case _2dLattice:
-        // HELP!!!
-        reducedStrain.at(1) -= shrinkageStrain.at(1);
-        reducedStrain.at(2) -= shrinkageStrain.at(2);
-        reducedStrain.at(6) -= shrinkageStrain.at(3);
-        crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * length;
-        break;
-    case _3dLattice:
-        reducedStrain -= FloatArrayF< 6 >(shrinkageStrain);
-        crackWidth = omega * sqrt(pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * length;
-        break;
-    default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
-
-    // compute dissipation and store it. How does it work for a viscoelastic material with damage?
-
-    status->setTempEquivalentStrain(equivStrain);
     status->letTempLatticeStrainBe(totalStrain);
-    status->letTempReducedLatticeStrainBe(reducedStrain);
-    status->letTempLatticeStressBe(tempStress);
-    status->setTempKappa(tempKappa);
-    status->setTempDamage(omega);
-
-    status->setTempNormalLatticeStress(tempStress.at(1) );
-    status->setTempCrackWidth(crackWidth);
 
     return tempStress;
 }
@@ -291,7 +231,7 @@ int LatticeDamageViscoelastic :: checkConsistency()
 }
 
 
-LatticeDamageViscoelasticStatus :: LatticeDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g) :
+LatticeDamageViscoelasticStatus :: LatticeDamageViscoelasticStatus(GaussPoint *g) :
     LatticeDamageStatus(g), slaveGpVisco(std :: make_unique< GaussPoint >(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
 {}
 
@@ -299,7 +239,7 @@ LatticeDamageViscoelasticStatus :: LatticeDamageViscoelasticStatus(int n, Domain
 void
 LatticeDamageViscoelasticStatus :: initTempStatus()
 {
-    LatticeDamageStatus :: initTempStatus();
+  LatticeDamageStatus :: initTempStatus();
 
     RheoChainMaterialStatus *rheoStatus = static_cast< RheoChainMaterialStatus * >( this->giveSlaveGaussPointVisco()->giveMaterialStatus() );
     rheoStatus->initTempStatus();

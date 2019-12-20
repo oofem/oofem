@@ -63,7 +63,8 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode) const
     return mode == _3dMat || mode == _PlaneStress ||
            mode == _PlaneStrain || mode == _1dMat ||
            mode == _PlateLayer || mode == _2dBeamLayer ||
-           mode == _2dLattice || mode == _3dLattice;
+           mode == _1dLattice || mode == _2dLattice ||
+      mode == _3dLattice;
 }
 
 
@@ -176,7 +177,7 @@ RheoChainMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep
 //
 {
     MaterialMode mMode =  gp->giveMaterialMode();
-    if ( mMode ==  _2dLattice || mMode ==  _3dLattice ) {
+    if ( mMode == _1dLattice || mMode ==  _2dLattice || mMode ==  _3dLattice ) {
         return {
                    this->talpha, 0., 0., 0., 0., 0.
         };
@@ -552,44 +553,6 @@ RheoChainMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
         return incrStiffness * this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     }
 }
-
-// is it really needed altogether?
-/*FloatMatrixF< 3, 3 >
- * RheoChainMaterial :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
- * {
- *
- *   this->giveStatus(gp); // Ensures correct status creation
- *   if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
- *       LatticeStructuralMaterial *sMat = static_cast< LatticeStructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
- *       return sMat->give2dLatticeStiffnessMatrix(mode, gp, tStep);
- *
- *   } else {
- *       double incrStiffness = this->giveEModulus(gp, tStep);
- *       //         LatticeStructuralMaterial *lMat = static_cast< LatticeStructuralMaterial * >( this->giveLinearElasticMaterial() );
- *       LatticeStructuralMaterial *lMat = static_cast< LatticeStructuralMaterial * >( this->linearElasticMaterial );
- *       return incrStiffness * lMat->give2dLatticeStiffnessMatrix(mode, gp, tStep);
- *   }
- *   }*/
-
-
-// is it really needed altogether?
-/*FloatMatrixF< 6, 6 >
- * RheoChainMaterial :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
- * {
- *
- *  this->giveStatus(gp); // Ensures correct status creation
- *  if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
- *      LatticeStructuralMaterial *sMat = static_cast< LatticeStructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
- *      return sMat->give3dLatticeStiffnessMatrix(mode, gp, tStep);
- *
- *  } else {
- *      double incrStiffness = this->giveEModulus(gp, tStep);
- *      //         LatticeStructuralMaterial *lMat = static_cast< LatticeStructuralMaterial * >( this->giveLinearElasticMaterial() );
- *      LatticeStructuralMaterial *lMat = static_cast< LatticeStructuralMaterial * >( this->linearElasticMaterial );
- *      return incrStiffness * lMat->give3dLatticeStiffnessMatrix(mode, gp, tStep);
- *  }
- *  }*/
-
 
 MaterialStatus *
 RheoChainMaterial :: CreateStatus(GaussPoint *gp) const

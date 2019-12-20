@@ -64,7 +64,7 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g);
+    LatticeDamageViscoelasticStatus(GaussPoint *g);
 
     /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep) const override;

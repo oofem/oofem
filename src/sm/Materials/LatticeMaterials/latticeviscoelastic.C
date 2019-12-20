@@ -75,9 +75,6 @@ LatticeViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
     FloatArray viscoStress;
     FloatArray partialStrain;
 
-    //   MaterialMode mode = gp->giveMaterialMode();
-    //   StressVector tempEffectiveStress(mode);
-
     GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
 
     auto reducedStrain = totalStrain;
@@ -87,45 +84,16 @@ LatticeViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
         reducedStrain -= FloatArrayF< 6 >(indepStrain);
     }
 
-
-    //    this->giveStressDependentPartOfStrainVector(partialStrain, gp, totalStrain, tStep, VM_Incremental);
-    //    partialStrain = totalStrain;
-
-    // we need to pass  "const FloatArray &totalStrain" to giveRealStressVector
-
     FloatArrayF< 6 >tempStress;
 
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    case _1dLattice:
-        OOFEM_ERROR("mode (%s) not implemented", __MaterialModeToString(mMode) );
-        break;
-    case _2dLattice:
-        rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain [ { 0, 1, 5 } ], tStep);
-        //      tempStress.assemble<6> ( viscoStress, { 0, 1, 5 });
-        // HELP!!!
-        tempStress.at(1) = viscoStress.at(1);
-        tempStress.at(2) = viscoStress.at(2);
-        tempStress.at(6) = viscoStress.at(3);
-        break;
-    case _3dLattice:
-        rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain, tStep);
-        tempStress = FloatArrayF< 6 >(viscoStress);
-        break;
-    default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain, tStep);
+    tempStress = FloatArrayF< 6 >(viscoStress);
 
-    // we need to pass   "const FloatArrayF< 6 > &v"
     status->letTempLatticeStrainBe(totalStrain);
     status->letTempLatticeStressBe(tempStress);
 
     return tempStress;
 }
-
-
-
-
 
 
 FloatMatrixF< 6, 6 >
