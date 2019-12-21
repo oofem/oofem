@@ -31,9 +31,9 @@ latticecs 1 material 2
 #
 # MATERIAL
 #
-mps 1 d 0. lattice a1 1. a2 1. talpha 0. referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 0
+mps 1 d 0. lattice a1 1. a2 1. talpha 0. referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 0
 #
-latticedamageviscoelastic 2 d 0. talpha 0. viscomat 1 a1 1. a2 1. e 30.e9 e0 100.e-6 wf 100.e-6
+latticedamageviscoelastic 2 d 0. talpha 0. viscomat 1 a1 1. a2 1. e 1000 e0 100.e3 wf 100.e-3
 #
 #
 BoundaryCondition 1 loadTimeFunction 1 dofs 2 2 6 values 2 0. 0. set 1
