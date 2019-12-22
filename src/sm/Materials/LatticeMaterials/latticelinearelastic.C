@@ -143,7 +143,7 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
         reducedStrain -= FloatArrayF< 6 >(indepStrain);
     }
 
-    auto stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
     auto stress = dot(stiffnessMatrix, reducedStrain);
 
     //Read in fluid pressures from structural element if this is not a slave problem
