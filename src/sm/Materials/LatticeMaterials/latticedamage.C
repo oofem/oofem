@@ -96,7 +96,7 @@ LatticeDamage :: initializeFrom(InputRecord &ir)
 
 
 double
-LatticeDamage :: computeEquivalentStrain(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *atTime) const
+LatticeDamage :: computeEquivalentStrain(const FloatArrayF< 6 > &strain, GaussPoint *gp) const
 {
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     double paramA = 0.5 * ( e0 + ec * e0 );
@@ -204,10 +204,9 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
         return elastic;
     } else if ( ( mode == SecantStiffness ) || ( mode == TangentStiffness ) ) {
         auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
-	
-        double omega = min(status->giveTempDamage(), 0.99999);
-	return elastic * ( 1. - omega );
 
+        double omega = min(status->giveTempDamage(), 0.99999);
+        return elastic * ( 1. - omega );
     } else {
         OOFEM_ERROR("Unsupported stiffness mode\n");
         return elastic;
@@ -248,8 +247,6 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
     status->setE0(e0);
     this->initTempStatus(gp);
 
-    //const auto &testStrainOld = status->giveLatticeStrain(); // unused?
-
     // substract stress independent part
     auto reducedStrain = strain;
     auto thermalStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
@@ -257,8 +254,51 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
         reducedStrain -= FloatArrayF< 6 >(thermalStrain);
     }
 
+    double omega = 0.;
+    this->performDamageEvaluation(gp, reducedStrain);
+    omega = status->giveTempDamage();
+
+    auto stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+
+    FloatArrayF< 6 >answer;
+    for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
+        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
+    }
+
+    //Read in fluid pressures from structural element if this is not a slave problem
+    FloatArray pressures;
+    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
+        static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
+    }
+
+    double waterPressure = 0.;
+    for ( int i = 0; i < pressures.giveSize(); i++ ) {
+        waterPressure += 1. / pressures.giveSize() * pressures [ i ];
+    }
+    answer.at(1) += waterPressure;
+
+    double tempDeltaDissipation = computeDeltaDissipation3d(omega, reducedStrain, gp, tStep);
+    double tempDissipation = status->giveDissipation() + tempDeltaDissipation;
+
+    //Set all temp values
+    status->setTempDissipation(tempDissipation);
+    status->setTempDeltaDissipation(tempDeltaDissipation);
+
+    status->letTempLatticeStrainBe(strain);
+    status->letTempReducedLatticeStrainBe(reducedStrain);
+    status->letTempLatticeStressBe(answer);
+    status->setTempNormalLatticeStress(answer.at(1) );
+
+    return answer;
+}
+
+
+void
+LatticeDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const
+{
+    auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
     // compute equivalent strain
-    double equivStrain = this->computeEquivalentStrain(reducedStrain, gp, tStep);
+    double equivStrain = this->computeEquivalentStrain(reducedStrain, gp);
 
     // compute value of loading function if strainLevel crit apply
     double f = equivStrain - status->giveKappa();
@@ -285,49 +325,15 @@ LatticeDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &strain, GaussPoint 
         }
     }
 
-    auto stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-
-    FloatArrayF< 6 >answer;
-    for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
-        answer.at(i) = stiffnessMatrix.at(i, i) * reducedStrain.at(i) * ( 1. - omega );
-    }
-
     //Compute crack width
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
     double crackWidth = omega * norm(reducedStrain [ { 0, 1, 2 } ]) * length;
 
-    //Read in fluid pressures from structural element if this is not a slave problem
-    FloatArray pressures;
-    if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
-        static_cast< LatticeStructuralElement * >( gp->giveElement() )->givePressures(pressures);
-    }
-
-    double waterPressure = 0.;
-    for ( int i = 0; i < pressures.giveSize(); i++ ) {
-        waterPressure += 1. / pressures.giveSize() * pressures [ i ];
-    }
-    answer.at(1) += waterPressure;
-
-    double tempDeltaDissipation = computeDeltaDissipation3d(omega, reducedStrain, gp, tStep);
-    double tempDissipation = status->giveDissipation() + tempDeltaDissipation;
-
-    //Set all temp values
-    status->setTempDissipation(tempDissipation);
-    status->setTempDeltaDissipation(tempDeltaDissipation);
-
     status->setTempEquivalentStrain(equivStrain);
-    status->letTempLatticeStrainBe(strain);
-    status->letTempReducedLatticeStrainBe(reducedStrain);
-    status->letTempLatticeStressBe(answer);
     status->setTempKappa(tempKappa);
     status->setTempDamage(omega);
-
-    status->setTempNormalLatticeStress(answer.at(1) );
     status->setTempCrackWidth(crackWidth);
-
-    return answer;
 }
-
 
 double
 LatticeDamage :: computeBiot(double omega, double kappa, double le) const
@@ -402,7 +408,7 @@ LatticeDamage :: computeDeltaDissipation2d(double omega,
         double tempDeltaDissipation = 0.;
         for ( int k = 0; k < intervals; k++ ) {
             auto intermediateStrain = reducedStrainOld + ( k + 1 ) / intervals * ( reducedStrain - reducedStrainOld );
-            double equivStrain = this->computeEquivalentStrain(assemble< 6 >(intermediateStrain, { 0, 1, 5 }), gp, tStep);
+            double equivStrain = this->computeEquivalentStrain(assemble< 6 >(intermediateStrain, { 0, 1, 5 }), gp);
             double f = equivStrain - oldKappa;
             if ( f > 0 ) {
                 auto intermediateOmega = this->computeDamageParam(equivStrain, gp);
@@ -455,7 +461,7 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
         double tempDeltaDissipation = 0.;
         for ( int k = 0; k < intervals; k++ ) {
             auto intermediateStrain = reducedStrainOld + ( k + 1 ) / intervals * ( reducedStrain - reducedStrainOld );
-            double equivStrain = this->computeEquivalentStrain(intermediateStrain, gp, atTime);
+            double equivStrain = this->computeEquivalentStrain(intermediateStrain, gp);
             double f = equivStrain - oldKappa;
             if ( f > 0 ) {
                 auto intermediateOmega = this->computeDamageParam(equivStrain, gp);

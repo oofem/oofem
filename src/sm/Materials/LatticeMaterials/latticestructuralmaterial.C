@@ -70,24 +70,7 @@ LatticeStructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    // MaterialMode mMode = gp->giveMaterialMode();
-    // switch ( mMode ) {
-    // case _1dLattice:
-    // case _2dLattice:
-    // case _3dLattice:
-        answer = this->give3dLatticeStiffnessMatrix(rMode, gp, tStep);
-	//    }      
-      // answer = this->give1dLatticeStiffnessMatrix(rMode, gp, tStep);
-      //   break;
-
-      //   answer = this->give2dLatticeStiffnessMatrix(rMode, gp, tStep);
-      //   break;
-
-      //   answer = this->give3dLatticeStiffnessMatrix(rMode, gp, tStep);
-    //     break;
-    // default:
-    //     OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-	//    }
+    answer = this->give3dLatticeStiffnessMatrix(rMode, gp, tStep);
 }
 
 

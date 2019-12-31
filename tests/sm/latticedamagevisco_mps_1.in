@@ -1,0 +1,27 @@
+latticedamagevisco_mps_1.out
+Single element creep test
+IncrLinearStatic endOfTimeOfInterest 10000 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 0
+domain 2dlattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 2 nbc 3 nic 0 nltf 3 nset 3
+node   1   coords 3  0.0  0.0  0.0 
+node   2   coords 3  100  0.0  0.0 
+Lattice2D 1 nodes 2 1 2 crossSect 1 mat 2 gpCoords 2 50 0. width 1000.0 thick 1000.0
+latticecs 1 material 2
+mps 1 d 0. lattice a1 1. a2 1. talpha 0. referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 28. CoupledAnalysisType 0
+latticedamageviscoelastic 2 d 0. talpha 0. viscomat 1 a1 1. a2 1. e 20.e3 e0 150.e-6 wf 50.e-3
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 2 6 values 2 0. 0. set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0. set 2
+BoundaryCondition 3 loadTimeFunction 3 dofs 1 1 values 1 1. set 3
+ConstantFunction 1 f(t) 1.0
+ConstantFunction 2 f(t) 1.0
+PiecewiseLinFunction 3 nPoints 2 t 2 0. 10000 f(t) 2 0. 0.1
+Set 1 nodes 2 1 2
+Set 2 nodes 1 1
+Set 3 nodes 1 2 
+#
+#%BEGIN_CHECK%
+#ELEMENT number 1 gp 1 keyword 138 component 1
+#ELEMENT number 1 gp 1 keyword 139 component 1
+##TIME
+#%END_CHECK%

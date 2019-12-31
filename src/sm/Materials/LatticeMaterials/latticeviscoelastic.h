@@ -108,11 +108,11 @@ public:
 
     FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                      GaussPoint *gp,
-                                                     TimeStep *atTime) const override;
+                                                     TimeStep *atTime);
 
     FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                      GaussPoint *gp,
-                                                     TimeStep *atTime) const override;
+                                                     TimeStep *atTime);
 
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,

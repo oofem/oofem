@@ -192,15 +192,17 @@ public:
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
 
-    virtual double computeEquivalentStrain(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *atTime) const;
+    void performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const;
+
+    virtual double computeEquivalentStrain(const FloatArrayF< 6 > &strain, GaussPoint *gp) const;
 
     virtual double computeBiot(double omega, double kappa, double le) const;
 
     virtual double computeDamageParam(double kappa, GaussPoint *gp) const;
     ///Compute increment of dissipation for post-processing reasons
-    double computeDeltaDissipation2d(double omega, const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
+    double computeDeltaDissipation2d(double omega, const FloatArrayF< 3 > &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
 
-    double computeDeltaDissipation3d(double omega, const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
+    double computeDeltaDissipation3d(double omega, const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -210,7 +212,7 @@ public:
 protected:
     double computeReferenceGf(GaussPoint *gp) const;
     double computeIntervals(double testDissipation, double referenceGf) const;
-    
+
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
                     InternalStateType type,

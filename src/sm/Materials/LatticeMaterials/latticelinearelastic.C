@@ -53,9 +53,9 @@ namespace oofem {
 REGISTER_Material(LatticeLinearElastic);
 
 // constructor which creates a dummy material without a status and without random extension interface
-LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double a1, double a2) :
+LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e, double a1, double a2) :
     LatticeStructuralMaterial(n, d),
-    eNormalMean(e0),
+    eNormalMean(e),
     alphaOne(a1),
     alphaTwo(a2)
 {}

@@ -101,21 +101,18 @@ LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus :: printOutputAt(file, tStep);
 
-    fprintf(file, "lattice strains ");
+    fprintf(file, "latticestrains ");
     for ( double s : this->latticeStrain ) {
-        fprintf(file, "% .4e ", s );
+        fprintf(file, "% .4e ", s);
     }
-    fprintf(file, "\n");
-
-    fprintf(file, "lattice stress ");
+    fprintf(file, " latticestress ");
     for ( double s : this->latticeStress ) {
-        fprintf(file, "% .4e ", s );
+        fprintf(file, "% .4e ", s);
     }
-    fprintf(file, "\n");
 
-    fprintf(file, "reduced lattice strains ");
+    fprintf(file, " reducedlatticestrains ");
     for ( double s : this->reducedLatticeStrain ) {
-        fprintf(file, "% .4e ", s );
+        fprintf(file, "% .4e ", s);
     }
     fprintf(file, "\n");
 }

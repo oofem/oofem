@@ -344,15 +344,20 @@ LatticePlasticityDamage :: giveReducedStrain(GaussPoint *gp, TimeStep *tStep) co
 }
 
 
-FloatArrayF< 3 >
+FloatArrayF< 6 >
 LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
-                                                   const FloatArrayF< 3 > &strain,
+                                                   const FloatArrayF< 6 > &reducedStrain,
                                                    TimeStep *tStep) const
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
     //Get tempKappa from the status
     double tempKappa = status->giveTempKappaP();
+
+    //Subset of reduced strain.
+    //Rotational components are not used for plasticity return
+    auto strain = reducedStrain [ { 0, 1, 2 } ];
+
 
     /* Get plastic strain vector from status*/
     auto tempPlasticStrain = status->giveTempPlasticLatticeStrain() [ { 0, 1, 2 } ];
@@ -427,9 +432,16 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
     status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
-    status->letTempLatticeStressBe(assemble< 6 >(stress, { 0, 1, 2 }) );
 
-    return stress;
+
+    //    status->letTempLatticeStressBe(assemble< 6 >(stress, { 0, 1, 2 }) );
+
+    auto answer = assemble< 6 >(stress, { 0, 1, 2 });
+    answer.at(4) = this->alphaTwo * this->eNormalMean * reducedStrain.at(4);
+    answer.at(5) = this->alphaTwo * this->eNormalMean * reducedStrain.at(5);
+    answer.at(6) = this->alphaTwo * this->eNormalMean * reducedStrain.at(6);
+
+    return answer;
 }
 
 
@@ -590,26 +602,15 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
         reducedStrain -= FloatArrayF< 6 >(thermalStrain);
     }
 
-    //Subset of reduced strain.
-    //Rotational components are not used for plasticity return
-    auto strain = reducedStrain [ { 0, 1, 2 } ];
-
-    auto stress3 = this->performPlasticityReturn(gp, strain, tStep);
+    auto stress = this->performPlasticityReturn(gp, reducedStrain, tStep);
 
     double omega = 0.;
     if ( damageFlag == 1 ) {
-        this->performDamageEvaluation(gp, strain);
+        this->performDamageEvaluation(gp, reducedStrain);
         omega = status->giveTempDamage();
     }
 
-    FloatArrayF< 6 >stress;
-
-    stress.at(1) = ( 1. - omega ) * stress3.at(1);
-    stress.at(2) = ( 1. - omega ) * stress3.at(2);
-    stress.at(3) = ( 1. - omega ) * stress3.at(3);
-    stress.at(4) = ( 1. - omega ) * reducedStrain.at(4) * this->alphaTwo * this->eNormalMean;
-    stress.at(5) = ( 1. - omega ) * reducedStrain.at(5) * this->alphaTwo * this->eNormalMean;
-    stress.at(6) = ( 1. - omega ) * reducedStrain.at(6) * this->alphaTwo * this->eNormalMean;
+    stress *= ( 1. - omega );
 
     status->letTempLatticeStrainBe(originalStrain);
     status->letTempReducedLatticeStrainBe(reducedStrain);
@@ -620,14 +621,14 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
 
 
 void
-LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 3 > &reducedStrain) const
+LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
     double le = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
 
-    auto tempPlasticStrain = status->giveTempPlasticLatticeStrain() [ { 0, 1, 2 } ];
-    auto plasticStrain = status->givePlasticLatticeStrain() [ { 0, 1, 2 } ];
+    auto tempPlasticStrain = status->giveTempPlasticLatticeStrain();
+    auto plasticStrain = status->givePlasticLatticeStrain();
     auto deltaPlasticStrain = tempPlasticStrain - plasticStrain;
 
     //Compute the damage history variable
@@ -640,8 +641,6 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 
     double kappaP = status->giveKappaP();
     double deltaKappaP = tempKappaP - kappaP;
     double hardening = computeHardening(tempKappaP, gp);
-
-
 
     double strength = ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( 1 + this->frictionAngleOne * this->frictionAngleTwo );
 
