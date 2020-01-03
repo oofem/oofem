@@ -61,6 +61,8 @@ namespace oofem {
 class LatticeDamageStatus : public LatticeMaterialStatus
 {
 protected:
+
+
     /// scalar measure of the largest strain level ever reached in material
     double kappa = 0.;
 
@@ -92,6 +94,7 @@ public:
     double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level
     double giveTempKappa() const { return tempKappa; }
+
     /// Sets the temp scalar measure of the largest strain level to given value
     void   setTempKappa(double newKappa) { tempKappa = newKappa; }
 
@@ -109,7 +112,6 @@ public:
     double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
-
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -137,9 +139,15 @@ public:
 class LatticeDamage : public LatticeLinearElastic
 {
 protected:
+
+
     /// max effective strain at peak
     double e0Mean = 0.;
     double e0OneMean = 0.;
+
+    ///tensile strength
+    double ftMean = 0.;
+    double ftOneMean = 0.;
 
     /**parameter which determines the typ of the softeningFunction
      * 1 = linear softening
@@ -190,7 +198,6 @@ public:
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
-
 
     void performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const;
 

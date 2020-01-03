@@ -79,7 +79,8 @@ LatticeDamage :: initializeFrom(InputRecord &ir)
     }
 
 
-    IR_GIVE_FIELD(ir, e0Mean, _IFT_LatticeDamage_e0Mean); // Macro
+    IR_GIVE_OPTIONAL_FIELD(ir, e0Mean, _IFT_LatticeDamage_e0Mean); // Macro
+
 
     this->coh = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, coh, _IFT_LatticeDamage_coh); // Macro
@@ -324,6 +325,10 @@ LatticeDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reduc
             status->setTempCrackFlag(1);
         }
     }
+
+    //Create history variables for the damage strain
+    FloatArrayF< 6 >tempDamageLatticeStrain = omega * reducedStrain;
+    status->letTempDamageLatticeStrainBe(tempDamageLatticeStrain);
 
     //Compute crack width
     double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
@@ -601,7 +606,6 @@ LatticeDamageStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
     LatticeMaterialStatus :: saveContext(stream, mode);
 
-    // write a raw data
     if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -631,7 +635,6 @@ LatticeDamageStatus :: restoreContext(DataStream &stream, ContextMode mode)
 {
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
-    // read raw data
     if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }

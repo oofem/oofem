@@ -680,6 +680,11 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 
         }
     }
 
+    //Create history variables for the damage strain
+    FloatArrayF< 6 >elasticReducedStrain = reducedStrain - tempPlasticStrain;
+    FloatArrayF< 6 >tempDamageLatticeStrain = omega * elasticReducedStrain;
+    status->letTempDamageLatticeStrainBe(tempDamageLatticeStrain);
+
     double crackWidth = norm(tempPlasticStrain + omega * ( reducedStrain - tempPlasticStrain ) ) * le;
 
     //TODO: Compute dissipation

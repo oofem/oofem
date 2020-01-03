@@ -79,6 +79,8 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
                                                  GaussPoint *gp,
                                                  TimeStep *tStep)
 {
+    double tol = 1.e-12; // error in order of Pascals
+
     auto *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
 
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
@@ -100,27 +102,48 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
 
     FloatArray indepStrain, indepStrainMechanical;
 
-    //total strain
-    reducedStrain = totalStrain;
+    int itercount = 1;
+    double tolerance = 1.;
 
-    indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
-    if ( indepStrain.giveSize() > 0 ) {
-        reducedStrain -= FloatArrayF< 6 >(indepStrain);
-    }
+    do {
+        if ( itercount > 100 ) {
+            printf("tolerance = %e and itercount = %d\n", tolerance, itercount);
+            OOFEM_ERROR("Algorithm not converging");
+        }
 
-    rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain, tStep);
-    tempStress = FloatArrayF< 6 >(viscoStress);
+        //total strain
+        reducedStrain = totalStrain;
 
-    /*Not clear which stiffness to use here. If I use the stiffness of the elastic material (original version), the quasiReducedStrain is larger than total strain, which is clearly wrong. Use now the incremental stiffness from this material*/
-    auto elasticStiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-    for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
-        quasiReducedStrain.at(i) = tempStress.at(i) / elasticStiffnessMatrix.at(i, i);
-    }
+        indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
+        if ( indepStrain.giveSize() > 0 ) {
+            reducedStrain -= FloatArrayF< 6 >(indepStrain);
+        }
 
-    LatticeDamage :: performDamageEvaluation(gp, quasiReducedStrain);
-    double tempDamage = status->giveTempDamage();
+        FloatArrayF< 6 >tempDamageLatticeStrain = status->giveTempDamageLatticeStrain();
+        reducedStrain -= FloatArrayF< 6 >(tempDamageLatticeStrain);
 
-    tempStress *= ( 1. - tempDamage );
+        rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrain, tStep);
+        tempStress = FloatArrayF< 6 >(viscoStress);
+
+        auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+        for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
+            quasiReducedStrain.at(i) = tempStress.at(i) / elasticStiffnessMatrix.at(i, i);
+        }
+
+        quasiReducedStrain += tempDamageLatticeStrain;
+
+        LatticeDamage :: performDamageEvaluation(gp, quasiReducedStrain);
+        double tempDamage = status->giveTempDamage();
+
+        FloatArrayF< 6 >answer;
+        for ( int i = 1; i <= 6; i++ ) { // only diagonal terms matter
+            stress.at(i) = elasticStiffnessMatrix.at(i, i) * quasiReducedStrain.at(i) * ( 1. - tempDamage );
+        }
+
+        tolerance = norm(stress - tempStress) / this->eNormalMean;
+
+        itercount++;
+    } while ( tolerance >= tol );
 
     status->letTempLatticeStrainBe(totalStrain);
     status->letTempLatticeStressBe(tempStress);
@@ -147,11 +170,9 @@ LatticeDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode,
 
     double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
 
-    this->eNormalMean = Eincr;
-    auto answer = LatticeDamage :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-
-    //    answer *= ( Eincr / this->eNormalMean );
+    answer *= ( Eincr / this->eNormalMean );
 
     return answer;
 }
@@ -172,11 +193,9 @@ LatticeDamageViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode,
 
     double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
 
-    this->eNormalMean = Eincr;
+    auto answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    auto answer = LatticeDamage :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-
-    //    answer *= ( Eincr / this->eNormalMean );
+    answer *= ( Eincr / this->eNormalMean );
 
     return answer;
 }

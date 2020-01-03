@@ -67,6 +67,8 @@ LatticeMaterialStatus :: initTempStatus()
     this->tempCrackFlag = this->crackFlag;
     this->tempCrackWidth = this->crackWidth;
 
+    this->tempDamageLatticeStrain = this->damageLatticeStrain;
+
     this->updateFlag = 0;
 }
 
@@ -83,6 +85,8 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
     this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
 
     this->reducedLatticeStrain = this->tempReducedLatticeStrain;
+
+    this->damageLatticeStrain = this->tempDamageLatticeStrain;
 
     this->dissipation = this->tempDissipation;
 
@@ -156,6 +160,10 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
+    if ( ( iores = damageLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
     if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -183,6 +191,10 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     MaterialStatus :: saveContext(stream, mode);
 
     contextIOResultType iores;
+
+    if ( ( iores = damageLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
     if ( ( iores = latticeStress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
