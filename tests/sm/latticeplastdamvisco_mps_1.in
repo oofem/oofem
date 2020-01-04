@@ -1,6 +1,7 @@
 latticeplastdamvisco_mps_1.out
 Single element creep test
-nonlinearstatic nsteps 100 rtolv 1.e-8 MaxIter 5000 controllmode 1 stiffMode 1 renumber 1 miniter 3 updateelasticstiffnessflag manrmsteps 5 deltatfunction 4
+nonlinearstatic nsteps 100 rtolv 1.e-8 MaxIter 5000 controllmode 1 stiffMode 1 renumber 1 miniter 3 updateelasticstiffnessflag manrmsteps 5 deltatfunction 4 nmodules 1
+errorcheck
 domain 3dlattice
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect 1 nmat 2 nbc 3 nic 0 nltf 4 nset 3
@@ -22,7 +23,8 @@ Set 2 nodes 1 1
 Set 3 nodes 1 2 
 #
 #%BEGIN_CHECK%
-#ELEMENT number 1 gp 1 keyword 138 component 1
-#ELEMENT number 1 gp 1 keyword 139 component 1
-##TIME
+#ELEMENT tStep 4 number 1 gp 1 keyword 138 component 1 value 3.000e-05 tolerance 1.e-6
+#ELEMENT tStep 4 number 1 gp 1 keyword 139 component 1 value 7.54207396e-01 tolerance 1.e-6
+#ELEMENT tStep 40 number 1 gp 1 keyword 138 component 1 value 3.90000000e-04 tolerance 1.e-6
+#ELEMENT tStep 40 number 1 gp 1 keyword 139 component 1 value 2.55709479e-01 tolerance 1.e-6
 #%END_CHECK%
