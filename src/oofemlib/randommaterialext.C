@@ -84,7 +84,7 @@ RandomMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &ir)
 bool
 RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value) const
 {
-    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterial()->giveStatus(gp) );
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
 
     // check if random material status has been initialized - does not have to be if material is used as a dummy
     if  ( status->giveInterface(RandomMaterialStatusExtensionInterfaceType) == NULL ) {

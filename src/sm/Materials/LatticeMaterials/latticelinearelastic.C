@@ -241,9 +241,7 @@ double
 LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
-    // if ( static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
-
-    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
+    if ( static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems
             answer = 0.1;
         } else if ( answer > 10 ) {
