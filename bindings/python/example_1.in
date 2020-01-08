@@ -1,0 +1,20 @@
+example_1.out
+comment
+LinearStatic nsteps 1 nmodules 0
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 1
+node 1 coords 3  0.0  1.0  0.0 bc 3 1 1 1
+node 2 coords 3  1.0  1.0  0.0 bc 3 1 1 1
+node 3 coords 3  1.0  1.0  1.0 bc 3 1 1 1
+node 4 coords 3  0.0  1.0  1.0 bc 3 1 1 1
+node 5 coords 3  0.0  0.0  0.0 bc 3 1 1 1
+node 6 coords 3  1.0  0.0  0.0 bc 3 1 1 1
+node 7 coords 3  1.0  0.0  1.0 bc 3 1 1 1
+node 8 coords 3  0.0  0.0  1.0 bc 3 1 1 1
+LSpace  1  nodes 8  1  2  3  4  5  6  7  8
+SimpleCS 1 thick 1.0 material 1 set 1
+IsoLE 1 d 2500.  E 10000.0  n 0.3 tAlpha 0.000012
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 1)}
