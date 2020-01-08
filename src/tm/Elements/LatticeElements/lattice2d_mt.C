@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "tm/Elements/lattice2d_mt.h"
+#include "tm/Elements/LatticeElements/lattice2d_mt.h"
 #include "tm/Materials/transportmaterial.h"
-#include "tm/Materials/latticetransmat.h"
+#include "tm/Materials/LatticeMaterials/latticetransmat.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -62,7 +62,6 @@ Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
 {
     numberOfDofMans  = 2;
 }
-
 
 double Lattice2d_mt :: giveLength()
 {
@@ -156,9 +155,9 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
 
     // force updating ip values
     for ( auto &iRule: integrationRulesArray ) {
-        for ( auto &gp: *iRule ) {
-            this->computeNmatrixAt( n, gp->giveNaturalCoordinates() );
-            this->computeVectorOf({P_f}, VM_Total, tStep, r);
+        for ( auto &gp: * iRule ) {
+            this->computeNmatrixAt(n, gp->giveNaturalCoordinates() );
+            this->computeVectorOf({ P_f }, VM_Total, tStep, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, tStep);
         }
@@ -169,15 +168,15 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
 void
 Lattice2d_mt :: computeGaussPoints()
 {
-    integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ] = std::make_unique<GaussIntegrationRule>(1, this, 1, 2);
+    integrationRulesArray.resize(1);
+    integrationRulesArray [ 0 ] = std :: make_unique< GaussIntegrationRule >(1, this, 1, 2);
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dMTLattice);
 }
 
 void
 Lattice2d_mt :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {P_f};
+    answer = { P_f };
 }
 
 void
@@ -194,7 +193,7 @@ Lattice2d_mt :: initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, width, _IFT_Lattice2DMT_width);
     crackLengths.resize(1);
     crackLengths.at(1) = width;
-    
+
 
     IR_GIVE_FIELD(ir, gpCoords, _IFT_Lattice2DMT_gpcoords);
 
@@ -204,11 +203,11 @@ Lattice2d_mt :: initializeFrom(InputRecord &ir)
 
     couplingFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, couplingFlag, _IFT_Lattice2DMT_couplingflag);
-    
+
     couplingNumbers.resize(1);
     couplingNumbers.zero();
     if ( couplingFlag == 1 ) {
-      IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers.at(1), _IFT_Lattice2DMT_couplingnumber);
+        IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers.at(1), _IFT_Lattice2DMT_couplingnumber);
     }
 
     numberOfGaussPoints = 1;
@@ -217,13 +216,13 @@ Lattice2d_mt :: initializeFrom(InputRecord &ir)
 double
 Lattice2d_mt :: computeVolumeAround(GaussPoint *gp)
 {
-    return this->width *this->thickness *this->giveLength();
+    return this->width * this->thickness * this->giveLength();
 }
 
 void
 Lattice2d_mt :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    std :: unique_ptr< IntegrationRule >&iRule = integrationRulesArray [ 0 ];
+    std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
     answer.resize(2, 2);
@@ -301,7 +300,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
             gravityHelp.times(helpFactor);
 
             if ( helpLoadVector.isEmpty() ) {
-                helpLoadVector.resize( gravityHelp.giveSize() );
+                helpLoadVector.resize(gravityHelp.giveSize() );
             }
 
             for ( int j = 1; j <= gravityHelp.giveSize(); j++ ) {
@@ -373,7 +372,7 @@ void Lattice2d_mt :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getElementColor() );
+    EASValsSetColor(gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
@@ -399,7 +398,7 @@ void Lattice2d_mt :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tSt
     }
 
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
-    EASValsSetColor( gc.getCrossSectionColor() );
+    EASValsSetColor(gc.getCrossSectionColor() );
     EASValsSetLayer(OOFEG_RAW_CROSSSECTION_LAYER);
 
     FloatArray coords;

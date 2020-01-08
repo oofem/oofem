@@ -72,7 +72,7 @@ protected:
 
 public:
     ///Constructor
-    LatticeTransportMaterialStatus(GaussPoint * g);
+    LatticeTransportMaterialStatus(GaussPoint *g);
 
     void printOutputAt(FILE *, TimeStep *) const override;
 
@@ -144,13 +144,13 @@ protected:
 
 
 public:
-    LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
+    LatticeTransportMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
 
     void initializeFrom(InputRecord &ir) override;
 
-    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 3 >computeFlux3D(const FloatArrayF< 3 > &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { return {}; }
+    FloatMatrixF< 3, 3 >computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override { return {}; }
 
     double  giveCharacteristicValue(MatResponseMode mode,
                                     GaussPoint *gp,

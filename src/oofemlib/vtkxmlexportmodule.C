@@ -127,7 +127,7 @@ VTKXMLExportModule :: makeFullTensorForm(FloatArray &answer, const FloatArray &r
     answer.zero();
 
     for ( int i = 1; i <= reducedForm.giveSize(); i++ ) {
-        answer.at( redToFull.at(i) ) = reducedForm.at(i);
+        answer.at(redToFull.at(i) ) = reducedForm.at(i);
     }
 
     if ( vtype == ISVT_TENSOR_S3E ) {
@@ -158,7 +158,7 @@ VTKXMLExportModule :: giveOutputStream(TimeStep *tStep)
     FILE *answer;
     std :: string fileName = giveOutputFileName(tStep);
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR( "failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
 
     return answer;
@@ -203,7 +203,7 @@ VTKXMLExportModule :: giveCellType(Element *elem)
     } else if ( elemGT == EGT_wedge_2 ) {
         vtkCellType = 26;
     } else {
-        OOFEM_ERROR( "unsupported element geometry type on element %d", elem->giveNumber() );
+        OOFEM_ERROR("unsupported element geometry type on element %d", elem->giveNumber() );
     }
 
     return vtkCellType;
@@ -264,14 +264,12 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
     Element_Geometry_Type elemGT = elem->giveGeometryType();
     IntArray nodeMapping(0);
     if ( ( elemGT == EGT_point ) ||
-        ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
-        ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
-        ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
-        ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
-        ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_quad9_2 ) ||
-        ( elemGT == EGT_wedge_1 ) ) {  
-            
-    } else if ( elemGT == EGT_hexa_27 ) {
+         ( elemGT == EGT_line_1 ) || ( elemGT == EGT_line_2 ) ||
+         ( elemGT == EGT_triangle_1 ) || ( elemGT == EGT_triangle_2 ) ||
+         ( elemGT == EGT_tetra_1 ) || ( elemGT == EGT_tetra_2 ) ||
+         ( elemGT == EGT_quad_1 ) || ( elemGT == EGT_quad_2 ) ||
+         ( elemGT == EGT_hexa_1 ) || ( elemGT == EGT_quad9_2 ) ||
+         ( elemGT == EGT_wedge_1 ) ) {} else if ( elemGT == EGT_hexa_27 ) {
         nodeMapping = {
             5, 8, 7, 6, 1, 4, 3, 2, 16, 15, 14, 13, 12, 11, 10, 9, 17, 20, 19, 18, 23, 25, 26, 24, 22, 21, 27
         };
@@ -299,7 +297,7 @@ VTKXMLExportModule :: giveElementCell(IntArray &answer, Element *elem)
     answer.resize(nelemNodes);
     if ( nodeMapping.giveSize() > 0 ) {
         for ( int i = 1; i <= nelemNodes; i++ ) {
-            answer.at(i) = elem->giveNode( nodeMapping.at(i) )->giveNumber();
+            answer.at(i) = elem->giveNode(nodeMapping.at(i) )->giveNumber();
         }
     } else {
         for ( int i = 1; i <= nelemNodes; i++ ) {
@@ -322,7 +320,6 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
-
 
 
 #ifdef __VTK_MODULE
@@ -374,7 +371,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         for ( int pieceNum = 1; pieceNum <= nPiecesToExport; pieceNum++ ) {
             const IntArray &elements = this->giveRegionSet(pieceNum)->giveElementList();
             for ( int i = 1; i <= elements.giveSize(); i++ ) {
-                Element *el = d->giveElement( elements.at(i) );
+                Element *el = d->giveElement(elements.at(i) );
                 if ( this->isElementComposite(el) ) {
                     if ( el->giveParallelMode() != Element_local ) {
                         continue;
@@ -395,15 +392,13 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         } // end loop over composite elements
 
 #ifndef __VTK_MODULE
-        if (anyPieceNonEmpty == 0) {
-          // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
-          fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
-          fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
-          fprintf(this->fileStream, "</Piece>\n");
+        if ( anyPieceNonEmpty == 0 ) {
+            // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
+            fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
+            fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
+            fprintf(this->fileStream, "</Piece>\n");
         }
 #endif
-
-        
     } else {     // if (particleExportFlag)
 #ifdef __PFEM_MODULE
         // write out the particles (nodes exported as vertices = VTK_VERTEX)
@@ -427,13 +422,13 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
         for ( int inode = 1; inode <= nnode; inode++ ) {
             node = d->giveNode(inode);
-            PFEMParticle *particle = dynamic_cast< PFEMParticle * >(node);
+            PFEMParticle *particle = dynamic_cast< PFEMParticle * >( node );
             if ( particle ) {
                 if ( particle->isActive() ) {
                     coords = node->giveCoordinates();
                     ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
                     for ( int i = 1; i <= coords->giveSize(); i++ ) {
-                        fprintf( this->fileStream, "%e ", coords->at(i) );
+                        fprintf(this->fileStream, "%e ", coords->at(i) );
                     }
 
                     for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
@@ -489,16 +484,16 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     // * Part files are renamed and time step and everything else is cut off => name collisions
     vtkSmartPointer< vtkXMLPUnstructuredGridWriter >writer = vtkSmartPointer< vtkXMLPUnstructuredGridWriter > :: New();
     writer->SetTimeStep(tStep->giveNumber() - 1);
-    writer->SetNumberOfPieces( this->emodel->giveNumberOfProcesses() );
-    writer->SetStartPiece( this->emodel->giveRank() );
-    writer->SetEndPiece( this->emodel->giveRank() );
+    writer->SetNumberOfPieces(this->emodel->giveNumberOfProcesses() );
+    writer->SetStartPiece(this->emodel->giveRank() );
+    writer->SetEndPiece(this->emodel->giveRank() );
 
 
  #else
     vtkSmartPointer< vtkXMLUnstructuredGridWriter >writer = vtkSmartPointer< vtkXMLUnstructuredGridWriter > :: New();
  #endif
 
-    writer->SetFileName( fname.c_str() );
+    writer->SetFileName(fname.c_str() );
     //writer->SetInput(this->fileStream); // VTK 4
     writer->SetInputData(this->fileStream); // VTK 6
 
@@ -521,7 +516,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 subStep << "." << tStep->giveSubStepNumber();
             }
             pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << this->giveOutputBaseFileName(tStep) + ".gp.vtu" << "\"/>";
-            this->gpPvdBuffer.push_back( pvdEntry.str() );
+            this->gpPvdBuffer.push_back(pvdEntry.str() );
             this->writeGPVTKCollection();
         }
     }
@@ -536,15 +531,15 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             std :: stringstream subStep;
             char fext [ 100 ];
             if ( this->emodel->giveNumberOfProcesses() > 1 ) {
-                sprintf( fext, "_%03d.m%d.%d", i, this->number, tStep->giveNumber() );
+                sprintf(fext, "_%03d.m%d.%d", i, this->number, tStep->giveNumber() );
             } else {
-                sprintf( fext, "m%d.%d", this->number, tStep->giveNumber() );
+                sprintf(fext, "m%d.%d", this->number, tStep->giveNumber() );
             }
             if ( tstep_substeps_out_flag ) {
                 subStep << "." << tStep->giveSubStepNumber();
             }
             pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"" << i << "\" file=\"" << this->emodel->giveOutputBaseFileName() << fext << ".vtu\"/>";
-            this->pvdBuffer.push_back( pvdEntry.str() );
+            this->pvdBuffer.push_back(pvdEntry.str() );
         }
 
         this->writeVTKCollection();
@@ -555,7 +550,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             subStep << "." << tStep->giveSubStepNumber();
         }
         pvdEntry << "<DataSet timestep=\"" << tStep->giveTargetTime() * this->timeScale << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
-        this->pvdBuffer.push_back( pvdEntry.str() );
+        this->pvdBuffer.push_back(pvdEntry.str() );
         this->writeVTKCollection();
     }
 }
@@ -690,7 +685,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            const auto &coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
+            const auto &coords = d->giveNode(mapL2G.at(inode) )->giveCoordinates();
             vtkPiece.setNodeCoords(inode, coords);
         }
 
@@ -711,15 +706,15 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
             // Skip elements that:
             // are inactivated or of composite type ( these are exported individually later)
-	    if ( this->isElementComposite(elem) || !elem->isActivated(tStep) ) {
+            if ( this->isElementComposite(elem) || !elem->isActivated(tStep) ) {
                 continue;
             }
 
-	    //skip materials with casting time > current time
-	    if ( !elem->isCast(tStep) ) {
-	      continue;
-	    }
-	    
+            //skip materials with casting time > current time
+            if ( !elem->isCast(tStep) ) {
+                continue;
+            }
+
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -735,12 +730,12 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
             int numElNodes = cellNodes.giveSize();
             IntArray connectivity(numElNodes);
             for ( int i = 1; i <= numElNodes; i++ ) {
-                connectivity.at(i) = mapG2L.at( cellNodes.at(i) );
+                connectivity.at(i) = mapG2L.at(cellNodes.at(i) );
             }
 
             vtkPiece.setConnectivity(cellNum, connectivity);
 
-            vtkPiece.setCellType( cellNum, this->giveCellType(elem) ); // VTK cell type
+            vtkPiece.setCellType(cellNum, this->giveCellType(elem) );  // VTK cell type
 
             offset += numElNodes;
             vtkPiece.setOffset(cellNum, offset);
@@ -763,15 +758,17 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // Write a VTK piece to file. This could be the whole domain (most common case) or it can be a
     // (so-called) composite element consisting of several VTK cells (layered structures, XFEM, etc.).
 
-  /*
-    if ( !vtkPiece.giveNumberOfCells() ) { // handle piece with no elements. Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
-//          fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
-//          fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
-//          fprintf(this->fileStream, "</Piece>\n");
-        return;
+    /*
+     * if ( !vtkPiece.giveNumberOfCells() ) { // handle piece with no elements. Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
+     * //          fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
+     * //          fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
+     * //          fprintf(this->fileStream, "</Piece>\n");
+     *    return;
+     * }
+     */
+    if ( !vtkPiece.giveNumberOfCells() ) {
+        return false;
     }
-  */
-    if ( !vtkPiece.giveNumberOfCells() ) return false;
 
 
     // Write output: node coords
@@ -788,7 +785,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
             vtkCoords.at(i) = coords.at(i);
         }
 
-        this->nodes->InsertNextPoint( vtkCoords.at(1), vtkCoords.at(2), vtkCoords.at(3) );
+        this->nodes->InsertNextPoint(vtkCoords.at(1), vtkCoords.at(2), vtkCoords.at(3) );
         this->fileStream->SetPoints(nodes);
     }
 
@@ -800,7 +797,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
         coords = vtkPiece.giveNodeCoords(inode);
         ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
         for ( int i = 1; i <= coords.giveSize(); i++ ) {
-            fprintf( this->fileStream, "%e ", coords.at(i) );
+            fprintf(this->fileStream, "%e ", coords.at(i) );
         }
 
         for ( int i = coords.giveSize() + 1; i <= 3; i++ ) {
@@ -827,7 +824,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
 
 #ifdef __VTK_MODULE
         elemNodeArray->Reset();
-        elemNodeArray->SetNumberOfIds( cellNodes.giveSize() );
+        elemNodeArray->SetNumberOfIds(cellNodes.giveSize() );
 #endif
         for ( int i = 1; i <= cellNodes.giveSize(); i++ ) {
 #ifdef __VTK_MODULE
@@ -851,7 +848,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
 
     for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-        fprintf( this->fileStream, "%d ", vtkPiece.giveCellOffset(ielem) );
+        fprintf(this->fileStream, "%d ", vtkPiece.giveCellOffset(ielem) );
     }
 
     fprintf(this->fileStream, "</DataArray>\n");
@@ -860,7 +857,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     // output cell (element) types
     fprintf(this->fileStream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
     for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-        fprintf( this->fileStream, "%d ", vtkPiece.giveCellType(ielem) );
+        fprintf(this->fileStream, "%d ", vtkPiece.giveCellType(ielem) );
     }
 
     fprintf(this->fileStream, "</DataArray>\n");
@@ -871,7 +868,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     std :: string pointHeader, cellHeader;
     this->giveDataHeaders(pointHeader, cellHeader);
 
-    fprintf( this->fileStream, "%s", pointHeader.c_str() );
+    fprintf(this->fileStream, "%s", pointHeader.c_str() );
 #endif
 
     this->writePrimaryVars(vtkPiece);       // Primary field
@@ -884,7 +881,7 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
 
 #ifndef __VTK_MODULE
     fprintf(this->fileStream, "</PointData>\n");
-    fprintf( this->fileStream, "%s", cellHeader.c_str() );
+    fprintf(this->fileStream, "%s", cellHeader.c_str() );
 #endif
 
     this->writeCellVars(vtkPiece);          // Single cell variables ( if given in the integration points then an average will be exported)
@@ -919,7 +916,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
-            OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );
+            OOFEM_ERROR("unsupported UnknownType %s", __UnknownTypeToString(type) );
         }
     }
 
@@ -937,7 +934,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
         } else {
-            OOFEM_ERROR( "unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+            OOFEM_ERROR("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
         }
     }
 
@@ -950,7 +947,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
             scalars += std :: string("Load") + __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
-            OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );
+            OOFEM_ERROR("unsupported UnknownType %s", __UnknownTypeToString(type) );
         }
     }
 
@@ -978,7 +975,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
         } else {
-            OOFEM_WARNING( "unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+            OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
         }
     }
 
@@ -1008,12 +1005,12 @@ VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArr
     this->giveSmoother()->clear(); // Makes sure smoother is up-to-date with potentially new mesh.
 
     // Export of Internal State Type fields
-    vtkPiece.setNumberOfInternalVarsToExport( internalVarsToExport.giveSize(), mapL2G.giveSize() );
+    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), mapL2G.giveSize() );
     for ( int field = 1; field <= internalVarsToExport.giveSize(); field++ ) {
         isType = ( InternalStateType ) internalVarsToExport.at(field);
 
         for ( int nodeNum = 1; nodeNum <= mapL2G.giveSize(); nodeNum++ ) {
-            Node *node = d->giveNode( mapL2G.at(nodeNum) );
+            Node *node = d->giveNode(mapL2G.at(nodeNum) );
             this->getNodalVariableFromIS(answer, node, tStep, isType, region);
             vtkPiece.setInternalVarInNode(field, nodeNum, answer);
         }
@@ -1024,14 +1021,14 @@ VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArr
         XfemManager *xFemMan = d->giveXfemManager();
         int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
 
-        vtkPiece.setNumberOfInternalXFEMVarsToExport( xFemMan->vtkExportFields.giveSize(), nEnrIt, mapL2G.giveSize() );
+        vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, mapL2G.giveSize() );
         for ( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
             XFEMStateType xfemstype = ( XFEMStateType ) xFemMan->vtkExportFields [ field - 1 ];
 
             for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
                 for ( int nodeIndx = 1; nodeIndx <= mapL2G.giveSize(); nodeIndx++ ) {
-                    Node *node = d->giveNode( mapL2G.at(nodeIndx) );
-                    getNodalVariableFromXFEMST( answer, node, tStep, xfemstype, region, xFemMan->giveEnrichmentItem(enrItIndex) );
+                    Node *node = d->giveNode(mapL2G.at(nodeIndx) );
+                    getNodalVariableFromXFEMST(answer, node, tStep, xfemstype, region, xFemMan->giveEnrichmentItem(enrItIndex) );
                     vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeIndx, answer);
                 }
             }
@@ -1070,12 +1067,12 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
         if ( mi ) {
             valueArray.resize(1);
             val = & valueArray;
-            valueArray.at(1) = mi->giveNodalScalarRepresentation( node->giveNumber() );
+            valueArray.at(1) = mi->giveNodalScalarRepresentation(node->giveNumber() );
         }
     } else {
-        int found = this->smoother->giveNodalVector( val, node->giveNumber() );
+        int found = this->smoother->giveNodalVector(val, node->giveNumber() );
         if ( !found ) {
-            valueArray.resize( redIndx.giveSize() );
+            valueArray.resize(redIndx.giveSize() );
             val = & valueArray;
         }
     }
@@ -1090,10 +1087,10 @@ VTKXMLExportModule :: getNodalVariableFromIS(FloatArray &answer, Node *node, Tim
     } else if ( valType == ISVT_VECTOR ) {
         answer = * val;
         // bp: hack for BeamForceMomentTensor, which should be splitted into force and momentum vectors
-        if (type == IST_BeamForceMomentTensor) {
-          answer.resizeWithValues(6);
+        if ( type == IST_BeamForceMomentTensor ) {
+            answer.resizeWithValues(6);
         } else {
-          answer.resizeWithValues(3);
+            answer.resizeWithValues(3);
         }
     } else if ( valType == ISVT_TENSOR_S3 || valType == ISVT_TENSOR_S3E || valType == ISVT_TENSOR_G ) {
         this->makeFullTensorForm(answer, * val, valType);
@@ -1122,15 +1119,15 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
     if ( xfemstype == XFEMST_LevelSetPhi ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber(), node->giveCoordinates() );
+        ei->evalLevelSetNormalInNode(valueArray.at(1), node->giveNumber(), node->giveCoordinates() );
     } else if ( xfemstype == XFEMST_LevelSetGamma ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), node->giveCoordinates() );
+        ei->evalLevelSetTangInNode(valueArray.at(1), node->giveNumber(), node->giveCoordinates() );
     } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
+        ei->evalNodeEnrMarkerInNode(valueArray.at(1), node->giveNumber() );
     } else {
         //OOFEM_WARNING("invalid data in node %d", inode);
     }
@@ -1178,7 +1175,7 @@ VTKXMLExportModule :: writeIntVars(VTKPiece &vtkPiece)
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             valueArray = vtkPiece.giveInternalVarInNode(i, inode);
             for ( int i = 1; i <= ncomponents; ++i ) {
-                varArray->SetComponent( inode - 1, i - 1, valueArray.at(i) );
+                varArray->SetComponent(inode - 1, i - 1, valueArray.at(i) );
             }
         }
 
@@ -1224,7 +1221,7 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
         for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
             // Header
             char name [ 100 ];   // Must I define a fixed size? /JB
-            sprintf( name, "%s_%d ", namePart, xFemMan->giveEnrichmentItem(enrItIndex)->giveNumber() );
+            sprintf(name, "%s_%d ", namePart, xFemMan->giveEnrichmentItem(enrItIndex)->giveNumber() );
 
 #ifdef __VTK_MODULE
             vtkSmartPointer< vtkDoubleArray >varArray = vtkSmartPointer< vtkDoubleArray > :: New();
@@ -1234,7 +1231,7 @@ VTKXMLExportModule :: writeXFEMVars(VTKPiece &vtkPiece)
             for ( int inode = 1; inode <= numNodes; inode++ ) {
                 valueArray = vtkPiece.giveInternalXFEMVarInNode(field, enrItIndex, inode);
                 for ( int i = 1; i <= ncomponents; ++i ) {
-                    varArray->SetComponent( inode - 1, i - 1, valueArray.at(i) );
+                    varArray->SetComponent(inode - 1, i - 1, valueArray.at(i) );
                 }
             }
 
@@ -1284,7 +1281,7 @@ VTKXMLExportModule :: writeVTKPointData(FloatArray &valueArray)
 {
     // Write the data to file
     for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
-        fprintf( this->fileStream, "%e ", valueArray.at(i) );
+        fprintf(this->fileStream, "%e ", valueArray.at(i) );
     }
 }
 #endif
@@ -1322,7 +1319,7 @@ VTKXMLExportModule :: writeVTKCellData(FloatArray &valueArray)
 {
     // Write the data to file ///@todo exact copy of writeVTKPointData so remove
     for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
-        fprintf( this->fileStream, "%e ", valueArray.at(i) );
+        fprintf(this->fileStream, "%e ", valueArray.at(i) );
     }
 }
 #endif
@@ -1368,10 +1365,10 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
             continue;
         }
 
-	//skip materials with casting time > current time
-	if ( !element->isCast(tStep) ) {                    
-	  continue;
-	}
+        //skip materials with casting time > current time
+        if ( !element->isCast(tStep) ) {
+            continue;
+        }
 
         if ( element->giveParallelMode() != Element_local ) {
             continue;
@@ -1399,7 +1396,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
     for ( int i = 1; i <= nnodes; i++ ) {
         if ( regionG2LNodalNumbers.at(i) ) {
             regionG2LNodalNumbers.at(i) = currOffset++;
-            regionL2GNodalNumbers.at( regionG2LNodalNumbers.at(i) ) = i;
+            regionL2GNodalNumbers.at(regionG2LNodalNumbers.at(i) ) = i;
         }
     }
 
@@ -1423,15 +1420,15 @@ VTKXMLExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, In
     FloatArray valueArray;
     this->givePrimVarSmoother()->clear(); // Makes sure primary smoother is up-to-date with potentially new mesh.
 
-    vtkPiece.setNumberOfPrimaryVarsToExport( primaryVarsToExport.giveSize(), mapL2G.giveSize() );
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), mapL2G.giveSize() );
     for ( int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
 
         for ( int inode = 1; inode <= mapL2G.giveSize(); inode++ ) {
-            DofManager *dman = d->giveNode( mapL2G.at(inode) );
+            DofManager *dman = d->giveNode(mapL2G.at(inode) );
 
             this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
-            vtkPiece.setPrimaryVarInNode( i, inode, std :: move(valueArray) );
+            vtkPiece.setPrimaryVarInNode(i, inode, std :: move(valueArray) );
         }
     }
 }
@@ -1456,7 +1453,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         dofIDMask = {
             ( int ) Undef, ( int ) Undef, ( int ) Undef
         };
-        for ( Dof *dof : *dman ) {
+        for ( Dof *dof : * dman ) {
             DofIDItem id = dof->giveDofID();
             if ( id == D_u ) {
                 dofIDMask.at(1) = id;
@@ -1472,7 +1469,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         dofIDMask = {
             ( int ) Undef, ( int ) Undef, ( int ) Undef
         };
-        for ( Dof *dof : *dman ) {
+        for ( Dof *dof : * dman ) {
             DofIDItem id = dof->giveDofID();
             if ( id == V_u ) {
                 dofIDMask.at(1) = id;
@@ -1488,7 +1485,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         dofIDMask = {
             ( int ) Undef, ( int ) Undef, ( int ) Undef
         };
-        for ( Dof *dof : *dman ) {
+        for ( Dof *dof : * dman ) {
             DofIDItem id = dof->giveDofID();
             if ( ( id == V_u ) || ( id == D_u ) ) {
                 dofIDMask.at(1) = id;
@@ -1517,7 +1514,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
         iState = IST_Pressure;
         answer.resize(1);
     } else if ( type == DirectorField ) {
-        for ( Dof *dof : *dman ) {
+        for ( Dof *dof : * dman ) {
             DofIDItem id = dof->giveDofID();
             if ( ( id == W_u ) || ( id == W_v ) || ( id == W_w ) ) {
                 dofIDMask.followedBy(id);
@@ -1528,7 +1525,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
 
         iState = IST_DirectorField;
     } else {
-        OOFEM_ERROR( "unsupported unknownType %s", __UnknownTypeToString(type) );
+        OOFEM_ERROR("unsupported unknownType %s", __UnknownTypeToString(type) );
     }
 
     size = dofIDMask.giveSize();
@@ -1542,7 +1539,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             answer.at(j) = dman->giveDofWithID(id)->giveUnknown(VM_Total, tStep);
             // recover values if not done before
             this->givePrimVarSmoother()->recoverValues(* this->giveRegionSet(ireg), iState, tStep);
-            this->givePrimVarSmoother()->giveNodalVector( recoveredVal, dman->giveNumber() );
+            this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber() );
             if ( size == recoveredVal->giveSize() ) {
                 answer.at(j) = recoveredVal->at(j);
             } else {
@@ -1561,7 +1558,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
             // This can't deal with ValueModeType, and would recover over and over for some vectorial quantities like velocity
             // recover values if not done before.
             this->givePrimVarSmoother()->recoverValues(* this->giveRegionSet(ireg), iState, tStep);
-            this->givePrimVarSmoother()->giveNodalVector( recoveredVal, dman->giveNumber() );
+            this->givePrimVarSmoother()->giveNodalVector(recoveredVal, dman->giveNumber() );
             // here we have a lack of information about how to convert recovered values to response
             // if the size is compatible we accept it, otherwise give a warning and zero value.
             if ( size == recoveredVal->giveSize() ) {
@@ -1578,7 +1575,7 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     InternalStateValueType valType = giveInternalStateValueType(type);
     //rotate back from nodal CS to global CS if applies
     if ( valType == ISVT_VECTOR ) { ///@todo in general, shouldn't this apply for 2nd order tensors as well? /JB
-        Node *node = dynamic_cast< Node * >(dman);
+        Node *node = dynamic_cast< Node * >( dman );
         if ( node && node->hasLocalCS() ) {
             answer.rotatedWith(* node->giveLocalCoordinateTriplet(), 't');
         }
@@ -1605,7 +1602,7 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             FloatArray &valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
             for ( int j = 1; j <= ncomponents; ++j ) {
-                varArray->SetComponent( inode - 1, j - 1, valueArray.at(j) );
+                varArray->SetComponent(inode - 1, j - 1, valueArray.at(j) );
             }
         }
 
@@ -1638,13 +1635,13 @@ VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L,
 
     ///@todo Add a more flexible solution here, ask the Engineering model for the equivalent to this (perhaps as part of the primary field?)
     /// This should be looked into, just as "getNodalVariableFromPrimaryField" is particularly complicated.
-    int neq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    int npeq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() );
+    int neq = emodel->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering() );
+    int npeq = emodel->giveNumberOfDomainEquations(1, EModelDefaultPrescribedEquationNumbering() );
     FloatArray extForces(neq), extForcesP(npeq);
     emodel->assembleVector(extForces, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultEquationNumbering(), d);
     emodel->assembleVector(extForcesP, tStep, ExternalForceAssembler(), VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
 
-    vtkPiece.setNumberOfLoadsToExport( externalForcesToExport.giveSize(), mapL2G.giveSize() );
+    vtkPiece.setNumberOfLoadsToExport(externalForcesToExport.giveSize(), mapL2G.giveSize() );
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) externalForcesToExport.at(i);
         ///@todo Have some mapping for UnknownType -> DofID array
@@ -1666,21 +1663,21 @@ VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L,
         }
 
         for ( int inode = 1; inode <= mapL2G.giveSize(); inode++ ) {
-            DofManager *dman = d->giveNode( mapL2G.at(inode) );
+            DofManager *dman = d->giveNode(mapL2G.at(inode) );
 
-            FloatArray valueArray( dofids.giveSize() );
+            FloatArray valueArray(dofids.giveSize() );
             for ( int k = 1; k <= dofids.giveSize(); ++k ) {
-                Dof *dof = dman->giveDofWithID( dofids.at(k) );
+                Dof *dof = dman->giveDofWithID(dofids.at(k) );
                 ///@todo Have to make more assumptions here.. we shouldn't assume EModelDefaultEquationNumbering. Do something nicer than extForces and extForcesP instead.
                 int eq;
-                if ( ( eq = dof->giveEquationNumber( EModelDefaultEquationNumbering() ) ) > 0 ) {
+                if ( ( eq = dof->giveEquationNumber(EModelDefaultEquationNumbering() ) ) > 0 ) {
                     valueArray.at(k) = extForces.at(eq);
-                } else if ( ( eq = dof->giveEquationNumber( EModelDefaultPrescribedEquationNumbering() ) ) > 0 ) {
+                } else if ( ( eq = dof->giveEquationNumber(EModelDefaultPrescribedEquationNumbering() ) ) > 0 ) {
                     valueArray.at(k) = extForcesP.at(eq);
                 }
             }
             //this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
-            vtkPiece.setLoadInNode( i, inode, std :: move(valueArray) );
+            vtkPiece.setLoadInNode(i, inode, std :: move(valueArray) );
         }
     }
 }
@@ -1699,14 +1696,14 @@ VTKXMLExportModule :: writeExternalForces(VTKPiece &vtkPiece)
         // Header
 #ifdef __VTK_MODULE
         vtkSmartPointer< vtkDoubleArray >varArray = vtkSmartPointer< vtkDoubleArray > :: New();
-        varArray->SetName(name.c_str());
+        varArray->SetName(name.c_str() );
         varArray->SetNumberOfComponents(ncomponents);
         varArray->SetNumberOfTuples(numNodes);
 
         for ( int inode = 1; inode <= numNodes; inode++ ) {
             FloatArray &valueArray = vtkPiece.giveLoadInNode(i, inode);
             for ( int j = 1; j <= ncomponents; ++j ) {
-                varArray->SetComponent( inode - 1, j - 1, valueArray.at(j) );
+                varArray->SetComponent(inode - 1, j - 1, valueArray.at(j) );
             }
         }
 
@@ -1736,12 +1733,12 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, const IntArray &elems, 
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
 
-    vtkPiece.setNumberOfCellVarsToExport( cellVarsToExport.giveSize(), elems.giveSize() );
+    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), elems.giveSize() );
     for ( int field = 1; field <= cellVarsToExport.giveSize(); field++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(field);
 
         for ( int subIndex = 1; subIndex <= elems.giveSize(); ++subIndex ) {
-            Element *el = d->giveElement( elems.at(subIndex) ); ///@todo should be a pointer to an element in the region /JB
+            Element *el = d->giveElement(elems.at(subIndex) );  ///@todo should be a pointer to an element in the region /JB
             if ( el->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -1818,7 +1815,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     default:
 
         // compute cell average from ip values
-        IntegrationRule * iRule = el->giveDefaultIntegrationRulePtr();
+        IntegrationRule *iRule = el->giveDefaultIntegrationRulePtr();
         computeIPAverage(answer, iRule, el, type, tStep); // if element has more than one iRule?? /JB
         // Reshape the Voigt vectors to include all components (duplicated if necessary, VTK insists on 9 components for tensors.)
         /// @todo Is this part necessary now when giveIPValue returns full form? Only need to symmetrize in case of 6 components /JB
@@ -1855,7 +1852,7 @@ VTKXMLExportModule :: writeCellVars(VTKPiece &vtkPiece)
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             valueArray = vtkPiece.giveCellVar(i, ielem);
             for ( int i = 1; i <= ncomponents; ++i ) {
-                cellVarsArray->SetComponent( ielem - 1, i - 1, valueArray.at(i) );
+                cellVarsArray->SetComponent(ielem - 1, i - 1, valueArray.at(i) );
             }
         }
 
@@ -1882,7 +1879,7 @@ VTKXMLExportModule :: computeIPAverage(FloatArray &answer, IntegrationRule *iRul
     answer.clear();
     FloatArray temp;
     if ( iRule ) {
-        for ( IntegrationPoint *ip : *iRule ) {
+        for ( IntegrationPoint *ip : * iRule ) {
             elem->giveIPValue(temp, ip, isType, tStep);
             gptot += ip->giveWeight();
             answer.add(ip->giveWeight(), temp);
@@ -1909,7 +1906,7 @@ VTKXMLExportModule :: writeVTKCollection()
         fname = this->emodel->giveOutputBaseFileName() + ".m" + std :: to_string(this->number) + ".pvd";
     }
 
-    std :: ofstream outfile( fname.c_str() );
+    std :: ofstream outfile(fname.c_str() );
 
     sprintf(buff, "<!-- Computation started %d-%02d-%02d at %02d:%02d:%02d -->\n", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
     //     outfile << buff;
@@ -1940,7 +1937,7 @@ VTKXMLExportModule :: writeGPVTKCollection()
         fname = this->emodel->giveOutputBaseFileName() + ".m" + std :: to_string(this->number) + ".gp.pvd";
     }
 
-    std :: ofstream outfile( fname.c_str() );
+    std :: ofstream outfile(fname.c_str() );
 
     sprintf(buff, "<!-- Computation started %d-%02d-%02d at %02d:%02d:%02d -->\n", current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
     //     outfile << buff;
@@ -2041,7 +2038,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
     // open output stream
     std :: string outputFileName = this->giveOutputBaseFileName(tStep) + ".gp.vtu";
     if ( ( stream = fopen(outputFileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR( "failed to open file %s", outputFileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", outputFileName.c_str() );
     }
 
     fprintf(stream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
@@ -2052,7 +2049,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
         const IntArray &elements = this->giveRegionSet(ireg)->giveElementList();
         int nip = 0;
         for ( int i = 1; i <= elements.giveSize(); i++ ) {
-            nip += d->giveElement( elements.at(i) )->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
+            nip += d->giveElement(elements.at(i) )->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
         }
 
         //Create one cell per each GP
@@ -2061,8 +2058,8 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
         for ( int i = 1; i <= elements.giveSize(); i++ ) {
             int ielem = elements.at(i);
 
-            for ( GaussPoint *gp : *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
-                d->giveElement(ielem)->computeGlobalCoordinates( gc, gp->giveNaturalCoordinates() );
+            for ( GaussPoint *gp : * d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
+                d->giveElement(ielem)->computeGlobalCoordinates(gc, gp->giveNaturalCoordinates() );
                 for ( double c : gc ) {
                     fprintf(stream, "%e ", c);
                 }
@@ -2110,12 +2107,12 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 tensors += __InternalStateTypeToString(isttype);
                 tensors.append(" ");
             } else {
-                OOFEM_WARNING( "unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+                OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }
         }
 
         // print collected data summary in header
-        fprintf( stream, "<PointData Scalars=\"%s\" Vectors=\"%s\" Tensors=\"%s\" >\n", scalars.c_str(), vectors.c_str(), tensors.c_str() );
+        fprintf(stream, "<PointData Scalars=\"%s\" Vectors=\"%s\" Tensors=\"%s\" >\n", scalars.c_str(), vectors.c_str(), tensors.c_str() );
         scalars.clear();
         vectors.clear();
         tensors.clear();
@@ -2134,7 +2131,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                 nc = 9;
             } else {
-                OOFEM_WARNING( "unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+                OOFEM_WARNING("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
             }
 
             fprintf(stream, "  <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\">", __InternalStateTypeToString(isttype), nc);
@@ -2142,16 +2139,16 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
                 int ielem = elements.at(i);
 
                 // loop over default IRule gps
-                for ( GaussPoint *gp : *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
+                for ( GaussPoint *gp : * d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
                     d->giveElement(ielem)->giveIPValue(value, gp, isttype, tStep);
 
                     if ( vtype == ISVT_VECTOR ) {
-                      // bp: hack for BeamForceMomentTensor, which should be splitted into force and momentum vectors
-                      if (isttype == IST_BeamForceMomentTensor) {
-                        value.resizeWithValues(6);
-                      } else {
-                        value.resizeWithValues(3);
-                      }
+                        // bp: hack for BeamForceMomentTensor, which should be splitted into force and momentum vectors
+                        if ( isttype == IST_BeamForceMomentTensor ) {
+                            value.resizeWithValues(6);
+                        } else {
+                            value.resizeWithValues(3);
+                        }
                     } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E || vtype == ISVT_TENSOR_G ) {
                         FloatArray help = value;
                         this->makeFullTensorForm(value, help, vtype);

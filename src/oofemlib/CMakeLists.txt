@@ -178,6 +178,7 @@ set (core_export
     vtkexportmodule.C
     vtkxmlexportmodule.C
     vtkxmlperiodicexportmodule.C
+    vtkxmllatticeexportmodule.C
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C

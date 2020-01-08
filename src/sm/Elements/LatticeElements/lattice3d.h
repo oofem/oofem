@@ -107,7 +107,7 @@ public:
     /**
      * This function gives the cross-section coordinates.
      */
-    void giveCrossSectionCoordinates(FloatArray &coords) { coords = polygonCoords; }
+    void giveCrossSectionCoordinates(FloatArray &coords) override { coords = polygonCoords; }
 
     virtual void giveGPCoordinates(FloatArray &coords);
 

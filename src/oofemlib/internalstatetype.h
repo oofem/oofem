@@ -108,7 +108,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_HumidityFlow, 58) \
     ENUM_ITEM_WITH_VALUE(IST_CrackStatuses, 59) \
     ENUM_ITEM_WITH_VALUE(IST_CrackedFlag, 60) \
-    ENUM_ITEM_WITH_VALUE(IST_CrackDirs, 61)     \
+    ENUM_ITEM_WITH_VALUE(IST_CrackDirs, 61) \
     ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain, 62) \
     ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain_2, 63) \
     ENUM_ITEM_WITH_VALUE(IST_StressWorkDensity, 64) \
@@ -186,7 +186,8 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_IncrementCreepModulus, 136) \
     ENUM_ITEM_WITH_VALUE(IST_NormalStress, 137) \
     ENUM_ITEM_WITH_VALUE(IST_LatticeStrain, 138) \
-    ENUM_ITEM_WITH_VALUE(IST_LatticeStress, 139)
+    ENUM_ITEM_WITH_VALUE(IST_LatticeStress, 139) \
+    ENUM_ITEM_WITH_VALUE(IST_PlasticLatticeStrain, 140)
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
