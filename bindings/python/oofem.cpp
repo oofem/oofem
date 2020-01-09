@@ -692,8 +692,10 @@ PYBIND11_MODULE(oofempy, m) {
 
         ;
 
-
-
+    py::class_<oofem::MetaStep>(m, "MetaStep")
+        .def("setNumberOfSteps", &oofem::MetaStep::setNumberOfSteps)
+    ;
+        
     py::class_<oofem::TimeStep>(m, "TimeStep")
         .def("giveNumber", &oofem::TimeStep::giveNumber)
         .def("giveTargetTime", &oofem::TimeStep::giveTargetTime)
@@ -721,22 +723,30 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::EngngModel>(m, "EngngModel")
         .def("giveDomain", &oofem::EngngModel::giveDomain, py::return_value_policy::reference)
         .def("setDomain", &oofem::EngngModel::setDomain, py::keep_alive<1, 3>())
-        .def("giveNimberOfDomains", &oofem::EngngModel::giveNumberOfDomains)
+        .def("giveNumberOfDomains", &oofem::EngngModel::giveNumberOfDomains)
+        .def("giveMetaStep", &oofem::EngngModel::giveMetaStep, py::return_value_policy::reference)
         .def("terminateAnalysis", &oofem::EngngModel::terminateAnalysis)
+        .def("terminate", &oofem::EngngModel::terminate)
         .def("solveYourself", &oofem::EngngModel::solveYourself)
         .def("solveYourselfAt", &oofem::EngngModel::solveYourselfAt)
         .def("terminate",&oofem::EngngModel::terminate)
         .def("giveField", &oofem::EngngModel::giveField)
-        .def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference)
+        //.def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference)
+        .def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference, py::arg("force") = false)
         .def("givePreviousStep", &oofem::EngngModel::givePreviousStep, py::return_value_policy::reference)
         .def("giveNextStep", &oofem::EngngModel::giveNextStep, py::return_value_policy::reference)
         .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
         .def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
         .def("checkProblemConsistency", &oofem::EngngModel::checkProblemConsistency)
         .def("init", &oofem::EngngModel::init)
+        .def("initializeYourself", &oofem::EngngModel::initializeYourself)
+        .def("initMetaStepAttributes", &oofem::EngngModel::initMetaStepAttributes)
+        .def("preInitializeNextStep", &oofem::EngngModel::preInitializeNextStep)
+        .def("updateYourself", &oofem::EngngModel::updateYourself)
         .def("postInitialize", &oofem::EngngModel::postInitialize)
         .def("setRenumberFlag", &oofem::EngngModel::setRenumberFlag)
         .def("giveContext", &oofem::EngngModel::giveContext, py::return_value_policy::reference)
+        
 
         ;
 
@@ -804,7 +814,7 @@ PYBIND11_MODULE(oofempy, m) {
         //.def("giveCharacteristicVector", &oofem::Element::giveCharacteristicVector)
         //.def("giveCharacteristicValue", &oofem::Element::giveCharacteristicValue)
         .def("computeVectorOf", (void (oofem::Element::*)(oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &)) &oofem::Element::computeVectorOf)
-        .def("computeVectorOf", (void (oofem::Element::*)(const oofem::IntArray &, oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &, bool)) &oofem::Element::computeVectorOf)
+        .def("computeVectorOf", (void (oofem::Element::*)(const oofem::IntArray &, oofem::ValueModeType , oofem::TimeStep*, oofem::FloatArray &, bool)) &oofem::Element::computeVectorOf)
         .def("computeVectorOfPrescribed", (void (oofem::Element::*)(oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray &)) &oofem::Element::computeVectorOfPrescribed)
         .def("computeVectorOfPrescribed", (void (oofem::Element::*)(const oofem::IntArray &, oofem::ValueModeType , oofem::TimeStep *, oofem::FloatArray & )) &oofem::Element::computeVectorOfPrescribed)
         .def("giveDofManagerNumber", &oofem::Element::giveDofManagerNumber)

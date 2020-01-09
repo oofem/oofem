@@ -1,13 +1,12 @@
-from __future__ import print_function
 import oofempy
+#Inject external temperature field to OOFEM problem, defined on a uniform grid
 
-
-def test_5():
-
-    f = oofempy.UniformGridField()
+def example_1():
     dr = oofempy.OOFEMTXTDataReader('example_1.in')
     problem = oofempy.InstanciateProblem(dr, oofempy.problemMode.processor, 0, None, False)
 
+    f = oofempy.UniformGridField()    
+    #Lower bound, upper bound, number of elements on edges
     f.setGeometry((0., 0., 0.), (1., 1., 1.), (2, 2, 2))
     f.setValues([500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500., 500.])
 
@@ -28,4 +27,4 @@ def test_5():
 
 
 if __name__ == "__main__":
-    test_5()
+    example_1()
