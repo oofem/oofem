@@ -66,6 +66,13 @@ set (sm_element
     Elements/PlaneStress/basicelement.C
     Elements/PlaneStress/trplanestressrotallman3d.C
     Elements/PlaneStress/linquad3d_planestress.C
+    Elements/Fsb/FsbLinearStatic.C
+    Elements/Fsb/FsbLinearStatic2D.C
+    Elements/Fsb/FsbPlaneStress.C
+    Elements/Fsb/FsbPlaneStressDrill.C
+    Elements/Fsb/FsbInterpolatorPlaneStress.C
+    Elements/Fsb/FsbInterpolatorPlate.C
+    Elements/Fsb/FsbPlate.C
     Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
