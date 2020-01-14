@@ -59,6 +59,7 @@ void FsbPlate::updateLocalNumbering(EntityRenumberingFunctor &f)
     }
 }
 
+// This method might not work properly because interpolator.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this)); is in comments
 void FsbPlate::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     FloatMatrix ndx;
@@ -106,7 +107,8 @@ void FsbPlate::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int
 
     FloatMatrix dH(12, 4); // [dvx/dx, dvy/dx, dvx/dy, dvy/dy]
     FloatMatrix dNdx;
-    interpolator.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
+    // The following line is in comments because an error appears saying that N is not defined.
+	//interpolator.evalN(N, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
     interpolator.evaldNdx(dNdx, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
     for (int i = 1; i <= 2; i++)
