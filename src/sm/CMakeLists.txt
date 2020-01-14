@@ -73,6 +73,15 @@ set (sm_element
     Elements/Fsb/FsbInterpolatorPlaneStress.C
     Elements/Fsb/FsbInterpolatorPlate.C
     Elements/Fsb/FsbPlate.C
+    Elements/Perleta/acm_plate.C
+    Elements/Perleta/basiclsr.C
+    Elements/Perleta/basiclsr3d.C
+    Elements/Perleta/basiclsrk3d.C
+    Elements/Perleta/cssrk3d.C
+    Elements/Perleta/mplate.C
+    Elements/Perleta/pplate.C
+    Elements/Perleta/qcshell.C
+    Elements/Perleta/qshell.C
     Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/latticestructuralelement.C
