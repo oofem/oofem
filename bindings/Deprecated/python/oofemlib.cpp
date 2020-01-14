@@ -617,7 +617,7 @@ void pyclass_ExportModule()
 *****************************************************/
 struct PyDataReader : DataReader, wrapper<DataReader>
 {
-    InputRecord *giveInputRecord(InputRecordType irType, int recordId) override
+    InputRecord &giveInputRecord(InputRecordType irType, int recordId) override
     {
         return this->get_override("giveInputRecord")();
     }
@@ -767,7 +767,7 @@ void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofM
 void pyclass_DofManager()
 {
     class_<DofManager, bases<FEMComponent>, boost::noncopyable>("DofManager", no_init)
-        .def("hasCoordinates", &DofManager::hasCoordinates)
+        //.def("hasCoordinates", &DofManager::hasCoordinates)
         // TODO return type (copy rather than pointer?)
         .def("giveCoordinates", &DofManager::giveCoordinates, return_internal_reference<>())
         .add_property("coordinates", make_function(&DofManager::giveCoordinates, return_internal_reference<>()))
@@ -1499,7 +1499,7 @@ object engngModel(bp::tuple args, bp::dict kw)
     if ( ir.hasField(_IFT_EngngModel_nmsteps) ) {
       OOFEM_LOG_ERROR("engngModel: simulation with metasteps is not (yet) supported in Python");
     } else {
-      engngm->instanciateDefaultMetaStep(&ir);
+      engngm->instanciateDefaultMetaStep(ir);
     }
 
     engngm->Instanciate_init();
@@ -1535,7 +1535,7 @@ object domain(bp::tuple args, bp::dict kw)
     d->setDomainType(dType);
     // output manager record
     OOFEMTXTInputRecord omir = makeOutputManagerOOFEMTXTInputRecordFrom(kw);
-    d->giveOutputManager()->initializeFrom(&omir);
+    d->giveOutputManager()->initializeFrom(omir);
     object ret = object(ptr(d.release()));
     /* ????????????????????
     // sets the last created domain as default one for furtherscript

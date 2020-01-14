@@ -39,6 +39,13 @@ To generate the binding, the pybind11 is required to be installed. Python module
 #############################
 pip3 install pybind11
 
+Sometimes it happens that running any example raises an error:
+expected constructor, destructor, or type conversion before ‘(’ token PYBIND11_MODULE(oofempy, m) {
+
+In such a case, install pybind11 rather from source:
+git clone https://github.com/pybind/pybind11.git; cd pybind11; pip3 install
+
+
 #############################
 #cmake confuration
 #############################

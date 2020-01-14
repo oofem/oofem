@@ -87,6 +87,8 @@ namespace py = pybind11;
 #include "unknownnumberingscheme.h"
 
 #include "uniformgridfield.h"
+#include "unstructuredgridfield.h"
+#include "pythonfield.h"
 
 #include <iostream>
 
@@ -467,8 +469,6 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
 PYBIND11_MODULE(oofempy, m) {
     m.doc() = "oofem python bindings module"; // optional module docstring
-
-
 
     py::class_<oofem::FloatArray>(m, "FloatArray")
         .def(py::init<int>(), py::arg("n")=0)
@@ -1303,6 +1303,16 @@ PYBIND11_MODULE(oofempy, m) {
         .def ("setValues", &oofem::UniformGridField::setValues)
         .def("evaluateAt", (int (oofem::UniformGridField::*)(oofem::FloatArray &, const oofem::FloatArray &, oofem::ValueModeType , oofem::TimeStep *)) &oofem::UniformGridField::evaluateAt)
         ;
+ 
+//depends on Python.h
+#ifdef _PYBIND_BINDINGS       
+    py::class_<oofem::PythonField, oofem::Field, std::shared_ptr<oofem::PythonField>>(m, "PythonField")
+        .def(py::init<>(),py::return_value_policy::copy)
+        .def("setModuleName", &oofem::PythonField::setModuleName)
+        .def("setFunctionName", &oofem::PythonField::setFunctionName)
+        ;   
+#endif
+
 
     m.def("test", &test);
  }

@@ -84,7 +84,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, double time)
     int numArgs = 3;
 
     // Create array with node coordinates
-    int dim = dMan->giveCoordinates()->giveSize();
+    int dim = dMan->giveCoordinates().giveSize();
     PyObject *pArgArray = PyList_New(dim);
 
     PyObject *pArgs = PyTuple_New(numArgs);

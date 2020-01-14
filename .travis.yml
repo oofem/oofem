@@ -11,7 +11,7 @@ install:
    - cd pybind11; mkdir build; cd build; cmake .. -DPYTHON_EXECUTABLE=$PYCMD; sudo make install; cd ../..
 script:
    - echo $PYCMD
-   - CXX=g++-6 cmake -DPYTHON_EXECUTABLE=$PYCMD -DUSE_PYTHON_BINDINGS=ON -DENABLE_COVERAGE:BOOL=TRUE .
+   - CXX=g++-6 cmake -DPYTHON_EXECUTABLE=$PYCMD -DUSE_PYBIND_BINDINGS=ON -DUSE_PYTHON_EXTENSION=ON -DENABLE_COVERAGE:BOOL=TRUE .
    - make -j 2
    - make test
    - bash <(curl -s https://codecov.io/bash)

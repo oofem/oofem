@@ -92,16 +92,16 @@ MaterialStatus *StructuralPythonMaterial :: CreateStatus(GaussPoint *gp) const
     return new StructuralPythonMaterialStatus(gp);
 }
 
-void StructuralPythonMaterial :: callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
+FloatArray StructuralPythonMaterial :: callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
 {
     // pass mutable args via bp::ref
     // pass "const" args without, which by default results in a new copy, ensuring the original won't be modified
     return bp::extract<FloatArray>(func(oldStrain, oldStress, strain, stateDict, tempStateDict, tStep->giveTargetTime()));
 }
 
-void StructuralPythonMaterial :: callTangentFunction(bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
+FloatMatrix StructuralPythonMaterial :: callTangentFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const
 {
-    return bp::extract<FloatMatrix>(func(strain, stress, stateDict, tempStateDict, tStep->giveTargetTime()));
+    return bp::extract<FloatMatrix>(func(oldStrain, oldStress, stateDict, tempStateDict, tStep->giveTargetTime()));
 }
 
 void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
@@ -113,7 +113,8 @@ void StructuralPythonMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answ
     } else {
         FloatArray vE_h, stress, stressh;
         const auto &vE = ms->giveTempStrainVector();
-        const auto &stress = ms->giveTempStressVector();
+//         const auto &stress = ms->giveTempStressVector();
+        stress = ms->giveTempStressVector();
         answer.resize(6, 6);
         for ( int i = 1; i <= 6; ++i ) {
             vE_h = vE;
@@ -144,7 +145,7 @@ FloatMatrixF<9,9> StructuralPythonMaterial :: give3dMaterialStiffnessMatrix_dPdF
             auto vF_h = vF;
             vF_h.at(i) += pert;
             auto vPh = this->giveFirstPKStressVector_3d(vF_h, gp, tStep);
-            dvP = (vPh - vP) / pert;
+            auto dvP = (vPh - vP) / pert;
             tangent.setColumn(dvP, i);
         }
 
@@ -194,6 +195,8 @@ FloatArrayF<9> StructuralPythonMaterial :: giveFirstPKStressVector_3d(const Floa
     ms->letTempStressVectorBe(vS);
     ms->letTempPVectorBe(vP);
     ms->letTempFVectorBe(vF);
+    
+    return vF;//TODO - Check what is returned
 }
 
 
