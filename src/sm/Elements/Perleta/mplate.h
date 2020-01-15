@@ -77,6 +77,10 @@ public:
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
+	// This was put here only to implement the abstract method so that the project could build. The final implementation should be taken care of later. 
+	virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) {};
+	virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) {};
+
 protected:
     virtual void computeGaussPoints();
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

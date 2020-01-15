@@ -119,6 +119,9 @@ public:
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     int computeLoadGToLRotationMtrx(FloatMatrix &answer);
 
+	// This was put here only to implement the abstract method so that the project could build. The final implementation should be taken care of later. 
+	virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) {};
+	virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) {};
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
