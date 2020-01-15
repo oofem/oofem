@@ -89,6 +89,8 @@ set (sm_element
     Elements/LatticeElements/lattice3dboundary.C
     Elements/LatticeElements/latticelink3d.C
     Elements/LatticeElements/latticelink3dboundary.C
+    Elements/LatticeElements/latticebeam3d.C
+    Elements/LatticeElements/latticebeam3dboundary.C
     Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/quad2platesubsoil.C
