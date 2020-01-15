@@ -62,15 +62,12 @@ Function *GeneralBoundaryCondition :: giveTimeFunction()
 }
 
 
-IRResultType
-GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
+void
+GeneralBoundaryCondition :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;           // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, timeFunction, _IFT_GeneralBoundaryCondition_timeFunct);
     if ( timeFunction <= 0 ) {
-        OOFEM_WARNING("bad TimeFunction id");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_GeneralBoundaryCondition_timeFunct, "Must be over 0");
     }
 
     int val = 0;
@@ -85,8 +82,6 @@ GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     set = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, set, _IFT_GeneralBoundaryCondition_set);
-
-    return IRRT_OK;
 }
 
 bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)

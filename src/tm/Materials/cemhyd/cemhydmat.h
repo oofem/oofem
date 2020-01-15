@@ -94,14 +94,12 @@ class CemhydMat : public IsotropicHeatTransferMaterial
 public:
     /// Constructor
     CemhydMat(int n, Domain * d);
-    /// Destructor
-    virtual ~CemhydMat();
     /// Returns input record name of the receiver.
     const char *giveInputRecordName() const override { return _IFT_CemhydMat_Name; }
     const char *giveClassName() const override { return "CemhydMat"; }
 
-    int hasInternalSource() override { return 1; }
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    bool hasInternalSource() const override { return true; }
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
     /// Returns cycle number at the closest cycle after the target time
     virtual int giveCycleNumber(GaussPoint *gp);
     /// Returns time of the CEMHYD3D at the first cycle after the target time
@@ -109,14 +107,14 @@ public:
     /// Returns DoH of the closest CEMHYD3D cycle after the target time
     virtual double giveDoHActual(GaussPoint *gp);
     /// Returns concrete heat conductivity depending on chosen type
-    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) override;
+    double giveIsotropicConductivity(GaussPoint *gp, TimeStep *tStep) const override;
     /// Returns concrete thermal capacity depending on chosen type
-    virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveConcreteCapacity(GaussPoint *gp, TimeStep *tStep) const;
     /// Returns concrete density depending on chosen type
-    virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep);
+    virtual double giveConcreteDensity(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Compute heat thermal capacity per volume.
-    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     int initMaterial(Element *element) override;
@@ -127,7 +125,7 @@ public:
     /// Perform averaging on a master CemhydMatStatus.
     virtual void averageTemperature();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     /// Use different methods to evaluate material parameters
     int conductivityType, capacityType, densityType;
     /// Array containing warnings supression for density, conductivity, capacity, high temperature.
@@ -168,7 +166,7 @@ public:
     //Interface *giveInterface(InterfaceType) override;
     const char *giveClassName() const override { return "CemhydMatStatus"; }
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 #elif CEMPY
  #define OUTFILES
  #define IMAGEFILES
@@ -176,8 +174,8 @@ public:
 class CemhydMatStatus
 {
 public:
-    CemhydMatStatus(void);
-    ~CemhydMatStatus(void);
+    CemhydMatStatus();
+    ~CemhydMatStatus();
     void InitializePy(const char *inp);
 #endif
     FILE *in;

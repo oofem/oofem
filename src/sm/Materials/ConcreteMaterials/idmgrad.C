@@ -50,31 +50,17 @@
 namespace oofem {
 REGISTER_Material(IsotropicGradientDamageMaterial);
 
-IsotropicGradientDamageMaterial :: IsotropicGradientDamageMaterial(int n, Domain *d) : IsotropicDamageMaterial1(n, d), GradientDamageMaterialExtensionInterface(d)
-    //
-    // constructor
-    //
+IsotropicGradientDamageMaterial :: IsotropicGradientDamageMaterial(int n, Domain *d) :
+    IsotropicDamageMaterial1(n, d),
+    GradientDamageMaterialExtensionInterface(d)
 {}
 
 
-IsotropicGradientDamageMaterial :: ~IsotropicGradientDamageMaterial()
-//
-// destructor
-//
-{ }
-
-IRResultType
-IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicGradientDamageMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-    result = IsotropicDamageMaterial1 :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    result = GradientDamageMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    IsotropicDamageMaterial1 :: initializeFrom(ir);
+    GradientDamageMaterialExtensionInterface :: initializeFrom(ir);
 
     int formulationType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, formulationType, _IFT_IsotropicGradientDamageMaterial_formulationType);
@@ -89,8 +75,7 @@ IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
     } else if ( formulationType == 2 ) {
         this->gradientDamageFormulationType =   GDFT_Eikonal;
     } else {
-        OOFEM_WARNING("Unknown gradient damage formulation %d", formulationType);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_IsotropicGradientDamageMaterial_formulationType, "Unknown gradient damage formulation");
     }
 
 
@@ -101,8 +86,8 @@ IsotropicGradientDamageMaterial :: initializeFrom(InputRecord *ir)
 
 
 
-int
-IsotropicGradientDamageMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+IsotropicGradientDamageMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _1dMat || mode == _PlaneStress || mode == _PlaneStrain || mode == _3dMat;
 }
@@ -449,8 +434,8 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
 // strain increment, the only way, how to correctly update gp records
 //
 {
-    IsotropicGradientDamageMaterialStatus *status = static_cast< IsotropicGradientDamageMaterialStatus * >( this->giveStatus(gp) );
-    LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
+    auto status = static_cast< IsotropicGradientDamageMaterialStatus * >( this->giveStatus(gp) );
+    auto lmat = this->giveLinearElasticMaterial();
     FloatArray reducedTotalStrainVector, strain;
 
     FloatMatrix de;
@@ -465,7 +450,7 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
 
 
     // compute equivalent strain
-    this->computeEquivalentStrain(localDamageDrivingVariable, reducedTotalStrainVector, gp, tStep);
+    localDamageDrivingVariable = this->computeEquivalentStrain(reducedTotalStrainVector, gp, tStep);
 
     if ( llcriteria == idm_strainLevelCR ) {
         // compute value of loading function if strainLevel crit apply
@@ -473,19 +458,19 @@ IsotropicGradientDamageMaterial :: giveRealStressVectorGradientDamage(FloatArray
         if ( f <= 0.0 ) {
             // damage does not grow
             tempKappa = status->giveKappa();
-            damage     = status->giveDamage();
+            damage    = status->giveDamage();
         } else {
             // damage grow
             tempKappa = nonlocalDamageDrivingVariable;
             this->initDamaged(nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
             // evaluate damage parameter
-            this->computeDamageParam(damage, nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
+            damage = this->computeDamageParam(nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
         }
     } else if ( llcriteria == idm_damageLevelCR ) {
         // evaluate damage parameter first
         tempKappa = nonlocalDamageDrivingVariable;
         this->initDamaged(nonlocalDamageDrivingVariable, strain, gp);
-        this->computeDamageParam(damage, nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
+        damage = this->computeDamageParam(nonlocalDamageDrivingVariable, reducedTotalStrainVector, gp);
         if ( damage < status->giveDamage() ) {
             // unloading takes place
             damage = status->giveDamage();
@@ -523,12 +508,6 @@ IsotropicGradientDamageMaterial :: CreateStatus(GaussPoint *gp) const
 
 IsotropicGradientDamageMaterialStatus :: IsotropicGradientDamageMaterialStatus(GaussPoint *g) : IsotropicDamageMaterial1Status(g)
 { }
-
-
-IsotropicGradientDamageMaterialStatus :: ~IsotropicGradientDamageMaterialStatus()
-{ }
-
-
 
 
 void

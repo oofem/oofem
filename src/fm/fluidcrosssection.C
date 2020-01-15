@@ -43,17 +43,12 @@ REGISTER_CrossSection(FluidCrossSection);
 
 FluidCrossSection :: FluidCrossSection(int n, Domain *d) : CrossSection(n, d), matNumber(0) { }
 
-FluidCrossSection :: ~FluidCrossSection() { }
 
-
-IRResultType
-FluidCrossSection :: initializeFrom(InputRecord *ir)
+void
+FluidCrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    CrossSection :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->matNumber, _IFT_FluidCrossSection_material);
-
-    return CrossSection :: initializeFrom(ir);
 }
 
 
@@ -89,7 +84,7 @@ FluidCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalSta
 
 
 bool
-FluidCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode)
+FluidCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMode) const
 {
     return this->domain->giveMaterial(this->matNumber)->isCharacteristicMtrxSymmetric(rMode);
 }
@@ -102,7 +97,7 @@ FluidCrossSection :: giveFluidMaterial()
 }
 
 Material*
-FluidCrossSection :: giveMaterial(IntegrationPoint *ip)
+FluidCrossSection :: giveMaterial(IntegrationPoint *ip) const
 {
     if ( this->matNumber ) {
         return this->giveDomain()->giveMaterial( this->matNumber );

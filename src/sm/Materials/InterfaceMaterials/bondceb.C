@@ -130,10 +130,10 @@ BondCEBMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
     }
 }
 
-IRResultType
-BondCEBMaterial :: initializeFrom(InputRecord *ir)
+void
+BondCEBMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     // mandatory parameters
     IR_GIVE_FIELD(ir, kn, _IFT_BondCEBMaterial_kn);
@@ -148,14 +148,13 @@ BondCEBMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, alpha, _IFT_BondCEBMaterial_al);
 
     // dependent parameter
-    s0 = pow(pow(s1, -alpha)*taumax/ks, 1./(1.-alpha));
-    if ( s0 > s1 ) {
-      s0 = s1;
-      ks = taumax/s1;
-      OOFEM_WARNING("Parameter ks adjusted");
-    }
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
+    //@todo: why not simply if ks <taumax/s1 choose ks = taumax/s1
+    //s0 = pow(pow(s1, -alpha)*taumax/ks, 1./(1.-alpha));
+   if ( s0 > s1 ) {
+     s0 = s1;
+     ks = taumax/s1;
+     OOFEM_WARNING("Parameter ks adjusted");
+   }
 }
 
 
@@ -179,7 +178,7 @@ BondCEBMaterialStatus :: BondCEBMaterialStatus(GaussPoint *g) : StructuralInterf
 
 
 void
-BondCEBMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+BondCEBMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

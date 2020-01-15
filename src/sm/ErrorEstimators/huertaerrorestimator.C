@@ -563,10 +563,9 @@ HuertaErrorEstimator :: giveRemeshingCrit()
 }
 
 
-IRResultType
-HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
+void
+HuertaErrorEstimator :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                       // Required by IR_GIVE_FIELD macro
     int n, level, wErrorFlag = 0;
 
     ErrorEstimator :: initializeFrom(ir);
@@ -976,10 +975,9 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 }
 
 
-IRResultType
-HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
+void
+HuertaRemeshingCriteria :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     double coeff;
     int noRemeshFlag = 0, wErrorFlag = 0;
 
@@ -1002,8 +1000,6 @@ HuertaRemeshingCriteria :: initializeFrom(InputRecord *ir)
     if ( coeff > 0.0 && coeff <= 1.0 ) {
         this->refineCoeff = coeff;
     }
-
-    return IRRT_OK;
 }
 
 
@@ -1075,7 +1071,7 @@ void
 HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, RefinedElement *refinedElement,
                                                               int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                               HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
-                                                              FloatArray **corner, FloatArray &midNode,
+                                                              FloatArray *corner, FloatArray &midNode,
                                                               int &localNodeId, int &localElemId, int &localBcId,
                                                               IntArray &controlNode, IntArray &controlDof,
                                                               HuertaErrorEstimator :: AnalysisMode aMode, const char *edgetype)
@@ -1147,9 +1143,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
         element->giveElementDofIDMask(dofIdArray);
 
         for ( int inode = startNode; inode <= endNode; inode++ ) {
-            xc = corner [ inode - 1 ]->at(1);
-            yc = corner [ inode - 1 ]->at(2);
-            zc = corner [ inode - 1 ]->at(3);
+            xc = corner [ inode - 1 ].at(1);
+            yc = corner [ inode - 1 ].at(2);
+            zc = corner [ inode - 1 ].at(3);
 
             xm = midNode.at(1);
             ym = midNode.at(2);
@@ -1366,9 +1362,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
             GaussPoint gp(&ir, 1, {}, 1.0, mmode);
 
             for ( int inode = startNode; inode <= endNode; inode++ ) {
-                xc = corner [ inode - 1 ]->at(1);
-                yc = corner [ inode - 1 ]->at(2);
-                zc = corner [ inode - 1 ]->at(3);
+                xc = corner [ inode - 1 ].at(1);
+                yc = corner [ inode - 1 ].at(2);
+                zc = corner [ inode - 1 ].at(3);
 
                 xm = midNode.at(1);
                 ym = midNode.at(2);
@@ -1485,7 +1481,7 @@ void
 HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, RefinedElement *refinedElement,
                                                               int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                               HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
-                                                              FloatArray **corner, FloatArray *midSide, FloatArray &midNode,
+                                                              FloatArray *corner, FloatArray *midSide, FloatArray &midNode,
                                                               int &localNodeId, int &localElemId, int &localBcId,
                                                               IntArray &controlNode, IntArray &controlDof,
                                                               HuertaErrorEstimator :: AnalysisMode aMode, const char *quadtype)
@@ -1584,9 +1580,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                 s2 = nodes;
             }
 
-            xc = corner [ inode - 1 ]->at(1);
-            yc = corner [ inode - 1 ]->at(2);
-            zc = corner [ inode - 1 ]->at(3);
+            xc = corner [ inode - 1 ].at(1);
+            yc = corner [ inode - 1 ].at(2);
+            zc = corner [ inode - 1 ].at(3);
 
             xs1 = midSide [ s1 - 1 ].at(1);
             ys1 = midSide [ s1 - 1 ].at(2);
@@ -1868,9 +1864,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                     s2 = nodes;
                 }
 
-                xc = corner [ inode - 1 ]->at(1);
-                yc = corner [ inode - 1 ]->at(2);
-                zc = corner [ inode - 1 ]->at(3);
+                xc = corner [ inode - 1 ].at(1);
+                yc = corner [ inode - 1 ].at(2);
+                zc = corner [ inode - 1 ].at(3);
 
                 xs1 = midSide [ s1 - 1 ].at(1);
                 ys1 = midSide [ s1 - 1 ].at(2);
@@ -2031,7 +2027,7 @@ void
 HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, RefinedElement *refinedElement,
                                                               int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                               HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
-                                                              FloatArray **corner, FloatArray *midSide, FloatArray *midFace, FloatArray &midNode,
+                                                              FloatArray *corner, FloatArray *midSide, FloatArray *midFace, FloatArray &midNode,
                                                               int &localNodeId, int &localElemId, int &localBcId,
                                                               int hexaSideNode [ 1 ] [ 3 ], int hexaFaceNode [ 1 ] [ 3 ],
                                                               IntArray &controlNode, IntArray &controlDof,
@@ -2160,9 +2156,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
             f2 = hexaFaceNode [ inode - 1 ] [ 1 ];
             f3 = hexaFaceNode [ inode - 1 ] [ 2 ];
 
-            xc = corner [ inode - 1 ]->at(1);
-            yc = corner [ inode - 1 ]->at(2);
-            zc = corner [ inode - 1 ]->at(3);
+            xc = corner [ inode - 1 ].at(1);
+            yc = corner [ inode - 1 ].at(2);
+            zc = corner [ inode - 1 ].at(3);
 
             xs1 = midSide [ s1 - 1 ].at(1);
             ys1 = midSide [ s1 - 1 ].at(2);
@@ -2536,9 +2532,9 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                 f2 = hexaFaceNode [ inode - 1 ] [ 1 ];
                 f3 = hexaFaceNode [ inode - 1 ] [ 2 ];
 
-                xc = corner [ inode - 1 ]->at(1);
-                yc = corner [ inode - 1 ]->at(2);
-                zc = corner [ inode - 1 ]->at(3);
+                xc = corner [ inode - 1 ].at(1);
+                yc = corner [ inode - 1 ].at(2);
+                zc = corner [ inode - 1 ].at(3);
 
                 xs1 = midSide [ s1 - 1 ].at(1);
                 ys1 = midSide [ s1 - 1 ].at(2);
@@ -3888,7 +3884,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
     double rtolv = -1.0, minStepLength = 0.0, initialStepLength = -1.0, stepLength = -1.0, psi = 1.0;
     IntArray ddm, hpc;
     FloatArray ddv, hpcw;
-    IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
 #if defined ( USE_OUTPUT_FILE ) || defined ( USE_CONTEXT_FILE )
     sprintf(line, "/home/dr/Huerta/%s_%d.out", problemName, problemId);
@@ -3917,9 +3912,8 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #endif
         refinedReader.insertInputRecord(DataReader :: IR_emodelRec, std::move(ir));
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >(problem) ) {
-        InputRecord *ir;
         nmstep = tStep->giveMetaStepNumber();
-        ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
+        auto &ir = problem->giveMetaStep(nmstep)->giveAttributesRecord();
 
         IR_GIVE_OPTIONAL_FIELD(ir, stiffMode, _IFT_NonLinearStatic_stiffmode);
         IR_GIVE_OPTIONAL_FIELD(ir, controlMode, _IFT_NonLinearStatic_controlmode);

@@ -36,7 +36,9 @@
 #define trabboneembed_h
 
 #include "sm/Materials/structuralmaterial.h"
+#include "floatarrayf.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
 #include "floatmatrix.h"
 #include "cltypes.h"
 #include "matconst.h"
@@ -58,28 +60,26 @@ namespace oofem {
 class TrabBoneEmbedStatus : public StructuralMaterialStatus
 {
 protected:
-    double tempAlpha, alpha;
-    double tempDam, dam;
-    double tempPSED, psed;
-    double tempTSED, tsed;
-    FloatMatrix smtrx, matConstD;
-    FloatArray densStress, tempPlasDef, plasDef, tempIncPlasDef;
+    double tempAlpha = 0., alpha = 0.;
+    double tempDam = 0., dam = 0.;
+    double tempPSED = 0., psed = 0.;
+    double tempTSED = 0., tsed = 0.;
+
+    FloatMatrixF<6,6> smtrx, matConstD;
+    FloatArrayF<6> densStress, tempPlasDef, plasDef, tempIncPlasDef;
 
 public:
     TrabBoneEmbedStatus(GaussPoint * g);
-    virtual ~TrabBoneEmbedStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveTempTSED();
-
+    double giveTempTSED() const { return tempTSED; }
     void setTempDam(double da) { tempDam = da; }
     void setTempTSED(double tse) { tempTSED = tse; }
     void setTempAlpha(double al) { tempAlpha = al; }
-    void setTempPlasDef(FloatArray epsip) { tempPlasDef = epsip; }
-    void setSmtrx(FloatMatrix smt) { smtrx = smt; }
+    void setTempPlasDef(const FloatArrayF<6> &epsip) { tempPlasDef = epsip; }
 
-    const FloatArray &givePlasDef() const { return plasDef; }
+    const FloatArrayF<6> &givePlasDef() const { return plasDef; }
 
     const char *giveClassName() const override { return "TrabBoneEmbedStatus"; }
 
@@ -97,33 +97,31 @@ public:
 class TrabBoneEmbed : public StructuralMaterial
 {
 protected:
-    double eps0, nu0;
+    double eps0 = 0., nu0 = 0.;
 
 public:
     TrabBoneEmbed(int n, Domain * d);
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &totalStrain) const;
 
-    double computeDamageParam(double alpha, GaussPoint *gp);
+    double computeDamageParam(double alpha, GaussPoint *gp) const;
 
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
     /// Constructs the anisotropic compliance tensor.
-    void constructIsoComplTensor(FloatMatrix &answer, const double eps0, const double nu0);
+    static FloatMatrixF<6,6> constructIsoComplTensor(double eps0, double nu0);
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_TrabBoneEmbed_Name; }
     const char *giveClassName() const override { return "TrabBoneEmbed"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

@@ -1,4 +1,4 @@
-/*
+    /*
  *
  *                 #####    #####   ######  ######  ###   ###
  *               ##   ##  ##   ##  ##      ##      ## ### ##
@@ -41,6 +41,7 @@
 #include "valuemodetype.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "floatmatrixf.h"
 
 ///@name Input fields for PrescribedTensor
 //@{
@@ -63,7 +64,7 @@ class OOFEM_EXPORT PrescribedGenStrainShell7 : public BoundaryCondition
 {
 protected:
     /// Prescribed gradient @f$ d_{ij} @f$
-    FloatMatrix gradient;
+    FloatMatrixF<3,3> gradient;
 
     /**
      * Initial generalized strain
@@ -77,7 +78,7 @@ protected:
     FloatArray genEps;
 
     /// Center coordinate @f$ \bar{x}_i @f$
-    FloatArray centerCoord;
+    FloatArrayF<3> centerCoord;
 
 public:
     /**
@@ -102,7 +103,7 @@ public:
      * The prescribed tensor's columns must be equal to the size of the center coordinates.
      * The size of the center coordinates must be equal to the size of the coordinates in the applied nodes.
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     /**
@@ -114,8 +115,8 @@ public:
     //void updateCoefficientMatrix(FloatMatrix &C);
 
 
-    void evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArray &genEps, double zeta);
-    void evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, FloatArray &genEps, double zeta);
+    FloatMatrixF<3,3> evalCovarBaseVectorsAt(FloatArray &genEps, double zeta);
+    FloatMatrixF<3,3> evalInitialCovarBaseVectorsAt(FloatArray &genEps, double zeta);
     void setDeformationGradient(double zeta);
     void evaluateHigherOrderContribution(FloatArray &answer, double zeta, FloatArray &dx);
 
@@ -125,7 +126,7 @@ public:
      */
     virtual void setCenterCoordinate(const FloatArray &x) { centerCoord = x; }
     /// Returns the center coordinate
-    virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
+    virtual FloatArrayF<3> &giveCenterCoordinate() { return centerCoord; }
 
     const char *giveClassName() const override { return "PrescribedGenStrainShell7"; }
     const char *giveInputRecordName() const override { return _IFT_PrescribedGenStrainShell7_Name; }

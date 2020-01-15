@@ -46,17 +46,8 @@ namespace oofem {
 REGISTER_Material(RCSDNLMaterial);
 
 RCSDNLMaterial :: RCSDNLMaterial(int n, Domain *d) : RCSDEMaterial(n, d), StructuralNonlocalMaterialExtensionInterface(d)
-{
-    //linearElasticMaterial = new IsotropicLinearElasticMaterial (n,d);
-    SDTransitionCoeff2 = 0.;
-    R = 0.;
-}
+{}
 
-
-RCSDNLMaterial :: ~RCSDNLMaterial()
-{
-    //delete linearElasticMaterial;
-}
 
 Interface *
 RCSDNLMaterial :: giveInterface(InterfaceType type)
@@ -64,13 +55,13 @@ RCSDNLMaterial :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
         return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 
 
 void
-RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     /*  Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process. Actually, no update is necessary,
@@ -78,7 +69,7 @@ RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gaus
      * computation. It is therefore necessary only to store local strain in corresponding status.
      * This service is declared at StructuralNonlocalMaterial level.
      */
-    RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
 
@@ -346,17 +337,12 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 }
 
 
-IRResultType
-RCSDNLMaterial :: initializeFrom(InputRecord *ir)
+void
+RCSDNLMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     //RCSDEMaterial::instanciateFrom (ir);
-    result = this->giveLinearElasticMaterial()->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;    
-
-    result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    this->giveLinearElasticMaterial()->initializeFrom(ir);
+    StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, Ft, _IFT_RCSDNLMaterial_ft);
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDNLMaterial_sdtransitioncoeff);
@@ -374,18 +360,15 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         R = 0.0;
     }
 
-    if ( ir->hasField(_IFT_RCSDNLMaterial_ef) ) { // if ef is specified, Gf is computed acordingly
+    if ( ir.hasField(_IFT_RCSDNLMaterial_ef) ) { // if ef is specified, Gf is computed acordingly
         IR_GIVE_FIELD(ir, this->ef, _IFT_RCSDNLMaterial_ef);
         this->Gf = this->Ft * this->ef;
-    } else if ( ir->hasField(_IFT_RCSDNLMaterial_gf) ) { // otherwise if Gf is specified, ef is computed acordingly
+    } else if ( ir.hasField(_IFT_RCSDNLMaterial_gf) ) { // otherwise if Gf is specified, ef is computed acordingly
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        OOFEM_WARNING("cannot determine Gf and ef from input data");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, "none", "cannot determine Gf and ef from input data");
     }
-
-    return IRRT_OK;
 }
 
 
@@ -397,7 +380,7 @@ RCSDNLMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
 
 
 double
-RCSDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
+RCSDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
 {
     // Bell shaped function decaying with the distance.
 
@@ -446,12 +429,8 @@ RCSDNLMaterialStatus :: RCSDNLMaterialStatus(GaussPoint *g) :
 }
 
 
-RCSDNLMaterialStatus :: ~RCSDNLMaterialStatus()
-{ }
-
-
 void
-RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCSDNLMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FloatArray helpVec;
 

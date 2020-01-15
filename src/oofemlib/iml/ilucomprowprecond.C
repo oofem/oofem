@@ -41,18 +41,15 @@ CompRow_ILUPreconditioner ::
 CompRow_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes) : Preconditioner(A, attributes)
 { }
 
-IRResultType
-CompRow_ILUPreconditioner :: initializeFrom(InputRecord *ir)
+void
+CompRow_ILUPreconditioner :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    Preconditioner :: initializeFrom(ir);
     this->drop_tol = 1.e-8;
     IR_GIVE_OPTIONAL_FIELD(ir, this->drop_tol, _IFT_CompRow_ILUPrecond_droptol);
 
     part_fill = 5;
     IR_GIVE_OPTIONAL_FIELD(ir, part_fill, _IFT_CompRow_ILUPrecond_partfill);
-
-    return Preconditioner :: initializeFrom(ir);
 }
 
 

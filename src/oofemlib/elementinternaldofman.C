@@ -49,14 +49,14 @@ ElementDofManager :: ~ElementDofManager()
 { }
 
 
-IRResultType ElementDofManager :: initializeFrom(InputRecord *ir)
+void ElementDofManager :: initializeFrom(InputRecord &ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating node ",number)
 #  endif
 
-    return DofManager :: initializeFrom(ir);
+    DofManager :: initializeFrom(ir);
 }
 
 

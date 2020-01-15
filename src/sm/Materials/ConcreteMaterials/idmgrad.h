@@ -63,47 +63,44 @@ protected:
         GDFT_Eikonal = 2
     };
 
+    GradientDamageFormulationType gradientDamageFormulationType = GDFT_Standard;
 
-    GradientDamageFormulationType gradientDamageFormulationType;
-
-    double di_rho;
-    double di_eta;
+    double di_rho = 0.;
+    double di_eta = 0.;
 
 
 public:
     /// Constructor
     IsotropicGradientDamageMaterial(int n, Domain *d);
-    /// Destructor
-    virtual ~IsotropicGradientDamageMaterial();
 
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override;
     // identification and auxiliary functions
-    virtual const char *giveClassName() const { return "IsotropicGradientDamageMaterial"; }
-    virtual const char *giveInputRecordName() const { return _IFT_IsotropicGradientDamageMaterial_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    const char *giveClassName() const override { return "IsotropicGradientDamageMaterial"; }
+    const char *giveInputRecordName() const override { return _IFT_IsotropicGradientDamageMaterial_Name; }
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual Interface *giveInterface(InterfaceType t) {
+    Interface *giveInterface(InterfaceType t) override {
         if ( t == GradientDamageMaterialExtensionInterfaceType ) {
             return static_cast< GradientDamageMaterialExtensionInterface * >( this );
         } else {
-            return NULL;
+            return nullptr;
         }
     }
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
-    virtual void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_dd_NN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveGradientDamageStiffnessMatrix_dd_BN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    void giveGradientDamageStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_du(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_ud(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_dd_NN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_dd_BB(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    void giveGradientDamageStiffnessMatrix_dd_BN(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
 
-    virtual void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep);
+    void giveRealStressVectorGradientDamage(FloatArray &answer1, double &answer2, GaussPoint *gp, const FloatArray &totalStrain, double nonlocalCumulatedStrain, TimeStep *tStep) override;
 
-    void giveStiffnessMatrix(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep) {; }
-    virtual void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep);
-    virtual void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep);
+    void giveStiffnessMatrix(FloatMatrix &answer,  MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) override;
+    void computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep) override { }
+    void giveNonlocalInternalForces_N_factor(double &answer, double nlddv, GaussPoint *gp, TimeStep *tStep) override;
+    void giveNonlocalInternalForces_B_factor(FloatArray &answer, const FloatArray &nlddv, GaussPoint *gp, TimeStep *tStep) override;
 protected:
     double computeInternalLength(GaussPoint *gp);
     int giveDimension(GaussPoint *gp);
@@ -125,12 +122,11 @@ class IsotropicGradientDamageMaterialStatus : public IsotropicDamageMaterial1Sta
 {
 public:
     IsotropicGradientDamageMaterialStatus(GaussPoint *g);
-    virtual ~IsotropicGradientDamageMaterialStatus();
 
-    virtual const char *giveClassName() const { return "IsotropicGradientDamageMaterialStatus"; }
+    const char *giveClassName() const override { return "IsotropicGradientDamageMaterialStatus"; }
 
-    virtual void initTempStatus();
-    virtual void updateYourself(TimeStep *);
+    void initTempStatus() override;
+    void updateYourself(TimeStep *) override;
 };
 } // end namespace oofem
 #endif // idmgrad_h

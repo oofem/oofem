@@ -95,11 +95,9 @@ SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(
 }
 
 
-IRResultType
-LinearStability :: initializeFrom(InputRecord *ir)
+void
+LinearStability :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     //StructuralEngngModel::instanciateFrom(ir);
     IR_GIVE_FIELD(ir, numberOfRequiredEigenValues, _IFT_LinearStability_nroot);
     // numberOfSteps set artifficially to numberOfRequiredEigenValues
@@ -121,7 +119,7 @@ LinearStability :: initializeFrom(InputRecord *ir)
 
     nMetaSteps = 0;
 
-    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+    suppressOutput = ir.hasField(_IFT_EngngModel_suppressOutput);
 
     if (suppressOutput) {
         printf("Suppressing output.\n");
@@ -134,8 +132,6 @@ LinearStability :: initializeFrom(InputRecord *ir)
         fprintf(outputStream, "\nStarting analysis on: %s\n", ctime(& this->startTime) );
         fprintf(outputStream, "%s\n", simulationDescription.c_str());
     }
-
-    return IRRT_OK;
 }
 
 

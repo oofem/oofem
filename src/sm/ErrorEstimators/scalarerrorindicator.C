@@ -89,11 +89,9 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
 }
 
 
-IRResultType
-ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
+void
+ScalarErrorIndicator :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     ErrorEstimator :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, indicatorType, _IFT_ScalarErrorIndicator_vartype);

@@ -68,21 +68,20 @@ namespace oofem {
 REGISTER_BoundaryCondition(TransportGradientDirichlet);
 
 
-IRResultType TransportGradientDirichlet :: initializeFrom(InputRecord *ir)
+void TransportGradientDirichlet :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;           // Required by IR_GIVE_FIELD macro
+    GeneralBoundaryCondition :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, mGradient, _IFT_TransportGradientDirichlet_gradient);
 
     mCenterCoord.resize(3);
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientDirichlet_centerCoords);
 
-    this->tractionControl = ir->hasField(_IFT_TransportGradientDirichlet_tractionControl);
+    this->tractionControl = ir.hasField(_IFT_TransportGradientDirichlet_tractionControl);
     if ( this->tractionControl ) {
         IR_GIVE_FIELD(ir, surfSets, _IFT_TransportGradientDirichlet_surfSets);
         //IR_GIVE_FIELD(ir, edgeSets, _IFT_TransportGradientDirichlet_edgeSets);
     }
-
-    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 
@@ -110,9 +109,9 @@ void TransportGradientDirichlet :: postInitialize()
 
 double TransportGradientDirichlet :: give(Dof *dof, ValueModeType mode, double time)
 {
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
 
-    if ( coords->giveSize() != this->mCenterCoord.giveSize() ) {
+    if ( coords.giveSize() != this->mCenterCoord.giveSize() ) {
         OOFEM_ERROR("Size of coordinate system different from center coordinate in b.c.");
     }
 
@@ -128,8 +127,7 @@ double TransportGradientDirichlet :: give(Dof *dof, ValueModeType mode, double t
     }
 
     // Reminder: u_i = g_i . (x_i - xc_i + xi_i)
-    FloatArray dx;
-    dx.beDifferenceOf(* coords, this->mCenterCoord);
+    auto dx = coords - this->mCenterCoord;
     // Add "xi" if it is defined. Classical Dirichlet b.c. is retained if this isn't defined (or set to zero).
     if ( !xis.empty() ) {
         dx.add(xis[dof->giveDofManager()->giveNumber()]);
@@ -182,7 +180,7 @@ void TransportGradientDirichlet :: computeCoefficientMatrix(FloatMatrix &C)
     C.zero();
 
     for ( auto &n : domain->giveDofManagers() ) {
-        FloatArray *coords = n->giveCoordinates();
+        const auto &coords = n->giveCoordinates();
         Dof *d1 = n->giveDofWithID( this->dofs[0] );
         int k1 = d1->__givePrescribedEquationNumber();
         if ( k1 ) {
@@ -192,7 +190,7 @@ void TransportGradientDirichlet :: computeCoefficientMatrix(FloatMatrix &C)
                 xi = xis[n->giveNumber()];
             }
             for ( int i = 1; i <= nsd; ++i ) {
-                C.at(k1, i) = coords->at(i) - mCenterCoord.at(i) + xi.at(i);
+                C.at(k1, i) = coords.at(i) - mCenterCoord.at(i) + xi.at(i);
             }
             //printf("C.at(%d, :) = %e, %e, %e\n", k1, C.at(k1, 1), C.at(k1, 2), C.at(k1, 3));
         }
@@ -320,9 +318,9 @@ void TransportGradientDirichlet :: computeTangent(FloatMatrix &tangent, TimeStep
     for ( auto &n : domain->giveDofManagers() ) {
         int k1 = n->giveDofWithID( this->dofs[0] )->__giveEquationNumber();
         if ( k1 ) {
-            FloatArray *coords = n->giveCoordinates();
+            const auto &coords = n->giveCoordinates();
             for ( int i = 1; i <= nsd; ++i ) {
-                sol.at(k1, i) = -(coords->at(i) - mCenterCoord.at(i));
+                sol.at(k1, i) = -(coords.at(i) - mCenterCoord.at(i));
             }
         }
     }
@@ -448,8 +446,7 @@ void TransportGradientDirichlet :: computeXi()
             FloatArray b;
             
             FEInterpolation3d *interp = static_cast< FEInterpolation3d* >( e->giveInterpolation() );
-            IntArray bNodes;
-            interp->boundaryEdgeGiveNodes(bNodes, edge);
+            const auto &bNodes = interp->boundaryEdgeGiveNodes(edge);
             int order = interp->giveInterpolationOrder();
             std :: unique_ptr< IntegrationRule > ir( interp->giveBoundaryEdgeIntegrationRule(order, edge) );
             static_cast< TransportElement* >(e)->computeConstitutiveMatrixAt(D, Capacity, e->giveDefaultIntegrationRulePtr()->getIntegrationPoint(1), tStep);
@@ -470,7 +467,7 @@ void TransportGradientDirichlet :: computeXi()
 #if 1
                 FloatArray t;
                 for ( int i = 1; i <= b.giveSize(); ++i ) {
-                    t.add(b.at(i), *e->giveNode(bNodes.at(i))->giveCoordinates());
+                    t.add(b.at(i), e->giveNode(bNodes.at(i))->giveCoordinates());
                 }
                 t.normalize();
                 FloatArray tmp;
@@ -490,7 +487,7 @@ void TransportGradientDirichlet :: computeXi()
             for ( int i = 1; i <= bNodes.giveSize(); ++i ) {
                 int enode = bNodes.at(i);
                 Node *n = e->giveNode(enode);
-                const FloatArray &x = *n->giveCoordinates();
+                const auto &x = n->giveCoordinates();
                 cvec.at(i, 1) = x.at(1);
                 cvec.at(i, 2) = x.at(2);
                 cvec.at(i, 3) = x.at(3);
@@ -588,14 +585,13 @@ void TransportGradientDirichlet :: computeXi()
             }
             Ke.symmetrized();
 
-            IntArray bNodes;
-            interp->boundaryGiveNodes(bNodes, surf);
+            const auto &bNodes = interp->boundaryGiveNodes(surf);
             IntArray loc(bNodes.giveSize());
             FloatMatrix cvec(bNodes.giveSize(), 3);
             for ( int i = 1; i <= bNodes.giveSize(); ++i ) {
                 int enode = bNodes.at(i);
                 Node *n = e->giveNode(enode);
-                FloatArray x = *n->giveCoordinates() + this->xis[n->giveNumber()];
+                auto x = n->giveCoordinates() + this->xis[n->giveNumber()];
                 cvec.at(i, 1) = x.at(1);
                 cvec.at(i, 2) = x.at(2);
                 cvec.at(i, 3) = x.at(3);

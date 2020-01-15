@@ -70,30 +70,28 @@ public:
 
 protected:
     /// Volumetric plastic strain.
-    double volumetricPlasticStrain;
-    double tempVolumetricPlasticStrain;
+    double volumetricPlasticStrain = 0.;
+    double tempVolumetricPlasticStrain = 0.;
 
     /// Deviatoric of plastic strain.
-    FloatArray plasticStrainDeviator;
-    FloatArray tempPlasticStrainDeviator;
+    FloatArrayF<6> plasticStrainDeviator;
+    FloatArrayF<6> tempPlasticStrainDeviator;
 
     /// Hardening variable.
-    double kappa;
-    double tempKappa;
+    double kappa = 0.;
+    double tempKappa = 0.;
 
     /// Indicates the state (i.e. elastic, yielding, vertex, unloading) of the Gauss point
-    int state_flag;
-    int temp_state_flag;
+    int state_flag = DruckerPragerPlasticitySMStatus :: DP_Elastic;
+    int temp_state_flag = DruckerPragerPlasticitySMStatus :: DP_Elastic;
 
 public:
     /// Constructor
     DruckerPragerPlasticitySMStatus(GaussPoint * gp);
-    /// Destructor
-    virtual ~DruckerPragerPlasticitySMStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -104,18 +102,19 @@ public:
      * Get the full plastic strain vector from the material status.
      * @param answer Plastic strain vector.
      */
-    void  givePlasticStrainVector(FloatArray &answer) const
+    FloatArrayF<6> givePlasticStrainVector() const
     {
-        answer = plasticStrainDeviator;
-        answer[0] += volumetricPlasticStrain;
-        answer[1] += volumetricPlasticStrain;
-        answer[2] += volumetricPlasticStrain;
+        auto plasticStrain = plasticStrainDeviator;
+        plasticStrain[0] += volumetricPlasticStrain;
+        plasticStrain[1] += volumetricPlasticStrain;
+        plasticStrain[2] += volumetricPlasticStrain;
+        return plasticStrain;
     }
     /**
      * Get the plastic strain deviator from the material status.
      * @return Plastic strain deviator.
      */
-    const FloatArray &givePlasticStrainDeviator() const { return plasticStrainDeviator; }
+    const FloatArrayF<6> &givePlasticStrainDeviator() const { return plasticStrainDeviator; }
     /**
      * Get the volumetric plastic strain from the material status.
      * @return Volumetric plastic strain.
@@ -136,18 +135,19 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @param answer Temp value of plastic strain vector.
      */
-    void giveTempPlasticStrainVector(FloatArray &answer) const
+    FloatArrayF<6> giveTempPlasticStrainVector() const
     {
-        answer = tempPlasticStrainDeviator;
-        answer[0] += tempVolumetricPlasticStrain;
-        answer[1] += tempVolumetricPlasticStrain;
-        answer[2] += tempVolumetricPlasticStrain;
+        auto plasticStrain = tempPlasticStrainDeviator;
+        plasticStrain[0] += tempVolumetricPlasticStrain;
+        plasticStrain[1] += tempVolumetricPlasticStrain;
+        plasticStrain[2] += tempVolumetricPlasticStrain;
+        return plasticStrain;
     }
     /**
      * Get the temp value of the plastic strain deviator from the material status.
      * @param answer Temp value of plastic strain deviator.
      */
-    const FloatArray &giveTempPlasticStrainDeviator() const { return tempPlasticStrainDeviator; }
+    const FloatArrayF<6> &giveTempPlasticStrainDeviator() const { return tempPlasticStrainDeviator; }
     /**
      * Get the temp value of the volumetric strain deviator from the material status.
      * @return Temp value of volumetric plastic strain
@@ -168,7 +168,7 @@ public:
      * Assign the temp value of deviatoric plastic strain.
      * @param v New temp value of deviatoric plastic strain.
      */
-    void letTempPlasticStrainDeviatorBe(const FloatArray &v) { tempPlasticStrainDeviator = v; }
+    void letTempPlasticStrainDeviatorBe(const FloatArrayF<6> &v) { tempPlasticStrainDeviator = v; }
     /**
      * Assign the temp value of volumetric plastic strain.
      * @param v New temp value of volumetric plastic strain.
@@ -202,48 +202,43 @@ protected:
      * 1: linear hardening/softening with cutoff at zero stress.
      * 2: exponential hardening/softening to limitYieldStress.
      */
-    int hardeningType;
+    int hardeningType = 1;
     /// Parameter of the exponential laws.
-    double kappaC;
+    double kappaC = 0.;
     /// Hardening modulus normalized with the elastic modulus, parameter of the linear hardening/softening law.
-    double hardeningModulus;
+    double hardeningModulus = 0.;
     /// Parameter of the exponential hardening law.
-    double limitYieldStress;
+    double limitYieldStress = 0.;
     /// Parameter of all three laws, this is the initial value of the yield stress in pure shear.
-    double initialYieldStress;
+    double initialYieldStress = 0.;
     /// Friction coefficient, parameter of the yield criterion.
-    double alpha;
+    double alpha = 0.;
     /// Dilatancy coefficient, parameter of the flow rule.
-    double alphaPsi;
+    double alphaPsi = 0.;
     /// Scalar factor between rate of plastic multiplier and rate of hardening variable.
-    double kFactor;
+    double kFactor = 0.;
 
     /// Associated linear elastic material.
     IsotropicLinearElasticMaterial LEMaterial;
 
     /// Yield tolerance.
-    double yieldTol;
+    double yieldTol = 0.;
     /// Maximum number of iterations for stress return.
-    int newtonIter;
+    int newtonIter = 0;
 
 public:
     /// Constructor
     DruckerPragerPlasticitySM(int n, Domain * d);
-    /// Destructor
-    virtual ~DruckerPragerPlasticitySM() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "DruckerPragerPlasticitySM"; }
     const char *giveInputRecordName() const override { return _IFT_DruckerPragerPlasticitySM_Name; }
 
-    void giveRealStressVector_3d(FloatArray &answer,
-                              GaussPoint *gp,
-                              const FloatArray &strainVector,
-                              TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     /**
      * Perform a standard local stress return using the function computeYieldValue at the specified Gauss point.
@@ -251,7 +246,7 @@ public:
      * @param gp Gauss point.
      * @param strain Strain vector of this Gauss point.
      */
-    void performLocalStressReturn(GaussPoint *gp, const FloatArray &strain);
+    void performLocalStressReturn(GaussPoint *gp, const FloatArrayF<6> &strain) const;
     /**
      * Check if the trial stress state falls within the vertex region.
      * @param eM Elasticity modulus.
@@ -259,21 +254,21 @@ public:
      * @param kM Bulk modulus.
      * @return True for vertex case and false if regular stress return has to be used.
      */
-    bool checkForVertexCase(double eM, double gM, double kM, double trialStressJTwo, double volumetricStress, double tempKappa);
+    bool checkForVertexCase(double eM, double gM, double kM, double trialStressJTwo, double volumetricStress, double tempKappa) const;
     /**
      * Perform stress return for regular case, i.e. if the trial stress state does not lie within the vertex region.
      * @param eM Elasticity modulus.
      * @param gM Shear modulus.
      * @param kM Bulk modulus.
      */
-    void performRegularReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa);
+    void performRegularReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArrayF<6> &stressDeviator, double &volumetricStress, double &tempKappa) const;
     /**
      * Perform stress return for vertex case, i.e. if the trial stress state lies within the vertex region.
      * @param eM Elasticity modulus.
      * @param gM Shear modulus.
      * @param kM Bulk modulus.
      */
-    void performVertexReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArray &stressDeviator, double &volumetricStress, double &tempKappa, double volumetricElasticTrialStrain, double kappa);
+    void performVertexReturn(double eM, double gM, double kM, double trialStressJTwo, FloatArrayF<6> &stressDeviator, double &volumetricStress, double &tempKappa, double volumetricElasticTrialStrain, double kappa) const;
     /**
      * Compute the yield value based on stress and hardening variable.
      * @param meanStress 1/3 of trace of sigma.
@@ -304,37 +299,31 @@ public:
 
     /**
      * Compute and give back algorithmic stiffness matrix for the regular case (no vertex).
-     * @param answer Consistent stiffness matrix.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
+     * @return Consistent stiffness matrix.
      */
-    void giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep);
+    FloatMatrixF<6,6> giveRegAlgorithmicStiffMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Compute consistent stiffness matrix for the vertex case.
-     * @param answer Consistent stiffness matrix.
      * @param mode Material reponse mode.
      * @param gp Gauss point.
      * @param tStep Time step.
+     * @return Consistent stiffness matrix.
      */
-    void giveVertexAlgorithmicStiffMatrix(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep);
+    FloatMatrixF<6,6> giveVertexAlgorithmicStiffMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
 
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
                     InternalStateType type,
                     TimeStep *tStep) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override
     {
-        LEMaterial.giveThermalDilatationVector(answer, gp, tStep);
+        return LEMaterial.giveThermalDilatationVector(gp, tStep);
     }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

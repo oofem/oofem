@@ -83,11 +83,9 @@ QClinearStatic :: ~QClinearStatic()
 }
 
 
-IRResultType
-QClinearStatic :: initializeFrom(InputRecord *ir)
+void
+QClinearStatic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     LinearStatic :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, qcApproach, _IFT_QuasiContinuum_approach);
@@ -179,8 +177,6 @@ QClinearStatic :: initializeFrom(InputRecord *ir)
     }
 
 #endif
-
-    return IRRT_OK;
 }
 
 
@@ -290,11 +286,9 @@ void QClinearStatic :: solveYourselfAt(TimeStep *tStep)
 }
 
 
-IRResultType
-QClinearStatic :: initializeFullSolvedDomain(InputRecord *ir)
+void
+QClinearStatic :: initializeFullSolvedDomain(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainNodes, _IFT_FullSolvedDomain_nodes);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainElements, _IFT_FullSolvedDomain_elements);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainRadius, _IFT_FullSolvedDomain_radius);
@@ -308,15 +302,13 @@ QClinearStatic :: initializeFullSolvedDomain(InputRecord *ir)
         OOFEM_ERROR("invalid format of FullSolvedDomainBox");
     }
 #endif
-
-    return IRRT_OK;
 }
 
 
 bool
 QClinearStatic :: nodeInFullSolvedDomainTest(Node *n)
 {
-    FloatArray &coordinates = *n->giveCoordinates();
+    const auto &coordinates = n->giveCoordinates();
     // is tested node in FullSolvedDomainNodes
     if ( FullSolvedDomainNodes.giveSize() != 0 ) {
         for ( int i = 1; i <= FullSolvedDomainNodes.giveSize(); i++ ) {
@@ -570,7 +562,7 @@ QClinearStatic :: transformMeshToParticles(Domain *d, std :: vector< FloatArray 
             //        OOFEM_WARNING(" ");
         }
 
-        nodeCoords [ i - 1 ] = * nearestParticle->giveCoordinates();
+        nodeCoords [ i - 1 ] = nearestParticle->giveCoordinates();
         newNodeNumbers [ i - 1 ] =  nearestParticle->giveNumber();
     }
 
@@ -627,18 +619,18 @@ QClinearStatic :: transformMeshToParticles(Domain *d, std :: vector< FloatArray 
                  newNodeNumbers.at(n3) == newNodeNumbers.at(n4) ) {
                 continue; // skip degenerate element
             } else {                                            // check degeneration to negative volume
-                double x1 = d->giveDofManager( newNodeNumbers.at(n1) )->giveCoordinates()->at(1);
-                double y1 = d->giveDofManager( newNodeNumbers.at(n1) )->giveCoordinates()->at(2);
-                double z1 = d->giveDofManager( newNodeNumbers.at(n1) )->giveCoordinates()->at(3);
-                double x2 = d->giveDofManager( newNodeNumbers.at(n2) )->giveCoordinates()->at(1);
-                double y2 = d->giveDofManager( newNodeNumbers.at(n2) )->giveCoordinates()->at(2);
-                double z2 = d->giveDofManager( newNodeNumbers.at(n2) )->giveCoordinates()->at(3);
-                double x3 = d->giveDofManager( newNodeNumbers.at(n3) )->giveCoordinates()->at(1);
-                double y3 = d->giveDofManager( newNodeNumbers.at(n3) )->giveCoordinates()->at(2);
-                double z3 = d->giveDofManager( newNodeNumbers.at(n3) )->giveCoordinates()->at(3);
-                double x4 = d->giveDofManager( newNodeNumbers.at(n4) )->giveCoordinates()->at(1);
-                double y4 = d->giveDofManager( newNodeNumbers.at(n4) )->giveCoordinates()->at(2);
-                double z4 = d->giveDofManager( newNodeNumbers.at(n4) )->giveCoordinates()->at(3);
+                double x1 = d->giveDofManager( newNodeNumbers.at(n1) )->giveCoordinate(1);
+                double y1 = d->giveDofManager( newNodeNumbers.at(n1) )->giveCoordinate(2);
+                double z1 = d->giveDofManager( newNodeNumbers.at(n1) )->giveCoordinate(3);
+                double x2 = d->giveDofManager( newNodeNumbers.at(n2) )->giveCoordinate(1);
+                double y2 = d->giveDofManager( newNodeNumbers.at(n2) )->giveCoordinate(2);
+                double z2 = d->giveDofManager( newNodeNumbers.at(n2) )->giveCoordinate(3);
+                double x3 = d->giveDofManager( newNodeNumbers.at(n3) )->giveCoordinate(1);
+                double y3 = d->giveDofManager( newNodeNumbers.at(n3) )->giveCoordinate(2);
+                double z3 = d->giveDofManager( newNodeNumbers.at(n3) )->giveCoordinate(3);
+                double x4 = d->giveDofManager( newNodeNumbers.at(n4) )->giveCoordinate(1);
+                double y4 = d->giveDofManager( newNodeNumbers.at(n4) )->giveCoordinate(2);
+                double z4 = d->giveDofManager( newNodeNumbers.at(n4) )->giveCoordinate(3);
                 double detJ = ( x4 - x1 ) * ( y2 - y1 ) * ( z3 - z1 ) - ( x4 - x1 ) * ( y3 - y1 ) * ( z2 - z1 ) + ( x3 - x1 ) * ( y4 - y1 ) * ( z2 - z1 ) - ( x2 - x1 ) * ( y4 - y1 ) * ( z3 - z1 ) + ( x2 - x1 ) * ( y3 - y1 ) * ( z4 - z1 ) - ( x3 - x1 ) * ( y2 - y1 ) * ( z4 - z1 );
                 if ( detJ <= 0 ) {
                     OOFEM_WARNING("%d-th interpolation element degenerates to negative volume", i);
@@ -702,10 +694,10 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
 {
     // TO DO: use octree here
     double minDistance = 1.0e100;
-    DofManager *p;
+    DofManager *p = nullptr;
     // loop over all particles (nodes in existing domain)
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        double dist = distance(coords, *d->giveDofManager(i)->giveCoordinates() );
+        double dist = distance(coords, d->giveDofManager(i)->giveCoordinates() );
         if ( dist < minDistance ) {
             minDistance = dist;
             p = d->giveDofManager(i);
@@ -715,7 +707,7 @@ QClinearStatic :: findNearestParticle(Domain *d, FloatArray coords)
         return p;
     } else {
         OOFEM_ERROR( "Neares particle for point [%d, %d] not found", coords.at(1), coords.at(2) );
-        return NULL;
+        return nullptr;
     }
 }
 

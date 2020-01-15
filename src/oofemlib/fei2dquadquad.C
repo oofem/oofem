@@ -141,7 +141,7 @@ FEI2dQuadQuad :: evaldNdxi(const FloatArrayF<2> &lcoords)
         -eta * ( 1. - ksi ),
         -ksi * ( 1. - eta ), // 7
         -0.5 * ( 1. - ksi * ksi ),
-        0.5 * ( 1. - eta * eta ), // 8
+        0.5 * ( 1. - eta * eta ), // 83
         -eta * ( 1. + ksi )
     };
 }
@@ -183,7 +183,7 @@ FEI2dQuadQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &
 {
     auto dn = evaldNdxi(lcoords);
     FloatMatrixF<2,2> jacT;
-    for ( int i = 1; i <= dn.cols(); i++ ) {
+    for ( std::size_t i = 1; i <= dn.cols(); i++ ) {
         const auto &c = cellgeo.giveVertexCoordinates(i);
         double x = c.at(xind);
         double y = c.at(yind);
@@ -287,9 +287,8 @@ void
 FEI2dQuadQuad :: edgeLocal2global(FloatArray &answer, int iedge,
                                   const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(2);
@@ -302,41 +301,26 @@ FEI2dQuadQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 }
 
 
-void
-FEI2dQuadQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI2dQuadQuad :: computeLocalEdgeMapping(int iedge) const
 {
-    int aNode = 0, bNode = 0, cNode = 0;
-    edgeNodes.resize(3);
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-        cNode = 5;
+        return {1, 2, 5};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-        cNode = 6;
+        return {2, 3, 6};
     } else if ( iedge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 4;
-        cNode = 7;
+        return {3, 4, 7};
     } else if ( iedge == 4 ) { // edge between nodes 3 4
-        aNode = 4;
-        bNode = 1;
-        cNode = 8;
+        return {4, 1, 8};
     } else {
-        OOFEM_ERROR("wrong edge number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
-
-    edgeNodes.at(1) = aNode;
-    edgeNodes.at(2) = bNode;
-    edgeNodes.at(3) = cNode;
 }
 
 double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double xi = lcoords(0);
     double dN1dxi = -0.5 + xi;
     double dN2dxi =  0.5 + xi;
@@ -359,8 +343,7 @@ double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
 double
 FEI2dQuadQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    IntArray eNodes;
-    this->computeLocalEdgeMapping(eNodes, iEdge);
+    auto eNodes = this->computeLocalEdgeMapping(iEdge);
 
     const FloatArray &node1 = cellgeo.giveVertexCoordinates( eNodes.at(1) );
     double x1 = node1.at(xind);
@@ -410,9 +393,8 @@ double
 FEI2dQuadQuadAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
                                                  const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     double r = n.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1)).at(1) +

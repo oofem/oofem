@@ -92,13 +92,12 @@ protected:
     FloatMatrix transMatrix_L2Gstrain;
 
     /// number of maximum possible cracks (optional parameter)
-    int nMaxCracks;
+    int nMaxCracks = 0;
 
 public:
     FCMMaterialStatus(GaussPoint *g);
-    virtual ~FCMMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     /// returns number of cracks from the previous time step (equilibrated value)
     virtual int giveNumberOfCracks() const;
     /// returns temporary number of cracks
@@ -201,48 +200,62 @@ protected:
 
 public:
     FCMMaterial(int n, Domain *d);
-    virtual ~FCMMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveClassName() const override { return "FCMMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
     virtual void initializeCrack(GaussPoint *gp, TimeStep *tStep, FloatMatrix &base, int nCrack);
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<FCMMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<4> giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<FCMMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<FCMMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<FCMMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<2> giveRealStressVector_2dBeamLayer(const FloatArrayF<2> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<FCMMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<5> giveRealStressVector_PlateLayer(const FloatArrayF<5> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<FCMMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

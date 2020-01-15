@@ -162,7 +162,7 @@ public:
     virtual void postInitialize() { }
 
     // Overloaded methods:
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;

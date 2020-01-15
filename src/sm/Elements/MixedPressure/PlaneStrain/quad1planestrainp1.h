@@ -51,26 +51,26 @@ public:
     virtual ~Quad1PlaneStrainP1() { }
 
 protected:
-    virtual void computePressureNMatrixAt(GaussPoint *gp, FloatArray &Np);
-    virtual void computeVolumetricBmatrixAt(GaussPoint *gp, FloatArray &answer, NLStructuralElement *element);
-    virtual NLStructuralElement *giveElement() { return this; }
+    void computePressureNMatrixAt(GaussPoint *gp, FloatArray &Np) override;
+    void computeVolumetricBmatrixAt(GaussPoint *gp, FloatArray &answer, NLStructuralElement *element) override;
+    NLStructuralElement *giveElement() override { return this; }
 
 public:
-    virtual const char *giveInputRecordName() const { return _IFT_Quad1PlaneStrainP1_Name; }
-    virtual const char *giveClassName() const { return "Quad1PlaneStrainP0"; }
+    const char *giveInputRecordName() const override { return _IFT_Quad1PlaneStrainP1_Name; }
+    const char *giveClassName() const override { return "Quad1PlaneStrainP0"; }
 
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual void giveDofManDofIDMask_u(IntArray &answer);
-    virtual void giveDofManDofIDMask_p(IntArray &answer);
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    void giveDofManDofIDMask_u(IntArray &answer) override;
+    void giveDofManDofIDMask_p(IntArray &answer) override;
 
-    virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep) { BaseMixedPressureElement :: computeStiffnessMatrix(answer, mode, tStep); }
-    virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) { BaseMixedPressureElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
+    void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, TimeStep *tStep) override { BaseMixedPressureElement :: computeStiffnessMatrix(answer, mode, tStep); }
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) override { BaseMixedPressureElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
 
 
-    virtual int giveNumberOfPressureDofs() { return 4; }
-    virtual int giveNumberOfDisplacementDofs() { return 8; }
-    virtual int giveNumberOfDofs() { return 12; }
-    virtual void postInitialize();
+    int giveNumberOfPressureDofs() override { return 4; }
+    int giveNumberOfDisplacementDofs() override { return 8; }
+    int giveNumberOfDofs() override { return 12; }
+    void postInitialize() override;
 };
 } // end namespace oofem
 #endif // quad1planestrainp1_h

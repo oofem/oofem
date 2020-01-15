@@ -102,7 +102,7 @@ public:
 
     int mapStatus(MaterialStatus &oStatus) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     const char *giveClassName() const override { return "MMALeastSquareProjectionPatchType"; }

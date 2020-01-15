@@ -121,7 +121,7 @@ void PrescribedGradientBCPeriodic :: findSlaveToMasterMap()
     for ( int inode : nodes ) {
         Node *masterNode = nullptr;
         Node *node = this->domain->giveNode(inode);
-        const auto &masterCoord = *node->giveCoordinates();
+        const auto &masterCoord = node->giveCoordinates();
         //printf("node %d\n", node->giveLabel()); masterCoord.printYourself();
         // The difficult part, what offset to subtract to find the master side;
         for ( const FloatArray &testJump : jumps ) {
@@ -163,7 +163,7 @@ Dof *PrescribedGradientBCPeriodic :: giveMasterDof(ActiveDof *dof, int mdof)
         return this->domain->giveDofManager(node)->giveDofWithID(dof->giveDofID());
     } else {
         DofIDItem dofid = dof->giveDofID();
-        const auto &coords = *dof->giveDofManager()->giveCoordinates();
+        const auto &coords = dof->giveDofManager()->giveCoordinates();
         int nsd = coords.giveSize();
         if ( dofid == D_u || dofid == V_u ) {
             return this->strain->giveDofWithID(strain_id[nsd*(mdof-2)]);
@@ -262,8 +262,8 @@ void PrescribedGradientBCPeriodic :: computeTangent(FloatMatrix &E, TimeStep *tS
 void PrescribedGradientBCPeriodic :: computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
-    const auto &coords = *dof->giveDofManager()->giveCoordinates();
-    const auto &masterCoords = *master->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
+    const auto &masterCoords = master->giveCoordinates();
 
     FloatArray dx;
     dx.beDifferenceOf(coords, masterCoords);
@@ -283,8 +283,8 @@ double PrescribedGradientBCPeriodic :: giveUnknown(double val, ValueModeType mod
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
     DofIDItem id = dof->giveDofID();
-    const auto &coords = *dof->giveDofManager()->giveCoordinates();
-    const auto &masterCoords = *master->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
+    const auto &masterCoords = master->giveCoordinates();
     FloatArray dx, uM;
     dx.beDifferenceOf(coords, masterCoords);
 
@@ -368,15 +368,13 @@ bool PrescribedGradientBCPeriodic :: isStrainDof(Dof *dof)
 }
 
 
-IRResultType PrescribedGradientBCPeriodic :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCPeriodic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    PrescribedGradientHomogenization::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_PrescribedGradientBCPeriodic_masterSet)
     IR_GIVE_FIELD(ir, this->jump, _IFT_PrescribedGradientBCPeriodic_jump)
-
-    ActiveBoundaryCondition :: initializeFrom(ir);
-    return PrescribedGradientHomogenization::initializeFrom(ir);
 }
 
 

@@ -91,7 +91,7 @@ public:
      * @return Nonzero if o.k.
      */
     virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
-                           Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep) = 0;
+                           Domain *oldd, const FloatArray &coords, IntArray &regList, TimeStep *tStep) = 0;
 protected:
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;

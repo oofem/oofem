@@ -74,10 +74,6 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->bubble->appendDof( new MasterDof(this->bubble.get(), V_w) );
 }
 
-Tet1BubbleStokes :: ~Tet1BubbleStokes()
-{
-}
-
 void Tet1BubbleStokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
@@ -153,7 +149,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
 
         FloatArrayF<15> dN_V;
         FloatMatrixF<6,15> B;
-        for ( int j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
+        for ( std::size_t j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
             dN_V[k + 0] = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(0, j);
             dN_V[k + 1] = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(1, j);
             dN_V[k + 2] = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(2, j);
@@ -329,7 +325,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, MatResponse
 
         FloatArrayF<15> dN_V;
         FloatMatrixF<6,15> B;
-        for ( int j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
+        for ( std::size_t j = 0, k = 0; j < dN.rows(); j++, k += 3 ) {
             dN_V[k + 0] = B(0, k + 0) = B(5, k + 1) = B(4, k + 2) = dN(0, j);
             dN_V[k + 1] = B(1, k + 1) = B(5, k + 0) = B(3, k + 2) = dN(1, j);
             dN_V[k + 2] = B(2, k + 2) = B(4, k + 0) = B(3, k + 1) = dN(2, j);

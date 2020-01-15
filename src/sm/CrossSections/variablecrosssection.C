@@ -49,78 +49,73 @@ namespace oofem {
 REGISTER_CrossSection(VariableCrossSection);
 
 
-IRResultType
-VariableCrossSection :: initializeFrom(InputRecord *ir)
-//
-// instanciates receiver from input record
-//
+void
+VariableCrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thicknessExpr, _IFT_SimpleCrossSection_thick);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_width) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_width) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, widthExpr, _IFT_SimpleCrossSection_width);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_area) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_area) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, areaExpr, _IFT_SimpleCrossSection_area);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_iy) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_iy) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, iyExpr, _IFT_SimpleCrossSection_iy);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_iy) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_iy) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, izExpr, _IFT_SimpleCrossSection_iz);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_ik) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_ik) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, ixExpr, _IFT_SimpleCrossSection_ik);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_shearareay) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_shearareay) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, shearAreayExpr, _IFT_SimpleCrossSection_shearareay);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_shearareaz) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_shearareaz) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, shearAreazExpr, _IFT_SimpleCrossSection_shearareaz);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_drillStiffness) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_drillStiffness) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, drillingStiffnessExpr, _IFT_SimpleCrossSection_drillStiffness);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_relDrillStiffness) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_relDrillStiffness) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, relDrillingStiffnessExpr, _IFT_SimpleCrossSection_relDrillStiffness);
     }
 
-    if ( ir->hasField(_IFT_SimpleCrossSection_drillType) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_drillType) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, drillingTypeExpr, _IFT_SimpleCrossSection_drillType);
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
     directorxExpr.setValue(0.0);
-    if ( ir->hasField(_IFT_SimpleCrossSection_directorx) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_directorx) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, directorxExpr, _IFT_SimpleCrossSection_directorx);
     }
 
     directoryExpr.setValue(0.0);
-    if ( ir->hasField(_IFT_SimpleCrossSection_directory) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_directory) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, directoryExpr, _IFT_SimpleCrossSection_directory);
     }
 
     directorzExpr.setValue(1.0);
-    if ( ir->hasField(_IFT_SimpleCrossSection_directorz) ) {
+    if ( ir.hasField(_IFT_SimpleCrossSection_directorz) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, directorzExpr, _IFT_SimpleCrossSection_directorz);
     }
 
     // will read density and other inheritted parameters as constants
     // NOTE: do not call SimpleCrossSection here (as the parameter names are same, but different type is used here!!!!)
-    return CrossSection :: initializeFrom(ir);
+    CrossSection :: initializeFrom(ir);
 
 }
 
@@ -185,14 +180,14 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx)
+VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx) const
 {
     return this->give(aProperty, gpx->giveNaturalCoordinates(), gpx->giveElement(), true);
 }
 
 
 double
-VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
+VariableCrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local) const
 {
     double value = 0.0;
     const ScalarFunction *expr;

@@ -79,8 +79,8 @@ public:
     void solveYourself() override;
 
     //virtual void initializeYourself(TimeStep *tStep);
-    int instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc) override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    int instanciateYourself(DataReader &dr, InputRecord &ir, const char *outFileName, const char *desc) override;
+    void initializeFrom(InputRecord &ir) override;
     int checkProblemConsistency() override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -100,7 +100,7 @@ public:
     EngngModel *giveSlaveProblem(int i) override { return NULL; }
     int giveNumberOfSlaveProblems() override { return 0; }
 
-    int instanciateDefaultMetaStep(InputRecord *ir) override { return 1; }
+    int instanciateDefaultMetaStep(InputRecord &ir) override { return 1; }
 };
 } // end namespace oofem
 #endif // problemsequence_h

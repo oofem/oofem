@@ -62,14 +62,15 @@ class DofManager;
 class OOFEM_EXPORT ErrorCheckingRule
 {
 protected:
-    int tstep;
-    int tsubstep;
-    int number;
-    double tolerance;
-    double value;
+    int tstep = 0;
+    int tsubstep = 0;
+    int number = 0;
+    double tolerance = 0.;
+    double value = 0.;
 
 public:
-    ErrorCheckingRule(double tol) : tolerance(tol) {tsubstep=0;}
+    ErrorCheckingRule(double tol) : tolerance(tol) { }
+    virtual ~ErrorCheckingRule() = default;
 
     /// Checks if the rule is correct.
     virtual bool check(Domain *domain, TimeStep *tStep) = 0;
@@ -82,8 +83,8 @@ public:
 class OOFEM_EXPORT NodeErrorCheckingRule : public ErrorCheckingRule
 {
 protected:
-    int dofid;
-    ValueModeType mode;
+    int dofid = 0;
+    ValueModeType mode = VM_Unknown;
 
 public:
     NodeErrorCheckingRule(const std :: string &line, double tol);
@@ -95,10 +96,10 @@ public:
 class OOFEM_EXPORT ElementErrorCheckingRule : public ErrorCheckingRule
 {
 protected:
-    int irule;
-    int gpnum;
-    InternalStateType ist;
-    int component;
+    int irule = 0;
+    int gpnum = 0;
+    InternalStateType ist = IST_Undefined;
+    int component = 0;
 
 public:
     ElementErrorCheckingRule(const std :: string &line, double tol);
@@ -116,8 +117,8 @@ public:
     };
 
 protected:
-    BeamElementValueType ist;
-    int component;
+    BeamElementValueType ist = BET_localEndDisplacement;
+    int component = 0;
 
 public:
     BeamElementErrorCheckingRule(const std :: string &line, double tol);
@@ -130,7 +131,7 @@ public:
 class OOFEM_EXPORT ReactionErrorCheckingRule : public ErrorCheckingRule
 {
 protected:
-    int dofid;
+    int dofid = 0;
 
 public:
     ReactionErrorCheckingRule(const std :: string &line, double tol);
@@ -168,8 +169,8 @@ class OOFEM_EXPORT ErrorCheckingExportModule : public ExportModule
 protected:
     std :: string filename;
     std :: vector< std :: unique_ptr< ErrorCheckingRule > > errorCheckingRules;
-    bool allPassed;
-    bool writeChecks;
+    bool allPassed = true;
+    bool writeChecks = false;
     IntArray writeIST;
 
     bool scanToErrorChecks(std :: ifstream &stream, double &errorTolerance);
@@ -179,11 +180,10 @@ protected:
 
 public:
     ErrorCheckingExportModule(int n, EngngModel * e);
-    virtual ~ErrorCheckingExportModule() {}
     ErrorCheckingExportModule(const ErrorCheckingExportModule &) = delete;
     ErrorCheckingExportModule &operator=(const ErrorCheckingExportModule &) = delete;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
 
     const char *giveClassName() const override { return "ErrorCheckingExportModule"; }

@@ -243,13 +243,13 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStrain::nucleateEnrichme
 	}
 
 
-	return std::move( eiList );
+	return eiList;
 }
 
 
-IRResultType NCPrincipalStrain::initializeFrom(InputRecord *ir) {
-
-    IRResultType result; // Required by IR_GIVE_FIELD macro
+void NCPrincipalStrain::initializeFrom(InputRecord &ir)
+{
+    NucleationCriterion::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, mStrainThreshold, _IFT_NCPrincipalStrain_StrainThreshold);
     printf("mStrainThreshold: %e\n", mStrainThreshold);
@@ -262,8 +262,6 @@ IRResultType NCPrincipalStrain::initializeFrom(InputRecord *ir) {
 
     IR_GIVE_FIELD(ir, mPropStrainThreshold, _IFT_NCPrincipalStrain_PropStrainThreshold);
     printf("mPropStrainThreshold: %e\n", mPropStrainThreshold);
-
-    return NucleationCriterion::initializeFrom(ir);
 }
 
 void NCPrincipalStrain :: appendInputRecords(DynamicDataReader &oDR)

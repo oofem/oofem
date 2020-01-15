@@ -96,23 +96,18 @@ SolidShell :: computeGaussPoints()
 FEInterpolation *SolidShell :: giveInterpolation() const { return & interpolation; }
 
 
-IRResultType
-SolidShell :: initializeFrom(InputRecord *ir)
+void
+SolidShell :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 8;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    NLStructuralElement :: initializeFrom(ir);
 
     // Check if EAS should be used
     this->EAS_type = 0;
-    if ( ir->hasField(_IFT_SolidShell_EAS_type) ) {
+    if ( ir.hasField(_IFT_SolidShell_EAS_type) ) {
         IR_GIVE_FIELD(ir, this->EAS_type,   _IFT_SolidShell_EAS_type);
 
     }
-
-    return IRRT_OK;
 }
 
 

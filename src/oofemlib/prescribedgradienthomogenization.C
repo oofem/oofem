@@ -42,17 +42,13 @@
 
 namespace oofem {
 
-IRResultType PrescribedGradientHomogenization :: initializeFrom(InputRecord *ir)
+void PrescribedGradientHomogenization :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, mGradient, _IFT_PrescribedGradientHomogenization_gradient);
 
     mCenterCoord.resize( mGradient.giveNumberOfColumns() );
     mCenterCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_PrescribedGradientHomogenization_centercoords)
-
-    return IRRT_OK;
 }
 
 void PrescribedGradientHomogenization :: giveInputRecord(DynamicInputRecord &input)
@@ -71,6 +67,12 @@ void PrescribedGradientHomogenization :: setPrescribedGradientVoigt(const FloatA
         this->mGradient.at(2, 2) = t.at(2);
         // In voigt form, assuming the use of gamma_12 instead of eps_12
         this->mGradient.at(1, 2) = this->mGradient.at(2, 1) = t.at(3) * 0.5;
+    } if ( n == 4 ) { // Then 2D
+        this->mGradient.resize(2, 2);
+        this->mGradient.at(1, 1) = t.at(1);
+        this->mGradient.at(2, 2) = t.at(2);
+        // In voigt form, assuming the use of gamma_12 instead of eps_12
+        this->mGradient.at(1, 2) = this->mGradient.at(2, 1) = t.at(4) * 0.5;
     } else if ( n == 6 ) { // Then 3D
         this->mGradient.resize(3, 3);
         this->mGradient.at(1, 1) = t.at(1);

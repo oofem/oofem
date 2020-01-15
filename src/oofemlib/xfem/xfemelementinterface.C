@@ -114,7 +114,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
     for ( int i = 1; i <= nDofMan; i++ ) {
         const Node *node = iEl.giveNode(i);
-        const FloatArray &nodeCoord = node->giveNodeCoordinates();
+        const auto &nodeCoord = node->giveCoordinates();
         globalCoord.at(1) += N.at(i) * nodeCoord [ 0 ];
         globalCoord.at(2) += N.at(i) * nodeCoord [ 1 ];
     }
@@ -184,7 +184,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
                     ei->evaluateEnrFuncAt(efGP, globalCoord, iNaturalGpCoord, globalNodeInd, * element, N, elNodes);
 
 
-                    const FloatArray &nodePos = node->giveNodeCoordinates();
+                    const auto &nodePos = node->giveCoordinates();
 
 //                    double levelSetNode  = 0.0;
 //                    ei->evalLevelSetNormalInNode(levelSetNode, globalNodeInd, nodePos);
@@ -309,7 +309,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
                 ei->evaluateEnrFuncAt(efGP, globalCoord, iLocCoord, globalNodeInd, iEl, Nc, elNodes);
 
 
-                const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+                const auto &nodePos = dMan->giveCoordinates();
 
                 std :: vector< double >efNode;
 
@@ -477,14 +477,14 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, int iEnrItemIndex, bool &oIntersection)
 {
-    int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
+    int dim = element->giveDofManager(1)->giveCoordinates().giveSize();
 
-    FloatArray elCenter( element->giveDofManager(1)->giveCoordinates()->giveSize() );
+    FloatArray elCenter( element->giveDofManager(1)->giveCoordinates().giveSize() );
     elCenter.zero();
     std :: vector< const FloatArray * >nodeCoord;
     for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
-        nodeCoord.push_back( element->giveDofManager(i)->giveCoordinates() );
-        elCenter.add( * ( element->giveDofManager(i)->giveCoordinates() ) );
+        nodeCoord.push_back( &element->giveDofManager(i)->giveCoordinates() );
+        elCenter.add( element->giveDofManager(i)->giveCoordinates() );
     }
     elCenter.times( 1.0 / double( element->giveNumberOfDofManagers() ) );
 
@@ -542,16 +542,15 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             // Divide into subdomains
             int triPassed = 0;
             for ( int i = 1; i <= nEdges; i++ ) {
-                IntArray bNodes;
-                this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
+                const auto &bNodes = this->element->giveInterpolation()->boundaryGiveNodes(i);
 
                 if ( bNodes.giveSize() == 2 ) {
 
 					int nsLoc = bNodes.at(1);
 					int neLoc = bNodes.at( bNodes.giveSize() );
 
-					const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
-					const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
+					const auto &coordS = element->giveDofManager(nsLoc)->giveCoordinates();
+					const auto &coordE = element->giveDofManager(neLoc)->giveCoordinates();
 
 					if ( i == intersecEdgeInd [ 0 ] ) {
 						oPointPartitions.push_back( std :: vector< FloatArray >() );
@@ -575,13 +574,13 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 } else if( bNodes.giveSize() == 3 ) {
 
                 	// Start
-					const auto &coordS = * ( element->giveDofManager(bNodes[0])->giveCoordinates() );
+					const auto &coordS = element->giveDofManager(bNodes[0])->giveCoordinates();
 
 					// Center
-					const auto &coordC = * ( element->giveDofManager(bNodes[2])->giveCoordinates() );
+					const auto &coordC = element->giveDofManager(bNodes[2])->giveCoordinates();
 
 					// End
-					const auto &coordE = * ( element->giveDofManager(bNodes[1])->giveCoordinates() );
+					const auto &coordE = element->giveDofManager(bNodes[1])->giveCoordinates();
 
 
 					if ( i == intersecEdgeInd [ 0 ] ) {
@@ -666,7 +665,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             oPointPartitions.resize(1);
 
             for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
-                const FloatArray &nodeCoord = * element->giveDofManager(i)->giveCoordinates();
+                const auto &nodeCoord = element->giveDofManager(i)->giveCoordinates();
                 oPointPartitions [ 0 ].push_back(nodeCoord);
             }
 
@@ -699,7 +698,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, const Triangle &iTri, int iEnrItemIndex, bool &oIntersection)
 {
-    int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
+    int dim = element->giveDofManager(1)->giveCoordinates().giveSize();
 
     FloatArray elCenter( iTri.giveVertex(1).giveSize() );
     elCenter.zero();
@@ -749,7 +748,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         std :: vector< FloatArray >edgeCoords, nodeCoords;
 
         FloatArray tipCoord;
-        int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
+        int dim = element->giveDofManager(1)->giveCoordinates().giveSize();
         tipCoord.resize(dim);
 
         bool foundTip = false;
@@ -854,16 +853,15 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
     FEInterpolation *interp = element->giveInterpolation(); // Geometry interpolation
-    IntArray edgeNodes;
     FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
     if ( interp2d == nullptr ) {
         OOFEM_ERROR("In XfemElementInterface :: partitionEdgeSegment: failed to cast to FEInterpolation2d.\n")
     }
-    interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
+    const auto &edgeNodes = interp2d->computeLocalEdgeMapping(iBndIndex);
 
     // Fetch start and end points.
-    const FloatArray &xS = * ( element->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
-    const FloatArray &xE = * ( element->giveDofManager( edgeNodes.at(2) )->giveCoordinates() );
+    const auto &xS = element->giveDofManager( edgeNodes.at(1) )->giveCoordinates();
+    const auto &xE = element->giveDofManager( edgeNodes.at(2) )->giveCoordinates();
 
     // The point of departure is the original edge segment.
     // This segment will be subdivided as many times as necessary.
@@ -884,8 +882,8 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
         for ( size_t segInd = 0; segInd < numSeg; segInd++ ) {
             // Check if the segment is cut by the current enrichment item
 
-            const FloatArray &seg_xS = oSegments [ segInd ].giveVertex(1);
-            const FloatArray &seg_xE = oSegments [ segInd ].giveVertex(2);
+            const auto &seg_xS = oSegments [ segInd ].giveVertex(1);
+            const auto &seg_xE = oSegments [ segInd ].giveVertex(2);
 
 
             // Local coordinates of vertices
@@ -912,7 +910,7 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
 
 
             for ( int i = 1; i <= Ns.giveSize(); i++ ) {
-                const FloatArray &nodePos = * ( element->giveNode(i)->giveCoordinates() );
+                const auto &nodePos = element->giveNode(i)->giveCoordinates();
                 double phiNode = 0.0;
                 if ( !ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ], nodePos) ) {
                     evaluationSucceeded = false;

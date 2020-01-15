@@ -41,7 +41,6 @@ namespace oofem {
 REGISTER_Material(Steel1);
 
 Steel1 :: Steel1(int n, Domain *d) : PerfectlyPlasticMaterial(n, d)
-    // constructor
 {
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
@@ -173,15 +172,13 @@ Steel1 :: GiveLCPlasticStrainGradient(GaussPoint *gp,
 }
 
 
-IRResultType
-Steel1 :: initializeFrom(InputRecord *ir)
+void
+Steel1 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-    double value;
+    PerfectlyPlasticMaterial :: initializeFrom(ir);
 
+    double value;
     IR_GIVE_FIELD(ir, value, _IFT_Steel1_ry);
     propertyDictionary.add( 'k', value / sqrt(3.) );
-
-    return PerfectlyPlasticMaterial :: initializeFrom(ir);
 }
 } // end namespace oofem

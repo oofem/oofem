@@ -77,11 +77,8 @@ MDM :: CreateStatus(GaussPoint *gp) const
 }
 
 
-int
-MDM :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+MDM :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
@@ -154,7 +151,7 @@ MDM :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
 void
 MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStrain,
-                           GaussPoint *gp, TimeStep *tStep)
+                           GaussPoint *gp, TimeStep *tStep) const
 {
     // local or nonlocal
     if ( nonlocal ) {
@@ -199,7 +196,7 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
 
 void
 MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStrain,
-                                GaussPoint *gp, TimeStep *tStep)
+                                GaussPoint *gp, TimeStep *tStep) const
 {
     FloatArray damageVector(6);
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
@@ -264,7 +261,7 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
 #define HUGE_RELATIVE_COMPLIANCE 1.e20
 
 double
-MDM :: computeDamageOnPlane(GaussPoint *gp, int mnumber, const FloatArray &strain)
+MDM :: computeDamageOnPlane(GaussPoint *gp, int mnumber, const FloatArray &strain) const
 {
     double en, em, el, Ep, Efp, ParEpp;
     double Enorm = 0.0, sv = 0.0, answer = 0.0;
@@ -337,7 +334,7 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, int mnumber, const FloatArray &strai
 
 void
 MDM :: computePDC(FloatMatrix &tempDamageTensor, FloatArray &tempDamageTensorEigenVals,
-                  FloatMatrix &tempDamageTensorEigenVec)
+                  FloatMatrix &tempDamageTensorEigenVec) const
 {
     FloatMatrix help = tempDamageTensor;
 
@@ -359,7 +356,7 @@ MDM :: computePDC(FloatMatrix &tempDamageTensor, FloatArray &tempDamageTensorEig
 
 void
 MDM :: transformStrainToPDC(FloatArray &answer, FloatArray &strain,
-                            FloatMatrix &t, GaussPoint *gp)
+                            FloatMatrix &t, GaussPoint *gp) const
 {
     FloatArray fullStrain;
 
@@ -403,7 +400,7 @@ MDM :: transformStrainToPDC(FloatArray &answer, FloatArray &strain,
 }
 
 void
-MDM :: applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDamageTensorEigenVals)
+MDM :: applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDamageTensorEigenVals) const
 {
     if ( mdmMode == mdm_3d ) {
         double psi1 = tempDamageTensorEigenVals.at(1);
@@ -452,17 +449,17 @@ MDM :: applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDam
 
 
 void
-MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC, GaussPoint *gp, TimeStep *tStep)
+MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatMatrix de;
+    FloatMatrixF<6,6> de;
     if ( mdmMode == mdm_3d ) {
         // PDC components in 3d mode are in full 3d format, even in planeStrain situation
-        linearElasticMaterial.give3dMaterialStiffnessMatrix(de, TangentStiffness, gp, tStep);
+        de = linearElasticMaterial.give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
     } else {
-        linearElasticMaterial.giveStiffnessMatrix(de, TangentStiffness, gp, tStep);
+        de = linearElasticMaterial.give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
     }
 
-    stressPDC.beProductOf(de, strainPDC);
+    stressPDC = dot(de, FloatArrayF<6>(strainPDC));
 }
 
 
@@ -471,7 +468,7 @@ MDM :: computeEffectiveStress(FloatArray &stressPDC, const FloatArray &strainPDC
 #define S(p) stressPDC.at(p)
 
 void
-MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, const FloatMatrix &t, GaussPoint *gp)
+MDM :: transformStressFromPDC(FloatArray &answer, const FloatArray &stressPDC, const FloatMatrix &t, GaussPoint *gp) const
 {
     if ( mdmMode == mdm_3d ) {
         FloatArray fullAnswer(6);
@@ -515,11 +512,12 @@ void
 MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
                                    MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep)
+                                   TimeStep *tStep) const
 {
-    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
-    this->linearElasticMaterial.giveStiffnessMatrix(answer, TangentStiffness, gp, tStep);
+    /// FIXME: ask for 3d stiffness?
+    const_cast<MDM*>(this)->linearElasticMaterial.giveStiffnessMatrix(answer, TangentStiffness, gp, tStep);
     //answer = de;
     //return;
     // if (isVirgin()) return ;
@@ -536,7 +534,7 @@ MDM :: giveMaterialStiffnessMatrix(FloatMatrix &answer,
 #define MAX_REL_COMPL_TRESHOLD 1.e6
 
 void
-MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
+MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp) const
 {
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
@@ -621,36 +619,39 @@ MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
 
 
 void
-MDM :: transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t)
+MDM :: transformStiffnessfromPDC(FloatMatrix &de, const FloatMatrix &t) const
 {
     this->rotateTensor4(de, t);
 }
 
 
-void
-MDM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                     MatResponseMode mode,
+FloatMatrixF<6,6>
+MDM :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                      GaussPoint *gp,
-                                     TimeStep *tStep)
+                                     TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
-}
-
-void
-MDM :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                GaussPoint *gp, TimeStep *tStep)
-{
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<MDM*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-MDM :: givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
-                                GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<3,3>
+MDM :: givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<MDM*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
+
+FloatMatrixF<4,4>
+MDM :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+{
+    FloatMatrix answer;
+    const_cast<MDM*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
+}
 
 
 int
@@ -757,26 +758,24 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, T
     }
 }
 
-void
-MDM :: giveThermalDilatationVector(FloatArray &answer,
-                                   GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+MDM :: giveThermalDilatationVector(GaussPoint *gp,  TimeStep *tStep) const
 {
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = this->tempDillatCoeff;
-    answer.at(2) = this->tempDillatCoeff;
-    answer.at(3) = this->tempDillatCoeff;
+    return {
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        this->tempDillatCoeff,
+        0., 0., 0.
+    };
 }
 
 
-IRResultType
-MDM :: initializeFrom(InputRecord *ir)
+void
+MDM :: initializeFrom(InputRecord &ir)
 //
 // initializes according to string
 //
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->tempDillatCoeff, _IFT_MDM_talpha);
     IR_GIVE_FIELD(ir, this->ParMd, _IFT_MDM_parmd);
     IR_GIVE_FIELD(ir, this->nonlocal, _IFT_MDM_nonloc);
@@ -787,28 +786,26 @@ MDM :: initializeFrom(InputRecord *ir)
             R = 0.0;
         }
 
-        if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        if ( ir.hasField(_IFT_MDM_efp) && ir.hasField(_IFT_MDM_ep) ) {
             // read raw_params if available
             IR_GIVE_FIELD(ir, this->mdm_Efp, _IFT_MDM_efp);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
-        } else if ( ( ir->hasField(_IFT_MDM_gf) ) && ( ir->hasField(_IFT_MDM_ft) ) ) {
+        } else if ( ir.hasField(_IFT_MDM_gf) && ir.hasField(_IFT_MDM_ft) ) {
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->Ft, _IFT_MDM_ft);
         } else {
-            OOFEM_WARNING("unknown set of parameters");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, _IFT_MDM_nonloc, "unknown set of parameters");
         }
     } else { // local case
-        if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        if ( ir.hasField(_IFT_MDM_efp) && ir.hasField(_IFT_MDM_ep) ) {
             // read raw_params if available
             IR_GIVE_FIELD(ir, this->mdm_Efp, _IFT_MDM_efp);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
-        } else if ( ( ir->hasField(_IFT_MDM_gf) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
+        } else if ( ir.hasField(_IFT_MDM_gf) && ir.hasField(_IFT_MDM_ep) ) {
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
         } else {
-            OOFEM_WARNING("unknown set of parameters");
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, _IFT_MDM_nonloc, "unknown set of parameters");
         }
     }
 
@@ -836,30 +833,21 @@ MDM :: initializeFrom(InputRecord *ir)
     OOFEM_LOG_INFO("MDM: using optional mapper %d\n", mapperType);
 #endif
 
-    result = MicroplaneMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MicroplaneMaterial :: initializeFrom(ir);
     
     if ( this->nonlocal ) {
-        result = StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
-        if ( result != IRRT_OK ) return result;
+        StructuralNonlocalMaterialExtensionInterface :: initializeFrom(ir);
     }
 
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    linearElasticMaterial.initializeFrom(ir);
 
 #ifdef MDM_MAPPING_DEBUG
-    result = mapperSFT.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = mapperLST.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    mapperSFT.initializeFrom(ir);
+    mapperLST.initializeFrom(ir);
 #else
-    result = mapper.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    mapper.initializeFrom(ir);
 #endif
-    result = mapper2.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
-    return IRRT_OK;
+    mapper2.initializeFrom(ir);
 }
 
 
@@ -909,7 +897,7 @@ void MDM :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-MDM :: rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t)
+MDM :: rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t) const
 //
 // Interpreting "t" as the rotation matrix containing in its
 // columns the local base vectors, transform a fourth-order tensor
@@ -929,7 +917,7 @@ MDM :: rotateTensor4(FloatMatrix &Dlocal, const FloatMatrix &t)
 
 
 void
-MDM :: formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n)
+MDM :: formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n) const
 //
 // Interpreting "t" as the rotation matrix containing in its
 // columns the local base vectors, form the transformation matrix
@@ -980,7 +968,7 @@ MDM :: formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n
 }
 
 void
-MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedStrain, GaussPoint *gp)
+MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedStrain, GaussPoint *gp) const
 {
     // test if raw parameters are given
     if ( this->mdm_Efp > 0.0 ) {
@@ -1140,7 +1128,7 @@ MDM :: initializeData(int numberOfMicroplanes)
 
 
 void
-MDM :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
+MDM :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const
 {
     /*  Implements the service updating local variables in given integration points,
      * which take part in nonlocal average process.
@@ -1148,16 +1136,15 @@ MDM :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp,
      * corresponding status variable.
      * This service is declared at StructuralNonlocalMaterial level.
      */
-    MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< MDMStatus * >( this->giveStatus(gp) );
     FloatMatrix tempDamageTensor;
-
     this->computeLocalDamageTensor(tempDamageTensor, strainVector, gp, tStep);
     status->setLocalDamageTensorForAverage(tempDamageTensor);
 }
 
 
 double
-MDM :: computeWeightFunction(const FloatArray &src, const FloatArray &coord)
+MDM :: computeWeightFunction(const FloatArray &src, const FloatArray &coord) const
 {
     // Bell shaped function decaying with the distance.
 
@@ -1379,8 +1366,6 @@ MDMStatus :: MDMStatus(GaussPoint *g, int nsd, int nmplanes) : StructuralMateria
 }
 
 
-MDMStatus :: ~MDMStatus() { }
-
 void
 MDMStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
@@ -1451,7 +1436,7 @@ MDMStatus :: initTempStatus()
 }
 
 void
-MDMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MDMStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
@@ -1487,7 +1472,7 @@ MDMStatus :: giveInterface(InterfaceType type)
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
         return this;
     } else {
-        return NULL;
+        return nullptr;
     }
 }
 } // end namespace oofem

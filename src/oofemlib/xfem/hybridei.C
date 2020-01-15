@@ -72,7 +72,7 @@ void HybridEI :: interpLevelSet(double &oLevelSet, const FloatArray &iN, const I
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {
         double levelSetNode = 0.0;
-        const FloatArray &nodePos = this->giveDomain()->giveNode(iNodeInd [ i - 1 ])->giveNodeCoordinates();
+        const auto &nodePos = this->giveDomain()->giveNode(iNodeInd [ i - 1 ])->giveCoordinates();
         if ( evalLevelSetNormalInNode(levelSetNode, iNodeInd [ i - 1 ], nodePos) ) {
             oLevelSet += iN.at(i) * levelSetNode;
         }
@@ -84,7 +84,7 @@ void HybridEI :: interpLevelSetTangential(double &oLevelSet, const FloatArray &i
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {
         double levelSetNode = 0.0;
-        const FloatArray &nodePos = this->giveDomain()->giveNode(iNodeInd [ i - 1 ])->giveNodeCoordinates();
+        const auto &nodePos = this->giveDomain()->giveNode(iNodeInd [ i - 1 ])->giveCoordinates();
         if ( evalLevelSetTangInNode(levelSetNode, iNodeInd [ i - 1 ], nodePos) ) {
             oLevelSet += iN.at(i) * levelSetNode;
         }
@@ -104,7 +104,7 @@ void HybridEI :: interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix
     for ( int i = 1; i <= idNdX.giveNumberOfRows(); i++ ) {
         for ( int j = 1; j <= dim; j++ ) {
             double levelSetNode = 0.0;
-            const FloatArray &nodePos = this->giveDomain()->giveNode(iNodeInd [ i - 1 ])->giveNodeCoordinates();
+            const auto &nodePos = this->giveDomain()->giveNode(iNodeInd [ i - 1 ])->giveCoordinates();
             if ( evalLevelSetNormalInNode(levelSetNode, iNodeInd [ i - 1 ], nodePos) ) {
                 oGradLevelSet.at(j) += idNdX.at(i, j) * levelSetNode;
             }

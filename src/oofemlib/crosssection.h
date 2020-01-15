@@ -140,7 +140,7 @@ public:
      * @param gp Integration point
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a, GaussPoint *gp);
+    virtual double give(CrossSectionProperty a, GaussPoint *gp) const;
     /**
      * Returns the value of cross section property at given point (belonging to given element).
      * the point coordinates can be specified using its local element coordinates or
@@ -152,7 +152,7 @@ public:
      * @param gp Integration point
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local = true);
+    virtual double give(CrossSectionProperty a, const FloatArray &coords, Element *elem, bool local = true) const;
 
     /**
      * Returns the value of cross section property.
@@ -160,7 +160,7 @@ public:
      * @param gp Integration point.
      * @return Property value.
      */
-    virtual double give(int aProperty, GaussPoint *gp) { return 0.0; }
+    virtual double give(int aProperty, GaussPoint *gp) const { return 0.0; }
 
     /**
      * Check for symmetry of stiffness matrix.
@@ -169,7 +169,7 @@ public:
      * @param rMode Response mode of material.
      * @return True if stiffness matrix of receiver is symmetric.
      */
-    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
+    virtual bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const { return false; }
 
     void printYourself() override;
 
@@ -264,14 +264,14 @@ public:
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     /**
      * Returns the material associated with the GP.
      * Default implementation uses gp->giveMaterial() for backwards compatibility, but it should be overloaded in each specialized cross-section.
      */
-    virtual Material *giveMaterial(IntegrationPoint *ip) = 0;
+    virtual Material *giveMaterial(IntegrationPoint *ip) const = 0;
 
     /**
      * Stores integration point state to output stream.

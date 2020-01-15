@@ -93,11 +93,11 @@ public:
     /// Returns time increment.
     double giveTimeIncrement() { return this->deltaT; }
     /// Returns e-model attributes.
-    InputRecord *giveAttributesRecord() { return this->attributes.get(); }
+    InputRecord &giveAttributesRecord() { return *this->attributes; }
     /**
      * Instanciates the receiver from input record.
      */
-    IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir);
     /// Sets the receiver bounds according to given solution step number, returns end index.
     int setStepBounds(int startStepNumber);
     /// Sets the number of steps within the metastep.

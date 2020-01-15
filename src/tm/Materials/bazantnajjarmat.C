@@ -33,7 +33,6 @@
  */
 
 #include "tm/Materials/bazantnajjarmat.h"
-#include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -41,10 +40,10 @@
 namespace oofem {
 REGISTER_Material(BazantNajjarMoistureTransferMaterial);
 
-IRResultType
-BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, C1, _IFT_BazantNajjarMoistureTransferMaterial_c1);
     IR_GIVE_FIELD(ir, n, _IFT_BazantNajjarMoistureTransferMaterial_n);
@@ -53,37 +52,29 @@ BazantNajjarMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 
     this->moistureCapacity = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, moistureCapacity, _IFT_BazantNajjarMoistureTransferMaterial_capa);
-
-    return IsotropicMoistureTransferMaterial :: initializeFrom(ir);
 }
 
 
 double
-BazantNajjarMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep)
+BazantNajjarMoistureTransferMaterial :: giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const
 {
     return this->moistureCapacity;
 }
 
 double
-BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep)
+BazantNajjarMoistureTransferMaterial :: givePermeability(GaussPoint *gp, TimeStep *tStep) const
 {
-    double permeability;
-    double humidity = this->giveHumidity(gp, VM_Total);
-
-    humidity = max(humidity, 0.0);
-    humidity = min(humidity, 1.0);
-
-    permeability = C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
-    return permeability;
+    double humidity = clamp(this->giveHumidity(gp, VM_Total), 0., 1.);
+    return C1 * ( alpha0 + ( 1. - alpha0 ) / ( 1. + pow( ( 1. - humidity ) / ( 1. - hC ), n ) ) );
 }
 
 double
-BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
+BazantNajjarMoistureTransferMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode) const
 {
-    FloatArray tempState = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
-    if ( ( tempState.at(1) > 1.0 ) || ( tempState.at(1) < 0.0 ) ) {
-         OOFEM_WARNING("Relative humidity %.5f is out of range 0.0 - 1.0", tempState.at(1) );
+    auto field = static_cast< TransportMaterialStatus * >( giveStatus(gp) )->giveTempField();
+    if ( ( field > 1.0 ) || ( field < 0.0 ) ) {
+         OOFEM_WARNING("Relative humidity %.5f is out of range 0.0 - 1.0", field );
     }
-    return tempState.at(1);
+    return field;
 }
 } // end namespace oofem

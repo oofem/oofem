@@ -45,15 +45,14 @@ MaxwellChainMaterial :: MaxwellChainMaterial(int n, Domain *d) : RheoChainMateri
 { }
 
 
-void
-MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep)
+FloatArray
+MaxwellChainMaterial :: computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const
 {
-    int rSize;
     FloatArray rhs(this->nUnits), discreteRelaxFunctionVal;
     FloatMatrix A(this->nUnits, this->nUnits);
 
     const FloatArray &rTimes = this->giveDiscreteTimes();
-    rSize = rTimes.giveSize();
+    int rSize = rTimes.giveSize();
 
     // compute discrete values of the relaxation function at times rTimes
     // from the creep function (by numerically solving integral equations)
@@ -96,13 +95,15 @@ MaxwellChainMaterial :: computeCharCoefficients(FloatArray &answer, double tPrim
     }
 
     // solve the linear system
+    FloatArray answer;
     A.solveForRhs(rhs, answer);
+    return answer;
 }
 
 
 
 double
-MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
+MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep) const
 {
     /*
      * This function returns the incremental modulus for the given time increment.
@@ -143,7 +144,7 @@ MaxwellChainMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
 
 void
 MaxwellChainMaterial :: giveEigenStrainVector(FloatArray &answer,
-                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode)
+                                              GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
 //
 // computes the strain due to creep at constant stress during the increment
 // (in fact, the INCREMENT of creep strain is computed for mode == VM_Incremental)
@@ -267,10 +268,10 @@ MaxwellChainMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-IRResultType
-MaxwellChainMaterial :: initializeFrom(InputRecord *ir)
+void
+MaxwellChainMaterial :: initializeFrom(InputRecord &ir)
 {
-    return RheoChainMaterial :: initializeFrom(ir);
+    RheoChainMaterial :: initializeFrom(ir);
 }
 
 /****************************************************************************************/
@@ -280,7 +281,7 @@ MaxwellChainMaterialStatus :: MaxwellChainMaterialStatus(GaussPoint *g, int nuni
 
 
 void
-MaxwellChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+MaxwellChainMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     RheoChainMaterialStatus :: printOutputAt(file, tStep);
 }

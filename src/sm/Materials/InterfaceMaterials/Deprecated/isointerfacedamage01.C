@@ -156,10 +156,10 @@ IsoInterfaceDamageMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, In
 }
 
 
-IRResultType
-IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
+void
+IsoInterfaceDamageMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, kn, _IFT_IsoInterfaceDamageMaterial_kn);
     IR_GIVE_FIELD(ir, ks, _IFT_IsoInterfaceDamageMaterial_ks);
@@ -175,8 +175,6 @@ IsoInterfaceDamageMaterial :: initializeFrom(InputRecord *ir)
 
     beta = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, beta, _IFT_IsoInterfaceDamageMaterial_beta);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 
@@ -222,7 +220,7 @@ IsoInterfaceDamageMaterialStatus :: IsoInterfaceDamageMaterialStatus(GaussPoint 
 
 
 void
-IsoInterfaceDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IsoInterfaceDamageMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");

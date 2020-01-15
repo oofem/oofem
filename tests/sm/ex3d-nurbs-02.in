@@ -5,37 +5,37 @@ errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 27 nelem 1 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 1 nset 4
-node 1 coords 4 0 0 0 1
-node 2 coords 4 2 0 0 1
-node 3 coords 4 4 0 0 1
-node 4 coords 4 0 1.5 0 1
-node 5 coords 4 2 1.5 0 1
-node 6 coords 4 4 1.5 0 1
-node 7 coords 4 0 3 0 1
-node 8 coords 4 2 3 0 1
-node 9 coords 4 4 3 0 1
+node 1 coords 3 0 0 0
+node 2 coords 3 2 0 0
+node 3 coords 3 4 0 0
+node 4 coords 3 0 1.5 0
+node 5 coords 3 2 1.5 0
+node 6 coords 3 4 1.5 0
+node 7 coords 3 0 3 0
+node 8 coords 3 2 3 0
+node 9 coords 3 4 3 0
 #
-node 10 coords 4 0 0 2.5 1
-node 11 coords 4 2 0 2.5 1
-node 12 coords 4 4 0 2.5 1
-node 13 coords 4 0 1.5 2.5 1
-node 14 coords 4 2 1.5 2.5 1
-node 15 coords 4 4 1.5 2.5 1
-node 16 coords 4 0 3 2.5 1
-node 17 coords 4 2 3 2.5 1
-node 18 coords 4 4 3 2.5 1
+node 10 coords 3 0 0 2.5
+node 11 coords 3 2 0 2.5
+node 12 coords 3 4 0 2.5
+node 13 coords 3 0 1.5 2.5
+node 14 coords 3 2 1.5 2.5
+node 15 coords 3 4 1.5 2.5
+node 16 coords 3 0 3 2.5
+node 17 coords 3 2 3 2.5
+node 18 coords 3 4 3 2.5
 #
-node 19 coords 4 0 0 5 1
-node 20 coords 4 2 0 5 1
-node 21 coords 4 4 0 5 1
-node 22 coords 4 0 1.5 5 1
-node 23 coords 4 2 1.5 5 1
-node 24 coords 4 4 1.5 5 1
-node 25 coords 4 0 3 5 1
-node 26 coords 4 2 3 5 1
-node 27 coords 4 4 3 5 1
+node 19 coords 3 0 0 5
+node 20 coords 3 2 0 5
+node 21 coords 3 4 0 5
+node 22 coords 3 0 1.5 5
+node 23 coords 3 2 1.5 5
+node 24 coords 3 4 1.5 5
+node 25 coords 3 0 3 5
+node 26 coords 3 2 3 5
+node 27 coords 3 4 3 5
 #
-nurbs3delement 1 nodes 27 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 crossSect 1 knotvectoru 2 0 1 knotmultiplicityu 2 3 3 knotvectorv 2 0 1 knotmultiplicityv 2 3 3 knotvectorw 2 0 1 knotmultiplicityw 2 3 3 degree 3 2 2 2 nip 64
+nurbs3delement 1 crossSect 1 nodes 27 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 weights 27 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 knotvectoru 2 0 1 knotmultiplicityu 2 3 3 knotvectorv 2 0 1 knotmultiplicityv 2 3 3 knotvectorw 2 0 1 knotmultiplicityw 2 3 3 degree 3 2 2 2 nip 64
 #
 SimpleCS 1 material 1
 #

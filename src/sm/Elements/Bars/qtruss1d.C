@@ -59,10 +59,10 @@ QTruss1d :: QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
 }
 
 
-IRResultType
-QTruss1d :: initializeFrom(InputRecord *ir)
+void
+QTruss1d :: initializeFrom(InputRecord &ir)
 {
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 void
@@ -81,13 +81,13 @@ QTruss1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoor
 void
 QTruss1d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
 }
 
 void
 QTruss1d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(rMode, gp, tStep);
 }
 
 double

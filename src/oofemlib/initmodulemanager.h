@@ -60,7 +60,7 @@ public:
      */
     void doInit();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveClassName() const override { return "InitModuleManager"; }
 };

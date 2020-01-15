@@ -67,7 +67,6 @@ namespace oofem {
 class HeMoKunzelMaterial : public TransportMaterial
 {
 protected:
-
     enum isothermType { Hansen, Kunzeliso } Isotherm;
 
     enum permeabilityType { Multilin_h, Multilin_wV, Kunzelperm } Permeability;
@@ -77,23 +76,23 @@ protected:
     FloatArray perm_wV;
     FloatArray perm_DwwV;
 
-    double A;            ///< water absorption coefficient [kg m^-2 s^-0.5]
+    double A = 0.;            ///< water absorption coefficient [kg m^-2 s^-0.5]
 
-    double iso_wh;       ///< Parameter of Hansen's/Kunzel's isotherm - max. adsorbed water content [kg/m^3]
-    double iso_n;        ///< Parameter of Hansen's isotherm - exponent
-    double iso_a;        ///< Parameter of Hansen's isotherm
-    double iso_b;        ///< Parameter of Kunzel's isotherm
+    double iso_wh = 0.;       ///< Parameter of Hansen's/Kunzel's isotherm - max. adsorbed water content [kg/m^3]
+    double iso_n = 0.;        ///< Parameter of Hansen's isotherm - exponent
+    double iso_a = 0.;        ///< Parameter of Hansen's isotherm
+    double iso_b = 0.;        ///< Parameter of Kunzel's isotherm
 
-    double mu;           ///< water vapor diffusion resistance [-]
-    double PL;           ///< ambient atmospheric pressure [Pa]
+    double mu = 0.;           ///< water vapor diffusion resistance [-]
+    double PL = 0.;           ///< ambient atmospheric pressure [Pa]
 
-    double lambda0;      ///< thermal conductivity [W m^-1 K^-1]
-    double b;            ///< thermal conductivity supplement [-]
-    double rho;          ///< bulk density of dry building material [kg m^-3]
-    double rhoH2O;       ///< water density [kg m^-3]
-    double cs;           ///< specific heat capacity of the building material [J kg^-1 K^-1]
-    double cw;           ///< specific heat capacity of liquid water [J kg^-1 K^-1]
-    double hv;           ///< latent heat of phase change/evaporation enthalpy of pure water [J/kg]
+    double lambda0 = 0.;      ///< thermal conductivity [W m^-1 K^-1]
+    double b = 0.;            ///< thermal conductivity supplement [-]
+    double rho = 0.;          ///< bulk density of dry building material [kg m^-3]
+    double rhoH2O = 0.;       ///< water density [kg m^-3]
+    double cs = 0.;           ///< specific heat capacity of the building material [J kg^-1 K^-1]
+    double cw = 0.;           ///< specific heat capacity of liquid water [J kg^-1 K^-1]
+    double hv = 0.;           ///< latent heat of phase change/evaporation enthalpy of pure water [J/kg]
 
 public:
     /**
@@ -102,57 +101,44 @@ public:
      * @param d Domain to which new material will belong.
      */
     HeMoKunzelMaterial(int n, Domain *d) : TransportMaterial(n, d) { }
-    /// Destructor.
-    virtual ~HeMoKunzelMaterial() { }
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    std::pair<FloatArrayF<3>, FloatArrayF<3>> computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *atTime) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
-    double giveCharacteristicValue(MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *atTime) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-
-    double give(int aProperty, GaussPoint *gp) override;
-
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_HeMoKunzelMaterial_Name; }
     const char *giveClassName() const override { return "HeMoKunzelMaterial"; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *atTime) override;
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
 
     /// returns water content (in kg/m^3)
-    double giveMoistureContent(double h);
+    double giveMoistureContent(double h) const;
 
     /// computes derivative of the moisture storage function (sorption isotherm) with respect to relative humidity
-    double giveMoistureContentDerivative(double h);
+    double giveMoistureContentDerivative(double h) const;
 
-    double computeWaterVaporPerm(double T);
-    double computeSatVaporPressure(double T);
-    double computeSatVaporPressureDerivative(double T);
-    double computeDw(double h);
+    double computeWaterVaporPerm(double T) const;
+    double computeSatVaporPressure(double T) const;
+    double computeSatVaporPressureDerivative(double T) const;
+    double computeDw(double h) const;
+
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new HeMoTransportMaterialStatus(gp); }
 
 protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *atTime);
+    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime) const;
 
-    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *atTime);
-
-    double perm_mm(double h, double T);
-    double perm_mh(double h, double T);
-    double perm_hm(double h, double T);
-    double perm_hh(double h, double T);
+    double perm_mm(double h, double T) const;
+    double perm_mh(double h, double T) const;
+    double perm_hm(double h, double T) const;
+    double perm_hh(double h, double T) const;
 
 };
 } // end namespace oofem

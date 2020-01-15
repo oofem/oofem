@@ -47,17 +47,13 @@ InitModule :: ~InitModule()
 { }
 
 
-IRResultType
-InitModule :: initializeFrom(InputRecord *ir)
+void
+InitModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     std :: string initFileName;
     IR_GIVE_FIELD(ir, initFileName, _IFT_InitModule_initfilename);
     if ( ( initStream = fopen(initFileName.c_str(), "r") ) == NULL ) {
         OOFEM_ERROR("failed to open file %s", initFileName.c_str());
     }
-
-    return IRRT_OK;
 }
 } // end namespace oofem

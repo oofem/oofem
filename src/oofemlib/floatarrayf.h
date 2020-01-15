@@ -40,6 +40,7 @@
 #include "contextmode.h"
 #include "datastream.h"
 #include "error.h"
+#include "floatarray.h"
 
 #include <array>
 #include <initializer_list>
@@ -53,7 +54,7 @@ namespace oofem {
  * Class representing vector of real numbers with compile time fixed size.
  * @author Mikael Öhman
  */
-template<int N>
+template<std::size_t N>
 class OOFEM_EXPORT FloatArrayF
 {
 protected:
@@ -142,6 +143,39 @@ public:
         return values [ i ];
 #endif
     }
+
+    /**
+     * Multi-indexing to select sub-vectors,
+     * @param c Position of coefficient in array.
+     */
+    template<std::size_t M>
+    inline FloatArrayF<M> operator[] (int const (&c)[M]) const
+    {
+        FloatArrayF<M> x;
+        for ( std::size_t i = 0; i < M; ++i ) {
+            x[i] = values[ c[i] ];
+        }
+        return x;
+    }
+
+    /// Assign x into self.
+    template<size_t M>
+    inline void assign(const FloatArrayF<M> &x, int const (&c)[M] )
+    {
+        for ( std::size_t i = 0; i < M; ++i ) {
+            (*this)[c[i]] = x[i];
+        }
+    }
+
+    /// Assemble x into self.
+    template<size_t M>
+    inline void assemble(const FloatArrayF<M> &x, int const (&c)[M] )
+    {
+        for ( std::size_t i = 0; i < M; ++i ) {
+            (*this)[c[i]] += x[i];
+        }
+    }
+    
     /// Returns the size of receiver.
     int size() const { return N; }
     /// Returns the size of receiver.
@@ -189,8 +223,21 @@ public:
     //friend class FloatMatrixF;
 };
 
+
+/// Assemble components into zero matrix.
+template<size_t N, size_t M>
+inline FloatArrayF<N> assemble(const FloatArrayF<M> &x, int const (&c)[M] )
+{
+    FloatArrayF<N> out;
+    for ( std::size_t i = 0; i < M; ++i ) {
+        out[c[i]] = x[i];
+    }
+    return out;
+}
+
+
 /// Print to stream
-template<int N>
+template<std::size_t N>
 std::ostream & operator << ( std::ostream & out, const FloatArrayF<N> & x )
 {
     out << x.size();
@@ -201,81 +248,103 @@ std::ostream & operator << ( std::ostream & out, const FloatArrayF<N> & x )
 }
 
 /// Simple math operations
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> operator * ( double a, const FloatArrayF<N> & x )
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         out[i] = x[i] * a;
     }
     return out;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> operator * ( const FloatArrayF<N> & x, double a )
 {
     return a*x;
 }
 
-template<int N>
-FloatArrayF<N> operator / ( const FloatArrayF<N> & x, double a )
+/// Element-wise multiplication
+template<std::size_t N>
+FloatArrayF<N> mult ( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < N; ++i ) {
-        out[i] = x[i] * a;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        out[i] = x[i] * y[i];
     }
     return out;
 }
 
-template<int N>
+
+template<std::size_t N>
+FloatArrayF<N> operator / ( const FloatArrayF<N> & x, double a )
+{
+    FloatArrayF<N> out;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        out[i] = x[i] / a;
+    }
+    return out;
+}
+
+template<std::size_t N>
 FloatArrayF<N> operator ^ ( const FloatArrayF<N> & x, double a)
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         out[i] = std::pow(x[i], a);
     }
     return out;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> operator + ( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         out[i] = x[i] + y[i];
     }
     return out;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> operator - ( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
     FloatArrayF<N> out;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         out[i] = x[i] - y[i];
     }
     return out;
 }
 
-template<int N>
+template<std::size_t N>
+FloatArrayF<N> operator - ( const FloatArrayF<N> & x )
+{
+    FloatArrayF<N> out;
+    for ( std::size_t i = 0; i < N; ++i ) {
+        out[i] = - x[i];
+    }
+    return out;
+}
+
+template<std::size_t N>
 FloatArrayF<N> &operator += ( FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         x[i] += y[i];
     }
     return x;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> &operator -= ( FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         x[i] -= y[i];
     }
     return x;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> &operator *= ( FloatArrayF<N> & x, double a )
 {
     for ( auto &v : x ) {
@@ -284,7 +353,7 @@ FloatArrayF<N> &operator *= ( FloatArrayF<N> & x, double a )
     return x;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> &operator /= ( FloatArrayF<N> & x, double a )
 {
     for ( auto &v : x ) {
@@ -293,7 +362,7 @@ FloatArrayF<N> &operator /= ( FloatArrayF<N> & x, double a )
     return x;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> operator ^= ( FloatArrayF<N> & x, double a)
 {
     for ( auto &v : x ) {
@@ -303,11 +372,11 @@ FloatArrayF<N> operator ^= ( FloatArrayF<N> & x, double a)
 
 
 /// Returns true if all coefficients of the receiver are 0, else false.
-template<int N>
+template<std::size_t N>
 bool iszero(const FloatArrayF<N> &x)
 {
-    for ( auto &x : x ) {
-        if ( x != 0. ) {
+    for ( auto &v : x ) {
+        if ( v != 0. ) {
             return false;
         }
     }
@@ -315,7 +384,7 @@ bool iszero(const FloatArrayF<N> &x)
 }
 
 /// Returns true if all coefficients of the receiver are finite, else false.
-template<int N>
+template<std::size_t N>
 bool isfinite( const FloatArrayF<N> &x )
 {
     for ( auto &val : x ) {
@@ -327,7 +396,7 @@ bool isfinite( const FloatArrayF<N> &x )
 }
 
 /// Computes the L2 norm of x
-template<int N>
+template<std::size_t N>
 double norm_squared( const FloatArrayF<N> & x )
 {
     double ans = 0.;
@@ -338,35 +407,42 @@ double norm_squared( const FloatArrayF<N> & x )
 }
 
 /// Computes the L2 norm of x
-template<int N>
+template<std::size_t N>
 double norm( const FloatArrayF<N> & x )
 {
     return std::sqrt(norm_squared(x));
 }
 
+/// Normalizes vector (L2 norm)
+template<std::size_t N>
+FloatArrayF<N> normalize( const FloatArrayF<N> & x )
+{
+    return x / norm(x);
+}
+
 /// Computes the sum of x
-template<int N>
+template<std::size_t N>
 double sum( const FloatArrayF<N> & x )
 {
     return std::accumulate(x.begin(), x.end(), 0.);
 }
 
 /// Computes the product of x
-template<int N>
+template<std::size_t N>
 double product( const FloatArrayF<N> & x )
 {
     return std::accumulate(x.begin(), x.end(), 1.0, [](double a, double b) { return a*b; });
 }
 
 /// Computes the norm(a-b)^2
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> distance_squared(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     return norm_squared(a-b);
 }
 
 /// Computes the norm(a-b)
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> distance(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     return norm(a-b);
@@ -383,11 +459,11 @@ inline FloatArrayF<3> cross( const FloatArrayF<3> & x, const FloatArrayF<3> & y 
 }
 
 /// Computes @$ x_i y_i @$
-template<int N>
+template<std::size_t N>
 double dot( const FloatArrayF<N> & x, const FloatArrayF<N> & y )
 {
     double ans = 0.;
-    for ( int i = 0; i < N; ++i ) {
+    for ( std::size_t i = 0; i < N; ++i ) {
         ans += x[i] * y[i];
     }
     return ans;
@@ -410,21 +486,21 @@ inline void swap_46(FloatArrayF<9> &t)
     std::swap( t[7], t[8] );
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> max(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     FloatArrayF<N> out;
-    for (int i; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         out[i] = std::max(a[i], b[i]);
     }
     return out;
 }
 
-template<int N>
+template<std::size_t N>
 FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 {
     FloatArrayF<N> out;
-    for (int i; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         out[i] = std::min(a[i], b[i]);
     }
     return out;
@@ -433,6 +509,23 @@ FloatArrayF<N> min(const FloatArrayF<N> &a, const FloatArrayF<N> &b)
 /// I expressed in Voigt form
 const FloatArrayF<6> I6 {1., 1., 1., 0., 0., 0.};
 
+/// Convert stress to strain Voigt form
+inline FloatArrayF<6> to_voigt_strain(const FloatArrayF<6> &s)
+{
+    return {s[0], s[1], s[2], 0.5*s[3], 0.5*s[4], 0.5*s[5]};
+}
+
+/// Convert strain to stress Voigt form
+inline FloatArrayF<6> to_voigt_stress(const FloatArrayF<6> &e)
+{
+    return {e[0], e[1], e[2], 2*e[3], 2*e[4], 2*e[5]};
+}
+
+/// For more readable code
+template<std::size_t N>
+FloatArrayF<N> zeros() {
+    return FloatArrayF<N>();
+}
 
 } // end namespace oofem
 #endif // floatarrayf_h

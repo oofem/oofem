@@ -112,7 +112,7 @@ public:
     /// Returns the preconditioner name.
     virtual const char *giveClassName() const { return "Preconditioner"; }
     /// Initializes receiver from given record. Empty implementation.
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
 };
 } // end namespace oofem
 #endif // precond_h

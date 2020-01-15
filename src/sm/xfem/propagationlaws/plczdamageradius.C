@@ -54,15 +54,11 @@ namespace oofem {
 REGISTER_PropagationLaw(PLCZdamageRadius)
 
 /////////////////////////////////////////////
-IRResultType PLCZdamageRadius :: initializeFrom(InputRecord *ir)
+void PLCZdamageRadius :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-    
     IR_GIVE_FIELD(ir, mIncrementRadius,         _IFT_PLCZdamageRadius_IncRadius);
     IR_GIVE_FIELD(ir, mDamageThreshold, _IFT_PLCZdamageRadius_DamageThreshold);
     IR_GIVE_OPTIONAL_FIELD(ir, this->mPropCS, _IFT_PLCZdamageRadius_PropagationCS);
-
-    return IRRT_OK;
 }
 
 void PLCZdamageRadius :: giveInputRecord(DynamicInputRecord &input)
@@ -181,10 +177,10 @@ bool PLCZdamageRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
     for ( int i = 1 ; i <= propagationDF.giveSize() ; i++ ) {
         
         Node *iNode = iDomain.giveNode(propagationDF.at(i));
-        const FloatArray gCoords = iNode->giveNodeCoordinates();
+        const auto &gCoords = iNode->giveCoordinates();
         
         std :: list< int > nodeList;
-        localizer->giveAllNodesWithinBox(nodeList,gCoords,mIncrementRadius);
+        localizer->giveAllNodesWithinBox(nodeList, gCoords, mIncrementRadius);
         for ( int jNode : nodeList ) {
             //printf("nodeList node %d \n",jNode);
             oTipProp.mPropagationDofManNumbers.insertSortedOnce(jNode);

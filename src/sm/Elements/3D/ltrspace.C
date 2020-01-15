@@ -187,9 +187,8 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
                                                              IntArray &controlNode, IntArray &controlDof,
                                                              HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    FloatArray *corner [ 4 ], midSide [ 6 ], midFace [ 4 ], midNode;
     double x = 0.0, y = 0.0, z = 0.0;
-    int inode, nodes = 4, iside, sides = 6, iface, faces = 4, nd, nd1, nd2;
+    int nodes = 4, sides = 6, faces = 4;
 
     static int sideNode [ 6 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 1 }, { 1, 4 }, { 2, 4 }, { 3, 4 } };
     static int faceNode [ 4 ] [ 3 ] = { { 1, 2, 3 }, { 1, 2, 4 }, { 2, 3, 4 }, { 3, 1, 4 } };
@@ -201,25 +200,26 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
     int hexaSideNode [ 4 ] [ 3 ] = { { 1, 3, 4 }, { 2, 1, 5 }, { 3, 2, 6 }, { 4, 6, 5 } };
     int hexaFaceNode [ 4 ] [ 3 ] = { { 1, 2, 4 }, { 1, 3, 2 }, { 1, 4, 3 }, { 4, 2, 3 } };
 
+    FloatArray corner [ 4 ], midSide [ 6 ], midFace [ 4 ], midNode;
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
-        for ( inode = 0; inode < nodes; inode++ ) {
+        for ( int inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
 
-            x += corner [ inode ]->at(1);
-            y += corner [ inode ]->at(2);
-            z += corner [ inode ]->at(3);
+            x += corner [ inode ].at(1);
+            y += corner [ inode ].at(2);
+            z += corner [ inode ].at(3);
         }
 
-        for ( iside = 0; iside < sides; iside++ ) {
+        for ( int iside = 0; iside < sides; iside++ ) {
             midSide [ iside ].resize(3);
 
-            nd1 = sideNode [ iside ] [ 0 ] - 1;
-            nd2 = sideNode [ iside ] [ 1 ] - 1;
+            int nd1 = sideNode [ iside ] [ 0 ] - 1;
+            int nd2 = sideNode [ iside ] [ 1 ] - 1;
 
-            midSide [ iside ].at(1) = ( corner [ nd1 ]->at(1) + corner [ nd2 ]->at(1) ) / 2.0;
-            midSide [ iside ].at(2) = ( corner [ nd1 ]->at(2) + corner [ nd2 ]->at(2) ) / 2.0;
-            midSide [ iside ].at(3) = ( corner [ nd1 ]->at(3) + corner [ nd2 ]->at(3) ) / 2.0;
+            midSide [ iside ].at(1) = ( corner [ nd1 ].at(1) + corner [ nd2 ].at(1) ) / 2.0;
+            midSide [ iside ].at(2) = ( corner [ nd1 ].at(2) + corner [ nd2 ].at(2) ) / 2.0;
+            midSide [ iside ].at(3) = ( corner [ nd1 ].at(3) + corner [ nd2 ].at(3) ) / 2.0;
         }
 
         midNode.resize(3);
@@ -228,13 +228,13 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
         midNode.at(2) = y / nodes;
         midNode.at(3) = z / nodes;
 
-        for ( iface = 0; iface < faces; iface++ ) {
+        for ( int iface = 0; iface < faces; iface++ ) {
             x = y = z = 0.0;
-            for ( inode = 0; inode < 3; inode++ ) {
-                nd = faceNode [ iface ] [ inode ] - 1;
-                x += corner [ nd ]->at(1);
-                y += corner [ nd ]->at(2);
-                z += corner [ nd ]->at(3);
+            for ( int inode = 0; inode < 3; inode++ ) {
+                int nd = faceNode [ iface ] [ inode ] - 1;
+                x += corner [ nd ].at(1);
+                y += corner [ nd ].at(2);
+                z += corner [ nd ].at(3);
             }
 
             midFace [ iface ].resize(3);

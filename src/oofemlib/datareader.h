@@ -75,7 +75,7 @@ public:
      * @param irType Determines type of record to be returned.
      * @param recordId Determines the record  number corresponding to component number.
      */
-    virtual InputRecord *giveInputRecord(InputRecordType irType, int recordId) = 0;
+    virtual InputRecord &giveInputRecord(InputRecordType irType, int recordId) = 0;
 
     /**
      * Peak in advance into the record list.
@@ -94,9 +94,6 @@ public:
     std :: string giveOutputFileName() { return this->outputFileName; }
     /// Gives the problem description
     std :: string giveDescription() { return this->description; }
-
-    /// Prints the error message.
-    void report_error(const char *_class, const char *proc, const char *kwd, IRResultType result, const char *file, int line);
 };
 } // end namespace oofem
 #endif // datareader_h

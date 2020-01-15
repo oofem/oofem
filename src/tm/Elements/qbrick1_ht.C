@@ -63,9 +63,6 @@ QBrick1_hmt :: QBrick1_hmt(int n, Domain *aDomain) : QBrick1_ht(n, aDomain)
     emode = HeatMass1TransferEM;
 }
 
-QBrick1_ht :: ~QBrick1_ht()
-{ }
-
 
 FEInterpolation *
 QBrick1_ht :: giveInterpolation() const { return & interpolation; }
@@ -73,7 +70,6 @@ QBrick1_ht :: giveInterpolation() const { return & interpolation; }
 
 void
 QBrick1_ht :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -83,25 +79,21 @@ QBrick1_ht :: computeGaussPoints()
 }
 
 
-IRResultType
-QBrick1_ht :: initializeFrom(InputRecord *ir)
+void
+QBrick1_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 27;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 
 double
 QBrick1_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-    return volume;
+    return determinant * gp->giveWeight();
 }
 
 
@@ -117,11 +109,8 @@ QBrick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 double
 QBrick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-    return volume;
+    double determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    return determinant * gp->giveWeight();
 }
 
 
@@ -138,7 +127,7 @@ QBrick1_ht :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void

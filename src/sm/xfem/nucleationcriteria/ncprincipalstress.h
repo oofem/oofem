@@ -56,7 +56,7 @@ public:
 
     std::vector<std::unique_ptr<EnrichmentItem>> nucleateEnrichmentItems() override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void appendInputRecords(DynamicDataReader &oDR) override;
 

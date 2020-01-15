@@ -45,12 +45,9 @@ namespace oofem {
 Material :: Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary(), castingTime(-1.) { }
 
 
-Material :: ~Material()
-{}
-
 
 double
-Material :: give(int aProperty, GaussPoint *gp)
+Material :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 // tStep allows time dependent behavior to be taken into account
@@ -68,7 +65,7 @@ Material :: give(int aProperty, GaussPoint *gp)
 
 
 bool
-Material :: hasProperty(int aProperty, GaussPoint *gp)
+Material :: hasProperty(int aProperty, GaussPoint *gp) const
 // Returns true if the aProperty is defined on a material
 {
     return propertyDictionary.includes(aProperty);
@@ -86,11 +83,9 @@ Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
 }
 
 
-IRResultType
-Material :: initializeFrom(InputRecord *ir)
+void
+Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     double value;
 
 #  ifdef VERBOSE
@@ -105,8 +100,6 @@ Material :: initializeFrom(InputRecord *ir)
     
     this->preCastingTimeMat = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, preCastingTimeMat, _IFT_Material_preCastingTimeMat);
-
-    return IRRT_OK;
 }
 
 
@@ -119,26 +112,19 @@ Material :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-int
-Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+Material :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
 {
-    return 0;
+    return false;
 }
 
-int
-Material :: hasCastingTimeSupport()
-//
-// returns whether receiver fully supports casting time
-//
+bool
+Material :: hasCastingTimeSupport() const
 {
-    if ( this->castingTime > 0. ) {
-        return 0; // casting time is user-defined. By default the casting time is not supported.
-    } else {
-        return 1; // do not check anything - casting time has not been user-defined
-    }
+    return this->castingTime <= 0.;
 }
 
 
@@ -234,7 +220,7 @@ Material :: giveStatus(GaussPoint *gp) const
 
 
 void
-Material :: initTempStatus(GaussPoint *gp)
+Material :: initTempStatus(GaussPoint *gp) const
 //
 // Initialize MatStatus (respective it's temporary variables at the begining
 // of integrating incremental constitutive relations) to correct values

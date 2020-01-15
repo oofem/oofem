@@ -393,14 +393,14 @@ LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 void
 LIBeam2dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam2d(strain, gp, tStep);
 }
 
 
 void
 LIBeam2dNL :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->give2dBeamStiffMtrx(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give2dBeamStiffMtrx(rMode, gp, tStep);
 }
 
 
@@ -487,10 +487,10 @@ double LIBeam2dNL :: givePitch()
 }
 
 
-IRResultType
-LIBeam2dNL :: initializeFrom(InputRecord *ir)
+void
+LIBeam2dNL :: initializeFrom(InputRecord &ir)
 {
-    return NLStructuralElement :: initializeFrom(ir);
+    NLStructuralElement :: initializeFrom(ir);
 }
 
 

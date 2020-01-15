@@ -64,7 +64,7 @@ class StokesFlow : public FluidModel
 {
 protected:
     /// Time increment read from input record.
-    double deltaT;
+    double deltaT = 1.;
     /// Primary unknowns.
     std :: unique_ptr< PrimaryField > velocityPressureField;
     /// Sparse matrix type.
@@ -72,14 +72,14 @@ protected:
     /// Numerical method.
     std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
     /// Linear solver type.
-    LinSystSolverType solverType;
+    LinSystSolverType solverType = ST_Direct;
     /// Element norm for nonlinear analysis (squared)
     FloatArray eNorm;
 
     /// Used for determining if a new mesh must be created.
     std :: unique_ptr< MeshQualityErrorEstimator > meshqualityee;
     /// Maximum deformation allowed
-    double maxdef;
+    double maxdef = 1.;
 
     std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray solutionVector;
@@ -89,8 +89,8 @@ protected:
     TopologyState ts;
 
 public:
-    StokesFlow(int i, EngngModel * _master = NULL);
-    virtual ~StokesFlow();
+    StokesFlow(int i, EngngModel * _master = nullptr);
+    ~StokesFlow();
 
     void solveYourselfAt(TimeStep *tStep) override;
 
@@ -108,7 +108,7 @@ public:
 
     int forceEquationNumbering(int id) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int checkConsistency() override;
     void doStepOutput(TimeStep *tStep) override;

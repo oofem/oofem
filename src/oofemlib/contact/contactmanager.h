@@ -83,7 +83,7 @@ public:
     void createContactDofs();
     
     /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     virtual int instanciateYourself(DataReader &dr);
     virtual const char *giveClassName() const { return "ContactManager"; }

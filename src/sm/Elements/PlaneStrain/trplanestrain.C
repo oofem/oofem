@@ -90,21 +90,15 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-
-IRResultType
-TrPlaneStrain :: initializeFrom(InputRecord *ir)
+void
+TrPlaneStrain :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = PlaneStrainElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    PlaneStrainElement :: initializeFrom(ir);
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
     }
-
-    return IRRT_OK;
 }
 
 
@@ -165,37 +159,37 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    int inode, nodes = 3, iside, sides = 3, nd1, nd2;
-    FloatArray *corner [ 3 ], midSide [ 3 ], midNode, cor [ 3 ];
+    int nodes = 3, sides = 3;
+    FloatArray corner [ 3 ], midSide [ 3 ], midNode, cor [ 3 ];
     double x = 0.0, y = 0.0;
 
     static int sideNode [ 3 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
-        for ( inode = 0; inode < nodes; inode++ ) {
+        for ( int inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
-            if ( corner [ inode ]->giveSize() != 3 ) {
+            if ( corner [ inode ].giveSize() != 3 ) {
                 cor [ inode ].resize(3);
-                cor [ inode ].at(1) = corner [ inode ]->at(1);
-                cor [ inode ].at(2) = corner [ inode ]->at(2);
+                cor [ inode ].at(1) = corner [ inode ].at(1);
+                cor [ inode ].at(2) = corner [ inode ].at(2);
                 cor [ inode ].at(3) = 0.0;
 
-                corner [ inode ] = & ( cor [ inode ] );
+                corner [ inode ] = cor [ inode ];
             }
 
-            x += corner [ inode ]->at(1);
-            y += corner [ inode ]->at(2);
+            x += corner [ inode ].at(1);
+            y += corner [ inode ].at(2);
         }
 
-        for ( iside = 0; iside < sides; iside++ ) {
+        for ( int iside = 0; iside < sides; iside++ ) {
             midSide [ iside ].resize(3);
 
-            nd1 = sideNode [ iside ] [ 0 ] - 1;
-            nd2 = sideNode [ iside ] [ 1 ] - 1;
+            int nd1 = sideNode [ iside ] [ 0 ] - 1;
+            int nd2 = sideNode [ iside ] [ 1 ] - 1;
 
-            midSide [ iside ].at(1) = ( corner [ nd1 ]->at(1) + corner [ nd2 ]->at(1) ) / 2.0;
-            midSide [ iside ].at(2) = ( corner [ nd1 ]->at(2) + corner [ nd2 ]->at(2) ) / 2.0;
+            midSide [ iside ].at(1) = ( corner [ nd1 ].at(1) + corner [ nd2 ].at(1) ) / 2.0;
+            midSide [ iside ].at(2) = ( corner [ nd1 ].at(2) + corner [ nd2 ].at(2) ) / 2.0;
             midSide [ iside ].at(3) = 0.0;
         }
 

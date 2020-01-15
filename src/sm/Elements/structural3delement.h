@@ -67,7 +67,7 @@ public:
     /// Destructor.
     virtual ~Structural3DElement() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialMode giveMaterialMode() override;
     int computeNumberOfDofs() override;

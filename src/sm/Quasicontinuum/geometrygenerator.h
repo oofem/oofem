@@ -70,14 +70,14 @@ public:
     GeometryGenerator();
     virtual ~GeometryGenerator();
 
-    IRResultType initializeParticleGenerator(InputRecord *ir);
+    void initializeParticleGenerator(InputRecord &ir);
     void generateParticles();
     void loadParticles();
 
     bool CheckDistances(double R, FloatArray coords, int n);
 
 
-    IRResultType initializeLinkGenerator(InputRecord *ir);
+    void initializeLinkGenerator(InputRecord &ir);
     void generateLinks();
     void loadLinks();
 

@@ -53,10 +53,8 @@ namespace oofem {
 REGISTER_PropagationLaw(PLHoopStressCirc)
 
 /////////////////////////////////////////////
-IRResultType PLHoopStressCirc :: initializeFrom(InputRecord *ir)
+void PLHoopStressCirc :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mRadius,                          _IFT_PLHoopStressCirc_Radius);
     IR_GIVE_FIELD(ir, mAngleInc,                        _IFT_PLHoopStressCirc_AngleInc);
     IR_GIVE_FIELD(ir, mIncrementLength,         _IFT_PLHoopStressCirc_IncLength);
@@ -67,8 +65,6 @@ IRResultType PLHoopStressCirc :: initializeFrom(InputRecord *ir)
     if ( useRadialBasisFunc == 1 ) {
         mUseRadialBasisFunc = true;
     }
-
-    return IRRT_OK;
 }
 
 void PLHoopStressCirc :: giveInputRecord(DynamicInputRecord &input)
@@ -142,8 +138,8 @@ bool PLHoopStressCirc :: propagateInterface(Domain &iDomain, EnrichmentFront &iE
                 // crack tip multiplied by a constant factor.
                 // ( This choice implies that we hope that the element has reasonable
                 // aspect ratio.)
-                const auto &x1 = * ( el->giveDofManager(1)->giveCoordinates() );
-                const auto &x2 = * ( el->giveDofManager(2)->giveCoordinates() );
+                const auto &x1 = el->giveDofManager(1)->giveCoordinates();
+                const auto &x2 = el->giveDofManager(2)->giveCoordinates();
                 const double l = 1.0 * distance(x1, x2);
 
                 // Use the octree to get all elements that have

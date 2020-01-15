@@ -74,9 +74,9 @@ public:
     virtual ~SymmetryBarrier();
 
     void applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
-                         bool &shieldFlag, NonlocalMaterialExtensionInterface *nei) override;
+                         bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei) override;
     double calculateMinimumDistanceFromBoundary(const FloatArray &coords) override { return 1.e10; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_SymmetryBarrier_Name; }
     const char *giveClassName() const override { return "SymmetryBarrier"; }

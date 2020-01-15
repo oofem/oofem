@@ -63,10 +63,9 @@ Shell7BasePhFi :: Shell7BasePhFi(int n, Domain *aDomain) : Shell7Base(n, aDomain
 	this->numberOfLayers = nLayers;
 }
 
-IRResultType Shell7BasePhFi :: initializeFrom(InputRecord *ir)
+void Shell7BasePhFi :: initializeFrom(InputRecord &ir)
 {
     Shell7Base :: initializeFrom(ir);
-    return IRRT_OK;
 }
 
 
@@ -1285,11 +1284,8 @@ Shell7BasePhFi :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix 
 }
 
 
-
-
-
-void 
-Shell7BasePhFi :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer)
+std::vector<FloatArray>
+Shell7BasePhFi :: giveFictiousNodeCoordsForExport(int layer)
 {
     // compute fictious node coords
     FloatMatrix localNodeCoords;
@@ -1297,53 +1293,48 @@ Shell7BasePhFi :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes
     
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
-        FloatArray coords, localCoords(3);
+        FloatArray localCoords(3);
         localCoords.beColumnOf(localNodeCoords,i);
 
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer, coords);
-        nodes[i-1].resize(3); 
-        nodes[i-1] = coords;
+        nodes[i-1] = this->vtkEvalInitialGlobalCoordinateAt(localCoords, layer);
     }
-
+    return nodes;
 }
 
 
-void 
-Shell7BasePhFi :: giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int interface)
+std::vector<FloatArray>
+Shell7BasePhFi :: giveFictiousCZNodeCoordsForExport(int interface)
 {
     // compute fictious node coords
     FloatMatrix localNodeCoords;
     this->interpolationForCZExport.giveLocalNodeCoords(localNodeCoords);
     
-    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    std::vector<FloatArray> nodes(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
-        FloatArray coords, localCoords(3);
+        FloatArray localCoords(3);
         localCoords.beColumnOf(localNodeCoords,i);
 
         localCoords.at(3) = 1.0;
-        this->vtkEvalInitialGlobalCoordinateAt(localCoords, interface, coords);
-        nodes[i-1].resize(3); 
-        nodes[i-1] = coords;
+        nodes[i-1] = this->vtkEvalInitialGlobalCoordinateAt(localCoords, interface);
     }
-
+    return nodes;
 }
 
 void 
-Shell7BasePhFi :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep)
+Shell7BasePhFi :: giveFictiousUpdatedNodeCoordsForExport(int layer, TimeStep *tStep)
 {
     // compute fictious node coords
 
     FloatMatrix localNodeCoords;
     this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
-    nodes.resize(localNodeCoords.giveNumberOfColumns());
+    std::vector<FloatArray> nodes(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
-        FloatArray coords, localCoords(3);
+        FloatArray localCoords;
         localCoords.beColumnOf(localNodeCoords,i);
 
-        this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, coords, tStep);
-        nodes[i-1].resize(3); 
-        nodes[i-1] = coords;
+        nodes[i-1] = this->vtkEvalUpdatedGlobalCoordinateAt(localCoords, layer, tStep);
     }
+    return nodes;
 }
 
 

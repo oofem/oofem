@@ -83,7 +83,6 @@ public:
     BSplineInterpolation(int nsd) : FEInterpolation(0),
         nsd(nsd)
     {}
-    virtual ~BSplineInterpolation() {}
 
     integrationDomain giveIntegrationDomain() const override {
         if ( nsd == 3 ) {
@@ -127,10 +126,10 @@ public:
     }
 
     int giveNsd() override { return nsd; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    IntArray boundaryEdgeGiveNodes(int boundary) const override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); return {}; }
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
@@ -151,13 +150,13 @@ public:
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    void boundarySurfaceGiveNodes(IntArray &answer, int boundary) override
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    IntArray boundarySurfaceGiveNodes(int boundary) const override
+    { OOFEM_ERROR("Functions not supported for this interpolator."); return {}; }
     //@}
 
 
-    void boundaryGiveNodes(IntArray &answer, int boundary) override
-    { OOFEM_ERROR("Not implemented"); }
+    IntArray boundaryGiveNodes(int boundary) const override
+    { OOFEM_ERROR("Not implemented"); return {}; }
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Not implemented"); }
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override

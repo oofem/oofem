@@ -78,7 +78,7 @@ public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
     virtual ~Delamination() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     int instanciateYourself(DataReader &dr) override;
     void appendInputRecords(DynamicDataReader &oDR) override;
 

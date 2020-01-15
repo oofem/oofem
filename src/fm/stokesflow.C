@@ -55,13 +55,13 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
     this->ndomains = 1;
 }
 
-StokesFlow :: ~StokesFlow()
-{
-}
 
-IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
+StokesFlow :: ~StokesFlow() { }
+
+
+void StokesFlow :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    FluidModel :: initializeFrom(ir);
     int val;
 
     val = ( int ) SMT_PetscMtrx;
@@ -82,8 +82,6 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     this->ts = TS_OK;
 
     this->maxdef = 25; ///@todo Deal with this parameter (set to some reasonable value by default now)
-
-    return FluidModel :: initializeFrom(ir);
 }
 
 

@@ -54,21 +54,20 @@ namespace oofem {
 class HydratingHeMoMaterial : public HeMoTKMaterial, public HydrationModelInterface
 {
 protected:
-    int hydration, hydrationHeat, hydrationLHS, teplotaOut;
+    bool hydration = false, hydrationHeat = false, hydrationLHS = false, teplotaOut = false;
 
 public:
     HydratingHeMoMaterial(int n, Domain * d) : HeMoTKMaterial(n, d), HydrationModelInterface() { }
-    virtual ~HydratingHeMoMaterial() { }
 
     void setMixture(MixtureType mix);
 
-    int hasInternalSource() override;
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    bool hasInternalSource() const override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
     void updateInternalState(const FloatArray &state, GaussPoint *gp, TimeStep *tStep) override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
     // saves current context(state) into stream
     void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
@@ -78,7 +77,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_HydratingHeMoMaterial_Name; }
     const char *giveClassName() const override { return "HydratingHeMoMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     // post-processing
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;

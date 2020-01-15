@@ -68,7 +68,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Quad2PlateSubSoil_Name; }
     const char *giveClassName() const override { return "Quad2PlateSubSoil"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 8; }
 

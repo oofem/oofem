@@ -66,22 +66,22 @@ namespace oofem {
 class HeMoTKMaterial : public TransportMaterial
 {
 protected:
-    double a_0;       ///< Constant (obtained from experiments) [Bazant and Najjar, 1972]
-    double nn;        ///< Constant-exponent (obtained from experiments) [Bazant and Najjar, 1972]
-    double phi_c;     ///< Constant-relative humidity  (obtained from experiments) [Bazant and Najjar, 1972]
-    double delta_wet; ///< Constant-water vapor permeability (obtained from experiments) [Bazant and Najjar, 1972]
+    double a_0 = 0.;       ///< Constant (obtained from experiments) [Bazant and Najjar, 1972]
+    double nn = 0.;        ///< Constant-exponent (obtained from experiments) [Bazant and Najjar, 1972]
+    double phi_c = 0.;     ///< Constant-relative humidity  (obtained from experiments) [Bazant and Najjar, 1972]
+    double delta_wet = 0.; ///< Constant-water vapor permeability (obtained from experiments) [Bazant and Najjar, 1972]
 
-    double w_h;       ///< Constant water content (obtained from experiments) [Pedersen, 1990]
-    double n;         ///< Constant-exponent (obtained from experiments) [Pedersen, 1990]
-    double a;         ///< Constant (obtained from experiments) [Pedersen, 1990]
+    double w_h = 0.;       ///< Constant water content (obtained from experiments) [Pedersen, 1990]
+    double n = 0.;         ///< Constant-exponent (obtained from experiments) [Pedersen, 1990]
+    double a = 0.;         ///< Constant (obtained from experiments) [Pedersen, 1990]
 
-    double latent;    ///< Latent heat of evaporation.
-    double c;         ///< Thermal capacity.
-    double rho;       ///< Volume density.
-    double chi_eff;   ///< Effective thermal conductivity.
+    double latent = 0.;    ///< Latent heat of evaporation.
+    double c = 0.;         ///< Thermal capacity.
+    double rho = 0.;       ///< Volume density.
+    double chi_eff = 0.;   ///< Effective thermal conductivity.
 
-    double por;       ///< Porosity.
-    double rho_gws;   ///< Saturation volume density.
+    double por = 0.;       ///< Porosity.
+    double rho_gws = 0.;   ///< Saturation volume density.
 
 public:
     /**
@@ -90,61 +90,49 @@ public:
      * @param d Domain to which new material will belong.
      */
     HeMoTKMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    /// Destructor.
-    virtual ~HeMoTKMaterial() { }
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    std::pair<FloatArrayF<3>, FloatArrayF<3>> computeHeMoFlux3D(const FloatArrayF<3> &grad_t, const FloatArrayF<3> &grad_w, double t, double h, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
 
-    double giveCharacteristicValue(MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *tStep) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-
-    double give(int aProperty, GaussPoint *gp) override;
-
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     // identification
     const char *giveInputRecordName() const override { return _IFT_HeMoTKMaterial_Name; }
     const char *giveClassName() const override { return "HeMoTKMaterial"; }
 
-    double sorption_isotherm(double phi);
-    double inverse_sorption_isotherm(double w);
-    double give_dphi_dw(double w);
+    double sorption_isotherm(double phi) const;
+    double inverse_sorption_isotherm(double w) const;
+    double give_dphi_dw(double w) const;
+
+    MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new HeMoTransportMaterialStatus(gp); }
 
 protected:
-    void computeConductivityMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    void matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
-    void matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
-    void matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode, TimeStep *tStep);
-
-    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    double computeCapacityCoeff(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const;
     /**
      * Returns positive value of humidity, use VM_Velocity for previous (equilibrated) value
      */
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 
-    double get_latent(double w, double t);
-    double get_ceff(double w, double t);
-    double get_chi(double w, double t);
+    double get_latent(double w, double t) const;
+    double get_ceff(double w, double t) const;
+    double get_chi(double w, double t) const;
 
-    double perm_wt(double w, double t);
-    double perm_ww(double w, double t);
-    double give_delta_gw(double phi);
-    double give_dpgw_dt(double t, double phi);
+    double perm_wt(double w, double t) const;
+    double perm_ww(double w, double t) const;
+    double give_delta_gw(double phi) const;
+    double give_dpgw_dt(double t, double phi) const;
 
-    double get_b(double w, double t);
-    double get_sat(double w, double t);
-    double give_p_gws(double t);
+    double get_b(double w, double t) const;
+    double get_sat(double w, double t) const;
+    double give_p_gws(double t) const;
 };
 } // end namespace oofem
 #endif // hemotkmat_h

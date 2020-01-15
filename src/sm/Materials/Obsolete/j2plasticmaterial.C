@@ -47,24 +47,16 @@ REGISTER_Material(J2plasticMaterial);
 
 J2plasticMaterial :: J2plasticMaterial(int n, Domain *d) : PlasticMaterial(n, d)
 {
-    kinematicHardeningFlag = isotropicHardeningFlag = 0;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
 }
 
-J2plasticMaterial :: ~J2plasticMaterial()
+void
+J2plasticMaterial :: initializeFrom(InputRecord &ir)
 {
-}
-
-IRResultType
-J2plasticMaterial :: initializeFrom(InputRecord *ir)
-{
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
-    result = PlasticMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    PlasticMaterial :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, _IFT_J2plasticMaterial_ry);
     k = value / sqrt(3.0);
@@ -82,8 +74,6 @@ J2plasticMaterial :: initializeFrom(InputRecord *ir)
     if ( fabs(isotropicModuli) > 1.e-12 ) {
         isotropicHardeningFlag = 1;
     }
-
-    return IRRT_OK;
 }
 
 void J2plasticMaterial :: giveInputRecord(DynamicInputRecord &input)
@@ -111,7 +101,7 @@ J2plasticMaterial :: CreateStatus(GaussPoint *gp) const
 
 FloatArray *
 J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
-                                                     FloatArray *strainSpaceHardeningVariables)
+                                                     FloatArray *strainSpaceHardeningVariables) const
 {
     // in full stress strain space
 
@@ -149,7 +139,7 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVars(GaussPoint *gp,
 
 double
 J2plasticMaterial :: computeYieldValueAt(GaussPoint *gp, FloatArray *stressVector,
-                                         FloatArray *stressSpaceHardeningVars)
+                                         FloatArray *stressSpaceHardeningVars) const
 {
     double f;
     FloatArray helpVector, backStress;
@@ -178,7 +168,7 @@ void
 J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                    GaussPoint *gp,
                                                    FloatArray *strainSpaceHardeningVariables,
-                                                   TimeStep *tStep)
+                                                   TimeStep *tStep) const
 {
     /* computes hardening moduli in reduced stress strain space (for kinematic back-stress)*/
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
@@ -208,7 +198,7 @@ J2plasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
 
 FloatArray *
 J2plasticMaterial :: ComputeStressGradient(GaussPoint *gp, FloatArray *stressVector,
-                                           FloatArray *stressSpaceHardeningVars)
+                                           FloatArray *stressSpaceHardeningVars) const
 {
     /* stress gradient of yield function in full stress - strain space */
 
@@ -256,7 +246,7 @@ J2plasticMaterial :: ComputeStressGradient(GaussPoint *gp, FloatArray *stressVec
 
 FloatArray *
 J2plasticMaterial :: ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *gp, FloatArray *stressVector,
-                                                                    FloatArray *stressSpaceHardeningVars)
+                                                                    FloatArray *stressSpaceHardeningVars) const
 {
     /* computes stress space hardening gradient in reduced stress-strain space */
 
@@ -297,7 +287,7 @@ J2plasticMaterial :: ComputeStressSpaceHardeningVarsReducedGradient(GaussPoint *
 
 
 int
-J2plasticMaterial :: hasHardening()
+J2plasticMaterial :: hasHardening() const
 {
     return ( this->kinematicHardeningFlag || this->isotropicHardeningFlag );
 }
@@ -307,7 +297,7 @@ void
 J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
                                                   GaussPoint *gp,
                                                   const FloatArray &stressVector,
-                                                  const FloatArray &stressSpaceHardeningVars)
+                                                  const FloatArray &stressSpaceHardeningVars) const
 {
     int size;
     int imask, jmask;
@@ -408,13 +398,13 @@ J2plasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer,
 void
 J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                                  const FloatArray &strainIncrement,
-                                                 TimeStep *tStep)
+                                                 TimeStep *tStep) const
 {
     /* Computes the full trial elastic stress vector */
     FloatArray reducedAnswer;
     FloatMatrix reducedModuli;
 
-    this->giveLinearElasticMaterial()->giveStiffnessMatrix(reducedModuli, ElasticStiffness,
+    this->linearElasticMaterial->giveStiffnessMatrix(reducedModuli, ElasticStiffness,
                                                            gp, tStep);
 
     reducedAnswer.beProductOf(reducedModuli, strainIncrement);
@@ -425,15 +415,15 @@ J2plasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint 
 void
 J2plasticMaterial :: compute3dElasticModuli(FloatMatrix &answer,
                                             GaussPoint *gp,
-                                            TimeStep *tStep)
+                                            TimeStep *tStep) const
 {
     /* Returns 3d elastic moduli */
-    this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, ElasticStiffness, gp, tStep);
+    answer = this->linearElasticMaterial->give3dMaterialStiffnessMatrix(ElasticStiffness, gp, tStep);
 }
 
 
 double
-J2plasticMaterial :: computeJ2InvariantAt(FloatArray *stressVector)
+J2plasticMaterial :: computeJ2InvariantAt(FloatArray *stressVector) const
 {
     double answer;
     double v1, v2, v3;
@@ -454,7 +444,7 @@ J2plasticMaterial :: computeJ2InvariantAt(FloatArray *stressVector)
 
 
 int
-J2plasticMaterial :: giveSizeOfFullHardeningVarsVector()
+J2plasticMaterial :: giveSizeOfFullHardeningVarsVector() const
 {
     /* Returns the size of hardening variables vector */
     int size = 0;
@@ -490,7 +480,7 @@ J2plasticMaterial :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const
 
 void
 J2plasticMaterial :: giveStressBackVector(FloatArray &answer,
-                                          const FloatArray &stressSpaceHardeningVars)
+                                          const FloatArray &stressSpaceHardeningVars) const
 {
     /* returns part of hardening vector corresponding to kinematic hardening */
     if ( this->kinematicHardeningFlag ) {
@@ -507,7 +497,7 @@ J2plasticMaterial :: giveStressBackVector(FloatArray &answer,
 
 
 double
-J2plasticMaterial :: giveIsotropicHardeningVar(FloatArray *stressSpaceHardeningVars)
+J2plasticMaterial :: giveIsotropicHardeningVar(FloatArray *stressSpaceHardeningVars) const
 {
     /* returns value in  hardening vector corresponding to isotropic hardening */
     if ( !isotropicHardeningFlag ) {

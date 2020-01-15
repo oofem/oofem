@@ -76,37 +76,36 @@ class Masonry02 : public MPlasticMaterial2
 {
 protected:
     /// Tensile strength.
-    double ft0;
+    double ft0 = 0.;
     /// Mode I GF.
-    double gfI;
+    double gfI = 0.;
     /// Mode II GF.
-    double gfII;
+    double gfII = 0.;
     /// Residual friction angle.
-    double tanfir;
+    double tanfir = 0.;
     /// Initial friction angle.
-    double tanfi0;
+    double tanfi0 = 0.;
     /// Initial cohesion of joint.
-    double c0;
+    double c0 = 0.;
     /// Cap mode parameters.
-    double Cnn, Css, Cn;
-    // double fm;
+    double Cnn = 0., Css = 0., Cn = 0.;
+    // double fm = 0.;
 
     /// Elastic properties.
-    double kn, ks;
+    double kn = 0., ks = 0.;
 
     /// Dilatancy angle.
-    double tanpsi;
+    double tanpsi = 0.;
 
     /// Cap mode parameters.
-    double sic, spc, smc, src;
-    double kp, km, kr;
+    double sic = 0., spc = 0., smc = 0., src = 0.;
+    double kp = 0., km = 0., kr = 0.;
+
 public:
-
     Masonry02(int n, Domain * d);
-    virtual ~Masonry02();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    void initializeFrom(InputRecord &ir) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_Masonry02_Name; }
     const char *giveClassName() const override { return "Masonry02"; }
@@ -116,56 +115,56 @@ public:
                              GaussPoint *gp,
                              TimeStep *tStep) override;
 
-    int giveSizeOfFullHardeningVarsVector() override { return 3; }
+    int giveSizeOfFullHardeningVarsVector() const override { return 3; }
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *) const override { return 3; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 
 protected:
-    int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) override { return 2; }
+    int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) const override { return 2; }
     //
     // yield(YC-like functions) and loading(LC-like functions) criteria specific section
     //
 
     double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                               const FloatArray &stressSpaceHardeningVars) override;
+                               const FloatArray &stressSpaceHardeningVars) const override;
 
     void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                     const FloatArray &stressSpaceHardeningVars) override;
+                                     const FloatArray &stressSpaceHardeningVars) const override;
     void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &stress, const FloatArray &dlambda,
-                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) override;
+                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) const override;
     void computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector,
-                                const FloatArray &strainSpaceHardeningVariables) override;
+                                const FloatArray &strainSpaceHardeningVariables) const override;
 
     void computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap,
                                                   const FloatArray &fullStressVector,
                                                   const FloatArray &strainSpaceHardeningVars,
-                                                  const FloatArray &gamma) override;
+                                                  const FloatArray &gamma) const override;
     void computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf,
                                                 const IntArray &activeConditionMap,
                                                 const FloatArray &fullStressVector,
                                                 const FloatArray &strainSpaceHardeningVars,
-                                                const FloatArray &gamma) override;
-    int hasHardening() override { return 1; }
+                                                const FloatArray &gamma) const override;
+    int hasHardening() const override { return 1; }
 
     void computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                        const FloatArray &strainSpaceHardeningVariables) override;
+                                        const FloatArray &strainSpaceHardeningVariables) const override;
     void computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                        const FloatArray &strainSpaceHardeningVariables) override;
+                                        const FloatArray &strainSpaceHardeningVariables) const override;
 
 
     void give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                                 GaussPoint *gp, TimeStep *tStep);
 
-    void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) override;
+    void computeReducedElasticModuli(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Cap mode related functions.
-    double computeF3HardeningLaw(double k);
-    double computeF3HardeningGradient(double k);
+    double computeF3HardeningLaw(double k) const;
+    double computeF3HardeningGradient(double k) const;
 };
 } // end namespace oofem
 #endif // masonry02_h

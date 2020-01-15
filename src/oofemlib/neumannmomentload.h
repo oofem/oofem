@@ -85,7 +85,7 @@ public:
      */
     void updateLoad(const FloatArray &newValue) { componentArray = newValue; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bcGeomType giveBCGeoType() const override { return SurfaceLoadBGT; }
 
     const char *giveClassName() const override { return "NeumannMomentLoad"; }

@@ -290,7 +290,7 @@ public:
     void updateInternalState(TimeStep *tStep) override;
     void updateYourself(TimeStep *tStep) override;
     int checkConsistency() override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "StructuralElement"; }
 
@@ -307,12 +307,12 @@ public:
      * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
-    virtual int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                        int node, TimeStep *tStep);
+    int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
+                                int node, TimeStep *tStep) override;
     /// Shows sparse structure
-    virtual void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
+    void showSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep) override;
     /// Shows extended sparse structure (for example, due to nonlocal interactions for tangent stiffness)
-    virtual void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep);
+    void showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep) override;
 
 #endif
 

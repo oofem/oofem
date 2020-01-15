@@ -277,17 +277,15 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
 }
 
 
-IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
+void PrescribedGenStrainShell7 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->gradient, _IFT_PrescribedGenStrainShell7_gradient);
 
     this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
     this->centerCoord.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords)
-
-    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 

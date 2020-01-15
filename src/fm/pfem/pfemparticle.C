@@ -53,10 +53,10 @@ REGISTER_DofManager(PFEMParticle);
 /**
  * Gets from the source line from the data file all the data of the receiver.
  */
-IRResultType
-PFEMParticle :: initializeFrom(InputRecord *ir)
+void
+PFEMParticle :: initializeFrom(InputRecord &ir)
 {
-    return Node :: initializeFrom(ir);
+    Node :: initializeFrom(ir);
 }
 
 /**

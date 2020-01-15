@@ -60,15 +60,14 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 MacroLSpace :: ~MacroLSpace() { }
 
 
-IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
+void MacroLSpace :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
+    LSpace :: initializeFrom(ir);;
 
     IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        OOFEM_WARNING("Need 8 master nodes from the microproblem defined on macroLspace element");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_MacroLspace_microMasterNodes, "Need 8 master nodes from the microproblem defined on macroLspace element");
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
@@ -76,7 +75,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 
 #if 0
-    if ( ir->hasField(_IFT_MacroLspace_stiffMatrxFileName) ) {
+    if ( ir.hasField(_IFT_MacroLspace_stiffMatrxFileName) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, this->stiffMatrxFileName, _IFT_MacroLspace_stiffMatrxFileName);
         if ( fopen(this->stiffMatrxFileName, "r") != NULL ) { //if the file exist
             stiffMatrxFile = fopen(this->stiffMatrxFileName, "r");
@@ -89,7 +88,6 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
         }
     }
 #endif
-    return LSpace :: initializeFrom(ir);;
 }
 
 
@@ -177,7 +175,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     if ( !timeFunct ) {
         OOFEM_ERROR("Couldn't create constant time function");
     }
-    timeFunct->initializeFrom(& ir_func);
+    timeFunct->initializeFrom(ir_func);
     microDomain->setFunction(1, std::move(timeFunct));
 
 
@@ -190,7 +188,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     counter = 1;
     for ( auto &DofMan : microDomain->giveDofManagers() ) { //go through all nodes on microDomain
         if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is on boundary
-            this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
+            this->evalInterpolation( n, microMaterial->microMasterCoords, DofMan->giveCoordinates() );
             //n.printYourself();
 
             for ( Dof *dof: *DofMan ) {
@@ -205,7 +203,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 if ( !bc ) {
                     OOFEM_ERROR("Couldn't create boundary condition.");
                 }
-                bc->initializeFrom(& ir_bc);
+                bc->initializeFrom(ir_bc);
                 microDomain->setBoundaryCondition(counter, std::move(bc));
                 counter++;
             }
@@ -257,7 +255,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
 
         for ( int i = 1; i <= this->microBoundaryDofManager.giveSize() / 3; i++ ) { //Number of DoFManagers stored in triplets
             DofMan = microDomain->giveDofManager( this->microBoundaryDofManager.at(3 * i - 2) );
-            this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
+            this->evalInterpolation( n, microMaterial->microMasterCoords, DofMan->giveCoordinates() );
             for ( int j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) { //3
                 reactionForce = reactions.at(3 * i + j - 3);
                 for ( int k = 1; k <= 8; k++ ) {

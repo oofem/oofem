@@ -44,7 +44,7 @@ namespace oofem {
 class OOFEM_EXPORT FEI1dLin : public FEInterpolation1d
 {
 protected:
-    int cindx;
+    int cindx = 0;
 
 public:
     FEI1dLin(int coordIndx) : FEInterpolation1d(1), cindx(coordIndx) { }
@@ -68,7 +68,7 @@ public:
 
     int giveNumberOfNodes() const override { return 2; }
 
-    void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundaryEdgeGiveNodes(int boundary) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

@@ -55,10 +55,8 @@ StructuralMaterialEvaluator :: StructuralMaterialEvaluator(int i, EngngModel *_m
 StructuralMaterialEvaluator :: ~StructuralMaterialEvaluator()
 { }
 
-IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
+void StructuralMaterialEvaluator :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->deltaT, _IFT_StructuralMaterialEvaluator_deltat);
     IR_GIVE_FIELD(ir, this->numberOfSteps, _IFT_StructuralMaterialEvaluator_numberOfTimeSteps);
@@ -67,7 +65,7 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->cmpntFunctions, _IFT_StructuralMaterialEvaluator_componentFunctions);
     IR_GIVE_FIELD(ir, this->sControl, _IFT_StructuralMaterialEvaluator_stressControl);
-    this->keepTangent = ir->hasField(_IFT_StructuralMaterialEvaluator_keepTangent);
+    this->keepTangent = ir.hasField(_IFT_StructuralMaterialEvaluator_keepTangent);
 
     tolerance = 1.0;
     if ( this->sControl.giveSize() > 0 ) {
@@ -84,8 +82,6 @@ IRResultType StructuralMaterialEvaluator :: initializeFrom(InputRecord *ir)
             eControl.followedBy(i);
         }
     }
-
-    return IRRT_OK;
 }
 
 
@@ -154,7 +150,7 @@ void StructuralMaterialEvaluator :: solveYourself()
 #endif
 
                 strain.printYourself("Macro strain guess");
-                mat->giveRealStressVector_3d(stress, gp, strain, tStep);
+                stress = mat->giveRealStressVector_3d(strain, gp, tStep);
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressC.at(j) - stress.at( sControl.at(j) );
                 }
@@ -166,7 +162,7 @@ void StructuralMaterialEvaluator :: solveYourself()
                     break;
                 } else {
                     if ( tangent.giveNumberOfRows() == 0 || !keepTangent ) {
-                        mat->give3dMaterialStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
+                        tangent = mat->give3dMaterialStiffnessMatrix(TangentStiffness, gp, tStep);
                     }
 
                     // Pick out the stress-controlled part;

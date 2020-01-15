@@ -46,25 +46,12 @@ namespace oofem {
 #define rcm_RESIDUALSTIFFFACTOR 1.e-3
 
 RCM2Material :: RCM2Material(int n, Domain *d) : StructuralMaterial(n, d)
-    //
-    // constructor
-    //
 {
-    linearElasticMaterial = NULL;
-    Gf = Ft = 0.;
 }
 
 
-RCM2Material :: ~RCM2Material()
-//
-// destructor
-//
-{
-    //delete linearElasticMaterial;
-}
-
-int
-RCM2Material :: hasMaterialModeCapability(MaterialMode mode)
+bool
+RCM2Material :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
@@ -147,7 +134,7 @@ RCM2Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     princStress.resizeWithValues(6);
 
     tempCrackDirs = status->giveTempCrackDirs();
-    this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
+    answer = this->transformStressVectorTo(tempCrackDirs, princStress, 1);
 
     status->letTempStrainVectorBe(totalStrain);
     StructuralMaterial :: giveReducedSymVectorForm( reducedStressVector, answer, gp->giveMaterialMode() );
@@ -206,8 +193,8 @@ RCM2Material :: giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *
         // keep old principal values
         status->letTempCrackDirsBe(crackDirs);
     } else {
-        this->sortPrincDirAndValCloseTo(& principalStrain,
-                                        & tempCrackDirs, & crackDirs);
+        this->sortPrincDirAndValCloseTo(principalStrain,
+                                        tempCrackDirs, crackDirs);
         status->letTempCrackDirsBe(tempCrackDirs);
     }
 
@@ -708,7 +695,7 @@ RCM2Material :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
     // final step - transform stiffnes to global c.s
     //
 
-    this->giveStressVectorTranformationMtrx(t, tempCrackDirs, 1);
+    t = this->giveStressVectorTranformationMtrx(tempCrackDirs, 1);
     df.rotatedWith(t, 't');
 
     StructuralMaterial :: giveReducedSymMatrixForm( answer, df, gp->giveMaterialMode() );
@@ -792,11 +779,9 @@ RCM2Material :: updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCr
 }
 
 
-IRResultType
-RCM2Material :: initializeFrom(InputRecord *ir)
+void
+RCM2Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, Gf, _IFT_RCM2Material_gf);
     IR_GIVE_FIELD(ir, Ft, _IFT_RCM2Material_ft);
 
@@ -804,7 +789,7 @@ RCM2Material :: initializeFrom(InputRecord *ir)
 }
 
 double
-RCM2Material :: give(int aProperty, GaussPoint *gp)
+RCM2Material :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -886,25 +871,21 @@ RCM2Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
     }
 }
 
-void
-RCM2Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                              MatResponseMode mode,
+FloatMatrixF<6,6>
+RCM2Material :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                               GaussPoint *gp,
-                                              TimeStep *tStep)
+                                              TimeStep *tStep) const
 {
-    //
-    // returns receiver 3d material matrix
-    //
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<3,3>
+RCM2Material :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
-
+                                         TimeStep *tStep) const
 //
 // returns receiver's 2dPlaneStressMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -913,15 +894,16 @@ RCM2Material :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<4,4>
+RCM2Material :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
+                                         TimeStep *tStep) const
 
 //
 // return receiver's 2dPlaneStrainMtrx constructed from
@@ -929,29 +911,33 @@ RCM2Material :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                      MatResponseMode mode,
+FloatMatrixF<1,1>
+RCM2Material :: give1dStressStiffMtrx(MatResponseMode mode,
                                       GaussPoint *gp,
-                                      TimeStep *tStep)
+                                      TimeStep *tStep) const
 
 //
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
+FloatMatrixF<2,2>
+RCM2Material :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                          GaussPoint *gp,
-                                         TimeStep *tStep)
+                                         TimeStep *tStep) const
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -960,15 +946,17 @@ RCM2Material :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
+FloatMatrixF<5,5>
+RCM2Material :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
+                                        TimeStep *tStep) const
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -977,7 +965,10 @@ RCM2Material :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    /// FIXME: Temporary const-cast until other routines have been made const.
+    FloatMatrix answer;
+    const_cast<RCM2Material*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
@@ -995,11 +986,6 @@ RCM2MaterialStatus :: RCM2MaterialStatus(GaussPoint *g) :
         crackDirs.at(i, i) = tempCrackDirs.at(i, i) = 1.0;
     }
 }
-
-
-RCM2MaterialStatus :: ~RCM2MaterialStatus()
-{ }
-
 
 
 int
@@ -1021,15 +1007,14 @@ RCM2MaterialStatus :: isCrackActive(int i) const
 }
 
 void
-RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+RCM2MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->giveTempAlreadyCrack() ) {
-        for ( i = 1; i <= 3; i++ ) {
+        for ( int i = 1; i <= 3; i++ ) {
             switch ( crackStatuses.at(i) ) {
             case pscm_NONE:
                 strcpy(s, "NONE");

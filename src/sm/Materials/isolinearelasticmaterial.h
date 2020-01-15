@@ -100,8 +100,6 @@ public:
      * @param nu Poisson ratio.
      */
     IsotropicLinearElasticMaterial(int n, Domain *d, double E, double nu);
-    /// Destructor.
-    virtual ~IsotropicLinearElasticMaterial() { }
 
     const char *giveClassName() const override { return "IsotropicLinearElasticMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_IsotropicLinearElasticMaterial_Name; }
@@ -111,7 +109,7 @@ public:
      * The E modulus (keyword "E"), Poisson ratio ("nu") and coefficient of thermal dilatation
      * alpha ("talpha") are read. The parent class instanciateFrom method is called.
      */
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void saveContext(DataStream &stream, ContextMode mode) override;
@@ -119,33 +117,29 @@ public:
 
     /// Initialized fixed size tangents. Called by ctor and initializeFrom.
     void initTangents();
-    FloatMatrixF< 3, 3 >foo() { return this->tangentPlaneStress; }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     /// Returns Young's modulus.
-    double giveYoungsModulus() { return E; }
+    double giveYoungsModulus() const { return E; }
 
     /// Returns Poisson's ratio.
-    double givePoissonsRatio() { return nu; }
+    double givePoissonsRatio() const { return nu; }
 
     /// Returns the shear elastic modulus @f$ G = \frac{E}{2(1+\nu)} @f$.
-    double giveShearModulus() override { return G; }
+    double giveShearModulus() const override { return G; }
 
     /// Returns the bulk elastic modulus @f$ K = \frac{E}{3(1-2\nu)} @f$.
-    double giveBulkModulus() { return E / ( 3. * ( 1. - 2. * nu ) ); }
+    double giveBulkModulus() const { return E / ( 3. * ( 1. - 2. * nu ) ); }
 
-    void givePlaneStressStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode, GaussPoint * gp,
+                                               TimeStep * tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix & answer,
-                                  MatResponseMode, GaussPoint * gp,
-                                  TimeStep * tStep) override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode, GaussPoint * gp,
+                                               TimeStep * tStep) const override;
 
-    void give1dStressStiffMtrx(FloatMatrix & answer,
-                               MatResponseMode, GaussPoint * gp,
-                               TimeStep * tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode, GaussPoint * gp,
+                                            TimeStep * tStep) const override;
 
     /**
      * Computes bulk modulus from given Young's modulus and Poisson's ratio.
@@ -174,8 +168,7 @@ public:
 
     Interface *giveInterface(InterfaceType t) override {
         if ( t == QCMaterialExtensionInterfaceType ) {
-	  return static_cast< QCMaterialExtensionInterface * >(this);
-          //  return this;
+            return static_cast< QCMaterialExtensionInterface * >(this);
         } else if ( t == MixedPressureMaterialExtensionInterfaceType ) {
             return static_cast< MixedPressureMaterialExtensionInterface * >( this );
         } else {
@@ -189,21 +182,21 @@ public:
     **
     */
 
-    virtual void giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                                         MatResponseMode,
-                                                         GaussPoint * gp,
-                                                         TimeStep * tStep);
+    void giveDeviatoric3dMaterialStiffnessMatrix(FloatMatrix & answer,
+                                                 MatResponseMode,
+                                                 GaussPoint * gp,
+                                                 TimeStep * tStep) override;
 
 
-    virtual void giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix & answer,
-                                                    MatResponseMode, GaussPoint * gp,
-                                                    TimeStep * tStep);
+    void giveDeviatoricPlaneStrainStiffMtrx(FloatMatrix & answer,
+                                            MatResponseMode, GaussPoint * gp,
+                                            TimeStep * tStep) override;
 
 
-    virtual void giveInverseOfBulkModulus(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { answer  = 3. * ( 1. - 2. * nu ) / E; }
+    void giveInverseOfBulkModulus(double &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override { answer  = 3. * ( 1. - 2. * nu ) / E; }
 
-    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep);
-    virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep);
+    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) override;
+    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, double pressure, TimeStep *tStep) override;
 
 };
 } // end namespace oofem

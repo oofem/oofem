@@ -40,39 +40,33 @@ MicroplaneMaterial_Bazant :: MicroplaneMaterial_Bazant(int n, Domain *d) : Micro
 { }
 
 
-void
-MicroplaneMaterial_Bazant :: giveRealStressVector_3d(FloatArray &answer,
-                                                  GaussPoint *gp,
-                                                  const FloatArray &totalStrain,
-                                                  TimeStep *tStep)
+FloatArrayF<6>
+MicroplaneMaterial_Bazant :: giveRealStressVector_3d(const FloatArrayF<6> &strain,
+                                                     GaussPoint *gp, TimeStep *tStep) const
 {
-    double SvDash, SvSum = 0.;
-    double SD;
+    double SvDash = 0., SvSum = 0.;
     FloatArray mPlaneNormalStress(numberOfMicroplanes), mPlaneShear_L_Stress(numberOfMicroplanes),
     mPlaneShear_M_Stress(numberOfMicroplanes);
-    double mPlaneIntegrationWeight;
 
-    answer.resize(6);
-    answer.zero();
-
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
 
+    FloatArrayF<6> answer;
 
     for ( int mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
         int mPlaneIndex1 = mPlaneIndex + 1;
         // compute strain projections on mPlaneIndex-th microplane
-        auto mPlaneStrainCmpns = computeStrainVectorComponents(mPlaneIndex1, totalStrain);
+        auto mPlaneStrainCmpns = computeStrainVectorComponents(mPlaneIndex1, strain);
         // compute real stresses on this microplane
         auto mPlaneStressCmpns = giveRealMicroplaneStressVector(gp, mPlaneIndex1, mPlaneStrainCmpns, tStep);
 
         mPlaneNormalStress.at(mPlaneIndex1) = mPlaneStressCmpns.n;
         mPlaneShear_L_Stress.at(mPlaneIndex1) = mPlaneStressCmpns.l;
         mPlaneShear_M_Stress.at(mPlaneIndex1) = mPlaneStressCmpns.m;
-        mPlaneIntegrationWeight = this->giveMicroplaneIntegrationWeight(mPlaneIndex1);
+        double mPlaneIntegrationWeight = this->giveMicroplaneIntegrationWeight(mPlaneIndex1);
 
         SvSum += mPlaneNormalStress.at(mPlaneIndex1) * mPlaneIntegrationWeight;
-        SD = mPlaneNormalStress.at(mPlaneIndex1) - mPlaneStressCmpns.v;
+        double SD = mPlaneNormalStress.at(mPlaneIndex1) - mPlaneStressCmpns.v;
         //SDSum +=  SD* mPlaneIntegrationWeight;
 
         SvDash = mPlaneStressCmpns.v;
@@ -103,15 +97,15 @@ MicroplaneMaterial_Bazant :: giveRealStressVector_3d(FloatArray &answer,
 
     if ( SvDash > SvSum / 3. ) {
         SvDash = SvSum / 3.;
-        answer.zero();
+        answer = zeros<6>();
 
         for ( int mPlaneIndex = 0; mPlaneIndex < numberOfMicroplanes; mPlaneIndex++ ) {
             int mPlaneIndex1 = mPlaneIndex + 1;
 
             updateVolumetricStressTo(gp, mPlaneIndex1, SvDash);
 
-            SD = mPlaneNormalStress.at(mPlaneIndex1) - SvDash;
-            mPlaneIntegrationWeight = this->giveMicroplaneIntegrationWeight(mPlaneIndex1);
+            double SD = mPlaneNormalStress.at(mPlaneIndex1) - SvDash;
+            double mPlaneIntegrationWeight = this->giveMicroplaneIntegrationWeight(mPlaneIndex1);
 
             for ( int i = 0; i < 6; i++ ) {
                 answer.at(i + 1) += ( ( N [ mPlaneIndex ] [ i ] - Kronecker [ i ] / 3. ) * SD +
@@ -122,14 +116,15 @@ MicroplaneMaterial_Bazant :: giveRealStressVector_3d(FloatArray &answer,
         }
     }
 
-    answer.times(6.0);
+    answer *= 6.0;
 
     //2nd constraint, addition of volumetric part
     answer.at(1) += SvDash;
     answer.at(2) += SvDash;
     answer.at(3) += SvDash;
 
-    status->letTempStrainVectorBe(totalStrain);
+    status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(answer);
+    return answer;
 }
 } // end namespace oofem

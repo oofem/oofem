@@ -72,10 +72,10 @@ PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 }
 
 
-IRResultType PrescribedGradientBCNeumann :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCNeumann :: initializeFrom(InputRecord &ir)
 {
     ActiveBoundaryCondition :: initializeFrom(ir);
-    return PrescribedGradientHomogenization :: initializeFrom(ir);
+    PrescribedGradientHomogenization :: initializeFrom(ir);
 }
 
 
@@ -328,12 +328,11 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
 
     XfemElementInterface *xfemElInt = dynamic_cast< XfemElementInterface * >( e );
     if ( xfemElInt && domain->hasXfemManager() ) {
-        IntArray edgeNodes;
         FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
         if ( !interp2d ) {
             OOFEM_ERROR("failed to cast to FEInterpolation2d.")
         }
-        interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
+        const auto &edgeNodes = interp2d->computeLocalEdgeMapping(iBndIndex);
 
 //        const auto &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
 //        const auto &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );

@@ -61,15 +61,13 @@ QuasicontinuumVTKXMLExportModule :: ~QuasicontinuumVTKXMLExportModule()
 {}
 
 
-IRResultType
-QuasicontinuumVTKXMLExportModule :: initializeFrom(InputRecord *ir)
+void
+QuasicontinuumVTKXMLExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    VTKXMLExportModule :: initializeFrom(ir);
 
     deactivatedElementsExportFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, deactivatedElementsExportFlag, _IFT_QuasicontinuumVTKXMLExportModule_ExportDeactivatedElements); // Macro
-
-    return VTKXMLExportModule :: initializeFrom(ir);
 }
 
 
@@ -81,7 +79,6 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
 
     Domain *d  = emodel->giveDomain(1);
     Element *elem;
-    FloatArray *coords;
 
     this->giveSmoother(); // make sure smoother is created
 
@@ -96,8 +93,8 @@ QuasicontinuumVTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
-            vtkPiece.setNodeCoords(inode, * coords);
+            const auto &coords = d->giveNode( mapL2G.at(inode) )->giveCoordinates();
+            vtkPiece.setNodeCoords(inode, coords);
         }
 
 

@@ -67,16 +67,16 @@ protected:
     void postInitialize() override;
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
 
-    void evalCovarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec, TimeStep *tStep) override;
+    FloatMatrixF<3,3> evalCovarBaseVectorsAt(const FloatArrayF<3> &lCoords, FloatArray &solVec, TimeStep *tStep) override;
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, const FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
     void computeDiscSolutionVector(IntArray &dofIdArray , TimeStep *tStep, FloatArray &solVecD);
-    void computeInterfaceJumpAt(int interf, FloatArray &lCoords, TimeStep *tStep, FloatArray &answer);
+    FloatArrayF<3> computeInterfaceJumpAt(int interf, const FloatArrayF<3> &lCoords, TimeStep *tStep);
 
     // Internal forces
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord) override;
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
-    void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
+    FloatArray computeSectionalForcesAt(IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
 
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
 //    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei, const int edge);
@@ -86,8 +86,8 @@ protected:
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei, EnrichmentItem *coupledToEi);
 
     // Tangent matrices
-    void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
-    void computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta);  
+    std::array<FloatMatrixF<3,18>, 3> computeLambdaGMatricesDis(double zeta);
+    FloatMatrixF<3,7> computeLambdaNMatrixDis(double zeta);  
     virtual void OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) override;
 
@@ -101,7 +101,7 @@ protected:
 
     void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep) override;
 
-    void edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei);
+    FloatMatrixF<3,3> edgeEvalEnrCovarBaseVectorsAt(const FloatArrayF<3> &lCoords, const int iedge, TimeStep *tStep, EnrichmentItem *ei);
     void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
     void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep, Delamination *dei, EnrichmentItem *ei_j, EnrichmentItem *ei_k);
 
@@ -129,8 +129,8 @@ protected:
     void giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
     void giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep );
 
-    void vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep) override;
-    void giveDisUnknownsAt(const FloatArray &lCoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double &gam, TimeStep *tStep);
+    FloatArrayF<3> vtkEvalUpdatedGlobalCoordinateAt(const FloatArrayF<3> &localCoords, int layer, TimeStep *tStep) override;
+    void giveDisUnknownsAt(const FloatArrayF<3> &lCoords, EnrichmentItem *ei, const FloatArray &solVec, FloatArrayF<3> &x, FloatArrayF<3> &m, double &gam, TimeStep *tStep);
     IntArray DelaminatedInterfaceList;
     void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep) override;
 
@@ -141,10 +141,10 @@ protected:
     std :: vector < std :: vector< Triangle > > crackSubdivisions;
     IntArray numSubDivisionsArray;
 
-    void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
-    void giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
-    void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
-    void giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
+    std::vector<FloatArray> giveFictiousNodeCoordsForExport(int layer, int subCell);
+    std::vector<FloatArray> giveFictiousCZNodeCoordsForExport(int layer, int subCell);
+    std::vector<FloatArray> giveFictiousUpdatedNodeCoordsForExport(int layer, TimeStep *tStep, int subCell);
+    std::vector<FloatArray> giveFictiousUpdatedCZNodeCoordsForExport(int layer, TimeStep *tStep, int subCell);
     void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, int layer, FloatMatrix &localNodeCoords);
     void giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords);
     void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
@@ -170,7 +170,7 @@ public:
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     Interface *giveInterface(InterfaceType it) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int giveNumberOfDofs() override;
 

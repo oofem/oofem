@@ -47,23 +47,14 @@
 namespace oofem {
 REGISTER_EngngModel(NLTransientTransportProblem);
 
-NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = NULL) : NonStationaryTransportProblem(i, _master)
+NLTransientTransportProblem :: NLTransientTransportProblem(int i, EngngModel *_master = nullptr) : NonStationaryTransportProblem(i, _master)
 {
-    //constructor
 }
 
-NLTransientTransportProblem :: ~NLTransientTransportProblem()
+void
+NLTransientTransportProblem :: initializeFrom(InputRecord &ir)
 {
-    //destructor
-}
-
-IRResultType
-NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
-{
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    result = NonStationaryTransportProblem :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+     NonStationaryTransportProblem :: initializeFrom(ir);
 
     int val = 30;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NLTransientTransportProblem_nsmax);
@@ -79,8 +70,6 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
     } else {
         NR_Mode = nrsolverModifiedNRM;
     }
-
-    return IRRT_OK;
 }
 
 TimeStep *

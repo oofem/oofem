@@ -47,22 +47,15 @@ REGISTER_Material(TutorialMaterial);
 TutorialMaterial :: TutorialMaterial(int n, Domain *d) : StructuralMaterial(n, d), D(n, d)
 {}
 
-TutorialMaterial :: ~TutorialMaterial()
-{}
 
-IRResultType
-TutorialMaterial :: initializeFrom(InputRecord *ir)
+void
+TutorialMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
-    result = D.initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-
+    D.initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->sig0, _IFT_TutorialMaterial_yieldstress);
-
     IR_GIVE_FIELD(ir, this->H, _IFT_TutorialMaterial_hardeningmoduli);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 
@@ -83,147 +76,98 @@ TutorialMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-void
-TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+TutorialMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
-    FloatArray strain;
-    TutorialMaterialStatus *status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
+    auto status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
 
     // subtract stress thermal expansion
-    this->giveStressDependentPartOfStrainVector_3d(strain, gp, totalStrain, tStep, VM_Total);
+    auto thermalStrain = this->computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+    auto strain = totalStrain - thermalStrain;
 
-    FloatArray trialElastStrain;
-    trialElastStrain.beDifferenceOf(strain, status->givePlasticStrain());
+    auto trialElastStrain = strain - status->givePlasticStrain();
 
     // Compute trial stress = sig_tr = sig_old + E*delta_eps
-    FloatMatrix elasticStiffness;
-    D.give3dMaterialStiffnessMatrix(elasticStiffness, TangentStiffness, gp, tStep);
-    FloatArray trialStress;
-    trialStress.beProductOf(elasticStiffness, trialElastStrain);
+    const auto &elasticStiffness = D.giveTangent();
+    auto trialStress = dot(elasticStiffness, trialElastStrain);
 
-    FloatArray sphTrialStress, devTrialStress;
-    computeSphDevPartOf(trialStress, sphTrialStress, devTrialStress);
+    //auto [devTrialStress, meanTrialStress] = computeDeviatoricVolumetricSplit(); // c++17
+    auto tmp = computeDeviatoricVolumetricSplit(trialStress);
+    auto devTrialStress = tmp.first;
+    auto meanTrialStress = tmp.second;
 
     double J2 = this->computeSecondStressInvariant(devTrialStress);
     double effectiveTrialStress = sqrt(3 * J2);
 
-#if 1
-    double temperatureScaling = 1.0;
-#else
-    double temperature;
-    FloatArray et;
-    static_cast< StructuralElement *>(gp->giveIntegrationRule()->giveElement())->computeResultingIPTemperatureAt(et, tStep, gp, VM_Total);
-    temperature = et.at(1) + 800;
-
-    double temperatureScaling = temperature <= 400 ? 1.0 : 1.0 - (temperature - 400) * 0.5 / 400;
-#endif
-
     // evaluate the yield surface
     double k = status->giveK();
-    double phiTrial = effectiveTrialStress - ( temperatureScaling * this->sig0 +  temperatureScaling * H * k );
+    double phiTrial = effectiveTrialStress - ( this->sig0 +  H * k );
 
+    FloatArrayF<6> stress;
     if ( phiTrial < 0.0 ) { // elastic
-        answer = trialStress;
+        stress = trialStress;
 
         status->letTempPlasticStrainBe(status->givePlasticStrain());
     } else { // plastic loading
         double G = D.giveShearModulus();
-        double mu = phiTrial / ( 3.0 * G + temperatureScaling * H ); // plastic multiplier
-        answer = devTrialStress * ( 1.0 - 3.0*G*mu/effectiveTrialStress); // radial return
-        answer.add(sphTrialStress);
+        double mu = phiTrial / ( 3.0 * G + H ); // plastic multiplier
+        // radial return
+        auto devStress = ( 1.0 - 3.0*G*mu/effectiveTrialStress) * devTrialStress;
+        stress = computeDeviatoricVolumetricSum(devStress, meanTrialStress);
         k += mu;
 
-        FloatArray plasticStrain = status->givePlasticStrain();
-        FloatArray dPlStrain;
-        applyDeviatoricElasticCompliance(dPlStrain, devTrialStress, 0.5);
-        plasticStrain.add(mu * 3. / (2. * effectiveTrialStress), dPlStrain);
+        auto plasticStrain = status->givePlasticStrain();
+        auto dPlStrain = applyDeviatoricElasticCompliance(devTrialStress, 0.5);
+        plasticStrain += (mu * 3. / (2. * effectiveTrialStress)) * dPlStrain;
         status->letTempPlasticStrainBe(plasticStrain);
     }
 
     // Store the temporary values for the given iteration
     status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStressVectorBe(stress);
     status->letTempKBe(k);
     status->letTempDevTrialStressBe(devTrialStress);
+    return stress;
 }
 
 
-void
-TutorialMaterial :: computeSphDevPartOf(const FloatArray &sigV, FloatArray &sigSph, FloatArray &sigDev)
+FloatMatrixF<6,6>
+TutorialMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    double volumetricPart = ( sigV.at(1) + sigV.at(2) + sigV.at(3) ) / 3.0;
-    sigSph = {volumetricPart, volumetricPart, volumetricPart, 0.0, 0.0, 0.0};
-    sigDev.beDifferenceOf(sigV, sigSph);
-}
-
-
-void 
-TutorialMaterial :: giveDeviatoricProjectionMatrix(FloatMatrix &answer)
-{
-    answer.resize(6,6);
-    answer.zero();
-    answer.at(1,1) = answer.at(2,2) = answer.at(3,3) =  2.0/3.0;
-    answer.at(1,2) = answer.at(1,3) = answer.at(2,3) = -1.0/3.0;
-    answer.at(2,1) = answer.at(3,1) = answer.at(3,2) = -1.0/3.0;
-    answer.at(4,4) = answer.at(5,5) = answer.at(6,6) =  1.0/2.0;
-}
-
-
-void
-TutorialMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
-{
-    TutorialMaterialStatus *status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray devTrialStress = status->giveTempDevTrialStress();
+    auto status = static_cast< TutorialMaterialStatus * >( this->giveStatus(gp) );
+    const auto &devTrialStress = status->giveTempDevTrialStress();
 
     double J2 = this->computeSecondStressInvariant(devTrialStress);
     double effectiveTrialStress = sqrt(3 * J2);
 
-#if 1
-    double temperatureScaling = 1.0;
-#else
-    double temperature;
-    FloatArray et;
-    static_cast< StructuralElement *>(gp->giveIntegrationRule()->giveElement())->computeResultingIPTemperatureAt(et, tStep, gp, VM_Total);
-    temperature = et.at(1) + 800;
-
-    double temperatureScaling = temperature <= 400 ? 1.0 : 1.0 - (temperature - 400) * 0.5 / 400;
-#endif
-
     // evaluate the yield surface
     double k = status->giveK();
-    double phiTrial = effectiveTrialStress - ( temperatureScaling * this->sig0 + temperatureScaling * H * k );
+    double phiTrial = effectiveTrialStress - ( this->sig0 + H * k );
     
-    FloatMatrix elasticStiffness;
-    D.give3dMaterialStiffnessMatrix(elasticStiffness, ElasticStiffness, gp, tStep);
+    const auto &elasticStiffness = D.giveTangent();
     
     if ( phiTrial < 0.0 ) { // elastic
-        answer = elasticStiffness;
+        return elasticStiffness;
     } else { // plastic loading
         double G = D.giveShearModulus();
         // E_t = elasticStiffness - correction
         // correction =  2.0 * G * ( 2.0 * G / h *( sig0 + kappa ) / sigtre *openProd(nu,nu) + mu*3*G/sigtre *Idev);
-        double h = 3.0 * G + temperatureScaling * H;
+        double h = 3.0 * G + H;
         double mu = phiTrial / h; // plasic multiplier
-        
-        FloatArray nu = (3.0/2.0 / effectiveTrialStress ) * devTrialStress; 
-        FloatMatrix Idev, correction;
-        giveDeviatoricProjectionMatrix(Idev);
-        
-        correction.plusDyadUnsym(nu, nu, 2.0 * G / h * ( temperatureScaling * this->sig0 + temperatureScaling * H * k ));
-        correction.add(mu * 3.0 * G, Idev);
-        correction.times(2.0 * G / effectiveTrialStress);
-        answer = elasticStiffness;
-        answer.subtract(correction);
+        auto nu = ( 3.0/2.0 / effectiveTrialStress ) * devTrialStress; 
+
+        auto correction = dyad(nu, nu) * (2.0 * G / h * ( this->sig0 + H * k ));
+        correction += (mu * 3.0 * G) * I_dev6;
+        correction *= 2.0 * G / effectiveTrialStress;
+        return elasticStiffness - correction;
     }
 }
 
 
-void
-TutorialMaterial :: giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+FloatArrayF<6>
+TutorialMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 {
-    double alpha = D.give(tAlpha, gp);
-    answer = {alpha, alpha, alpha, 0., 0., 0.};
+    return D.giveAlpha();
 }
 
 
@@ -244,10 +188,7 @@ TutorialMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 
 
 TutorialMaterialStatus :: TutorialMaterialStatus(GaussPoint * g) :
-    StructuralMaterialStatus(g),
-    tempPlasticStrain(6), plasticStrain(6),
-    tempDevTrialStress(6),
-    tempK(0.), k(0.)
+    StructuralMaterialStatus(g)
 {
     strainVector.resize(6);
     stressVector.resize(6);
@@ -269,8 +210,7 @@ TutorialMaterialStatus :: initTempStatus()
 
     tempPlasticStrain = plasticStrain;
     tempK = k;
-    tempDevTrialStress.resize(6);
-    tempDevTrialStress.zero();
+    tempDevTrialStress = zeros<6>();
 }
 
 

@@ -83,7 +83,7 @@ protected:
 public:
     IntMatPhaseField(int n, Domain * d);
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "IntMatPhaseField"; }
     const char *giveInputRecordName() const override { return _IFT_IntMatPhaseField_Name; }
 
@@ -91,7 +91,7 @@ public:
     FloatMatrixF<3,3> give3dStiffnessMatrix_Eng(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
     void giveTangents(FloatMatrix &jj, FloatMatrix &jd, FloatMatrix &dj, FloatMatrix &dd, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatPhaseFieldStatus(gp); }; 

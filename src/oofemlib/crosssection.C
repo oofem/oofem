@@ -64,19 +64,12 @@ CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npointsXY, in
     return irule.setUpIntegrationPoints( element->giveIntegrationDomain(), npointsXY, npointsZ, element->giveMaterialMode() );
 }
 
-IRResultType
-CrossSection :: initializeFrom(InputRecord *ir)
-//
-// instanciates receiver from input record
-//
+void
+CrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
     // Read set number the cross section is applied to
     this->setNumber = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->setNumber, _IFT_CrossSection_SetNumber);
-
-    return IRRT_OK;
 }
 
 void
@@ -129,7 +122,7 @@ CrossSection :: hasProperty(CrossSectionProperty aProperty)
 }
 
 double
-CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
+CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty of the receiver.
 {
     if ( propertyDictionary.includes(aProperty) ) {
@@ -142,7 +135,7 @@ CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 }
 
 double
-CrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local)
+CrossSection :: give(CrossSectionProperty aProperty, const FloatArray &coords, Element *elem, bool local) const
 // Returns the value of the property aProperty of the receiver.
 {
     if ( propertyDictionary.includes(aProperty) ) {

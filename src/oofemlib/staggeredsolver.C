@@ -76,15 +76,10 @@ StaggeredSolver :: StaggeredSolver(Domain *d, EngngModel *m) : NRSolver(d, m)
 }
 
 
-IRResultType
-StaggeredSolver :: initializeFrom(InputRecord *ir)
+void
+StaggeredSolver :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = NRSolver ::initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    NRSolver ::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->totalIdList, _IFT_StaggeredSolver_DofIdList);
     IR_GIVE_FIELD(ir, this->idPos, _IFT_StaggeredSolver_DofIdListPositions);
@@ -100,7 +95,6 @@ StaggeredSolver :: initializeFrom(InputRecord *ir)
         }
         this->UnknownNumberingSchemeList[i].setDofIdArray(idList);
     }
-    return IRRT_OK;
 }
 
 

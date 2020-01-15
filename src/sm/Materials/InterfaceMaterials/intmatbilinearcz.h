@@ -124,7 +124,7 @@ private:
     FloatArrayF<3> computeTraction(const FloatArrayF<3> &iTTrial, double iPlastMultInc) const;
 
 public:
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IntMatBilinearCZStatus(gp); }

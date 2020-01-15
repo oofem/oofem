@@ -72,7 +72,7 @@ public:
     OutputExportModule(int n, EngngModel * e);
     virtual ~OutputExportModule() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     FILE *giveOutputStream();
 
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;

@@ -62,7 +62,7 @@ public:
 
     FEInterpolation *giveInterpolation() const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     Interface *giveInterface(InterfaceType) override;
     int testElementExtension(ElementExtension ext) override { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }

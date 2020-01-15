@@ -50,11 +50,9 @@ double PrescribedMean :: domainSize;
 
 REGISTER_BoundaryCondition(PrescribedMean);
 
-IRResultType
-PrescribedMean :: initializeFrom(InputRecord *ir)
+void
+PrescribedMean :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, c, _IFT_PrescribedMean_Mean);
@@ -70,8 +68,6 @@ PrescribedMean :: initializeFrom(InputRecord *ir)
     lambdaDman->appendDof( new MasterDof( lambdaDman.get(), ( DofIDItem )newdofid ));
 
     domainSize=-1.;
-
-    return IRRT_OK;
 
 }
 
@@ -103,11 +99,11 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
             FloatArray N; //, a;
             FloatMatrix temp, tempT;
             double detJ = 0.0;
-            IntArray boundaryNodes, dofids={(DofIDItem) this->dofid}, r_Sideloc, c_Sideloc;
+            IntArray dofids={(DofIDItem) this->dofid}, r_Sideloc, c_Sideloc;
 
             if (elementEdges) {
                 // Compute boundary integral
-                interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
+                auto boundaryNodes = interpolator->boundaryGiveNodes(sides.at(i) );
                 interpolator->boundaryEvalN(N, sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement));
                 detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );
                 // Retrieve locations for dofs on boundary
@@ -179,12 +175,12 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         for ( auto &gp: *iRule ) {
             FloatArray lcoords = gp->giveNaturalCoordinates();
             FloatArray a, N, pressureEqns, lambdaEqns;
-            IntArray boundaryNodes, dofids={(DofIDItem) this->dofid}, locationArray;
+            IntArray dofids={(DofIDItem) this->dofid}, locationArray;
             double detJ = 0.0;
 
             if (elementEdges) {
                 // Compute integral
-                interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
+                auto boundaryNodes = interpolator->boundaryGiveNodes(sides.at(i) );
                 thisElement->computeBoundaryVectorOf(boundaryNodes, dofids, VM_Total, tStep, a);
                 interpolator->boundaryEvalN(N, sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement));
                 detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), lcoords, FEIElementGeometryWrapper(thisElement)) );

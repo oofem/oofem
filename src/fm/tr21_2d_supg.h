@@ -62,7 +62,6 @@ protected:
 
 public:
     TR21_2D_SUPG(int n, Domain * aDomain);
-    virtual ~TR21_2D_SUPG();
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
@@ -107,7 +106,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *tStep);
+                                int node, TimeStep *tStep) override;
     // Graphics output
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;

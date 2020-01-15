@@ -70,7 +70,7 @@ protected:
     std :: map< int, int > slavemap;
     FloatArray jump;
 
-    int masterSet;
+    int masterSet = 0;
 
     /**
      * This is the central support function, which finds the corresponding slave nodes for each master node.
@@ -81,9 +81,8 @@ protected:
 
 public:
     TransportGradientPeriodic(int n, Domain *d);
-    virtual ~TransportGradientPeriodic();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void postInitialize() override;
 

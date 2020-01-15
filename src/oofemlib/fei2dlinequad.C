@@ -134,9 +134,9 @@ int FEI2dLineQuad :: global2local(FloatArray &answer, const FloatArray &gcoords,
     return false; // It will never land exactly on the geometry.
 }
 
-void FEI2dLineQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray FEI2dLineQuad :: computeLocalEdgeMapping(int iedge) const
 {
-    edgeNodes = {1, 2, 3};
+    return {1, 2, 3};
 }
 
 void FEI2dLineQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
@@ -233,7 +233,7 @@ void FEI2dLineQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Fl
     jacobianMatrix(1, 1) = es1 / J;
 }
 
-double FEI2dLineQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+double FEI2dLineQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     OOFEM_ERROR("Not implemented");
     return 0.0;

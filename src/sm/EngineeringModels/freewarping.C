@@ -92,15 +92,10 @@ NumericalMethod *FreeWarping :: giveNumericalMethod(MetaStep *mStep)
     return nMethod.get();
 }
 
-IRResultType
-FreeWarping :: initializeFrom(InputRecord *ir)
+void
+FreeWarping :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralEngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralEngngModel :: initializeFrom(ir);
 
     int val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_lstype);
@@ -110,9 +105,6 @@ FreeWarping :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-
-
-
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
@@ -121,9 +113,6 @@ FreeWarping :: initializeFrom(InputRecord *ir)
     }
 
 #endif
-
-
-    return IRRT_OK;
 }
 
 

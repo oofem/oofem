@@ -160,6 +160,8 @@ set (core_dofman
     rigidarmnode.C
     elementinternaldofman.C
     elementside.C
+    latticedirichletcouplingnode.C
+    latticeneumanncouplingnode.C
     )
 
 set (core_material
@@ -175,6 +177,8 @@ set (core_export
     errorcheckingexportmodule.C
     vtkexportmodule.C
     vtkxmlexportmodule.C
+    vtkxmlperiodicexportmodule.C
+    vtkxmllatticeexportmodule.C
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C
@@ -301,10 +305,16 @@ set (core_bc
     linearconstraintbc.C
     )
 
-if (USE_PYTHON)
+if (USE_PYTHON_EXTENSION)
     list (APPEND core_bc userdefdirichletbc.C)
     list (APPEND core_unsorted pythonexpression.C)
 endif ()
+
+if (USE_PYBIND_BINDINGS)
+    list (APPEND core_unsorted pythonfield.C)
+endif ()
+
+
 
 set (core_mapping
     mmaclosestiptransfer.C

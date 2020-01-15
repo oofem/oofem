@@ -50,7 +50,7 @@ std::unique_ptr<DynamicInputRecord> CreateNodeIR(int i, InputFieldType nodeType,
 {
     auto result = std::make_unique<DynamicInputRecord>(nodeType, i);
     result->setField(std :: move(coord), _IFT_Node_coords);
-    return std::move(result);
+    return result;
 }
 
 std::unique_ptr<DynamicInputRecord> CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs)
@@ -60,12 +60,12 @@ std::unique_ptr<DynamicInputRecord> CreateElementIR(int i, InputFieldType elemen
     if ( cs != 0 ) {
         result->setField(cs, _IFT_Element_crosssect);
     }
-    return std::move(result);
+    return result;
 }
 
 
-DynamicInputRecord :: DynamicInputRecord(std :: string keyword, int value) : InputRecord(),
-    recordKeyword(keyword), ///@todo std::move here
+DynamicInputRecord :: DynamicInputRecord(std :: string keyword, int value) :
+    recordKeyword(std::move(keyword)),
     recordNumber(value),
     emptyRecord(),
     intRecord(),
@@ -80,7 +80,7 @@ DynamicInputRecord :: DynamicInputRecord(std :: string keyword, int value) : Inp
     rangeRecord()
 { }
 
-DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) : InputRecord(),
+DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) :
     recordKeyword(),
     recordNumber(0),
     emptyRecord(),
@@ -98,7 +98,7 @@ DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) : InputRecord(),
     femc.giveInputRecord(* this);
 }
 
-DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputRecord(src),
+DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) :
     recordKeyword(src.recordKeyword),
     recordNumber(src.recordNumber),
     emptyRecord(src.emptyRecord),
@@ -141,127 +141,114 @@ void DynamicInputRecord :: finish(bool wrn)
     ///@todo Implement warning about unread entries
 }
 
-IRResultType DynamicInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
+void DynamicInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
 {
     answer = this->recordKeyword;
     value = this->recordNumber;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveRecordKeywordField(std :: string &answer)
+void DynamicInputRecord :: giveRecordKeywordField(std :: string &answer)
 {
     answer = this->recordKeyword;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(int &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(int &answer, InputFieldType id)
 {
     std :: map< std :: string, int > :: iterator it = this->intRecord.find(id);
     if ( it == this->intRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(double &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(double &answer, InputFieldType id)
 {
     std :: map< std :: string, double > :: iterator it = this->doubleRecord.find(id);
     if ( it == this->doubleRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(bool &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(bool &answer, InputFieldType id)
 {
     std :: map< std :: string, bool > :: iterator it = this->boolRecord.find(id);
     if ( it == this->boolRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std :: string &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(std :: string &answer, InputFieldType id)
 {
     std :: map< std :: string, std :: string > :: iterator it = this->stringRecord.find(id);
     if ( it == this->stringRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(FloatArray &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 {
     std :: map< std :: string, FloatArray > :: iterator it = this->floatArrayRecord.find(id);
     if ( it == this->floatArrayRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(IntArray &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(IntArray &answer, InputFieldType id)
 {
     std :: map< std :: string, IntArray > :: iterator it = this->intArrayRecord.find(id);
     if ( it == this->intArrayRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
 {
     std :: map< std :: string, FloatMatrix > :: iterator it = this->matrixRecord.find(id);
     if ( it == this->matrixRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
 {
     std :: map< std :: string, std :: vector< std :: string > > :: iterator it = this->stringListRecord.find(id);
     if ( it == this->stringListRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(Dictionary &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 {
     std :: map< std :: string, Dictionary > :: iterator it = this->dictionaryRecord.find(id);
     if ( it == this->dictionaryRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(std :: list< Range > &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(std :: list< Range > &answer, InputFieldType id)
 {
     std :: map< std :: string, std :: list< Range > > :: iterator it = this->rangeRecord.find(id);
     if ( it == this->rangeRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
-IRResultType DynamicInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
+void DynamicInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
 {
     std :: map< std :: string, ScalarFunction > :: iterator it = this->scalarFunctionRecord.find(id);
     if ( it == this->scalarFunctionRecord.end() ) {
-        return IRRT_NOTFOUND;
+        throw MissingKeywordInputException(*this, id, recordNumber);
     }
     answer = it->second;
-    return IRRT_OK;
 }
 
 bool DynamicInputRecord :: hasField(InputFieldType id)
@@ -372,15 +359,6 @@ void DynamicInputRecord :: unsetField(InputFieldType id)
     this->scalarFunctionRecord.erase(id);
 }
 
-void
-DynamicInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
-                                   IRResultType result, const char *file, int line)
-{
-    oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
-                              "Input error: \"%s\", field keyword \"%s\"\n%s::%s",
-                              strerror(result), id, _class, proc);
-    OOFEM_EXIT(1); ///@todo We should never directly exit when dealing with user input.
-}
 
 // Helpful macro since we have so many separate records
 #define forRecord(name) \

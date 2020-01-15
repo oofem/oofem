@@ -41,6 +41,7 @@
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "load.h"
+#include "floatmatrixf.h"
 //#include "eleminterpmapperinterface.h"//
 
 #define _IFT_MITC4Shell_Name "mitc4shell"
@@ -79,20 +80,27 @@ protected:
      * Transformation Matrix form GtoL(3,3) is stored
      * at the element level for computation efficiency.
      */
-    FloatMatrix GtoLRotationMatrix;
-    int nPointsXY, nPointsZ, directorType;
-    double drillCoeff;
+    FloatMatrixF<3,3> GtoLRotationMatrix;
+    int nPointsXY = 0, nPointsZ = 0, directorType = 0;
+    double drillCoeff = 0.;
 
 public:
-
     MITC4Shell(int n, Domain *d);
-    virtual ~MITC4Shell() { }
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
     int testElementExtension(ElementExtension ext) override { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
     Interface *giveInterface(InterfaceType interface) override;
+    // definition & identification
+    const char *giveClassName() const override { return "MITC4Shell"; }
+    const char *giveInputRecordName() const override { return _IFT_MITC4Shell_Name; }
+    integrationDomain giveIntegrationDomain() const override { return _3dDegShell; }
+    MaterialMode giveMaterialMode() override { return _3dDegeneratedShell; }
+    void initializeFrom(InputRecord &ir) override;
+    void postInitialize() override;
+    int computeNumberOfDofs() override { return 24; }
+    int computeNumberOfGlobalDofs() override { return 24; }
 
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
@@ -104,7 +112,7 @@ public:
     // transformation
     bool computeGtoLRotationMatrix(FloatMatrix &answer) override;
     int computeLoadGToLRotationMtrx(FloatMatrix &answer) override;
-    void computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix &answer2, FloatMatrix &answer3, FloatMatrix &answer4);
+    std::array<FloatMatrixF<3,3>, 4> computeLToDirectorRotationMatrix();
     int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp) override;
 
 protected:
@@ -117,34 +125,22 @@ protected:
 
 
 private:
-    void giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
-                             double &y1, double &y2, double &y3, double &y4,
-                             double &z1, double &z2, double &z3, double &z4);
-    void giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4);
-    void giveLocalDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4);
-    void giveThickness(double &a1, double &a2, double &a3, double &a4);
-    void giveJacobian(FloatArray lcoords, FloatMatrix &jacobianMatrix);
-    void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
-    const FloatMatrix *computeGtoLRotationMatrix();
+    std::array<FloatArrayF<3>, 4> giveNodeCoordinates();
+    std::array<FloatArrayF<3>, 4> giveDirectorVectors();
+    std::array<FloatArrayF<3>, 4> giveLocalDirectorVectors();
+    std::array<double, 4> giveThickness();
+    FloatMatrixF<3,3> giveJacobian(const FloatArrayF<3> &lcoords);
+    FloatArrayF<3> giveLocalCoordinates(const FloatArrayF<3> &global);
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
-    void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
+    FloatMatrix giveCharacteristicTensor(CharTensor type, GaussPoint *gp, TimeStep *tStep);
     void printOutputAt(FILE *file, TimeStep *tStep) override;
     int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) override;
     bool computeLocalCoordinates(FloatArray &answer, const FloatArray &coords) override;
     double computeVolumeAround(GaussPoint *gp) override;
-    void computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray &e3);
-    void givedNdx(FloatArray &hkx, FloatArray &hky, FloatArray coords);
+    std::array<FloatArrayF<3>, 3> computeLocalBaseVectors();
+    std::array<FloatArrayF<4>, 2> givedNdx(const FloatArrayF<3> &coords);
 
-    void giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateType type, TimeStep *tStep);
-
-    // definition & identification
-    const char *giveClassName() const override { return "MITC4Shell"; }
-    const char *giveInputRecordName() const override { return _IFT_MITC4Shell_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
-    int computeNumberOfDofs() override { return 24; }
-    int computeNumberOfGlobalDofs() override { return 24; }
-    integrationDomain giveIntegrationDomain() const override { return _3dDegShell; }
-    MaterialMode giveMaterialMode() override { return _3dDegeneratedShell; }
+    FloatArray giveMidplaneIPValue(int gpXY, InternalStateType type, TimeStep *tStep);
 
     // edge & body load
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;

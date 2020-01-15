@@ -272,15 +272,14 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     const int numEdges = element->giveInterpolation()->giveNumberOfEdges();
 
     for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
-        IntArray bNodes;
-        element->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
+        auto bNodes = element->giveInterpolation()->boundaryGiveNodes(edgeIndex);
 
         const int nsLoc = bNodes.at(1);
         const int neLoc = bNodes.at( bNodes.giveSize() );
 
-        FloatArray xS = *(element->giveNode(nsLoc)->giveCoordinates() );
+        FloatArray xS = element->giveNode(nsLoc)->giveCoordinates();
         xS.resizeWithValues(2);
-        FloatArray xE = *(element->giveNode(neLoc)->giveCoordinates() );
+        FloatArray xE = element->giveNode(neLoc)->giveCoordinates();
         xE.resizeWithValues(2);
 
         const double dist = BasicGeometry :: computeLineDistance(xS, xE, mVertices[0], mVertices[1]);
@@ -304,10 +303,10 @@ void Line :: computeIntersectionPoints(Element *element, std :: vector< FloatArr
             n2 = 1;
         }
 
-        double lsn1 = computeDistanceTo( *element->giveDofManager(n1)->giveCoordinates() );
-        double lsn2 = computeDistanceTo( *element->giveDofManager(n2)->giveCoordinates() );
-        double lst1 = computeTangentialDistanceToEnd( *element->giveDofManager(n1)->giveCoordinates() );
-        double lst2 = computeTangentialDistanceToEnd( *element->giveDofManager(n2)->giveCoordinates() );
+        double lsn1 = computeDistanceTo( element->giveDofManager(n1)->giveCoordinates() );
+        double lsn2 = computeDistanceTo( element->giveDofManager(n2)->giveCoordinates() );
+        double lst1 = computeTangentialDistanceToEnd( element->giveDofManager(n1)->giveCoordinates() );
+        double lst2 = computeTangentialDistanceToEnd( element->giveDofManager(n2)->giveCoordinates() );
         if ( lsn1 * lsn2 <= 0 && lst1 <= 0 && lst2 <= 0 ) {
             double r = lsn1 / ( lsn1 - lsn2 );
             if ( i <= element->giveNumberOfDofManagers() ) {
@@ -355,14 +354,11 @@ void Line :: transformIntoPolar(FloatArray *point, FloatArray &answer)
     answer.at(2) = atan2( xp.at(2), xp.at(1) );
 }
 
-IRResultType Line :: initializeFrom(InputRecord *ir)
+void Line :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     mVertices.resize(2);
     IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Line_start);
     IR_GIVE_FIELD(ir, mVertices [ 1 ], _IFT_Line_end);
-    return IRRT_OK;
 }
 
 bool Line :: isPointInside(FloatArray *point)
@@ -674,21 +670,18 @@ void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iAr
     oGlobalCoord = { mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) };
 }
 
-IRResultType Circle :: initializeFrom(InputRecord *ir)
+void Circle :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     mVertices.resize(1);
     IR_GIVE_FIELD(ir, mVertices [ 0 ], _IFT_Circle_center);
     IR_GIVE_FIELD(ir, radius, _IFT_Circle_radius);
-    return IRRT_OK;
 }
 
 bool Circle :: intersects(Element *element)
 {
     int count = 0;
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        const auto &nodeCoor = *element->giveDofManager(i)->giveCoordinates();
+        const auto &nodeCoor = element->giveDofManager(i)->giveCoordinates();
         // distance from the node to the center of the circle
         double dist = distance(nodeCoor, mVertices [ 0 ]);
         if ( dist > this->radius ) {
@@ -719,7 +712,7 @@ Circle :: isInside(const FloatArray &point)
 bool Circle :: isInside(Element *element)
 {   // condition should maybe be that all nodes should be inside
     for ( int i = 1; i <= element->giveNumberOfDofManagers(); i++ ) {
-        const auto &nodeCoord = *element->giveDofManager(i)->giveCoordinates();
+        const auto &nodeCoord = element->giveDofManager(i)->giveCoordinates();
         if ( isInside(nodeCoord) ) {
             return true;
         }
@@ -736,10 +729,10 @@ void Circle :: computeIntersectionPoints(Element *element, std :: vector< FloatA
         for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
             std :: vector< FloatArray >oneLineIntersects;
             ///@todo Move semantics or something would be useful here to avoid multiple copies.
-            const auto a = * element->giveDofManager ( i )->giveCoordinates();
-            const auto b = ( i != element->giveNumberOfBoundarySides() ) ? 
-                * element->giveDofManager ( i + 1 )->giveCoordinates() :
-                * element->giveDofManager ( 1 )->giveCoordinates();
+            const auto &a = element->giveDofManager ( i )->giveCoordinates();
+            const auto &b = ( i != element->giveNumberOfBoundarySides() ) ? 
+                element->giveDofManager ( i + 1 )->giveCoordinates() :
+                element->giveDofManager ( 1 )->giveCoordinates();
 
             Line l(a, b);
             computeIntersectionPoints(& l, oneLineIntersects);
@@ -1252,11 +1245,8 @@ void PolygonLine :: giveTangent(FloatArray &oTangent, const double &iArcPosition
     OOFEM_ERROR("Arc position not found.")
 }
 
-IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
+void PolygonLine :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
-
     FloatArray points;
     IR_GIVE_FIELD(ir, points, _IFT_PolygonLine_points);
 
@@ -1266,13 +1256,10 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
         mVertices.push_back({points.at(2 * ( i - 1 ) + 1), points.at( 2 * ( i   ) )});
     }
 
-
 #ifdef __BOOST_MODULE
     // Precompute bounding box to speed up calculation of intersection points.
     calcBoundingBox(LC, UC);
 #endif
-
-    return IRRT_OK;
 }
 
 void PolygonLine :: giveInputRecord(DynamicInputRecord &input)
@@ -1425,10 +1412,10 @@ void PolygonLine :: computeIntersectionPoints(Element *element, std :: vector< F
     for ( int i = 1; i <= element->giveNumberOfBoundarySides(); i++ ) {
         std :: vector< FloatArray > oneLineIntersects;
         ///@todo Move semantics or something would be useful here to avoid multiple copies.
-        const auto &xStart = * element->giveDofManager ( i )->giveCoordinates();
+        const auto &xStart = element->giveDofManager ( i )->giveCoordinates();
         const auto &xEnd = ( i != element->giveNumberOfBoundarySides() ) ?
-            * element->giveDofManager ( i + 1 )->giveCoordinates() :
-            * element->giveDofManager ( 1 )->giveCoordinates();
+            element->giveDofManager ( i + 1 )->giveCoordinates() :
+            element->giveDofManager ( 1 )->giveCoordinates();
 
         computeIntersectionPoints(xStart, xEnd, oneLineIntersects);
 
@@ -1793,9 +1780,8 @@ void PolygonLine :: cropPolygon(const double &iArcPosStart, const double &iArcPo
 
 }
 
-IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
+void PointSwarm :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     IntArray idList;
 
     IR_GIVE_FIELD(ir, idList, _IFT_PointSwarm_nodeID); // Macro
@@ -1803,6 +1789,5 @@ IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
     for ( int i = 1; i <= idList.giveSize(); i++ ) {
         this->idList.push_back( idList.at(i) );
     }
-    return IRRT_OK;
 }
 } // end namespace oofem

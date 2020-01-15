@@ -68,11 +68,11 @@ QWedgeGradDamage :: QWedgeGradDamage(int n, Domain *aDomain) :  QWedge(n, aDomai
 }
 
 
-IRResultType
-QWedgeGradDamage :: initializeFrom(InputRecord *ir)
+void
+QWedgeGradDamage :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 9;
-    return Structural3DElement :: initializeFrom(ir);
+    Structural3DElement :: initializeFrom(ir);
 }
 
 

@@ -108,7 +108,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_HumidityFlow, 58) \
     ENUM_ITEM_WITH_VALUE(IST_CrackStatuses, 59) \
     ENUM_ITEM_WITH_VALUE(IST_CrackedFlag, 60) \
-    ENUM_ITEM_WITH_VALUE(IST_CrackDirs, 61)     \
+    ENUM_ITEM_WITH_VALUE(IST_CrackDirs, 61) \
     ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain, 62) \
     ENUM_ITEM_WITH_VALUE(IST_CumPlasticStrain_2, 63) \
     ENUM_ITEM_WITH_VALUE(IST_StressWorkDensity, 64) \
@@ -150,7 +150,7 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 100) \
     ENUM_ITEM_WITH_VALUE(IST_StressTensor_Reduced, 101) \
     ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 102) \
-    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 103 ) \
+    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 103) \
     ENUM_ITEM_WITH_VALUE(IST_ShellStrainTensor, 104) \
     ENUM_ITEM_WITH_VALUE(IST_AbaqusStateVector, 105) \
     ENUM_ITEM_WITH_VALUE(IST_AutogenousShrinkageTensor, 106) \
@@ -182,9 +182,13 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_MoistureContent, 132) \
     ENUM_ITEM_WITH_VALUE(IST_CrackStatusesTemp, 133) \
     ENUM_ITEM_WITH_VALUE(IST_CrackSlip, 134) \
-    ENUM_ITEM_WITH_VALUE(IST_EquivalentTime, 135)\
-    ENUM_ITEM_WITH_VALUE(IST_IncrementCreepModulus, 136)
-  
+    ENUM_ITEM_WITH_VALUE(IST_EquivalentTime, 135) \
+    ENUM_ITEM_WITH_VALUE(IST_IncrementCreepModulus, 136) \
+    ENUM_ITEM_WITH_VALUE(IST_NormalStress, 137) \
+    ENUM_ITEM_WITH_VALUE(IST_LatticeStrain, 138) \
+    ENUM_ITEM_WITH_VALUE(IST_LatticeStress, 139) \
+    ENUM_ITEM_WITH_VALUE(IST_PlasticLatticeStrain, 140)
+
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
  * Values of this type are used, when these internal variables are requested.

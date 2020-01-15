@@ -83,7 +83,7 @@ public:
      * @param gp Integration point to update.
      * @param tStep Solution step indicating time of update.
      */
-    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const = 0;
 };
 } // end namespace oofem
 #endif // structuralnonlocalmaterialext_h

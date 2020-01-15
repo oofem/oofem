@@ -87,7 +87,7 @@ protected:
 public:
     StaticStructural(int i, EngngModel *master=nullptr);
     virtual ~StaticStructural();
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void updateAttributes(MetaStep *mStep) override;
 
     void solveYourself() override;

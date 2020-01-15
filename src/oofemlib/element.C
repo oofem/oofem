@@ -634,11 +634,9 @@ Element :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 }
 
 
-IRResultType
-Element :: initializeFrom(InputRecord *ir)
+void
+Element :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                          // Required by IR_GIVE_FIELD macro
-
 #  ifdef VERBOSE
     // VERBOSE_PRINT1("Instanciating element ",number);
 #  endif
@@ -660,7 +658,7 @@ Element :: initializeFrom(InputRecord *ir)
 
     elemLocalCS.clear();
 
-    if ( ir->hasField(_IFT_Element_lcs) ) { //local coordinate system
+    if ( ir.hasField(_IFT_Element_lcs) ) { //local coordinate system
         double n1 = 0.0, n2 = 0.0;
         FloatArray triplets;
         IR_GIVE_OPTIONAL_FIELD(ir, triplets, _IFT_Element_lcs);
@@ -687,7 +685,7 @@ Element :: initializeFrom(InputRecord *ir)
 
     partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
-    if ( ir->hasField(_IFT_Element_remote) ) {
+    if ( ir.hasField(_IFT_Element_remote) ) {
         parallel_mode = Element_remote;
     } else {
         parallel_mode = Element_local;
@@ -697,8 +695,6 @@ Element :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfGaussPoints, _IFT_Element_nip);
-
-    return IRRT_OK;
 }
 
 
@@ -843,16 +839,16 @@ Element :: initForNewStep()
 }
 
 
-void
-Element::giveBoundaryEdgeNodes(IntArray& bNodes, int boundary)
+IntArray
+Element::giveBoundaryEdgeNodes(int boundary) const
 {
-    this->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
+    return this->giveInterpolation()->boundaryEdgeGiveNodes(boundary);
 }
 
-void
-Element::giveBoundarySurfaceNodes(IntArray& bNodes, int boundary)
+IntArray
+Element::giveBoundarySurfaceNodes(int boundary) const
 {
-    this->giveInterpolation()->boundarySurfaceGiveNodes(bNodes, boundary);
+    return this->giveInterpolation()->boundarySurfaceGiveNodes(boundary);
 }
 
 std::unique_ptr<IntegrationRule>
@@ -1119,11 +1115,11 @@ Element :: giveLengthInDir(const FloatArray &normalToCrackPlane)
     double maxDis, minDis;
     int nnode = giveNumberOfNodes();
 
-    const auto &coords = *this->giveNode(1)->giveCoordinates();
+    const auto &coords = this->giveNode(1)->giveCoordinates();
     minDis = maxDis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
 
     for ( int i = 2; i <= nnode; i++ ) {
-        const auto &coords = *this->giveNode(i)->giveCoordinates();
+        const auto &coords = this->giveNode(i)->giveCoordinates();
         double dis = normalToCrackPlane.dotProduct( coords, coords.giveSize() );
         if ( dis > maxDis ) {
             maxDis = dis;

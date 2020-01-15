@@ -83,7 +83,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_LIBeam2d_Name; }
     const char *giveClassName() const override { return "LIBeam2d"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialMode giveMaterialMode() override { return _2dBeam; }
 

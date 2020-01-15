@@ -67,7 +67,7 @@ protected:
     /// C1 constant, defined as $\int_0^hE_{oed}(z)\left\(d\Psi(z)\over dz\right\)^2\ dz$
     FloatArray c1;
     /// Flag indicating whether subsoil model defined in global or element local c.s.
-    bool globalFromulation;
+    bool globalFromulation = false;
 
 public:
     /**
@@ -76,21 +76,19 @@ public:
      * @param d Domain to which new material will belong.
      */
     WinklerMaterial(int n, Domain * d);
-    /// Destructor.
-    virtual ~WinklerMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "WinklerMaterial"; }
     const char *giveInputRecordName() const override { return _IFT_WinklerMaterial_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
-    void giveRealStressVector_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
+    FloatArrayF<3> giveRealStressVector_2dPlateSubSoil(const FloatArrayF<3> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<6> giveRealStressVector_3dBeamSubSoil(const FloatArrayF<6> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
-    void give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<3,3> give2dPlateSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<6,6> give3dBeamSubSoilStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     MaterialStatus * CreateStatus(GaussPoint *gp) const override;
 };
 
@@ -106,7 +104,7 @@ public:
     virtual ~Beam3dSubsoilMaterialInterface() { }
 
     /// Evaluate transformation matrix for reciver unknowns
-    virtual void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix &answer) = 0;
+    virtual FloatMatrixF<6,6> B3SSMI_getUnknownsGtoLRotationMatrix() const = 0;
 };
 
  

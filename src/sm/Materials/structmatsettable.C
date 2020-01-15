@@ -53,36 +53,33 @@ StructuralMaterialSettable :: StructuralMaterialSettable(int n, Domain *d) :
 {}
 
 
-IRResultType
-StructuralMaterialSettable :: initializeFrom(InputRecord *ir)
+void
+StructuralMaterialSettable :: initializeFrom(InputRecord &ir)
 {
     StructuralMaterial :: initializeFrom(ir);
-    return isoLE.initializeFrom(ir);
+    isoLE.initializeFrom(ir);
 }
 
-void
-StructuralMaterialSettable :: giveRealStressVector_3d(FloatArray &answer,
-                                                  GaussPoint *gp,
-                                                  const FloatArray &totalStrain,
-                                                  TimeStep *atTime)
-{
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    const FloatArray& stressVector = status->giveStressVector();
 
-    status->letTempStrainVectorBe(totalStrain);
+FloatArrayF<6>
+StructuralMaterialSettable :: giveRealStressVector_3d(const FloatArrayF<6> &strain,GaussPoint *gp, 
+                                                      TimeStep *atTime) const
+{
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    const auto &stressVector = status->giveStressVector();
+
+    status->letTempStrainVectorBe(strain);
     status->letTempStressVectorBe(stressVector);
-    answer = stressVector;
+    return stressVector;
 }
 
 
 // TODO
-void
-StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                           MatResponseMode mode,
-                                                           GaussPoint *gp,
-                                                           TimeStep *atTime)
+FloatMatrixF<6,6>
+StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp,
+                                                            TimeStep *atTime) const
 {
-    isoLE.give3dMaterialStiffnessMatrix(answer,mode,gp,atTime);
+    return isoLE.give3dMaterialStiffnessMatrix(mode, gp, atTime);
 }
 
 MaterialStatus *

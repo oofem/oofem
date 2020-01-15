@@ -36,9 +36,7 @@
 #define anisomassmat_h
 
 #include "tm/Materials/transportmaterial.h"
-#include "dictionary.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
+#include "floatmatrixf.h"
 
 ///@name Input fields for AnisotropicMassTransferMaterial
 //@{
@@ -60,19 +58,17 @@ namespace oofem {
 class AnisotropicMassTransferMaterial : public TransportMaterial
 {
 protected:
-    FloatMatrix k; ///< Conductivity/permeability matrix. This matrix is read from the input file and should be given row-wise as a vector of 4, eg "C 4 1 0 0 1".
+    FloatMatrixF<3,3> k; ///< Conductivity/permeability matrix.
 
 public:
     AnisotropicMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~AnisotropicMassTransferMaterial() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
-
-    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_AnisotropicMassTransferMaterial_Name; }
     const char *giveClassName() const override { return "AnisotropicMassTransferMaterial"; }

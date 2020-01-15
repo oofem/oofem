@@ -53,26 +53,18 @@
 
 namespace oofem {
 SUPGElement :: SUPGElement(int n, Domain *aDomain) :
-    FMElement(n, aDomain), t_supg(0), t_pspg(0), t_lsic(0)
+    FMElement(n, aDomain)
 { }
 
 
-SUPGElement :: ~SUPGElement()
-// Destructor.
-{ }
-
-IRResultType
-SUPGElement :: initializeFrom(InputRecord *ir)
+void
+SUPGElement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-
+    FMElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_SUPGElement_bsides);
     if ( !boundarySides.isEmpty() ) {
         IR_GIVE_FIELD(ir, boundaryCodes, _IFT_SUPGElement_bcodes);
     }
-
-    return FMElement :: initializeFrom(ir);
 }
 
 

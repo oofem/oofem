@@ -59,7 +59,7 @@ class Concrete3 : public RCM2Material
 
 private:
     //double shearRetFactor; // shearRetentionFactor
-    Concrete3_softeningMode softeningMode;
+    Concrete3_softeningMode softeningMode = linearSoftening;
 
 public:
     Concrete3(int n, Domain * d);
@@ -67,7 +67,7 @@ public:
         delete linearElasticMaterial;
     }
 
-     IRResultType initializeFrom(InputRecord *ir) override;
+     void initializeFrom(InputRecord &ir) override;
      const char *giveClassName() const override { return "Concrete3"; }
      const char *giveInputRecordName() const override { return _IFT_Concrete3_Name; }
 

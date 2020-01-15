@@ -77,11 +77,6 @@ TransportGradientPeriodic :: TransportGradientPeriodic(int n, Domain *d) : Activ
 }
 
 
-TransportGradientPeriodic :: ~TransportGradientPeriodic()
-{
-}
-
-
 int TransportGradientPeriodic :: giveNumberOfInternalDofManagers()
 {
     return 1;
@@ -121,7 +116,7 @@ void TransportGradientPeriodic :: findSlaveToMasterMap()
     for ( int inode : nodes ) {
         Node *masterNode = nullptr;
         Node *node = this->domain->giveNode(inode);
-        const FloatArray &masterCoord = *node->giveCoordinates();
+        const auto &masterCoord = node->giveCoordinates();
         //printf("node %d\n", node->giveLabel()); masterCoord.printYourself();
         // The difficult part, what offset to subtract to find the master side;
         for ( FloatArray &testJump : jumps ) {
@@ -296,9 +291,9 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
     for ( auto &n : domain->giveDofManagers() ) {
         int k1 = n->giveDofWithID( this->dofs[0] )->__giveEquationNumber();
         if ( k1 ) {
-            FloatArray *coords = n->giveCoordinates();
+            const auto &coords = n->giveCoordinates();
             for ( int i = 1; i <= nsd; ++i ) {
-                sol.at(k1, i) = -(coords->at(i) - mCenterCoord.at(i));
+                sol.at(k1, i) = -(coords.at(i) - mCenterCoord.at(i));
             }
         }
     }
@@ -323,11 +318,10 @@ void TransportGradientPeriodic :: computeTangent(FloatMatrix &k, TimeStep *tStep
 void TransportGradientPeriodic :: computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
-    FloatArray *masterCoords = master->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
+    const auto &masterCoords = master->giveCoordinates();
 
-    FloatArray dx;
-    dx.beDifferenceOf(* coords, * masterCoords );
+    auto dx = coords - masterCoords;
 
     masterContribs.resize(dx.giveSize() + 1);
 
@@ -342,7 +336,7 @@ double TransportGradientPeriodic :: giveUnknown(double val, ValueModeType mode, 
 {
     DofManager *master = this->domain->giveDofManager(this->slavemap[dof->giveDofManager()->giveNumber()]);
     FloatArray dx, g;
-    dx.beDifferenceOf(* dof->giveDofManager()->giveCoordinates(), * master->giveCoordinates());
+    dx.beDifferenceOf(dof->giveDofManager()->giveCoordinates(), master->giveCoordinates());
     this->grad->giveUnknownVector(g, this->grad_ids, mode, tStep);
     return val + g.dotProduct(dx);
 }
@@ -404,9 +398,10 @@ bool TransportGradientPeriodic :: isGradDof(Dof *dof)
 }
 
 
-IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
+void TransportGradientPeriodic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    ActiveBoundaryCondition :: initializeFrom(ir);
+    //PrescribedGradientHomogenization::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->mGradient, _IFT_TransportGradientPeriodic_gradient)
     this->mCenterCoord = {0., 0., 0.};
@@ -414,9 +409,6 @@ IRResultType TransportGradientPeriodic :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->masterSet, _IFT_TransportGradientPeriodic_masterSet)
     IR_GIVE_FIELD(ir, this->jump, _IFT_TransportGradientPeriodic_jump)
-
-    return ActiveBoundaryCondition :: initializeFrom(ir);
-    //return PrescribedGradientHomogenization::initializeFrom(ir);
 }
 
 

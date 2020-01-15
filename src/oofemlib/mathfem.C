@@ -236,6 +236,7 @@ void cubic3r(double a, double b, double c, double d, double *r1, double *r2, dou
 
         * r1 = -2.0 *p *cos(phi / 3.0) - a / 3.0;
         * r2 = -2.0 *p *cos( ( phi + 2.0 *M_PI ) / 3.0 ) - a / 3.0;
+        * r2 = -2.0 *p *cos( ( phi + 2.0 *M_PI ) / 3.0 ) - a / 3.0;
         * r3 = -2.0 *p *cos( ( phi - 2.0 *M_PI ) / 3.0 ) - a / 3.0;
         * num = 3;
         /*  } else {

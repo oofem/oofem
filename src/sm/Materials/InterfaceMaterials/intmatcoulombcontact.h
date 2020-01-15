@@ -63,7 +63,7 @@ protected:
 public:
     IntMatCoulombContactStatus(GaussPoint *g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -110,7 +110,7 @@ public:
 
     std::pair<double, FloatArrayF<2>> computeEngTraction(const FloatArrayF<2> &tempShearStressShift, double normalJump, const FloatArrayF<2> &shearJump );
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     bool hasAnalyticalTangentStiffness() const override { return true; }
 

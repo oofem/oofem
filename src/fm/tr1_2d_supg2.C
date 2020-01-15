@@ -75,10 +75,6 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     numberOfDofMans  = 3;
 }
 
-TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
-{
-}
-
 
 void
 TR1_2D_SUPG2 :: computeNVector(FloatArray &answer, GaussPoint *gp)
@@ -99,16 +95,10 @@ TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
     answer = {V_u, V_v, P_f};
 }
 
-IRResultType
-TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
+void
+TR1_2D_SUPG2 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;               // Required by IR_GIVE_FIELD macro
-
-    result = SUPGElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
+    SUPGElement :: initializeFrom(ir);
 
     this->vof = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, vof, _IFT_Tr1SUPG_pvof);
@@ -125,8 +115,6 @@ TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 0 ], _IFT_Tr1SUPG2_mat0);
     IR_GIVE_OPTIONAL_FIELD(ir, mat [ 1 ], _IFT_Tr1SUPG2_mat1);
     this->material = this->mat [ 0 ];
-
-    return IRRT_OK;
 }
 
 

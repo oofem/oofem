@@ -90,10 +90,9 @@ DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 }
 
 
-IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir)
+void MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
+    MixedGradientPressureBC :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->order, _IFT_MixedGradientPressureWeakPeriodic_order);
     if ( this->order < 0 ) {
@@ -111,8 +110,6 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
         // then the linear terms, [x,0,0], [0,x,0] ... and so on
         this->tractionsdman->appendDof( new MasterDof( tractionsdman.get(), ( DofIDItem ) dofid ) );
     }
-
-    return MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 
@@ -169,7 +166,6 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntA
     this->voldman->giveLocationArray(v_id, e_loc_c, c_s);
 
     Set *set = this->giveDomain()->giveSet(this->set);
-    IntArray bNodes;
     const IntArray &boundaries = set->giveBoundaryList();
 
     rows.resize(boundaries.giveSize() + 2);
@@ -179,7 +175,7 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntA
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
         e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
         e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
         // For most uses, *loc_r == *loc_c
@@ -392,7 +388,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(boundary);
             el->giveBoundaryLocationArray(v_loc, bNodes, this->dofs, s, & velocityDofIDs);
             el->computeBoundaryVectorOf(bNodes, this->dofs, mode, tStep, v);
 
@@ -428,7 +424,6 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep 
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke_v, Ke_vT, Ke_e, Ke_eT;
         IntArray v_loc_r, v_loc_c, t_loc_r, t_loc_c, e_loc_r, e_loc_c;
-        IntArray bNodes;
         Set *set = this->giveDomain()->giveSet(this->set);
         const IntArray &boundaries = set->giveBoundaryList();
 
@@ -444,7 +439,7 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep 
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(boundary);
             el->giveBoundaryLocationArray(v_loc_r, bNodes, this->dofs, r_s);
             el->giveBoundaryLocationArray(v_loc_c, bNodes, this->dofs, c_s);
 

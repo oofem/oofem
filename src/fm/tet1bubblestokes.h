@@ -77,7 +77,6 @@ protected:
 
 public:
     Tet1BubbleStokes(int n, Domain * d);
-    virtual ~Tet1BubbleStokes();
 
     double computeVolumeAround(GaussPoint *gp) override;
 

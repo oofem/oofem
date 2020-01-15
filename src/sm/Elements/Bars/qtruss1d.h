@@ -55,7 +55,7 @@ public:
     QTruss1d(int n, Domain * d);
     virtual ~QTruss1d() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 3; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;

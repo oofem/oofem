@@ -177,7 +177,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
         }
 
         // get node coordinates
-        const auto &x = * ( inode->giveCoordinates() );
+        const auto &x = inode->giveCoordinates();
         // get velocity field v(tn, x(tn)) for dof manager
 
 #if 1
@@ -631,14 +631,11 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
     }
 }
 
-IRResultType
-LEPlic :: initializeFrom(InputRecord *ir)
+void
+LEPlic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     orig_reference_fluid_volume = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, orig_reference_fluid_volume, _IFT_LEPLIC_refVol);
-    return IRRT_OK;
 }
 
 

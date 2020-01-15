@@ -56,7 +56,7 @@ public:
     const char *giveInputRecordName() const override { return _IFT_IntElLine2IntPen_Name; }
     const char *giveClassName() const override { return "IntElLine2IntPen"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     FloatArrayF<2> computeCovarBaseVectorAt(GaussPoint *gp) const override;
 

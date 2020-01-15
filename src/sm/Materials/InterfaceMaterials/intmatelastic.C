@@ -68,14 +68,12 @@ IntMatElastic :: give3dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *g
     return eye<3>() * k;
 }
 
-IRResultType
-IntMatElastic :: initializeFrom(InputRecord *ir)
+void
+IntMatElastic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, k, _IFT_IntMatElastic_kn);
-
-    return StructuralInterfaceMaterial :: initializeFrom(ir);
 }
 
 void IntMatElastic :: giveInputRecord(DynamicInputRecord &input)

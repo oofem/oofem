@@ -40,15 +40,24 @@
 #include "floatmatrix.h"
 #include "mathfem.h"
 
+///@name Input fields for NURBSInterpolation
+//@{
+#define _IFT_NURBSInterpolation_weights "weights"
+//@}
+
 namespace oofem {
 /**
  * Interpolation class for NURBS.
  */
 class OOFEM_EXPORT NURBSInterpolation : public BSplineInterpolation
 {
+protected:
+    FloatArray weights;
+
 public:
     NURBSInterpolation(int nsd) : BSplineInterpolation(nsd) { }
-    virtual ~NURBSInterpolation() {}
+
+    void initializeFrom(InputRecord &ir) override;
 
     void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;

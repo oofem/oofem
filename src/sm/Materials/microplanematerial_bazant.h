@@ -56,11 +56,9 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     MicroplaneMaterial_Bazant(int n, Domain * d);
-    /// Destructor.
-    virtual ~MicroplaneMaterial_Bazant() { }
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp,
+                                           TimeStep *tStep) const override;
 
     /**
     * Computes stress on given microplane (volumetric, deviatoric normal stresses and shead stresses)

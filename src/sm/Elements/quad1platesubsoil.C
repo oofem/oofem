@@ -118,22 +118,22 @@ Quad1PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 void
 Quad1PlateSubSoil :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_PlateSubSoil(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_PlateSubSoil(strain, gp, tStep);
 }
 
 
 void
 Quad1PlateSubSoil :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->give2dPlateSubSoilStiffMtrx(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give2dPlateSubSoilStiffMtrx(rMode, gp, tStep);
 }
 
 
-IRResultType
-Quad1PlateSubSoil :: initializeFrom(InputRecord *ir)
+void
+Quad1PlateSubSoil :: initializeFrom(InputRecord &ir)
 {
     this->numberOfGaussPoints = 4;
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 
@@ -148,8 +148,8 @@ void
 Quad1PlateSubSoil :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 {
     FloatArray u, v;
-    u.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    v.beDifferenceOf( * this->giveNode(3)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    u.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    v.beDifferenceOf( this->giveNode(3)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
 
     answer.beVectorProductOf(u, v);
     answer.normalize();

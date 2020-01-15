@@ -62,11 +62,7 @@ InternalVariableField :: evaluateAt(FloatArray &answer, const FloatArray &coords
 int
 InternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
-    if ( dman->hasCoordinates() ) {
-        return this->evaluateAt(answer, * ( dman->giveCoordinates() ), mode, tStep);
-    } else {
-        return 1; // failed -> dman without coordinates
-    }
+    return this->evaluateAt(answer, dman->giveCoordinates(), mode, tStep);
 }
 
 void

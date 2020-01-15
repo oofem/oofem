@@ -57,7 +57,7 @@ DynamicDataReader :: insertInputRecord(InputRecordType type, std::unique_ptr<Inp
     this->it = recordList.end();
 }
 
-InputRecord *
+InputRecord &
 DynamicDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
 {
     // Ignores recordId in favor of having a dynamic list (just incremental access). typeId could be supported, but its a hassle.
@@ -67,7 +67,7 @@ DynamicDataReader :: giveInputRecord(InputRecordType typeId, int recordId)
     } else {
         ++this->it;
     }
-    return this->it->get();
+    return **(this->it);
 }
 
 bool

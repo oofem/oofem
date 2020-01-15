@@ -18,11 +18,10 @@ PrescribedGradientBCWeakPeriodic :: PrescribedGradientBCWeakPeriodic(int n, Doma
 
 PrescribedGradientBCWeakPeriodic :: ~PrescribedGradientBCWeakPeriodic() {}
 
-IRResultType PrescribedGradientBCWeakPeriodic :: initializeFrom(InputRecord *ir)
+void PrescribedGradientBCWeakPeriodic :: initializeFrom(InputRecord &ir)
 {
+    PrescribedGradientBCWeak :: initializeFrom(ir);
     mMeshIsPeriodic = true;
-
-    return PrescribedGradientBCWeak :: initializeFrom(ir);
 }
 
 void PrescribedGradientBCWeakPeriodic :: postInitialize()

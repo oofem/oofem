@@ -74,7 +74,7 @@ protected:
      */
     FloatMatrix GtoLRotationMatrix;
 
-    void giveLocalCoordinates(FloatArray &answer, FloatArray &global);
+    void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
     void giveNodeCoordinates(FloatArray &x, FloatArray &y) override;
 
     double computeVolumeAround(GaussPoint *gp) override;

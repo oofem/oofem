@@ -1,0 +1,24 @@
+lattice3d_damplast_1.out
+Direct tension. 3D Plasticity Damage Model
+NonLinearStatic nmsteps 1 nsteps 1 contextOutputStep 1000 nmodules 1
+nsteps 3 rtolv 1.e-6 stiffMode 1 controllmode 1 refloadmode 0 minsteplength 1.e-3 ddm 2 2 1 ddv 1 1.e-4 ddltf 2
+errorcheck
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 2
+node 1 coords 3 0.000000e+00 0.000000e+00 0.000000e+00 bc 6 1 1 1 1 1 1 
+node 2 coords 3 0.00100000e+00 0.000000e+00 0.000000e+00 bc 6 0 0 1 1 1 1
+lattice3D 1 nodes 2 1 2 crossSect 1 mat 1 polycoords 12 0.00005 -0.05 -0.05   0.00005 0.05 -0.05   0.00005 0.05 0.05   0.00005 -0.05 0.05
+latticecs 1 material 1
+latticeplastdam 1 d 0 talpha 0. e 40.e9 a1 0.175 a2 1. ft 6.5e6 fc 130.e6 angle1 0.5 angle2 0.5 flow 0.25 wf 1.53e-5 ahard 1.e-3 iter 100 tol 1.e-6
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 nPoints 2 t 2 0. 3. f(t) 2 0. 1.
+#%BEGIN_CHECK% 
+#ELEMENT tStep 1 number 1 gp 1 keyword 138 component 1  value 0.0 tolerance 1.e-5
+#ELEMENT tStep 1 number 1 gp 1 keyword 139 component 1  value 0.0 tolerance 1.e-5
+#ELEMENT tStep 2 number 1 gp 1 keyword 138 component 1  value 3.3333e-2 tolerance 1.e-6
+#ELEMENT tStep 2 number 1 gp 1 keyword 139 component 1  value 7.36649264e+05 tolerance 1.e-2
+#ELEMENT tStep 3 number 1 gp 1 keyword 138 component 1  value 6.6667e-2 tolerance 1.e-6
+#ELEMENT tStep 3 number 1 gp 1 keyword 139 component 1  value 8.32955448e+04 tolerance 1.e-2
+#%END_CHECK%

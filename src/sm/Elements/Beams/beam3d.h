@@ -168,7 +168,7 @@ public:
     // definition & identification
     const char *giveClassName() const override { return "Beam3d"; }
     const char *giveInputRecordName() const override { return _IFT_Beam3d_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     ///@todo Introduce interpolator and remove these two:
     integrationDomain giveIntegrationDomain() const override { return _Line; }
     //Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
@@ -188,7 +188,7 @@ public:
       return this->computeVolumeAround(gp);
     }
     */
-    void B3SSMI_getUnknownsGtoLRotationMatrix(FloatMatrix& answer) override;
+    FloatMatrixF<6,6> B3SSMI_getUnknownsGtoLRotationMatrix() const override;
 
     void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep ) override;
 

@@ -113,11 +113,11 @@ IntElLine2 :: giveInterpolation() const
 }
 
 
-IRResultType
-IntElLine2 :: initializeFrom(InputRecord *ir)
+void
+IntElLine2 :: initializeFrom(InputRecord &ir)
 {
-    linear = ir->hasField(_IFT_IntElLine2_LinearTraction);
-    return IntElLine1 :: initializeFrom(ir);
+    IntElLine1 :: initializeFrom(ir);
+    linear = ir.hasField(_IFT_IntElLine2_LinearTraction);
 }
 
 

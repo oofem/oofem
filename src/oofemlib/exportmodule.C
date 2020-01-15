@@ -54,12 +54,10 @@ ExportModule :: ~ExportModule()
 { }
 
 
-IRResultType
-ExportModule :: initializeFrom(InputRecord *ir)
+void
+ExportModule :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    tstep_all_out_flag = ir->hasField(_IFT_ExportModule_tstepall);
+    tstep_all_out_flag = ir.hasField(_IFT_ExportModule_tstepall);
 
     tstep_step_out = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, tstep_step_out, _IFT_ExportModule_tstepstep);
@@ -69,7 +67,7 @@ ExportModule :: initializeFrom(InputRecord *ir)
     tstep_substeps_out_flag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, tstep_substeps_out_flag, _IFT_ExportModule_subtstepsout);
 
-    domain_all_flag = ir->hasField(_IFT_ExportModule_domainall);
+    domain_all_flag = ir.hasField(_IFT_ExportModule_domainall);
 
     if ( !domain_all_flag ) {
         domainMask.clear();
@@ -79,8 +77,6 @@ ExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, regionSets, _IFT_ExportModule_regionsets); // Macro
 
     IR_GIVE_OPTIONAL_FIELD(ir, timeScale, _IFT_ExportModule_timescale); // Macro
-
-    return IRRT_OK;
 }
 
 void ExportModule :: initialize(){

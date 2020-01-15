@@ -210,7 +210,7 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
         DofManager *idofman = this->giveDomain()->giveDofManager(i);
         Node *inode = dynamic_cast< Node * >(idofman);
         if ( inode ) {
-            if ( distance(coords, *inode->giveCoordinates()) <= radius ) {
+            if ( distance(coords, inode->giveCoordinates()) <= radius ) {
                 nodeSet.push_back(i);
             }
         }
@@ -226,7 +226,7 @@ DummySpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &coords, double
     for ( auto &dman : this->giveDomain()->giveDofManagers() ) {
         Node *node = dynamic_cast< Node* >( dman.get() );
         if ( node ) {
-            double dist = distance(coords, *node->giveCoordinates());
+            double dist = distance(coords, node->giveCoordinates());
             if ( closest == nullptr || dist < maxdist ) {
                 closest = node;
                 maxdist = dist;

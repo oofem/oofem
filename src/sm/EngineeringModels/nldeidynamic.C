@@ -78,15 +78,10 @@ NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 }
 
 
-IRResultType
-NlDEIDynamic :: initializeFrom(InputRecord *ir)
+void
+NlDEIDynamic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
-    result = StructuralEngngModel :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralEngngModel :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, dumpingCoef, _IFT_NlDEIDynamic_dumpcoef); // C = dumpingCoef * M
     IR_GIVE_FIELD(ir, deltaT, _IFT_NlDEIDynamic_deltat);
@@ -103,15 +98,13 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
     communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
                                         this->giveNumberOfProcesses());
 
-    if ( ir->hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
+    if ( ir.hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
         nonlocalExt = 1;
         nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
                                                      this->giveNumberOfProcesses());
     }
 
 #endif
-
-    return IRRT_OK;
 }
 
 

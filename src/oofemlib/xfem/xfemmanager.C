@@ -151,10 +151,8 @@ IntArray XfemManager :: giveEnrichedDofIDs(const DofManager &iDMan) const
     return dofIdArray;
 }
 
-IRResultType XfemManager :: initializeFrom(InputRecord *ir)
+void XfemManager :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
 
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfNucleationCriteria, _IFT_XfemManager_numberOfNucleationCriteria);
@@ -180,8 +178,6 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
     // TODO: Read as input.
     XfemTolerances :: setCharacteristicElementLength(0.001);
-
-    return IRRT_OK;
 }
 
 
@@ -209,17 +205,12 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 
 int XfemManager :: instanciateYourself(DataReader &dr)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
     enrichmentItemList.resize(numberOfEnrichmentItems);
     for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
-        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_enrichItemRec, i);
-        result = mir->giveRecordKeywordField(name);
-
-        if ( result != IRRT_OK ) {
-            mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
-        }
+        auto &mir = dr.giveInputRecord(DataReader :: IR_enrichItemRec, i);
+        mir.giveRecordKeywordField(name);
 
         std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() ) );
         if ( ei.get() == NULL ) {
@@ -233,12 +224,8 @@ int XfemManager :: instanciateYourself(DataReader &dr)
 
     mNucleationCriteria.resize(numberOfNucleationCriteria);
     for ( int i = 1; i <= numberOfNucleationCriteria; i++ ) {
-        InputRecord *mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, i);
-        result = mir->giveRecordKeywordField(name);
-
-        if ( result != IRRT_OK ) {
-            mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
-        }
+        auto &mir = dr.giveInputRecord(DataReader :: IR_crackNucleationRec, i);
+        mir.giveRecordKeywordField(name);
 
         std :: unique_ptr< NucleationCriterion >nc( classFactory.createNucleationCriterion( name.c_str(), this->giveDomain() ) );
         if ( nc.get() == NULL ) {
@@ -363,7 +350,8 @@ void XfemManager :: propagateFronts(bool &oAnyFronHasPropagated)
 
 void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
 {
-    oAnyFronHasPropagated = false;
+#ifdef __SM_MODULE
+  oAnyFronHasPropagated = false;
         
     // Loop over EI:s and collect cross sections which have delaminaion EI:s
     IntArray CSnumbers;
@@ -388,7 +376,7 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
     for ( auto &ei: enrichmentItemList ) {
 
         bool eiHasPropagated = false;
-        
+
         if ( Delamination *dei =  dynamic_cast< Delamination * >( ei.get() ) ) {         
             
             if ( !failureChecked ) {
@@ -415,13 +403,17 @@ void XfemManager :: initiateFronts(bool &oAnyFronHasPropagated, TimeStep *tStep)
         } else {
             OOFEM_ERROR(" XfemManager :: initiateFronts not implemented for other than Delamination.")
         }
-
         if(eiHasPropagated) {
             oAnyFronHasPropagated = true;
         }
     }
-
     updateNodeEnrichmentItemMap();
+
+#else
+    OOFEM_ERROR(" XfemManager :: initiateFronts not implemented for other than Delamination.")
+#endif
+
+
 }
 
 bool XfemManager :: hasPropagatingFronts()

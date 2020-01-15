@@ -71,20 +71,15 @@ HTSelement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 
-IRResultType
-HTSelement :: initializeFrom(InputRecord *ir)
+void
+HTSelement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-    result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
     //IR_GIVE_FIELD(ir, numberOfEdges, _IFT_HTSelement_numberOfEdges, "numberOfEdges");
     //numberOfEdges = 3;
 
     this->computeCenterOfGravity();
-    return IRRT_OK;
 }
 
 void

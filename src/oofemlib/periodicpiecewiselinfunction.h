@@ -75,7 +75,7 @@ public:
     }
     virtual ~PeriodicPiecewiseLinFunction() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "PeriodicPiecewiseClass"; }
     const char *giveInputRecordName() const override { return _IFT_PeriodicPiecewiseLinFunction_Name; }

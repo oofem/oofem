@@ -137,7 +137,7 @@ public:
 
     void updateYourself(TimeStep *tStep) override;
     double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof) override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     TimeStep *giveNextStep() override;
     NumericalMethod *giveNumericalMethod(MetaStep *mStep) override;

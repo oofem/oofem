@@ -63,80 +63,78 @@ class IsotropicDamageMaterialStatus : public StructuralMaterialStatus
 {
 protected:
     /// Scalar measure of the largest strain level ever reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar measure of the largest strain level.
-    double tempKappa;
+    double tempKappa = 0.;
     /// Damage level of material.
-    double damage;
+    double damage = 0.;
     /// Non-equilibrated damage level of material.
-    double tempDamage;
+    double tempDamage = 0.;
     /**
      * Characteristic element length,
      * computed when damage initialized from direction of
      * maximum positive principal strain. Fixed during further loading.
      */
-    double le;
+    double le = 0.;
     /// Angle characterizing the crack direction.
-    double crack_angle;
+    double crack_angle = -1000.0;
     /// Crack orientation normalized to damage magnitude. This is useful for plotting cracks as a vector field (paraview etc.).
-    FloatArray crackVector;
+    FloatArrayF<3> crackVector;
 
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
-    double stressWork;
+    double stressWork = 0.;
     /// Non-equilibrated density of total work done by stresses on strain increments.
-    double tempStressWork;
+    double tempStressWork = 0.;
     /// Density of dissipated work.
-    double dissWork;
+    double dissWork = 0.;
     /// Non-equilibrated density of dissipated work.
-    double tempDissWork;
+    double tempDissWork = 0.;
 #endif
 
 public:
     /// Constructor
     IsotropicDamageMaterialStatus(GaussPoint *g);
-    /// Destructor
-    virtual ~IsotropicDamageMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level.
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated damage level.
-    double giveDamage() { return damage; }
+    double giveDamage() const { return damage; }
     /// Returns the temp. damage level.
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
     /// Returns characteristic length stored in receiver.
-    double giveLe() { return le; }
+    double giveLe() const { return le; }
     /// Sets characteristic length to given value.
     void setLe(double ls) { le = ls; }
     /// Returns crack angle stored in receiver.
-    double giveCrackAngle() { return crack_angle; }
+    double giveCrackAngle() const { return crack_angle; }
     /// Sets crack angle to given value.
     void setCrackAngle(double ca) { crack_angle = ca; }
     /// Returns crack vector stored in receiver. This is useful for plotting cracks as a vector field (paraview etc.).
-    void giveCrackVector(FloatArray &answer);
+    FloatArrayF<3> giveCrackVector() const { return crackVector * damage; }
     /// Sets crack vector to given value. This is useful for plotting cracks as a vector field (paraview etc.).
-    void setCrackVector(FloatArray cv) { crackVector = cv; }
+    void setCrackVector(const FloatArrayF<3> &cv) { crackVector = cv; }
 
 #ifdef keep_track_of_dissipated_energy
     /// Returns the density of total work of stress on strain increments.
-    double giveStressWork() { return stressWork; }
+    double giveStressWork() const { return stressWork; }
     /// Returns the temp density of total work of stress on strain increments.
-    double giveTempStressWork() { return tempStressWork; }
+    double giveTempStressWork() const { return tempStressWork; }
     /// Sets the density of total work of stress on strain increments to given value.
     void setTempStressWork(double w) { tempStressWork = w; }
     /// Returns the density of dissipated work.
-    double giveDissWork() { return dissWork; }
+    double giveDissWork() const { return dissWork; }
     /// Returns the density of temp dissipated work.
-    double giveTempDissWork() { return tempDissWork; }
+    double giveTempDissWork() const { return tempDissWork; }
     /// Sets the density of dissipated work to given value.
     void setTempDissWork(double w) { tempDissWork = w; }
     /// Computes the increment of total stress work and of dissipated work.
@@ -163,23 +161,23 @@ class IsotropicDamageMaterial : public StructuralMaterial
 {
 protected:
     /// Coefficient of thermal dilatation.
-    double tempDillatCoeff;
+    double tempDillatCoeff = 0.;
 
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergence problems. Set to something like 0.99 if needed.
-    double maxOmega;
+    double maxOmega = 0.999999;
 
     /// Indicator of the type of permanent strain formulation (0 = standard damage with no permanent strain)
-    int permStrain;
+    int permStrain = 0;
 
     /// Reference to bulk (undamaged) material
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
     /**
      * Variable controlling type of loading/unloading law, default set to idm_strainLevel
      * defines the two two possibilities:
      * - idm_strainLevelCR the unloading takes place, when strain level is smaller than the largest level ever reached;
      * - idm_damageLevelCR the unloading takes place, when damage level is smaller than the largest damage ever  reached;
      */
-    enum loaUnloCriterium { idm_strainLevelCR, idm_damageLevelCR } llcriteria;
+    enum loaUnloCriterium { idm_strainLevelCR, idm_damageLevelCR } llcriteria = idm_strainLevelCR;
 
 public:
     /// Constructor
@@ -187,35 +185,52 @@ public:
     /// Destructor
     virtual ~IsotropicDamageMaterial();
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "IsotropicDamageMaterial"; }
 
     /// Returns reference to undamaged (bulk) material
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector(FloatArray &answer,  GaussPoint *gp,
+    void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<IsotropicDamageMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<4> giveRealStressVector_PlaneStrain( const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<IsotropicDamageMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArray giveRealStressVector_StressControl(const FloatArray &strain, const IntArray &strainControl, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<IsotropicDamageMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<IsotropicDamageMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<IsotropicDamageMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
-    virtual double evaluatePermanentStrain(double kappa, double omega) { return 0.; }
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
+    virtual double evaluatePermanentStrain(double kappa, double omega) const { return 0.; }
 
     /**
      * Returns the value of material property 'aProperty'. Property must be identified
@@ -225,7 +240,7 @@ public:
      * @param gp Integration point,
      * @return Property value.
      */
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
     /**
      * Computes the equivalent strain measure from given strain vector (full form).
      * @param[out] kappa Return parameter, containing the corresponding equivalent strain.
@@ -233,14 +248,14 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) = 0;
+    virtual double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const = 0;
     /**Computes derivative of the equivalent strain with regards to strain
      * @param[out] answer Contains the resulting derivative.
      * @param strain Strain vector.
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) { OOFEM_ERROR("not implemented"); }
+    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const { OOFEM_ERROR("not implemented"); }
     /**
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param[out] omega Contains result.
@@ -248,13 +263,16 @@ public:
      * @param strain Total strain in full form.
      * @param gp Integration point.
      */
-    virtual void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) = 0;
+    virtual double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const = 0;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new IsotropicDamageMaterialStatus(gp); }
 
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp,
+                                            TimeStep *tStep) const override;
+    
 protected:
     /**
      * Abstract service allowing to perform some initialization, when damage first appear.
@@ -262,7 +280,7 @@ protected:
      * @param totalStrainVector Current total strain vector.
      * @param gp Integration point.
      */
-    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) { }
+    virtual void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const { }
 
     /**
      * Returns the value of derivative of damage function
@@ -272,22 +290,14 @@ protected:
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
      */
-    virtual double damageFunctionPrime(double kappa, GaussPoint *gp) {
+    virtual double damageFunctionPrime(double kappa, GaussPoint *gp) const {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp,TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-
-    void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // isodamagemodel_h

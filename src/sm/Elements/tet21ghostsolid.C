@@ -206,27 +206,26 @@ tet21ghostsolid :: computeNumericStiffnessMatrixDebug(FloatMatrix &answer, MatRe
 void
 tet21ghostsolid :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_3d(strain, gp, tStep);
 }
 
 void
 tet21ghostsolid :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
 }
 
 void
 tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
+#ifdef __FM_MODULE
 #if USENUMTAN == 1
     computeNumericStiffnessMatrix(answer, rMode, tStep);
     return;
 
 #endif
 
-#ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-#endif
 
     FloatMatrix afDu, afDw, bfuDu, bfuDp, bfpDu, bfpDw, cfwDu;
     FloatMatrix Kf, G, Kx, Ed, EdB, dNx;
@@ -280,13 +279,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             dNv.at(k * 3 + 3) = dNx.at(k + 1, 3);
         }
 
-#ifdef __FM_MODULE
         gp->setMaterialMode(_3dFlow);
         Ed = fluidMaterial->computeTangent3D(TangentStiffness, gp, tStep);
         gp->setMaterialMode(_3dMat);
-#else
-        OOFEM_ERROR("Fluid module missing\n");
-#endif
 
         if ( nlGeometry == 0 ) {
             FloatMatrix B;
@@ -595,6 +590,11 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
         }
     }
 #endif
+#else // ifdef __FM_MODULE
+        OOFEM_ERROR("Fluid module missing\n");
+#endif// ifdef __FM_MODULE
+
+
     // *******************
     //computeNumericStiffnessMatrix(answer, rMode, tStep);
 }
@@ -1365,8 +1365,7 @@ tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
         if ( node <= 4 ) {
             answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
         } else {
-            IntArray eNodes;
-            this->interpolation.computeLocalEdgeMapping(eNodes, node - 4);
+            const auto &eNodes = this->interpolation.computeLocalEdgeMapping(node - 4);
             answer.at(1) = 0.5 * (
                 this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
                 this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );

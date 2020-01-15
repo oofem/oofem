@@ -120,12 +120,9 @@ void EnrFrontIntersection :: evaluateEnrFuncJumps(std :: vector< double > &oEnrF
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
-IRResultType EnrFrontIntersection :: initializeFrom(InputRecord *ir)
+void EnrFrontIntersection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result; // Required by IR_GIVE_FIELD macro
     IR_GIVE_FIELD(ir, mTangent, _IFT_EnrFrontIntersection_Tangent);
-
-    return IRRT_OK;
 }
 
 void EnrFrontIntersection :: giveInputRecord(DynamicInputRecord &input)

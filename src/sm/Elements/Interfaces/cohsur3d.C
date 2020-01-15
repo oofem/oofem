@@ -33,6 +33,7 @@
  */
 
 #include "sm/Elements/Interfaces/cohsur3d.h"
+#include "element.h"
 #include "dof.h"
 #include "node.h"
 #include "particle.h"
@@ -362,22 +363,16 @@ CohesiveSurface3d :: evaluateLocalCoordinateSystem()
 }
 
 
-IRResultType
-CohesiveSurface3d :: initializeFrom(InputRecord *ir)
+void
+CohesiveSurface3d :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     // first call parent
-    result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
 
     // read the area from the input file
     IR_GIVE_FIELD(ir, area, _IFT_CohSur3d_area);
     if ( area < 0. ) {
-        OOFEM_WARNING("negative area specified");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_CohSur3d_area, "negative area specified");
     }
 
     // read shift constants of second (periodic) particle form the input file (if defined)
@@ -389,13 +384,11 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     // evaluate number of Dof Managers
     numberOfDofMans = dofManArray.giveSize();
     if ( numberOfDofMans <= 0 ) {
-        OOFEM_WARNING("unread nodes: Element %d", this->giveNumber() );
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_Element_nodes, "unread nodes" );
     }
 
     if ( ( numberOfDofMans == 3 ) & ( kx == 0 ) & ( ky == 0 ) & ( kz == 0 ) ) {
-        OOFEM_WARNING("no periodic shift defined: Element %d", this->giveNumber() );
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_CohSur3d_kx, "no periodic shift defined" );
     }
 
 
@@ -411,16 +404,13 @@ CohesiveSurface3d :: initializeFrom(InputRecord *ir)
     // evaluate the length
     giveLength();
     if ( length <= 0. ) {
-        OOFEM_WARNING("negative length evaluated: Element %d", this->giveNumber() );
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_Element_nodes, "negative length evaluated");
         // evaluate the coordinates of the center
         evaluateCenter(); /// @todo This will never execute. Verify this / Mikael
     }
 
     // evaluate the local coordinate system
     evaluateLocalCoordinateSystem();
-
-    return IRRT_OK;
 }
 
 

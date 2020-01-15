@@ -73,7 +73,6 @@ protected:
 
 public:
     Tr1BubbleStokes(int n, Domain * d);
-    virtual ~Tr1BubbleStokes();
 
     double computeVolumeAround(GaussPoint *gp) override;
 

@@ -69,7 +69,7 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: unordered_map< in
 
     for ( int i = 1; i <= nNodes; i++ ) {
         DofManager *dMan = d->giveDofManager(i);
-        const auto &nodePos = * ( dMan->giveCoordinates() );
+        const auto &nodePos = dMan->giveCoordinates();
 
         double radius2 = distance_square(iTipInfo.mGlobalCoord, nodePos);
 
@@ -160,13 +160,9 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< doubl
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
-IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
+void EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
-
-    return IRRT_OK;
 }
 
 void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input)

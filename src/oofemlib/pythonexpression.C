@@ -55,10 +55,10 @@ PythonExpression :: ~PythonExpression()
     Py_DECREF(this->main_dict);
 }
 
-IRResultType
-PythonExpression :: initializeFrom(InputRecord *ir)
+void
+PythonExpression :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    Function :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->fExpression, _IFT_PythonExpression_f);
     IR_GIVE_OPTIONAL_FIELD(ir, this->dfdtExpression, _IFT_PythonExpression_dfdt);
@@ -73,8 +73,6 @@ PythonExpression :: initializeFrom(InputRecord *ir)
         PyObject *main_module = PyImport_AddModule("__main__");
         this->main_dict = PyModule_GetDict(main_module);
     }
-
-    return Function :: initializeFrom(ir);
 }
 
 

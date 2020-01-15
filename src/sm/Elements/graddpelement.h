@@ -56,7 +56,7 @@ public:
     GradDpElement();
     virtual ~GradDpElement() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
 protected:
     virtual StructuralElement *giveStructuralElement() = 0;

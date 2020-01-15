@@ -223,12 +223,10 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 }
 
 
-IRResultType
-WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
+void
+WallClockLoadBalancerMonitor :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    result = LoadBalancerMonitor :: initializeFrom(ir);
+    LoadBalancerMonitor :: initializeFrom(ir);
 
     IR_GIVE_OPTIONAL_FIELD(ir, relWallClockImbalanceTreshold, _IFT_WallClockLoadBalancerMonitor_relwct);
     IR_GIVE_OPTIONAL_FIELD(ir, absWallClockImbalanceTreshold, _IFT_WallClockLoadBalancerMonitor_abswct);
@@ -250,8 +248,6 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     }
 
 #endif
-
-    return result;
 }
 
 }

@@ -55,20 +55,13 @@ Truss3dnl :: Truss3dnl(int n, Domain *aDomain) : Truss3d(n, aDomain)
 }
 
 
-IRResultType
-Truss3dnl :: initializeFrom(InputRecord *ir)
+void
+Truss3dnl :: initializeFrom(InputRecord &ir)
 {
-  IRResultType result = Truss3d :: initializeFrom(ir);
-  if ( result != IRRT_OK ) {
-    return result;
-  }
+  Truss3d :: initializeFrom(ir);
   initialStretch = 1;
   IR_GIVE_OPTIONAL_FIELD(ir, initialStretch, _IFT_Truss3dnl_initialStretch);
-  
-  return IRRT_OK;      
 }
-
-
 
   
 void
@@ -233,33 +226,31 @@ Truss3dnl :: computeBnlMatrixAt(GaussPoint *gp, FloatMatrix &answer, TimeStep *t
 void
 Truss3dnl :: computeInitialStressStiffness(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
 {
-  
-  answer.resize(6,6);
-  answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = answer.at(4,4) = answer.at(5,5) = answer.at(6,6) =  1.0;
-  answer.at(1,4) = answer.at(2,5) = answer.at(3,6) = answer.at(4,1) = answer.at(5,2) = answer.at(6,3) = -1.0;
-  
-  FloatArray d, stress, strain;
-  FloatMatrix B;
-  this->computeVectorOf(VM_Total, tStep, d);
-  this->computeBmatrixAt(gp, B, tStep);	  
-  strain.beProductOf(B, d);
-  // add influence of initial stress/stretch
-  double l2 = initialStretch*initialStretch;
-  strain.times(l2);
-  FloatArray E0(1);
-  E0.at(1) = (l2-1.)/2;
-  strain.add(E0);
-  /////////////////////////////////////////////////////////////////////////////////////////
-  this->giveStructuralCrossSection()->giveRealStress_1d(stress, gp, strain, tStep);
-  double l0 = this->computeLength();	
-  double factor = 1/l0/l0;
-  // prevent zero initial stress stiffness
-  if(stress.at(1) == 0) {
-    stress.at(1) = 1;
-  }
-  answer.times(stress.at(1));
-  answer.times(factor);
-  
+    answer.resize(6,6);
+    answer.at(1,1) = answer.at(2,2) = answer.at(3,3) = answer.at(4,4) = answer.at(5,5) = answer.at(6,6) =  1.0;
+    answer.at(1,4) = answer.at(2,5) = answer.at(3,6) = answer.at(4,1) = answer.at(5,2) = answer.at(6,3) = -1.0;
+    
+    FloatArray d, strain;
+    FloatMatrix B;
+    this->computeVectorOf(VM_Total, tStep, d);
+    this->computeBmatrixAt(gp, B, tStep);	  
+    strain.beProductOf(B, d);
+    // add influence of initial stress/stretch
+    double l2 = initialStretch*initialStretch;
+    strain.times(l2);
+    FloatArray E0(1);
+    E0.at(1) = (l2-1.)/2;
+    strain.add(E0);
+    /////////////////////////////////////////////////////////////////////////////////////////
+    auto stress = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
+    double l0 = this->computeLength();	
+    double factor = 1/l0/l0;
+    // prevent zero initial stress stiffness
+    if ( stress.at(1) == 0 ) {
+        stress.at(1) = 1;
+    }
+    answer.times(stress.at(1));
+    answer.times(factor);
 }
     
 

@@ -45,9 +45,8 @@ class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
     MaxwellChainMaterialStatus(GaussPoint * g, int nunits);
-    virtual ~MaxwellChainMaterialStatus() { }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -69,7 +68,6 @@ class MaxwellChainMaterial : public RheoChainMaterial
 {
 public:
     MaxwellChainMaterial(int n, Domain * d);
-    virtual ~MaxwellChainMaterial() { }
 
     // overload thesse function such that computation of hidden vars can be done after the computation of stress
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -77,21 +75,21 @@ public:
 
     // identification and auxiliary functions
     const char *giveClassName() const override { return "MaxwellChainMaterial"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     void giveShrinkageStrainVector(FloatArray &answer,
                                    GaussPoint *gp,
                                    TimeStep *tStep,
-                                   ValueModeType mode) override
+                                   ValueModeType mode) const override
     { answer.clear(); }
 
     void giveEigenStrainVector(FloatArray &answer,
-                               GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+                               GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 0; }
+    bool hasIncrementalShrinkageFormulation() const override { return false; }
     /**
      * This function computes the moduli of individual Maxwell units
      * such that the corresponding Dirichlet series gives the best
@@ -106,9 +104,9 @@ protected:
      * @param[out] answer Array with coefficients
      * @param tStep Age of material when load is applied ???
      */
-    void computeCharCoefficients(FloatArray &answer, double tPrime, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double giveEModulus(GaussPoint *gp, TimeStep *tStep) override;
+    double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
     LinearElasticMaterial *giveLinearElasticMaterial();
 };
 } // end namespace oofem

@@ -114,31 +114,23 @@ FEI2dQuadConst :: edgeLocal2global(FloatArray &answer, int iedge,
     OOFEM_ERROR("not implemented");
 }
 
-void
-FEI2dQuadConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI2dQuadConst :: computeLocalEdgeMapping(int iedge) const
 {
-    int aNode = 0, bNode = 0;
-    edgeNodes.resize(2);
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
+        return {1, 2};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
+        return {2, 3};
     } else if ( iedge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
+        return {3, 1};
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        throw std::range_error("invalid egde number");
+        return {};
     }
-
-    edgeNodes.at(1) = aNode;
-    edgeNodes.at(2) = bNode;
 }
 
 double
-FEI2dQuadConst :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI2dQuadConst :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     int nodeA = edgeNodes.at(1);
     int nodeB = edgeNodes.at(2);

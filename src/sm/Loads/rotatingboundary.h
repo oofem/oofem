@@ -75,7 +75,7 @@ public:
 
     double give(Dof *dof, ValueModeType mode, double time) override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void scale(double s) override { }

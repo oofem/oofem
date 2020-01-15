@@ -63,13 +63,11 @@ class MazarsMaterialStatus : public IsotropicDamageMaterial1Status
 {
 protected:
     /// Characteristic element length for compression, fixed as square from element size (for 2d).
-    double lec;
+    double lec = 0.;
 
 public:
     /// Constructor.
     MazarsMaterialStatus(GaussPoint * g);
-    /// Destructor.
-    virtual ~MazarsMaterialStatus() { }
 
     /// Returns characteristic length stored in receiver.
     double giveLec() { return lec; }
@@ -95,13 +93,13 @@ class MazarsMaterial : public IsotropicDamageMaterial1
 {
 protected:
     /// Elastic parameters.
-    double E, nu;
+    double E = 0., nu = 0.;
     /// Model parameters related to the shape of uniaxial stress-strain diagrams.
-    double At, Bt, Ac, Bc;
+    double At = 0., Bt = 0., Ac = 0., Bc = 0.;
     /// Reference elem-length for objectivity.
-    double hReft, hRefc;
+    double hReft = 0., hRefc = 0.;
     /// Beta coefficient reducing the effect of shear; default val = 1.06.
-    double beta;
+    double beta = 0.;
 
     /// Model variants.
     enum mazarsModelVariant { maz_original, maz_modTension } modelVersion;
@@ -109,16 +107,14 @@ protected:
 public:
     /// Constructor
     MazarsMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MazarsMaterial();
 
     const char *giveInputRecordName() const override { return _IFT_MazarsMaterial_Name; }
     const char *giveClassName() const override { return "MazarsMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) override;
-    void computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp) override;
+    double computeEquivalentStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const override;
+    double computeDamageParam(double kappa, const FloatArray &strain, GaussPoint *gp) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new MazarsMaterialStatus(gp); }
 
@@ -131,7 +127,7 @@ protected:
      *  @param totalStrainVector Current total strain vector,
      *  @param gp Integration point,
      */
-    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) override;
+    void initDamaged(double kappa, FloatArray &totalStrainVector, GaussPoint *gp) const override;
     /*
      * Computes elastic stiffness for normal stress components.
      * @param answer Result of size (3,3).
@@ -145,10 +141,10 @@ protected:
      *                                    GaussPoint *gp, TimeStep *tStep);
      */
 
-    int giveNumberOfSpatialDimensions(GaussPoint *gp);
-    void giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp);
-    double computeGt(double kappa, GaussPoint *gp);
-    double computeGc(double kappa, GaussPoint *gp);
+    int giveNumberOfSpatialDimensions(GaussPoint *gp) const;
+    void giveNormalBlockOfElasticCompliance(FloatMatrix &answer, GaussPoint *gp) const;
+    double computeGt(double kappa, GaussPoint *gp) const;
+    double computeGc(double kappa, GaussPoint *gp) const;
 };
 } // end namespace oofem
 #endif // mazarsmodel_h

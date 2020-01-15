@@ -43,6 +43,7 @@
 
 #include "dofmanager.h"
 #include "floatarray.h"
+#include "floatmatrix.h"
 
 #include <memory>
 
@@ -89,8 +90,6 @@ class IntArray;
 class OOFEM_EXPORT Node : public DofManager
 {
 protected:
-    /// Array storing nodal coordinates.
-    FloatArray coordinates;
     /**
      * Triplet defining the local coordinate system in node.
      * Value at position (i,j) represents angle between e'(i) and e(j),
@@ -106,18 +105,6 @@ public:
      * @param aDomain Domain to which node belongs.
      */
     Node(int n, Domain * aDomain);
-    /// Destructor.
-    virtual ~Node();
-
-    bool hasCoordinates() override { return true; }
-    double giveCoordinate(int i) override;
-    FloatArray *giveCoordinates() override { return & coordinates; }
-
-    /**
-     * As giveCoordinates, but non-virtual and therefore faster
-     * (because it can be inlined). /ES
-     */
-    inline const FloatArray &giveNodeCoordinates() const { return coordinates; }
 
     /**
      * Sets node coordinates to given array.
@@ -175,7 +162,7 @@ public:
     // miscellaneous
     const char *giveClassName() const override { return "Node"; }
     const char *giveInputRecordName() const override { return _IFT_Node_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void printYourself() override;
     int checkConsistency() override;

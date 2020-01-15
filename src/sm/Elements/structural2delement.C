@@ -55,16 +55,11 @@ Structural2DElement :: ~Structural2DElement()
 }
 
 
-IRResultType
-Structural2DElement :: initializeFrom(InputRecord *ir)
+void
+Structural2DElement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    matRotation = ir->hasField(_IFT_Structural2DElement_materialCoordinateSystem); //|| this->elemLocalCS.isNotEmpty();
-    return IRRT_OK;
+    NLStructuralElement :: initializeFrom(ir);
+    matRotation = ir.hasField(_IFT_Structural2DElement_materialCoordinateSystem); //|| this->elemLocalCS.isNotEmpty();
 }
 
 
@@ -181,8 +176,7 @@ Structural2DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
      * to global element dofs
      */
-    IntArray eNodes;
-    static_cast< FEInterpolation2d * >( this->giveInterpolation() )->computeLocalEdgeMapping(eNodes,  iEdge);
+    const auto &eNodes = static_cast< FEInterpolation2d * >( this->giveInterpolation() )->computeLocalEdgeMapping(iEdge);
 
     answer.resize(eNodes.giveSize() * 2);
     for ( int i = 1; i <= eNodes.giveSize(); i++ ) {
@@ -290,25 +284,23 @@ PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
-        FloatArray rotStrain, s;
-
         this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        rotStrain = {
-            e(0) * x(0) * x(0) + e(2) * x(0) * x(1) + e(1) * x(1) * x(1),
-            e(0) * y(0) * y(0) + e(2) * y(0) * y(1) + e(1) * y(1) * y(1),
-            2 * e(0) * x(0) * y(0) + 2 * e(1) * x(1) * y(1) + e(2) * ( x(1) * y(0) + x(0) * y(1) )
+        FloatArrayF<3> rotStrain = {
+            e[0] * x[0] * x[0] + e[2] * x[0] * x[1] + e[1] * x[1] * x[1],
+            e[0] * y[0] * y[0] + e[2] * y[0] * y[1] + e[1] * y[1] * y[1],
+            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[2] * ( x[1] * y[0] + x[0] * y[1] )
         };
 
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStress(s, gp, rotStrain, tStep);
+        auto s = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(rotStrain, gp, tStep);
 
         answer = {
-            s(0) * x(0) * x(0) + 2 * s(2) * x(0) * y(0) + s(1) * y(0) * y(0),
-            s(0) * x(1) * x(1) + 2 * s(2) * x(1) * y(1) + s(1) * y(1) * y(1),
-            s(1) * y(0) * y(1) + s(0) * x(0) * x(1) + s(2) * ( x(1) * y(0) + x(0) * y(1) )
+            s[0] * x[0] * x[0] + 2 * s[2] * x[0] * y[0] + s[1] * y[0] * y[0],
+            s[0] * x[1] * x[1] + 2 * s[2] * x[1] * y[1] + s[1] * y[1] * y[1],
+            s[1] * y[0] * y[1] + s[0] * x[0] * x[1] + s[2] * ( x[1] * y[0] + x[0] * y[1] )
         };
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStress(answer, gp, e, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStress(e, gp, tStep);
     }
 }
 
@@ -316,7 +308,7 @@ PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &
 void
 PlaneStressElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -396,25 +388,24 @@ PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
-        FloatArray rotStrain, s;
 
         this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        rotStrain = {
-            e(0) * x(0) * x(0) + e(3) * x(0) * x(1) + e(1) * x(1) * x(1),
-            e(0) * y(0) * y(0) + e(3) * y(0) * y(1) + e(1) * y(1) * y(1),
-            e(2),
-            2 * e(0) * x(0) * y(0) + 2 * e(1) * x(1) * y(1) + e(3) * ( x(1) * y(0) + x(0) * y(1) )
+        FloatArrayF<4> rotStrain = {
+            e[0] * x[0] * x[0] + e[3] * x[0] * x[1] + e[1] * x[1] * x[1],
+            e[0] * y[0] * y[0] + e[3] * y[0] * y[1] + e[1] * y[1] * y[1],
+            e[2],
+            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[3] * ( x[1] * y[0] + x[0] * y[1] )
         };
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(s, gp, rotStrain, tStep);
+        auto s = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(rotStrain, gp, tStep);
         answer = {
-            s(0) * x(0) * x(0) + 2 * s(3) * x(0) * y(0) + s(1) * y(0) * y(0),
-            s(0) * x(1) * x(1) + 2 * s(3) * x(1) * y(1) + s(1) * y(1) * y(1),
-            s(2),
-            y(1) * ( s(3) * x(0) + s(1) * y(0) ) + x(1) * ( s(0) * x(0) + s(3) * y(0) )
+            s[0] * x[0] * x[0] + 2 * s[3] * x[0] * y[0] + s[1] * y[0] * y[0],
+            s[0] * x[1] * x[1] + 2 * s[3] * x[1] * y[1] + s[1] * y[1] * y[1],
+            s[2],
+            y[1] * ( s[3] * x[0] + s[1] * y[0] ) + x[1] * ( s[0] * x[0] + s[3] * y[0] )
         };
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(answer, gp, e, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(e, gp, tStep);
     }
 }
 
@@ -422,7 +413,7 @@ PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &
 void
 PlaneStrainElement :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStrain(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;
@@ -579,29 +570,28 @@ AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &e, Ga
     if ( this->matRotation ) {
         ///@todo This won't work properly with "useUpdatedGpRecord" (!)
         FloatArray x, y;
-        FloatArray rotStrain, s;
 
         this->giveMaterialOrientationAt( x, y, gp->giveNaturalCoordinates() );
         // Transform to material c.s.
-        rotStrain = {
-            e(0) * x(0) * x(0) + e(5) * x(0) * x(1) + e(1) * x(1) * x(1),
-            e(0) * y(0) * y(0) + e(5) * y(0) * y(1) + e(1) * y(1) * y(1),
-            e(2),
-            e(4) * y(0) + e(3) * y(1),
-            e(4) * x(0) + e(3) * x(1),
-            2 * e(0) * x(0) * y(0) + 2 * e(1) * x(1) * y(1) + e(5) * ( x(1) * y(0) + x(0) * y(1) )
+        FloatArrayF<6> rotStrain = {
+            e[0] * x[0] * x[0] + e[5] * x[0] * x[1] + e[1] * x[1] * x[1],
+            e[0] * y[0] * y[0] + e[5] * y[0] * y[1] + e[1] * y[1] * y[1],
+            e[2],
+            e[4] * y[0] + e[3] * y[1],
+            e[4] * x[0] + e[3] * x[1],
+            2 * e[0] * x[0] * y[0] + 2 * e[1] * x[1] * y[1] + e[5] * ( x[1] * y[0] + x[0] * y[1] )
         };
-        this->giveStructuralCrossSection()->giveRealStress_3d(s, gp, rotStrain, tStep);
+        auto s = this->giveStructuralCrossSection()->giveRealStress_3d(rotStrain, gp, tStep);
         answer = {
-            s(0) * x(0) * x(0) + 2 * s(5) * x(0) * y(0) + s(1) * y(0) * y(0),
-            s(0) * x(1) * x(1) + 2 * s(5) * x(1) * y(1) + s(1) * y(1) * y(1),
-            s(2),
-            s(4) * x(1) + s(3) * y(1),
-            s(4) * x(0) + s(3) * y(0),
-            y(1) * ( s(5) * x(0) + s(1) * y(0) ) + x(1) * ( s(0) * x(0) + s(5) * y(0) )
+            s[0] * x[0] * x[0] + 2 * s[5] * x[0] * y[0] + s[1] * y[0] * y[0],
+            s[0] * x[1] * x[1] + 2 * s[5] * x[1] * y[1] + s[1] * y[1] * y[1],
+            s[2],
+            s[4] * x[1] + s[3] * y[1],
+            s[4] * x[0] + s[3] * y[0],
+            y[1] * ( s[5] * x[0] + s[1] * y[0] ) + x[1] * ( s[0] * x[0] + s[5] * y[0] )
         };
     } else {
-        this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, e, tStep);
+        answer = this->giveStructuralCrossSection()->giveRealStress_3d(e, gp, tStep);
     }
 }
 
@@ -610,7 +600,7 @@ AxisymElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
                                              MatResponseMode rMode, GaussPoint *gp,
                                              TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_3d(rMode, gp, tStep);
     if ( this->matRotation ) {
         FloatArray x, y;
         FloatMatrix Q;

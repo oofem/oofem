@@ -54,7 +54,7 @@ public:
      */
     virtual double giveVolume(const FEICellGeometry &cellgeo) const;
 
-    void boundaryEdgeGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundaryEdgeGiveNodes(int boundary) const override;
     void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -70,7 +70,7 @@ public:
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { return this->surfaceGiveTransformationJacobian(isurf, lcoords, cellgeo); }
 
-    void boundaryGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundaryGiveNodes(int boundary) const override;
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -122,8 +122,8 @@ public:
      */
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,const FEICellGeometry &cellgeo) = 0;
 
-    virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) = 0;
-    void computeEdgeMapping(IntArray &edgeNodes, IntArray &elemNodes, int iedge);
+    virtual IntArray computeLocalEdgeMapping(int iedge) const = 0;
+    IntArray computeEdgeMapping(const IntArray &elemNodes, int iedge) const;
     //@}
 
     /**@name Surface interpolation services */
@@ -173,8 +173,8 @@ public:
      */
     virtual double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
 
-    virtual void computeLocalSurfaceMapping(IntArray &surfNodes, int isurf) = 0;
-    void computeSurfaceMapping(IntArray &surfNodes, IntArray &elemNodes, int isurf);
+    virtual IntArray computeLocalSurfaceMapping(int isurf) const = 0;
+    IntArray computeSurfaceMapping(const IntArray &elemNodes, int isurf) const;
     //@}
 
     std::unique_ptr<IntegrationRule> giveBoundaryEdgeIntegrationRule(int order, int boundary) override;
@@ -183,7 +183,7 @@ public:
         OOFEM_ERROR("Not overloaded"); 
         return nullptr;
     };
-    void boundarySurfaceGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundarySurfaceGiveNodes(int boundary) const override;
 };
 } // end namespace oofem
 #endif // feinterpol3d_h

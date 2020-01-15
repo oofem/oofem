@@ -67,7 +67,7 @@ public:
     void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     //void surfaceEvaldNdx(FloatMatrix&answer, int isurf, const FloatArray& lcoords, const FEICellGeometry& cellgeo) override;
-    void computeLocalSurfaceMapping(IntArray &nodes, int iSurf) override;
+    IntArray computeLocalSurfaceMapping(int iSurf) const override;
     double evalNXIntegral(int iSurf, const FEICellGeometry &cellgeo) override;
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;

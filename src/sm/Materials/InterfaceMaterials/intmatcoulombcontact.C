@@ -107,10 +107,10 @@ IntMatCoulombContact :: give3dStiffnessMatrix_Eng(MatResponseMode rMode, GaussPo
 }
 
 
-IRResultType
-IntMatCoulombContact :: initializeFrom(InputRecord *ir)
+void
+IntMatCoulombContact :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceMaterial :: initializeFrom( ir );
 
     frictCoeff = 0.;
     stiffCoeff = 0.;
@@ -119,8 +119,6 @@ IntMatCoulombContact :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, frictCoeff, _IFT_IntMatCoulombContact_frictCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, stiffCoeff, _IFT_IntMatCoulombContact_stiffCoeff);
     IR_GIVE_OPTIONAL_FIELD(ir, normalClearance, _IFT_IntMatCoulombContact_normalClearance);
-
-    return StructuralInterfaceMaterial :: initializeFrom( ir );
 }
 
 
@@ -140,7 +138,7 @@ IntMatCoulombContactStatus :: IntMatCoulombContactStatus(GaussPoint *g) : Struct
 
 
 void
-IntMatCoulombContactStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+IntMatCoulombContactStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralInterfaceMaterialStatus::printOutputAt( file, tStep );
     fprintf(file, "status { ");

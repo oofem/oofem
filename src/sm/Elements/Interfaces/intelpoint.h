@@ -46,6 +46,7 @@
 #define _IFT_IntElPoint_refnode "refnode"
 #define _IFT_IntElPoint_normal "normal"
 #define _IFT_IntElPoint_area "area"
+#define _IFT_IntElPoint_length "length"
 //@}
 
 namespace oofem {
@@ -66,6 +67,7 @@ protected:
     int referenceNode = 0;
     FloatArrayF<3> normal;
     double area = 0.;
+    double length = 0.;
 
 public:
     IntElPoint(int n, Domain *d);
@@ -79,7 +81,7 @@ public:
 
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElPoint_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 
     MaterialMode giveMaterialMode() override;

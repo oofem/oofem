@@ -63,10 +63,8 @@ PLPrincipalStrain::~PLPrincipalStrain() {
 
 }
 
-IRResultType PLPrincipalStrain :: initializeFrom(InputRecord *ir)
+void PLPrincipalStrain :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mRadius,                          _IFT_PLPrincipalStrain_Radius);
     IR_GIVE_FIELD(ir, mIncrementLength,         _IFT_PLPrincipalStrain_IncLength);
     IR_GIVE_FIELD(ir, mStrainThreshold, _IFT_PLPrincipalStrain_StrainThreshold);
@@ -76,8 +74,6 @@ IRResultType PLPrincipalStrain :: initializeFrom(InputRecord *ir)
     if ( useRadialBasisFunc == 1 ) {
         mUseRadialBasisFunc = true;
     }
-
-    return IRRT_OK;
 }
 
 void PLPrincipalStrain :: giveInputRecord(DynamicInputRecord &input)
@@ -134,8 +130,8 @@ bool PLPrincipalStrain :: propagateInterface(Domain &iDomain, EnrichmentFront &i
         	// crack tip multiplied by a constant factor.
         	// ( This choice implies that we hope that the element has reasonable
         	// aspect ratio.)
-        	const auto &x1 = * ( el->giveDofManager(1)->giveCoordinates() );
-        	const auto &x2 = * ( el->giveDofManager(2)->giveCoordinates() );
+        	const auto &x1 = el->giveDofManager(1)->giveCoordinates();
+        	const auto &x2 = el->giveDofManager(2)->giveCoordinates();
             const double l = 1.0 * distance(x1, x2);
 
         	// Use the octree to get all elements that have

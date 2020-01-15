@@ -70,15 +70,10 @@ WeakPeriodicBoundaryCondition :: ~WeakPeriodicBoundaryCondition()
 {
 }
 
-IRResultType
-WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
+void
+WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
-    result = ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    ActiveBoundaryCondition :: initializeFrom(ir);     ///@todo Carl, remove this line and use elementsidespositive/negative instead.
 
     orderOfPolygon = 2;
     IR_GIVE_OPTIONAL_FIELD(ir, orderOfPolygon, _IFT_WeakPeriodicBoundaryCondition_order);
@@ -91,13 +86,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dofids, _IFT_WeakPeriodicBoundaryCondition_dofids);
     ndofids = dofids.giveSize();
 
-    ngp = -1;        // Pressure as default
-    IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
-    if ( ngp != -1 ) {
-        OOFEM_WARNING("ngp isn't being used anymore! see how the interpolator constructs the integration rule automatically.");
-        return IRRT_BAD_FORMAT;
-    }
-
+    ngp = -1;        // ngp is deprecated
 
     nlgeo = false;
     IR_GIVE_OPTIONAL_FIELD(ir, nlgeo, _IFT_WeakPeriodicBoundaryCondition_nlgeo );
@@ -151,8 +140,6 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
         gamma_ids.followedBy(dofid);
         gammaDman->appendDof( new MasterDof( gammaDman.get(), ( DofIDItem )dofid ) );
     }
-
-    return IRRT_OK;
 }
 
 void WeakPeriodicBoundaryCondition :: computeOrthogonalBasis()
@@ -436,14 +423,13 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     OOFEM_ERROR("Function obsolete");
 
     FloatArray gcoords;
-    IntArray bnodes;
 
     FEInterpolation *geoInterpolation = e->giveInterpolation();
 
     // Use correct interpolation for the dofid on which the condition is applied
     FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofids[0] );
 
-    interpolation->boundaryGiveNodes(bnodes, boundary);
+    auto bnodes = interpolation->boundaryGiveNodes(boundary);
 
     B.resize(bnodes.giveSize(), ndof);
     B.zero();
@@ -515,12 +501,10 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
             IntArray r_sideLoc, c_sideLoc;
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes;
-
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-            interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+            auto bNodes = interpolation->boundaryGiveNodes(side [ thisSide ].at(ielement));
 
             thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, r_s);
             thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, c_s);
@@ -530,8 +514,8 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
 
             std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
 
-            for ( GaussPoint *gp: *iRule ) {
-                FloatArray lcoords = gp->giveNaturalCoordinates();
+            for ( auto &gp: *iRule ) {
+                auto const &lcoords = gp->giveNaturalCoordinates();
                 FloatArray N, gcoords;
 
                 geoInterpolation->boundaryLocal2Global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(thisElement));
@@ -696,12 +680,10 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
             int boundary = side [ thisSide ].at(ielement);
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes;
-
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofids[0] );
             FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-            interpolation->boundaryGiveNodes( bNodes, boundary );
+            auto bNodes = interpolation->boundaryGiveNodes(boundary);
 
             thisElement->giveBoundaryLocationArray(sideLocation, bNodes, dofids, s, &masterDofIDs);
             thisElement->computeBoundaryVectorOf(bNodes, dofids, VM_Total, tStep, a);

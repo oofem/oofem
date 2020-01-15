@@ -216,9 +216,8 @@ void
 FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray N;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
     answer.clear();
@@ -231,10 +230,9 @@ FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray eNodes;
     FloatArray dNdu;
     double u = lcoords.at(1);
-    this->computeLocalEdgeMapping(eNodes, iedge);
+    const auto &eNodes = this->computeLocalEdgeMapping(iedge);
     dNdu.add( u - 0.5, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
     dNdu.add( u + 0.5, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
     dNdu.add( -2. * u, cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
@@ -242,35 +240,23 @@ FEI3dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
 }
 
 
-void
-FEI3dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dTrQuad :: computeLocalEdgeMapping(int iedge) const
 {
-    int aNode = 0, bNode = 0, cNode = 0;
-    edgeNodes.resize(3);
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-        cNode = 4;
+        return {1, 2, 4};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-        cNode = 5;
+        return {2, 3, 5};
     } else if ( iedge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
-        cNode = 6;
+        return {3, 1, 6};
     } else {
-        OOFEM_ERROR("Wrong edge number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
-
-    edgeNodes.at(1) = aNode;
-    edgeNodes.at(2) = bNode;
-    edgeNodes.at(3) = cNode;
 }
 
 double
-FEI3dTrQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI3dTrQuad :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     ///@todo Implement this
     OOFEM_ERROR("Not supported");
@@ -386,13 +372,13 @@ FEI3dTrQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lc
     return 0;
 }
 
-void
-FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
+IntArray
+FEI3dTrQuad :: computeLocalSurfaceMapping(int isurf) const
 {
     //surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
     //surfNodes = {1, 2, 3, 4, 5, 6};
     ///@todo - fix wrt xfem
-    computeLocalEdgeMapping(surfNodes, isurf);
+    return computeLocalEdgeMapping(isurf);
 
 }
 

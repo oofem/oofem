@@ -61,22 +61,14 @@ QuadAxisym1_mt :: QuadAxisym1_mt(int n, Domain *aDomain) : QuadAxisym1_ht(n, aDo
     this->emode = Mass1TransferEM;
 }
 
-QuadAxisym1_ht :: ~QuadAxisym1_ht()
-// Destructor
-{ }
-
 double
 QuadAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = gp->giveWeight();
-    volume = determinant * weight * this->computeRadiusAt(gp);
-
-    return volume;
+    double weight = gp->giveWeight();
+    return determinant * weight * this->computeRadiusAt(gp);
 }
 
 double
@@ -88,10 +80,9 @@ QuadAxisym1_ht :: giveThicknessAt(const FloatArray &gcoords)
 double
 QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double radius;
     FloatArray gcoords;
     this->interpolation.edgeLocal2global( gcoords, iEdge, gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
-    radius = gcoords.at(1);
+    double radius = gcoords.at(1);
 
     double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(),
                                                                            FEIElementGeometryWrapper(this) ) );

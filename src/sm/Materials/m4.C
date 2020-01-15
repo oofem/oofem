@@ -187,13 +187,10 @@ M4Material :: giveRealMicroplaneStressVector(GaussPoint *gp, int mnumber,
 }
 
 
-IRResultType
-M4Material :: initializeFrom(InputRecord *ir)
+void
+M4Material :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = MicroplaneMaterial_Bazant :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MicroplaneMaterial_Bazant :: initializeFrom(ir);
 
     c1 = 6.20e-1;
     c2 = 2.76;
@@ -228,8 +225,6 @@ M4Material :: initializeFrom(InputRecord *ir)
     EV = E / ( 1 - 2 * nu );
     ED = 5 * E / ( 2 + 3 * mu ) / ( 1 + nu );
     ET = mu * ED;
-
-    return IRRT_OK;
 }
 
 
@@ -247,9 +242,8 @@ M4Material :: updateVolumetricStressTo(GaussPoint *gp, int mnumber, double sigv)
 }
 
 
-void
-M4Material :: giveThermalDilatationVector(FloatArray &answer,
-                                          GaussPoint *gp,  TimeStep *tStep)
+FloatArrayF<6>
+M4Material :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const
 //
 // returns a FloatArray(6) of initial strain vector
 // eps_0 = {exx_0, eyy_0, ezz_0, gyz_0, gxz_0, gxy_0}^T
@@ -257,11 +251,14 @@ M4Material :: giveThermalDilatationVector(FloatArray &answer,
 // gp (element) local axes
 //
 {
-    answer.resize(6);
-    answer.zero();
-    answer.at(1) = talpha;
-    answer.at(2) = talpha;
-    answer.at(3) = talpha;
+    return {
+        talpha,
+        talpha,
+        talpha,
+        0.,
+        0.,
+        0.,
+    };
 }
 
 
@@ -273,9 +270,6 @@ M4MaterialStatus :: M4MaterialStatus(GaussPoint *g, int nplanes) :
     microplaneStress(nplanes), tempMicroplaneStress(nplanes)
 { }
 
-
-M4MaterialStatus :: ~M4MaterialStatus()
-{ }
 
 void
 M4MaterialStatus :: initTempStatus()

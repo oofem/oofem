@@ -82,7 +82,7 @@ public:
 
     virtual void createContactDofs();
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
 
     virtual int instanciateYourself(DataReader &dr);
     virtual const char *giveClassName() const { return "ContactDefinition"; }

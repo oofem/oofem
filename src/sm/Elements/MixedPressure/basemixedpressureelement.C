@@ -366,12 +366,10 @@ BaseMixedPressureElement :: computeStiffnessMatrix_pp(FloatMatrix &answer, MatRe
 
 
 
-IRResultType
-BaseMixedPressureElement :: initializeFrom(InputRecord *ir)
+void
+BaseMixedPressureElement :: initializeFrom(InputRecord &ir)
 {
     // @todo Is this function necessary???
-
-    return IRRT_OK;
 }
 
 void

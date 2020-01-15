@@ -74,9 +74,6 @@ Brick1_mt :: Brick1_mt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
     emode = Mass1TransferEM;
 }
 
-Brick1_ht :: ~Brick1_ht()
-{ }
-
 FEInterpolation *
 Brick1_ht :: giveInterpolation() const { return & interpolation; }
 
@@ -91,25 +88,21 @@ Brick1_ht :: computeGaussPoints()
 }
 
 
-IRResultType
-Brick1_ht :: initializeFrom(InputRecord *ir)
+void
+Brick1_ht :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 8;
-    return TransportElement :: initializeFrom(ir);
+    TransportElement :: initializeFrom(ir);
 }
 
 
 double
 Brick1_ht :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-    return volume;
+    return determinant * gp->giveWeight();
 }
 
 
@@ -125,11 +118,8 @@ Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 double
 Brick1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    weight = gp->giveWeight();
-    volume = determinant * weight;
-    return volume;
+    double determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    return determinant * gp->giveWeight();
 }
 
 
@@ -146,7 +136,7 @@ Brick1_ht :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void

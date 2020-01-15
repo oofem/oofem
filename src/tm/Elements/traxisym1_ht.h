@@ -38,6 +38,8 @@
 #include "tm/Elements/tr1_ht.h"
 
 #define _IFT_TrAxisym1_ht_Name "traxisym1ht"
+#define _IFT_TrAxisym1_hmt_Name "traxisym1hmt"
+#define _IFT_TrAxisym1_mt_Name "traxisym1mt"
 
 namespace oofem {
 /**
@@ -47,7 +49,6 @@ class TrAxisym1_ht : public Tr1_ht
 {
 public:
     TrAxisym1_ht(int n, Domain * d);
-    virtual ~TrAxisym1_ht();
 
     double computeVolumeAround(GaussPoint *gp) override;
     const char *giveInputRecordName() const override { return _IFT_TrAxisym1_ht_Name; }
@@ -59,6 +60,27 @@ protected:
     double computeRadiusAt(GaussPoint *gp);
     double computeEdgeVolumeAround(GaussPoint *gp, int iEdge) override;
     int giveApproxOrder(int unknownIndx) override { return 2; }
+};
+/**
+ * Same as TrAxisym1_ht but for heat+mass transfer.
+ */
+class TrAxisym1_hmt : public TrAxisym1_ht
+{
+public:
+    TrAxisym1_hmt(int n, Domain * d);
+
+    const char *giveClassName() const override { return "TrAxisym1_hmt"; }
+};
+
+
+/**
+ * Class for mass transfer.
+ */
+class TrAxisym1_mt : public TrAxisym1_ht
+{
+public:
+    TrAxisym1_mt(int n, Domain * d);
+    const char *giveClassName() const override { return "TrAxisym1_mt"; }
 };
 } // end namespace oofem
 #endif // traxisym1_ht_h

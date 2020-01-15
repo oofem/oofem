@@ -113,7 +113,7 @@ public:
 
 protected:
     void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS) override;
-    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer); ///@todo BH is just used in nlstructuralelement
+    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) override; ///@todo BH is just used in nlstructuralelement
     void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;
     void computeGaussPoints() override;
 };

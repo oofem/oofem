@@ -82,8 +82,6 @@ public:
      * @param inputfile The input file describing the micro problem.
      */
     FE2FluidMaterialStatus(int n, int rank, GaussPoint * gp, const std :: string & inputfile);
-    /// Destructor
-    virtual ~FE2FluidMaterialStatus() {}
 
     EngngModel *giveRVE() { return this->rve.get(); }
     MixedGradientPressureBC *giveBC() { return this->bc; }
@@ -107,7 +105,7 @@ public:
     double givePressure() { return this->pressure; }
     void letPressureBe(double val) { this->pressure = val; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
@@ -142,10 +140,8 @@ public:
      * @param d Domain to which new material will belong.
      */
     FE2FluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
-    /// Destructor.
-    virtual ~FE2FluidMaterial() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     int checkConsistency() override;

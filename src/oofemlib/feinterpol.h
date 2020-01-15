@@ -52,8 +52,8 @@ class FloatMatrix;
 class IntArray;
 class IntegrationRule;
 
-template <int N> class FloatArrayF;
-template <int N, int M> class FloatMatrixF;
+template <std::size_t N> class FloatArrayF;
+template <std::size_t N, std::size_t M> class FloatMatrixF;
 
 /**
  * Class representing a general abstraction for cell geometry.
@@ -109,7 +109,7 @@ public:
     int giveNumberOfVertices() const override;
     const FloatArray &giveVertexCoordinates(int i) const override
     {
-        return elem->giveNode(i)->giveNodeCoordinates();
+        return elem->giveNode(i)->giveCoordinates();
     }
 };
 
@@ -137,13 +137,13 @@ public:
 class OOFEM_EXPORT FEInterpolation
 {
 protected:
-    int order;
+    int order = 0;
 
 public:
     FEInterpolation(int o) : order(o) { }
-    virtual ~FEInterpolation() { }
+    virtual ~FEInterpolation() = default;
     /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual void initializeFrom(InputRecord &ir) { }
 
     /* @name basic interpolation services */
     //@{
@@ -292,7 +292,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary) = 0;
+    virtual IntArray boundaryEdgeGiveNodes(int boundary) const = 0;
     //@}
 
     /**@name Surface interpolation services 
@@ -357,7 +357,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundarySurfaceGiveNodes(IntArray &answer, int boundary) = 0;
+    virtual IntArray boundarySurfaceGiveNodes(int boundary) const = 0;
     //@}
 
     /** @name General boundary interpolation functions.
@@ -372,7 +372,7 @@ public:
      * @param answer Array to be filled with the boundary nodes.
      * @param boundary Boundary number.
      */
-    virtual void boundaryGiveNodes(IntArray &answer, int boundary) = 0;
+    virtual IntArray boundaryGiveNodes(int boundary) const = 0;
     /**
      * Evaluates the basis functions on the requested boundary.
      * Only basis functions that are nonzero anywhere on the boundary are given. Ordering can be obtained from giveBoundaryNodes.

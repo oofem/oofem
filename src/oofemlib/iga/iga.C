@@ -48,28 +48,22 @@
 
 
 namespace oofem {
-IRResultType IGAElement :: initializeFrom(InputRecord *ir)
+void IGAElement :: initializeFrom(InputRecord &ir)
 {
-    int indx = 0, nsd;
+    int indx = 0;
     numberOfGaussPoints = 1;
-    double du, dv, dw;
-    FloatArray newgpcoords;
-    IntArray knotSpan;
 #ifdef __PARALLEL_MODE
     int numberOfKnotSpans = 0;
 
 #endif
 
-    IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    Element :: initializeFrom(ir); // read nodes , material, cross section
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     this->giveInterpolation()->initializeFrom(ir); // read geometry
 
     // generate individual IntegrationElements; one for each nonzero knot span
-    nsd = this->giveNsd();
+    int nsd = this->giveNsd();
     if ( nsd == 1 ) {
         //HUHU
     } else if ( nsd == 2 ) {
@@ -83,27 +77,27 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         const FloatArray *knotValuesU = this->giveInterpolation()->giveKnotValues(1);
         const FloatArray *knotValuesV = this->giveInterpolation()->giveKnotValues(2);
 
-        newgpcoords.resize(2);
-        knotSpan.resize(2);
+        FloatArray newgpcoords(2);
+        IntArray knotSpan(2);
 
         int numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV;
         integrationRulesArray.resize( numberOfIntegrationRules );
 
         knotSpan.at(2) = -1;
         for ( int vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
-            dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
+            double dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
             knotSpan.at(2) += knotMultiplicityV->at(vi);
 
             knotSpan.at(1) = -1;
             for ( int ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
-                du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
+                double du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
                 integrationRulesArray [ indx ] = std::make_unique<IGAIntegrationElement>(indx, this, knotSpan);
                 integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
+                for ( auto &gp: *integrationRulesArray [ indx ] ) {
                     const FloatArray &gpcoords = gp->giveNaturalCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords.at(1) / 2.0 + 0.5 );
@@ -129,32 +123,32 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         const FloatArray *knotValuesV = this->giveInterpolation()->giveKnotValues(2);
         const FloatArray *knotValuesW = this->giveInterpolation()->giveKnotValues(3);
 
-        newgpcoords.resize(3);
-        knotSpan.resize(3);
+        FloatArray newgpcoords(3);
+        IntArray knotSpan(3);
 
         int numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV * numberOfKnotSpansW;
         integrationRulesArray.resize( numberOfIntegrationRules );
 
         knotSpan.at(3) = -1;
         for ( int wi = 1; wi <= numberOfKnotSpansW; wi++ ) {
-            dw = knotValuesW->at(wi + 1) - knotValuesW->at(wi);
+            double dw = knotValuesW->at(wi + 1) - knotValuesW->at(wi);
             knotSpan.at(3) += knotMultiplicityW->at(wi);
 
             knotSpan.at(2) = -1;
             for ( int vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
-                dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
+                double dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
                 knotSpan.at(2) += knotMultiplicityV->at(vi);
 
                 knotSpan.at(1) = -1;
                 for ( int ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
-                    du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
+                    double du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                     knotSpan.at(1) += knotMultiplicityU->at(ui);
 
                     integrationRulesArray [ indx ] = std::make_unique<IGAIntegrationElement>(indx, this, knotSpan);
                     integrationRulesArray [ indx ]->SetUpPointsOnCube(numberOfGaussPoints, _3dMat);
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                    for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
+                    for ( auto &gp: *integrationRulesArray [ indx ] ) {
                         const FloatArray &gpcoords = gp->giveNaturalCoordinates();
 
                         newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords.at(1) / 2.0 + 0.5 );
@@ -169,10 +163,9 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_WARNING("unsupported number of spatial dimensions (nsd = %d)", nsd);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
     }
-
+    
 #ifdef __PARALLEL_MODE
     // read optional knot span parallel mode
     this->knotSpanParallelMode.resize(numberOfKnotSpans);
@@ -182,9 +175,6 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
     }
     IR_GIVE_OPTIONAL_FIELD(ir, knotSpanParallelMode, _IFT_IGAElement_KnotSpanParallelMode);
 #endif
-
-
-    return IRRT_OK;
 }
 
 
@@ -209,31 +199,23 @@ IGAElement :: giveKnotSpanParallelMode(int knotSpanIndex) const
 
 // integration elements are setup in the same way as for IGAElement for now HUHU
 
-IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
+void IGATSplineElement :: initializeFrom(InputRecord &ir)
 {
     TSplineInterpolation *interpol = static_cast< TSplineInterpolation * >( this->giveInterpolation() );
 
-    int indx = 0, ui, vi, nsd, numberOfGaussPoints = 1;
-    double du, dv;
-    FloatArray newgpcoords;
-    IntArray knotSpan;
+    int indx = 0, numberOfGaussPoints = 1;
 
-    IRResultType result = Element :: initializeFrom(ir); // read nodes , material, cross section
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    Element :: initializeFrom(ir); // read nodes , material, cross section
+
     // set number of dofmanagers
     this->numberOfDofMans = dofManArray.giveSize();
     // set number of control points before initialization HUHU HAHA
     interpol->setNumberOfControlPoints(this->numberOfDofMans);
-    result = this->giveInterpolation()->initializeFrom(ir); // read geometry
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    this->giveInterpolation()->initializeFrom(ir); // read geometry
 
 
     // generate individual IntegrationElements; one for each nonzero knot span
-    nsd = giveNsd();
+    int nsd = giveNsd();
     if ( nsd == 2 ) {
         int numberOfKnotSpansU = this->giveInterpolation()->giveNumberOfKnotSpans(1);
         int numberOfKnotSpansV = this->giveInterpolation()->giveNumberOfKnotSpans(2);
@@ -242,28 +224,28 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
         const FloatArray *knotValuesU = this->giveInterpolation()->giveKnotValues(1);
         const FloatArray *knotValuesV = this->giveInterpolation()->giveKnotValues(2);
 
-        newgpcoords.resize(2);
-        knotSpan.resize(2);
+        FloatArray newgpcoords(2);
+        IntArray knotSpan(2);
 
         int numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV;
         integrationRulesArray.resize( numberOfIntegrationRules );
 
         knotSpan.at(2) = -1;
-        for ( vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
-            dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
+        for ( int vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
+            double dv = knotValuesV->at(vi + 1) - knotValuesV->at(vi);
             knotSpan.at(2) += knotMultiplicityV->at(vi);
 
             knotSpan.at(1) = -1;
-            for ( ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
-                du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
+            for ( int ui = 1; ui <= numberOfKnotSpansU; ui++ ) {
+                double du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
                 integrationRulesArray [ indx ] = std::make_unique<IGAIntegrationElement>(indx, this, knotSpan);
                 integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
-                for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
-                    const FloatArray &gpcoords = gp->giveNaturalCoordinates();
+                for ( auto &gp: *integrationRulesArray [ indx ] ) {
+                    const auto &gpcoords = gp->giveNaturalCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords.at(1) / 2.0 + 0.5 );
                     newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords.at(2) / 2.0 + 0.5 );
@@ -275,11 +257,8 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
             }
         }
     } else {
-        OOFEM_WARNING("unsupported number of spatial dimensions (nsd = %d)", nsd);
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, "Domain", "unsupported number of spatial dimensions");
     }
-
-    return IRRT_OK;
 }
 
 
@@ -298,9 +277,8 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 8 ];
-    GraphicObj *go;
     FEInterpolation *interp = this->giveInterpolation();
-    int i, j, k, m, nseg;
+    int nseg;
 
  #ifdef DRAW_MESH
     WCRec pp [ 2 ];
@@ -326,35 +304,33 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
  #endif
 
     const FloatArray *knotVector = interp->giveKnotVector();
-    const IntArray *span;
     int nsd = this->giveNsd();
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];
-        double du;
 
-        for ( j = 0; j < 2; j++ ) {
+        for ( int j = 0; j < 2; j++ ) {
             c [ j ].resize(1);
             cg [ j ].resize(1);
         }
 
         // loop over individual integration rules (i.e., knot spans)
         for ( auto &iRule: integrationRulesArray ) {
-            span = iRule->giveKnotSpan();
+            const IntArray *span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
-            du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
-            for ( i = 1; i <= nseg; i++ ) {
+            double du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
+            for ( int i = 1; i <= nseg; i++ ) {
                 c [ 0 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                 c [ 1 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * i;
 
-                for ( k = 0; k < 2; k++ ) {
+                for ( int k = 0; k < 2; k++ ) {
                     interp->local2global( cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ) );
                     p [ k ].x = ( FPNum ) cg [ k ].at(1);
                     p [ k ].y = 0.;
                     p [ k ].z = 0.;
                 }
 
-                go =  CreateLine3D(p);
+                auto go = CreateLine3D(p);
                 EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                 EGAttachObject(go, ( EObjectP ) this);
                 EMAddGraphicsToModel(ESIModel(), go);
@@ -362,21 +338,20 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
         }                 // end loop over knot spans (irules)
     } else if ( nsd == 2 ) {
         FloatArray c [ 4 ], cg [ 4 ];
-        double du, dv;
 
-        for ( j = 0; j < 4; j++ ) {
+        for ( int j = 0; j < 4; j++ ) {
             c [ j ].resize(2);
             cg [ j ].resize(2);
         }
 
         // loop over individual integration rules (i.e., knot spans)
         for ( auto &iRule: integrationRulesArray ) {
-            span = iRule->giveKnotSpan();
+            const IntArray *span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
-            du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
-            dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
-            for ( i = 1; i <= nseg; i++ ) {
-                for ( j = 1; j <= nseg; j++ ) {
+            double du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
+            double dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
+            for ( int i = 1; i <= nseg; i++ ) {
+                for ( int j = 1; j <= nseg; j++ ) {
                     c [ 0 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                     c [ 0 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * ( j - 1 );
                     c [ 1 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * i;
@@ -386,7 +361,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                     c [ 3 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                     c [ 3 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
 
-                    for ( k = 0; k < 4; k++ ) {
+                    for ( int k = 0; k < 4; k++ ) {
                         interp->local2global( cg [ k ], c [ k ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ) );
                         p [ k ].x = ( FPNum ) cg [ k ].at(1);
                         p [ k ].y = ( FPNum ) cg [ k ].at(2);
@@ -403,7 +378,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                         pp [ 1 ].y = p [ 3 ].y;
                         pp [ 1 ].z = p [ 3 ].z;
 
-                        go =  CreateLine3D(pp);
+                        auto go = CreateLine3D(pp);
                         EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                         EGAttachObject(go, ( EObjectP ) this);
                         EMAddGraphicsToModel(ESIModel(), go);
@@ -418,7 +393,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                         pp [ 1 ].y = p [ 1 ].y;
                         pp [ 1 ].z = p [ 1 ].z;
 
-                        go =  CreateLine3D(pp);
+                        auto go = CreateLine3D(pp);
                         EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                         EGAttachObject(go, ( EObjectP ) this);
                         EMAddGraphicsToModel(ESIModel(), go);
@@ -433,7 +408,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                         pp [ 1 ].y = p [ 2 ].y;
                         pp [ 1 ].z = p [ 2 ].z;
 
-                        go =  CreateLine3D(pp);
+                        auto go = CreateLine3D(pp);
                         EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                         EGAttachObject(go, ( EObjectP ) this);
                         EMAddGraphicsToModel(ESIModel(), go);
@@ -448,14 +423,14 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                         pp [ 1 ].y = p [ 3 ].y;
                         pp [ 1 ].z = p [ 3 ].z;
 
-                        go =  CreateLine3D(pp);
+                        auto go = CreateLine3D(pp);
                         EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                         EGAttachObject(go, ( EObjectP ) this);
                         EMAddGraphicsToModel(ESIModel(), go);
                     }
 
  #else
-                    go =  CreateQuad3D(p);
+                    auto go = CreateQuad3D(p);
                     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
                     EGAttachObject(go, ( EObjectP ) this);
                     EMAddGraphicsToModel(ESIModel(), go);
@@ -465,23 +440,22 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
         }                 // end loop over knot spans (irules)
     } else if ( nsd == 3 ) {
         FloatArray c [ 8 ], cg [ 8 ];
-        double du, dv, dt;
 
-        for ( j = 0; j < 8; j++ ) {
+        for ( int j = 0; j < 8; j++ ) {
             c [ j ].resize(3);
             cg [ j ].resize(3);
         }
 
         // loop over individual integration rules (i.e., knot spans)
         for ( auto &iRule: integrationRulesArray ) {
-            span = iRule->giveKnotSpan();
+            const IntArray *span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
-            du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
-            dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
-            dt = ( knotVector [ 2 ] [ span->at(3) + 1 ] - knotVector [ 2 ] [ span->at(3) ] ) / nseg;
-            for ( i = 1; i <= nseg; i++ ) {
-                for ( j = 1; j <= nseg; j++ ) {
-                    for ( k = 1; k <= nseg; k++ ) {
+            double du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
+            double dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
+            double dt = ( knotVector [ 2 ] [ span->at(3) + 1 ] - knotVector [ 2 ] [ span->at(3) ] ) / nseg;
+            for ( int i = 1; i <= nseg; i++ ) {
+                for ( int j = 1; j <= nseg; j++ ) {
+                    for ( int k = 1; k <= nseg; k++ ) {
                         c [ 0 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                         c [ 0 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * ( j - 1 );
                         c [ 0 ].at(3) = knotVector [ 2 ] [ span->at(3) ] + dt * ( k - 1 );
@@ -507,7 +481,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                         c [ 7 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
                         c [ 7 ].at(3) = knotVector [ 2 ] [ span->at(3) ] + dt * k;
 
-                        for ( m = 0; m < 8; m++ ) {
+                        for ( int m = 0; m < 8; m++ ) {
                             interp->local2global( cg [ m ], c [ m ], FEIIGAElementGeometryWrapper( this, iRule->giveKnotSpan() ) );
                             p [ m ].x = ( FPNum ) cg [ m ].at(1);
                             p [ m ].y = ( FPNum ) cg [ m ].at(2);
@@ -540,7 +514,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001 ) {
-                                    go = CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -548,7 +522,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -580,7 +554,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001 ) {
-                                    go =  CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -588,7 +562,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -620,7 +594,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001 ) {
-                                    go =  CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -628,7 +602,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -660,7 +634,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( zz < 2.0001 || rr < 1.001 * 1.001 || yy < 0.0001 ) {
-                                    go =  CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -668,7 +642,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -699,14 +673,14 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             r = rr + zz * zz;
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
-                                go =  CreateLine3D(pp);
+                                auto go = CreateLine3D(pp);
                                 EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                 EGAttachObject(go, ( EObjectP ) this);
                                 EMAddGraphicsToModel(ESIModel(), go);
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -738,7 +712,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( yy < 1.5 || zz < 2.0001 ) {
-                                    go =  CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -746,7 +720,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -777,14 +751,14 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             r = rr + zz * zz;
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
-                                go =  CreateLine3D(pp);
+                                auto go = CreateLine3D(pp);
                                 EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                 EGAttachObject(go, ( EObjectP ) this);
                                 EMAddGraphicsToModel(ESIModel(), go);
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -816,7 +790,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( yy < 1.5 || zz < 2.0001 ) {
-                                    go =  CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -824,7 +798,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -855,14 +829,14 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             r = rr + zz * zz;
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
-                                go =  CreateLine3D(pp);
+                                auto go = CreateLine3D(pp);
                                 EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                 EGAttachObject(go, ( EObjectP ) this);
                                 EMAddGraphicsToModel(ESIModel(), go);
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -893,14 +867,14 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             r = rr + zz * zz;
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
-                                go =  CreateLine3D(pp);
+                                auto go = CreateLine3D(pp);
                                 EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                 EGAttachObject(go, ( EObjectP ) this);
                                 EMAddGraphicsToModel(ESIModel(), go);
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -932,7 +906,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( yy < 0.0001 ) {
-                                    go =  CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -940,7 +914,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -972,7 +946,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 
                             if ( zz < 2.0001 /* || xx < 0.0001 */ || yy < 0.0001 || rr < 1.001 * 1.001 || r < 25.0 || r > 5.98 * 5.98 ) {
                                 if ( yy < 2.0001 ) {
-                                    go =  CreateLine3D(pp);
+                                    auto go = CreateLine3D(pp);
                                     EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                                     EGAttachObject(go, ( EObjectP ) this);
                                     EMAddGraphicsToModel(ESIModel(), go);
@@ -980,7 +954,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                             }
    #endif
   #else
-                            go =  CreateLine3D(pp);
+                            auto go = CreateLine3D(pp);
                             EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                             EGAttachObject(go, ( EObjectP ) this);
                             EMAddGraphicsToModel(ESIModel(), go);
@@ -988,7 +962,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
                         }
 
  #else
-                        go =  CreateHexahedron(p);
+                        auto go = CreateHexahedron(p);
                         EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
                         EGAttachObject(go, ( EObjectP ) this);
                         EMAddGraphicsToModel(ESIModel(), go);
@@ -1006,8 +980,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, TimeStep *tStep, UnknownType)
 {
     WCRec p [ 8 ];
-    GraphicObj *go;
-    int i, j, k, m, n, nseg;
+    int nseg;
     FloatArray u;
     FloatMatrix N;
     FloatArray ur, d;
@@ -1036,16 +1009,15 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
  #endif
 
     const FloatArray *knotVector = interp->giveKnotVector();
-    const IntArray *span;
     int nsd = interp->giveNsd();
 
     se->computeVectorOf(VM_Total, tStep, u);
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];
-        double du;
 
-        for ( j = 0; j < 2; j++ ) {
+
+        for ( int j = 0; j < 2; j++ ) {
             c [ j ].resize(1);
             cg [ j ].resize(1);
         }
@@ -1053,14 +1025,14 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         // loop over individual integration rules (i.e., knot spans)
         for ( int ir = 0; ir < elem->giveNumberOfIntegrationRules(); ir++ ) {
             IntegrationRule *iRule = elem->giveIntegrationRule(ir);
-            span = iRule->giveKnotSpan();
+            const IntArray *span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
-            du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
-            for ( i = 1; i <= nseg; i++ ) {
+            double du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
+            for ( int i = 1; i <= nseg; i++ ) {
                 c [ 0 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                 c [ 1 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * i;
 
-                for ( k = 0; k < 2; k++ ) {
+                for ( int k = 0; k < 2; k++ ) {
                     // create a dummy ip's
                     GaussPoint gp(iRule, 999, c [ k ], 1.0, _PlaneStress);
 
@@ -1070,7 +1042,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                     // get local code numbers corresponding to ir
                     se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule());
                     ur.resize( N.giveNumberOfColumns() );
-                    for ( n = 1; n <= lc.giveSize(); n++ ) {
+                    for ( int n = 1; n <= lc.giveSize(); n++ ) {
                         ur.at(n) = u.at( lc.at(n) );
                     }
 
@@ -1083,7 +1055,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                     p [ k ].z = 0.;
                 }
 
-                go =  CreateLine3D(p);
+                auto go = CreateLine3D(p);
                 EGWithMaskChangeAttributes(WIDTH_MASK | STYLE_MASK | COLOR_MASK | LAYER_MASK, go);
                 EGAttachObject(go, ( EObjectP ) elem);
                 EMAddGraphicsToModel(ESIModel(), go);
@@ -1091,9 +1063,8 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         }                 // end loop over knot spans (irules)
     } else if ( nsd == 2 ) {
         FloatArray c [ 4 ], cg [ 4 ];
-        double du, dv;
 
-        for ( j = 0; j < 4; j++ ) {
+        for ( int j = 0; j < 4; j++ ) {
             c [ j ].resize(2);
             cg [ j ].resize(2);
         }
@@ -1101,12 +1072,12 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         // loop over individual integration rules (i.e., knot spans)
         for ( int ir = 0; ir < elem->giveNumberOfIntegrationRules(); ir++ ) {
             IntegrationRule *iRule = elem->giveIntegrationRule(ir);
-            span = iRule->giveKnotSpan();
+            const IntArray *span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
-            du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
-            dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
-            for ( i = 1; i <= nseg; i++ ) {
-                for ( j = 1; j <= nseg; j++ ) {
+            double du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
+            double dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
+            for ( int i = 1; i <= nseg; i++ ) {
+                for ( int j = 1; j <= nseg; j++ ) {
                     c [ 0 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                     c [ 0 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * ( j - 1 );
                     c [ 1 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * i;
@@ -1116,7 +1087,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                     c [ 3 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                     c [ 3 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
 
-                    for ( k = 0; k < 4; k++ ) {
+                    for ( int k = 0; k < 4; k++ ) {
                         // create a dummy ip's
                         GaussPoint gp(iRule, 999, c [ k ], 1.0, _PlaneStress);
 
@@ -1126,7 +1097,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                         // get local code numbers corresponding to ir
                         se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule());
                         ur.resize( N.giveNumberOfColumns() );
-                        for ( n = 1; n <= lc.giveSize(); n++ ) {
+                        for ( int n = 1; n <= lc.giveSize(); n++ ) {
                             ur.at(n) = u.at( lc.at(n) );
                         }
 
@@ -1139,7 +1110,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                         p [ k ].z = 0.;
                     }
 
-                    go =  CreateQuad3D(p);
+                    auto go = CreateQuad3D(p);
                     EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
                     EGAttachObject(go, ( EObjectP ) elem);
                     EMAddGraphicsToModel(ESIModel(), go);
@@ -1148,9 +1119,8 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         }                 // end loop over knot spans (irules)
     } else if ( nsd == 3 ) {
         FloatArray c [ 8 ], cg [ 8 ];
-        double du, dv, dt;
 
-        for ( j = 0; j < 8; j++ ) {
+        for ( int j = 0; j < 8; j++ ) {
             c [ j ].resize(3);
             cg [ j ].resize(3);
         }
@@ -1158,14 +1128,14 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         // loop over individual integration rules (i.e., knot spans)
         for ( int ir = 0; ir < elem->giveNumberOfIntegrationRules(); ir++ ) {
             IntegrationRule *iRule = elem->giveIntegrationRule(ir);
-            span = iRule->giveKnotSpan();
+            const IntArray *span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
-            du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
-            dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
-            dt = ( knotVector [ 2 ] [ span->at(3) + 1 ] - knotVector [ 2 ] [ span->at(3) ] ) / nseg;
-            for ( i = 1; i <= nseg; i++ ) {
-                for ( j = 1; j <= nseg; j++ ) {
-                    for ( k = 1; k <= nseg; k++ ) {
+            double du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
+            double dv = ( knotVector [ 1 ] [ span->at(2) + 1 ] - knotVector [ 1 ] [ span->at(2) ] ) / nseg;
+            double dt = ( knotVector [ 2 ] [ span->at(3) + 1 ] - knotVector [ 2 ] [ span->at(3) ] ) / nseg;
+            for ( int i = 1; i <= nseg; i++ ) {
+                for ( int j = 1; j <= nseg; j++ ) {
+                    for ( int k = 1; k <= nseg; k++ ) {
                         c [ 0 ].at(1) = knotVector [ 0 ] [ span->at(1) ] + du * ( i - 1 );
                         c [ 0 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * ( j - 1 );
                         c [ 0 ].at(3) = knotVector [ 2 ] [ span->at(3) ] + dt * ( k - 1 );
@@ -1191,7 +1161,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                         c [ 7 ].at(2) = knotVector [ 1 ] [ span->at(2) ] + dv * j;
                         c [ 7 ].at(3) = knotVector [ 2 ] [ span->at(3) ] + dt * k;
 
-                        for ( m = 0; m < 8; m++ ) {
+                        for ( int m = 0; m < 8; m++ ) {
                             // create a dummy ip's
                             GaussPoint gp(iRule, 999, c [ m ], 1.0, _3dMat);
 
@@ -1201,7 +1171,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                             // get local code numbers corresponding to ir
                             se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule());
                             ur.resize( N.giveNumberOfColumns() );
-                            for ( n = 1; n <= lc.giveSize(); n++ ) {
+                            for ( int n = 1; n <= lc.giveSize(); n++ ) {
                                 ur.at(n) = u.at( lc.at(n) );
                             }
 
@@ -1214,7 +1184,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                             p [ m ].z = ( FPNum ) ( cg [ m ].at(3) + d.at(3) * defScale );
                         }
 
-                        go =  CreateHexahedron(p);
+                        auto go = CreateHexahedron(p);
                         EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
                         EGAttachObject(go, ( EObjectP ) elem);
                         EMAddGraphicsToModel(ESIModel(), go);

@@ -37,66 +37,38 @@
 #include "gausspoint.h"
 
 namespace oofem {
-IRResultType
-IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicMoistureTransferMaterial :: initializeFrom(InputRecord &ir)
 {
-    return Material :: initializeFrom(ir);
+    Material :: initializeFrom(ir);
 }
 
-void
-IsotropicMoistureTransferMaterial :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep)
-{
-    TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
 
-    ms->setTempField(field);
+FloatArrayF<3>
+IsotropicMoistureTransferMaterial :: computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const
+{
+    auto ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     ms->setTempGradient(grad);
-    answer.beScaled(-this->givePermeability(gp, tStep), grad);
+    ms->setTempField(field);
+
+    auto answer = -this->givePermeability(gp, tStep) * grad;
     ms->setTempFlux(answer);
+    return answer;
 }
 
-void
-IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                                              MatResponseMode mode,
-                                                              GaussPoint *gp,
-                                                              TimeStep *tStep)
+
+FloatMatrixF<3,3>
+IsotropicMoistureTransferMaterial :: computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    /*
-     * returns constitutive (conductivity) matrix of receiver
-     */
-
-    double permeability;
-    permeability = this->givePermeability(gp, tStep);
-
-    MaterialMode mMode = gp->giveMaterialMode();
-    switch  ( mMode ) {
-    case _1dHeat:
-        answer.resize(1, 1);
-        answer.at(1, 1) = permeability;
-    case _2dHeat:
-        answer.resize(2, 2);
-        answer.at(1, 1) = permeability;
-        answer.at(2, 2) = permeability;
-        return;
-
-    case _3dHeat:
-        answer.resize(3, 3);
-        answer.at(1, 1) = permeability;
-        answer.at(2, 2) = permeability;
-        answer.at(3, 3) = permeability;
-        return;
-
-    default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
-
-    return;
+    double permeability = this->givePermeability(gp, tStep);
+    return permeability * eye<3>();
 }
 
 
 double
 IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                              GaussPoint *gp,
-                                                             TimeStep *tStep)
+                                                             TimeStep *tStep) const
 {
     if ( mode == Capacity ) {
         return this->giveMoistureCapacity(gp, tStep);

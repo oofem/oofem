@@ -75,45 +75,42 @@ namespace oofem {
 class B3Material : public MaxwellChainMaterial
 {
 protected:
-    double t0; ///< Age when drying begins (in days)
+    double t0 = 0.; ///< Age when drying begins (in days)
 
-    double w, E28;
-    double q1, q2, q3, q4, q5; // predicted data
-    enum b3ShModeType { B3_NoShrinkage, B3_AverageShrinkage, B3_PointShrinkage } shMode;
+    double w = 0., E28 = 0.;
+    double q1 = 0., q2 = 0., q3 = 0., q4 = 0., q5 = 0.; // predicted data
+    enum b3ShModeType { B3_NoShrinkage, B3_AverageShrinkage, B3_PointShrinkage } shMode = B3_NoShrinkage;
     ///@name Additional parameters for average cross section shrinkage.
     //@{
-    double EpsSinf, kt, ks, vs, hum;
+    double EpsSinf = 0., kt = 0., ks = 0., vs = 0., hum = 0.;
     //@}
     ///@name Additional parameters for free shrinkage at material point.
     //@{
-    double es0, r, rprime, at;
+    double es0 = 0., r = 0., rprime = 0., at = 0.;
     //@}
     ///@name Additional parameters for absorption isotherm (used to compute relative humidity from water content)
     //@{
-    double w_h;      ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
-    double n;        ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
-    double a;        ///< Constant (obtained from experiments) A [Pedersen, 1990]
+    double w_h = 0.;      ///< Constant water content (obtained from experiments) w_h [Pedersen, 1990]
+    double n = 0.;        ///< Constant-exponent (obtained from experiments) n [Pedersen, 1990]
+    double a = 0.;        ///< Constant (obtained from experiments) A [Pedersen, 1990]
     //@}
 public:
-    B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) {
-        shMode = B3_NoShrinkage;
-    }
-    virtual ~B3Material() { }
+    B3Material(int n, Domain *d) : MaxwellChainMaterial(n, d) {}
 
-    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    void giveShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     const char *giveClassName() const override { return "B3Material"; }
     const char *giveInputRecordName() const override { return _IFT_B3Material_Name; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCreepFunction(double t, double t_prime, GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
-    int hasIncrementalShrinkageFormulation() override { return 1; }
+    bool hasIncrementalShrinkageFormulation() const override { return true; }
 
-    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeTotalAverageShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) const;
     /// Free shrinkage at material point, requires staggered analysis.
-    virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
+    virtual void computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const;
     void predictParametersFrom(double, double, double, double, double, double, double);
 
     /**
@@ -123,7 +120,7 @@ protected:
      * PhD-thesis, Technical University of Denmark, Lingby.
      * @param w Water content (kg/kg).
      */
-    double inverse_sorption_isotherm(double w);
+    double inverse_sorption_isotherm(double w) const;
 };
 } // end namespace oofem
 #endif // b3mat_h

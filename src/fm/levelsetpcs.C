@@ -71,11 +71,9 @@ LevelSetPCS :: initialize()
 }
 
 
-IRResultType
-LevelSetPCS :: initializeFrom(InputRecord *ir)
+void
+LevelSetPCS :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_OPTIONAL_FIELD(ir, previousLevelSetValues, _IFT_LevelSetPCS_levelSetValues);
     if ( !previousLevelSetValues.giveSize() ) {
         FloatArray refmatpoly_x, refmatpoly_y;
@@ -116,8 +114,6 @@ LevelSetPCS :: initializeFrom(InputRecord *ir)
 
     nsd = 2;
     IR_GIVE_OPTIONAL_FIELD(ir, nsd, _IFT_LevelSetPCS_nsd);
-
-    return IRRT_OK;
 }
 
 

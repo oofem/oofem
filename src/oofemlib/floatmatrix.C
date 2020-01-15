@@ -58,7 +58,7 @@
         } \
     }
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
  #include <boost/python.hpp>
  #include <boost/python/extract.hpp>
 #endif
@@ -2044,7 +2044,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 } /* jaco_ */
 
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
 void
 FloatMatrix :: __setitem__(boost :: python :: api :: object t, double val)
 {
@@ -2070,4 +2070,18 @@ std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )
     out << "}";
     return out;
 }
+
+FloatMatrix &operator *= ( FloatMatrix & x, const double & a ) {x.times(a); return x;}
+FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans; ans.beProductOf (a,b); return ans;}
+FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) {FloatArray ans; ans.beProductOf (a,b); return ans;}
+FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans(a); ans.add(b); return ans;}
+FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) {FloatMatrix ans(a); ans.subtract(b); return ans;}
+FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) {a.add(b); return a;}
+FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) {a.subtract(b); return a;}
+
+
+
+
+
+
 } // end namespace oofem

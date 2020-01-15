@@ -53,11 +53,10 @@ int
 Node2NodeContact :: instanciateYourself(DataReader &dr)
 {
     // compute normal as direction vector from master node to slave node
-    FloatArray xs, xm, _normal;
-    xs = *this->slaveNode->giveCoordinates();
-    xm = *this->masterNode->giveCoordinates();
+    const auto &xs = this->slaveNode->giveCoordinates();
+    const auto &xm = this->masterNode->giveCoordinates();
 
-    _normal = xs-xm;
+    auto _normal = xs - xm;
     double norm = _normal.computeNorm();
     if ( norm < 1.0e-8 ) {
         OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.", 
@@ -72,9 +71,9 @@ Node2NodeContact :: instanciateYourself(DataReader &dr)
 void
 Node2NodeContact :: computeGap(FloatArray &answer, TimeStep *tStep)
 {
-    FloatArray xs, xm, uS, uM;
-    xs = *this->slaveNode->giveCoordinates();
-    xm = *this->masterNode->giveCoordinates();
+    FloatArray uS, uM;
+    auto xs = this->slaveNode->giveCoordinates();
+    auto xm = this->masterNode->giveCoordinates();
     this->slaveNode->giveUnknownVector(uS, {D_u, D_v, D_w}, VM_Total, tStep, true);
     this->masterNode->giveUnknownVector(uM, {D_u, D_v, D_w}, VM_Total, tStep, true);
     xs.add(uS);

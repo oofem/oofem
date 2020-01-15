@@ -54,13 +54,12 @@ class Steel1 : public PerfectlyPlasticMaterial
 {
 public:
     Steel1(int n, Domain * d);
-    virtual ~Steel1() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_Steel1_Name; }
     const char *giveClassName() const override { return "Steel1MaterialClass"; }
     void updateIfFailure(GaussPoint *gp, FloatArray *, FloatArray *) override { }
-    int hasCastingTimeSupport() override { return 1.; }
+    bool hasCastingTimeSupport() const override { return true; }
 
 protected:
     //

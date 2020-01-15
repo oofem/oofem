@@ -70,8 +70,9 @@ FEI2dTrLin :: evaldNdx(const FEICellGeometry &cellgeo) const
     double detJ = x1 * ( y2 - y3 ) + x2 * ( y3 - y1 ) + x3 * ( y1 - y2 );
 
     FloatMatrixF<2,3> ans = {
-        y2 - y3, y3 - y1, y1 - y2,
-        x3 - x2, x1 - x3, x2 - x1,
+        y2 - y3, x3 - x2,
+        y3 - y1, x1 - x3,
+        y1 - y2, x2 - x1,
     };
 
     return {detJ, ans * (1./detJ)};
@@ -213,8 +214,7 @@ void
 FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
                            const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double l = this->edgeComputeLength(edgeNodes, cellgeo);
 
     answer = { -1.0 / l, 1.0 / l };
@@ -222,8 +222,7 @@ FEI2dTrLin :: edgeEvaldNds(FloatArray &answer, int iedge,
 
 double FEI2dTrLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     normal = {
         cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(yind) - cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(yind),
         cellgeo.giveVertexCoordinates( edgeNodes.at(1) ).at(xind) - cellgeo.giveVertexCoordinates( edgeNodes.at(2) ).at(xind)
@@ -235,9 +234,8 @@ void
 FEI2dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(2);
@@ -248,31 +246,23 @@ FEI2dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 }
 
 
-void
-FEI2dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI2dTrLin :: computeLocalEdgeMapping(int iedge) const
 {
-    int aNode = 0, bNode = 0;
-    edgeNodes.resize(2);
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
+        return {1, 2};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
+        return {2, 3};
     } else if ( iedge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
+        return {3, 1};
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
-
-    edgeNodes.at(1) = aNode;
-    edgeNodes.at(2) = bNode;
 }
 
 double
-FEI2dTrLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI2dTrLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     int nodeA = edgeNodes.at(1);
     int nodeB = edgeNodes.at(2);
@@ -301,8 +291,7 @@ FEI2dTrLin :: giveArea(const FEICellGeometry &cellgeo) const
 double
 FEI2dTrLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    IntArray eNodes;
-    this->computeLocalEdgeMapping(eNodes, iEdge);
+    const auto &eNodes = this->computeLocalEdgeMapping(iEdge);
 
     const auto &node1 = cellgeo.giveVertexCoordinates( eNodes.at(1) );
     double x1 = node1.at(xind);
@@ -345,9 +334,8 @@ double
 FEI2dTrLinAxi::edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
                                                 const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     double r = n.at(1)*cellgeo.giveVertexCoordinates(edgeNodes.at(1)).at(1) + n.at(2)*cellgeo.giveVertexCoordinates(edgeNodes.at(2)).at(1);

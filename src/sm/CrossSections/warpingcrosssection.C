@@ -40,17 +40,15 @@ namespace oofem {
 REGISTER_CrossSection(WarpingCrossSection);
 
 
-IRResultType
-WarpingCrossSection :: initializeFrom(InputRecord *ir)
+void
+WarpingCrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    SimpleCrossSection :: initializeFrom(ir);
 
     int value;
     IR_GIVE_FIELD(ir, value, _IFT_WarpingCrossSection_WarpingNodeNumber);
     this->WarpingNodeNumber = value;
     //propertyDictionary->add(CS_Thickness, thick);
-
-    return SimpleCrossSection :: initializeFrom(ir);
 }
 
 } // end namespace oofem

@@ -69,14 +69,10 @@ TransportGradientNeumann :: TransportGradientNeumann(int n, Domain *d) :
     }
 }
 
-TransportGradientNeumann :: ~TransportGradientNeumann()
-{
-}
 
-
-IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
+void TransportGradientNeumann :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    ActiveBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, mGradient, _IFT_TransportGradientNeumann_gradient);
 
@@ -84,9 +80,7 @@ IRResultType TransportGradientNeumann :: initializeFrom(InputRecord *ir)
     this->mCenterCoord.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_TransportGradientNeumann_centerCoords)
     
-    this->dispControl = ir->hasField(_IFT_TransportGradientNeumann_dispControl);
-    
-    return ActiveBoundaryCondition :: initializeFrom(ir);
+    this->dispControl = ir.hasField(_IFT_TransportGradientNeumann_dispControl);    
 }
 
 
@@ -156,7 +150,7 @@ void TransportGradientNeumann :: assembleVector(FloatArray &answer, TimeStep *tS
         FloatMatrix Ke;
         FloatArray fe_v, fe_s;
         FloatArray fluxHom, e_u;
-        IntArray loc, masterDofIDs, fluxMasterDofIDs, bNodes;
+        IntArray loc, masterDofIDs, fluxMasterDofIDs;
 
         // Fetch the current values of the flux;
         mpFluxHom->giveUnknownVector(fluxHom, mFluxIds, mode, tStep);
@@ -173,7 +167,7 @@ void TransportGradientNeumann :: assembleVector(FloatArray &answer, TimeStep *tS
                 int boundary = boundaries[pos * 2 + 1];
 
                 // Fetch the element information;
-                e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
                 e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterDofIDs);
                 e->computeBoundaryVectorOf(bNodes, this->dofs, mode, tStep, e_u);
                 this->integrateTangent(Ke, e, boundary, i, pos);
@@ -202,7 +196,7 @@ void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
-        IntArray loc_r, loc_c, flux_loc_r, flux_loc_c, bNodes;
+        IntArray loc_r, loc_c, flux_loc_r, flux_loc_c;
 
         // Fetch the columns/rows for the flux contributions;
         mpFluxHom->giveLocationArray(mFluxIds, flux_loc_r, r_s);
@@ -216,7 +210,7 @@ void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                 Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
                 int boundary = boundaries[pos * 2 + 1];
 
-                e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+                const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
                 e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
                 e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
 
@@ -236,7 +230,7 @@ void TransportGradientNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
 void TransportGradientNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                        const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    IntArray loc_r, loc_c, flux_loc_r, flux_loc_c, bNodes;
+    IntArray loc_r, loc_c, flux_loc_r, flux_loc_c;
 
     // Fetch the columns/rows for the flux contributions;
     mpFluxHom->giveLocationArray(mFluxIds, flux_loc_r, r_s);
@@ -256,7 +250,7 @@ void TransportGradientNeumann :: giveLocationArrays(std :: vector< IntArray > &r
             Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
             int boundary = boundaries[pos * 2 + 1];
 
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
             e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
             e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
 
@@ -330,7 +324,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     // PETSc doesn't allow you to take non-symmetric submatrices from a SBAIJ-matrix.
     // Which means extracting "Kus" puts limitations on Kuu.
     FloatMatrix Ke, KeT;
-    IntArray loc_r, bNodes;
+    IntArray loc_r;
 
     KusD.resize(neq - loc_s.giveSize(), loc_s.giveSize());
     for ( int i = 0; i < this->surfSets.giveSize(); ++i ) {
@@ -341,7 +335,7 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
             Element *e = this->giveDomain()->giveElement( boundaries[pos * 2] );
             int boundary = boundaries[pos * 2 + 1];
 
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
             e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, fnum);
 
             this->integrateTangent(Ke, e, boundary, i, pos);
@@ -380,9 +374,9 @@ void TransportGradientNeumann :: computeTangent(FloatMatrix &tangent, TimeStep *
     for ( auto &n : domain->giveDofManagers() ) {
         int k1 = n->giveDofWithID( this->dofs[0] )->__giveEquationNumber();
         if ( k1 ) {
-            FloatArray *coords = n->giveCoordinates();
+            const auto &coords = n->giveCoordinates();
             for ( int i = 1; i <= nsd; ++i ) {
-                us.at(k1, i) += -(coords->at(i) - mCenterCoord.at(i));
+                us.at(k1, i) += -(coords.at(i) - mCenterCoord.at(i));
             }
         }
     }

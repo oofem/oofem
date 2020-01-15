@@ -51,15 +51,13 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 #endif
 }
 
-IRResultType HangingNode :: initializeFrom(InputRecord *ir)
+void HangingNode :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-
+    Node :: initializeFrom(ir);
     this->masterElement = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterElement, _IFT_HangingNode_masterElement);
     this->masterRegion = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->masterRegion, _IFT_HangingNode_masterRegion);
-    return Node :: initializeFrom(ir);
 }
 
 int HangingNode :: checkConsistency()

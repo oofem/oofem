@@ -40,34 +40,36 @@
 #include "floatarray.h"
 
 namespace oofem {
-void
-StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+FloatArray
+StructuralCrossSection :: giveRealStresses(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( mode == _2dBeam ) {
-        this->giveGeneralizedStress_Beam2d(answer, gp, strain, tStep);
+        return this->giveGeneralizedStress_Beam2d(strain, gp, tStep);
     } else if ( mode == _3dBeam ) {
-        this->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
+        return this->giveGeneralizedStress_Beam3d(strain, gp, tStep);
     } else if ( mode == _2dPlate ) {
-        this->giveGeneralizedStress_Plate(answer, gp, strain, tStep);
+        return this->giveGeneralizedStress_Plate(strain, gp, tStep);
     } else if ( mode == _3dShell ) {
-        this->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
+        return this->giveGeneralizedStress_Shell(strain, gp, tStep);
     } else if ( mode == _3dMat ) {
-        this->giveRealStress_3d(answer, gp, strain, tStep);
+        return this->giveRealStress_3d(strain, gp, tStep);
     } else if ( mode == _PlaneStrain ) {
-        this->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+        return this->giveRealStress_PlaneStrain(strain, gp, tStep);
     } else if ( mode == _PlaneStress ) {
-        this->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+        return this->giveRealStress_PlaneStress(strain, gp, tStep);
     } else if ( mode == _1dMat ) {
-        this->giveRealStress_1d(answer, gp, strain, tStep);
+        return this->giveRealStress_1d(strain, gp, tStep);
     } else if ( mode == _Warping ) {
-        this->giveRealStress_Warping(answer, gp, strain, tStep);
+        return this->giveRealStress_Warping(strain, gp, tStep);
     } else {
         // This should never happen ?
         ///@todo this part only works for simple cross section and will be removed soon when new interface elements are done /JB
-        StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-        if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
+        auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+        if ( mat->hasMaterialModeCapability( mode ) ) {
+            FloatArray answer;
             mat->giveRealStressVector(answer, gp, strain, tStep);
+            return answer;
         } else {
             OOFEM_ERROR("unsupported mode");
         }
@@ -127,19 +129,18 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
     return gradientStressVector3d;
 }
 
-void
-StructuralCrossSection :: giveGeneralizedStress_3dBeamSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep)
+FloatArrayF<6>
+StructuralCrossSection :: giveGeneralizedStress_3dBeamSubSoil(const FloatArrayF<6> &generalizedStrain, GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    return mat->giveRealStressVector_3dBeamSubSoil(answer, gp, generalizedStrain, tStep);
+    auto mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    return mat->giveRealStressVector_3dBeamSubSoil(generalizedStrain, gp, tStep);
 }
 
-void
-StructuralCrossSection :: give3dBeamSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+StructuralCrossSection :: give3dBeamSubSoilStiffMtrx(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralMaterial *mat;
-    mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
-    mat->give3dBeamSubSoilStiffMtrx(answer, ElasticStiffness, gp, tStep);
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    return mat->give3dBeamSubSoilStiffMtrx(ElasticStiffness, gp, tStep);
 }
 
   

@@ -57,9 +57,9 @@ REGISTER_BoundaryCondition(PrescribedGenStrainShell7);
 double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
 
-    if ( coords->giveSize() != this->centerCoord.giveSize() ) {
+    if ( coords.giveSize() != this->centerCoord.giveSize() ) {
         OOFEM_ERROR("PrescribedGenStrainShell7 :: give - Size of coordinate system different from center coordinate in b.c.");
     }
 
@@ -76,7 +76,7 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double ti
 
     // Reminder: u_i = F_ij . (x_j - xb_j) = H_ij . dx_j
     FloatArray dx;
-    dx.beDifferenceOf(* coords, this->centerCoord);
+    dx.beDifferenceOf(coords, this->centerCoord);
 
     // Assuming the coordinate system to be local, dx(3) = z
     this->setDeformationGradient( dx.at(3) );
@@ -110,32 +110,31 @@ double PrescribedGenStrainShell7 :: give(Dof *dof, ValueModeType mode, double ti
 
 
 
-void
-PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatMatrix &gcov, FloatArray &genEps, double zeta)
+FloatMatrixF<3,3>
+PrescribedGenStrainShell7 :: evalCovarBaseVectorsAt(FloatArray &genEps, double zeta)
 {
     // Evaluates the covariant base vectors in the current configuration
-    FloatArray g1; FloatArray g2; FloatArray g3;
-
-    FloatArray dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
+    FloatArrayF<3> dxdxi1, dxdxi2, m, dmdxi1, dmdxi2;
     double dgamdxi1, dgamdxi2, gam;
     Shell7Base :: giveGeneralizedStrainComponents(genEps, dxdxi1, dxdxi2, dmdxi1, dmdxi2, m, dgamdxi1, dgamdxi2, gam);
     double fac1 = ( zeta + 0.5 * gam * zeta * zeta );
     double fac2 = ( 0.5 * zeta * zeta );
     double fac3 = ( 1.0 + zeta * gam );
 
-    g1 = dxdxi1 + fac1*dmdxi1 + fac2*dgamdxi1*m;
-    g2 = dxdxi2 + fac1*dmdxi2 + fac2*dgamdxi2*m;
-    g3 = fac3*m;
-    gcov.resize(3,3);
+    auto g1 = dxdxi1 + fac1*dmdxi1 + fac2*dgamdxi1*m;
+    auto g2 = dxdxi2 + fac1*dmdxi2 + fac2*dgamdxi2*m;
+    auto g3 = fac3*m;
+    FloatMatrixF<3,3> gcov;
     gcov.setColumn(g1,1); gcov.setColumn(g2,2); gcov.setColumn(g3,3);
+    return gcov;
 }
 
 
-void
-PrescribedGenStrainShell7 :: evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, FloatArray &genEps,  double zeta)
+FloatMatrixF<3,3>
+PrescribedGenStrainShell7 :: evalInitialCovarBaseVectorsAt(FloatArray &genEps, double zeta)
 {
     // Evaluates the initial base vectors given the array of generalized strain
-    FloatArray G1(3), G2(3), G3(3); 
+    FloatArrayF<3> G1, G2, G3; 
     
     G1.at(1) = genEps.at(1) + zeta * genEps.at(7);
     G1.at(2) = genEps.at(2) + zeta * genEps.at(8);
@@ -150,8 +149,9 @@ PrescribedGenStrainShell7 :: evalInitialCovarBaseVectorsAt(FloatMatrix &Gcov, Fl
     G3.at(3) = genEps.at(15);
 
 
-    Gcov.resize(3,3);
-    Gcov.setColumn(G1,1); Gcov.setColumn(G2,2); Gcov.setColumn(G3,3);
+    FloatMatrixF<3,3> Gcov;
+    Gcov.setColumn(G1,0); Gcov.setColumn(G2,1); Gcov.setColumn(G3,2);
+    return Gcov;
 }
 
 
@@ -159,16 +159,11 @@ void
 PrescribedGenStrainShell7 :: setDeformationGradient(double zeta)
 {
     // Computes the deformation gradient in matrix form as open product(g_i, G^i) = gcov*Gcon^T
-    FloatMatrix gcov, Gcon, Gcov;
+    auto gcov = this->evalCovarBaseVectorsAt(this->genEps, zeta);
+    auto Gcov = this->evalInitialCovarBaseVectorsAt(this->initialGenEps, zeta);
+    auto Gcon = Shell7Base :: giveDualBase(Gcov);
 
-    this->evalCovarBaseVectorsAt(gcov, this->genEps, zeta);
-    this->evalInitialCovarBaseVectorsAt(Gcov, this->initialGenEps, zeta);
-    Shell7Base :: giveDualBase(Gcov, Gcon);
-
-    this->gradient.beProductTOf(gcov, Gcon);
-    this->gradient.at(1,1) -= 1.0;
-    this->gradient.at(2,2) -= 1.0;
-    this->gradient.at(3,3) -= 1.0;
+    this->gradient = dotT(gcov, Gcon) - eye<3>();
 }
 
 void
@@ -176,23 +171,21 @@ PrescribedGenStrainShell7 :: evaluateHigherOrderContribution(FloatArray &answer,
 {
     // Computes the higher order contribution from the second gradient F2_ijk = (g3,3)_i * (G^3)_j * (G^3)_k 
     // Simplified version with only contribtion in the xi-direction
-    FloatMatrix gcov, Gcon, Gcov;
+    //auto gcov = this->evalCovarBaseVectorsAt(this->genEps, zeta);
+    auto Gcov = this->evalInitialCovarBaseVectorsAt(this->initialGenEps, zeta);
+    auto Gcon = Shell7Base :: giveDualBase(Gcov);
 
-    this->evalCovarBaseVectorsAt(gcov, this->genEps, zeta);
-    this->evalInitialCovarBaseVectorsAt(Gcov, this->initialGenEps, zeta);
-    Shell7Base :: giveDualBase(Gcov, Gcon);
-
-    FloatArray G3(3), g3prime(3), m(3);
+    FloatArrayF<3> G3, m;
     G3.at(1) = Gcon.at(1,3);
     G3.at(2) = Gcon.at(2,3);
     G3.at(3) = Gcon.at(3,3);
 
-    double factor = G3.dotProduct(dx);
+    double factor = dot(G3, dx);
     double gamma = this->genEps.at(18);
     m.at(1) = this->genEps.at(13);
     m.at(2) = this->genEps.at(14);
     m.at(3) = this->genEps.at(15);
-    g3prime = gamma*m;
+    auto g3prime = gamma*m;
     
     answer = 0.5*factor*factor * g3prime;
 
@@ -287,18 +280,16 @@ double PrescribedGenStrainShell7 :: domainSize()
 
 
 
-IRResultType PrescribedGenStrainShell7 :: initializeFrom(InputRecord *ir)
+void PrescribedGenStrainShell7 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->initialGenEps, _IFT_PrescribedGenStrainShell7_initialgeneralizedstrain);
     IR_GIVE_FIELD(ir, this->genEps, _IFT_PrescribedGenStrainShell7_generalizedstrain);
 
-    this->centerCoord.resize( this->gradient.giveNumberOfColumns() );
-    this->centerCoord.zero();
-    IR_GIVE_OPTIONAL_FIELD(ir, this->centerCoord, _IFT_PrescribedGenStrainShell7_centercoords)
-
-    return GeneralBoundaryCondition :: initializeFrom(ir);
+    FloatArray c;
+    IR_GIVE_OPTIONAL_FIELD(ir, c, _IFT_PrescribedGenStrainShell7_centercoords)
+    this->centerCoord = c;
 }
 
 

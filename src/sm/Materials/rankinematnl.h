@@ -51,20 +51,18 @@ class RankineMatNlStatus : public RankineMatStatus, public StructuralNonlocalMat
 {
 protected:
     /// Equivalent strain for averaging.
-    double localCumPlasticStrainForAverage;
+    double localCumPlasticStrainForAverage = 0.;
 
     /// For printing only
-    double kappa_nl;
-    double kappa_hat;
+    double kappa_nl = 0.;
+    double kappa_hat = 0.;
 
 public:
     RankineMatNlStatus(GaussPoint * g);
-    virtual ~RankineMatNlStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveLocalCumPlasticStrainForAverage() { return localCumPlasticStrainForAverage; }
-    const FloatArray *giveLTangentContrib();
+    double giveLocalCumPlasticStrainForAverage() const { return localCumPlasticStrainForAverage; }
     void setLocalCumPlasticStrainForAverage(double ls) { localCumPlasticStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "RankineMatNlStatus"; }
@@ -75,8 +73,8 @@ public:
 
     void setKappa_nl(double kap) { kappa_nl = kap; }
     void setKappa_hat(double kap) { kappa_hat = kap; }
-    double giveKappa_nl() { return kappa_nl; }
-    double giveKappa_hat() { return kappa_hat; }
+    double giveKappa_nl() const { return kappa_nl; }
+    double giveKappa_hat() const { return kappa_hat; }
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -93,12 +91,11 @@ public NonlocalMaterialStiffnessInterface
 {
 public:
     RankineMatNl(int n, Domain * d);
-    virtual ~RankineMatNl() { }
 
     const char *giveClassName() const override { return "RankineMatNl"; }
     const char *giveInputRecordName() const override { return _IFT_RankineMatNl_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType) override;
@@ -109,17 +106,17 @@ public:
      * @param gp integration point.
      * @param tStep time step.
      */
-    virtual void computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const;
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
     //void modifyNonlocalWeightFunctionAround(GaussPoint *gp);
-    double computeDistanceModifier(double damage);
-    void computeLocalCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep *tStep)
+    double computeDistanceModifier(double damage) const;
+    double computeLocalCumPlasticStrain(GaussPoint *gp, TimeStep *tStep) const
     {
-        RankineMat :: computeCumPlastStrain(kappa, gp, tStep);
+        return RankineMat :: computeCumPlastStrain(gp, tStep);
     }
 
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     //void givePlaneStrainStiffMtrx(FloatMatrix& answer, MatResponseMode,GaussPoint * gp,TimeStep * tStep) override;
     //void give3dMaterialStiffnessMatrix(FloatMatrix& answer,  MatResponseMode,GaussPoint* gp, TimeStep* tStep) override;
 
@@ -163,17 +160,17 @@ public:
     // @param tStep time step
     //  void giveNormalElasticStiffnessMatrix (FloatMatrix& answer, MatResponseMode rMode, GaussPoint*gp, TimeStep* tStep) ;
 
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     // Computes 1D stress
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Compute the factor that specifies how the interaction length should be modified (by eikonal nonlocal damage models)
-    double giveNonlocalMetricModifierAt(GaussPoint *gp) override;
+    double giveNonlocalMetricModifierAt(GaussPoint *gp) const override;
 
-    int hasBoundedSupport() override { return 1; }
+    int hasBoundedSupport() const override { return 1; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

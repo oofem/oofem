@@ -281,20 +281,17 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
     }
 }
 
-IRResultType
-Truss2d :: initializeFrom(InputRecord *ir)
+void
+Truss2d :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                            // Required by IR_GIVE_FIELD macro
+    NLStructuralElement :: initializeFrom(ir);
 
     cs_mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        OOFEM_WARNING("Unsupported value of cs_mode");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_Truss2d_cs, "Unsupported mode");
     }
-
-    return NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -314,14 +311,14 @@ Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Truss2d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_1d(strain, gp, tStep);
 }
 
 
 void
 Truss2d :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_1d(rMode, gp, tStep);
 }
 
 

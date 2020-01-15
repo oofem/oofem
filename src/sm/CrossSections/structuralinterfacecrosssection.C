@@ -61,21 +61,17 @@ StructuralInterfaceCrossSection :: checkConsistency()
     return 1;
 }
 
-IRResultType
-StructuralInterfaceCrossSection :: initializeFrom(InputRecord *ir)
+void
+StructuralInterfaceCrossSection :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     CrossSection :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->materialNum, _IFT_StructuralInterfaceCrossSection_Material);
 
     double thickness = 0.0;
-    if ( ir->hasField(_IFT_StructuralInterfaceCrossSection_thickness) ) {
+    if ( ir.hasField(_IFT_StructuralInterfaceCrossSection_thickness) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_StructuralInterfaceCrossSection_thickness);
         propertyDictionary.add(CS_Thickness, thickness);
     }
-
-    return IRRT_OK;
 }
 
 
@@ -172,7 +168,7 @@ StructuralInterfaceCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *i
 }
 
 
-Material *StructuralInterfaceCrossSection :: giveMaterial(IntegrationPoint *ip)
+Material *StructuralInterfaceCrossSection :: giveMaterial(IntegrationPoint *ip) const
 {
     if ( this->giveMaterialNumber() ) {
         return this->giveDomain()->giveMaterial( this->giveMaterialNumber() );

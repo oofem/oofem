@@ -53,7 +53,7 @@ SymmetryBarrier :: ~SymmetryBarrier()
 
 void
 SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, double &weight,
-                                   bool &shieldFlag, NonlocalMaterialExtensionInterface *nei)
+                                   bool &shieldFlag, const NonlocalMaterialExtensionInterface &nei)
 {
     // compute node coordinates in barrrier lcs
     FloatArray mc2(3), help(3);
@@ -82,7 +82,7 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
             }
 
             // compute weight of mirrored source
-            weight += nei->computeWeightFunction(c1, mc2);
+            weight += nei.computeWeightFunction(c1, mc2);
         }
     }
 
@@ -104,7 +104,7 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
             }
 
             // compute weight of mirrored source
-            weight += nei->computeWeightFunction(c1, mc2);
+            weight += nei.computeWeightFunction(c1, mc2);
         }
     }
 
@@ -116,15 +116,13 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
         }
 
         // compute weight of mirrored source
-        weight += nei->computeWeightFunction(c1, mc2);
+        weight += nei.computeWeightFunction(c1, mc2);
     }
 }
 
-IRResultType
-SymmetryBarrier :: initializeFrom(InputRecord *ir)
+void
+SymmetryBarrier :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     FloatArray normals;
 
     IR_GIVE_FIELD(ir, origin, _IFT_SymmetryBarrier_origin);
@@ -165,10 +163,7 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mask, _IFT_SymmetryBarrier_activemask);
     if ( mask.giveSize() != 3 ) {
-        OOFEM_WARNING("activemask size should be 3");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_SymmetryBarrier_activemask, "size must be 3");
     }
-
-    return IRRT_OK;
 }
 } // end namespace oofem

@@ -69,9 +69,8 @@ protected:
 
 public:
     PerfectlyPlasticMaterialStatus(GaussPoint * g);
-    virtual ~PerfectlyPlasticMaterialStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     int setTempYieldFlag(int i) { return temp_yield_flag = i; }
     int giveTempYieldFlag() { return temp_yield_flag; }
@@ -114,18 +113,13 @@ public:
 class PerfectlyPlasticMaterial : public StructuralMaterial
 {
 protected:
-    int yieldCriteria;
-    int loadingCriteria;
-    LinearElasticMaterial *linearElasticMaterial;
+    int yieldCriteria = 0;
+    int loadingCriteria = 0;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
 
 public:
 
-    PerfectlyPlasticMaterial(int n, Domain * d) : StructuralMaterial(n, d)
-    {
-        yieldCriteria = 0;
-        loadingCriteria = 0;
-        linearElasticMaterial = NULL;
-    }
+    PerfectlyPlasticMaterial(int n, Domain * d) : StructuralMaterial(n, d) {}
 
     virtual ~PerfectlyPlasticMaterial() {
         delete linearElasticMaterial;
@@ -134,35 +128,56 @@ public:
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                               const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<4> giveRealStressVector_PlaneStrain(const FloatArrayF<4> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<2> giveRealStressVector_2dBeamLayer(const FloatArrayF<2> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
+    FloatArrayF<5> giveRealStressVector_PlateLayer(const FloatArrayF<5> &strain, GaussPoint *gp, TimeStep *tStep) const override
+    {
+        FloatArray answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveRealStressVector(answer, gp, strain, tStep);
+        return answer;
+    }
 
     // can be moved to parent classes
     virtual void updateIfFailure(GaussPoint *gp,
                                  FloatArray *stressVector3d,
                                  FloatArray *PlasticStrainVector3d) { }
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
     const char *giveClassName() const override { return "PerfectlyPlasticMaterial"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
@@ -179,26 +194,11 @@ protected:
                                                       MatResponseMode mode, GaussPoint *gp,
                                                       TimeStep *tStep);
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
-    void give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
-    void givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                 MatResponseMode mode,
-                                 GaussPoint *gp,
-                                 TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<2,2> give2dBeamLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<5,5> givePlateLayerStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     void computeTrialStressIncrement(FloatArray &answer, GaussPoint *gp,
                                      const FloatArray &strainIncrement, TimeStep *tStep);

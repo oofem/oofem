@@ -68,7 +68,7 @@ public:
     }
     virtual ~HeavisideTimeFunction() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveClassName() const override { return "HeavisideTimeFunction"; }
     const char *giveInputRecordName() const override { return _IFT_HeavisideTimeFunction_Name; }

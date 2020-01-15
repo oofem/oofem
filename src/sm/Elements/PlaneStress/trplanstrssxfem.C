@@ -296,29 +296,19 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 }
 #endif
 
-IRResultType
-TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
+void
+TrPlaneStress2dXFEM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
-    result = TrPlaneStress2d :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
+    TrPlaneStress2d :: initializeFrom(ir);
+    XfemStructuralElementInterface :: initializeCZFrom(ir);
+
+    if ( ir.hasField(_IFT_TrPlaneStress2dXFEM_RegCoeff) ) {
+        ir.giveOptionalField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
     }
 
-    result = XfemStructuralElementInterface :: initializeCZFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
+    if ( ir.hasField(_IFT_TrPlaneStress2dXFEM_RegCoeffTol) ) {
+        ir.giveOptionalField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
     }
-
-    if(ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeff) ) {
-		ir->giveOptionalField(mRegCoeff, _IFT_TrPlaneStress2dXFEM_RegCoeff);
-    }
-
-    if(ir->hasField(_IFT_TrPlaneStress2dXFEM_RegCoeffTol) ) {
-		ir->giveOptionalField(mRegCoeffTol, _IFT_TrPlaneStress2dXFEM_RegCoeffTol);
-    }
-
-    return result;
 }
 
 MaterialMode TrPlaneStress2dXFEM :: giveMaterialMode()
@@ -376,7 +366,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
         // Node coordinates
         std :: vector< FloatArray >nodeCoords;
         for(int i = 1; i <= 3; i++) {
-            FloatArray &x = *(giveDofManager(i)->giveCoordinates());
+            const auto &x = giveDofManager(i)->giveCoordinates();
             nodeCoords.push_back(x);
 
             vtkPieces[0].setNodeCoords(i, x);
@@ -508,7 +498,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), dMan->giveCoordinates() );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }
@@ -522,7 +512,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), dMan->giveCoordinates() );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }

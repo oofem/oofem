@@ -42,6 +42,7 @@
 #include "matstatus.h"
 #include "sm/Materials/structuralms.h"
 #include "cltypes.h"
+#include "floatmatrixf.h"
 
 ///@name Input fields for TrabBone3D
 //@{
@@ -101,38 +102,41 @@ namespace oofem {
 class TrabBone3DStatus : public StructuralMaterialStatus
 {
 protected:
-    double kappa, tempKappa, dam, tempDam, tempPSED, tempTSED, tsed, beta;
-    FloatArray tempPlasDef, plasDef, effectiveStress, tempEffectiveStress, plasFlowDirec, tempStrain;
-    FloatMatrix smtrx, tangentMatrix, SSaTensor;
+    double kappa = 0., tempKappa = 0;
+    double dam = 0., tempDam = 0.;
+    double tempPSED = 0., tempTSED = 0.;
+    double tsed = 0.;
+    double beta = 0.;
+
+    FloatArrayF<6> tempPlasDef, plasDef;
+    FloatArrayF<6> effectiveStress, tempEffectiveStress;
+    FloatArrayF<6> plasFlowDirec, tempStrain;
+
+    FloatMatrixF<6,6> SSaTensor;
 
     /// Densificator criterion
-    double densG;
-
+    double densG = 1.;
 
 public:
     TrabBone3DStatus(GaussPoint *g);
 
-    virtual ~TrabBone3DStatus();
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
+    
+    double giveKappa() const { return kappa; }
+    double giveTempKappa() const { return tempKappa; }
+    double giveDam() const { return dam; }
+    double giveTempDam() const { return tempDam; }
+    double giveTempPSED() const { return tempPSED; }
+    double giveTSED() const { return tsed; }
+    double giveTempTSED() const { return tempTSED; }
+    double giveBeta() const { return beta; }
+    double giveDensG() const { return densG; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
-
-    double giveKappa();
-    double giveTempKappa();
-    double giveDam();
-    double giveTempDam();
-    double giveTempPSED();
-    double giveTSED();
-    double giveTempTSED();
-    double giveBeta();
-    double giveDensG() { return densG; }
-
-    const FloatArray &givePlasDef() const;
-    const FloatArray &giveTempPlasDef() const;
-    const FloatArray &giveTempEffectiveStress() const;
-    const FloatArray &givePlasFlowDirec() const;
-    const FloatMatrix &giveTangentMatrix() const;
-    const FloatMatrix &giveSmtrx() const;
-    const FloatMatrix &giveSSaTensor() const;
+    const FloatArrayF<6> &givePlasDef() const { return plasDef; }
+    const FloatArrayF<6> &giveTempPlasDef() const { return tempPlasDef; }
+    const FloatArrayF<6> &givePlasFlowDirec() const { return plasFlowDirec; }
+    const FloatArrayF<6> &giveTempEffectiveStress() const { return tempEffectiveStress; }
+    const FloatMatrixF<6,6> &giveSSaTensor() const { return SSaTensor; }
 
     void setTempKappa(double al) { tempKappa = al; }
     void setKappa(double values) { kappa = values; }
@@ -140,12 +144,10 @@ public:
     void setTempPSED(double pse) { tempPSED = pse; }
     void setTempTSED(double tse) { tempTSED = tse; }
     void setBeta(double be) { beta = be; }
-    void setTempEffectiveStress(FloatArray &sc) { tempEffectiveStress = sc; }
-    void setTempPlasDef(FloatArray &epsip) { tempPlasDef = epsip; }
-    void setPlasFlowDirec(FloatArray &pfd) { plasFlowDirec = pfd; }
-    void setSmtrx(FloatMatrix &smt) { smtrx = smt; }
-    void setTangentMatrix(FloatMatrix &tmm) { tangentMatrix = tmm; }
-    void setSSaTensor(FloatMatrix &ssa) { SSaTensor = ssa; }
+    void setTempEffectiveStress(const FloatArrayF<6> &sc) { tempEffectiveStress = sc; }
+    void setTempPlasDef(const FloatArrayF<6> &epsip) { tempPlasDef = epsip; }
+    void setPlasFlowDirec(const FloatArrayF<6> &pfd) { plasFlowDirec = pfd; }
+    void setSSaTensor(const FloatMatrixF<6,6> &ssa) { SSaTensor = ssa; }
 
     void setDensG(double g) { densG = g; }
 
@@ -167,70 +169,79 @@ public:
 class TrabBone3D : public StructuralMaterial
 {
 protected:
-    double m1, m2, rho, eps0, nu0, mu0, expk, expl, sig0Pos, sig0Neg, chi0Pos, chi0, chi0Neg, tau0, expq, expp;
-    double plasHardFactor, expPlasHard, expDam, critDam;
-    int printflag, max_num_iter;
-    double rel_yield_tol, strain_tol;
+    double m1 = 0., m2 = 0.;
+    double rho = 0.;
+    double eps0 = 0., nu0 = 0., mu0 = 0.;
+    double expk = 0., expl = 0.;
+    double sig0Pos = 0., sig0Neg = 0.;
+    double chi0Pos = 0., chi0 = 0., chi0Neg = 0.;
+    double tau0 = 0.;
+    double expq = 0., expp = 0.;
+    double plasHardFactor = 0., expPlasHard = 0., expDam = 0., critDam = 0.;
+    int printflag = 0, max_num_iter = 0;
+    double rel_yield_tol = 0., strain_tol = 0.;
     /// Local coordinate system
-    double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+    double x1 = 1., x2 = 0., x3 = 0.;
+    double y1 = 0., y2 = 1., y3 = 0.;
+    double z1 = 0., z2 = 0., z3 = 1.;
     /// Densificator properties
-    double gammaL0, gammaP0, tDens, densCrit, rL, rP, gammaL, gammaP;
+    double gammaL0 = 0., gammaP0 = 0., tDens = 0., densCrit = 0., rL = 0., rP = 0., gammaL = 0., gammaP = 0.;
     /// Viscosity parameter
-    double viscosity;
+    double viscosity = 0.;
 
 public:
     TrabBone3D(int n, Domain *d);
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
-    double evaluateCurrentYieldStress(const double kappa);
-    double evaluateCurrentPlasticModulus(const double kappa);
-    double evaluateCurrentViscousStress(const double deltaKappa, TimeStep *tStep);
-    double evaluateCurrentViscousModulus(const double deltaKappa, TimeStep *tStep);
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
+    double evaluateCurrentYieldStress(double kappa) const;
+    double evaluateCurrentPlasticModulus(double kappa) const;
+    double evaluateCurrentViscousStress(double deltaKappa, TimeStep *tStep) const;
+    double evaluateCurrentViscousModulus(double deltaKappa, TimeStep *tStep) const;
 
-    bool projectOnYieldSurface(double &tempKappa, FloatArray &tempEffectiveStress, FloatArray &tempPlasDef, const FloatArray &trialEffectiveStress, const FloatMatrix &elasticity, const FloatMatrix &compliance, TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag);
+    bool projectOnYieldSurface(double &tempKappa, FloatArrayF<6> &tempEffectiveStress, FloatArrayF<6> &tempPlasDef,
+                               const FloatArrayF<6> &trialEffectiveStress,
+                               const FloatMatrixF<6,6> &elasticity, const FloatMatrixF<6,6> &compliance,
+                               TrabBone3DStatus *status, TimeStep *tStep, GaussPoint *gp, int lineSearchFlag) const;
 
-    void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
+    void performPlasticityReturn(GaussPoint *gp, const FloatArrayF<6> &strain, TimeStep *tStep) const;
 
-    void  constructPlasFlowDirec(FloatArray &answer, double &norm, FloatMatrix &fabric, FloatArray &F, FloatArray &S);
-    void  constructDerivativeOfPlasFlowDirec(FloatMatrix &answer, FloatMatrix &fabric, FloatArray &F, FloatArray &S);
-    double evaluatePlasCriterion(FloatMatrix &fabric, FloatArray &F, FloatArray &stress, double kappa, double deltaKappa, TimeStep *tStep);
+    std::pair<FloatArrayF<6>, double> constructPlasFlowDirec(FloatMatrixF<6,6> &fabric, const FloatArrayF<6> &F, const FloatArrayF<6> &S) const;
+    FloatMatrixF<6,6> constructDerivativeOfPlasFlowDirec(const FloatMatrixF<6,6> &fabric, const FloatArrayF<6> &F, const FloatArrayF<6> &S) const;
+    double evaluatePlasCriterion(const FloatMatrixF<6,6> &fabric, const FloatArrayF<6> &F, const FloatArrayF<6> &stress, double kappa, double deltaKappa, TimeStep *tStep) const;
 
-    double computeDamageParam(double kappa);
-    double computeDamageParamPrime(double kappa);
+    double computeDamageParam(double kappa) const;
+    double computeDamageParamPrime(double kappa) const;
 
-    double computeDamage(GaussPoint *gp, TimeStep *tStep);
+    double computeDamage(GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual void computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const;
 
-    void computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress);
+    void computePlasStrainEnerDensity(GaussPoint *gp, const FloatArrayF<6> &strain, const FloatArrayF<6> &stress) const;
 
-    void computeDensificationStress(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep);
+    FloatArrayF<6> computeDensificationStress(GaussPoint *gp, const FloatArrayF<6> &totalStrain, TimeStep *tStep) const;
 
     /// Construct anisotropic compliance tensor.
-    void constructAnisoComplTensor(FloatMatrix &answer);
+    FloatMatrixF<6,6> constructAnisoComplTensor() const;
     /// Construct anisotropic stiffness tensor.
-    void constructAnisoStiffnessTensor(FloatMatrix &answer);
+    FloatMatrixF<6,6> constructAnisoStiffnessTensor() const;
 
     /// Construct anisotropic fabric tensor.
-    void constructAnisoFabricTensor(FloatMatrix &answer);
-    void constructAnisoFtensor(FloatArray &answer);
+    FloatMatrixF<6,6> constructAnisoFabricTensor() const;
+    FloatArrayF<6> constructAnisoFtensor() const;
 
-    void constructStiffnessTransformationMatrix(FloatMatrix &answer);
-    void constructFabricTransformationMatrix(FloatMatrix &answer);
+    FloatMatrixF<6,6> constructStiffnessTransformationMatrix() const;
+    FloatMatrixF<6,6> constructFabricTransformationMatrix() const;
     /// Construct Tensor to adjust Norm.
-    void constructNormAdjustTensor(FloatMatrix &answer);
+    FloatMatrixF<6,6> constructNormAdjustTensor() const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                       MatResponseMode, GaussPoint * gp,
-                                       TimeStep * tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode, GaussPoint * gp, TimeStep * tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     const char *giveInputRecordName() const override { return _IFT_TrabBone3D_Name; }
     const char *giveClassName() const override { return "TrabBone3D"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

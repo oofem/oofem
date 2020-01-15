@@ -55,15 +55,14 @@ class TrabBoneNLStatus : public TrabBoneMaterialStatus, public StructuralNonloca
 {
 protected:
     /// Equivalent strain for averaging.
-    double localCumPlastStrainForAverage;
+    double localCumPlastStrainForAverage = 0.;
 
 public:
     TrabBoneNLStatus(GaussPoint * g);
-    virtual ~TrabBoneNLStatus();
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
-    double giveLocalCumPlastStrainForAverage() { return localCumPlastStrainForAverage; }
+    double giveLocalCumPlastStrainForAverage() const { return localCumPlastStrainForAverage; }
     void setLocalCumPlastStrainForAverage(double ls) { localCumPlastStrainForAverage = ls; }
 
     const char *giveClassName() const override { return "TrabBoneNLStatus"; }
@@ -82,37 +81,36 @@ public:
 class TrabBoneNL : public TrabBoneMaterial, public StructuralNonlocalMaterialExtensionInterface
 {
 protected:
-    double R;
-    double mParam;
+    double R = 0.;
+    double mParam = 0.;
 
 public:
     TrabBoneNL(int n, Domain * d);
-    virtual ~TrabBoneNL();
 
     const char *giveClassName() const override { return "TrabBoneNL"; }
     const char *giveInputRecordName() const override { return _IFT_TrabBoneNL_Name; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     Interface *giveInterface(InterfaceType) override;
 
-    void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep) override;
+    double computeCumPlastStrain(GaussPoint *gp, TimeStep *tStep) const override;
 
-    void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep) override;
+    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
-    void computeLocalCumPlastStrain(double &alpha, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+    double computeLocalCumPlastStrain(const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) const
     {
-        TrabBoneMaterial :: computeCumPlastStrain(alpha, gp, tStep);
+        return TrabBoneMaterial :: computeCumPlastStrain(gp, tStep);
     }
 
-    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) override;
+    void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep) const override;
 
-    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) override;
+    double computeWeightFunction(const FloatArray &src, const FloatArray &coord) const override;
 
-    int hasBoundedSupport() override { return 1; }
+    int hasBoundedSupport() const override { return 1; }
 
-    void giveSupportRadius(double &radius) { radius = this->R; }
+    double giveSupportRadius() const { return this->R; }
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new TrabBoneNLStatus(gp); }

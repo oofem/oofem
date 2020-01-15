@@ -45,6 +45,8 @@
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "intarray.h"
 #include "load.h"
 #include "boundaryload.h"
@@ -59,12 +61,11 @@ FEI2dQuadLin MITC4Shell :: interp_lin(1, 2);
 
 MITC4Shell :: MITC4Shell(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this)
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
+    nPointsXY(4),
+    nPointsZ(2)
 {
     numberOfDofMans = 4;
-    nPointsXY = 4;
-    nPointsZ = 2;
-
     numberOfGaussPoints = nPointsXY * nPointsZ;
 }
 
@@ -93,7 +94,7 @@ MITC4Shell :: giveInterface(InterfaceType interface)
         return static_cast< SpatialLocalizerInterface * >(this);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -143,7 +144,6 @@ MITC4Shell :: SPRNodalRecoveryMI_givePatchType()
 
 void
 MITC4Shell :: computeGaussPoints()
-// Sets up the array containing the eight Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
@@ -153,105 +153,65 @@ MITC4Shell :: computeGaussPoints()
 }
 
 
-void
-MITC4Shell ::  giveDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4)
+std::array<FloatArrayF<3>, 4>
+MITC4Shell :: giveDirectorVectors()
 {
     if ( directorType == 0 ) { // normal to the midplane
-        FloatArray e1, e2, e3;
-        this->computeLocalBaseVectors(e1, e2, e3);
-        V1 = e3;
-        V2 = e3;
-        V3 = e3;
-        V4 = e3;
+        auto e = this->computeLocalBaseVectors();
+        return {e[2], e[2], e[2], e[2]};
     } else if ( directorType == 1 ) {          // nodal average
-        FloatArray e1, e2, e3;
-        FloatMatrix directors;
-        FloatArray nodeDir;
-        nodeDir.resize(3);
-        directors.resize(3, 4);
         int csNum = this->giveCrossSection()->giveNumber();
-        // OOFEM_ERROR("DirectorType 1 not implemented yet.");
+        std::array<FloatArrayF<3>, 4> directors;
+
         IntArray neighbours;
         ConnectivityTable *conTable = this->giveDomain()->giveConnectivityTable();
         IntArray node(1);
-        int count;
 
         for ( int i = 1; i <= 4; i++ ) {
-            count = 0;
-            nodeDir.zero();
+            FloatArrayF<3> nodeDir;
             node.at(1) = this->giveNode(i)->giveNumber();
             conTable->giveNodeNeighbourList(neighbours, node);
 
             for ( int j = 1; j <= neighbours.giveSize(); j++ ) {
-                MITC4Shell *neighbour = dynamic_cast< MITC4Shell * >( this->giveDomain()->giveElement( neighbours.at(j) ) );
+                auto neighbour = dynamic_cast< MITC4Shell * >( this->giveDomain()->giveElement( neighbours.at(j) ) );
                 if ( neighbour ) {
                     if ( neighbour->giveCrossSection()->giveNumber() == csNum ) {
-                        neighbour->computeLocalBaseVectors(e1, e2, e3);
-                        nodeDir.add(e3);
-                        count++;
+                        auto e = neighbour->computeLocalBaseVectors();
+                        nodeDir += e[2];
                     }
                 }
             }
-            directors.at(1, i) = nodeDir.at(1) / count;
-            directors.at(2, i) = nodeDir.at(2) / count;
-            directors.at(3, i) = nodeDir.at(3) / count;
+            directors[i] = normalize(nodeDir);
         }
-        V1.beColumnOf(directors, 1);
-        V2.beColumnOf(directors, 2);
-        V3.beColumnOf(directors, 3);
-        V4.beColumnOf(directors, 4);
-
-        V1.normalize();
-        V2.normalize();
-        V3.normalize();
-        V4.normalize();
+        return directors;
     } else if ( directorType == 2 ) {          // specified at crosssection
-        V1.resize(3);
-        V2.resize(3);
-        V3.resize(3);
-        V4.resize(3);
-        FloatArray *c1, *c2, *c3, *c4;
-        c1 = this->giveNode(1)->giveCoordinates();
-        c2 = this->giveNode(2)->giveCoordinates();
-        c3 = this->giveNode(3)->giveCoordinates();
-        c4 = this->giveNode(4)->giveCoordinates();
-        V1.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c1, this, false);
-        V1.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c1, this, false);
-        V1.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c1, this, false);
-
-        V2.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c2, this, false);
-        V2.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c2, this, false);
-        V2.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c2, this, false);
-
-        V3.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c3, this, false);
-        V3.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c3, this, false);
-        V3.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c3, this, false);
-
-        V4.at(1) = this->giveCrossSection()->give(CS_DirectorVectorX, * c4, this, false);
-        V4.at(2) = this->giveCrossSection()->give(CS_DirectorVectorY, * c4, this, false);
-        V4.at(3) = this->giveCrossSection()->give(CS_DirectorVectorZ, * c4, this, false);
-
-        V1.normalize();
-        V2.normalize();
-        V3.normalize();
-        V4.normalize();
+        std::array<FloatArrayF<3>, 4> V;
+        for ( int i = 0; i < 4; ++i ) {
+            const auto &c = this->giveNode(i+1)->giveCoordinates();
+            FloatArrayF<3> v = {
+                this->giveCrossSection()->give(CS_DirectorVectorX, c, this, false),
+                this->giveCrossSection()->give(CS_DirectorVectorY, c, this, false),
+                this->giveCrossSection()->give(CS_DirectorVectorZ, c, this, false),
+            };
+            V[i] = normalize(v);
+        }
+        return V;
     } else {
-        OOFEM_ERROR("Unsupported directorType");
+        throw std::runtime_error("Unsupported directorType");
     }
 }
 
 
-void
-MITC4Shell ::  giveLocalDirectorVectors(FloatArray &V1, FloatArray &V2, FloatArray &V3, FloatArray &V4)
+std::array<FloatArrayF<3>, 4>
+MITC4Shell ::  giveLocalDirectorVectors()
 {
-    FloatArray V1g, V2g, V3g, V4g;
-    this->giveDirectorVectors(V1g, V2g, V3g, V4g);
-    this->computeGtoLRotationMatrix();
-
-    V1.beProductOf(GtoLRotationMatrix, V1g);
-    V2.beProductOf(GtoLRotationMatrix, V2g);
-    V3.beProductOf(GtoLRotationMatrix, V3g);
-    V4.beProductOf(GtoLRotationMatrix, V4g);
+    auto Vg = this->giveDirectorVectors();
+    return {
+        dot(GtoLRotationMatrix, Vg[0]),
+        dot(GtoLRotationMatrix, Vg[1]),
+        dot(GtoLRotationMatrix, Vg[2]),
+        dot(GtoLRotationMatrix, Vg[3]),
+    };
 }
 
 
@@ -261,128 +221,58 @@ MITC4Shell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // evaluated at gp.
 // Zeroes in rows 4, 5, 6.
 {
-    FloatArray h(4);
+    auto h = interp_lin.evalN(FloatArrayF<3>(iLocCoord)[{0, 1}]);
+    auto a = this->giveThickness();
+    auto V = this->giveLocalDirectorVectors();
 
-    interp_lin.evalN( h, iLocCoord,  FEIElementGeometryWrapper(this) );
+    FloatArrayF<3> e2 = {0., 1., 0.};
 
-    double a1, a2, a3, a4;
-    this->giveThickness(a1, a2, a3, a4);
-
-    FloatArray V1, V2, V3, V4;
-    this->giveLocalDirectorVectors(V1, V2, V3, V4);
-
-    FloatArray e2 = {
-        0, 1, 0
-    };
-
-    FloatArray V11(3), V12(3), V13(3), V14(3), V21(3), V22(3), V23(3), V24(3);
-    V11.beVectorProductOf(e2, V1);
-    V11.normalize();
-    V12.beVectorProductOf(e2, V2);
-    V12.normalize();
-    V13.beVectorProductOf(e2, V3);
-    V13.normalize();
-    V14.beVectorProductOf(e2, V4);
-    V14.normalize();
-
-    V21.beVectorProductOf(V1, V11);
-    V22.beVectorProductOf(V2, V12);
-    V23.beVectorProductOf(V3, V13);
-    V24.beVectorProductOf(V4, V14);
-
-    answer.resize(6, 24);
+    answer.resize(6, 6 * 4);
     answer.zero();
-
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = h.at(1);
-    answer.at(1, 4) = -iLocCoord.at(3) / 2.0 *a1 *h.at(1) * V21.at(1);
-    answer.at(1, 5) =  iLocCoord.at(3) / 2.0 *a1 *h.at(1) * V11.at(1);
-    answer.at(2, 4) = -iLocCoord.at(3) / 2.0 *a1 *h.at(1) * V21.at(2);
-    answer.at(2, 5) =  iLocCoord.at(3) / 2.0 *a1 *h.at(1) * V11.at(2);
-    answer.at(3, 4) = -iLocCoord.at(3) / 2.0 *a1 *h.at(1) * V21.at(3);
-    answer.at(3, 5) =  iLocCoord.at(3) / 2.0 *a1 *h.at(1) * V11.at(3);
-
-    answer.at(1, 7)  = answer.at(2, 8) = answer.at(3, 9) = h.at(2);
-    answer.at(1, 10)  = -iLocCoord.at(3) / 2.0 *a2 *h.at(2) * V22.at(1);
-    answer.at(1, 11) =  iLocCoord.at(3) / 2.0 *a2 *h.at(2) * V12.at(1);
-    answer.at(2, 10)  = -iLocCoord.at(3) / 2.0 *a2 *h.at(2) * V22.at(2);
-    answer.at(2, 11) =  iLocCoord.at(3) / 2.0 *a2 *h.at(2) * V12.at(2);
-    answer.at(3, 10)  = -iLocCoord.at(3) / 2.0 *a2 *h.at(2) * V22.at(3);
-    answer.at(3, 11) =  iLocCoord.at(3) / 2.0 *a2 *h.at(2) * V12.at(3);
-
-    answer.at(1, 13) = answer.at(2, 14) = answer.at(3, 15) = h.at(3);
-    answer.at(1, 16) = -iLocCoord.at(3) / 2.0 *a3 *h.at(3) * V23.at(1);
-    answer.at(1, 17) =  iLocCoord.at(3) / 2.0 *a3 *h.at(3) * V13.at(1);
-    answer.at(2, 16) = -iLocCoord.at(3) / 2.0 *a3 *h.at(3) * V23.at(2);
-    answer.at(2, 17) =  iLocCoord.at(3) / 2.0 *a3 *h.at(3) * V13.at(2);
-    answer.at(3, 16) = -iLocCoord.at(3) / 2.0 *a3 *h.at(3) * V23.at(3);
-    answer.at(3, 17) =  iLocCoord.at(3) / 2.0 *a3 *h.at(3) * V13.at(3);
-
-    answer.at(1, 19) = answer.at(2, 20) = answer.at(3, 21) = h.at(4);
-    answer.at(1, 23) = -iLocCoord.at(3) / 2.0 *a4 *h.at(4) * V24.at(1);
-    answer.at(1, 24) =  iLocCoord.at(3) / 2.0 *a4 *h.at(4) * V14.at(1);
-    answer.at(2, 23) = -iLocCoord.at(3) / 2.0 *a4 *h.at(4) * V24.at(2);
-    answer.at(2, 24) =  iLocCoord.at(3) / 2.0 *a4 *h.at(4) * V14.at(2);
-    answer.at(3, 23) = -iLocCoord.at(3) / 2.0 *a4 *h.at(4) * V24.at(3);
-    answer.at(3, 24) =  iLocCoord.at(3) / 2.0 *a4 *h.at(4) * V14.at(3);
+    for ( int i = 0; i < 4; ++i ) {
+        auto Ve = normalize(cross(e2, V[i]));
+        auto VVe = cross(V[i], Ve);
+        answer.at(1, 1+i*6) = answer.at(2, 2+i*6) = answer.at(3, 3+i*6) = h[i];
+        answer.at(1, 4+i*6) = -iLocCoord.at(3) / 2.0 * a[i] * h[i] * VVe.at(1);
+        answer.at(1, 5+i*6) =  iLocCoord.at(3) / 2.0 * a[i] * h[i] * Ve.at(1);
+        answer.at(2, 4+i*6) = -iLocCoord.at(3) / 2.0 * a[i] * h[i] * VVe.at(2);
+        answer.at(2, 5+i*6) =  iLocCoord.at(3) / 2.0 * a[i] * h[i] * Ve.at(2);
+        answer.at(3, 4+i*6) = -iLocCoord.at(3) / 2.0 * a[i] * h[i] * VVe.at(3);
+        answer.at(3, 5+i*6) =  iLocCoord.at(3) / 2.0 * a[i] * h[i] * Ve.at(3);
+    }
 }
 
 
 void
 MITC4Shell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *scs = dynamic_cast< StructuralCrossSection * >( this->giveCrossSection() );
-    //SimpleCrossSection *cs = dynamic_cast< SimpleCrossSection * >( this->giveCrossSection() );
-    scs->give3dDegeneratedShellStiffMtrx(answer, rMode, gp, tStep);
+    auto scs = dynamic_cast< StructuralCrossSection * >( this->giveCrossSection() );
+    //auto cs = dynamic_cast< SimpleCrossSection * >( this->giveCrossSection() );
+    answer = scs->give3dDegeneratedShellStiffMtrx(rMode, gp, tStep);
 }
 
 
-void
-MITC4Shell :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
-                                  double &y1, double &y2, double &y3, double &y4,
-                                  double &z1, double &z2, double &z3, double &z4)
+std::array<FloatArrayF<3>, 4>
+MITC4Shell :: giveNodeCoordinates()
 {
-    FloatArray nc1(3), nc2(3), nc3(3), nc4(3);
-
-    this->giveLocalCoordinates( nc1, * ( this->giveNode(1)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc2, * ( this->giveNode(2)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc3, * ( this->giveNode(3)->giveCoordinates() ) );
-    this->giveLocalCoordinates( nc4, * ( this->giveNode(4)->giveCoordinates() ) );
-
-    x1 = nc1.at(1);
-    x2 = nc2.at(1);
-    x3 = nc3.at(1);
-    x4 = nc4.at(1);
-
-    y1 = nc1.at(2);
-    y2 = nc2.at(2);
-    y3 = nc3.at(2);
-    y4 = nc4.at(2);
-
-    z1 = nc1.at(3);
-    z2 = nc2.at(3);
-    z3 = nc3.at(3);
-    z4 = nc4.at(3);
-}
-
-void
-MITC4Shell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
-{
-    // test the parametr
-    if ( global.giveSize() != 3 ) {
-        OOFEM_ERROR("cannot transform coordinates - size mismatch");
+    std::array<FloatArrayF<3>, 4> c;
+    for (int i = 0; i < 4; ++i) {
+        c[i] = this->giveLocalCoordinates(this->giveNode(i+1)->giveCoordinates());
     }
-
-    this->computeGtoLRotationMatrix();
-
-    FloatArray offset;
-    offset.beDifferenceOf(global, * this->giveNode(1)->giveCoordinates() );
-    answer.beProductOf(GtoLRotationMatrix, offset);
+    return c;
 }
 
-IRResultType
-MITC4Shell :: initializeFrom(InputRecord *ir)
+FloatArrayF<3>
+MITC4Shell :: giveLocalCoordinates(const FloatArrayF<3> &global)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    auto offset = global - FloatArrayF<3>(this->giveNode(1)->giveCoordinates());
+    return dot(GtoLRotationMatrix, offset);
+}
+
+void
+MITC4Shell :: initializeFrom(InputRecord &ir)
+{
+    NLStructuralElement :: initializeFrom(ir);
 
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsXY, _IFT_Element_nip);
     IR_GIVE_OPTIONAL_FIELD(ir, nPointsZ, _IFT_MITC4Shell_nipZ);
@@ -390,8 +280,6 @@ MITC4Shell :: initializeFrom(InputRecord *ir)
 
     directorType = 0; // default
     IR_GIVE_OPTIONAL_FIELD(ir, directorType, _IFT_MITC4Shell_directorType);
-
-    return this->NLStructuralElement :: initializeFrom(ir);
 }
 
 
@@ -405,74 +293,59 @@ MITC4Shell :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 double
 MITC4Shell :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
 {
-    double detJ, weight;
-    FloatMatrix jacobianMatrix(3, 3);
+    FloatArrayF<3> lcoords = {
+        gp->giveNaturalCoordinate(1),
+        gp->giveNaturalCoordinate(2),
+        gp->giveNaturalCoordinate(3),
+    };
 
-    FloatArray lcoords(3);
-    lcoords.at(1) = gp->giveNaturalCoordinate(1);
-    lcoords.at(2) = gp->giveNaturalCoordinate(2);
-    lcoords.at(3) = gp->giveNaturalCoordinate(3);
-
-    weight = gp->giveWeight();
-
-    this->giveJacobian(lcoords, jacobianMatrix);
-
-    detJ = jacobianMatrix.giveDeterminant();
-    return detJ * weight;
+    auto jacobianMatrix = this->giveJacobian(lcoords);
+    return det(jacobianMatrix) * gp->giveWeight();
 }
 
 
-void
-MITC4Shell :: giveJacobian(FloatArray lcoords, FloatMatrix &jacobianMatrix)
-// Returns the jacobianMatrix
+FloatMatrixF<3,3>
+MITC4Shell :: giveJacobian(const FloatArrayF<3> &lcoords)
 {
-    FloatArray h(4);
-    FloatMatrix dn(4, 2);
-    FloatMatrix dndx(4, 2);
-
-    jacobianMatrix.resize(3, 3);
-    // get node coordinates
-    double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
-    this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
-
-    double r3 = lcoords.at(3);
-
-    // get local director vector
-    FloatArray V1, V2, V3, V4;
-    this->giveLocalDirectorVectors(V1, V2, V3, V4);
-
-    // get thickness
-    double a1, a2, a3, a4;
-    this->giveThickness(a1, a2, a3, a4);
-
-    interp_lin.evalN( h, lcoords,  FEIElementGeometryWrapper(this) );
-    interp_lin.evaldNdxi(dn, lcoords, FEIElementGeometryWrapper(this) );
-
-    FloatArray hk1(4);
     // derivatives of interpolation functions
-    // dh(r1,r2)/dr1
-    hk1.at(1) =  dn.at(1, 1);
-    hk1.at(2) =  dn.at(2, 1);
-    hk1.at(3) =  dn.at(3, 1);
-    hk1.at(4) =  dn.at(4, 1);
+    auto dn = interp_lin.evaldNdxi(lcoords[{0, 1}]);
+    auto hk1 = dn.row<0>(); // dh(r1,r2)/dr1
+    auto hk2 = dn.row<1>(); // dh(r1,r2)/dr2
 
-    FloatArray hk2(4);
-    // dh(r1,r2)/dr2
-    hk2.at(1) =  dn.at(1, 2);
-    hk2.at(2) =  dn.at(2, 2);
-    hk2.at(3) =  dn.at(3, 2);
-    hk2.at(4) =  dn.at(4, 2);
-
-    double h1, h2, h3, h4;
     // interpolation functions - h(r1,r2)
-    h1 = h.at(1);
-    h2 = h.at(2);
-    h3 = h.at(3);
-    h4 = h.at(4);
+    //auto [h1, h2, h3, h4] = interp_lin.evalN(lcoords[{0, 1}]);
+    auto h = interp_lin.evalN(lcoords[{0, 1}]);
+    double h1 = h[0];
+    double h2 = h[1];
+    double h3 = h[2];
+    double h4 = h[3];
 
+    //auto [a1, a2, a3, a4] = this->giveThickness();
+    auto a = this->giveThickness();
+    double a1 = a[0];
+    double a2 = a[1];
+    double a3 = a[2];
+    double a4 = a[3];
+
+    // get node coordinates
+    double r3 = lcoords.at(3);
+    auto c = this->giveNodeCoordinates();
+    //auto [x1, y1, z1] = c[0];
+    //auto [x2, y2, z2] = c[1];
+    //auto [x3, y3, z3] = c[2];
+    //auto [x4, y4, z4] = c[3];
+    double x1 = c[0][0], y1 = c[0][1];
+    double x2 = c[1][0], y2 = c[1][1];
+    double x3 = c[2][0], y3 = c[2][1];
+    double x4 = c[3][0], y4 = c[3][1];
+    
+    //auto [V1, V2, V3, V4] = this->giveLocalDirectorVectors();
+    auto V = this->giveLocalDirectorVectors();
+    auto V1 = V[0], V2 = V[1], V3 = V[2], V4 = V[3];
+    
     // Jacobian Matrix
+    FloatMatrixF<3,3> jacobianMatrix;
     jacobianMatrix.at(1, 1) = hk1.at(1) * x1 + hk1.at(2) * x2 + hk1.at(3) * x3 + hk1.at(4) * x4 + r3 / 2. * ( a1 * hk1.at(1) * V1.at(1) + a2 * hk1.at(2) * V2.at(1) + a3 * hk1.at(3) * V3.at(1) + a4 * hk1.at(4) * V4.at(1) );
     jacobianMatrix.at(1, 2) = hk1.at(1) * y1 + hk1.at(2) * y2 + hk1.at(3) * y3 + hk1.at(4) * y4 + r3 / 2. * ( a1 * hk1.at(1) * V1.at(2) + a2 * hk1.at(2) * V2.at(2) + a3 * hk1.at(3) * V3.at(2) + a4 * hk1.at(4) * V4.at(2) );
     jacobianMatrix.at(1, 3) = r3 / 2. * ( a1 * hk1.at(1) * V1.at(3) + a2 * hk1.at(2) * V2.at(3) + a3 * hk1.at(3) * V3.at(3) + a4 * hk1.at(4) * V4.at(3) );
@@ -482,6 +355,7 @@ MITC4Shell :: giveJacobian(FloatArray lcoords, FloatMatrix &jacobianMatrix)
     jacobianMatrix.at(3, 1) =  1. / 2. * ( a1 * h1 * V1.at(1) + a2 * h2 * V2.at(1) + a3 * h3 * V3.at(1) + a4 * h4 * V4.at(1) );
     jacobianMatrix.at(3, 2) =  1. / 2. * ( a1 * h1 * V1.at(2) + a2 * h2 * V2.at(2) + a3 * h3 * V3.at(2) + a4 * h4 * V4.at(2) );
     jacobianMatrix.at(3, 3) =  1. / 2. * ( a1 * h1 * V1.at(3) + a2 * h2 * V2.at(3) + a3 * h3 * V3.at(3) + a4 * h4 * V4.at(3) );
+    return jacobianMatrix;
 }
 
 void
@@ -493,10 +367,10 @@ MITC4Shell :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     bool drillType = this->giveStructuralCrossSection()->give( CS_DrillingType, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0) );
     if ( drillType == 1 ) {
         double relDrillCoeff = this->giveStructuralCrossSection()->give( CS_RelDrillingStiffness, this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0) );
-        FloatArray n;
-        IntArray drillDofs = {
-            6, 12, 18, 24
-        };
+        if ( relDrillCoeff == 0.0 ) {
+            relDrillCoeff = 0.001; // default
+        }
+
         int j = 1;
         while ( answer.at(j, j) == 0 ) {
             j++;
@@ -509,34 +383,27 @@ MITC4Shell :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
             }
         }
 
-        if ( relDrillCoeff == 0.0 ) {
-            relDrillCoeff = 0.001; // default
-        }
         drillCoeff *= relDrillCoeff;
 
+        IntArray drillDofs = {6, 12, 18, 24};
+        auto drillStiffness = eye<4>() * drillCoeff;
+#if 0
         FloatMatrix drillStiffness;
-        drillStiffness.resize(4, 4);
-        drillStiffness.zero();
-        for ( int i = 1; i <= 4; i++ ) {
-            drillStiffness.at(i, i) = drillCoeff;
+        for ( auto &gp : *integrationRulesArray [ 0 ] ) {
+            double dV = this->computeVolumeAround(gp);
+            // double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+            double coeff = drillCoeff;
+            if ( this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp)> 0)
+                drillCoeff *= this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+            // Drilling stiffness is here for improved numerical properties
+            this->interp_lin.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+            for ( int j = 0; j < 4; j++ ) {
+                n[j] -= 0.25;
+            }
+            drillStiffness.plusDyadSymmUpper(n, coeff * dV);
         }
-
-        /*
-         * for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
-         *  double dV = this->computeVolumeAround(gp);
-         *  // double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
-         *  double coeff = drillCoeff;
-         *  if ( this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp)> 0)
-         *      drillCoeff *= this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
-         *  // Drilling stiffness is here for improved numerical properties
-         *  this->interp_lin.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
-         *  for ( int j = 0; j < 4; j++ ) {
-         *      n(j) -= 0.25;
-         *  }
-         *  drillStiffness.plusDyadSymmUpper(n, coeff * dV);
-         *  }*/
-
-        // drillStiffness.symmetrized();
+        drillStiffness.symmetrized();
+#endif
         answer.assemble(drillStiffness, drillDofs);
     }
 }
@@ -558,22 +425,22 @@ MITC4Shell :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int 
         this->computeVectorOf(VM_Total, tStep, tmp);
         drillUnknowns.beSubArrayOf(tmp, drillDofs);
 
-        /*
-         * for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
-         *  double dV = this->computeVolumeAround(gp);
-         *  // double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
-         *  double coeff = drillCoeff;
-         *  if ( this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp)> 0)
-         *      drillCoeff *= this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
-         *
-         *      this->interp_lin.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
-         *  for ( int j = 0; j < 4; j++ ) {
-         *      n(j) -= 0.25;
-         *  }
-         *  double dtheta = n.dotProduct(drillUnknowns);
-         *  drillMoment.add(coeff * dV * dtheta, n);
-         * }
-         */
+#if 0
+        for ( auto &gp : *integrationRulesArray [ 0 ] ) {
+            double dV = this->computeVolumeAround(gp);
+            // double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+            double coeff = drillCoeff;
+            if ( this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp)> 0)
+                drillCoeff *= this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
+         
+            this->interp_lin.evalN( n, gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
+            for ( int j = 0; j < 4; j++ ) {
+                n[j] -= 0.25;
+            }
+            double dtheta = n.dotProduct(drillUnknowns);
+            drillMoment.add(coeff * dV * dtheta, n);
+         }
+#endif
 
         FloatMatrix drillStiffness;
         drillStiffness.resize(4, 4);
@@ -593,150 +460,131 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
 // Returns the [6x20] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-    FloatArray h(4);
-    FloatMatrix jacobianMatrix(3, 3);
-    FloatMatrix dn(4, 2);
-    FloatMatrix dndx(4, 2);
+    //auto [c1, c2, c3, c4] = this->giveNodeCoordinates();
+    auto c = this->giveNodeCoordinates();
+    auto c1 = c[0], c2 = c[1], c3 = c[2], c4 = c[3];
 
-    answer.resize(6, 24);
-    // get node coordinates
-    double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
-    this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
-
-    // get gp coordinates
     double r1 = gp->giveNaturalCoordinate(1);
     double r2 = gp->giveNaturalCoordinate(2);
     double r3 = gp->giveNaturalCoordinate(3);
+    FloatArrayF<3> lcoords = {r1, r2, r3};
 
-    FloatArray lcoords(3);
-    lcoords.at(1) = r1;
-    lcoords.at(2) = r2;
-    lcoords.at(3) = r3;
+    //auto [a1, a2, a3, a4] = this->giveThickness();
+    auto a = this->giveThickness();
+    double a1 = a[0], a2 = a[1], a3 = a[2], a4 = a[3];
 
-    // get director vector
-    FloatArray V1, V2, V3, V4;
-    this->giveLocalDirectorVectors(V1, V2, V3, V4);
+    //auto h = interp_lin.evalN(lcoords);
+    //auto dn = interp_lin.evaldNdxi(lcoords);
 
-    // get thickness
-    double a1, a2, a3, a4;
-    this->giveThickness(a1, a2, a3, a4);
+    //auto [hkx, hky] = this->givedNdx(lcoords);
+    auto hk = this->givedNdx(lcoords);
+    auto hkx = hk[0], hky = hk[1];
 
-    interp_lin.evalN( h, lcoords,  FEIElementGeometryWrapper(this) );
-    interp_lin.evaldNdxi(dn, lcoords, FEIElementGeometryWrapper(this) );
+    auto J = this->giveJacobian(lcoords);
+    auto invJ = inv(J);
+    double sb = 2 * invJ.at(1, 1) * invJ.at(3, 3);
+    double sa = 2 * invJ.at(1, 2) * invJ.at(3, 3);
+    double cb = 2 * invJ.at(2, 1) * invJ.at(3, 3);
+    double ca = 2 * invJ.at(2, 2) * invJ.at(3, 3);
 
-    FloatArray hkx, hky;
-    this->givedNdx(hkx, hky, lcoords);
+    //auto [V1, V2, V3, V4] = this->giveLocalDirectorVectors();
+    auto V = this->giveLocalDirectorVectors();
+    auto V1 = V[0], V2 = V[1], V3 = V[2], V4 = V[3];
 
-    // Jacobian Matrix
-    this->giveJacobian(lcoords, jacobianMatrix);
-    FloatMatrix inv(3, 3);
-    FloatMatrix inv2(2, 2);
-    inv.beInverseOf(jacobianMatrix);
+    FloatArrayF<3> e2 = {0., 1., 0.};
 
-    double sb = 2 * inv.at(1, 1) * inv.at(3, 3);
-    double sa = 2 * inv.at(1, 2) * inv.at(3, 3);
-    double cb = 2 * inv.at(2, 1) * inv.at(3, 3);
-    double ca = 2 * inv.at(2, 2) * inv.at(3, 3);
+    auto V11 = normalize(cross(e2, V1));
+    auto V12 = normalize(cross(e2, V2));
+    auto V13 = normalize(cross(e2, V3));
+    auto V14 = normalize(cross(e2, V4));
 
-    FloatArray e2 = {
-        0, 1, 0
-    };
+    auto V21 = cross(V1, V11);
+    auto V22 = cross(V2, V12);
+    auto V23 = cross(V3, V13);
+    auto V24 = cross(V4, V14);
 
-    FloatArray V11(3), V12(3), V13(3), V14(3), V21(3), V22(3), V23(3), V24(3);
-    V11.beVectorProductOf(e2, V1);
-    V11.normalize();
-    V12.beVectorProductOf(e2, V2);
-    V12.normalize();
-    V13.beVectorProductOf(e2, V3);
-    V13.normalize();
-    V14.beVectorProductOf(e2, V4);
-    V14.normalize();
-
-    V21.beVectorProductOf(V1, V11);
-    V22.beVectorProductOf(V2, V12);
-    V23.beVectorProductOf(V3, V13);
-    V24.beVectorProductOf(V4, V14);
-
-
+    answer.resize(6, 24);
     answer.zero();
+
     answer.at(4, 1) = 1. / 32. * ( ( a1 * V1.at(1) + a2 * V2.at(1) ) * ( cb * ( 1. + r2 ) ) + ( a1 * V1.at(1) + a4 * V4.at(1) ) * ( ca * ( 1. + r1 ) ) );
     answer.at(4, 2) = 1. / 32. * ( ( a1 * V1.at(2) + a2 * V2.at(2) ) * ( cb * ( 1. + r2 ) ) + ( a1 * V1.at(2) + a4 * V4.at(2) ) * ( ca * ( 1. + r1 ) ) );
     answer.at(4, 3) = 1. / 32. * ( ( a1 * V1.at(3) + a2 * V2.at(3) ) * ( cb * ( 1. + r2 ) ) + ( a1 * V1.at(3) + a4 * V4.at(3) ) * ( ca * ( 1. + r1 ) ) );
-    answer.at(4, 4) = -a1 / 32. * ( ( V21.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( cb * ( 1. + r2 ) ) ) + ( V21.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( ca * ( 1. + r1 ) ) ) );
-    answer.at(4, 5) = a1 / 32. * ( ( V11.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( cb * ( 1. + r2 ) ) ) + ( V11.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( ca * ( 1. + r1 ) ) ) );
-
+    answer.at(4, 4) = -a1 / 32. * ( ( dot(V21, c1 - c2) * ( cb * ( 1. + r2 ) ) ) + ( dot(V21, c1 - c4) * ( ca * ( 1. + r1 ) ) ) );
+    answer.at(4, 5) = a1 / 32. * ( ( dot(V11, c1 - c2) * ( cb * ( 1. + r2 ) ) ) + ( dot(V11, c1 - c4) * ( ca * ( 1. + r1 ) ) ) );
+    
     answer.at(4, 7) = 1. / 32. * ( -( a1 * V1.at(1) + a2 * V2.at(1) ) * ( cb * ( 1. + r2 ) ) + ( a2 * V2.at(1) + a3 * V3.at(1) ) * ( ca * ( 1. - r1 ) ) );
     answer.at(4, 8) = 1. / 32. * ( -( a1 * V1.at(2) + a2 * V2.at(2) ) * ( cb * ( 1. + r2 ) ) + ( a2 * V2.at(2) + a3 * V3.at(2) ) * ( ca * ( 1. - r1 ) ) );
     answer.at(4, 9) = 1. / 32. * ( -( a1 * V1.at(3) + a2 * V2.at(3) ) * ( cb * ( 1. + r2 ) ) + ( a2 * V2.at(3) + a3 * V3.at(3) ) * ( ca * ( 1. - r1 ) ) );
-    answer.at(4, 10) = -a1 / 32. * ( ( V21.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( cb * ( 1. + r2 ) ) ) + ( V21.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( ca * ( 1. - r1 ) ) ) );
-    answer.at(4, 11) = a1 / 32. * ( ( V11.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( cb * ( 1. + r2 ) ) ) + ( V11.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( ca * ( 1. - r1 ) ) ) );
+    answer.at(4, 10) = -a1 / 32. * ( ( dot(V21, c1 - c2) * ( cb * ( 1. + r2 ) ) ) + ( dot(V21, c2 - c3) * ( ca * ( 1. - r1 ) ) ) );
+    answer.at(4, 11) = a1 / 32. * ( ( dot(V11, c1 - c2) * ( cb * ( 1. + r2 ) ) ) + ( dot(V11, c2 - c3) * ( ca * ( 1. - r1 ) ) ) );
 
     answer.at(4, 13) = 1. / 32. * ( -( a3 * V3.at(1) + a4 * V4.at(1) ) * ( cb * ( 1. - r2 ) ) - ( a2 * V2.at(1) + a3 * V3.at(1) ) * ( ca * ( 1. - r1 ) ) );
     answer.at(4, 14) = 1. / 32. * ( -( a3 * V3.at(2) + a4 * V4.at(2) ) * ( cb * ( 1. - r2 ) ) - ( a2 * V2.at(2) + a3 * V3.at(2) ) * ( ca * ( 1. - r1 ) ) );
     answer.at(4, 15) = 1. / 32. * ( -( a3 * V3.at(3) + a4 * V4.at(3) ) * ( cb * ( 1. - r2 ) ) - ( a2 * V2.at(3) + a3 * V3.at(3) ) * ( ca * ( 1. - r1 ) ) );
-    answer.at(4, 16) = -a1 / 32. * ( ( V21.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( cb * ( 1. - r2 ) ) ) + ( V21.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( ca * ( 1. - r1 ) ) ) );
-    answer.at(4, 17) = a1 / 32. * ( ( V11.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( cb * ( 1. - r2 ) ) ) + ( V11.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( ca * ( 1. - r1 ) ) ) );
+    answer.at(4, 16) = -a1 / 32. * ( ( dot(V21, c4 - c3) * ( cb * ( 1. - r2 ) ) ) + ( dot(V21, c2 - c3) * ( ca * ( 1. - r1 ) ) ) );
+    answer.at(4, 17) = a1 / 32. * ( ( dot(V11, c4 - c3) * ( cb * ( 1. - r2 ) ) ) + ( dot(V11, c2 - c3) * ( ca * ( 1. - r1 ) ) ) );
 
     answer.at(4, 19) = 1. / 32. * ( ( a3 * V3.at(1) + a4 * V4.at(1) ) * ( cb * ( 1. - r2 ) ) - ( a1 * V1.at(1) + a4 * V4.at(1) ) * ( ca * ( 1. + r1 ) ) );
     answer.at(4, 20) = 1. / 32. * ( ( a3 * V3.at(2) + a4 * V4.at(2) ) * ( cb * ( 1. - r2 ) ) - ( a1 * V1.at(2) + a4 * V4.at(2) ) * ( ca * ( 1. + r1 ) ) );
     answer.at(4, 21) = 1. / 32. * ( ( a3 * V3.at(3) + a4 * V4.at(3) ) * ( cb * ( 1. - r2 ) ) - ( a1 * V1.at(3) + a4 * V4.at(3) ) * ( ca * ( 1. + r1 ) ) );
-    answer.at(4, 22) = -a1 / 32. * ( ( V21.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( cb * ( 1. - r2 ) ) ) + ( V21.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( ca * ( 1. + r1 ) ) ) );
-    answer.at(4, 23) = a1 / 32. * ( ( V11.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( cb * ( 1. - r2 ) ) ) + ( V11.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( ca * ( 1. + r1 ) ) ) );
+    answer.at(4, 22) = -a1 / 32. * ( ( dot(V21, c4 - c3) * ( cb * ( 1. - r2 ) ) ) + ( dot(V21, c1 - c4) * ( ca * ( 1. + r1 ) ) ) );
+    answer.at(4, 23) = a1 / 32. * ( ( dot(V11, c4 - c3) * ( cb * ( 1. - r2 ) ) ) + ( dot(V11, c1 - c4) * ( ca * ( 1. + r1 ) ) ) );
 
     answer.at(5, 1) = 1. / 32. * ( ( a1 * V1.at(1) + a2 * V2.at(1) ) * ( sb * ( 1. + r2 ) ) + ( a1 * V1.at(1) + a4 * V4.at(1) ) * ( sa * ( 1. + r1 ) ) );
     answer.at(5, 2) = 1. / 32. * ( ( a1 * V1.at(2) + a2 * V2.at(2) ) * ( sb * ( 1. + r2 ) ) + ( a1 * V1.at(2) + a4 * V4.at(2) ) * ( sa * ( 1. + r1 ) ) );
     answer.at(5, 3) = 1. / 32. * ( ( a1 * V1.at(3) + a2 * V2.at(3) ) * ( sb * ( 1. + r2 ) ) + ( a1 * V1.at(3) + a4 * V4.at(3) ) * ( sa * ( 1. + r1 ) ) );
-    answer.at(5, 4) = -a1 / 32. * ( ( V21.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( sb * ( 1. + r2 ) ) ) + ( V21.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( sa * ( 1. + r1 ) ) ) );
-    answer.at(5, 5) = a1 / 32. * ( ( V11.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( sb * ( 1. + r2 ) ) ) + ( V11.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( sa * ( 1. + r1 ) ) ) );
+    answer.at(5, 4) = -a1 / 32. * ( ( dot(V21, c1 - c2) * ( sb * ( 1. + r2 ) ) ) + ( dot(V21, c1 - c4) * ( sa * ( 1. + r1 ) ) ) );
+    answer.at(5, 5) = a1 / 32. * ( ( dot(V11, c1 - c2) * ( sb * ( 1. + r2 ) ) ) + ( dot(V11, c1 - c4) * ( sa * ( 1. + r1 ) ) ) );
 
     answer.at(5, 7) = 1. / 32. * ( -( a1 * V1.at(1) + a2 * V2.at(1) ) * ( sb * ( 1. + r2 ) ) + ( a2 * V2.at(1) + a3 * V3.at(1) ) * ( sa * ( 1. - r1 ) ) );
     answer.at(5, 8) = 1. / 32. * ( -( a1 * V1.at(2) + a2 * V2.at(2) ) * ( sb * ( 1. + r2 ) ) + ( a2 * V2.at(2) + a3 * V3.at(2) ) * ( sa * ( 1. - r1 ) ) );
     answer.at(5, 9) = 1. / 32. * ( -( a1 * V1.at(3) + a2 * V2.at(3) ) * ( sb * ( 1. + r2 ) ) + ( a2 * V2.at(3) + a3 * V3.at(3) ) * ( sa * ( 1. - r1 ) ) );
-    answer.at(5, 10) = -a1 / 32. * ( ( V21.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( sb * ( 1. + r2 ) ) ) + ( V21.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( sa * ( 1. - r1 ) ) ) );
-    answer.at(5, 11) = a1 / 32. * ( ( V11.dotProduct({ x1 - x2, y1 - y2, z1 - z2 }) * ( sb * ( 1. + r2 ) ) ) + ( V11.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( sa * ( 1. - r1 ) ) ) );
+    answer.at(5, 10) = -a1 / 32. * ( ( dot(V21, c1 - c2) * ( sb * ( 1. + r2 ) ) ) + ( dot(V21, c2 - c3) * ( sa * ( 1. - r1 ) ) ) );
+    answer.at(5, 11) = a1 / 32. * ( ( dot(V11, c1 - c2) * ( sb * ( 1. + r2 ) ) ) + ( dot(V11, c2 - c3) * ( sa * ( 1. - r1 ) ) ) );
 
     answer.at(5, 13) = 1. / 32. * ( -( a3 * V3.at(1) + a4 * V4.at(1) ) * ( sb * ( 1. - r2 ) ) - ( a2 * V2.at(1) + a3 * V3.at(1) ) * ( sa * ( 1. - r1 ) ) );
     answer.at(5, 14) = 1. / 32. * ( -( a3 * V3.at(2) + a4 * V4.at(2) ) * ( sb * ( 1. - r2 ) ) - ( a2 * V2.at(2) + a3 * V3.at(2) ) * ( sa * ( 1. - r1 ) ) );
     answer.at(5, 15) = 1. / 32. * ( -( a3 * V3.at(3) + a4 * V4.at(3) ) * ( sb * ( 1. - r2 ) ) - ( a2 * V2.at(3) + a3 * V3.at(3) ) * ( sa * ( 1. - r1 ) ) );
-    answer.at(5, 16) = -a1 / 32. * ( ( V21.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( sb * ( 1. - r2 ) ) ) + ( V21.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( sa * ( 1. - r1 ) ) ) );
-    answer.at(5, 17) = a1 / 32. * ( ( V11.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( sb * ( 1. - r2 ) ) ) + ( V11.dotProduct({ x2 - x3, y2 - y3, z2 - z3 }) * ( sa * ( 1. - r1 ) ) ) );
+    answer.at(5, 16) = -a1 / 32. * ( ( dot(V21, c4 - c3) * ( sb * ( 1. - r2 ) ) ) + ( dot(V21, c2 - c3) * ( sa * ( 1. - r1 ) ) ) );
+    answer.at(5, 17) = a1 / 32. * ( ( dot(V11, c4 - c3) * ( sb * ( 1. - r2 ) ) ) + ( dot(V11, c2 - c3) * ( sa * ( 1. - r1 ) ) ) );
 
     answer.at(5, 19) = 1. / 32. * ( ( a3 * V3.at(1) + a4 * V4.at(1) ) * ( sb * ( 1. - r2 ) ) - ( a1 * V1.at(1) + a4 * V4.at(1) ) * ( sa * ( 1. + r1 ) ) );
     answer.at(5, 20) = 1. / 32. * ( ( a3 * V3.at(2) + a4 * V4.at(2) ) * ( sb * ( 1. - r2 ) ) - ( a1 * V1.at(2) + a4 * V4.at(2) ) * ( sa * ( 1. + r1 ) ) );
     answer.at(5, 21) = 1. / 32. * ( ( a3 * V3.at(3) + a4 * V4.at(3) ) * ( sb * ( 1. - r2 ) ) - ( a1 * V1.at(3) + a4 * V4.at(3) ) * ( sa * ( 1. + r1 ) ) );
-    answer.at(5, 22) = -a1 / 32. * ( ( V21.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( sb * ( 1. - r2 ) ) ) + ( V21.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( sa * ( 1. + r1 ) ) ) );
-    answer.at(5, 23) = a1 / 32. * ( ( V11.dotProduct({ x4 - x3, y4 - y3, z4 - z3 }) * ( sb * ( 1. - r2 ) ) ) + ( V11.dotProduct({ x1 - x4, y1 - y4, z1 - z4 }) * ( sa * ( 1. + r1 ) ) ) );
-
-
+    answer.at(5, 22) = -a1 / 32. * ( ( dot(V21, c4 - c3) * ( sb * ( 1. - r2 ) ) ) + ( dot(V21, c1 - c4) * ( sa * ( 1. + r1 ) ) ) );
+    answer.at(5, 23) = a1 / 32. * ( ( dot(V11, c4 - c3) * ( sb * ( 1. - r2 ) ) ) + ( dot(V11, c1 - c4) * ( sa * ( 1. + r1 ) ) ) );
 
     answer.at(1, 1) = hkx.at(1);
-    answer.at(1, 4) = -r3 / 2. *a1 *hkx.at(1) * V21.at(1);
-    answer.at(1, 5) = r3 / 2. *a1 *hkx.at(1) * V11.at(1);
+    answer.at(1, 4) = -r3 / 2. * a1 * hkx.at(1) * V21.at(1);
+    answer.at(1, 5) = r3 / 2. * a1 * hkx.at(1) * V11.at(1);
+
     answer.at(1, 7) = hkx.at(2);
-    answer.at(1, 10) = -r3 / 2. *a2 *hkx.at(2) * V22.at(1);
-    answer.at(1, 11) = r3 / 2. *a2 *hkx.at(2) * V12.at(1);
-    answer.at(1, 13) =  hkx.at(3);
-    answer.at(1, 16) = -r3 / 2. *a3 *hkx.at(3) * V23.at(1);
-    answer.at(1, 17) = r3 / 2. *a3 *hkx.at(3) * V13.at(1);
+    answer.at(1, 10) = -r3 / 2. * a2 * hkx.at(2) * V22.at(1);
+    answer.at(1, 11) = r3 / 2. * a2 * hkx.at(2) * V12.at(1);
+
+    answer.at(1, 13) = hkx.at(3);
+    answer.at(1, 16) = -r3 / 2. * a3 * hkx.at(3) * V23.at(1);
+    answer.at(1, 17) = r3 / 2. * a3 * hkx.at(3) * V13.at(1);
+
     answer.at(1, 19) = hkx.at(4);
-    answer.at(1, 22) = -r3 / 2. *a4 *hkx.at(4) * V24.at(1);
-    answer.at(1, 23) = r3 / 2. *a4 *hkx.at(4) * V14.at(1);
+    answer.at(1, 22) = -r3 / 2. * a4 * hkx.at(4) * V24.at(1);
+    answer.at(1, 23) = r3 / 2. * a4 * hkx.at(4) * V14.at(1);
 
     answer.at(2, 2) = hky.at(1);
-    answer.at(2, 4) = -r3 / 2. *a1 *hky.at(1) * V21.at(2);
-    answer.at(2, 5) = r3 / 2. *a1 *hky.at(1) * V11.at(2);
+    answer.at(2, 4) = -r3 / 2. * a1 * hky.at(1) * V21.at(2);
+    answer.at(2, 5) = r3 / 2. * a1 * hky.at(1) * V11.at(2);
 
     answer.at(2, 8) = hky.at(2);
-    answer.at(2, 10) = -r3 / 2. *a2 *hky.at(2) * V22.at(2);
-    answer.at(2, 11) = r3 / 2. *a2 *hky.at(2) * V12.at(2);
+    answer.at(2, 10) = -r3 / 2. * a2 * hky.at(2) * V22.at(2);
+    answer.at(2, 11) = r3 / 2. * a2 * hky.at(2) * V12.at(2);
 
     answer.at(2, 14) = hky.at(3);
-    answer.at(2, 16) = -r3 / 2. *a3 *hky.at(3) * V23.at(2);
-    answer.at(2, 17) = r3 / 2. *a3 *hky.at(3) * V13.at(2);
+    answer.at(2, 16) = -r3 / 2. * a3 * hky.at(3) * V23.at(2);
+    answer.at(2, 17) = r3 / 2. * a3 * hky.at(3) * V13.at(2);
 
     answer.at(2, 20) = hky.at(4);
-    answer.at(2, 22) = -r3 / 2. *a4 *hky.at(4) * V24.at(2);
-    answer.at(2, 23) = r3 / 2. *a4 *hky.at(4) * V14.at(2);
+    answer.at(2, 22) = -r3 / 2. * a4 * hky.at(4) * V24.at(2);
+    answer.at(2, 23) = r3 / 2. * a4 * hky.at(4) * V14.at(2);
 
     answer.at(6, 1) = hky.at(1);
     answer.at(6, 2) = hkx.at(1);
@@ -759,98 +607,64 @@ MITC4Shell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     answer.at(6, 23) = r3 / 2. * a4 * ( hky.at(4) * V14.at(1) + hky.at(4) * V14.at(2) );
 }
 
-void
-MITC4Shell :: giveThickness(double &a1, double &a2, double &a3, double &a4)
-{
-    FloatArray *c1, *c2, *c3, *c4;
-    c1 = this->giveNode(1)->giveCoordinates();
-    c2 = this->giveNode(2)->giveCoordinates();
-    c3 = this->giveNode(3)->giveCoordinates();
-    c4 = this->giveNode(4)->giveCoordinates();
 
-    a1 = this->giveCrossSection()->give(CS_Thickness, * c1, this, false);
-    a2 = this->giveCrossSection()->give(CS_Thickness, * c2, this, false);
-    a3 = this->giveCrossSection()->give(CS_Thickness, * c3, this, false);
-    a4 = this->giveCrossSection()->give(CS_Thickness, * c4, this, false);
+std::array<double, 4>
+MITC4Shell :: giveThickness()
+{
+    const auto &c1 = this->giveNode(1)->giveCoordinates();
+    const auto &c2 = this->giveNode(2)->giveCoordinates();
+    const auto &c3 = this->giveNode(3)->giveCoordinates();
+    const auto &c4 = this->giveNode(4)->giveCoordinates();
+
+    return {
+        this->giveCrossSection()->give(CS_Thickness, c1, this, false),
+        this->giveCrossSection()->give(CS_Thickness, c2, this, false),
+        this->giveCrossSection()->give(CS_Thickness, c3, this, false),
+        this->giveCrossSection()->give(CS_Thickness, c4, this, false),
+    };
 }
 
 
-const FloatMatrix *
-MITC4Shell :: computeGtoLRotationMatrix()
-// Returns the rotation matrix of the receiver of the size [3,3]
-// coords(local) = T * coords(global)
-//
-// local coordinate (described by vector triplet e1',e2',e3') is defined as follows:
-//
-// e1'    : [N4-N3]    Ni - means i - th node
-// help   : [N2-N3]
-// e3'    : e1' x help
-// e2'    : e3' x e1'
+void
+MITC4Shell :: postInitialize()
 {
-    if ( !GtoLRotationMatrix.isNotEmpty() ) {
-        FloatArray e1, e2, e3;
+    NLStructuralElement :: postInitialize();
 
+    auto e = this->computeLocalBaseVectors();
 
-        this->computeLocalBaseVectors(e1, e2, e3);
-
-        GtoLRotationMatrix.resize(3, 3);
-
-        for ( int i = 1; i <= 3; i++ ) {
-            GtoLRotationMatrix.at(1, i) = e1.at(i);
-            GtoLRotationMatrix.at(2, i) = e2.at(i);
-            GtoLRotationMatrix.at(3, i) = e3.at(i);
-        }
+    for ( int i = 1; i <= 3; i++ ) {
+        GtoLRotationMatrix.at(1, i) = e[0].at(i);
+        GtoLRotationMatrix.at(2, i) = e[1].at(i);
+        GtoLRotationMatrix.at(3, i) = e[2].at(i);
     }
-
-    return & GtoLRotationMatrix;
 }
 
-void
-MITC4Shell :: computeLocalBaseVectors(FloatArray &e1, FloatArray &e2, FloatArray &e3)
+std::array<FloatArrayF<3>, 3>
+MITC4Shell :: computeLocalBaseVectors()
 {
-    FloatArray help;
-    FloatArray coordA, coordB;
-
     // compute A - (node2+node3)/2
-    coordA.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
-    coordA.times(0.5);
-    coordA.add( * this->giveNode(3)->giveCoordinates() );
-
+    auto coordA = 0.5 * ( FloatArrayF<3>(this->giveNode(2)->giveCoordinates()) + FloatArrayF<3>(this->giveNode(3)->giveCoordinates()) );
     // compute B - (node1+node4)/2
-    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(4)->giveCoordinates() );
-    coordB.times(0.5);
-    coordB.add( * this->giveNode(4)->giveCoordinates() );
-
+    auto coordB = 0.5 * ( FloatArrayF<3>(this->giveNode(1)->giveCoordinates()) + FloatArrayF<3>(this->giveNode(4)->giveCoordinates()) );
     // compute e1' = [B-A]
-    e1.beDifferenceOf(coordB, coordA);
-
+    auto e1 = normalize(coordB - coordA);
 
     // compute A - (node3+node4)/2
-    coordA.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(3)->giveCoordinates() );
-    coordA.times(0.5);
-    coordA.add( * this->giveNode(3)->giveCoordinates() );
-
+    auto coordC = 0.5 * ( FloatArrayF<3>(this->giveNode(4)->giveCoordinates()) + FloatArrayF<3>(this->giveNode(3)->giveCoordinates()) );
     // compute B - (node2+node1)/2
-    coordB.beDifferenceOf( * this->giveNode(1)->giveCoordinates(), * this->giveNode(2)->giveCoordinates() );
-    coordB.times(0.5);
-    coordB.add( * this->giveNode(2)->giveCoordinates() );
+    auto coordD = 0.5 * ( FloatArrayF<3>(this->giveNode(1)->giveCoordinates()) + FloatArrayF<3>(this->giveNode(2)->giveCoordinates()) );
 
-    // compute help = [B-A]
-    help.beDifferenceOf(coordB, coordA);
-
-    // let us normalize e1'
-    e1.normalize();
-
+    // compute help = [D-C]
+    auto help = coordD - coordC;
     // compute e3' : vector product of e1' x help
-    e3.beVectorProductOf(e1, help);
-    e3.normalize();
-
+    auto e3 = normalize(cross(e1, help));
     // now from e3' x e1' compute e2'
-    e2.beVectorProductOf(e3, e1);
+    auto e2 = cross(e3, e1);
+    return {e1, e2, e3};
 }
 
-void
-MITC4Shell :: computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix &answer2, FloatMatrix &answer3, FloatMatrix &answer4)
+std::array<FloatMatrixF<3,3>, 4>
+MITC4Shell :: computeLToDirectorRotationMatrix()
 // Returns the rotation matrix of the reciever of the size [3,3]
 // {alpha_i,beta_i} = Ti * {rotL_xi, rotL_yi, rotL_zi}
 //      alpha_i, beta_i - rotations about the components of director vector at node i
@@ -863,107 +677,47 @@ MITC4Shell :: computeLToDirectorRotationMatrix(FloatMatrix &answer1, FloatMatrix
 // e3'    : e1' x help
 // e2'    : e3' x e1'
 {
-    FloatArray e1, e2, e3;
+    //auto [e1, e2, e3, e4] = this->computeLocalBaseVectors();
+    auto e = this->computeLocalBaseVectors();
+    auto V = this->giveDirectorVectors();
 
-    this->computeLocalBaseVectors(e1, e2, e3);
+    std::array<FloatMatrixF<3,3>, 4> answer;
+    for (int i = 0; i < 4; ++i) {
+        auto Ve = normalize(cross(e[1], V[i]));
+        auto VV = cross(V[i], Ve);
 
-    // get director vector
-    FloatArray V1, V2, V3, V4;
-    this->giveDirectorVectors(V1, V2, V3, V4);
+        answer[i].at(1, 1) = dot(Ve, e[0]);
+        answer[i].at(1, 2) = dot(Ve, e[1]);
+        answer[i].at(1, 3) = dot(Ve, e[2]);
 
-    FloatArray V11(3), V12(3), V13(3), V14(3), V21(3), V22(3), V23(3), V24(3);
-    V11.beVectorProductOf(e2, V1);
-    V11.normalize();
-    V12.beVectorProductOf(e2, V2);
-    V12.normalize();
-    V13.beVectorProductOf(e2, V3);
-    V13.normalize();
-    V14.beVectorProductOf(e2, V4);
-    V14.normalize();
+        answer[i].at(2, 1) = dot(VV, e[0]);
+        answer[i].at(2, 2) = dot(VV, e[1]);
+        answer[i].at(2, 3) = dot(VV, e[2]);
 
-    V21.beVectorProductOf(V1, V11);
-    V22.beVectorProductOf(V2, V12);
-    V23.beVectorProductOf(V3, V13);
-    V24.beVectorProductOf(V4, V14);
-
-    answer1.resize(3, 3);
-    answer2.resize(3, 3);
-    answer3.resize(3, 3);
-    answer4.resize(3, 3);
-
-    answer1.at(1, 1) = V11.dotProduct(e1);
-    answer1.at(1, 2) = V11.dotProduct(e2);
-    answer1.at(1, 3) = V11.dotProduct(e3);
-    answer1.at(2, 1) = V21.dotProduct(e1);
-    answer1.at(2, 2) = V21.dotProduct(e2);
-    answer1.at(2, 3) = V21.dotProduct(e3);
-    answer1.at(3, 1) = V1.dotProduct(e1);
-    answer1.at(3, 2) = V1.dotProduct(e2);
-    answer1.at(3, 3) = V1.dotProduct(e3);
-
-    answer2.at(1, 1) = V12.dotProduct(e1);
-    answer2.at(1, 2) = V12.dotProduct(e2);
-    answer2.at(1, 3) = V12.dotProduct(e3);
-    answer2.at(2, 1) = V22.dotProduct(e1);
-    answer2.at(2, 2) = V22.dotProduct(e2);
-    answer2.at(2, 3) = V22.dotProduct(e3);
-    answer2.at(3, 1) = V2.dotProduct(e1);
-    answer2.at(3, 2) = V2.dotProduct(e2);
-    answer2.at(3, 3) = V2.dotProduct(e3);
-
-    answer3.at(1, 1) = V13.dotProduct(e1);
-    answer3.at(1, 2) = V13.dotProduct(e2);
-    answer3.at(1, 3) = V13.dotProduct(e3);
-    answer3.at(2, 1) = V23.dotProduct(e1);
-    answer3.at(2, 2) = V23.dotProduct(e2);
-    answer3.at(2, 3) = V23.dotProduct(e3);
-    answer3.at(3, 1) = V3.dotProduct(e1);
-    answer3.at(3, 2) = V3.dotProduct(e2);
-    answer3.at(3, 3) = V3.dotProduct(e3);
-
-    answer4.at(1, 1) = V14.dotProduct(e1);
-    answer4.at(1, 2) = V14.dotProduct(e2);
-    answer4.at(1, 3) = V14.dotProduct(e3);
-    answer4.at(2, 1) = V24.dotProduct(e1);
-    answer4.at(2, 2) = V24.dotProduct(e2);
-    answer4.at(2, 3) = V24.dotProduct(e3);
-    answer4.at(3, 1) = V4.dotProduct(e1);
-    answer4.at(3, 2) = V4.dotProduct(e2);
-    answer4.at(3, 3) = V4.dotProduct(e3);
+        answer[i].at(3, 1) = dot(V[i], e[0]);
+        answer[i].at(3, 2) = dot(V[i], e[1]);
+        answer[i].at(3, 3) = dot(V[i], e[2]);
+    }
+    return answer;
 }
+
 
 bool
 MITC4Shell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [24,24]
 // r(local) = T * r(global)
 // for one node (r written transposed): {u,v,w,alpha,beta} = T * {u,v,w,r1,r2,r3}
-
 {
-    this->computeGtoLRotationMatrix();
+    auto LtoDir = this->computeLToDirectorRotationMatrix();
 
     answer.resize(24, 24);
     answer.zero();
 
-    FloatMatrix LtoDir1, LtoDir2, LtoDir3, LtoDir4;
-    this->computeLToDirectorRotationMatrix(LtoDir1, LtoDir2, LtoDir3, LtoDir4);
-
     for ( int i = 0; i <= 3; i++ ) {
         answer.setSubMatrix(GtoLRotationMatrix, i * 6 + 1, i * 6 + 1);
+        auto help = dot(LtoDir[i], GtoLRotationMatrix);
+        answer.setSubMatrix(help, i * 6 + 4, i * 6 + 4);
     }
-    ////
-    FloatMatrix help;
-
-    help.beProductOf(LtoDir1, GtoLRotationMatrix);
-    answer.setSubMatrix(help, 4, 4);
-
-    help.beProductOf(LtoDir2, GtoLRotationMatrix);
-    answer.setSubMatrix(help, 10, 10);
-
-    help.beProductOf(LtoDir3, GtoLRotationMatrix);
-    answer.setSubMatrix(help, 16, 16);
-
-    help.beProductOf(LtoDir4, GtoLRotationMatrix);
-    answer.setSubMatrix(help, 22, 22);
 
     return 1;
 }
@@ -972,92 +726,62 @@ MITC4Shell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 void
 MITC4Shell :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_3dDegeneratedShell(strain, gp, tStep);
 }
 
 
-void
-MITC4Shell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep)
-// returns characteristic tensor of the receiver at given gp and tStep
+FloatMatrix
+MITC4Shell :: giveCharacteristicTensor(CharTensor type, GaussPoint *gp, TimeStep *tStep)
 {
-    answer.resize(3, 3);
-    answer.zero();
-    this->computeGtoLRotationMatrix();
-    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
+    auto mat = dynamic_cast< StructuralMaterial * >( this->giveStructuralCrossSection()->giveMaterial(gp) );
 
     if ( type == GlobalForceTensor ) {
-        FloatArray stress, localStress, localStrain;
+        FloatArray localStress, localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
         this->computeStressVector(localStress, localStrain, gp, tStep);
-        mat->transformStressVectorTo(stress,  GtoLRotationMatrix, localStress, false);
-
-        answer.at(1, 1) = stress.at(1);
-        answer.at(2, 2) = stress.at(2);
-        answer.at(3, 3) = stress.at(3);
-        answer.at(2, 3) = stress.at(4);
-        answer.at(3, 2) = stress.at(4);
-        answer.at(1, 3) = stress.at(5);
-        answer.at(3, 1) = stress.at(5);
-        answer.at(1, 2) = stress.at(6);
-        answer.at(2, 1) = stress.at(6);
+        auto stress = mat->transformStressVectorTo(GtoLRotationMatrix, localStress, false);
+        return from_voigt_stress(stress);
     } else if ( type == GlobalStrainTensor ) {
-        FloatArray strain, localStrain;
+        FloatArray localStrain;
         this->computeStrainVector(localStrain, gp, tStep);
-        mat->transformStrainVectorTo(strain,  GtoLRotationMatrix, localStrain, false);
-
-        answer.at(1, 1) = strain.at(1);
-        answer.at(2, 2) = strain.at(2);
-        answer.at(3, 3) = strain.at(3);
-        answer.at(2, 3) = strain.at(4) / 2.;
-        answer.at(3, 2) = strain.at(4) / 2.;
-        answer.at(1, 3) = strain.at(5) / 2.;
-        answer.at(3, 1) = strain.at(5) / 2.;
-        answer.at(1, 2) = strain.at(6) / 2.;
-        answer.at(2, 1) = strain.at(6) / 2.;
+        auto strain = mat->transformStrainVectorTo(GtoLRotationMatrix, localStrain, false);
+        return from_voigt_strain(strain);
     } else {
-        OOFEM_ERROR("unsupported tensor mode");
-        exit(1);
+        throw std::runtime_error("unsupported tensor mode");
     }
 }
 
 void
 MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
 {
     FloatArray v;
-    GaussPoint *gp;
-
     fprintf(file, "element %d (%8d):\n", this->giveLabel(), number);
 
     for ( int i = 0; i < nPointsXY; i++ ) {
         fprintf(file, "  GP %d :", i + 1);
 
-        this->giveMidplaneIPValue(v, i, IST_ShellForceTensor, tStep);
         fprintf(file, "  forces     ");
-        for ( auto &val : v ) {
+        for ( auto &val : this->giveMidplaneIPValue(i, IST_ShellForceTensor, tStep) ) {
             fprintf(file, " %.4e", val);
         }
 
-        this->giveMidplaneIPValue(v, i, IST_ShellMomentTensor, tStep);
         fprintf(file, "\n          moments    ");
-        for ( auto &val : v ) {
+        for ( auto &val : this->giveMidplaneIPValue(i, IST_ShellMomentTensor, tStep) ) {
             fprintf(file, " %.4e", val);
         }
 
-        this->giveMidplaneIPValue(v, i, IST_ShellStrainTensor, tStep);
         fprintf(file, "\n          strains    ");
-        for ( auto &val : v ) {
+        for ( auto &val : this->giveMidplaneIPValue(i, IST_ShellStrainTensor, tStep) ) {
             fprintf(file, " %.4e", val);
         }
 
-        this->giveMidplaneIPValue(v, i, IST_CurvatureTensor, tStep);
         fprintf(file, "\n          curvatures ");
-        for ( auto &val : v ) {
+        for ( auto &val : this->giveMidplaneIPValue(i, IST_CurvatureTensor, tStep) ) {
             fprintf(file, " %.4e", val);
         }
 
         for ( int j = 0; j < nPointsZ; j++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * i + j);
+            auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * i + j);
 
             fprintf(file, "\n          GP %d.%d :", i + 1, j + 1);
 
@@ -1077,115 +801,80 @@ MITC4Shell :: printOutputAt(FILE *file, TimeStep *tStep)
     }
 }
 
-void
-MITC4Shell :: giveMidplaneIPValue(FloatArray &answer, int gpXY, InternalStateType type, TimeStep *tStep)
+FloatArray
+MITC4Shell :: giveMidplaneIPValue(int gpXY, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor ) {
-        FloatArray mLocal;
-        mLocal.resize(6);
-        mLocal.zero();
+        FloatArrayF<6> mLocal;
 
         for ( int i = 0; i < nPointsZ; i++ ) {
             auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY + i);
             double thickness = this->giveCrossSection()->give(CS_Thickness, gp->giveGlobalCoordinates(), this, false);
             double J = thickness / 2.0;
-            double z, w;
+            double z;
             if (  type == IST_ShellMomentTensor ) {
                 z = gp->giveNaturalCoordinates().at(3) * ( thickness / 2 );
-            } else if (  type == IST_ShellForceTensor ) {
+            } else /*if (  type == IST_ShellForceTensor )*/ {
                 z = 1;
             }
-            w = gp->giveWeight() * J * z;
+            double w = gp->giveWeight() * J * z;
 
             FloatArray localStress, localStrain;
             this->computeStrainVector(localStrain, gp, tStep);
             this->computeStressVector(localStress, localStrain, gp, tStep);
-            mLocal.add(w, localStress);
+            mLocal += w * FloatArrayF<6>(localStress);
         }
 
         // local to global
-        this->computeGtoLRotationMatrix();
-        StructuralMaterial::transformStressVectorTo(answer,  GtoLRotationMatrix, mLocal, false);
+        return StructuralMaterial::transformStressVectorTo(GtoLRotationMatrix, mLocal, false);
     } else if ( type == IST_CurvatureTensor ) {
-        FloatArray h;
-        FloatMatrix dn;
-        FloatArray coords;
-
         auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
-        coords = gp->giveNaturalCoordinates();
+        const auto &coords = gp->giveNaturalCoordinates();
 
-        FloatArray hkx, hky;
-        this->givedNdx(hkx, hky, coords);
+        //auto [hkx, hky] = this->givedNdx(coords);
+        auto hk = this->givedNdx(coords);
 
         FloatArray dofs(24);
-        FloatArray rotX(4), rotY(4);
-
         this->computeVectorOf(VM_Total, tStep, dofs);
-        for ( int i = 0; i < 4; i++ ) {
-            rotX(i) = dofs.at(i * 6 + 4);
-            rotY(i) = dofs.at(i * 6 + 5);
-        }
-        FloatArray cLocal(6);
-        cLocal.zero();
-        cLocal.at(1) = rotY.dotProduct(hkx);
-        cLocal.at(2) = -rotX.dotProduct(hky);
-        cLocal.at(6) = rotY.dotProduct(hky) - rotX.dotProduct(hkx);
 
-        StructuralMaterial::transformStrainVectorTo(answer, GtoLRotationMatrix, cLocal, false);
+        FloatArrayF<4> rotX, rotY;
+        for ( int i = 0; i < 4; i++ ) {
+            rotX[i] = dofs.at(i * 6 + 4);
+            rotY[i] = dofs.at(i * 6 + 5);
+        }
+        FloatArrayF<6> cLocal;
+        cLocal.at(1) = dot(rotY, hk[0]);
+        cLocal.at(2) = -dot(rotX, hk[1]);
+        cLocal.at(6) = dot(rotY, hk[1]) - dot(rotX, hk[0]);
+
+        return StructuralMaterial::transformStrainVectorTo(GtoLRotationMatrix, cLocal, false);
     } else if ( type == IST_ShellStrainTensor ) {
-        FloatArray coords;
         auto gp = integrationRulesArray [ 0 ]->getIntegrationPoint(nPointsZ * gpXY);
-        coords = gp->giveNaturalCoordinates();
-        coords.at(3) = 0;     //set to midplane
+        auto coords = gp->giveNaturalCoordinates();
+        coords.at(3) = 0.; //set to midplane
         GaussIntegrationRule iRule(1, this, 1, 10);
         GaussPoint midGP( &iRule, 1, coords, 1, this->giveMaterialMode() );
 
+        FloatArray answer;
         this->giveIPValue(answer, &midGP, IST_StrainTensor, tStep);
+        return answer;
     } else {
-        OOFEM_ERROR("MITC4Shell :: giveMidplaneIPValue - unknown type");
+        throw std::runtime_error("unknown type");
     }
 }
 
-void
-MITC4Shell :: givedNdx(FloatArray &hkx, FloatArray &hky, FloatArray coords)
+std::array<FloatArrayF<4>, 2>
+MITC4Shell :: givedNdx(const FloatArrayF<3> &coords)
 {
-    FloatArray h, hk1(4), hk2(4);
-    FloatMatrix dn, dndx, jacobianMatrix, inv, inv2;
+    auto dn = interp_lin.evaldNdxi(coords[{0, 1}]);
+    auto J = this->giveJacobian(coords);
+    auto invJ = inv(J);
+    auto invJ2 = invJ({0, 1}, {0, 1});
+    auto dndx = dot(invJ2, dn);
 
-    interp_lin.evalN( h, coords,  FEIElementGeometryWrapper(this) );
-    interp_lin.evaldNdxi(dn, coords, FEIElementGeometryWrapper(this) );
-
-    // derivatives of interpolation functions
-    // dh(r1,r2)/dr1
-    hk1.at(1) =  dn.at(1, 1);
-    hk1.at(2) =  dn.at(2, 1);
-    hk1.at(3) =  dn.at(3, 1);
-    hk1.at(4) =  dn.at(4, 1);
-
-    // dh(r1,r2)/dr2
-    hk2.at(1) =  dn.at(1, 2);
-    hk2.at(2) =  dn.at(2, 2);
-    hk2.at(3) =  dn.at(3, 2);
-    hk2.at(4) =  dn.at(4, 2);
-
-    // Jacobian Matrix
-    this->giveJacobian(coords, jacobianMatrix);
-    inv.beInverseOf(jacobianMatrix);
-
-    inv2.beSubMatrixOf(inv, 1, 2, 1, 2);
-    dndx.beProductTOf(dn, inv2);
-
-    hkx.resize(4);
-    hkx.at(1)  = dndx.at(1, 1);
-    hkx.at(2)  = dndx.at(2, 1);
-    hkx.at(3)  = dndx.at(3, 1);
-    hkx.at(4)  = dndx.at(4, 1);
-
-    hky.resize(4);
-    hky.at(1)  = dndx.at(1, 2);
-    hky.at(2)  = dndx.at(2, 2);
-    hky.at(3)  = dndx.at(3, 2);
-    hky.at(4)  = dndx.at(4, 2);
+    auto hkx = dndx.row<0>();
+    auto hky = dndx.row<1>();
+    return {hkx, hky};
 }
 
 void
@@ -1197,40 +886,17 @@ MITC4Shell :: setupIRForMassMtrxIntegration(IntegrationRule &iRule)
 int
 MITC4Shell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    FloatMatrix globTensor;
-    CharTensor cht;
-
-    answer.resize(6);
-
-    if (  type == IST_StrainTensor ) {
-        cht = GlobalStrainTensor;
-
-        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
-
-        answer.at(1) = globTensor.at(1, 1); //xx
-        answer.at(2) = globTensor.at(2, 2); //yy
-        answer.at(3) = globTensor.at(3, 3); //zz
-        answer.at(4) = 2 * globTensor.at(2, 3); //yz
-        answer.at(5) = 2 * globTensor.at(1, 3); //xz
-        answer.at(6) = 2 * globTensor.at(1, 2); //xy
-
+    if ( type == IST_StrainTensor ) {
+        auto globTensor = this->giveCharacteristicTensor(GlobalStrainTensor, gp, tStep);
+        answer = to_voigt_strain(globTensor);
         return 1;
     } else if ( type == IST_StressTensor ) {
-        cht = GlobalForceTensor;
-
-        this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
-
-        answer.at(1) = globTensor.at(1, 1); //xx
-        answer.at(2) = globTensor.at(2, 2); //yy
-        answer.at(3) = globTensor.at(3, 3); //zz
-        answer.at(4) = globTensor.at(2, 3); //yz
-        answer.at(5) = globTensor.at(1, 3); //xz
-        answer.at(6) = globTensor.at(1, 2); //xy
-
+        auto globTensor = this->giveCharacteristicTensor(GlobalForceTensor, gp, tStep);
+        answer = to_voigt_stress(globTensor);
         return 1;
     } else if ( type == IST_ShellMomentTensor || type == IST_ShellForceTensor || type == IST_CurvatureTensor || type == IST_ShellStrainTensor ) {
         int gpnXY = ( gp->giveNumber() - 1 ) / 2;
-        this->giveMidplaneIPValue(answer, gpnXY, type, tStep);
+        answer = this->giveMidplaneIPValue(gpnXY, type, tStep);
 
         return 1;
     } else {
@@ -1246,12 +912,11 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 //does check that the point is in the element thickness
 {
     // rotate the input point Coordinate System into the element CS
-    FloatArray inputCoords_ElCS;
-    std :: vector< FloatArray >lc(3);
     FloatArray llc;
-    this->giveLocalCoordinates( inputCoords_ElCS, coords );
+    auto inputCoords_ElCS = this->giveLocalCoordinates(coords);
+    std :: vector< FloatArray >lc(3);
     for ( int _i = 0; _i < 4; _i++ ) {
-        this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
+        lc [ _i ] = this->giveLocalCoordinates(this->giveNode(_i + 1)->giveCoordinates());
     }
     bool inplane = interp_lin.global2local( llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc) ) > 0;
     answer.resize(2);
@@ -1269,11 +934,7 @@ MITC4Shell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 int
 MITC4Shell :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    //double l1 = lcoords.at(1);
-    //double l2 = lcoords.at(2);
-    //double l3 = lcoords.at(3);
     FloatMatrix N;
-    
     computeNmatrixAt(lcoords, N);
 
     answer.resize(3);
@@ -1289,8 +950,6 @@ MITC4Shell :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [5,6]
 // f(local) = T * f(global)
 {
-    this->computeGtoLRotationMatrix();
-
     answer.resize(6, 6);
     answer.zero();
 
@@ -1308,24 +967,18 @@ void
 MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                          InternalStateType type, TimeStep *tStep)
 {
-    double x1 = 0.0, x2 = 0.0, y = 0.0;
-    FloatMatrix A(3, 3);
-    FloatMatrix b, r;
+    FloatMatrixF<3,3> A;
+    std::vector<FloatArrayF<3>> r;
     FloatArray val;
-
     int size = 0;
-
     for ( GaussPoint *gp : *integrationRulesArray [ 0 ] ) {
         giveIPValue(val, gp, type, tStep);
         if ( size == 0 ) {
             size = val.giveSize();
-            b.resize(3, size);
-            r.resize(3, size);
-            A.zero();
-            r.zero();
+            r.resize(size);
         }
 
-        const FloatArray &coord = gp->giveNaturalCoordinates();
+        const auto &coord = gp->giveNaturalCoordinates();
         double u = coord.at(1);
         double v = coord.at(2);
 
@@ -1340,15 +993,20 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
         A.at(3, 3) += v * v;
 
         for ( int j = 1; j <= size; j++ ) {
-            y = val.at(j);
-            r.at(1, j) += y;
-            r.at(2, j) += y * u;
-            r.at(3, j) += y * v;
+            double y = val.at(j);
+            r[j].at(1) += y;
+            r[j].at(2) += y * u;
+            r[j].at(3) += y * v;
         }
     }
 
-    A.solveForRhs(r, b);
+    auto invA = inv(A);
+    std::vector<FloatArrayF<3>> b(size);
+    for (int i = 0; i < size; ++i) {
+        b[i] = dot(invA, r[i]);
+    }
 
+    double x1 = 0.0, x2 = 0.0;
     switch ( node ) {
     case 1:
         x1 =  1.0;
@@ -1372,7 +1030,7 @@ MITC4Shell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 
     answer.resize(size);
     for ( int j = 1; j <= size; j++ ) {
-        answer.at(j) = b.at(1, j) + x1 *b.at(2, j) + x2 *b.at(3, j);
+        answer.at(j) = b[j].at(1) + x1 * b[j].at(2) + x2 * b[j].at(3);
     }
 }
 
@@ -1405,64 +1063,57 @@ MITC4Shell :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 MITC4Shell :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    std :: vector< FloatArray >lc = {
-        FloatArray(3), FloatArray(3), FloatArray(3), FloatArray(3)
-    };
-    this->giveNodeCoordinates( lc [ 0 ].at(1), lc [ 1 ].at(1), lc [ 2 ].at(1), lc [ 3 ].at(1),
-                               lc [ 0 ].at(2), lc [ 1 ].at(2), lc [ 2 ].at(2), lc [ 3 ].at(2),
-                               lc [ 0 ].at(3), lc [ 1 ].at(3), lc [ 2 ].at(3), lc [ 3 ].at(3) );
-
-
+    auto lcF = this->giveNodeCoordinates();
+    std :: vector< FloatArray >lc;
+    lc[0] = lcF[0];
+    lc[1] = lcF[1];
+    lc[2] = lcF[2];
+    lc[3] = lcF[3];
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) );
     return detJ * gp->giveWeight();
 }
 
-/*
- * void
- * MITC4Shell :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
- * {
- * std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3), FloatArray(3)};
- * this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), lc[3].at(1),
- *                          lc[0].at(2), lc[1].at(2), lc[2].at(2), lc[3].at(2),
- *                          lc[0].at(3), lc[1].at(3), lc[2].at(3), lc[3].at(3));
- *
- * FloatArray local;
- * this->interp_lin.edgeLocal2global( local, iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc)  );
- * local.resize(3);
- * local.at(3) = 0.;
- *
- * answer = local; // MITC4 - todo
- * // answer.beProductOf(this->lcsMatrix, local);
- * }
- */
+#if 0
+void
+MITC4Shell :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    auto lc = this->giveNodeCoordinates();
+ 
+    FloatArray local;
+    this->interp_lin.edgeLocal2global( local, iEdge, gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc)  );
+    local.resize(3);
+    local.at(3) = 0.;
+ 
+    answer = local; // MITC4 - todo
+    // answer.beProductOf(this->lcsMatrix, local);
+}
+#endif
 
 int
 MITC4Shell :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
-    FloatArray e1, e2, e3, xl, yl;
-    this->computeLocalBaseVectors(e1, e2, e3);
+    auto e = this->computeLocalBaseVectors();
 
-    IntArray edgeNodes;
-    this->interp_lin.computeLocalEdgeMapping(edgeNodes, iEdge);
+    const auto &edgeNodes = this->interp_lin.computeLocalEdgeMapping(iEdge);
 
-    xl.beDifferenceOf( * this->giveNode( edgeNodes.at(2) )->giveCoordinates(), * this->giveNode( edgeNodes.at(1) )->giveCoordinates() );
+    auto n1 = FloatArrayF<3>(this->giveNode( edgeNodes.at(1) )->giveCoordinates());
+    auto n2 = FloatArrayF<3>(this->giveNode( edgeNodes.at(2) )->giveCoordinates());
 
-    xl.normalize();
-    yl.beVectorProductOf(e3, xl);
+    auto xl = normalize(n1 - n2);
+    auto yl = cross(e[2], xl);
 
     answer.resize(6, 6);
     answer.zero();
 
-    answer.at(1, 1) = answer.at(4, 4) = e1.dotProduct(xl);
-    answer.at(1, 2) = answer.at(4, 5) = e1.dotProduct(yl);
-    answer.at(1, 3) = answer.at(4, 6) = e1.dotProduct(e3);
-    answer.at(2, 1) = answer.at(5, 4) = e2.dotProduct(xl);
-    answer.at(2, 2) = answer.at(5, 5) = e2.dotProduct(yl);
-    answer.at(2, 3) = answer.at(5, 6) = e2.dotProduct(e3);
-    answer.at(3, 1) = answer.at(6, 4) = e3.dotProduct(xl);
-    answer.at(3, 2) = answer.at(6, 5) = e3.dotProduct(yl);
-    answer.at(3, 3) = answer.at(6, 6) = e3.dotProduct(e3);
-
+    answer.at(1, 1) = answer.at(4, 4) = dot(e[0], xl);
+    answer.at(1, 2) = answer.at(4, 5) = dot(e[0], yl);
+    answer.at(1, 3) = answer.at(4, 6) = dot(e[0], e[2]);
+    answer.at(2, 1) = answer.at(5, 4) = dot(e[1], xl);
+    answer.at(2, 2) = answer.at(5, 5) = dot(e[1], yl);
+    answer.at(2, 3) = answer.at(5, 6) = dot(e[1], e[2]);
+    answer.at(3, 1) = answer.at(6, 4) = dot(e[2], xl);
+    answer.at(3, 2) = answer.at(6, 5) = dot(e[2], yl);
+    answer.at(3, 3) = answer.at(6, 6) = dot(e[2], e[2]);
 
     return 1;
 }
@@ -1472,24 +1123,16 @@ MITC4Shell :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
 void
 MITC4Shell :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    const FloatArray &coords2 = sgp->giveNaturalCoordinates();
-    FloatArray coords(3);
-    coords.at(1) = coords2.at(1);
-    coords.at(2) = coords2.at(2);
-    coords.at(3) = 0.0;
+    const auto &coords2 = sgp->giveNaturalCoordinates();
+    FloatArray coords = {coords2[0], coords[1], 0.};
     this->computeNmatrixAt(coords, answer);
 }
 
 void
 MITC4Shell :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
-    int i;
-    answer.resize(24);
-    answer.zero();
     if ( iSurf == 1 ) {
-        for ( i = 1; i <= 24; i++ ) {
-            answer.at(i) = i;
-        }
+        answer.enumerate(24);
     } else {
         OOFEM_ERROR("wrong surface number");
     }
@@ -1498,31 +1141,26 @@ MITC4Shell :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 double
 MITC4Shell :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
-    double detJ, weight;
-    FloatMatrix jacobianMatrix(2, 2);
-    FloatMatrix dn;
-    FloatArray lcoords(2);
-    lcoords.at(1) = gp->giveNaturalCoordinate(1);
-    lcoords.at(2) = gp->giveNaturalCoordinate(2);
-    FloatArray x(4), y(4), z(4);
-    this->giveNodeCoordinates( x.at(1), x.at(2), x.at(3), x.at(4), y.at(1), y.at(2), y.at(3), y.at(4), z.at(1), z.at(2), z.at(3), z.at(4) );
+    FloatArrayF<2> lcoords = {
+        gp->giveNaturalCoordinate(1),
+        gp->giveNaturalCoordinate(2),
+    };
 
-    weight = gp->giveWeight();
+    auto xyz = this->giveNodeCoordinates();
+    auto dn = interp_lin.evaldNdxi(lcoords);
 
-    interp_lin.evaldNdxi(dn, lcoords, FEIElementGeometryWrapper(this) );
+    FloatMatrixF<2,2> jacobianMatrix;
+    for ( std::size_t i = 0; i < dn.cols(); i++ ) {
+        double x = xyz[i][0];
+        double y = xyz[i][1];
 
-    for ( int i = 1; i <= dn.giveNumberOfRows(); i++ ) {
-        double xl = x.at(i);
-        double yl = y.at(i);
-
-        jacobianMatrix.at(1, 1) += dn.at(i, 1) * xl;
-        jacobianMatrix.at(1, 2) += dn.at(i, 1) * yl;
-        jacobianMatrix.at(2, 1) += dn.at(i, 2) * xl;
-        jacobianMatrix.at(2, 2) += dn.at(i, 2) * yl;
+        jacobianMatrix(0, 0) += dn(0, i) * x;
+        jacobianMatrix(0, 1) += dn(0, i) * y;
+        jacobianMatrix(1, 0) += dn(1, i) * x;
+        jacobianMatrix(1, 1) += dn(1, i) * y;
     }
 
-    detJ = jacobianMatrix.giveDeterminant();
-    return detJ * weight;
+    return det(jacobianMatrix) * gp->giveWeight();
 }
 
 void

@@ -58,11 +58,9 @@ QCFullsolveddomain :: ~QCFullsolveddomain()
 // Destructor
 { }
 
-IRResultType
-QCFullsolveddomain :: initializeFrom(InputRecord *ir)
+void
+QCFullsolveddomain :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainNodes, _IFT_FullSolvedDomain_nodes);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainElements, _IFT_FullSolvedDomain_elements);
     IR_GIVE_OPTIONAL_FIELD(ir, FullSolvedDomainRadius, _IFT_FullSolvedDomain_radius);
@@ -76,8 +74,6 @@ QCFullsolveddomain :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("invalid format of FullSolvedDomainBox");
     }
 #endif
-
-    return IRRT_OK;
 }
 
 void
@@ -90,7 +86,7 @@ QCFullsolveddomain :: updateYourself()
 bool
 QCFullsolveddomain :: isNodeInside(Node *n)
 {
-    FloatArray *coordinates = n->giveCoordinates();
+    const auto &coordinates = n->giveCoordinates();
     // is tested node in FullSolvedDomainNodes
     if ( FullSolvedDomainNodes.giveSize() != 0 ) {
         for ( int i = 1; i <= FullSolvedDomainNodes.giveSize(); i++ ) {
@@ -112,11 +108,10 @@ QCFullsolveddomain :: isNodeInside(Node *n)
     // is tested node in FullSolvedDomainRadius
     if ( FullSolvedDomainRadius.giveSize() != 0 ) {
         for ( int i = 0; i <= FullSolvedDomainRadius.giveSize() / 4 - 1; i++ ) {
-            FloatArray vector;
-            vector.resize(3);
-            vector.at(1) = coordinates->at(1) - FullSolvedDomainRadius.at(4 * i + 1);
-            vector.at(2) = coordinates->at(2) - FullSolvedDomainRadius.at(4 * i + 2);
-            vector.at(3) = coordinates->at(3) - FullSolvedDomainRadius.at(4 * i + 3);
+            FloatArray vector(3);
+            vector.at(1) = coordinates.at(1) - FullSolvedDomainRadius.at(4 * i + 1);
+            vector.at(2) = coordinates.at(2) - FullSolvedDomainRadius.at(4 * i + 2);
+            vector.at(3) = coordinates.at(3) - FullSolvedDomainRadius.at(4 * i + 3);
 
 
             if ( vector.computeNorm() <= FullSolvedDomainRadius.at(4 * i + 4) ) {

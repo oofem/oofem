@@ -64,12 +64,10 @@ class MicroMaterialStatus : public StructuralMaterialStatus
 public:
     /// Constructor
     MicroMaterialStatus(GaussPoint * gp);
-    /// Destructor
-    virtual ~MicroMaterialStatus();
 
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "MicroMaterialStatus"; }
 
@@ -90,17 +88,15 @@ class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 public:
     /// Constructor
     MicroMaterial(int n, Domain * d);
-    /// Destructor
-    virtual ~MicroMaterial() {}
 
     std :: string inputFileNameMicro;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_MicroMaterial_Name; }
     const char *giveClassName() const override { return "MicroMaterial"; }
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -112,10 +108,10 @@ public:
     std::unique_ptr<EngngModel> problemMicro;
 
     /// Pointer to the macroscale domain.
-    Domain *macroDomain;
+    Domain *macroDomain = nullptr;
 
     /// Pointer to the macroscale element.
-    MacroLSpace *macroLSpaceElement;
+    MacroLSpace *macroLSpaceElement = nullptr;
 
     /// Related to numbering scheme.
     void init(void) override;
@@ -136,22 +132,22 @@ public:
     /// Array containing default equation numbers for all nodes [DofManagerNumber][DOF].
     std::vector<IntArray> microDefaultDofs;
     /// Flag signalizing whether micromaterial is used by other element.
-    bool microMatIsUsed;
+    bool microMatIsUsed = false;
 
 protected:
-    bool isDefaultNumbering;
+    bool isDefaultNumbering = true;
     /// The maximum DOFs corresponding to released all of the boundary conditions.
-    int maxNumberOfDomainEquation;
+    int maxNumberOfDomainEquation = 0;
     /// Required number of domain equations.
-    int reqNumberOfDomainEquation;
+    int reqNumberOfDomainEquation = 0;
     /// Number of DOF Managers.
-    int NumberOfDofManagers;
+    int NumberOfDofManagers = 0;
     enum EquationNumbering { AllNodes, BoundaryNodes, InteriorNodes };
-    EquationNumbering DofEquationNumbering;
+    EquationNumbering DofEquationNumbering = AllNodes;
     /// Number of equations associated with boundary nodes.
-    int totalBoundaryDofs;
+    int totalBoundaryDofs = 0;
     /// Number of equations associated with boundary nodes.
-    int totalInternalDofs;
+    int totalInternalDofs = 0;
 };
 } // end namespace oofem
 #endif // micromaterial_h

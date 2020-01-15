@@ -51,11 +51,11 @@ IntElLine2IntPen::IntElLine2IntPen(int n, Domain * d):IntElLine2(n, d)
 }
 
 
-IRResultType
-IntElLine2IntPen :: initializeFrom(InputRecord *ir)
+void
+IntElLine2IntPen :: initializeFrom(InputRecord &ir)
 {
-    this->axisymmode = ir->hasField(_IFT_IntElLine1_axisymmode);
-    IRResultType result = StructuralInterfaceElement :: initializeFrom(ir);
+    StructuralInterfaceElement :: initializeFrom(ir);
+    this->axisymmode = ir.hasField(_IFT_IntElLine1_axisymmode);
 
     // Check if node numbering is ok
 //    printf("this->dofManArray: "); this->dofManArray.printYourself();
@@ -120,9 +120,6 @@ IntElLine2IntPen :: initializeFrom(InputRecord *ir)
 //    	printf("Renumbering element %d\n.\n", this->giveNumber());
 //    	std::swap(dofManArray.at(2), dofManArray.at(3));
 //    }
-
-
-    return result;
 }
 
 

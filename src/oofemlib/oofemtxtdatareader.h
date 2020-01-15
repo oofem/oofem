@@ -64,7 +64,7 @@ public:
     OOFEMTXTDataReader(const OOFEMTXTDataReader & x);
     virtual ~OOFEMTXTDataReader();
 
-    InputRecord *giveInputRecord(InputRecordType, int recordId) override;
+    InputRecord &giveInputRecord(InputRecordType, int recordId) override;
     bool peakNext(const std :: string &keyword) override;
     void finish() override;
     std :: string giveReferenceName() const override { return dataSourceName; }

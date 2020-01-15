@@ -35,6 +35,8 @@
 #include "hyperelasticmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
+#include "floatmatrixf.h"
+#include "floatarrayf.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -44,15 +46,12 @@ HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMater
 { }
 
 
-void
-HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep)
+FloatMatrixF<6,6>
+HyperElasticMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode, GaussPoint *gp, TimeStep *tStep) const
 {
-    double J2, c11, c22, c33, c12, c13, c23, A, B;
-    FloatMatrix C(3, 3);
-    FloatMatrix invC;
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
+    FloatMatrixF<3,3> C;
     C.at(1, 1) = 1. + 2. * status->giveTempStrainVector().at(1);
     C.at(2, 2) = 1. + 2. * status->giveTempStrainVector().at(2);
     C.at(3, 3) = 1. + 2. * status->giveTempStrainVector().at(3);
@@ -60,21 +59,20 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
     C.at(1, 3) = C.at(3, 1) = status->giveTempStrainVector().at(5);
     C.at(1, 2) = C.at(2, 1) = status->giveTempStrainVector().at(6);
 
-    invC.beInverseOf(C);
-    J2 = C.giveDeterminant();
+    auto invC = inv(C);
+    auto J2 = det(C);
 
-    c11 = invC.at(1, 1);
-    c22 = invC.at(2, 2);
-    c33 = invC.at(3, 3);
-    c12 = invC.at(1, 2);
-    c13 = invC.at(1, 3);
-    c23 = invC.at(2, 3);
+    double c11 = invC.at(1, 1);
+    double c22 = invC.at(2, 2);
+    double c33 = invC.at(3, 3);
+    double c12 = invC.at(1, 2);
+    double c13 = invC.at(1, 3);
+    double c23 = invC.at(2, 3);
 
-    A = ( K - 2. / 3. * G ) * J2;
-    B = -( K - 2. / 3. * G ) * ( J2 - 1. ) + 2. * G;
+    double A = ( K - 2. / 3. * G ) * J2;
+    double B = -( K - 2. / 3. * G ) * ( J2 - 1. ) + 2. * G;
 
-    answer.resize(6, 6);
-
+    FloatMatrixF<6,6> answer;
     answer.at(1, 1) = ( A + B ) * c11 * c11;
     answer.at(2, 2) = ( A + B ) * c22 * c22;
     answer.at(3, 3) = ( A + B ) * c33 * c33;
@@ -96,43 +94,43 @@ HyperElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatRe
     answer.at(4, 5) = answer.at(5, 4) = A * c23 * c13 + B / 2. * ( c12 * c33 + c13 * c23 );
     answer.at(4, 6) = answer.at(6, 4) = A * c23 * c12 + B / 2. * ( c12 * c23 + c22 * c13 );
     answer.at(5, 6) = answer.at(6, 5) = A * c13 * c12 + B / 2. * ( c11 * c23 + c12 * c13 );
+    return answer;
 }
 
 
-void
-HyperElasticMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6>
+HyperElasticMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const
 {
-    double J2;
-    FloatMatrix C(3, 3);
-    FloatMatrix invC;
-    FloatArray strainVector;
+    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    
+    auto thermalStrain = computeStressIndependentStrainVector_3d(gp, tStep, VM_Total);
+    auto elasticStrain = strain - thermalStrain;
 
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    this->giveStressDependentPartOfStrainVector_3d(strainVector, gp,
-                                                totalStrain,
-                                                tStep, VM_Total);
+    FloatMatrixF<3,3> C;
+    C.at(1, 1) = 1. + 2. * elasticStrain.at(1);
+    C.at(2, 2) = 1. + 2. * elasticStrain.at(2);
+    C.at(3, 3) = 1. + 2. * elasticStrain.at(3);
+    C.at(1, 2) = C.at(2, 1) = elasticStrain.at(6);
+    C.at(1, 3) = C.at(3, 1) = elasticStrain.at(5);
+    C.at(2, 3) = C.at(3, 2) = elasticStrain.at(4);
+    auto invC = inv(C);
+    double J2 = det(C);
 
-    C.at(1, 1) = 1. + 2. * strainVector.at(1);
-    C.at(2, 2) = 1. + 2. * strainVector.at(2);
-    C.at(3, 3) = 1. + 2. * strainVector.at(3);
-    C.at(1, 2) = C.at(2, 1) = strainVector.at(6);
-    C.at(1, 3) = C.at(3, 1) = strainVector.at(5);
-    C.at(2, 3) = C.at(3, 2) = strainVector.at(4);
-    invC.beInverseOf(C);
-    J2 = C.giveDeterminant();
-
-    answer.resize(6);
     double aux = ( K - 2. / 3. * G ) * ( J2 - 1. ) / 2. - G;
-    answer.at(1) = aux * invC.at(1, 1) + G;
-    answer.at(2) = aux * invC.at(2, 2) + G;
-    answer.at(3) = aux * invC.at(3, 3) + G;
-    answer.at(4) = aux * invC.at(2, 3);
-    answer.at(5) = aux * invC.at(1, 3);
-    answer.at(6) = aux * invC.at(1, 2);
+    FloatArrayF<6> stress = {
+        aux * invC.at(1, 1) + G,
+        aux * invC.at(2, 2) + G,
+        aux * invC.at(3, 3) + G,
+        aux * invC.at(2, 3),
+        aux * invC.at(1, 3),
+        aux * invC.at(1, 2),
+    };
 
     // update gp
-    status->letTempStrainVectorBe(totalStrain);
-    status->letTempStressVectorBe(answer);
+    status->letTempStrainVectorBe(strain);
+    status->letTempStressVectorBe(stress);
+    
+    return stress;
 }
 
 
@@ -143,15 +141,13 @@ HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-IRResultType
-HyperElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+HyperElasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    StructuralMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, K, _IFT_HyperElasticMaterial_k);
     IR_GIVE_FIELD(ir, G, _IFT_HyperElasticMaterial_g);
-
-    return StructuralMaterial :: initializeFrom(ir);
 }
 
 } // end namespace oofem

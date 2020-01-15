@@ -322,11 +322,9 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(const IntArray &dofIDArray) cons
 }
 
 
-IRResultType
-DofManager :: initializeFrom(InputRecord *ir)
+void
+DofManager :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     delete dofidmask;
     dofidmask = NULL;
     delete dofTypemap;
@@ -348,7 +346,7 @@ DofManager :: initializeFrom(InputRecord *ir)
     int dummy;
     IR_GIVE_OPTIONAL_FIELD(ir, dummy, "ndofs");
 
-    if ( ir->hasField(_IFT_DofManager_dofidmask) ) {
+    if ( ir.hasField(_IFT_DofManager_dofidmask) ) {
         IR_GIVE_FIELD(ir, dofIDArry, _IFT_DofManager_dofidmask);
         this->dofidmask = new IntArray(dofIDArry);
     } else {
@@ -370,7 +368,7 @@ DofManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dofTypeMask, _IFT_DofManager_doftypemask);
 
     // read boundary flag
-    if ( ir->hasField(_IFT_DofManager_boundaryflag) ) {
+    if ( ir.hasField(_IFT_DofManager_boundaryflag) ) {
         isBoundaryFlag = true;
     }
 
@@ -378,11 +376,11 @@ DofManager :: initializeFrom(InputRecord *ir)
     partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_DofManager_partitions);
 
-    if ( ir->hasField(_IFT_DofManager_sharedflag) ) {
+    if ( ir.hasField(_IFT_DofManager_sharedflag) ) {
         parallel_mode = DofManager_shared;
-    } else if ( ir->hasField(_IFT_DofManager_remoteflag) ) {
+    } else if ( ir.hasField(_IFT_DofManager_remoteflag) ) {
         parallel_mode = DofManager_remote;
-    } else if ( ir->hasField(_IFT_DofManager_nullflag) ) {
+    } else if ( ir.hasField(_IFT_DofManager_nullflag) ) {
         parallel_mode = DofManager_null;
     } else {
         parallel_mode = DofManager_local;
@@ -450,8 +448,6 @@ DofManager :: initializeFrom(InputRecord *ir)
             }
         }
     }
-
-    return IRRT_OK;
 }
 
 

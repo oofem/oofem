@@ -57,59 +57,58 @@ class Domain;
 class J2Mat : public MPlasticMaterial2
 {
 protected:
-    int kinematicHardeningFlag, isotropicHardeningFlag;
-    double kinematicModuli, isotropicModuli;
-    double k;
+    int kinematicHardeningFlag = 0, isotropicHardeningFlag = 0;
+    double kinematicModuli = 0., isotropicModuli = 0.;
+    double k = 0.;
 
 public:
     J2Mat(int n, Domain * d);
-    virtual ~J2Mat();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_J2Mat_Name; }
     const char *giveClassName() const override { return "J2Mat"; }
 
-    int giveSizeOfFullHardeningVarsVector() override;
+    int giveSizeOfFullHardeningVarsVector() const override;
     int giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const override;
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 protected:
-    int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) override { return 2; }
+    int giveMaxNumberOfActiveYieldConds(GaussPoint *gp) const override { return 2; }
 
     double computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                               const FloatArray &strainSpaceHardeningVars) override;
+                               const FloatArray &strainSpaceHardeningVars) const override;
 
     void computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp,
-                                     const FloatArray &stressVector, const FloatArray &strainSpaceHardeningVars) override;
+                                     const FloatArray &stressVector, const FloatArray &strainSpaceHardeningVars) const override;
 
     void computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &stress, const FloatArray &dlambda,
-                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) override;
+                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) const override;
     void computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector,
-                                const FloatArray &strainSpaceHardeningVariables) override;
+                                const FloatArray &strainSpaceHardeningVariables) const override;
 
     void computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap,
                                                   const FloatArray &fullStressVector,
                                                   const FloatArray &strainSpaceHardeningVars,
-                                                  const FloatArray &gamma) override;
+                                                  const FloatArray &gamma) const override;
     void computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint *gp, int actSurf,
                                                 const IntArray &activeConditionMap,
                                                 const FloatArray &fullStressVector,
                                                 const FloatArray &strainSpaceHardeningVars,
-                                                const FloatArray &gamma) override;
-    int hasHardening() override;
+                                                const FloatArray &gamma) const override;
+    int hasHardening() const override;
 
     void  computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                         const FloatArray &strainSpaceHardeningVariables) override;
+                                         const FloatArray &strainSpaceHardeningVariables) const override;
     void  computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                         const FloatArray &strainSpaceHardeningVariables) override;
+                                         const FloatArray &strainSpaceHardeningVariables) const override;
 
     // auxiliary function
     static double computeJ2InvariantAt(const FloatArray &stressVector);
-    double giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
-    void giveStressBackVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainSpaceHardeningVars);
+    double giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpaceHardeningVars) const;
+    void giveStressBackVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainSpaceHardeningVars) const;
 };
 } // end namespace oofem
 #endif // j2mat_h

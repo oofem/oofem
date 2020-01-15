@@ -66,7 +66,6 @@ REGISTER_Material(MicroMaterial);
 //strainVector, tempStrainVector, stressVector, tempStressVector are defined on StructuralMaterialStatus
 MicroMaterialStatus :: MicroMaterialStatus(GaussPoint *gp) : StructuralMaterialStatus(gp) { }
 
-MicroMaterialStatus :: ~MicroMaterialStatus() { }
 
 void MicroMaterialStatus :: initTempStatus()
 {
@@ -78,7 +77,7 @@ void MicroMaterialStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 }
 
-void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 { }
 
 void MicroMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
@@ -90,17 +89,12 @@ void MicroMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
 }
 
 
-MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme(),
-    microMatIsUsed(false),
-    isDefaultNumbering(true),
-    DofEquationNumbering(AllNodes)
+MicroMaterial :: MicroMaterial(int n, Domain *d) : StructuralMaterial(n, d), UnknownNumberingScheme()
 {}
 
 
-IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
+void MicroMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->inputFileNameMicro, _IFT_MicroMaterial_fileName);
 
     OOFEM_LOG_INFO( "** Instanciating microproblem with BC from file %s\n", inputFileNameMicro.c_str() );
@@ -108,14 +102,12 @@ IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
     this->problemMicro = InstanciateProblem(drMicro, _processor, 0); //0=contextFlag-store/resore
     drMicro.finish();
     OOFEM_LOG_INFO("Microproblem instanciated\n");
-
-    return IRRT_OK;
 }
 
 
 //original pure virtual function has to be declared here
 //this function should not be used, internal forces are calculated based on reactions not stresses in GPs
-void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep)
+FloatArrayF<6> MicroMaterial :: giveRealStressVector_3d(const FloatArrayF<6> &totalStrain, GaussPoint *gp, TimeStep *tStep) const
 {
     //perform average over microproblem
     //     int index;
@@ -128,6 +120,7 @@ void MicroMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
     //     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
     OOFEM_ERROR("Should not be called, use giveInternalForcesVector instead");
+    return zeros<6>();
 
     //     int nelem = microDomain->giveNumberOfElements();
     //     //int nnodes = microDomain->giveNumberOfDofManagers();
@@ -386,7 +379,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
             OOFEM_ERROR("Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber() );
         }
 
-        this->macroLSpaceElement->evalInterpolation( n, this->microMasterCoords, * DofMan->giveCoordinates() );
+        this->macroLSpaceElement->evalInterpolation( n, this->microMasterCoords, DofMan->giveCoordinates() );
 
         //construct transformation matrix relating displacement of slave boundary nodes to macroelement nodes
         //the answer is returned to macroelement so the columns correspond to x,y,z DOFs of each macroelement node
@@ -455,7 +448,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     this->microMasterCoords.clear();
     this->microMasterCoords.reserve(microMasterNodes.giveSize());
     for ( int nodeNum: microMasterNodes ) { //8 nodes
-        this->microMasterCoords.push_back( * microDomain->giveNode( nodeNum )->giveCoordinates() );
+        this->microMasterCoords.push_back( microDomain->giveNode( nodeNum )->giveCoordinates() );
     }
 
     microEngngModel->giveNextStep(); //set the first time step

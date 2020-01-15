@@ -70,9 +70,6 @@ Quad10_2D_SUPG :: Quad10_2D_SUPG(int n, Domain *aDomain) :
     numberOfDofMans = 4;
 }
 
-Quad10_2D_SUPG :: ~Quad10_2D_SUPG()
-{ }
-
 FEInterpolation *
 Quad10_2D_SUPG :: giveInterpolation() const
 {
@@ -117,12 +114,12 @@ Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 }
 
 
-IRResultType
-Quad10_2D_SUPG :: initializeFrom(InputRecord *ir)
+void
+Quad10_2D_SUPG :: initializeFrom(InputRecord &ir)
 {
     this->pressureNode.initializeFrom(ir);
 
-    return SUPGElement2 :: initializeFrom(ir);
+    SUPGElement2 :: initializeFrom(ir);
 }
 
 

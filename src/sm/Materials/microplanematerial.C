@@ -42,14 +42,14 @@
 namespace oofem {
 
 double
-MicroplaneMaterial :: giveMicroplaneIntegrationWeight(int mnumber)
+MicroplaneMaterial :: giveMicroplaneIntegrationWeight(int mnumber) const
 {
     return microplaneWeights [ mnumber - 1 ];
 }
 
 double
 MicroplaneMaterial :: computeNormalStrainComponent(int mnumber,
-                                                   const FloatArray &macroStrain)
+                                                   const FloatArray &macroStrain) const
 {
     double en = 0.0;
     for ( int i = 0; i < 6; i++ ) {
@@ -60,14 +60,14 @@ MicroplaneMaterial :: computeNormalStrainComponent(int mnumber,
 }
 
 double
-MicroplaneMaterial :: computeNormalVolumetricStrainComponent(const FloatArray &macroStrain)
+MicroplaneMaterial :: computeNormalVolumetricStrainComponent(const FloatArray &macroStrain) const
 {
     return ( macroStrain.at(1) + macroStrain.at(2) + macroStrain.at(3) ) / 3.0;
 }
 
 double
 MicroplaneMaterial :: computeNormalDeviatoricStrainComponent(int mnumber,
-                                                             const FloatArray &macroStrain)
+                                                             const FloatArray &macroStrain) const
 {
     return this->computeNormalStrainComponent(mnumber, macroStrain) -
            this->computeNormalVolumetricStrainComponent(macroStrain);
@@ -75,7 +75,7 @@ MicroplaneMaterial :: computeNormalDeviatoricStrainComponent(int mnumber,
 
 double
 MicroplaneMaterial :: computeShearMStrainComponent(int mnumber,
-                                                   const FloatArray &macroStrain)
+                                                   const FloatArray &macroStrain) const
 {
     double em = 0.0;
     for ( int i = 0; i < 6; i++ ) {
@@ -87,7 +87,7 @@ MicroplaneMaterial :: computeShearMStrainComponent(int mnumber,
 
 double
 MicroplaneMaterial :: computeShearLStrainComponent(int mnumber,
-                                                   const FloatArray &macroStrain)
+                                                   const FloatArray &macroStrain) const
 {
     double el = 0.0;
 
@@ -100,7 +100,7 @@ MicroplaneMaterial :: computeShearLStrainComponent(int mnumber,
 
 MicroplaneState
 MicroplaneMaterial :: computeStrainVectorComponents(int mnumber,
-                                                    const FloatArray &macroStrain)
+                                                    const FloatArray &macroStrain) const
 {
     MicroplaneState e;
 
@@ -114,28 +114,25 @@ MicroplaneMaterial :: computeStrainVectorComponents(int mnumber,
     return e;
 }
 
-void
-MicroplaneMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                    MatResponseMode mode,
+
+FloatMatrixF<6,6>
+MicroplaneMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                     GaussPoint *gp,
-                                                    TimeStep *tStep)
+                                                    TimeStep *tStep) const
 {
-    answer.resize(6, 6);
-    answer.zero();
+    FloatMatrixF<6,6> answer;
     // elastic stiffness matrix
     answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = E / ( 2. + 2. * nu );
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = E * ( 1. - nu ) / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
     answer.at(1, 2) = answer.at(2, 1) = answer.at(1, 3) = answer.at(3, 1) =
-                                                              answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+            answer.at(2, 3) = answer.at(3, 2) = E * nu / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
+    return answer;
 }
 
-IRResultType
-MicroplaneMaterial :: initializeFrom(InputRecord *ir)
+void
+MicroplaneMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    StructuralMaterial :: initializeFrom(ir);
 
     // elastic constants
     IR_GIVE_FIELD(ir, E, _IFT_MicroplaneMaterial_e);
@@ -143,7 +140,6 @@ MicroplaneMaterial :: initializeFrom(InputRecord *ir)
     // number of microplanes
     IR_GIVE_FIELD(ir, numberOfMicroplanes, _IFT_MicroplaneMaterial_nmp);
     this->initializeData(numberOfMicroplanes);
-    return IRRT_OK;
 }
 
 

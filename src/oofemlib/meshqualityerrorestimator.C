@@ -71,9 +71,9 @@ double MeshQualityErrorEstimator :: computeTriangleRadiusError(Element *elem)
 {
     // Outside/inside circle radius fraction based for quality measurement.
     // Zero for a perfect triangle,
-    const auto &c1 = *elem->giveNode(1)->giveCoordinates();
-    const auto &c2 = *elem->giveNode(2)->giveCoordinates();
-    const auto &c3 = *elem->giveNode(3)->giveCoordinates();
+    const auto &c1 = elem->giveNode(1)->giveCoordinates();
+    const auto &c2 = elem->giveNode(2)->giveCoordinates();
+    const auto &c3 = elem->giveNode(3)->giveCoordinates();
     double a = distance(c1, c2);
     double b = distance(c1, c3);
     double c = distance(c2, c3);
@@ -115,8 +115,8 @@ int MeshQualityErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tSte
     return true;
 }
 
-IRResultType MeshQualityErrorEstimator :: initializeFrom(InputRecord *ir)
+void MeshQualityErrorEstimator :: initializeFrom(InputRecord &ir)
 {
-    return ErrorEstimator :: initializeFrom(ir);
+    ErrorEstimator :: initializeFrom(ir);
 }
 } // end namespace oofem

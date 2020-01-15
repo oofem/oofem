@@ -66,7 +66,7 @@ public:
 
     void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) override;
     int giveApproxOrder() override { return 0; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     bcGeomType giveBCGeoType() const override { return EdgeLoadBGT; }
 
     const char *giveClassName() const override { return "ConstantEdgeLoad"; }

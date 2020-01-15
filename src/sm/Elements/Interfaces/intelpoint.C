@@ -202,8 +202,8 @@ IntElPoint :: computeGaussPoints()
 int
 IntElPoint :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    answer = *this->giveNode(1)->giveCoordinates();
-    answer.add(*this->giveNode(2)->giveCoordinates());
+    answer = this->giveNode(1)->giveCoordinates();
+    answer.add(this->giveNode(2)->giveCoordinates());
     answer.times(0.5);
     return 1;
 }
@@ -213,33 +213,32 @@ IntElPoint :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 double
 IntElPoint :: computeAreaAround(GaussPoint *gp)
 {
+    if ( (this->giveCrossSection()->hasProperty(CS_Thickness)) ) {
+        double thickness = this->giveCrossSection()->give(CS_Thickness, gp);
+        return thickness*this->length;
+    } else {
     // The modeled area/extension around the connected nodes. 
     // Compare with the cs area of a bar. ///@todo replace with cs-property? /JB
     return this->area;
+    }
 }
 
 
-IRResultType
-IntElPoint :: initializeFrom(InputRecord *ir)
+void
+IntElPoint :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;  // Required by IR_GIVE_FIELD macro
+    StructuralInterfaceElement :: initializeFrom(ir);
 
-    result = StructuralInterfaceElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ir->hasField(_IFT_IntElPoint_refnode) && ir->hasField(_IFT_IntElPoint_normal) ) {
-        OOFEM_WARNING("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
-        return IRRT_BAD_FORMAT;
+    if ( ir.hasField(_IFT_IntElPoint_refnode) &&ir.hasField(_IFT_IntElPoint_normal) ) {
+        throw ValueInputException(ir, _IFT_IntElPoint_refnode, "Ambiguous input: 'refnode' and 'normal' cannot both be specified");
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
-    FloatArray n;
+    FloatArray n(3);
     IR_GIVE_OPTIONAL_FIELD(ir, n, _IFT_IntElPoint_normal);
     normal = n;
     
-    /*if ( ir->hasField(_IFT_IntElPoint_refnode) ) {
+    /*if ( ir.hasField(_IFT_IntElPoint_refnode) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
         normal = *domain->giveNode(this->referenceNode)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
     } else {
@@ -253,8 +252,10 @@ IntElPoint :: initializeFrom(InputRecord *ir)
     this->area = 1.0; // Default area ///@todo Make non-optional? /JB
     IR_GIVE_OPTIONAL_FIELD(ir, this->area, _IFT_IntElPoint_area);
 
+    this->length = 1.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->length, _IFT_IntElPoint_length);
+
     this->computeLocalSlipDir();     
-    return IRRT_OK;
 }
 
 
@@ -306,12 +307,12 @@ IntElPoint :: computeLocalSlipDir(void)
 {
     if ( this->referenceNode ) {
         // normal
-        normal = *domain->giveNode(this->referenceNode)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+        normal = domain->giveNode(this->referenceNode)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
     } else {
 
       if ( normal.at(1) == 0. && normal.at(2) == 0. && normal.at(3) == 0. ) {
 	// let the element compute the slip direction if the nodes' cooridantes are different
-        normal = *this->giveNode(2)->giveCoordinates() - *this->giveNode(1)->giveCoordinates();
+        normal = this->giveNode(2)->giveCoordinates() - this->giveNode(1)->giveCoordinates();
 	
 	// final check
 	if ( normal.at(1) == 0. && normal.at(2) == 0. && normal.at(3) == 0. ) {

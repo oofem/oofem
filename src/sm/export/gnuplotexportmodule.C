@@ -84,22 +84,22 @@ GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
 GnuplotExportModule::~GnuplotExportModule()
 {}
 
-IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
+void GnuplotExportModule::initializeFrom(InputRecord &ir)
 {
-    mExportReactionForces = ir->hasField(_IFT_GnuplotExportModule_ReactionForces);
-    mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
-    mExportBoundaryConditionsExtra = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditionsExtra);
-    mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
-    mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
-    mExportCrackLength = ir->hasField(_IFT_GnuplotExportModule_cracklength);
-    mExportInterfaceEl = ir->hasField(_IFT_GnuplotExportModule_interface_el);
+    ExportModule::initializeFrom(ir);
 
-    ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
+    mExportReactionForces = ir.hasField(_IFT_GnuplotExportModule_ReactionForces);
+    mExportBoundaryConditions = ir.hasField(_IFT_GnuplotExportModule_BoundaryConditions);
+    mExportBoundaryConditionsExtra = ir.hasField(_IFT_GnuplotExportModule_BoundaryConditionsExtra);
+    mExportMesh = ir.hasField(_IFT_GnuplotExportModule_mesh);
+    mExportXFEM = ir.hasField(_IFT_GnuplotExportModule_xfem);
+    mExportCrackLength = ir.hasField(_IFT_GnuplotExportModule_cracklength);
+    mExportInterfaceEl = ir.hasField(_IFT_GnuplotExportModule_interface_el);
 
-    ir->giveOptionalField(mMatForceRadii, _IFT_GnuplotExportModule_materialforceradii);
+    ir.giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
+
+    ir.giveOptionalField(mMatForceRadii, _IFT_GnuplotExportModule_materialforceradii);
 //    printf("mMatForceRadii: "); mMatForceRadii.printYourself();
-
-    return ExportModule::initializeFrom(ir);
 }
 
 void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
@@ -771,7 +771,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
 
         // Boundary points and displacements
-        IntArray boundaries, bNodes;
+        IntArray boundaries;
         iBC.giveBoundaries(boundaries);
 
         std::vector< std::vector<FloatArray> > bndNodes;
@@ -781,13 +781,13 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
             Element *e = iBC.giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
             int boundary = boundaries.at(pos * 2);
 
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
 
             std::vector<FloatArray> bndSegNodes;
 
             // Add the start and end nodes of the segment
-            DofManager *startNode   = e->giveDofManager( bNodes[0] );
-            FloatArray xS    = *(startNode->giveCoordinates());
+            DofManager *startNode = e->giveDofManager( bNodes[0] );
+            FloatArray xS = startNode->giveCoordinates();
 
             Dof *dSu = startNode->giveDofWithID(D_u);
             double dU = dSu->giveUnknown(VM_Total, tStep);
@@ -799,8 +799,8 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
             bndSegNodes.push_back(xS);
 
-            DofManager *endNode     = e->giveDofManager( bNodes[1] );
-            FloatArray xE    = *(endNode->giveCoordinates());
+            DofManager *endNode = e->giveDofManager( bNodes[1] );
+            FloatArray xE = endNode->giveCoordinates();
 
             Dof *dEu = endNode->giveDofWithID(D_u);
             dU = dEu->giveUnknown(VM_Total, tStep);
@@ -861,15 +861,14 @@ void GnuplotExportModule::outputMesh(Domain &iDomain)
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
                 std::vector<FloatArray> points;
 
-                IntArray bNodes;
-                el->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
+                const auto &bNodes = el->giveInterpolation()->boundaryGiveNodes(edgeIndex);
 
                 int niLoc = bNodes.at(1);
-                const FloatArray &xS = *(el->giveNode(niLoc)->giveCoordinates() );
+                const auto &xS = el->giveNode(niLoc)->giveCoordinates();
                 points.push_back(xS);
 
                 int njLoc = bNodes.at( bNodes.giveSize() );
-                const FloatArray &xE = *(el->giveNode(njLoc)->giveCoordinates() );
+                const auto &xE = el->giveNode(njLoc)->giveCoordinates();
                 points.push_back(xE);
 
                 pointArray.push_back(points);

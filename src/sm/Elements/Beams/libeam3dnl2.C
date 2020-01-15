@@ -433,27 +433,22 @@ LIBeam3dNL2 :: computeGaussPoints()
 void
 LIBeam3dNL2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep);
 }
 
 
 void
 LIBeam3dNL2 :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
 }
 
 
-IRResultType
-LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
+void
+LIBeam3dNL2 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // first call parent
-    result = NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    NLStructuralElement :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL2_refnode);
     if ( referenceNode == 0 ) {
@@ -477,7 +472,6 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
     tc.beTranspositionOf(lcs);
 
     this->computeQuaternionFromRotMtrx(q, tc);
-    return IRRT_OK;
 }
 
 

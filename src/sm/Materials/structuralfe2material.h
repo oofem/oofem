@@ -57,10 +57,10 @@ protected:
     /// The RVE
     std :: unique_ptr< EngngModel > rve;
     /// Boundary condition in RVE that performs the computational homogenization.
-    PrescribedGradientHomogenization *bc;
+    PrescribedGradientHomogenization *bc = nullptr;
 
     FloatMatrix tangent;
-    bool oldTangent;
+    bool oldTangent = true;
 
     /// Interface normal direction
     FloatArray mNormalDir;
@@ -69,9 +69,8 @@ protected:
 
 public:
     StructuralFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile);
-    virtual ~StructuralFE2MaterialStatus() {}
 
-    EngngModel *giveRVE() { return this->rve.get(); }
+    EngngModel *giveRVE() const { return this->rve.get(); }
     PrescribedGradientHomogenization *giveBC();// { return this->bc; }
 
     void markOldTangent();
@@ -104,7 +103,7 @@ public:
     void addStateVariables(const MaterialStatus &iStatus) override { OOFEM_ERROR("Not implemented."); }
 
     // For debugging only
-    bool mNewlyInitialized;
+    bool mNewlyInitialized = true;
 };
 
 
@@ -123,21 +122,21 @@ class StructuralFE2Material : public StructuralMaterial
 protected:
     std :: string inputfile;
     static int n;
-    bool useNumTangent;
+    bool useNumTangent = false;
 
 public:
     StructuralFE2Material(int n, Domain * d);
-    virtual ~StructuralFE2Material();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     const char *giveInputRecordName() const override { return _IFT_StructuralFE2Material_Name; }
     const char *giveClassName() const override { return "StructuralFE2Material"; }
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return true; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep) override;
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 };
 
 } // end namespace oofem

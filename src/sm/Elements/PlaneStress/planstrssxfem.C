@@ -295,18 +295,11 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 #endif
 
 
-IRResultType
-PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
+void
+PlaneStress2dXfem :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
-    result = PlaneStress2d :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = XfemStructuralElementInterface :: initializeCZFrom(ir);
-    return result;
+    PlaneStress2d :: initializeFrom(ir);
+    XfemStructuralElementInterface :: initializeCZFrom(ir);
 }
 
 MaterialMode PlaneStress2dXfem :: giveMaterialMode()
@@ -338,7 +331,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
         // Node coordinates
         std :: vector< FloatArray >nodeCoords;
         for(int i = 1; i <= 4; i++) {
-            FloatArray &x = *(giveDofManager(i)->giveCoordinates());
+            const auto &x = giveDofManager(i)->giveCoordinates();
             nodeCoords.push_back(x);
 
             vtkPieces[0].setNodeCoords(i, x);
@@ -473,7 +466,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), dMan->giveCoordinates() );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }
@@ -487,7 +480,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), dMan->giveCoordinates() );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }

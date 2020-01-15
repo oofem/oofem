@@ -242,7 +242,6 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray 
         return;
     }
 
-    IntArray bNodes;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
 
     // Fetch the columns/rows for the stress contributions;
@@ -259,7 +258,7 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray 
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
         e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
         e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
         // For most uses, loc_r == loc_c, and sigma_loc_r == sigma_loc_c.
@@ -402,7 +401,6 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
 
     IntArray loc, sigma_loc;  // For the velocities and stress respectively
     IntArray masterDofIDs;
-    IntArray bNodes;
     this->sigmaDev->giveLocationArray(dev_id, sigma_loc, s);
 
     if ( type == ExternalForcesVector ) {
@@ -418,7 +416,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
             int boundary = boundaries.at(pos * 2);
 
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
             e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterDofIDs);
             this->integrateVolTangent(fe, e, boundary);
             fe.times(-this->pressure);
@@ -442,7 +440,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
             e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterDofIDs);
             e->computeBoundaryVectorOf(bNodes, this->dofs, mode, tStep, e_v);
             this->integrateDevTangent(Ke, e, boundary);
@@ -471,7 +469,6 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tSte
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
-        IntArray bNodes;
         Set *set = this->giveDomain()->giveSet(this->set);
         const IntArray &boundaries = set->giveBoundaryList();
 
@@ -484,7 +481,7 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tSte
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
             e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
             e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
             this->integrateDevTangent(Ke, e, boundary);
@@ -520,14 +517,13 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
     }
 
     // Postprocessing; vol = int v . n dA
-    IntArray bNodes;
     FloatArray unknowns, fe;
     vol = 0.;
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
         e->computeBoundaryVectorOf(bNodes, this->dofs, VM_Total, tStep, unknowns);
         this->integrateVolTangent(fe, e, boundary);
         vol += fe.dotProduct(unknowns);
@@ -548,7 +544,6 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     Set *set = this->giveDomain()->giveSet(this->set);
-    IntArray bNodes;
     const IntArray &boundaries = set->giveBoundaryList();
     double rve_size = this->domainSize();
 
@@ -588,7 +583,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
         e->giveBoundaryLocationArray(loc, bNodes, this->dofs, fnum);
         this->integrateVolTangent(fe, e, boundary);
         fe.times(-1.0); // here d_p = 1.0
@@ -620,7 +615,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
 
         this->integrateVolTangent(fe, e, boundary);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        const auto &bNodes = e->giveInterpolation()->boundaryGiveNodes(boundary);
         e->giveBoundaryLocationArray(loc, bNodes, this->dofs, fnum);
 
         // Using "loc" to pick out the relevant contributions. This won't work at all if there are local coordinate systems in these nodes
@@ -657,9 +652,9 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
 }
 
 
-IRResultType MixedGradientPressureNeumann :: initializeFrom(InputRecord *ir)
+void MixedGradientPressureNeumann :: initializeFrom(InputRecord &ir)
 {
-    return MixedGradientPressureBC :: initializeFrom(ir);
+    MixedGradientPressureBC :: initializeFrom(ir);
 }
 
 

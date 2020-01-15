@@ -87,7 +87,6 @@ protected:
 
 public:
     Quad1MindlinShell3D(int n, Domain * d);
-    virtual ~Quad1MindlinShell3D();
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
@@ -101,7 +100,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Quad1MindlinShell3D_Name; }
     const char *giveClassName() const override { return "Quad1MindlinShell3D"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 24; }
     int computeNumberOfGlobalDofs() override { return 24; }

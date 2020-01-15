@@ -77,32 +77,31 @@ protected:
     /// Temporary stress vector in reduced form (increments are used mainly in nonlinear analysis)
     FloatArray tempEffectiveStressVector;
     /// Scalar measure of the largest strain level ever reached in material.
-    double kappa;
+    double kappa = 0.;
     /// Non-equilibrated scalar measure of the largest strain level.
-    double tempKappa;
+    double tempKappa = 0.;
     /// Damage level of material.
-    double damage;
+    double damage = 0.;
     /// Non-equilibrated damage level of material.
-    double tempDamage;
+    double tempDamage = 0.;
 
     /// Characteristic length
-    double charLength;
+    double charLength = 0.;
     /// Crack orientation normalized to damage magnitude. This is useful for plotting cracks as a vector field (paraview etc.).
     FloatArray crackVector;
 
     /// hydration-degree dependent equivalent strain at stress peak
-    double var_e0;
+    double var_e0 = 0.;
     /// hydration-degree dependent fracture energy
-    double var_gf;
+    double var_gf = 0.;
 
 #ifdef supplementary_info
-    double crackWidth;
-    double residTensileStrength;
+    double crackWidth = 0.;
+    double residTensileStrength = 0.;
 #endif
 
 public:
     MPSDamMaterialStatus(GaussPoint *g, int nunits);
-    virtual ~MPSDamMaterialStatus() { }
 
     const FloatArray &giveViscoelasticStressVector() const override { return effectiveStressVector; }
     /// Assigns tempStressVector to given vector v.
@@ -110,33 +109,33 @@ public:
     virtual const FloatArray &giveTempViscoelasticStressVector() const { return tempEffectiveStressVector; }
 
     /// Returns the last equilibrated scalar measure of the largest strain level.
-    double giveKappa() { return kappa; }
+    double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level.
-    double giveTempKappa() { return tempKappa; }
+    double giveTempKappa() const { return tempKappa; }
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated damage level.
-    double giveDamage() { return damage; }
+    double giveDamage() const { return damage; }
     /// Returns the temp. damage level.
-    double giveTempDamage() { return tempDamage; }
+    double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value.
     void setTempDamage(double newDamage) { tempDamage = newDamage; }
 
     /// Returns characteristic length stored in receiver.
-    double giveCharLength() { return charLength; }
+    double giveCharLength() const { return charLength; }
     /// Sets characteristic length to given value.
     void setCharLength(double length) { charLength = length; }
     /// Returns crack vector stored in receiver. This is useful for plotting cracks as a vector field (paraview etc.).
-    void giveCrackVector(FloatArray &answer);
+    void giveCrackVector(FloatArray &answer) const;
     /// Sets crack vector to given value. This is useful for plotting cracks as a vector field (paraview etc.).
     void setCrackVector(FloatArray cv) { crackVector = cv; }
 
     void sete0(double e0) { var_e0 = e0; }
     void setgf(double gf) { var_gf = gf; }
-    double givee0() { return var_e0; }
-    double givegf() { return var_gf; }
+    double givee0() const { return var_e0; }
+    double givegf() const { return var_gf; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void initTempStatus() override;
     void updateYourself(TimeStep *tStep) override;
 
@@ -146,7 +145,6 @@ public:
     void setResidualTensileStrength(double src) { residTensileStrength = src; }
     double giveResidualTensileStrength(void) { return residTensileStrength; }
 #endif
-
 
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -183,22 +181,22 @@ class MPSDamMaterial : public MPSMaterial
 {
 protected:
 
-    bool timeDepFracturing;
-    double fib_s;
-    double fib_fcm28;
-    bool isotropic;
+    bool timeDepFracturing = false;
+    double fib_s = 0.;
+    double fib_fcm28 = 0.;
+    bool isotropic = false;
 
     /// dummy Young's modulus
-    double E;
+    double E = -1.;
 
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergence problems. Set to something like 0.99 if needed.
-    double maxOmega;
+    double maxOmega = 0.999999;
 
     /// Equivalent strain at stress peak (or a similar parameter).
     //double const_e0;
 
     /// constant tensile strength
-    double ft;
+    double ft = 0.;
 
     /**
      * Determines the softening -> corresponds to the initial fracture energy. For a linear law, it is the area
@@ -206,44 +204,42 @@ protected:
      * and a tangent to the softening part of the curve at the peak stress. For a bilinear law,
      * gf corresponds to area bounded by elasticity and the first linear softening line projected to zero stress.
      */
-    double const_gf;
+    double const_gf = 0.;
+
+    /// Check possible snap back flag
+    int checkSnapBack = 1;
 
     /** Type characterizing the formula for the damage law. For example, linear softening can be specified
      *   with fracturing strain or crack opening.
      */
     enum SofteningType { ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_Disable_Damage };
-
-    /// Check possible snap back flag
-    int checkSnapBack;
-
     /// Parameter specifying the type of softening (damage law).
-    SofteningType softType;
+    SofteningType softType = ST_Exponential_Cohesive_Crack;
 
     /// Method used for evaluation of characteristic element size
-    ElementCharSizeMethod ecsMethod;
+    ElementCharSizeMethod ecsMethod = ECSM_Projection;
 
     /// 28-day value of tensile strength. Used only with "timedepfracturing"
-    double ft28;
+    double ft28 = 0.;
     /// 28-day value of fracture energy. Used only with "timedepfracturing"
-    double gf28;
+    double gf28 = 0.;
 
 public:
     MPSDamMaterial(int n, Domain *d);
-    virtual ~MPSDamMaterial() { }
 
-    int hasMaterialModeCapability(MaterialMode mode) override;
+    bool hasMaterialModeCapability(MaterialMode mode) const override;
 
     const char *giveInputRecordName() const override { return _IFT_MPSDamMaterial_Name; }
     const char *giveClassName() const override { return "MPSDamMaterial"; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    double givee0(GaussPoint *gp);
-    double givegf(GaussPoint *gp);
+    double givee0(GaussPoint *gp) const;
+    double givegf(GaussPoint *gp) const;
 
     /**
      * Abstract service allowing to perform some initialization, when damage first appear.
@@ -259,49 +255,41 @@ public:
 
     /**
      * Computes the value of damage omega, based on given value of equivalent strain.
-     * @param[out] omega Contains result.
      * @param kappa Equivalent strain measure.
      * @param strain Total strain in full form.
      * @param gp Integration point.
+     * @return Damage.
      */
-    void computeDamage(double &omega, double kappa, GaussPoint *gp);
+    double computeDamage(double kappa, GaussPoint *gp) const;
 
     /**
      * computes the value of damage parameter omega,
      * based on a given value of equivalent strain,
      * using iterations to achieve objectivity,
      * based on the crack band concept (effective element size used)
-     * @param[out] omega Contains the resulting damage.
      * @param kappa Equivalent strain measure.
      * @param gp Integration point.
+     * @return Damage.
      */
-    void computeDamageForCohesiveCrack(double &omega, double kappa, GaussPoint *gp);
+    double computeDamageForCohesiveCrack(double kappa, GaussPoint *gp) const;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
 
-    virtual double computeTensileStrength(double equivalentTime);
-    virtual double computeFractureEnergy(double equivalentTime);
+    virtual double computeTensileStrength(double equivalentTime) const;
+    virtual double computeFractureEnergy(double equivalentTime) const;
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp,
+                                                    TimeStep *tStep) const override;
 
-    void givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
+                                               TimeStep *tStep) const override;
 
-    void givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                  MatResponseMode mode,
-                                  GaussPoint *gp,
-                                  TimeStep *tStep) override;
+    FloatMatrixF<4,4> givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoint *gp,
+                                               TimeStep *tStep) const override;
 
-    void give1dStressStiffMtrx(FloatMatrix &answer,
-                               MatResponseMode mode,
-                               GaussPoint *gp,
-                               TimeStep *tStep) override;
+    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp,
+                                            TimeStep *tStep) const override;
 };
 } // end namespace oofem
 #endif // mpsdammat_h

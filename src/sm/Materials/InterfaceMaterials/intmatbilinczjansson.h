@@ -96,7 +96,7 @@ public:
     /// Constructor
     IntMatBilinearCZJanssonStatus(GaussPoint * g);
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "IntMatBilinearCZJanssonStatus"; }
 
@@ -180,7 +180,7 @@ public:
 
     bool hasAnalyticalTangentStiffness() const override { return true; }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     FloatArray giveInterfaceStrength() override { return {this->sigf*this->gamma,this->sigf*this->gamma,this->sigf}; }
 

@@ -42,8 +42,8 @@
 #include "contextioerr.h"
 
 namespace oofem {
-int
-PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode)
+bool
+PerfectlyPlasticMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 //
 // returns whether receiver supports given mode
 //
@@ -350,11 +350,10 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 }
 
 
-void
-PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                          MatResponseMode mode,
+FloatMatrixF<6,6>
+PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                                           GaussPoint *gp,
-                                                          TimeStep *tStep)
+                                                          TimeStep *tStep) const
 //
 //
 //
@@ -370,11 +369,6 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 //
 //
 {
-    MaterialMode originalMode = gp->giveMaterialMode();
-    if ( originalMode != _3dMat ) {
-        OOFEM_ERROR("Different stressStrain mode encountered");
-    }
-
     // we can force 3d response, and we obtain correct 3d tangent matrix,
     // but in fact, stress integration algorithm will not work
     // because in stress integration algorithm we are unable to recognize
@@ -385,19 +379,19 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
     // calling GiveMaterailStiffenssMatrix, which imposes constrains correctly.
 
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        FloatMatrix answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        return answer;
     }
 }
 
 
-void
-PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                                     MatResponseMode mode,
+FloatMatrixF<3,3>
+PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                                      GaussPoint *gp,
-                                                     TimeStep *tStep)
-
+                                                     TimeStep *tStep) const
 //
 // returns receiver's 2dPlaneStressMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -406,64 +400,61 @@ PerfectlyPlasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlaneStressStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 
 
-void
-PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                     MatResponseMode mode,
+FloatMatrixF<4,4>
+PerfectlyPlasticMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                                      GaussPoint *gp,
-                                                     TimeStep *tStep)
-
+                                                     TimeStep *tStep) const
 //
 // return receiver's 2dPlaneStrainMtrx constructed from
 // general 3dMatrialStiffnessMatrix
 // (2dPlaneStrain ==> eps_z = gamma_xz = gamma_yz = 0.)
 //
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlaneStrainStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 
 
-void
-PerfectlyPlasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                                  MatResponseMode mode,
-                                                  GaussPoint *gp,
-                                                  TimeStep *tStep)
+FloatMatrixF<1,1>
+PerfectlyPlasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 
 //
 // returns receiver's 1dMaterialStiffnessMAtrix
 // (1d case ==> sigma_y = sigma_z = tau_yz = tau_zx = tau_xy  = 0.)
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 
 
 
-void
-PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
-                                                     MatResponseMode mode,
+FloatMatrixF<2,2>
+PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(MatResponseMode mode,
                                                      GaussPoint *gp,
-                                                     TimeStep *tStep)
+                                                     TimeStep *tStep) const
 //
 // returns receiver's 2dBeamLayerStiffMtrx.
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -472,21 +463,21 @@ PerfectlyPlasticMaterial :: give2dBeamLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->give2dBeamLayerStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 
 
-void
-PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                                    MatResponseMode mode,
+FloatMatrixF<5,5>
+PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(MatResponseMode mode,
                                                     GaussPoint *gp,
-                                                    TimeStep *tStep)
+                                                    TimeStep *tStep) const
 //
 // returns receiver's 2dPlateLayerMtrx
 // (2dPlaneStres ==> sigma_z = tau_xz = tau_yz = 0.)
@@ -495,12 +486,13 @@ PerfectlyPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 // the reduction from 3d case will not work
 // this implementation should be faster.
 {
-    FloatMatrix fullAnswer;
     if ( mode == ElasticStiffness ) {
-        this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, tStep);
+        return this->linearElasticMaterial->givePlateLayerStiffMtrx(mode, gp, tStep);
     } else {
-        this->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
+        FloatMatrix fullAnswer, answer;
+        const_cast<PerfectlyPlasticMaterial*>(this)->giveMaterialStiffnessMatrix(fullAnswer, mode, gp, tStep);
         StructuralMaterial :: giveReducedSymMatrixForm( answer, fullAnswer, gp->giveMaterialMode() );
+        return answer;
     }
 }
 
@@ -632,17 +624,16 @@ PerfectlyPlasticMaterial :: GiveStressCorrectionBackToYieldSurface(GaussPoint *g
 }
 
 
-IRResultType
-PerfectlyPlasticMaterial :: initializeFrom(InputRecord *ir)
+void
+PerfectlyPlasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result = Material :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    return this->giveLinearElasticMaterial()->initializeFrom(ir);
+    Material :: initializeFrom(ir);
+    this->giveLinearElasticMaterial()->initializeFrom(ir);
 }
 
 
 double
-PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
+PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
@@ -706,10 +697,6 @@ PerfectlyPlasticMaterialStatus :: PerfectlyPlasticMaterialStatus(GaussPoint *g) 
 }
 
 
-PerfectlyPlasticMaterialStatus :: ~PerfectlyPlasticMaterialStatus()
-{ }
-
-
 void
 PerfectlyPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
 {
@@ -743,7 +730,7 @@ PerfectlyPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode
 
 
 void
-PerfectlyPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+PerfectlyPlasticMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { yield_flag %d}\n", yield_flag);

@@ -76,9 +76,6 @@ Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), ZZNoda
     }
 }
 
-Tr21Stokes :: ~Tr21Stokes()
-{ }
-
 void Tr21Stokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {

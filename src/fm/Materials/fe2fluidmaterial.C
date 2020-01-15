@@ -244,11 +244,10 @@ FE2FluidMaterial :: computeTangents3D(MatResponseMode mode, GaussPoint *gp, Time
     };
 }
 
-IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
+void FE2FluidMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    FluidDynamicMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_FE2FluidMaterial_fileName);
-    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 void FE2FluidMaterial :: giveInputRecord(DynamicInputRecord &input)
@@ -350,7 +349,7 @@ bool FE2FluidMaterialStatus :: createRVE(int n, int rank, GaussPoint *gp, const 
     return true;
 }
 
-void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+void FE2FluidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     FluidDynamicMaterialStatus :: printOutputAt(file, tStep);
 }

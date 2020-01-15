@@ -63,8 +63,6 @@ public:
      * @param d Pointer to the domain to which element belongs.
      */
     Line2BoundaryElement(int n, Domain * d);
-    /// Destructor.
-    virtual ~Line2BoundaryElement();
 
     void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) override { answer.clear(); }
     void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) override { answer.clear(); }

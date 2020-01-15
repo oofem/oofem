@@ -64,9 +64,9 @@ LinearConstraintBC :: ~LinearConstraintBC()
 }
 
 
-IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
+void LinearConstraintBC :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    ActiveBoundaryCondition :: initializeFrom(ir);
     rhsTf = 0;
 
     IR_GIVE_FIELD(ir, weights, _IFT_LinearConstraintBC_weights);
@@ -74,16 +74,13 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, dofmans, _IFT_LinearConstraintBC_dofmans);
     IR_GIVE_FIELD(ir, dofs, _IFT_LinearConstraintBC_dofs);
     if ( weights.giveSize() != dofmans.giveSize() ) {
-        OOFEM_WARNING("Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize());
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_LinearConstraintBC_weights, "Size mismatch weights and dofmans");
     }
     IR_GIVE_OPTIONAL_FIELD(ir, weightsTf, _IFT_LinearConstraintBC_weightsfuncs);
     IR_GIVE_OPTIONAL_FIELD(ir, rhsTf, _IFT_LinearConstraintBC_rhsfuncs);
 
     IR_GIVE_FIELD(ir, lhsType, _IFT_LinearConstraintBC_lhstype);
     IR_GIVE_FIELD(ir, rhsType, _IFT_LinearConstraintBC_rhstype);
-
-    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 

@@ -73,14 +73,10 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 }
 
 
-IRResultType
-StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
+void
+StructuralInterfaceMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_OPTIONAL_FIELD(ir, this->useNumericalTangent, _IFT_StructuralInterfaceMaterial_useNumericalTangent);
-
-    return IRRT_OK;
 }
 
 
@@ -103,7 +99,7 @@ FloatMatrixF<2,2>
 StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto d = give3dStiffnessMatrix_Eng(mode, gp, tStep);
-    return d.sub<2,2>({0,1}, {0,1});
+    return d({0,1}, {0,1});
 #if 0
     answer3D.printYourself("analytical tangent");
 
@@ -138,7 +134,7 @@ FloatMatrixF<2,2>
 StructuralInterfaceMaterial :: give2dStiffnessMatrix_dTdj(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
     auto d = this->give3dStiffnessMatrix_dTdj_Num(gp, tStep);
-    return d.sub<2,2>({0,1}, {0,1});
+    return d({0,1}, {0,1});
 }
 
 FloatMatrixF<3,3>

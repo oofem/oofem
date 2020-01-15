@@ -43,32 +43,19 @@ namespace oofem {
 REGISTER_Material(ConcreteFCMViscoElastic);
 
 ConcreteFCMViscoElastic :: ConcreteFCMViscoElastic(int n, Domain *d) : ConcreteFCM(n, d)
-{
-  //    viscoElasticMaterial = new RheoChainMaterial(n, d);
-
-  viscoMat = 0;
-}
-
-ConcreteFCMViscoElastic :: ~ConcreteFCMViscoElastic()
 {}
 
-
   
-IRResultType
-ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
+void
+ConcreteFCMViscoElastic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
-    result = ConcreteFCM :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    ConcreteFCM :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, viscoMat, _IFT_ConcreteFCMViscoElastic_viscoMat);
 
     this->fib = false;
     
-    if ( ir->hasField(_IFT_ConcreteFCMViscoElastic_timedepfracturing) ) {
+    if ( ir.hasField(_IFT_ConcreteFCMViscoElastic_timedepfracturing) ) {
         this->fib = true;
         //
         IR_GIVE_FIELD(ir, fib_s, _IFT_ConcreteFCMViscoElastic_fib_s);
@@ -76,29 +63,25 @@ ConcreteFCMViscoElastic :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fib_fcm28, _IFT_ConcreteFCMViscoElastic_fcm28);
 
         IR_GIVE_FIELD(ir, timeFactor, _IFT_ConcreteFCMViscoElastic_timeFactor);
-	IR_GIVE_FIELD(ir, stiffnessFactor, _IFT_ConcreteFCMViscoElastic_stiffnessFactor);
+        IR_GIVE_FIELD(ir, stiffnessFactor, _IFT_ConcreteFCMViscoElastic_stiffnessFactor);
 
-	ConcreteFCM :: Gf = -1.;
-	ConcreteFCM :: Ft = -1.;	  
+        ConcreteFCM :: Gf = -1.;
+        ConcreteFCM :: Ft = -1.;
         IR_GIVE_OPTIONAL_FIELD(ir, ConcreteFCM :: Ft, _IFT_ConcreteFCMViscoElastic_ft28);
-	IR_GIVE_OPTIONAL_FIELD(ir, ConcreteFCM :: Gf, _IFT_ConcreteFCMViscoElastic_gf28);
-	
+        IR_GIVE_OPTIONAL_FIELD(ir, ConcreteFCM :: Gf, _IFT_ConcreteFCMViscoElastic_gf28);
     }
 
 
     if ( propertyDictionary.includes(tAlpha) ) {
-      if( propertyDictionary.at(tAlpha) != 0. ) {
-	OOFEM_ERROR("tAlpha must be set to zero in ConcreteFCMViscoElastic material");
-      }
+        if( propertyDictionary.at(tAlpha) != 0. ) {
+            OOFEM_ERROR("tAlpha must be set to zero in ConcreteFCMViscoElastic material");
+        }
     }
-
-    
-    return IRRT_OK;
 }
   
 
 double
-ConcreteFCMViscoElastic :: give(int aProperty, GaussPoint *gp)
+ConcreteFCMViscoElastic :: give(int aProperty, GaussPoint *gp) const
 {
   return ConcreteFCM :: give(aProperty, gp);
 }
@@ -136,22 +119,20 @@ ConcreteFCMViscoElastic :: giveRealStressVector(FloatArray &answer, GaussPoint *
   return;
 }
 
-void
-ConcreteFCMViscoElastic :: computeStressIndependentStrainVector(FloatArray &answer,
-								GaussPoint *gp, TimeStep *tStep, ValueModeType mode) {
+FloatArray
+ConcreteFCMViscoElastic :: computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const
+{
+    // temperature strain is treated ONLY by the rheoMat
 
-  // temperature strain is treated ONLY by the rheoMat
-
-  if ( !this->isActivated(tStep) ) {
-    return;
-  }
-    
-  ConcreteFCMViscoElasticStatus *status = static_cast< ConcreteFCMViscoElasticStatus * > ( gp->giveMaterialStatus() );
-    
-  RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
-    
-  rheoMat->computeStressIndependentStrainVector(answer, status->giveSlaveGaussPointVisco(), tStep, mode);
-
+    if ( !this->isActivated(tStep) ) {
+        return FloatArray();
+    }
+        
+    ConcreteFCMViscoElasticStatus *status = static_cast< ConcreteFCMViscoElasticStatus * > ( gp->giveMaterialStatus() );
+        
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+        
+    return rheoMat->computeStressIndependentStrainVector(status->giveSlaveGaussPointVisco(), tStep, mode);
 }
 
   
@@ -429,22 +410,19 @@ ConcreteFCMViscoElastic :: giveEquivalentTime(GaussPoint *gp, TimeStep *tStep)
 
 ConcreteFCMViscoElasticStatus :: ConcreteFCMViscoElasticStatus(GaussPoint *gp) :
   ConcreteFCMStatus(gp),
-  slaveGpVisco( new GaussPoint( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
+  slaveGpVisco(std::make_unique<GaussPoint>( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
 {
 
 }
 
 
-ConcreteFCMViscoElasticStatus :: ~ConcreteFCMViscoElasticStatus()
-{ }
-
 void
-ConcreteFCMViscoElasticStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+ConcreteFCMViscoElasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     ConcreteFCMStatus :: printOutputAt(file, tStep);
 
     fprintf( file, "\nOutput for slave viscoelastic material\n");
-    this->giveSlaveGaussPointVisco()->giveMaterialStatus()->printOutputAt(file, tStep);
+    this->slaveGpVisco->giveMaterialStatus()->printOutputAt(file, tStep);
     fprintf( file, "\n");
 }
 

@@ -57,31 +57,25 @@ public:
     QSpaceGradDamage(int n, Domain * d);
     virtual ~QSpaceGradDamage() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    void giveDofManDofIDMask_u(IntArray &answer) const;
-    void giveDofManDofIDMask_d(IntArray &answer) const;
+    void initializeFrom(InputRecord &ir) override;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const override;
+    void giveDofManDofIDMask_u(IntArray &answer) const override;
+    void giveDofManDofIDMask_d(IntArray &answer) const override;
 
     // definition & identification
-    virtual const char *giveInputRecordName() const { return _IFT_QSpaceGradDamage_Name; }
-    virtual const char *giveClassName() const { return "QSpaceGradDamage"; }
-    virtual int computeNumberOfDofs() { return 68; }
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
-
-
-
-
-
-    
+    const char *giveInputRecordName() const override { return _IFT_QSpaceGradDamage_Name; }
+    const char *giveClassName() const override { return "QSpaceGradDamage"; }
+    int computeNumberOfDofs() override { return 68; }
+    MaterialMode giveMaterialMode() override { return _3dMat; }
 
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer);
-    virtual void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual StructuralElement *giveStructuralElement() { return this; }
-    virtual NLStructuralElement *giveNLStructuralElement() { return this; }
-    virtual void giveLocationArray_u(IntArray &answer){;}
-    virtual void giveLocationArray_d(IntArray &answer){;}
+    void computeGaussPoints() override;
+    void computeNdMatrixAt(GaussPoint *gp, FloatArray &answer) override;
+    void computeBdMatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
+    StructuralElement *giveStructuralElement() override { return this; }
+    NLStructuralElement *giveNLStructuralElement() override { return this; }
+    void giveLocationArray_u(IntArray &answer) override { }
+    void giveLocationArray_d(IntArray &answer) override { }
 };
 }
 #endif // end namespace oofem

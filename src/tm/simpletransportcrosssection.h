@@ -53,8 +53,8 @@ class TransportMaterial;
 class OOFEM_EXPORT SimpleTransportCrossSection : public TransportCrossSection
 {
 protected:
-    int matNumber;
-    double thickness;
+    int matNumber = 0;
+    double thickness = 0.;
 
 public:
     /**
@@ -63,17 +63,15 @@ public:
      * @param d Domain for cross section.
      */
     SimpleTransportCrossSection(int n, Domain * d);
-    /// Destructor.
-    virtual ~SimpleTransportCrossSection();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     /// Temporary function that hands out the material. Must be removed for future layered support, but input files will still look the same.
-    TransportMaterial *giveMaterial() override;
-    Material *giveMaterial(IntegrationPoint *ip) override;
+    TransportMaterial *giveMaterial() const override;
+    Material *giveMaterial(IntegrationPoint *ip) const override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override;
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override;
     int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep) override;
 
     int checkConsistency() override;

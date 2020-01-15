@@ -43,14 +43,12 @@
 namespace oofem {
 REGISTER_Material(NewtonianFluidMaterial);
 
-IRResultType
-NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
+void
+NewtonianFluidMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
+    FluidDynamicMaterial :: initializeFrom(ir);
     IR_GIVE_FIELD(ir, viscosity, _IFT_NewtonianFluidMaterial_mu);
 
-    return FluidDynamicMaterial :: initializeFrom(ir);
 }
 
 
@@ -70,7 +68,7 @@ NewtonianFluidMaterial :: giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep
 
 
 double
-NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp)
+NewtonianFluidMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( aProperty == Viscosity ) {
         return viscosity;

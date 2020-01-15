@@ -53,8 +53,7 @@ Concrete3 :: CreateStatus(GaussPoint *gp) const
  */
 {
     // double Ee, Gf, Et, Etp, Ft, Le, minEffStrainForFullyOpenCrack;
-    RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( RCM2Material :: CreateStatus(gp) );
-    return status;
+    return RCM2Material :: CreateStatus(gp);
 }
 
 
@@ -436,10 +435,10 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
  */
 
 
-IRResultType
-Concrete3 :: initializeFrom(InputRecord *ir)
+void
+Concrete3 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    RCM2Material :: initializeFrom(ir);
 
     int exmode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, exmode, _IFT_Concrete3_exp_soft);
@@ -448,7 +447,5 @@ Concrete3 :: initializeFrom(InputRecord *ir)
     } else {
         softeningMode = linearSoftening;
     }
-
-    return RCM2Material :: initializeFrom(ir);
 }
 } // end namespace oofem

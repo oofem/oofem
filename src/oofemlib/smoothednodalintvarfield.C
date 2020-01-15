@@ -94,14 +94,10 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, const Float
 int
 SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
-    if ( dman->hasCoordinates() ) {
-        const FloatArray *val;
-        int result = this->smoother->giveNodalVector( val, dman->giveNumber() );
-        answer = * val;
-        return ( result == 1 );
-    } else {
-        return 1; // failed -> dman without coordinates
-    }
+    const FloatArray *val;
+    int result = this->smoother->giveNodalVector( val, dman->giveNumber() );
+    answer = * val;
+    return ( result == 1 );
 }
 
 void

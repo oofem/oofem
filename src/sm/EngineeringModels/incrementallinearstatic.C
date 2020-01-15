@@ -86,10 +86,8 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 }
 
 
-IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
+void IncrementalLinearStatic :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, _IFT_IncrementalLinearStatic_prescribedtimes);
     if ( discreteTimes.giveSize() > 0 ) {
         numberOfSteps = discreteTimes.giveSize();
@@ -113,7 +111,7 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
     sparseMtrxType = ( SparseMtrxType ) val;
 
 
-    suppressOutput = ir->hasField(_IFT_EngngModel_suppressOutput);
+    suppressOutput = ir.hasField(_IFT_EngngModel_suppressOutput);
 
     if(suppressOutput) {
     	printf("Suppressing output.\n");
@@ -130,7 +128,6 @@ IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
 	}
 
     //StructuralEngngModel::initializeFrom (ir);
-    return IRRT_OK;
 }
 
 

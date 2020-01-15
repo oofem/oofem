@@ -48,25 +48,17 @@ RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
 
-IRResultType
-RigidArmNode :: initializeFrom(InputRecord *ir)
+void
+RigidArmNode :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    result = Node :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    Node :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, masterDofMngr, _IFT_RigidArmNode_master);
 
     IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
     if ( masterMask.giveSize() != this->dofidmask->giveSize() ) {
-        OOFEM_WARNING("mastermask size mismatch");
-        return IRRT_BAD_FORMAT;
+        throw ValueInputException(ir, _IFT_DofManager_mastermask, "mastermask size mismatch");
     }
-
-    return IRRT_OK;
 }
 
 void
@@ -232,7 +224,7 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
     bool hasg2l = this->computeL2GTransformation(TG2L, fullDofMask);
     bool mhasg2l = masterNode->computeL2GTransformation(TMG2L, fullDofMask);
 
-    xyz.beDifferenceOf(*this->giveCoordinates(), *masterNode->giveCoordinates());
+    xyz.beDifferenceOf(this->giveCoordinates(), masterNode->giveCoordinates());
 
     if (xyz.giveSize() < 3) {
       xyz.resizeWithValues(3);

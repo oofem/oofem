@@ -91,15 +91,15 @@ RerShell :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     FloatArray b(3), c(3), nodeCoords;
     double x1, x2, x3, y1, y2, y3, area;
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(1)->giveCoordinates() );
     x1 = nodeCoords.at(1);
     y1 = nodeCoords.at(2);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(2)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(2)->giveCoordinates() );
     x2 = nodeCoords.at(1);
     y2 = nodeCoords.at(2);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(3)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(3)->giveCoordinates() );
     x3 = nodeCoords.at(1);
     y3 = nodeCoords.at(2);
 
@@ -183,15 +183,15 @@ RerShell :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
     l2 = iLocCoord.at(2);
     l3 = 1.0 - l1 - l2;
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(1)->giveCoordinates() );
     x1 = nodeCoords.at(1);
     y1 = nodeCoords.at(2);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(2)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(2)->giveCoordinates() );
     x2 = nodeCoords.at(1);
     y2 = nodeCoords.at(2);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(3)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(3)->giveCoordinates() );
     x3 = nodeCoords.at(1);
     y3 = nodeCoords.at(2);
 
@@ -255,15 +255,15 @@ RerShell :: giveArea()
 
     double x1, x2, x3, y1, y2, y3;
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(1)->giveCoordinates() );
     x1 = nodeCoords.at(1);
     y1 = nodeCoords.at(2);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(2)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(2)->giveCoordinates() );
     x2 = nodeCoords.at(1);
     y2 = nodeCoords.at(2);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(3)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(3)->giveCoordinates() );
     x3 = nodeCoords.at(1);
     y3 = nodeCoords.at(2);
 
@@ -271,33 +271,28 @@ RerShell :: giveArea()
 }
 
 
-IRResultType
-RerShell :: initializeFrom(InputRecord *ir)
+void
+RerShell :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    IRResultType result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
 
     if ( numberOfGaussPoints != 1 ) {
         numberOfGaussPoints = 1;
     }
-
-    return IRRT_OK;
 }
 
 
 void
 RerShell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give3dShellStiffMtrx(rMode, gp, tStep);
 }
 
 void
 RerShell :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(strain, gp, tStep);
 }
 
 void
@@ -405,17 +400,17 @@ RerShell :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
     FloatArray nodeCoords;
     double x1, x2, x3, y1, y2, y3, z1, z2, z3;
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(1)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(1)->giveCoordinates() );
     x1 = nodeCoords.at(1);
     y1 = nodeCoords.at(2);
     z1 = nodeCoords.at(3);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(2)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(2)->giveCoordinates() );
     x2 = nodeCoords.at(1);
     y2 = nodeCoords.at(2);
     z2 = nodeCoords.at(3);
 
-    this->giveLocalCoordinates( nodeCoords, * ( this->giveNode(3)->giveCoordinates() ) );
+    this->giveLocalCoordinates( nodeCoords, this->giveNode(3)->giveCoordinates() );
     x3 = nodeCoords.at(1);
     y3 = nodeCoords.at(2);
     z3 = nodeCoords.at(3);

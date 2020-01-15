@@ -112,7 +112,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_SpringElement_Name; }
     const char *giveClassName() const override { return "SpringElement"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     Element_Geometry_Type giveGeometryType() const override { return EGT_point; }
 
 protected:

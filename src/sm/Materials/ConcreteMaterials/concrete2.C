@@ -50,12 +50,10 @@ Concrete2 :: Concrete2(int n, Domain *d) : DeformationTheoryMaterial(n, d),
 { }
 
 
-Concrete2 :: ~Concrete2() { }
-
-IRResultType
-Concrete2 :: initializeFrom(InputRecord *ir)
+void
+Concrete2 :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    Material :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E, _IFT_Concrete2_e);
     IR_GIVE_FIELD(ir, n, _IFT_Concrete2_n);
@@ -77,21 +75,15 @@ Concrete2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, stirrEREF, _IFT_Concrete2_stirr_eref);
     IR_GIVE_FIELD(ir, stirrLAMBDA, _IFT_Concrete2_stirr_lambda);
 
-    result = this->linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    return Material :: initializeFrom(ir);
+    this->linearElasticMaterial.initializeFrom(ir);
 }
 
 
 double
-Concrete2 :: give(int aProperty, GaussPoint *gp)
+Concrete2 :: give(int aProperty, GaussPoint *gp) const
 // Returns the value of the property aProperty (e.g. the Young's modulus
 // 'E') of the receiver.
 {
-    double value;
-
     switch ( aProperty ) {
     case c2_SCCC:
         return this->SCCC;
@@ -146,8 +138,7 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 
     default:
         if ( propertyDictionary.includes(aProperty) ) {
-            value = propertyDictionary.at(aProperty);
-            return value;
+            return propertyDictionary.at(aProperty);
         } else {
             return this->linearElasticMaterial.give(aProperty, gp);
             // error ("give: property not defined");
@@ -156,11 +147,9 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 }
 
 
-void
-Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
-                                             GaussPoint *gp,
-                                             const FloatArray &totalStrain,
-                                             TimeStep *tStep)
+FloatArrayF<5>
+Concrete2 :: giveRealStressVector_PlateLayer(const FloatArrayF<5> &totalStrain,
+                                             GaussPoint *gp, TimeStep *tStep) const
 //
 // returns total stress vector of receiver according to
 // previous level of stress and current
@@ -320,8 +309,9 @@ Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
         //   plasticStrain->negated()->add (status->givePlasticStrainVector());
         //      status->givePlasticStrainIncrementVector()-> add(plasticStrain);
 
+        FloatArray answer;
         StructuralMaterial :: giveReducedSymVectorForm( answer, currentStress, gp->giveMaterialMode() );
-        return;
+        return answer;
     }
 
     //
@@ -642,13 +632,15 @@ label18:
     //plasticStrain->negated()->add (status->givePlasticStrainVector());
     //status->givePlasticStrainIncrementVector()-> add(plasticStrain);
 
+    FloatArray answer;
     StructuralMaterial :: giveFullSymVectorForm( answer, currentStress, gp->giveMaterialMode() );
+    return answer;
 }
 
 
 void
 Concrete2 :: dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
-                  double SCC, double SCT, int *ifplas)
+                  double SCC, double SCT, int *ifplas) const
 //
 // DEFORMATION THEORY OF PLASTICITY, PRNCIPAL STRESSES
 // CONDITION OF PLASTICITY.
@@ -851,7 +843,7 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
 
 void
 Concrete2 :: dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
-                  double SCC, double SCT, int *ifplas)
+                  double SCC, double SCT, int *ifplas) const
 //
 // DEFORMATION THEORY OF PLASTICITY, PRNCIPAL STRESSES
 // CONDITION OF PLASTICITY. - PLANE STRESS
@@ -999,7 +991,7 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
 
 void
 Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray &ep, double &ep1, double &ep2, double &ep3,
-                     double SCC, double SCT, int &ifupd)
+                     double SCC, double SCT, int &ifupd) const
 // material constant of concrete
 // stored in this.propertyDictionary
 //
@@ -1164,7 +1156,7 @@ label14:
 
 
 void
-Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep)
+Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep) const
 // stirr (double dez, double srf)
 //
 //
@@ -1223,11 +1215,10 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeSte
 
 
 
-void
-Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
-                                     MatResponseMode rMode,
+FloatMatrixF<5,5>
+Concrete2 :: givePlateLayerStiffMtrx(MatResponseMode rMode,
                                      GaussPoint *gp,
-                                     TimeStep *tStep)
+                                     TimeStep *tStep) const
 //
 // This material is currently unable compute material stiffness
 // so it uses slave material (linearElasticMaterial ) to perform this work
@@ -1236,7 +1227,7 @@ Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 //
 {
     // error ("givePlateLayerStiffMtrx: unable to compute");
-    linearElasticMaterial.givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
+    return linearElasticMaterial.givePlateLayerStiffMtrx( rMode, gp, tStep);
 }
 
 
@@ -1249,16 +1240,9 @@ Concrete2 :: CreateStatus(GaussPoint *gp) const
 
 
 Concrete2MaterialStatus :: Concrete2MaterialStatus(GaussPoint *g) :
-    StructuralMaterialStatus(g), plasticStrainVector(), plasticStrainIncrementVector()
+    StructuralMaterialStatus(g)
 {
-    SCCM = EPM = E0PM = SRF = SEZ = 0.0;
-    SCTM = -1.0;     // init status if SCTM < 0.;
 }
-
-
-
-Concrete2MaterialStatus :: ~Concrete2MaterialStatus()
-{ }
 
 
 void

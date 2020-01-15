@@ -61,10 +61,10 @@ IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *
 }
 
 
-IRResultType
-IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
+void
+IsotropicLinearElasticMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    LinearElasticMaterial :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
@@ -73,8 +73,6 @@ IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
     // compute  value of shear modulus
     G = E / ( 2.0 * ( 1. + nu ) );
     this->initTangents();
-
-    return LinearElasticMaterial :: initializeFrom(ir);
 }
 
 
@@ -141,7 +139,7 @@ void IsotropicLinearElasticMaterial :: restoreContext(DataStream &stream, Contex
 
 
 double
-IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
+IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     if ( ( aProperty == NYxy ) || ( aProperty == NYxz ) || ( aProperty == NYyz ) ) {
         return nu;
@@ -166,46 +164,42 @@ IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
 }
 
 
-void
-IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<3,3>
+IsotropicLinearElasticMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
-    answer = tangentPlaneStress;
-
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+        return tangentPlaneStress * (1. - this->preCastStiffnessReduction);
+    } else {
+        return tangentPlaneStress;
     }
 }
 
 
-void
-IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                                           MatResponseMode mode,
+FloatMatrixF<4,4>
+IsotropicLinearElasticMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                                            GaussPoint *gp,
-                                                           TimeStep *tStep)
+                                                           TimeStep *tStep) const
 {
-    answer = tangentPlaneStrain;
-
     if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+        return tangentPlaneStrain * (1. - this->preCastStiffnessReduction);
+    } else {
+        return tangentPlaneStrain;
     }
 }
 
 
-void
-IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(FloatMatrix &answer,
-                                                        MatResponseMode mode,
+FloatMatrixF<1,1>
+IsotropicLinearElasticMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                                         GaussPoint *gp,
-                                                        TimeStep *tStep)
+                                                        TimeStep *tStep) const
 {
-    answer.resize(1, 1);
-    answer.at(1, 1) = this->E;
-
-    if ( ( tStep->giveIntrinsicTime() < this->castingTime ) ) {
-        answer.times(1. - this->preCastStiffnessReduction);
+    double e = this->E;
+    if ( tStep->giveIntrinsicTime() < this->castingTime ) {
+        e *= 1. - this->preCastStiffnessReduction;
     }
+    return {e};
 }
 
 

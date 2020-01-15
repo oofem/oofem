@@ -330,9 +330,9 @@ TrPlaneStrRot :: giveArea()
 void
 TrPlaneStrRot :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
 {
-    const auto &nc1 = *this->giveNode(1)->giveCoordinates();
-    const auto &nc2 = *this->giveNode(2)->giveCoordinates();
-    const auto &nc3 = *this->giveNode(3)->giveCoordinates();
+    const auto &nc1 = this->giveNode(1)->giveCoordinates();
+    const auto &nc2 = this->giveNode(2)->giveCoordinates();
+    const auto &nc3 = this->giveNode(3)->giveCoordinates();
 
     x.at(1) = nc1.at(1);
     x.at(2) = nc2.at(1);
@@ -557,16 +557,11 @@ TrPlaneStrRot :: GiveDerivativeVY(const FloatArray &lCoords)
 }
 
 
-IRResultType
-TrPlaneStrRot :: initializeFrom(InputRecord *ir)
+void
+TrPlaneStrRot :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
     numberOfGaussPoints = 4;
-    result = TrPlaneStress2d :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    TrPlaneStress2d :: initializeFrom(ir);
 
     numberOfRotGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfRotGaussPoints, _IFT_TrPlaneStrRot_niprot);
@@ -582,24 +577,22 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
     if ( numberOfRotGaussPoints != 1 ) {
         OOFEM_ERROR("numberOfRotGaussPoints size mismatch - must be equal to one");
     }
-    
-    return IRRT_OK;
 }
 
 
 void
 TrPlaneStrRot :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveMembraneRotStiffMtrx(answer, rMode, gp, tStep);
+    auto cs = this->giveStructuralCrossSection();
+    answer = cs->giveMembraneRotStiffMtrx(rMode, gp, tStep);
 }
 
 
 void
 TrPlaneStrRot :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    StructuralCrossSection *cs = this->giveStructuralCrossSection();
-    cs->giveGeneralizedStress_MembraneRot(answer, gp, strain, tStep);
+    auto cs = this->giveStructuralCrossSection();
+    answer = cs->giveGeneralizedStress_MembraneRot(strain, gp, tStep);
 }
 
 

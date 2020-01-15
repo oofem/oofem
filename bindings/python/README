@@ -1,4 +1,4 @@
-/*
+#/*
 
                    *****    *****   ******  ******  ***   ***
                  **   **  **   **  **      **      ** *** **
@@ -31,22 +31,33 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
 */
 
-This directory contains sources to generate OOFEM bindings to Python programming language.
-Currently, Python version 3.x is supported, small changes are required for old Python 2.x.
-The boost.python library is required to be installed.
+This directory contains sources to generate OOFEM bindings to Python programming language using Pybind11.
+To generate the binding, the pybind11 is required to be installed. Python module pytest is required as well.
 
-To compile oofem python module, set "USE_PYTHON_BINDINGS" to "ON" when configuring 
-oofem target using cmake. Also, if needed, set corresponding -DPYTHON_EXECUTABLE
--DPYTHON_INCLUDE_DIR and -DPYTHON_LIBRARY. This is useful when more Python versions are available.
+#############################
+#prerequisites
+#############################
+pip3 install pybind11
+
+Sometimes it happens that running any example raises an error:
+expected constructor, destructor, or type conversion before ‘(’ token PYBIND11_MODULE(oofempy, m) {
+
+In such a case, install pybind11 rather from source:
+git clone https://github.com/pybind/pybind11.git; cd pybind11; pip3 install
 
 
-For testing the bindings, the liboofem.so file must be somewhere where python looks for
-modules. This can be done e.g. by symlinking to the .so in the build directory by 
-running something like
+#############################
+#cmake confuration
+#############################
+set USE_PYTHON_BINDINGS to ON
 
-    ln -s /usr/local/lib/python2.7/dist-packages/liboofem.so /home/user/oofem-build/liboofem.so
+#############################
+# running the test
+#############################
+export PYTHONPATH=.
+python3 -m pytest /path/to/oofem.git/bindings/python
 
-This will make sure the module is always up-to-date with the build tree. Running
-``python test3.py`` in the bindings/python directory will run a simple test which
-runs an oofem simulation (heat transfer) and then iterates over DoFs and reads out
-some temperature values.
+#############################
+# generating documentation
+#############################
+cd oofem.git/bindings/python2/docs; make html

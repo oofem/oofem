@@ -79,14 +79,14 @@ public:
     void edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) override;
+    IntArray computeLocalEdgeMapping(int iedge) const override;
 
     // Surface
     void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     //void surfaceEvaldNdx (FloatMatrix&answer, int iedge, const FloatArray& lcoords, const FEICellGeometry& cellgeo) override;
     void surfaceLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
-    void computeLocalSurfaceMapping(IntArray &nodes, int iSurf) override;
+    IntArray computeLocalSurfaceMapping(int iSurf) const override;
 
     std::unique_ptr<IntegrationRule> giveIntegrationRule(int order) override;
     std::unique_ptr<IntegrationRule> giveBoundaryIntegrationRule(int order, int boundary) override;

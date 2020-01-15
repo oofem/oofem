@@ -46,28 +46,17 @@ REGISTER_Material(J2Mat);
 
 J2Mat :: J2Mat(int n, Domain *d) : MPlasticMaterial2(n, d)
 {
-    //
-    // constructor
-    //
-    kinematicHardeningFlag = isotropicHardeningFlag = 0;
     linearElasticMaterial = new IsotropicLinearElasticMaterial(n, d);
     this->nsurf = 1;
 }
 
-J2Mat :: ~J2Mat()
-{ }
-
-IRResultType
-J2Mat :: initializeFrom(InputRecord *ir)
+void
+J2Mat :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 
-    result = MPlasticMaterial2 :: initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
-    
-    result = linearElasticMaterial->initializeFrom(ir);
-    if ( result != IRRT_OK ) return result;
+    MPlasticMaterial2 :: initializeFrom(ir);
+    linearElasticMaterial->initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, value, _IFT_J2Mat_ry);
     k = value / sqrt(3.0);
@@ -93,9 +82,6 @@ J2Mat :: initializeFrom(InputRecord *ir)
     } else {
         this->rmType = mpm_CuttingPlane;
     }
-
-
-    return IRRT_OK;
 }
 
 
@@ -106,7 +92,7 @@ J2Mat :: CreateStatus(GaussPoint *gp) const
 }
 
 int
-J2Mat :: giveSizeOfFullHardeningVarsVector()
+J2Mat :: giveSizeOfFullHardeningVarsVector() const
 {
     /* Returns the size of hardening variables vector */
     int size = 0;
@@ -142,7 +128,7 @@ J2Mat :: giveSizeOfReducedHardeningVarsVector(GaussPoint *gp) const
 
 double
 J2Mat :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stressVector,
-                             const FloatArray &strainSpaceHardeningVars)
+                             const FloatArray &strainSpaceHardeningVars) const
 {
     double f;
     FloatArray helpVector, backStress;
@@ -166,7 +152,7 @@ J2Mat :: computeYieldValueAt(GaussPoint *gp, int isurf, const FloatArray &stress
 
 void
 J2Mat :: computeStressGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, const FloatArray &stressVector,
-                                     const FloatArray &strainSpaceHardeningVars)
+                                     const FloatArray &strainSpaceHardeningVars) const
 {
     /* stress gradient of yield function in full stress - strain space */
 
@@ -213,7 +199,7 @@ J2Mat :: computeStressGradientVector(FloatArray &answer, functType ftype, int is
 void
 J2Mat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
                                              const FloatArray &stress, const FloatArray &dlambda,
-                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap)
+                                             const FloatArray &dplasticStrain, const IntArray &activeConditionMap) const
 {
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
     answer.resize(size);
@@ -234,7 +220,7 @@ J2Mat :: computeStrainHardeningVarsIncrement(FloatArray &answer, GaussPoint *gp,
 
 void
 J2Mat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, GaussPoint *gp, FloatArray &fullStressVector,
-                                const FloatArray &strainSpaceHardeningVariables)
+                                const FloatArray &strainSpaceHardeningVariables) const
 {
     int kcount = 0, size = this->giveSizeOfReducedHardeningVarsVector(gp);
     FloatArray reducedKinematicGrad;
@@ -264,7 +250,7 @@ void
 J2Mat :: computeReducedHardeningVarsSigmaGradient(FloatMatrix &answer, GaussPoint *gp, const IntArray &activeConditionMap,
                                                   const FloatArray &fullStressVector,
                                                   const FloatArray &strainSpaceHardeningVars,
-                                                  const FloatArray &gamma)
+                                                  const FloatArray &gamma) const
 {
     int rsize = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() );
     answer.resize(giveSizeOfReducedHardeningVarsVector(gp), rsize);
@@ -288,7 +274,7 @@ J2Mat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint 
                                                 const IntArray &activeConditionMap,
                                                 const FloatArray &fullStressVector,
                                                 const FloatArray &strainSpaceHardeningVars,
-                                                const FloatArray &gamma)
+                                                const FloatArray &gamma) const
 {
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
     answer.resize(size, 1);
@@ -314,7 +300,7 @@ J2Mat :: computeReducedHardeningVarsLamGradient(FloatMatrix &answer, GaussPoint 
 
 void
 J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf, GaussPoint *gp, const FloatArray &fullStressVector,
-                                        const FloatArray &strainSpaceHardeningVars)
+                                        const FloatArray &strainSpaceHardeningVars) const
 {
     int size;
     int imask, jmask;
@@ -412,7 +398,7 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
 
 void
 J2Mat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, GaussPoint *gp, const FloatArray &fullStressVector,
-                                        const FloatArray &strainSpaceHardeningVariables)
+                                        const FloatArray &strainSpaceHardeningVariables) const
 {
     // something will be here for k1 vector
     int size = giveSizeOfReducedHardeningVarsVector(gp);
@@ -435,7 +421,7 @@ J2Mat :: computeReducedSKGradientMatrix(FloatMatrix &gradientMatrix,  int i, Gau
 
 
 int
-J2Mat :: hasHardening()
+J2Mat :: hasHardening() const
 {
     return ( this->kinematicHardeningFlag || this->isotropicHardeningFlag );
 }
@@ -464,7 +450,7 @@ J2Mat :: computeJ2InvariantAt(const FloatArray &stressVector)
 
 void
 J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
-                              const FloatArray &strainSpaceHardeningVars)
+                              const FloatArray &strainSpaceHardeningVars) const
 {
     /* returns part of hardening vector corresponding to kinematic hardening */
     if ( this->kinematicHardeningFlag ) {
@@ -488,7 +474,7 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
 
 
 double
-J2Mat :: giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpaceHardeningVars)
+J2Mat :: giveIsotropicHardeningVar(GaussPoint *gp, const FloatArray &strainSpaceHardeningVars) const
 {
     /* returns value in  hardening vector corresponding to isotropic hardening */
     if ( !isotropicHardeningFlag ) {

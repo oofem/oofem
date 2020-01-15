@@ -63,7 +63,7 @@ public:
     /// Destructor
     virtual ~DofManExportModule();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
     const char *giveClassName() const override { return "DofManExportModuleClass"; }
     const char *giveInputRecordName() const { return _IFT_DofManExportModule_Name; }

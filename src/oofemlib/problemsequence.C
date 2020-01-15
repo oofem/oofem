@@ -64,10 +64,10 @@ void ProblemSequence :: solveYourself()
 }
 
 
-int ProblemSequence :: instanciateYourself(DataReader &dr, InputRecord *ir, const char *outFileName, const char *desc)
+int ProblemSequence :: instanciateYourself(DataReader &dr, InputRecord &ir, const char *outFileName, const char *desc)
 {
     int result = EngngModel :: instanciateYourself(dr, ir, dataOutputFileName.c_str(), desc);
-    ir->finish();
+    ir.finish();
 
     for ( auto &s : inputStreamNames ) {
         OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ] );
@@ -82,11 +82,11 @@ int ProblemSequence :: instanciateYourself(DataReader &dr, InputRecord *ir, cons
 }
 
 
-IRResultType ProblemSequence :: initializeFrom(InputRecord *ir)
+void ProblemSequence :: initializeFrom(InputRecord &ir)
 {
-    IRResultType ret = EngngModel :: initializeFrom(ir);
+    EngngModel :: initializeFrom(ir);
+
     IR_GIVE_FIELD(ir, inputStreamNames, _IFT_ProblemSequence_engineeringModels);
-    return ret;
 }
 
 

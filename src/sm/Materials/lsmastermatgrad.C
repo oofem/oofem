@@ -51,16 +51,12 @@ REGISTER_Material(LargeStrainMasterMaterialGrad);
 // constructor
 LargeStrainMasterMaterialGrad :: LargeStrainMasterMaterialGrad(int n, Domain *d) : LargeStrainMasterMaterial(n, d), GradientDamageMaterialExtensionInterface(d)
 {
-    slaveMat = 0;
 }
 
-// destructor
-LargeStrainMasterMaterialGrad :: ~LargeStrainMasterMaterialGrad()
-{ }
 
 // specifies whether a given material mode is supported by this model
-int
-LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode)
+bool
+LargeStrainMasterMaterialGrad :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat;
 }
@@ -89,7 +85,7 @@ LargeStrainMasterMaterialGrad :: giveGradientDamageStiffnessMatrix_uu(FloatMatri
     MaterialMode mMode = gp->giveMaterialMode();
     switch ( mMode ) {
     case _3dMat:
-        LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
+        answer = LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(mode, gp, tStep);
         break;
     default:
         OOFEM_ERROR( "unknown mode (%s)", __MaterialModeToString(mMode) );
@@ -187,7 +183,7 @@ LargeStrainMasterMaterialGrad :: giveNonlocalInternalForces_B_factor(FloatArray 
 void
 LargeStrainMasterMaterialGrad :: computeLocalDamageDrivingVariable(double &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
+    // LargeStrainMasterMaterialStatus *status = static_cast< LargeStrainMasterMaterialStatus * >( this->giveStatus(gp) );
     // @todo: solve this
     //  answer = status->giveTempKappa();w
     answer = 1;
@@ -287,9 +283,9 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
 }
 
 
-IRResultType
-LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
+void
+LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord &ir)
 {
-    return LargeStrainMasterMaterial :: initializeFrom(ir);
+    LargeStrainMasterMaterial :: initializeFrom(ir);
 }
 } // end namespace oofem

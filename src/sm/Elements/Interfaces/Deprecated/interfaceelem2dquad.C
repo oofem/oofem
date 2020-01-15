@@ -154,11 +154,11 @@ InterfaceElem2dQuad :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 }
 
 
-IRResultType
-InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
+void
+InterfaceElem2dQuad :: initializeFrom(InputRecord &ir)
 {
-    this->axisymmode = ir->hasField(_IFT_InterfaceElem2dQuad_axisymmode);
-    return StructuralElement :: initializeFrom(ir);
+    this->axisymmode = ir.hasField(_IFT_InterfaceElem2dQuad_axisymmode);
+    StructuralElement :: initializeFrom(ir);
 }
 
 

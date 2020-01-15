@@ -48,9 +48,6 @@
 //
 
 extern "C" {
- #define new __new
- #define class __class
- #define inline __inline
  #define min __min
  #define max __max
  #define sgn __sgn
@@ -61,9 +58,6 @@ extern "C" {
 
  #include <Esimple.h>
 
- #undef new
- #undef class
- #undef inline
  #undef min
  #undef max
  #undef sgn

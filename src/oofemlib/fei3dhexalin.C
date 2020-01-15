@@ -360,10 +360,8 @@ void
 FEI3dHexaLin :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                              const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l;
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
-    l = this->edgeComputeLength(edgeNodes, cellgeo);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
+    double l = this->edgeComputeLength(edgeNodes, cellgeo);
 
     answer.resize(2, 1);
     answer.at(1, 1) = -1.0 / l;
@@ -384,9 +382,8 @@ void
 FEI3dHexaLin :: edgeLocal2global(FloatArray &answer, int iedge,
                                  const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(3);
@@ -402,62 +399,46 @@ FEI3dHexaLin :: edgeLocal2global(FloatArray &answer, int iedge,
 double
 FEI3dHexaLin :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     return 0.5 * this->edgeComputeLength(edgeNodes, cellgeo);
 }
 
 
-void
-FEI3dHexaLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dHexaLin :: computeLocalEdgeMapping(int iedge) const
 {
-    int aNode = 0, bNode = 0;
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
+        return {1, 2};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
+        return {2, 3};
     } else if ( iedge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
+        return {3, 4};
     } else if ( iedge == 4 ) { // edge between nodes 4 1
-        aNode = 4;
-        bNode = 1;
+        return {4, 1};
     } else if ( iedge == 5 ) { // edge between nodes 1 5
-        aNode = 1;
-        bNode = 5;
+        return {1, 5};
     } else if ( iedge == 6 ) { // edge between nodes 2 6
-        aNode = 2;
-        bNode = 6;
+        return {2, 6};
     } else if ( iedge == 7 ) { // edge between nodes 3 7
-        aNode = 3;
-        bNode = 7;
+        return {3, 7};
     } else if ( iedge == 8 ) { // edge between nodes 4 8
-        aNode = 4;
-        bNode = 8;
+        return {4, 8};
     } else if ( iedge == 9 ) { // edge between nodes 5 6
-        aNode = 5;
-        bNode = 6;
+        return {5, 6};
     } else if ( iedge == 10 ) { // edge between nodes 6 7
-        aNode = 6;
-        bNode = 7;
+        return {6, 7};
     } else if ( iedge == 11 ) { // edge between nodes 7 8
-        aNode = 7;
-        bNode = 8;
+        return {7, 8};
     } else if ( iedge == 12 ) { // edge between nodes 8 5
-        aNode = 8;
-        bNode = 5;
+        return {8, 5};
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
-
-    edgeNodes = {aNode, bNode};
 }
 
 double
-FEI3dHexaLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
+FEI3dHexaLin :: edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const
 {
     return distance(cellgeo.giveVertexCoordinates( edgeNodes.at(2) ), cellgeo.giveVertexCoordinates( edgeNodes.at(1) ));
 }
@@ -479,8 +460,7 @@ void
 FEI3dHexaLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Note, this must be in correct order, not just the correct nodes, therefore we must use snodes;
-    IntArray snodes;
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
     FloatArray lcoords_hex;
 
@@ -534,10 +514,9 @@ void
 FEI3dHexaLin :: surfaceLocal2global(FloatArray &answer, int iedge,
                                     const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray nodes;
     FloatArray n;
 
-    this->computeLocalSurfaceMapping(nodes, iedge);
+    const auto &nodes = this->computeLocalSurfaceMapping(iedge);
     this->surfaceEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(3);
@@ -553,9 +532,7 @@ double
 FEI3dHexaLin :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray a, b, dNdksi(4), dNdeta(4);
-    IntArray snodes;
-
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
     double ksi = lcoords.at(1);
     double eta = lcoords.at(2);
@@ -588,23 +565,23 @@ FEI3dHexaLin :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &l
     return this->surfaceEvalNormal(normal, isurf, lcoords, cellgeo);
 }
 
-void
-FEI3dHexaLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
+IntArray
+FEI3dHexaLin :: computeLocalSurfaceMapping(int isurf) const
 {
     if ( isurf == 1 ) { // surface 1 - nodes 1 4 3 2
-        surfNodes = {1, 4, 3, 2};
+        return  {1, 4, 3, 2};
     } else if ( isurf == 2 ) { // surface 2 - nodes 5 6 7 8
-        surfNodes = {5, 6, 7, 8};
+        return  {5, 6, 7, 8};
     } else if ( isurf == 3 ) { // surface 3  - nodes 1 2 6 5
-        surfNodes = {1, 2, 6, 5};
+        return  {1, 2, 6, 5};
     } else if ( isurf == 4 ) { // surface 4 - nodes 2 3 7 6
-        surfNodes = {2, 3, 7, 6};
+        return  {2, 3, 7, 6};
     } else if ( isurf == 5 ) { // surface 5 - nodes 3 4 8 7
-        surfNodes = {3, 4, 8, 7};
+        return {3, 4, 8, 7};
     } else if ( isurf == 6 ) { // surface 6 - nodes 4 1 5 8
-        surfNodes = {4, 1, 5, 8};
+        return {4, 1, 5, 8};
     } else {
-        OOFEM_ERROR("wrong surface number (%d)", isurf);
+        throw std::runtime_error("invalid surface number");
     }
 }
 
@@ -625,13 +602,12 @@ FEI3dHexaLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 double
 FEI3dHexaLin :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    IntArray fNodes;
-    this->computeLocalSurfaceMapping(fNodes, iEdge);
+    const auto &fNodes = this->computeLocalSurfaceMapping(iEdge);
 
-    const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
-    const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
-    const FloatArray &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
-    const FloatArray &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
+    const auto &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const auto &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const auto &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const auto &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
 
     return (
         c4(2) * ( c1(1) * ( -c2(0) - c3(0) ) + c2(1) * ( c1(0) - c3(0) ) + c3(1) * ( c1(0) + c2(0) ) ) +

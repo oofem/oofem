@@ -62,9 +62,8 @@ class AnisotropicLinearElasticMaterial : public LinearElasticMaterial
 {
 public:
     AnisotropicLinearElasticMaterial(int n, Domain *d) : LinearElasticMaterial(n, d) {}
-    virtual ~AnisotropicLinearElasticMaterial() {}
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     const char *giveInputRecordName() const override { return _IFT_AnisotropicLinearElasticMaterial_Name; }

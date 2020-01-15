@@ -79,7 +79,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_TrPlaneStrRot_Name; }
     const char *giveClassName() const override { return "TrPlaneStrRot"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     MaterialMode giveMaterialMode() override { return _PlaneStressRot; }
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;

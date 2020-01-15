@@ -252,7 +252,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     for ( int i = 1; i <= nnode; i++ ) {
         Node *node = domain->giveNode(i);
         if ( node ) {
-            const auto &coords = *node->giveCoordinates();
+            const auto &coords = node->giveCoordinates();
             if ( init ) {
                 init = 0;
                 for ( int j = 1; j <= coords.giveSize(); j++ ) {
@@ -303,7 +303,7 @@ OctreeSpatialLocalizer :: buildOctreeDataStructure()
     for ( int i = 1; i <= nnode; i++ ) {
         Node *node = domain->giveNode(i);
         if ( node ) {
-            const auto &coords = *node->giveCoordinates();
+            const auto &coords = node->giveCoordinates();
             this->insertNodeIntoOctree(*this->rootCell, i, coords);
         }
     }
@@ -347,7 +347,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
         // but the element should be present in octree data structure
         // this is needed by some services (giveElementContainingPoint, for example)
         for ( int j = 1; j <= ielem->giveNumberOfNodes(); j++ ) {
-            const auto &nc = *ielem->giveNode(j)->giveCoordinates();
+            const auto &nc = ielem->giveNode(j)->giveCoordinates();
             this->insertIPElementIntoOctree(*this->rootCell, i, nc);
         }
     }
@@ -492,7 +492,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec &rootCell, int nodeNum,
         // propagate all nodes already assigned to currCell to children
         for ( int inod: cellNodeList ) {
             Node *node = domain->giveNode(inod);
-            const auto &nodeCoords = *node->giveCoordinates();
+            const auto &nodeCoords = node->giveCoordinates();
             this->insertNodeIntoOctree(*currCell, inod, nodeCoords);
         }
 
@@ -1422,7 +1422,7 @@ OctreeSpatialLocalizer :: giveNodeClosestToPointWithinOctant(OctantRec &currCell
     for ( auto &inod : currCell.giveNodeList() ) {
         Node *node = domain->giveNode(inod);
 
-        double currDist2 = distance_square(gcoords, *node->giveCoordinates());
+        double currDist2 = distance_square(gcoords, node->giveCoordinates());
 
         if ( currDist2 < minDist2 ) {
             answer = node;
@@ -1442,7 +1442,7 @@ OctreeSpatialLocalizer :: giveNodesWithinBox(nodeContainerType &nodeList, Octant
         if ( !cellNodes.empty() ) {
             for ( int inod: cellNodes ) {
                 // loop over cell nodes and check if they meet the criteria
-                const auto &nodeCoords = *domain->giveNode(inod)->giveCoordinates();
+                const auto &nodeCoords = domain->giveNode(inod)->giveCoordinates();
                 // is node within bbox
                 if ( distance(nodeCoords, coords) <= radius ) {
                     // if yes, append them into set

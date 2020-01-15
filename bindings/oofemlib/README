@@ -8,7 +8,10 @@ Compilation:
 g++ -c -I../../src/oofemlib -I../../src -I../../default beam2d_1.C -o beam2d_1.o
 
 Linking:
-g++ beam2d_1.o -L ../../default -loofem -o beam2d_1
+g++ beam2d_1.o -L../../default -loofem -o beam2d_1
 
 Running (you may need to create a symlink to liboofem.so to current directory):
 ./beam2d_1
+
+Sometimes, it is necessary to specify path to shared library explicitly
+export LD_LIBRARY_PATH=.

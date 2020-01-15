@@ -68,11 +68,10 @@ public SPRNodalRecoveryModelInterface
 protected:
     static FEI2dQuadLin interp_lin;
     /// Flag controlling reduced (one - point) integration for shear
-    bool reducedIntegrationFlag;
+    bool reducedIntegrationFlag = false;
 
 public:
     Quad1Mindlin(int n, Domain * d);
-    virtual ~Quad1Mindlin() { }
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
@@ -83,7 +82,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Quad1Mindlin_Name; }
     const char *giveClassName() const override { return "Quad1Mindlin"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     int computeNumberOfDofs() override { return 12; }
     void giveDofManDofIDMask(int inode, IntArray &) const override;

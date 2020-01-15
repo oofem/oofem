@@ -1,0 +1,103 @@
+mooneyrivlin.out
+description...
+StaticStructural nmsteps 1 nsteps 1 nmodules 1 
+nsteps 1 rtolf 1.e-6
+errorcheck
+#writeist 1 92
+#vtkxml 1 tstep_all domain_all cellvars 1 1 vars 2 1 81 primvars 1 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 2
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  1.0   0.0   0.0
+node 3 coords 3  1.0   1.0   0.0
+node 4 coords 3  0.0   1.0   0.0
+node 5 coords 3  0.0   0.0   1.0
+node 6 coords 3  1.0   0.0   1.0
+node 7 coords 3  1.0   1.0   1.0
+node 8 coords 3  0.0   1.0   1.0
+lspace  1 nodes 8 1 2 3 4 5 6 7 8 crossSect 1 nlgeo 1
+SimpleCS 1 material 1
+#IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0  
+mooneyrivlin 1 d 0. C1 2 C2 3 K 5 talpha -1.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.0 0.0 0.0 set 1
+BoundaryCondition  2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0.3 0.2 0.1 set 2
+PiecewiseLinFunction 1 t 2 1. 5. f(t) 2 0.1 1.
+Set 1 nodes 4 1 2 3 4
+Set 2 nodes 4 5 6 7 8
+#
+#%BEGIN_CHECK% tolerance 1.e-3
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 9 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 2 keyword 92 component 9 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 3 keyword 92 component 9 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 4 keyword 92 component 9 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 5 keyword 92 component 9 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 6 keyword 92 component 9 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 7 keyword 92 component 9 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 1 value 4.92922
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 2 value 4.93218
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 3 value 5.07498
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 4 value 0.19789
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 5 value 0.296834
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 6 value -0.00355255
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 7 value 0.0983688
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 8 value 0.147553
+#ELEMENT tStep 1 number 1 gp 8 keyword 92 component 9 value -0.00355255
+#%END_CHECK%
+

@@ -670,10 +670,10 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
 
 
-IRResultType
-CylindricalALM :: initializeFrom(InputRecord *ir)
+void
+CylindricalALM :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                   // Required by IR_GIVE_FIELD macro
+    SparseNonLinearSystemNM :: initializeFrom(ir);
 
     double oldPsi =  Psi; // default from constructor
     double initialStepLength, forcedInitialStepLength;
@@ -724,8 +724,9 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         numberOfRequiredIterations = 1000;
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
-    if ( result == IRRT_OK ) {
+    try {
+        IR_GIVE_OPTIONAL_FIELD(ir, minIterations, _IFT_CylindricalALM_miniterations);
+    } catch ( InputException & ) {
         if ( minIterations > 3 && minIterations < 1000 ) {
             numberOfRequiredIterations = minIterations;
         }
@@ -833,7 +834,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     if ( nccdg >= 1 ) {
         IntArray _val;
-        char name [ 12 ];
+        char name [ 16 ];
         // create an empty set
         __DofIDSet _set;
         // resize dof group vector
@@ -875,10 +876,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     }
 
     this->giveLinearSolver()->initializeFrom(ir);
-
-    SparseNonLinearSystemNM :: initializeFrom(ir);
-
-    return IRRT_OK;
 }
 
 

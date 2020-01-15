@@ -67,10 +67,7 @@ StructuralMaterialStatus :: StructuralMaterialStatus(GaussPoint *g) :
 }
 
 
-StructuralMaterialStatus :: ~StructuralMaterialStatus() { }
-
-
-void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
+void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) const
 // Prints the strains and stresses on the data file.
 {
     FloatArray helpVec;

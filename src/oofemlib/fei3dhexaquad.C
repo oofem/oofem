@@ -390,9 +390,8 @@ void FEI3dHexaQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray 
 
 void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray eNodes;
     double u = lcoords.at(1);
-    this->computeLocalEdgeMapping(eNodes, iedge);
+    const auto &eNodes = this->computeLocalEdgeMapping(iedge);
     answer.clear();
     answer.add( 0.5 * ( u - 1. ) * u, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
     answer.add( 0.5 * ( u - 1. ) * u, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
@@ -402,10 +401,9 @@ void FEI3dHexaQuad :: edgeLocal2global(FloatArray &answer, int iedge, const Floa
 void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     ///@todo I think the "x" in dNdx implies global cs. It should be 
-    IntArray eNodes;
     FloatArray dNdu;
     double u = lcoords.at(1);
-    this->computeLocalEdgeMapping(eNodes, iedge);
+    const auto &eNodes = this->computeLocalEdgeMapping(iedge);
     dNdu.add( u - 0.5, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
     dNdu.add( u + 0.5, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
     dNdu.add( -2. * u, cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
@@ -416,57 +414,54 @@ void FEI3dHexaQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatAr
 
 double FEI3dHexaQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray eNodes;
     FloatArray dNdu;
     double u = lcoords.at(1);
-    this->computeLocalEdgeMapping(eNodes, iedge);
+    const auto &eNodes = this->computeLocalEdgeMapping(iedge);
     dNdu.add( u - 0.5, cellgeo.giveVertexCoordinates( eNodes.at(1) ) );
     dNdu.add( u + 0.5, cellgeo.giveVertexCoordinates( eNodes.at(2) ) );
     dNdu.add( -2. * u, cellgeo.giveVertexCoordinates( eNodes.at(3) ) );
     return dNdu.computeNorm();
 }
 
-void
-FEI3dHexaQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI3dHexaQuad :: computeLocalEdgeMapping(int iedge) const
 {
     if ( iedge == 1 ) {
-        edgeNodes = { 1, 2,  9};
+        return { 1, 2,  9};
     } else if ( iedge == 2 ) {
-        edgeNodes = { 2, 3, 10};
+        return { 2, 3, 10};
     } else if ( iedge == 3 ) {
-        edgeNodes = { 3, 4, 11};
+        return { 3, 4, 11};
     } else if ( iedge == 4 ) {
-        edgeNodes = { 4, 1, 12};
+        return { 4, 1, 12};
     } else if ( iedge == 5 ) {
-        edgeNodes = { 5, 6, 13};
+        return { 5, 6, 13};
     } else if ( iedge == 6 ) {
-        edgeNodes = { 6, 7, 14};
+        return { 6, 7, 14};
     } else if ( iedge == 7 ) {
-        edgeNodes = { 7, 8, 15};
+        return { 7, 8, 15};
     } else if ( iedge == 8 ) {
-        edgeNodes = { 8, 5, 16};
+        return { 8, 5, 16};
     } else if ( iedge == 9 ) {
-        edgeNodes = { 1, 5, 17};
+        return { 1, 5, 17};
     } else if ( iedge == 10 ) {
-        edgeNodes = { 2, 6, 18};
+        return { 2, 6, 18};
     } else if ( iedge == 11 ) {
-        edgeNodes = { 3, 7, 19};
+        return { 3, 7, 19};
     } else if ( iedge == 12 ) {
-        edgeNodes = { 4, 8, 20};
+        return { 4, 8, 20};
     } else {
-        OOFEM_ERROR("wrong edge number (%d)", iedge);
+        throw std::range_error("invalid edge number");
     }
 }
 
 void
 FEI3dHexaQuad :: surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double ksi, eta;
+    double ksi = lcoords.at(1);
+    double eta = lcoords.at(2);
+
     answer.resize(8);
-
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
-
     answer.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
     answer.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
     answer.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. );
@@ -481,8 +476,7 @@ void
 FEI3dHexaQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     // Note, this must be in correct order, not just the correct nodes, therefore we must use snodes;
-    IntArray snodes;
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
     FloatArray lcoords_hex;
 
@@ -537,13 +531,11 @@ double
 FEI3dHexaQuad :: surfaceEvalNormal(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray a, b, dNdksi(8), dNdeta(8);
-    double ksi, eta;
-    IntArray snodes;
 
-    this->computeLocalSurfaceMapping(snodes, isurf);
+    const auto &snodes = this->computeLocalSurfaceMapping(isurf);
 
-    ksi = lcoords.at(1);
-    eta = lcoords.at(2);
+    double ksi = lcoords.at(1);
+    double eta = lcoords.at(2);
 
     dNdksi.at(1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
     dNdksi.at(2) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
@@ -576,10 +568,9 @@ void
 FEI3dHexaQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
                                      const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray nodes;
     FloatArray n;
 
-    this->computeLocalSurfaceMapping(nodes, isurf);
+    const auto &nodes = this->computeLocalSurfaceMapping(isurf);
 
     this->surfaceEvalN(n, isurf, lcoords, cellgeo);
 
@@ -599,27 +590,25 @@ FEI3dHexaQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &
 }
 
 
-void
-FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
+IntArray
+FEI3dHexaQuad :: computeLocalSurfaceMapping(int isurf) const
 {
-    nodes.resize(8);
-
     // the actual numbering  has a positive normal pointing outwards from the element  - (LSpace compatible)
 
     if ( isurf == 1 ) {
-        nodes = { 3, 2, 1, 4, 10,  9, 12, 11};
+        return { 3, 2, 1, 4, 10,  9, 12, 11};
     } else if ( isurf == 2 ) {
-        nodes = { 7, 8, 5, 6, 15, 16, 13, 14};
+        return { 7, 8, 5, 6, 15, 16, 13, 14};
     } else if ( isurf == 3 ) {
-        nodes = { 2, 6, 5, 1, 18, 13, 17,  9};
+        return { 2, 6, 5, 1, 18, 13, 17,  9};
     } else if ( isurf == 4 ) {
-        nodes = { 3, 7, 6, 2, 19, 14, 18, 10};
+        return { 3, 7, 6, 2, 19, 14, 18, 10};
     } else if ( isurf == 5 ) {
-        nodes = { 3, 4, 8, 7, 11, 20, 15, 19};
+        return { 3, 4, 8, 7, 11, 20, 15, 19};
     } else if ( isurf == 6 ) {
-        nodes = { 4, 1, 5, 8, 12, 17, 16, 20};
+        return { 4, 1, 5, 8, 12, 17, 16, 20};
     } else {
-        OOFEM_ERROR("wrong surface number (%d)", isurf);
+        throw std::range_error("invalid surface number");
     }
 
 #if 0
@@ -703,17 +692,16 @@ FEI3dHexaQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatAr
 double
 FEI3dHexaQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    IntArray fNodes;
-    this->computeLocalSurfaceMapping(fNodes, iEdge);
+    const auto &fNodes = this->computeLocalSurfaceMapping(iEdge);
 
-    const FloatArray &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
-    const FloatArray &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
-    const FloatArray &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
-    const FloatArray &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
-    const FloatArray &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
-    const FloatArray &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
-    const FloatArray &c7 = cellgeo.giveVertexCoordinates( fNodes.at(7) );
-    const FloatArray &c8 = cellgeo.giveVertexCoordinates( fNodes.at(8) );
+    const auto &c1 = cellgeo.giveVertexCoordinates( fNodes.at(1) );
+    const auto &c2 = cellgeo.giveVertexCoordinates( fNodes.at(2) );
+    const auto &c3 = cellgeo.giveVertexCoordinates( fNodes.at(3) );
+    const auto &c4 = cellgeo.giveVertexCoordinates( fNodes.at(4) );
+    const auto &c5 = cellgeo.giveVertexCoordinates( fNodes.at(5) );
+    const auto &c6 = cellgeo.giveVertexCoordinates( fNodes.at(6) );
+    const auto &c7 = cellgeo.giveVertexCoordinates( fNodes.at(7) );
+    const auto &c8 = cellgeo.giveVertexCoordinates( fNodes.at(8) );
 
     // Generated with Mathematica (rather unwieldy expression, tried to simplify it as good as possible, but it could probably be better)
     return (

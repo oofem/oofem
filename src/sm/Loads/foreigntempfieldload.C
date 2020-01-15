@@ -56,9 +56,8 @@ ForeignTemperatureFieldLoad :: computeValueAt(FloatArray &answer, TimeStep *tSte
     }
 }
 
-IRResultType
-ForeignTemperatureFieldLoad :: initializeFrom(InputRecord *ir)
+void
+ForeignTemperatureFieldLoad :: initializeFrom(InputRecord &ir)
 {
-    return IRRT_OK;
 }
 } // end namespace oofem

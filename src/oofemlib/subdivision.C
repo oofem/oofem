@@ -3404,7 +3404,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     // all nodes (including remote which are not needed) are imported to ensure consistency between
     // node number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
     for ( int i = 1; i <= nnodes; i++ ) {
-        _node = new Subdivision :: RS_Node( i, mesh, i, * ( domain->giveNode ( i )->giveCoordinates() ),
+        _node = new Subdivision :: RS_Node( i, mesh, i, domain->giveNode ( i )->giveCoordinates(),
                                            domain->giveErrorEstimator ( )->giveRemeshingCrit ( )->giveRequiredDofManDensity ( i, tStep ),
                                            domain->giveNode ( i )->isBoundary() );
         _node->setGlobalNumber( domain->giveNode(i)->giveGlobalNumber() );
@@ -3537,7 +3537,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         mesh->giveElement(i)->drawGeometry();
     }
 
-    ESIEventLoop(YES, "After bisection; Press Ctrl-p to continue");
+    ESIEventLoop(YES, (char*) "After bisection; Press Ctrl-p to continue");
  #endif
 #endif
 
@@ -3805,7 +3805,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
             ir.giveRecordKeywordField(name);
             auto elem = classFactory.createElement(name.c_str(), eNum, * dNew);
-            elem->initializeFrom(& ir);
+            elem->initializeFrom(ir);
             elem->setGlobalNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
 #ifdef __PARALLEL_MODE
             //ir.setRecordKeywordNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
@@ -3827,7 +3827,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         ir.giveRecordKeywordField(name);
 
         auto crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
-        crossSection->initializeFrom(& ir);
+        crossSection->initializeFrom(ir);
         ( * dNew )->setCrossSection(i, std::move(crossSection));
     }
 
@@ -3839,7 +3839,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         ir.giveRecordKeywordField(name);
 
         auto mat = classFactory.createMaterial(name.c_str(), i, * dNew);
-        mat->initializeFrom(& ir);
+        mat->initializeFrom(ir);
         ( * dNew )->setMaterial(i, std::move(mat));
     }
 
@@ -3851,7 +3851,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         ir.giveRecordKeywordField(name);
 
         auto barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
-        barrier->initializeFrom(& ir);
+        barrier->initializeFrom(ir);
         ( * dNew )->setNonlocalBarrier(i, std::move(barrier));
     }
 
@@ -3863,7 +3863,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         ir.giveRecordKeywordField(name);
 
         auto bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
-        bc->initializeFrom(& ir);
+        bc->initializeFrom(ir);
         ( * dNew )->setBoundaryCondition(i, std::move(bc));
     }
 
@@ -3874,7 +3874,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         DynamicInputRecord ir( *domain->giveIc ( i ) );
 
         auto ic = std::make_unique<InitialCondition>(i, *dNew);
-        ic->initializeFrom(& ir);
+        ic->initializeFrom(ir);
         ( * dNew )->setInitialCondition(i, std::move(ic));
     }
 
@@ -3886,7 +3886,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         ir.giveRecordKeywordField(name);
 
         auto func = classFactory.createFunction(name.c_str(), i, * dNew);
-        func->initializeFrom(& ir);
+        func->initializeFrom(ir);
         ( * dNew )->setFunction(i, std::move(func));
     }
 
@@ -3898,7 +3898,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
         ir.giveRecordKeywordField(name);
 
         auto set = std::make_unique<Set>(i, * dNew);
-        set->initializeFrom(& ir);
+        set->initializeFrom(ir);
         ( * dNew )->setSet(i, std::move(set));
     }
 

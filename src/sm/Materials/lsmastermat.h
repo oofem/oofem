@@ -64,40 +64,38 @@ class LargeStrainMasterMaterial : public StructuralMaterial
 {
 protected:
     /// Reference to the basic elastic material.
-    LinearElasticMaterial *linearElasticMaterial;
+    LinearElasticMaterial *linearElasticMaterial = nullptr;
 
     /// 'slave' material model number.
-    int slaveMat;
+    int slaveMat = 0;
     /// Specifies the strain tensor.
-    double m;
+    double m = 0.;
 
 public:
     LargeStrainMasterMaterial(int n, Domain *d);
-    virtual ~LargeStrainMasterMaterial();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     const char *giveInputRecordName() const override { return _IFT_LargeStrainMasterMaterial_Name; }
     const char *giveClassName() const override { return "LargeStrainMasterMaterial"; }
 
     LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) override { return false; }
+    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix & answer,
-                                            MatResponseMode,
+    FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode,
                                             GaussPoint * gp,
-                                            TimeStep * tStep) override;
+                                            TimeStep * tStep) const override;
 
-    void giveRealStressVector_3d(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *) override
-    { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
-    void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep) override;
+    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &, GaussPoint *, TimeStep *) const override
+    { OOFEM_ERROR("not implemented, this material is designed for large strains only"); return zeros<6>(); }
+    FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// transformation matrices
-    void constructTransformationMatrix(FloatMatrix &answer, const FloatMatrix &eigenVectors);
-    void constructL1L2TransformationMatrices(FloatMatrix &answer1, FloatMatrix &answer2, const FloatArray &eigenValues, FloatArray &stress, double E1, double E2, double E3);
+    FloatMatrixF<6,6> constructTransformationMatrix(const FloatMatrixF<3,3> &eigenVectors) const;
+    std::pair<FloatMatrixF<6,6>, FloatMatrixF<6,6>> constructL1L2TransformationMatrices(const FloatArrayF<3> &eigenValues, const FloatArrayF<6> &stress, double E1, double E2, double E3) const;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 };
@@ -108,23 +106,23 @@ public:
 class LargeStrainMasterMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    FloatMatrix Pmatrix, TLmatrix, transformationMatrix;
-    Domain *domain;
-    int slaveMat;
+    FloatMatrixF<6,6> Pmatrix = eye<6>();
+    FloatMatrixF<6,6> TLmatrix, transformationMatrix;
+    Domain *domain = nullptr;
+    int slaveMat = 0.;
 
 public:
     LargeStrainMasterMaterialStatus(GaussPoint *g, Domain *d, int s);
-    virtual ~LargeStrainMasterMaterialStatus();
 
-    const FloatMatrix &givePmatrix() { return Pmatrix; }
-    const FloatMatrix &giveTLmatrix() { return TLmatrix; }
-    const FloatMatrix &giveTransformationMatrix() { return transformationMatrix; }
+    const FloatMatrixF<6,6> &givePmatrix() const { return Pmatrix; }
+    const FloatMatrixF<6,6> &giveTLmatrix() const { return TLmatrix; }
+    const FloatMatrixF<6,6> &giveTransformationMatrix() const { return transformationMatrix; }
 
-    void setPmatrix(const FloatMatrix &values) { Pmatrix = values; }
-    void setTLmatrix(const FloatMatrix &values) { TLmatrix = values; }
-    void setTransformationMatrix(const FloatMatrix &values) { transformationMatrix = values; }
+    void setPmatrix(const FloatMatrixF<6,6> &values) { Pmatrix = values; }
+    void setTLmatrix(const FloatMatrixF<6,6> &values) { TLmatrix = values; }
+    void setTransformationMatrix(const FloatMatrixF<6,6> &values) { transformationMatrix = values; }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
     void initTempStatus() override;
     void updateYourself(TimeStep *) override;
 

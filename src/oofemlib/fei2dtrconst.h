@@ -57,7 +57,7 @@ public:
     double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
 
     // Edge
-    void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge) override;
+    IntArray computeLocalEdgeMapping(int iedge) const override;
     void edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     void edgeEvaldNds(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -68,7 +68,7 @@ public:
     int giveNumberOfNodes() const override { return 3; }
 
 protected:
-    double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);
+    double edgeComputeLength(const IntArray &edgeNodes, const FEICellGeometry &cellgeo) const;
 };
 } // end namespace oofem
 #endif // fei2dtrlin_h

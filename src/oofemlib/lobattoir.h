@@ -63,7 +63,7 @@ public:
 
     const char *giveClassName() const override { return "LobattoIntegrationRule"; }
     IntegrationRuleType giveIntegrationRuleType() const override { return IRT_Lobatto; }
-    IRResultType initializeFrom(InputRecord *ir) override { return IRRT_OK; }
+    void initializeFrom(InputRecord &ir) override { }
 
     int getRequiredNumberOfIntegrationPoints(integrationDomain dType, int approxOrder) override;
 

@@ -84,7 +84,7 @@ public:
      */
     void setDescription(const std :: string &description) { this->description = description; }
 
-    InputRecord *giveInputRecord(InputRecordType, int recordId) override;
+    InputRecord &giveInputRecord(InputRecordType, int recordId) override;
     bool peakNext(const std :: string &keyword) override;
     void finish() override;
     std :: string giveReferenceName() const override { return name; }

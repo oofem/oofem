@@ -94,7 +94,7 @@ public:
     void setOffset(int cellNum, int offset) { this->elOffsets.at(cellNum) = offset; }
     int giveCellOffset(int cellNum) { return this->elOffsets.at(cellNum); }
 
-    void setNodeCoords(int nodeNum, FloatArray &coords);
+    void setNodeCoords(int nodeNum, const FloatArray &coords);
     FloatArray &giveNodeCoords(int nodeNum) { return this->nodeCoords [ nodeNum - 1 ]; }
 
     void setNumberOfPrimaryVarsToExport(int numVars, int numNodes);
@@ -161,9 +161,9 @@ protected:
     /// Smoother type.
     NodalRecoveryModel :: NodalRecoveryModelType stype;
     /// Smoother.
-    std::unique_ptr<NodalRecoveryModel> smoother;
+    std :: unique_ptr< NodalRecoveryModel >smoother;
     /// Smoother for primary variables.
-    std::unique_ptr<NodalRecoveryModel> primVarSmoother;
+    std :: unique_ptr< NodalRecoveryModel >primVarSmoother;
 
     /// particle export flag
     bool particleExportFlag;
@@ -176,11 +176,11 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKXMLExportModule(int n, EngngModel * e);
+    VTKXMLExportModule(int n, EngngModel *e);
     /// Destructor
     virtual ~VTKXMLExportModule();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
     void initialize() override;
     void terminate() override;
@@ -209,7 +209,7 @@ public:
 
     VTKPiece defaultVTKPiece;
 
-    std :: vector < VTKPiece > defaultVTKPieces;
+    std :: vector< VTKPiece >defaultVTKPieces;
 
     /**
      * Computes a cell average of an InternalStateType varible based on the weights
@@ -245,13 +245,13 @@ protected:
     /**
      * Export internal variables by smoothing.
      */
-    void exportIntVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int ireg, TimeStep *tStep);
+    virtual void exportIntVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int ireg, TimeStep *tStep);
 
 
     /**
      * Export primary variables.
      */
-    void exportPrimaryVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep);
+    virtual void exportPrimaryVars(VTKPiece &piece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep);
 
     /**
      * Export external forces.
@@ -277,8 +277,8 @@ protected:
     void writeExternalForces(VTKPiece &vtkPiece);
 
     /**
-       @return true if piece is not empty and thus written
-    */
+     * @return true if piece is not empty and thus written
+     */
     bool writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep);
 
 
@@ -314,13 +314,13 @@ protected:
      * The i-th value contains the corresponding global node number.
      */
     virtual int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans, int &totalcells,
-                                Domain *domain, TimeStep *tStep, int reg);
+                                        int &regionDofMans, int &totalcells,
+                                        Domain *domain, TimeStep *tStep, int reg);
     /**
      * Writes a VTK collection file where time step data is stored.
      */
     void writeVTKCollection();
-    
+
     /// Writes a VTK collection file for Gauss points.
     void writeGPVTKCollection();
 
@@ -340,7 +340,7 @@ protected:
 
     bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
     void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
-    void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
+    void exportCompositeElement(std :: vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
 };
 
 
@@ -357,7 +357,7 @@ class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() { }
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
-    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
+    virtual void giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

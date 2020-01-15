@@ -49,7 +49,7 @@ public:
 
     //FloatArray giveParametricCenter() const override { return {0.}; }
 
-    void boundaryGiveNodes(IntArray &answer, int boundary) override;
+    IntArray boundaryGiveNodes(int boundary) const override;
     void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryEvalNormal(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
     double boundaryGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override;
@@ -67,8 +67,8 @@ public:
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     double boundarySurfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo) override
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
-    void boundarySurfaceGiveNodes(IntArray &answer, int boundary) override
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    IntArray boundarySurfaceGiveNodes(int boundary) const override
+    { throw std::runtime_error("Functions not supported for this interpolator."); }
     //@}
 
     /**

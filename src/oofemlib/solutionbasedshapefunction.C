@@ -69,10 +69,10 @@ SolutionbasedShapeFunction :: SolutionbasedShapeFunction(int n, Domain *d) : Act
 {}
 
 
-IRResultType
-SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
+void
+SolutionbasedShapeFunction :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
+    ActiveBoundaryCondition :: initializeFrom(ir);
 
     // Load problem file
     this->filename = "";
@@ -101,8 +101,6 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
     }
 
     init();
-
-    return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
 DofManager *
@@ -127,8 +125,8 @@ SolutionbasedShapeFunction :: init()
 {
     Node *n1 = this->giveDomain()->giveNode(1);
 
-    maxCoord = * n1->giveCoordinates();
-    minCoord = * n1->giveCoordinates();
+    maxCoord = n1->giveCoordinates();
+    minCoord = n1->giveCoordinates();
 
     for ( auto &n :this->giveDomain()->giveDofManagers() ) {
         for ( int j = 1; j <= maxCoord.giveSize(); j++ ) {
@@ -158,10 +156,10 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 
         Element *thisElement = model.giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
-        IntArray bnodes, zNodes, pNodes, mNodes;
+        IntArray zNodes, pNodes, mNodes;
         FloatMatrix nodeValues;
 
-        geoInterpolation->boundaryGiveNodes(bnodes, Boundary);
+        auto bnodes = geoInterpolation->boundaryGiveNodes(Boundary);
 
         nodeValues.resize( this->dofs.giveSize(), bnodes.giveSize() );
         nodeValues.zero();
@@ -244,7 +242,7 @@ SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e,
         bool isPlus = false;
         bool isMinus = false;
 
-        whichBoundary(* dman->giveCoordinates(), isPlus, isMinus, isZero);
+        whichBoundary(dman->giveCoordinates(), isPlus, isMinus, isZero);
 
         if ( isZero ) {
             zList.insertSorted(j);
@@ -307,7 +305,7 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
     IntArray dofIDs = {dof->giveDofID()};
 
     bool isPlus, isMinus, isZero, found;
-    whichBoundary(* dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
+    whichBoundary(dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
 
     for ( int i = 0; i < this->giveDomain()->giveNumberOfSpatialDimensions(); i++ ) {
         double factor = 1.0;
@@ -379,7 +377,7 @@ SolutionbasedShapeFunction :: loadProblem()
 
             for ( int k = 1; k <= elem->giveNumberOfDofManagers(); k++ ) {
                 DofManager *dman = elem->giveDofManager(k);
-                centerCoord.add( * dman->giveCoordinates() );
+                centerCoord.add( dman->giveCoordinates() );
                 for ( Dof *dof: *dman ) {
                     if ( dof->giveBcId() != 0 ) {
                         vlockCount++;
@@ -477,7 +475,7 @@ SolutionbasedShapeFunction :: setLoads(EngngModel &myEngngModel, int d)
 
     int bcID = myEngngModel.giveDomain(1)->giveNumberOfBoundaryConditions() + 1;
     auto myBodyLoad = classFactory.createBoundaryCondition( "deadweight", bcID, myEngngModel.giveDomain(1) );
-    myBodyLoad->initializeFrom(& ir);
+    myBodyLoad->initializeFrom(ir);
     myEngngModel.giveDomain(1)->setBoundaryCondition(bcID, std::move(myBodyLoad));
 
     for ( auto &elem : myEngngModel.giveDomain(1)->giveElements() ) {
@@ -489,7 +487,7 @@ SolutionbasedShapeFunction :: setLoads(EngngModel &myEngngModel, int d)
 }
 
 void
-SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel)
+SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, const FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel)
 {
     answer.resize( dofIDs.giveSize() );
     answer.zero();
@@ -511,7 +509,7 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
         myEngngModel.giveDomain(1)->giveSpatialLocalizer()->init(false);
 
         if ( this->giveDomain()->giveNumberOfSpatialDimensions() == 2 ) {
-            coords.resize(2);
+            //coords.resize(2); /// FIXME
         }
 
         // Determine if current coordinate is at a max or min point and if so, which type (on a surface, edge or a corner?)
@@ -614,7 +612,7 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
         bcID = d->giveDofManager()->giveDomain()->giveNumberOfBoundaryConditions() + 1;
 
         auto myBC = classFactory.createBoundaryCondition( "boundarycondition", bcID, d->giveDofManager()->giveDomain() );
-        myBC->initializeFrom(& ir);
+        myBC->initializeFrom(ir);
         d->giveDofManager()->giveDomain()->setBoundaryCondition(bcID, std::move(myBC));
 
         d->setBcId(bcID);
@@ -645,19 +643,17 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct &mode)
         FEInterpolation *geoInterpolation = e->giveInterpolation();
 
         // Check all sides of element
-        IntArray bnodes;
-
 #define usePoints 1
 #if usePoints == 1
         // Check if all nodes are on the boundary
-        geoInterpolation->boundaryGiveNodes(bnodes, Boundary);
+        auto bnodes = geoInterpolation->boundaryGiveNodes(Boundary);
         for ( int k = 1; k <= bnodes.giveSize(); k++ ) {
             DofManager *dman = e->giveDofManager( bnodes.at(k) );
-            for ( int l = 1; l <= dman->giveCoordinates()->giveSize(); l++ ) {
-                if ( fabs( dman->giveCoordinates()->at(l) - maxCoord.at(l) ) < TOL2 ) {
+            for ( int l = 1; l <= dman->giveCoordinates().giveSize(); l++ ) {
+                if ( fabs( dman->giveCoordinates().at(l) - maxCoord.at(l) ) < TOL2 ) {
                     pNodes.insertOnce( dman->giveNumber() );
                 }
-                if ( fabs( dman->giveCoordinates()->at(l) - minCoord.at(l) ) < TOL2 ) {
+                if ( fabs( dman->giveCoordinates().at(l) - minCoord.at(l) ) < TOL2 ) {
                     mNodes.insertOnce( dman->giveNumber() );
                 }
             }
@@ -779,7 +775,7 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct &mode)
 }
 
 void
-SolutionbasedShapeFunction :: whichBoundary(FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero)
+SolutionbasedShapeFunction :: whichBoundary(const FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero)
 {
     isPlus = false;
     isMinus = false;
@@ -802,7 +798,7 @@ SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct &mode, Int
         IntArray DofIDs;
         DofManager *dman = mode.myEngngModel->giveDomain(1)->giveDofManager(nodeList.at(i));
 
-        computeBaseFunctionValueAt(values, *dman->giveCoordinates(), this->dofs, *mode.myEngngModel );
+        computeBaseFunctionValueAt(values, dman->giveCoordinates(), this->dofs, *mode.myEngngModel );
 
         // Check that current node contains current DofID
         for (int j=1; j<=this->dofs.giveSize(); j++) {

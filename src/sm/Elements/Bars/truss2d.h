@@ -99,7 +99,7 @@ public:
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_Truss2d_Name; }
     const char *giveClassName() const override { return "Truss2d"; }
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     ///@todo Introduce interpolator and remove these:
     Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
     integrationDomain giveIntegrationDomain() const override { return _Line; }

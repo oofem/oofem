@@ -69,14 +69,9 @@ AbaqusUserElement :: ~AbaqusUserElement()
 }
 
 
-IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
+void AbaqusUserElement :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                                        // Required by IR_GIVE_FIELD macro
-
-    result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
 
     this->numberOfDofMans = dofManArray.giveSize();
 
@@ -124,8 +119,6 @@ IRResultType AbaqusUserElement :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("couldn't load symbol uel,\ndlerror: %s\n", dlresult);
     }
 #endif
-
-    return IRRT_OK;
 }
 
 

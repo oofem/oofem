@@ -65,14 +65,9 @@ FEI2dTrLin TR21_2D_SUPG :: pressureInterpolation(1, 2);
 
 TR21_2D_SUPG :: TR21_2D_SUPG(int n, Domain *aDomain) :
     SUPGElement2(n, aDomain), ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans  = 6;
 }
-
-TR21_2D_SUPG :: ~TR21_2D_SUPG()
-// Destructor
-{ }
 
 FEInterpolation *
 TR21_2D_SUPG :: giveInterpolation() const
@@ -1068,11 +1063,10 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
 {
     FloatArray Coeff(3), helplcoords(3);
     double fi1, fi2, fi3, r1, r11, r12;
-    IntArray edge(3);
     intcoords.resize(2);
     intcoords.zero();
 
-    this->velocityInterpolation.computeLocalEdgeMapping(edge, iedge);
+    const auto &edge = this->velocityInterpolation.computeLocalEdgeMapping(iedge);
     fi1 = fi.at( edge.at(1) );
     fi2 = fi.at( edge.at(2) );
     fi3 = fi.at( edge.at(3) );
@@ -1199,9 +1193,7 @@ void
 TR21_2D_SUPG :: computeCoordsOfEdge(FloatArray &answer, int iedge)
 
 {
-    IntArray edge;
-
-    velocityInterpolation.computeLocalEdgeMapping(edge, iedge);
+    const auto &edge = velocityInterpolation.computeLocalEdgeMapping(iedge);
 
     answer.at(1) = this->giveNode( edge.at(1) )->giveCoordinate(1);
     answer.at(2) = this->giveNode( edge.at(1) )->giveCoordinate(2);

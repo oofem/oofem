@@ -63,23 +63,22 @@ protected:
     std :: unique_ptr< GaussPoint >slaveGpVisco;
   
     /// hydration-degree dependent tensile strength
-    double var_ft;
+    double var_ft = 0.;
     /// hydration-degree dependent fracture energy
-    double var_gf;
+    double var_gf = 0.;
   
 public:
     ConcreteFCMViscoElasticStatus(GaussPoint *g);
-    virtual ~ConcreteFCMViscoElasticStatus();
 
-    double giveFractureEnergy() { return var_gf; }
+    double giveFractureEnergy() const { return var_gf; }
     void setFractureEnergy(double new_Gf) { var_gf = new_Gf; }
 
-    double giveTensileStrength() { return var_ft; }
+    double giveTensileStrength() const { return var_ft; }
     void setTensileStrength(double new_ft) { var_ft = new_ft; }
 
     GaussPoint *giveSlaveGaussPointVisco() { return this->slaveGpVisco.get(); }
 
-    void printOutputAt(FILE *file, TimeStep *tStep) override;
+    void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
     const char *giveClassName() const override { return "ConcreteFCMViscoElasticStatus"; }
 
@@ -98,20 +97,19 @@ class ConcreteFCMViscoElastic : public ConcreteFCM
 {
 public:
     ConcreteFCMViscoElastic(int n, Domain *d);
-    virtual ~ConcreteFCMViscoElastic();
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveClassName() const override { return "ConcreteFCMViscoElastic"; }
     const char *giveInputRecordName() const override { return _IFT_ConcreteFCMViscoElastic_Name; }
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override { return new ConcreteFCMViscoElasticStatus(gp); }
 
-    double give(int aProperty, GaussPoint *gp) override;
+    double give(int aProperty, GaussPoint *gp) const override;
 
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep) override;
 
-    void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    FloatArray computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
     
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
@@ -120,17 +118,17 @@ public:
 
 protected:
     /// number of the viscoelastic material
-    int viscoMat;
+    int viscoMat = 0;
 
-    bool fib;
-    double fib_s;
-    double fib_fcm28;
+    bool fib = false;
+    double fib_s = 0.;
+    double fib_fcm28 = 0.;
     /* scaling time factor, 1 day expressed in the time units of the analysis
      *  e.g. if the time runs in days it is 1, if in seconds it is 86400 */
-    double timeFactor;
+    double timeFactor = 0.;
     /* scaling factor transforming PREDICTED strength and fracture energy
      *  e.g. if the stiffness should be in MPa, then stiffnessFactor = 1.e6 */
-    double stiffnessFactor;    
+    double stiffnessFactor = 0.;    
 
 
     double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) override;

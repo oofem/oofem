@@ -78,11 +78,10 @@ protected:
     //double a[3];
     double b [ 3 ];
     double c [ 3 ];
-    double area;
+    double area = 0.;
 
 public:
     TR1_2D_CBS(int n, Domain * aDomain);
-    virtual ~TR1_2D_CBS();
 
     FEInterpolation *giveInterpolation() const override;
 
@@ -105,7 +104,7 @@ public:
 
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void updateYourself(TimeStep *tStep) override;
     /// Used to check consistency and initialize some element geometry data (area,b,c)
@@ -147,7 +146,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *tStep);
+                                int node, TimeStep *tStep) override;
     // Graphics output
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;

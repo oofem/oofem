@@ -40,6 +40,7 @@
 
 #include "femcmpnn.h"
 #include "intarray.h"
+#include "floatarray.h"
 #include "valuemodetype.h"
 #include "doftype.h"
 #include "dofiditem.h"
@@ -113,6 +114,9 @@ enum dofManagerParallelMode {
 class OOFEM_EXPORT DofManager : public FEMComponent
 {
 protected:
+    /// Array storing nodal coordinates.
+    FloatArray coordinates;
+
     /// Array of DOFs.
     std::vector< Dof * > dofArray;
     /// List of applied loads.
@@ -375,11 +379,15 @@ public:
 
     /**@name Position query functions */
     //@{
-    virtual bool hasCoordinates() { return false; }
     /// @return The i-th coordinate.
-    virtual double giveCoordinate(int i) { return 0.0; }
+    double giveCoordinate(int i) const {
+        if ( i > this->coordinates.giveSize() ) {
+            return 0.;
+        }
+        return this->coordinates.at(i);
+    }
     /// @return Pointer to node coordinate array.
-    virtual FloatArray *giveCoordinates() { return NULL; }
+    const FloatArray &giveCoordinates() const { return this->coordinates; }
     //@}
 
     /**@name Functions necessary for dof creation. All optional. */
@@ -440,7 +448,7 @@ public:
      */
     virtual bool giveMasterDofMans(IntArray &masters);
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
     void printYourself() override;

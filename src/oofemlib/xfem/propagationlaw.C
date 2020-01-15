@@ -63,16 +63,12 @@ void PLDoNothing :: giveInputRecord(DynamicInputRecord &input)
     input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
-IRResultType PLCrackPrescribedDir :: initializeFrom(InputRecord *ir)
+void PLCrackPrescribedDir :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mAngle, _IFT_PLCrackPrescribedDir_Dir);
     IR_GIVE_FIELD(ir, mIncrementLength, _IFT_PLCrackPrescribedDir_IncLength);
 
     //    printf("In PLCrackPrescribedDir :: initializeFrom: mAngle: %e mIncrementLength: %e\n", mAngle, mIncrementLength);
-
-    return IRRT_OK;
 }
 
 void PLCrackPrescribedDir :: giveInputRecord(DynamicInputRecord &input)
@@ -116,15 +112,11 @@ bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront
     return true;
 }
 
-IRResultType PLnodeRadius :: initializeFrom(InputRecord *ir)
+void PLnodeRadius :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;
-
     IR_GIVE_FIELD(ir, mRadius, _IFT_PLnodeRadius_Radius);
 
     //printf("In PLnodeRadius :: initializeFrom: mRadius: %e \n", mRadius);
-
-    return IRRT_OK;
 }
 
 void PLnodeRadius :: giveInputRecord(DynamicInputRecord &input)
@@ -160,7 +152,7 @@ bool PLnodeRadius :: propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFr
         //DofManager *dofMan  = iDomain.giveDofManager(tipInfo.mTipDofManNumbers.at(i));
         //const FloatArray gCoords = dofMan->giveCoordinates();
         Node *iNode = iDomain.giveNode(tipInfo.mTipDofManNumbers.at(i));
-        const FloatArray gCoords = iNode->giveNodeCoordinates();
+        const auto &gCoords = iNode->giveCoordinates();
         
         std :: list< int > nodeList;
         localizer->giveAllNodesWithinBox(nodeList,gCoords,mRadius);

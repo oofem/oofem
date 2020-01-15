@@ -283,13 +283,13 @@ std::vector<std::unique_ptr<EnrichmentItem>> NCPrincipalStress::nucleateEnrichme
 	}
 
 
-	return std::move( eiList );
+	return eiList;
 }
 
 
-IRResultType NCPrincipalStress::initializeFrom(InputRecord *ir) {
-
-    IRResultType result; // Required by IR_GIVE_FIELD macro
+void NCPrincipalStress::initializeFrom(InputRecord &ir)
+{
+    NucleationCriterion::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, mStressThreshold, _IFT_NCPrincipalStress_StressThreshold);
 //    printf("mStressThreshold: %e\n", mStressThreshold);
@@ -307,7 +307,6 @@ IRResultType NCPrincipalStress::initializeFrom(InputRecord *ir) {
 //    printf("mCrackPropThreshold: %e\n", mCrackPropThreshold);
 
 
-    return NucleationCriterion::initializeFrom(ir);
 }
 
 void NCPrincipalStress :: appendInputRecords(DynamicDataReader &oDR)

@@ -50,7 +50,7 @@
 #define _IFT_NlIsoMoistureMaterial_capa "capa"
 #define _IFT_NlIsoMoistureMaterial_hx "hx"
 #define _IFT_NlIsoMoistureMaterial_dx "dx"
-#define _IFT_NlIsoMoistureMaterial_iso_offset "isoOffset"
+#define _IFT_NlIsoMoistureMaterial_iso_offset "isooffset"
 #define _IFT_NlIsoMoistureMaterial_iso_h "iso_h"
 #define _IFT_NlIsoMoistureMaterial_iso_wh "iso_w(h)"
 #define _IFT_NlIsoMoistureMaterial_dd "dd"
@@ -96,34 +96,34 @@ protected:
     enum isothermType { linear, multilinear, Ricken, Kuenzel, Hansen, BSB, bilinear } Isotherm;
 
     /// density of the dry solid phase
-    double rhodry;
+    double rhodry = 0.;
 
     /// values of the linear isotherm
-    double moistureCapacity;
+    double moistureCapacity = 0.;
 
     /// values of the multilinear isotherm
     FloatArray iso_h;
     FloatArray iso_wh;
 
     /// parameters of the Ricken isotherm
-    double dd;
+    double dd = 0.;
 
     /// parameters of the Kuenzel isotherm
-    double wf, b;
+    double wf = 0., b = 0.;
 
     /// parameters of the isotherm proposed by P. Freiesleben Hansen (Coupled moisture/heat transport in cross sections of structures, Beton og Konstruktionsinstituttet, 1985)
-    double uh, A, nn;
+    double uh = 0., A = 0., nn = 0.;
 
     /// parameters of the BSB isotherm
-    double c, k, Vm;
+    double c = 0., k = 0., Vm = 0.;
 
     /// values of the bilinear isotherm
-    double hx, dx;
-    double iso_offset;
-    double c1, c2, capa2;
+    double hx = 0., dx = 0.;
+    double iso_offset = 0.;
+    double c1 = 0., c2 = 0., capa2 = 0.;
 
     /// Nonevaporable water content per m3 of concrete at complete hydration
-    double wn;
+    double wn = 0.;
 
     /// Function of degree of hydration
     ScalarFunction alpha;
@@ -135,42 +135,41 @@ protected:
     FloatArray perm_ch;
 
     /// "permeability" according to Bazant
-    double C1, n, alpha0, hC;
+    double C1 = 0., n = 0., alpha0 = 0., hC = 0.;
 
     /// permeability parameters according to Xi, Bazant & Jennings
-    double alphah, betah, gammah;
+    double alphah = 0., betah = 0., gammah = 0.;
 
     /// permeability parameters according to Kunzel
-    double deltap, p_sat; // permation
+    double deltap = 0., p_sat = 0.; // permation
     enum capillaryTransportType {Multilin_h, Multilin_wV, KunzelCT} CapillaryTransport;
-    double Abs;            ///< water absorption coefficient [kg m^-2 s^-0.5]
+    double Abs = 0.;            ///< water absorption coefficient [kg m^-2 s^-0.5]
 
     /// values of the multilinear capillary transport function
     FloatArray capPerm_h;
     FloatArray capPerm_Dwh;
     FloatArray capPerm_wV;
     FloatArray capPerm_DwwV;
-    double rhoH2O;
+    double rhoH2O = 0.;
 
 public:
     NlIsoMoistureMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
-    virtual ~NlIsoMoistureMaterial() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
     /// evaluates slope of the sorption isotherm
-    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) override;
-    double giveMoistureContent(double humidity) override;
-    double givePermeability(GaussPoint *gp, TimeStep *tStep) override;
-    double computeCapTranspCoeff(double humidity);
+    double giveMoistureCapacity(GaussPoint *gp, TimeStep *tStep) const override;
+    double giveMoistureContent(double humidity) const override;
+    double givePermeability(GaussPoint *gp, TimeStep *tStep) const override;
+    double computeCapTranspCoeff(double humidity) const;
 
     const char *giveInputRecordName() const override { return _IFT_NlIsoMoistureMaterial_Name; }
     const char *giveClassName() const override { return "NlIsoMoistureMaterial"; }
 
-    double giveHumidity(GaussPoint *gp, ValueModeType mode) override;
+    double giveHumidity(GaussPoint *gp, ValueModeType mode) const override;
 
-    int hasInternalSource() override;
-    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) override;
+    bool hasInternalSource() const override;
+    void computeInternalSourceVector(FloatArray &val, GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 };
 } // end namespace oofem
 #endif // nlisomoisturemat_h

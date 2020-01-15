@@ -93,18 +93,18 @@ Tr_Warp :: computeGaussPoints()
 }
 
 
-IRResultType
-Tr_Warp :: initializeFrom(InputRecord *ir)
+void
+Tr_Warp :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 1;
-    return StructuralElement :: initializeFrom(ir);
+    StructuralElement :: initializeFrom(ir);
 }
 
 
 void
 Tr_Warp :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Warping(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveRealStress_Warping(strain, gp, tStep);
 }
 
 
@@ -238,17 +238,17 @@ Tr_Warp :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSt
         this->giveEdgeDofMapping(mask, iEdge);
 
         // coordinates of the initial and final node of the edge
-        FloatArray *coord1 = giveNode( mask.at(1) )->giveCoordinates();
-        FloatArray *coord2 = giveNode( mask.at(2) )->giveCoordinates();
+        const auto &coord1 = giveNode( mask.at(1) )->giveCoordinates();
+        const auto &coord2 = giveNode( mask.at(2) )->giveCoordinates();
         // components of the edge vector (from the initial to the final node)
-        double dx = coord2->at(1) - coord1->at(1);
-        double dy = coord2->at(2) - coord1->at(2);
+        double dx = coord2.at(1) - coord1.at(1);
+        double dy = coord2.at(2) - coord1.at(2);
         // coordinates of the initial node
-        double x1 =  coord1->at(1);
-        double y1 =  coord1->at(2);
+        double x1 =  coord1.at(1);
+        double y1 =  coord1.at(2);
         // coordinates of the final node
-        double x2 = coord2->at(1);
-        double y2 = coord2->at(2);
+        double x2 = coord2.at(1);
+        double y2 = coord2.at(2);
 
         // transform to coordinates w.r. center of gravity
         FloatArray tc1(2), c1(2), tc2(2), c2(2);

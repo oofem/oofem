@@ -48,7 +48,7 @@ namespace oofem {
 class IntArray;
 class FloatMatrix;
 class DataStream;
-template<int N> class FloatArrayF;
+template<std::size_t N> class FloatArrayF;
 
 /**
  * Class representing vector of real numbers. This array can grow or shrink to
@@ -110,7 +110,7 @@ public:
     template< class InputIt >
     FloatArray( InputIt first, InputIt last ) : values(first, last) { }
     /// Wrapper to direct assignment from iterator pairs
-    template< int N >
+    template< std::size_t N >
     inline FloatArray( const FloatArrayF<N> &src ) : values(src.begin(), src.end()) { }
     /// Destructor.
     virtual ~FloatArray() {}
@@ -122,7 +122,7 @@ public:
     /// Assignment operator.
     inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
     /// Assign from fixed size array
-    template<int N>
+    template< std::size_t N >
     inline FloatArray &operator = (const FloatArrayF<N> &src) { values.assign(src.begin(), src.end()); return *this; }
 
     /// Add one element
@@ -538,7 +538,7 @@ public:
     FloatArray &operator = ( const double & );
     //@}
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
     void __setitem__(int i, double val) { this->values[i] = val; }
     double __getitem__(int i) { return this->values[i]; }
     void beCopyOf(const FloatArray &src) { this->operator = ( src ); }

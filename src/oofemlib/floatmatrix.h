@@ -44,7 +44,7 @@
 #include <initializer_list>
 #include <algorithm>
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
 namespace boost {
 namespace python {
 namespace api {
@@ -56,8 +56,8 @@ class object;
 
 namespace oofem {
 class FloatArray;
-template<int N> class FloatArrayF;
-template<int M, int N> class FloatMatrixF;
+template<std::size_t N> class FloatArrayF;
+template<std::size_t M, std::size_t N> class FloatMatrixF;
 class IntArray;
 class DataStream;
 
@@ -130,7 +130,7 @@ public:
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Initializer list constructor.
-    template<int M, int N>
+    template<std::size_t M, std::size_t N>
     FloatMatrix(const FloatMatrixF<N,M> &src) : nRows(N), nColumns(M), values(src.begin(), src.end()) { }
     /// Assignment operator.
     FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
@@ -150,7 +150,7 @@ public:
         return * this;
     }
     /// Assignment operator, adjusts size of the receiver if necessary.
-    template<int N, int M>
+    template<std::size_t N, std::size_t M>
     FloatMatrix &operator=(const FloatMatrixF<N,M> &mat) {
         nRows = N;
         nColumns = M;
@@ -603,11 +603,27 @@ public:
     friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
 
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
     void __setitem__(boost :: python :: api :: object t, double val);
     double __getitem__(boost :: python :: api :: object t);
     void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
 #endif
-};
+
+
+}; // class FloatMatrix
+
+//@name operators
+//@{
+/// Vector multiplication by scalar
+FloatMatrix &operator *= ( FloatMatrix & x, const double & a ); 
+FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
+FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
+FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
+FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
+FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
+FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
+
+//@}
+
 } // end namespace oofem
 #endif // flotmtrx_h

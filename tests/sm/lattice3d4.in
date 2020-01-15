@@ -1,0 +1,20 @@
+lattice3d4.out
+Direct tension. 3D Model
+StaticStructural nmsteps 2 nsteps 1 nmodules 1
+nsteps 5 rtolv 1.e-6 ddm 2 2 1 ddv 1 -4. ddltf 2
+nsteps 5 rtolv 1.e-6 ddm 2 2 1 ddv 1 -1. ddltf 2
+errorcheck
+domain 3dlattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 2
+node 1 coords 3 1.111711e-02 7.114932e-03 4.692007e-02 bc 6 1 1 1 1 1 1
+node 2 coords 3 1.022527e-02 5.541532e-03 4.413610e-02 bc 6 0 0 0 0 0 0
+lattice3D 1 nodes 2 1 2 crossSect 1 mat 1 polycoords 21 9.052245e-03 7.130119e-03 4.559351e-02 9.147877e-03 7.231811e-03 4.550540e-02 9.476180e-03 7.416481e-03 4.529586e-02 1.157304e-02 6.652583e-03 4.505586e-02 1.187257e-02 6.018345e-03 4.531836e-02 1.190671e-02 5.897034e-03 4.537598e-02 1.012734e-02 5.606267e-03 4.611033e-02 pressures 7 -0.1 -0.1 -0.1 -0.1 -0.1 -0.1 -0.1
+latticecs 1 material 1
+latticedamage 1 d 0 talpha 0. e 1. e0 3. wf 1. a2 1.
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 t 2 1. 100. f(t) 2 0. 1.
+#%BEGIN_CHECK% tolerance 1.e-8
+#NODE tStep 8 number 2 dof 3 unknown d value 7.53812473e-02
+#%END_CHECK%

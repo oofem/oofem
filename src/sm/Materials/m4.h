@@ -65,7 +65,6 @@ protected:
 
 public:
     M4MaterialStatus(GaussPoint *g, int nplanes);
-    virtual ~M4MaterialStatus();
 
     const char *giveClassName() const override { return "M4MaterialStatus"; }
 
@@ -92,11 +91,13 @@ public:
 class M4Material : public MicroplaneMaterial_Bazant
 {
 protected:
-    double c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12;
-    double c13, c14, c15, c16, c17, c18, c19, c20; /*c... fixed empirical constants*/
-    double k1, k2, k3, k4, k5, mu;
-    double EV, ED, ET;
-    double talpha;
+    double c1 = 0., c2 = 0., c3 = 0., c4 = 0., c5 = 0.;
+    double c6 = 0., c7 = 0., c8 = 0., c9 = 0., c10 = 0.;
+    double c11 = 0., c12 = 0., c13 = 0., c14 = 0., c15 = 0.;
+    double c16 = 0., c17 = 0., c18 = 0., c19 = 0., c20 = 0.; /*c... fixed empirical constants*/
+    double k1 = 0., k2 = 0., k3 = 0., k4 = 0., k5 = 0., mu = 0.;
+    double EV = 0., ED = 0., ET = 0.;
+    double talpha = 0.;
 
 public:
     /**
@@ -106,10 +107,8 @@ public:
      * @param d Domain to which newly created material belongs.
      */
     M4Material(int n, Domain *d);
-    /// Destructor.
-    virtual ~M4Material() { }
 
-    void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) override;
+    FloatArrayF<6> giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep) const override;
 
     MicroplaneState giveRealMicroplaneStressVector(GaussPoint *gp, int mnumber, const MicroplaneState &strain, TimeStep *tStep) const override;
 
@@ -124,7 +123,7 @@ public:
 
     void updateVolumetricStressTo(GaussPoint *gp, int mnumber, double sigv) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     const char *giveInputRecordName() const override { return _IFT_M4Material_Name; }
     const char *giveClassName() const override { return "M4Material"; }
 

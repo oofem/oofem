@@ -50,15 +50,11 @@ REGISTER_Material(IntMatPhaseField);
 IntMatPhaseField::IntMatPhaseField(int n, Domain *d) : StructuralInterfaceMaterialPhF(n, d) {}
 
 
-int
-IntMatPhaseField :: hasMaterialModeCapability(MaterialMode mode)
+bool
+IntMatPhaseField :: hasMaterialModeCapability(MaterialMode mode) const
 {
     // returns whether receiver supports given mode
-    if ( mode == _3dInterface ) {
-        return 1;
-    } else {
-        return 0;
-    }
+    return mode == _3dInterface;
 }
 
 FloatArrayF<3>
@@ -212,17 +208,15 @@ IntMatPhaseField :: compute_gBis(double d) const
 }
 
 
-IRResultType
-IntMatPhaseField :: initializeFrom(InputRecord *ir)
+void
+IntMatPhaseField :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, this->k, _IFT_IntMatPhaseField_kn);
     IR_GIVE_FIELD(ir, this->Gc, _IFT_IntMatPhaseField_gc);
 
     StructuralInterfaceMaterial :: initializeFrom(ir);
-    return IRRT_OK;
 }
+
 
 void IntMatPhaseField :: giveInputRecord(DynamicInputRecord &input)
 {

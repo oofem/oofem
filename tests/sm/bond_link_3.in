@@ -1,0 +1,27 @@
+bond_link_3.out
+Bond test
+StaticStructural nsteps 10 nmodules 2 initialguess 1 lstype 0 smtype 1 stiffmode 2 rtolv 1.e-3
+vtkxmlperiodic tstep_all primvars 1 1 vars 2 4 1 stype 0 regionsets 1 1
+vtkxmlperiodic tstep_all primvars 1 1 vars 2 4 1 stype 0 regionsets 1 3
+#matlab tstep_all mesh data reactionforces integrationpoints internalvars 7 4 1 12 7 8 98 99
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nset 3
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 0. 0.1 0.
+bondlink3d 1 nodes 2 1 2 length 0.01 diameter 1.200000e-02 dirvector 3 1.000000e+00 0.000000e+00 0.000000e+00 length_end 2. 
+interfacecs 1 material 1 set 1
+linkslip 1 kn 30.e12 kl 30.e15 type 2 t0 10.e6 tf 3.e6 s1 5.e-5 s2 1.e-4 s3 1.5e-4 alpha 0.5 
+BoundaryCondition 1 loadTimeFunction 1 dofs 6 1 2 3 4 5 6 values 6 2.e-4 0. 0. 0. 0. 0. set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 3 1 2 3 values 3 0. 0. 0. set 3
+PiecewiseLinFunction 1 nPoints 2 t 2 0. 10. f(t) 2 0. 1.
+set 1 elements 1 1
+set 2 nodes 1 1 
+set 3 nodes 1 2
+#%BEGIN_CHECK%
+##NODE number 1 dof 1 unknown d
+##REACTION number 1 dof 1
+#ELEMENT number 1 gp 1 keyword "jump" component 1
+#ELEMENT number 1 gp 1 keyword  "traction" component 1
+#TIME
+#%END_CHECK%

@@ -556,13 +556,13 @@ public:
      * @param bNodes list of boundary edge nodes 
      * @param boundary edge id
      */
-    virtual void giveBoundaryEdgeNodes(IntArray& bNodes, int boundary);
+    virtual IntArray giveBoundaryEdgeNodes(int boundary) const;
     /**
      * Returns list of receiver boundary nodes for given surface
      * @param bNodes list of boundary surface nodes 
      * @param boundary surface id
      */
-    virtual void giveBoundarySurfaceNodes(IntArray& bNodes, int boundary);
+    virtual IntArray giveBoundarySurfaceNodes(int boundary) const;
     /**
      * Returns boundary edge integration rule
      * @param order approximation order to integrate 
@@ -652,6 +652,8 @@ public:
 
     /// @return Number of dofmanagers of receiver.
     virtual int giveNumberOfDofManagers() const { return numberOfDofMans; }
+    /// Sets number of element dof managers
+    void setNumberOfDofManagers(int i) {this->numberOfDofMans = i;}
     /**
      * Returns number of nodes of receiver.
      * Default implementation returns number of dofmanagers of element
@@ -1137,7 +1139,7 @@ public:
     IntArray *giveBoundaryLoadArray();
 
     // Overloaded methods:
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void saveContext(DataStream &stream, ContextMode mode) override;
     void restoreContext(DataStream &stream, ContextMode mode) override;
@@ -1145,7 +1147,10 @@ public:
 
     void printOutputAt(FILE *file, TimeStep *tStep) override;
 
-protected:
+    virtual const IntArray giveLocation() {IntArray answer(0); return answer;}
+    virtual void recalculateCoordinates(int nodeNumber, FloatArray &coords){;}
+
+ protected:
     /**
      * Initializes the array of integration rules member variable.
      * Element can have multiple integration rules for different tasks.

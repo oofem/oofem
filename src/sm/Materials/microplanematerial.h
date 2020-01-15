@@ -73,7 +73,7 @@ class MicroplaneMaterial : public StructuralMaterial
 {
 protected:
     /// Number of microplanes.
-    int numberOfMicroplanes;
+    int numberOfMicroplanes = 0;
 
     /// Integration weights of microplanes.
     FloatArray microplaneWeights;
@@ -100,10 +100,10 @@ protected:
     std::vector<FloatArrayF<6>> L;
 
     /// Young's modulus
-    double E;
+    double E = 0.;
 
     /// Poisson's ratio
-    double nu;
+    double nu = 0.;
 
 public:
 
@@ -112,35 +112,33 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d), numberOfMicroplanes(0) { }
-    /// Destructor.
-    virtual ~MicroplaneMaterial() { }
+    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
 
     /**
      * Computes the length of normal strain vector on given microplane.
      */
-    double computeNormalStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeNormalStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the normal volumetric component of macro strain on given microplane.
      */
-    double computeNormalVolumetricStrainComponent(const FloatArray &macroStrain);
+    double computeNormalVolumetricStrainComponent(const FloatArray &macroStrain) const;
     /**
      * Computes the normal deviatoric component of macro strain on given microplane.
      */
-    double computeNormalDeviatoricStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeNormalDeviatoricStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the shear component (in m direction) of macro strain on given microplane.
      */
-    double computeShearMStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeShearMStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the shear component (in l direction) of macro strain on given microplane.
      */
-    double computeShearLStrainComponent(int mnumber, const FloatArray &macroStrain);
+    double computeShearLStrainComponent(int mnumber, const FloatArray &macroStrain) const;
     /**
      * Computes the vector of all micro stress components (Ev, En, Em, El) of macro strain
      * vector on given microplane.
      */
-    MicroplaneState computeStrainVectorComponents(int mnumber, const FloatArray &macroStrain);
+    MicroplaneState computeStrainVectorComponents(int mnumber, const FloatArray &macroStrain) const;
 
 
     /**
@@ -148,7 +146,7 @@ public:
      * @param mplane Microplane.
      * @return Integration weight of given microplane.
      */
-    double giveMicroplaneIntegrationWeight(int mnumber);
+    double giveMicroplaneIntegrationWeight(int mnumber) const;
 
     /**
      * Initializes internal data (integration weights,
@@ -157,12 +155,9 @@ public:
      */
     virtual void initializeData(int numberOfMicroplanes);
 
-    void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode,
-                                       GaussPoint *gp,
-                                       TimeStep *tStep) override;
+    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 };
 } // end namespace oofem

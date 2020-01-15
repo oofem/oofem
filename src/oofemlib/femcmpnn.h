@@ -45,7 +45,6 @@
 
 #include "oofemcfg.h"
 #include "interfacetype.h"
-#include "irresulttype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
@@ -90,7 +89,7 @@ public:
      */
     FEMComponent(int n, Domain * d) : number(n), domain(d) { }
     /// Virtual destructor.
-    virtual ~FEMComponent() { }
+    virtual ~FEMComponent() = default;
 
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const = 0;
@@ -127,9 +126,8 @@ public:
      * @see IR_GIVE_FIELD
      * @see IR_GIVE_OPTIONAL_FIELD
      * @param ir Input record to initialize from.
-     * @return IRResultType
      */
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     /**
      * Setups the input record string of receiver.
      * @param input Dynamic input record to be filled by receiver.

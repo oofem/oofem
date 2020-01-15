@@ -256,7 +256,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(const FloatArrayF<3> &d
                 dAlpha = 1. - oldDamage;
             }
 
-            FloatMatrixF<3,3> Iep = Smati.sub<3,3>({0,1,2},{0,1,2});
+            auto Iep = Smati({0,1,2},{0,1,2});
             status->letTempIepBe(Iep);
 
             FloatArrayF<3> alpha_v {
@@ -297,11 +297,9 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(const FloatArrayF<3> &d
 
 
 const double tolerance = 1.0e-12; // small number
-IRResultType
-IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord *ir)
+void
+IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                    // Required by IR_GIVE_FIELD macro
-
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZFagerstrom_kn);
     this->knc = kn0;                        // Defaults to the same stiffness in compression and tension
     IR_GIVE_OPTIONAL_FIELD(ir, this->knc, _IFT_IntMatBilinearCZFagerstrom_knc);
@@ -328,7 +326,6 @@ IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord *ir)
 
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();
-    return IRRT_OK;
 }
 
 void IntMatBilinearCZFagerstromRate :: giveInputRecord(DynamicInputRecord &input)

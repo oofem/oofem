@@ -345,16 +345,11 @@ LIBeam3dNL :: computeGaussPoints()
 }
 
 
-IRResultType
-LIBeam3dNL :: initializeFrom(InputRecord *ir)
+void
+LIBeam3dNL :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
-
     // first call parent
-    result = NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    NLStructuralElement :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL_refnode);
     if ( referenceNode == 0 ) {
@@ -376,8 +371,6 @@ LIBeam3dNL :: initializeFrom(InputRecord *ir)
     FloatMatrix lcs;
     this->giveLocalCoordinateSystem(lcs);
     this->tc.beTranspositionOf(lcs);
-
-    return IRRT_OK;
 }
 
 
@@ -515,14 +508,14 @@ LIBeam3dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 void
 LIBeam3dNL :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->give3dBeamStiffMtrx(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->give3dBeamStiffMtrx(rMode, gp, tStep);
 }
 
 
 void
 LIBeam3dNL :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
+    answer = this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(strain, gp, tStep);
 }
 
 

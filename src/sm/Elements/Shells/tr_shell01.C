@@ -61,14 +61,13 @@ TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 }
 
 
-IRResultType
-TR_SHELL01 :: initializeFrom(InputRecord *ir)
+void
+TR_SHELL01 :: initializeFrom(InputRecord &ir)
 {
     // proc tady neni return = this...   ??? termitovo
-    IRResultType result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
+    plate->initializeFrom(ir);
+    membrane->initializeFrom(ir);
 
 #if 0
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
@@ -82,17 +81,6 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
         return result;
     }
 #endif
-
-    result = plate->initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-    result = membrane->initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
 }
 
 void
@@ -419,9 +407,9 @@ TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
     FloatArray _c;
 
     for ( int i = 1; i <= this->giveNumberOfNodes(); ++i ) {
-        FloatArray *coordinates = this->giveNode(i)->giveCoordinates();
+        const auto &coordinates = this->giveNode(i)->giveCoordinates();
 
-        _c = * coordinates;
+        _c = coordinates;
         _c.add(gt3);
         if ( i == 1 ) {
             bb0 = bb1 = _c;
@@ -430,7 +418,7 @@ TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
             bb1.beMaxOf(bb1, _c);
         }
 
-        _c = * coordinates;
+        _c = coordinates;
         _c.subtract(gt3);
         bb0.beMinOf(bb0, _c);
         bb1.beMaxOf(bb1, _c);

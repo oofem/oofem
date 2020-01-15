@@ -46,7 +46,7 @@ REGISTER_BoundaryCondition(RotatingBoundary);
 double RotatingBoundary :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
-    FloatArray *coords = dof->giveDofManager()->giveCoordinates();
+    const auto &coords = dof->giveDofManager()->giveCoordinates();
     FloatArray answer, newcoords;
     double theta = 0.;
 
@@ -65,11 +65,11 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, double time)
     }
 
     if ( center.giveSize() == 0 ) {
-        center.resize( coords->giveSize() );
+        center.resize( coords.giveSize() );
         center.zero();
     }
 
-    if ( coords == NULL || coords->giveSize() != center.giveSize() ) {
+    if ( coords.giveSize() != center.giveSize() ) {
         OOFEM_ERROR("Size of coordinate system different from center of rotation.");
     }
 
@@ -77,17 +77,17 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, double time)
     double &ny = axis.at(2);
     double &nz = axis.at(3);
 
-    if ( coords->giveSize() == 1 ) {
+    if ( coords.giveSize() == 1 ) {
         R.resize(1, 1);
         R.at(1, 1) = cos(theta) + nx * nx * ( 1 - cos(theta) );
     }
-    if ( coords->giveSize() == 2 ) {
+    if ( coords.giveSize() == 2 ) {
         R.resize(2, 2);
         R.at(1, 1) = cos(theta) + nx * nx * ( 1 - cos(theta) );
         R.at(1, 2) = nx * ny * ( 1 - cos(theta) ) - nz *sin(theta);
         R.at(2, 1) = ny * nx * ( 1 - cos(theta) ) + nz *sin(theta);
         R.at(2, 2) = cos(theta) + ny * ny * ( 1 - cos(theta) );
-    } else if ( coords->giveSize() == 3  ) {
+    } else if ( coords.giveSize() == 3  ) {
         R.resize(3, 3);
 
         R.at(1, 1) = cos(theta) + nx * nx * ( 1 - cos(theta) );
@@ -105,10 +105,10 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, double time)
         OOFEM_ERROR("Size of coordinate system has to be 1, 2 or 3.");
     }
 
-    newcoords.beDifferenceOf(center, *coords);
+    newcoords.beDifferenceOf(center, coords);
     answer.beProductOf(R, newcoords);
     answer.add(center);
-    answer.subtract(* coords);
+    answer.subtract(coords);
 
     switch ( id ) {
     case D_u:
@@ -125,17 +125,15 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, double time)
     }
 }
 
-IRResultType
-RotatingBoundary :: initializeFrom(InputRecord *ir)
+void
+RotatingBoundary :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, axis, _IFT_RotatingBoundary_axis);
     axis.normalize();
 
     IR_GIVE_OPTIONAL_FIELD(ir, center, _IFT_RotatingBoundary_center);
-
-    return GeneralBoundaryCondition :: initializeFrom(ir);
 }
 
 void

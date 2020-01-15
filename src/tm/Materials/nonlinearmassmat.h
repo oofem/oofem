@@ -60,26 +60,21 @@ class NonlinearMassTransferMaterial : public TransportMaterial
 {
 protected:
     /// Indicates the level of nonlinearity in the model
-    double C;
+    double C = 0.;
     /// Indicates the level of nonlinearity in the model
-    double alpha;
+    double alpha = 0.;
 
 public:
     NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
-    virtual ~NonlinearMassTransferMaterial() { }
 
-    IRResultType initializeFrom(InputRecord *ir) override;
-
-    void  giveCharacteristicMatrix(FloatMatrix &answer,
-                                   MatResponseMode mode,
-                                   GaussPoint *gp,
-                                   TimeStep *tStep) override;
+    void initializeFrom(InputRecord &ir) override;
 
     double giveCharacteristicValue(MatResponseMode mode,
                                    GaussPoint *gp,
-                                   TimeStep *tStep) override;
+                                   TimeStep *tStep) const override;
 
-    void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep) override;
+    FloatArrayF<3> computeFlux3D(const FloatArrayF<3> &grad, double field, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF<3,3> computeTangent3D(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep) override;
 

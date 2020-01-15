@@ -100,10 +100,10 @@ QTrPlaneStressGradDamage :: giveDofManDofIDMask_d(IntArray &answer) const
 
   
 
-IRResultType
-QTrPlaneStressGradDamage :: initializeFrom(InputRecord *ir)
+void
+QTrPlaneStressGradDamage :: initializeFrom(InputRecord &ir)
 {
-    return QTrPlaneStress2d :: initializeFrom(ir);
+    QTrPlaneStress2d :: initializeFrom(ir);
 }
 
 

@@ -63,7 +63,6 @@ protected:
 
 public:
     Quad10_2D_SUPG(int n, Domain * d);
-    virtual ~Quad10_2D_SUPG();
 
     FEInterpolation *giveInterpolation() const override;
     FEInterpolation *giveInterpolation(DofIDItem id) const override;
@@ -76,7 +75,7 @@ public:
     void giveInternalDofManDofIDMask(int i, IntArray &answer) const override;
     void giveDofManDofIDMask(int inode, IntArray &answer) const override;
     int computeNumberOfDofs() override;
-    IRResultType initializeFrom(InputRecord *ir) override;
+    void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
     void updateYourself(TimeStep *tStep) override;
     int checkConsistency() override;
@@ -116,7 +115,7 @@ public:
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
-                                int node, TimeStep *tStep);
+                                int node, TimeStep *tStep) override;
     // Graphics output
     void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) override;
     void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) override;

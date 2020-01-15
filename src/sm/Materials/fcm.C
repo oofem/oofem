@@ -48,13 +48,9 @@ FCMMaterial :: FCMMaterial(int n, Domain *d) : StructuralMaterial(n, d),
     ecsMethod(ECSM_Unknown)
 {}
 
-FCMMaterial :: ~FCMMaterial() {}
 
-int
-FCMMaterial :: hasMaterialModeCapability(MaterialMode mode)
-//
-// returns whether receiver supports given mode
-//
+bool
+FCMMaterial :: hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dMat || mode == _PlaneStress || mode == _PlaneStrain;
 }
@@ -93,7 +89,7 @@ FCMMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     int nCr = status->giveNumberOfCracks();
     int nMaxCr = status->giveMaxNumberOfCracks(gp);
 
-    double maxErr;
+    double maxErr = 0.;
     double maxTau = 0.;
 
     double G;
@@ -1021,17 +1017,17 @@ FCMMaterial :: initializeCrack(GaussPoint *gp, TimeStep *tStep, FloatMatrix &bas
         status->setCrackDirs(base);
 
         if ( mMode == _PlaneStress ) {
-            this->givePlaneStressVectorTranformationMtrx(sigmaG2L, base, 0);
-            this->give2DStrainVectorTranformationMtrx(epsG2L, base, 0);
+            sigmaG2L = this->givePlaneStressVectorTranformationMtrx(base, 0);
+            epsG2L = this->give2DStrainVectorTranformationMtrx(base, 0);
 
-            this->givePlaneStressVectorTranformationMtrx(sigmaL2G, base, 1);
-            this->give2DStrainVectorTranformationMtrx(epsL2G, base, 1);
+            sigmaL2G = this->givePlaneStressVectorTranformationMtrx(base, 1);
+            epsL2G = this->give2DStrainVectorTranformationMtrx(base, 1);
         } else {
-            this->giveStressVectorTranformationMtrx(sigmaG2L, base, 0);
-            this->giveStrainVectorTranformationMtrx(epsG2L, base, 0);
+            sigmaG2L = this->giveStressVectorTranformationMtrx(base, 0);
+            epsG2L = this->giveStrainVectorTranformationMtrx(base, 0);
 
-            this->giveStressVectorTranformationMtrx(sigmaL2G, base, 1);
-            this->giveStrainVectorTranformationMtrx(epsL2G, base, 1);
+            sigmaL2G = this->giveStressVectorTranformationMtrx(base, 1);
+            epsL2G = this->giveStrainVectorTranformationMtrx(base, 1);
         }
 
         status->setG2LStressVectorTransformationMtrx(sigmaG2L);
@@ -1978,32 +1974,23 @@ FCMMaterial :: computeNumerD2Modulus(GaussPoint *gp, TimeStep *tStep, int shearD
 
   
 
-IRResultType
-FCMMaterial :: initializeFrom(InputRecord *ir)
+void
+FCMMaterial :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;              // Required by IR_GIVE_FIELD macro
-
-    result = StructuralMaterial :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    result = linearElasticMaterial.initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralMaterial :: initializeFrom(ir);
+    linearElasticMaterial.initializeFrom(ir);
 
     this->nAllowedCracks = 3;
     IR_GIVE_OPTIONAL_FIELD(ir, nAllowedCracks, _IFT_FCM_nAllowedCracks);
 
 
     this->crackSpacing = -1.;
-    if  ( ir->hasField(_IFT_FCM_crackSpacing) ) {
+    if ( ir.hasField(_IFT_FCM_crackSpacing) ) {
         IR_GIVE_FIELD(ir, crackSpacing, _IFT_FCM_crackSpacing);
     }
 
     this->multipleCrackShear = false;
-    if  ( ir->hasField(_IFT_FCM_multipleCrackShear) ) {
+    if ( ir.hasField(_IFT_FCM_multipleCrackShear) ) {
         this->multipleCrackShear = true;
     }
 
@@ -2025,13 +2012,11 @@ FCMMaterial :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, shearCoeffNumer, _IFT_FCM_shearCoeffNumer);
     this->normalCoeffNumer = -1. * fcm_BIGNUMBER;
     IR_GIVE_OPTIONAL_FIELD(ir, normalCoeffNumer, _IFT_FCM_normalCoeffNumer);
-
-    return IRRT_OK;
 }
 
 
 double
-FCMMaterial :: give(int aProperty, GaussPoint *gp)
+FCMMaterial :: give(int aProperty, GaussPoint *gp) const
 {
     return linearElasticMaterial.give(aProperty, gp);
 }
@@ -2281,35 +2266,37 @@ FCMMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
     }
 }
 
-void
-FCMMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                             MatResponseMode mode,
+FloatMatrixF<6,6>
+FCMMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode,
                                              GaussPoint *gp,
-                                             TimeStep *tStep)
+                                             TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<FCMMaterial*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-FCMMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
+FloatMatrixF<3,3>
+FCMMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
-
+                                        TimeStep *tStep) const
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<FCMMaterial*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
-void
-FCMMaterial :: givePlaneStrainStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
+FloatMatrixF<4,4>
+FCMMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
                                         GaussPoint *gp,
-                                        TimeStep *tStep)
+                                        TimeStep *tStep) const
 
 {
-    this->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    FloatMatrix answer;
+    const_cast<FCMMaterial*>(this)->giveMaterialStiffnessMatrix(answer, mode, gp, tStep);
+    return answer;
 }
 
 
@@ -2324,7 +2311,6 @@ FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
     transMatrix_L2Gstress(), transMatrix_L2Gstrain()
 {
     // resize in constructor according to stress-state
-    this->nMaxCracks = 0;
     this->nMaxCracks = giveMaxNumberOfCracks(gp);
 
     crackStatuses.resize(this->nMaxCracks);
@@ -2369,21 +2355,15 @@ FCMMaterialStatus :: FCMMaterialStatus(GaussPoint *gp) :
 }
 
 
-FCMMaterialStatus :: ~FCMMaterialStatus()
-{ }
-
-
-
 void
-FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    int i;
     char s [ 11 ];
 
     StructuralMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "status { ");
     if ( this->giveNumberOfCracks() > 0 ) {
-        for ( i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
+        for ( int i = 1; i <= crackDirs.giveNumberOfColumns(); i++ ) {
             switch ( crackStatuses.at(i) ) {
             case pscm_NONE:
                 strcpy(s, "NONE");
@@ -2411,8 +2391,11 @@ FCMMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
                 fprintf( file, "%f ", crackDirs.at(j, i) );
             }
 
-            fprintf(file, "}}");
-            ;
+            fprintf(file, "} ");
+            
+	    fprintf(file, "crack_width %.4e", this->giveCharLength(i) * this->giveCrackStrain(i) );
+
+            fprintf(file, " } ");	    
         }
     }
 

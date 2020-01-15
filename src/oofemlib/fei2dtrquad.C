@@ -110,7 +110,7 @@ FEI2dTrQuad :: evaldNdx(const FloatArrayF<2> &lcoords, const FEICellGeometry &ce
 {
     auto dn = evaldNdxi(lcoords);
     FloatMatrixF<2,2> jacT;
-    for ( int i = 1; i <= dn.cols(); i++ ) {
+    for ( std::size_t i = 1; i <= dn.cols(); i++ ) {
         const auto &c = cellgeo.giveVertexCoordinates(i);
         double x = c.at(xind);
         double y = c.at(yind);
@@ -264,8 +264,7 @@ FEI2dTrQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
 
 double FEI2dTrQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     double xi = lcoords(0);
     double dN1dxi = -0.5 + xi;
     double dN2dxi =  0.5 + xi;
@@ -288,9 +287,8 @@ void
 FEI2dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
                                 const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    IntArray edgeNodes;
     FloatArray n;
-    this->computeLocalEdgeMapping(edgeNodes, iedge);
+    const auto &edgeNodes = this->computeLocalEdgeMapping(iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
     answer.resize(2);
@@ -303,41 +301,28 @@ FEI2dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 }
 
 
-void
-FEI2dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+IntArray
+FEI2dTrQuad :: computeLocalEdgeMapping(int iedge) const
 {
-    int aNode = 0, bNode = 0, cNode = 0;
-    edgeNodes.resize(3);
-
     if ( iedge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-        cNode = 4;
+        return {1, 2, 4};
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-        cNode = 5;
+        return {2, 3, 5};
     } else if ( iedge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
-        cNode = 6;
+        return {3, 1, 6};
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        throw std::range_error("invalid edge number");
+        return {};
     }
-
-    edgeNodes.at(1) = aNode;
-    edgeNodes.at(2) = bNode;
-    edgeNodes.at(3) = cNode;
 }
 
 
 
 void FEI2dTrQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    double l1, l2, l3;
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = 1.0 - l1 - l2;
+    double l1 = lcoords.at(1);
+    double l2 = lcoords.at(2);
+    double l3 = 1.0 - l1 - l2;
 
     answer.resize(6, 2);
 
@@ -360,22 +345,22 @@ void FEI2dTrQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, co
 double
 FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
 {
-    const FloatArray &p1 = cellgeo.giveVertexCoordinates(1);
+    const auto &p1 = cellgeo.giveVertexCoordinates(1);
     double x1 = p1.at(xind);
     double y1 = p1.at(yind);
-    const FloatArray &p2 = cellgeo.giveVertexCoordinates(2);
+    const auto &p2 = cellgeo.giveVertexCoordinates(2);
     double x2 = p2.at(xind);
     double y2 = p2.at(yind);
-    const FloatArray &p3 = cellgeo.giveVertexCoordinates(3);
+    const auto &p3 = cellgeo.giveVertexCoordinates(3);
     double x3 = p3.at(xind);
     double y3 = p3.at(yind);
-    const FloatArray &p4 = cellgeo.giveVertexCoordinates(4);
+    const auto &p4 = cellgeo.giveVertexCoordinates(4);
     double x4 = p4.at(xind);
     double y4 = p4.at(yind);
-    const FloatArray &p5 = cellgeo.giveVertexCoordinates(5);
+    const auto &p5 = cellgeo.giveVertexCoordinates(5);
     double x5 = p5.at(xind);
     double y5 = p5.at(yind);
-    const FloatArray &p6 = cellgeo.giveVertexCoordinates(6);
+    const auto &p6 = cellgeo.giveVertexCoordinates(6);
     double x6 = p6.at(xind);
     double y6 = p6.at(yind);
 
@@ -385,7 +370,7 @@ FEI2dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
 
 bool FEI2dTrQuad :: inside(const FloatArray &lcoords) const
 {
-	const double point_tol = 1.0e-3;
+    const double point_tol = 1.0e-3;
     bool inside = true;
     for ( int i = 1; i <= 2; i++ ) {
         if ( lcoords.at(i) < - point_tol ) {
@@ -407,18 +392,17 @@ bool FEI2dTrQuad :: inside(const FloatArray &lcoords) const
 double
 FEI2dTrQuad :: evalNXIntegral(int iEdge, const FEICellGeometry &cellgeo)
 {
-    IntArray eNodes;
-    this->computeLocalEdgeMapping(eNodes, iEdge);
+    const auto &eNodes = this->computeLocalEdgeMapping(iEdge);
 
-    const FloatArray &node1 = cellgeo.giveVertexCoordinates( eNodes.at(1) );
+    const auto &node1 = cellgeo.giveVertexCoordinates( eNodes.at(1) );
     double x1 = node1.at(xind);
     double y1 = node1.at(yind);
 
-    const FloatArray &node2 = cellgeo.giveVertexCoordinates( eNodes.at(2) );
+    const auto &node2 = cellgeo.giveVertexCoordinates( eNodes.at(2) );
     double x2 = node2.at(xind);
     double y2 = node2.at(yind);
 
-    const FloatArray &node3 = cellgeo.giveVertexCoordinates( eNodes.at(3) );
+    const auto &node3 = cellgeo.giveVertexCoordinates( eNodes.at(3) );
     double x3 = node3.at(xind);
     double y3 = node3.at(yind);
 

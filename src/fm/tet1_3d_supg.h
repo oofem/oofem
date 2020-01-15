@@ -54,7 +54,6 @@ protected:
 
 public:
     Tet1_3D_SUPG(int n, Domain * d);
-    virtual ~Tet1_3D_SUPG();
 
     // definition
     const char *giveClassName() const override { return "Tet1_3D_SUPG"; }

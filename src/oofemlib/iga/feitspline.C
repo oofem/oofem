@@ -43,10 +43,8 @@ namespace oofem {
 #define OPTIMIZED_VERSION_A4dot4
 
 
-IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
+void TSplineInterpolation :: initializeFrom(InputRecord &ir)
 {
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
     BSplineInterpolation :: initializeFrom(ir);
 
     IntArray localIndexKnotVector_tmp;
@@ -71,8 +69,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
         localIndexKnotVector_tmp.clear();
         IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
-            OOFEM_WARNING("invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
-            return IRRT_BAD_FORMAT;
+            throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "invalid size of knot vector");
         }
 
         int pos = 0;
@@ -89,9 +86,7 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             int indexKnotVal = indexKnotVec [ 0 ];
             for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
-                    OOFEM_WARNING("local index knot vector %s of control point %d is not monotonic",
-                                 IFT_localIndexKnotVector [ n ], i + 1);
-                    return IRRT_BAD_FORMAT;
+                    throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "local index knot vector is not monotonic");
                 }
 
                 /* this is only for the case when TSpline = NURBS
@@ -104,21 +99,17 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
             // check for nondegeneracy of local index knot vector
             if ( indexKnotVal == indexKnotVec [ 0 ] ) {
-                OOFEM_WARNING("local index knot vector %s of control point %d is degenerated",
-                             IFT_localIndexKnotVector [ n ], i + 1);
-                return IRRT_BAD_FORMAT;
+                throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "local index knot vector is degenerated");
             }
 
             // check for range of local index knot vector
             if ( indexKnotVec [ 0 ] <= 0 || indexKnotVal > knotValues [ n ].giveSize() ) {
-                OOFEM_WARNING("local index knot vector %s of control point %d out of range",
-                             IFT_localIndexKnotVector [ n ], i + 1);
-                return IRRT_BAD_FORMAT;
+                throw ValueInputException(ir, IFT_localIndexKnotVector [ n ], "local index knot vector out of range");
             }
         }
     }
 
-    return IRRT_OK;
+    IR_GIVE_FIELD(ir, this->weights, _IFT_TSplineInterpolation_weights);
 }
 
 
@@ -154,7 +145,7 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
                 N[i] = this->basisFunction(lcoords[i], degree [ i ], * giveKnotValues(i + 1), localIndexKnotVector [ mask[k] - 1 ] [ i ]);
             }
 
-            answer[k] = val = N[0] * N[1] * cellgeo.giveVertexCoordinates( mask[k] ).at(3);        // Nu*Nv*w
+            answer[k] = val = N[0] * N[1] * this->weights.at( mask[k] );        // Nu*Nv*w
             sum += val;
         }
     }
@@ -229,7 +220,7 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
             // calculation of jacobian matrix in similar fashion as A4.4
             // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
             const auto &vertexCoords = cellgeo.giveVertexCoordinates( mask[k] );
-            double w = vertexCoords[2];
+            double w = this->weights.at( mask[k] );
             double xw = vertexCoords[0] * w;
             double yw = vertexCoords[1] * w;
             double product;
@@ -280,7 +271,7 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
         double product = Jacob * weight * weight;
 
         for ( int k = 0; k < count; k++ ) {
-            double w = cellgeo.giveVertexCoordinates( mask[k] ).at(3);
+            double w = this->weights.at( mask[k] );
             // dNu/du*Nv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(dNu/du*Nv*w)
             temp[0] = ders [ 0 ](1, k) * ders [ 1 ](0, k) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, k) * w * wders(1, 0);
             // Nu*dNv/dv*w*sum(Nv*Nu*w) - Nu*Nv*w*sum(Nu*dNv/dv*w)
@@ -331,7 +322,7 @@ void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
             }
 
             const auto &vertexCoords = cellgeo.giveVertexCoordinates( mask[k] );
-            double w = vertexCoords[2];
+            double w = this->weights.at( mask[k] );
             double xw = vertexCoords[0] * w;
             double yw = vertexCoords[1] * w;
 
@@ -405,7 +396,7 @@ void TSplineInterpolation :: giveJacobianMatrixAt(FloatMatrix &jacobian, const F
             // calculation of jacobian matrix in similar fashion as A4.4
             // calculate values and derivatives of nonrational Bspline surface with weights at first (Aders, wders)
             const auto &vertexCoords = cellgeo.giveVertexCoordinates( mask[k] );
-            double w = vertexCoords[2];
+            double w = this->weights.at( mask[k] );
             double xw = vertexCoords[0] * w;
             double yw = vertexCoords[1] * w;
             double product;
