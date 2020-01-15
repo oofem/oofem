@@ -71,6 +71,7 @@ namespace py = pybind11;
 #include "oofemtxtdatareader.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
+#include "timer.h"
 
 #include "classfactory.h"
 
@@ -91,7 +92,6 @@ namespace py = pybind11;
 #include "pythonfield.h"
 
 #include <iostream>
-
 
 #include "oofemutil.h"
 
@@ -738,6 +738,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
         .def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
         .def("checkProblemConsistency", &oofem::EngngModel::checkProblemConsistency)
+        .def("giveTimer", &oofem::EngngModel::giveTimer, py::return_value_policy::reference)
         .def("init", &oofem::EngngModel::init)
         .def("initializeYourself", &oofem::EngngModel::initializeYourself)
         .def("initMetaStepAttributes", &oofem::EngngModel::initMetaStepAttributes)
@@ -746,12 +747,9 @@ PYBIND11_MODULE(oofempy, m) {
         .def("postInitialize", &oofem::EngngModel::postInitialize)
         .def("setRenumberFlag", &oofem::EngngModel::setRenumberFlag)
         .def("giveContext", &oofem::EngngModel::giveContext, py::return_value_policy::reference)
-        
-
         ;
 
     py::class_<oofem::Domain>(m, "Domain")
-
         .def(py::init<int, int, oofem::EngngModel*>())
         .def("giveNumber", &oofem::Domain::giveNumber)
         .def("setNumber", &oofem::Domain::setNumber)
@@ -778,7 +776,6 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setFunction", &oofem::Domain::py_setFunction, py::keep_alive<0, 2>())
         .def("resizeSets", &oofem::Domain::resizeSets)
         .def("setSet", &oofem::Domain::py_setSet, py::keep_alive<0, 2>())
-
     ;
 
     py::class_<oofem::Dof>(m, "Dof")
@@ -853,6 +850,24 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
     ;
 
+//     py::class_<oofem::Timer>(m, "Timer")
+//     ;
+    
+    py::class_<oofem::EngngModelTimer> (m, "EngngModelTimer")
+        .def("startTimer", &oofem::EngngModelTimer::startTimer);
+    ;
+    
+    py::enum_<oofem::EngngModelTimer::EngngModelTimerType>(m, "EngngModelTimerType")
+        .value("EMTT_AnalysisTimer", oofem::EngngModelTimer::EMTT_AnalysisTimer)
+        .value("EMTT_SolutionStepTimer", oofem::EngngModelTimer::EMTT_SolutionStepTimer)
+        .value("EMTT_NetComputationalStepTimer", oofem::EngngModelTimer::EMTT_NetComputationalStepTimer)
+        .value("EMTT_LoadBalancingTimer", oofem::EngngModelTimer::EMTT_LoadBalancingTimer)
+        .value("EMTT_DataTransferTimer", oofem::EngngModelTimer::EMTT_DataTransferTimer)
+        .value("EMTT_LastTimer", oofem::EngngModelTimer::EMTT_LastTimer)
+        .export_values()
+    ;
+    
+    
     /*
         Function class
     */
@@ -1280,9 +1295,12 @@ PYBIND11_MODULE(oofempy, m) {
 
 
     m.def("linearStatic", &linearStatic, py::return_value_policy::move);
+    m.def("staticStructural", &staticStructural, py::return_value_policy::move);
     m.def("domain", &domain, py::return_value_policy::move);
     m.def("truss1d", &truss1d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
+    m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);
+    
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
     m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);
@@ -1291,6 +1309,8 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("isoLE", &isoLE, py::return_value_policy::move);
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
+    m.def("constantFunction", &constantFunction, py::return_value_policy::move);
+    m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
 
 
 
@@ -1307,7 +1327,7 @@ PYBIND11_MODULE(oofempy, m) {
 //depends on Python.h
 #ifdef _PYBIND_BINDINGS       
     py::class_<oofem::PythonField, oofem::Field, std::shared_ptr<oofem::PythonField>>(m, "PythonField")
-        .def(py::init<>(),py::return_value_policy::copy)
+        .def(py::init<>())
         .def("setModuleName", &oofem::PythonField::setModuleName)
         .def("setFunctionName", &oofem::PythonField::setFunctionName)
         ;   

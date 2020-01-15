@@ -4,7 +4,7 @@ import util
 def test_2():
 
     # engngModel
-    problem = oofempy.linearStatic(nSteps=3, outFile='test2.out')
+    problem = oofempy.linearStatic(nSteps=3, outFile='test_2.out')
 
     # domain (if no engngModel specified to domain, it is asigned to the last one created)
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._2dBeamMode, tstep_all=True, dofman_all=True, element_all=True)

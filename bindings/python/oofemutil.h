@@ -30,7 +30,7 @@ oofem::OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(py::kwargs &kw)
             // printf ("huhu\n");
             ;
         } else if (PyNumber_Check(value.ptr()) or PyUnicode_Check(value.ptr())) {
-            PyObject* repr = PyObject_Repr(value.ptr());
+            PyObject* repr = PyObject_Str(value.ptr()); //PyObject_Repr puts single quotes around
             PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
             const char*bytes = PyBytes_AS_STRING(str) ;
             rec.append(space);
@@ -132,10 +132,11 @@ py::object createEngngModelOfType(const char* type, py::args args, py::kwargs kw
     ///@todo Output filename isn't stored like this (and has never been!)!?
     std::string outFile;
     if ( ir.hasField("outfile") ) {
-       ir.giveField(outFile, "outfile");
+        ir.giveField(outFile, "outfile");
     } else {
-       outFile = "oofem.out.XXXXXX";
+        outFile = "oofem.out.XXXXXX";
     }
+    
     //engngm->Instanciate_init(outFile.c_str(), engngm->giveNumberOfDomains());
     engngm->letOutputBaseFileNameBe(outFile);
     engngm->initializeFrom(ir);
@@ -157,6 +158,9 @@ py::object createEngngModelOfType(const char* type, py::args args, py::kwargs kw
 }
 
 py::object linearStatic(py::args args, py::kwargs kw) { return createEngngModelOfType("linearstatic", args, kw); }
+
+py::object staticStructural(py::args args, py::kwargs kw) { return createEngngModelOfType("staticstructural", args, kw); }
+
 
 
 /*****************************************************
@@ -217,6 +221,10 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
 // specific elements
 py::object beam2d(py::args args, py::kwargs &kw) { return createElementOfType("beam2d",args,kw); }
 py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("truss1d",args,kw); }
+py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
+
+
+
 
 /*****************************************************
 * DofManager
@@ -311,6 +319,9 @@ py::object createLoadTimeFunctionOfType(const char* type, py::args args, py::kwa
 
 py::object peakFunction(py::args args, py::kwargs kw) { return createLoadTimeFunctionOfType("peakfunction",args,kw); }
 
+py::object constantFunction(py::args args, py::kwargs kw) { return createLoadTimeFunctionOfType("constantfunction",args,kw); }
+
+py::object piecewiseLinFunction(py::args args, py::kwargs kw) { return createLoadTimeFunctionOfType("piecewiselinfunction",args,kw); }
 
 
 /*****************************************************

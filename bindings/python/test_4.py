@@ -39,7 +39,7 @@ class MyMaterial(oofempy.StructuralMaterial):
         
 def test_4():
     # engngModel
-    problem = oofempy.linearStatic(nSteps=1, outFile="test4.out")
+    problem = oofempy.linearStatic(nSteps=1, outFile="test_4.out")
 
     # domain (if no engngModel specified to domain, it is asigned to the last one created)
     domain = oofempy.domain(1, 1, problem, oofempy.domainType._1dTrussMode, tstep_all=True, dofman_all=True, element_all=True)
