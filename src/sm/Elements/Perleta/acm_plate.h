@@ -65,7 +65,6 @@ protected:
     FloatMatrix lcsMatrix;
     std::vector< FloatArray > lnodes;
 
-
 public:
     ACMPlate(int n, Domain * d);
     virtual ~ACMPlate() { }
@@ -75,10 +74,14 @@ public:
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
+	
+	// This was put here only to implement the abstract method so that the project could build. The final implementation should be taken care of later. 
+	virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) {};
+	virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) {};
 
 protected:
     virtual void computeGaussPoints();
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+	virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeStiffnessMatrix(FloatMatrix &answer,
                                         MatResponseMode rMode, TimeStep *tStep);
 
@@ -87,10 +90,7 @@ protected:
                                      double &z1, double &z2, double &z3, double &z4);
 
     void crossSectioncharacteristics();
-    virtual double computeLength();
-
-
-
+	virtual double computeLength();
 
 public:
     // definition & identification

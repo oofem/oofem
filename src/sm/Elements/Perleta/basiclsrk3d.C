@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/PlaneStress/basiclsrk3d.h"
+#include "../sm/Elements/Perleta/basiclsrk3d.h"
 #include "../sm/Materials/structuralms.h"
 #include "Materials/structuralmaterial.h"
 #include "node.h"

@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Plates/pplate.h"
+#include "../sm/Elements/Perleta/pplate.h"
 #include "../sm/Materials/structuralms.h"
 #include "../sm/CrossSections/structuralcrosssection.h"
 #include "fei2dquadlin.h"
@@ -730,8 +730,8 @@ PPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
         answer.at(5) = help.at(4); // vxz
         answer.at(6) = 0.0; // vxy
         return 1;
-    } else if ( type == IST_ShellMomentumTensor || type == IST_ShellCurvatureTensor ) {
-        if ( type == IST_ShellMomentumTensor ) {
+    } else if ( type == IST_ShellMomentTensor || type == IST_CurvatureTensor ) {
+        if ( type == IST_ShellMomentTensor ) {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
