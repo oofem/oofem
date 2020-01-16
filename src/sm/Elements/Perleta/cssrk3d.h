@@ -109,7 +109,7 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "CSSRK3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_CSSRK3d_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     ///@todo Introduce interpolator and remove these two:
     virtual integrationDomain giveIntegrationDomain() const { return _Square; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_quad_1; }

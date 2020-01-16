@@ -36,7 +36,7 @@ public:
 
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const { answer = { D_u, D_v }; }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 };

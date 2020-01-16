@@ -33,20 +33,15 @@ FEInterpolation *FsbPlaneStressDrill::giveInterpolation() const
     return & interpolator;
 }
 
-IRResultType FsbPlaneStressDrill::initializeFrom(InputRecord *ir)
+void FsbPlaneStressDrill::initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 && numberOfGaussPoints != 25 ) {
         numberOfGaussPoints = 4;
         OOFEM_WARNING("Number of Gauss points enforced to 4");
     }
-
-    return IRRT_OK;
 }
 
 void FsbPlaneStressDrill::updateLocalNumbering(EntityRenumberingFunctor &f)
@@ -74,11 +69,11 @@ void FsbPlaneStressDrill::computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 
     for (int it = 0; it < 4; it++)
     {
-        double x = this->giveNode(j1[it])->giveCoordinates()->at(1) -
-                this->giveNode(i1[it])->giveCoordinates()->at(1);
+        double x = this->giveNode(j1[it])->giveCoordinates().at(1) -
+                this->giveNode(i1[it])->giveCoordinates().at(1);
 
-        double y = this->giveNode(j1[it])->giveCoordinates()->at(2) -
-                this->giveNode(i1[it])->giveCoordinates()->at(2);
+        double y = this->giveNode(j1[it])->giveCoordinates().at(2) -
+                this->giveNode(i1[it])->giveCoordinates().at(2);
 
         lMat.at(i1[it], j1[it]) = sqrt(x*x + y*y);
 

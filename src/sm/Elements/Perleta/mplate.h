@@ -107,7 +107,7 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "MPlate"; }
     virtual const char *giveInputRecordName() const { return _IFT_MPlate_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     virtual int computeNumberOfDofs() { return 12; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;

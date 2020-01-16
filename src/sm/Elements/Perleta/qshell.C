@@ -383,21 +383,16 @@ qshell :: computeLength()
 }
 
 
-IRResultType
-qshell :: initializeFrom(InputRecord *ir)
+void
+qshell :: initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 && numberOfGaussPoints != 25 ) {
         numberOfGaussPoints = 4;
         OOFEM_WARNING("Number of Gauss points enforced to 1");
     }
-
-    return IRRT_OK;
 }
 
 
@@ -409,9 +404,13 @@ qshell :: computeLCS()
     FloatArray e1, e2, e3, help;
 
     // compute e1' = [N2-N1]  and  help = [N4-N1]
-    e1.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    help.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    e1.normalize();
+    
+	// Pointer operators removed because the project could not build. Test later to check if the method still works properly.
+	e1.beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    help.beDifferenceOf( this->giveNode(4)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    
+	
+	e1.normalize();
     e3.beVectorProductOf(e1, help);
     e3.normalize();
     e2.beVectorProductOf(e3, e1);
@@ -421,7 +420,8 @@ qshell :: computeLCS()
         this->lcsMatrix.at(3, i) = e3.at(i);
     }
     for ( int i = 1; i <= 4; i++ ) {
-        this->lnodes [ i - 1 ].beProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
+		// Pointer operator removed because the project could not build. Test later to check if the method still works properly.
+        this->lnodes [ i - 1 ].beProductOf( this->lcsMatrix, this->giveNode(i)->giveCoordinates() );
     }
 
 }

@@ -66,8 +66,9 @@ void FsbLinearStatic::computeLCS()
     FloatArray e[3];
 
     // compute e1' = [N2-N1]  and  help = [N4-N1]
-    e[0].beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    e[1].beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+	// Pointer operators removed because the project could not build. Test later to check if the method still works properly.
+    e[0].beDifferenceOf( this->giveNode(2)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
+    e[1].beDifferenceOf( this->giveNode(4)->giveCoordinates(), this->giveNode(1)->giveCoordinates() );
     e[0].normalize();
     e[2].beVectorProductOf(e[0], e[1]);
     e[2].normalize();
@@ -82,7 +83,7 @@ void FsbLinearStatic::computeLCS()
 void FsbLinearStatic::computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     // copied from planestresselement (structural2delement.C)
-    this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(answer, rMode, gp, tStep);
+    answer = this->giveStructuralCrossSection()->giveStiffnessMatrix_PlaneStress(rMode, gp, tStep);
 }
 
 void FsbLinearStatic::computeGaussPoints()

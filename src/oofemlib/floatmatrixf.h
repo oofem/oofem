@@ -59,368 +59,371 @@ template<std::size_t N, std::size_t M>
 class OOFEM_EXPORT FloatMatrixF
 {
 protected:
-    /// Values of matrix stored column wise.
-    std::array< double, N*M > values;
+	/// Values of matrix stored column wise.
+	std::array< double, N*M > values;
 
 public:
-    /// @name Iterator for for-each loops:
-    //@{
-    auto begin() { return this->values.begin(); }
-    auto end() { return this->values.end(); }
-    auto begin() const { return this->values.begin(); }
-    auto end() const { return this->values.end(); }
-    //@}
+	/// @name Iterator for for-each loops:
+	//@{
+	auto begin() { return this->values.begin(); }
+	auto end() { return this->values.end(); }
+	auto begin() const { return this->values.begin(); }
+	auto end() const { return this->values.end(); }
+	//@}
 
-    /**
-     * Constructor (values are specified column-wise)
-     * @note The syntax {{x,y,z},{...}} can be achieved by nested initializer_list, but 
-     */
-    template< typename... V, class = typename std::enable_if_t<sizeof...(V) == N*M> >
-    FloatMatrixF(V... x) noexcept : values{x...} { }
-    /**
-     * Empty ctor, initializes to zero.
-     */
-    FloatMatrixF() noexcept : values{} { }
-    /// Copy constructor.
-    FloatMatrixF(const FloatMatrixF<N,M> &mat) noexcept : values(mat.values) {}
-    /// FloatMatrix conversion constructor.
-    FloatMatrixF(const FloatMatrix &mat)
-    {
+	/**
+	 * Constructor (values are specified column-wise)
+	 * @note The syntax {{x,y,z},{...}} can be achieved by nested initializer_list, but
+	 */
+	template< typename... V, class = typename std::enable_if_t<sizeof...(V) == N * M> >
+	FloatMatrixF(V... x) noexcept : values{ x... } { }
+	/**
+	 * Empty ctor, initializes to zero.
+	 */
+	FloatMatrixF() noexcept : values{} { }
+	/// Copy constructor.
+	FloatMatrixF(const FloatMatrixF<N, M> &mat) noexcept : values(mat.values) {}
+	/// FloatMatrix conversion constructor.
+	FloatMatrixF(const FloatMatrix &mat)
+	{
 #ifndef NDEBUG
-        if ( mat.giveNumberOfRows() != N || mat.giveNumberOfColumns() != M ) {
-            throw std::out_of_range("Can't convert dynamic float matrix of size " + 
-                std::to_string(mat.giveNumberOfRows()) + "x" + std::to_string(mat.giveNumberOfRows()) + 
-                " to fixed size " + std::to_string(N) + "x" + std::to_string(M));
-        }
+		if (mat.giveNumberOfRows() != N || mat.giveNumberOfColumns() != M) {
+			throw std::out_of_range("Can't convert dynamic float matrix of size " +
+				std::to_string(mat.giveNumberOfRows()) + "x" + std::to_string(mat.giveNumberOfRows()) +
+				" to fixed size " + std::to_string(N) + "x" + std::to_string(M));
+		}
 #endif
-        std::copy_n(mat.begin(), N*M, values.begin());
-    }
-    FloatMatrixF(FloatArrayF<N> const (&x)[M]) noexcept
-    {
-        for (std::size_t i = 0; i < N; ++i) {
-            for (std::size_t j = 0; j < M; ++j) {
-                (*this)(i,j) = x[j][i];
-            }
-        }
-    }
+		std::copy_n(mat.begin(), N*M, values.begin());
+	}
+	FloatMatrixF(FloatArrayF<N> const (&x)[M]) noexcept
+	{
+		for (std::size_t i = 0; i < N; ++i) {
+			for (std::size_t j = 0; j < M; ++j) {
+				(*this)(i, j) = x[j][i];
+			}
+		}
+	}
 
-    /// Assignment operator
-    FloatMatrixF &operator=(const FloatMatrixF<N,M> &mat)
-    {
-        values = mat.values;
-        return * this;
-    }
+	/// Assignment operator
+	FloatMatrixF &operator=(const FloatMatrixF<N, M> &mat)
+	{
+		values = mat.values;
+		return *this;
+	}
 
-    /**
-     * Checks size of receiver towards requested bounds.
-     * @param i Required number of rows.
-     * @param j Required number of columns.
-     */
-    void checkBounds(std::size_t i, std::size_t j) const
-    {
-        if ( i <= 0 ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " <= 0");
-        } else if ( j <= 0 ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " <= 0");
-        } else if ( i > N ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " < " + std::to_string(N));
-        } else if ( j > M ) {
-            throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " < " + std::to_string(M));
-        }
-    }
+	/**
+	 * Checks size of receiver towards requested bounds.
+	 * @param i Required number of rows.
+	 * @param j Required number of columns.
+	 */
+	void checkBounds(std::size_t i, std::size_t j) const
+	{
+		if (i <= 0) {
+			throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " <= 0");
+		}
+		else if (j <= 0) {
+			throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " <= 0");
+		}
+		else if (i > N) {
+			throw std::out_of_range("matrix error on rows : " + std::to_string(i) + " < " + std::to_string(N));
+		}
+		else if (j > M) {
+			throw std::out_of_range("matrix error on rows : " + std::to_string(j) + " < " + std::to_string(M));
+		}
+	}
 
-    /// Returns number of rows of receiver.
-    std::size_t rows() const { return N; }
-    /// Returns number of columns of receiver.
-    std::size_t cols() const { return M; }
+	/// Returns number of rows of receiver.
+	std::size_t rows() const { return N; }
+	/// Returns number of columns of receiver.
+	std::size_t cols() const { return M; }
 
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Implements 1-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    double at(int i, int j) const
-    {
+	/**
+	 * Coefficient access function. Returns value of coefficient at given
+	 * position of the receiver. Implements 1-based indexing.
+	 * @param i Row position of coefficient.
+	 * @param j Column position of coefficient.
+	 */
+	double at(int i, int j) const
+	{
 #ifndef NDEBUG
-        this->checkBounds(i, j);
+		this->checkBounds(i, j);
 #endif
-        return values [ ( j - 1 ) * N + i - 1 ];
-    }
-    /**
-     * Coefficient access function. Returns value of coefficient at given
-     * position of the receiver. Implements 1-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    inline double &at(int i, int j)
-    {
+		return values[(j - 1) * N + i - 1];
+	}
+	/**
+	 * Coefficient access function. Returns value of coefficient at given
+	 * position of the receiver. Implements 1-based indexing.
+	 * @param i Row position of coefficient.
+	 * @param j Column position of coefficient.
+	 */
+	inline double &at(int i, int j)
+	{
 #ifndef NDEBUG
-        this->checkBounds(i, j);
+		this->checkBounds(i, j);
 #endif
-        return values [ ( j - 1 ) * N + i - 1 ];
-    }
+		return values[(j - 1) * N + i - 1];
+	}
 
-    /**
-     * Direct value access (column major). Implements 0-based indexing.
-     * @param i Position in data.
-     */
-    double &operator[](int i)
-    {
-        return values[ i ];
-    }
-    /**
-     * Direct value access (column major). Implements 0-based indexing.
-     * @param i Position in data.
-     */
-    double operator[](int i) const
-    {
-        return values[ i ];
-    }
+	/**
+	 * Direct value access (column major). Implements 0-based indexing.
+	 * @param i Position in data.
+	 */
+	double &operator[](int i)
+	{
+		return values[i];
+	}
+	/**
+	 * Direct value access (column major). Implements 0-based indexing.
+	 * @param i Position in data.
+	 */
+	double operator[](int i) const
+	{
+		return values[i];
+	}
 
-    /**
-     * Coefficient access function. Returns l-value of coefficient at given
-     * position of the receiver. Implements 0-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    double &operator()(int i, int j)
-    {
+	/**
+	 * Coefficient access function. Returns l-value of coefficient at given
+	 * position of the receiver. Implements 0-based indexing.
+	 * @param i Row position of coefficient.
+	 * @param j Column position of coefficient.
+	 */
+	double &operator()(int i, int j)
+	{
 #ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
+		this->checkBounds(i + 1, j + 1);
 #endif
-        return values [ j * N + i ];
-    }
-    /**
-     * Coefficient access function. Implements 0-based indexing.
-     * @param i Row position of coefficient.
-     * @param j Column position of coefficient.
-     */
-    double operator()(int i, int j) const
-    {
+		return values[j * N + i];
+	}
+	/**
+	 * Coefficient access function. Implements 0-based indexing.
+	 * @param i Row position of coefficient.
+	 * @param j Column position of coefficient.
+	 */
+	double operator()(int i, int j) const
+	{
 #ifndef NDEBUG
-        this->checkBounds(i + 1, j + 1);
+		this->checkBounds(i + 1, j + 1);
 #endif 
-        return values [ j * N + i ];
-    }
+		return values[j * N + i];
+	}
 
-    /**
-     * Extract sub matrix (can also reorder the matrix). Implements 0-based indexing.
-     * @param r Rows to extract.
-     * @param c Columns to extract.
-     */
-    template<std::size_t R, std::size_t C>
-    FloatMatrixF<R,C> operator()(int const (&r)[R], int const (&c)[C]) const
-    {
-        FloatMatrixF<R,C> x;
-        for ( std::size_t i = 0; i < R; ++i ) {
-            for ( std::size_t j = 0; j < C; ++j ) {
-                x(i, j) = (*this)(r[i], c[j]);
-            }
-        }
-        return x;
-    }
-    
-    /// Assemble x into self.
-    template<std::size_t R, std::size_t C>
-    inline void assemble(const FloatMatrixF<R,C> &x, int const (&r)[R], int const (&c)[C] )
-    {
-        for ( std::size_t i = 0; i < R; ++i ) {
-            for ( std::size_t j = 0; j < C; ++j ) {
-                (*this)(r[i], c[j]) += x(i, j);
-            }
-        }
-    }
+	/**
+	 * Extract sub matrix (can also reorder the matrix). Implements 0-based indexing.
+	 * @param r Rows to extract.
+	 * @param c Columns to extract.
+	 */
+	template<std::size_t R, std::size_t C>
+	FloatMatrixF<R, C> operator()(int const (&r)[R], int const (&c)[C]) const
+	{
+		FloatMatrixF<R, C> x;
+		for (std::size_t i = 0; i < R; ++i) {
+			for (std::size_t j = 0; j < C; ++j) {
+				x(i, j) = (*this)(r[i], c[j]);
+			}
+		}
+		return x;
+	}
 
-    
-    /**
-     * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.
-     * @param src Array to set at column c.
-     * @param c Column to set.
-     */
-    void setColumn(const FloatArrayF<N> &src, int c)
-    {
-        for ( std::size_t i = 0; i < N; i++ ) {
-            (*this)(i, c) = src[i];
-        }
-    }
-    
-    /**
-     * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.
-     * @param src Array to set at column c.
-     * @param c Column to set.
-     */
-    FloatArrayF<N> column(int j) const
-    {
-        FloatArrayF<N> c;
-        for ( std::size_t i = 0; i < N; i++ ) {
-            c[i] = (*this)(i, j);
-        }
-        return c;
-    }
+	/// Assemble x into self.
+	template<std::size_t R, std::size_t C>
+	inline void assemble(const FloatMatrixF<R, C> &x, int const (&r)[R], int const (&c)[C])
+	{
+		for (std::size_t i = 0; i < R; ++i) {
+			for (std::size_t j = 0; j < C; ++j) {
+				(*this)(r[i], c[j]) += x(i, j);
+			}
+		}
+	}
 
-    /**
-     * Extract column from matrix
-     */
-    template<std::size_t C, class = typename std::enable_if_t<C < M>>
-    FloatArrayF<N> column() const
-    {
-        FloatArrayF<N> c;
-        for ( std::size_t i = 0; i < N; i++ ) {
-            c[i] = (*this)(i, C);
-        }
-        return c;
-    }
 
-    /**
-     * Extract row from matrix
-     */
-    template<std::size_t R, class = typename std::enable_if_t<R < N>>
-    FloatArrayF<M> row() const
-    {
-        FloatArrayF<M> r;
-        for ( std::size_t j = 0; j < M; j++ ) {
-            r[j] = (*this)(R, j);
-        }
-        return r;
-    }
+	/**
+	 * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.
+	 * @param src Array to set at column c.
+	 * @param c Column to set.
+	 */
+	void setColumn(const FloatArrayF<N> &src, int c)
+	{
+		for (std::size_t i = 0; i < N; i++) {
+			(*this)(i, c) = src[i];
+		}
+	}
 
-    /**
-     * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
-     * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the
-     * upper half of receiver.
-     * @param a Matrix a in equation.
-     * @param b Matrix b in equation.
-     * @param dV Scaling factor.
-     */
-    template<std::size_t P>
-    void plusProductSymmUpper(const FloatMatrixF<P,N> &a, const FloatMatrixF<P,M> &b, double dV)
-    {
-        ///@todo Larger matrices needs optimized BLAS.
-        for ( std::size_t i = 0; i < N; ++i ) {
-            for ( std::size_t j = i; j < M; ++j ) {
-                double summ = 0.;
-                for ( std::size_t k = 0; k < P; ++k ) {
-                    summ += a(k, i) * b(k, j);
-                }
-                (*this)(i, j) += summ * dV;
-            }
-        }
-    }
-    /**
-     * Adds to the receiver the dyadic product @f$ a \otimes a \mathrm{d}V @f$.
-     * Computes only the upper half of receiver.
-     * @param a Array a in equation.
-     * @param dV Scaling factor.
-     */
-    void plusDyadSymmUpper(const FloatArrayF<N> &a, double dV)
-    {
-        ///@todo This method should only exist if we have N == M, how do I enforce this?
-        for ( std::size_t i = 0; i < N; ++i ) {
-            for ( std::size_t j = i; j < N; ++j ) {
-                (*this)(i, j) += a[i] * a[j] * dV;
-            }
-        }
-    }
-    /**
-     * Adds to the receiver the product @f$a^{\mathrm{T}} \cdot b \mathrm{d}V@f$.
-     * @param a Matrix a in equation.
-     * @param b Matrix b in equation.
-     * @param dV Scaling factor.
-     */
-    template<std::size_t P>
-    void plusProductUnsym(const FloatMatrixF<P,N> &a, const FloatMatrixF<P,M> &b, double dV)
-    {
-        ///@todo Larger matrices needs optimized BLAS.
-        for ( std::size_t i = 0; i < N; ++i ) {
-            for ( std::size_t j = 0; j < M; ++j ) {
-                double summ = 0.;
-                for ( std::size_t k = 0; k < P; ++k ) {
-                    summ += a(k, i) * b(k, j);
-                }
-                (*this)(i, j) += summ * dV;
-            }
-        }
-    }
-    /**
-     * Adds to the receiver the product @f$a \otimes b \mathrm{d}V@f$.
-     * @param a Array a in equation.
-     * @param b Array b in equation.
-     * @param dV Scaling factor.
-     */
-    void plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
-    {
-        ///@todo This method should only exist if we have N == M, how do I enforce this?
-        for ( std::size_t i = 0; i < N; ++i ) {
-            for ( std::size_t j = 0; j < M; ++j ) {
-                (*this)(i, j) += a[i] * b[j] * dV;
-            }
-        }
-    }
-    /**
-     * Initializes the lower half of the receiver according to the upper half.
-     */
-    void symmetrized()
-    {
-        for ( std::size_t i = 2; i <= this->rows(); i++ ) {
-            for ( std::size_t j = 1; j < i; j++ ) {
-                this->at(i, j) = this->at(j, i);
-            }
-        }
-    }
+	/**
+	 * Sets the values of the matrix in specified column. If matrix size is zero, the size is adjusted.
+	 * @param src Array to set at column c.
+	 * @param c Column to set.
+	 */
+	FloatArrayF<N> column(int j) const
+	{
+		FloatArrayF<N> c;
+		for (std::size_t i = 0; i < N; i++) {
+			c[i] = (*this)(i, j);
+		}
+		return c;
+	}
 
-    /// Prints matrix to stdout. Useful for debugging.
-    void printYourself(const std::string &name="FloatMatrixF") const
-    {
-        printf("%s (%zu x %zu): \n", name.c_str(), N, M);
-        if ( this->rows() <= 250 && this->cols() <= 250 ) {
-            for ( std::size_t i = 0; i < this->rows(); ++i ) {
-                for ( std::size_t j = 0; j < this->cols() && j < 100; ++j ) {
-                    printf( "%10.3e  ", (*this)(i, j) );
-                }
-                printf("\n");
-            }
-        } else {
-            for ( std::size_t i = 0; i < this->rows() && i < 20; ++i ) {
-                for ( std::size_t j = 0; j < this->cols() && j < 10; ++j ) {
-                    printf( "%10.3e  ", (*this)(i, j) );
-                }
-                if ( this->cols() > 10 ) printf(" ...");
-                printf("\n");
-            }
-            if ( this->cols() > 20 )  printf(" ...\n");
-        }
-    }
+	/**
+	 * Extract column from matrix
+	 */
+	template<std::size_t C, class = typename std::enable_if_t<C < M>>>
+		FloatArrayF<N> column() const
+		{
+			FloatArrayF<N> c;
+			for (std::size_t i = 0; i < N; i++) {
+				c[i] = (*this)(i, C);
+			}
+			return c;
+		}
 
-    /**
-     * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
-     * @return Pointer to the values of the matrix.
-     */
-    const double *givePointer() const { return values.data(); }
-    double *givePointer() { return values.data(); }
+		/**
+		 * Extract row from matrix
+		 */
+		template<std::size_t R, class = typename std::enable_if_t<R < N>>>
+			FloatArrayF<M> row() const
+			{
+				FloatArrayF<M> r;
+				for (std::size_t j = 0; j < M; j++) {
+					r[j] = (*this)(R, j);
+				}
+				return r;
+			}
 
-    contextIOResultType storeYourself(DataStream &stream) const
-    {
-        if ( !stream.write(values.data(), N*M) ) {
-            return CIO_IOERR;
-        }
-        return CIO_OK;
-    }
+			/**
+			 * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
+			 * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the
+			 * upper half of receiver.
+			 * @param a Matrix a in equation.
+			 * @param b Matrix b in equation.
+			 * @param dV Scaling factor.
+			 */
+			template<std::size_t P>
+			void plusProductSymmUpper(const FloatMatrixF<P, N> &a, const FloatMatrixF<P, M> &b, double dV)
+			{
+				///@todo Larger matrices needs optimized BLAS.
+				for (std::size_t i = 0; i < N; ++i) {
+					for (std::size_t j = i; j < M; ++j) {
+						double summ = 0.;
+						for (std::size_t k = 0; k < P; ++k) {
+							summ += a(k, i) * b(k, j);
+						}
+						(*this)(i, j) += summ * dV;
+					}
+				}
+			}
+			/**
+			 * Adds to the receiver the dyadic product @f$ a \otimes a \mathrm{d}V @f$.
+			 * Computes only the upper half of receiver.
+			 * @param a Array a in equation.
+			 * @param dV Scaling factor.
+			 */
+			void plusDyadSymmUpper(const FloatArrayF<N> &a, double dV)
+			{
+				///@todo This method should only exist if we have N == M, how do I enforce this?
+				for (std::size_t i = 0; i < N; ++i) {
+					for (std::size_t j = i; j < N; ++j) {
+						(*this)(i, j) += a[i] * a[j] * dV;
+					}
+				}
+			}
+			/**
+			 * Adds to the receiver the product @f$a^{\mathrm{T}} \cdot b \mathrm{d}V@f$.
+			 * @param a Matrix a in equation.
+			 * @param b Matrix b in equation.
+			 * @param dV Scaling factor.
+			 */
+			template<std::size_t P>
+			void plusProductUnsym(const FloatMatrixF<P, N> &a, const FloatMatrixF<P, M> &b, double dV)
+			{
+				///@todo Larger matrices needs optimized BLAS.
+				for (std::size_t i = 0; i < N; ++i) {
+					for (std::size_t j = 0; j < M; ++j) {
+						double summ = 0.;
+						for (std::size_t k = 0; k < P; ++k) {
+							summ += a(k, i) * b(k, j);
+						}
+						(*this)(i, j) += summ * dV;
+					}
+				}
+			}
+			/**
+			 * Adds to the receiver the product @f$a \otimes b \mathrm{d}V@f$.
+			 * @param a Array a in equation.
+			 * @param b Array b in equation.
+			 * @param dV Scaling factor.
+			 */
+			void plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
+			{
+				///@todo This method should only exist if we have N == M, how do I enforce this?
+				for (std::size_t i = 0; i < N; ++i) {
+					for (std::size_t j = 0; j < M; ++j) {
+						(*this)(i, j) += a[i] * b[j] * dV;
+					}
+				}
+			}
+			/**
+			 * Initializes the lower half of the receiver according to the upper half.
+			 */
+			void symmetrized()
+			{
+				for (std::size_t i = 2; i <= this->rows(); i++) {
+					for (std::size_t j = 1; j < i; j++) {
+						this->at(i, j) = this->at(j, i);
+					}
+				}
+			}
 
-    contextIOResultType restoreYourself(DataStream &stream)
-    {
-        if ( !stream.read(values.data(), N*M) ) {
-            return CIO_IOERR;
-        }
-        return CIO_OK;
-    }
+			/// Prints matrix to stdout. Useful for debugging.
+			void printYourself(const std::string &name = "FloatMatrixF") const
+			{
+				printf("%s (%zu x %zu): \n", name.c_str(), N, M);
+				if (this->rows() <= 250 && this->cols() <= 250) {
+					for (std::size_t i = 0; i < this->rows(); ++i) {
+						for (std::size_t j = 0; j < this->cols() && j < 100; ++j) {
+							printf("%10.3e  ", (*this)(i, j));
+						}
+						printf("\n");
+					}
+				}
+				else {
+					for (std::size_t i = 0; i < this->rows() && i < 20; ++i) {
+						for (std::size_t j = 0; j < this->cols() && j < 10; ++j) {
+							printf("%10.3e  ", (*this)(i, j));
+						}
+						if (this->cols() > 10) printf(" ...");
+						printf("\n");
+					}
+					if (this->cols() > 20)  printf(" ...\n");
+				}
+			}
 
-    int givePackSize(DataStream &buff) const
-    {
-        return buff.givePackSizeOfDouble(N*M);
-    }
+			/**
+			 * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
+			 * @return Pointer to the values of the matrix.
+			 */
+			const double *givePointer() const { return values.data(); }
+			double *givePointer() { return values.data(); }
+
+			contextIOResultType storeYourself(DataStream &stream) const
+			{
+				if (!stream.write(values.data(), N*M)) {
+					return CIO_IOERR;
+				}
+				return CIO_OK;
+			}
+
+			contextIOResultType restoreYourself(DataStream &stream)
+			{
+				if (!stream.read(values.data(), N*M)) {
+					return CIO_IOERR;
+				}
+				return CIO_OK;
+			}
+
+			int givePackSize(DataStream &buff) const
+			{
+				return buff.givePackSizeOfDouble(N*M);
+			}
 };
-
 
 /// Assemble components into zero matrix.
 template<std::size_t N, std::size_t M, std::size_t R, std::size_t C>

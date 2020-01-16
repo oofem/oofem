@@ -33,20 +33,15 @@ FEInterpolation *FsbPlaneStress::giveInterpolation() const
     return & interpolator;
 }
 
-IRResultType FsbPlaneStress::initializeFrom(InputRecord *ir)
+void FsbPlaneStress::initializeFrom(InputRecord &ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
+    StructuralElement :: initializeFrom(ir);
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 && numberOfGaussPoints != 25 ) {
         numberOfGaussPoints = 4;
         OOFEM_WARNING("Number of Gauss points enforced to 4");
     }
-
-    return IRRT_OK;
 }
 
 void FsbPlaneStress::updateLocalNumbering(EntityRenumberingFunctor &f)

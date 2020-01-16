@@ -41,7 +41,7 @@ public:
         return this->computeNumberOfDofs();
     }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);

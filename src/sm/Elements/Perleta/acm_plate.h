@@ -96,7 +96,7 @@ public:
     // definition & identification
     virtual const char *giveClassName() const { return "ACMPlate"; }
     virtual const char *giveInputRecordName() const { return _IFT_ACMPlate_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void initializeFrom(InputRecord &ir);
 
     virtual int computeNumberOfDofs() { return 12; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
