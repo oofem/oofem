@@ -85,8 +85,10 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
     auto *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
 
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
-
+   
     GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
+    // just a dummy yet essential call to create a status of viscomaterial. Otherwise initTempStatus() would fail.
+    rheoMat->giveStatus(rChGP);
 
     // the value from the status seems to be unused except for printout
     status->setE0(this->give(e0_ID, gp) * this->e0Mean);
@@ -238,7 +240,7 @@ int LatticeDamageViscoelastic :: checkConsistency()
 
     GaussPoint * noGP = NULL;
     if ( rheoMat->give(tAlpha,noGP) != 0.) {
-        OOFEM_ERROR("tAlpha must be set to 0. in viscoelastic material");
+        OOFEM_ERROR("tAlpha must be set to 0. in slave viscoelastic material");
     }
 
     return FEMComponent :: checkConsistency();
@@ -255,8 +257,10 @@ LatticeDamageViscoelasticStatus :: initTempStatus()
 {
     LatticeDamageStatus :: initTempStatus();
 
-    //  RheoChainMaterialStatus *rheoStatus = static_cast< RheoChainMaterialStatus * >( this->giveSlaveGaussPointVisco()->giveMaterialStatus() );
-    //  rheoStatus->initTempStatus();
+    // at this point rheomat :: giveStatus (viscoGP) has to be called first
+    RheoChainMaterialStatus *rheoStatus = static_cast< RheoChainMaterialStatus * >( this->giveSlaveGaussPointVisco()->giveMaterialStatus() );
+
+    rheoStatus->initTempStatus();   
 }
 
 
