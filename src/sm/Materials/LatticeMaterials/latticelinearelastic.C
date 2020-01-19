@@ -192,7 +192,7 @@ FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
     //Needed to make sure that status exists before random values are requested for elastic stiffness. Problem is that gp->giveMaterialStatus does not check if status exist already
-    auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+  static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
     FloatArrayF< 6 >d = {
         1.,
@@ -211,7 +211,7 @@ FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
   //Needed to make sure that status exists before random values are requested for elastic stiffness. Problem is that gp->giveMaterialStatus does not check if status exist already
-    auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+  static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
 
   FloatArrayF< 3 >d = {
         1.,
