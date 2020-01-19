@@ -907,8 +907,7 @@ LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) cons
         fprintf(file, "% .8e ", s);
     }
 
-    fprintf(file, "\n \t");
-    fprintf(file, " kappaP %.8e, kappaDOne %.8e, kappaDTwo %.8e, damage %.8e, deltaDissipation %.8e, dissipation %.8e, crackFlag %d, crackWidth %.8e }\n", this->kappaP, this->kappaDOne,  this->kappaDTwo, this->damage, this->deltaDissipation, this->dissipation, this->crackFlag, this->crackWidth);
+    fprintf(file, ", kappaP %.8e, kappaDOne %.8e, kappaDTwo %.8e, damage %.8e, deltaDissipation %.8e, dissipation %.8e, crackFlag %d, crackWidth %.8e \n", this->kappaP, this->kappaDOne,  this->kappaDTwo, this->damage, this->deltaDissipation, this->dissipation, this->crackFlag, this->crackWidth);
 }
 
 

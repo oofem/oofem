@@ -43,6 +43,7 @@
 //@{
 #define _IFT_LatticePlasticityDamageViscoelastic_Name "latticeplasticitydamageviscoelastic"
 #define _IFT_LatticePlasticityDamageViscoelastic_viscoMat "viscomat"
+#define _IFT_LatticePlasticityDamageViscoelastic_timeFactor "timefactor"
 
 //@}
 
@@ -103,7 +104,7 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
 
-    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
                                         GaussPoint *gp,

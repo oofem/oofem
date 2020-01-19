@@ -43,6 +43,7 @@
 //@{
 #define _IFT_LatticeDamageViscoelastic_Name "latticedamageviscoelastic"
 #define _IFT_LatticeDamageViscoelastic_viscoMat "viscomat"
+#define _IFT_LatticeDamageViscoelastic_timeFactor "timefactor"
 
 //@}
 
@@ -56,10 +57,6 @@ class LatticeDamageViscoelasticStatus : public LatticeDamageStatus
 {
 protected:
     std :: unique_ptr< GaussPoint >slaveGpVisco;
-
-    //GaussPoint *viscoelasticGP = nullptr;
-    /// 'slave' material model number.
-    // int slaveMat = 0;
 
 public:
 
@@ -82,8 +79,6 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
     GaussPoint *giveSlaveGaussPointVisco() const { return this->slaveGpVisco.get(); }
-
-    // MaterialStatus *giveViscoelasticMatStatus() const;
 };
 
 
@@ -112,9 +107,9 @@ public:
 
     FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                      GaussPoint *gp,
-                                                     TimeStep *atTime);
+                                                     TimeStep *atTime) const override;
 
-    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
+    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,

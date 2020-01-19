@@ -191,6 +191,9 @@ LatticeLinearElastic :: giveInterface(InterfaceType type)
 FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
+    //Needed to make sure that status exists before random values are requested for elastic stiffness. Problem is that gp->giveMaterialStatus does not check if status exist already
+    auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+
     FloatArrayF< 6 >d = {
         1.,
         this->alphaOne, // shear
@@ -241,7 +244,7 @@ double
 LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
-    if ( static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
+    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems
             answer = 0.1;
         } else if ( answer > 10 ) {

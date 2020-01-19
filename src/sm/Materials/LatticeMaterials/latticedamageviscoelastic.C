@@ -59,12 +59,12 @@ LatticeDamageViscoelastic :: initializeFrom(InputRecord &ir)
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
     // override elastic modulus by the one given by the compliance function
+    double timeFactor = 0.;
+    IR_GIVE_FIELD(ir, timeFactor, _IFT_LatticeDamageViscoelastic_timeFactor); // timeConversion equal to 1 day in current time units of the analysis
 
-    // fix to work at arbitrary time units!
-    double E28 = 1. / rheoMat->computeCreepFunction(28.01, 28., NULL, NULL); // modulus of elasticity evaluated at 28 days, duration of loading 15 min
+    double E28 = 1. / rheoMat->computeCreepFunction(timeFactor * 28.01, timeFactor * 28., NULL, NULL); // modulus of elasticity evaluated at 28 days, duration of loading 15 min
     this->e0Mean *= ( this->eNormalMean / E28 ); // transform strain at peak stress accordingly
     this->eNormalMean = E28; // swap elastic modulus/stiffness
-    
 }
 
 
@@ -85,7 +85,7 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
     auto *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
 
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
-   
+
     GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
     // just a dummy yet essential call to create a status of viscomaterial. Otherwise initTempStatus() would fail.
     rheoMat->giveStatus(rChGP);
@@ -109,7 +109,7 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
     // componentes which do not change during iterations
     indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
     auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
-    
+
     do {
         if ( itercount > 100 ) {
             printf("tolerance = %e and itercount = %d\n", tolerance, itercount);
@@ -119,9 +119,9 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
         //total strain
         reducedStrain = totalStrain;
 
-	if ( indepStrain.giveSize() > 0 ) {
-	  reducedStrain -= FloatArrayF< 6 >(indepStrain);
-	}
+        if ( indepStrain.giveSize() > 0 ) {
+            reducedStrain -= FloatArrayF< 6 >(indepStrain);
+        }
 
         FloatArrayF< 6 >tempDamageLatticeStrain = status->giveTempDamageLatticeStrain();
         reducedStrain -= FloatArrayF< 6 >(tempDamageLatticeStrain);
@@ -159,7 +159,7 @@ LatticeDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalSt
 FloatMatrixF< 6, 6 >
 LatticeDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                           GaussPoint *gp,
-                                                          TimeStep *tStep)
+                                                          TimeStep *tStep) const
 {
     LatticeDamageViscoelasticStatus *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
     GaussPoint *slaveGp;
@@ -182,7 +182,7 @@ LatticeDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode,
 FloatMatrixF< 3, 3 >
 LatticeDamageViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode,
                                                           GaussPoint *gp,
-                                                          TimeStep *tStep)
+                                                          TimeStep *tStep) const
 {
     LatticeDamageViscoelasticStatus *status = static_cast< LatticeDamageViscoelasticStatus * >( this->giveStatus(gp) );
     GaussPoint *slaveGp;
@@ -238,8 +238,8 @@ int LatticeDamageViscoelastic :: checkConsistency()
         OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
     }
 
-    GaussPoint * noGP = NULL;
-    if ( rheoMat->give(tAlpha,noGP) != 0.) {
+    GaussPoint *noGP = NULL;
+    if ( rheoMat->give(tAlpha, noGP) != 0. ) {
         OOFEM_ERROR("tAlpha must be set to 0. in slave viscoelastic material");
     }
 
@@ -260,7 +260,7 @@ LatticeDamageViscoelasticStatus :: initTempStatus()
     // at this point rheomat :: giveStatus (viscoGP) has to be called first
     RheoChainMaterialStatus *rheoStatus = static_cast< RheoChainMaterialStatus * >( this->giveSlaveGaussPointVisco()->giveMaterialStatus() );
 
-    rheoStatus->initTempStatus();   
+    rheoStatus->initTempStatus();
 }
 
 

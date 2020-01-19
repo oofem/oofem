@@ -116,7 +116,7 @@ LatticeViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
 }
 
 FloatMatrixF< 6, 6 >
-LatticeViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+LatticeViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 
 {
     LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
@@ -127,18 +127,17 @@ LatticeViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gauss
     // get viscoelastic material
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
+    auto answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+
     double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
 
-    this->eNormalMean = Eincr;
-    //    answer *= ( Eincr / this->eNormalMean );
-
-    auto answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    answer *= ( Eincr / this->eNormalMean );
 
     return answer;
 }
 
 FloatMatrixF< 3, 3 >
-LatticeViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
+LatticeViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
     GaussPoint *slaveGp;
@@ -148,13 +147,10 @@ LatticeViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, Gauss
     // get viscoelastic material
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
-    double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
-
-    // check if it works!
-    //    answer *= ( Eincr / this->eNormalMean );
-    this->eNormalMean = Eincr;
-
     auto answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+
+    double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
+    answer *= ( Eincr / this->eNormalMean );
 
     return answer;
 }

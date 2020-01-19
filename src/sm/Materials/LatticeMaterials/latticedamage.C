@@ -78,9 +78,7 @@ LatticeDamage :: initializeFrom(InputRecord &ir)
         IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage_e0OneMean);
     }
 
-
     IR_GIVE_OPTIONAL_FIELD(ir, e0Mean, _IFT_LatticeDamage_e0Mean); // Macro
-
 
     this->coh = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, coh, _IFT_LatticeDamage_coh); // Macro
@@ -218,6 +216,8 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 FloatMatrixF< 3, 3 >
 LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
+    auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
+
     auto elastic = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(mode, gp, tStep);
 
     if ( mode == ElasticStiffness ) {
@@ -492,7 +492,7 @@ double
 LatticeDamage :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
-    if ( static_cast< LatticeDamageStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
+    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems
             answer = 0.1;
         } else if ( answer > 10 ) {
