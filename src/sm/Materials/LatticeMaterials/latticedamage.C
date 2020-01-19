@@ -216,7 +216,6 @@ LatticeDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *
 FloatMatrixF< 3, 3 >
 LatticeDamage :: give2dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    auto status = static_cast< LatticeDamageStatus * >( this->giveStatus(gp) );
 
     auto elastic = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(mode, gp, tStep);
 
