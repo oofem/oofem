@@ -49,7 +49,6 @@
 #include "fei3dtetlin.h"
 #include "fei3dhexalin.h"
 #include "octreelocalizert.h"
-
 #include "error.h"
 
 namespace oofem {
@@ -112,12 +111,14 @@ protected:
         this->cell = c;
       }
       virtual ~FEICellGeometryWrapper() { }
+      
       int giveNumberOfVertices() const override {
         return this->cell->giveNumberOfVertices();
       }
+      
       const FloatArray &giveVertexCoordinates(int i) const override
       {
-        return ((cell->getVertex(i-1))->getCoordinates());
+        return ((cell->getVertex(i))->getCoordinates());
       }
     };
 
@@ -152,11 +153,12 @@ protected:
     }
   
     void giveBoundingBox(BoundingBox& bb) const  {
+//       OOFEM_LOG_INFO("Called giveBoundingBox");
       double size;
       FloatArray bb0, bb1;
-      bb1 = bb0 = this->getVertex(0)->getCoordinates();
+      bb1 = bb0 = this->getVertex(1)->getCoordinates();
 
-      for ( int i = 1; i < this->giveNumberOfVertices(); ++i ) {
+      for ( int i = 2; i <= this->giveNumberOfVertices(); i++ ) {
         const auto &coordinates = this->getVertex(i)->getCoordinates();
         bb0.beMinOf(bb0, coordinates);
         bb1.beMaxOf(bb1, coordinates);
@@ -197,7 +199,10 @@ protected:
       }
       
     }
-    const Vertex* getVertex (int i) const { return mesh->getVertex(vertices[i]); }
+    const Vertex* getVertex (int i) const {//1-based
+        return mesh->getVertex(vertices[i-1]); 
+    }
+    
     int interpolate (FloatArray& answer, const FloatArray& pos, FloatArray** vertexVals) {
       int i,j, size = vertexVals[0]->giveSize();
       FloatArray N, lcoords;
@@ -216,10 +221,13 @@ protected:
       }
       return 1;
     }
-    int getVertexNum (int i) {
-      return this->vertices[i];
+    
+    int getVertexNum (int i) { //1-based
+      return this->vertices[i-1];
     }
-  };
+  
+      
+};
 
 
   class CellInsertionFunctor : public SL_Insertion_Functor <Cell > {
@@ -321,18 +329,25 @@ protected:
   virtual ~UnstructuredGridField() { }
 
   void setVertexValue(int num, const FloatArray& vv) {
-    valueList[num] = vv;
+    valueList[num-1] = vv;
   }
   
-  void addVertex (int num, FloatArray& coords) {
-    vertexList[num] = Vertex(coords);
+  void addVertex (int num, FloatArray& coords) {//1-based
+    vertexList[num-1] = Vertex(coords);
     this->timeStamp++;
   }
 
-  Vertex* getVertex (int num) {return &this->vertexList[num];}
+  const FloatArray &getVertexCoordinates(int num) const
+  {
+      return (this->vertexList[num-1].getCoordinates());
+  }
   
-  void addCell (int num, Element_Geometry_Type type, IntArray& vertices) {
-    cellList[num]=Cell(type, vertices, this);
+  Vertex* getVertex (int num) { //1-based
+      return &this->vertexList[num-1];
+  }
+  
+  void addCell (int num, Element_Geometry_Type type, IntArray& vertices) { //1-based
+    cellList[num-1]=Cell(type, vertices, this);
     this->timeStamp ++;
   }
 
@@ -350,15 +365,19 @@ protected:
                 int size = c.giveNumberOfVertices();
                 FloatArray** vertexValues = new FloatArray*[size];
                 for (int i=0; i<size; i++) {
-                    vertexValues[i]=&(this->valueList[c.getVertexNum(i)]);
+                    vertexValues[i]=&(this->valueList[c.getVertexNum(i+1)-1]);
                 }
                 c.interpolate (answer, coords, vertexValues);
+                //answer.printYourself();
                 return 0;
             } else {
+                coords.printYourself();
+                OOFEM_ERROR("No cells defined");
                 return 1;
             }
         } else {
             if(!this->vertexList.size()) {
+                OOFEM_ERROR("No vertices defined");
                 return 1;
             }
             // alternative method - we use the value of the closest point
@@ -388,7 +407,7 @@ protected:
   int evaluateAt(FloatArray &answer, DofManager *dman,
                  ValueModeType mode, TimeStep *tStep) override {
     const auto &coords = dman->giveCoordinates();
-    return this->evaluateAt (answer, coords, mode, tStep);
+    return this->evaluateAt(answer, coords, mode, tStep);
   }
 
   void saveContext(DataStream &stream) override { }

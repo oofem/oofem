@@ -52,6 +52,7 @@ namespace py = pybind11;
 #include "dofmanager.h"
 #include "element.h"
 #include "Elements/structuralelement.h"
+#include "datastream.h"
 
 #include "generalboundarycondition.h"
 #include "initialcondition.h"
@@ -94,6 +95,8 @@ namespace py = pybind11;
 #include <iostream>
 
 #include "oofemutil.h"
+
+
 
 //test
 void test (oofem::Element& e) {
@@ -297,6 +300,34 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     };
 
+    
+    class PyField : public oofem::Field {
+        // inherit the constructor
+        using oofem::Field::Field;
+        // trampoline (need one for each virtual method
+        int evaluateAt(oofem::FloatArray &answer, const oofem::FloatArray &coords,
+        oofem::ValueModeType mode, oofem::TimeStep *tStep) override  {
+            PYBIND11_OVERLOAD_PURE(int, oofem::Field, evaluateAt, std::ref(answer), coords, mode, tStep);
+        }
+        int evaluateAt(oofem::FloatArray &answer, oofem::DofManager *dman,
+        oofem::ValueModeType mode, oofem::TimeStep *tStep) override  {
+            PYBIND11_OVERLOAD_PURE(int, oofem::Field, evaluateAt, std::ref(answer), dman, mode, tStep);
+        }
+        const char *giveClassName() const override {
+            PYBIND11_OVERLOAD_PURE(const char*, oofem::Field, giveClassName, );
+        }
+        void saveContext(DataStream &stream) override {
+            PYBIND11_OVERLOAD_PURE(void, oofem::Field, saveContext, stream);
+        }
+        void restoreContext(DataStream &stream) override {
+            PYBIND11_OVERLOAD_PURE(void, oofem::Field, restoreContext, stream);
+        }
+        
+        
+        
+    };
+    
+    
     template <class StructuralMaterialBase = oofem::StructuralMaterial> class PyStructuralMaterial : public PyMaterial<StructuralMaterialBase> {
         // inherit the constructor
         using PyMaterial<StructuralMaterial>::PyMaterial;
@@ -754,7 +785,11 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumber", &oofem::Domain::giveNumber)
         .def("setNumber", &oofem::Domain::setNumber)
         .def("giveDofManager", &oofem::Domain::giveDofManager, py::return_value_policy::reference)
+        //.def("giveDofManagers", &oofem::Domain::giveDofManagers)
         .def("giveElement", &oofem::Domain::giveElement, py::return_value_policy::reference)
+        //.def("giveElements", &oofem::Domain::giveElements, py::return_value_policy::reference)
+        .def("giveNumberOfElements", &oofem::Domain::giveNumberOfElements)
+        .def("giveNumberOfDofManagers", &oofem::Domain::giveNumberOfDofManagers)
         .def("giveBc", &oofem::Domain::giveBc, py::return_value_policy::reference)
         .def("giveIc", &oofem::Domain::giveIc, py::return_value_policy::reference)
         .def("giveFunction", &oofem::Domain::giveFunction, py::return_value_policy::reference)
@@ -823,6 +858,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfDofManagers", &oofem::Element::giveNumberOfDofManagers)
         .def("giveNumberOfNodes", &oofem::Element::giveNumberOfNodes)
         .def("giveRegionNumber", &oofem::Element::giveRegionNumber)
+        .def("giveNode", &oofem::Element::giveNode)
         .def("updateYourself", &oofem::Element::updateYourself)
         .def("isActivated", &oofem::Element::isActivated)
         .def("isCast", &oofem::Element::isCast)
@@ -1313,17 +1349,34 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
 
 
-
-    py::class_<oofem::Field, std::shared_ptr<oofem::Field>>(m, "Field")
+//std::shared_ptr<oofem::Field>
+    py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
+        .def(py::init<oofem::FieldType>())  
+//         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)
+        
+        .def("evaluateAt", [](oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep){
+            return std::make_tuple(answer,coords);//TODO-how to invoke the function if it does not exist yet?
+        })
+        .def("giveType", &oofem::Field::giveType)
+        .def("setType", &oofem::Field::setType)
         ;
 
     py::class_<oofem::UniformGridField, oofem::Field, std::shared_ptr<oofem::UniformGridField>>(m, "UniformGridField")
         .def(py::init<>())
-        .def ("setGeometry", &oofem::UniformGridField::setGeometry)
-        .def ("setValues", &oofem::UniformGridField::setValues)
-        .def("evaluateAt", (int (oofem::UniformGridField::*)(oofem::FloatArray &, const oofem::FloatArray &, oofem::ValueModeType , oofem::TimeStep *)) &oofem::UniformGridField::evaluateAt)
+        .def("setGeometry", &oofem::UniformGridField::setGeometry)
+        .def("setValues", &oofem::UniformGridField::setValues)
         ;
- 
+    
+    py::class_<oofem::UnstructuredGridField, oofem::Field,  std::shared_ptr<oofem::UnstructuredGridField>>(m, "UnstructuredGridField")
+        .def(py::init<int,int,double>()) //problem.giveNumberOfNodes
+        .def("addVertex", &oofem::UnstructuredGridField::addVertex )
+        .def("setVertexValue", &oofem::UnstructuredGridField::setVertexValue )
+        .def("addCell", &oofem::UnstructuredGridField::addCell )
+        .def("getVertexCoordinates", &oofem::UnstructuredGridField::getVertexCoordinates )
+//         .def("evaluateAt", &oofem::UnstructuredGridField::evaluateAt)
+        ;
+    
+        
 //depends on Python.h
 #ifdef _PYBIND_BINDINGS       
     py::class_<oofem::PythonField, oofem::Field, std::shared_ptr<oofem::PythonField>>(m, "PythonField")
