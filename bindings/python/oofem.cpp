@@ -89,13 +89,10 @@ namespace py = pybind11;
 #include "unknownnumberingscheme.h"
 
 #include "uniformgridfield.h"
-#include "unstructuredgridfield.h"
+#include "dofmanvalfield.h"
 #include "pythonfield.h"
-
 #include <iostream>
-
 #include "oofemutil.h"
-
 
 
 //test
@@ -1367,13 +1364,13 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setValues", &oofem::UniformGridField::setValues)
         ;
     
-    py::class_<oofem::UnstructuredGridField, oofem::Field,  std::shared_ptr<oofem::UnstructuredGridField>>(m, "UnstructuredGridField")
-        .def(py::init<int,int,double>()) //problem.giveNumberOfNodes
-        .def("addVertex", &oofem::UnstructuredGridField::addVertex )
-        .def("setVertexValue", &oofem::UnstructuredGridField::setVertexValue )
-        .def("addCell", &oofem::UnstructuredGridField::addCell )
-        .def("getVertexCoordinates", &oofem::UnstructuredGridField::getVertexCoordinates )
-//         .def("evaluateAt", &oofem::UnstructuredGridField::evaluateAt)
+    py::class_<oofem::DofManValueField, oofem::Field,  std::shared_ptr<oofem::DofManValueField>>(m, "DofManValueField")
+        .def(py::init<oofem::FieldType,oofem::Domain*>())
+        .def(py::init<oofem::FieldType,int,int, const std::string, const std::string>(), py::arg().noconvert(), py::arg().noconvert(), py::arg().noconvert(), py::arg("engngModel")="transienttransport", py::arg("domainDofsDefaults")="heattransfer")
+        .def("addNode", &oofem::DofManValueField::addNode )
+        .def("addElement", &oofem::DofManValueField::addElement )
+        .def("setDofManValue", &oofem::DofManValueField::setDofManValue )
+        .def("getNodeCoordinates", &oofem::DofManValueField::getNodeCoordinates )
         ;
     
         
