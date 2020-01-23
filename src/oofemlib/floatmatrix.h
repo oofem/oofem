@@ -44,7 +44,7 @@
 #include <initializer_list>
 #include <algorithm>
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
 namespace boost {
 namespace python {
 namespace api {
@@ -603,7 +603,7 @@ public:
     friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
 
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
     void __setitem__(boost :: python :: api :: object t, double val);
     double __getitem__(boost :: python :: api :: object t);
     void beCopyOf(const FloatMatrix &src) { this->operator=(src); }

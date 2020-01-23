@@ -95,7 +95,7 @@ public:
 #endif
         std::copy_n(mat.begin(), N*M, values.begin());
     }
-    template<typename... V> FloatMatrixF(const std::array<const FloatArrayF<N>,M> &x) noexcept
+    FloatMatrixF(FloatArrayF<N> const (&x)[M]) noexcept
     {
         for (std::size_t i = 0; i < N; ++i) {
             for (std::size_t j = 0; j < M; ++j) {
@@ -260,6 +260,32 @@ public:
     }
 
     /**
+     * Extract column from matrix
+     */
+    template<std::size_t C, class = typename std::enable_if_t<C < M>>
+    FloatArrayF<N> column() const
+    {
+        FloatArrayF<N> c;
+        for ( std::size_t i = 0; i < N; i++ ) {
+            c[i] = (*this)(i, C);
+        }
+        return c;
+    }
+
+    /**
+     * Extract row from matrix
+     */
+    template<std::size_t R, class = typename std::enable_if_t<R < N>>
+    FloatArrayF<M> row() const
+    {
+        FloatArrayF<M> r;
+        for ( std::size_t j = 0; j < M; j++ ) {
+            r[j] = (*this)(R, j);
+        }
+        return r;
+    }
+
+    /**
      * Adds to the receiver the product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$. If the receiver has zero size, it is expanded.
      * Assumes that receiver and product @f$ a^{\mathrm{T}}\cdot b \mathrm{d}V @f$ are symmetric matrices. Computes only the
      * upper half of receiver.
@@ -346,7 +372,7 @@ public:
     /// Prints matrix to stdout. Useful for debugging.
     void printYourself(const std::string &name="FloatMatrixF") const
     {
-        printf("%s (%d x %d): \n", name.c_str(), N, M);
+        printf("%s (%zu x %zu): \n", name.c_str(), N, M);
         if ( this->rows() <= 250 && this->cols() <= 250 ) {
             for ( std::size_t i = 0; i < this->rows(); ++i ) {
                 for ( std::size_t j = 0; j < this->cols() && j < 100; ++j ) {
@@ -549,6 +575,9 @@ inline FloatMatrixF<3,3> local_cs(const FloatArrayF<3> &normal)
     auto bigent = cross(tangent, normal);
 
     FloatMatrixF<3,3> out;
+    //out.setColumn(normal, 0);
+    //out.setColumn(bigent, 1);
+    //out.setColumn(tangent, 2);
     out(0, 0) = normal[0];
     out(0, 1) = normal[1];
     out(0, 2) = normal[2];

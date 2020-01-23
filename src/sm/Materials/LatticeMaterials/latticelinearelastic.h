@@ -117,13 +117,7 @@ public:
     double  give(int aProperty, GaussPoint *gp) const override;
 
 protected:
-
-    int giveIPValue(FloatArray &answer,
-                    GaussPoint *gp,
-                    InternalStateType type,
-                    TimeStep *atTime) override;
 };
-
 } // end namespace oofem
 
 #endif

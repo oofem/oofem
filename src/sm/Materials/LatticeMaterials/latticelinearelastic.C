@@ -140,7 +140,7 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
     auto reducedStrain = strain;
     FloatArray indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
     if ( indepStrain.giveSize() > 0 ) {
-        reducedStrain -= FloatArrayF<6>(indepStrain);
+        reducedStrain -= FloatArrayF< 6 >(indepStrain);
     }
 
     auto stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
@@ -154,7 +154,7 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
 
     double waterPressure = 0.;
     for ( int i = 0; i < pressures.giveSize(); i++ ) {
-        waterPressure += 1. / pressures.giveSize() * pressures[i];
+        waterPressure += 1. / pressures.giveSize() * pressures [ i ];
     }
 
     stress.at(1) += waterPressure;
@@ -191,7 +191,7 @@ LatticeLinearElastic :: giveInterface(InterfaceType type)
 FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    FloatArrayF<6> d = {
+    FloatArrayF< 6 >d = {
         1.,
         this->alphaOne, // shear
         this->alphaOne, // shear
@@ -207,7 +207,7 @@ LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gaus
 FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    FloatArrayF<3> d = {
+    FloatArrayF< 3 >d = {
         1.,
         this->alphaOne, // shear
         this->alphaTwo, // torsion
@@ -256,44 +256,4 @@ LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
         return LatticeStructuralMaterial :: give(aProperty, gp);
     }
 }
-
-
-int
-LatticeLinearElastic :: giveIPValue(FloatArray &answer,
-                                    GaussPoint *gp,
-                                    InternalStateType type,
-                                    TimeStep *atTime)
-{
-    auto status = static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
-
-    if ( type == IST_CharacteristicLength ) {
-        answer.resize(1);
-        answer.zero();
-        answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
-        return 1;
-    } else if ( type == IST_DeltaDissWork ) {
-        answer.resize(1);
-        answer.zero();
-        answer.at(1) = status->giveDeltaDissipation();
-        return 1;
-    } else if ( type == IST_CrackWidth ) {
-        answer.resize(1);
-        answer.zero();
-        answer.at(1) = status->giveCrackWidth();
-        return 1;
-    } else if ( type == IST_DissWork ) {
-        answer.resize(1);
-        answer.zero();
-        answer.at(1) = status->giveDissipation();
-        return 1;
-    }  else if ( type == IST_CrackStatuses ) {
-        answer.resize(1);
-        answer.zero();
-        answer.at(1) = status->giveCrackFlag();
-        return 1;
-    } else {
-        return LatticeStructuralMaterial :: giveIPValue(answer, gp, type, atTime);
-    }
-}
-
 }

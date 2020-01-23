@@ -44,9 +44,9 @@ endif ()
 
 set (CMAKE_CXX_STANDARD 14)
 
-set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+set (CMAKE_CXX_FLAGS_DEBUG "-DDEBUG ${CMAKE_CXX_FLAGS_DEBUG}")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Og -Wsuggest-override")
+    set (CMAKE_CXX_FLAGS_DEBUG "-O0 -Wsuggest-override ${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 set (CMAKE_CXX_FLAGS_PROFILING "${CMAKE_CXX_FLAGS_PROFILING} -O2 -pg")
 
@@ -106,10 +106,9 @@ option (USE_PFEM "Enable PFEM module" OFF)
 option (USE_TM "Enable heat/mass transfer module" ON)
 option (USE_CEMHYD "Enable CemHyd support" OFF)
 option (USE_T3D "Enable T3D support" OFF)
-#option (USE_BOOST "Enable Boost" OFF)
-option (USE_BOOSTPYTHON_BINDINGS "Deprecated. Enable Python bidings (OOFEM usable from Python). Use USE_BOOSTPYTHON_BINDINGS instead. Implies USE_PYTHON." OFF)
-option (USE_PYTHON "Enable Python to be used inside OOFEM (e.g. userdef Dirichlet BCs)" OFF)
-option (USE_PYTHON_BINDINGS "Enable Python Pybind11 bindings" OFF)
+option (USE_BOOSTPYTHON_BINDINGS "Rather obsolete, use USE_PYBIND_BINDINGS. Enable Python bidings using boost (OOFEM callable from Python)." OFF)
+option (USE_PYBIND_BINDINGS "Enable Python Pybind11 bindings (OOFEM callable from Python and vice versa)." OFF)
+option (USE_PYTHON_EXTENSION "Enable Python extension for exposing C++ code to python. Uses Python.h library." OFF)
 option (USE_HDF5 "HDF5 support" OFF)
 
 if (USE_PARALLEL)
@@ -481,7 +480,7 @@ if (USE_SPOOLES)
     list (APPEND MODULE_LIST "SPOOLES")
 endif ()
 
-if (USE_BOOSTPYTHON_BINDINGS OR USE_PYTHON)
+if (USE_PYTHON_EXTENSION OR USE_BOOSTPYTHON_BINDINGS)
     # PythonLibs in cmake is bugged, have to try and rely on PythonInterp to get the suitable major and minor versions.
     #set (CMAKE_LIBRARY_DIR ${PYTHON_DIR})
     #Print if set up manually
@@ -493,18 +492,28 @@ if (USE_BOOSTPYTHON_BINDINGS OR USE_PYTHON)
     include_directories (${PYTHON_INCLUDE_DIRS})
     list (APPEND EXT_LIBS ${PYTHON_LIBRARIES})
     list (APPEND MODULE_LIST "Python")
-    add_definitions(-D__PYTHON_MODULE)
-
-    if (USE_BOOSTPYTHON_BINDINGS)
+    if(USE_PYTHON_EXTENSION)
+        add_definitions(-D_PYTHON_EXTENSION)    
+    endif ()
+    
+    if(USE_BOOSTPYTHON_BINDINGS)
         # require boost_python also for python stuff by itself
         find_package(Boost COMPONENTS "python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}" REQUIRED)
         include_directories (${Boost_INCLUDE_DIRS})
         list (APPEND EXT_LIBS ${Boost_LIBRARIES})
-        add_definitions(-DBOOST_PYTHON)
-    endif ()
+        add_definitions(-D_BOOSTPYTHON_BINDINGS)
+     endif ()   
 endif ()
 
-if (USE_PYTHON_BINDINGS)
+
+if(WIN32)
+    set(PYTHON_MODULE_EXTENSION ".pyd")
+else()
+    set(PYTHON_MODULE_EXTENSION ".so")
+endif()
+
+
+if (USE_PYBIND_BINDINGS)
     #build pybind11 bindings
     find_package(PythonInterp 3.0 REQUIRED)
     find_package(pybind11 REQUIRED CONFIG)
@@ -514,6 +523,7 @@ if (USE_PYTHON_BINDINGS)
     endif ()
     pybind11_add_module(oofempy THIN_LTO ${oofem_SOURCE_DIR}/bindings/python/oofem.cpp ${PYBIND11_HEADERS})
     target_link_libraries(oofempy PRIVATE liboofem)
+    set_target_properties (oofempy PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
     # Make sure pytest is found or produce a fatal error
     if(NOT PYTEST_FOUND)
@@ -524,6 +534,7 @@ if (USE_PYTHON_BINDINGS)
                     " (try: ${PYTHON_EXECUTABLE} -m pip install pytest)")
         endif()
         set(PYBIND11_PYTEST_FOUND TRUE CACHE INTERNAL "")
+    add_definitions(-D_PYBIND_BINDINGS)
     endif()
     set (USE_SHARED_LIB ON)
 endif()
@@ -848,7 +859,7 @@ else ()
 endif ()
 
 ######################## Tests of Python bindings ########################################
-if (USE_PYTHON_BINDINGS)
+if (USE_PYBIND_BINDINGS)
     add_test (NAME "test_python_pybind11_bindings" WORKING_DIRECTORY ${oofem_SOURCE_DIR}/bindings/python COMMAND ${PYTHON_EXECUTABLE} "-m" "pytest" ${oofem_SOURCE_DIR}/bindings/python)
     set_tests_properties("test_python_pybind11_bindings" PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}")
 endif()

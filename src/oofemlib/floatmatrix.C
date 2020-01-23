@@ -58,7 +58,7 @@
         } \
     }
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
  #include <boost/python.hpp>
  #include <boost/python/extract.hpp>
 #endif
@@ -2044,7 +2044,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 } /* jaco_ */
 
 
-#ifdef BOOST_PYTHON
+#ifdef _BOOSTPYTHON_BINDINGS
 void
 FloatMatrix :: __setitem__(boost :: python :: api :: object t, double val)
 {

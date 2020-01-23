@@ -90,16 +90,19 @@ public:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
     FloatArray callStressFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
-    FloatMatrix callTangentFunction(bp::object func, const FloatArray &strain, const FloatArray &stress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
+    
+    FloatMatrix callTangentFunction(bp::object func, const FloatArray &oldStrain, const FloatArray &oldStress, bp::object stateDict, bp::object tempStateDict, TimeStep *tStep) const;
+    
+    
 
     void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) override;
+                                       MatResponseMode mode, GaussPoint *gp, TimeStep *tStep); //TODO check override
 
     FloatMatrixF<9,9> give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode, GaussPoint *gp,
                                                          TimeStep *tStep) const override;
 
     void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                 const FloatArray &reducedStrain, TimeStep *tStep) override;
+                                 const FloatArray &reducedStrain, TimeStep *tStep); //TODO check override
 
     FloatArrayF<9> giveFirstPKStressVector_3d(const FloatArrayF<9> &vF, GaussPoint *gp,
                                               TimeStep *tStep) const override;

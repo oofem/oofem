@@ -161,9 +161,9 @@ protected:
     /// Smoother type.
     NodalRecoveryModel :: NodalRecoveryModelType stype;
     /// Smoother.
-    std::unique_ptr<NodalRecoveryModel> smoother;
+    std :: unique_ptr< NodalRecoveryModel >smoother;
     /// Smoother for primary variables.
-    std::unique_ptr<NodalRecoveryModel> primVarSmoother;
+    std :: unique_ptr< NodalRecoveryModel >primVarSmoother;
 
     /// particle export flag
     bool particleExportFlag;
@@ -176,7 +176,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    VTKXMLExportModule(int n, EngngModel * e);
+    VTKXMLExportModule(int n, EngngModel *e);
     /// Destructor
     virtual ~VTKXMLExportModule();
 
@@ -209,7 +209,7 @@ public:
 
     VTKPiece defaultVTKPiece;
 
-    std :: vector < VTKPiece > defaultVTKPieces;
+    std :: vector< VTKPiece >defaultVTKPieces;
 
     /**
      * Computes a cell average of an InternalStateType varible based on the weights
@@ -277,8 +277,8 @@ protected:
     void writeExternalForces(VTKPiece &vtkPiece);
 
     /**
-       @return true if piece is not empty and thus written
-    */
+     * @return true if piece is not empty and thus written
+     */
     bool writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep);
 
 
@@ -314,13 +314,13 @@ protected:
      * The i-th value contains the corresponding global node number.
      */
     virtual int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans, int &totalcells,
-                                Domain *domain, TimeStep *tStep, int reg);
+                                        int &regionDofMans, int &totalcells,
+                                        Domain *domain, TimeStep *tStep, int reg);
     /**
      * Writes a VTK collection file where time step data is stored.
      */
     void writeVTKCollection();
-    
+
     /// Writes a VTK collection file for Gauss points.
     void writeGPVTKCollection();
 
@@ -340,7 +340,7 @@ protected:
 
     bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
     void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
-    void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
+    void exportCompositeElement(std :: vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
 };
 
 
@@ -357,7 +357,7 @@ class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() { }
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
-    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
+    virtual void giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

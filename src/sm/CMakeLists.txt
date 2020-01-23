@@ -274,9 +274,11 @@ set (sm_material
     Materials/LatticeMaterials/latticeplasticitydamage.C
     Materials/LatticeMaterials/latticeslip.C
     Materials/LatticeMaterials/latticeplasticitydamageviscoelastic.C
-    )
+)
 
-if (USE_PYTHON)
+    
+
+if (USE_BOOSTPYTHON_BINDINGS AND USE_PYTHON_EXTENSION)
     list (APPEND sm_material Materials/structuralpythonmaterial.C)
 endif ()
 
