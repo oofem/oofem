@@ -54,22 +54,37 @@ class NonlocalMaterialStatusExtension;
 class LatticeMaterialStatus : public MaterialStatus, public RandomMaterialStatusExtensionInterface
 {
 protected:
+
+    /// Equilibriated lattice strain
     FloatArrayF< 6 >latticeStrain;
+
+    /// Non-equilibriated lattice strain
     FloatArrayF< 6 >tempLatticeStrain;
 
+    /// Equilibriated lattice stress
     FloatArrayF< 6 >latticeStress;
+
+    /// Non-equilibriated lattice stress
     FloatArrayF< 6 >tempLatticeStress;
 
-    /// Equilibriated reduced strain, which is free of thermal strain
+    /// Equilibriated reduced lattice strain, which is free of thermal strain
     FloatArrayF< 6 >reducedLatticeStrain;
-    /// Non-equilibrated reduced strain, which is free of thermal strain
+    /// Non-equilibrated reduced lattice strain, which is free of thermal strain
     FloatArrayF< 6 >tempReducedLatticeStrain;
-    /// Equilibriated plastic strain
+    /// Equilibriated plastic lattice strain
     FloatArrayF< 6 >plasticLatticeStrain;
-    /// Non-equilibrated plastic strain
+    /// Non-equilibrated plastic lattice strain
     FloatArrayF< 6 >tempPlasticLatticeStrain;
-    /// Non-equilibrated plastic strain
+    /// Non-equilibrated plastic lattice strain
     FloatArrayF< 6 >oldPlasticLatticeStrain;
+
+
+    /// Equilibriated damage lattice strain
+    FloatArrayF< 6 >damageLatticeStrain;
+
+    /// Non-equilibriated damage lattice strain
+    FloatArrayF< 6 >tempDamageLatticeStrain;
+
 
     /// Equilibrated normal stress
     double normalLatticeStress = 0.;
@@ -142,11 +157,13 @@ public:
     /// Returns plastic lattice strain.
     const FloatArrayF< 6 > &giveOldPlasticLatticeStrain() const { return this->oldPlasticLatticeStrain; }
 
-
     /// Returns lattice stress.
     const FloatArrayF< 6 > &giveLatticeStress() const { return this->latticeStress; }
     /// Returns temp lattice stress.
     const FloatArrayF< 6 > &giveTempLatticeStress() const { return this->tempLatticeStress; }
+
+    /// Returns temp damage lattice strain.
+    const FloatArrayF< 6 > &giveTempDamageLatticeStrain() const { return this->tempDamageLatticeStrain; }
 
     /// Assigns the temp value of lattice strain.
     void letTempLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempLatticeStrain = v; }
@@ -159,6 +176,9 @@ public:
 
     /// Assigns the temp value of lattice stress.
     void letTempLatticeStressBe(const FloatArrayF< 6 > &v) { this->tempLatticeStress = v; }
+
+    /// Assigns the temp value of damage lattice strain.
+    void letTempDamageLatticeStrainBe(const FloatArrayF< 6 > &v) { this->tempDamageLatticeStrain = v; }
 
 
     /// Sets the temp normalStress

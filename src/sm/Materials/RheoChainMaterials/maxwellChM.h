@@ -44,7 +44,7 @@ namespace oofem {
 class MaxwellChainMaterialStatus : public RheoChainMaterialStatus
 {
 public:
-    MaxwellChainMaterialStatus(GaussPoint * g, int nunits);
+    MaxwellChainMaterialStatus(GaussPoint *g, int nunits);
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -67,7 +67,7 @@ public:
 class MaxwellChainMaterial : public RheoChainMaterial
 {
 public:
-    MaxwellChainMaterial(int n, Domain * d);
+    MaxwellChainMaterial(int n, Domain *d);
 
     // overload thesse function such that computation of hidden vars can be done after the computation of stress
     void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep) override;
@@ -107,7 +107,7 @@ protected:
     FloatArray computeCharCoefficients(double tPrime, GaussPoint *gp, TimeStep *tStep) const override;
 
     double giveEModulus(GaussPoint *gp, TimeStep *tStep) const override;
-    LinearElasticMaterial *giveLinearElasticMaterial();
+    //    LinearElasticMaterial *giveLinearElasticMaterial();
 };
 } // end namespace oofem
 #endif // maxwellchm_h

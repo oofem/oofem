@@ -5087,7 +5087,7 @@ The model is described first in \textit{P. Grassl and T. Davies. "Lattice modell
 Description & Combined plasticity damage model for lattice elements \\
 \hline
 Record Format & \descitem{latticeplastdam} \elemparam{}{in} 
-\elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn} \elemparam{ft}{rn}  \elemparam{fc}{rn} \optelemparam{angle1}{rn}  \optelemparam{angle1}{rn} \optelemparam{flow}{rn} \optelemparam{stype}{rn} \elemparam{wf}{rn} \optelemparam{ft1}{rn} \optelemparam{wf1}{rn}  \optelemparam{ahard}{rn} \optelemparam{damage}{in}  \optelemparam{sub}{in}  \optelemparam{tol}{rn}  \optelemparam{iter}{in}\\
+\elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn} \elemparam{ft}{rn}  \elemparam{fc}{rn} \optelemparam{angle1}{rn}  \optelemparam{angle2}{rn} \optelemparam{flow}{rn} \optelemparam{stype}{rn} \elemparam{wf}{rn} \optelemparam{ft1}{rn} \optelemparam{wf1}{rn}  \optelemparam{ahard}{rn} \optelemparam{damage}{in}  \optelemparam{sub}{in}  \optelemparam{tol}{rn}  \optelemparam{iter}{in}\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \optparam{talpha} Thermal expansion coefficient. Default is 0.\\
@@ -5186,6 +5186,114 @@ Supported modes & 3dlattice\\
 \caption{Bond plasticity model for lattice elements -- summary.}
 \label{latticebond_table}
 %\end{center}
+\end{table}
+
+\subsubsection{Viscoelastic lattice model}
+
+This model combines a viscoelastic model, described in previous sections, with a linear elastic lattice material. Two material entries are used. One is for the viscoelastic lattice model and the other is for the viscoelastic model of choice. 
+
+The model description and parameters are summarized in Tab.~\ref{latticeviscoelastic_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Viscoelastic lattice model\\
+\hline
+Record Format & \descitem{latticeviscoelastic} \elemparam{}{in}
+\elemparam{viscomat}{in} \elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{viscomat} material number for viscoelastic model\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal strain expansion coefficient. Default is 0.\\
+&- \optparam{calpha} Thermal displacement expansion coefficient. Default is 0.\\
+&- \param{e} Young's modulus of the equivalent lattice material\\
+&- \optparam{a1} ratio of shear and normal modulus. Default is 1.\\
+&- \optparam{a2} ratio of rotational and normal modulus. Default is 1.\\
+Supported modes & 2dlattice, 3dlattice\\
+\hline
+\end{mmt}
+\caption{Visco elastic material model for lattice elements -- summary.}
+\label{latticeviscoelastic_table}
+\end{table}
+
+
+\subsubsection{Viscoelastic damage lattice model}
+
+This model combines a viscoelastic model, described in previous sections, with a damage lattice material model. Two material entries are used. One is for the viscoelastic extension of the damage lattice model and the other is for the viscoelastic model of choice. 
+
+The model description and parameters are summarized in Tab.~\ref{latticedamageviscoelastic_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Viscoelastic damage lattice model\\
+\hline
+Record Format & \descitem{latticedamageviscoelastic} \elemparam{}{in} 
+\elemparam{viscomat}{in} \elemparam{timefactor}{rn} \elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn} \optelemparam{e0}{rn}  \optelemparam{coh}{rn} \optelemparam{ec}{rn} \optelemparam{stype}{rn} \optelemparam{wf}{rn} \optelemparam{wf1}{rn}\\
+Parameters &- \param{} material number\\
+&- \param{viscomat} material number for viscoelastic model\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal strain expansion coefficient. Default is 0.\\
+&- \optparam{calpha} Thermal displacement expansion coefficient. Default is 0.\\
+&- \param{e} Young's modulus of the equivalent lattice material\\
+&- \optparam{a1} ratio of shear and normal modulus. Default is 1.\\
+&- \optparam{a2} ratio of rotational and normal modulus. Default is 1.\\
+&- \param{e0} strain at tensile strength: $f_{\rm t}/E$\\
+&- \param{coh} ratio of shear and tensile strength: $f_{\rm q}/f_{\rm t}$\\
+&- \param{ec} ratio of compressive and tensile strength: $f_{\rm c}/f_{\rm t}$\\
+&- \optparam{stype} softening types: 1-linear, 2-bilinear and 3-exponential. Default is 1.\\
+&- \param{wf} displacement threshold related to fracture energy used in all three softening types.\\
+&- \optparam{wf1} displacement threshold related to softening type 2. Default is wf1=0.15 wf.\\
+&- \optparam{e01} strain threshold related to softening type 2. Default is wf1=0.15 wf\\
+&- \optparam{bio} Biot's coefficient.\\
+&- \optparam{btype} Type to consider how Biot's coefficient changes with crack opening.\\
+Supported modes & 2dlattice, 3dlattice\\
+\hline
+\end{mmt}
+\caption{Damage visco elastic material model for lattice elements -- summary.}
+\label{latticedamageviscoelastic_table}
+\end{table}
+
+\subsubsection{Viscoelastic plasticity damage lattice model}
+
+This model combines a viscoelastic model, described in previous sections, with a plasticity damage lattice material model. Two material entries are used. One is for the viscoelastic extension of the plasticity damage lattice model and the other is for the viscoelastic model of choice. 
+
+The model description and parameters are summarized in Tab.~\ref{latticeplasticdamageviscoelastic_table}.
+
+\begin{table}[!htb]
+\begin{mmt}
+\hline
+Description & Plasticity-damage viscoelastic lattice model\\
+\hline
+Record Format & \descitem{latticeplasticitydamageviscoelastic} \elemparam{}{in} 
+\elemparam{viscomat}{in} \elemparam{timefactor}{rn} \elemparam{d}{rn} \optelemparam{talpha}{rn} \optelemparam{calpha}{rn} \elemparam{e}{rn} \optelemparam{a1}{rn} \optelemparam{a2}{rn}  \elemparam{ft}{rn}  \elemparam{fc}{rn} \optelemparam{angle1}{rn}  \optelemparam{angle2}{rn} \optelemparam{flow}{rn} \optelemparam{stype}{rn} \elemparam{wf}{rn} \optelemparam{ft1}{rn} \optelemparam{wf1}{rn}  \optelemparam{ahard}{rn} \optelemparam{damage}{in}  \optelemparam{sub}{in}  \optelemparam{tol}{rn}  \optelemparam{iter}{in}\\
+Parameters &- \param{} material number\\
+&- \param{viscomat} material number for viscoelastic material\\
+&- \param{d} material density\\
+&- \optparam{talpha} Thermal strain expansion coefficient. Default is 0.\\
+&- \optparam{calpha} Thermal displacement expansion coefficient. Default is 0.\\
+&- \param{e} Young's modulus of the equivalent lattice material\\
+&- \optparam{a1} ratio of shear and normal modulus. Default is 1.\\
+&- \optparam{a2} ratio of rotational and normal modulus. Default is 1.\\
+&- \param{ft} tensile strength\\
+&- \param{fc} compressive strength\\
+&- \optparam{angle1} ratio of compressive and tensile strength. Default is 0.5\\
+&- \optparam{angle2} ratio of compressive and tensile strength. Default is 0.5\\
+&- \optparam{flow} ratio of compressive and tensile strength. Default is 0.25\\
+&- \optparam{stype} softening types: 0-exponential, 1-bilinear. Default is 0\\
+&- \param{wf} displacement threshold related to fracture energy used in both softening types.\\
+&- \optparam{wf1} displacement threshold related to softening type 1. Default is wf1=0.1 wf.\\
+&- \optparam{ft1} stress threshold related to softening type 1. Optional parameter. Default is ft1=0.15 ft.\\
+&- \optparam{ahard} displacement threshold related to fracture energy used in all three softening types. Default value is 0.1\\
+&- \optparam{damage} flag to switch on and off damage. Default value is 1, which considers damage.\\
+&- \optparam{sub} maximum number of subincrementations in the plasticity part. Default is 10.\\
+&- \optparam{tol} tolerance for the newton iteration of the plasticity part.  Default value is 1.e-6.\\
+&- \optparam{iter} maximum number of iterations for the stress return of the plasticity model. Default is 100.\\
+Supported modes & 3dlattice\\
+\hline
+\end{mmt}
+\caption{Plasticity-damage viscoelastic material model for lattice elements -- summary.}
+\label{latticeplasticdamageviscoelastic_table}
 \end{table}
 
 

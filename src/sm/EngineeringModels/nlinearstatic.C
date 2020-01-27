@@ -53,6 +53,7 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "unknownnumberingscheme.h"
+#include "function.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -167,6 +168,9 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     if ( deltaT < 0. ) {
         OOFEM_ERROR("deltaT < 0");
     }
+
+    dtFunction = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_NonLinearStatic_deltatfunction);
 
     _val = nls_tangentStiffness;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_stiffmode);
@@ -283,19 +287,16 @@ TimeStep *NonLinearStatic :: giveNextStep()
     int mStepNum = 1;
     double totalTime = 0.0;
     StateCounterType counter = 1;
-    double deltaTtmp = deltaT;
-
-    //do not increase deltaT on microproblem
-    if ( pScale == microScale ) {
-        deltaTtmp = 0.;
-    }
+    // double deltaTtmp = deltaT;
+    double deltaTtmp = this->giveDeltaT(istep);
 
     if ( currentStep ) {
-        totalTime = currentStep->giveTargetTime() + deltaTtmp;
         istep = currentStep->giveNumber() + 1;
+	deltaTtmp = this->giveDeltaT(istep);
+	totalTime = currentStep->giveTargetTime() + deltaTtmp;
         counter = currentStep->giveSolutionStateCounter() + 1;
         mStepNum = currentStep->giveMetaStepNumber();
-
+	
         if ( !this->giveMetaStep(mStepNum)->isStepValid(istep) ) {
             mStepNum++;
             if ( mStepNum > nMetaSteps ) {
@@ -314,6 +315,34 @@ TimeStep *NonLinearStatic :: giveNextStep()
     // *Wrong* It has meaning for viscoelastic materials.
 
     return currentStep.get();
+}
+
+Function *
+NonLinearStatic :: giveDtFunction()
+// Returns the load-time function of the receiver.
+{
+    if ( !dtFunction ) {
+        return NULL;
+    }
+
+    return giveDomain(1)->giveFunction(dtFunction);
+}
+
+
+double
+NonLinearStatic :: giveDeltaT(int n)
+{
+
+    //do not increase deltaT on microproblem
+    if ( pScale == microScale ) {
+      return 0.;
+    }
+  
+    if ( giveDtFunction() ) {
+      return giveDtFunction()->evaluateAtTime(n);
+    }
+
+    return deltaT;
 }
 
 

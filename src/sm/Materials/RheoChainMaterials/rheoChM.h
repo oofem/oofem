@@ -39,7 +39,7 @@
 #define keep_track_of_strains
 
 #include "sm/Materials/structuralmaterial.h"
-#include "sm/Materials/linearelasticmaterial.h"
+//#include "sm/Materials/linearelasticmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 
@@ -159,7 +159,9 @@ protected:
     /// Time (age???) up to which the model should give a good approximation.
     double endOfTimeOfInterest = 0.; // local one or taken from e-model
     /// Associated linearElasticMaterial, with E = 1.
-    LinearElasticMaterial *linearElasticMaterial = nullptr;
+    //    LinearElasticMaterial *linearElasticMaterial = nullptr;
+    StructuralMaterial *linearElasticMaterial = nullptr;
+
     /// Partial moduli of individual units.
     mutable FloatArray EparVal;
     //FloatArray relaxationTimes;
@@ -252,20 +254,30 @@ public:
     void saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
     void restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp) override;
 
+    /**
+     * Computes the stiffness matrix for giveRealStressVector of receiver in given integration point, respecting its history.
+     * The algorithm should use temporary or equilibrium  history variables stored in integration point status
+     * to compute and return required result.
+     * @param answer Contains result.
+     * @param mode Material response mode.
+     * @param gp Integration point.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    /*    void giveStiffnessMatrix(FloatMatrix &answer,
+     *                               MatResponseMode mode,
+     *                               GaussPoint *gp,
+     *                               TimeStep *tStep) override;
+     */
+
     FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF< 3, 3 >givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF< 4, 4 >givePlaneStrainStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
     FloatMatrixF< 1, 1 >give1dStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    /* void give2dLatticeStiffMtrx(FloatMatrix &answer, */
-    /*                             MatResponseMode mmode, */
-    /*                             GaussPoint *gp, */
-    /*                             TimeStep *tStep) override; */
+    // maybe not needed afterall?
+    //	FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 
-    /* void give3dLatticeStiffMtrx(FloatMatrix &answer, */
-    /*                             MatResponseMode mmode, */
-    /*                             GaussPoint *gp, */
-    /*                             TimeStep *tStep) override; */
+    //	FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const;
 
     FloatArray computeStressIndependentStrainVector(GaussPoint *gp, TimeStep *tStep, ValueModeType mode) const override;
 
@@ -377,7 +389,8 @@ protected:
     virtual double giveCharTimeExponent(int i) const { return 1.0; }
 
     /// Access to the underlying linear elastic material with unit Young's modulus
-    LinearElasticMaterial *giveLinearElasticMaterial();
+    //    LinearElasticMaterial *giveLinearElasticMaterial();
+    StructuralMaterial *giveLinearElasticMaterial();
 
     /// Access to the time up to which the response should be accurate
     double giveEndOfTimeOfInterest();

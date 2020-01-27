@@ -42,7 +42,8 @@
 ///@name Input fields for LatticePlasticityDamageViscoelastic
 //@{
 #define _IFT_LatticePlasticityDamageViscoelastic_Name "latticeplasticitydamageviscoelastic"
-#define _IFT_LatticePlasticityDamageViscoelastic_slaveMat "slavemat"
+#define _IFT_LatticePlasticityDamageViscoelastic_viscoMat "viscomat"
+#define _IFT_LatticePlasticityDamageViscoelastic_timeFactor "timefactor"
 
 //@}
 
@@ -55,14 +56,12 @@ class LatticePlasticityDamageViscoelasticStatus : public LatticePlasticityDamage
 
 {
 protected:
-    GaussPoint *viscoelasticGP = nullptr;
-    /// 'slave' material model number.
-    int slaveMat = 0;
+    std :: unique_ptr< GaussPoint >slaveGpVisco;
 
 public:
 
     /// Constructor
-    LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
+    LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g);
 
     /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
@@ -79,12 +78,8 @@ public:
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    GaussPoint *giveViscoelasticGaussPoint() { return viscoelasticGP; }
-
-    MaterialStatus *giveViscoelasticMatStatus() const;
+    GaussPoint *giveSlaveGaussPointVisco() const { return this->slaveGpVisco.get(); }
 };
-
-
 
 
 
@@ -97,7 +92,7 @@ class LatticePlasticityDamageViscoelastic : public LatticePlasticityDamage
 {
 protected:
     /// 'slave' (= viscoelastic) material model number.
-    int slaveMat = 0;
+    int viscoMat = 0;
 
 public:
 
@@ -107,31 +102,15 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamageViscoelastic_Name; }
     const char *giveClassName() const override { return "LatticePlasticityDamageViscoelastic"; }
 
-
     void initializeFrom(InputRecord &ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rmode,
-                                                     GaussPoint *gp,
-                                                     TimeStep *atTime) const override;
-
-    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
-                                                     GaussPoint *gp,
-                                                     TimeStep *atTime) const override;
-
-    bool hasMaterialModeCapability(MaterialMode mode) const override;
-
-
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
-
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-
-    RheoChainMaterial *giveViscoelasticMaterial();
-
-    FloatArrayF<6> giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
 
@@ -139,6 +118,8 @@ protected:
                     GaussPoint *gp,
                     InternalStateType type,
                     TimeStep *atTime) override;
+
+    int checkConsistency(void) override;
 };
 } // end namespace oofem
 
