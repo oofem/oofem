@@ -79,6 +79,11 @@ public:
      */
     LatticeStructuralMaterial(int n, Domain *d);
 
+    void giveStiffnessMatrix(FloatMatrix &answer,
+                             MatResponseMode mode,
+                             GaussPoint *gp,
+                             TimeStep *tStep) override;
+
     virtual bool hasAnalyticalTangentStiffness() const { return true; }
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;

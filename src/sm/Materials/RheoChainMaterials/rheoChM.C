@@ -36,7 +36,7 @@
 #include "rheoChM.h"
 #include "material.h"
 #include "sm/Materials/isolinearelasticmaterial.h"
-//#include "sm/Materials/latticelinearelastic.h"
+#include "sm/Materials/LatticeMaterials/latticelinearelastic.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
@@ -63,7 +63,8 @@ RheoChainMaterial :: hasMaterialModeCapability(MaterialMode mode) const
     return mode == _3dMat || mode == _PlaneStress ||
            mode == _PlaneStrain || mode == _1dMat ||
            mode == _PlateLayer || mode == _2dBeamLayer ||
-           mode == _2dLattice || mode == _3dLattice;
+           mode == _1dLattice || mode == _2dLattice ||
+      mode == _3dLattice;
 }
 
 
@@ -176,7 +177,7 @@ RheoChainMaterial :: giveThermalDilatationVector(GaussPoint *gp, TimeStep *tStep
 //
 {
     MaterialMode mMode =  gp->giveMaterialMode();
-    if ( mMode ==  _2dLattice || mMode ==  _3dLattice ) {
+    if ( mMode == _1dLattice || mMode ==  _2dLattice || mMode ==  _3dLattice ) {
         return {
                    this->talpha, 0., 0., 0., 0., 0.
         };
@@ -452,6 +453,34 @@ RheoChainMaterial :: computeCharTimes()
     }
 }
 
+/*
+ * void
+ * RheoChainMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+ *                                        MatResponseMode rMode,
+ *                                        GaussPoint *gp, TimeStep *tStep)
+ * {
+ *  //
+ *  // Returns the incremental material stiffness matrix of the receiver
+ *  // PH: the "giveEModulus must be called before any method on elastic material
+ *  // otherwise the status would refer to the elastic material and not to the
+ *  // viscoelastic one
+ *  // in my opinion ElasticStiffness should return incremental stiffness and not unit stiffness
+ *  // for this purpose use giveUnitStiffnessMatrix
+ *  //
+ *  this->giveStatus(gp); // Ensures correct status creation
+ *  if ( ( !Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
+ *    auto sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
+ *    sMat->giveStiffnessMatrix(answer, rMode, gp, tStep);
+ *    // return sMat->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+ *  } else {
+ *    this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, rMode, gp, tStep);
+ *    double incrStiffness = this->giveEModulus(gp, tStep);
+ *    answer.times(incrStiffness);
+ *    //return incrStiffness * this->linearElasticMaterial->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+ *  }
+ * }
+ */
+
 
 FloatMatrixF< 6, 6 >
 RheoChainMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
@@ -475,6 +504,7 @@ RheoChainMaterial :: give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPo
 }
 
 
+
 FloatMatrixF< 3, 3 >
 RheoChainMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
                                               GaussPoint *gp,
@@ -489,6 +519,8 @@ RheoChainMaterial :: givePlaneStressStiffMtrx(MatResponseMode mode,
         return incrStiffness * this->linearElasticMaterial->givePlaneStressStiffMtrx(mode, gp, tStep);
     }
 }
+
+
 
 FloatMatrixF< 4, 4 >
 RheoChainMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
@@ -506,6 +538,7 @@ RheoChainMaterial :: givePlaneStrainStiffMtrx(MatResponseMode mode,
 }
 
 
+
 FloatMatrixF< 1, 1 >
 RheoChainMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
                                            GaussPoint *gp,
@@ -520,46 +553,6 @@ RheoChainMaterial :: give1dStressStiffMtrx(MatResponseMode mode,
         return incrStiffness * this->linearElasticMaterial->give1dStressStiffMtrx(mode, gp, tStep);
     }
 }
-
-// void
-// RheoChainMaterial :: give2dLatticeStiffMtrx(FloatMatrix &answer,
-//                                             MatResponseMode mode,
-//                                             GaussPoint *gp,
-//                                             TimeStep *tStep)
-// {
-
-//     this->giveStatus(gp); // Ensures correct status creation
-//     if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
-//         StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
-//         sMat->give2dLatticeStiffMtrx(answer, mode, gp, tStep);
-//  return;
-//     } else {
-//         double incrStiffness = this->giveEModulus(gp, tStep);
-//         this->giveLinearElasticMaterial()->give2dLatticeStiffMtrx(answer, mode, gp, tStep);
-//         answer.times(incrStiffness);
-//     }
-// }
-
-
-// void
-// RheoChainMaterial :: give3dLatticeStiffMtrx(FloatMatrix &answer,
-//                                             MatResponseMode mode,
-//                                             GaussPoint *gp,
-//                                             TimeStep *tStep)
-// {
-//     this->giveStatus(gp); // Ensures correct status creation
-//     if ( ( ! Material :: isActivated(tStep) ) && ( preCastingTimeMat > 0 ) ) {
-//         StructuralMaterial *sMat = static_cast< StructuralMaterial * >( domain->giveMaterial(preCastingTimeMat) );
-//         sMat->give3dLatticeStiffMtrx(answer, mode, gp, tStep);
-//  return;
-//     } else {
-//         double incrStiffness = this->giveEModulus(gp, tStep);
-//         this->giveLinearElasticMaterial()->give3dLatticeStiffMtrx(answer, mode, gp, tStep);
-//         answer.times(incrStiffness);
-//     }
-// }
-
-
 
 MaterialStatus *
 RheoChainMaterial :: CreateStatus(GaussPoint *gp) const
@@ -613,14 +606,15 @@ RheoChainMaterial :: initializeFrom(InputRecord &ir)
     //this->updateEparModuli(0.); // stiffnesses are time independent (evaluated at time t = 0.)
 }
 
-LinearElasticMaterial *
+//LinearElasticMaterial *
+StructuralMaterial *
 RheoChainMaterial :: giveLinearElasticMaterial()
 {
     if ( linearElasticMaterial == NULL ) {
         if ( this->lattice ) {
-            /*            linearElasticMaterial = new LatticeLinearElastic(this->giveNumber(),
-             *                                                 this->giveDomain(),
-             *                                                 1.0, this->alphaOne, this->alphaTwo);*/
+            linearElasticMaterial = new LatticeLinearElastic(this->giveNumber(),
+                                                             this->giveDomain(),
+                                                             1.0, this->alphaOne, this->alphaTwo);
         } else {
             linearElasticMaterial = new IsotropicLinearElasticMaterial(this->giveNumber(),
                                                                        this->giveDomain(),

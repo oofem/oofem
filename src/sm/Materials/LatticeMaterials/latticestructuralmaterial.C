@@ -62,6 +62,17 @@ LatticeStructuralMaterial :: hasMaterialModeCapability(MaterialMode mode) const
     return mode == _3dLattice || mode == _2dLattice || mode == _1dLattice;
 }
 
+void
+LatticeStructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
+                                                 MatResponseMode rMode,
+                                                 GaussPoint *gp, TimeStep *tStep)
+//
+// Returns characteristic material stiffness matrix of the receiver
+//
+{
+    answer = this->give3dLatticeStiffnessMatrix(rMode, gp, tStep);
+}
+
 
 int
 LatticeStructuralMaterial :: giveIPValue(FloatArray &answer,

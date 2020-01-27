@@ -84,6 +84,14 @@ RandomMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &ir)
 bool
 RandomMaterialExtensionInterface :: give(int key, GaussPoint *gp, double &value) const
 {
+    MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
+
+    // check if random material status has been initialized - does not have to be if material is used as a dummy
+    if  ( status->giveInterface(RandomMaterialStatusExtensionInterfaceType) == NULL ) {
+        return false;
+    }
+
+
     RandomMaterialStatusExtensionInterface *interface = dynamic_cast< RandomMaterialStatusExtensionInterface * >
                                                         ( gp->giveMaterialStatus()->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
     return interface->_giveProperty(key, value);
@@ -95,15 +103,15 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
     // Have to wrap it through the material to ensure that it gets an actual material status (for now at least)
     int size = randVariables.giveSize();
     double value;
-    MaterialStatus *matStat = static_cast< MaterialStatus* >( gp->giveMaterialStatus() );
+    MaterialStatus *matStat = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
     RandomMaterialStatusExtensionInterface *status = static_cast< RandomMaterialStatusExtensionInterface * >
                                                      ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
     for ( int i = 1; i <= size; i++ ) {
         FloatArray globalCoordinates;
-        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, gp->giveSubPatchCoordinates() ) ) {
-            Function *f = gp->giveElement()->giveDomain()->giveFunction( randomVariableGenerators.at(i) );
-            value = f->evaluate({{"x", globalCoordinates}});
+        if ( gp->giveElement()->computeGlobalCoordinates(globalCoordinates, gp->giveSubPatchCoordinates() ) ) {
+            Function *f = gp->giveElement()->giveDomain()->giveFunction(randomVariableGenerators.at(i) );
+            value = f->evaluate({{ "x", globalCoordinates } });
             status->_setProperty(randVariables.at(i), value);
         } else {
             OOFEM_ERROR("computeGlobalCoordinates failed");

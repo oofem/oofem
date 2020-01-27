@@ -61,6 +61,8 @@ namespace oofem {
 class LatticeDamageStatus : public LatticeMaterialStatus
 {
 protected:
+
+
     /// scalar measure of the largest strain level ever reached in material
     double kappa = 0.;
 
@@ -92,6 +94,7 @@ public:
     double giveKappa() const { return kappa; }
     /// Returns the temp. scalar measure of the largest strain level
     double giveTempKappa() const { return tempKappa; }
+
     /// Sets the temp scalar measure of the largest strain level to given value
     void   setTempKappa(double newKappa) { tempKappa = newKappa; }
 
@@ -109,7 +112,6 @@ public:
     double giveTempDamage() const { return tempDamage; }
     /// Sets the temp damage level to given value
     void   setTempDamage(double newDamage) { tempDamage = newDamage; }
-
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
 
@@ -137,9 +139,15 @@ public:
 class LatticeDamage : public LatticeLinearElastic
 {
 protected:
+
+
     /// max effective strain at peak
     double e0Mean = 0.;
     double e0OneMean = 0.;
+
+    ///tensile strength
+    double ftMean = 0.;
+    double ftOneMean = 0.;
 
     /**parameter which determines the typ of the softeningFunction
      * 1 = linear softening
@@ -191,16 +199,17 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
+    void performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const;
 
-    virtual double computeEquivalentStrain(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *atTime) const;
+    virtual double computeEquivalentStrain(const FloatArrayF< 6 > &strain, GaussPoint *gp) const;
 
     virtual double computeBiot(double omega, double kappa, double le) const;
 
     virtual double computeDamageParam(double kappa, GaussPoint *gp) const;
     ///Compute increment of dissipation for post-processing reasons
-    double computeDeltaDissipation2d(double omega, const FloatArrayF<3> &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
+    double computeDeltaDissipation2d(double omega, const FloatArrayF< 3 > &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
 
-    double computeDeltaDissipation3d(double omega, const FloatArrayF<6> &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
+    double computeDeltaDissipation3d(double omega, const FloatArrayF< 6 > &reducedStrain, GaussPoint *gp, TimeStep *atTime) const;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
@@ -210,7 +219,7 @@ public:
 protected:
     double computeReferenceGf(GaussPoint *gp) const;
     double computeIntervals(double testDissipation, double referenceGf) const;
-    
+
     int giveIPValue(FloatArray &answer,
                     GaussPoint *gp,
                     InternalStateType type,

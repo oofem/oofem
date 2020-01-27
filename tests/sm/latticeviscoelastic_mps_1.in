@@ -1,0 +1,59 @@
+latticeviscoelastic_mps_1.out
+# 
+Test on a viscoelastic extension to lattice materials which supports all RheoChainMaterials. This particular test uses mps and computes a basic creep compliance function. Uses incremental linear statics which updates the incremental stiffness in each step. Please do not change to StaticStructural.
+#
+IncrLinearStatic endOfTimeOfInterest 10000.00000 prescribedTimes 25 0.0001 0.0002 0.0005 0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2 0.5 1. 2. 5. 10. 20. 50. 100. 200. 500. 1000. 2000. 5000. 10000. nmodules 1
+#
+errorcheck
+#
+# vtkxml tstep_step 1 domain_all vars 2 1 4 primvars 1 1 
+#
+domain 2dlattice
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 2 nbc 3 nic 0 nltf 2 nset 3
+#
+#
+# NODES
+#
+node   1   coords 3  0.0  0.0  0.0 
+node   2   coords 3  0.1  0.0  0.0 
+#
+#
+# ELEMENTS
+#
+Lattice2D 1 nodes 2 1 2 crossSect 1 mat 2 gpCoords 2 0.05 0. width 1.0 thick 1.0
+#
+#
+# CROSSECTION
+#
+latticecs 1 material 2
+#
+# MATERIAL
+#
+mps 1 d 0. lattice a1 1. a2 1. talpha 0. referencetemperature 296. mode 0 fc 30. cc 350. w/c 0.5 a/c 6. stiffnessfactor 1.e6  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 0
+#
+latticeviscoelastic 2 d 0. talpha 0. viscomat 1 a1 1. a2 1. e 1000.
+#
+#
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 2 6 values 2 0. 0. set 1
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 1 values 1 0. set 2
+NodalLoad 3 loadTimeFunction 2 dofs 1 1 Components 1 1. set 3
+#
+#
+# TIME FUNCTION
+#
+ConstantFunction 1 f(t) 1.0
+ConstantFunction 2 f(t) 1.0
+#
+Set 1 nodes 2 1 2
+Set 2 nodes 1 1
+Set 3 nodes 1 2 
+#
+#%BEGIN_CHECK% tolerance 1.e-13
+#NODE tStep 4  number 2 dof 1 unknown d value 4.92523215e-06
+#NODE tStep 10 number 2 dof 1 unknown d value 6.09119806e-06
+#NODE tStep 16 number 2 dof 1 unknown d value 7.90759484e-06
+#NODE tStep 22 number 2 dof 1 unknown d value 1.07307196e-05
+#NODE tStep 25 number 2 dof 1 unknown d value 1.20895134e-05
+#%END_CHECK%

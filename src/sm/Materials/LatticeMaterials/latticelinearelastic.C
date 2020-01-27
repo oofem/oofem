@@ -53,9 +53,9 @@ namespace oofem {
 REGISTER_Material(LatticeLinearElastic);
 
 // constructor which creates a dummy material without a status and without random extension interface
-LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e0, double a1, double a2) :
+LatticeLinearElastic :: LatticeLinearElastic(int n, Domain *d, double e, double a1, double a2) :
     LatticeStructuralMaterial(n, d),
-    eNormalMean(e0),
+    eNormalMean(e),
     alphaOne(a1),
     alphaTwo(a2)
 {}
@@ -143,7 +143,7 @@ LatticeLinearElastic :: giveLatticeStress3d(const FloatArrayF< 6 > &strain,
         reducedStrain -= FloatArrayF< 6 >(indepStrain);
     }
 
-    auto stiffnessMatrix = this->give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto stiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
     auto stress = dot(stiffnessMatrix, reducedStrain);
 
     //Read in fluid pressures from structural element if this is not a slave problem
@@ -191,6 +191,9 @@ LatticeLinearElastic :: giveInterface(InterfaceType type)
 FloatMatrixF< 6, 6 >
 LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
+    //Needed to make sure that status exists before random values are requested for elastic stiffness. Problem is that gp->giveMaterialStatus does not check if status exist already
+  static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+
     FloatArrayF< 6 >d = {
         1.,
         this->alphaOne, // shear
@@ -207,7 +210,10 @@ LatticeLinearElastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gaus
 FloatMatrixF< 3, 3 >
 LatticeLinearElastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *atTime) const
 {
-    FloatArrayF< 3 >d = {
+  //Needed to make sure that status exists before random values are requested for elastic stiffness. Problem is that gp->giveMaterialStatus does not check if status exist already
+  static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) );
+
+  FloatArrayF< 3 >d = {
         1.,
         this->alphaOne, // shear
         this->alphaTwo, // torsion
@@ -241,7 +247,7 @@ double
 LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
 {
     double answer;
-    if ( static_cast< LatticeMaterialStatus * >( this->giveStatus(gp) )->_giveProperty(aProperty, answer) ) {
+    if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems
             answer = 0.1;
         } else if ( answer > 10 ) {
