@@ -4301,6 +4301,163 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain\\
 \label{concrete_fcm_table}
 \end{longtable}
 
+
+\subsubsection{Viscoelastic fixed crack model for concrete - ConcreteFCMViscoelastic}
+\label{concreteFCMViscoelastic}
+
+The material model ``ConcreteFcmViscoelastic'' has been developed in order to
+realistically capture the time-dependent behavior of cementitious materials
+with the possibility of tensile cracking.
+The model allows to link an arbitrary
+viscoelastic material model present in OOFEM with the model "ConcreteFCM" for
+tensile failure with fixed (not rotating) orientation of cracks
+developed for concrete. The material model assumes an additive split of the total deformation
+into the viscoelastic and cracking part. The viscoelastic material handles the
+stress-independent strains, i.e. shrinkage and thermal dilation.
+
+The current implementation supports both constant and time-evolving
+values of tensile strength and fracture energy.
+\textbf{Constant} values are used when the keyword \param{timeDepFracturing}
+is missing in the definition of the material. Then, the values are taken directly from the
+\emph{ConcreteFCM} material (keywords \param{ft} and \param{gf}).
+On the other hand, when the flag \texttt{timeDepFracturing} is present
+in the material definition, the tensile strength and fracture energy
+is \textbf{time-evolving}. In that case, the values of \param{ft} and \param{gf}
+are ignored, and the value of parameter $s$ (\param{fib\_s}), and the mean
+value of the compressive strength $f_{cm,28}$ (\param{fcm28}) need to be
+provided and serve for the prediction of $f_t(t)$ and $G_F(t)$.
+Yet, it is possible to
+override the predicted 28-day values by providing the fields
+\param{ft28} and \param{gf28}.
+%
+It must be noted that once the tensile stress exceeds the current
+value of tensile strength, the time development of the properties is
+terminated on the particular crack plane.
+
+Mean value of the uniaxial compressive strength at specific time which
+is used for evaluation of the tensile strength and fracture energy is
+computed using expressions (5.1-50) and (5.1-51) in \emph{fib}~MC2010 \cite{fib:2010}:
+\begin{equation}  
+f_{cm}(t_e) = \exp \left[ s \left( 1. - \sqrt{28/t_e} \right)   \right] f_{cm,28}
+\end{equation}
+in which $s$ is a coefficient reflecting cement type (table
+5.1-9), $t_e$ is the equivalent time from the viscoelastic model, and
+$f_{cm,28}$ is the mean value of the uniaxial compressive strength at
+the age of 28 days.
+
+Current value of tensile strength $f_{ctm}(t)$ at time $t$ is computed from the compressive
+strength at corresponding age, similarly to section 5.1.5.1 in
+MC2010. The difference is that in MC2010 both tensile strength and fracture energy
+are treated as non-aging and are evaluated from $f_{cm,28}$. 
+In the following expressions the $f_{cm}$ and $f_{ctm}$ are in MPa.
+\begin{equation}
+f_{ctm}(t_e) = 2.12 \: \ln \left(1 + 0.1 f_{cm}(t_e) \right) \: \dots \:
+\mathrm{for \:} f_{cm} \geq 58\:\mathrm{MPa}
+\end{equation}  
+%
+\begin{equation}
+f_{ctm}(t_e) = 0.3 \left(f_{cm}(t_e)-8 \right)^{2/3} \: \dots \:
+\mathrm{for \:} 20 \leq f_{cm} \leq 58\:\mathrm{MPa}
+\end{equation}  
+%
+\begin{equation}
+f_{ctm}(t_e) = 0.07862 \: f_{cm} \: \dots \:
+\mathrm{for \:} f_{cm} \leq 20 \: \mathrm{MPa}
+\end{equation}
+%
+The value of fracture energy at the age of 28 days is computed
+accordingly to section 5.1.5.2 in MC2010
+\begin{equation}
+G_F = 73 \left( f_{cm,28} \right)^{0.18}
+\end{equation} 
+%
+in this equation $G_F$ is in N/m and the compressive strength is in MPa.
+%
+Here, the time development of fracture energy is chosen to be the same as
+the tensile strength
+\begin{equation}
+G_F(t) = G_F \frac{f_{ctm}(t)}{f_{ctm}(28)}
+\end{equation} 
+
+
+%begin{latexonly}
+\begin{longtable}{|l|p{9cm}|}
+%end{latexonly}
+\hline
+Description & Viscoelastic fixed crack model for concrete\\
+\hline
+Record Format & \descitem{ConcreteFCMViscoelastic} 
+\elemparam{viscoMat}{in}
+\elemparam{gf}{rn}
+\elemparam{ft}{rn}
+\optelemstring{timeDepFracturing}
+\optelemparam{fib\_s}{rn}
+\optelemparam{fcm28}{rn}
+\optelemparam{timefactor}{rn}
+\optelemparam{stiffnessfactor}{rn}
+\optelemparam{gf28}{rn}
+\optelemparam{ft28}{rn}
+\\
+Parameters &- \param{} material model number\\
+&- \param{viscoMat} number of the slave viscoelastic material\\
+&- \param{ft} tensile strength - constant value\\
+&- \param{gf} fracture energy - constant value\\
+&- \param{timeDepFracturing} flag to activate evolving $f_t$ and $G_f$
+according to \emph{fib MC2010}\\
+&- \param{fib\_s} strength class of cement coefficient (Table 5.1-9 in
+fib MC2010)\\
+&- \param{fcm28} 28-day mean compressive strength of concrete used for
+prediction and evolution of $f_t$ and $G_f$\\
+&- \param{timefactor} time transformation factor, 1 for days,
+86400 for seconds etc.\\
+&- \param{stiffnessfactor} stiffness transformation factor, 1 for Pa,
+1.e6 for MPa etc.\\
+&- \param{ft28} overrides predicted tensile strength\\
+&- \param{gf28} overrides predicted fracture energy\\
+Supported modes& 3dMat, PlaneStress, PlaneStrain\\
+\hline
+\caption{Viscoelastic fixed crack model for concrete -- summary.}
+\label{concretefcmviscoelastic_table}
+\end{longtable}
+%
+The following lines show a sample syntax specifying the viscoelastic
+fixed crack model with the compliance defined by the MPS model.
+Volume density is 24 kN/m$^3$, thermal dilation coefficient
+$12\times10^{-6}$ K$^{-1}$, Poisson's ratio~0.2,
+fracture energy $G_f$ and tensile strength $f_t$ predicted from the
+mean compressive strength $f_{cm} = 30$~MPa (defined ft and gf are
+discarded, to override use keywords ft28 and gf28),
+exponential softening, maximum 2 perpendicular tensile cracks,
+constant shear factor coefficient, $sf = 20.$,
+all cracks contribute to the shear stiffness,
+shear strength equal to $f_t$, numerical stiffness factors 1e-3,
+number of viscoelastic material is 2.
+The analysis uses [m], [MPa], [MN], and [day]:\\
+%
+\noindent
+\texttt{
+  ConcreteFcmViscoelastic 1 d 24.e-3 talpha 0. E 30000. n 0.2\\
+  Gf 100.e-6 ft 2. softtype 1 sheartype 2 sf 20.\\
+  multiplecrackshear shearstrengthtype 1 ncracks 2\\
+  shearCoeffNumer 0.001 normalCoeffNumer 0.001 viscomat 2\\
+  timeDepFracturing fib\_s 0.20 fcm28 30. timeFactor 1.\\
+  stiffnessFactor 1.e6}
+
+The viscoelastic material can be defined e.g. by the following
+listing. Note that the coefficient of thermal expansion is zero in
+ConcreteFcmViscoelastic and nonzero in the viscoelastic material which
+handles all stress-independent strains. Also note same values of the Poisson's ratio.
+
+\noindent
+\texttt{mps 2 d 24.e-3 n 0.2 talpha 12.e-6 referencetemperature  296.\\
+  mode 0  fc 30. cc 340. w/c 0.523 a/c 5.28 stiffnessfactor 1.e6 \\
+  timefactor 1. lambda0 1. begoftimeofinterest 1.e-6 \\
+  endoftimeofinterest 1.e4 relMatAge 7. CoupledAnalysisType 2 \\
+  ksh 0.0 k3 35. p 1000.}
+
+
+
+
 \subsubsection{Fixed crack model for fiber reinforced composites - FRCFCM}
 
 This material model is an extension of the ConcreteFCM described in Section~\ref{concreteFCM}.
