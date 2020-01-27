@@ -46,30 +46,18 @@ LatticeViscoelastic :: LatticeViscoelastic(int n, Domain *d) : LatticeLinearElas
 {}
 
 
-bool
-LatticeViscoelastic :: hasMaterialModeCapability(MaterialMode mode) const
-{
-    return ( mode == _3dLattice );
-}
-
-
 void
 LatticeViscoelastic :: initializeFrom(InputRecord &ir)
 {
     LatticeLinearElastic :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, slaveMat, _IFT_LatticeViscoelastic_slaveMat); // number of slave material
+    IR_GIVE_FIELD(ir, viscoMat, _IFT_LatticeViscoelastic_viscoMat); // number of slave material
 
-    RheoChainMaterial *rChM = giveViscoelasticMaterial();
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
-    if ( rChM->giveAlphaOne() != this->alphaOne ) {
-        OOFEM_ERROR("a1 must be set to the same value in both master and viscoelastic slave materials");
-    }
-
-
-    if ( rChM->giveAlphaTwo() != this->alphaTwo ) {
-        OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
-    }
+    // fix to work at arbitrary time units!
+    double E28 = 1. / rheoMat->computeCreepFunction(28.01, 28., NULL, NULL); // modulus of elasticity evaluated at 28 days, duration of loading 15 min
+    this->eNormalMean = E28;  // swap elastic modulus/stiffness
 }
 
 
@@ -84,88 +72,89 @@ LatticeViscoelastic :: CreateStatus(GaussPoint *gp) const
 FloatArrayF< 6 >
 LatticeViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
                                            GaussPoint *gp,
-                                           TimeStep *tStep) const
-//
-// returns real stress vector in 3d stress space of receiver according to
-// previous level of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
+                                           TimeStep *tStep)
 {
-    FloatArray answer;
-    answer.resize(6);
-    answer.zero();
+    auto status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
 
-    //@todo: This has to be rewritten for the 3d case.
-    // LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
-    //   //    this->initGpForNewStep(gp);
+    FloatArray viscoStress;
+    FloatArray partialStrain;
 
-    //   FloatArray reducedStrain;
+    GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
+    double Eincr = rheoMat->giveEModulus(rChGP, tStep);
+    this->eNormalMean = Eincr;
 
+    FloatArrayF< 6 >reducedStrainForViscoMat;
+    FloatArrayF< 6 >quasiTotalStrain;
 
-    //   // evaluate viscoelastic material:
-    //   // pass: viscoelasticGP, temperature-free increment of strain
+    FloatArray indepStrain;
 
-    //   //    RheoChainMaterial *rChM = giveViscoelasticMaterial();
-
-    //   MaterialMode mode = gp->giveMaterialMode();
-    //   StressVector tempEffectiveStress(mode);
-
-    //   GaussPoint *rChGP = status->giveSlaveGaussPointVisco();
-
-    //   // subtract stress independent part = temperature
-
-    //   this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Incremental);
-
-    //   rChM->giveRealStressVector(tempEffectiveStress, rChGP, reducedStrain, tStep);
-
-    //   answer.zero();
-    //   answer.add(tempEffectiveStress);
-
-    //   status->letTempStrainVectorBe(totalStrain);
-    //   status->letTempStressVectorBe(answer);
-
-    return answer;
-}
+    FloatArrayF< 6 >tempStress;
+    reducedStrainForViscoMat = totalStrain;
 
 
 
-RheoChainMaterial *
-LatticeViscoelastic :: giveViscoelasticMaterial() {
-    Material *mat;
-    RheoChainMaterial *rChMat;
-    mat = domain->giveMaterial(slaveMat);
+    indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
 
-    rChMat = dynamic_cast< RheoChainMaterial * >( mat );
+    printf("indepStrain:\n");
+    indepStrain.printYourself();
 
-    return rChMat;
+    if ( indepStrain.giveSize() > 0 ) {
+        reducedStrainForViscoMat -= FloatArrayF< 6 >(indepStrain);
+    }
+
+
+    rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrainForViscoMat, tStep);
+    tempStress = FloatArrayF< 6 >(viscoStress);
+
+
+    status->letTempLatticeStrainBe(totalStrain);
+    status->letTempLatticeStressBe(tempStress);
+
+    return tempStress;
 }
 
 FloatMatrixF< 6, 6 >
 LatticeViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
+
 {
-    FloatMatrix answer;
-    answer.resize(6, 6);
-    answer.zero();
+    LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
+    GaussPoint *slaveGp;
 
-    //@todo: has to be rewritten for 3d
+    // get status of the slave viscoelastic material
+    slaveGp = status->giveSlaveGaussPointVisco();
+    // get viscoelastic material
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
-    // LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
-    // GaussPoint *slaveGp;
-    // RheoChainMaterial *rChMat;
-    // double Eincr;
+    auto answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
-    // slaveGp = status->giveSlaveGaussPointVisco();
-    // rChMat = giveViscoelasticMaterial();
+    double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
 
-    // LatticeLinearElastic :: give3dLatticeStiffMtrx(answer, rmode, gp, tStep);
-
-    // Eincr = rChMat->giveEModulus(slaveGp, tStep);
-
-    // answer.times(Eincr / this->eNormalMean);
+    answer *= ( Eincr / this->eNormalMean );
 
     return answer;
 }
+
+FloatMatrixF< 3, 3 >
+LatticeViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
+{
+    LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
+    GaussPoint *slaveGp;
+
+    // get status of the slave viscoelastic material
+    slaveGp = status->giveSlaveGaussPointVisco();
+    // get viscoelastic material
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+
+    auto answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+
+    double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
+    answer *= ( Eincr / this->eNormalMean );
+
+    return answer;
+}
+
 
 int
 LatticeViscoelastic :: giveIPValue(FloatArray &answer,
@@ -173,13 +162,49 @@ LatticeViscoelastic :: giveIPValue(FloatArray &answer,
                                    InternalStateType type,
                                    TimeStep *tStep)
 {
+    if ( ( type == IST_DryingShrinkageTensor ) ||
+         ( type == IST_AutogenousShrinkageTensor ) ||
+         ( type == IST_TotalShrinkageTensor ) ||
+         ( type == IST_CreepStrainTensor ) ||
+         ( type == IST_DryingShrinkageTensor ) ||
+         ( type == IST_ThermalStrainTensor ) ) {
+        LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
+        RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+        return rheoMat->giveIPValue(answer, status->giveSlaveGaussPointVisco(), type, tStep);
+    }
+
     return LatticeLinearElastic :: giveIPValue(answer, gp, type, tStep);
 }
 
 
-LatticeViscoelasticStatus :: LatticeViscoelasticStatus(GaussPoint *g) :
-    LatticeMaterialStatus(g),
-    slaveGpVisco(new GaussPoint(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
+
+int LatticeViscoelastic :: checkConsistency()
+{
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+
+
+    if ( rheoMat->giveAlphaOne() != this->alphaOne ) {
+        OOFEM_ERROR("a1 must be set to the same value in both master and viscoelastic slave materials");
+    }
+
+    if ( rheoMat->giveAlphaTwo() != this->alphaTwo ) {
+        OOFEM_ERROR("a2 must be set to the same value in both master and viscoelastic slave materials");
+    }
+
+
+    return FEMComponent :: checkConsistency();
+}
+
+
+
+
+
+LatticeViscoelasticStatus :: LatticeViscoelasticStatus(GaussPoint *gp) :
+    LatticeMaterialStatus(gp),
+    slaveGpVisco(std :: make_unique< GaussPoint >(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
+    //    slaveGpVisco(std::make_unique<GaussPoint>( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
+
+
 {}
 
 void
@@ -190,38 +215,24 @@ LatticeViscoelasticStatus :: initTempStatus()
 //
 {
     LatticeMaterialStatus :: initTempStatus();
+
+    RheoChainMaterialStatus *rheoStatus = static_cast< RheoChainMaterialStatus * >( this->giveSlaveGaussPointVisco()->giveMaterialStatus() );
+    rheoStatus->initTempStatus();
 }
 
 void
 LatticeViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    MaterialStatus *mS = this->giveViscoelasticMatStatus();
+    //    MaterialStatus *mS = this->giveViscoelasticMatStatus();
 
     LatticeMaterialStatus :: printOutputAt(file, tStep);
     fprintf(file, "\nViscoelastic material:");
 
-    mS->printOutputAt(file, tStep);
+    //this->slaveGpVisco->giveMaterialStatus()->printOutputAt(file, tStep);
+    this->giveSlaveGaussPointVisco()->giveMaterialStatus()->printOutputAt(file, tStep);
 
     fprintf(file, "\n");
 }
-
-MaterialStatus *
-LatticeViscoelasticStatus :: giveViscoelasticMatStatus() const {
-    //    Material *mat;
-    //    RheoChainMaterial *rChMat;
-    //    GaussPoint *rChGP;
-
-    //    mat = domain->giveMaterial(slaveMat);
-    //    rChMat = dynamic_cast< RheoChainMaterial * >(mat);
-
-    //    rChGP = this->giveSlaveGaussPointVisco();
-
-    //    MaterialStatus *mS = rChMat->giveStatus(rChGP);
-
-    //    return mS;
-    return NULL;
-}
-
 
 void
 LatticeViscoelasticStatus :: updateYourself(TimeStep *tStep)
@@ -231,8 +242,8 @@ LatticeViscoelasticStatus :: updateYourself(TimeStep *tStep)
 // temporary variables are having values corresponding to newly reached equilibrium.
 //
 {
-    MaterialStatus *mS = this->giveViscoelasticMatStatus();
-    mS->updateYourself(tStep);
+    //  this->slaveGpVisco->giveMaterialStatus()->updateYourself(tStep);
+    this->giveSlaveGaussPointVisco()->giveMaterialStatus()->updateYourself(tStep);
 
     LatticeMaterialStatus :: updateYourself(tStep);
 }
@@ -247,7 +258,8 @@ LatticeViscoelasticStatus :: saveContext(DataStream &stream, ContextMode mode)
     // save parent class status
     LatticeMaterialStatus :: saveContext(stream, mode);
 
-    this->giveViscoelasticMatStatus()->saveContext(stream, mode);
+    //    this->slaveGpVisco->giveMaterialStatus()->saveContext(stream, mode);
+    this->giveSlaveGaussPointVisco()->giveMaterialStatus()->saveContext(stream, mode);
 }
 
 void
@@ -258,6 +270,7 @@ LatticeViscoelasticStatus :: restoreContext(DataStream &stream, ContextMode mode
 {
     LatticeMaterialStatus :: restoreContext(stream, mode);
 
-    this->giveViscoelasticMatStatus()->restoreContext(stream, mode);
+    //  this->slaveGpVisco->giveMaterialStatus()->restoreContext(stream, mode);
+    this->giveSlaveGaussPointVisco()->giveMaterialStatus()->restoreContext(stream, mode);
 }
 }     // end namespace oofem

@@ -67,6 +67,8 @@ LatticeMaterialStatus :: initTempStatus()
     this->tempCrackFlag = this->crackFlag;
     this->tempCrackWidth = this->crackWidth;
 
+    this->tempDamageLatticeStrain = this->damageLatticeStrain;
+
     this->updateFlag = 0;
 }
 
@@ -83,6 +85,8 @@ LatticeMaterialStatus :: updateYourself(TimeStep *atTime)
     this->plasticLatticeStrain = this->tempPlasticLatticeStrain;
 
     this->reducedLatticeStrain = this->tempReducedLatticeStrain;
+
+    this->damageLatticeStrain = this->tempDamageLatticeStrain;
 
     this->dissipation = this->tempDissipation;
 
@@ -101,23 +105,18 @@ LatticeMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 {
     MaterialStatus :: printOutputAt(file, tStep);
 
-    fprintf(file, "lattice strains ");
+    fprintf(file, " latticestrain ");
     for ( double s : this->latticeStrain ) {
-        fprintf(file, "% .4e ", s );
+        fprintf(file, "% .4e ", s);
     }
-    fprintf(file, "\n");
-
-    fprintf(file, "lattice stress ");
+    fprintf(file, " latticestress ");
     for ( double s : this->latticeStress ) {
-        fprintf(file, "% .4e ", s );
+        fprintf(file, "% .4e ", s);
     }
-    fprintf(file, "\n");
-
-    fprintf(file, "reduced lattice strains ");
+    fprintf(file, " reducedlatticestrain ");
     for ( double s : this->reducedLatticeStrain ) {
-        fprintf(file, "% .4e ", s );
+        fprintf(file, "% .4e ", s);
     }
-    fprintf(file, "\n");
 }
 
 
@@ -159,6 +158,10 @@ LatticeMaterialStatus :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(iores);
     }
 
+    if ( ( iores = damageLatticeStrain.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
     if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
@@ -186,6 +189,10 @@ LatticeMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode)
     MaterialStatus :: saveContext(stream, mode);
 
     contextIOResultType iores;
+
+    if ( ( iores = damageLatticeStrain.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
     if ( ( iores = latticeStress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
