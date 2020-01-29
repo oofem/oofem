@@ -47,7 +47,7 @@ def test_5():
     vtkxml = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,), primvars=(6,), stype=1, pythonExport=0)
     
     # add export module for outputting python lists with values
-    vtkxmlPy = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,), primvars=(6,), stype=1, pythonExport=1)
+    vtkxmlPy = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,37), primvars=(6,), cellvars = (46,47), stype=1, pythonExport=1)
     
     
     print("\nSolving problem")
@@ -76,15 +76,27 @@ def test_5():
         problem.updateYourself( currentStep )
         problem.terminate( currentStep )
         print("TimeStep %d finished" % (timeStep))
+        
+        #get results at nodes and domain
         primVars = vtkxmlPy.getPrimaryVars()
-        print("PrimVars", primVars)
+        print("PrimaryVars Temperature", primVars['Temperature'])
+        intVars = vtkxmlPy.getInternalVars()
+        print("InternalVars IST_Temperature", intVars['IST_Temperature'])
+        cellVars = vtkxmlPy.getCellVars()
+        print("CellVars", cellVars)
+        nodesVTK = vtkxmlPy.getNodes()
+        print("Nodes", nodesVTK)
+        elementsVTK = vtkxmlPy.getElementsConnectivity()
+        print("Elements", elementsVTK)
+        
     problem.terminateAnalysis()
 
     ##check solution
     v3 = problem.giveUnknownComponent(oofempy.ValueModeType.VM_Total, problem.giveCurrentStep(False), domain, domain.giveDofManager(3).giveDofWithID(oofempy.DofIDItem.D_v))
     assert (round (v3-4.608e-4, 8) == 0), "Node 3 dof 2 displacement check failed"
     
-    t1 = primVars[0][1][0][0]
+    
+    t1 = primVars['Temperature'][0][0]
     assert (round (t1-48.0000, 4) == 0), "Export of primary field failed"
     
     problem.terminateAnalysis()

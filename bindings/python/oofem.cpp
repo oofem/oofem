@@ -522,13 +522,20 @@ PYBIND11_MODULE(oofempy, m) {
         })
         .def("__repr__",
             [](const oofem::FloatArray &s) {
+                std::ostringstream streamObj;
+                std::string strObj;
                 std::string a = "<oofempy.FloatArray: {";
                 for ( int i = 0; i < s.giveSize(); ++i ) {
                     if ( i > 40 ) {
                         a.append("...");
                         break;
                     } else {
-                        a.append(std::to_string(s[i]));
+                        streamObj.str("");
+                        streamObj.clear();
+                        streamObj << s[i];//convert to scientific notation if necessary
+                        strObj = streamObj.str();
+                        a.append(strObj);
+                        //a.append(std::to_string(s[i]));
                         a.append(", ");
                     }
                 }
@@ -1007,6 +1014,11 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::VTKXMLExportModule>(m, "VTKXMLExportModule")
     .def("getPrimaryVars", &oofem::VTKXMLExportModule::getPrimaryVars)
+    .def("getInternalVars", &oofem::VTKXMLExportModule::getInternalVars)
+    .def("getCellVars", &oofem::VTKXMLExportModule::getCellVars)
+    .def("getNodes", &oofem::VTKXMLExportModule::getNodes)
+    .def("getElementsConnectivity", &oofem::VTKXMLExportModule::getElementsConnectivity)
+    ;
     ;
     
 

@@ -333,6 +333,16 @@ VTKXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
 
+#ifdef _PYBIND_BINDINGS
+//clear all dictionaries so they can be filled during export
+Py_PrimaryVars.clear();
+Py_IntVars.clear();
+Py_CellVars.clear();
+Py_Nodes.clear();
+Py_Elements.clear();
+#endif
+    
+    
 #ifdef __VTK_MODULE
     this->fileStream = vtkSmartPointer< vtkUnstructuredGrid >::New();
     this->nodes = vtkSmartPointer< vtkPoints >::New();
@@ -393,7 +403,7 @@ VTKXMLExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
                     this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
                     for ( int j = 0; j < ( int ) this->defaultVTKPieces.size(); j++ ) {
-                        anyPieceNonEmpty += this->writeVTKPiece(this->defaultVTKPieces [ j ], tStep);
+                        anyPieceNonEmpty += this->writeVTKPiece(this->defaultVTKPieces [ j ],  tStep);
                     }
 #else
                     // No support for binary export yet
@@ -735,7 +745,7 @@ VTKXMLExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int regio
             cellNum++;
 
             // Set the connectivity
-            this->giveElementCell(cellNodes, elem);  // node numbering of the cell with according to the VTK format
+            this->giveElementCell(cellNodes, elem);  // node numbering of the cell according to the VTK format
 
             // Map from global to local node numbers for the current piece
             int numElNodes = cellNodes.giveSize();
@@ -759,6 +769,40 @@ VTKXMLExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int regio
         this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
 
         this->exportCellVars(vtkPiece, regionElInd, tStep);
+        
+        
+#ifdef _PYBIND_BINDINGS    
+        if ( pythonExport ) {
+        //Export nodes
+            py::list vals;
+            for ( int inode = 1; inode <= numNodes; inode++ ) {
+                py::list node;
+                const int numberG = d->giveNode(mapL2G.at(inode))->giveGlobalNumber();
+                const int number = d->giveNode(mapL2G.at(inode))->giveNumber();
+                const auto &coords = d->giveNode(mapL2G.at(inode))->giveCoordinates();
+                node.append(inode);
+                node.append(number);
+                node.append(numberG);
+                node.append(coords);
+                vals.append(node);
+            }
+            std::string s = std::to_string(region);
+            this->Py_Nodes[s.c_str()] = vals;//keys as region number (VTKPiece)
+       
+       //Export elements
+            py::list elemVals;
+            for ( int ei = 1; ei <= vtkPiece.giveNumberOfCells(); ei++ ) {
+                py::list element;
+                IntArray &conn = vtkPiece.giveCellConnectivity(ei);
+                element.append(ei);
+                element.append(conn);
+                elemVals.append(element);
+            }
+            this->Py_Elements[s.c_str()] = elemVals;//keys as region number (VTKPiece)
+        }
+#endif    
+
+        
     } // end of default piece for simple geometry elements
 }
 
@@ -903,8 +947,7 @@ VTKXMLExportModule::writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
 #endif
 
     //}
-
-
+    
     // Clear object so it can be filled with new data for the next piece
     vtkPiece.clear();
     return true;
@@ -1199,13 +1242,22 @@ VTKXMLExportModule::writeIntVars(VTKPiece &vtkPiece)
         }
 
 #endif
-
-
         // Footer
 #ifndef __VTK_MODULE
         this->fileStream << "</DataArray>\n";
 #endif
-    }
+    
+#ifdef _PYBIND_BINDINGS
+        if ( pythonExport ) {
+            py::list vals;
+            for ( int inode = 1; inode <= numNodes; inode++ ) {
+                valueArray = vtkPiece.giveInternalVarInNode(i, inode);
+                vals.append(valueArray);
+            }
+            this->Py_IntVars[name] = vals;
+        }
+#endif
+    } //end of for
 }
 
 
@@ -1625,16 +1677,12 @@ VTKXMLExportModule::writePrimaryVars(VTKPiece &vtkPiece)
 
  #ifdef _PYBIND_BINDINGS
         if ( pythonExport ) {
-            clearPyList(this->Py_PrimaryVars);
-            py::list result, vals;
-            result.append(name);
-            //result.append(emodel->giveCurrentStep()->giveTargetTime());
+            py::list vals;
             for ( int inode = 1; inode <= numNodes; inode++ ) {
                 FloatArray &valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
                 vals.append(valueArray);
             }
-            result.append(vals);
-            this->Py_PrimaryVars.append(result);
+            this->Py_PrimaryVars[name] = vals;
         }
  #endif
 #endif
@@ -1891,7 +1939,18 @@ VTKXMLExportModule::writeCellVars(VTKPiece &vtkPiece)
         }
         this->fileStream << "</DataArray>\n";
 #endif
-    }
+    
+#ifdef _PYBIND_BINDINGS
+        if ( pythonExport ) {
+            py::list vals;
+            for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+                valueArray = vtkPiece.giveCellVar(i, ielem);
+                vals.append(valueArray);
+            }
+            this->Py_CellVars[name] = vals;
+        }
+ #endif        
+    }//end of for
 }
 
 

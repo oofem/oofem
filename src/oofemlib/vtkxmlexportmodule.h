@@ -191,8 +191,8 @@ protected:
     std::list< std::string >gpPvdBuffer;
 
 #ifdef _PYBIND_BINDINGS
-    ///Lists used for Python export
-    py::list Py_Nodes, Py_PrimaryVars, Py_IntVars, Py_CellVars;
+    ///Dictionaries used for Python export
+    py::dict Py_PrimaryVars, Py_IntVars, Py_CellVars, Py_Nodes, Py_Elements;
 #endif
 
 public:
@@ -241,8 +241,12 @@ public:
 #ifdef _PYBIND_BINDINGS
     void clearPyList(py::list &list) {py::list tmp; list = tmp; }
     
-    py::list getPrimaryVars(void) { return Py_PrimaryVars; }
-
+    py::dict getPrimaryVars(void) { return Py_PrimaryVars; }
+    py::dict getInternalVars(void) { return Py_IntVars; }
+    py::dict getCellVars(void) { return Py_CellVars; }
+    py::dict getNodes(void) { return Py_Nodes; } //from all VTKpieces sorted in dictionary
+    py::dict getElementsConnectivity(void) { return Py_Elements; }
+    
 
 #endif
 
