@@ -9,6 +9,7 @@ namespace py = pybind11;
 #include "logger.h"
 #include "domain.h"
 #include "outputmanager.h"
+#include "modulemanager.h"
 
 using namespace oofem;
 
@@ -106,7 +107,7 @@ oofem::OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(py::kwargs k
         py::handle value = item.second;
 
         transform(key.begin(), key.end(), key.begin(), ::tolower);
-        if (key=="tstep_all" || key=="tstep_step" || key=="tsteps_out" || key=="dofman_all" || key=="dofman_output" || key=="dofman_except" || key=="element_all" || key=="element_output" || key=="element_except") {
+        if (key=="tstep_all" || key=="tstep_step" || key=="tsteps_out" || key=="dofman_all" || key=="dofman_output" || key=="dofman_except" || key=="element_all" || key=="element_output" || key=="element_except" || key=="pythonexport") {
             kw2[key.c_str()] = value;
         }
         kw2[""] = "outputmanager";
@@ -335,7 +336,9 @@ py::object createExportModuleOfType(const char* type, py::args args, py::kwargs 
     if (!module) { oofem::OOFEM_LOG_ERROR("exportModule: wrong input data"); }
     oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
     module->initializeFrom(ir);
-    return py::cast(module.release());
+    module->initialize();
+    engngModel->giveExportModuleManager()->registerModule(module);
+    return py::cast(engngModel->giveExportModuleManager()->giveModule(engngModel->giveExportModuleManager()->giveNumberOfModules()));
 }
 
 

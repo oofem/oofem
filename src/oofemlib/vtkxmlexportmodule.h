@@ -42,12 +42,27 @@
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
 #include "xfem/xfemmanager.h"
-
+#include <iostream>
+#include <fstream>
+#include <iomanip>
 
 #ifdef __VTK_MODULE
  #include <vtkUnstructuredGrid.h>
  #include <vtkSmartPointer.h>
 #endif
+
+#ifdef _PYBIND_BINDINGS
+ #include <pybind11/pybind11.h>
+ #include <pybind11/stl.h>   //Conversion for lists
+namespace py = pybind11;
+#endif
+
+#ifdef _WIN32
+ #define NULL_DEVICE "NUL:"
+#else
+ #define NULL_DEVICE "/dev/null"
+#endif
+
 
 #include <string>
 #include <list>
@@ -64,6 +79,7 @@
 #define _IFT_VTKXMLExportModule_particleexportflag "particleexportflag"
 //@}
 
+using namespace std;
 namespace oofem {
 class Node;
 
@@ -124,13 +140,13 @@ private:
     int numNodes;
     IntArray elCellTypes;
     IntArray elOffsets;
-    std :: vector< FloatArray >nodeCoords; // all the nodes in the piece [node][coords]
-    std :: vector< IntArray >connectivity; // cell connectivity [cell][nodes]
-    std :: vector< std :: vector< FloatArray > >nodeVars; // [field][node][valArray]
-    std :: vector< std :: vector< FloatArray > >nodeLoads; // [field][node][valArray]
-    std :: vector< std :: vector< FloatArray > >nodeVarsFromIS; // [field][node][valArray]
-    std :: vector< std :: vector< std :: vector< FloatArray > > >nodeVarsFromXFEMIS; // [field][ei][node][valArray]
-    std :: vector< std :: vector< FloatArray > >elVars; // [el][field][valArray]
+    std::vector< FloatArray >nodeCoords;   // all the nodes in the piece [node][coords]
+    std::vector< IntArray >connectivity;   // cell connectivity [cell][nodes]
+    std::vector< std::vector< FloatArray > >nodeVars;     // [field][node][valArray]
+    std::vector< std::vector< FloatArray > >nodeLoads;     // [field][node][valArray]
+    std::vector< std::vector< FloatArray > >nodeVarsFromIS;     // [field][node][valArray]
+    std::vector< std::vector< std::vector< FloatArray > > >nodeVarsFromXFEMIS;       // [field][ei][node][valArray]
+    std::vector< std::vector< FloatArray > >elVars;     // [el][field][valArray]
 };
 
 
@@ -159,20 +175,25 @@ protected:
     static IntArray redToFull;
 
     /// Smoother type.
-    NodalRecoveryModel :: NodalRecoveryModelType stype;
+    NodalRecoveryModel::NodalRecoveryModelType stype;
     /// Smoother.
-    std :: unique_ptr< NodalRecoveryModel >smoother;
+    std::unique_ptr< NodalRecoveryModel >smoother;
     /// Smoother for primary variables.
-    std :: unique_ptr< NodalRecoveryModel >primVarSmoother;
+    std::unique_ptr< NodalRecoveryModel >primVarSmoother;
 
     /// particle export flag
     bool particleExportFlag;
 
     /// Buffer for earlier time steps exported to *.pvd file.
-    std :: list< std :: string >pvdBuffer;
+    std::list< std::string >pvdBuffer;
 
     /// Buffer for earlier time steps with gauss points exported to *.gp.pvd file.
-    std :: list< std :: string >gpPvdBuffer;
+    std::list< std::string >gpPvdBuffer;
+
+#ifdef _PYBIND_BINDINGS
+    ///Lists used for Python export
+    py::list Py_Nodes, Py_PrimaryVars, Py_IntVars, Py_CellVars;
+#endif
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
@@ -188,13 +209,13 @@ public:
     /**
      * Prints point data header.
      */
-    void exportPointDataHeader(FILE *fileStream, TimeStep *tStep);
-    void giveDataHeaders(std :: string &pointHeader, std :: string &cellHeader); // returns the headers
+    void exportPointDataHeader(std::ofstream fileStream, TimeStep *tStep);
+    void giveDataHeaders(std::string &pointHeader, std::string &cellHeader);     // returns the headers
     /// Returns the internal smoother.
     NodalRecoveryModel *giveSmoother();
     /// Returns the smoother for primary variables (nodal averaging).
     NodalRecoveryModel *givePrimVarSmoother();
-
+    
 
 #ifdef __VTK_MODULE
     vtkSmartPointer< vtkUnstructuredGrid >fileStream;
@@ -204,12 +225,12 @@ public:
     vtkSmartPointer< vtkDoubleArray >intVarArray;
     vtkSmartPointer< vtkDoubleArray >primVarArray;
 #else
-    FILE *fileStream;
+    std::ofstream fileStream;
 #endif
 
     VTKPiece defaultVTKPiece;
 
-    std :: vector< VTKPiece >defaultVTKPieces;
+    std::vector< VTKPiece >defaultVTKPieces;
 
     /**
      * Computes a cell average of an InternalStateType varible based on the weights
@@ -217,16 +238,25 @@ public:
      */
     static void computeIPAverage(FloatArray &answer, IntegrationRule *iRule, Element *elem,  InternalStateType isType, TimeStep *tStep);
 
+#ifdef _PYBIND_BINDINGS
+    void clearPyList(py::list &list) {py::list tmp; list = tmp; }
+    
+    py::list getPrimaryVars(void) { return Py_PrimaryVars; }
+
+
+#endif
+
+
 protected:
 
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
     static void makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm, InternalStateValueType vtype);
 
     /// Returns the filename for the given time step.
-    std :: string giveOutputFileName(TimeStep *tStep);
+    std::string giveOutputFileName(TimeStep *tStep);
 
     /// Returns the output stream for given solution step.
-    FILE *giveOutputStream(TimeStep *tStep);
+    std::ofstream giveOutputStream(TimeStep *tStep);
     /**
      * Returns corresponding element cell_type.
      * Some common element types are supported, others can be supported via interface concept.
@@ -340,7 +370,7 @@ protected:
 
     bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
     void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
-    void exportCompositeElement(std :: vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
+    void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
 };
 
 
@@ -357,7 +387,7 @@ class OOFEM_EXPORT VTKXMLExportModuleElementInterface : public Interface
 public:
     VTKXMLExportModuleElementInterface() : Interface() { }
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
-    virtual void giveCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
+    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { }
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

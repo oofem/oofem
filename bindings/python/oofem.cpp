@@ -33,6 +33,7 @@
  */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h> //Conversion for lists
 #include <pybind11/operators.h>
 namespace py = pybind11;
 
@@ -87,6 +88,7 @@ namespace py = pybind11;
 
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
+#include "vtkxmlexportmodule.h"
 
 #include "uniformgridfield.h"
 #include "dofmanvalfield.h"
@@ -1003,6 +1005,10 @@ PYBIND11_MODULE(oofempy, m) {
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
+    py::class_<oofem::VTKXMLExportModule>(m, "VTKXMLExportModule")
+    .def("getPrimaryVars", &oofem::VTKXMLExportModule::getPrimaryVars)
+    ;
+    
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
@@ -1305,6 +1311,8 @@ PYBIND11_MODULE(oofempy, m) {
     py::register_exception<oofem::BadFormatInputException>(m, "BadFormatInputException");
     py::register_exception<oofem::ValueInputException>(m, "ValueInputException");
 
+   
+    
     py::enum_<oofem::MatResponseMode>(m, "MatResponseMode")
         .value("TangentStiffness", oofem::MatResponseMode::TangentStiffness)
         .value("SecantStiffness", oofem::MatResponseMode::SecantStiffness)
@@ -1344,6 +1352,7 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
+    m.def("vtkxml", &vtkxml, py::return_value_policy::move);
 
 
 //std::shared_ptr<oofem::Field>
