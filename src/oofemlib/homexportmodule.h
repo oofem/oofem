@@ -37,6 +37,8 @@
 
 #include "exportmodule.h"
 #include "floatarray.h"
+#include <iostream>
+#include <fstream>
 
 ///@name Input fields for Homogenization export module
 //@{
@@ -46,6 +48,7 @@
 #define _IFT_HOMExportModule_scale "scale" ///[optional] Scales the output variables
 //@}
 
+using namespace std;
 namespace oofem {
 /**
  * Represents HOM (Homogenization) export module. It averages internal variables over the whole domain
@@ -61,7 +64,7 @@ protected:
     /// Scale of all homogenized values.
     double scale;
     /// Stream for file.
-    FILE *stream;
+    std::ofstream stream;
     /// Internal states to export
     IntArray ists;
     /// Reactions to export

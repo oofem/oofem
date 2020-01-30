@@ -524,7 +524,9 @@ Py_Elements.clear();
     writer->Write();
 #else
     this->fileStream << "</UnstructuredGrid>\n</VTKFile>";
-    this->fileStream.close();
+    if(this->fileStream){
+        this->fileStream.close();
+    }
 #endif
 
     // export raw ip values (if required), works only on one domain
@@ -2010,7 +2012,9 @@ VTKXMLExportModule::writeVTKCollection()
 
     streamP << "</Collection>\n</VTKFile>";
 
-    streamP.close();
+    if (streamP){
+        streamP.close();
+    }
 }
 
 void
@@ -2041,7 +2045,9 @@ VTKXMLExportModule::writeGPVTKCollection()
 
     outfile << "</Collection>\n</VTKFile>";
 
-    outfile.close();
+    if (outfile){
+        outfile.close();
+    }
 }
 
 
@@ -2269,6 +2275,8 @@ VTKXMLExportModule::exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
     streamG << "</UnstructuredGrid>\n";
     streamG << "</VTKFile>\n";
-    streamG.close();
+    if(streamG){
+        streamG.close();
+    }
 }
 } // end namespace oofem
