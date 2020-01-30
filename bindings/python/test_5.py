@@ -34,21 +34,27 @@ def test_5():
 
     # material and cross section
     mat = oofempy.isoLE(1, domain, d=1., E=30.e3, n=0.2, tAlpha=1.2e-5)
-    cs  = oofempy.simpleCS(1, domain, thick=0.5)
+    cs  = oofempy.simpleCS(1, domain, thick=0.5, material=1, set=1)
     
-    # elements
-    e1 = oofempy.trPlaneStress2d(1, domain, nodes=(1,2,3), mat=1, crossSect=1)
+    # elements - assign through sets
+    e1 = oofempy.trPlaneStress2d(1, domain, nodes=(1,2,3))
     elems = (e1,)
 
+    set1 = oofempy.createSet(1, domain, elements=(1,)) #Ettringite
+
     # setup domain
-    util.setupDomain(domain, nodes, elems, (mat,), (cs,), bcs, ltfs, ())
+    util.setupDomain(domain, nodes, elems, (cs,), (mat,), bcs, (), ltfs, (set1,))
     
-    # add export module for outputting regular VTU files
+    # add export module for outputting regular VTU files - automatically registered
     vtkxml = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,), primvars=(6,), stype=1, pythonExport=0)
     
-    # add export module for outputting python lists with values
-    vtkxmlPy = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,37), primvars=(6,), cellvars = (46,47), stype=1, pythonExport=1)
+    # add export module for outputting python lists with values - automatically registered
+    vtkxmlPy = oofempy.vtkxml(1, problem, domain_all=True, tstep_all=True, dofman_all=True, element_all=True, vars=(56,37), primvars=(6,), cellvars = (47,103), stype=1, pythonExport=1)
     
+    #add homogenization module - automatically registered
+    homPy1 = oofempy.homExport(3, problem, tstep_all=True, ists=(1,4), regionsets=(1,))
+    
+   
     
     print("\nSolving problem")
     problem.checkProblemConsistency()

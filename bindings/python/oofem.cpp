@@ -89,6 +89,7 @@ namespace py = pybind11;
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
 #include "vtkxmlexportmodule.h"
+#include "homexportmodule.h"
 
 #include "uniformgridfield.h"
 #include "dofmanvalfield.h"
@@ -1000,6 +1001,10 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
     ;
 
+    py::class_<oofem::Set, oofem::FEMComponent>(m, "Set")
+    ;
+
+    
     py::class_<oofem::UnknownNumberingScheme>(m, "UnknownNumberingScheme")
     ;
 
@@ -1012,6 +1017,9 @@ PYBIND11_MODULE(oofempy, m) {
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
+    py::class_<oofem::HOMExportModule>(m, "HOMExportModule")
+    ;
+    
     py::class_<oofem::VTKXMLExportModule>(m, "VTKXMLExportModule")
     .def("getPrimaryVars", &oofem::VTKXMLExportModule::getPrimaryVars)
     .def("getInternalVars", &oofem::VTKXMLExportModule::getInternalVars)
@@ -1019,13 +1027,12 @@ PYBIND11_MODULE(oofempy, m) {
     .def("getNodes", &oofem::VTKXMLExportModule::getNodes)
     .def("getElementsConnectivity", &oofem::VTKXMLExportModule::getElementsConnectivity)
     ;
-    ;
     
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
         .def("createEngngModel", &oofem::ClassFactory::createEngngModel)
-        ;
+    ;
 
     m.def("getClassFactory", &oofem::GiveClassFactory, py::return_value_policy::reference);
     m.def("InstanciateProblem", &oofem::InstanciateProblem);
@@ -1353,18 +1360,24 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("truss1d", &truss1d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
     m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);
+    m.def("planeStress2d", &planeStress2d, py::return_value_policy::move);
     
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
     m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);
     m.def("nodalLoad", &nodalLoad, py::return_value_policy::move);
     m.def("structTemperatureLoad", &structTemperatureLoad, py::return_value_policy::move);
+    m.def("structEigenstrainLoad", &structEigenstrainLoad, py::return_value_policy::move);
     m.def("isoLE", &isoLE, py::return_value_policy::move);
+    m.def("idm1", &idm1, py::return_value_policy::move);
+    
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
     m.def("vtkxml", &vtkxml, py::return_value_policy::move);
+    m.def("homExport", &homExport, py::return_value_policy::move);
+    m.def("createSet", &createSet, py::return_value_policy::move);
 
 
 //std::shared_ptr<oofem::Field>

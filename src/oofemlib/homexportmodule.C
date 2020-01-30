@@ -75,7 +75,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     for ( int ireg = 1; ireg <= this->giveNumberOfRegions(); ireg++ ) {
         elements.followedBy(this->giveRegionSet(ireg)->giveElementList());
     }
-    //elements.printYourself();
+    elements.printYourself();
 
     if (!ists.isEmpty()) {
         for ( int ist: ists ) {

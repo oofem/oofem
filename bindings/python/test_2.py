@@ -47,7 +47,7 @@ def test_2():
     elems = (e1, e2, e3, e4, e5)
 
     # add eveything to domain (resize container first to save some time, but it is not necessary 0 see ltfs)
-    util.setupDomain(domain, nodes, elems, (mat,), (cs,), bcs, ltfs, ())
+    util.setupDomain(domain, nodes, elems, (cs,), (mat,),  bcs, (), ltfs, ())
 
     print("\nSolving problem")
     problem.checkProblemConsistency()

@@ -10,6 +10,7 @@ namespace py = pybind11;
 #include "domain.h"
 #include "outputmanager.h"
 #include "modulemanager.h"
+#include "set.h"
 
 using namespace oofem;
 
@@ -92,8 +93,8 @@ oofem::OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(py::kwargs &kw)
         }
         */  
    } 
-    transform(rec.begin(), rec.end(), rec.begin(), ::tolower); // convert to lowercase
-    //    std::cout << rec << std::endl;
+    transform(rec.begin(), rec.end(), rec.begin(), ::tolower); // convert to lowercase, text probably in "" should not be converted (like filenames)
+//     std::cout << rec << std::endl;
     oofem::OOFEMTXTInputRecord answer(0, rec) ;
     return answer;
 }
@@ -107,6 +108,7 @@ oofem::OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(py::kwargs k
         py::handle value = item.second;
 
         transform(key.begin(), key.end(), key.begin(), ::tolower);
+        
         if (key=="tstep_all" || key=="tstep_step" || key=="tsteps_out" || key=="dofman_all" || key=="dofman_output" || key=="dofman_except" || key=="element_all" || key=="element_output" || key=="element_except" || key=="pythonexport") {
             kw2[key.c_str()] = value;
         }
@@ -223,6 +225,7 @@ py::object createElementOfType(const char* type, py::args args, py::kwargs kw)
 py::object beam2d(py::args args, py::kwargs &kw) { return createElementOfType("beam2d",args,kw); }
 py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("truss1d",args,kw); }
 py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
+py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
 
 
 
@@ -266,6 +269,9 @@ py::object boundaryCondition(py::args args, py::kwargs kw) { return createGenera
 py::object constantEdgeLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("constantedgeload",args,kw); }
 py::object nodalLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("nodalload",args,kw); }
 py::object structTemperatureLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("structtemperatureload",args,kw); }
+py::object structEigenstrainLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("structEigenstrainLoad",args,kw); }
+
+
 
 
 /*****************************************************
@@ -283,6 +289,7 @@ py::object createMaterialOfType(const char* type, py::args args, py::kwargs kw)
 }
 
 py::object isoLE(py::args args, py::kwargs kw) { return createMaterialOfType("isole",args,kw); }
+py::object idm1(py::args args, py::kwargs kw) { return createMaterialOfType("idm1",args,kw); }
 
 
 /*****************************************************
@@ -298,7 +305,6 @@ py::object createCrossSectionOfType(const char* type, py::args args, py::kwargs 
     cs->initializeFrom(ir);
     return py::cast(cs.release());
 }
-
 
 py::object simpleCS(py::args args, py::kwargs kw) { return createCrossSectionOfType("simplecs",args,kw); }
 
@@ -341,5 +347,22 @@ py::object createExportModuleOfType(const char* type, py::args args, py::kwargs 
     return py::cast(engngModel->giveExportModuleManager()->giveModule(engngModel->giveExportModuleManager()->giveNumberOfModules()));
 }
 
-
 py::object vtkxml(py::args args, py::kwargs kw) { return createExportModuleOfType("vtkxml",args,kw); }
+py::object homExport(py::args args, py::kwargs kw) { return createExportModuleOfType("hom",args,kw); }
+
+
+/*****************************************************
+* Sets
+*****************************************************/
+py::object createSetOfType(const char* type, py::args args, py::kwargs kw)
+{
+    int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
+    oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
+    std::unique_ptr<Set> setP = std::make_unique<Set>(number, domain);
+    if ( !setP ) { oofem::OOFEM_LOG_ERROR("Couldn't create set: %d", number); }
+    oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    setP->initializeFrom(ir);
+    return py::cast(setP.release());
+}
+
+py::object createSet(py::args args, py::kwargs kw) { return createSetOfType("set",args,kw); }
