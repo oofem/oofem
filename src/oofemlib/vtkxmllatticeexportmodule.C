@@ -654,6 +654,11 @@ VTKXMLLatticeExportModule::exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
                             valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3);
                             valueArray.at(3) = helpArray.at(3);
+                        } else if ( dofIdArray.giveSize() == 1 && dofIdArray.at(1) == E_xx ) { //Macroscale: 3D truss. 1 DOF: EXX
+                            valueArray.resize(helpArray.giveSize() );
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
+                            valueArray.at(2) = helpArray.at(2);
+                            valueArray.at(3) = helpArray.at(3);
                         } else if ( dofIdArray.giveSize() == 6 && dofIdArray.at(1) == E_xx && dofIdArray.at(2) == E_yy && dofIdArray.at(3) == E_zz && dofIdArray.at(4) == G_yz && dofIdArray.at(5) == G_xz && dofIdArray.at(6) == G_xy ) { //Macroscale: 3D solid using Voigt notation
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
