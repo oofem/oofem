@@ -749,9 +749,9 @@ void Lattice2dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
 
     //Node Three
     FloatArray dispThree(3);
-    dispThree.at(1) = this->giveNode(3)->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep);
-    dispThree.at(2) = this->giveNode(3)->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep);
-    dispThree.at(3) = this->giveNode(3)->giveDofWithID(R_w)->giveUnknown(VM_Total, tStep);
+    dispThree.at(1) = this->giveNode(3)->giveDofWithID(E_xx)->giveUnknown(VM_Total, tStep);
+    dispThree.at(2) = this->giveNode(3)->giveDofWithID(E_yy)->giveUnknown(VM_Total, tStep);
+    dispThree.at(3) = this->giveNode(3)->giveDofWithID(G_xy)->giveUnknown(VM_Total, tStep);
 
     //Modify dispOne and dispTwo
     dispTwo.at(1) = dispTwo.at(1) + projectionComponent.at(1) * dispThree.at(1);
