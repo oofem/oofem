@@ -800,12 +800,47 @@ VTKXMLLatticeExportModule::writeVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep 
     this->fileStreamCross << "</PointData>\n";
     this->fileStreamCross << cellHeader.c_str();
 
-    this->writeCellVars(vtkPieceCross);
+    this->writeCellVarsCross(vtkPieceCross);
 
     this->fileStreamCross << "</CellData>\n";
     this->fileStreamCross << "</Piece>\n";
 
     vtkPieceCross.clear();
     return true;
+}
+
+void
+VTKXMLLatticeExportModule::writeCellVarsCross(VTKPiece &vtkPiece)
+{
+    FloatArray valueArray;
+    int numCells = vtkPiece.giveNumberOfCells();
+    for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
+        InternalStateValueType valType = giveInternalStateValueType(type);
+        int ncomponents = giveInternalStateTypeSize(valType);
+        const char *name = __InternalStateTypeToString(type);
+        ( void ) name; //silence the warning
+
+        this->fileStreamCross << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
+        valueArray.resize(ncomponents);
+        for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+            valueArray = vtkPiece.giveCellVar(i, ielem);
+            for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
+                this->fileStreamCross << valueArray.at(i) << " ";
+            }
+        }
+        this->fileStreamCross << "</DataArray>\n";
+
+#ifdef _PYBIND_BINDINGS
+        if ( pythonExport ) {
+            py::list vals;
+            for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+                valueArray = vtkPiece.giveCellVar(i, ielem);
+                vals.append(valueArray);
+            }
+            this->Py_CellVars [ name ] = vals;
+        }
+#endif
+    }//end of for
 }
 } // end namespace oofem
