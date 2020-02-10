@@ -98,6 +98,8 @@ public:
 
     void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region) override;
 
+    void writeCellVarsCross(VTKPiece &vtkPiece);
+
     void setupVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep, int region);
 
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
