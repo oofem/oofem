@@ -79,6 +79,9 @@ public:
     /// Destructor.
     virtual ~Node2NodeLagrangianMultiplierContact() {};
 
+	Node2NodeLagrangianMultiplierContact(const Node2NodeLagrangianMultiplierContact&) = delete;
+	Node2NodeLagrangianMultiplierContact& operator = (const Node2NodeLagrangianMultiplierContact&) = delete;
+
     void initializeFrom(InputRecord &ir) override;
 
     void assemble(SparseMtrx &answer, TimeStep *tStep,
