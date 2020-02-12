@@ -4,7 +4,8 @@ sudo: required
 before_install:
    - PYCMD=$(which python3)
    - echo $PYCMD
-   - sudo $PYCMD -m pip install --upgrade pytest
+   - sudo -H $PYCMD -m pip install --upgrade pip
+   - sudo -H $PYCMD -m pip install --upgrade pytest
    - git clone https://github.com/pybind/pybind11.git; cd pybind11; git checkout stable; cd ..
 install:
    - echo $PYCMD
