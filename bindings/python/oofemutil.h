@@ -17,11 +17,16 @@ oofem::OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(py::kwargs &kw)
     py::dict tmp;
     std::string rec;
     std::string space= " ";
+
+#ifdef _MSC_VER 
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
     
     for (auto item: kw) {
         std::string key = std::string(py::str(item.first));
         py::handle value = item.second;
-        if ((strcasecmp(std::string(key).c_str(), "number") == 0) or (strcasecmp(std::string(key).c_str(), "domain") == 0))
+        if ((strcasecmp(std::string(key).c_str(), "number") == 0) || (strcasecmp(std::string(key).c_str(), "domain") == 0))
             continue;
         if (key=="f_t") key="f(t)"; // handle f(t) loadTimeFunction field name
         rec.append(space);
@@ -29,7 +34,7 @@ oofem::OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(py::kwargs &kw)
         if (PyBool_Check(value.ptr())) {
             // printf ("huhu\n");
             ;
-        } else if (PyNumber_Check(value.ptr()) or PyUnicode_Check(value.ptr())) {
+        } else if (PyNumber_Check(value.ptr()) || PyUnicode_Check(value.ptr())) {
             PyObject* repr = PyObject_Str(value.ptr()); //PyObject_Repr puts single quotes around
             PyObject* str = PyUnicode_AsEncodedString(repr, "utf-8", "~E~");
             const char*bytes = PyBytes_AS_STRING(str) ;

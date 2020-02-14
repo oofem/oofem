@@ -38,6 +38,8 @@
 #include "floatarray.h"
 #include "gaussintegrationrule.h"
 
+#include<stdexcept>
+
 namespace oofem {
 void
 FEI2dQuadConst :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

@@ -39,6 +39,8 @@
 #include "floatarray.h"
 #include "gaussintegrationrule.h"
 
+#include<stdexcept>
+
 namespace oofem {
 void
 FEI3dTrLin :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

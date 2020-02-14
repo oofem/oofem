@@ -43,6 +43,7 @@
 #include <iosfwd>
 #include <initializer_list>
 #include <algorithm>
+#include <string>
 
 #ifdef _BOOSTPYTHON_BINDINGS
 namespace boost {

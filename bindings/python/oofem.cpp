@@ -108,8 +108,10 @@ void test (oofem::Element& e) {
     Trampoline classes
 */
 template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
+    public:    
         // inherit the constructor
         using ElementBase::ElementBase;
+    private:
         // trampoline (need one for each virtual method)
         int giveNumberOfDofs() override {
             PYBIND11_OVERLOAD (int, ElementBase, giveNumberOfDofs,);
@@ -164,8 +166,10 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
     };
 
     template <class StructuralElementBase = oofem::StructuralElement> class PyStructuralElement : public PyElement<StructuralElementBase> {
+    public:
         // inherit the constructor
         using PyElement<StructuralElementBase>::PyElement;
+    private:
         // trampoline (need one for each virtual method)
         void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override {
             PYBIND11_OVERLOAD (void, StructuralElementBase, computeMassMatrix, std::ref(answer), tStep);
@@ -195,8 +199,10 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
 
     template <class IntegrationPointStatusBase = oofem::IntegrationPointStatus> class PyIntegrationPointStatus : public IntegrationPointStatusBase {
+    public:
         // inherit the constructor
         using IntegrationPointStatusBase::IntegrationPointStatusBase;
+    private:
         // trampoline (need one for each virtual method)
         const char *giveClassName() const override {
             PYBIND11_OVERLOAD_PURE (const char*, IntegrationPointStatusBase, giveClassName,);
@@ -204,8 +210,10 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
     };
 
     template <class MaterialStatusBase = oofem::MaterialStatus> class PyMaterialStatus : public PyIntegrationPointStatus<MaterialStatusBase> {
+    public:
         // inherit the constructor
         using PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus;
+    private:
         // trampoline (need one for each virtual method)
         void printOutputAt(FILE *file, TimeStep *tStep) const override {
             PYBIND11_OVERLOAD (void, MaterialStatusBase, printOutputAt, file, tStep);
@@ -226,14 +234,17 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
     };
 
     template <class StructuralMaterialStatusBase = oofem::StructuralMaterialStatus> class PyStructuralMaterialStatus : public PyMaterialStatus<StructuralMaterialStatusBase> {
+    public:
         // inherit the constructor
         using PyMaterialStatus<StructuralMaterialStatusBase>::PyMaterialStatus;
     };
 
 
     template <class MaterialBase = oofem::Material> class PyMaterial : public MaterialBase {
+    public:
         // inherit the constructor
         using MaterialBase::MaterialBase;
+    private:
         // trampoline (need one for each virtual method)
         bool isCharacteristicMtrxSymmetric(oofem::MatResponseMode rMode) const override {
             PYBIND11_OVERLOAD(bool, MaterialBase, isCharacteristicMtrxSymmetric, rMode);
@@ -298,8 +309,10 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
     };
 
     template <class StructuralMaterialBase = oofem::StructuralMaterial> class PyStructuralMaterial : public PyMaterial<StructuralMaterialBase> {
+    public:
         // inherit the constructor
         using PyMaterial<StructuralMaterial>::PyMaterial;
+    private:
         // trampoline (need one for each virtual method)
         bool hasMaterialModeCapability(oofem::MaterialMode mode) const override {
             PYBIND11_OVERLOAD(bool, StructuralMaterialBase, hasMaterialModeCapability, mode);
