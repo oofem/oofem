@@ -1,0 +1,52 @@
+test_wp6.out
+Winkler pasternak model: test of constant surface load in step 1 on quadratic elements. The same load applies in step 2, using equivalent nodal load instead.
+StaticStructural nsteps 2 nmodules 1
+#vtkxml tstep_step 1 domain_all primvars 1 1  vars 3 1 2 4 stype 0
+errorcheck
+domain 2dMindlinPlate
+OutputManager tstep_all dofman_all element_all
+ndofman 14 nelem 3 ncrosssect 1 nmat 1 nbc 4 nic 0 nltf 2 nset 5
+node  1 coords 3  0.00 0.0  0.0
+node  2 coords 3  0.15 0.0  0.0
+node  3 coords 3  0.30 0.0  0.0
+node  4 coords 3  0.55 0.0  0.0
+node  5 coords 3  0.80 0.0  0.0
+node  6 coords 3  0.00 0.5  0.0
+node  7 coords 3  0.15 0.5  0.0
+node  8 coords 3  0.30 0.5  0.0
+node  9 coords 3  0.55 0.5  0.0
+node  10 coords 3  0.80 0.5  0.0
+node  11 coords 3  0.00 0.25  0.0
+node  12 coords 3  0.30 0.25  0.0
+node  13 coords 3  0.55 0.25  0.0
+node  14 coords 3  0.80 0.25  0.0
+quad2platesubsoil 1 nodes 8  1 3 8 6 2 12 7 11
+Tria2PlateSubSoil 2 nodes 6  3 5 8 4 13 12
+Tria2PlateSubSoil 3 nodes 6  5 10 8 14 9 13
+SimpleCS 1 thick 1.0 material 1 set 1
+winklerpasternak 1 d 2500. c1 3.0 c2 0.4
+ConstantSurfaceLoad 1 loadTimeFunction 1 dofs 1 3 Components 1 7.0 set 2
+#Quadratic triangle - equivalent nodal load is just at mid-points of edges. Corver vertices have zero load.
+NodalLoad 2 loadTimeFunction 2 dofs 1 3 Components 1 0.29166666666 set 3
+#Quadratic rectangle - equivalent nodal load at mid-nodes A*q/3 (total 4*A*q), at corner vertices -A*q/12 (total -A*q*3)
+NodalLoad 3 loadTimeFunction 2 dofs 1 3 Components 1 0.35 set 4
+NodalLoad 4 loadTimeFunction 2 dofs 1 3 Components 1 -0.0875 set 5
+PeakFunction 1 t 1.0 f(t) 1.
+PeakFunction 2 t 2.0 f(t) 1.
+Set 1 allelements
+Set 2 elementboundaries 4 1 1 2 1
+Set 3 nodes 3 4 13 12
+Set 4 nodes 4 2 12 7 11
+Set 5 nodes 4 1 3 8 6
+#%BEGIN_CHECK% tolerance 5.e-4
+#NODE tStep 1 number 1 dof 3 unknown d value 1.94199900e+00
+#NODE tStep 1 number 3 dof 3 unknown d value 1.79566126e+00
+#NODE tStep 1 number 4 dof 3 unknown d value 1.59531221e+00
+#NODE tStep 1 number 5 dof 3 unknown d value 1.38671935e+00
+#NODE tStep 1 number 8 dof 3 unknown d value 1.67031938e+00
+#NODE tStep 2 number 1 dof 3 unknown d value 1.94199900e+00
+#NODE tStep 2 number 3 dof 3 unknown d value 1.79566126e+00
+#NODE tStep 2 number 4 dof 3 unknown d value 1.59531221e+00
+#NODE tStep 2 number 5 dof 3 unknown d value 1.38671935e+00
+#NODE tStep 2 number 8 dof 3 unknown d value 1.67031938e+00
+#%END_CHECK%

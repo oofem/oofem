@@ -106,11 +106,14 @@ protected:
     /**
      * @name Surface load support
      */
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;    
+    void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords) override;
+    
     //@{
-    void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
-    double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) override;
-    int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) override;
+    //void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    //void giveSurfaceDofMapping(IntArray &answer, int iSurf) const override;
+    //double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) override;
+    //int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp) override;
     //@}
 };
 } // end namespace oofem

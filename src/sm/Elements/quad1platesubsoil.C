@@ -242,40 +242,55 @@ Quad1PlateSubSoil :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &a
     }
 }
 
-
 void
-Quad1PlateSubSoil :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+Quad1PlateSubSoil ::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+// Returns the [1x4] displacement interpolation matrix {N}
 {
-  this->computeNmatrixAt(sgp->giveNaturalCoordinates(), answer);
+    FloatArray N(4);
+    giveInterpolation()->evalN(N, iLocCoord, FEIElementGeometryWrapper(this) );
+    answer.beNMatrixOf(N, 1);
 }
 
+
 void
-Quad1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+Quad1PlateSubSoil ::computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
 {
-    answer.resize(4);
-    answer.zero();
-    if ( iSurf == 1 ) {
-        for (int i = 1; i <= 4; i++) {
-            answer.at(i) = i;
-        }
+    if (boundaryID == 1) {
+        this->computeNmatrixAt(lcoords, answer);
     } else {
-        OOFEM_ERROR("wrong surface number");
+        OOFEM_ERROR("computeSurfaceNMatrix: Only one surface is supported with id=1");
     }
 }
 
 
-double
-Quad1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
-{
-    return this->computeVolumeAround(gp);
-}
+
+// void
+// Quad1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+// {
+//     answer.resize(4);
+//     answer.zero();
+//     if ( iSurf == 1 ) {
+//         for (int i = 1; i <= 4; i++) {
+//             answer.at(i) = i;
+//         }
+//     } else {
+//         OOFEM_ERROR("wrong surface number");
+//     }
+// }
 
 
-int
-Quad1PlateSubSoil :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
-{
-    return 0;
-}
+// double
+// Quad1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+// {
+//     return this->computeVolumeAround(gp);
+// }
+
+
+// int
+// Quad1PlateSubSoil :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+// {
+//     return 0;
+// }
 
 
 } // end namespace oofem

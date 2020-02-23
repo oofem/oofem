@@ -106,7 +106,7 @@ Tria2PlateSubSoil :: initializeFrom(InputRecord &ir)
     StructuralElement :: initializeFrom(ir);
 }
 
-//TODO ZZNodalRecoveryModel can not determine some values.  This is cause by sum of row entries is zero for (N^T)N matrix for vertices,  yielding zero entries in lumped form.
+//TODO ZZNodalRecoveryModel can not determine some values.  This is caused by sum of row entries is zero for (N^T)N matrix for vertices, yielding zero entries in the lumped form.
 
 void
 Tria2PlateSubSoil :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
@@ -142,6 +142,25 @@ SPRPatchType
 Tria2PlateSubSoil :: SPRNodalRecoveryMI_givePatchType()
 { 
     return SPRPatchType_2dquadratic;
+}
+
+void
+Tria2PlateSubSoil ::computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
+// Returns the [1x6] displacement interpolation matrix {N}
+{
+    FloatArray N(6);
+    giveInterpolation()->evalN(N, iLocCoord, FEIElementGeometryWrapper(this) );
+    answer.beNMatrixOf(N, 1);
+}
+
+void
+Tria2PlateSubSoil :: computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords)
+{
+    if (boundaryID == 1) {
+        this->computeNmatrixAt(lcoords, answer);
+    } else {
+        OOFEM_ERROR("computeSurfaceNMatrix: Only one surface is supported with id=1");
+    }
 }
 
 } // end namespace oofem
