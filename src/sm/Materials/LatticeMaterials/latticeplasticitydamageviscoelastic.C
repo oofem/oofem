@@ -45,13 +45,13 @@
 namespace oofem {
 REGISTER_Material(LatticePlasticityDamageViscoelastic);
 
-LatticePlasticityDamageViscoelastic :: LatticePlasticityDamageViscoelastic(int n, Domain *d) : LatticePlasticityDamage(n, d)
+LatticePlasticityDamageViscoelastic::LatticePlasticityDamageViscoelastic(int n, Domain *d) : LatticePlasticityDamage(n, d)
 {}
 
 void
-LatticePlasticityDamageViscoelastic :: initializeFrom(InputRecord &ir)
+LatticePlasticityDamageViscoelastic::initializeFrom(InputRecord &ir)
 {
-    LatticePlasticityDamage :: initializeFrom(ir);
+    LatticePlasticityDamage::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, viscoMat, _IFT_LatticePlasticityDamageViscoelastic_viscoMat); // number of slave material
 
@@ -68,16 +68,16 @@ LatticePlasticityDamageViscoelastic :: initializeFrom(InputRecord &ir)
 
 
 MaterialStatus *
-LatticePlasticityDamageViscoelastic :: CreateStatus(GaussPoint *gp) const
+LatticePlasticityDamageViscoelastic::CreateStatus(GaussPoint *gp) const
 {
-    return new LatticePlasticityDamageViscoelasticStatus(1, LatticePlasticityDamageViscoelastic :: domain, gp);
+    return new LatticePlasticityDamageViscoelasticStatus(1, LatticePlasticityDamageViscoelastic::domain, gp);
 }
 
 
 FloatArrayF< 6 >
-LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
-                                                           GaussPoint *gp,
-                                                           TimeStep *tStep)
+LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
+                                                         GaussPoint *gp,
+                                                         TimeStep *tStep)
 {
     double tol = 1.e-12; // error in order of Pascals
 
@@ -105,7 +105,7 @@ LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 
     FloatArray indepStrain;
     indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
 
-    auto elasticStiffnessMatrix = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto elasticStiffnessMatrix = LatticeLinearElastic::give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     double tolerance = 1.;
 
@@ -156,7 +156,7 @@ LatticePlasticityDamageViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 
 
 
 FloatMatrixF< 6, 6 >
-LatticePlasticityDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
+LatticePlasticityDamageViscoelastic::give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     LatticePlasticityDamageViscoelasticStatus *status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
     GaussPoint *slaveGp;
@@ -169,18 +169,26 @@ LatticePlasticityDamageViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseM
 
     double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
 
-    auto answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto answer = LatticeLinearElastic::give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     answer *= ( Eincr / this->eNormalMean );
 
-    return answer;
+    if ( rmode == ElasticStiffness ) {
+        return answer;
+    } else if ( ( rmode == SecantStiffness ) || ( rmode == TangentStiffness ) ) {
+        double omega = min(status->giveTempDamage(), 0.99999);
+        return answer * ( 1. - omega );
+    } else {
+        OOFEM_ERROR("Unsupported stiffness mode\n");
+        return answer;
+    }
 }
 
 int
-LatticePlasticityDamageViscoelastic :: giveIPValue(FloatArray &answer,
-                                                   GaussPoint *gp,
-                                                   InternalStateType type,
-                                                   TimeStep *tStep)
+LatticePlasticityDamageViscoelastic::giveIPValue(FloatArray &answer,
+                                                 GaussPoint *gp,
+                                                 InternalStateType type,
+                                                 TimeStep *tStep)
 {
     if ( ( type == IST_DryingShrinkageTensor ) ||
          ( type == IST_AutogenousShrinkageTensor ) ||
@@ -194,11 +202,11 @@ LatticePlasticityDamageViscoelastic :: giveIPValue(FloatArray &answer,
         return rheoMat->giveIPValue(answer, status->giveSlaveGaussPointVisco(), type, tStep);
     }
 
-    return LatticePlasticityDamage :: giveIPValue(answer, gp, type, tStep);
+    return LatticePlasticityDamage::giveIPValue(answer, gp, type, tStep);
 }
 
 
-int LatticePlasticityDamageViscoelastic :: checkConsistency()
+int LatticePlasticityDamageViscoelastic::checkConsistency()
 {
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
@@ -216,20 +224,20 @@ int LatticePlasticityDamageViscoelastic :: checkConsistency()
     }
 
 
-    return FEMComponent :: checkConsistency();
+    return FEMComponent::checkConsistency();
 }
 
 
-LatticePlasticityDamageViscoelasticStatus :: LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *gp) :
-    LatticePlasticityDamageStatus(n, d, gp), slaveGpVisco(std :: make_unique< GaussPoint >(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
+LatticePlasticityDamageViscoelasticStatus::LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *gp) :
+    LatticePlasticityDamageStatus(n, d, gp), slaveGpVisco( std::make_unique< GaussPoint >( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
 {}
 
 void
-LatticePlasticityDamageViscoelasticStatus :: initTempStatus()
+LatticePlasticityDamageViscoelasticStatus::initTempStatus()
 //
 // initializes temp variables according to variables form previous equlibrium state.
 {
-    LatticePlasticityDamageStatus :: initTempStatus();
+    LatticePlasticityDamageStatus::initTempStatus();
 
     // at this point rheomat :: giveStatus (viscoGP) has to be called first
     RheoChainMaterialStatus *rheoStatus = static_cast< RheoChainMaterialStatus * >( this->giveSlaveGaussPointVisco()->giveMaterialStatus() );
@@ -238,9 +246,9 @@ LatticePlasticityDamageViscoelasticStatus :: initTempStatus()
 }
 
 void
-LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
+LatticePlasticityDamageViscoelasticStatus::printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    LatticePlasticityDamageStatus :: printOutputAt(file, tStep);
+    LatticePlasticityDamageStatus::printOutputAt(file, tStep);
     fprintf(file, "\nViscoelastic material:");
 
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->printOutputAt(file, tStep);
@@ -250,7 +258,7 @@ LatticePlasticityDamageViscoelasticStatus :: printOutputAt(FILE *file, TimeStep 
 
 
 void
-LatticePlasticityDamageViscoelasticStatus :: updateYourself(TimeStep *tStep)
+LatticePlasticityDamageViscoelasticStatus::updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
@@ -259,28 +267,28 @@ LatticePlasticityDamageViscoelasticStatus :: updateYourself(TimeStep *tStep)
 {
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->updateYourself(tStep);
 
-    LatticePlasticityDamageStatus :: updateYourself(tStep);
+    LatticePlasticityDamageStatus::updateYourself(tStep);
 }
 
 void
-LatticePlasticityDamageViscoelasticStatus :: saveContext(DataStream &stream, ContextMode mode)
+LatticePlasticityDamageViscoelasticStatus::saveContext(DataStream &stream, ContextMode mode)
 //
 // saves full information stored in this Status
 // no temp variables stored
 //
 {
-    LatticePlasticityDamageStatus :: saveContext(stream, mode);
+    LatticePlasticityDamageStatus::saveContext(stream, mode);
 
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->saveContext(stream, mode);
 }
 
 void
-LatticePlasticityDamageViscoelasticStatus :: restoreContext(DataStream &stream, ContextMode mode)
+LatticePlasticityDamageViscoelasticStatus::restoreContext(DataStream &stream, ContextMode mode)
 //
 // restores full information stored in stream to this Status
 //
 {
-    LatticePlasticityDamageStatus :: restoreContext(stream, mode);
+    LatticePlasticityDamageStatus::restoreContext(stream, mode);
 
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->restoreContext(stream, mode);
 }
