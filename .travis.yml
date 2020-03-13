@@ -16,7 +16,7 @@ script:
    - CXX=g++-6 cmake -DPYTHON_EXECUTABLE=$PYCMD -DUSE_PYBIND_BINDINGS=ON -DUSE_PYTHON_EXTENSION=ON -DENABLE_COVERAGE:BOOL=TRUE .
    - make -j 2
    - make test
-   #Comment out various unrelated messages, read configuration from oofem/codecov.yml
+   #Comment out various unrelated messages
    #- bash <(curl -s https://codecov.io/bash)
    
 addons:
