@@ -63,6 +63,7 @@ namespace py = pybind11;
 #include "matstatus.h"
 #include "Materials/structuralmaterial.h"
 #include "Materials/structuralms.h"
+#include "Materials/isoheatmat.h"
 
 #include "crosssection.h"
 
@@ -878,7 +879,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setDofManagers", &oofem::Element::setDofManagers)
         .def("setNumberOfDofManagers", &oofem::Element::setNumberOfDofManagers)
         .def("giveDofManDofIDMask", &oofem::Element::giveDofManDofIDMask)
-
+        .def("getActivityTimeFunction", &oofem::Element::getActivityTimeFunction)
+        .def("setActivityTimeFunction", &oofem::Element::setActivityTimeFunction)
     ;
 
     py::class_<oofem::StructuralElement, oofem::Element, PyStructuralElement<>>(m, "StructuralElement")
@@ -998,6 +1000,11 @@ PYBIND11_MODULE(oofempy, m) {
         .def("CreateStatus", &oofem::StructuralMaterial::CreateStatus, py::return_value_policy::reference)
     ;
 
+    py::class_<oofem::IsotropicHeatTransferMaterial, oofem::Material>(m, "IsotropicHeatTransferMaterial")
+        .def(py::init<int, oofem::Domain*>())
+        .def("giveTemperature", &oofem::IsotropicHeatTransferMaterial::giveTemperature)
+    ;
+
     py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
     ;
 
@@ -1010,7 +1017,7 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::IntegrationRule>(m, "IntegrationRule")
         .def("giveNumberOfIntegrationPoints", &oofem::IntegrationRule::giveNumberOfIntegrationPoints)
-        .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint)
+        .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint, py::return_value_policy::reference)
     ;
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
       .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)() const) &oofem::GaussPoint::giveMaterialStatus, py::return_value_policy::reference)

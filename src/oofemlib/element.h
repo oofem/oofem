@@ -638,6 +638,20 @@ public:
     int giveMaterialNumber() const {return material;}
     /// @return Reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
+
+
+    /**
+     * Gets the activity time function number.
+     */
+    int getActivityTimeFunction(){ return this->activityTimeFunction; }
+
+
+    /**
+     * Sets the activity time function number of receiver.
+     * @param funcIndx Index of new time function.
+     */
+    void setActivityTimeFunction(int funcIndx){ this->activityTimeFunction = funcIndx; }
+
     /**
      * Sets the material of receiver.
      * @param matIndx Index of new material.
