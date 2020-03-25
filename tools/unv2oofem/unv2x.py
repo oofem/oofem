@@ -40,7 +40,7 @@ class UNVParser:
     
         oofem_elemProp = []
         oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
-        oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
+        oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load (edge or surface)
         oofem_elemProp.append(oofem_elementProperties("Truss1D", [0,1], [], []))
         oofem_elemProp.append(oofem_elementProperties("Interface1d", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Truss2D", [0,1], [0,1],[]))
@@ -55,7 +55,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl2",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("IntELPoint",oofem_elemProp[-1]))
         #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
-        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
+        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise.
         oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2DXFEM", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("TrPlaneStrain",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Axisymm3D",oofem_elemProp[-1]))
@@ -66,6 +66,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("TrPlaneStrRot",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("CCTplate",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("CCTplate3D",oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("Tria1PlateSubSoil",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("QTrPlStr", [2,0,4,1,5,3], [[2,1,0],[0,5,4],[4,3,2]],[]))#checked
         oofem_elemProp.append(oofem_elementProperties("Tria2PlateSubSoil", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("PlaneStress2D", [0,1,2,3], [[0,1],[1,2],[2,3],[3,0]],[]))#checked
@@ -77,6 +78,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1ht", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1hmt", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Quadaxisym1mt", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("quad1platesubsoil", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Interface2dlin", [0,1,3,2], [[0,1],[],[3,2],[]], []))
         oofem_elemProp.append(oofem_elementProperties("IntElLine1", oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("QPlaneStress2D", [2,4,6,0,3,5,7,1], [[2,3,4],[4,5,6],[6,7,0],[0,1,2]],[]))#checked
@@ -100,6 +102,7 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("tet21ghostsolid", [9, 2, 0, 4, 7, 1, 6, 8, 3, 5], [], [[2,7,9,6,0,1],[2,3,4,8,9,7],[4,3,2,1,0,5],[0,6,9,8,5,4]]))
         oofem_elemProp.append(oofem_elementProperties("Tet1BubbleStokes", [0,1,2,3], [[0,1],[1,2],[2,0],[0,3],[1,3],[2,3]], [[0,1,2],[0,1,3],[1,2,3],[0,2,3]]))
         return oofem_elemProp
+
 
     def scanfile(self):
         """ Read file & fill the section list"""
