@@ -139,7 +139,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, const FloatArray &c
     if ( indx ) {
         container.reserve(nnodes);
         for ( int inode = 1; inode <= nnodes; inode++ ) {
-            this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber() );
+            this->smootherList.at(indx-1)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber() );
             container.emplace_back(*nvec);
         }
 

@@ -41,7 +41,19 @@
 #include "engngm.h"
 #include "domain.h"
 #include <vector>
+#include "internalstatetype.h"
+#include "intarray.h"
+#include "materialmappingalgorithm.h"
+#include "mmashapefunctprojection.h"
+#include "cltypes.h"
 
+#ifdef _PYBIND_BINDINGS
+    #include <pybind11/pybind11.h>
+    #include <pybind11/stl.h>//Conversion for lists
+    namespace py = pybind11;
+#endif
+
+    
 namespace oofem {
 class Domain;
 
@@ -62,6 +74,8 @@ protected:
     std::vector< FloatArray >dmanvallist;
     /// Pointer to engineering model
     std::unique_ptr< EngngModel >eModel;
+    /// Pointer to single cross-section;
+    std::unique_ptr< CrossSection >crossSect;
 
 public:
     /**
@@ -101,7 +115,7 @@ public:
      * @param[out] answer Evaluated field for dman.
      * @param dman Reference to dof manager.
      * @param mode Mode of value (total, velocity,...).
-     * @param tStep Time step to evaluate for.
+     * @param tStep TimInternalStateType valID, IntArray regions, TimeStep *tStepe step to evaluate for.
      * @return Zero if ok, nonzero Error code (0-ok, 1-failed)
      */
     int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep) override;
@@ -120,7 +134,7 @@ public:
     void restoreContext(DataStream &stream) override;
 
     const char *giveClassName() const override {
-        return "DofManValueField"; 
+        return "DofManValueField";
     }
 };
 } // end namespace oofem

@@ -3704,7 +3704,7 @@ under general triaxial stress, is described in detail in \cite{GraJir}.
 It belongs to the class of damage-plastic models with yield condition formulated
 in terms of the effective stress $\bar{\vsig}=\mD_e:(\veps-\veps_p)$.
 The stress-strain law is postulated in the form 
-\beq
+\beq\label{cdpm1-1}
 \vsig = (1-\omega)\bar{\vsig}=(1-\omega)\mD_e:(\veps-\veps_p)
 \eeq
 where $\mD_e$ is the elastic stiffness tensor
@@ -4006,7 +4006,8 @@ it is useful to have the option of  specifying $h$ as an input ``material'' valu
 If the element is too large, it may become too brittle and local snap-back
 occurs in the stress-strain diagram, which is not acceptable. 
 In such a case, an error message is issued and the program execution
-is terminated. The maximum admissible element size 
+is terminated. The maximum admis
+sible element size 
 \begin{equation}
 h_{\max} = \frac{EG_f}{f_t^2} = \frac{Ew_f}{f_t}
 \end{equation}
@@ -4020,35 +4021,88 @@ size in the direction of the body diagonal can be 173 mm.
 \subsubsection{CDPM2}
 
 This model is an extension of the ConcreteDPM presented in \ref{sec:cdpm}.
-CDPM2 has been developed by Grassl, Xenos, Nystr\"{o}m, Rempling and Gylltoft for modelling the failure of concrete for both static and dynamic loading. It is is described in detail in \cite{GraXenNys13}.
-The main differences between CDPM2 and ConcreteDPM are that in CDPM2 the plasticity part exhibits hardening once damage is active. Furthermore, two independent damage parameters, which describe tensile and compressive damage, are introduced.
-The parameters of CDPM2 are summarised in Tab.~\ref{cdpm2_table}
+CDPM2 has been developed by Grassl and coworkers for modelling the failure of concrete for both static and dynamic loading. It is is described in detail in \cite{GraXenNys13}.
+The main differences between CDPM2 and ConcreteDPM are that in CDPM2
+\begin{itemize}
+\item the plasticity part exhibits hardening once damage is active,
+\item two independent damage parameters, which describe tensile and compressive damage, are introduced.
+\end{itemize}
+These extensions provide more flexibility, and the shapes
+of stress-strain curves under various loading scenarios, including unloading, can be better adapted. The price to pay
+is an increased number of parameters and thus more difficult calibration.
 
-The stress for the anisotropic damage plasticity model (ISOFLAG=0) is defined as
+CDPM2 deals with the same definition of effective stress as ConcreteDPM, namely
 \begin{equation}
-\boldsymbol{\sigma} = \left(1-\omega_{\rm t}\right) \bar{\boldsymbol{\sigma}}_{\rm t} + \left(1-\omega_{\rm c}\right) \bar{\boldsymbol{\sigma}}_{\rm c}
+    \bar{\boldsymbol{\sigma}} = \boldsymbol{D}_e:(\boldsymbol{\varepsilon}-\boldsymbol{\varepsilon}_p)
 \end{equation}
-where $\bar{\boldsymbol{\sigma}}_{\rm t}$ and $\bar{\boldsymbol{\sigma}}_{\rm c}$ are the positive and negative parts of the effective stress tensor $\bar{\boldsymbol{\sigma}}$, respectively, and $\omega_{\rm t}$ and $\omega_{\rm c}$ are two scalar damage variables, ranging from 0 (undamaged) to 1 (fully damaged).
-
-The stress for the isotropic damage plasticity model (ISOFLAG=1) is defined as 
+which means that the effective stress is computed using the plastic part of the model.
+The effect of damage is incorporated in the transformation from effective to nominal stress.
+While ConcreteDPM uses a simple reduction factor $1-\omega$ (see (\ref{cdpm1-1})), CDPM2 splits the
+effective stress into the positive part, $\bar{\boldsymbol{\sigma}}_{\rm t}$,
+and the negative part, $\bar{\boldsymbol{\sigma}}_{\rm c}$, and then uses 
+two damage variables, $\omega_t$ and $\omega_c$ (for tension and for compression). 
+The nominal stress is thus evaluated as
+\begin{equation}\label{cdpm2:efftonominal}
+    \boldsymbol{\sigma} = \left(1-\omega_{\rm t}\right) \bar{\boldsymbol{\sigma}}_{\rm t} + \left(1-\omega_{\rm c}\right) \bar{\boldsymbol{\sigma}}_{\rm c}
+\end{equation}
+The values of $\omega_{\rm t}$ and $\omega_{\rm c}$ range from 0 (undamaged) to 1 (fully damaged).
+The decomposition of the effective stress tensor into the positive and negative parts is based
+on principal values. If $\bar{\sigma}_I$, $I=1,2,3$, are the principal effective stresses and $\boldsymbol{n}_I$,
+$I=1,2,3$, are the corresponding principal directions, the effective stress tensor
 \begin{equation}
-\boldsymbol{\sigma} = \left(1-\omega_{\rm t}\right) \bar{\boldsymbol{\sigma}}
+    \bar{\boldsymbol{\sigma}} = \sum_{I=1}^3 \bar{\sigma}_I\,\boldsymbol{n}_I\otimes\boldsymbol{n}_I
 \end{equation}
-The effective stress $\bar{\boldsymbol{\sigma}}$ is defined according to the damage mechanics convention as 
-\begin{equation}
-\bar{\boldsymbol{\sigma}} = \mathbf{D}_{\rm e} : \left(\boldsymbol{\varepsilon} - \boldsymbol{\varepsilon}_{\rm p}\right) 
-\end{equation}
+is decomposed into
+\begin{eqnarray}
+  \bar{\boldsymbol{\sigma}}_t &=& \sum_{I=1}^3 \langle\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I \\
+  \bar{\boldsymbol{\sigma}}_c &=& -\sum_{I=1}^3 \langle-\bar{\sigma}_I\,\rangle\boldsymbol{n}_I\otimes\boldsymbol{n}_I
+\end{eqnarray}
+where $\langle\ldots\rangle$ are Macaulay brackets (positive-part operator).
 
-\noindent\textbf{Plasticity:}
-
-The yield surface is described by the Haigh-Westergaard coordinates: the volumetric effective stress $\sigma_{\rm V}$, the norm of the deviatoric effective stress $\rho$ and the Lode angle $\theta$. The yield surface is
+%Let us now describe in more detail the {\bf plastic part} of the model. 
+The {\bf yield condition} is formulated in terms of the effective
+stress $\bar{\boldsymbol{\sigma}}$ and therefore is unaffected by damage.
+The yield function is given by
 \begin{equation} \label{eqcdpm2:yieldSurface}    
 \begin{split}
 & f_{\rm p}(\bar{\sigma}_{\rm V},\bar\rho,\bar\theta;\kappa_{\rm p})=  \left\{\left[1-q_{\rm{h1}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}f_{\rm c}} + \frac{\bar{\sigma}_{\rm V}} {f_{\rm c}} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{f_{\rm c}} \right\}^2 \\
 & +m_0 q^2_{\rm{h1}}(\kappa_{\rm p})q_{\rm{h2}}(\kappa_{\rm p}) \left[\frac{\bar{\rho} }{\sqrt{6}f_{\rm c}}r(\cos{\bar{\theta}}) + \frac{\bar{\sigma}_{\rm V}}{f_{\rm c}} \right] - q_{\rm{h1}}^2(\kappa_{\rm p}) q_{{\rm h2}}^2(\kappa_{\rm p})
 \end{split}
 \end{equation}
-It depends also on the hardening variable $\kappa_{\rm p}$ (which enters through the dimensionless variables $q_{\rm h1}$ and $q_{\rm h2}$). Parameter $f_{\rm c}$ is the uniaxial compressive strength. For $q_{\rm h2} = 1$, the yield function is identical to the one of CDPM.
+where $\bar\sigma_{\rm V}$ is the volumetric effective stress, $\bar\rho$ is the norm of the deviatoric effective stress
+and $\bar\theta$ is the Lode angle (another invariant of the effective
+stress tensor).
+Parameter $f_{\rm c}$ is the uniaxial compressive strength.
+Evolution of the
+yield surface is controlled by two dimensionless stress-like hardening variables,
+$q_{h1}$ and $q_{h2}$, which are considered as functions of one
+dimensionless strain-like hardening variable, $\kappa_p$.
+The {\bf hardening laws} read
+\begin{eqnarray} \nonumber
+q_{\rm h1}(\kappa_{\rm p}) &=& 
+\left \{ \begin{array}{ll} q_{\rm h0} + \left(1-q_{\rm h0}\right) \left( \kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 3 \kappa_{\rm p} \right) - H_{\rm p} \left(\kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 2 \kappa_{\rm p}\right) & \mbox{if $\kappa_{\rm p} < 1$} \\
+1 & \mbox{if $\kappa_{\rm p} \ge 1$}
+\end{array}
+\right.
+\\ \label{eq:hardeningLawOne} \\ 
+q_{\rm h2}(\kappa_{\rm p}) &=& \left \{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
+1 + H_{\rm p} (\kappa_{\rm p} - 1)  & \mbox{if $\kappa_{\rm p} \ge 1$}
+\end{array}
+\right.
+\label{eq:hardeningLawTwo}
+\end{eqnarray}
+During the initial stage of
+hardening, $\kappa_p$ grows from 0 to 1, $q_{h1}$ grows from
+its initial value $q_{h0}$ to 1 while $q_{h2}$ remains equal to 1.
+No damage is induced and the yield surface is expanding. A change
+of behavior occurs when $\kappa_p$ becomes equal to 1. For the
+original ConcreteDPM model, there would not be any further evolution
+of the yield surface. In CDPM2, linear hardening with constant
+plastic modulus $H_p$ is assumed. Variable $q_{h1}$ remains equal to 1
+while $q_{h2}$ grows proportionally to the increments of $\kappa_p$.
+If $H_p$ is set to zero (i.e., $q_{\rm h2}$ remains equal to 1),
+the same behavior as for the ConcreteDPM is obtained.
+
 The shape of the deviatoric section is controlled by the Willam-Warnke function
 \begin{equation} \label{eq:rFunction}
 \begin{split}
@@ -4062,82 +4116,297 @@ m_0 = \dfrac{3 \left(f_{\rm c}^2 - f_{\rm t}^2\right)}{f_{\rm c}f_{\rm t}} \dfra
 \end{equation}
 where $f_{\rm t}$ is the tensile strength.
 
-The flow rule (\ref{eq:flowRule}) is split into a volumetric and a deviatoric part, i.e., the gradient of the plastic potential is decomposed as
+{\bf Hardening variable} $\kappa_p$ is a generalized form of
+cumulative plastic strain. Its rate corresponds to the rate
+of the norm of plastic strain rate scaled by a factor that
+depends on the stress state. This is described by the evolution
+equation
+\begin{equation}
+  \dot{\kappa}_p =\frac{\Vert\dot{\boldsymbol{\varepsilon}}_p\Vert}{x_h(\bar{\sigma}_V)}\left(2\cos\bar{\theta}\right)^2
+\end{equation}
+in which $\bar{\sigma}_V$ is the hydrostatic part of effective stress
+and $\bar{\theta}$ is the Lode angle. Function $x_h$ has a complicated form, designed such that
+$\kappa_p$ grows faster for positive hydrostatic stress and more slowly
+under negative hydrostatic stress. Consequently, the material response
+is brittle in tension and less brittle or even ductile in compression,
+especially under confinement. The form of function $x_h$ suggested
+in \cite{GraXenNys13} is
+\begin{equation}\label{eq:xh}
+x_h(\bar{\sigma}_V) = \left\{\begin{array}{ll}
+A_h-(A_h-B_h)\exp(-R_h(\bar{\sigma}_V)/C_h) & \hskip 10mm \mbox{if } R_h(\bar{\sigma}_V) \ge 0
+\\[3mm]
+D_h + E_h\exp(R_h(\bar{\sigma}_V)/F_h) & \hskip 10mm \mbox{if } R_h(\bar{\sigma}_V) < 0
+\end{array}\right.
+\end{equation}
+where
+\begin{equation}
+ R_h(\bar{\sigma}_V) = -\frac{\bar{\sigma}_V}{f_c}-\frac{1}{3}
+\end{equation}
+At the peak of the 
+uniaxial compressive stress-strain curve, we have $\bar{\sigma}_V=-f_c/3$
+and thus $R_h=0$. Positive values of $R_h$ correspond to confined
+compression. Under compression with no confinement, $x_h$ is equal to $B_h$, and under high confinement
+it is close to $A_h$. Parameter $C_h$ controls the transition from
+$B_h$ to $A_h$ and if it is high, the transition occurs at higher 
+compressive stresses. In this way, parameters $A_h$, $B_h$ and $C_h$
+can be used to tune up the sensitivity of the model to confining
+stresses. Parameter $D_h$ affects the behavior under combined
+tension and compression, or under uniaxial or multiaxial tension.
+
+Parameters $E_h$ and $F_h$ are not considered as independent.
+To ensure a smooth transition between cases with positive and
+negative $R_h$, they need to be set to $E_h=B_h-D_h$ and
+$F_h=(B_h-D_h)C_h/(A_h-B_h)$. Note that all these parameters
+are dimensionless. In \cite{GraXenNys13} it was suggested to
+calibrate parameters $A_h$, $B_h$, $C_h$ and $D_h$ from the strains
+at peak stress under uniaxial tension, uniaxial compression and triaxial
+compression. Of course, four parameters cannot be uniquely
+determined from just three experimental values. It is desirable to
+use experimental data for triaxial compression at
+several levels of confinement. From the foregoing discussion of the role
+of individual parameters it follows that $A_h$ should be greater 
+than $B_h$, to obtain a positive effect of confinement on ductility,
+and parameter $D_h$ should be  smaller than $B_h$, to get a more brittle behavior
+in tension than in compression. 
+
+The {\bf flow rule} is postulated in the non-associated format (\ref{eq:flowRuleDPM})
+with a plastic potential given  by the same expression (\ref{eq:plasticPotential})
+as for the ConcreteDPM model, just with hardening variable $q_h$ formally replaced by $q_{h1}$.
+The direction of plastic flow is given by the gradient of the plastic potential,
+and it can be split into the volumetric and deviatoric parts:
 %
 \begin{equation}\label{eq:generalFlow}
-\mathbf{m} = \dfrac{\partial g}{\partial \bar{\boldsymbol{\sigma}} } = \frac{\partial g}{\partial \bar{\sigma}_{\rm V}} \frac{\partial \bar{\sigma}_{\rm V}}{\partial \bar{\boldsymbol{\sigma}}} + \frac{\partial g}{\partial \bar{\rho}} \frac{\partial \bar{\rho} }{\partial \bar{\boldsymbol{\sigma}}}
+\boldsymbol{m} = \dfrac{\partial g}{\partial \bar{\boldsymbol{\sigma}} } = \frac{\partial g}{\partial \bar{\sigma}_{\rm V}} \frac{\partial \bar{\sigma}_{\rm V}}{\partial \bar{\boldsymbol{\sigma}}} + \frac{\partial g}{\partial \bar{\rho}} \frac{\partial \bar{\rho} }{\partial \bar{\boldsymbol{\sigma}}}
 \end{equation}
 Taking into account that $\partial\bar{\sigma}_{\rm V}/\partial\bar{\boldsymbol{\sigma}}=\boldsymbol{\delta}/3$ and $\partial\bar{\rho}/\partial\bar{\boldsymbol{\sigma}}=\bar{\mbf{s}}/\bar\rho$, restricting attention to the post-peak regime (in which $q_{\rm h1} = 1$) and differentiating the plastic potential (\ref{eq:plasticPotential}), we rewrite equation (\ref{eq:generalFlow}) as
 \begin{equation}\label{eq:detailedFlow}
 \mbf{m} = \dfrac{\partial g}{\partial \bar{\boldsymbol{\sigma}}} =  \frac{{\partial}{m_{\rm g}}}{{\partial}{\bar{\sigma}_{\rm V}}} \frac{\boldsymbol{\delta}}{3f_{\rm c}} 
  + \left(\frac{3}{f_{\rm c}} + \frac{m_0}{\sqrt{6}\bar\rho} \right)\frac{\bar{\mbf{s}}}{f_{\rm c}}
 \end{equation}
-The flow rule is non-associative which means that the direction of the plastic flow is not normal to the yield surface. This is important for concrete since an associative flow rule would give an overestimated maximum stress for passive confinement. 
+Since the flow rule is non-associative, the direction of the plastic flow is not normal to the yield surface. This is important for concrete since an associative flow rule would give an overestimated maximum stress for passive confinement. 
 
-The dimensionless variables $q_{\rm h1}$ and $q_{\rm h2}$ that appear in (\ref{eq:yieldSurface}), (\ref{eq:plasticPotential}) and (\ref{eq:mg}) are functions of the hardening variable $\kappa_{\rm p}$. They control the evolution of the size and shape of the yield surface and plastic potential. 
-The first hardening law $q_{\rm h1}$ is
-%
-\begin{equation} \label{eq:hardeningLawOne}
-q_{\rm h1}(\kappa_{\rm p}) = 
-\left \{ \begin{array}{ll} q_{\rm h0} + \left(1-q_{\rm h0}\right) \left( \kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 3 \kappa_{\rm p} \right) - H_{\rm p} \left(\kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 2 \kappa_{\rm p}\right) & \mbox{if $\kappa_{\rm p} < 1$} \\
-1 & \mbox{if $\kappa_{\rm p} \ge 1$}
-\end{array}
-\right.
-\end{equation}
-%
-The second hardening law $q_{\rm h2}$ is given by
-\begin{equation} \label{eq:hardeningLawTwo}
-q_{\rm h2}(\kappa_{\rm p}) = \left \{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
-1 + H_{\rm p} (\kappa_{\rm p} - 1)  & \mbox{if $\kappa_{\rm p} \ge 1$}
-\end{array}
-\right.
-\end{equation}
 
-The evolution law for the hardening variable,
+{\bf Damage} is initiated when the equivalent strain reaches the threshold $\varepsilon_{0} = f_{\rm t}/E$,
+which represents the limit elastic strain under uniaxial tension. 
+The evolution of damage variables depends
+on certain internal variables linked to the elastic and plastic strains
+computed using the plastic part of the model.
+
+The {\bf tensile damage} variable $\omega_t$ is a function of three auxiliary
+internal variables, $\kappa_{dt}$, $\kappa_{dt1}$ and $\kappa_{dt2}$.
+Variable $\kappa_{dt}$ is the maximum previously reached value of
+equivalent strain
+\begin{equation}\label{cdpm2:eps}
+\tilde\varepsilon = \frac{\varepsilon_0m_0}{2}\left(\frac{\bar\rho r(\cos\bar\theta)}{\sqrt{6}f_c}+\frac{\bar\sigma_V}{f_c}\right) + \sqrt{\frac{\varepsilon_0^2m_0^2}{4}\left(\frac{\bar\rho r(\cos\bar\theta)}{\sqrt{6}f_c}+\frac{\bar\sigma_V}{f_c}\right)^2+\frac{3\varepsilon_0^2\bar\rho^2}{2f_c^2}}    
+\end{equation}
+where $r$ is the function of the Lode angle specified in (\ref{eq:rFunction}) and $m_0$ is the friction parameter specified in (\ref{eq:frictionM}).
+Expression (\ref{cdpm2:eps}) has been derived from the yield condition $f_{\rm p} = 0$ by setting $q_{\rm {h1}}=1$ and $q_{\rm{h2}} = \tilde{\varepsilon}/\varepsilon_{0}$,
+which leads to a quadratic equation.
+
+Variables $\kappa_{dt1}$ and $\kappa_{dt2}$ are defined by the rate equations
+\begin{eqnarray}
+\dot\kappa_{dt1} &=& \left\{\begin{array}{ll}
+\displaystyle\frac{\Vert\dot{\boldsymbol\varepsilon}_p\Vert}{x_s(\bar\rho,\bar\sigma_V)} & \hskip 10mm \mbox{if } \dot\kappa_{dt}>0\;\mbox{ and }\; \kappa_{dt}\ge \varepsilon_0
+\\[3mm]
+0 & \hskip 10mm \mbox{if } \dot\kappa_{dt}=0\;\mbox{ or }\; \kappa_{dt}< \varepsilon_0
+\end{array}\right.
+\\
+\dot\kappa_{dt2} &=&  \frac{\dot\kappa_{dt}}{x_s(\bar\rho,\bar\sigma_V)}
+\end{eqnarray}
+where 
+\begin{equation}\label{eq:xs}
+    x_s(\bar\rho,\bar\sigma_V) =
+    1+(A_s-1)\frac{\sqrt{6}\langle-\bar\sigma_V\rangle}{\bar\rho}
+\end{equation}
+is a ductility measure. For positive hydrostatic stress $\bar\sigma_V$,
+we have $\langle-\bar\sigma_V\rangle=0$ and $x_s=1$. Under compression,
+$x_s$ increases (provided that parameter $A_s$ is greater than 1),
+which slows down the evolution of variables $\kappa_{dt1}$ and $\kappa_{dt2}$
+and consequently of damage. For uniaxial compression, we have
+$\bar\sigma_V/\bar\rho=-1/\sqrt{6}$ and formula (\ref{eq:xs}) gives $x_s=A_s$.
+
+The specific form of the dependence of damage variable $\omega_t$ on 
+$\kappa_{dt}$, $\kappa_{dt1}$ and $\kappa_{dt2}$ is dictated by the desired
+shape of the softening part of the uniaxial tensile stress-strain diagram.
+For instance, bilinear softening is obtained with
+\begin{equation}\label{cdpm2:omegat}
+  \omega_t = \left\{\begin{array}{ll}
+  \dfrac{(E\kappa_{dt}-f_t)\varepsilon_{f1}-(\sigma_1-f_t)\kappa_{dt1}}{E\kappa_{dt}\varepsilon_{f1}+(\sigma_1-f_t)\kappa_{dt2}} & \hskip 10mm \mbox{ if } 0\le\kappa_{dt1}+\omega_t\kappa_{dt2}\le\varepsilon_{f1}
+  \\[3mm]
+    \dfrac{E\kappa_{dt}(\varepsilon_f-\varepsilon_{f1})+\sigma_1(\kappa_{dt1}-\varepsilon_f)}{E\kappa_{dt}(\varepsilon_f-\varepsilon_{f1})-\sigma_1\kappa_{dt2}} & \hskip 10mm \mbox{ if } \varepsilon_{f1}<\kappa_{dt1}+\omega_t\kappa_{dt2}\le\varepsilon_{f}
+    \\[3mm]
+    0 & \hskip 10mm \mbox{ if } \varepsilon_{f}<\kappa_{dt1}+\omega_t\kappa_{dt2}
+  \end{array}\right.
+\end{equation}
+where $\varepsilon_{f1}$ and $\sigma_1$ is the strain and stress at the knee point
+of the softening diagram (where the two linear segments meet), and $\varepsilon_{f}$
+is the strain at which the stress vanishes. The choice of a bilinear softening
+diagram for tension makes it possible to obtain a steep initial descent
+followed by a long tail, which would not be that easy with the exponential diagram
+used in the ConcreteDPM model. In the local version of the model, objectivity
+with respect to mesh size must be enforced by adjustment of the softening diagram.
+Numerical parameters $\varepsilon_{f1}$ and $\varepsilon_{f}$ are then derived from material
+parameters $w_{f1}$ and $w_f$ that define the cohesive law in terms of the dependence of stress
+on crack opening, $w$. Transformation of crack opening into the smeared cracking strain
+then leads to parameters $\varepsilon_{f1}=w_{f1}/h$ and $\varepsilon_{f}=w_f/h$ where
+$h$ is the estimated thickness of the computationally resolved localized band.
+
+The {\bf compressive damage} variable $\omega_c$ is a function of three auxiliary
+internal variables, $\kappa_{dc}$, $\kappa_{dc1}$ and $\kappa_{dc2}$.
+Variable $\kappa_{dc}$ is defined by the rate equation
 \begin{equation}
-\dot{\kappa}_{\rm {p}} = \frac {\| \dot{\veps_{\rm{p}}}\|}{x_{\rm{h}}\left(\bar{\sigma}_{\rm V} \right)} \left(2 \cos{\bar{\theta}}\right)^2 = \frac {\dot{\lambda} \| \mbf{m}\|}{x_{\rm{h}}\left(\bar{\sigma}_{\rm V} \right)} \left(2\cos{\bar{\theta}}\right)^2
+  \dot\kappa_{dc} = \alpha_c\dot{\tilde\varepsilon}
 \end{equation}
-sets the rate of the hardening variable equal to the norm of the plastic strain rate scaled by a hardening ductility measure, which is identical to the one used for the CDPM.
-
-\noindent\textbf{Damage:}
-
-Damage is initiated when the maximum equivalent strain in the history of the material reaches the threshold $\varepsilon_{0} = f_{\rm t}/E$. 
-This expression is determined from the yield surface ($f_{\rm p} = 0$) by setting $q_{\rm {h1}}=1$ and $q_{\rm{h2}} = \tilde{\varepsilon}/\varepsilon_{0}$.
-From this quadratic equation for $\tilde{\varepsilon}$, the equivalent strain is determined as
+where $\tilde\varepsilon$ is the already defined equivalent strain, and
+the scaling factor $\alpha_c$ depends on the type of stress state
+and is given by
 \begin{equation}
-\tilde{\varepsilon} = \dfrac{\varepsilon_0 m_0}{2}  \left(\dfrac{\bar{\rho}}{\sqrt{6} f_{\rm c}} r\left(\cos\theta\right) + \dfrac{\bar{\sigma}_{\rm V}}{f_{c}}\right) + \sqrt{\dfrac{\varepsilon_0^2 m_0^2}{4} \left(\dfrac{\bar{\rho}}{\sqrt{6}f_{\rm c}} r\left(\cos\theta\right) + \dfrac{\bar{\sigma}_{\rm V}}{f_{\rm c}}\right)^2 + \dfrac{3 \varepsilon_0^2 \bar{\rho}^2}{2 f_{\rm c}^2}}
+  \alpha_c = \frac{\sum_{I=1}^3 \langle-\bar\sigma_I\rangle^2}{\sum_{I=1}^3 \bar\sigma_I^2}
 \end{equation}
+If all principal effective stresses $\sigma_I$ are positive (or at least non-negative),
+we have $\alpha_c=0$, and if all principal effective stresses are negative (or at least non-positive),
+we have $\alpha_c=1$. For the zero stress state, $\alpha_c$ is undefined, but for that
+particular state it is not needed. 
 
-Tensile damage is described by a stress-inelastic displacement law. For linear and exponential damage type the stress value $f_{\rm t}$ and the displacement value $w_{\rm f}$ must be defined. For the bi-linear type two additional parameters $f_{\rm t1}$ and  $w_{\rm f1}$ are required.
- 
-For the compressive damage variable, an evolution based on an exponential stress-inelastic strain law is used. The stress versus inelastic strain in the softening regime in compression is
-\begin{equation}
+Two other auxiliary internal variables that affect compressive damage are defined by the rate equations
+\begin{eqnarray}
+\dot\kappa_{dc1} &=& \left\{\begin{array}{ll}
+\displaystyle\frac{\alpha_c\beta_c\vert\dot{\boldsymbol\varepsilon}_p\vert}{x_s} & \hskip 10mm \mbox{if } \dot\kappa_{dt}>0\;\mbox{ and }\; \kappa_{dt}\ge \varepsilon_0
+\\[3mm]
+0 & \hskip 10mm \mbox{if } \dot\kappa_{dt}=0\;\mbox{ or }\; \kappa_{dt}< \varepsilon_0
+\end{array}\right.
+\\
+\dot\kappa_{dc2} &=&  \frac{\dot\kappa_{dc}}{x_s}
+\end{eqnarray}
+where factor
+\begin{equation}\label{cdpm2:betac}
+  \beta_c =\frac{f_tq_{h2}\sqrt{2/3}}{\bar\rho\sqrt{1+2D_f^2}}
+\end{equation}
+depends on the plastic hardening variable $q_{h2}$ and
+effective stress invariant $\bar\rho$ and provides a smooth transition 
+from pure damage to damage-plastic softening, which can occur during cyclic
+loading. The dependence of the compressive damage $\omega_c$ on the internal
+variables is defined such that the relation between the stress and the inelastic strain, $\varepsilon_{\rm i}$,
+under uniaxial compression is exponential and is given by
+\begin{equation}\label{cdpm2:sigma}
 \begin{array}{ll}
-\sigma = f_{\rm t} \exp\left(-\dfrac{\varepsilon_{\rm i}}{\varepsilon_{\rm fc}}\right) & \mbox{if $0 < \varepsilon_{\rm i}$}
+\sigma = f_{\rm c} \exp\left(-\dfrac{\varepsilon_{\rm i}}{\varepsilon_{\rm fc}}\right) & \mbox{if $0 < \varepsilon_{\rm i}$}
 \end{array}
 \end{equation}
-where $\varepsilon_{\rm fc}$ is an inelastic strain threshold which controls the initial inclination of the softening curve. The use of different damage evolution for tension and compression is one important improvement over CDPM.
-
-The history variables $\kappa_{\rm dt1}$, $\kappa_{\rm dt2}$, $\kappa_{\rm dc1}$ and $\kappa_{\rm dc2}$ depend on a ductility measure $x_{\rm s}$, which takes into account the influence of multiaxial stress states on the damage evolution.
-This ductility measure is given by
-\begin{equation}
-x_{\rm s} = 1+ \left(A_{\rm s}-1\right) R_{\rm s}
+where $\varepsilon_{\rm fc}$ is a parameter controls the initial inclination of the softening curve.
+The inelastic strain is defined as the difference between the total strain, $\varepsilon$, and the elastic strain, $\sigma/E$.
+Replacing $\sigma$ bythe right-hand side of (\ref{cdpm2:sigma}), we obtain a nonlinear equation
+\begin{equation}\label{cdpm2:epsi}
+\begin{array}{ll}
+\varepsilon_{\rm i} + \dfrac{f_{\rm c}}{E} \exp\left(-\dfrac{\varepsilon_{\rm i}}{\varepsilon_{\rm fc}}\right) = \varepsilon
+\end{array}
 \end{equation}
-where $R_{\rm s}$ is
-\begin{equation}
-R_{\rm s} = \left \{ \begin{array}{ll} -\dfrac{\sqrt{6} \bar{\sigma}_{\rm V}}{\bar{\rho}} & \mbox{if $\bar{\sigma}_{\rm V} \leq 0$} \\
-    0 & \mbox{if $\bar{\sigma}_{\rm V} > 0$}  \end{array} \right.
-\end{equation}
-and $A_{\rm s}$ is a model parameter.
- 
-\noindent\textbf{Strain rate:}
+from which $\varepsilon_{\rm i}$ can be evaluated iteratively if the total strain $\varepsilon$ is given.
+The use of different damage evolution rules for tension and compression is one important improvement over ConcreteDPM.
+In contrast to tension, the evolution law for compressive damage is considered to be independent of the
+element size, since compressive failure is often characterized by mesh-independent zones of damage growth.
 
-Concrete is strongly rate dependent. If the loading rate is increased, the tensile and compressive strength increase and are more prominent in tension then in compression. The dependency of the stress-strain response on the dynamic increase factor is taken into account by an additional variable $alpha_{\rm r}$. The rate dependency is included by scaling both the equivalent strain rate and the inelastic strain. The rate parameter is defined by
+\begin{table} [!h]
+   \caption{Summary of parameters of CDPM2}
+   \label{CDPM2-params}
+   \centering
+   \begin{tabular}{ | c | c | c | c | c |}
+\hline
+parameter & OOFEM & unit & default & meaning \\
+ &   identifier      &  & value & \\
+\hline
+$E$ & E      &  Pa  &   & Young's modulus\\
+$\nu$ & n      &  -  &  & Poisson's ratio \\
+$f_t$ & ft      &  Pa  &  & uniaxial tensile strength \\
+$f_c$ & fc      &  Pa  &  & uniaxial compression strength \\
+$w_f$ & wf & m & & critical crack opening\\
+%$G_{ft}$ &       &  J/m$^2$  &  & tensile fracture energy \\
+$e$ & ecc & - & 0.525 & eccentricity, eq.~(\ref{eq:rFunction})--(\ref{eq:frictionM}) \\
+$q_{h0}$ & kinit & - & 0.3 & initial value of hardening variable $q_{h1}$, eq.~(\ref{eq:hardeningLawOne})\\
+$H_p$ & hp & - & 0.5 & hardening modulus (for the last stage, eq.~(\ref{eq:hardeningLawTwo}))\\
+$D_f$ & dilation & - & 0.85 & dilation factor, eq.~(\ref{cdpm2:betac}) \\
+$A_h$ & Ahard & - & 0.08 & hardening parameter, eq.~(\ref{eq:xh})\\
+$B_h$ & Bhard & - & 0.003 & hardening parameter, eq.~(\ref{eq:xh}) \\
+$C_h$ & Chard & - & 2 & hardening parameter, eq.~(\ref{eq:xh}) \\
+$D_h$ & Dhard & - & $10^{-6}$ & hardening parameter, eq.~(\ref{eq:xh}) \\
+$A_s$ & Asoft & - & 15 & softening parameter, eq.~(\ref{eq:xs})\\
+$\varepsilon_{fc}$ & efc & - &$10^{-4}$ & softening parameter for compression, eq.~(\ref{cdpm2:sigma})  \\
+ & stype &  & 1 & type of softening (1=bilinear) \\
+$w_{f1}/w_f$ & wf1 & - & 0.15   & softening parameter for tension\\
+$\sigma_1/f_t$ & ft1 & - & 0.3 &  softening parameter for tension, eq.~(\ref{cdpm2:omegat})\\
+\hline
+   \end{tabular}
+\end{table}
+
+From the presented description of the model equations,
+it is clear that CDPM2 uses a large number of parameters. In \cite{GraXenNys13}
+it was recommended to adjust only a few basic parameters, most of which have 
+a certain physical meaning, and to set all the other parameters to their
+default values. The physical parameters that can be adjusted depending on
+the specific type of concrete are Young's modulus, Poisson's ratio, uniaxial
+tensile and compression strengths, and the critical crack opening,
+which controls the tensile fracture energy. 
+A summary of all model parameters and of their recommended default values
+is provided in Table~\ref{CDPM2-params}. The table shows the symbol used for the parameter
+in equations describing the theoretical background and also the corresponding identifier
+used in OOFEM input files. 
+
+Parameters listed on the first five lines of Table~\ref{CDPM2-params} 
+must be specified by the user. Parameter $w_f$ corresponds to the opening
+of a cohesive crack at which the stress transmitted by the crack vanishes.
+It is closely related to the tensile fracture energy, $G_{Ft}$.
+The shape of the cohesive curve for tensile failure is affected by
+the choice of the type of softening. The default choice is bilinear
+softening, which requires, in addition to $f_t$ and $w_f$, two more
+parameters that control the position of the point at which the slope 
+of the diagram changes. This point is characterized by crack opening $w_{f1}$
+and stress $\sigma_1$, but the input parameters for OOFEM are dimensionless
+ratios $w_{f1}/w_f$ and $\sigma_1/f_t$ with default values 0.15 and 0.3.
+In general, the fracture energy is evaluated as $G_{Ft}=(f_tw_{f1} +\sigma_1 w_f)/2$, and for the default values this gives $G_{Ft}=f_tw_f/4.444$,
+which means that parameter $w_f$ can be evaluated from the tensile strength
+and fracture energy using formula $w_f=4.444\,G_{Ft}/f_t$.
+
+The eccentricity parameter $e$ could be evaluated from $f_t$ and $f_c$
+combined with the biaxial compression strength, $f_{bc}$, using formula
+\begin{equation}
+e=    \frac{1+\epsilon}{2-\epsilon}
+\end{equation}
+where 
+\begin{equation}
+\epsilon=\frac{f_t}{f_{bc}}\frac{f_{bc}^2-f_c^2}{f_c^2-f_t^2}
+\end{equation}
+The default value is not mentioned in  \cite{GraXenNys13};
+in OOFEM it is taken as $e=0.525$. 
+
+Parameter $H_p$ is a dimensionless hardening modulus that sets the
+ratio between the increments of variables $q_{h2}$ and $\kappa_p$
+during the last stage of the plastic hardening process.
+The value recommended in  \cite{GraXenNys13} is $H_p=0.01$,
+but the default value used in OOFEM is 0.5.
+
+The dilation parameter $D_f$ controls the ratio between the transversal
+and axial plastic strain rates in uniaxial compression and thus can
+be used to control the volumetric expansion in the softening regime.
+The default value is set to 0.85, as suggested in \cite{GraJir},
+which means that the transversal plastic strain rate will be $-0.85$ times the (negative) axial plastic strain rate. 
+
+The default values of $q_{h0}=0.3$, $A_h=0.08$, $B_h=0.003$, $C_h=2$, $D_h=10^{-6}$
+and $\varepsilon_{fc}=10^{-4}$ are taken from \cite{GraXenNys13}.
+Parameter $A_s$ was varied in \cite{GraXenNys13}
+in the range from 1.5 to 15. In OOFEM, the default value of $A_s$ is taken as 15, which was recommended in \cite{GraJir}.
+
+Concrete is strongly {\bf rate-dependent}. If the loading rate is increased, the tensile and compressive strength increase and are more prominent in tension then in compression. The dependency of the stress-strain response on the dynamic increase factor is taken into account by an additional variable $\alpha_{\rm r}$. The rate dependency is included by scaling both the equivalent strain rate and the inelastic strain. The rate parameter is defined by
 \begin{equation}
 \alpha_{\rm r}=(1-X) \alpha_{\rm rt} + X  \alpha_{\rm rc}
 \end{equation}
 where $X$ is the continuous compression measure (= 1 means only compression, = 0 means only tension).
 The dynamic increase factor (DIF) for strength is computed according to Model Code 2010.  
+
+The {\bf parameters of CDPM2} for OOFEM input file are summarised in Tab.~\ref{cdpm2_table}.
+By default, two damage variables are used, i.e., the effective stress is transformed into
+nominal stress using equation (\ref{cdpm2:efftonominal}). If parameter {\em isoflag} is set to 1,
+only $\omega_t$ is used and the effective stress is reduced by $1-\omega_t$.
+
 
 \begin{htmlonly}
 \begin{longtable}{|l|l|}
@@ -4178,7 +4447,7 @@ Parameters &- \param{d} material density\\
 &- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
 &- \param{sratetype}  Dynamic increase factor (DIF) for strength
 \begin{itemize}\setlength{\itemsep}{-3pt}
-\item[0 -] DIF = 1  
+\item[0 -] DIF = 1  (no rate effect)
 \item[1 -] First branch of Model Code 2010 DIF for strength.
 \item[2 -] First and second branch of Model Code 2010 DIF for strength
 \end{itemize}\\
@@ -6545,7 +6814,7 @@ Supported modes&  2d, 3d flow\\
 \bibitem{GraJir} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Damage-plastic model for concrete failure.
 \newblock {\em International Journal of Solids and Structures}, 43:7166--7196, 2006.
-\bibitem{GraXenNys13} P.~Grassl and M.~Jir\'{a}sek.
+\bibitem{GraXenNys13} P.~Grassl, D.~Xenos, U.~Nystr\"{o}m, R.~Rempling and K.~Gylltoft.
 \newblock CDPM2: A damage-plasticity approach to modelling the failure of concrete.
 \newblock {\em International Journal of Solids and Structures}, 50:3805--3816, 2013.
 \bibitem{GraJir10} P.~Grassl and M.~Jir\'{a}sek.

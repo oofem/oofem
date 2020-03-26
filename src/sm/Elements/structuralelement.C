@@ -155,7 +155,7 @@ void StructuralElement :: computeBoundarySurfaceLoadVector(FloatArray &answer, B
         }
 
         // Construct n-matrix
-        this->computeSurfaceNMatrix(n, boundary, lcoords); // to allow adapttation on element level
+        this->computeSurfaceNMatrix(n, boundary, lcoords); // to allow adaptation on element level
 
         ///@todo Some way to ask for the thickness at a global coordinate maybe?
         double thickness = 1.0; // Should be the circumference for axisymm-elements.

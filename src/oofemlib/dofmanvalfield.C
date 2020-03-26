@@ -36,12 +36,16 @@
 #include "domain.h"
 #include "spatiallocalizer.h"
 #include "element.h"
+#include "crosssection.h"
 #include "timestep.h"
 #include "util.h"
 #include "classfactory.h"
 #include "dofmanager.h"
 #include "feinterpol.h"
 #include "problemmode.h"
+#include "nodalrecoverymodel.h"
+#include "vtkxmlexportmodule.h"
+
 
 namespace oofem {
 DofManValueField::DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanvallist()
@@ -66,6 +70,11 @@ DofManValueField::DofManValueField(FieldType ft, int nNodes, int nElements, cons
     dmanvallist.resize(nNodes);
     this->domain->elementList.clear();
     this->domain->elementList.resize(nElements);
+    this->crossSect = classFactory.createCrossSection("emptycs", 1, this->domain);//create one dummy cross-section
+    this->domain->crossSectionList.clear();
+    this->domain->crossSectionList.resize(1);
+    this->domain->crossSectionList[0] = std::move(this->crossSect);
+    //this->domain->setCrossSection(1, this->crossSect);
 }
 
 
@@ -89,6 +98,7 @@ DofManValueField::addElement(int i, const char *name, const IntArray &nodes) {
 
     elem->setDofManagers(nodes);
     elem->setGlobalNumber(i);
+    elem->setCrossSection(1);
     this->domain->elementList [ i - 1 ] = std::move(elem);
 }
 
@@ -146,7 +156,6 @@ const FloatArray &DofManValueField::getNodeCoordinates(int i)
 {
     return this->domain->dofManagerList [ i - 1 ]->giveCoordinates();
 }
-
 
 
 void

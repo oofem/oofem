@@ -71,7 +71,7 @@ def test_4():
     elems = (e1,)
 
     # setup domain
-    util.setupDomain (domain, nodes, elems, (mat,), (cs,), bcs, ltfs, ())
+    util.setupDomain (domain, nodes, elems, (cs,), (mat,), bcs, (), ltfs, ())
 
     print("\nSolving problem")
     problem.checkProblemConsistency()

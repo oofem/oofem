@@ -79,6 +79,12 @@ protected:
     void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap) override;
     void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap) override;
     SPRPatchType SPRNodalRecoveryMI_givePatchType() override;
+    
+    /**
+     * @name Surface load support
+     */
+    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) override;    
+    void computeSurfaceNMatrix(FloatMatrix &answer, int boundaryID, const FloatArray &lcoords) override;
 };
 } // end namespace oofem
 #endif // tria2platesubsoil_H

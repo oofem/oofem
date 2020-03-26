@@ -58,7 +58,7 @@ class OOFEM_EXPORT ModuleManager
 {
 protected:
     /// Module list.
-    std :: vector< std :: unique_ptr< M > > moduleList;
+    std::vector< std::unique_ptr< M > > moduleList;
     /// Number of modules.
     int numberOfModules;
     /// Associated Engineering model.
@@ -108,7 +108,8 @@ public:
             }
 
             module->initializeFrom(mir);
-            moduleList.push_back(std :: move(module));
+            registerModule(module);
+//             moduleList.push_back(std :: move(module));
         }
 
 #  ifdef VERBOSE
@@ -117,6 +118,16 @@ public:
         return 1;
     }
 
+    /**
+     * Stores a module in moduleList. Useful when 
+     * adding modules externally, e.g. from Python
+     */
+    
+    virtual void registerModule (std::unique_ptr< M > &module){
+        moduleList.push_back(std::move(module));
+    }
+    
+    
     /**
      * Instanciates the receiver from input record. Called from instanciateYourself to initialize yourself
      * from corresponding record. Should be called before instanciateYourself.

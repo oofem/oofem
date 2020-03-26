@@ -1,0 +1,55 @@
+qquad01.out
+Test of quadratic quadrilateral QQuad element, 1. step with internal source, exact solution is a quadratic profile in y direction, 2. step with heat flow prescribed on the top boundary
+StationaryProblem nsteps 2 nmodules 1
+errorcheck
+#vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 2
+domain HeatTransfer
+OutputManager tstep_all dofman_all element_all
+ndofman 20 nelem 5 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 3 nset 3
+Node  1 coords 3  0.0   0.0   0.0
+Node  2 coords 3  0.0   4.0   0.0
+Node  3 coords 3  2.0   2.0   0.0
+Node  4 coords 3  3.0   1.0   0.0
+Node  5 coords 3  8.0   0.8   0.0
+Node  6 coords 3  7.0   3.0   0.0
+Node  7 coords 3  9.0   0.0   0.0
+Node  8 coords 3  9.0   4.0   0.0
+Node  9 coords 3  4.5   0.0   0.0
+Node 10 coords 3  1.5   0.5   0.0
+Node 11 coords 3  5.5   0.9   0.0
+Node 12 coords 3  0.0   2.0   0.0
+Node 13 coords 3  2.5   1.5   0.0
+Node 14 coords 3  1.0   3.0   0.0
+Node 15 coords 3  4.5   2.5   0.0
+Node 16 coords 3  4.5   4.0   0.0
+Node 17 coords 3  8.0   3.5   0.0
+Node 18 coords 3  7.5   1.9   0.0
+Node 19 coords 3  8.5   0.4   0.0
+Node 20 coords 3  9.0   2.0   0.0
+QQuad1ht 1 nodes 8 1 4 3 2 10 13 14 12 NIP 9
+QQuad1ht 2 nodes 8 1 7 5 4  9 19 11 10 NIP 9
+QQuad1ht 3 nodes 8 4 5 6 3 11 18 15 13 NIP 9
+QQuad1ht 4 nodes 8 3 6 8 2 15 17 16 14 NIP 9
+QQuad1ht 5 nodes 8 5 7 8 6 19 20 17 18 NIP 9
+SimpleTransportCS 1 mat 1 thickness 0.15 set 1
+IsoHeat 1 d 0. k 1.0 c 1.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 10 values 1 0.0 set 2
+constantedgeload 2 loadTimeFunction 2 ndofs 1 components 1 -3.0 loadtype 2 set 3
+deadweight 3 loadTimeFunction 3 components 1 0.5 set 1
+ConstantFunction 1 f(t) 1.0
+PeakFunction 2 t 1.0 f(t) 1.0
+PeakFunction 3 t 2.0 f(t) 1.0
+Set 1 elementranges {(1 5)}
+Set 2 nodes 3 1 7 9
+Set 3 elementedges 2 4 3
+#%BEGIN_CHECK%
+#NODE tStep 1 number 2 dof 10 unknown d value 1.20000000e+01
+#NODE tStep 1 number 8 dof 10 unknown d value 1.20000000e+01
+#NODE tStep 1 number 16 dof 10 unknown d value 1.20000000e+01
+#NODE tStep 2 number 2 dof 10 unknown d value 4.03973323e+00
+#NODE tStep 2 number 8 dof 10 unknown d value 4.02274874e+00
+#NODE tStep 2 number 16 dof 10 unknown d value 3.98437951e+00
+#%END_CHECK%
+
+
+

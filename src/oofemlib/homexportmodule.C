@@ -68,7 +68,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
     bool volExported = false;
-    fprintf(this->stream, "%.3e  ", tStep->giveTargetTime()*this->timeScale);
+    this->stream << std::scientific << tStep->giveTargetTime()*this->timeScale << "   ";
     IntArray elements;
     //assemble list of eligible elements. Elements can be present more times in a list but averaging goes just once over each element.
     elements.resize(0);
@@ -95,15 +95,15 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             }
 
             if ( !volExported ) {
-                fprintf(this->stream, "%.3e    ", VolTot);
+                this->stream << std::scientific << VolTot << "    ";
                 volExported = true;
             }
             avgState.times( 1. / VolTot * this->scale );
-            fprintf(this->stream, "%d ", avgState.giveSize());
+            this->stream << avgState.giveSize() << " ";
             for ( auto s: avgState ) {
-                fprintf(this->stream, "%e ", s);
+                this->stream << std::scientific << s << " ";
             }
-            fprintf(this->stream, "    ");
+            this->stream << "    ";
         }
     }
     if (reactions) {
@@ -115,8 +115,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     
     }
         
-    fprintf(this->stream, "\n" );
-    fflush(this->stream);
+    this->stream << "\n" << std::flush;
 }
 
 void
@@ -124,18 +123,17 @@ HOMExportModule :: initialize()
 {
     char numStr[32];
     sprintf(numStr, "%02d", this->number);
-    std :: string fileName = emodel->giveOutputBaseFileName() + "." + numStr + ".hom";
-    if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR( "failed to open file %s", fileName.c_str() );
+    std::string fileName = emodel->giveOutputBaseFileName() + "." + numStr + ".hom";
+    stream = std::ofstream(fileName);
+    if ( !stream.good() ) {
+        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
-
-    fprintf(this->stream, "#Time      Volume       ");
+    
+    this->stream << "#Time          Volume          ";
     for ( int var: this->ists ) {
-        fprintf(this->stream, "%s    ", __InternalStateTypeToString( ( InternalStateType ) var) );
+        this->stream << __InternalStateTypeToString( ( InternalStateType ) var) << "        ";
     }
-    fprintf(this->stream, "\n" );
-    fflush(this->stream);
-
+    this->stream << "\n" << std::flush;
 
     initializeElementSet();
 
@@ -145,6 +143,9 @@ HOMExportModule :: initialize()
 void
 HOMExportModule :: terminate()
 {
-    fclose(this->stream);
+    
+    if (this->stream){
+        this->stream.close();
+    }
 }
 } // end namespace oofem

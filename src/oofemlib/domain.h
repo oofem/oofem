@@ -119,11 +119,11 @@ class OOFEM_EXPORT Domain
     std :: vector< std :: unique_ptr< Element > > elementList;
     /// Dof manager list.
     std :: vector< std :: unique_ptr< DofManager > > dofManagerList;
-    private:
+    /// Cross section list.
+    std :: vector< std :: unique_ptr< CrossSection > > crossSectionList;    
+private:
     /// Material list.
     std :: vector< std :: unique_ptr< Material > > materialList;
-    /// Cross section list.
-    std :: vector< std :: unique_ptr< CrossSection > > crossSectionList;
     /// Boundary condition list.
     std :: vector< std :: unique_ptr< GeneralBoundaryCondition > > bcList;
     /// Initial condition list.

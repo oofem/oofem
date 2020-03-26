@@ -89,7 +89,7 @@ POIExportModule :: readPOIFile(const std :: string &poiFileName)
     // Open the file;
     std :: ifstream file(poiFileName.c_str(), std :: ios :: in);
     if ( !file.is_open() ) {
-        OOFEM_ERROR("Failed to open time data file: %s\n", poiFileName.c_str() );
+        OOFEM_ERROR("Failed to open POI data file: %s\n. Did you specify poifilename?", poiFileName.c_str() );
     }
 
     file >> nPOI; // Not actually needed.

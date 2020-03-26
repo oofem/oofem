@@ -14,6 +14,7 @@ set (tm_emodel
 set (tm_element
     Elements/transportelement.C
     Elements/quad1_ht.C
+    Elements/qquad1_ht.C
     Elements/tr1_ht.C
     Elements/quadaxisym1_ht.C
     Elements/traxisym1_ht.C

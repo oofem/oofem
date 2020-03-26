@@ -58,7 +58,7 @@ class OOFEM_EXPORT VTKXMLLatticeExportModule : public VTKXMLExportModule
 {
 protected:
 
-  FloatMatrix uniqueNodeTable;
+    FloatMatrix uniqueNodeTable;
     FloatMatrix uniqueNodeTableCross;
     IntArray periodicMap, regionToUniqueMap;
     IntArray locationMap;
@@ -66,7 +66,7 @@ protected:
     int elemNodes;
 
     bool crossSectionExportFlag;
-    
+
     void giveSwitches(IntArray &answer, int location);
 
 public:
@@ -76,26 +76,26 @@ public:
     /// Destructor
     virtual ~VTKXMLLatticeExportModule();
 
-    FILE *fileStreamCross;
+    std::ofstream fileStreamCross;
 
     VTKPiece defaultVTKPieceCross;
-    
+
     void initializeFrom(InputRecord &ir) override;
 
-    std :: string giveOutputFileNameCross(TimeStep *tStep);
+    std::string giveOutputFileNameCross(TimeStep *tStep);
 
-    FILE *giveOutputStreamCross(TimeStep *tStep);
+    std::ofstream giveOutputStreamCross(TimeStep *tStep);
 
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
 
     void doOutputNormal(TimeStep *tStep, bool forcedOutput = false);
 
     void doOutputCross(TimeStep *tStep, bool forcedOutput = false);
-    
+
     const char *giveClassName() const override { return "VTKXMLLatticeExportModule"; }
 
     bool writeVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep);
-    
+
     void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region) override;
 
     void setupVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep, int region);
@@ -105,11 +105,10 @@ public:
                                 int &totalcells,
                                 Domain *domain, TimeStep *tStep, int reg) override;
 
-    
+
     void exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;
 
     void exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;
-
 };
 } // end namespace oofem
 #endif // vtkxmllatticeexportmodule_h

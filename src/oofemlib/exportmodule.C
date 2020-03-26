@@ -47,6 +47,7 @@ ExportModule :: ExportModule(int n, EngngModel *e) : tsteps_out(), domainMask(),
     emodel = e;
     regionSets.resize(0);
     timeScale = 1.;
+    pythonExport = false;
 }
 
 
@@ -67,6 +68,8 @@ ExportModule :: initializeFrom(InputRecord &ir)
     tstep_substeps_out_flag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, tstep_substeps_out_flag, _IFT_ExportModule_subtstepsout);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, pythonExport, _IFT_ExportModule_pythonexport);
+    
     domain_all_flag = ir.hasField(_IFT_ExportModule_domainall);
 
     if ( !domain_all_flag ) {
