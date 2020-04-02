@@ -87,7 +87,8 @@
 namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs(),
     exportModuleManager(this),
-    initModuleManager(this)
+    initModuleManager(this),
+    monitorManager(this)
 {
     suppressOutput = false;
 
@@ -216,6 +217,7 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         this->initializeFrom(ir);
         exportModuleManager.initializeFrom(ir);
         initModuleManager.initializeFrom(ir);
+        monitorManager.initializeFrom(ir);
 
         if ( this->nMetaSteps == 0 ) {
             inputReaderFinish = false;
@@ -228,6 +230,8 @@ int EngngModel :: instanciateYourself(DataReader &dr, InputRecord &ir, const cha
         initModuleManager.instanciateYourself(dr, ir);
         // instanciate export module manager
         exportModuleManager.instanciateYourself(dr, ir);
+        // instanciate monitor manager
+        monitorManager.instanciateYourself(dr, ir);
         this->instanciateDomains(dr);
 
         exportModuleManager.initialize();
@@ -646,7 +650,8 @@ EngngModel :: terminate(TimeStep *tStep)
     } else {
         exportModuleManager.doOutput(tStep);
     }
-
+    monitorManager.update(tStep, Monitor::MonitorEvent::TimeStepTermination);
+    
     this->saveStepContext(tStep, CM_State | CM_Definition);
 }
 

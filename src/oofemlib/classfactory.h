@@ -67,6 +67,7 @@ class ExportModule;
 class SparseNonLinearSystemNM;
 class InitModule;
 class TopologyDescription;
+class Monitor;
 
 class Dof;
 class SparseMtrx;
@@ -137,6 +138,7 @@ template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { retu
 #define REGISTER_TopologyDescription(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, CTOR< TopologyDescription, class, Domain* > );
 #define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, CTOR< LoadBalancerMonitor, class, EngngModel* > );
 #define REGISTER_LoadBalancer(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, CTOR< LoadBalancer, class, EngngModel* > );
+#define REGISTER_Monitor(class) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerMonitor(_IFT_ ## class ## _Name, CTOR< Monitor, class, int > );
 
 // These should be converted to use strings.
 #define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class OOFEM_ATTR_UNUSED = GiveClassFactory().registerSparseMtrx(type, CTOR< SparseMtrx, class > );
@@ -194,6 +196,8 @@ private:
     std :: map < std :: string, std::unique_ptr<NonlocalBarrier> ( * )(int, Domain *) > nlbList;
     /// Associative container containing export module creators.
     std :: map < std :: string, std::unique_ptr<ExportModule> ( * )(int, EngngModel *) > exportList;
+    /// Associative container containing monitor creators.
+    std :: map < std :: string, std::unique_ptr<Monitor> ( * )(int) > monitorList;
     /// Associative container containing nonlinear solver creators.
     std :: map < std :: string, std::unique_ptr<SparseNonLinearSystemNM> ( * )(Domain *, EngngModel *) > nonlinList;
     /// Associative container containing init module creators.
@@ -370,6 +374,19 @@ public:
      * @param name Keyword string.
      */
     bool registerExportModule( const char *name, std::unique_ptr<ExportModule> ( *creator )( int, EngngModel * ) );
+    /**
+     * Creates new instance of monitor corresponding to given keyword.
+     * @param name Keyword string determining the type of new instance.
+     * @param num  Monitor number.
+     * @return Newly allocated object of requested type, null if keyword not supported.
+     */
+    std::unique_ptr<Monitor> createMonitor(const char *name, int num);
+    /**
+     * Registers a new monitor in the class factory.
+     * @param name Keyword string.
+     */
+    bool registerMonitor( const char *name, std::unique_ptr<Monitor> ( *creator )( int ) );
+
     /**
      * Creates new instance of nonlinear solver corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
