@@ -79,7 +79,7 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
                                                          GaussPoint *gp,
                                                          TimeStep *tStep)
 {
-    double tol = 1.e-12; // error in order of Pascals
+    double tol = 1.e-12; // error in order of approx. Pascals
 
     auto status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
 
@@ -94,11 +94,11 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
     FloatArrayF< 6 >reducedStrainForViscoMat;
     FloatArrayF< 6 >reducedStrain;
     FloatArrayF< 6 >quasiReducedStrain;
-    FloatArrayF< 6 >tempPlasticStrain;
+    // FloatArrayF< 6 >tempPlasticStrain;
 
-    FloatArray viscoStress;
-    FloatArrayF< 6 >tempStress;
-    FloatArrayF< 6 >stress;
+    FloatArray tempStressVE;
+    FloatArrayF< 6 >viscoStress;
+    FloatArrayF< 6 >plastDamStress;
 
     int itercount = 1;
 
@@ -109,11 +109,48 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
 
     double tolerance = 1.;
 
+    FloatArrayF< 6 >inelasticTrialStrain;
+
+    double sigmaResid;
+    double sigmaResidPlus = this->eNormalMean;
+    double sigmaResidMinus = -sigmaResidPlus;
+
+
+    FloatArrayF< 6 >inelastPlus;
+    FloatArrayF< 6 >inelastMinus;
+
+    bool plusFlag = false;
+    bool minusFlag = false;
+
+    int iterBisection = 10;
 
     do {
         if ( itercount > 100 ) {
-            printf("tolerance = %e and itercount = %d\n", tolerance, itercount);
-            OOFEM_ERROR("Algorithm not converging");
+            OOFEM_WARNING("Algorithm not converging");
+
+            printf("Algorithm not converging, giving up\n");
+            printf( "Unable to reach equilibrium between viscoelastic and CDPM materials, Element %d\n", gp->giveElement()->giveNumber() );
+            printf("tolerance = %e > %e!, stress error = %e, itercount = %d\n", tolerance, tol, sigmaResid, itercount);
+
+            if ( plusFlag ) {
+                printf("inelastPlus  = ");
+                for ( auto &val : inelastPlus ) {
+                    printf(" %.10e", val);
+                }
+                printf(" sigmaResidPlus  = %e \n", sigmaResidPlus);
+            }
+
+            if ( minusFlag ) {
+                printf("inelastMinus = ");
+                for ( auto &val : inelastMinus ) {
+                    printf(" %.10e", val);
+                }
+                printf(" sigmaResidMinus = %e \n", sigmaResidMinus);
+            }
+
+            break;
+
+            //OOFEM_ERROR("Algorithm not converging");
         }
 
         reducedStrainForViscoMat = totalStrain;
@@ -122,36 +159,65 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
             reducedStrainForViscoMat -= FloatArrayF< 6 >(indepStrain);
         }
 
-        tempPlasticStrain = status->giveTempPlasticLatticeStrain();
-        reducedStrainForViscoMat -= tempPlasticStrain;
+        if ( itercount < iterBisection || ( !plusFlag || !minusFlag ) ) {
+            //tempPlasticStrain = status->giveTempPlasticLatticeStrain();
+            //reducedStrainForViscoMat -= tempPlasticStrain;
 
-        FloatArrayF< 6 >tempDamageLatticeStrain = status->giveTempDamageLatticeStrain();
-        reducedStrainForViscoMat -= FloatArrayF< 6 >(tempDamageLatticeStrain);
+            //FloatArrayF< 6 >tempDamageLatticeStrain = status->giveTempDamageLatticeStrain();
+            //reducedStrainForViscoMat -= FloatArrayF< 6 >(tempDamageLatticeStrain);
 
-        rheoMat->giveRealStressVector(viscoStress, rChGP, reducedStrainForViscoMat, tStep);
-        tempStress = FloatArrayF< 6 >(viscoStress);
-
-
-        for ( int i = 1; i <= 6; i++ ) {
-            quasiReducedStrain.at(i) =  tempStress.at(i) / elasticStiffnessMatrix.at(i, i) + tempPlasticStrain.at(i) + tempDamageLatticeStrain.at(i);
+            inelasticTrialStrain = status->giveTempPlasticLatticeStrain() + FloatArrayF< 6 >(status->giveTempDamageLatticeStrain() );
         }
 
-        stress = this->performPlasticityReturn(gp, quasiReducedStrain, tStep);
+        reducedStrainForViscoMat -= inelasticTrialStrain;
+
+        rheoMat->giveRealStressVector(tempStressVE, rChGP, reducedStrainForViscoMat, tStep);
+        viscoStress = FloatArrayF< 6 >(tempStressVE);
+
+        for ( int i = 1; i <= 6; i++ ) {
+            //  quasiReducedStrain.at(i) =  viscoStress.at(i) / elasticStiffnessMatrix.at(i, i) + tempPlasticStrain.at(i) + tempDamageLatticeStrain.at(i);
+            quasiReducedStrain.at(i) =  viscoStress.at(i) / elasticStiffnessMatrix.at(i, i) + inelasticTrialStrain.at(i);
+        }
+
+        plastDamStress = this->performPlasticityReturn(gp, quasiReducedStrain, tStep);
         this->performDamageEvaluation(gp, quasiReducedStrain);
         double tempDamage = status->giveTempDamage();
-        stress *= ( 1. - tempDamage );
+        plastDamStress *= ( 1. - tempDamage );
 
-        tolerance = norm(stress - tempStress) / this->eNormalMean;
+        inelasticTrialStrain = status->giveTempPlasticLatticeStrain();
+        inelasticTrialStrain += FloatArrayF< 6 >( status->giveTempDamageLatticeStrain() );
+
+        tolerance = norm(plastDamStress - viscoStress) / this->eNormalMean;
+
+        // try bisection method - prepare bounds, might be needed
+        sigmaResid = viscoStress [ 0 ] - plastDamStress [ 0 ];
+
+        if ( sigmaResid > 0. ) {
+            if ( sigmaResid < sigmaResidPlus ) {
+                plusFlag = true;
+                sigmaResidPlus = sigmaResid;
+                inelastPlus = inelasticTrialStrain;
+            }
+        } else {
+            if ( sigmaResid > sigmaResidMinus ) {
+                minusFlag = true;
+                sigmaResidMinus = sigmaResid;
+                inelastMinus = inelasticTrialStrain;
+            }
+        }
+
+        if ( itercount >= iterBisection && plusFlag && minusFlag ) {
+            inelasticTrialStrain = ( sigmaResidPlus * inelastMinus - sigmaResidMinus * inelastPlus ) / ( sigmaResidPlus - sigmaResidMinus );
+        }
+
         itercount++;
-
-        //	printf("tolerance = %e, itercount = %d\n", tolerance, itercount);
     } while ( tolerance >= tol );
 
     status->letTempLatticeStrainBe(totalStrain);
-    status->letTempLatticeStressBe(tempStress);
+    status->letTempLatticeStressBe(viscoStress);
     status->letTempReducedLatticeStrainBe(quasiReducedStrain);
 
-    return tempStress;
+    return viscoStress;
 }
 
 
