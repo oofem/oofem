@@ -86,7 +86,9 @@ int FEI2dLineLin :: global2local(FloatArray &answer, const FloatArray &gcoords, 
     double y2_y1 = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
 
     // Projection of the global coordinate gives the value interpolated in [0,1].
-    double xi = ( x2_x1 * gcoords(0) + y2_y1 * gcoords(1) ) / ( sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) );
+    double dx = gcoords(0) - cellgeo.giveVertexCoordinates(1).at(xind);
+    double dy = gcoords(1) - cellgeo.giveVertexCoordinates(1).at(yind);
+    double xi = (x2_x1) ? ( sqrt( dx*dx*(1 + (y2_y1 / x2_x1)*(y2_y1 / x2_x1) )) ) / ( sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) ) : sqrt(dy*dy) / ( sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) );
     // Map to [-1,1] domain.
     xi = xi * 2 - 1;
 
@@ -116,8 +118,8 @@ void FEI2dLineLin :: edgeEvaldNds(FloatArray &answer, int iedge,
 double FEI2dLineLin :: edgeEvalNormal(FloatArray &normal, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     normal.resize(2);
-    normal.at(1) = cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind);
-    normal.at(2) = -( cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind) );
+    normal.at(1) = cellgeo.giveVertexCoordinates(2).at(yind) - cellgeo.giveVertexCoordinates(1).at(yind);
+    normal.at(2) = -( cellgeo.giveVertexCoordinates(2).at(xind) - cellgeo.giveVertexCoordinates(1).at(xind) );
     return normal.normalize() * 0.5;
 }
 
