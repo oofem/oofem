@@ -171,7 +171,7 @@ LayeredCrossSection :: giveRealStress_Warping(const FloatArrayF<2> &strain, Gaus
 FloatMatrixF<6,6>
 LayeredCrossSection :: giveStiffnessMatrix_3d(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const
 {
-    if ( gp->giveIntegrationRule()->giveIntegrationDomain() != _Cube and gp->giveIntegrationRule()->giveIntegrationDomain() != _Wedge ) {
+    if ( gp->giveIntegrationRule()->giveIntegrationDomain() != _Cube && gp->giveIntegrationRule()->giveIntegrationDomain() != _Wedge ) {
         OOFEM_ERROR("Only cubes and wedges are meaningful for layered cross-sections");
     }
     // Determine which layer the gp belongs to. This code assumes that the gauss point are created consistently (through CrossSection::setupIntegrationPoints)

@@ -36,6 +36,7 @@
 #define feinterpol1d_h
 
 #include "feinterpol.h"
+#include <stdexcept>
 
 namespace oofem {
 /**
