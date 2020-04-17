@@ -365,7 +365,7 @@ LatticeBondPlasticity :: performRegularReturn(FloatArrayF< 3 > &stress,
 
         normOfResiduals = norm(residualsNorm);
 
-        if ( isnan(normOfResiduals) ) {
+        if ( std::isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return kappa;
         }
