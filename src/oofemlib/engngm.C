@@ -1197,6 +1197,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     FloatMatrix R;
     FloatArray charVec;
     int nelem = domain->giveNumberOfElements();
+    bool assembleFlag = false;
 
     ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way.
     /// For now, this is the best we can do.
@@ -1317,7 +1318,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             int boundary = list2.at(j * 2);
             SurfaceLoad *sLoad;
             EdgeLoad *eLoad;
-            bool assembleFlag = false;
+            assembleFlag = false;
             IntArray bNodes;
 
             if ((eLoad = dynamic_cast< EdgeLoad * >(domain->giveLoad(iload)))) {
