@@ -1,0 +1,17 @@
+Welcome to OOFEM Theory manual README.
+
+Prerequisities
+----------------
+To build the documentation, you need Sphinx (Python documentation generator, https://www.sphinx-doc.org).
+Typically invoke ``pip install -U Sphinx`` to install it on your system.
+
+Building documentation
+----------------------
+1) Change working directory to doc/theorymanual2 inside your oofem source tree
+2) run ``make html`` or ``make latexpdf`` to build html or pdf versions
+
+Contributing
+-------------
+The philosophy and contributing guide is part of manual. 
+
+Happy contributing!
