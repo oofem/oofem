@@ -49,6 +49,7 @@ namespace py = pybind11;
 #include "timestep.h"
 #include "domain.h"
 #include "engngm.h"
+#include "staggeredproblem.h"
 #include "dof.h"
 #include "dofmanager.h"
 #include "element.h"
@@ -732,6 +733,7 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::MetaStep>(m, "MetaStep")
         .def("setNumberOfSteps", &oofem::MetaStep::setNumberOfSteps)
+        .def("giveNumberOfSteps", &oofem::MetaStep::giveNumberOfSteps)
     ;
         
     py::class_<oofem::TimeStep>(m, "TimeStep")
@@ -750,7 +752,6 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::FieldManager>(m, "FieldManager")
         .def("registerField", &oofem::FieldManager::registerField, py::keep_alive<1, 2>())
-
         ;
 
     py::class_<oofem::EngngModelContext>(m, "EngngModelContext")
@@ -773,7 +774,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference, py::arg("force") = false)
         .def("givePreviousStep", &oofem::EngngModel::givePreviousStep, py::return_value_policy::reference)
         .def("giveNextStep", &oofem::EngngModel::giveNextStep, py::return_value_policy::reference)
-        .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
+        .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps, py::arg("force")=false)
         .def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
         .def("checkProblemConsistency", &oofem::EngngModel::checkProblemConsistency)
         .def("giveTimer", &oofem::EngngModel::giveTimer, py::return_value_policy::reference)
@@ -785,8 +786,15 @@ PYBIND11_MODULE(oofempy, m) {
         .def("postInitialize", &oofem::EngngModel::postInitialize)
         .def("setRenumberFlag", &oofem::EngngModel::setRenumberFlag)
         .def("giveContext", &oofem::EngngModel::giveContext, py::return_value_policy::reference)
+        .def("forceEquationNumbering", py::overload_cast<int>(&oofem::EngngModel::forceEquationNumbering))
+        .def("forceEquationNumbering", py::overload_cast<>(&oofem::EngngModel::forceEquationNumbering))
         ;
-
+    
+    py::class_<oofem::StaggeredProblem, oofem::EngngModel>(m, "StaggeredProblem")
+        .def("giveSlaveProblem", &oofem::StaggeredProblem::giveSlaveProblem, py::return_value_policy::reference)
+        .def("giveTimeControl", &oofem::StaggeredProblem::giveTimeControl, py::return_value_policy::reference)
+    ;
+        
     py::class_<oofem::Domain>(m, "Domain")
         .def(py::init<int, int, oofem::EngngModel*>())
         .def("giveNumber", &oofem::Domain::giveNumber)
@@ -842,11 +850,11 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfDofs", &oofem::DofManager::giveNumberOfDofs)
         .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
         .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
-
         .def("giveCoordinates", &oofem::DofManager::giveCoordinates, py::return_value_policy::reference)
         .def("appendDof", &oofem::DofManager::appendDof, py::keep_alive<1, 2>())
         .def("removeDof", &oofem::DofManager::removeDof)
         .def("hasDofID", &oofem::DofManager::hasDofID)
+        .def("giveGlobalNumber", &oofem::DofManager::giveGlobalNumber)
     ;
 
     /*
@@ -908,7 +916,9 @@ PYBIND11_MODULE(oofempy, m) {
 //     ;
     
     py::class_<oofem::EngngModelTimer> (m, "EngngModelTimer")
-        .def("startTimer", &oofem::EngngModelTimer::startTimer);
+        .def("startTimer", &oofem::EngngModelTimer::startTimer)
+        .def("stopTimer", &oofem::EngngModelTimer::stopTimer)
+        .def("getUtime", &oofem::EngngModelTimer::getUtime)
     ;
     
     py::enum_<oofem::EngngModelTimer::EngngModelTimerType>(m, "EngngModelTimerType")

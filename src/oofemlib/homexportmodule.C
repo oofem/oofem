@@ -40,6 +40,8 @@
 #include "material.h"
 #include "classfactory.h"
 #include "tm/EngineeringModels/transienttransportproblem.h"
+#include "sm/Elements/structuralelement.h"
+#include "sm/Materials/structuralmaterial.h"
 
 namespace oofem {
 REGISTER_ExportModule(HOMExportModule)
@@ -58,6 +60,8 @@ HOMExportModule :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->reactions, _IFT_HOMExportModule_reactions);
     this->scale = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->scale, _IFT_HOMExportModule_scale);
+    this->strainEnergy = ir.hasField(_IFT_HOMExportModule_strain_energy);
+    this->strainEnergySum = 0;
 }
 
 void
@@ -114,7 +118,33 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
       */
     
     }
+    
+    if (strainEnergy) {
+        double strainEnergyIncr = 0.;
+        FloatArray Stress, StrainIncrement, StrainIncrementFull, du;
+        FloatMatrix b;
+        Domain *d = emodel->giveDomain(1);
+        StructuralElement *elem;
         
+        //Can not access strain history, need to compute through an increment in displacements
+        for (int i=1; i<=d->giveNumberOfElements(); i++){
+            elem = dynamic_cast< StructuralElement *> (d->giveElement(i));
+            for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
+                double dV = elem->computeVolumeAround(gp);
+                elem->giveGlobalIPValue(Stress, gp, IST_StressTensor, tStep);
+                elem->computeBmatrixAt(gp, b);
+                elem->computeVectorOf(VM_Incremental, tStep, du);
+                StrainIncrement.beProductOf(b, du);
+                StructuralMaterial :: giveFullSymVectorForm(StrainIncrementFull, StrainIncrement, gp->giveMaterialMode());
+                strainEnergyIncr += Stress.dotProduct(StrainIncrementFull)*dV;
+//                 Stress.printYourself();
+//                 du.printYourself();
+            }
+        }
+        strainEnergySum += strainEnergyIncr;
+        this->stream << strainEnergyIncr << " " << strainEnergySum << " ";
+    }
+    
     this->stream << "\n" << std::flush;
 }
 
@@ -133,6 +163,11 @@ HOMExportModule :: initialize()
     for ( int var: this->ists ) {
         this->stream << __InternalStateTypeToString( ( InternalStateType ) var) << "        ";
     }
+    
+    if(this->strainEnergy){
+        this->stream << "StrainEnergyIncr StrainEnergySum      ";
+    }
+    
     this->stream << "\n" << std::flush;
 
     initializeElementSet();

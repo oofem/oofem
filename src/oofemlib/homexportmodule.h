@@ -46,6 +46,7 @@
 #define _IFT_HOMExportModule_ISTs "ists" /// List of internal state types used for output
 #define _IFT_HOMExportModule_reactions "reactions" /// Whether to export reactions
 #define _IFT_HOMExportModule_scale "scale" ///[optional] Scales the output variables
+#define _IFT_HOMExportModule_strain_energy "strain_energy" ///[optional] Strain energy through the integration over strain energy densities in integration points
 //@}
 
 using namespace std;
@@ -69,6 +70,9 @@ protected:
     IntArray ists;
     /// Reactions to export
     bool reactions;
+    /// Strain energy. Stress increment should be small since the integral is evaluated from the right point (last stress only, not a midpoint rule).
+    bool strainEnergy;
+    double strainEnergySum;
 
 public:
     /// Constructor. Creates empty Output Manager.

@@ -173,6 +173,7 @@ public:
     TimeStep *giveCurrentStep(bool force = false) override;
     TimeStep *givePreviousStep(bool force = false) override;
     TimeStep *giveSolutionStepWhenIcApply(bool force = false) override;
+    EngngModel *giveTimeControl();
     int giveNumberOfFirstStep(bool force = false) override;
 
     TimeStep *giveNextStep() override;
