@@ -57,6 +57,7 @@ namespace py = pybind11;
 #include "datastream.h"
 
 #include "generalboundarycondition.h"
+#include "boundarycondition.h"
 #include "initialcondition.h"
 #include "function.h"
 #include "material.h"
@@ -907,6 +908,11 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
         .def("getIsImposedTimeFunctionNumber", &oofem::GeneralBoundaryCondition::getIsImposedTimeFunctionNumber)
         .def("setIsImposedTimeFunctionNumber", &oofem::GeneralBoundaryCondition::setIsImposedTimeFunctionNumber)
+    ;
+
+
+    py::class_<oofem::BoundaryCondition, oofem::GeneralBoundaryCondition>(m, "BoundaryCondition")
+        .def("setPrescribedValue", &oofem::BoundaryCondition::setPrescribedValue)
     ;
 
     py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
