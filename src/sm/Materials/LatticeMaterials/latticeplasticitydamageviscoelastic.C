@@ -58,12 +58,19 @@ LatticePlasticityDamageViscoelastic::initializeFrom(InputRecord &ir)
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
     // override elastic modulus by the one given by the compliance function
-    double timeFactor = 0.;
+    timeFactor = 0.;
     IR_GIVE_FIELD(ir, timeFactor, _IFT_LatticePlasticityDamageViscoelastic_timeFactor); // timeConversion equal to 1 day in current time units of the analysis
 
     double E28 = 1. / rheoMat->computeCreepFunction(timeFactor * 28.01, timeFactor * 28., NULL, NULL); // modulus of elasticity evaluated at 28 days, duration of loading 15 min
 
     this->eNormalMean = E28; // swap elastic modulus/stiffness
+
+    if ( ir.hasField(_IFT_LatticePlasticityDamageViscoelastic_timedepfracturing) ) {
+        this->fib = true;
+        IR_GIVE_FIELD(ir, fib_fcm28, _IFT_LatticePlasticityDamageViscoelastic_fcm28);
+        IR_GIVE_FIELD(ir, fib_s, _IFT_LatticePlasticityDamageViscoelastic_fib_s);
+        IR_GIVE_FIELD(ir, stiffnessFactor, _IFT_LatticePlasticityDamageViscoelastic_stiffnessFactor);
+    }
 }
 
 
@@ -94,7 +101,6 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
     FloatArrayF< 6 >reducedStrainForViscoMat;
     FloatArrayF< 6 >reducedStrain;
     FloatArrayF< 6 >quasiReducedStrain;
-    // FloatArrayF< 6 >tempPlasticStrain;
 
     FloatArray tempStressVE;
     FloatArrayF< 6 >viscoStress;
@@ -129,7 +135,7 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
             OOFEM_WARNING("Algorithm not converging");
 
             printf("Algorithm not converging, giving up\n");
-            printf( "Unable to reach equilibrium between viscoelastic and CDPM materials, Element %d\n", gp->giveElement()->giveNumber() );
+            printf("Unable to reach equilibrium between viscoelastic and CDPM materials, Element %d\n", gp->giveElement()->giveNumber() );
             printf("tolerance = %e > %e!, stress error = %e, itercount = %d\n", tolerance, tol, sigmaResid, itercount);
 
             if ( plusFlag ) {
@@ -149,8 +155,6 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
             }
 
             break;
-
-            //OOFEM_ERROR("Algorithm not converging");
         }
 
         reducedStrainForViscoMat = totalStrain;
@@ -160,13 +164,7 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
         }
 
         if ( itercount < iterBisection || ( !plusFlag || !minusFlag ) ) {
-            //tempPlasticStrain = status->giveTempPlasticLatticeStrain();
-            //reducedStrainForViscoMat -= tempPlasticStrain;
-
-            //FloatArrayF< 6 >tempDamageLatticeStrain = status->giveTempDamageLatticeStrain();
-            //reducedStrainForViscoMat -= FloatArrayF< 6 >(tempDamageLatticeStrain);
-
-            inelasticTrialStrain = status->giveTempPlasticLatticeStrain() + FloatArrayF< 6 >(status->giveTempDamageLatticeStrain() );
+            inelasticTrialStrain = status->giveTempPlasticLatticeStrain() + FloatArrayF< 6 >( status->giveTempDamageLatticeStrain() );
         }
 
         reducedStrainForViscoMat -= inelasticTrialStrain;
@@ -175,17 +173,16 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
         viscoStress = FloatArrayF< 6 >(tempStressVE);
 
         for ( int i = 1; i <= 6; i++ ) {
-            //  quasiReducedStrain.at(i) =  viscoStress.at(i) / elasticStiffnessMatrix.at(i, i) + tempPlasticStrain.at(i) + tempDamageLatticeStrain.at(i);
             quasiReducedStrain.at(i) =  viscoStress.at(i) / elasticStiffnessMatrix.at(i, i) + inelasticTrialStrain.at(i);
         }
 
         plastDamStress = this->performPlasticityReturn(gp, quasiReducedStrain, tStep);
-        this->performDamageEvaluation(gp, quasiReducedStrain);
+        this->performDamageEvaluation(gp, quasiReducedStrain, tStep);
         double tempDamage = status->giveTempDamage();
         plastDamStress *= ( 1. - tempDamage );
 
         inelasticTrialStrain = status->giveTempPlasticLatticeStrain();
-        inelasticTrialStrain += FloatArrayF< 6 >( status->giveTempDamageLatticeStrain() );
+        inelasticTrialStrain += FloatArrayF< 6 >(status->giveTempDamageLatticeStrain() );
 
         tolerance = norm(plastDamStress - viscoStress) / this->eNormalMean;
 
@@ -218,6 +215,54 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
     status->letTempReducedLatticeStrainBe(quasiReducedStrain);
 
     return viscoStress;
+}
+
+double
+LatticePlasticityDamageViscoelastic::giveCompressiveStrength(GaussPoint *gp, TimeStep *tStep) const
+{
+    double fcm = this->fib_fcm28;
+
+    if ( fib ) {
+        double equivalentTime = this->giveEquivalentTime(gp, tStep);
+        fcm = exp(this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
+    }
+
+            
+    return fcm / this->fib_fcm28 * LatticePlasticityDamage::fc;
+}
+
+
+double
+LatticePlasticityDamageViscoelastic::giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const
+{
+    // check if the fracture properties are constant or time-dependent
+    double ftm = 1.;
+    double ftm28 = 1.;
+
+    if ( fib ) {
+        double equivalentTime = this->giveEquivalentTime(gp, tStep);
+        double fcm = exp(this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
+
+        //Calculate the aged tensile strength
+        if ( fcm >= 58. ) {
+            ftm = 2.12 * log(1. + 0.1 * fcm) * 1.e6 / this->stiffnessFactor;
+        } else if ( fcm <= 20. ) {
+            ftm = 0.07862 * fcm * 1.e6 / this->stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
+        } else {
+            ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / this->stiffnessFactor; //5.1-3a
+        }
+
+        //Do the same for the 28 day compressive strength
+        if ( this->fib_fcm28 >= 58. ) {
+            ftm28 = 2.12 * log(1. + 0.1 * this->fib_fcm28) * 1.e6 / this->stiffnessFactor;
+        } else if ( this->fib_fcm28 <= 20. ) {
+            ftm28 = 0.07862 * this->fib_fcm28 * 1.e6 / this->stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
+        } else {
+            ftm28 = 0.3 * pow(this->fib_fcm28 - 8., 2. / 3.) * 1.e6 / this->stiffnessFactor; //5.1-3a
+        }
+    }
+
+    return ftm / ftm28 * LatticePlasticityDamage::ft;
 }
 
 
@@ -293,9 +338,19 @@ int LatticePlasticityDamageViscoelastic::checkConsistency()
     return FEMComponent::checkConsistency();
 }
 
+double
+LatticePlasticityDamageViscoelastic::giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const
+{
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+
+    LatticePlasticityDamageViscoelasticStatus *status = static_cast< LatticePlasticityDamageViscoelasticStatus * >( this->giveStatus(gp) );
+
+    return rheoMat->giveEquivalentTime(status->giveSlaveGaussPointVisco(), tStep);
+}
+
 
 LatticePlasticityDamageViscoelasticStatus::LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *gp) :
-    LatticePlasticityDamageStatus(n, d, gp), slaveGpVisco( std::make_unique< GaussPoint >( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
+    LatticePlasticityDamageStatus(n, d, gp), slaveGpVisco(std::make_unique< GaussPoint >(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
 {}
 
 void
