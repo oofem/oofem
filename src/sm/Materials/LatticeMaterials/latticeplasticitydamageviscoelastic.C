@@ -135,7 +135,7 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
             OOFEM_WARNING("Algorithm not converging");
 
             printf("Algorithm not converging, giving up\n");
-            printf("Unable to reach equilibrium between viscoelastic and CDPM materials, Element %d\n", gp->giveElement()->giveNumber() );
+            printf( "Unable to reach equilibrium between viscoelastic and CDPM materials, Element %d\n", gp->giveElement()->giveNumber() );
             printf("tolerance = %e > %e!, stress error = %e, itercount = %d\n", tolerance, tol, sigmaResid, itercount);
 
             if ( plusFlag ) {
@@ -164,7 +164,7 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
         }
 
         if ( itercount < iterBisection || ( !plusFlag || !minusFlag ) ) {
-            inelasticTrialStrain = status->giveTempPlasticLatticeStrain() + FloatArrayF< 6 >( status->giveTempDamageLatticeStrain() );
+            inelasticTrialStrain = status->giveTempPlasticLatticeStrain() + FloatArrayF< 6 >(status->giveTempDamageLatticeStrain() );
         }
 
         reducedStrainForViscoMat -= inelasticTrialStrain;
@@ -182,7 +182,7 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
         plastDamStress *= ( 1. - tempDamage );
 
         inelasticTrialStrain = status->giveTempPlasticLatticeStrain();
-        inelasticTrialStrain += FloatArrayF< 6 >(status->giveTempDamageLatticeStrain() );
+        inelasticTrialStrain += FloatArrayF< 6 >( status->giveTempDamageLatticeStrain() );
 
         tolerance = norm(plastDamStress - viscoStress) / this->eNormalMean;
 
@@ -220,15 +220,13 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
 double
 LatticePlasticityDamageViscoelastic::giveCompressiveStrength(GaussPoint *gp, TimeStep *tStep) const
 {
-    double fcm = this->fib_fcm28;
-
     if ( fib ) {
         double equivalentTime = this->giveEquivalentTime(gp, tStep);
-        fcm = exp(this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
+        double fcm = exp( this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
+        return fcm / this->fib_fcm28 * LatticePlasticityDamage::fc;
+    } else   {
+        return LatticePlasticityDamage::fc;
     }
-
-            
-    return fcm / this->fib_fcm28 * LatticePlasticityDamage::fc;
 }
 
 
@@ -241,7 +239,7 @@ LatticePlasticityDamageViscoelastic::giveTensileStrength(GaussPoint *gp, TimeSte
 
     if ( fib ) {
         double equivalentTime = this->giveEquivalentTime(gp, tStep);
-        double fcm = exp(this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
+        double fcm = exp( this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
 
         //Calculate the aged tensile strength
         if ( fcm >= 58. ) {
@@ -260,9 +258,10 @@ LatticePlasticityDamageViscoelastic::giveTensileStrength(GaussPoint *gp, TimeSte
         } else {
             ftm28 = 0.3 * pow(this->fib_fcm28 - 8., 2. / 3.) * 1.e6 / this->stiffnessFactor; //5.1-3a
         }
+        return ftm / ftm28 * LatticePlasticityDamage::ft;
+    } else   {
+        return LatticePlasticityDamage::ft;
     }
-
-    return ftm / ftm28 * LatticePlasticityDamage::ft;
 }
 
 
@@ -350,7 +349,7 @@ LatticePlasticityDamageViscoelastic::giveEquivalentTime(GaussPoint *gp, TimeStep
 
 
 LatticePlasticityDamageViscoelasticStatus::LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *gp) :
-    LatticePlasticityDamageStatus(n, d, gp), slaveGpVisco(std::make_unique< GaussPoint >(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
+    LatticePlasticityDamageStatus(n, d, gp), slaveGpVisco( std::make_unique< GaussPoint >( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
 {}
 
 void
