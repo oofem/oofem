@@ -155,6 +155,8 @@ LatticePlasticityDamageViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > 
             }
 
             break;
+
+            //OOFEM_ERROR("Algorithm not converging");
         }
 
         reducedStrainForViscoMat = totalStrain;
