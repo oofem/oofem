@@ -70,42 +70,36 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
-
-    bool volExported = false;
+    bool outputVol = false;
+    double volTot;
     this->stream << std::scientific << tStep->giveTargetTime()*this->timeScale << "   ";
-    IntArray elements;
+    
     //assemble list of eligible elements. Elements can be present more times in a list but averaging goes just once over each element.
     elements.resize(0);
     for ( int ireg = 1; ireg <= this->giveNumberOfRegions(); ireg++ ) {
         elements.followedBy(this->giveRegionSet(ireg)->giveElementList());
     }
     //elements.printYourself();
-
+    
     if (!ists.isEmpty()) {
         for ( int ist: ists ) {
-            FloatArray ipState, avgState;
-            double VolTot = 0.;
-            Domain *d = emodel->giveDomain(1);
-            for ( auto &elem : d->giveElements() ) {
-                //printf("%d ", elem -> giveNumber());
-                if ( elements.contains(elem -> giveNumber()) ){
-                    for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
-                        double dV = elem->computeVolumeAround(gp);
-                        VolTot += dV;
-                        elem->giveGlobalIPValue(ipState, gp, (InternalStateType)ist, tStep);
-                        avgState.add(dV, ipState);
-                    }
+            FloatArray answer;
+            average(answer, volTot, ist, tStep);
+            
+            if(!outputVol){
+                this->stream << std::scientific << volTot << "    ";
+                outputVol = true;
+            }
+            
+            if(answer.giveSize() == 0) { //value not defined
+                this->stream << "-";
+            } else if (answer.giveSize() == 1) {
+                this->stream << answer.at(1);
+            } else {
+                this->stream << answer.giveSize() << " ";
+                for ( auto s: answer ) {
+                    this->stream << std::scientific << s << " ";
                 }
-            }
-
-            if ( !volExported ) {
-                this->stream << std::scientific << VolTot << "    ";
-                volExported = true;
-            }
-            avgState.times( 1. / VolTot * this->scale );
-            this->stream << avgState.giveSize() << " ";
-            for ( auto s: avgState ) {
-                this->stream << std::scientific << s << " ";
             }
             this->stream << "    ";
         }
@@ -120,33 +114,57 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
     
     if (strainEnergy) {
+        FloatArray averageStress, averageStrain, avSig, dEps;
         double strainEnergyIncr = 0.;
-        FloatArray Stress, StrainIncrement, StrainIncrementFull, du;
-        FloatMatrix b;
-        Domain *d = emodel->giveDomain(1);
-        StructuralElement *elem;
         
-        //Can not access strain history, need to compute through an increment in displacements
-        for (int i=1; i<=d->giveNumberOfElements(); i++){
-            elem = dynamic_cast< StructuralElement *> (d->giveElement(i));
-            for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
-                double dV = elem->computeVolumeAround(gp);
-                elem->giveGlobalIPValue(Stress, gp, IST_StressTensor, tStep);
-                elem->computeBmatrixAt(gp, b);
-                elem->computeVectorOf(VM_Incremental, tStep, du);
-                StrainIncrement.beProductOf(b, du);
-                StructuralMaterial :: giveFullSymVectorForm(StrainIncrementFull, StrainIncrement, gp->giveMaterialMode());
-                strainEnergyIncr += Stress.dotProduct(StrainIncrementFull)*dV;
-//                 Stress.printYourself();
-//                 du.printYourself();
-            }
+        average(averageStress, volTot, IST_StressTensor, tStep);
+        average(averageStrain, volTot, IST_StrainTensor, tStep);
+        
+        if(lastAverageStress.isEmpty()){
+            lastAverageStress.resize(averageStress.giveSize());
+            lastAverageStress.zero();
+            lastAverageStrain.resize(averageStrain.giveSize());
+            lastAverageStrain.zero();
         }
+        
+        //Average stress for integration
+        avSig = 0.5*lastAverageStress + 0.5*averageStress;
+        dEps.beDifferenceOf(averageStrain, lastAverageStrain);
+        strainEnergyIncr = volTot*avSig.dotProduct(dEps);
+        
+        lastAverageStress = averageStress;
+        lastAverageStrain = averageStrain;
+        
         strainEnergySum += strainEnergyIncr;
         this->stream << strainEnergyIncr << " " << strainEnergySum << " ";
     }
     
     this->stream << "\n" << std::flush;
 }
+
+
+void 
+HOMExportModule :: average(FloatArray &answer, double &volTot, int ist, TimeStep *tStep)
+{
+       
+    FloatArray ipState;
+    volTot = 0.;
+    Domain *d = emodel->giveDomain(1);
+    for ( auto &elem : d->giveElements() ) {
+        //printf("%d ", elem -> giveNumber());
+        if ( elements.contains(elem -> giveNumber()) ){
+            for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
+                double dV = elem->computeVolumeAround(gp);
+                volTot += dV;
+                elem->giveGlobalIPValue(ipState, gp, (InternalStateType)ist, tStep);
+                answer.add(dV, ipState);
+            }
+        }
+    }
+
+    answer.times( 1. / volTot * this->scale );
+}
+
 
 void
 HOMExportModule :: initialize()

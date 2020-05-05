@@ -68,9 +68,15 @@ protected:
     std::ofstream stream;
     /// Internal states to export
     IntArray ists;
+    /// List of elements
+    IntArray elements;
+    /// Last averaged stress
+    FloatArray lastAverageStress;
+    /// Last averaged strain
+    FloatArray lastAverageStrain;
     /// Reactions to export
     bool reactions;
-    /// Strain energy. Stress increment should be small since the integral is evaluated from the right point (last stress only, not a midpoint rule).
+    /// Strain energy, evaluated from mid-point rule (exact for linear elastic problems with zero initial stress/strain field).
     bool strainEnergy;
     double strainEnergySum;
 
@@ -81,6 +87,8 @@ public:
     virtual ~HOMExportModule();
     void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
+    //returns averaged property
+    void average(FloatArray &answer, double &volTot, int ist, TimeStep *tStep);
     void initialize() override;
     void terminate() override;
     const char *giveClassName() const override { return "HOMExportModule"; }
