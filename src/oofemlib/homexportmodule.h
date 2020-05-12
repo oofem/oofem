@@ -71,14 +71,15 @@ protected:
     /// List of elements
     IntArray elements;
     /// Last averaged stress
-    FloatArray lastAverageStress;
-    /// Last averaged strain
-    FloatArray lastAverageStrain;
+    std::vector< FloatArray > lastStress;
+    /// Last averaged stress-dependent strain
+    std::vector< FloatArray > lastStrainStressDep;
     /// Reactions to export
     bool reactions;
-    /// Strain energy, evaluated from mid-point rule (exact for linear elastic problems with zero initial stress/strain field).
+    /// Allow calculation of strain energy, evaluated from mid-point rule (exact for linear elastic problems with zero initial stress/strain field). Allows only non-growing domains. 
     bool strainEnergy;
-    double strainEnergySum;
+    // Sum of strain energy (total) and stress-dependent strain energy
+    double strainEnergySumStressDep;
 
 public:
     /// Constructor. Creates empty Output Manager.
@@ -88,7 +89,7 @@ public:
     void initializeFrom(InputRecord &ir) override;
     void doOutput(TimeStep *tStep, bool forcedOutput = false) override;
     //returns averaged property
-    void average(FloatArray &answer, double &volTot, int ist, TimeStep *tStep);
+    void average(FloatArray &answer, double &volTot, int ist, bool subtractStressDepStrain, TimeStep *tStep);
     void initialize() override;
     void terminate() override;
     const char *giveClassName() const override { return "HOMExportModule"; }

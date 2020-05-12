@@ -1,7 +1,8 @@
 patch103.out
 Patch test of PlaneStress2d elements -> thermal load
-StaticStructural nsteps 1 nmodules 1
+StaticStructural nsteps 1 nmodules 2
 errorcheck
+hom tstep_all ists 2 1 4 strain_energy
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 3

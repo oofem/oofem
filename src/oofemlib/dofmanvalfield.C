@@ -108,7 +108,8 @@ DofManValueField::evaluateAt(FloatArray &answer, const FloatArray &coords, Value
 {
     int result = 0; // assume ok
     FloatArray lc, n;
-
+    answer.resize(0);
+    
     // request element containing target point
     Element *elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
     if ( elem ) { // ok element containing target point found

@@ -39,6 +39,7 @@
 #include "engngm.h"
 #include "material.h"
 #include "classfactory.h"
+#include "crosssection.h"
 #include "tm/EngineeringModels/transienttransportproblem.h"
 #include "sm/Elements/structuralelement.h"
 #include "sm/Materials/structuralmaterial.h"
@@ -61,7 +62,10 @@ HOMExportModule :: initializeFrom(InputRecord &ir)
     this->scale = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->scale, _IFT_HOMExportModule_scale);
     this->strainEnergy = ir.hasField(_IFT_HOMExportModule_strain_energy);
-    this->strainEnergySum = 0;
+    this->strainEnergySumStressDep = 0;
+    
+    lastStress.resize(0);
+    lastStrainStressDep.resize(0);
 }
 
 void
@@ -72,6 +76,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
     bool outputVol = false;
     double volTot;
+    FloatArray answer;
     this->stream << std::scientific << tStep->giveTargetTime()*this->timeScale << "   ";
     
     //assemble list of eligible elements. Elements can be present more times in a list but averaging goes just once over each element.
@@ -83,8 +88,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     
     if (!ists.isEmpty()) {
         for ( int ist: ists ) {
-            FloatArray answer;
-            average(answer, volTot, ist, tStep);
+            average(answer, volTot, ist, false, tStep);
             
             if(!outputVol){
                 this->stream << std::scientific << volTot << "    ";
@@ -113,30 +117,11 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     
     }
     
-    if (strainEnergy) {
-        FloatArray averageStress, averageStrain, avSig, dEps;
-        double strainEnergyIncr = 0.;
         
-        average(averageStress, volTot, IST_StressTensor, tStep);
-        average(averageStrain, volTot, IST_StrainTensor, tStep);
-        
-        if(lastAverageStress.isEmpty()){
-            lastAverageStress.resize(averageStress.giveSize());
-            lastAverageStress.zero();
-            lastAverageStrain.resize(averageStrain.giveSize());
-            lastAverageStrain.zero();
-        }
-        
-        //Average stress for integration
-        avSig = 0.5*lastAverageStress + 0.5*averageStress;
-        dEps.beDifferenceOf(averageStrain, lastAverageStrain);
-        strainEnergyIncr = volTot*avSig.dotProduct(dEps);
-        
-        lastAverageStress = averageStress;
-        lastAverageStrain = averageStrain;
-        
-        strainEnergySum += strainEnergyIncr;
-        this->stream << strainEnergyIncr << " " << strainEnergySum << " ";
+    if(strainEnergy){
+        average(answer, volTot, IST_Undefined, true, tStep);
+        strainEnergySumStressDep += answer.at(1);
+        this->stream << answer.at(1) << " " << strainEnergySumStressDep;
     }
     
     this->stream << "\n" << std::flush;
@@ -144,11 +129,13 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 
 void 
-HOMExportModule :: average(FloatArray &answer, double &volTot, int ist, TimeStep *tStep)
+HOMExportModule :: average(FloatArray &answer, double &volTot, int ist, bool strainEn, TimeStep *tStep)
 {
-       
-    FloatArray ipState;
+    FloatArray ipState, tmp;
+    answer.resize(0);
     volTot = 0.;
+    double dStrainEnergyStressDep=0;
+    int num = 0;
     Domain *d = emodel->giveDomain(1);
     for ( auto &elem : d->giveElements() ) {
         //printf("%d ", elem -> giveNumber());
@@ -156,13 +143,59 @@ HOMExportModule :: average(FloatArray &answer, double &volTot, int ist, TimeStep
             for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                 double dV = elem->computeVolumeAround(gp);
                 volTot += dV;
-                elem->giveGlobalIPValue(ipState, gp, (InternalStateType)ist, tStep);
-                answer.add(dV, ipState);
+                
+                if(strainEn){
+                    FloatArray stress, lastStressIP, strain, strainRed, tmp, strainStressDep, lastStrainStressDepIP, avSig, dEpsStressDep;
+                    elem->giveGlobalIPValue(stress, gp, IST_StressTensor, tStep); //returns in giveFullSymVectorForm
+                    elem->giveGlobalIPValue(strain, gp, IST_StrainTensor, tStep);
+                    
+                    //Get stress-dependent strain, need FullSymVectorForm of (eps-eps_eig)
+                    StructuralMaterial :: giveReducedSymVectorForm(strainRed, strain, gp->giveMaterialMode());
+                    dynamic_cast< StructuralMaterial * >(elem->giveCrossSection()->giveMaterial(gp))->giveStressDependentPartOfStrainVector(tmp, gp, strainRed, tStep, VM_Total);
+                    StructuralMaterial :: giveFullSymVectorForm(strainStressDep, tmp, gp->giveMaterialMode());
+                    
+                    if(int(lastStress.size()) <= num){
+                        lastStressIP.resize(stress.giveSize());
+                        lastStressIP.zero();
+                        lastStrainStressDepIP.resize(stress.giveSize());
+                        lastStrainStressDepIP.zero();
+                    } else {
+                        lastStressIP = lastStress[num];
+                        lastStrainStressDepIP = lastStrainStressDep[num];
+                    }
+                    
+                    
+                    avSig = 0.5*lastStressIP + 0.5*stress;
+                    dEpsStressDep.beDifferenceOf(strainStressDep, lastStrainStressDepIP);
+                    
+                    dStrainEnergyStressDep += dV*avSig.dotProduct(dEpsStressDep);
+                    
+                    //memorize current values for the next step
+                    if(int(lastStress.size()) <= num){
+                        lastStress.push_back(stress);
+                        lastStrainStressDep.push_back(strainStressDep);
+                    } else {
+                        lastStress[num] = stress;
+                        lastStrainStressDep[num] = strainStressDep;    
+                    }
+                    num++;
+                } else {
+                    elem->giveGlobalIPValue(ipState, gp, (InternalStateType)ist, tStep);
+                    answer.add(dV, ipState);
+                }
+                
             }
         }
     }
 
-    answer.times( 1. / volTot * this->scale );
+    if(strainEn){
+        answer.resize(1);
+        answer.at(1) = dStrainEnergyStressDep ;
+        return;
+    } else {
+        answer.times( 1. / volTot * this->scale );
+        return;
+    }
 }
 
 
@@ -183,7 +216,7 @@ HOMExportModule :: initialize()
     }
     
     if(this->strainEnergy){
-        this->stream << "StrainEnergyIncr StrainEnergySum      ";
+        this->stream << "StrainEnergyIncrStressDep StrainEnergySumStressDep     ";
     }
     
     this->stream << "\n" << std::flush;

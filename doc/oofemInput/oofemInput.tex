@@ -3040,12 +3040,13 @@ By default vtk and vtkxml modules perform recovery over the whole domain. The VT
 \item Homogenization of IP quantities in the global coordinate system (such as stress, strain, damage, heat flow). Corresponding IP quantities are summed and averaged over the volume. It is possible to select region sets from which the averaging occurs. The averaging works for all domains with an extension to trusses. A truss is considered as a volume element with oriented stress and strain components along the truss axis. The transformation to global components occurs before averaging.
 
 \begin{record}[0.9\textwidth]
-  \recentry{\entKeywordInst{hom}}
+  \recentry{\entKeywordInst{hom}}{}
   \recentry{}{\field{ists}{ia}}
   \recentry{}{\optField{scale}{rn}}
   \recentry{}{\optField{regionSets}{ia}}
-  \recentry{}{\optFieldnotype{strain_energy}}
+  \recentry{}{\optFieldnotype{strain\_energy}}
 \end{record}
+
 \begin{itemize}
 
 \item An integer array \param{ists} specifies internal state types for export which are defined in internalstatetype.h file.
@@ -3054,7 +3055,11 @@ By default vtk and vtkxml modules perform recovery over the whole domain. The VT
 
 \item An integer array \param{regionSets} specifies region sets for averaging. All domain is averaged by default.
 
-\item \param{strain_energy} calculates strain energy over selected domains (defined by sets). It integrates stress over total strain differential in the volume. Strain energy increment and total strain energy is reported in each step. The integration uses mid-point rule for stress and yields exact results for linear elastic materials.
+\item \param{strain\_energy} calculates strain energy over selected elements (defined by sets) by
+\begin{equation}
+W^*=\int_V \int \sigma \mathrm{d} (\varepsilon-\varepsilon_{eig}) \mathrm{d} V
+\end{equation}
+where $\sigma$ is the stress tensor, $\varepsilon$ stands for the strain tensor and $\varepsilon_{eig}$ is eigenstrain tensor (originates from temperature load or prescribed eigenstrain). Strain energy increment and total strain energy is reported in each step. The integration uses mid-point rule for stress and yields exact results for linear elastic materials.
 
 \end{itemize}
 
