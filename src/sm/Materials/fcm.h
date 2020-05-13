@@ -71,7 +71,7 @@ namespace oofem {
 class FCMMaterialStatus : public StructuralMaterialStatus
 {
 protected:
-    /// crack statuses (none, just initialized, softenin, unlo-relo, closed)
+    /// crack statuses (none, just initialized, softening, unload-reload, closed)
     IntArray crackStatuses, tempCrackStatuses;
     /// Max. crack strain reached in the entire previous history
     FloatArray maxCrackStrains, tempMaxCrackStrains;
@@ -191,7 +191,7 @@ public:
  * After the onset of cracking, the cracks can still transfer tractions (i.e. cohesive crack approach) in
  * both normal and shear directions. Cracks can develop only in mutually perpendicular directions.
  * In elastic state this model is isotropic.
- * This is class is purely abstract, it can be used only in the derived classes (e.g. ConcreteFCM)
+ * This class is purely abstract, it can be used only in the derived classes (e.g. ConcreteFCM)
  */
 class FCMMaterial : public StructuralMaterial
 {
@@ -377,7 +377,7 @@ protected:
     /// returns overall shear modulus
     virtual double computeOverallElasticShearModulus(GaussPoint *gp, TimeStep *tStep) { return linearElasticMaterial.giveShearModulus(); }
 
-    /// returns poisson's ratio
+    /// returns Poisson's ratio
     virtual double givePoissonsRatio() { return linearElasticMaterial.givePoissonsRatio(); }
 
 

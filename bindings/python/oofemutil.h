@@ -164,6 +164,8 @@ py::object linearStatic(py::args args, py::kwargs kw) { return createEngngModelO
 
 py::object staticStructural(py::args args, py::kwargs kw) { return createEngngModelOfType("staticstructural", args, kw); }
 
+py::object transientTransport(py::args args, py::kwargs kw) { return createEngngModelOfType("transienttransport", args, kw); }
+
 
 
 /*****************************************************
@@ -226,6 +228,7 @@ py::object beam2d(py::args args, py::kwargs &kw) { return createElementOfType("b
 py::object truss1d(py::args args, py::kwargs &kw) { return createElementOfType("truss1d",args,kw); }
 py::object trPlaneStress2d(py::args args, py::kwargs &kw) { return createElementOfType("trplanestress2d",args,kw); }
 py::object planeStress2d(py::args args, py::kwargs &kw) { return createElementOfType("planestress2d",args,kw); }
+py::object qBrick1ht(py::args args, py::kwargs &kw) { return createElementOfType("qbrick1ht",args,kw); }
 
 
 
@@ -270,6 +273,7 @@ py::object constantEdgeLoad(py::args args, py::kwargs kw) { return createGeneral
 py::object nodalLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("nodalload",args,kw); }
 py::object structTemperatureLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("structtemperatureload",args,kw); }
 py::object structEigenstrainLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("structEigenstrainLoad",args,kw); }
+py::object constantSurfaceLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("constantsurfaceload",args,kw); }
 
 
 
@@ -290,6 +294,7 @@ py::object createMaterialOfType(const char* type, py::args args, py::kwargs kw)
 
 py::object isoLE(py::args args, py::kwargs kw) { return createMaterialOfType("isole",args,kw); }
 py::object idm1(py::args args, py::kwargs kw) { return createMaterialOfType("idm1",args,kw); }
+py::object isoHeat(py::args args, py::kwargs kw) { return createMaterialOfType("isoheat",args,kw); }
 
 
 /*****************************************************
@@ -307,6 +312,7 @@ py::object createCrossSectionOfType(const char* type, py::args args, py::kwargs 
 }
 
 py::object simpleCS(py::args args, py::kwargs kw) { return createCrossSectionOfType("simplecs",args,kw); }
+py::object simpleTransportCS(py::args args, py::kwargs kw) { return createCrossSectionOfType("simpletransportcs",args,kw); }
 
 
 

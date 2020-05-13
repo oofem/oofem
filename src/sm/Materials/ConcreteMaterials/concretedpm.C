@@ -1464,7 +1464,7 @@ ConcreteDPM :: computeTrialCoordinates(const FloatArrayF<6> &stress, GaussPoint 
     double sig = tmp.second;
     double rho = computeSecondCoordinate(deviatoricStress);
     double thetaTrial = computeThirdCoordinate(deviatoricStress);
-    return {sig, rho, thetaTrial};
+    return std::tuple< double, double, double > {sig, rho, thetaTrial};
 }
 
 

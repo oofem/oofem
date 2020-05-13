@@ -1,0 +1,46 @@
+\usepackage{fancyhdr, blindtext}
+\usepackage{lastpage}
+
+\pagestyle{fancyplain}
+
+\fancyhead{}
+\fancyfoot{}
+\fancyhead[L]{\bf \mytitle}
+\fancyhead[R]{\large OOFEM.ORG}
+\fancyfoot[L]{Responsible: \myauthor}
+\fancyfoot[R]{Date: \mydate\ Page:\ \thepage/\pageref{LastPage} }
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\setlength\headheight{14pt}
+
+\fancypagestyle{titlestyle}{%
+    \fancyhead[L]{}
+    \fancyhead[R]{\large OOFEM.ORG}
+    \lfoot{Responsible:~\myauthor}
+    \renewcommand{\headrulewidth}{0.4pt}
+    \renewcommand{\footrulewidth}{0.4pt}
+}
+ 
+%Redefine chapter by adding special first chapter page page-style
+%\makeatletter
+%    \let\stdchapter\chapter
+%    \renewcommand*\chapter{%
+%    \@ifstar{\starchapter}{\@dblarg\nostarchapter}}
+%   \newcommand*\starchapter[1]{\stdchapter*{#1}\thispagestyle{chapterstyle}}
+%    \def\nostarchapter[#1]#2{\stdchapter[{#1}]{#2}\thispagestyle{chapterstyle}}
+%\makeatother
+
+\renewcommand{\maketitle}[1]{
+    %\begin{titlepage}
+        %{
+        \thispagestyle{titlestyle}
+        \vspace*{15em}
+        \noindent{\Huge \mytitle}\\
+        \noindent\rule{\textwidth}{0.4pt}\\[2em]
+        {\bf Summary}\\[0.5em]
+        #1
+        \newpage
+        %}
+    %\end{titlepage}
+}
+

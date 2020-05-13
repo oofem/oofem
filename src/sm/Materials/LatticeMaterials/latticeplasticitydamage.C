@@ -511,7 +511,7 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
         normOfResiduals = norm(residualsNorm);
 
         //First check if return has failed
-        if ( isnan(normOfResiduals) ) {
+        if ( std::isnan(normOfResiduals) ) {
             returnResult = RR_NotConverged;
             return 0.;
         }

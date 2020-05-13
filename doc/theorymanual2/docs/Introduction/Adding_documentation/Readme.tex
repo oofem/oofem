@@ -1,0 +1,43 @@
+\documentclass[11pt]{article}
+\usepackage[english]{babel}
+%\usepackage{fancyhdr, blindtext}
+%\usepackage{lastpage}
+
+\def\mytitle{Adding documentation}
+\def\myauthor{Borek Patzak}
+\def\mydate{11/09/2019}
+
+\input{../../../templates/template}
+
+\begin{document}
+\maketitle{This document describes the schema and structure of the manual. 
+It also shows how to add new documentation entries to the manual.}
+\section{Introduction}
+Writting the complete thery manual of OOFEM would be huge task. Therefore, we followed an idea of providing an extensible system of individual documents, maintained by the independent authors, that are put together to establish the manual.
+
+The top level structure is created in Sphinx~\cite{Sphinx}. Sphinx is a tool to generate docummentation in diffrenet formats, including HTML, LaTeX, etc. It uses reStructuredText~\cite{reStructuredText} as a markup language. The top level structure defines the root page of the manual and defines a number of sections corresponding to different types of documentation entries. In this case, a separate subsections are create to contain documentation of Engineering problems, individual finete elements, constitutive models, etc. In individual sections, the links to independent entries are provided, which contain the specific documentation. 
+
+The documentation of individual entries are supposed to be a small latex projects, consisting at least from a latex file containing the documentation source and Makefile which default target builds pdf version of manual entry.
+
+The directory structure of the Theory manual is the following
+\begin{verbatim}
+    |- index.rst      
+    |- docs           
+    |  |- EngngModels 
+    |  |- Elements    
+    |  |- Material    
+    |- Makefile      
+\end{verbatim}
+The {\em index.rst} is the top level document of the manual. It defines the overall structure of the manual, contains links to other nodes of the documentation. The {\em docs} subdirectory is containing documentation of individual entries. The entries are organized in groups, for each group there is a subdirectory. For example, {\em docs/EngngModes} is a directory containing subdirectories contating the documentation of individual EngngModels (problem types in OOFEM). The subdirectories contating the documentation of individual entries are supposed to contain documentation sources and {\em Makefile} which default target should build the PDF of the entry documentation. 
+
+\section{Adingd a new entry}
+To add a new entry, one first should determine the location of entry documantation. The {\em docs} directory constains namy subdirectories for specific entry types, like EngngModels, Elements, Materials, etc. The new item documentation should be created in these subdirectories. For example, when documenting a new element (Truss1d), for example, one should create a new sudirectory {\em Truss1D} in {\em docs/Elements}. At present, there is no restriction on the source format of the item documentation, however, either Sphinx or LaTex is reccomended. The only requirements is that in the item documentation directory a {\em Makefile} must exist, which default target have to generate documantation in PDF. The individaul entries should follow the same template, which is provided for LaTex documents in {\em docs/templates}. 
+
+\section{Building documentation}
+The {\em html} documentation can be build by running {\em make html} in manual top level directory. The documentation will be available in {\em \_build/html}.
+
+\begin{thebibliography}{1}
+\bibitem{Sphinx}Sphinx - Python Documentation generator, http://www.sphinx-doc.org/en/master/
+\bibitem{reStructuredText}reStructuresText - Markup Syntax and Parser Component of Docutils, http://docutils.sourceforge.net/rst.html
+\end{thebibliography}
+\end{document}

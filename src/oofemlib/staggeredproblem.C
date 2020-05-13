@@ -365,6 +365,17 @@ StaggeredProblem :: giveSolutionStepWhenIcApply(bool force)
     }
 }
 
+
+EngngModel *
+StaggeredProblem :: giveTimeControl(){
+    if ( !timeDefinedByProb ) {
+        return this;
+    } else { //time dictated by slave problem
+        return this->giveSlaveProblem(timeDefinedByProb);
+    }
+}
+
+
 int
 StaggeredProblem :: giveNumberOfFirstStep(bool force)
 {
@@ -418,11 +429,7 @@ void
 StaggeredProblem :: solveYourself()
 {
     EngngModel *sp;
-    if ( !timeDefinedByProb ) {
-        sp = this;
-    } else { //time dictated by slave problem
-        sp = this->giveSlaveProblem(timeDefinedByProb);
-    }
+    sp = giveTimeControl();
 
     int smstep = 1, sjstep = 1;
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
