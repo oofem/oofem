@@ -1,0 +1,39 @@
+con1dpm1.out
+#
+Concrete Plasticity Uniaxial Tension (CDPM1 by Grassl and Jirasek)
+StaticStructural nsteps 5 solverType "calm" initialguess 0 rtolf 2.e-3 reqIterations 10 stiffMode 2 maxiter 10 stepLength 1.e-4 minsteplength 1.e-4 Psi 0. hpcmode 2 hpc 2 2 1 hpcw 1 1. nmodules 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_all element_all
+#
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 5 nltf 1 nic 0 nset 5
+node 1 coords 3 0. 0. 0.
+node 2 coords 3 1. 0. 0.
+node 3 coords 3 0. 1. 0.
+node 4 coords 3 0. 0. 1.
+#
+ltrspace 1 nodes 4 1 2 3 4
+#
+SimpleCS 1 material 1 set 1
+#
+ConcreteDPM 1 d 0. E 30.e9 n 0.2 talpha 0. fc 30.e6 ft 3.e6 ecc 0.525 Ahard 8.e-2 Bhard 3.e-3 Chard 2. Dhard 1.e-6 Asoft 35. dilation -0.85 yieldtol 1.e-8 newtoniter 300 wf 300.e-6
+#
+BoundaryCondition  1 loadTimeFunction 1 dofs 3 1 2 3 values 3 0. 0. 0. set 2
+BoundaryCondition  2 loadTimeFunction 1 dofs 2 2 3 values 2 0. 0. set 3
+BoundaryCondition  3 loadTimeFunction 1 dofs 2 1 3 values 2 0. 0. set 4
+BoundaryCondition  4 loadTimeFunction 1 dofs 2 1 2 values 2 0. 0. set 5
+NodalLoad 5 loadTimeFunction 1 dofs 3 1 2 3 Components 3 1.e6 0. 0. set 3 reference
+#
+ConstantFunction 1 f(t) 1.
+Set 1 elementranges {1}
+Set 2 nodes 1 1
+Set 3 nodes 1 2
+Set 4 nodes 1 3
+Set 5 nodes 1 4
+
+#%BEGIN_CHECK% 
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1 value 1e-04 tolerance 1e-10
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1 value 2.94847927e+06 tolerance 1e-2
+#ELEMENT tStep 5 number 1 gp 1 keyword 4 component 1 value 5e-04 tolerance 1e-10
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 1 value 6.21765727e+05 tolerance 1e-2
+#%END_CHECK%
