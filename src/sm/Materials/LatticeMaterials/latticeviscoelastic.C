@@ -42,14 +42,14 @@
 namespace oofem {
 REGISTER_Material(LatticeViscoelastic);
 
-LatticeViscoelastic :: LatticeViscoelastic(int n, Domain *d) : LatticeLinearElastic(n, d)
+LatticeViscoelastic::LatticeViscoelastic(int n, Domain *d) : LatticeLinearElastic(n, d)
 {}
 
 
 void
-LatticeViscoelastic :: initializeFrom(InputRecord &ir)
+LatticeViscoelastic::initializeFrom(InputRecord &ir)
 {
-    LatticeLinearElastic :: initializeFrom(ir);
+    LatticeLinearElastic::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, viscoMat, _IFT_LatticeViscoelastic_viscoMat); // number of slave material
 
@@ -62,7 +62,7 @@ LatticeViscoelastic :: initializeFrom(InputRecord &ir)
 
 
 MaterialStatus *
-LatticeViscoelastic :: CreateStatus(GaussPoint *gp) const
+LatticeViscoelastic::CreateStatus(GaussPoint *gp) const
 {
     LatticeViscoelasticStatus *answer = new LatticeViscoelasticStatus(gp);
     return answer;
@@ -70,9 +70,9 @@ LatticeViscoelastic :: CreateStatus(GaussPoint *gp) const
 
 
 FloatArrayF< 6 >
-LatticeViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep)
+LatticeViscoelastic::giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
+                                         GaussPoint *gp,
+                                         TimeStep *tStep)
 {
     auto status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
 
@@ -93,12 +93,7 @@ LatticeViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
     FloatArrayF< 6 >tempStress;
     reducedStrainForViscoMat = totalStrain;
 
-
-
     indepStrain = this->computeStressIndependentStrainVector(gp, tStep, VM_Total);
-
-    printf("indepStrain:\n");
-    indepStrain.printYourself();
 
     if ( indepStrain.giveSize() > 0 ) {
         reducedStrainForViscoMat -= FloatArrayF< 6 >(indepStrain);
@@ -116,7 +111,7 @@ LatticeViscoelastic :: giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
 }
 
 FloatMatrixF< 6, 6 >
-LatticeViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
+LatticeViscoelastic::give3dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 
 {
     LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
@@ -127,7 +122,7 @@ LatticeViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gauss
     // get viscoelastic material
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
-    auto answer = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto answer = LatticeLinearElastic::give3dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
 
@@ -137,7 +132,7 @@ LatticeViscoelastic :: give3dLatticeStiffnessMatrix(MatResponseMode rmode, Gauss
 }
 
 FloatMatrixF< 3, 3 >
-LatticeViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
+LatticeViscoelastic::give2dLatticeStiffnessMatrix(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep) const
 {
     LatticeViscoelasticStatus *status = static_cast< LatticeViscoelasticStatus * >( this->giveStatus(gp) );
     GaussPoint *slaveGp;
@@ -147,7 +142,7 @@ LatticeViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, Gauss
     // get viscoelastic material
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
-    auto answer = LatticeLinearElastic :: give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
+    auto answer = LatticeLinearElastic::give2dLatticeStiffnessMatrix(ElasticStiffness, gp, tStep);
 
     double Eincr = rheoMat->giveEModulus(slaveGp, tStep);
     answer *= ( Eincr / this->eNormalMean );
@@ -157,10 +152,10 @@ LatticeViscoelastic :: give2dLatticeStiffnessMatrix(MatResponseMode rmode, Gauss
 
 
 int
-LatticeViscoelastic :: giveIPValue(FloatArray &answer,
-                                   GaussPoint *gp,
-                                   InternalStateType type,
-                                   TimeStep *tStep)
+LatticeViscoelastic::giveIPValue(FloatArray &answer,
+                                 GaussPoint *gp,
+                                 InternalStateType type,
+                                 TimeStep *tStep)
 {
     if ( ( type == IST_DryingShrinkageTensor ) ||
          ( type == IST_AutogenousShrinkageTensor ) ||
@@ -173,12 +168,12 @@ LatticeViscoelastic :: giveIPValue(FloatArray &answer,
         return rheoMat->giveIPValue(answer, status->giveSlaveGaussPointVisco(), type, tStep);
     }
 
-    return LatticeLinearElastic :: giveIPValue(answer, gp, type, tStep);
+    return LatticeLinearElastic::giveIPValue(answer, gp, type, tStep);
 }
 
 
 
-int LatticeViscoelastic :: checkConsistency()
+int LatticeViscoelastic::checkConsistency()
 {
     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
 
@@ -192,40 +187,40 @@ int LatticeViscoelastic :: checkConsistency()
     }
 
 
-    return FEMComponent :: checkConsistency();
+    return FEMComponent::checkConsistency();
 }
 
 
 
 
 
-LatticeViscoelasticStatus :: LatticeViscoelasticStatus(GaussPoint *gp) :
+LatticeViscoelasticStatus::LatticeViscoelasticStatus(GaussPoint *gp) :
     LatticeMaterialStatus(gp),
-    slaveGpVisco(std :: make_unique< GaussPoint >(gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
+    slaveGpVisco( std::make_unique< GaussPoint >( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode() ) )
     //    slaveGpVisco(std::make_unique<GaussPoint>( gp->giveIntegrationRule(), 0, gp->giveNaturalCoordinates(), 0., gp->giveMaterialMode()) )
 
 
 {}
 
 void
-LatticeViscoelasticStatus :: initTempStatus()
+LatticeViscoelasticStatus::initTempStatus()
 //
 // initializes temp variables according to variables form previous equlibrium state.
 // builds new crackMap
 //
 {
-    LatticeMaterialStatus :: initTempStatus();
+    LatticeMaterialStatus::initTempStatus();
 
     RheoChainMaterialStatus *rheoStatus = static_cast< RheoChainMaterialStatus * >( this->giveSlaveGaussPointVisco()->giveMaterialStatus() );
     rheoStatus->initTempStatus();
 }
 
 void
-LatticeViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
+LatticeViscoelasticStatus::printOutputAt(FILE *file, TimeStep *tStep) const
 {
     //    MaterialStatus *mS = this->giveViscoelasticMatStatus();
 
-    LatticeMaterialStatus :: printOutputAt(file, tStep);
+    LatticeMaterialStatus::printOutputAt(file, tStep);
     fprintf(file, "\nViscoelastic material:");
 
     //this->slaveGpVisco->giveMaterialStatus()->printOutputAt(file, tStep);
@@ -235,7 +230,7 @@ LatticeViscoelasticStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
 }
 
 void
-LatticeViscoelasticStatus :: updateYourself(TimeStep *tStep)
+LatticeViscoelasticStatus::updateYourself(TimeStep *tStep)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
@@ -245,30 +240,30 @@ LatticeViscoelasticStatus :: updateYourself(TimeStep *tStep)
     //  this->slaveGpVisco->giveMaterialStatus()->updateYourself(tStep);
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->updateYourself(tStep);
 
-    LatticeMaterialStatus :: updateYourself(tStep);
+    LatticeMaterialStatus::updateYourself(tStep);
 }
 
 void
-LatticeViscoelasticStatus :: saveContext(DataStream &stream, ContextMode mode)
+LatticeViscoelasticStatus::saveContext(DataStream &stream, ContextMode mode)
 //
 // saves full information stored in this Status
 // no temp variables stored
 //
 {
     // save parent class status
-    LatticeMaterialStatus :: saveContext(stream, mode);
+    LatticeMaterialStatus::saveContext(stream, mode);
 
     //    this->slaveGpVisco->giveMaterialStatus()->saveContext(stream, mode);
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->saveContext(stream, mode);
 }
 
 void
-LatticeViscoelasticStatus :: restoreContext(DataStream &stream, ContextMode mode)
+LatticeViscoelasticStatus::restoreContext(DataStream &stream, ContextMode mode)
 //
 // restores full information stored in stream to this Status
 //
 {
-    LatticeMaterialStatus :: restoreContext(stream, mode);
+    LatticeMaterialStatus::restoreContext(stream, mode);
 
     //  this->slaveGpVisco->giveMaterialStatus()->restoreContext(stream, mode);
     this->giveSlaveGaussPointVisco()->giveMaterialStatus()->restoreContext(stream, mode);
