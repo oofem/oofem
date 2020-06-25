@@ -58,6 +58,7 @@ namespace py = pybind11;
 
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
+#include "load.h"
 #include "initialcondition.h"
 #include "function.h"
 #include "material.h"
@@ -94,6 +95,7 @@ namespace py = pybind11;
 #include "homexportmodule.h"
 
 #include "uniformgridfield.h"
+#include "unstructuredgridfield.h"
 #include "dofmanvalfield.h"
 #include "pythonfield.h"
 #include <iostream>
@@ -1429,6 +1431,12 @@ PYBIND11_MODULE(oofempy, m) {
         .def(py::init<>())
         .def("setGeometry", &oofem::UniformGridField::setGeometry)
         .def("setValues", &oofem::UniformGridField::setValues)
+        ;
+
+    py::class_<oofem::UnstructuredGridField, oofem::Field, std::shared_ptr<oofem::UnstructuredGridField>>(m, "UnstructuredGridField")
+        .def(py::init<int, int, double>(), py::arg().noconvert(), py::arg().noconvert(), py::arg("octreeOriginShift") = 0.0)
+        .def("addVertex", &oofem::UnstructuredGridField::addVertex)
+        .def("setVertexValue", &oofem::UnstructuredGridField::setVertexValue)
         ;
     
     py::class_<oofem::DofManValueField, oofem::Field,  std::shared_ptr<oofem::DofManValueField>>(m, "DofManValueField")
