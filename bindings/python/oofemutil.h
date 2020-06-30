@@ -276,6 +276,21 @@ py::object structEigenstrainLoad(py::args args, py::kwargs kw) { return createGe
 py::object constantSurfaceLoad(py::args args, py::kwargs kw) { return createGeneralBoundaryConditionOfType("constantsurfaceload",args,kw); }
 
 
+/*****************************************************
+* InitialCondition
+*****************************************************/
+py::object createInitialConditionOfType(const char* type, py::args args, py::kwargs kw)
+{
+    int number = len(args)>0?PyLong_AsUnsignedLong(args[0].ptr()):0;
+    oofem::Domain* domain = len(args)>1? args[1].cast<oofem::Domain *>() : nullptr;
+    auto ic = oofem::classFactory.createInitialCondition(type,number,domain);
+    if (!ic) { oofem::OOFEM_LOG_ERROR("initialCondition: wrong input data"); }
+    oofem::OOFEMTXTInputRecord ir = makeOOFEMTXTInputRecordFrom(kw);
+    ic->initializeFrom(ir);
+    return py::cast(ic.release());
+}
+
+py::object initialCondition(py::args args, py::kwargs kw) { return createInitialConditionOfType("initialcondition",args,kw); }
 
 
 /*****************************************************
