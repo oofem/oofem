@@ -58,7 +58,6 @@ namespace py = pybind11;
 
 #include "generalboundarycondition.h"
 #include "boundarycondition.h"
-#include "load.h"
 #include "initialcondition.h"
 #include "function.h"
 #include "material.h"
@@ -1396,6 +1395,7 @@ PYBIND11_MODULE(oofempy, m) {
 
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
+    m.def("initialCondition", &initialCondition, py::return_value_policy::move);
     m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);
     m.def("constantSurfaceLoad", &constantSurfaceLoad, py::return_value_policy::move);
     m.def("nodalLoad", &nodalLoad, py::return_value_policy::move);
