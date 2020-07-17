@@ -324,18 +324,20 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(const FloatArrayF< 5 >
 }
 
 
-FloatArrayF< 4 >
-StructuralMaterial :: giveFirstPKStressVector_PlaneStress(const FloatArrayF< 4 > &reducedvF, GaussPoint *gp, TimeStep *tStep) const
+
+
+
+FloatArray
+StructuralMaterial :: giveFirstPKStressVector_StressControl(const FloatArray &reducedvF, const IntArray &F_control, GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    IntArray F_control, P_control; // Determines which components are controlled by F and P resp.
-    FloatArray vF, increment_vF, vP, vP_control, vP_n;
-    FloatMatrix tangent, tangent_Pcontrol;
+    
+    IntArray P_control;
+    FloatArray vF, increment_vF, vP, reducedvP;
+    FloatMatrix tangent, reducedTangent;
     // Iterate to find full vF.
-    StructuralMaterial :: giveVoigtVectorMask(F_control, _PlaneStress); // {0, 1, 5, 8};
-    // Compute the negated the array of control since we need P_control as well;
-    P_control.resize(9 - F_control.giveSize() );
+    // Compute the negated the array of control since we need stressControl as well;
+    P_control.resize( 9 - F_control.giveSize() );
     for ( int i = 1, j = 1; i <= 9; i++ ) {
         if ( !F_control.contains(i) ) {
             P_control.at(j++) = i;
@@ -345,69 +347,49 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStress(const FloatArrayF< 4 >
     // Initial guess;
     vF = status->giveFVector();
     for ( int i = 1; i <= F_control.giveSize(); ++i ) {
-        vF.at(F_control.at(i) ) = reducedvF.at(i);
+        vF.at( F_control.at(i) ) = reducedvF.at(i);
     }
 
     // Iterate to find full vF.
+    FloatArray answer;
     for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
         vP = this->giveFirstPKStressVector_3d(vF, gp, tStep);
-        vP_control.beSubArrayOf(vP, P_control);
-        vP_n.beSubArrayOf(vP, F_control);
-        double norm = vP_n.computeNorm();
-        if ( vP_control.computeNorm() < 1e-6 * norm ) { ///@todo We need a tolerance here!
-            FloatArray answer;
-            StructuralMaterial :: giveReducedVectorForm(answer, vP, _PlaneStress);
-            return answer;
+        reducedvP.beSubArrayOf(vP, P_control);
+        // Pick out the (response) stresses for the controlled strains
+        answer.beSubArrayOf(vP, F_control);
+	if ( reducedvP.computeNorm() <= 1e-6 * answer.computeNorm() && k >= 1 ) {
+	  return answer;
         }
 
-        tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
-        tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
-        tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
+	tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
+        reducedTangent.beSubMatrixOf(tangent, P_control, P_control);
+        reducedTangent.solveForRhs(reducedvP, increment_vF);
         increment_vF.negated();
         vF.assemble(increment_vF, P_control);
     }
+    
+    OOFEM_ERROR("Iteration did not converge");
+    return FloatArray();
+}
 
-    OOFEM_WARNING("Iteration did not converge");
-    return zeros< 4 >();
+
+
+
+FloatArrayF< 4 >
+StructuralMaterial :: giveFirstPKStressVector_PlaneStress(const FloatArrayF< 4 > &reducedvF, GaussPoint *gp, TimeStep *tStep) const
+{
+    IntArray FControl;
+    StructuralMaterial :: giveVoigtVectorMask(FControl, _PlaneStress);
+    return this->giveRealStressVector_StressControl(reducedvF, FControl, gp, tStep);
 }
 
 
 FloatArrayF< 1 >
 StructuralMaterial :: giveFirstPKStressVector_1d(const FloatArrayF< 1 > &reducedvF, GaussPoint *gp, TimeStep *tStep) const
 {
-    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-
-    IntArray P_control; // Determines which components are controlled by P resp.
-    FloatArray vF, increment_vF, vP, vP_control, vP_n(1);
-    FloatMatrix tangent, tangent_Pcontrol;
-    // Compute the negated the array of control since we need P_control as well;
-    P_control.resize(8);
-    for ( int i = 1; i <= 8; i++ ) {
-        P_control.at(i) = i + 1;
-    }
-
-    // Initial guess;
-    vF = status->giveFVector();
-    vF.at(1) = reducedvF.at(1);
-    // Iterate to find full vF.
-    for ( int k = 0; k < 100; k++ ) { // Allow for a generous 100 iterations.
-        vP = this->giveFirstPKStressVector_3d(vF, gp, tStep);
-        vP_control.beSubArrayOf(vP, P_control);
-        if ( vP_control.computeNorm() < 1e-6 * vP.at(1) ) { ///@todo We need a tolerance here!
-            FloatArray answer;
-            StructuralMaterial :: giveReducedVectorForm(answer, vP, _1dMat);
-            return answer;
-        }
-
-        tangent = this->give3dMaterialStiffnessMatrix_dPdF(TangentStiffness, gp, tStep);
-        tangent_Pcontrol.beSubMatrixOf(tangent, P_control, P_control);
-        tangent_Pcontrol.solveForRhs(vP_control, increment_vF);
-        increment_vF.negated();
-        vF.assemble(increment_vF, P_control);
-    }
-
-    OOFEM_WARNING("Iteration did not converge");
-    return zeros< 1 >();
+    IntArray FControl;
+    StructuralMaterial :: giveVoigtVectorMask(FControl, _PlaneStress);
+    return this->giveRealStressVector_StressControl(reducedvF, FControl, gp, tStep);
 }
 
 
@@ -659,12 +641,9 @@ FloatMatrixF< 5, 5 >
 StructuralMaterial :: givePlaneStrainStiffMtrx_dPdF(MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *tStep) const
 {
-    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    /// TODO: use ref. when ms has been converted to to use fixed size arrays.
-    FloatArrayF< 9 >vF = status->giveTempFVector();
-    FloatArrayF< 6 >vS = status->giveTempStressVector();
-    auto dSdE = this->givePlaneStrainStiffMtrx(mode, gp, tStep);
-    return convert_dSdE_2_dPdF_PlaneStrain(dSdE, vS [ { 0, 1, 2, 5 } ], vF [ { 0, 1, 2, 5, 8 } ]);
+
+    auto m3d = this->give3dMaterialStiffnessMatrix_dPdF(mode, gp, tStep);
+    return m3d({ 0, 1, 2, 5, 8 }, { 0, 1, 2, 5, 8 });
 }
 
 
@@ -672,12 +651,9 @@ FloatMatrixF< 4, 4 >
 StructuralMaterial :: givePlaneStressStiffMtrx_dPdF(MatResponseMode mode,
                                                     GaussPoint *gp, TimeStep *tStep) const
 {
-    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    /// TODO: use ref. when ms has been converted to to use fixed size arrays.
-    FloatArrayF< 9 >vF = status->giveTempFVector();
-    FloatArrayF< 6 >vS = status->giveTempStressVector();
-    auto dSdE = this->givePlaneStressStiffMtrx(mode, gp, tStep);
-    return convert_dSdE_2_dPdF_PlaneStress(dSdE, vS [ { 0, 1, 5 } ], vF [ { 0, 1, 5, 8 } ]);
+    auto m3d = this->give3dMaterialStiffnessMatrix_dPdF(mode, gp, tStep);
+    auto c3d = inv(m3d);
+    return inv(c3d({ 0, 1, 5, 8 }, { 0, 1, 5, 8 }) );
 }
 
 
@@ -685,12 +661,9 @@ FloatMatrixF< 1, 1 >
 StructuralMaterial :: give1dStressStiffMtrx_dPdF(MatResponseMode mode,
                                                  GaussPoint *gp, TimeStep *tStep) const
 {
-    auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
-    /// TODO: use ref. when ms has been converted to to use fixed size arrays.
-    const FloatArrayF< 9 >vF = status->giveTempFVector();
-    const FloatArrayF< 6 >vS = status->giveTempStressVector();
-    auto dSdE = this->give1dStressStiffMtrx(mode, gp, tStep);
-    return convert_dSdE_2_dPdF_1D(dSdE, vS [ { 0 } ], vF [ { 0 } ]);
+    auto m3d = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
+    auto c3d = inv(m3d);
+    return { 1. / c3d.at(1, 1) };
 }
 
 
