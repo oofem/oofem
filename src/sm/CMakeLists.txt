@@ -234,7 +234,6 @@ set (sm_material
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C
-    Materials/mooneyrivlin.C
     Materials/m4.C
     Materials/microplane_m1.C
     Materials/druckerPragerPlasticitySM.C
@@ -242,14 +241,12 @@ set (sm_material
     Materials/j2mat.C
     Materials/mdm.C
     Materials/micromaterial.C
-    Materials/hyperelasticmaterial.C
     Materials/misesmat.C 
     Materials/misesmatgrad.C 
     Materials/misesmatnl.C
     Materials/rankinemat.C
     Materials/rankinematgrad.C
     Materials/rankinematnl.C
-
     Materials/dustmat.C
     Materials/lsmastermat.C
     Materials/lsmastermatgrad.C
@@ -259,13 +256,19 @@ set (sm_material
     Materials/winklermodel.C
     Materials/structmatsettable.C
     Materials/tutorialmaterial.C
-    Materials/graddamagematerialextensioninterface.C
-    #Mixed pressure material interface
-    Materials/MixedPressure/mixedpressurematerialextensioninterface.C
+    Materials/graddamagematerialextensioninterface.C    
     Materials/rcm2.C
     Materials/isodamagemodel.C
     Materials/steelrelaxmat.C
     Materials/fcm.C
+    #Mixed pressure material interface
+    Materials/MixedPressure/mixedpressurematerialextensioninterface.C
+    #Hyperelastic materials
+    Materials/HyperelasticMaterials/basehyperelasticmaterial.C    
+    Materials/HyperelasticMaterials/mooneyrivlincompressiblematerial.C
+    Materials/HyperelasticMaterials/blatzkomaterial.C
+    Materials/HyperelasticMaterials/simopistermaterial.C
+    Materials/HyperelasticMaterials/ogdencompressiblematerial.C
     #Lattice models
     Materials/LatticeMaterials/latticematstatus.C
     Materials/LatticeMaterials/latticestructuralmaterial.C	

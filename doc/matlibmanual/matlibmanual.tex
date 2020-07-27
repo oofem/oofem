@@ -264,7 +264,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 %\end{center}
 \end{table}
 
-\subsubsection{Hyperelastic material - HyperMat}
+\subsubsection{Hyperelastic material - Simo-Pister Material}
 This material model can describe elastic behavior at large strains.
 A hyperelastic model postulates the existence of free energy potential. Existence of the potential implies reversibility of deformations and no energy dissipation during loading process. Here we use the free energy function introduced in \cite{SimoHughes}
 \begin{equation}\label{freeEnergy}
@@ -283,7 +283,7 @@ The model description and parameters are summarized in Tab.~\ref{hyperElMat_tabl
 \hline
 Description & Hyperelastic material\\
 \hline
-Record Format & \descitem{HyperMat}  \elemparam{}{in}
+Record Format & \descitem{SimoPisterMat}  \elemparam{}{in}
 \elemparam{d}{rn} \elemparam{K}{rn} \elemparam{G}{rn} \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
@@ -342,7 +342,7 @@ The model description and parameters are summarized in Tab.~\ref{MooneyRivlin_ta
 		\hline
 		Description & Mooney-Rivlin\\
 		\hline
-		Record Format & \descitem{MooneyRivlin}  \elemparam{}{in}
+		Record Format & \descitem{MooneyRivlinCompressibleMat}  \elemparam{}{in}
 		\elemparam{d}{rn} \elemparam{K}{rn} \elemparam{C1}{rn} \elemparam{C2}{rn}\\
 		Parameters &- \param{} material number\\
 		&- \param{d} material density\\
@@ -354,6 +354,66 @@ The model description and parameters are summarized in Tab.~\ref{MooneyRivlin_ta
 	\end{mmt}
 	\caption{Compressible Mooney-Rivlin - summary.}
 	\label{MooneyRivlin_table}
+	%\end{center}
+\end{table}
+
+
+
+
+\subsubsection{Hyperelastic material - Compressible Ogden}
+The Ogden strain energy function is expressed by
+\begin{equation}\label{freeEnergyOgdenDeviatoricStretch}
+\rho_0 \psi = \sum_{I=1}^N \frac{\mu_I}{\alpha_I} \left( \bar{\lambda}_1^{\alpha_I}+\bar{\lambda}_2^{\alpha_I}+\bar{\lambda}_3^{\alpha_I}-3\right)+ U(J)
+\end{equation}
+where $\mu_I$ and $\alpha_I$ are material constants, $U(J)$ is the volumetric part of energy, $J$ is the Jacobian (determinant of the deformation gradient, corresponding to the ratio of the current and initial volume),  $\bar{\lambda}_i = J^{-\frac{1}{3}} {\lambda}_i$ are the deviatoric stretches.
+
+The model description and parameters are summarized in Tab.~\ref{CompressibleOgden_table}.
+\begin{table}[!htb]
+	%\begin{center}
+	\begin{mmt}
+		\hline
+		Description & Ogden material\\
+		\hline
+		Record Format & \descitem{OgdenCompressibleMat}  \elemparam{}{in}
+		\elemparam{d}{rn} \elemparam{K}{rn} \elemparam{alpha}{ra} \elemparam{mu}{ra}\\
+		Parameters &- \param{} material number\\
+		&- \param{d} material density\\
+		&- \param{K} bulk modulus\\
+		&- \param{alpha} array of material constants\\
+		&- \param{mu} array of material constants\\
+                alpha and mu have to have the same size\\
+		\hline
+	\end{mmt}
+	\caption{Compressible Ogden material - summary.}
+	\label{CompressibleOgden_table}
+	%\end{center}
+\end{table}
+
+
+\subsubsection{Hyperelastic material - Blatz-Ko}
+The Mooney-Rivlin strain energy function is expressed by
+\begin{equation}\label{freeEnergyBlatzKo}
+\rho_0 \psi = \frac{\mu}{2}\left(\frac{I_2}{I_3} + 2\sqrt{I_3}-5 \right)
+\end{equation}
+where $\mu$ is initial shear modulus, $I_2$ and $I_3$ are the second and third invariants of the Cauchy-Green tensor $\bm{C}$.
+
+The model description and parameters are summarized in Tab.~\ref{BlatzKo_table}.
+\begin{table}[!htb]
+	%\begin{center}
+	\begin{mmt}
+		\hline
+		Description & Blatz-Ko material\\
+		\hline
+		Record Format & \descitem{blatzkomat}  \elemparam{}{in}
+		\elemparam{d}{rn} \elemparam{mu}{rn}\\
+		Parameters &- \param{} material number\\
+		&- \param{d} material density\\
+		&- \param{mu} shear modulus\\
+                \nu is fixed to 0.25\\
+		\hline
+	\end{mmt}
+	\caption{Blatz-Ko material - summary.}
+	\label{BlatzKo_table}
 	%\end{center}
 \end{table}
 

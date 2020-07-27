@@ -2254,24 +2254,35 @@ StructuralMaterial :: giveFullSymVectorForm(FloatArray &answer, const FloatArray
 void
 StructuralMaterial :: giveFullVectorForm(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
+
+  if ( vec.giveSize() == 9 ) {
+    // If we use default 3D implementation to treat e.g. plane strain.
+    answer = vec;
+  } else {
     IntArray indx;
     answer.resize(StructuralMaterial :: giveVoigtVectorMask(indx, matMode) );
     answer.zero();
     answer.assemble(vec, indx);
+  }
 }
 
 
 void
 StructuralMaterial :: giveFullVectorFormF(FloatArray &answer, const FloatArray &vec, MaterialMode matMode)
 {
+  if ( vec.giveSize() == 9 ) {
+    // If we use default 3D implementation to treat e.g. plane strain.
+    answer = vec;
+  } else {
     IntArray indx;
     answer.resize(9);
     answer.at(1) = answer.at(2) = answer.at(3) = 1.0;   // set diagonal terms
-
+    
     StructuralMaterial :: giveVoigtVectorMask(indx, matMode);
     for ( int i = 1; i <= indx.giveSize(); i++ ) {
-        answer.at(indx.at(i) ) = vec.at(i);
+      answer.at(indx.at(i) ) = vec.at(i);
     }
+  }
 }
 
 
