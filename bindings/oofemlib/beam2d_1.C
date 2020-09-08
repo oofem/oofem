@@ -24,7 +24,7 @@ using namespace oofem;
 
 int main(int argc, char *argv[])
 {
-    DynamicDataReader myData("beam2d_1");
+    DynamicDataReader myData("beam2d_1-anyName");
     std::unique_ptr<DynamicInputRecord> myInput;
 
     //Output File
@@ -218,5 +218,5 @@ int main(int argc, char *argv[])
     em->solveYourself();
     
     //example of accessing nodal coordinates
-    em->giveDomain(1)->giveDofManager(2)->giveCoordinates()->printYourself();
+    em->giveDomain(1)->giveDofManager(2)->giveCoordinates().printYourself();
 }
