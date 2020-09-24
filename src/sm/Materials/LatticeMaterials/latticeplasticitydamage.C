@@ -51,20 +51,20 @@
 namespace oofem {
 REGISTER_Material(LatticePlasticityDamage);
 
-LatticePlasticityDamage :: LatticePlasticityDamage(int n, Domain *d) : LatticeLinearElastic(n, d)
+LatticePlasticityDamage::LatticePlasticityDamage(int n, Domain *d) : LatticeLinearElastic(n, d)
 {}
 
 
 bool
-LatticePlasticityDamage :: hasMaterialModeCapability(MaterialMode mode) const
+LatticePlasticityDamage::hasMaterialModeCapability(MaterialMode mode) const
 {
     return mode == _3dLattice;
 }
 
 void
-LatticePlasticityDamage :: initializeFrom(InputRecord &ir)
+LatticePlasticityDamage::initializeFrom(InputRecord &ir)
 {
-    LatticeLinearElastic :: initializeFrom(ir);
+    LatticeLinearElastic::initializeFrom(ir);
 
     yieldTol = 1.e-6;
     IR_GIVE_OPTIONAL_FIELD(ir, yieldTol, _IFT_LatticePlasticityDamage_tol);
@@ -75,9 +75,9 @@ LatticePlasticityDamage :: initializeFrom(InputRecord &ir)
     numberOfSubIncrements = 10;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfSubIncrements, _IFT_LatticePlasticityDamage_sub);
 
-    IR_GIVE_FIELD(ir, ft, _IFT_LatticePlasticityDamage_ft);
+    IR_GIVE_FIELD(ir, this->ft, _IFT_LatticePlasticityDamage_ft);
 
-    IR_GIVE_FIELD(ir, fc, _IFT_LatticePlasticityDamage_fc);
+    IR_GIVE_FIELD(ir, this->fc, _IFT_LatticePlasticityDamage_fc);
 
     this->frictionAngleOne = 0.23; //Based on fc = 10*ft and fq= ft
     IR_GIVE_OPTIONAL_FIELD(ir, frictionAngleOne, _IFT_LatticePlasticityDamage_angle1);
@@ -106,10 +106,11 @@ LatticePlasticityDamage :: initializeFrom(InputRecord &ir)
 
     IR_GIVE_FIELD(ir, wf, _IFT_LatticePlasticityDamage_wf);
 
-
+    double ftOne = 0.;
     if ( softeningType == 1 ) { //bilinear softening
-        this->ftOne = 0.15 * this->ft;
+        ftOne = 0.15 * this->ft;
         IR_GIVE_OPTIONAL_FIELD(ir, ftOne, _IFT_LatticePlasticityDamage_ft1);
+        this->ftOneRatio = ftOne / this->ft;
         this->wfOne = 0.1 * this->wf;
         IR_GIVE_OPTIONAL_FIELD(ir, wfOne, _IFT_LatticePlasticityDamage_wf1);
     }
@@ -122,14 +123,17 @@ LatticePlasticityDamage :: initializeFrom(InputRecord &ir)
 }
 
 double
-LatticePlasticityDamage :: computeDamageParam(double kappaDOne, double kappaDTwo, GaussPoint *gp) const
+LatticePlasticityDamage::computeDamageParam(double kappaDOne, double kappaDTwo, GaussPoint *gp, TimeStep *tStep) const
 {
+    double ftLocal =  giveTensileStrength(gp, tStep);
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
+
     double le = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
     double strength;
-    if ( this->ft == 0 ) {
-        strength = ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( 1 + this->frictionAngleOne * this->frictionAngleTwo );
+    if ( ftLocal == 0 ) {
+        strength = ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) / ( 1 + this->frictionAngleOne * this->frictionAngleTwo );
     } else {
-        strength = this->ft;
+        strength = ftLocal;
     }
 
     double omega = 0.;
@@ -148,14 +152,14 @@ LatticePlasticityDamage :: computeDamageParam(double kappaDOne, double kappaDTwo
             }
         } while ( fabs(R) >= 1.e-6 || omega < 0.0 );
     } else if ( softeningType == 1 ) {      //bilinear: Calculate all damage parameters and check which makes sense
-        double omegaOne = ( this->eNormalMean * kappaDTwo * this->wfOne - this->ft * this->wfOne - ( this->ftOne - this->ft ) * kappaDOne * le ) /
-                          ( this->eNormalMean * kappaDTwo * this->wfOne + ( this->ftOne - this->ft ) * le * kappaDTwo );
+        double omegaOne = ( this->eNormalMean * kappaDTwo * this->wfOne - ftLocal * this->wfOne - ( this->ftOneRatio * ftLocal - ftLocal ) * kappaDOne * le ) /
+                          ( this->eNormalMean * kappaDTwo * this->wfOne + ( this->ftOneRatio * ftLocal - this->ftOneRatio * ftLocal ) * le * kappaDTwo );
         double helpOne = le * kappaDOne + le * omegaOne * kappaDTwo;
 
 
-        double omegaTwo = ( this->eNormalMean * kappaDTwo * ( this->wf - this->wfOne ) - this->ftOne * ( this->wf - this->wfOne ) +
-                            this->ftOne * kappaDOne * le  - this->ftOne * this->wfOne ) /
-                          ( this->eNormalMean * kappaDTwo * ( this->wf - this->wfOne )  - this->ftOne * le * kappaDTwo );
+        double omegaTwo = ( this->eNormalMean * kappaDTwo * ( this->wf - this->wfOne ) - this->ftOneRatio * ftLocal * ( this->wf - this->wfOne ) +
+                            this->ftOneRatio * ftLocal * kappaDOne * le  - this->ftOneRatio * ftLocal * this->wfOne ) /
+                          ( this->eNormalMean * kappaDTwo * ( this->wf - this->wfOne )  - this->ftOneRatio * ftLocal * le * kappaDTwo );
         double helpTwo = le * kappaDOne + le * omegaTwo * kappaDTwo;
 
 
@@ -181,75 +185,84 @@ LatticePlasticityDamage :: computeDamageParam(double kappaDOne, double kappaDTwo
 
 
 MaterialStatus *
-LatticePlasticityDamage :: CreateStatus(GaussPoint *gp) const
+LatticePlasticityDamage::CreateStatus(GaussPoint *gp) const
 {
-    return new LatticePlasticityDamageStatus(1, LatticePlasticityDamage :: domain, gp);
+    return new LatticePlasticityDamageStatus(1, LatticePlasticityDamage::domain, gp);
 }
 
 
 double
-LatticePlasticityDamage :: computeYieldValue(const FloatArrayF< 3 > &stress,
-                                             const double kappa,
-                                             GaussPoint *gp) const
+LatticePlasticityDamage::computeYieldValue(const FloatArrayF< 3 > &stress,
+                                           const double kappa,
+                                           GaussPoint *gp,
+                                           TimeStep *tStep) const
 {
+    double ftLocal =  giveTensileStrength(gp, tStep);
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
+
     double yieldValue = 0;
     double hardening = computeHardening(kappa, gp);
     double shearNorm = norm(stress [ { 1, 2 } ]);
-    double transition = -( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening;
+    double transition = -( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening;
 
     if ( stress.at(1) >= transition ) { //main ellipse
         yieldValue = pow(shearNorm, 2.) + pow(this->frictionAngleOne, 2.) * pow(stress.at(1), 2.) +
-                     2. * ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) * pow(this->frictionAngleOne, 2.) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening * stress.at(1) -
-                     ( 2. * this->fc * this->ft * pow(this->frictionAngleOne, 2.) + ( 1. - this->frictionAngleOne * this->frictionAngleTwo ) * pow(this->ft, 2.) * pow(this->frictionAngleOne, 2.) ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * pow(hardening, 2.);
+                     2. * ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) * pow(this->frictionAngleOne, 2.) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening * stress.at(1) -
+                     ( 2. * fcLocal * ftLocal * pow(this->frictionAngleOne, 2.) + ( 1. - this->frictionAngleOne * this->frictionAngleTwo ) * pow(ftLocal, 2.) * pow(this->frictionAngleOne, 2.) ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * pow(hardening, 2.);
     } else {   //cap ellipse
         yieldValue =  pow(shearNorm, 2.) + pow(stress.at(1) / this->frictionAngleTwo, 2.) +
-                     2. * ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( pow(this->frictionAngleTwo, 2.) * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) * hardening * stress.at(1) +
-                     ( pow(this->fc, 2.) * ( 1. - pow(this->frictionAngleOne * this->frictionAngleTwo, 2.) ) -
-                       2. * this->fc * this->ft * this->frictionAngleOne * this->frictionAngleTwo * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) / ( pow(this->frictionAngleTwo, 2.) * pow(1. + this->frictionAngleOne * this->frictionAngleTwo, 2.) ) * pow(hardening, 2.);
+                     2. * ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) / ( pow(this->frictionAngleTwo, 2.) * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) * hardening * stress.at(1) +
+                     ( pow(fcLocal, 2.) * ( 1. - pow(this->frictionAngleOne * this->frictionAngleTwo, 2.) ) -
+                       2. * fcLocal * ftLocal * this->frictionAngleOne * this->frictionAngleTwo * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) / ( pow(this->frictionAngleTwo, 2.) * pow(1. + this->frictionAngleOne * this->frictionAngleTwo, 2.) ) * pow(hardening, 2.);
     }
 
     return yieldValue;
 }
 
 double
-LatticePlasticityDamage :: computeHardening(const double kappa, GaussPoint *gp) const
+LatticePlasticityDamage::computeHardening(const double kappa, GaussPoint *gp) const
 {
     return exp(kappa / this->aHard);
 }
 
 double
-LatticePlasticityDamage :: computeDHardeningDKappa(const double kappa, GaussPoint *gp) const
+LatticePlasticityDamage::computeDHardeningDKappa(const double kappa, GaussPoint *gp) const
 {
     return 1. / this->aHard * exp(kappa / this->aHard);
 }
 
 double
-LatticePlasticityDamage :: computeDDHardeningDDKappa(const double kappa, GaussPoint *gp) const
+LatticePlasticityDamage::computeDDHardeningDDKappa(const double kappa, GaussPoint *gp) const
 {
     return 1. / pow(this->aHard, 2.) * exp(kappa / this->aHard);
 }
 
 FloatArrayF< 3 >
-LatticePlasticityDamage :: computeFVector(const FloatArrayF< 3 > &stress,
-                                          const double kappa, GaussPoint *gp) const
+LatticePlasticityDamage::computeFVector(const FloatArrayF< 3 > &stress,
+                                        const double kappa,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep) const
 {
+    double ftLocal =  giveTensileStrength(gp, tStep);
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
+
     double hardening = computeHardening(kappa, gp);
     double dHardeningDKappa = computeDHardeningDKappa(kappa, gp);
     double shearNorm = norm(stress [ { 1, 2 } ]);
-    double transition = -( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening;
+    double transition = -( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening;
 
     FloatArrayF< 3 >f;
     if ( stress.at(1) >= transition ) { //main ellipse
-        f.at(1) = 2. * pow(this->frictionAngleOne, 2.) * stress.at(1) + 2. * ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) * pow(this->frictionAngleOne, 2.) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening;
+        f.at(1) = 2. * pow(this->frictionAngleOne, 2.) * stress.at(1) + 2. * ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) * pow(this->frictionAngleOne, 2.) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening;
         f.at(2) = 2. * shearNorm;
-        f.at(3) = 2. * ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) * pow(this->frictionAngleOne, 2.) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * stress.at(1) * dHardeningDKappa -
-                  2. * ( 2. * this->fc * this->ft * pow(this->frictionAngleOne, 2.) + ( 1. - this->frictionAngleOne * this->frictionAngleTwo ) * pow(this->ft, 2.) * pow(this->frictionAngleOne, 2.) ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening * dHardeningDKappa;
+        f.at(3) = 2. * ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) * pow(this->frictionAngleOne, 2.) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * stress.at(1) * dHardeningDKappa -
+                  2. * ( 2. * fcLocal * ftLocal * pow(this->frictionAngleOne, 2.) + ( 1. - this->frictionAngleOne * this->frictionAngleTwo ) * pow(ftLocal, 2.) * pow(this->frictionAngleOne, 2.) ) / ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) * hardening * dHardeningDKappa;
     } else {   //cap ellipse
-        f.at(1) = 2. * stress.at(1) / pow(this->frictionAngleTwo, 2.) + 2. * ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( pow(this->frictionAngleTwo, 2.) * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) * hardening;
+        f.at(1) = 2. * stress.at(1) / pow(this->frictionAngleTwo, 2.) + 2. * ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) / ( pow(this->frictionAngleTwo, 2.) * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) * hardening;
         f.at(2) = 2. * shearNorm;
-        f.at(3) = 2. * ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( pow(this->frictionAngleTwo, 2.) * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) * stress.at(1) * dHardeningDKappa +
-                  2. * ( pow(this->fc, 2.) * ( 1. - pow(this->frictionAngleOne * this->frictionAngleTwo, 2.) ) -
-                         2. * this->fc * this->ft * this->frictionAngleOne * this->frictionAngleTwo * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) /
+        f.at(3) = 2. * ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) / ( pow(this->frictionAngleTwo, 2.) * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) * stress.at(1) * dHardeningDKappa +
+                  2. * ( pow(fcLocal, 2.) * ( 1. - pow(this->frictionAngleOne * this->frictionAngleTwo, 2.) ) -
+                         2. * fcLocal * ftLocal * this->frictionAngleOne * this->frictionAngleTwo * ( 1. + this->frictionAngleOne * this->frictionAngleTwo ) ) /
                   ( pow(frictionAngleTwo, 2.) * pow(1. + this->frictionAngleOne * this->frictionAngleTwo, 2.) ) * hardening * dHardeningDKappa;
     }
 
@@ -257,22 +270,27 @@ LatticePlasticityDamage :: computeFVector(const FloatArrayF< 3 > &stress,
 }
 
 FloatArrayF< 3 >
-LatticePlasticityDamage :: computeMVector(const FloatArrayF< 3 > &stress,
-                                          const double kappa, GaussPoint *gp) const
+LatticePlasticityDamage::computeMVector(const FloatArrayF< 3 > &stress,
+                                        const double kappa,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep) const
 {
+    double ftLocal =  giveTensileStrength(gp, tStep);
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
+
     double hardening = computeHardening(kappa, gp);
     double shearNorm = norm(stress [ { 1, 2 } ]);
-    double transition = -( this->fc - this->flowAngleOne * this->frictionAngleTwo * this->ft ) / ( 1. + this->flowAngleOne * this->frictionAngleTwo ) * hardening;
+    double transition = -( fcLocal - this->flowAngleOne * this->frictionAngleTwo * ftLocal ) / ( 1. + this->flowAngleOne * this->frictionAngleTwo ) * hardening;
 
     FloatArrayF< 3 >m;
     if ( stress.at(1) >= transition ) { //ellipse
-        m.at(1) = 2. * pow(this->flowAngleOne, 2.) * stress.at(1) + 2. * ( this->fc - this->flowAngleOne * this->flowAngleTwo * this->ft ) * pow(this->flowAngleOne, 2.) / ( 1. + this->flowAngleOne * this->flowAngleTwo ) * hardening;
+        m.at(1) = 2. * pow(this->flowAngleOne, 2.) * stress.at(1) + 2. * ( fcLocal - this->flowAngleOne * this->flowAngleTwo * ftLocal ) * pow(this->flowAngleOne, 2.) / ( 1. + this->flowAngleOne * this->flowAngleTwo ) * hardening;
         m.at(2) = 2. * shearNorm;
-        m.at(3) = fabs( m.at(1) );
+        m.at(3) = fabs(m.at(1) );
     } else {   //circle
-        m.at(1) = 2. * stress.at(1) / pow(this->flowAngleTwo, 2.) + 2. * ( this->fc - this->flowAngleTwo * this->flowAngleOne * this->ft ) / ( pow(this->flowAngleTwo, 2.) * ( 1. + this->flowAngleOne * this->flowAngleTwo ) ) * hardening;
+        m.at(1) = 2. * stress.at(1) / pow(this->flowAngleTwo, 2.) + 2. * ( fcLocal - this->flowAngleTwo * this->flowAngleOne * ftLocal ) / ( pow(this->flowAngleTwo, 2.) * ( 1. + this->flowAngleOne * this->flowAngleTwo ) ) * hardening;
         m.at(2) = 2. * shearNorm;
-        m.at(3) = fabs( m.at(1) );
+        m.at(3) = fabs(m.at(1) );
     }
 
     return m;
@@ -280,18 +298,21 @@ LatticePlasticityDamage :: computeMVector(const FloatArrayF< 3 > &stress,
 
 
 FloatMatrixF< 3, 3 >
-LatticePlasticityDamage :: computeDMMatrix(const FloatArrayF< 3 > &stress, const double kappa, GaussPoint *gp) const
+LatticePlasticityDamage::computeDMMatrix(const FloatArrayF< 3 > &stress, const double kappa, GaussPoint *gp, TimeStep *tStep) const
 {
+    double ftLocal =  giveTensileStrength(gp, tStep);
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
+
     double hardening = computeHardening(kappa, gp);
     double dHardeningDKappa = computeDHardeningDKappa(kappa, gp);
-    double transition = -( this->fc - this->flowAngleOne * this->flowAngleTwo * this->ft ) / ( 1. + this->flowAngleOne * this->flowAngleTwo ) * hardening;
+    double transition = -( fcLocal - this->flowAngleOne * this->flowAngleTwo * this->ft ) / ( 1. + this->flowAngleOne * this->flowAngleTwo ) * hardening;
 
     FloatMatrixF< 3, 3 >dm;
     if ( stress.at(1) >= transition ) { //main ellipse
         //Derivatives of dGDSig
         dm.at(1, 1) = 2. * pow(this->flowAngleOne, 2.);
         dm.at(1, 2) = 0.;
-        dm.at(1, 3) = 2. * ( this->fc - this->flowAngleOne * this->flowAngleTwo * this->ft ) * pow(this->flowAngleOne, 2.) / ( 1. + this->flowAngleOne * this->flowAngleTwo ) * dHardeningDKappa;
+        dm.at(1, 3) = 2. * ( fcLocal - this->flowAngleOne * this->flowAngleTwo * ftLocal ) * pow(this->flowAngleOne, 2.) / ( 1. + this->flowAngleOne * this->flowAngleTwo ) * dHardeningDKappa;
 
         //Derivatives of dGDTau
         dm.at(2, 1) = 0.;
@@ -306,7 +327,7 @@ LatticePlasticityDamage :: computeDMMatrix(const FloatArrayF< 3 > &stress, const
                //Derivatives of dGDSig
         dm.at(1, 1) = 2. / pow(this->flowAngleTwo, 2.);
         dm.at(1, 2) = 0.;
-        dm.at(1, 3) = 2. * ( this->fc - this->flowAngleOne * this->flowAngleTwo * this->ft ) / ( pow(this->flowAngleTwo, 2.) * ( 1. + this->flowAngleOne * this->flowAngleTwo ) ) * dHardeningDKappa;
+        dm.at(1, 3) = 2. * ( fcLocal - this->flowAngleOne * this->flowAngleTwo * ftLocal ) / ( pow(this->flowAngleTwo, 2.) * ( 1. + this->flowAngleOne * this->flowAngleTwo ) ) * dHardeningDKappa;
 
         //Derivatives of dGDTau
         dm.at(2, 1) = 0.;
@@ -322,32 +343,8 @@ LatticePlasticityDamage :: computeDMMatrix(const FloatArrayF< 3 > &stress, const
 }
 
 
-FloatMatrixF< 3, 3 >
-LatticePlasticityDamage :: computeAMatrix(const FloatArrayF< 3 > &stress,
-                                          const double kappa,
-                                          const double deltaLambda,
-                                          GaussPoint *gp) const
-{
-    auto dMMatrix = computeDMMatrix(stress, kappa, gp);
-    /* Compute matrix*/
-    FloatMatrixF< 3, 3 >a;
-    a.at(1, 1) = 1 / this->eNormalMean + deltaLambda * dMMatrix.at(1, 1);
-    a.at(1, 2) = deltaLambda * dMMatrix.at(1, 2);
-    a.at(1, 3) = deltaLambda * dMMatrix.at(1, 3);
-    /**/
-    a.at(2, 1) = deltaLambda * dMMatrix.at(2, 1);
-    a.at(2, 2) = 1 / ( this->alphaOne * this->eNormalMean ) + deltaLambda * dMMatrix.at(2, 2);
-    a.at(2, 3) = deltaLambda * dMMatrix.at(2, 3);
-    /**/
-    a.at(3, 1) = deltaLambda * dMMatrix.at(3, 1);
-    a.at(3, 2) = deltaLambda * dMMatrix.at(3, 2);
-    a.at(3, 3) = deltaLambda * dMMatrix.at(3, 3) - 1.;
-    return a;
-}
-
-
 FloatArrayF< 6 >
-LatticePlasticityDamage :: giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const
+LatticePlasticityDamage::giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
     return status->giveReducedLatticeStrain();
@@ -355,14 +352,15 @@ LatticePlasticityDamage :: giveReducedStrain(GaussPoint *gp, TimeStep *tStep) co
 
 
 FloatArrayF< 6 >
-LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
-                                                   const FloatArrayF< 6 > &reducedStrain,
-                                                   TimeStep *tStep) const
+LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
+                                                 const FloatArrayF< 6 > &reducedStrain,
+                                                 TimeStep *tStep) const
 {
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
-    //Get tempKappa from the status
-    double tempKappa = status->giveTempKappaP();
+    //Get kappa from the status
+    double tempKappa = status->giveKappaP();
 
     //Subset of reduced strain.
     //Rotational components are not used for plasticity return
@@ -370,7 +368,7 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
 
 
     /* Get plastic strain vector from status*/
-    auto tempPlasticStrain = status->giveTempPlasticLatticeStrain() [ { 0, 1, 2 } ];
+    auto tempPlasticStrain = status->givePlasticLatticeStrain() [ { 0, 1, 2 } ];
 
     FloatArrayF< 3 >tangent = { this->eNormalMean, this->alphaOne * this->eNormalMean, this->alphaOne * this->eNormalMean };
     /* Compute trial stress*/
@@ -382,13 +380,13 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
     auto oldStrain = this->giveReducedStrain(gp, tStep) [ { 0, 1, 2 } ];
 
     /* Compute yield value*/
-    double yieldValue = computeYieldValue(stress, tempKappa, gp);
+    double yieldValue = computeYieldValue(stress, tempKappa, gp, tStep);
     int subIncrementCounter = 0;
 
     /* Check yield condition, i.e. if the yield value is less than the yield tolerance.
      * If yield condition is valid. Do perform regular return (closest point return)*/
 
-    if ( yieldValue / pow(fc, 2.) > yieldTol ) {
+    if ( yieldValue / pow(fcLocal, 2.) > yieldTol ) {
         // introduce a subincrementation flag
         int subIncrementFlag = 0;
         auto convergedStrain = oldStrain;
@@ -399,20 +397,21 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
         while ( returnResult == RR_NotConverged || subIncrementFlag == 1 ) {
             stress = mult(tangent, tempStrain - tempPlasticStrain);
 
-            tempKappa = performRegularReturn(stress, yieldValue, gp);
+            tempKappa = performRegularReturn(stress, yieldValue, gp, tStep);
 
             if ( returnResult == RR_NotConverged ) {
                 subIncrementCounter++;
                 if ( subIncrementCounter > numberOfSubIncrements ) {
-                    OOFEM_LOG_INFO( "Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
+                    OOFEM_LOG_INFO("Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
                     OOFEM_LOG_INFO("Yield value %e \n", yieldValue);
-                    OOFEM_LOG_INFO( "ConvergedStrain value %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3) );
-                    OOFEM_LOG_INFO( "tempStrain value %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3) );
-                    OOFEM_LOG_INFO( "deltaStrain value %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3) );
-                    OOFEM_LOG_INFO( "targetstrain value %e %e %e\n", strain.at(1), strain.at(2), strain.at(3) );
+                    OOFEM_LOG_INFO("ConvergedStrain value %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3) );
+                    OOFEM_LOG_INFO("tempStrain value %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3) );
+                    OOFEM_LOG_INFO("deltaStrain value %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3) );
+                    OOFEM_LOG_INFO("targetstrain value %e %e %e\n", strain.at(1), strain.at(2), strain.at(3) );
 
                     OOFEM_ERROR("LatticePlasticityDamage :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
                 }
+                printf("subincrementation required\n");
                 subIncrementFlag = 1;
                 deltaStrain *= 0.5;
                 tempStrain = convergedStrain + deltaStrain;
@@ -421,7 +420,7 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
                 tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
                 tempPlasticStrain.at(3) = tempStrain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-                status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
+                status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
                 status->setTempKappaP(tempKappa);
 
                 subIncrementFlag = 0;
@@ -441,7 +440,7 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-    status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
+    status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
 
 
     //    status->letTempLatticeStressBe(assemble< 6 >(stress, { 0, 1, 2 }) );
@@ -456,10 +455,13 @@ LatticePlasticityDamage :: performPlasticityReturn(GaussPoint *gp,
 
 
 double
-LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
-                                                double yieldValue,
-                                                GaussPoint *gp) const
+LatticePlasticityDamage::performRegularReturn(FloatArrayF< 3 > &stress,
+                                              double yieldValue,
+                                              GaussPoint *gp,
+                                              TimeStep *tStep) const
 {
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
+
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
     double deltaLambda = 0.;
@@ -471,7 +473,7 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
 
     double tempShearStressNorm = trialShearStressNorm;
 
-    double thetaTrial = atan2( stress.at(3), stress.at(2) );
+    double thetaTrial = atan2(stress.at(3), stress.at(2) );
 
     // Do the same for kappa
     double kappa = status->giveKappaP();
@@ -485,7 +487,7 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
     unknowns.at(4) = 0.;
 
     // Look at the magnitudes of the residuals. You have to scale the yieldValue down.
-    yieldValue = computeYieldValue(tempStress, tempKappa, gp);
+    yieldValue = computeYieldValue(tempStress, tempKappa, gp, tStep);
 
     //initiate residuals
     FloatArrayF< 4 >residuals;
@@ -503,10 +505,10 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
 
         //Normalize residuals. Think about it more.
         FloatArrayF< 4 >residualsNorm;
-        residualsNorm.at(1) = residuals.at(1) / this->fc;
-        residualsNorm.at(2) = residuals.at(2) / this->fc;
+        residualsNorm.at(1) = residuals.at(1) / fcLocal;
+        residualsNorm.at(2) = residuals.at(2) / fcLocal;
         residualsNorm.at(3) = residuals.at(3);
-        residualsNorm.at(4) = residuals.at(4) / pow(this->fc, 2.);
+        residualsNorm.at(4) = residuals.at(4) / pow(fcLocal, 2.);
 
         normOfResiduals = norm(residualsNorm);
 
@@ -516,10 +518,9 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
             return 0.;
         }
 
-
         if ( normOfResiduals > yieldTol ) {
             // Test to run newton iteration using inverse of Jacobian
-            auto jacobian = computeJacobian(tempStress, tempKappa, deltaLambda, gp);
+            auto jacobian = computeJacobian(tempStress, tempKappa, deltaLambda, gp, tStep);
 
             auto solution = solve_check(jacobian, residuals);
             if ( solution.first ) {
@@ -544,16 +545,14 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
             deltaLambda = unknowns.at(4);
 
             /* Compute the mVector holding the derivatives of the g function and the hardening function*/
-            auto mVector = computeMVector(tempStress, tempKappa, gp);
+            auto mVector = computeMVector(tempStress, tempKappa, gp, tStep);
 
             residuals.at(1) = tempStress.at(1) - trialStress.at(1) + this->eNormalMean * deltaLambda * mVector.at(1);
             residuals.at(2) = tempShearStressNorm - trialShearStressNorm + this->alphaOne * this->eNormalMean * deltaLambda * mVector.at(2);
             residuals.at(3) = -tempKappa + kappa + deltaLambda * mVector.at(3);
-            residuals.at(4) = computeYieldValue(tempStress, tempKappa, gp);
+            residuals.at(4) = computeYieldValue(tempStress, tempKappa, gp, tStep);
         }
     }
-
-    //  status-> setTempKappaP (tempKappa);
 
     returnResult = RR_Converged;
 
@@ -565,14 +564,15 @@ LatticePlasticityDamage :: performRegularReturn(FloatArrayF< 3 > &stress,
 
 
 FloatMatrixF< 4, 4 >
-LatticePlasticityDamage :: computeJacobian(const FloatArrayF< 3 > &stress,
-                                           const double kappa,
-                                           const double deltaLambda,
-                                           GaussPoint *gp) const
+LatticePlasticityDamage::computeJacobian(const FloatArrayF< 3 > &stress,
+                                         const double kappa,
+                                         const double deltaLambda,
+                                         GaussPoint *gp,
+                                         TimeStep *tStep) const
 {
-    auto dMMatrix = computeDMMatrix(stress, kappa, gp);
-    auto mVector = computeMVector(stress, kappa, gp);
-    auto fVector = computeFVector(stress, kappa, gp);
+    auto dMMatrix = computeDMMatrix(stress, kappa, gp, tStep);
+    auto mVector = computeMVector(stress, kappa, gp, tStep);
+    auto fVector = computeFVector(stress, kappa, gp, tStep);
 
     /* Compute matrix*/
     FloatMatrixF< 4, 4 >jacobian;
@@ -599,9 +599,26 @@ LatticePlasticityDamage :: computeJacobian(const FloatArrayF< 3 > &stress,
     return jacobian;
 }
 
+double
+LatticePlasticityDamage::give(int aProperty, GaussPoint *gp) const
+{
+    this->giveStatus(gp);
+
+    double answer;
+    if ( RandomMaterialExtensionInterface::give(aProperty, gp, answer) ) {
+        return answer;
+    } else if ( aProperty == fc_strength ) {
+        return this->fc;
+    } else if ( aProperty == ft_strength ) {
+        return this->ft;
+    } else {
+        return LatticeLinearElastic::give(aProperty, gp);
+    }
+}
+
 
 FloatArrayF< 6 >
-LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *tStep)
+LatticePlasticityDamage::giveLatticeStress3d(const FloatArrayF< 6 > &originalStrain, GaussPoint *gp, TimeStep *tStep)
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
     status->initTempStatus();
@@ -616,7 +633,7 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
 
     double omega = 0.;
     if ( damageFlag == 1 ) {
-        this->performDamageEvaluation(gp, reducedStrain);
+        this->performDamageEvaluation(gp, reducedStrain, tStep);
         omega = status->giveTempDamage();
     }
 
@@ -631,8 +648,12 @@ LatticePlasticityDamage :: giveLatticeStress3d(const FloatArrayF< 6 > &originalS
 
 
 void
-LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain) const
+LatticePlasticityDamage::performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 > &reducedStrain, TimeStep *tStep) const
 {
+    double ftLocal =  giveTensileStrength(gp, tStep);
+    double fcLocal =  giveCompressiveStrength(gp, tStep);
+
+
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
     double le = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
@@ -652,7 +673,7 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 
     double deltaKappaP = tempKappaP - kappaP;
     double hardening = computeHardening(tempKappaP, gp);
 
-    double strength = ( this->fc - this->frictionAngleOne * this->frictionAngleTwo * this->ft ) / ( 1 + this->frictionAngleOne * this->frictionAngleTwo );
+    double strength = ( fcLocal - this->frictionAngleOne * this->frictionAngleTwo * ftLocal ) / ( 1 + this->frictionAngleOne * this->frictionAngleTwo );
 
     if ( deltaKappaP <= 0. ) { //unloading or reloading
         tempKappaDOne = status->giveKappaDOne();
@@ -672,14 +693,14 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 
         } else {
             tempKappaDOne += deltaPlasticStrain.at(1);
 
-            if ( this->ft == 0 ) {
+            if ( ftLocal == 0 ) {
                 tempKappaDTwo = hardening * strength / this->eNormalMean;
             } else {
-                tempKappaDTwo = hardening * this->ft / this->eNormalMean;
+                tempKappaDTwo = hardening * ftLocal / this->eNormalMean;
             }
 
             // evaluate damage parameter
-            omega = this->computeDamageParam(tempKappaDOne, tempKappaDTwo, gp);
+            omega = this->computeDamageParam(tempKappaDOne, tempKappaDTwo, gp, tStep);
 
             //threshold for crack patterns
             if ( ( tempKappaDOne + omega * tempKappaDTwo ) * le > 0. ) {
@@ -695,7 +716,7 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 
     FloatArrayF< 6 >tempDamageLatticeStrain = omega * elasticReducedStrain;
     status->letTempDamageLatticeStrainBe(tempDamageLatticeStrain);
 
-    double crackWidth = norm( tempPlasticStrain + omega * ( reducedStrain - tempPlasticStrain ) ) * le;
+    double crackWidth = norm(tempPlasticStrain + omega * ( reducedStrain - tempPlasticStrain ) ) * le;
 
     //TODO: Compute dissipation
     // double tempDissipation = status->giveDissipation();
@@ -821,9 +842,9 @@ LatticePlasticityDamage :: performDamageEvaluation(GaussPoint *gp, FloatArrayF< 
 
 
 FloatMatrixF< 6, 6 >
-LatticePlasticityDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
+LatticePlasticityDamage::give3dLatticeStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const
 {
-    auto elastic = LatticeLinearElastic :: give3dLatticeStiffnessMatrix(mode, gp, tStep);
+    auto elastic = LatticeLinearElastic::give3dLatticeStiffnessMatrix(mode, gp, tStep);
 
     if ( mode == ElasticStiffness ) {
         return elastic;
@@ -838,10 +859,10 @@ LatticePlasticityDamage :: give3dLatticeStiffnessMatrix(MatResponseMode mode, Ga
 }
 
 int
-LatticePlasticityDamage :: giveIPValue(FloatArray &answer,
-                                       GaussPoint *gp,
-                                       InternalStateType type,
-                                       TimeStep *atTime)
+LatticePlasticityDamage::giveIPValue(FloatArray &answer,
+                                     GaussPoint *gp,
+                                     InternalStateType type,
+                                     TimeStep *atTime)
 {
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
@@ -889,18 +910,18 @@ LatticePlasticityDamage :: giveIPValue(FloatArray &answer,
         answer = status->givePlasticLatticeStrain();
         return 1;
     } else {
-        return LatticeLinearElastic :: giveIPValue(answer, gp, type, atTime);
+        return LatticeLinearElastic::giveIPValue(answer, gp, type, atTime);
     }
 }
 
 
-LatticePlasticityDamageStatus :: LatticePlasticityDamageStatus(int n, Domain *d, GaussPoint *g) :  LatticeMaterialStatus(g)
+LatticePlasticityDamageStatus::LatticePlasticityDamageStatus(int n, Domain *d, GaussPoint *g) :  LatticeMaterialStatus(g)
 { }
 
 void
-LatticePlasticityDamageStatus :: initTempStatus()
+LatticePlasticityDamageStatus::initTempStatus()
 {
-    LatticeMaterialStatus :: initTempStatus();
+    LatticeMaterialStatus::initTempStatus();
     this->tempKappaP = this->kappaP;
     this->tempKappaDOne = this->kappaDOne;
     this->tempKappaDTwo = this->kappaDTwo;
@@ -908,9 +929,9 @@ LatticePlasticityDamageStatus :: initTempStatus()
 }
 
 void
-LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
+LatticePlasticityDamageStatus::printOutputAt(FILE *file, TimeStep *tStep) const
 {
-    LatticeMaterialStatus :: printOutputAt(file, tStep);
+    LatticeMaterialStatus::printOutputAt(file, tStep);
 
     fprintf(file, "plasticStrains ");
     for ( double s : this->plasticLatticeStrain ) {
@@ -922,14 +943,14 @@ LatticePlasticityDamageStatus :: printOutputAt(FILE *file, TimeStep *tStep) cons
 
 
 void
-LatticePlasticityDamageStatus :: updateYourself(TimeStep *atTime)
+LatticePlasticityDamageStatus::updateYourself(TimeStep *atTime)
 //
 // updates variables (nonTemp variables describing situation at previous equilibrium state)
 // after a new equilibrium state has been reached
 // temporary variables are having values corresponding to newly reached equilibrium.
 //
 {
-    LatticeMaterialStatus :: updateYourself(atTime);
+    LatticeMaterialStatus::updateYourself(atTime);
     this->kappaP = this->tempKappaP;
     this->kappaDOne = this->tempKappaDOne;
     this->kappaDTwo = this->tempKappaDTwo;
@@ -938,13 +959,13 @@ LatticePlasticityDamageStatus :: updateYourself(TimeStep *atTime)
 
 
 void
-LatticePlasticityDamageStatus :: saveContext(DataStream &stream, ContextMode mode)
+LatticePlasticityDamageStatus::saveContext(DataStream &stream, ContextMode mode)
 //
 // saves full information stored in this Status
 // no temp variables stored
 //
 {
-    LatticeMaterialStatus :: saveContext(stream, mode);
+    LatticeMaterialStatus::saveContext(stream, mode);
 
     if ( !stream.write(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -962,12 +983,12 @@ LatticePlasticityDamageStatus :: saveContext(DataStream &stream, ContextMode mod
 
 
 void
-LatticePlasticityDamageStatus :: restoreContext(DataStream &stream, ContextMode mode)
+LatticePlasticityDamageStatus::restoreContext(DataStream &stream, ContextMode mode)
 //
 // restores full information stored in stream to this Status
 //
 {
-    LatticeMaterialStatus :: restoreContext(stream, mode);
+    LatticeMaterialStatus::restoreContext(stream, mode);
 
     if ( !stream.read(& kappaP, 1) ) {
         THROW_CIOERR(CIO_IOERR);

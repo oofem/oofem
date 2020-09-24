@@ -44,6 +44,10 @@
 #define _IFT_LatticePlasticityDamageViscoelastic_Name "latticeplasticitydamageviscoelastic"
 #define _IFT_LatticePlasticityDamageViscoelastic_viscoMat "viscomat"
 #define _IFT_LatticePlasticityDamageViscoelastic_timeFactor "timefactor"
+#define _IFT_LatticePlasticityDamageViscoelastic_timedepfracturing "timedepfracturing"
+#define _IFT_LatticePlasticityDamageViscoelastic_fcm28 "fcm28"
+#define _IFT_LatticePlasticityDamageViscoelastic_fib_s "fib_s"
+#define _IFT_LatticePlasticityDamageViscoelastic_stiffnessFactor "stiffnessfactor"
 
 //@}
 
@@ -56,7 +60,8 @@ class LatticePlasticityDamageViscoelasticStatus : public LatticePlasticityDamage
 
 {
 protected:
-    std :: unique_ptr< GaussPoint >slaveGpVisco;
+
+    std::unique_ptr< GaussPoint >slaveGpVisco;
 
 public:
 
@@ -94,6 +99,15 @@ protected:
     /// 'slave' (= viscoelastic) material model number.
     int viscoMat = 0;
 
+    bool fib = false;
+    double fib_fcm28 = 0;
+    double fib_s = 0;
+    double timeFactor = 0;
+
+    /* scaling factor transforming PREDICTED strength and fracture energy
+     *  e.g. if the stiffness should be in MPa, then stiffnessFactor = 1.e6 */
+    double stiffnessFactor = 0.;
+
 public:
 
     /// Constructor
@@ -120,6 +134,12 @@ protected:
                     TimeStep *atTime) override;
 
     int checkConsistency(void) override;
+
+    /// returns equivalent time (used to compute time-dependent ft and gf)
+    virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const;
+
+    double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const override;
+    double giveCompressiveStrength(GaussPoint *gp, TimeStep *tStep) const override;
 };
 } // end namespace oofem
 
