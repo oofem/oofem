@@ -503,8 +503,7 @@ EngngModel :: solveYourself()
         // update state according to new meta step
         this->initMetaStepAttributes(activeMStep);
 
-        int nTimeSteps = activeMStep->giveNumberOfSteps();
-        for ( int jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
+	for ( int jstep = sjstep; jstep <= activeMStep->giveNumberOfSteps(); jstep++ ) { //loop over time steps
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
