@@ -43,6 +43,8 @@
 
 #define _IFT_QBrick1_ht_Name "qbrick1ht"
 #define _IFT_QBrick1_hmt_Name "qbrick1hmt"
+#define _IFT_QBrick1_mt_Name "qbrick1mt"
+
 
 namespace oofem {
 class FEI3dHexaQuad;
@@ -92,6 +94,19 @@ public:
     MaterialMode giveMaterialMode() override { return _3dHeMo; }
     const char *giveInputRecordName() const override { return _IFT_QBrick1_hmt_Name; }
     const char *giveClassName() const override { return "QBrick1_hmt"; }
+};
+
+/**
+ * Class for mass transfer.
+ */
+class QBrick1_mt : public QBrick1_ht
+{
+public:
+    QBrick1_mt(int n, Domain * d);
+
+    const char *giveInputRecordName() const override { return _IFT_QBrick1_mt_Name; }
+    const char *giveClassName() const override { return "QBrick1_mt"; }
+    MaterialMode giveMaterialMode() override { return _3dHeat; }
 };
 } // end namespace oofem
 #endif // qbrick1_ht_h
