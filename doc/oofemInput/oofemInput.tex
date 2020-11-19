@@ -571,10 +571,11 @@ Represents the direct explicit  nonlinear dynamic  integration.
 The central difference method with diagonal mass matrix is used,
 damping matrix is assumed to be proportional to mass matrix, $\mbf{C}
 = \mathrm{dumpcoef} * \mbf{M}$, where
-$\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
-integration, which may be reduced by program in order to satisfy
-solution stability conditions. Parameter \param{nsteps} specifies
-how many time steps will be analyzed.
+$\mbf{M}$ is diagonal mass matrix.
+Parameter \param{nsteps} specifies how many time steps will be analyzed.
+\param{deltaT} is time step length used for integration, which may be reduced by program in order to satisfy solution stability conditions.
+Parameter \param{reduct} is a scaling factor (smaller than 1), which is multiplied with the determined step length adjusted by the program.
+If \param{deltaT} is reduced internally, then \param{nsteps} is adjusted so that the total analysis time remains the same.
 
 The parallel version has the following additional syntax:\\ \\
 \begin{record}

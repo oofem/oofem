@@ -395,7 +395,7 @@ The Mooney-Rivlin strain energy function is expressed by
 \begin{equation}\label{freeEnergyBlatzKo}
 \rho_0 \psi = \frac{\mu}{2}\left(\frac{I_2}{I_3} + 2\sqrt{I_3}-5 \right)
 \end{equation}
-where $\mu$ is initial shear modulus, $I_2$ and $I_3$ are the second and third invariants of the Cauchy-Green tensor $\bm{C}$.
+where $\mu$ is initial shear modulus, $I_2$ and $I_3$ are the second and third invariants of the Cauchy-Green tensor $\mbf{C}$.
 
 The model description and parameters are summarized in Tab.~\ref{BlatzKo_table}.
 \begin{table}[!htb]
@@ -409,7 +409,7 @@ The model description and parameters are summarized in Tab.~\ref{BlatzKo_table}.
 		Parameters &- \param{} material number\\
 		&- \param{d} material density\\
 		&- \param{mu} shear modulus\\
-                \nu is fixed to 0.25\\
+                $\nu$ is fixed to 0.25\\
 		\hline
 	\end{mmt}
 	\caption{Blatz-Ko material - summary.}
@@ -742,7 +742,7 @@ the incremental definition of cumulative plastic strain
 \begin{equation}\label{VMcumPlasStrain}
 \dot{\kappa} = \| \epspd \|,
 \end{equation}
-the linear hardening law
+the linear hardening law (for \param{htype} = 0)
 \begin{equation}\label{VMlinearHardeningLaw}
 \sigma_Y(\kappa) = \sigma_0 + H\kappa,
 \end{equation}
@@ -778,13 +778,16 @@ The model description and parameters are summarized in Tab.~\ref{misesMat_table}
 Description & Mises plasticity model with isotropic hardening\\
 \hline
 Record Format & \descitem{MisesMat}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\\
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \optelemparam{htype}{in} \optelemparam{h\_eps}{ra} \optelemparam{h(eps)}{ra} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
 &- \param{n} Poisson's ratio\\
-&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
-&- \param{H} hardening modulus (can be negative in the case of plastic softening)\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression) (Required if htype = 0, which is default)\\
+&- \param{H} hardening modulus (can be negative in the case of plastic softening) (Required if htype = 0, which is default)\\
+&- \param{htype} hardening type (Optional parameter. Default = 0)\\
+&- \param{h\_eps} array of plastic strains (Required if htype = 1)\\
+&- \param{h(eps)} array of yield stresses (Required if htype = 1)\\
 &- \param{omega\_crit} critical damage in damage law (\ref{damagelawmp})\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 Supported modes& 1dMat, PlaneStrain, 3dMat, 3dMatF\\
