@@ -126,6 +126,8 @@ public:
     const char *giveClassName() const override { return "LatticeCrossSection"; }
     const char *giveInputRecordName() const override { return _IFT_LatticeCrossSection_Name; }
 
+    virtual double give(int aProperty, GaussPoint *gp) const override;
+    
     //    void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
 

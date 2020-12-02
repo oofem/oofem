@@ -81,8 +81,8 @@ LatticeLinearElastic :: initializeFrom(InputRecord &ir)
     alphaOne = 1.;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaOne, _IFT_LatticeLinearElastic_a1); // Macro
 
-    //Parameter which is used for the definition of bending stiffness. Default is 1.
-    alphaTwo = 1.;
+    //Parameter which is used for the definition of bending stiffness. Default is 0.
+    alphaTwo = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, alphaTwo, _IFT_LatticeLinearElastic_a2); // Macro
 
     localRandomType = 0; //Default: No local random field
@@ -92,12 +92,6 @@ LatticeLinearElastic :: initializeFrom(InputRecord &ir)
         IR_GIVE_FIELD(ir, coefficientOfVariation, _IFT_LatticeLinearElastic_cov); // Macro
     }
 
-    // double value = 0.;
-    // IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_LatticeLinearElastic_talpha);
-    // if ( !propertyDictionary.includes(tAlpha) ) {
-    //   // and not previously defined
-    //     propertyDictionary.add(tAlpha, value);
-    // }
 
     this->cAlpha = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, cAlpha, _IFT_LatticeLinearElastic_calpha);
@@ -246,6 +240,8 @@ LatticeLinearElastic :: giveThermalDilatationVector(GaussPoint *gp,  TimeStep *t
 double
 LatticeLinearElastic :: give(int aProperty, GaussPoint *gp) const
 {
+   this->giveStatus(gp);
+  
     double answer;
     if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems

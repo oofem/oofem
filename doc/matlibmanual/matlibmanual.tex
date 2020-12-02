@@ -5560,14 +5560,31 @@ Supported modes& 2dlattice, 3dlattice\\
 
 \subsubsection{Plasticity damage lattice model}
 
-This combined plasticity damage model for lattice elements has been developed to describe the failure process of geomaterials such as concrete and rock. The plasticity part is based on the effective stress and damage is evaluated by the plastic strain.
+This combined plasticity damage model for lattice elements has been developed to describe the failure process of geomaterials such as concrete and rock. The plasticity part is based on the effective stress and damage is evaluated by the plastic strain. The model was first introduced in \cite{GraDav11} without hardening and then extended to hardening in \cite{AthWheGra18}.
+
 The main stress-strain law has the form
 \begin{equation}
 \boldsymbol{\sigma} = \left(1-\omega\right) \mathbf{D}_{\rm e} \left(\boldsymbol{\varepsilon}-\boldsymbol{\varepsilon}_{\rm p} \right)
 \end{equation}
 where $\boldsymbol{\sigma}$ is a vector of tractions and rotational components, $\omega$ is the damage variable and $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix, $\boldsymbol{\varepsilon}$ is a vector of strains obtained from displacement jumps smeared over the element length and rotational components and $\boldsymbol{\varepsilon}_{\rm p}$ are the plastic strains.
 
-The model is described first in \textit{P. Grassl and T. Davies. "Lattice modelling of corrosion induced cracking and bond in reinforced concrete". Cement and Concrete Composites, Volume 33, pp. 918-924, 2011.} and then later in more detail in \textit{I. Athanasiadis, S. Wheeler and P. Grassl. "Hydro-mechanical network modelling of particulate composites", International Journal of Solids and Structures. Vol. 130-131, Pages 49-60, 2018}. The model parameters are summarised in Tab.~\ref{latticeplastdam_table}.
+The plasticity part is based on the effective stresses and uses only a subset of the strains and stresses which are the normal stress $\sigma_{\rm n}$ and the two shear stresses $\sigma_{\rm s}$ and $\sigma_{\rm t}$. The yield surface is composed of two ellipse which are arranged so that the transition of the two ellipses is smooth (Figure~\ref{plastdamyieldfig}).
+%
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.6\textwidth]{./plastdamyieldfig.pdf}
+ \caption{Latticeplastdam yield surface, which is composed of ellipse with a smooth transition.}
+ \label{plastdamyieldfig}
+\end{figure}
+%
+The resulting yield function $f$ is
+\begin{equation}
+f = \left\{ \begin{array}{l} \alpha^2\bar{\sigma}_{\rm n}^2 + 2 \dfrac{\alpha^2\left(f_{\rm c} - \alpha \beta f_{\rm t}\right)}{\left(1+\alpha \beta\right)} q \bar{\sigma}_{\rm n} + \bar{\sigma}_{\rm q}^2 - \dfrac{2 \alpha^2 f_{\rm c}f_{\rm t} + \alpha^2 \left(1-\alpha \beta \right) f_{\rm t}^2}{1+\alpha \beta} q^2 \\ \mbox{if $\bar{\sigma}_{\rm n} \geq -\dfrac{f_{\rm c} - \alpha \beta f_{\rm t}}{1+\alpha \beta} q$} \vspace{0.5cm}\\
+  \dfrac{\bar{\sigma}_{\rm n}^2}{\beta^2} + 2 \dfrac{f_{\rm c} - \alpha \beta f_{\rm t}}{\beta^2 \left(1+\alpha \beta \right)} q \bar{\sigma}_{\rm n} + \bar{\sigma}_{\rm q}^2 + \dfrac{\left(1-\alpha \beta\right) f_{\rm c}^2 -2 \alpha \beta f_{\rm c} f_{\rm t} }{\beta^2 \left(1+\alpha \beta \right)} q^2\\ \mbox{if $\bar{\sigma}_{\rm n} < - \dfrac{f_{\rm c} - \alpha \beta f_{\rm t}}{1+\alpha \beta} q$} \end{array} \right.
+  \end{equation}
+here parameters $\alpha$ and $\beta$ are the slopes, and $f_{\rm c}$ and $f_{\rm t}$ are the strength parameters shown in Figure~\ref{plastdamyieldfig}. The hardening function $q$ controls the shape of the yield function.
+
+The model parameters are summarised in Tab.~\ref{latticeplastdam_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -6916,7 +6933,8 @@ In Rock Under Compression, International Journal of Fracture Mechanics
 \bibitem{Bazant-97-I} Z.P. Ba\v{z}ant, A.B. Hauggaard, F. Ulm: Microprestress-solidification theory for concrete creep. {I}: Aging and drying effects. Journal of Engineering Mechanics 123(11), 1188–1194, 1997.
 \bibitem{JirHav14a} M. Jir\'{a}sek, P. Havl\'{a}sek: Microprestress-Solidification Theory of Concrete Creep: Reformulation and Improvement. Cement and Concrete Research 60, 51–62, 2014.
 \bibitem{fib:2010} International Federation for Structural Concrete (\textit{fib}): The \textit{fib} Model Code for Concrete Structures 2010.
-
+\bibitem{GraDav11} P. Grassl and T. Davies: Lattice modelling of corrosion induced cracking and bond in reinforced concrete. Cement and Concrete Composites, 33, 918-924, 2011.
+\bibitem{AthWheGra18} I. Athanasiadis, S. Wheeler and P. Grassl: Hydro-mechanical network modelling of particulate composites. International Journal of Solids and Structures 130-131, 49-60, 2018.
 \end{thebibliography}
 
 \end{document}
