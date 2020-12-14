@@ -4277,7 +4277,7 @@ Variables $\kappa_{dt1}$ and $\kappa_{dt2}$ are defined by the rate equations
 \dot\kappa_{dt2} &=&  \frac{\dot\kappa_{dt}}{x_s(\bar\rho,\bar\sigma_V)}
 \end{eqnarray}
 where 
-\begin{equation}\label{eq:xs}
+\begin{equation}\label{eq:xs2}
     x_s(\bar\rho,\bar\sigma_V) =
     1+(A_s-1)\frac{\sqrt{6}\langle-\bar\sigma_V\rangle}{\bar\rho}
 \end{equation}
@@ -4286,7 +4286,7 @@ we have $\langle-\bar\sigma_V\rangle=0$ and $x_s=1$. Under compression,
 $x_s$ increases (provided that parameter $A_s$ is greater than 1),
 which slows down the evolution of variables $\kappa_{dt1}$ and $\kappa_{dt2}$
 and consequently of damage. For uniaxial compression, we have
-$\bar\sigma_V/\bar\rho=-1/\sqrt{6}$ and formula (\ref{eq:xs}) gives $x_s=A_s$.
+$\bar\sigma_V/\bar\rho=-1/\sqrt{6}$ and formula (\ref{eq:xs2}) gives $x_s=A_s$.
 
 The specific form of the dependence of damage variable $\omega_t$ on 
 $\kappa_{dt}$, $\kappa_{dt1}$ and $\kappa_{dt2}$ is dictated by the desired
@@ -4647,6 +4647,106 @@ developed for concrete. The material model assumes an additive split of the tota
 into the viscoelastic and cracking part. The viscoelastic material handles the
 stress-independent strains, i.e. shrinkage and thermal dilation.
 
+\subsubsection*{Incremental stiffness matrix}
+In the case of an elastic (initial) stiffness or uncracked material, the
+stiffness matrix $\bar{\mbf{D}}_{ve}$ is evaluated as the product of incremental stiffness of the
+viscoelastic material $\bar{E}$ and the unit elastic
+stiffness matrix $\mbf{D}_v$.
+The evaluation of the incremental modulus $\bar{E}$ is
+computationally demanding, therefore within one time step it is stored
+in the material status. The value of stiffness depends on the history
+  of relative humidity and temperature at given Gauss point and
+  depends entirely on the viscoelastic material.
+
+
+Secant stiffness matrix is obtained by adding the secant compliance of
+the cohesive cracks to the viscoelastic compliance matrix and by subsequent
+inversion of the result. 
+%
+\begin{equation}
+\mbf{D} =   \left( \bar{\mbf{D}}^{-1}_{ve} + \mbf{D}^{-1}_{cr}  \right)^{-1}
+\end{equation}
+
+Tangent stiffness matrix is computed as 
+\begin{equation}
+\mbf{D} = \bar{\mbf{D}}_{ve} - \bar{\mbf{D}}_{ve} \left(\bar{\mbf{D}}_{ve} + \mbf{D}_{cr} \right)^{-1} \bar{\mbf{D}}_{ve}
+\end{equation}
+where $\mbf{D}_{cr}$ is the tangent stiffness of the cracked material.
+
+The secant and tangent matrix are constructed in the local
+coordinate system corresponding to the orientation of the cracks and
+then are rotated to the global
+coordinate system. The individual components of $\mbf{D}_{cr}$ are managed by
+\emph{ConcreteFCM} material model.
+
+\subsubsection*{Algorithm for stress evaluation}
+%
+The stress evaluation algorithm can be decomposed into 3 subsequent steps:
+%
+\begin{enumerate}
+
+\item Call the viscoelastic material to compute the stress-dependent strain increment
+\begin{equation}
+\Delta \varepsilon_\sigma  = \Delta \varepsilon - \Delta \varepsilon''
+- \Delta \varepsilon_{sh} - \Delta \varepsilon_T  
+\end{equation}
+where $\Delta \varepsilon$ is the total strain increment, $\Delta
+\varepsilon''$ is the strain increment due to creep, $\Delta
+\varepsilon_{sh}$ is the shrinkage increment, and $\Delta
+\varepsilon_T$ is the thermal dilation increment.
+
+\item Call the fixed-crack material to compute the new stress vector
+  $\sigma_{i+1}$ 
+  fulfilling the nonlinear equation
+%
+  \begin{equation}
+\sigma_{i+1} = \sigma_{i} + \bar{\mbf{D}}_{ve} \left ( \Delta
+\varepsilon_\sigma - \Delta
+\varepsilon_{cr} \right)
+  \end{equation}
+ %
+where $\sigma_{i}$ is the old stress vector and $\Delta
+\varepsilon_{cr}$ is the increment of crack strain, and update the new crack strain vector 
+  \begin{equation}
+\varepsilon_{cr,i+1} = \varepsilon_{cr,i} + \Delta \varepsilon_{cr} 
+  \end{equation}
+  
+\item Pass the difference of the total strain and the cracking strain
+  to the viscoelastic material and perform a regular viscoelastic step.
+%
+\begin{equation}  
+\sigma_{i+1} = \sigma_{i} + \bar{\mbf{D}}_{ve} \left ( \Delta
+\varepsilon - \Delta \varepsilon_{cr}  - \Delta \varepsilon''
+- \Delta \varepsilon_{sh} - \Delta \varepsilon_T  \right)
+\end{equation}
+%
+\end{enumerate}  
+
+
+\vspace{1em}
+Before the onset of cracking, the material is modeled as isotropic
+linear viscoelastic characterized by its compliance function, Poisson's
+ratio, and the evolution of shrinkage which can depend both on
+equivalent time and change in relative humidity provided that the
+problem is solved as coupled.
+
+Cracking is initiated when principal stress reaches tensile
+strength. Further loading is governed by a softening law. Proper
+amount energy dissipation is guaranteed by the crack-band approach,
+the width of the crack band is given by the size of the finite element
+projected in the direction of the principal stress.
+
+Multiple cracking is allowed, the maximum number of cracks is controlled by \param{ncracks} parameter. Only mutually perpendicular cracks are supported. If cracking occurs in more directions, the behavior on the crack planes is considered to be independent.
+The secant stiffness is used for unloading and reloading. In
+compression regime full stiffness is restored.
+
+It is worth emphasizing that the status of the viscoelastic material
+tracks and keeps only a part of the total deformation equal to the
+difference of the total strain and the cracking strain.
+
+
+\subsubsection*{Evolution of tensile strength and fracture energy}
+
 The current implementation supports both constant and time-evolving
 values of tensile strength and fracture energy.
 \textbf{Constant} values are used when the keyword \param{timeDepFracturing}
@@ -4752,6 +4852,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain\\
 \label{concretefcmviscoelastic_table}
 \end{longtable}
 %
+\subsubsection*{Examples}
 The following lines show a sample syntax specifying the viscoelastic
 fixed crack model with the compliance defined by the MPS model.
 Volume density is 24 kN/m$^3$, thermal dilation coefficient
