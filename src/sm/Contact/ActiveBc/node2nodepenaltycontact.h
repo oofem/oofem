@@ -82,11 +82,12 @@ public:
     void initializeFrom(InputRecord &ir) override;
 
     void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, 
+                          double scale = 1.0, void* lock=nullptr) override;
 
     void assembleVector(FloatArray &answer, TimeStep *tStep,
                         CharType type, ValueModeType mode,
-                        const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
+                        const UnknownNumberingScheme &s, FloatArray *eNorms = NULL, void*lock=nullptr) override;
 
 
     const char *giveClassName() const override { return "Node2NodePenaltyContact"; }

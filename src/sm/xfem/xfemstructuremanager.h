@@ -72,6 +72,7 @@ public:
     int instanciateYourself(DataReader &dr) override;
     const char *giveClassName() const override { return "XfemStructureManager"; }
     const char *giveInputRecordName() const override { return _IFT_XfemStructureManager_Name; }
+    virtual void postInitialize() override;
 
     void propagateFronts(bool &oAnyFronHasPropagated) override;
 

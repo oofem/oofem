@@ -64,6 +64,11 @@
 #include <sstream>
 #include <iterator>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+
 namespace oofem {
 
 void TracSegArray::giveTractionLocationArray(IntArray &rows, CharType type, const UnknownNumberingScheme &s)
@@ -224,7 +229,9 @@ void PrescribedGradientBCWeak :: postInitialize()
 
 void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                 CharType type, ValueModeType mode,
-                                                const UnknownNumberingScheme &s, FloatArray *eNorm)
+                                                const UnknownNumberingScheme &s, 
+                                                FloatArray *eNorm,
+                                                void* lock)
 {
     int dim = domain->giveNumberOfSpatialDimensions();
 
@@ -240,7 +247,13 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
 
             IntArray rows;
             el.giveTractionLocationArray(rows, type, s);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(contrib, rows);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
         }
 
@@ -254,9 +267,14 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
                 FloatArray contrib_disp, contrib_trac;
                 IntArray disp_loc_array, trac_loc_array;
                 computeIntForceGPContrib(contrib_disp, disp_loc_array, contrib_trac, trac_loc_array, el, *gp, dim, tStep, gp->giveGlobalCoordinates(), 1.0, mode, type, s);
+#ifdef _OPENMP
+                if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
                 answer.assemble(contrib_disp, disp_loc_array);
                 answer.assemble(contrib_trac, trac_loc_array);
-
+#ifdef _OPENMP
+                if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
                 // Contribution on gamma_minus
                 contrib_disp.clear(); contrib_trac.clear();
@@ -264,8 +282,14 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
                 FloatArray xMinus;
                 this->giveMirroredPointOnGammaMinus(xMinus, gp->giveGlobalCoordinates());
                 computeIntForceGPContrib(contrib_disp, disp_loc_array, contrib_trac, trac_loc_array, el, *gp, dim, tStep, xMinus, -1.0, mode, type, s);
+#ifdef _OPENMP
+                if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
                 answer.assemble(contrib_disp, disp_loc_array);
                 answer.assemble(contrib_trac, trac_loc_array);
+#ifdef _OPENMP
+                if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
             }
     	}
@@ -285,8 +309,13 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
             }
 
             fe_dispLock.times(mDispLockScaling);
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(fe_dispLock, dispLockRows);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
 
     }
@@ -377,8 +406,13 @@ void PrescribedGradientBCWeak :: computeIntForceGPContrib(FloatArray &oContrib_d
     oContrib_trac.negated();
 }
 
-void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+void PrescribedGradientBCWeak :: assemble( SparseMtrx &answer,
+                                        TimeStep *tStep,
+                                        CharType type,
+                                        const UnknownNumberingScheme &r_s,
+                                        const UnknownNumberingScheme &c_s,
+                                        double scale,
+                                        void* lock)
 {
     std::vector<FloatArray> gpCoordArray;
 
@@ -408,14 +442,25 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
 
             mpDisplacementLock->giveLocationArray(giveDispLockDofIDs(), lockCols, c_s);
             node->giveLocationArray(giveRegularDispDofIDs(), nodeCols, c_s);
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(lockRows, nodeCols, KeDispLock);
             answer.assemble(nodeRows, lockCols, KeDispLock);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
             FloatMatrix KZero( lockRows.giveSize(), lockCols.giveSize() );
             KZero.zero();
             KZero.times(scale);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(lockRows, lockCols, KZero);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
 
 
@@ -432,7 +477,13 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
         node1->giveLocationArray(giveRegularDispDofIDs(), nodeRows, r_s);
         node1->giveLocationArray(giveRegularDispDofIDs(), nodeCols, c_s);
         KeDispLock.times(scale);
+#ifdef _OPENMP
+        if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
         answer.assemble(nodeRows, nodeCols, KeDispLock);
+#ifdef _OPENMP
+        if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
 
     } else {
@@ -514,7 +565,9 @@ void PrescribedGradientBCWeak :: assembleExtraDisplock(SparseMtrx &answer, TimeS
 }
 
 void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep *tStep,
-                      CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, TracSegArray &iEl, GaussPoint &iGP, double k)
+                                                    CharType type, const UnknownNumberingScheme &r_s, 
+                                                    const UnknownNumberingScheme &c_s, TracSegArray &iEl, 
+                                                    GaussPoint &iGP, double k, void* lock)
 {
 
     SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
@@ -539,12 +592,23 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
     dispEl->giveLocationArray(disp_cols, c_s);
 
     contrib.times(k);
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
     answer.assemble(trac_rows, disp_cols, contrib);
+#ifdef _OPENMP
+    if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
     FloatMatrix contribT;
     contribT.beTranspositionOf(contrib);
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
     answer.assemble(disp_cols, trac_rows, contribT);
-
+#ifdef _OPENMP
+    if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
     ///////////////
     // Gamma_minus
     contrib.clear();
@@ -566,19 +630,35 @@ void PrescribedGradientBCWeak :: assembleGPContrib(SparseMtrx &answer, TimeStep 
     disp_cols.clear();
     dispEl->giveLocationArray(disp_cols, c_s);
     contrib.times(k);
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
     answer.assemble(trac_rows, disp_cols, contrib);
-
+#ifdef _OPENMP
+    if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
     contribT.clear();
     contribT.beTranspositionOf(contrib);
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
     answer.assemble(disp_cols, trac_rows, contribT);
-
+#ifdef _OPENMP
+    if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
     // Assemble zeros on diagonal (required by PETSc solver)
     FloatMatrix KZero(1,1);
     KZero.zero();
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
     for ( int i :  trac_rows) {
         answer.assemble(IntArray({i}), IntArray({i}), KZero);
     }
+#ifdef _OPENMP
+    if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 }
 
 void PrescribedGradientBCWeak :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,

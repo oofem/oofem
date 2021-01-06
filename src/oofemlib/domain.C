@@ -983,6 +983,17 @@ Domain :: postInitialize()
         }
     }
 
+    {
+        spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
+        spatialLocalizer->init();
+        connectivityTable = std::make_unique<ConnectivityTable>(this);
+        OOFEM_LOG_INFO("Spatial localizer init done\n");
+    }
+
+    if ( this->hasXfemManager() ) {
+        this->giveXfemManager()->postInitialize();
+    }
+
     // Dofs must be created before dof managers due their post-initialization:
     this->createDofs();
 
@@ -990,9 +1001,6 @@ Domain :: postInitialize()
         dman->postInitialize();
     }
 
-    if ( this->hasXfemManager() ) {
-        //this->giveXfemManager()->postInitialize();
-    }
 
     for ( auto &el: elementList ) {
         el->postInitialize();
@@ -1001,6 +1009,8 @@ Domain :: postInitialize()
     for ( auto &bc: bcList ) {
         bc->postInitialize();
     }
+
+
 }
 
 
@@ -1184,7 +1194,8 @@ Domain :: giveConnectivityTable()
 //
 {
     if ( !connectivityTable ) {
-        connectivityTable = std::make_unique<ConnectivityTable>(this);
+        //connectivityTable = std::make_unique<ConnectivityTable>(this);
+        OOFEM_LOG_ERROR("Connectivity table init error");
     }
 
     return connectivityTable.get();
@@ -1198,12 +1209,12 @@ Domain :: giveSpatialLocalizer()
 //
 {
     //  if (spatialLocalizer == NULL) spatialLocalizer = new DummySpatialLocalizer(1, this);
-    if ( !spatialLocalizer ) {
-        spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this);
+    if ( spatialLocalizer ) {
+        return spatialLocalizer.get();
+    } else {
+        OOFEM_LOG_ERROR("Spatial localizer init failure");
+        return nullptr;      
     }
-
-    spatialLocalizer->init();
-    return spatialLocalizer.get();
 }
 
 

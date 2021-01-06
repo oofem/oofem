@@ -56,6 +56,10 @@
 #include "feinterpol.h"
 #include "unknownnumberingscheme.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureWeakPeriodic);
 
@@ -336,7 +340,10 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
 
 
 void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, TimeStep *tStep,
-                                                         CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
+                                                         CharType type, ValueModeType mode, 
+                                                         const UnknownNumberingScheme &s, 
+                                                         FloatArray *eNorms,
+                                                         void*lock)
 {
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -351,10 +358,16 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
         double rve_size = this->domainSize();
 
         if ( e_loc.at(1) ) {
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.at( e_loc.at(1) ) -= rve_size * pressure; // Note the negative sign (pressure as opposed to mean stress)
             if ( eNorms ) {
                 eNorms->at( v_id.at(1) ) += rve_size * pressure * rve_size * pressure;
             }
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
 
         // The second contribution is on the momentumbalance equation; int t . [[ d_dev . x ]] dA = int t . [[ d_dev . x ]] dA
@@ -365,11 +378,16 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
 
             this->integrateTractionDev(fe, e, boundary, this->devGradient);
             fe.negated();
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(fe, t_loc);
             if ( eNorms ) {
                 eNorms->assembleSquared(fe, velocityDofIDs);
             }
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke_v, Ke_e;
@@ -404,7 +422,9 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             fe_t2.beProductOf(Ke_e, e);
             fe_t.add(fe_t2);
             fe_e.beTProductOf(Ke_e, t);
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(fe_v, v_loc); // Contributions to delta_v equations
             answer.assemble(fe_t, t_loc); // Contribution to delta_t equations
             answer.assemble(fe_e, e_loc); // Contribution to delta_e equations
@@ -413,13 +433,18 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
                 eNorms->assembleSquared(fe_t, t_id);
                 eNorms->assembleSquared(fe_e, v_id);
             }
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }
 
 
 void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                                   CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+                                                   CharType type, const UnknownNumberingScheme &r_s, 
+                                                   const UnknownNumberingScheme &c_s, double scale,
+                                                   void*lock)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke_v, Ke_vT, Ke_e, Ke_eT;
@@ -451,11 +476,17 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx &answer, TimeStep 
             Ke_vT.beTranspositionOf(Ke_v);
             Ke_eT.beTranspositionOf(Ke_e);
 
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(t_loc_r, v_loc_c, Ke_v);
             answer.assemble(v_loc_r, t_loc_c, Ke_vT);
 
             answer.assemble(t_loc_r, e_loc_c, Ke_e);
             answer.assemble(e_loc_r, t_loc_c, Ke_eT);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }

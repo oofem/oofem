@@ -56,6 +56,10 @@
 #include "feinterpol.h"
 #include "unknownnumberingscheme.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureNeumann);
 
@@ -394,7 +398,10 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 
 
 void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep,
-                                                    CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
+                                                    CharType type, ValueModeType mode, 
+                                                    const UnknownNumberingScheme &s,
+                                                    FloatArray *eNorms,
+                                                    void* lock)
 {
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -408,7 +415,13 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
         double rve_size = this->domainSize();
         FloatArray devLoad;
         devLoad.beScaled(-rve_size, this->devGradient);
+#ifdef _OPENMP
+        if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
         answer.assemble(devLoad, sigma_loc);
+#ifdef _OPENMP
+        if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 
         // The second contribution is on the momentumbalance equation; - int delta_v . n dA * p
         FloatArray fe;
@@ -420,10 +433,16 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterDofIDs);
             this->integrateVolTangent(fe, e, boundary);
             fe.times(-this->pressure);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(fe, loc);
             if ( eNorms ) {
                 eNorms->assembleSquared(fe, masterDofIDs);
             }
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke;
@@ -452,19 +471,27 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
             fe_v.negated();
             fe_s.negated();
 
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
             if ( eNorms ) {
                 eNorms->assembleSquared(fe_s, masterDofIDs);
                 eNorms->assembleSquared(fe_v, dev_id);
             }
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }
 
 
 void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                              CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+                                              CharType type, const UnknownNumberingScheme &r_s, 
+                                              const UnknownNumberingScheme &c_s, double scale,
+                                              void* lock)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
@@ -488,8 +515,14 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tSte
             Ke.negated();
             Ke.times(scale);
             KeT.beTranspositionOf(Ke);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
             answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }

@@ -42,6 +42,10 @@
 #include "sparsemtrx.h"
 #include "classfactory.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 REGISTER_BoundaryCondition(Node2NodePenaltyContact);
 
@@ -62,7 +66,9 @@ Node2NodePenaltyContact :: initializeFrom(InputRecord &ir)
 
 void
 Node2NodePenaltyContact :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+                                    CharType type, const UnknownNumberingScheme &r_s, 
+                                    const UnknownNumberingScheme &c_s, double scale,
+                                    void* lock)
 {
     if ( !this->useTangent || type != TangentStiffnessMatrix ) {
         return;
@@ -89,14 +95,21 @@ Node2NodePenaltyContact :: assemble(SparseMtrx &answer, TimeStep *tStep,
         loc.followedBy(c_loc);
 
         this->computeTangentFromContact(K, masterNode, slaveNode, tStep);
+#ifdef _OPENMP
+        if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
         answer.assemble(loc, K);
+#ifdef _OPENMP
+        if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
     }
 }
 
 void
 Node2NodePenaltyContact :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                           CharType type, ValueModeType mode,
-                                          const UnknownNumberingScheme &s, FloatArray *eNorms)
+                                          const UnknownNumberingScheme &s, FloatArray *eNorms,
+                                          void*lock)
 {
     if ( type != ExternalForcesVector ) {
         return;
@@ -122,7 +135,13 @@ Node2NodePenaltyContact :: assembleVector(FloatArray &answer, TimeStep *tStep,
         slaveNode->giveLocationArray(dofIdArray, c_loc, s);
         this->computeExternalForcesFromContact(fext, masterNode, slaveNode, tStep);
         loc.followedBy(c_loc);
+#ifdef _OPENMP
+        if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
         answer.assemble(fext, loc);
+#ifdef _OPENMP
+        if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
     }
 }
 

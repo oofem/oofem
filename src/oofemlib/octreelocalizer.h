@@ -45,6 +45,10 @@
 #include <vector>
 #include <memory>
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 class Domain;
 class Element;
@@ -83,6 +87,7 @@ protected:
     IntArray elementIPList;
     /// Element list of all elements close to the cell.
     std :: vector< std :: list< int > >elementList;
+
 
 public:
     enum BoundingBoxStatus { BBS_OutsideCell, BBS_InsideCell, BBS_ContainsCell };
@@ -194,7 +199,9 @@ protected:
     /// Flag indicating elementIP tables are initialized.
     bool elementIPListsInitialized;
     IntArray elementListsInitialized;
-
+#ifdef _OPENMP
+    omp_lock_t ElementIPDataStructureLock;
+#endif
 public:
     /// Constructor
     OctreeSpatialLocalizer(Domain * d);

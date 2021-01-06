@@ -42,6 +42,10 @@
 #include "function.h"
 #include "mathfem.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem
 {
 
@@ -73,7 +77,7 @@ PrescribedMean :: initializeFrom(InputRecord &ir)
 
 void
 PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
-                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale, void*lock)
 {
 
     if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
@@ -130,9 +134,14 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
             // delta p part:
             temp = N * (scale * detJ * gp->giveWeight() / domainSize);
             tempT.beTranspositionOf(temp);
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(r_Sideloc, c_loc, temp);
             answer.assemble(r_loc, c_Sideloc, tempT);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }
@@ -140,20 +149,23 @@ PrescribedMean :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
 void
 PrescribedMean :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                  CharType type, ValueModeType mode,
-                                 const UnknownNumberingScheme &s, FloatArray *eNorm)
+                                 const UnknownNumberingScheme &s, FloatArray *eNorm, 
+                                 void*lock)
 {
 
     if ( type == InternalForcesVector ) {
-        giveInternalForcesVector(answer, tStep, type, mode, s);
+        giveInternalForcesVector(answer, tStep, type, mode, s, eNorm, lock);
     } else if ( type == ExternalForcesVector ) {
-        giveExternalForcesVector(answer, tStep, type, mode, s);
+        giveExternalForcesVector(answer, tStep, type, mode, s, lock);
     }
 }
 
 void
 PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                            CharType type, ValueModeType mode,
-                                           const UnknownNumberingScheme &s, FloatArray *eNorm)
+                                           const UnknownNumberingScheme &s, 
+                                           FloatArray *eNorm,
+                                           void*lock)
 {
     computeDomainSize();
 
@@ -213,12 +225,17 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
             lambdaEqns.times(detJ*gp->giveWeight()*1.0/domainSize);
             lambdaEqns.at(1) = lambdaEqns.at(1);
 
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             // delta p part
             answer.assemble(pressureEqns, locationArray);
 
             // delta lambda part
             answer.assemble(lambdaEqns, lambdaLoc);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif            
         }
     }
 
@@ -227,7 +244,8 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 void
 PrescribedMean :: giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                            CharType type, ValueModeType mode,
-                                           const UnknownNumberingScheme &s)
+                                           const UnknownNumberingScheme &s,
+                                           void* lock)
 {
     computeDomainSize();
 
@@ -238,8 +256,13 @@ PrescribedMean :: giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
     temp.at(1) = c;
 
     lambdaDman->giveLocationArray(lambdaIDs, lambdaLoc, s);
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
     answer.assemble(temp, lambdaLoc);
-
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
     // Finally, compute value of loadtimefunction
     double factor;
     factor = this->giveTimeFunction()->evaluate(tStep, mode);

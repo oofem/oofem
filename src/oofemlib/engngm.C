@@ -70,6 +70,7 @@
 #include "unknownnumberingscheme.h"
 #include "contact/contactmanager.h"
 
+
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
@@ -79,7 +80,9 @@
 #include <cstdio>
 #include <cstdarg>
 #include <ctime>
-
+#ifdef _OPENMP
+    #include <omp.h>
+#endif
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
@@ -794,11 +797,15 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 {
     IntArray loc;
     FloatMatrix mat, R;
+#ifdef _OPENMP
+    omp_lock_t writelock;
+    omp_init_lock(&writelock);
+#endif
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer) private(mat, R, loc)
+#pragma omp parallel for shared(answer) private(mat, R, loc)
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         auto element = domain->giveElement(ielem);
@@ -827,13 +834,20 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         }
     }
 
+#ifdef _OPENMP
+#pragma omp parallel for shared(answer) private(mat, R, loc)
+#endif
     for ( auto &bc : domain->giveBcs() ) {
         auto abc = dynamic_cast< ActiveBoundaryCondition * >(bc.get());
 
         if ( abc ) {
             /// @note: Some active bcs still make changes even when they are not applied
             /// We should probably reconsider this approach, so that they e.g. just prescribe their lagrange mult. instead.
+#ifdef _OPENMP
+            ma.assembleFromActiveBC(answer, *abc, tStep, s, s, &writelock);
+#else
             ma.assembleFromActiveBC(answer, *abc, tStep, s, s);
+#endif
         } else if ( bc->giveSetNumber() ) {
             if ( !bc->isImposed(tStep) ) continue;
             auto load = dynamic_cast< Load * >(bc.get());
@@ -859,7 +873,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         }
 
                         ma.locationFromElement(loc, *element, s);
+#ifdef _OPENMP
+            			omp_set_lock(&writelock);
+#endif
                         answer.assemble(loc, mat);
+#ifdef _OPENMP
+			            omp_unset_lock(&writelock);
+#endif
                     }
                 }
             } else if ( ( sLoad = dynamic_cast< SurfaceLoad * >(load) ) ) {
@@ -877,7 +897,14 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         }
 
                         ma.locationFromElementNodes(loc, *element, bNodes, s);
+ 
+ #ifdef _OPENMP
+            			omp_set_lock(&writelock);
+#endif			
                         answer.assemble(loc, mat);
+#ifdef _OPENMP
+			            omp_unset_lock(&writelock);
+#endif
                     }
                 }
             } else if ( ( eLoad = dynamic_cast< EdgeLoad * >(load) ) ) {
@@ -895,7 +922,13 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
                         }
 
                         ma.locationFromElementNodes(loc, *element, bNodes, s);
+#ifdef _OPENMP
+            			omp_set_lock(&writelock);
+#endif			
                         answer.assemble(loc, mat);
+#ifdef _OPENMP
+			            omp_unset_lock(&writelock);
+#endif
                     }
                 }
             }
@@ -921,11 +954,15 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
 {
     IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
+#ifdef _OPENMP
+    omp_lock_t writelock;
+    omp_init_lock(&writelock);
+#endif
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer) private(mat, R, r_loc, c_loc)
+#pragma omp parallel for shared(answer) private(mat, R, r_loc, c_loc)
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
@@ -953,10 +990,17 @@ void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep, const MatrixAss
         }
     }
 
+#ifdef _OPENMP
+#pragma omp parallel for shared(answer) private(mat, R, r_loc, c_loc)
+#endif
     for ( auto &gbc : domain->giveBcs() ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
+#ifdef _OPENMP
+            ma.assembleFromActiveBC(answer, *bc, tStep, rs, cs, &writelock);
+#else
             ma.assembleFromActiveBC(answer, *bc, tStep, rs, cs);
+#endif
         }
     }
 
@@ -1015,7 +1059,7 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     // Note! For normal master dofs, loc is unique to each node, but there can be slave dofs, so we must keep it shared, unfortunately.
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer, eNorms) private(R, charVec, loc, dofids)
+#pragma omp parallel for shared(answer, eNorms) private(R, charVec, loc, dofids)
 #endif
     for ( int i = 1; i <= nnode; i++ ) {
         DofManager *node = domain->giveDofManager(i);
@@ -1062,15 +1106,26 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
     int nbc = domain->giveNumberOfBoundaryConditions();
+#ifdef _OPENMP
+    omp_lock_t writelock;
+    omp_init_lock(&writelock);
+#endif
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+#ifdef _OPENMP
+#pragma omp parallel for shared(answer, eNorms)
+#endif
     for ( int i = 1; i <= nbc; ++i ) {
         GeneralBoundaryCondition *bc = domain->giveBc(i);
         ActiveBoundaryCondition *abc;
         Load *load;
 
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
+#ifdef _OPENMP
+            va.assembleFromActiveBC(answer, *abc, tStep, mode, s, eNorms, &writelock);
+#else
             va.assembleFromActiveBC(answer, *abc, tStep, mode, s, eNorms);
+#endif
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
             // Now we assemble the corresponding load type fo the respective components in the set:
             IntArray dofids, loc;
@@ -1097,11 +1152,16 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                             }
 
                             va.locationFromElement(loc, *element, s, & dofids);
+#ifdef _OPENMP
+                			omp_set_lock(&writelock);
+#endif
                             answer.assemble(charVec, loc);
-
                             if ( eNorms ) {
                                 eNorms->assembleSquared(charVec, dofids);
                             }
+#ifdef _OPENMP
+            			    omp_unset_lock(&writelock);
+#endif
                         }
                     }
                 }
@@ -1123,11 +1183,17 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                             }
 
                             va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+#ifdef _OPENMP
+                  			omp_set_lock(&writelock);
+#endif                            
                             answer.assemble(charVec, loc);
 
                             if ( eNorms ) {
                                 eNorms->assembleSquared(charVec, dofids);
                             }
+#ifdef _OPENMP
+            			    omp_unset_lock(&writelock);
+#endif                            
                         }
                     }
                 }
@@ -1148,11 +1214,17 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                             }
 
                             va.locationFromElementNodes(loc, *element, bNodes, s, & dofids);
+#ifdef _OPENMP
+            			    omp_set_lock(&writelock);
+#endif                            
                             answer.assemble(charVec, loc);
 
                             if ( eNorms ) {
                                 eNorms->assembleSquared(charVec, dofids);
                             }
+#ifdef _OPENMP
+            			    omp_unset_lock(&writelock);
+#endif                            
                         }
                     }
                 }
@@ -1169,11 +1241,17 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                         }
 
                         node->giveLocationArray(nLoad->giveDofIDs(), loc, s);
+#ifdef _OPENMP
+            			omp_set_lock(&writelock);
+#endif                        
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
                             eNorms->assembleSquared(charVec, dofids);
                         }
+#ifdef _OPENMP
+            			omp_unset_lock(&writelock);
+#endif                        
                     }
                 }
             }
@@ -1384,7 +1462,7 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer) private(R, charMatrix, charVec, loc, delta_u)
+//#pragma omp parallel for shared(answer) private(R, charMatrix, charVec, loc, delta_u)
 #endif
     for ( int i = 1; i <= nelems; i++ ) {
         Element *element = domain->giveElement(i);
@@ -1400,11 +1478,12 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
             continue;
         }
 
-        element->giveLocationArray(loc, dn);
+            element->giveLocationArray(loc, dn);
 
         // Take the tangent from the previous step
         ///@todo This is not perfect. It is probably no good for viscoelastic materials, and possibly other scenarios that are rate dependent
         ///(tangent will be computed for the previous step, with whatever deltaT it had)
+
         element->giveCharacteristicMatrix(charMatrix, type, tStep);
         if ( charMatrix.isNotEmpty() ) {
             ///@note Temporary work-around for active b.c. used in multiscale (it can't support VM_Incremental easily).
@@ -1432,13 +1511,14 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
 
             ///@todo Deal with element deactivation and reactivation properly.
 #ifdef _OPENMP
- #pragma omp critical
+#pragma omp critical
 #endif
             {
                 answer.assemble(charVec, loc);
             }
         }
     }
+
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 }
@@ -1460,7 +1540,7 @@ EngngModel :: assemblePrescribedExtrapolatedForces(FloatArray &answer, TimeStep 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
 #ifdef _OPENMP
- #pragma omp parallel for shared(answer) private(R, charMatrix, charVec, loc, delta_u)
+//#pragma omp parallel for shared(answer) private(R, charMatrix, charVec, loc, delta_u)
 #endif
     for ( int i = 1; i <= nelems; i++ ) {
         Element *element = domain->giveElement(i);
