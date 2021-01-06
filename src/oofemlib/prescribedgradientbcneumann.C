@@ -50,6 +50,10 @@
 #include "engngm.h"
 #include "mathfem.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCNeumann);
 
@@ -98,7 +102,9 @@ void PrescribedGradientBCNeumann :: scale(double s)
 
 void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                    CharType type, ValueModeType mode,
-                                                   const UnknownNumberingScheme &s, FloatArray *eNorm)
+                                                   const UnknownNumberingScheme &s, 
+                                                   FloatArray *eNorm, 
+                                                   void* lock)
 {
     IntArray sigma_loc;  // For the displacements and stress respectively
     mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc, s);
@@ -112,8 +118,13 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
 
         double loadLevel = this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
         stressLoad.beScaled(-rve_size*loadLevel, gradVoigt);
-
+#ifdef _OPENMP
+        if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
         answer.assemble(stressLoad, sigma_loc);
+#ifdef _OPENMP
+        if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
     } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke;
         FloatArray fe_v, fe_s;
@@ -149,19 +160,28 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
             // Note: The terms appear negative in the equations:
             fe_v.negated();
             fe_s.negated();
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(fe_s, loc); // Contributions to delta_v equations
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
             if ( eNorm != NULL ) {
                 eNorm->assembleSquared(fe_s, masterDofIDs);
                 eNorm->assembleSquared(fe_v, sigmaMasterDofIDs);
             }
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }
 
 void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                             CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+                                             CharType type, 
+                                             const UnknownNumberingScheme &r_s, 
+                                             const UnknownNumberingScheme &c_s, 
+                                             double scale,
+                                             void* lock)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
@@ -189,9 +209,14 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep
             Ke.negated();
             Ke.times(scale);
             KeT.beTranspositionOf(Ke);
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
             answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     } else   {
         OOFEM_LOG_DEBUG("Skipping assembly in PrescribedGradientBCNeumann::assemble().");

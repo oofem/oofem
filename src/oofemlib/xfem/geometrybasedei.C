@@ -149,13 +149,19 @@ int GeometryBasedEI :: instanciateYourself(DataReader &dr)
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
 
 
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    
     //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
-    this->updateNodeEnrMarker(* xMan);
+    // this->updateNodeEnrMarker(* xMan); // moved to postInitialize
 
 //    writeVtkDebug();
 
     return 1;
+}
+
+void GeometryBasedEI :: postInitialize()
+{
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    this->updateNodeEnrMarker(* xMan);
 }
 
 void GeometryBasedEI :: updateDofIdPool()

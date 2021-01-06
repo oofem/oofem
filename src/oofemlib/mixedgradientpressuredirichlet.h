@@ -147,7 +147,8 @@ public:
 
     void assembleVector(FloatArray &answer, TimeStep *tStep,
                         CharType type, ValueModeType mode,
-                        const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr) override;
+                        const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr, 
+                        void* lock=nullptr) override;
 
     bool requiresActiveDofs() override { return true; }
     bool isPrimaryDof(ActiveDof *dof) override;

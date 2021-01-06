@@ -55,7 +55,7 @@ void VectorAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& element, Ed
 
 void VectorAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& dman, NodalLoad* load, TimeStep* tStep, ValueModeType mode) const { vec.clear(); }
 
-void VectorAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const { }
+void VectorAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms, void* lock) const { }
 
 void VectorAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
 {
@@ -75,7 +75,7 @@ void MatrixAssembler :: matrixFromSurfaceLoad(FloatMatrix& mat, Element& element
 
 void MatrixAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, EdgeLoad* load, int edge, TimeStep* tStep) const { mat.clear(); }
 
-void MatrixAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const {}
+void MatrixAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c, void *lock) const {}
 
 void MatrixAssembler :: locationFromElement(IntArray& loc, Element& element, const UnknownNumberingScheme& s, IntArray* dofIds) const
 {
@@ -141,9 +141,9 @@ void InternalForceAssembler :: vectorFromEdgeLoad(FloatArray& vec, Element& elem
     //element.computeInternalForcesFromEdgeLoad(vec, load, edge, tStep);
 }
 
-void InternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const
+void InternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms, void* lock) const
 {
-    bc.assembleVector(answer, tStep, InternalForcesVector, mode, s, eNorms);
+    bc.assembleVector(answer, tStep, InternalForcesVector, mode, s, eNorms, lock);
     //bc.assembleInternalForces(answer, tStep, s, eNorms);
 }
 
@@ -186,9 +186,9 @@ void ExternalForceAssembler :: vectorFromNodeLoad(FloatArray& vec, DofManager& d
         //dman.computeExternalForcesFromLoad(vec, load, tStep);
 }
 
-void ExternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms) const
+void ExternalForceAssembler :: assembleFromActiveBC(FloatArray &answer, ActiveBoundaryCondition &bc, TimeStep* tStep, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms, void* lock) const
 {
-    bc.assembleVector(answer, tStep, ExternalForcesVector, mode, s, eNorms);
+    bc.assembleVector(answer, tStep, ExternalForcesVector, mode, s, eNorms, lock);
     //bc.assembleExternalForces(answer, tStep, s, eNorms);
 }
 
@@ -270,9 +270,9 @@ void TangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& element, 
   element.computeTangentFromEdgeLoad(mat, load, edge, this->rmode, tStep);
 }
 
-void TangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const
+void TangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c, void *lock) const
 {
-    bc.assemble(k, tStep, TangentStiffnessMatrix, s_r, s_c);
+    bc.assemble(k, tStep, TangentStiffnessMatrix, s_r, s_c, 1.0, lock);
 }
 
 
@@ -327,10 +327,10 @@ void EffectiveTangentAssembler :: matrixFromEdgeLoad(FloatMatrix& mat, Element& 
     //mat.times(this->k);
 }
 
-void EffectiveTangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c) const
+void EffectiveTangentAssembler :: assembleFromActiveBC(SparseMtrx &k, ActiveBoundaryCondition &bc, TimeStep* tStep, const UnknownNumberingScheme &s_r, const UnknownNumberingScheme &s_c, void* lock) const
 {
     // TODO: Crucial part to add: We have to support a scaling factor for this method to support effective tangents.
-    bc.assemble(k, tStep, TangentStiffnessMatrix, s_r, s_c, this->k);
+    bc.assemble(k, tStep, TangentStiffnessMatrix, s_r, s_c, this->k, lock);
 }
 
 
