@@ -171,8 +171,8 @@ public:
     void initializeFrom(InputRecord &ir) override;
     ///@todo Introduce interpolator and remove these two:
     integrationDomain giveIntegrationDomain() const override { return _Line; }
-    //Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
-    Element_Geometry_Type giveGeometryType() const override { return EGT_Composite; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
+    //Element_Geometry_Type giveGeometryType() const override { return EGT_Composite; }
     void updateLocalNumbering(EntityRenumberingFunctor &f) override;
 
     /*
