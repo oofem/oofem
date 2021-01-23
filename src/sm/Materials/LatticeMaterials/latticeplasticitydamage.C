@@ -608,9 +608,9 @@ LatticePlasticityDamage::give(int aProperty, GaussPoint *gp) const
     if ( RandomMaterialExtensionInterface::give(aProperty, gp, answer) ) {
         return answer;
     } else if ( aProperty == fc_strength ) {
-        return this->fc;
+        return 1.;
     } else if ( aProperty == ft_strength ) {
-        return this->ft;
+        return 1.;
     } else {
         return LatticeLinearElastic::give(aProperty, gp);
     }
@@ -652,7 +652,6 @@ LatticePlasticityDamage::performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 
 {
     double ftLocal =  giveTensileStrength(gp, tStep);
     double fcLocal =  giveCompressiveStrength(gp, tStep);
-
 
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
@@ -901,13 +900,13 @@ LatticePlasticityDamage::giveIPValue(FloatArray &answer,
         answer.zero();
         answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
         return 1;
-    } else if ( type == IST_CharacteristicLength ) {
-        answer.resize(1);
-        answer.zero();
-        answer.at(1) = static_cast< LatticeStructuralElement * >( gp->giveElement() )->giveLength();
-        return 1;
     } else if ( type == IST_PlasticLatticeStrain ) {
         answer = status->givePlasticLatticeStrain();
+        return 1;
+    } else if ( type == IST_TensileStrength ) {
+        answer.resize(1);
+        answer.at(1);
+        answer.at(1) = giveTensileStrength(gp, atTime);
         return 1;
     } else {
         return LatticeLinearElastic::giveIPValue(answer, gp, type, atTime);
