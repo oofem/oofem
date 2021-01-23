@@ -286,11 +286,11 @@ LatticePlasticityDamage::computeMVector(const FloatArrayF< 3 > &stress,
     if ( stress.at(1) >= transition ) { //ellipse
         m.at(1) = 2. * pow(this->flowAngleOne, 2.) * stress.at(1) + 2. * ( fcLocal - this->flowAngleOne * this->flowAngleTwo * ftLocal ) * pow(this->flowAngleOne, 2.) / ( 1. + this->flowAngleOne * this->flowAngleTwo ) * hardening;
         m.at(2) = 2. * shearNorm;
-        m.at(3) = fabs(m.at(1) );
+        m.at(3) = fabs( m.at(1) );
     } else {   //circle
         m.at(1) = 2. * stress.at(1) / pow(this->flowAngleTwo, 2.) + 2. * ( fcLocal - this->flowAngleTwo * this->flowAngleOne * ftLocal ) / ( pow(this->flowAngleTwo, 2.) * ( 1. + this->flowAngleOne * this->flowAngleTwo ) ) * hardening;
         m.at(2) = 2. * shearNorm;
-        m.at(3) = fabs(m.at(1) );
+        m.at(3) = fabs( m.at(1) );
     }
 
     return m;
@@ -402,12 +402,12 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
             if ( returnResult == RR_NotConverged ) {
                 subIncrementCounter++;
                 if ( subIncrementCounter > numberOfSubIncrements ) {
-                    OOFEM_LOG_INFO("Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
+                    OOFEM_LOG_INFO( "Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
                     OOFEM_LOG_INFO("Yield value %e \n", yieldValue);
-                    OOFEM_LOG_INFO("ConvergedStrain value %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3) );
-                    OOFEM_LOG_INFO("tempStrain value %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3) );
-                    OOFEM_LOG_INFO("deltaStrain value %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3) );
-                    OOFEM_LOG_INFO("targetstrain value %e %e %e\n", strain.at(1), strain.at(2), strain.at(3) );
+                    OOFEM_LOG_INFO( "ConvergedStrain value %e %e %e\n", convergedStrain.at(1), convergedStrain.at(2), convergedStrain.at(3) );
+                    OOFEM_LOG_INFO( "tempStrain value %e %e %e\n", tempStrain.at(1), tempStrain.at(2), tempStrain.at(3) );
+                    OOFEM_LOG_INFO( "deltaStrain value %e %e %e\n", deltaStrain.at(1), deltaStrain.at(2), deltaStrain.at(3) );
+                    OOFEM_LOG_INFO( "targetstrain value %e %e %e\n", strain.at(1), strain.at(2), strain.at(3) );
 
                     OOFEM_ERROR("LatticePlasticityDamage :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
                 }
@@ -420,7 +420,7 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
                 tempPlasticStrain.at(2) = tempStrain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
                 tempPlasticStrain.at(3) = tempStrain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-                status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
+                status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
                 status->setTempKappaP(tempKappa);
 
                 subIncrementFlag = 0;
@@ -440,7 +440,7 @@ LatticePlasticityDamage::performPlasticityReturn(GaussPoint *gp,
     tempPlasticStrain.at(2) = strain.at(2) - stress.at(2) / ( this->alphaOne * eNormalMean );
     tempPlasticStrain.at(3) = strain.at(3) - stress.at(3) / ( this->alphaOne * eNormalMean );
 
-    status->letTempPlasticLatticeStrainBe(assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
+    status->letTempPlasticLatticeStrainBe( assemble< 6 >(tempPlasticStrain, { 0, 1, 2 }) );
 
 
     //    status->letTempLatticeStressBe(assemble< 6 >(stress, { 0, 1, 2 }) );
@@ -473,7 +473,7 @@ LatticePlasticityDamage::performRegularReturn(FloatArrayF< 3 > &stress,
 
     double tempShearStressNorm = trialShearStressNorm;
 
-    double thetaTrial = atan2(stress.at(3), stress.at(2) );
+    double thetaTrial = atan2( stress.at(3), stress.at(2) );
 
     // Do the same for kappa
     double kappa = status->giveKappaP();
@@ -608,9 +608,9 @@ LatticePlasticityDamage::give(int aProperty, GaussPoint *gp) const
     if ( RandomMaterialExtensionInterface::give(aProperty, gp, answer) ) {
         return answer;
     } else if ( aProperty == fc_strength ) {
-        return this->fc;
+        return 1.;
     } else if ( aProperty == ft_strength ) {
-        return this->ft;
+        return 1.;
     } else {
         return LatticeLinearElastic::give(aProperty, gp);
     }
@@ -652,7 +652,6 @@ LatticePlasticityDamage::performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 
 {
     double ftLocal =  giveTensileStrength(gp, tStep);
     double fcLocal =  giveCompressiveStrength(gp, tStep);
-
 
     auto status = static_cast< LatticePlasticityDamageStatus * >( this->giveStatus(gp) );
 
@@ -716,7 +715,7 @@ LatticePlasticityDamage::performDamageEvaluation(GaussPoint *gp, FloatArrayF< 6 
     FloatArrayF< 6 >tempDamageLatticeStrain = omega * elasticReducedStrain;
     status->letTempDamageLatticeStrainBe(tempDamageLatticeStrain);
 
-    double crackWidth = norm(tempPlasticStrain + omega * ( reducedStrain - tempPlasticStrain ) ) * le;
+    double crackWidth = norm( tempPlasticStrain + omega * ( reducedStrain - tempPlasticStrain ) ) * le;
 
     //TODO: Compute dissipation
     // double tempDissipation = status->giveDissipation();
