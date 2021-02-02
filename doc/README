@@ -60,6 +60,10 @@ OOFEM_DOC_DIR
 |-- refman           - oofem regerence manual
 |
 |-- extractorInput   - documentation of extractor tool
+|
+|--usermanual        - oofem user manual
+|
+|--theorymanual      - theory manual
 
 
 [2] Pre-requisites
@@ -73,6 +77,8 @@ The latex, htlatex, and latex2html instalation is required to generate both post
 
 The compiled Reference Manual itself is not included in release 
 due to its size. It can be accessed online from oofem home page.
+
+User and Theory manuals require Sphinx (Python documantation generator, https://www.sphinx-doc.org) to be installed.
 
 
 [3] Generating documentation from sources
@@ -88,6 +94,8 @@ To generate reference manual (in refman subdir), the doxygen (doxygen package)
 and graphviz (graphviz package) tools are required. Note that only html version 
 of reference manual is supported now.
 1) To generate reference manaual in html, use "make html"
+
+To generate user and theory manuals, use "make html! or "make latexpdf".
  
 [4] Bugs
 ==============================================================================

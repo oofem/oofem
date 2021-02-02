@@ -571,10 +571,11 @@ Represents the direct explicit  nonlinear dynamic  integration.
 The central difference method with diagonal mass matrix is used,
 damping matrix is assumed to be proportional to mass matrix, $\mbf{C}
 = \mathrm{dumpcoef} * \mbf{M}$, where
-$\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
-integration, which may be reduced by program in order to satisfy
-solution stability conditions. Parameter \param{nsteps} specifies
-how many time steps will be analyzed.
+$\mbf{M}$ is diagonal mass matrix.
+Parameter \param{nsteps} specifies how many time steps will be analyzed.
+\param{deltaT} is time step length used for integration, which may be reduced by program in order to satisfy solution stability conditions.
+Parameter \param{reduct} is a scaling factor (smaller than 1), which is multiplied with the determined step length adjusted by the program.
+If \param{deltaT} is reduced internally, then \param{nsteps} is adjusted so that the total analysis time remains the same.
 
 The parallel version has the following additional syntax:\\ \\
 \begin{record}
@@ -3040,10 +3041,13 @@ By default vtk and vtkxml modules perform recovery over the whole domain. The VT
 \item Homogenization of IP quantities in the global coordinate system (such as stress, strain, damage, heat flow). Corresponding IP quantities are summed and averaged over the volume. It is possible to select region sets from which the averaging occurs. The averaging works for all domains with an extension to trusses. A truss is considered as a volume element with oriented stress and strain components along the truss axis. The transformation to global components occurs before averaging.
 
 \begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{hom}}{}
   \recentry{}{\field{ists}{ia}}
   \recentry{}{\optField{scale}{rn}}
   \recentry{}{\optField{regionSets}{ia}}
+  \recentry{}{\optFieldnotype{strain\_energy}}
 \end{record}
+
 \begin{itemize}
 
 \item An integer array \param{ists} specifies internal state types for export which are defined in internalstatetype.h file.
@@ -3051,6 +3055,13 @@ By default vtk and vtkxml modules perform recovery over the whole domain. The VT
 \item The parameter \param{scale} multiplies all averaged IP quantities. \param{scale}=1 by default.
 
 \item An integer array \param{regionSets} specifies region sets for averaging. All domain is averaged by default.
+
+\item \param{strain\_energy} calculates strain energy over selected elements (defined by sets) by
+\begin{equation}
+W^*=\int_V \int \sigma \mathrm{d} (\varepsilon-\varepsilon_{eig}) \mathrm{d} V
+\end{equation}
+where $\sigma$ is the stress tensor, $\varepsilon$ stands for the strain tensor and $\varepsilon_{eig}$ is eigenstrain tensor (originates from temperature load or prescribed eigenstrain). Strain energy increment and total strain energy is reported in each step. The integration uses mid-point rule for stress and yields exact results for linear elastic materials.
+
 \end{itemize}
 
 \item Gauss point export is useful if one needs to plot a certain variable

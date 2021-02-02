@@ -47,7 +47,7 @@ git clone https://github.com/pybind/pybind11.git; cd pybind11; pip3 install
 
 
 #############################
-#cmake confuration
+#cmake configuration
 #############################
 set USE_PYTHON_BINDINGS to ON
 

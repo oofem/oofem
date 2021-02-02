@@ -390,6 +390,11 @@ public:
     const FloatArray &giveCoordinates() const { return this->coordinates; }
     //@}
 
+    /// Set coordinates
+    void setCoordinates(const FloatArray &coords) {
+        this->coordinates = coords;
+    }
+    
     /**@name Functions necessary for dof creation. All optional. */
     //@{
     /**

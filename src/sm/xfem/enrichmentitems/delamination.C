@@ -154,17 +154,19 @@ int Delamination :: instanciateYourself(DataReader &dr)
     int xDofPoolAllocSize = this->giveDofPoolSize();
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
-
-
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
-    this->updateNodeEnrMarker(* xMan);
-
-
+   
     //writeVtkDebug();
 
     return 1;
 }
+
+void Delamination :: postInitialize() {
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    this->updateNodeEnrMarker(* xMan);
+
+}
+
 
 #if 0
 void

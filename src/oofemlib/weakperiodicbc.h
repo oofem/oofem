@@ -166,19 +166,19 @@ public:
     basisType giveBasisType() { return useBasisType; }
 
     void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
-                  const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
+                  const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0, void* lock=nullptr) override;
 
     void assembleVector(FloatArray &answer, TimeStep *tStep,
                         CharType type, ValueModeType mode,
-                        const UnknownNumberingScheme &s, FloatArray *eNorm = nullptr) override;
+                        const UnknownNumberingScheme &s, FloatArray *eNorm = nullptr, void* lock=nullptr) override;
 
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s, FloatArray *eNorm = nullptr);
+                                  const UnknownNumberingScheme &s, FloatArray *eNorm = nullptr, void* lock=nullptr);
 
     void giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                   CharType type, ValueModeType mode,
-                                  const UnknownNumberingScheme &s);
+                                  const UnknownNumberingScheme &s, void*lock=nullptr);
 
     int giveNumberOfInternalDofManagers() override;
 

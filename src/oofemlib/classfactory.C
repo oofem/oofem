@@ -284,6 +284,16 @@ bool ClassFactory :: registerExportModule( const char *name, std::unique_ptr<Exp
     return cf_store(exportList, name, creator);
 }
 
+std::unique_ptr<Monitor> ClassFactory :: createMonitor(const char *name, int number)
+{
+    return cf_create<Monitor>(monitorList, name, number);
+}
+
+bool ClassFactory :: registerMonitor( const char *name, std::unique_ptr<Monitor> ( *creator )( int ) )
+{
+    return cf_store(monitorList, name, creator);
+}
+
 std::unique_ptr<SparseNonLinearSystemNM>ClassFactory :: createNonLinearSolver(const char *name, Domain *domain, EngngModel *emodel)
 {
     return cf_create<SparseNonLinearSystemNM>(nonlinList, name, domain, emodel);

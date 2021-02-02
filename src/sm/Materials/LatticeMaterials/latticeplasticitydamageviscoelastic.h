@@ -42,7 +42,12 @@
 ///@name Input fields for LatticePlasticityDamageViscoelastic
 //@{
 #define _IFT_LatticePlasticityDamageViscoelastic_Name "latticeplasticitydamageviscoelastic"
-#define _IFT_LatticePlasticityDamageViscoelastic_slaveMat "slavemat"
+#define _IFT_LatticePlasticityDamageViscoelastic_viscoMat "viscomat"
+#define _IFT_LatticePlasticityDamageViscoelastic_timeFactor "timefactor"
+#define _IFT_LatticePlasticityDamageViscoelastic_timedepfracturing "timedepfracturing"
+#define _IFT_LatticePlasticityDamageViscoelastic_fcm28 "fcm28"
+#define _IFT_LatticePlasticityDamageViscoelastic_fib_s "fib_s"
+#define _IFT_LatticePlasticityDamageViscoelastic_stiffnessFactor "stiffnessfactor"
 
 //@}
 
@@ -55,14 +60,13 @@ class LatticePlasticityDamageViscoelasticStatus : public LatticePlasticityDamage
 
 {
 protected:
-    GaussPoint *viscoelasticGP = nullptr;
-    /// 'slave' material model number.
-    int slaveMat = 0;
+
+    std::unique_ptr< GaussPoint >slaveGpVisco;
 
 public:
 
     /// Constructor
-    LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g, int s);
+    LatticePlasticityDamageViscoelasticStatus(int n, Domain *d, GaussPoint *g);
 
     /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep) const override;
@@ -79,12 +83,8 @@ public:
 
     void restoreContext(DataStream &stream, ContextMode mode) override;
 
-    GaussPoint *giveViscoelasticGaussPoint() { return viscoelasticGP; }
-
-    MaterialStatus *giveViscoelasticMatStatus() const;
+    GaussPoint *giveSlaveGaussPointVisco() const { return this->slaveGpVisco.get(); }
 };
-
-
 
 
 
@@ -97,7 +97,16 @@ class LatticePlasticityDamageViscoelastic : public LatticePlasticityDamage
 {
 protected:
     /// 'slave' (= viscoelastic) material model number.
-    int slaveMat = 0;
+    int viscoMat = 0;
+
+    bool fib = false;
+    double fib_fcm28 = 0;
+    double fib_s = 0;
+    double timeFactor = 0;
+
+    /* scaling factor transforming PREDICTED strength and fracture energy
+     *  e.g. if the stiffness should be in MPa, then stiffnessFactor = 1.e6 */
+    double stiffnessFactor = 0.;
 
 public:
 
@@ -107,31 +116,15 @@ public:
     const char *giveInputRecordName() const override { return _IFT_LatticePlasticityDamageViscoelastic_Name; }
     const char *giveClassName() const override { return "LatticePlasticityDamageViscoelastic"; }
 
-
     void initializeFrom(InputRecord &ir) override;
 
-    bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
+    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF< 3, 3 >give2dLatticeStiffnessMatrix(MatResponseMode rmode,
-                                                     GaussPoint *gp,
-                                                     TimeStep *atTime) const override;
-
-    FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rmode,
-                                                     GaussPoint *gp,
-                                                     TimeStep *atTime) const override;
-
-    bool hasMaterialModeCapability(MaterialMode mode) const override;
-
-
-    void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                              const FloatArray &, TimeStep *) override;
-
+    FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &totalStrain,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep) override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
-
-    RheoChainMaterial *giveViscoelasticMaterial();
-
-    FloatArrayF<6> giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const override;
 
 protected:
 
@@ -139,6 +132,14 @@ protected:
                     GaussPoint *gp,
                     InternalStateType type,
                     TimeStep *atTime) override;
+
+    int checkConsistency(void) override;
+
+    /// returns equivalent time (used to compute time-dependent ft and gf)
+    virtual double giveEquivalentTime(GaussPoint *gp, TimeStep *tStep) const;
+
+    double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const override;
+    double giveCompressiveStrength(GaussPoint *gp, TimeStep *tStep) const override;
 };
 } // end namespace oofem
 

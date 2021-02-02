@@ -33,6 +33,7 @@
  */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h> //Conversion for lists
 #include <pybind11/operators.h>
 namespace py = pybind11;
 
@@ -48,12 +49,15 @@ namespace py = pybind11;
 #include "timestep.h"
 #include "domain.h"
 #include "engngm.h"
+#include "staggeredproblem.h"
 #include "dof.h"
 #include "dofmanager.h"
 #include "element.h"
 #include "Elements/structuralelement.h"
+#include "datastream.h"
 
 #include "generalboundarycondition.h"
+#include "boundarycondition.h"
 #include "initialcondition.h"
 #include "function.h"
 #include "material.h"
@@ -86,14 +90,16 @@ namespace py = pybind11;
 
 #include "classfactory.h"
 #include "unknownnumberingscheme.h"
+#include "vtkxmlexportmodule.h"
+#include "homexportmodule.h"
 
 #include "uniformgridfield.h"
 #include "unstructuredgridfield.h"
+#include "dofmanvalfield.h"
 #include "pythonfield.h"
-
 #include <iostream>
-
 #include "oofemutil.h"
+
 
 //test
 void test (oofem::Element& e) {
@@ -308,6 +314,34 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     };
 
+    
+    class PyField : public oofem::Field {
+        // inherit the constructor
+        using oofem::Field::Field;
+        // trampoline (need one for each virtual method
+        int evaluateAt(oofem::FloatArray &answer, const oofem::FloatArray &coords,
+        oofem::ValueModeType mode, oofem::TimeStep *tStep) override  {
+            PYBIND11_OVERLOAD_PURE(int, oofem::Field, evaluateAt, std::ref(answer), coords, mode, tStep);
+        }
+        int evaluateAt(oofem::FloatArray &answer, oofem::DofManager *dman,
+        oofem::ValueModeType mode, oofem::TimeStep *tStep) override  {
+            PYBIND11_OVERLOAD_PURE(int, oofem::Field, evaluateAt, std::ref(answer), dman, mode, tStep);
+        }
+        const char *giveClassName() const override {
+            PYBIND11_OVERLOAD_PURE(const char*, oofem::Field, giveClassName, );
+        }
+        void saveContext(DataStream &stream) override {
+            PYBIND11_OVERLOAD_PURE(void, oofem::Field, saveContext, stream);
+        }
+        void restoreContext(DataStream &stream) override {
+            PYBIND11_OVERLOAD_PURE(void, oofem::Field, restoreContext, stream);
+        }
+        
+        
+        
+    };
+    
+    
     template <class StructuralMaterialBase = oofem::StructuralMaterial> class PyStructuralMaterial : public PyMaterial<StructuralMaterialBase> {
     public:
         // inherit the constructor
@@ -505,13 +539,20 @@ PYBIND11_MODULE(oofempy, m) {
         })
         .def("__repr__",
             [](const oofem::FloatArray &s) {
+                std::ostringstream streamObj;
+                std::string strObj;
                 std::string a = "<oofempy.FloatArray: {";
                 for ( int i = 0; i < s.giveSize(); ++i ) {
                     if ( i > 40 ) {
                         a.append("...");
                         break;
                     } else {
-                        a.append(std::to_string(s[i]));
+                        streamObj.str("");
+                        streamObj.clear();
+                        streamObj << s[i];//convert to scientific notation if necessary
+                        strObj = streamObj.str();
+                        a.append(strObj);
+                        //a.append(std::to_string(s[i]));
                         a.append(", ");
                     }
                 }
@@ -707,6 +748,7 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::MetaStep>(m, "MetaStep")
         .def("setNumberOfSteps", &oofem::MetaStep::setNumberOfSteps)
+        .def("giveNumberOfSteps", &oofem::MetaStep::giveNumberOfSteps)
     ;
         
     py::class_<oofem::TimeStep>(m, "TimeStep")
@@ -725,7 +767,6 @@ PYBIND11_MODULE(oofempy, m) {
 
     py::class_<oofem::FieldManager>(m, "FieldManager")
         .def("registerField", &oofem::FieldManager::registerField, py::keep_alive<1, 2>())
-
         ;
 
     py::class_<oofem::EngngModelContext>(m, "EngngModelContext")
@@ -748,7 +789,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveCurrentStep", &oofem::EngngModel::giveCurrentStep, py::return_value_policy::reference, py::arg("force") = false)
         .def("givePreviousStep", &oofem::EngngModel::givePreviousStep, py::return_value_policy::reference)
         .def("giveNextStep", &oofem::EngngModel::giveNextStep, py::return_value_policy::reference)
-        .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps)
+        .def("giveNumberOfSteps", &oofem::EngngModel::giveNumberOfSteps, py::arg("force")=false)
         .def("giveUnknownComponent", &oofem::EngngModel::giveUnknownComponent)
         .def("checkProblemConsistency", &oofem::EngngModel::checkProblemConsistency)
         .def("giveTimer", &oofem::EngngModel::giveTimer, py::return_value_policy::reference)
@@ -760,14 +801,33 @@ PYBIND11_MODULE(oofempy, m) {
         .def("postInitialize", &oofem::EngngModel::postInitialize)
         .def("setRenumberFlag", &oofem::EngngModel::setRenumberFlag)
         .def("giveContext", &oofem::EngngModel::giveContext, py::return_value_policy::reference)
+        .def("forceEquationNumbering", py::overload_cast<int>(&oofem::EngngModel::forceEquationNumbering))
+        .def("forceEquationNumbering", py::overload_cast<>(&oofem::EngngModel::forceEquationNumbering))
         ;
-
+    
+    py::class_<oofem::StaggeredProblem, oofem::EngngModel>(m, "StaggeredProblem")
+        .def("giveSlaveProblem", &oofem::StaggeredProblem::giveSlaveProblem, py::return_value_policy::reference)
+        .def("giveTimeControl", &oofem::StaggeredProblem::giveTimeControl, py::return_value_policy::reference)
+    ;
+        
     py::class_<oofem::Domain>(m, "Domain")
         .def(py::init<int, int, oofem::EngngModel*>())
         .def("giveNumber", &oofem::Domain::giveNumber)
         .def("setNumber", &oofem::Domain::setNumber)
         .def("giveDofManager", &oofem::Domain::giveDofManager, py::return_value_policy::reference)
+        //.def("giveDofManagers", &oofem::Domain::giveDofManagers)
         .def("giveElement", &oofem::Domain::giveElement, py::return_value_policy::reference)
+        //.def("giveElements", &oofem::Domain::giveElements, py::return_value_policy::reference)
+        .def("giveNumberOfElements", &oofem::Domain::giveNumberOfElements)
+        .def("giveNumberOfDofManagers", &oofem::Domain::giveNumberOfDofManagers)
+        .def("giveNumberOfBoundaryConditions", &oofem::Domain::giveNumberOfBoundaryConditions)
+        .def("giveNumberOfFunctions", &oofem::Domain::giveNumberOfFunctions)
+        .def("giveNumberOfMaterialModels", &oofem::Domain::giveNumberOfMaterialModels)
+        .def("giveNumberOfCrossSectionModels", &oofem::Domain::giveNumberOfCrossSectionModels)
+        .def("giveNumberOfInitialConditions", &oofem::Domain::giveNumberOfInitialConditions)
+        .def("giveNumberOfRegions", &oofem::Domain::giveNumberOfRegions)
+        .def("giveNumberOfNonlocalBarriers", &oofem::Domain::giveNumberOfNonlocalBarriers)
+        .def("giveNumberOfSets", &oofem::Domain::giveNumberOfSets)
         .def("giveBc", &oofem::Domain::giveBc, py::return_value_policy::reference)
         .def("giveIc", &oofem::Domain::giveIc, py::return_value_policy::reference)
         .def("giveFunction", &oofem::Domain::giveFunction, py::return_value_policy::reference)
@@ -805,11 +865,11 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfDofs", &oofem::DofManager::giveNumberOfDofs)
         .def("giveUnknownVector", (void (oofem::DofManager::*)(oofem::FloatArray&, const oofem::IntArray&, oofem::ValueModeType, oofem::TimeStep*, bool)) &oofem::DofManager::giveUnknownVector)
         .def("givePrescribedUnknownVector", &oofem::DofManager::givePrescribedUnknownVector)
-
         .def("giveCoordinates", &oofem::DofManager::giveCoordinates, py::return_value_policy::reference)
         .def("appendDof", &oofem::DofManager::appendDof, py::keep_alive<1, 2>())
         .def("removeDof", &oofem::DofManager::removeDof)
         .def("hasDofID", &oofem::DofManager::hasDofID)
+        .def("giveGlobalNumber", &oofem::DofManager::giveGlobalNumber)
     ;
 
     /*
@@ -836,6 +896,7 @@ PYBIND11_MODULE(oofempy, m) {
         .def("giveNumberOfDofManagers", &oofem::Element::giveNumberOfDofManagers)
         .def("giveNumberOfNodes", &oofem::Element::giveNumberOfNodes)
         .def("giveRegionNumber", &oofem::Element::giveRegionNumber)
+        .def("giveNode", &oofem::Element::giveNode)
         .def("updateYourself", &oofem::Element::updateYourself)
         .def("isActivated", &oofem::Element::isActivated)
         .def("isCast", &oofem::Element::isCast)
@@ -848,7 +909,8 @@ PYBIND11_MODULE(oofempy, m) {
         .def("setDofManagers", &oofem::Element::setDofManagers)
         .def("setNumberOfDofManagers", &oofem::Element::setNumberOfDofManagers)
         .def("giveDofManDofIDMask", &oofem::Element::giveDofManDofIDMask)
-
+        .def("getActivityTimeFunctionNumber", &oofem::Element::getActivityTimeFunctionNumber)
+        .def("setActivityTimeFunctionNumber", &oofem::Element::setActivityTimeFunctionNumber)
     ;
 
     py::class_<oofem::StructuralElement, oofem::Element, PyStructuralElement<>>(m, "StructuralElement")
@@ -858,6 +920,13 @@ PYBIND11_MODULE(oofempy, m) {
 
 
     py::class_<oofem::GeneralBoundaryCondition, oofem::FEMComponent>(m, "GeneralBoundaryCondition")
+        .def("getIsImposedTimeFunctionNumber", &oofem::GeneralBoundaryCondition::getIsImposedTimeFunctionNumber)
+        .def("setIsImposedTimeFunctionNumber", &oofem::GeneralBoundaryCondition::setIsImposedTimeFunctionNumber)
+    ;
+
+
+    py::class_<oofem::BoundaryCondition, oofem::GeneralBoundaryCondition>(m, "BoundaryCondition")
+        .def("setPrescribedValue", &oofem::BoundaryCondition::setPrescribedValue)
     ;
 
     py::class_<oofem::InitialCondition, oofem::FEMComponent>(m, "InitialCondition")
@@ -867,7 +936,9 @@ PYBIND11_MODULE(oofempy, m) {
 //     ;
     
     py::class_<oofem::EngngModelTimer> (m, "EngngModelTimer")
-        .def("startTimer", &oofem::EngngModelTimer::startTimer);
+        .def("startTimer", &oofem::EngngModelTimer::startTimer)
+        .def("stopTimer", &oofem::EngngModelTimer::stopTimer)
+        .def("getUtime", &oofem::EngngModelTimer::getUtime)
     ;
     
     py::enum_<oofem::EngngModelTimer::EngngModelTimerType>(m, "EngngModelTimerType")
@@ -960,6 +1031,7 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::Material, oofem::FEMComponent>(m, "Material")
         .def("giveStatus", &oofem::Material::giveStatus, py::return_value_policy::reference)
         .def("CreateStatus", &oofem::Material::CreateStatus, py::return_value_policy::reference)
+        .def("giveIPValue", &oofem::Material::giveIPValue)
     ;
 
     py::class_<oofem::StructuralMaterial, oofem::Material, PyStructuralMaterial<>>(m, "StructuralMaterial")
@@ -971,23 +1043,38 @@ PYBIND11_MODULE(oofempy, m) {
     py::class_<oofem::CrossSection, oofem::FEMComponent>(m, "CrossSection")
     ;
 
+    py::class_<oofem::Set, oofem::FEMComponent>(m, "Set")
+    ;
+
+    
     py::class_<oofem::UnknownNumberingScheme>(m, "UnknownNumberingScheme")
     ;
 
     py::class_<oofem::IntegrationRule>(m, "IntegrationRule")
         .def("giveNumberOfIntegrationPoints", &oofem::IntegrationRule::giveNumberOfIntegrationPoints)
-        .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint)
+        .def("getIntegrationPoint", &oofem::IntegrationRule::getIntegrationPoint, py::return_value_policy::reference)
     ;
     py::class_<oofem::GaussPoint>(m, "GaussPoint")
       .def ("giveMaterialStatus", (const oofem::IntegrationPointStatus* (oofem::GaussPoint::*)() const) &oofem::GaussPoint::giveMaterialStatus, py::return_value_policy::reference)
       .def ("setMaterialStatus", (oofem::IntegrationPointStatus* (oofem::GaussPoint::*)(oofem::IntegrationPointStatus*)) &oofem::GaussPoint::setMaterialStatus, py::keep_alive<0, 2>())
     ;
 
+    py::class_<oofem::HOMExportModule>(m, "HOMExportModule")
+    ;
+    
+    py::class_<oofem::VTKXMLExportModule>(m, "VTKXMLExportModule")
+    .def("getPrimaryVars", &oofem::VTKXMLExportModule::getPrimaryVars)
+    .def("getInternalVars", &oofem::VTKXMLExportModule::getInternalVars)
+    .def("getCellVars", &oofem::VTKXMLExportModule::getCellVars)
+    .def("getNodes", &oofem::VTKXMLExportModule::getNodes)
+    .def("getElementsConnectivity", &oofem::VTKXMLExportModule::getElementsConnectivity)
+    ;
+    
 
     py::class_<oofem::ClassFactory>(m, "ClassFactory")
         .def("createElement", &oofem::ClassFactory::createElement)
         .def("createEngngModel", &oofem::ClassFactory::createEngngModel)
-        ;
+    ;
 
     m.def("getClassFactory", &oofem::GiveClassFactory, py::return_value_policy::reference);
     m.def("InstanciateProblem", &oofem::InstanciateProblem);
@@ -1285,6 +1372,8 @@ PYBIND11_MODULE(oofempy, m) {
     py::register_exception<oofem::BadFormatInputException>(m, "BadFormatInputException");
     py::register_exception<oofem::ValueInputException>(m, "ValueInputException");
 
+   
+    
     py::enum_<oofem::MatResponseMode>(m, "MatResponseMode")
         .value("TangentStiffness", oofem::MatResponseMode::TangentStiffness)
         .value("SecantStiffness", oofem::MatResponseMode::SecantStiffness)
@@ -1313,30 +1402,66 @@ PYBIND11_MODULE(oofempy, m) {
     m.def("truss1d", &truss1d, py::return_value_policy::move);
     m.def("beam2d", &beam2d, py::return_value_policy::move);
     m.def("trPlaneStress2d", &trPlaneStress2d, py::return_value_policy::move);
-    
+    m.def("planeStress2d", &planeStress2d, py::return_value_policy::move);
+    m.def("transientTransport", &transientTransport, py::return_value_policy::move);
+    m.def("qBrick1ht", &qBrick1ht, py::return_value_policy::move);
+
     m.def("node", &node, py::return_value_policy::move);
     m.def("boundaryCondition", &boundaryCondition, py::return_value_policy::move);
+    m.def("initialCondition", &initialCondition, py::return_value_policy::move);
     m.def("constantEdgeLoad", &constantEdgeLoad, py::return_value_policy::move);
+    m.def("constantSurfaceLoad", &constantSurfaceLoad, py::return_value_policy::move);
     m.def("nodalLoad", &nodalLoad, py::return_value_policy::move);
     m.def("structTemperatureLoad", &structTemperatureLoad, py::return_value_policy::move);
+    m.def("structEigenstrainLoad", &structEigenstrainLoad, py::return_value_policy::move);
     m.def("isoLE", &isoLE, py::return_value_policy::move);
+    m.def("idm1", &idm1, py::return_value_policy::move);
+    m.def("isoHeat", &isoHeat, py::return_value_policy::move);
+
     m.def("simpleCS", &simpleCS, py::return_value_policy::move);
+    m.def("simpleTransportCS", &simpleTransportCS, py::return_value_policy::move);
     m.def("peakFunction", &peakFunction, py::return_value_policy::move);
     m.def("constantFunction", &constantFunction, py::return_value_policy::move);
     m.def("piecewiseLinFunction", &piecewiseLinFunction, py::return_value_policy::move);
+    m.def("vtkxml", &vtkxml, py::return_value_policy::move);
+    m.def("homExport", &homExport, py::return_value_policy::move);
+    m.def("createSet", &createSet, py::return_value_policy::move);
 
 
-
-    py::class_<oofem::Field, std::shared_ptr<oofem::Field>>(m, "Field")
+//std::shared_ptr<oofem::Field>
+    py::class_<oofem::Field, PyField, std::shared_ptr<oofem::Field>>(m, "Field")
+        .def(py::init<oofem::FieldType>())  
+//         .def("evaluateAt", (int (oofem::Field::*)(oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep)) &oofem::Field::evaluateAt)
+        
+        .def("evaluateAt", [](oofem::FloatArray &answer, const oofem::FloatArray &coords, oofem::ValueModeType mode, oofem::TimeStep *tStep){
+            return std::make_tuple(answer,coords);//TODO-how to invoke the function if it does not exist yet?
+        })
+        .def("giveType", &oofem::Field::giveType)
+        .def("setType", &oofem::Field::setType)
         ;
 
     py::class_<oofem::UniformGridField, oofem::Field, std::shared_ptr<oofem::UniformGridField>>(m, "UniformGridField")
         .def(py::init<>())
-        .def ("setGeometry", &oofem::UniformGridField::setGeometry)
-        .def ("setValues", &oofem::UniformGridField::setValues)
-        .def("evaluateAt", (int (oofem::UniformGridField::*)(oofem::FloatArray &, const oofem::FloatArray &, oofem::ValueModeType , oofem::TimeStep *)) &oofem::UniformGridField::evaluateAt)
+        .def("setGeometry", &oofem::UniformGridField::setGeometry)
+        .def("setValues", &oofem::UniformGridField::setValues)
         ;
- 
+
+    py::class_<oofem::UnstructuredGridField, oofem::Field, std::shared_ptr<oofem::UnstructuredGridField>>(m, "UnstructuredGridField")
+        .def(py::init<int, int, double>(), py::arg().noconvert(), py::arg().noconvert(), py::arg("octreeOriginShift") = 0.0)
+        .def("addVertex", &oofem::UnstructuredGridField::addVertex)
+        .def("setVertexValue", &oofem::UnstructuredGridField::setVertexValue)
+        ;
+    
+    py::class_<oofem::DofManValueField, oofem::Field,  std::shared_ptr<oofem::DofManValueField>>(m, "DofManValueField")
+        .def(py::init<oofem::FieldType,oofem::Domain*>())
+        .def(py::init<oofem::FieldType,int,int, const std::string, const std::string>(), py::arg().noconvert(), py::arg().noconvert(), py::arg().noconvert(), py::arg("engngModel")="transienttransport", py::arg("domainDofsDefaults")="heattransfer")
+        .def("addNode", &oofem::DofManValueField::addNode )
+        .def("addElement", &oofem::DofManValueField::addElement )
+        .def("setDofManValue", &oofem::DofManValueField::setDofManValue )
+        .def("getNodeCoordinates", &oofem::DofManValueField::getNodeCoordinates )
+        ;
+    
+        
 //depends on Python.h
 #ifdef _PYBIND_BINDINGS       
     py::class_<oofem::PythonField, oofem::Field, std::shared_ptr<oofem::PythonField>>(m, "PythonField")

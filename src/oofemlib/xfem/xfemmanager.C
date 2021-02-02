@@ -238,10 +238,25 @@ int XfemManager :: instanciateYourself(DataReader &dr)
     }
 
 
-    updateNodeEnrichmentItemMap();
-
+   
     return 1;
 }
+
+void XfemManager :: postInitialize()
+{
+    for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
+        this->giveEnrichmentItem(i)->postInitialize();
+    }
+
+     for ( int i = 1; i <= numberOfNucleationCriteria; i++ ) {
+         giveNucleationCriterion(i)->postInitialize();
+     }
+
+    updateNodeEnrichmentItemMap();
+
+}
+
+
 
 void XfemManager :: setDomain(Domain *ipDomain)
 {

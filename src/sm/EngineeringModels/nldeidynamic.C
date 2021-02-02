@@ -86,6 +86,9 @@ NlDEIDynamic :: initializeFrom(InputRecord &ir)
     IR_GIVE_FIELD(ir, dumpingCoef, _IFT_NlDEIDynamic_dumpcoef); // C = dumpingCoef * M
     IR_GIVE_FIELD(ir, deltaT, _IFT_NlDEIDynamic_deltat);
 
+    reductionFactor = 1.;
+    IR_GIVE_OPTIONAL_FIELD(ir, reductionFactor, _IFT_NlDEIDynamic_reduct);
+ 
     drFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, drFlag, _IFT_NlDEIDynamic_drflag);
     if ( drFlag ) {
@@ -287,12 +290,20 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         //
 
         // Try to determine the best deltaT,
-        double maxDt = 2.0 / sqrt(maxOm);
-        if ( deltaT > maxDt ) {
-            // Print reduced time step increment and minimum period Tmin
-            OOFEM_LOG_RELEVANT("deltaT reduced to %e, Tmin is %e\n", maxDt, maxDt * M_PI);
-            deltaT = maxDt;
-            tStep->setTimeIncrement(deltaT);
+	double maxDt = reductionFactor * 2.0 / sqrt(maxOm);
+        int newNumberOfSteps = this->numberOfSteps;
+        double newDeltaT = 0;
+
+	if ( deltaT > maxDt ) {
+	  //Scale number of steps based on reduced time step        
+	  newDeltaT = maxDt;
+	  newNumberOfSteps = floor(numberOfSteps*deltaT/newDeltaT);
+	  this->giveMetaStep(1)->setNumberOfSteps(newNumberOfSteps);
+	  this->deltaT = newDeltaT;
+	  tStep->setTimeIncrement(deltaT);
+	  
+	  // Print reduced time step increment and minimum period Tmin
+	  OOFEM_LOG_RELEVANT("deltaT reduced to %e, Tmin is %e, nsteps is %d\n", this->deltaT, maxDt * M_PI, newNumberOfSteps);	  
         }
 
         for ( int j = 1; j <= neq; j++ ) {

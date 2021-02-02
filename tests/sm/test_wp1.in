@@ -1,0 +1,68 @@
+test_wp1.out
+Winkler pasternak model: test of settlement profile
+StaticStructural nsteps 1 nmodules 1
+errorcheck
+#vtkxml tstep_all domain_all primvars 1 1 vars 4 1 2 4 10 stype 2
+domain 2dMindlinPlate
+OutputManager tstep_all dofman_all element_all
+ndofman 24 nelem 11 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 2
+#pure bending along x axis
+node  1 coords 3  0.0  0.0  0.0
+node  2 coords 3  1.0  0.0  0.0
+node  3 coords 3  2.0  0.0  0.0
+node  4 coords 3  3.0  0.0  0.0
+node  5 coords 3  4.0  0.0  0.0
+node  6 coords 3  5.0  0.0  0.0
+node  7 coords 3  6.0  0.0  0.0
+node  8 coords 3  7.0  0.0  0.0
+node  9 coords 3  8.0  0.0  0.0
+node 10 coords 3  9.0  0.0  0.0
+node 11 coords 3  10.0  0.0  0.0
+node 12 coords 3  11.0  0.0  0.0
+#
+node 21 coords 3  0.0  1.0  0.0
+node 22 coords 3  1.0  1.0  0.0
+node 23 coords 3  2.0  1.0  0.0
+node 24 coords 3  3.0  1.0  0.0
+node 25 coords 3  4.0  1.0  0.0
+node 26 coords 3  5.0  1.0  0.0
+node 27 coords 3  6.0  1.0  0.0
+node 28 coords 3  7.0  1.0  0.0
+node 29 coords 3  8.0  1.0  0.0
+node 30 coords 3  9.0  1.0  0.0
+node 31 coords 3  10.0  1.0  0.0
+node 32 coords 3  11.0  1.0  0.0
+##
+quad1platesubsoil 1 nodes 4 1 2 22 21
+quad1platesubsoil 2 nodes 4 2 3 23 22
+quad1platesubsoil 3 nodes 4 3 4 24 23
+quad1platesubsoil 4 nodes 4 4 5 25 24
+quad1platesubsoil 5 nodes 4 5 6 26 25
+quad1platesubsoil 6 nodes 4 6 7 27 26
+quad1platesubsoil 7 nodes 4 7 8 28 27
+quad1platesubsoil 8 nodes 4 8 9 29 28
+quad1platesubsoil 9 nodes 4 9 10 30 29
+quad1platesubsoil 10 nodes 4 10 11 31 30
+quad1platesubsoil 11 nodes 4 11 12 32 31
+SimpleCS 1 thick 1.0 material 1 set 1
+winklerpasternak 1 d 2500. c1 1.0 c2 2.0
+BoundaryCondition  1 loadTimeFunction 1 dofs 1 3 values 1 0.1 set 2
+ConstantFunction 1 f(t) 1.0
+Set 1 elementranges {(1 11)}
+Set 2 nodes 2 1 21
+#
+# Exact solution: w = 0.1*exp(-sqrt(c1/c2)*x
+#%BEGIN_CHECK% tolerance 5.e-4
+#NODE tStep 1 number 1 dof 3 unknown d value 0.1
+#NODE tStep 1 number 2 dof 3 unknown d value 4.85431647e-02
+#NODE tStep 1 number 3 dof 3 unknown d value 2.35644192e-02
+#NODE tStep 1 number 4 dof 3 unknown d value 1.14389933e-02
+#NODE tStep 1 number 5 dof 3 unknown d value 5.55301838e-03
+#NODE tStep 1 number 6 dof 3 unknown d value 2.69596252e-03
+#NODE tStep 1 number 7 dof 3 unknown d value 1.30943168e-03
+#NODE tStep 1 number 8 dof 3 unknown d value 6.37136294e-04
+#NODE tStep 1 number 9 dof 3 unknown d value 3.12369798e-04
+#NODE tStep 1 number 10 dof 3 unknown d value 1.57986829e-04
+#NODE tStep 1 number 11 dof 3 unknown d value 8.97784931e-05
+#NODE tStep 1 number 12 dof 3 unknown d value 7.05402446e-05
+#%END_CHECK%

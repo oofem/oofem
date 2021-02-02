@@ -199,6 +199,8 @@ public:
     virtual const char *giveClassName() const { return "XfemManager"; }
     virtual const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 
+    virtual void postInitialize();
+
     Domain *giveDomain() { return this->domain; }
     void setDomain(Domain *ipDomain);
 

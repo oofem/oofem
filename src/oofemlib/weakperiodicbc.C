@@ -53,6 +53,10 @@
 #include "set.h"
 #include "function.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include "timestep.h"
 // #include "sm/Elements/tet21ghostsolid.h"
 #include "sm/Elements/nlstructuralelement.h"
@@ -474,7 +478,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     }
 }
 
-void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale, void* lock)
 {
     if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
         return;
@@ -571,8 +575,16 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx &answer, TimeStep *tSt
             B.times(normalSign * scale);
             BT.beTranspositionOf(B);
 
+#ifdef _OPENMP
+            if (lock)
+                omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(r_sideLoc, c_loc, B);
             answer.assemble(r_loc, c_sideLoc, BT);
+#ifdef _OPENMP
+            if (lock)
+                omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 
@@ -639,12 +651,12 @@ double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue1D(int baseID, d
 
 void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                      CharType type, ValueModeType mode,
-                                                     const UnknownNumberingScheme &s, FloatArray *eNorms)
+                                                     const UnknownNumberingScheme &s, FloatArray *eNorms, void* lock)
 {
     if ( type == InternalForcesVector ) {
-        giveInternalForcesVector(answer, tStep, type, mode, s);
+        giveInternalForcesVector(answer, tStep, type, mode, s, nullptr, lock);
     } else if ( type == ExternalForcesVector ) {
-        giveExternalForcesVector(answer, tStep, type, mode, s);
+        giveExternalForcesVector(answer, tStep, type, mode, s, lock);
     }
 
 }
@@ -652,7 +664,7 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 void
 WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                                           CharType type, ValueModeType mode,
-                                                          const UnknownNumberingScheme &s, FloatArray *eNorms)
+                                                          const UnknownNumberingScheme &s, FloatArray *eNorms, void* lock)
 {
     // Fetch unknowns of this boundary condition
     IntArray gammaLoc;
@@ -768,7 +780,9 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
                 myProdGamma.plusProduct(D, gamma, detJ*gp->giveWeight()*normalSign); */
 
             }
-
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             if ( eNorms ) {
                 eNorms->assembleSquared( vProd, gamma_ids );
                 eNorms->assembleSquared( gammaProd, masterDofIDs);
@@ -776,6 +790,9 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
 
             answer.assemble(gammaProd, gammaLoc);
             answer.assemble(vProd, sideLocation);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
 //            answer.assemble(myProd, gammaLoc);
 //            answer.assemble(myProdGamma, sideLocation);
         }
@@ -785,7 +802,7 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
 void
 WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
                                                           CharType type, ValueModeType mode,
-                                                          const UnknownNumberingScheme &s)
+                                                          const UnknownNumberingScheme &s, void* lock)
 {
 
     updateSminmax();
@@ -830,8 +847,15 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
         }
     }
 
-    answer.assemble(temp, gammaLoc);
 
+#ifdef _OPENMP
+    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
+    answer.assemble(temp, gammaLoc);
+#ifdef _OPENMP
+    if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
+    // bp: can be a bug, answer changed after localization !
     // Finally, compute value of loadtimefunction
     double factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer.times(factor);

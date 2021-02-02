@@ -57,6 +57,7 @@
 #include "parallelcontext.h"
 #include "exportmodulemanager.h"
 #include "initmodulemanager.h"
+#include "monitormanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -252,6 +253,8 @@ protected:
     ExportModuleManager exportModuleManager;
     /// Initialization module manager.
     InitModuleManager initModuleManager;
+    /// Monitor manager.
+    MonitorManager monitorManager;
 
     /// Domain mode.
     problemMode pMode;

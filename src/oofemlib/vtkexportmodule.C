@@ -540,7 +540,7 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
                                            int offset, Domain *domain, int reg, int mode)
 {
     // if mode == 0 then regionNodalNumbers is array with mapping from global numbering to local region numbering.
-    // The i-th value contains the corresponding local region number (or zero, if global numbar is not in region).
+    // The i-th value contains the corresponding local region number (or zero, if global number is not in region).
 
     // if mode == 1 then regionNodalNumbers is array with mapping from local to global numbering.
     // The i-th value contains the corresponding global node number.

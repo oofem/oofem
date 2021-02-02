@@ -1,11 +1,12 @@
 cantilever_Qspace.out
 Cantilever 'beam' test from 3 Qspace elements
-#If considered as a beam, cross section width=2m, depth=1m, length=12m.
-#End deflection=FL3/3EI=345.6*F
-#Second step with end deflection 1.0m gives F=0.002893518 N, M(x=0m)=0.0347222 NM, sig_max(x=2m)=0.104166 Pa
-StaticStructural nsteps 3 nmodules 2
+#If considered as a beam, cross section width=2m, height=1.2m, length=12m.
+#End deflection=FL3/3EI=200*F
+#Second step with end deflection 1.0 m gives F=0.005 N, M(x=0m)=0.06 Nm, sig_max(x=0 m)=0.125 Pa, strain energy 2.5e-3 J (only sig_x, small contribution from shear)
+StaticStructural nsteps 3 nmodules 3
 errorcheck
 vtkxml tstep_all domain_all primvars 1 1 vars 3 1 2 4 stype 2
+hom tstep_all ists 2 1 4 strain_energy
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 44 nelem 3 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nset 3

@@ -160,8 +160,8 @@ protected:
     /// softening type determines the type of softening. 0 is exponential and 1 is bilinear.
     int softeningType = 0;
 
-    /// tensile stress value for bilinear stress-crack opening curve
-    double ftOne = 0.;
+    /// ratio of tensile stress value for bilinear stress-crack opening curve
+    double ftOneRatio = 0.;
 
     /// crack opening value for bilinear stress-crack opening curve
     double wfOne = 0.;
@@ -178,6 +178,10 @@ protected:
     //damageFlag
     int damageFlag = 0;
 
+    virtual double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const { return this->give(ft_strength, gp); }
+
+    virtual double giveCompressiveStrength(GaussPoint *gp, TimeStep *tStep) const { return this->give(fc_strength, gp); }
+
 public:
 
     /// Constructor
@@ -191,6 +195,8 @@ public:
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 
+    double give(int aProperty, GaussPoint *gp) const override;
+
     FloatMatrixF< 6, 6 >give3dLatticeStiffnessMatrix(MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
@@ -198,38 +204,40 @@ public:
     // Doesn't exist? old code:
     //FloatMatrix<X,X> computeBMatrix(const FloatArrayF<3> &sigma, const double deltaLambda) const;
 
-    FloatMatrixF<3,3> computeAMatrix(const FloatArrayF<3> &sigma, const double tempKappa,
-                        const double deltaLambda, GaussPoint *gp) const;
+    /* FloatMatrixF< 3, 3 >computeAMatrix(const FloatArrayF< 3 > &sigma, const double tempKappa, */
+    /*                                    const double deltaLambda, GaussPoint *gp) const; */
 
-    FloatArrayF<3> computeFVector(const FloatArrayF<3> &sigma, const double deltaLambda,
-                        GaussPoint *gp) const;
+    FloatArrayF< 3 >computeFVector(const FloatArrayF< 3 > &sigma, const double deltaLambda,
+                                   GaussPoint *gp, TimeStep *tStep) const;
 
-    FloatArrayF<3> computeMVector(const FloatArrayF<3> &sigma, const double deltaLambda,
-                        GaussPoint *gp) const;
+    FloatArrayF< 3 >computeMVector(const FloatArrayF< 3 > &sigma, const double deltaLambda,
+                                   GaussPoint *gp, TimeStep *tStep) const;
 
-    FloatMatrixF<3,3> computeDMMatrix(const FloatArrayF<3> &sigma, const double deltaLambda,
-                         GaussPoint *gp) const;
+    FloatMatrixF< 3, 3 >computeDMMatrix(const FloatArrayF< 3 > &sigma, const double deltaLambda,
+                                        GaussPoint *gp, TimeStep *tStep) const;
 
 
-    FloatMatrixF<4,4> computeJacobian(const FloatArrayF<3> &sigma, const double tempKappa,
-                         const double deltaLambda, GaussPoint *gp) const;
+    FloatMatrixF< 4, 4 >computeJacobian(const FloatArrayF< 3 > &sigma, const double tempKappa,
+                                        const double deltaLambda, GaussPoint *gp, TimeStep *tStep) const;
 
-    virtual double computeDamageParam(double kappaOne, double kappaTwo, GaussPoint *gp) const;
+    virtual double computeDamageParam(double kappaOne, double kappaTwo, GaussPoint *gp, TimeStep *tStep) const;
 
     FloatArrayF< 6 >giveLatticeStress3d(const FloatArrayF< 6 > &jump, GaussPoint *gp, TimeStep *tStep) override;
 
-    FloatArrayF<3> performPlasticityReturn(GaussPoint *gp,
-                                 const FloatArrayF<3> &totalStrain,
-                                 TimeStep *tStep) const;
+    FloatArrayF< 6 >performPlasticityReturn(GaussPoint *gp,
+                                            const FloatArrayF< 6 > &reducedStrain,
+                                            TimeStep *tStep) const;
 
     void performDamageEvaluation(GaussPoint *gp,
-                                 FloatArrayF<3> &reducedStrain) const;
+                                 FloatArrayF< 6 > &reducedStrain,
+                                 TimeStep *tStep) const;
 
-    double performRegularReturn(FloatArrayF<3> &stress, double yieldValue, GaussPoint *gp) const;
+    double performRegularReturn(FloatArrayF< 3 > &stress, double yieldValue, GaussPoint *gp, TimeStep *tStep) const;
 
-    double computeYieldValue(const FloatArrayF<3> &sigma,
+    double computeYieldValue(const FloatArrayF< 3 > &sigma,
                              const double tempKappa,
-                             GaussPoint *gp) const;
+                             GaussPoint *gp,
+                             TimeStep *tStep) const;
 
     double computeHardening(const double kappa,
                             GaussPoint *gp) const;
@@ -242,13 +250,14 @@ public:
 
     double computeDuctilityMeasure(FloatArray &stress, double ductilityParameter) const;
 
-    double computeYieldStress(double kappaP, GaussPoint *gp); const
+    double computeYieldStress(double kappaP, GaussPoint *gp);
+    const
 
     double computeEquivalentStress(const FloatArray &tempSigma) const;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    virtual FloatArrayF<6> giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
+    virtual FloatArrayF< 6 >giveReducedStrain(GaussPoint *gp, TimeStep *tStep) const;
 
 
 protected:

@@ -1,0 +1,41 @@
+test_wp5.out
+Winkler pasternak model: test of constant surface load in step 1 on linear elements. The same load applies in step 2, using equivalent nodal load instead.
+StaticStructural nsteps 2 nmodules 1
+#vtkxml tstep_all domain_all primvars 1 1 vars 4 1 2 4 10 stype 2
+errorcheck
+domain 2dMindlinPlate
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 4 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 2 nset 4
+node  1 coords 3  0.0  0.0  0.0
+node  2 coords 3  0.3  0.0  0.0
+node  3 coords 3  0.8  0.0  0.0
+node  4 coords 3  1.3  0.0  0.0
+node  5 coords 3  0.0  0.5  0.0
+node  6 coords 3  0.3  0.5  0.0
+node  7 coords 3  0.8  0.5  0.0
+node  8 coords 3  1.3  0.5  0.0
+quad1platesubsoil 1 nodes 4 1 2 6 5
+tria1platesubsoil 2 nodes 3 2 3 6
+tria1platesubsoil 3 nodes 3 3 7 6
+quad1platesubsoil 4 nodes 4 3 4 8 7
+SimpleCS 1 thick 1.0 material 1 set 1
+winklerpasternak 1 d 2500. c1 3.0 c2 0.4
+ConstantSurfaceLoad 1 loadTimeFunction 1 dofs 1 3 Components 1 7.0 set 2
+NodalLoad 2 loadTimeFunction 2 dofs 1 3 Components 1 0.2625 set 3
+NodalLoad 3 loadTimeFunction 2 dofs 1 3 Components 1 0.29166666666 set 4
+PeakFunction 1 t 1.0 f(t) 1.
+PeakFunction 2 t 2.0 f(t) 1.
+Set 1 allelements
+Set 2 elementboundaries 4 1 1 2 1
+Set 3 nodes 4 1 2 6 5
+Set 4 nodes 3 2 3 6
+#%BEGIN_CHECK% tolerance 5.e-4
+#NODE tStep 1 number 1 dof 3 unknown d value 1.82823013e+00
+#NODE tStep 1 number 2 dof 3 unknown d value 1.71134657e+00
+#NODE tStep 1 number 3 dof 3 unknown d value 6.75361433e-01
+#NODE tStep 1 number 4 dof 3 unknown d value 2.30473551e-01
+#NODE tStep 2 number 1 dof 3 unknown d value 1.82823013e+00
+#NODE tStep 2 number 2 dof 3 unknown d value 1.71134657e+00
+#NODE tStep 2 number 3 dof 3 unknown d value 6.75361433e-01
+#NODE tStep 2 number 4 dof 3 unknown d value 2.30473551e-01
+#%END_CHECK%

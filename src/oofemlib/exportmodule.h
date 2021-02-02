@@ -53,6 +53,7 @@
 #define _IFT_ExportModule_domainmask "domain_mask"
 #define _IFT_ExportModule_regionsets "regionsets"
 #define _IFT_ExportModule_timescale "timescale"
+#define _IFT_ExportModule_pythonexport "pythonexport"
 //@}
 
 namespace oofem {
@@ -108,6 +109,10 @@ protected:
 
     /// Returns element set
     Set *giveRegionSet(int i);
+    
+    ///Output is carried out as a python list instead of writing files
+    bool pythonExport;
+    
 
 public:
 

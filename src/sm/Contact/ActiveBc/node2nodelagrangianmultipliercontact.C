@@ -43,6 +43,10 @@
 #include "sparsemtrx.h"
 #include "classfactory.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 REGISTER_BoundaryCondition(Node2NodeLagrangianMultiplierContact);
 
@@ -69,7 +73,9 @@ Node2NodeLagrangianMultiplierContact :: initializeFrom(InputRecord &ir)
 
 void
 Node2NodeLagrangianMultiplierContact :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                                 CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale)
+                                                 CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, 
+                                                 double scale,
+                                                 void* lock)
 {
     if ( !this->useTangent || type != TangentStiffnessMatrix ) {
         return;
@@ -101,12 +107,30 @@ Node2NodeLagrangianMultiplierContact :: assemble(SparseMtrx &answer, TimeStep *t
             // to make the equation system regular in the case there is no contact we initialize the allocated equation to the following form 1*labmda = 0, forcing lagrange multiplier of inactive condition to be zero.
             FloatArray one(1);
             one.at(1) = 1;
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(lambdaeq.at(pos - 1), one);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         } else {
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(loc, lambdaeq.at(pos - 1), K);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
             FloatMatrix Kt;
             Kt.beTranspositionOf(K);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(lambdaeq.at(pos - 1), loc, Kt);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }
@@ -114,7 +138,9 @@ Node2NodeLagrangianMultiplierContact :: assemble(SparseMtrx &answer, TimeStep *t
 void
 Node2NodeLagrangianMultiplierContact :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                        CharType type, ValueModeType mode,
-                                                       const UnknownNumberingScheme &s, FloatArray *eNorms)
+                                                       const UnknownNumberingScheme &s, 
+                                                       FloatArray *eNorms,
+                                                       void* lock)
 {
     if ( masterSet.giveSize() != slaveSet.giveSize() ) {
         OOFEM_ERROR("Number of master nodes does not match number of slave nodes");
@@ -142,7 +168,13 @@ Node2NodeLagrangianMultiplierContact :: assembleVector(FloatArray &answer, TimeS
             masterNode->giveLocationArray(dofIdArray, loc, s);
             slaveNode->giveLocationArray(dofIdArray, s_loc, s);
             loc.followedBy(s_loc);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(n, loc);
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     } else if ( type == ExternalForcesVector ) {
         IntArray loc, c_loc;
@@ -156,7 +188,13 @@ Node2NodeLagrangianMultiplierContact :: assembleVector(FloatArray &answer, TimeS
             Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos) );
             Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos) );
             this->computeExternalForcesFromContact(fext, masterNode, slaveNode, tStep);
+#ifdef _OPENMP
+            if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
             answer.assemble(fext, lambdaeq.at(pos - 1) );
+#ifdef _OPENMP
+            if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
         }
     }
 }

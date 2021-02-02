@@ -808,12 +808,12 @@ void Lattice3dBoundary :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep
     dispTwo.at(6) = this->giveNode(2)->giveDofWithID(R_w)->giveUnknown(VM_Total, tStep);
 
     FloatArray dispThree(6);
-    dispThree.at(1) = this->giveNode(3)->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep);
-    dispThree.at(2) = this->giveNode(3)->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep);
-    dispThree.at(3) = this->giveNode(3)->giveDofWithID(D_w)->giveUnknown(VM_Total, tStep);
-    dispThree.at(4) = this->giveNode(3)->giveDofWithID(R_u)->giveUnknown(VM_Total, tStep);
-    dispThree.at(5) = this->giveNode(3)->giveDofWithID(R_v)->giveUnknown(VM_Total, tStep);
-    dispThree.at(6) = this->giveNode(3)->giveDofWithID(R_w)->giveUnknown(VM_Total, tStep);
+    dispThree.at(1) = this->giveNode(3)->giveDofWithID(E_xx)->giveUnknown(VM_Total, tStep);
+    dispThree.at(2) = this->giveNode(3)->giveDofWithID(E_yy)->giveUnknown(VM_Total, tStep);
+    dispThree.at(3) = this->giveNode(3)->giveDofWithID(E_zz)->giveUnknown(VM_Total, tStep);
+    dispThree.at(4) = this->giveNode(3)->giveDofWithID(G_yz)->giveUnknown(VM_Total, tStep);
+    dispThree.at(5) = this->giveNode(3)->giveDofWithID(G_xz)->giveUnknown(VM_Total, tStep);
+    dispThree.at(6) = this->giveNode(3)->giveDofWithID(G_xy)->giveUnknown(VM_Total, tStep);
 
     IntArray projectionComponentNodeOne(3);
     projectionComponentNodeOne.zero();

@@ -187,6 +187,8 @@ MPSMaterial :: initializeFrom(InputRecord &ir)
         p = 100.;
     }
 
+    IR_GIVE_FIELD(ir, lambda0, _IFT_MPSMaterial_lambda0);
+
     int mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_MPSMaterial_mode);
 
@@ -203,8 +205,6 @@ MPSMaterial :: initializeFrom(InputRecord &ir)
         IR_GIVE_FIELD(ir, q3, _IFT_MPSMaterial_q3);
         IR_GIVE_FIELD(ir, q4, _IFT_MPSMaterial_q4);
     }
-
-    IR_GIVE_FIELD(ir, lambda0, _IFT_MPSMaterial_lambda0);
 
     int type = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_MPSMaterial_coupledanalysistype);
@@ -242,6 +242,20 @@ MPSMaterial :: initializeFrom(InputRecord &ir)
         IR_GIVE_OPTIONAL_FIELD(ir, sh_a, _IFT_MPSMaterial_sh_a);
         IR_GIVE_OPTIONAL_FIELD(ir, sh_hC, _IFT_MPSMaterial_sh_hC);
         IR_GIVE_OPTIONAL_FIELD(ir, sh_n, _IFT_MPSMaterial_sh_n);
+
+
+        if ( ir.hasField(_IFT_MPSMaterial_factor_ksh_h) && ir.hasField(_IFT_MPSMaterial_factor_ksh_fh) ) {
+            IR_GIVE_FIELD(ir, ksh_h, _IFT_MPSMaterial_factor_ksh_h);
+            IR_GIVE_FIELD(ir, ksh_fh, _IFT_MPSMaterial_factor_ksh_fh);
+
+            if ( ksh_h.giveSize() != ksh_fh.giveSize() ) {
+                throw ValueInputException(ir, _IFT_MPSMaterial_factor_ksh_h, "the size of 'ksh_h' and 'ksh_f(h)' must be the same");
+            }
+        }
+
+        if ( ir.hasField(_IFT_MPSMaterial_timedependent_ksh) ) {
+            this->timeDependent_ksh = true;
+        }
 
         this->alphaE = 10.; // according to Bazant 1995
         IR_GIVE_OPTIONAL_FIELD(ir, alphaE, _IFT_MPSMaterial_alphae);
@@ -532,7 +546,7 @@ MPSMaterial :: predictParametersFrom(double fc, double c, double wc, double ac)
     char buff [ 1024 ];
     sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf", q1, q2, q3, q4);
     OOFEM_LOG_DEBUG("MPS[%d]: estimated params: %s\n", this->number, buff);
-    OOFEM_LOG_DEBUG("E28: %f\n", 1./computeCreepFunction(28+0.01, 28, NULL, NULL) );
+    OOFEM_LOG_DEBUG("E28: %f\n", 1. / computeCreepFunction(this->lambda0 * ( 28. + 0.01 ), this->lambda0 * 28., NULL, NULL) );
 }
 
 
@@ -543,16 +557,18 @@ MPSMaterial :: computeCreepFunction(double t, double t_prime, GaussPoint *gp, Ti
     // when load is acting from time t_prime
     // t-t_prime = duration of loading
 
+    // standard expressions which work with days - need to incorporate lambda0 to work in general
+
     double m = 0.5;
     double n = 0.1;
 
     // basic creep
-    double Qf = 1. / ( 0.086 * pow(t_prime, 2. / 9.) + 1.21 * pow(t_prime, 4. / 9.) );
-    double Z  = pow(t_prime, -m) * log(1. + pow(t - t_prime, n) );
-    double r  = 1.7 * pow(t_prime, 0.12) + 8.0;
+    double Qf = 1. / ( 0.086 * pow(t_prime / this->lambda0, 2. / 9.) + 1.21 * pow(t_prime / this->lambda0, 4. / 9.) );
+    double Z  = pow(t_prime / this->lambda0, -m) * log(1. + pow(t / this->lambda0 - t_prime / this->lambda0, n) );
+    double r  = 1.7 * pow(t_prime / this->lambda0, 0.12) + 8.0;
     double Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    double C0 = q2 * Q + q3 * log(1. + pow(t - t_prime, n) ) + q4 * log(t / t_prime);
+    double C0 = q2 * Q + q3 * log(1. + pow(t / this->lambda0 - t_prime / this->lambda0, n) ) + q4 * log(t / t_prime);
 
     return q1 + C0;
 }
@@ -1136,12 +1152,27 @@ MPSMaterial :: computePointShrinkageStrainVector(FloatArray &answer, GaussPoint 
         size = 6;
     }
 
-    double kShFactor;
+    double kShFactor = 1.;
     if ( this->sh_a != 1. ) {
         double h = this->giveHumidity(gp, tStep, 2);
         kShFactor =  sh_a + ( 1. - sh_a ) / ( 1. + pow( ( 1. - h ) / ( 1. - sh_hC ), sh_n ) );
-    } else {
-        kShFactor = 1.;
+    }
+
+
+    if ( ksh_h.giveSize() >= 2 ) {
+        double h = this->giveHumidity(gp, tStep, 2);
+        double tol = 1.e-10;
+        for ( int i = 2; i <= ksh_h.giveSize(); i++ ) {
+            if ( ( h - ksh_h.at(i) ) < tol ) {
+                kShFactor *=  ksh_fh.at(i - 1) + ( h - ksh_h.at(i - 1) ) * ( ksh_fh.at(i) - ksh_fh.at(i - 1) ) / ( ksh_h.at(i) - ksh_h.at(i - 1) );
+                break;
+            }
+        }
+    }
+
+    if ( this->timeDependent_ksh ) {
+        double te = this->computeEquivalentTime(gp, tStep, 0);
+        kShFactor *= MPSMaterial :: computeCreepFunction(te + 0.01 * this->lambda0, te, gp, tStep) / MPSMaterial :: computeCreepFunction(28.01 * this->lambda0, 28. * this->lambda0, gp, tStep);
     }
 
     double humDiff = this->giveHumidity(gp, tStep, 3);
@@ -1262,16 +1293,16 @@ MPSMaterial :: inverse_sorption_isotherm const
 // phi ... relative humidity
 // w_h, n, a ... constants obtained from experiments
 {
-   //relative humidity
-   double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
+    //relative humidity
+    double phi = exp(a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
-   /*if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
+    /*if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
      * OOFEM_ERROR("Relative humidity h = %e (w=%e) is out of range", phi, w);
      * }*/
-   //if ( phi < 0.20 ){ phi = 0.2;}
+    //if ( phi < 0.20 ){ phi = 0.2;}
     //if ( phi > 0.98 ){ phi = 0.98;}
 
-   return phi;
+    return phi;
 }
 #endif
 

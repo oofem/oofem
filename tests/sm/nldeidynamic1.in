@@ -1,0 +1,23 @@
+nldeidynamic1.out
+truss to test nldeidynamic
+NlDEIDynamic nsteps 1 nmodules 1 contextOutputStep 1000000 dumpcoef 0. deltat 0.0001 reduct 0.8 profileopt 1
+errorcheck
+domain 3d
+OutputManager tstep_all dofman_output { 1 3 }
+ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2
+node 1 coords 3 5.000000e-02 5.000000e-02 0.000000e+00 bc 3 1 1 1
+node 2 coords 3 5.000000e-02 5.000000e-02 2.000000e-02
+node 3 coords 3 5.000000e-02 5.000000e-02 4.000000e-02 bc 3 1 1 2
+truss3d 1 nodes 2 1 2 crossSect 1 mat 1
+truss3d 2 nodes 2 2 3 crossSect 1 mat 1
+SimpleCS 1 area 2.0106e-4 
+isole 1 d 7600 n 0.2 e 200.00e9 talpha 0.
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition  2 loadTimeFunction 2 prescribedvalue 0.00015 
+ConstantFunction 1 f(t) 1.0  
+PiecewiseLinFunction 2 t 2 0. 0.1 f(t) 2 0.0 1.0
+
+#%BEGIN_CHECK% 
+#NODE tStep 22 number 3 dof 3 unknown d value 6.61634340e-09 tolerance 1.e-12
+#REACTION tStep 22 number 1 dof 3 value 1.3303e+01 tolerance 1.e-3
+#%END_CHECK%

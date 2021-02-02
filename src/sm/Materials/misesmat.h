@@ -48,6 +48,9 @@
 #define _IFT_MisesMat_Name "misesmat"
 #define _IFT_MisesMat_sig0 "sig0"
 #define _IFT_MisesMat_h "h"
+#define _IFT_MisesMat_htype "htype"
+#define _IFT_MisesMat_h_eps "h_eps"
+#define _IFT_MisesMat_h_function_eps "h(eps)"
 #define _IFT_MisesMat_omega_crit "omega_crit"
 #define _IFT_MisesMat_a "a"
 #define _IFT_MisesMat_yieldTol "yieldtol"
@@ -88,6 +91,12 @@ protected:
     /// Initial (uniaxial) yield stress.
     ScalarFunction sig0;
 
+    /// type of hardening function
+    int hType;
+
+    /// user-defined hardening (yield stress - kappa)
+    FloatArray h_eps, h_function_eps;
+
     /// critical(maximal) damage.
     double omega_crit = 0.;
     /// exponent in damage function.
@@ -100,8 +109,9 @@ public:
     MisesMat(int n, Domain *d);
 
     void performPlasticityReturn(const FloatArray &totalStrain, GaussPoint *gp, TimeStep *tStep) const;
-    void performPlasticityReturn_PlaneStress(const FloatArrayF<3> &totalStrain, GaussPoint *gp, TimeStep *tStep) const;
+    void performPlasticityReturn_PlaneStress(const FloatArrayF< 3 > &totalStrain, GaussPoint *gp, TimeStep *tStep) const;
 
+    double checkYieldStress(double &dKappa, double kappa, GaussPoint *gp, TimeStep *tStep) const;
     double computeYieldStress(double kappa, GaussPoint *gp, TimeStep *tStep) const;
     double computeYieldStressPrime(double kappa) const;
 
@@ -119,17 +129,17 @@ public:
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 
-    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 3, 3 >givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 1, 1 >give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveRealStressVector_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF<3> &totalStrain, GaussPoint *gp,TimeStep *tStep) const override;
+    FloatArrayF< 3 >giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &totalStrain, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatArrayF<1> giveRealStressVector_1d(const FloatArrayF<1> &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 1 >giveRealStressVector_1d(const FloatArrayF< 1 > &reducedE, GaussPoint *gp, TimeStep *tStep) const override;
 
     double give(int aProperty, GaussPoint *gp, TimeStep *tStep) const;
     double giveTemperature(GaussPoint *gp, TimeStep *tStep) const;

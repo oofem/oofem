@@ -118,6 +118,9 @@ public:
 
     /// Returns the type of receiver
     FieldType giveType() { return type; }
+    
+    /// Sets the type of receiver
+    void setType(FieldType b) { type=b; }
 
     /**
      * Stores receiver state to output stream.

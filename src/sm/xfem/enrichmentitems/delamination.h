@@ -80,6 +80,7 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
     int instanciateYourself(DataReader &dr) override;
+    void postInitialize() override;
     void appendInputRecords(DynamicDataReader &oDR) override;
 
     const char *giveClassName() const override { return "Delamination"; }

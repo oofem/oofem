@@ -58,6 +58,7 @@ public:
     virtual ~GeometryBasedEI();
 
     int instanciateYourself(DataReader &dr) override;
+    void postInitialize() override;  
 
     virtual void updateDofIdPool();
 

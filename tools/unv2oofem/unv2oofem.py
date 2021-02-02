@@ -116,6 +116,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             for igroup in elem.oofem_groups:
                 #print igroup.name
                 properties+=igroup.oofem_properties
+                #print('Properties', properties)
             #Do output if oofem_elemtype resolved and not BoundaryLoads
             if ( elem.oofem_elemtype):
                 if(CTRL.oofem_elemProp[elem.oofem_elemtype].name != 'RepresentsBoundaryLoad'):

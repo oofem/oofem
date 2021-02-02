@@ -184,6 +184,11 @@ set (core_export
     gpexportmodule.C
     )
 
+set (core_monitors
+    monitormanager.C
+    monitor.C
+    )
+
 set (core_iga
     iga/iga.C
     iga/feibspline.C
@@ -342,6 +347,7 @@ set (core
     ${core_dofman}
     ${core_material}
     ${core_export}
+    ${core_monitors}
     ${core_ltf}
     ${core_cs}
     ${core_arrays}

@@ -114,15 +114,16 @@ class ContactManager;
  */
 class OOFEM_EXPORT Domain
 {
-private:
+    public:
     /// Element list.
     std :: vector< std :: unique_ptr< Element > > elementList;
     /// Dof manager list.
     std :: vector< std :: unique_ptr< DofManager > > dofManagerList;
+    /// Cross section list.
+    std :: vector< std :: unique_ptr< CrossSection > > crossSectionList;    
+private:
     /// Material list.
     std :: vector< std :: unique_ptr< Material > > materialList;
-    /// Cross section list.
-    std :: vector< std :: unique_ptr< CrossSection > > crossSectionList;
     /// Boundary condition list.
     std :: vector< std :: unique_ptr< GeneralBoundaryCondition > > bcList;
     /// Initial condition list.
@@ -703,9 +704,9 @@ public:
     /// sets the value of nonlocalUpdateStateCounter
     void setNonlocalUpdateStateCounter(StateCounterType val) { this->nonlocalUpdateStateCounter = val; }
 
-private:
     void resolveDomainDofsDefaults(const char *);
 
+private:
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;
 

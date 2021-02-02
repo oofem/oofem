@@ -49,6 +49,7 @@
 namespace oofem {
 REGISTER_Element(QBrick1_ht);
 REGISTER_Element(QBrick1_hmt);
+REGISTER_Element(QBrick1_mt);
 
 FEI3dHexaQuad QBrick1_ht :: interpolation;
 
@@ -61,6 +62,11 @@ QBrick1_ht :: QBrick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, 
 QBrick1_hmt :: QBrick1_hmt(int n, Domain *aDomain) : QBrick1_ht(n, aDomain)
 {
     emode = HeatMass1TransferEM;
+}
+
+QBrick1_mt :: QBrick1_mt(int n, Domain *aDomain) : QBrick1_ht(n, aDomain)
+{
+    emode = Mass1TransferEM;
 }
 
 

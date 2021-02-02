@@ -58,9 +58,6 @@
 // in input record t0 replaced by relMatAge
 //#define _IFT_MPSMaterial_t0 "t0"
 #define _IFT_MPSMaterial_ksh "ksh"
-//#define _IFT_MPSMaterial_wh "w_h"
-//#define _IFT_MPSMaterial_ncoeff "ncoeff"
-//#define _IFT_MPSMaterial_a "a"
 #define _IFT_MPSMaterial_qetor "qetor"
 #define _IFT_MPSMaterial_qrtor "qrtor"
 #define _IFT_MPSMaterial_qstor "qstor"
@@ -77,6 +74,9 @@
 #define _IFT_MPSMaterial_sh_a "sh_a"
 #define _IFT_MPSMaterial_sh_hC "sh_hc"
 #define _IFT_MPSMaterial_sh_n "sh_n"
+#define _IFT_MPSMaterial_factor_ksh_h "factor_ksh_h"
+#define _IFT_MPSMaterial_factor_ksh_fh "factor_ksh_f(h)"
+#define _IFT_MPSMaterial_timedependent_ksh "timedependent_ksh"
 #define _IFT_MPSMaterial_alpha_as "alpha_as"
 #define _IFT_MPSMaterial_eps_cas0 "eps_cas0"
 #define _IFT_MPSMaterial_B4_eps_au_infty "b4_eps_au_infty"
@@ -112,7 +112,7 @@ protected:
     /// flag for Emodulus - true if modulus has been already computed in the current time step
     bool storedEmodulusFlag = false;
     double storedEmodulus = -1.;
-    
+
 #ifdef keep_track_of_strains
     double dryingShrinkageStrain = 0.;
     double tempDryingShrinkageStrain = 0.;
@@ -240,6 +240,10 @@ protected:
     double p = 0.;
     /// parameters for nonlinear shrinkage function
     double sh_a = 0., sh_hC = 0., sh_n = 0.;
+    /// flag activating equivalent-time-dependence of shrinkage coefficient
+    bool timeDependent_ksh = false;
+    /// nonlinear shrinkage function - user-defined piecewise-linear function
+    FloatArray ksh_h, ksh_fh;
     /// parameter for autogenous shrinkage according to fib MC 2010
     double eps_cas0 = 0.;
     /// parameters for autogenous shrinkage according to B4 model
@@ -250,6 +254,8 @@ protected:
 
     /// 0 for Kelvin, 273.15 for Celsius
     double temperScaleDifference = 0.;
+
+
 
 
 public:

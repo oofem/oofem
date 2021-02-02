@@ -94,14 +94,29 @@ public:
         ConcreteDPM2_VertexCompressionDamage,
         ConcreteDPM2_VertexTensionDamage
     };
+
+    enum ConcreteDPM2_ReturnType {
+        RT_Regular,
+        RT_Tension,
+        RT_Compression,
+        RT_Auxiliary
+    };
+
+    enum ConcreteDPM2_ReturnResult {
+        RR_NotConverged,
+        RR_Converged
+    };
+
+
 protected:
+
     /// @name History variables of the plasticity model
     //@{
-    FloatArrayF<6> plasticStrain;
-    FloatArrayF<6> tempPlasticStrain;
-    
-    FloatArrayF<6> reducedStrain;
-    FloatArrayF<6> tempReducedStrain;
+    FloatArrayF< 6 >plasticStrain;
+    FloatArrayF< 6 >tempPlasticStrain;
+
+    FloatArrayF< 6 >reducedStrain;
+    FloatArrayF< 6 >tempReducedStrain;
     //@}
 
     /// @name Hardening variable
@@ -160,8 +175,16 @@ protected:
     double tempRateStrain = 0.;
 
     /// Indicates the state (i.e. elastic, unloading, plastic, damage, vertex) of the Gauss point
-    int state_flag = ConcreteDPM2Status :: ConcreteDPM2_Elastic;
-    int temp_state_flag = ConcreteDPM2Status :: ConcreteDPM2_Elastic;
+    int state_flag = ConcreteDPM2Status::ConcreteDPM2_Elastic;
+    int temp_state_flag = ConcreteDPM2Status::ConcreteDPM2_Elastic;
+
+    int returnType = ConcreteDPM2Status::RT_Regular;
+    int tempReturnType = ConcreteDPM2Status::RT_Regular;
+
+    int returnResult = ConcreteDPM2Status::RR_NotConverged;
+    int tempReturnResult = ConcreteDPM2Status::RR_NotConverged;
+
+
 #ifdef keep_track_of_dissipated_energy
     /// Density of total work done by stresses on strain increments.
     double stressWork = 0.;
@@ -184,26 +207,27 @@ public:
     void restoreContext(DataStream &stream, ContextMode mode) override;
     const char *giveClassName() const override { return "ConcreteDPM2Status"; }
 
+
     // Inline functions for access to state variables
 
     /**
      * Get the reduced strain vector from the material status.
      * @return Strain vector.
      */
-    const FloatArrayF<6> &giveReducedStrain() const { return reducedStrain; }
+    const FloatArrayF< 6 > &giveReducedStrain() const { return reducedStrain; }
 
     /**
      * Get the reduced strain vector from the material status.
      * @return Strain vector.
      */
-    const FloatArrayF<6> &giveTempReducedStrain() const { return tempReducedStrain; }
+    const FloatArrayF< 6 > &giveTempReducedStrain() const { return tempReducedStrain; }
 
 
     /**
      * Get the plastic strain vector from the material status.
      * @return Strain vector.
      */
-    const FloatArrayF<6> &givePlasticStrain() const { return plasticStrain; }
+    const FloatArrayF< 6 > &givePlasticStrain() const { return plasticStrain; }
 
     /**
      * Get the deviatoric plastic strain norm from the material status.
@@ -211,9 +235,9 @@ public:
      */
     double giveDeviatoricPlasticStrainNorm() const
     {
-        auto dev = StructuralMaterial :: computeDeviator(plasticStrain);
-        return sqrt( .5 * ( 2. * dev [ 0 ] * dev [ 0 ] + 2. * dev [ 1 ] * dev [ 1 ] + 2. * dev [ 2 ] * dev [ 2 ] +
-                    dev [ 3 ] * dev [ 3 ] + dev [ 4 ] * dev [ 4 ] + dev [ 5 ] * dev [ 5 ] ) );
+        auto dev = StructuralMaterial::computeDeviator(plasticStrain);
+        return sqrt(.5 * ( 2. * dev [ 0 ] * dev [ 0 ] + 2. * dev [ 1 ] * dev [ 1 ] + 2. * dev [ 2 ] * dev [ 2 ] +
+                           dev [ 3 ] * dev [ 3 ] + dev [ 4 ] * dev [ 4 ] + dev [ 5 ] * dev [ 5 ] ) );
     }
 
     /**
@@ -222,7 +246,7 @@ public:
      */
     double giveVolumetricPlasticStrain() const
     {
-        return 1. / 3. * ( plasticStrain[0] + plasticStrain[1] + plasticStrain[2] );
+        return 1. / 3. * ( plasticStrain [ 0 ] + plasticStrain [ 1 ] + plasticStrain [ 2 ] );
     }
 
     /**
@@ -342,6 +366,7 @@ public:
     int giveStateFlag() const
     { return state_flag; }
 
+
     // giveTemp:
 
     // Functions used to access the temp variables.
@@ -349,13 +374,13 @@ public:
      * Get the temp value of the full plastic strain vector from the material status.
      * @return Temp value of plastic strain vector.
      */
-    const FloatArrayF<6> &giveTempPlasticStrain() const { return tempPlasticStrain; }
+    const FloatArrayF< 6 > &giveTempPlasticStrain() const { return tempPlasticStrain; }
 
     /**
      *  Get the temp value of the volumetric plastic strain in plane stress
      */
     double giveTempVolumetricPlasticStrain() const
-    { return 1. / 3. * ( tempPlasticStrain[0] + tempPlasticStrain[1] + tempPlasticStrain[2] ); }
+    { return 1. / 3. * ( tempPlasticStrain [ 0 ] + tempPlasticStrain [ 1 ] + tempPlasticStrain [ 2 ] ); }
 
     /**
      * Get the temp value of the hardening variable of the plasticity model
@@ -416,17 +441,20 @@ public:
     int giveTempStateFlag() const
     { return temp_state_flag; }
 
+    int giveTempReturnType() const { return tempReturnType; }
+    int giveTempReturnResult() const { return tempReturnResult; }
+
     // letTemp...be :
     // Functions used by the material to assign a new value to a temp variable.
     /**
      * Assign the temp value of deviatoric plastic strain.
      * @param v New temp value of deviatoric plastic strain
      */
-    void letTempPlasticStrainBe(const FloatArrayF<6> &v)
+    void letTempPlasticStrainBe(const FloatArrayF< 6 > &v)
     { tempPlasticStrain = v; }
 
 
-    void letTempReducedStrainBe(const FloatArrayF<6> &v)
+    void letTempReducedStrainBe(const FloatArrayF< 6 > &v)
     { tempReducedStrain = v; }
 
 
@@ -539,6 +567,10 @@ public:
     void letTempStateFlagBe(const int v)
     { temp_state_flag = v; }
 
+    void letTempReturnTypeBe(const int type) { tempReturnType = type; }
+
+    void letTempReturnResultBe(const int result) { tempReturnResult = result; }
+
     void letKappaPPeakBe(double kappa)
     { kappaPPeak = kappa; }
 #ifdef keep_track_of_dissipated_energy
@@ -585,11 +617,13 @@ class ConcreteDPM2 : public StructuralMaterial
 public:
 
 protected:
-    enum ConcreteDPM2_ReturnType { RT_Regular, RT_Tension, RT_Compression, RT_Auxiliary };
-    mutable ConcreteDPM2_ReturnType returnType = RT_Regular; /// FIXME These must be replaced with return values in function calls. Material models must never have mutable state. The existance of this variable breaks openmp support.
+    // moved to material status (openmp issue)
+    // enum ConcreteDPM2_ReturnType { RT_Regular, RT_Tension, RT_Compression, RT_Auxiliary };
+    // mutable ConcreteDPM2_ReturnType returnType = RT_Regular; /// FIXME These must be replaced with return values in function calls. Material models must never have mutable state. The existance of this variable breaks openmp support.
 
-    enum ConcreteDPM2_ReturnResult { RR_NotConverged, RR_Converged };
-    mutable ConcreteDPM2_ReturnResult returnResult = RR_NotConverged; /// FIXME These must be replaced with return values in function calls. Material models must never have mutable state. The existance of this variable breaks openmp support.
+    // moved to material status (openmp issue)
+    // enum ConcreteDPM2_ReturnResult { RR_NotConverged, RR_Converged };
+    // mutable ConcreteDPM2_ReturnResult returnResult = RR_NotConverged; /// FIXME These must be replaced with return values in function calls. Material models must never have mutable state. The existance of this variable breaks openmp support.
 
     /// Parameters of the yield surface of the plasticity model. fc is the uniaxial compressive strength, ft the uniaxial tensile strength and ecc controls the out of roundness of the deviatoric section.
     double fc = 0., ft = 0., ecc = 0.;
@@ -676,15 +710,15 @@ protected:
      * 2 = Model Code 2010 initial and second branch of strain rate effect for strength
      */
     int strengthRateType = 0;
-    
+
     /** Type of energy strain rate dependence used if strengthRateType >0 .
      * 0 = mod. CEB strain rate effect for strength with constant fracture energy
      * 1 = CEB strain rate effect for strength and linear for fracture energy
      * 2 = mod. CEB strain rate effect for strength and squared for fracture energy
-
+     *
      */
     int energyRateType = 0;
-    
+
 public:
     /// Constructor
     ConcreteDPM2(int n, Domain *d);
@@ -696,7 +730,7 @@ public:
 
     //void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep) override;
 
-    FloatArrayF<6> giveRealStressVector_3d(const FloatArrayF<6> &strain, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF< 6 >giveRealStressVector_3d(const FloatArrayF< 6 > &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
@@ -706,9 +740,9 @@ public:
      * @param D stiffness matrix
      * @param strain Strain vector of this Gauss point.
      */
-    FloatArrayF<6> performPlasticityReturn(GaussPoint *gp,
-                                           const FloatMatrixF<6,6> &D,
-                                           const FloatArrayF<6> &strain) const;
+    FloatArrayF< 6 >performPlasticityReturn(GaussPoint *gp,
+                                            const FloatMatrixF< 6, 6 > &D,
+                                            const FloatArrayF< 6 > &strain) const;
 
     /**
      * Check if the trial stress state falls within the vertex region of the plasticity model at the apex of triaxial extension or triaxial compression.
@@ -717,11 +751,13 @@ public:
      * @param sig Volumetric stress.
      * @param tempKappa Hardening variable.
      * @param mode1d
+     * @param gp Gauss point
      */
     void checkForVertexCase(double &answer,
                             double sig,
                             double tempKappa,
-                            bool mode1d) const;
+                            bool mode1d,
+                            GaussPoint *gp) const;
 
     /**
      * Perform regular stress return for the plasticity model, i.e. if the trial stress state does not lie in the vertex region.
@@ -730,7 +766,7 @@ public:
      * @param gp Gauss point.
      * @param theta Load angle of trial stress (remains constant throughout return).
      */
-    double performRegularReturn(FloatArrayF<6> &stress,
+    double performRegularReturn(FloatArrayF< 6 > &stress,
                                 double kappaP,
                                 GaussPoint *gp,
                                 double theta) const;
@@ -744,11 +780,11 @@ public:
      * @param gp Gauss point
      */
 
-    FloatMatrixF<3,3> compute1dJacobian(double totalsigma,
-                                        double theta,
-                                        double tempKappa,
-                                        double deltaLambda,
-                                        GaussPoint *gp) const;
+    FloatMatrixF< 3, 3 >compute1dJacobian(double totalsigma,
+                                          double theta,
+                                          double tempKappa,
+                                          double deltaLambda,
+                                          GaussPoint *gp) const;
     /**
      * Compute jacobian for 2D(plane strain) and 3d cases
      * @param sig volumetric strain
@@ -757,12 +793,12 @@ public:
      * @param deltaLambda plastic multiplier
      * @param gp Gauss point
      */
-    FloatMatrixF<4,4> computeJacobian(double sig,
-                                      double rho,
-                                      double theta,
-                                      double tempKappa,
-                                      double deltaLambda,
-                                      GaussPoint *gp) const;
+    FloatMatrixF< 4, 4 >computeJacobian(double sig,
+                                        double rho,
+                                        double theta,
+                                        double tempKappa,
+                                        double deltaLambda,
+                                        GaussPoint *gp) const;
 
     /**
      * Perform stress return for vertex case of the plasticity model, i.e. if the trial stress state lies within the vertex region.
@@ -773,7 +809,7 @@ public:
      * @param gp Gauss point.
      * @returns updated temporary cummulative plastic strain
      */
-    double performVertexReturn(FloatArrayF<6> &stress,
+    double performVertexReturn(FloatArrayF< 6 > &stress,
                                double apexStress,
                                double tempKappaP,
                                GaussPoint *gp) const;
@@ -872,10 +908,10 @@ public:
      * @param theta Lode angle.
      * @param tempKappa plastic strain
      */
-    FloatArrayF<2> computeDDuctilityMeasureDInv(double sig,
-                                                double rho,
-                                                double theta,
-                                                double tempKappa) const;
+    FloatArrayF< 2 >computeDDuctilityMeasureDInv(double sig,
+                                                 double rho,
+                                                 double theta,
+                                                 double tempKappa) const;
     /**
      * Compute derivative the ductility measure with respect to  the stress state.
      * @return The derivative of the ductility measure with respect to stress
@@ -892,9 +928,9 @@ public:
      * @param rho deviatoric stress.
      * @param tempKappa plastic strain
      */
-    FloatArrayF<2> computeDGDInv(double sig,
-                                 double rho,
-                                 double tempKappa) const;
+    FloatArrayF< 2 >computeDGDInv(double sig,
+                                  double rho,
+                                  double tempKappa) const;
     /**
      * Compute derivative the palstic potential function with respect to  the stress state.
      * @param return The derivative of the plastic potential with respect to stress
@@ -924,9 +960,9 @@ public:
      * 3D: Second derivative of the plastic potential with respect to the
      * invariants sig and rho are computed.
      */
-    FloatMatrixF<2,2> computeDDGDDInv(double sig,
-                                      double rho,
-                                      double tempKappa) const;
+    FloatMatrixF< 2, 2 >computeDDGDDInv(double sig,
+                                        double rho,
+                                        double tempKappa) const;
     /**
      * 1D: The second derivative of the plastic potential with respect to the
      * invariants sig and rho are computed.
@@ -937,9 +973,9 @@ public:
      * 3D: The mixed derivative of the plastic potential with respect
      * to the invariants and the hardening parameter are determined.
      */
-    FloatArrayF<2> computeDDGDInvDKappa(double sig,
-                                        double rho,
-                                        double tempKappa) const;
+    FloatArrayF< 2 >computeDDGDInvDKappa(double sig,
+                                         double rho,
+                                         double tempKappa) const;
 
     /**
      * 1D: The mixed derivative of the plastic potential with respect
@@ -953,10 +989,10 @@ public:
      * respect to the plastic multiplier delta Lambda and the invariants sig
      * and rho.
      */
-    FloatArrayF<2> computeDDKappaDDeltaLambdaDInv(double sig,
-                                                  double rho,
-                                                  double theta,
-                                                  double tempKappa) const;
+    FloatArrayF< 2 >computeDDKappaDDeltaLambdaDInv(double sig,
+                                                   double rho,
+                                                   double theta,
+                                                   double tempKappa) const;
     /**
      * For 1D: Computes the mixed derivative of the hardening parameter kappa with
      * respect to the plastic multiplier delta Lambda and the invariants sig
@@ -979,10 +1015,10 @@ public:
      * Computes the derivative of the yield surface with respect to the
      * invariants sig and rho.
      */
-    FloatArrayF<2> computeDFDInv(double sig,
-                                 double rho,
-                                 double theta,
-                                 double tempKappa) const;
+    FloatArrayF< 2 >computeDFDInv(double sig,
+                                  double rho,
+                                  double theta,
+                                  double tempKappa) const;
 
     /**
      * 1D: Computes the derivative of the yield surface with respect to the
@@ -1001,7 +1037,7 @@ public:
     /**
      * Compute damage parameters
      */
-    FloatArrayF<2> computeDamage(const FloatArrayF<6> &strain, const FloatMatrixF<6,6> &D, double timeFactor, GaussPoint *gp, TimeStep *tStep, double alpha, const FloatArrayF<6> &effectiveStress) const;
+    FloatArrayF< 2 >computeDamage(const FloatArrayF< 6 > &strain, const FloatMatrixF< 6, 6 > &D, double timeFactor, GaussPoint *gp, TimeStep *tStep, double alpha, const FloatArrayF< 6 > &effectiveStress) const;
 
 
     /**
@@ -1009,10 +1045,10 @@ public:
      */
     int checkForUnAndReloading(double &tempEquivStrain,
                                double &minEquivStrain,
-                               const FloatMatrixF<6,6> &D,
+                               const FloatMatrixF< 6, 6 > &D,
                                GaussPoint *gp) const;
 
-    double computeAlpha(FloatArrayF<6> &effectiveStressTension, FloatArrayF<6> &effectiveStressCompression, const FloatArrayF<6> &effectiveStress) const;
+    double computeAlpha(FloatArrayF< 6 > &effectiveStressTension, FloatArrayF< 6 > &effectiveStressCompression, const FloatArrayF< 6 > &effectiveStress) const;
 
     /// Compute damage parameter in tension.
     virtual double computeDamageParamTension(double equivStrain, double kappaOne, double kappaTwo, double le, double omegaOld, double rateFactor) const;
@@ -1037,24 +1073,24 @@ public:
      * Set the increase factor for the strain rate dependence
      */
     void initDamaged(double kappa,
-                     const FloatArrayF<6> &strain,
+                     const FloatArrayF< 6 > &strain,
                      GaussPoint *gp) const;
 
     /// Compute the Haigh-Westergaard coordinates.
-    void computeCoordinates(const FloatArrayF<6> &stress, double &sig, double &rho, double &theta) const;
+    void computeCoordinates(const FloatArrayF< 6 > &stress, double &sig, double &rho, double &theta) const;
 
 
     /// Assign state flag.
     void assignStateFlag(GaussPoint *gp) const;
 
     /// Computes the derivative of rho with respect to the stress.
-    FloatArrayF<6> computeDRhoDStress(const FloatArrayF<6> &stress) const;
+    FloatArrayF< 6 >computeDRhoDStress(const FloatArrayF< 6 > &stress) const;
 
     /// Computes the derivative of sig with respect to the stress.
-    FloatArrayF<6> computeDSigDStress() const;
+    FloatArrayF< 6 >computeDSigDStress() const;
 
     /// Computes the seconfd derivative of rho with the respect to the stress.
-    FloatMatrixF<3,3> computeDDRhoDDStress(const FloatArrayF<6> &stress) const;
+    FloatMatrixF< 3, 3 >computeDDRhoDDStress(const FloatArrayF< 6 > &stress) const;
 
     /// Computes the derivative of costheta with respect to the stress.
     void computeDCosThetaDStress(FloatArray &answer,
@@ -1063,12 +1099,12 @@ public:
     /// Compute the derivative of R with respect to costheta.
     double computeDRDCosTheta(double theta, double ecc) const;
 
-    FloatMatrixF<1,1> give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 1, 1 >give1dStressStiffMtrx(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
-    FloatMatrixF<6,6> give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatMatrixF< 6, 6 >give3dMaterialStiffnessMatrix(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) const override;
 
     /// Compute the 3d secant stiffness matrix.
-    FloatMatrixF<6,6> compute3dSecantStiffness(GaussPoint *gp, TimeStep *tStep) const;
+    FloatMatrixF< 6, 6 >compute3dSecantStiffness(GaussPoint *gp, TimeStep *tStep) const;
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return false; }
 

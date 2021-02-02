@@ -56,14 +56,16 @@ StructuralMaterialStatus :: StructuralMaterialStatus(GaussPoint *g) :
         return;
     }
     if ( NLStructuralElement * el = dynamic_cast< NLStructuralElement * >( gp->giveElement() ) ) {
-        if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
-            PVector.resize(9);
-            FVector.resize(9);
-            FVector.at(1) = FVector.at(2) = FVector.at(3) = 1.;
-        }
-        tempPVector = PVector;
-        tempFVector = FVector;
+      if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
+	PVector.resize(9);
+	FVector.resize(9);
+	FVector.at(1) = FVector.at(2) = FVector.at(3) = 1.;
+	tempPVector = PVector;
+	tempFVector = FVector;
+	
+      }
     }
+
 }
 
 
@@ -73,18 +75,32 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep) cons
     FloatArray helpVec;
 
     MaterialStatus :: printOutputAt(File, tStep);
-
-    fprintf(File, "  strains ");
-    StructuralMaterial :: giveFullSymVectorForm( helpVec, strainVector, gp->giveMaterialMode() );
-    for ( auto &var : helpVec ) {
+    NLStructuralElement * el = static_cast< NLStructuralElement * >( gp->giveElement());
+    if ( el->giveGeometryMode() == 1) {
+      fprintf(File, "  F ");
+      StructuralMaterial :: giveFullVectorFormF( helpVec, FVector, gp->giveMaterialMode() );
+      for ( auto &var : helpVec ) {
         fprintf( File, " %.4e", var );
-    }
+      }
 
-    fprintf(File, "\n              stresses");
-    StructuralMaterial :: giveFullSymVectorForm( helpVec, stressVector, gp->giveMaterialMode() );
-
-    for ( auto &var : helpVec ) {
+      fprintf(File, "\n  P");
+      StructuralMaterial :: giveFullVectorForm( helpVec, PVector, gp->giveMaterialMode() );
+      for ( auto &var : helpVec ) {
         fprintf( File, " %.4e", var );
+      }
+    } else {
+      fprintf(File, "  strains ");
+      StructuralMaterial :: giveFullSymVectorForm( helpVec, strainVector, gp->giveMaterialMode() );
+      for ( auto &var : helpVec ) {
+        fprintf( File, " %.4e", var );
+      }
+      
+      fprintf(File, "\n              stresses");
+      StructuralMaterial :: giveFullSymVectorForm( helpVec, stressVector, gp->giveMaterialMode() );
+      
+      for ( auto &var : helpVec ) {
+        fprintf( File, " %.4e", var );
+      }
     }
     fprintf(File, "\n");
 }

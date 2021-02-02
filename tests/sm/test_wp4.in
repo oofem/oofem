@@ -1,8 +1,8 @@
 test_wp4.out
 Winkler pasternak model: test of settlement profile, quadratic triagle elements
-linearstatic nsteps 1 nmodules 2
+linearstatic nsteps 1 nmodules 1
 errorcheck
-vtkxml tstep_step 1 domain_all primvars 1 1  vars 3 1 2 4 stype 2
+#vtkxml tstep_step 1 domain_all primvars 1 1  vars 3 1 2 4 stype 2
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 13 nelem 4 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 1 nset 2

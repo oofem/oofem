@@ -61,44 +61,52 @@
 namespace oofem {
 REGISTER_ExportModule(VTKXMLLatticeExportModule)
 
-VTKXMLLatticeExportModule :: VTKXMLLatticeExportModule(int n, EngngModel *e) : VTKXMLExportModule(n, e)
+VTKXMLLatticeExportModule::VTKXMLLatticeExportModule(int n, EngngModel *e) : VTKXMLExportModule(n, e)
 {
     //Find out the element type and elemNodes
 }
 
 
-VTKXMLLatticeExportModule :: ~VTKXMLLatticeExportModule()
+VTKXMLLatticeExportModule::~VTKXMLLatticeExportModule()
 {}
 
 
 void
-VTKXMLLatticeExportModule :: initializeFrom(InputRecord &ir)
+VTKXMLLatticeExportModule::initializeFrom(InputRecord &ir)
 {
-    VTKXMLExportModule :: initializeFrom(ir);
+    VTKXMLExportModule::initializeFrom(ir);
     this->crossSectionExportFlag = false;
     IR_GIVE_OPTIONAL_FIELD(ir, this->crossSectionExportFlag, _IFT_VTKXMLLatticeExportModule_cross);
 }
 
-std :: string
-VTKXMLLatticeExportModule :: giveOutputFileNameCross(TimeStep *tStep)
+std::string
+VTKXMLLatticeExportModule::giveOutputFileNameCross(TimeStep *tStep)
 {
     return this->giveOutputBaseFileName(tStep) + ".cross.vtu";
 }
 
-FILE *
-VTKXMLLatticeExportModule :: giveOutputStreamCross(TimeStep *tStep)
+std::ofstream
+VTKXMLLatticeExportModule::giveOutputStreamCross(TimeStep *tStep)
 {
-    FILE *answer;
-    std :: string fileName = giveOutputFileNameCross(tStep);
-    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+    std::string fileName = giveOutputFileNameCross(tStep);
+    std::ofstream streamC;
+
+    if ( pythonExport ) {
+        streamC = std::ofstream(NULL_DEVICE);//do not write anything
+    } else {
+        streamC = std::ofstream(fileName);
+    }
+
+    if ( !streamC.good() ) {
         OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
 
-    return answer;
+    streamC.fill('0');//zero padding
+    return streamC;
 }
 
 void
-VTKXMLLatticeExportModule :: giveSwitches(IntArray &answer, int location) {
+VTKXMLLatticeExportModule::giveSwitches(IntArray &answer, int location) {
     answer.resize(3);
     answer.zero();
     int counter = 1;
@@ -121,7 +129,7 @@ VTKXMLLatticeExportModule :: giveSwitches(IntArray &answer, int location) {
 }
 
 void
-VTKXMLLatticeExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region)
+VTKXMLLatticeExportModule::setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
@@ -236,7 +244,7 @@ VTKXMLLatticeExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, 
 
 
 void
-VTKXMLLatticeExportModule :: setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep, int region)
+VTKXMLLatticeExportModule::setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep, int region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
@@ -254,7 +262,7 @@ VTKXMLLatticeExportModule :: setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeSte
     for ( int ie = 1; ie <= numberOfElements; ie++ ) {
         if (  dynamic_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes = ( static_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
-        } else if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )    {
+        } else if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes = ( static_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
         }
         crossSectionTable.at(ie) = numberOfCrossSectionNodes;
@@ -273,7 +281,7 @@ VTKXMLLatticeExportModule :: setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeSte
         if (  dynamic_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes =  ( static_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
             ( static_cast< LatticeStructuralElement * >( domain->giveElement(elements.at(ie) ) ) )->giveCrossSectionCoordinates(crossSectionCoordinates);
-        } else if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )    {
+        } else if ( dynamic_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) ) {
             numberOfCrossSectionNodes = ( static_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )->giveNumberOfCrossSectionNodes();
             ( static_cast< LatticeTransportElement * >( domain->giveElement(elements.at(ie) ) ) )->giveCrossSectionCoordinates(crossSectionCoordinates);
         }
@@ -325,7 +333,7 @@ VTKXMLLatticeExportModule :: setupVTKPieceCross(VTKPiece &vtkPieceCross, TimeSte
 
 
 void
-VTKXMLLatticeExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
+VTKXMLLatticeExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 {
     this->doOutputNormal(tStep, forcedOutput);
     if ( crossSectionExportFlag ) {
@@ -335,7 +343,7 @@ VTKXMLLatticeExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
 
 void
-VTKXMLLatticeExportModule :: doOutputCross(TimeStep *tStep, bool forcedOutput)
+VTKXMLLatticeExportModule::doOutputCross(TimeStep *tStep, bool forcedOutput)
 {
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
@@ -347,9 +355,9 @@ VTKXMLLatticeExportModule :: doOutputCross(TimeStep *tStep, bool forcedOutput)
     time(& now);
     current = localtime(& now);
 
-    fprintf(this->fileStreamCross, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveTargetTime() * timeScale, current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
-    fprintf(this->fileStreamCross, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
-    fprintf(this->fileStreamCross, "<UnstructuredGrid>\n");
+    this->fileStreamCross << "<!-- TimeStep " << tStep->giveTargetTime() * timeScale << " Computed " << current->tm_year + 1900 << "-" << setw(2) << current->tm_mon + 1 << "-" << setw(2) << current->tm_mday << " at " << current->tm_hour << ":" << current->tm_min << ":" << setw(2) << current->tm_sec << " -->\n";
+    this->fileStreamCross << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
+    this->fileStreamCross << "<UnstructuredGrid>\n";
 
     int nPiecesToExport = this->giveNumberOfRegions(); //old name: region, meaning: sets
     int anyPieceNonEmpty = 0;
@@ -365,18 +373,18 @@ VTKXMLLatticeExportModule :: doOutputCross(TimeStep *tStep, bool forcedOutput)
 
     if ( anyPieceNonEmpty == 0 ) {
         // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
-        fprintf(this->fileStreamCross, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
-        fprintf(this->fileStreamCross, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
-        fprintf(this->fileStreamCross, "</Piece>\n");
+        this->fileStreamCross << "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n";
+        this->fileStreamCross << "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n";
+        this->fileStreamCross << "</Piece>\n";
     }
 
-    fprintf(this->fileStreamCross, "</UnstructuredGrid>\n</VTKFile>");
-    fclose(this->fileStreamCross);
+    this->fileStreamCross << "</UnstructuredGrid>\n</VTKFile>";
+    this->fileStreamCross.close();
 }
 
 
 void
-VTKXMLLatticeExportModule :: doOutputNormal(TimeStep *tStep, bool forcedOutput)
+VTKXMLLatticeExportModule::doOutputNormal(TimeStep *tStep, bool forcedOutput)
 {
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
@@ -388,9 +396,10 @@ VTKXMLLatticeExportModule :: doOutputNormal(TimeStep *tStep, bool forcedOutput)
     time(& now);
     current = localtime(& now);
 
-    fprintf(this->fileStream, "<!-- TimeStep %e Computed %d-%02d-%02d at %02d:%02d:%02d -->\n", tStep->giveTargetTime() * timeScale, current->tm_year + 1900, current->tm_mon + 1, current->tm_mday, current->tm_hour,  current->tm_min,  current->tm_sec);
-    fprintf(this->fileStream, "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n");
-    fprintf(this->fileStream, "<UnstructuredGrid>\n");
+    this->fileStream << "<!-- TimeStep " << tStep->giveTargetTime() * timeScale << " Computed " << current->tm_year + 1900 << "-" << setw(2) << current->tm_mon + 1 << "-" << setw(2) << current->tm_mday << " at " << current->tm_hour << ":" << current->tm_min << ":" << setw(2) << current->tm_sec << " -->\n";
+
+    this->fileStream << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">\n";
+    this->fileStream << "<UnstructuredGrid>\n";
 
     this->giveSmoother(); // make sure smoother is created, Necessary? If it doesn't exist it is created /JB
 
@@ -432,24 +441,24 @@ VTKXMLLatticeExportModule :: doOutputNormal(TimeStep *tStep, bool forcedOutput)
 
     if ( anyPieceNonEmpty == 0 ) {
         // write empty piece, Otherwise ParaView complains if the whole vtu file is without <Piece></Piece>
-        fprintf(this->fileStream, "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n");
-        fprintf(this->fileStream, "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n");
-        fprintf(this->fileStream, "</Piece>\n");
+        this->fileStream << "<Piece NumberOfPoints=\"0\" NumberOfCells=\"0\">\n";
+        this->fileStream << "<Cells>\n<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> </DataArray>\n</Cells>\n";
+        this->fileStream << "</Piece>\n";
     }
 
-    fprintf(this->fileStream, "</UnstructuredGrid>\n</VTKFile>");
-    fclose(this->fileStream);
+    this->fileStream << "</UnstructuredGrid>\n</VTKFile>";
+    this->fileStream.close();
 }
 
 
 
 
 int
-VTKXMLLatticeExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
-                                                     IntArray &regionL2GNodalNumbers,
-                                                     int &regionDofMans,
-                                                     int &regionSingleCells,
-                                                     Domain *domain, TimeStep *tStep, int reg)
+VTKXMLLatticeExportModule::initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
+                                                   IntArray &regionL2GNodalNumbers,
+                                                   int &regionDofMans,
+                                                   int &regionSingleCells,
+                                                   Domain *domain, TimeStep *tStep, int reg)
 {
     int nnodes = domain->giveNumberOfDofManagers();
     int elementNode, node;
@@ -594,7 +603,7 @@ VTKXMLLatticeExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNum
 
 
 void
-VTKXMLLatticeExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
+VTKXMLLatticeExportModule::exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
@@ -624,7 +633,7 @@ VTKXMLLatticeExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &map
                 DofManager *dman = d->giveNode(mapL2G.at(inode) );
 
                 this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
-                vtkPiece.setPrimaryVarInNode(i, inode, std :: move(valueArray) );
+                vtkPiece.setPrimaryVarInNode(i, inode, std::move(valueArray) );
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
                 int pos = 0;
@@ -645,6 +654,11 @@ VTKXMLLatticeExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &map
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
                             valueArray.at(2) = helpArray.at(2) + unitCellSize.at(2) * switches.at(2) * macroField.at(2) + unitCellSize.at(1) * switches.at(1) * macroField.at(3);
                             valueArray.at(3) = helpArray.at(3);
+                        } else if ( dofIdArray.giveSize() == 1 && dofIdArray.at(1) == E_xx ) { //Macroscale: 3D truss. 1 DOF: EXX
+                            valueArray.resize(helpArray.giveSize() );
+                            valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1);
+                            valueArray.at(2) = helpArray.at(2);
+                            valueArray.at(3) = helpArray.at(3);
                         } else if ( dofIdArray.giveSize() == 6 && dofIdArray.at(1) == E_xx && dofIdArray.at(2) == E_yy && dofIdArray.at(3) == E_zz && dofIdArray.at(4) == G_yz && dofIdArray.at(5) == G_xz && dofIdArray.at(6) == G_xy ) { //Macroscale: 3D solid using Voigt notation
                             valueArray.resize(helpArray.giveSize() );
                             valueArray.at(1) = helpArray.at(1) + unitCellSize.at(1) * switches.at(1) * macroField.at(1) +
@@ -659,7 +673,7 @@ VTKXMLLatticeExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &map
                 } else {
                     valueArray.resize(3);
                 }
-                vtkPiece.setPrimaryVarInNode(i, inode, std :: move(valueArray) );
+                vtkPiece.setPrimaryVarInNode(i, inode, std::move(valueArray) );
             }
         }
     }
@@ -667,7 +681,7 @@ VTKXMLLatticeExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &map
 
 
 void
-VTKXMLLatticeExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
+VTKXMLLatticeExportModule::exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
@@ -716,7 +730,7 @@ VTKXMLLatticeExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L,
 
 
 bool
-VTKXMLLatticeExportModule :: writeVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep)
+VTKXMLLatticeExportModule::writeVTKPieceCross(VTKPiece &vtkPieceCross, TimeStep *tStep)
 {
     if ( !vtkPieceCross.giveNumberOfCells() ) {
         return false;
@@ -727,73 +741,106 @@ VTKXMLLatticeExportModule :: writeVTKPieceCross(VTKPiece &vtkPieceCross, TimeSte
     int numEl = vtkPieceCross.giveNumberOfCells();
     FloatArray coords;
 
-    fprintf(this->fileStreamCross, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", numNodes, numEl);
-    fprintf(this->fileStreamCross, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
+    this->fileStreamCross << "<Piece NumberOfPoints=\"" << numNodes << "\" NumberOfCells=\"" << numEl << "\">\n";
+    this->fileStreamCross << "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ";
 
     for ( int inode = 1; inode <= numNodes; inode++ ) {
         coords = vtkPieceCross.giveNodeCoords(inode);
         ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
         for ( int i = 1; i <= coords.giveSize(); i++ ) {
-            fprintf(this->fileStreamCross, "%e ", coords.at(i) );
+            this->fileStreamCross << scientific << coords.at(i) << " ";
         }
 
         for ( int i = coords.giveSize() + 1; i <= 3; i++ ) {
-            fprintf(this->fileStreamCross, "%e ", 0.0);
+            this->fileStreamCross << scientific << 0.0 << " ";
         }
     }
 
-    fprintf(this->fileStreamCross, "</DataArray>\n</Points>\n");
-
-    fprintf(this->fileStreamCross, "<Cells>\n");
-    fprintf(this->fileStreamCross, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
+    this->fileStreamCross << "</DataArray>\n</Points>\n";
+    this->fileStreamCross << "<Cells>\n";
+    this->fileStreamCross << " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ";
 
     IntArray cellNodes;
     for ( int ielem = 1; ielem <= numEl; ielem++ ) {
         cellNodes = vtkPieceCross.giveCellConnectivity(ielem);
 
         for ( int i = 1; i <= cellNodes.giveSize(); i++ ) {
-            fprintf(this->fileStreamCross, "%d ", cellNodes.at(i) - 1);
+            this->fileStreamCross << cellNodes.at(i) - 1 << " ";
         }
-
-        fprintf(this->fileStreamCross, " ");
+        this->fileStreamCross << " ";
     }
 
-    fprintf(this->fileStreamCross, "</DataArray>\n");
+    this->fileStreamCross << "</DataArray>\n";
 
     // output the offsets (index of individual element data in connectivity array)
-    fprintf(this->fileStreamCross, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
+    this->fileStreamCross << " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ";
 
     for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-        fprintf(this->fileStreamCross, "%d ", vtkPieceCross.giveCellOffset(ielem) );
+        this->fileStreamCross << vtkPieceCross.giveCellOffset(ielem) << " ";
     }
 
-    fprintf(this->fileStreamCross, "</DataArray>\n");
+    this->fileStreamCross << "</DataArray>\n";
 
 
     // output cell (element) types
-    fprintf(this->fileStreamCross, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
+    this->fileStreamCross << " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ";
     for ( int ielem = 1; ielem <= numEl; ielem++ ) {
-        fprintf(this->fileStreamCross, "%d ", vtkPieceCross.giveCellType(ielem) );
+        this->fileStreamCross << vtkPieceCross.giveCellType(ielem) << " ";
     }
 
-    fprintf(this->fileStreamCross, "</DataArray>\n");
-    fprintf(this->fileStreamCross, "</Cells>\n");
+    this->fileStreamCross << "</DataArray>\n";
+    this->fileStreamCross << "</Cells>\n";
 
 
     ///@todo giveDataHeaders is currently not updated wrt the new structure -> no file names in headers /JB
-    std :: string pointHeader, cellHeader;
+    std::string pointHeader, cellHeader;
     this->giveDataHeaders(pointHeader, cellHeader);
 
-    fprintf(this->fileStreamCross, "%s", pointHeader.c_str() );
-    fprintf(this->fileStreamCross, "</PointData>\n");
-    fprintf(this->fileStreamCross, "%s", cellHeader.c_str() );
+    this->fileStreamCross << pointHeader.c_str();
+    this->fileStreamCross << "</PointData>\n";
+    this->fileStreamCross << cellHeader.c_str();
 
-    this->writeCellVars(vtkPieceCross);
+    this->writeCellVarsCross(vtkPieceCross);
 
-    fprintf(this->fileStreamCross, "</CellData>\n");
-    fprintf(this->fileStreamCross, "</Piece>\n");
+    this->fileStreamCross << "</CellData>\n";
+    this->fileStreamCross << "</Piece>\n";
 
     vtkPieceCross.clear();
     return true;
+}
+
+void
+VTKXMLLatticeExportModule::writeCellVarsCross(VTKPiece &vtkPiece)
+{
+    FloatArray valueArray;
+    int numCells = vtkPiece.giveNumberOfCells();
+    for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
+        InternalStateValueType valType = giveInternalStateValueType(type);
+        int ncomponents = giveInternalStateTypeSize(valType);
+        const char *name = __InternalStateTypeToString(type);
+        ( void ) name; //silence the warning
+
+        this->fileStreamCross << " <DataArray type=\"Float64\" Name=\"" << name << "\" NumberOfComponents=\"" << ncomponents << "\" format=\"ascii\"> ";
+        valueArray.resize(ncomponents);
+        for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+            valueArray = vtkPiece.giveCellVar(i, ielem);
+            for ( int i = 1; i <= valueArray.giveSize(); i++ ) {
+                this->fileStreamCross << valueArray.at(i) << " ";
+            }
+        }
+        this->fileStreamCross << "</DataArray>\n";
+
+#ifdef _PYBIND_BINDINGS
+        if ( pythonExport ) {
+            py::list vals;
+            for ( int ielem = 1; ielem <= numCells; ielem++ ) {
+                valueArray = vtkPiece.giveCellVar(i, ielem);
+                vals.append(valueArray);
+            }
+            this->Py_CellVars [ name ] = vals;
+        }
+#endif
+    }//end of for
 }
 } // end namespace oofem
