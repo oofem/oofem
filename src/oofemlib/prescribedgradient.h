@@ -92,7 +92,7 @@ public:
      * @todo Perhaps this routine should only give results for the dof it prescribes?
      * @param C Coefficient matrix to fill.
      */
-    void updateCoefficientMatrix(FloatMatrix &C);
+    virtual void updateCoefficientMatrix(FloatMatrix &C);
 
     /**
      * Computes the homogenized, macroscopic, field (stress).
