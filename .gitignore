@@ -18,11 +18,10 @@ _build/
 *.vtu
 *.pvd
 *.out.*
-*.out-gp*
+*.out-*
 t3d.bmf*
 perf.data*
 *.orig
-*.out-gp*
 *.vtk
 *_out.*
 
