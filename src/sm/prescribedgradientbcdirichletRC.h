@@ -32,37 +32,44 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef prescribedgradientdd_h
-#define prescribedgradientdd_h
+#ifndef prescribedgradientbcdirichlet_h
+#define prescribedgradientbcdirichlet_h
 
 #include "prescribedgradient.h"
 #include "floatarrayf.h"
 
-///@name Input fields for PrescribedGradientDD
+///@name Input fields for PrescribedGradientBCDirichletRC
 //@{
-#define _IFT_PrescribedGradientDD_Name "prescribedgradientdd"
-#define _IFT_PrescribedGradientDD_ConcreteBoundary "conboundset"
-#define _IFT_PrescribedGradientDD_ReinfXBound "reinfxbound"
-#define _IFT_PrescribedGradientDD_ReinfYBound "reinfybound"
+#define _IFT_PrescribedGradientBCDirichletRC_Name "prescribedgradientbcdirichletrc"
+#define _IFT_PrescribedGradientBCDirichletRC_ConcreteBoundary "conboundset"
+#define _IFT_PrescribedGradientBCDirichletRC_ReinfXBound "reinfxbound"
+#define _IFT_PrescribedGradientBCDirichletRC_ReinfYBound "reinfybound"
 //@}
 
 namespace oofem {
 /**
- * Prescribes a displacement gradient with Dirichlet-Dirichlet boundary condition, cf.
+ * Prescribes a displacement gradient with Dirichlet boundary condition, cf.
  * Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2018).
  * Two‐scale finite element modelling of reinforced concrete structures: Effective response and subscale fracture development.
  * International Journal for Numerical Methods in Engineering, 114(10), 1074–1102. https://doi.org/10.1002/nme.5776
  * Works with 2D RVEs comprising solid elements (concrete), reinforcement (beam elements) and interface elements in between.
  * Used in multiscale analyses of reinforced concrete structures. Currently, only orthogonal reinforcement in X and Y direction is supported.
  *
+ * Current implementation supports both Dirichlet-Dirichlet and Dirichlet-Neumann BCs.
+ * This BC is applied to the set of nodes lying at the concrete boundary (either node set or elementboundaries set will work).
+ * If the optional reinfxbound and reinfybound sets are specified, the gradient is prescribed on both concerete and steel
+ * (Dirichlet-Dirichlet, see example RVE input in sm/deepbeamfe2_01.in.rve).
+ * If only the conboundset input record is specified, the gradient is prescribed only on concrete
+ * (Dirichlet-Neumann, see example RVE input in sm/deepbeam2_02.in.rve).
+ *
  * @author Adam Sciegaj
  */
-class OOFEM_EXPORT PrescribedGradientDD : public PrescribedGradient
+class OOFEM_EXPORT PrescribedGradientBCDirichletRC : public PrescribedGradient
 {
 public:
 
-    PrescribedGradientDD(int n, Domain *d) : PrescribedGradient(n, d) { }
-    virtual ~PrescribedGradientDD() { }
+    PrescribedGradientBCDirichletRC(int n, Domain *d) : PrescribedGradient(n, d) { }
+    virtual ~PrescribedGradientBCDirichletRC() { }
 
     double give(Dof *dof, ValueModeType mode, double time) override;
 
@@ -76,14 +83,14 @@ public:
     void scale(double s) override { mGradient.times(s); }
     double domainSize(Domain *d, int set) override;
 
-    const char *giveClassName() const override { return "PrescribedGradient"; }
-    const char *giveInputRecordName() const override { return _IFT_PrescribedGradient_Name; }
+    const char *giveClassName() const override { return "PrescribedGradientBCDirichletRC"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedGradientBCDirichletRC_Name; }
 
 protected:
     int conBoundSet; //element boundaries set for the concrete solid
-    int reinfXBound; //set containing end (boundary) nodes of horizontal rebars
-    int reinfYBound; //set containing end (boundary) nodes of vertical rebars
+    int reinfXBound=0; //set containing end (boundary) nodes of horizontal rebars
+    int reinfYBound=0; //set containing end (boundary) nodes of vertical rebars
 };
 } // end namespace oofem
 
-#endif // prescribedgradientdd_h
+#endif // prescribedgradientbcdirichlet_h

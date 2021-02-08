@@ -1,5 +1,5 @@
-deepbeamFE2_01_rve.out
-Reinforced concrete RVE - Dirichlet-Dirichelt BCs
+deepbeamFE2_02_rve.out
+Reinforced concrete RVE - Dirichlet-Neumann BCs
 StaticStructural nsteps 1 deltat 1.0 constrainednrminiter 5 rtolf 1.0e-3 MaxIter 30 minIter 1 stiffmode 0 initialguess 1 nmodules 0 suppress_output
 #vtkxml tstep_all domain_all vars 5 1 4 5 12 52 ipvars 6 1 4 5 12 52 90 stype 1 regionsets 1 1
 #vtkxml tstep_all domain_all vars 1 12 ipvars 3 7 8 81 stype 1 regionsets 2 9 10
@@ -32,16 +32,16 @@ node 22    coords 3 0  0.05     0
 node 23    coords 3  0.05    -0.05     0
 node 24    coords 3  0.05     0  0
 node 25    coords 3  0.05     0.05     0
-node 26    coords 3 -0.1      0        0
+node 26    coords 3 -0.1      0        0    dofidmask 3 1 2 6 doftype 3 0 1 0 mastermask 3 0 8 0
 node 27    coords 3 -0.05     0        0    dofidmask 3 1 2 6 doftype 3 0 1 0 mastermask 3 0 18 0
 node 28    coords 3  0        0        0    dofidmask 3 1 2 6 doftype 3 0 1 0 mastermask 3 0 21 0
 node 29    coords 3  0.05     0        0    dofidmask 3 1 2 6 doftype 3 0 1 0 mastermask 3 0 24 0
-node 30    coords 3  0.1      0        0
-node 31    coords 3  0       -0.1      0
+node 30    coords 3  0.1      0        0    dofidmask 3 1 2 6 doftype 3 0 1 0 mastermask 3 0 4 0
+node 31    coords 3  0       -0.1      0    dofidmask 3 1 2 6 doftype 3 1 0 0 mastermask 3 2 0 0
 node 32    coords 3  0       -0.05     0    dofidmask 3 1 2 6 doftype 3 1 0 0 mastermask 3 20 0 0
 node 33    coords 3  0        0        0    dofidmask 3 1 2 6 doftype 3 1 0 0 mastermask 3 21 0 0
 node 34    coords 3  0        0.05     0    dofidmask 3 1 2 6 doftype 3 1 0 0 mastermask 3 22 0 0
-node 35    coords 3  0        0.1      0
+node 35    coords 3  0        0.1      0    dofidmask 3 1 2 6 doftype 3 1 0 0 mastermask 3 6 0 0
 LIBeam2D 17    nodes 2   26  27  xy
 LIBeam2D 18    nodes 2   27  28  xy
 LIBeam2D 19    nodes 2   28  29  xy
@@ -86,7 +86,7 @@ MazarsModel 1 d 1.0 E 3.36e10 n 0.2 version 1 e0 8.63e-5 ac 2.6 bc 800 ef 0.0025
 MisesMat 2 d 1.0 E 2e11 n 0.3 sig0 500e6 H 8.456659619e8 omega_crit 0 a 0 tAlpha 1.0
 bondceb 3 kn 6e12 ks 6.135e10 s1 0.001 s2 0.002 s3 0.0065 taumax 1.541e7 tauf 6.164e6
 bondceb 4 kn 6e12 ks 6.135e10 s1 0.001 s2 0.002 s3 0.004 taumax 1.541e7 tauf 6.164e6
-PrescribedGradientBCDirichletRC 1 loadTimeFunction 1 dofs 3 1 2 6 ccoord 3 0.0 0.0 0.0 gradient 2 2 {0 0; 0 0} set 5 conboundset 6 reinfxbound 8 reinfybound 7
+PrescribedGradientBCDirichletRC 1 loadTimeFunction 1 dofs 2 1 2 ccoord 3 0.0 0.0 0.0 gradient 2 2 {0 0; 0 0} set 6 conboundset 6
 ConstantFunction 1 f(t) 1.0
 set 1 elements 16 32 33 34 35 36 37 38 39 40 25 26 27 28 29 30 31
 set 2 elements 3 33 35 36

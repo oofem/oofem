@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "prescribedgradientdd.h"
+#include "prescribedgradientbcdirichletRC.h"
 #include "dofiditem.h"
 #include "dofmanager.h"
 #include "dof.h"
@@ -55,14 +55,14 @@
 #include "crosssection.h"
 
 namespace oofem {
-REGISTER_BoundaryCondition(PrescribedGradientDD);
+REGISTER_BoundaryCondition(PrescribedGradientBCDirichletRC);
 
-double PrescribedGradientDD :: give(Dof *dof, ValueModeType mode, double time)
+double PrescribedGradientBCDirichletRC :: give(Dof *dof, ValueModeType mode, double time)
 {
     DofIDItem id = dof->giveDofID();
     int pos = this->dofs.findFirstIndexOf(id);
 
-    if ( pos == 3 ) { //reinforcement ends - rotation
+    if  ( reinfYBound && reinfYBound && ( pos == 3 ) ) { //reinforcement ends - rotation
         //Prescribing rotations at beams' ends. Defining sets and checking whether the node belongs to one of them
         //Works only in 2d, i.e. for a reinforcement with 3 degrees of freedom
         bool isXReinf = false;
@@ -85,7 +85,7 @@ double PrescribedGradientDD :: give(Dof *dof, ValueModeType mode, double time)
 }
 
 
-void PrescribedGradientDD :: updateCoefficientMatrix(FloatMatrix &C)
+void PrescribedGradientBCDirichletRC :: updateCoefficientMatrix(FloatMatrix &C)
 //Modified by AS:
 //Include end moments from the reinforcement.
 //\sum (R_L e_l + R_perp e_{\perp} ) \outerp (x-\bar{x}) already included in C^T.R_c (in computeField)
@@ -98,11 +98,12 @@ void PrescribedGradientDD :: updateCoefficientMatrix(FloatMatrix &C)
     PrescribedGradient::updateCoefficientMatrix(C);
 
     Domain *domain = this->giveDomain();
-    Set* setX = domain->giveSet(reinfXBound);
-    Set* setY = domain->giveSet(reinfYBound);
     int nsd = domain->giveNumberOfSpatialDimensions();
 
-    if ( nsd == 2 ) {
+    if ( ( reinfXBound && reinfYBound && ( nsd == 2 ) ) ) {
+        Set* setX = domain->giveSet(reinfXBound);
+        Set* setY = domain->giveSet(reinfYBound);
+
         FloatArrayF<2> eLX, ePerpX, eLY, ePerpY; //tangential and normal basis vectors, hardcoded for horizontal and vertical reinforcement
         eLX = {1., 0.};
         ePerpX = {0., 1.};
@@ -133,7 +134,7 @@ void PrescribedGradientDD :: updateCoefficientMatrix(FloatMatrix &C)
 }
 
 
-double PrescribedGradientDD::domainSize( Domain *d, int set )
+double PrescribedGradientBCDirichletRC::domainSize( Domain *d, int set )
 {
     double omegaBox = PrescribedGradientHomogenization::domainSize(d, conBoundSet);
 
@@ -151,20 +152,20 @@ double PrescribedGradientDD::domainSize( Domain *d, int set )
 }
 
 
-void PrescribedGradientDD :: initializeFrom(InputRecord &ir)
+void PrescribedGradientBCDirichletRC :: initializeFrom(InputRecord &ir)
 {
     PrescribedGradient :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, conBoundSet, _IFT_PrescribedGradientDD_ConcreteBoundary);
-    IR_GIVE_FIELD(ir, reinfXBound , _IFT_PrescribedGradientDD_ReinfXBound);
-    IR_GIVE_FIELD(ir, reinfYBound , _IFT_PrescribedGradientDD_ReinfYBound);
+    IR_GIVE_FIELD(ir, conBoundSet, _IFT_PrescribedGradientBCDirichletRC_ConcreteBoundary);
+    IR_GIVE_OPTIONAL_FIELD(ir, reinfXBound , _IFT_PrescribedGradientBCDirichletRC_ReinfXBound);
+    IR_GIVE_OPTIONAL_FIELD(ir, reinfYBound , _IFT_PrescribedGradientBCDirichletRC_ReinfYBound);
 }
 
 
-void PrescribedGradientDD :: giveInputRecord(DynamicInputRecord &input)
+void PrescribedGradientBCDirichletRC :: giveInputRecord(DynamicInputRecord &input)
 {
     PrescribedGradient :: giveInputRecord(input);
-    input.setField(conBoundSet, _IFT_PrescribedGradientDD_ConcreteBoundary);
-    input.setField(reinfXBound, _IFT_PrescribedGradientDD_ReinfXBound);
-    input.setField(reinfYBound, _IFT_PrescribedGradientDD_ReinfYBound);
+    input.setField(conBoundSet, _IFT_PrescribedGradientBCDirichletRC_ConcreteBoundary);
+    input.setField(reinfXBound, _IFT_PrescribedGradientBCDirichletRC_ReinfXBound);
+    input.setField(reinfYBound, _IFT_PrescribedGradientBCDirichletRC_ReinfYBound);
 }
 } // end namespace oofem
