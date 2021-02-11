@@ -143,7 +143,7 @@ double PrescribedGradientBCDirichletRC::domainSize( Domain *d, int set )
         Element *e = this->giveDomain()->giveElement( this->giveDomain()->giveSet(conBoundSet)->giveBoundaryList().at(1) );
         std::unique_ptr<IntegrationRule> ir = e->giveInterpolation()->giveIntegrationRule( e->giveInterpolation()->giveInterpolationOrder() );
         CrossSection *cs = e->giveCrossSection();
-        GaussPoint *gp = ir->getIntegrationPoint(1);
+        GaussPoint *gp = ir->getIntegrationPoint(0);
         double thickness = cs->give(CS_Thickness, gp);
         return omegaBox * thickness;
     } else {

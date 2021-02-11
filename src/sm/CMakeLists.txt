@@ -149,6 +149,7 @@ set (sm_interface_elements
 set (sm_boundary_conditions
     Deprecated/prescribedgenstrainshell7.C
         prescribedgradientbcdirichletRC.C
+        prescribedgradientbcneumannRC.C
     )
 
 set (sm_crosssection
