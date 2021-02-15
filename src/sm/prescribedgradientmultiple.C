@@ -120,9 +120,10 @@ DofManager *PrescribedGradientMultiple::giveInternalDofManager( int i )
     for ( int j: this->bcs ) {
         auto bc = dynamic_cast<ActiveBoundaryCondition*>(this->giveDomain()->giveBc(j));
         if ( bc != nullptr ) {
-            return bc->giveInternalDofManager(j);
+            return bc->giveInternalDofManager(i);
         }
     }
+    return nullptr;
 }
 
 
