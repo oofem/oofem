@@ -44,9 +44,6 @@
 ///@name Input fields for StructuralSlipFE2Material
 //@{
 #define _IFT_StructuralSlipFE2Material_Name "structslipfe2material"
-#define _IFT_StructuralSlipFE2Material_fileName "filename"
-#define _IFT_StructuralSlipFE2Material_useNumericalTangent "use_num_tangent"
-#define _IFT_StructuralSlipFE2Material_RegCoeff "regcoeff"
 #define _IFT_StructuralSlipFE2Material_useExternalStiffness "use_ext_stiffness"
 #define _IFT_StructuralSlipFE2Material_allGPResults "export_all_gps"
 #define _IFT_StructuralSlipFE2Material_outputSelectedResults "output_selected_el_gps"
@@ -83,21 +80,11 @@ public:
  * - It must be the first boundary condition
  *
  * For the macroscopic displacement field, the following boundary conditions on the RVE are supported (must use PrescribedGradientHomogenization class):
- * - PrescribedGradientDD (macroscopic displacement gradient prescribed with Dirichlet BCs on concrete and reinforcement)
- * - PrescribedGradientDN (macroscopic displacement gradient prescribed with Dirichlet BCs on concrete and Neumann B.C. on reinforcement)
- * - PrescribedGradientNN (macroscopic displacement gradient prescribed with Neumann BCs on concrete and reinforcement)
- * - PrescribedGradientSubBCs (for combining more than one PrescribedGradient boundary condition on the RVE)
+ * - PrescribedGradientBCDirichletRC (macroscopic displacement gradient prescribed with Dirichlet BCs on concrete and optionally on reinforcement)
+ * - PrescribedGradientBCNeumannRC (macroscopic displacement gradient prescribed with Neumann BCs on concrete)
+ * - PrescribedGradientMultiple (for combining more than one PrescribedGradient boundary condition on the RVE)
  * ref: Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2018). Two‐scale finite element modelling of reinforced concrete structures: Effective response and subscale fracture development. International Journal for Numerical Methods in Engineering, 114(10), 1074–1102. https://doi.org/10.1002/nme.5776
- *
- * For the optional macroscopic reinforcement slip field, the following boundary conditions on the RVE are supported (must use PrescribedFieldsGradientsHomogenization):
- * - PrescribedSlipGradientsDD (macroscopic displacement gradient, slip and slip gradient prescribed with Dirichlet BCs on concrete and reinforcement)
- * - PrescribedSlipBCNeumann (macroscopic slip field prescribed with Neumann BCs on reinforcement)
- * - PrescribedSlipGradientBCNeumann (macroscopic slip gradient prescribed with Neumann BCs on reinforcement)
- * - PrescribedFieldsGradientDirichlet (macroscopic displacement gradient prescribed with Dirichlet BCs on concrete)
- * - PrescribedFieldsGradientsSubBCs (for combining more than one PrescribedGradient boundary conditions on the RVE)
- * refs: Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2019). A multiscale model for reinforced concrete with macroscopic variation of reinforcement slip. Computational Mechanics, 63(2), 139–158. https://doi.org/10.1007/s00466-018-1588-3
- * Sciegaj, A., Larsson, F., Lundgren, K., & Runesson, K. (2020). On a volume averaged measure of macroscopic reinforcement slip in two-scale modeling of reinforced concrete. International Journal for Numerical Methods in Engineering, 121(8), 1822–1846. https://doi.org/10.1002/nme.6288
- *
+ * *
  * @author Adam Sciegaj
  */
 class StructuralSlipFE2Material : public StructuralFE2Material

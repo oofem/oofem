@@ -57,10 +57,8 @@ namespace oofem {
  *
  * Current implementation supports both Dirichlet-Dirichlet and Dirichlet-Neumann BCs.
  * This BC is applied to the set of nodes lying at the concrete boundary (either node set or elementboundaries set will work).
- * If the optional reinfxbound and reinfybound sets are specified, the gradient is prescribed on both concerete and steel
- * (Dirichlet-Dirichlet, see example RVE input in sm/deepbeamfe2_01.in.rve).
+ * If the optional reinfxbound and reinfybound sets are specified, the gradient is prescribed on both concrete and steel.
  * If only the conboundset input record is specified, the gradient is prescribed only on concrete
- * (Dirichlet-Neumann, see example RVE input in sm/deepbeam2_02.in.rve).
  *
  * @author Adam Sciegaj
  */
