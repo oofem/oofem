@@ -150,6 +150,7 @@ set (sm_boundary_conditions
     Deprecated/prescribedgenstrainshell7.C
         prescribedgradientbcdirichletRC.C
         prescribedgradientbcneumannRC.C
+        prescribedgradientmultiple.C
     )
 
 set (sm_crosssection
