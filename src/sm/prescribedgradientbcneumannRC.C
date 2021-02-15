@@ -87,8 +87,10 @@ double PrescribedGradientBCNeumannRC::domainSize( Domain *d, int set )
 void PrescribedGradientBCNeumannRC::computeField( FloatArray &sigma, TimeStep *tStep )
 {
     double volRVE = this->domainSize( this->giveDomain(), this->giveSetNumber() );
+    double areaRVE = PrescribedGradientHomogenization::domainSize(this->giveDomain(), this->giveSetNumber());
+    double thick = volRVE/areaRVE;
     mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
-    sigma.times(volRVE);
+    sigma.times(1/thick);
 }
 
 
@@ -99,7 +101,7 @@ void PrescribedGradientBCNeumannRC::assembleVector( FloatArray &answer, TimeStep
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for sigma, the load is simply the prescribed gradient.
-        double rve_size = this->domainSize(this->giveDomain(), this->giveSetNumber());
+        double rve_size = PrescribedGradientHomogenization::domainSize(this->giveDomain(), this->giveSetNumber());
         FloatArray stressLoad;
         FloatArray gradVoigt;
         giveGradientVoigt(gradVoigt);
