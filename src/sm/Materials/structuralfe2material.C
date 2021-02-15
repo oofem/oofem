@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2021   Borek Patzak
  *
  *
  *
@@ -263,6 +263,75 @@ StructuralFE2Material :: givePlaneStrainStiffMtrx(MatResponseMode mode, GaussPoi
         status->computeTangent(tStep);
         return status->giveTangent();
     }
+}
+
+FloatArrayF<3>
+StructuralFE2Material::giveRealStressVector_PlaneStress( const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep ) const
+{
+    auto ms = static_cast<StructuralFE2MaterialStatus*>( this->giveStatus(gp) );
+
+    ms->setTimeStep(tStep);
+    // Set input
+    ms->giveBC()->setPrescribedGradientVoigt(strain);
+    // Solve subscale problem
+    ms->giveRVE()->solveYourselfAt(tStep);
+    // Post-process the stress
+    FloatArray stress;
+    ms->giveBC()->computeField(stress, tStep);
+
+    FloatArrayF<6> updateStress;
+    updateStress = {stress[0], stress[1], 0., 0., 0., 0.5*(stress[2]+stress[3])};
+
+    FloatArrayF<6> updateStrain;
+    updateStrain = {strain[0], strain[1], 0., 0., 0., strain[2]};
+
+    FloatArrayF<3> answer;
+    answer = {stress[0], stress[1], 0.5*(stress[2]+stress[3])};
+
+    // Update the material status variables
+    ms->letTempStressVectorBe(updateStress);
+    ms->letTempStrainVectorBe(updateStrain);
+    ms->markOldTangent(); // Mark this so that tangent is reevaluated if they are needed.
+
+    return answer;
+
+}
+
+FloatMatrixF<3, 3>
+StructuralFE2Material::givePlaneStressStiffMtrx( MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep ) const
+{
+    if (useNumTangent) {
+        //Numerical tangent
+        auto status = static_cast<StructuralFE2MaterialStatus*>(this->giveStatus(gp));
+        double h = 1.0e-9;
+
+        FloatArrayF<6> eps = status->giveTempStrainVector();
+        FloatArrayF<6> sig = status->giveTempStressVector();
+
+        FloatArrayF<3> epsRed = {eps[0], eps[1], eps[5]};
+        FloatArrayF<3> sigRed = {sig[0], sig[1], sig[5]};
+
+        FloatMatrixF<3,3> answer;
+        for (int i=0; i < 3; i++) {
+            //Add a small perturbation to the strain
+            auto epsPert = epsRed;
+            epsPert[i] += h;
+
+            auto sigPert = const_cast<StructuralFE2Material*>(this)->giveRealStressVector_PlaneStress(epsPert, gp, tStep);
+            answer.setColumn((sigPert - sigRed) / h, i);
+        }
+        const_cast<StructuralFE2Material*>(this)->giveRealStressVector_PlaneStress(epsRed, gp, tStep);
+        return answer;
+    } else {
+        auto status = static_cast<StructuralFE2MaterialStatus*>(this->giveStatus(gp));
+        FloatMatrix tangent;
+        status->computeTangent(tStep); //implemented by BC
+        tangent.beSubMatrixOf(status->giveTangent(), {1,2,3}, {1,2,3});
+        FloatMatrixF<3,3> answer;
+        answer = tangent;
+        return answer;
+    }
+
 }
 
 
