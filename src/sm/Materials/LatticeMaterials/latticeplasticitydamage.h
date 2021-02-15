@@ -178,9 +178,9 @@ protected:
     //damageFlag
     int damageFlag = 0;
 
-    virtual double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const { return this->give(ft_strength, gp); }
+    virtual double giveTensileStrength(GaussPoint *gp, TimeStep *tStep) const { return this->give(ft_strength, gp) * this->ft; }
 
-    virtual double giveCompressiveStrength(GaussPoint *gp, TimeStep *tStep) const { return this->give(fc_strength, gp); }
+    virtual double giveCompressiveStrength(GaussPoint *gp, TimeStep *tStep) const { return this->give(fc_strength, gp) * this->fc; }
 
 public:
 
