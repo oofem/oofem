@@ -344,10 +344,12 @@ The element features are summarized in Table~\ref{beam3dsummary}.
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
-\subsection{LatticeElements}
-\subsubsection{Lattice2d}
+\subsection{Lattice elements}
+\subsubsection{Lattice2d element}
 Represents two-node lattice element. Each node has 3 degrees of freedom.
-The element is defined in x,y plane. The element features are summarized in Table~\ref{lattice2dsummary}.
+The element is based on the Rigid Body Spring Model originally developed by Kawai and later delveloped by Bolander for modelling fracture in concrete. The main idea is to model the elastic and inelastic response of a connection of two nodes by a set of springs located at the contact facet of two rigid bodies, which is the mid-cross-section of the element. Displacement jumps are computed at the mid-cross-section, which are smeared out over the element length in the form of strains.
+The element is defined in x,y plane (see Figure~\ref{lattice2dfig}).
+The element features are summarized in Table~\ref{lattice2dsummary}.
 
 \begin{figure}[htb]
  \centering
@@ -358,7 +360,7 @@ The element is defined in x,y plane. The element features are summarized in Tabl
  \label{lattice2dfig}
 \end{figure}
 
-\begin{elementsummary}{lattice2d}{Lattice element}{\field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra}}{lattice2d element summary}{lattice2dsummary}
+\begin{elementsummary}{lattice2d}{2d lattice element}{\field{thick}{rn} \field{width}{rn} \field{gpCoords}{ra}}{lattice2d element summary}{lattice2dsummary}
 \elementParam{\param{thick}: defines the out of plane ($z$-direction) thickness}
 \elementParam{\param{width}: defines the width of the midpoint cross-section in the $x$-$y$ plane with the point $C$ at its centre}
 \elementParam{\param{gpCooords}: array of the coordinates of the integration point $C$ in the global coordinate system}
@@ -367,29 +369,89 @@ The element is defined in x,y plane. The element features are summarized in Tabl
 
 The theory of lattice2d is described in the paper ``P. Grassl and M. Jir\'{a}sek. Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp. 957-968, 2010.''
 
-\subsubsection{Lattice2dboundary}
-Represents three-node lattice element for boundary of 2d periodic cells. The first two nodes have 3 degrees of freedom as for the element lattice2d. The third node is used to control the loading of the periodic cell using two normal (xx and yy) and one shear strain (xy) component.
-The element is defined in x,y plane. 
+\subsubsection{Lattice2dBoundary element}
+Represents three-node lattice element for boundary of 2d periodic cells. The first two nodes have 3 degrees of freedom as for the element lattice2d. The third node is used to control the loading of the periodic cell. It has three components which are displacements, which are produces of the macroscopic (average) strain components and length of the peridodic cell as $aE_{xx}$, $bE_{xx}$  and $bG_{xy}$ and the length of the periodic cell. The DOFs of the node that lies outside the periodic are computed from those of the periodic image inside the cell and the DOFs at the third node (Figure~\ref{lattice2dboundaryfig}). The coordinates $x$ and $y$ of the third node are the lengths $a$ and $b$ of the periodic cell, respectively.  The element is defined in x,y plane. The strain components at the additional node have the meaning of average strains in the periodic cell. The specific input parameters for this element in addition to those used for lattice2d are shown in Table~\ref{lattice2dboundarysummary}. 
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.4\textwidth]{./lattice2dboundaryfig.pdf}
+ \caption{Lattice2dboundary element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
+ \label{lattice2dboundaryfig}
+\end{figure}
 
-The theory pf lattice2dbounday is described in the paper ``P. Grassl and M. Jir\'{a}sek. Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension. International Journal of Solids and Structures. Volume 47, Issues 7-8, pp. 957-968, 2010.''
+\begin{elementsummary}{lattice2dboundary}{2d lattice boundary element}{\field{location}{in}}{lattice2dboundary element summary}{lattice2dboundarysummary}
 
-\subsubsection{Lattice3d}
-Represents two-node 3d lattice element. Each node has six degrees of freedom.
-The theory of lattice3d is described in the paper ``P. Grassl, J. Bolander. Three-Dimensional Network Model for Coupling of Fracture and Mass Transport in Quasi-Brittle Geomaterials, Materials, 9, 782, 2016.''
+\elementParam{\param{location}: number between 1 and 8 which specifies the location of the node with respect to the periodic cell.}
 
-\subsubsection{Lattice3dboundary}
-Represents three-noded 3d lattice element for boundary of 3d periodic cells. The first two nodes have 6 degrees of freedom as for the element lattice3d. The third node is used to control the loading of the periodic cell using three normal (xx, yy and zz) and three shear strain (yz, xz, xy) components.
+\elementDescription{Unknowns}{Nine DOFs are required, which are $u$-displacement, $v$-displacement and $w$-rotation at nodes 1 and 2, and $aE_{xx}$, $bE_{yy}$ and $bG_{xy}$ at node 3.}
+\elementDescription{Reference}{\cite{GraJir10}}
+\end{elementsummary}
 
-The theory of lattice3dboundary is described in the paper ``I. Athanasiadis, S. Wheeler and P. Grassl. Hydro-mechanical network modelling of particulate composites, International Journal of Solids and Structures. Vol. 130-131, Pages 49-60, 2018.''
+\subsubsection{Lattice3d element}
+Lattice3d represents a two-node 3d lattice element. Each node has six degrees of freedom as shown in Figure~\ref{lattice3dfig}.
+The element is based on the Rigid Body Spring Model originally developed by Kawai and later delveloped by Bolander for modelling fracture in concrete. The main idea is to model the elastic and inelastic response of a connection of two nodes by a set of springs located at the contact facet of two rigid bodies, which is the mid-cross-section of the element. The properties of the mid-cross-section are internally computed from its vertices which are given as input in the global coordinate sytem. Displacement jumps are computed at the mid-cross-section, which are smeared out over the element length in the form of strains.
+The input parameters for this element are shown in Table~\ref{lattice3dsummary}. 
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.3\textwidth]{./lattice3d.pdf}
+ \caption{Lattice3d element. Node numbering, DOF numbering, cross-section vertices and local coordinate system at integration point $C$.}
+ \label{lattice3dfig}
+\end{figure}
+
+\begin{elementsummary}{lattice3d}{3d lattice element}{\field{polycoords}{ra}  \field{couplingflag}{in} \field{couplingnumbers}{ra} \field{pressures}{ra} \field{mlength}{rn}}{lattice3d element summary}{lattice3dsummary}
+\elementParam{\param{polycooords}: array of the coordinates of the vertices of the mid-cross-section of the lattice element in the global coordinate system.}
+\elementParam{\param{couplingflag}: flag (optional parameter. Default is 0) which activates coupling with a transport lattice element.}
+\elementParam{\param{couplingnumbers}: array of numbers of transport lattice elements (optional parameter), which are coupled with the 3d lattice element.}
+\elementParam{\param{pressures}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
+\elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Reference}{\cite{GraBol16}}
+\end{elementsummary}
+
+
+\subsubsection{Lattice3dBoundary element}
+This element represents a three-noded 3d lattice element for boundaries of 3d periodic cells. The first two nodes have 6 degrees of freedom as for the element lattice3d. The third node is used to control the loading of the periodic cell using three normal ($aE_{xx}$, $bE_{yy}$ and $zE_{zz}$) and three shear strain ($cG_{yz}$, $cG_{xz}$, $bG_{xy}$) components. Here, $a$, $b$ and $c$ are the three dimensions of the periodic cell. The DOFs of the node that lies outside the periodic are computed from those of the periodic image inside the cell and the DOFs at the third node (Figure~\ref{lattice3dboundaryfig}). The connection between periodic nodes is defined as
+\begin{equation}
+  \mathbf{x}^{'} = \mathbf{M} \mathbf{x}
+\end{equation}
+Here, $\mathbf{x}^{'}$ and $\mathbf{x}$ are the nodes inside and outside, respectively, and $\mathbf{M}$ is the translation matrix, for which the input is provided in the form of a location parameter as shown in Table~\ref{lattice3dboundarysummary}. 
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.6\textwidth]{./lattice3dboundaryfig.pdf}
+ \caption{Lattice3dboundary element. Elements with cross boundary of periodic cell use DOFs of node inside cell and average strain values of periodic cell.}
+ \label{lattice3dboundaryfig}
+\end{figure}
+
+\begin{elementsummary}{lattice3dboundary}{3d lattice boundary element}{\field{location}{in}}{lattice3dboundary element summary}{lattice3dboundarysummary}
+\elementParam{\param{location}: array of two numbers between number between 1 and 26, which specifies the location of the two nodes with respect to the 3d periodic cell.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each of the first two node. Node 3 requires the 6 quantities to control the periodic cell $aE_{xx}$, $bE_{yy}$, $zE_{zz}$, $cG_{yz}$, $cG_{xz}$ and $bG_{xy}$ }
+\elementDescription{Reference}{\cite{AthWheGra18}}
+\end{elementsummary}
 
 \subsubsection{Latticelink3d}
-Represents two-node 3d link element connecting 3d beam and 3d lattice elements. Each node has six degrees of freedom.
-The theory of latticelink3d is described in the paper ``P. Grassl and A. Antonelli. 3D network modelling of fracture processes in fibre-reinforced geomaterials, International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.''
+This element represents a two-node 3d link element connecting 3d beam and 3d lattice elements. Each node has six degrees of freedom. 
+The input parameters for this element are shown in Table~\ref{latticelink3dsummary}. 
+
+\begin{elementsummary}{latticelink3d}{3d lattice link element}{\field{length}{rn}  \field{diameter}{rn} \field{dirvector}{ra} \field{l\_end}{rn}}{latticelink3d element summary}{latticelink3dsummary}
+\elementParam{\param{length}: bond length}
+\elementParam{\param{diameter}: diameter }
+\elementParam{\param{dirvector}: direction vector in which bond-slip occurs.}
+\elementParam{\param{l\_end}: array of pressure values (optional parameter), which are used to consider influence of fluid pressure on mechanical response.}
+\elementParam{\param{mlength}: minimum length (optional parameter) is used to check if the cross-section of the element is not too small. Default value is 1.e-20.}
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Reference}{\cite{GraAnt19}}
+\end{elementsummary}
 
 \subsubsection{Latticelink3dboundary}
 Represents three-node 3d boundary link element connecting 3d beam and 3d lattice elements. The first two nodes have the same meaning as for latticelink3d. The third node is used to control the loading of the periodic cell using three normal (xx, yy and zz) and three shear strain (yz, xz, xy) components.
+The specific input parameters for this element in addition of those for latticelink3d are shown in Table~\ref{latticelink3dboundarysummary}. 
 
-The theory of latticelink3dboundary is described in the paper ``P. Grassl and A. Antonelli. 3D network modelling of fracture processes in fibre-reinforced geomaterials, International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.''
+\begin{elementsummary}{latticelink3dboundary}{3d lattice link boundary element}{{ \field{location}{in} }{rn}}{latticelink3dboundary element summary}{latticelink3dboundarysummary}
+\elementParam{\param{location}: }
+\elementDescription{Unknowns}{Six dofs ($u$-displacement, $v$-displacement, $w$-displacement, $u$-rotation, $v$-rotation and $w$-rotation) are required in each node.}
+\elementDescription{Reference}{\cite{GraAnt19}}
+\end{elementsummary}
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -2103,9 +2165,17 @@ supports modelling of two immiscible fluids.}
 %\printbibliography
 
 \begin{thebibliography}{99}
+
+
 \bibitem{RobertCook1989} R. D. Cook and D. S. Malkus and M. E. Plesha, ``Concepts and Applications of Finite Element Analysis'', Third Edition, isbn: 0-471-84788-7, 1989.
 \bibitem{BittnarSejnoha1996} Z. Bittnar and J. Sejnoha, ``Numerical Methods in Structural Mechanics'',Thomas Telford,isbn:978-0784401705, 1996.
 \bibitem{RagnarLarsson2011} R. Larsson and J. Mediavilla and M. Fagerström, ``Dynamic fracture modeling in shell structures based on XFEM'', International Journal for Numerical Methods in Engineering, vol. 86, no. 4-5, 499--527, 2011.
+\bibitem{GraJir10} P. Grassl and M. Jir\'{a}sek, ``Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension'', International Journal of Solids and Structures, vol. 47, iss. 7-8, pp. 957-968, 2010..
+\bibitem{GraBol16} P. Grassl, J. Bolander, ``Three-Dimensional Network Model for Coupling of Fracture and Mass Transport in Quasi-Brittle Geomaterials'', Materials, 9, 782, 2016
+\bibitem{AthWheGra18} I. Athanasiadis, S. Wheeler and P. Grassl. ``Hydro-mechanical network modelling of particulate composites'', International Journal of Solids and Structures, vol. 130-131, pp. 49-60, 2018.
+\bibitem{GraAnt19} P. Grassl and A. Antonelli. ``3D network modelling of fracture processes in fibre-reinforced geomaterials'', International Journal of Solids and Structures, vol. 156-157, Pages 234-242, 2019.
+
+  
 \end{thebibliography}
 \end{document}
 

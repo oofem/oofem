@@ -67,7 +67,7 @@ void PrescribedGradientHomogenization :: setPrescribedGradientVoigt(const FloatA
         this->mGradient.at(2, 2) = t.at(2);
         // In voigt form, assuming the use of gamma_12 instead of eps_12
         this->mGradient.at(1, 2) = this->mGradient.at(2, 1) = t.at(3) * 0.5;
-    } if ( n == 4 ) { // Then 2D
+    } else if ( n == 4 ) { // Then 2D
         this->mGradient.resize(2, 2);
         this->mGradient.at(1, 1) = t.at(1);
         this->mGradient.at(2, 2) = t.at(2);

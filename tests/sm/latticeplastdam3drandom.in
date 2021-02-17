@@ -1,0 +1,22 @@
+latticeplastdam3drandom.out
+Direct tension. 3D Plastic Damage Lattice Model with random field
+StaticStructural nsteps 1 rtolv 1.e-6 ddm 2 2 1 ddv 1 1.e-4 ddltf 2 nmodules 1
+errorcheck
+domain 3dLattice
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 1 nic 0 nltf 3
+node 1 coords 3 0.0 0.0 0.0 bc 6 1 1 1 1 1 1
+node 2 coords 3 0.001 0.0 0.0 bc 6 0 0 1 1 1 1
+lattice3D 1 nodes 2 1 2 crossSect 1 mat 1 polycoords 12 0.0005 -0.05 -0.05 0.0005 0.05 -0.05 0.0005 0.05 0.05 0.0005 -0.05 0.05
+latticecs 1 material 1
+latticeplastdam 1 d 0 talpha 0. e 40.e9 a1 0.175 a2 1. ft 6.5e6 fc 130.e6 angle1 0.5 angle2 0.5 flow 0.25 wf 1.53e-5 ahard 1.e-3 iter 100 tol 1.e-6 randvars 2 806 807 randgen 2 3 3
+#latticeplastdam 1 d 0 talpha 0. e 30.e9 e0 100.e-6 wf 100.e-4 randvars 2 800 randgen 2 3 3
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+ConstantFunction 1 f(t) 1.
+PiecewiseLinFunction 2 t 1  1. f(t) 1 0.1
+InterpolatingFunction 3 name latticeplastdam3drandom.dat dim 3
+#
+#%BEGIN_CHECK% tolerance 1.e-3
+#REACTION tStep 1 number 1 dof 1 value -3.36669770e+04
+#%END_CHECK%
+
