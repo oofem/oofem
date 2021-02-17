@@ -152,6 +152,8 @@ set (sm_boundary_conditions
         prescribedgradientbcdirichletRC.C
         prescribedgradientbcneumannRC.C
         prescribedgradientmultiple.C
+        prescribeddispsliphomogenization.C
+        prescribeddispslipbcdirichletrc.C
     )
 
 set (sm_crosssection
