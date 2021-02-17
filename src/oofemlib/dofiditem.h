@@ -99,7 +99,10 @@ namespace oofem {
         ENUM_ITEM_WITH_VALUE(K_zx, 48) /* Macroscopic curvature component zx*/ \
         ENUM_ITEM_WITH_VALUE(K_xy, 49) /* Macroscopic curvature component xy*/ \
         ENUM_ITEM_WITH_VALUE(K_yx, 50) /* Macroscopic curvature component yx*/ \
-
+\
+        ENUM_ITEM_WITH_VALUE(S_u, 51) /* Macroscopic reinforcement slip field in x-direction */          \
+        ENUM_ITEM_WITH_VALUE(S_v, 52) /* Macroscopic reinforcement slip field in x-direction */          \
+        ENUM_ITEM_WITH_VALUE(S_w, 53) /* Macroscopic reinforcement slip field in x-direction */          \
 /**
  * Type representing particular dof type. Values of this type describe the physical meaning of
  * available DOFs.

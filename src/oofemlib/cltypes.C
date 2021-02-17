@@ -120,6 +120,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
 
     case IST_DeformationGradientTensor:
     case IST_FirstPKStressTensor:
+    case IST_MacroSlipGradient:
+    case IST_ReinfMembraneStress:
     //case IST_MaterialOrientation:
         return ISVT_TENSOR_G;
 
@@ -155,6 +157,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_PrincStressVector1:
     case IST_PrincStressVector2:
     case IST_PrincStressVector3:
+    case IST_MacroSlipVector:
+    case IST_TransferStress:
         return ISVT_VECTOR;
 
     case IST_MaxEquivalentStrainLevel:
@@ -243,7 +247,7 @@ int giveInternalStateTypeSize(InternalStateValueType valType)
 
 InternalStateValueType giveInternalStateValueType(UnknownType type)
 {
-    if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField ) {
+    if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField || type == MacroSlipVector ) {
         return ISVT_VECTOR;
     } else if ( type == FluxVector || type == PressureVector || type == Temperature || type == Humidity || type == DeplanationFunction ) {
         return ISVT_SCALAR;
