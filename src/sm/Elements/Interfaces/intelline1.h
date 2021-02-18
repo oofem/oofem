@@ -37,6 +37,7 @@
 
 #include "sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "floatmatrixf.h"
+#include "nodalaveragingrecoverymodel.h"
 
 #define _IFT_IntElLine1_Name "intelline1"
 #define _IFT_IntElLine1_axisymmode "axisymmode"
@@ -53,7 +54,7 @@ class FEI2dLineLin;
  * @author Jim Brouzoulis
  * @author Borek Patzak
  */
-class IntElLine1 : public StructuralInterfaceElement
+class IntElLine1 : public StructuralInterfaceElement, public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI2dLineLin interp;
@@ -74,8 +75,9 @@ public:
 
     int testElementExtension(ElementExtension ext) override { return 0; }
 
-    //Interface *giveInterface(InterfaceType) override { return NULL; }
-
+    Interface *giveInterface(InterfaceType interface) override;
+    void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
+                                                    InternalStateType type, TimeStep *tStep) override;
     // definition & identification
     const char *giveInputRecordName() const override { return _IFT_IntElLine1_Name; }
     const char *giveClassName() const override { return "IntElLine1"; }
@@ -101,7 +103,7 @@ protected:
     void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) override;
     void computeGaussPoints() override;
 
-    Element_Geometry_Type giveGeometryType() const override { return EGT_quad_1_interface; }
+    Element_Geometry_Type giveGeometryType() const override { return EGT_line_1; }
 };
 } // end namespace oofem
 #endif
