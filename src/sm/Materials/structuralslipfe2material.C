@@ -114,7 +114,7 @@ StructuralSlipFE2Material :: CreateStatus(GaussPoint *gp) const
         std::vector<GaussPoint*> gpArray;
         gpArray.resize(outputSelected.giveSize()/2);
         for (int i = 1; i <= outputSelected.giveSize()/2; i++) {
-            GaussPoint* gpOut = domain->giveElement(outputSelected.at(i*2-1))->giveIntegrationRule(0)->getIntegrationPoint(outputSelected.at(i*2) - 1);
+            GaussPoint* gpOut = domain->giveGlobalElement(outputSelected.at(i*2-1))->giveIntegrationRule(0)->getIntegrationPoint(outputSelected.at(i*2) - 1);
             gpArray[i - 1] = gpOut;
         }
 
