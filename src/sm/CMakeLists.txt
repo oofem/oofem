@@ -79,6 +79,7 @@ set (sm_element
     Elements/PlaneStress/trplanestressrotallman3d.C
     Elements/PlaneStress/linquad3d_planestress.C
     Elements/PlaneStress/qtrplstrslip.C
+    Elements/PlaneStress/qplanstrssslip.C
     Elements/AbaqusUserElement.C
     Elements/htselement.C
     Elements/lumpedmasselement.C
