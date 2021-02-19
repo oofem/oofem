@@ -66,6 +66,7 @@
 #include "sm/prescribedgradientbcneumannRC.h"
 #include "sm/prescribedgradientmultiple.h"
 #include "sm/prescribeddispslipbcdirichletrc.h"
+#include "sm/transversereinfconstraint.h"
 #endif
 
 
@@ -454,7 +455,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     */
 
     // Output weak periodic boundary conditions
-    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1, pgdcount=1, pgncount=1, pgmcount=1, pdsdcount=1;
+    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1, pgdcount=1, pgncount=1, pgmcount=1, pdsdcount=1, trccount=1;
 
     for ( auto &gbc : domain->giveBcs() ) {
         WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( gbc.get() );
@@ -546,6 +547,17 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             }
             fprintf(FID, "];\n");
             pdsdcount++;
+        }
+        TransverseReinfConstraint *trc = dynamic_cast<TransverseReinfConstraint *> ( gbc.get() );
+        if (trc) {
+            FloatArray lambda;
+            trc->computeField(lambda, tStep);
+            fprintf(FID, "\tspecials.transversereinfconstraint{%u}.stress=[", trccount);
+            for ( auto i : lambda ) {
+                fprintf(FID, "%e\t", i);
+            }
+            fprintf(FID, "];\n");
+            trccount++;
         }
     }
 }
