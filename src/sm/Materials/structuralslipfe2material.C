@@ -43,7 +43,6 @@
 #include "util.h"
 #include "contextioerr.h"
 #include "generalboundarycondition.h"
-#include "prescribedgradienthomogenization.h"
 #include "prescribeddispsliphomogenization.h"
 #include "exportmodulemanager.h"
 #include "vtkxmlexportmodule.h"
@@ -144,9 +143,48 @@ StructuralSlipFE2Material::givePlaneStressStiffMtrx( MatResponseMode rMode, Gaus
         answer = this->givendStressdEpsTangent;
         status->setdStressdEpsTangent(answer);
         return answer;
-    } else {
+    } else if (useNumTangent) {
         return StructuralFE2Material::givePlaneStressStiffMtrx(rMode, gp, tStep);
+    } else {
+        auto status = static_cast<StructuralSlipFE2MaterialStatus*>(this->giveStatus(gp));
+        FloatMatrix tangent;
+        status->computeTangent(tStep); //implemented by BC
+        tangent.beSubMatrixOf(status->givedStressdEpsTangent(), {1,2,3}, {1,2,3});
+        FloatMatrixF<3,3> answer;
+        answer = tangent;
+        return answer;
+
     }
+}
+
+
+FloatArrayF<3> StructuralSlipFE2Material::giveRealStressVector_PlaneStress( const FloatArrayF<3> &strain, GaussPoint *gp, TimeStep *tStep ) const
+{
+    auto ms = static_cast<StructuralSlipFE2MaterialStatus*>( this->giveStatus(gp) );
+
+    ms->setTimeStep(tStep);
+    ms->giveBC()->setDispGradient(strain);
+    // Solve subscale problem
+    ms->giveRVE()->solveYourselfAt(tStep);
+    // Post-process the stress
+    FloatArray stress;
+    ms->giveBC()->computeStress(stress, tStep);
+
+    FloatArrayF<6> updateStress;
+    updateStress = {stress[0], stress[1], 0., 0., 0., 0.5*(stress[2]+stress[3])};
+
+    FloatArrayF<6> updateStrain;
+    updateStrain = {strain[0], strain[1], 0., 0., 0., strain[2]};
+
+    FloatArrayF<3> answer;
+    answer = {stress[0], stress[1], 0.5*(stress[2]+stress[3])};
+
+    // Update the material status variables
+    ms->letTempStressVectorBe(updateStress);
+    ms->letTempStrainVectorBe(updateStrain);
+    ms->markOldTangent(); // Mark this so that tangent is reevaluated if they are needed.
+
+    return answer;
 }
 
 
@@ -156,18 +194,18 @@ void StructuralSlipFE2Material::giveHomogenizedFields( FloatArray &stress, Float
 
     ms->setTimeStep(tStep);
     //Set input
-    ms->giveBCds()->setDispGradient(strain);
-    ms->giveBCds()->setSlipField(slip);
-    ms->giveBCds()->setSlipGradient(slipGradient);
+    ms->giveBC()->setDispGradient(strain);
+    ms->giveBC()->setSlipField(slip);
+    ms->giveBC()->setSlipGradient(slipGradient);
 //     Solve subscale problem
 //     OOFEM_LOG_INFO("Solving subscale problem at element %d, gp %d.\n Applied strain is %10.6e, %10.6e, %10.6e \n Applied slip is %10.6e, %10.6e \n Applied slip gradient is %10.6e, %10.6e, %10.6e, %10.6e \n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), strain.at(1), strain.at(2), strain.at(3), slip.at(1), slip.at(2), slipGradient.at(1), slipGradient.at(2), slipGradient.at(3), slipGradient.at(4) );
     ms->giveRVE()->solveYourselfAt(tStep);
 //     OOFEM_LOG_INFO("Solution of RVE problem @ element %d, gp %d OK. \n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber() );
     //Homogenize fields
     FloatArray stress4;
-    ms->giveBCds()->computeStress(stress4, tStep);
-    ms->giveBCds()->computeTransferStress(bStress, tStep);
-    ms->giveBCds()->computeReinfStress(rStress, tStep);
+    ms->giveBC()->computeStress(stress4, tStep);
+    ms->giveBC()->computeTransferStress(bStress, tStep);
+    ms->giveBC()->computeReinfStress(rStress, tStep);
 
     if (stress4.giveSize() == 4 ) {
         stress = {stress4[0], stress4[1], 0.5*(stress4[2]+stress4[3])};
@@ -183,7 +221,6 @@ void StructuralSlipFE2Material::giveHomogenizedFields( FloatArray &stress, Float
     ms->letTempReinfStressVectorBe(rStress);
     ms->letTempSlipGradVectorBe(slipGradient);
     ms->markOldTangent(); // Mark this so that tangent is reevaluated if they are needed.
-
 }
 
 
@@ -371,18 +408,12 @@ StructuralSlipFE2MaterialStatus :: StructuralSlipFE2MaterialStatus( int rank, Ga
 }
 
 
-PrescribedGradientHomogenization* StructuralSlipFE2MaterialStatus::giveBC()
+PrescribedDispSlipHomogenization* StructuralSlipFE2MaterialStatus::giveBC()
 {
-    this->bc = dynamic_cast< PrescribedGradientHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
+    this->bc = dynamic_cast< PrescribedDispSlipHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
     return this->bc;
 }
 
-
-PrescribedDispSlipHomogenization* StructuralSlipFE2MaterialStatus::giveBCds()
-{
-    this->bcds = dynamic_cast< PrescribedDispSlipHomogenization * >( this->rve->giveDomain(1)->giveBc(1) );
-    return this->bcds;
-}
 
 bool StructuralSlipFE2MaterialStatus :: createRVE(const std :: string &inputfile, int rank, int el, int gp)
 {
@@ -404,9 +435,8 @@ bool StructuralSlipFE2MaterialStatus :: createRVE(const std :: string &inputfile
     this->rve->letOutputBaseFileNameBe( name.str() );
 
     bc = this->giveBC();
-    bcds = this->giveBCds();
-    if ( (!bc) && (!bcds) ) {
-        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedGradientHomogenization as first b.c.");
+    if ( !bc ) {
+        OOFEM_ERROR("RVE doesn't have necessary boundary condition; should have a type of PrescribedDispSlipHomogenization as first b.c.");
     }
 
     return true;

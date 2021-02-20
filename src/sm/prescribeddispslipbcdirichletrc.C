@@ -168,6 +168,20 @@ double PrescribedDispSlipBCDirichletRC::giveOnSteel( Dof *dof, int pos, const Fl
 
 void PrescribedDispSlipBCDirichletRC::updateCoefficientMatrix( FloatMatrix &C )
 {
+// This is written in a very general way, supporting both fm and sm problems.
+// v_prescribed = C.d = (x-xbar).d;
+// Modified by ES.
+// C = [x 0 0 y]
+//     [0 y x 0]
+//     [ ... ] in 2D, voigt form [d_11, d_22, d_12 d_21]
+//Modified by AS:
+//Include end moments from the reinforcement.
+//\sum (R_L e_l + R_perp e_{\perp} ) \outerp (x-\bar{x}) already included in C^T.R_c (in computeField)
+//Added term \sum R_M e_{\perp} \outerp e_l
+// C = [x                0              0               y  ]
+//     [0                y              y               0  ]
+//     [ePerp1*eL1   ePerp2*eL2    ePerp1*eL2    ePerp2*eL1]
+//  for DofManagers with rotational degrees of freedom.
     Domain *domain = this->giveDomain();
 
     int nsd = domain->giveNumberOfSpatialDimensions();
@@ -371,10 +385,50 @@ void PrescribedDispSlipBCDirichletRC::computeReinfStress( FloatArray &rStress, T
 
 
 void PrescribedDispSlipBCDirichletRC :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
+// a = [a_c; a_f];
+// K.a = [R_c,0];
+// [K_cc, K_cf; K_fc, K_ff].[a_c;a_f] = [R_c; 0];
+// a_c = d.[x-x_b] = [x-x_b].d = C.d
+// E = C'.(K_cc - K_cf.K_ff^(-1).K_fc).C
+//   = C'.(K_cc.C - K_cf.(K_ff^(-1).(K_fc.C)))
+//   = C'.(K_cc.C - K_cf.a)
+//   = C'.X
 {
-    OOFEM_ERROR("Not implemented. Use either numerical or externally provided tangent stiffness.")
-}
+    // Fetch some information from the engineering model
+    EngngModel *rve = this->giveDomain()->giveEngngModel();
+    std :: unique_ptr< SparseLinearSystemNM >solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
+    EModelDefaultEquationNumbering fnum;
+    EModelDefaultPrescribedEquationNumbering pnum;
 
+    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+    std :: unique_ptr< SparseMtrx >Kff( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx >Kfp( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx >Kpf( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx >Kpp( classFactory.createSparseMtrx(stype) );
+    if ( !Kff ) {
+        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+    }
+    Kff->buildInternalStructure(rve, 1, fnum);
+    Kfp->buildInternalStructure(rve, 1, fnum, pnum);
+    Kpf->buildInternalStructure(rve, 1, pnum, fnum);
+    Kpp->buildInternalStructure(rve, 1, pnum);
+    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
+    rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
+    rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
+    rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
+
+    FloatMatrix C, X, Kpfa, KfpC, a;
+
+    this->updateCoefficientMatrix(C);
+    Kpf->timesT(C, KfpC);
+    solver->solve(*Kff, KfpC, a);
+    Kpp->times(C, X);
+    Kpf->times(a, Kpfa);
+    X.subtract(Kpfa);
+    tangent.beTProductOf(C, X);
+    tangent.times( 1. / this->domainSize(this->giveDomain(), this->giveSetNumber()) );
+}
 
 void PrescribedDispSlipBCDirichletRC :: initializeFrom(InputRecord &ir)
 {

@@ -71,9 +71,7 @@ protected:
     /// The RVE
     std :: unique_ptr< EngngModel > rve;
     /// Boundary condition in RVE that performs the computational homogenization.
-    PrescribedGradientHomogenization *bc = nullptr;
-    /// Boundary condition with prescribing both displacement and slip fields
-    PrescribedDispSlipHomogenization *bcds = nullptr;
+    PrescribedDispSlipHomogenization *bc = nullptr;
 
     std :: string mInputFile;
 
@@ -104,8 +102,7 @@ public:
     StructuralSlipFE2MaterialStatus(int rank, GaussPoint * g,  const std :: string & inputfile, int el, int gp);
 
     EngngModel *giveRVE() const { return this->rve.get(); }
-    PrescribedGradientHomogenization *giveBC();
-    PrescribedDispSlipHomogenization *giveBCds();
+    PrescribedDispSlipHomogenization *giveBC();
 
     bool createRVE(const std :: string &inputfile, int rank, int el, int gp);
     void setTimeStep(TimeStep *tStep);
@@ -152,23 +149,19 @@ public:
  * At the macroscale, both the displacement and reinforcement slip can be treated as variables.
  * Currently, only plane stress mode is supported.
  *
- * This material uses the PrescribedGradient boundary conditions to perform computational homogenization.
+ * This material uses the PrescribedDispSlip boundary conditions to perform computational homogenization.
  * The requirement for the supplied subscale problem is:
- * - It must have a PrescribedGradient boundary condition.
+ * - It must have a PrescribedDispSlip boundary condition.
  * - It must be the first boundary condition
  *
- * For the macroscopic displacement field, the following boundary conditions on the RVE are supported (must use PrescribedGradientHomogenization class):
- * - PrescribedGradientBCDirichletRC (macroscopic displacement gradient prescribed with Dirichlet BCs on concrete and optionally on reinforcement)
- * - PrescribedGradientBCNeumannRC (macroscopic displacement gradient prescribed with Neumann BCs on concrete)
- * - PrescribedGradientMultiple (for combining more than one PrescribedGradient boundary condition on the RVE)
- * ref: Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2018). Two‐scale finite element modelling of reinforced concrete structures: Effective response and subscale fracture development. International Journal for Numerical Methods in Engineering, 114(10), 1074–1102. https://doi.org/10.1002/nme.5776
- *
- *
- * For the optional macroscopic reinforcement slip field, the following boundary conditions on the RVE are supported (must use PrescribedDispSlipHomogenization):
+ * The following boundary conditions on the RVE are supported (must use PrescribedDispSlipHomogenization class):
  * - PrescribedDispSlipBCDirichletRC (macroscopic displacement gradient, slip and slip gradient prescribed with Dirichlet BCs on concrete and optionally on reinforcement)
- * - PrescribedDispSlipBCNeumannRC (macroscopic displacement gradient, slip and slip gradient prescribed with Neumann BCs on concrete or reinforcement)
- * - PrescribedDispSlipMultiple (for combining more than one PrescribedDispSlip boundary conditions on the RVE)
- * refs: Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2019). A multiscale model for reinforced concrete with macroscopic variation of reinforcement slip. Computational Mechanics, 63(2), 139–158. https://doi.org/10.1007/s00466-018-1588-3
+ * - PrescribedDispSlipBCNeumannRC (macroscopic displacement gradient, slip and slip gradient prescribed with Neumann BCs on concrete and optionally on reinforcement)
+ * - PrescribedDispSlipMultiple (for combining more than one PrescribedDispSlip boundary condition on the RVE)
+ * Input fields slip and slipGrad are optional. If left unspecified, the BCs work then as usual PrescribedGradient BCs (PrescribedGradient, PrescribedGradientBCNeumann)
+ *
+ * refs: Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2018). Two‐scale finite element modelling of reinforced concrete structures: Effective response and subscale fracture development. International Journal for Numerical Methods in Engineering, 114(10), 1074–1102. https://doi.org/10.1002/nme.5776
+ * Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2019). A multiscale model for reinforced concrete with macroscopic variation of reinforcement slip. Computational Mechanics, 63(2), 139–158. https://doi.org/10.1007/s00466-018-1588-3
  * Sciegaj, A., Larsson, F., Lundgren, K., & Runesson, K. (2020). On a volume averaged measure of macroscopic reinforcement slip in two-scale modeling of reinforced concrete. International Journal for Numerical Methods in Engineering, 121(8), 1822–1846. https://doi.org/10.1002/nme.6288
  *
  * @author Adam Sciegaj
@@ -201,6 +194,7 @@ public:
     const char *giveClassName() const override { return "StructuralSlipFE2Material"; }
 
     FloatMatrixF<3,3> givePlaneStressStiffMtrx(MatResponseMode mmode, GaussPoint *gp, TimeStep *tStep) const override;
+    FloatArrayF<3> giveRealStressVector_PlaneStress(const FloatArrayF< 3 > &strain, GaussPoint *gp, TimeStep *tStep) const override;
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;
 

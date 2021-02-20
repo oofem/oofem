@@ -86,14 +86,16 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     // Methods for field homogenization implemented by respective BCs
-    virtual void computeStress(FloatArray &stress, TimeStep *tStep) { };
-    virtual void computeTransferStress(FloatArray &bStress, TimeStep *tStep) { };
-    virtual void computeReinfStress(FloatArray &rStress, TimeStep *tStep) { };
+    virtual void computeStress(FloatArray &stress, TimeStep *tStep) = 0;
+    virtual void computeTransferStress(FloatArray &bStress, TimeStep *tStep) = 0;
+    virtual void computeReinfStress(FloatArray &rStress, TimeStep *tStep) = 0;
 
-    void setDispField(const FloatArray &t);
-    void setSlipField(const FloatArray &t);
-    void setDispGradient(const FloatArray &t);
-    void setSlipGradient(const FloatArray &t);
+    virtual void computeTangent(FloatMatrix &tangent, TimeStep *tStep) = 0;
+
+    virtual void setDispField(const FloatArray &t);
+    virtual void setSlipField(const FloatArray &t);
+    virtual void setDispGradient(const FloatArray &t);
+    virtual void setSlipGradient(const FloatArray &t);
 
     void giveDispField(FloatArray &oField) const;
     void giveSlipField(FloatArray &oField) const;

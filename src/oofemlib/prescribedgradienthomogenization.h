@@ -105,14 +105,14 @@ public:
      * Set prescribed gradient.
      * @param t New prescribed gradient.
      */
-    virtual void setPrescribedGradient(const FloatMatrix &t) { mGradient = t; }
+    void setPrescribedGradient(const FloatMatrix &t) { mGradient = t; }
 
     /**
      * Sets the prescribed gradient from the matrix from given voigt notation.
      * Assumes use of double values for off-diagonal, usually the way for strain in Voigt form.
      * @param t Vector in voigt format.
      */
-    virtual void setPrescribedGradientVoigt(const FloatArray &t);
+    void setPrescribedGradientVoigt(const FloatArray &t);
     /**
      * Gives back the applied gradient in Voigt form.
      * @param oGradient The applied gradient, in Voigt form.
@@ -123,7 +123,7 @@ public:
      * Set the center coordinate for the prescribed values to be set for.
      * @param x Center coordinate.
      */
-    virtual void setCenterCoordinate(FloatArray &x) { mCenterCoord = x; }
+    void setCenterCoordinate(FloatArray &x) { mCenterCoord = x; }
     /// Returns the center coordinate
     FloatArray &giveCenterCoordinate() { return mCenterCoord; }
 

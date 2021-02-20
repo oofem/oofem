@@ -32,74 +32,76 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef prescribeddispslipbcdirichletrc_h
-#define prescribeddispslipbcdirichletrc_h
+#ifndef PRESCRIBEDDISPSLIPBCNEUMANN_H_
+#define PRESCRIBEDDISPSLIPBCNEUMANN_H_
 
 #include "prescribeddispsliphomogenization.h"
-#include "boundarycondition.h"
-#include "dof.h"
-#include "bctype.h"
-#include "valuemodetype.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
+#include "activebc.h"
 
-///@name Input fields for PrescribedDispSlipBCDirichletRC
-//@{
-#define _IFT_PrescribedDispSlipBCDirichletRC_Name "prescribeddispslipbcdirichletrc"
-#define _IFT_PrescribedDispSlipBCDirichletRC_ConcreteBoundary "conboundset"
-#define _IFT_PrescribedDispSlipBCDirichletRC_ReinfXBound "reinfxbound"
-#define _IFT_PrescribedDispSlipBCDirichletRC_ReinfYBound "reinfybound"
-//@}
+#include <memory>
+
+#define _IFT_PrescribedDispSlipBCNeumannRC_Name   "prescribeddispslipbcneumannrc"
 
 namespace oofem {
+class Node;
+class Element;
 /**
  * Prescribes macroscopic displacement gradient, reinforcement slip field and slip gradient
- * on the reinforced concrete RVE using Dirichlet boundary conditions, cf.
+ * on the reinforced concrete RVE using Neumann boundary conditions, cf.
  * Sciegaj, A., Larsson, F., Lundgren, K., Nilenius, F., & Runesson, K. (2019). A multiscale model for reinforced concrete with macroscopic variation of reinforcement slip. Computational Mechanics, 63(2), 139–158. https://doi.org/10.1007/s00466-018-1588-3
  * Macroscopic slip and slip gradient fields are optional (see PrescribedDispSlipHomogenization).
  * If not specified, this BC will prescribe only the displacement gradient, i.e., it will work the same was as a PrescribedGradient bc.
  * Works with 2D RVEs comprising solid elements (concrete), reinforcement (beam/truss elements) and interface elements in between.
  * Used in multiscale analyses of reinforced concrete structures. Currently, only orthogonal reinforcement in X and Y direction is supported.
  *
- * This BC is applied to the set of nodes lying at the concrete boundary (either node set or elementboundaries set will work).
- * If the optional reinfxbound and reinfybound sets are specified, the fields/gradients are prescribed on both concrete and steel.
- * If only the conboundset input record is specified, the displacement gradient is prescribed only on concrete.
- *
  * @author Adam Sciegaj
+ *
  */
-class OOFEM_EXPORT PrescribedDispSlipBCDirichletRC : public BoundaryCondition, public PrescribedDispSlipHomogenization
+class OOFEM_EXPORT PrescribedDispSlipBCNeumannRC : public ActiveBoundaryCondition, public PrescribedDispSlipHomogenization
 {
 public:
-    PrescribedDispSlipBCDirichletRC(int n, Domain *d) : BoundaryCondition(n, d) { }
-    virtual ~PrescribedDispSlipBCDirichletRC() { }
+    PrescribedDispSlipBCNeumannRC(int n, Domain *d);
+    virtual ~PrescribedDispSlipBCNeumannRC();
 
-    double give(Dof *dof, ValueModeType mode, double time) override;
+    int giveNumberOfInternalDofManagers() override { return 1; }
+    DofManager *giveInternalDofManager(int i) override;
 
     void initializeFrom(InputRecord &ir) override;
     void giveInputRecord(DynamicInputRecord &input) override;
 
-    virtual void updateCoefficientMatrix(FloatMatrix &C);
-    double domainSize(Domain *d, int set) override;
-
-    void computeStress(FloatArray &sigma, TimeStep *tStep) override;
-    void computeTransferStress(FloatArray &bStress, TimeStep *tStep) override;
-    void computeReinfStress(FloatArray &rStress, TimeStep *tStep) override;
-
-    void computeTangent(FloatMatrix &tangent, TimeStep *tStep) override;
+    bcType giveType() const override { return UnknownBT; }
 
     void scale(double s) override;
 
-    const char *giveClassName() const override { return "PrescribedDispSlipBCDirichletRC"; }
-    const char *giveInputRecordName() const override { return _IFT_PrescribedDispSlipBCDirichletRC_Name; }
+    void assembleVector(FloatArray &answer, TimeStep *tStep,
+                        CharType type, ValueModeType mode,
+                        const UnknownNumberingScheme &s, FloatArray *eNorm=nullptr, void* lock=nullptr) override;
+
+    void assemble(SparseMtrx &answer, TimeStep *tStep,
+                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, 
+                  double scale = 1.0, void* lock=nullptr) override;
+
+    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
+                            const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
+
+    const char *giveClassName() const override { return "PrescribedDispSlipBCNeumannRC"; }
+    const char *giveInputRecordName() const override { return _IFT_PrescribedDispSlipBCNeumannRC_Name; }
+
+    void computeStress(FloatArray &sigma, TimeStep *tStep) override;
+    void computeTransferStress(FloatArray &bStress, TimeStep *tStep) override {};
+    void computeReinfStress(FloatArray &rStress, TimeStep *tStep) override {};
+
+    void computeTangent(FloatMatrix &tangent, TimeStep *tStep) override;
+
+    void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
 
 protected:
-    int conBoundSet; //element boundaries set for the concrete solid
-    int reinfXBound=0; //set containing end (boundary) nodes of horizontal rebars
-    int reinfYBound=0; //set containing end (boundary) nodes of vertical rebars
+    std :: unique_ptr< Node > mpSigmaHom;
+    IntArray mSigmaIds;
 
-    double giveOnConcrete(Dof *dof, int pos, const FloatArray u);
-    double giveOnSteel(Dof *dof, int pos, const FloatArray u, const FloatArray us);
+    void integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex);
+    virtual double domainSize(Domain *d, int set) override;
 };
-} // end namespace oofem
+} /* namespace oofem */
 
-#endif // prescribeddispslipbcdirichletrc_h
+#endif /* PRESCRIBEDDISPSLIPBCNEUMANN_H_ */

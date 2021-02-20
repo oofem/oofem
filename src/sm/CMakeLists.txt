@@ -151,11 +151,10 @@ set (sm_interface_elements
 
 set (sm_boundary_conditions
     Deprecated/prescribedgenstrainshell7.C
-        prescribedgradientbcdirichletRC.C
-        prescribedgradientbcneumannRC.C
-        prescribedgradientmultiple.C
         prescribeddispsliphomogenization.C
         prescribeddispslipbcdirichletrc.C
+        prescribeddispslipbcneumannrc.C
+        prescribeddispslipmultiple.C
         transversereinfconstraint.C
     )
 
