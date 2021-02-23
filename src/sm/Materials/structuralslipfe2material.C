@@ -206,6 +206,7 @@ void StructuralSlipFE2Material::giveHomogenizedFields( FloatArray &stress, Float
     ms->giveBC()->computeStress(stress4, tStep);
     ms->giveBC()->computeTransferStress(bStress, tStep);
     ms->giveBC()->computeReinfStress(rStress, tStep);
+//    OOFEM_LOG_INFO("Stress is  %10.6e, %10.6e, %10.6e \n Transfer stress is %10.6e, %10.6e \n Reinforcement membrane stress is %10.6e, %10.6e, %10.6e, %10.6e \n",  stress4.at(1), stress4.at(2), stress4.at(3), bStress.at(1), bStress.at(2), rStress.at(1), rStress.at(2), rStress.at(3), rStress.at(4) );
 
     if (stress4.giveSize() == 4 ) {
         stress = {stress4[0], stress4[1], 0.5*(stress4[2]+stress4[3])};

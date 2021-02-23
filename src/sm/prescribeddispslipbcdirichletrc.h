@@ -93,6 +93,10 @@ public:
     const char *giveInputRecordName() const override { return _IFT_PrescribedDispSlipBCDirichletRC_Name; }
 
 protected:
+    bool dispGradON = false; /// on/off flag specifying whether the displacement gradient should be applied via Neumann BCs
+    bool slipON = false; /// on/off flag specifying whether the slip field should be applied via Neumann BCs
+    bool slipGradON = false; /// on/off flag specifying whether the slip gradient should be applied via Neumann BCs
+
     int conBoundSet; //element boundaries set for the concrete solid
     int reinfXBound=0; //set containing end (boundary) nodes of horizontal rebars
     int reinfYBound=0; //set containing end (boundary) nodes of vertical rebars

@@ -132,6 +132,7 @@ protected:
     void assembleOnTransferStress(SparseMtrx &answer, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale);
 
     void integrateTangentRStressSteel(FloatMatrix &oTangent, Element *e, const int &rebarSet);
+    void integrateTangentRStressConcrete(FloatMatrix &oTangent, Element *e, int iBndIndex);
     void assembleVectorRStress(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s);
     void assembleOnReinfStress(SparseMtrx &answer, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale);
 

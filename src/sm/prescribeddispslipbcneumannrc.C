@@ -77,7 +77,7 @@ PrescribedDispSlipBCNeumannRC :: PrescribedDispSlipBCNeumannRC(int n, Domain *d)
         lmTauHom->appendDof( new MasterDof( lmTauHom.get(), ( DofIDItem ) ( dofId ) ) );
     }
 
-    for ( int i = 0; i < nsd * nsd; i++ ) {
+    for ( int i = 0; i < nsd ; i++ ) {
         // Just putting in X_i id-items since they don't matter.
         int dofId = d->giveNextFreeDofID();
         lmSigmaSIds.followedBy(dofId);
@@ -358,6 +358,7 @@ void PrescribedDispSlipBCNeumannRC::assembleVectorRStress( FloatArray &answer, T
         FloatArray rStressLoad;
         FloatArray slipGrad;
         this->giveSlipGradient(slipGrad);
+        slipGrad.resizeWithValues(2);
 
         double loadLevel = this->giveTimeFunction()->evaluateAtTime(tStep->giveTargetTime());
         rStressLoad.beScaled(loadLevel, slipGrad);
@@ -376,7 +377,7 @@ void PrescribedDispSlipBCNeumannRC::assembleVectorRStress( FloatArray &answer, T
         FloatMatrix C;
         double gammaBoxInt = computeInterfaceLength(rebarSets);
         this->computeWeightMatrix(C, rebarSets);
-        C.resizeWithData(4,4);
+//        C.resizeWithData(4,4);
         Ksig.clear();
         Ksig_el.clear();
         fe_sig.clear();
@@ -433,7 +434,7 @@ void PrescribedDispSlipBCNeumannRC::assembleVectorRStress( FloatArray &answer, T
             ec->computeVectorOf(mode, tStep, u_c);
 
             //Compute the stiffness matrix expansion
-            this->integrateTangentStress(Ksig, ec, boundary);
+            this->integrateTangentRStressConcrete(Ksig, ec, boundary);
             Ksig.times(1/omegaBox);
 
             //Compute the contribution to internal force vector
@@ -655,6 +656,7 @@ void PrescribedDispSlipBCNeumannRC::computeReinfStress( FloatArray &rStress, Tim
     if ( slipGradON ) {
         double volRVE = this->domainSize( this->giveDomain(), this->giveSetNumber() );
         lmSigmaSHom->giveUnknownVector( rStress, lmSigmaSIds, VM_Total, tStep );
+        rStress.resizeWithValues(4);
         rStress.times( -1 / volRVE );
     }
 }
@@ -734,7 +736,6 @@ void PrescribedDispSlipBCNeumannRC :: integrateTangentStress(FloatMatrix &oTange
 
 void PrescribedDispSlipBCNeumannRC::integrateTangentBStressSteel( FloatMatrix &oTangent, Element *e, const int &rebarSet )
 {
-    //reminder: Ktau must be 2x6
     FloatMatrix Nstau, Ns, contrib;
     double Ss;
     IntArray DofMask;
@@ -778,7 +779,6 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentBStressSteel( FloatMatrix &o
 
 void PrescribedDispSlipBCNeumannRC::integrateTangentBStressConcrete( FloatMatrix &oTangent, Element *e )
 {
-    //reminder: Ktau must be 2x8
     FloatMatrix Nctau, Nc, contrib;
     IntArray DofMask;
 
@@ -816,7 +816,6 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentBStressConcrete( FloatMatrix
 
 void PrescribedDispSlipBCNeumannRC::integrateTangentRStressSteel( FloatMatrix &oTangent, Element *e, const int &rebarSet )
 {
-    //reminder: Ksig must be 4x6
     FloatMatrix Nssig, Bs, contrib;
     double Ss;
     IntArray DofMask;
@@ -849,7 +848,7 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentRStressSteel( FloatMatrix &o
 
         //Constant traction interpolation
         this->computeRebarDyad(Nssig, rebarSet);
-        Nssig.resizeWithData(2,4);
+//        Nssig.resizeWithData(2,4);
 
         //Compute rebar perimeter
         CrossSection *cs = e->giveCrossSection();
@@ -861,6 +860,62 @@ void PrescribedDispSlipBCNeumannRC::integrateTangentRStressSteel( FloatMatrix &o
         double detJ = interp->giveTransformationJacobian(lcoords, cellgeo);
         oTangent.add(detJ * gp->giveWeight(), contrib);
     }
+}
+
+
+void PrescribedDispSlipBCNeumannRC::integrateTangentRStressConcrete( FloatMatrix &oTangent, Element *e, int iBndIndex )
+{
+    FloatArray normal, n;
+    FloatMatrix nMatrix, E_n;
+    FloatMatrix contrib;
+
+    FEInterpolation *interp = e->giveInterpolation();
+
+    int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
+
+    //Interpolation order
+    int order = interp->giveInterpolationOrder();
+    std :: unique_ptr< IntegrationRule > ir = interp->giveBoundaryEdgeIntegrationRule(order, iBndIndex);
+
+    oTangent.clear();
+
+    for ( auto &gp : *ir ) {
+        const FloatArray &lcoords = gp->giveNaturalCoordinates();
+        FEIElementGeometryWrapper cellgeo(e);
+
+        //Evaluate the normal
+        double detJ = interp->boundaryEvalNormal(normal, iBndIndex, lcoords, cellgeo);
+
+        //Compute global coordinates of Gauss point
+        FloatArray globalCoord;
+        interp->boundaryLocal2Global(globalCoord, iBndIndex, lcoords, cellgeo);
+
+        //Compute local coordinates on the element
+        FloatArray bulkElLocCoords;
+        e->computeLocalCoordinates(bulkElLocCoords, globalCoord);
+
+        //Evaluate the shape functions
+        interp->evalN(n, bulkElLocCoords, cellgeo);
+        nMatrix.beNMatrixOf(n, nsd);
+
+        E_n.resize(nsd, nsd);
+        E_n.zero();
+        if ( nsd == 3 ) {
+            E_n.at(1, 1) = normal.at(1);
+            E_n.at(2, 2) = normal.at(2);
+            E_n.at(3, 3) = normal.at(3);
+        } else if ( nsd == 2 ) {
+            E_n.at(1, 1) = normal.at(1);
+            E_n.at(2,2) = normal.at(2);
+        } else {
+            E_n.at(1, 1) = normal.at(1);
+        }
+
+        contrib.beProductOf(E_n, nMatrix);
+
+        oTangent.add(detJ * gp->giveWeight(), contrib);
+    }
+
 }
 
 
@@ -974,7 +1029,7 @@ void PrescribedDispSlipBCNeumannRC::assembleOnReinfStress( SparseMtrx &answer, c
     FloatMatrix C;
     double gammaBoxInt = computeInterfaceLength(rebarSets);
     this->computeWeightMatrix(C, rebarSets);
-    C.resizeWithData(4,4);
+//    C.resizeWithData(4,4);
 
     for ( int i = 0; i < rebarSets.giveSize(); ++i ) {
         Set *steelSet = this->giveDomain()->giveSet(rebarSets.at(i+1));
@@ -1011,7 +1066,7 @@ void PrescribedDispSlipBCNeumannRC::assembleOnReinfStress( SparseMtrx &answer, c
         ec->giveLocationArray(loc_r, r_s);
         ec->giveLocationArray(loc_c, c_s);
 
-        this->integrateTangentStress(Ke, ec, boundary);
+        this->integrateTangentRStressConcrete(Ke, ec, boundary);
 
         //TODO: temporary hack for inconsistent normal vectors
         auto interp = dynamic_cast< FEI2dQuadLin * >( ec->giveInterpolation() );

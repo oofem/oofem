@@ -242,24 +242,26 @@ void PrescribedDispSlipBCDirichletRC::updateCoefficientMatrix( FloatMatrix &C )
 
 void PrescribedDispSlipBCDirichletRC :: computeStress(FloatArray &sigma, TimeStep *tStep)
 {
-    EngngModel *emodel = this->domain->giveEngngModel();
-    int npeq = emodel->giveNumberOfDomainEquations( this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
-    FloatArray R_c(npeq), R_ext(npeq);
+    if ( dispGradON ) {
+        EngngModel *emodel = this->domain->giveEngngModel();
+        int npeq           = emodel->giveNumberOfDomainEquations( this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
+        FloatArray R_c( npeq ), R_ext( npeq );
 
-    R_c.zero();
-    R_ext.zero();
-    emodel->assembleVector( R_c, tStep, InternalForceAssembler(), VM_Total,
-                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    emodel->assembleVector( R_ext, tStep, ExternalForceAssembler(), VM_Total,
-                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    R_c.subtract(R_ext);
+        R_c.zero();
+        R_ext.zero();
+        emodel->assembleVector( R_c, tStep, InternalForceAssembler(), VM_Total,
+            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+        emodel->assembleVector( R_ext, tStep, ExternalForceAssembler(), VM_Total,
+            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+        R_c.subtract( R_ext );
 
-    // Condense it;
-    FloatMatrix C;
-    this->updateCoefficientMatrix(C);
-    sigma.beTProductOf(C, R_c);
-    double volRVE = this->domainSize( this->giveDomain(), this->giveSetNumber() );
-    sigma.times( 1. / volRVE );
+        // Condense it;
+        FloatMatrix C;
+        this->updateCoefficientMatrix( C );
+        sigma.beTProductOf( C, R_c );
+        double volRVE = this->domainSize( this->giveDomain(), this->giveSetNumber() );
+        sigma.times( 1. / volRVE );
+    }
 }
 
 void PrescribedDispSlipBCDirichletRC::computeTransferStress( FloatArray &bStress, TimeStep *tStep )
@@ -268,7 +270,7 @@ void PrescribedDispSlipBCDirichletRC::computeTransferStress( FloatArray &bStress
     // [ tau_bxx, tau_byy ]
     // only compute when applied to reinforcement
 
-    if ( reinfXBound && reinfYBound ) {
+    if ( slipON ) {
         EngngModel *emodel = this->domain->giveEngngModel();
         Domain *domain = this->giveDomain();
 
@@ -326,7 +328,7 @@ void PrescribedDispSlipBCDirichletRC::computeReinfStress( FloatArray &rStress, T
     //order: sxx, syy, sxy, syx
     // only compute when applied to reinforcement
 
-    if ( reinfXBound && reinfYBound ) {
+    if ( slipGradON ) {
         EngngModel *emodel = this->domain->giveEngngModel();
         Domain *domain = this->giveDomain();
 
@@ -394,40 +396,42 @@ void PrescribedDispSlipBCDirichletRC :: computeTangent(FloatMatrix &tangent, Tim
 //   = C'.(K_cc.C - K_cf.a)
 //   = C'.X
 {
-    // Fetch some information from the engineering model
-    EngngModel *rve = this->giveDomain()->giveEngngModel();
-    std :: unique_ptr< SparseLinearSystemNM >solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
-    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
-    EModelDefaultEquationNumbering fnum;
-    EModelDefaultPrescribedEquationNumbering pnum;
+    if ( dispGradON && !slipON && !slipGradON ) {
+        // Fetch some information from the engineering model
+        EngngModel *rve = this->giveDomain()->giveEngngModel();
+        std ::unique_ptr<SparseLinearSystemNM> solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+        SparseMtrxType stype = solver->giveRecommendedMatrix( true );
+        EModelDefaultEquationNumbering fnum;
+        EModelDefaultPrescribedEquationNumbering pnum;
 
-    // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    std :: unique_ptr< SparseMtrx >Kff( classFactory.createSparseMtrx(stype) );
-    std :: unique_ptr< SparseMtrx >Kfp( classFactory.createSparseMtrx(stype) );
-    std :: unique_ptr< SparseMtrx >Kpf( classFactory.createSparseMtrx(stype) );
-    std :: unique_ptr< SparseMtrx >Kpp( classFactory.createSparseMtrx(stype) );
-    if ( !Kff ) {
-        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+        // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
+        std ::unique_ptr<SparseMtrx> Kff( classFactory.createSparseMtrx( stype ) );
+        std ::unique_ptr<SparseMtrx> Kfp( classFactory.createSparseMtrx( stype ) );
+        std ::unique_ptr<SparseMtrx> Kpf( classFactory.createSparseMtrx( stype ) );
+        std ::unique_ptr<SparseMtrx> Kpp( classFactory.createSparseMtrx( stype ) );
+        if ( !Kff ) {
+            OOFEM_ERROR( "Couldn't create sparse matrix of type %d\n", stype );
+        }
+        Kff->buildInternalStructure( rve, 1, fnum );
+        Kfp->buildInternalStructure( rve, 1, fnum, pnum );
+        Kpf->buildInternalStructure( rve, 1, pnum, fnum );
+        Kpp->buildInternalStructure( rve, 1, pnum );
+        rve->assemble( *Kff, tStep, TangentAssembler( TangentStiffness ), fnum, this->domain );
+        rve->assemble( *Kfp, tStep, TangentAssembler( TangentStiffness ), fnum, pnum, this->domain );
+        rve->assemble( *Kpf, tStep, TangentAssembler( TangentStiffness ), pnum, fnum, this->domain );
+        rve->assemble( *Kpp, tStep, TangentAssembler( TangentStiffness ), pnum, this->domain );
+
+        FloatMatrix C, X, Kpfa, KfpC, a;
+
+        this->updateCoefficientMatrix( C );
+        Kpf->timesT( C, KfpC );
+        solver->solve( *Kff, KfpC, a );
+        Kpp->times( C, X );
+        Kpf->times( a, Kpfa );
+        X.subtract( Kpfa );
+        tangent.beTProductOf( C, X );
+        tangent.times( 1. / this->domainSize( this->giveDomain(), this->giveSetNumber() ) );
     }
-    Kff->buildInternalStructure(rve, 1, fnum);
-    Kfp->buildInternalStructure(rve, 1, fnum, pnum);
-    Kpf->buildInternalStructure(rve, 1, pnum, fnum);
-    Kpp->buildInternalStructure(rve, 1, pnum);
-    rve->assemble(*Kff, tStep, TangentAssembler(TangentStiffness), fnum, this->domain);
-    rve->assemble(*Kfp, tStep, TangentAssembler(TangentStiffness), fnum, pnum, this->domain);
-    rve->assemble(*Kpf, tStep, TangentAssembler(TangentStiffness), pnum, fnum, this->domain);
-    rve->assemble(*Kpp, tStep, TangentAssembler(TangentStiffness), pnum, this->domain);
-
-    FloatMatrix C, X, Kpfa, KfpC, a;
-
-    this->updateCoefficientMatrix(C);
-    Kpf->timesT(C, KfpC);
-    solver->solve(*Kff, KfpC, a);
-    Kpp->times(C, X);
-    Kpf->times(a, Kpfa);
-    X.subtract(Kpfa);
-    tangent.beTProductOf(C, X);
-    tangent.times( 1. / this->domainSize(this->giveDomain(), this->giveSetNumber()) );
 }
 
 void PrescribedDispSlipBCDirichletRC :: initializeFrom(InputRecord &ir)
@@ -435,9 +439,23 @@ void PrescribedDispSlipBCDirichletRC :: initializeFrom(InputRecord &ir)
     GeneralBoundaryCondition :: initializeFrom(ir);
     PrescribedDispSlipHomogenization::initializeFrom(ir);
     IR_GIVE_FIELD(ir, conBoundSet, _IFT_PrescribedDispSlipBCDirichletRC_ConcreteBoundary);
-    IR_GIVE_OPTIONAL_FIELD(ir, reinfXBound , _IFT_PrescribedDispSlipBCDirichletRC_ReinfXBound);
-    IR_GIVE_OPTIONAL_FIELD(ir, reinfYBound , _IFT_PrescribedDispSlipBCDirichletRC_ReinfYBound);
 
+    if ( this->dispGradient.isNotEmpty() ) {
+        this->dispGradON = true;
+    }
+
+    if ( this->slipField.isNotEmpty() ) {
+        this->slipON = true;
+    }
+
+    if ( this->slipGradient.isNotEmpty() ) {
+        this->slipGradON = true;
+    }
+
+    if ( slipON || slipGradON) {
+        IR_GIVE_OPTIONAL_FIELD( ir, reinfXBound, _IFT_PrescribedDispSlipBCDirichletRC_ReinfXBound );
+        IR_GIVE_OPTIONAL_FIELD( ir, reinfYBound, _IFT_PrescribedDispSlipBCDirichletRC_ReinfYBound );
+    }
 }
 
 

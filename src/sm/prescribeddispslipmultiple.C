@@ -145,9 +145,9 @@ void PrescribedDispSlipMultiple :: scale(double s)
 
 void PrescribedDispSlipMultiple :: computeStress(FloatArray &sigma, TimeStep *tStep)
 {
-    FloatArray tmp;
     sigma.clear();
     for ( int i : this->bcs ) {
+        FloatArray tmp;
         auto bc = dynamic_cast<PrescribedDispSlipHomogenization*>(this->giveDomain()->giveBc(i));
         bc->computeStress(tmp, tStep);
         sigma.add(tmp);
@@ -157,9 +157,9 @@ void PrescribedDispSlipMultiple :: computeStress(FloatArray &sigma, TimeStep *tS
 
 void PrescribedDispSlipMultiple::computeTransferStress( FloatArray &bStress, TimeStep *tStep )
 {
-    FloatArray tmp;
     bStress.clear();
     for ( int i : this->bcs ) {
+        FloatArray tmp;
         auto bc = dynamic_cast<PrescribedDispSlipHomogenization*>(this->giveDomain()->giveBc(i));
         bc->computeTransferStress(tmp, tStep);
         bStress.add(tmp);
@@ -169,9 +169,9 @@ void PrescribedDispSlipMultiple::computeTransferStress( FloatArray &bStress, Tim
 
 void PrescribedDispSlipMultiple::computeReinfStress( FloatArray &rStress, TimeStep *tStep )
 {
-    FloatArray tmp;
     rStress.clear();
     for ( int i : this->bcs ) {
+        FloatArray tmp;
         auto bc = dynamic_cast<PrescribedDispSlipHomogenization*>(this->giveDomain()->giveBc(i));
         bc->computeReinfStress(tmp, tStep);
         rStress.add(tmp);
