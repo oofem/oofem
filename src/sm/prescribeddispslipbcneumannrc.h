@@ -37,10 +37,13 @@
 
 #include "prescribeddispsliphomogenization.h"
 #include "activebc.h"
+#include "dynamicinputrecord.h"
 
 #include <memory>
 
 #define _IFT_PrescribedDispSlipBCNeumannRC_Name   "prescribeddispslipbcneumannrc"
+#define _IFT_PrescribedDispSlipBCNeumannRC_ConcreteVolSet "concretevolset"
+#define _IFT_PrescribedDispSlipBCNeumannRC_RebarSets "rebarsets"
 
 namespace oofem {
 class Node;
@@ -54,6 +57,10 @@ class Element;
  * Works with 2D RVEs comprising solid elements (concrete), reinforcement (beam/truss elements) and interface elements in between.
  * Used in multiscale analyses of reinforced concrete structures. Currently, only orthogonal reinforcement in X and Y direction is supported.
  *
+ * For the optional slip and slip gradient, input fields concretevolset and rebarsets must be specified. concretevolset is the element set containing
+ * all concrete elements. rebarsets is an array of sets, each containing all reinforcement bars in one direction.
+ *
+ *
  * @author Adam Sciegaj
  *
  */
@@ -63,7 +70,7 @@ public:
     PrescribedDispSlipBCNeumannRC(int n, Domain *d);
     virtual ~PrescribedDispSlipBCNeumannRC();
 
-    int giveNumberOfInternalDofManagers() override { return 1; }
+    int giveNumberOfInternalDofManagers() override;
     DofManager *giveInternalDofManager(int i) override;
 
     void initializeFrom(InputRecord &ir) override;
@@ -88,18 +95,50 @@ public:
     const char *giveInputRecordName() const override { return _IFT_PrescribedDispSlipBCNeumannRC_Name; }
 
     void computeStress(FloatArray &sigma, TimeStep *tStep) override;
-    void computeTransferStress(FloatArray &bStress, TimeStep *tStep) override {};
-    void computeReinfStress(FloatArray &rStress, TimeStep *tStep) override {};
+    void computeTransferStress(FloatArray &bStress, TimeStep *tStep) override;
+    void computeReinfStress(FloatArray &rStress, TimeStep *tStep) override;
 
     void computeTangent(FloatMatrix &tangent, TimeStep *tStep) override;
 
-    void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
-
 protected:
+    bool dispGradON = false; /// on/off flag specifying whether the displacement gradient should be applied via Neumann BCs
+    bool slipON = false; /// on/off flag specifying whether the slip field should be applied via Neumann BCs
+    bool slipGradON = false; /// on/off flag specifying whether the slip gradient should be applied via Neumann BCs
+
+    /// DofManager for effective stress
     std :: unique_ptr< Node > mpSigmaHom;
     IntArray mSigmaIds;
 
-    void integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex);
+    /// DofManager for effective transfer stress
+    std :: unique_ptr< Node > lmTauHom;
+    IntArray lmTauIds;
+
+    /// DofManager for effective reinforcement membrane stress
+    std :: unique_ptr< Node > lmSigmaSHom;
+    IntArray lmSigmaSIds;
+
+    /// Element set containing concrete elements (in the volume of RVE)
+    int concreteVolSet=0;
+    /// IntArray containing sets of individual reinforcement bars
+    IntArray rebarSets;
+
+    void integrateTangentStress(FloatMatrix &oTangent, Element *e, int iBndIndex);
+    void assembleVectorStress(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorm);
+    void assembleOnStress(SparseMtrx &answer, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale);
+
+    void integrateTangentBStressSteel(FloatMatrix &oTangent, Element *e, const int &rebarSet);
+    void integrateTangentBStressConcrete(FloatMatrix &oTangent, Element *e);
+    void assembleVectorBStress(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s);
+    void assembleOnTransferStress(SparseMtrx &answer, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale);
+
+    void integrateTangentRStressSteel(FloatMatrix &oTangent, Element *e, const int &rebarSet);
+    void assembleVectorRStress(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s);
+    void assembleOnReinfStress(SparseMtrx &answer, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale);
+
+    void computeWeightMatrix(FloatMatrix &C, const IntArray &reinfSets);
+    void computeRebarDyad(FloatMatrix &dyad, const int &reinfSet);
+    double computeInterfaceLength(const IntArray &reinfSets);
+
     virtual double domainSize(Domain *d, int set) override;
 };
 } /* namespace oofem */

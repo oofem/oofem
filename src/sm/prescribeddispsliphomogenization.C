@@ -44,14 +44,13 @@ namespace oofem {
 
 void PrescribedDispSlipHomogenization::initializeFrom(InputRecord &ir)
 {
-    IR_GIVE_FIELD(ir, dispGradient, _IFT_PrescribedDispSlipHomogenization_dispGrad);
-
     mCenterCoord.resize( dispGradient.giveNumberOfColumns() );
     mCenterCoord.zero();
     dispField.resize( dispGradient.giveNumberOfColumns() );
     dispField.zero(); // prescribed displacement field results only in rigid body motion, no reason to require this input
 
     IR_GIVE_OPTIONAL_FIELD(ir, dispField, _IFT_PrescribedDispSlipHomogenization_dispField);
+    IR_GIVE_OPTIONAL_FIELD(ir, dispGradient, _IFT_PrescribedDispSlipHomogenization_dispGrad);
     IR_GIVE_OPTIONAL_FIELD(ir, slipField, _IFT_PrescribedDispSlipHomogenization_slipField);
     IR_GIVE_OPTIONAL_FIELD(ir, slipGradient, _IFT_PrescribedDispSlipHomogenization_slipGrad);
     IR_GIVE_OPTIONAL_FIELD(ir, mCenterCoord, _IFT_PrescribedDispSlipHomogenization_centercoords)
