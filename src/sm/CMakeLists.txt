@@ -136,6 +136,7 @@ set (sm_interface_elements
     Elements/Interfaces/intelline2.C
     Elements/Interfaces/intelline2intpen.C
     Elements/Interfaces/intelsurftr1.C
+    Elements/Interfaces/intelsurfquad1.C
     Elements/Interfaces/bondlink3d.C
     Elements/Interfaces/bondlink3dboundary.C
         #    Elements/bondlink3dboundarybeam.C	
