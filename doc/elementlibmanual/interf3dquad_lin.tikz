@@ -1,0 +1,39 @@
+\begin{tikzpicture}[scale=5,>=stealth,
+  x={(1cm,0cm)}, y={(-0.5cm,-0.5cm)}, z={(0cm,1cm)}]
+ \tikzstyle{elemnode} = [solid,draw,thin,circle,inner sep=1,fill=white]
+ 
+ \begin{scope}
+ %\draw[->] (-0.05,0,0) -- (0.5,0,0) node[at end, below] {$x_g$};
+ %\draw[->] (0,-0.05,0) -- (0,0.5,0) node[at end, below] {$y_g$};
+ %\draw[->] (0,0,-0.05) -- (0,0,0.25) node[at end, right] {$z_g$};
+ \end{scope}
+ 
+ \begin{scope}[xshift=-2.5]
+  \draw[dotted] (0,0,0) -- (-1,0,0) (0,0,1) -- (0,0,0) -- (0,1,0) ;
+  \draw[dotted] (-1,0,1) -- (-1,0,0) -- (-1,1,0) ;  	
+  \draw[dashed] (-1,1,0) -- (0,1,0) -- (0,1,1) -- (-1,1,1) -- cycle;
+  \draw[dashed] (-1,1,1) -- (-1,0,1) -- (0,0,1) -- (0,1,1) -- cycle;
+ \end{scope}
+
+ \begin{scope}[xshift=5]
+  \draw[dotted] (0,0,0) -- (1,0,0) (0,0,1) -- (0,0,0) -- (0,1,0);
+  \draw[dotted] (1,0,1) -- (1,0,0) -- (1,1,0) ;
+  \draw[dashed] (1,1,0) -- (0,1,0) -- (0,1,1) -- (1,1,1) -- cycle;
+  \draw[dashed] (1,1,1) -- (1,0,1) -- (0,0,1) -- (0,1,1) -- cycle;
+ \end{scope}
+
+ \draw[fill=red,opacity=0.05] (0,0,0) -- (0,1,0) -- (0,1,1) -- (0,1,1) -- (0,0,1) --cycle;
+ \draw[thick,red] (0,0,0) node[elemnode] {}  node[left] {1}
+  -- (0,1,0) node[elemnode] {} node[below] {4}
+  -- (0,1,1) node[elemnode] {} node[above] {3}
+  -- (0,0,1) node[elemnode] {} node[above] {2}
+  -- cycle node[draw,circle,inner sep=0] at (0,0.5,0.5) {\scriptsize $-$};
+
+ \draw[fill=black,opacity=0.1,xshift=2.5] (0,0,0) -- (0,1,0) -- (0,1,1) -- (0,0,1) -- cycle;
+ \draw[thick,xshift=2.5] (0,0,0) node[elemnode] {} node[right] {5}
+  -- (0,1,0) node[elemnode] {} node[below] {8}
+  -- (0,1,1) node[elemnode] {} node[above] {7}
+  -- (0,0,1) node[elemnode] {} node[above] {6}
+  -- cycle node[draw,circle,inner sep=0] at (0,0.5,0.5) {\scriptsize $+$};
+
+\end{tikzpicture}
