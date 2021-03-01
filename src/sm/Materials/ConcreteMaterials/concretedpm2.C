@@ -237,6 +237,10 @@ ConcreteDPM2Status::saveContext(DataStream &stream, ContextMode mode)
     if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    if ( ( iores = reducedStrain.storeYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
 
     if ( !stream.write(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -248,6 +252,10 @@ ConcreteDPM2Status::saveContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.write(alpha) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -264,6 +272,10 @@ ConcreteDPM2Status::saveContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.write(kappaDCompression) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(kappaDTensionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -335,6 +347,9 @@ ConcreteDPM2Status::restoreContext(DataStream &stream, ContextMode mode)
     if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
+    if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
 
     if ( !stream.read(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -345,6 +360,10 @@ ConcreteDPM2Status::restoreContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.read(alpha) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -361,6 +380,10 @@ ConcreteDPM2Status::restoreContext(DataStream &stream, ContextMode mode)
     }
 
     if ( !stream.read(kappaDCompression) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(kappaDTensionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -591,6 +614,224 @@ ConcreteDPM2::initializeFrom(InputRecord &ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->energyRateType, _IFT_ConcreteDPM2_energyratetype);
     }
 }
+
+void
+ConcreteDPM2::saveContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterial::saveContext(stream, mode);
+    if ( ( mode & CM_Definition ) ) {
+        if ( !stream.write(fc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ecc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+         if ( !stream.write(isotropicFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(e0) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(AHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(BHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(CHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(DHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+         if ( !stream.write(hardeningModulus) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ASoft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldHardPrimePeak) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldHardInitial) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(dilationConst) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(m) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(mQ) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(helem) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(eM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(gM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(kM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(nu) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+         if ( !stream.write(efCompression) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(wf) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(wfOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(ftOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldTol) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(yieldTolDamage) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+         if ( !stream.write(newtonIter) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(softeningType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(deltaTime) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(strengthRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.write(energyRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+   
+    }
+
+
+    linearElasticMaterial.saveContext(stream, mode);
+}
+
+void
+ConcreteDPM2::restoreContext(DataStream &stream, ContextMode mode)
+{
+    StructuralMaterial::restoreContext(stream, mode);
+    if ( ( mode & CM_Definition ) ) {
+        if ( !stream.read(fc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ecc) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(isotropicFlag) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(e0) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(AHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(BHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(CHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(DHard) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(hardeningModulus) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ASoft) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldHardPrimePeak) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldHardInitial) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(dilationConst) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(m) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(mQ) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(helem) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(eM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(gM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(kM) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(nu) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+         if ( !stream.read(efCompression) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(wf) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(wfOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(ftOne) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldTol) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(yieldTolDamage) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(newtonIter) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(softeningType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(deltaTime) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(strengthRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+        if ( !stream.read(energyRateType) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+   
+    }
+    linearElasticMaterial.restoreContext(stream, mode);
+}
+
+
+
+
 
 #if 0
 void
