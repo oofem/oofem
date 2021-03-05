@@ -210,6 +210,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_FiberStressLocal:
     case IST_CrackSlip:
     case IST_EquivalentTime:
+    case IST_MoistureContent:
     case IST_IncrementCreepModulus:
         return ISVT_SCALAR;
 
