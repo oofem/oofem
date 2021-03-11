@@ -621,6 +621,11 @@ public:
      * Returns receiver's associated spatial localizer.
      */
     SpatialLocalizer *giveSpatialLocalizer();
+    
+    /**
+    * Set spatial localizer
+    */
+    void setSpatialLocalizer(std::unique_ptr<SpatialLocalizer> sl);
     /**
      * Returns domain output manager.
      */

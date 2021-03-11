@@ -623,7 +623,7 @@ Domain :: instanciateYourself(DataReader &dr)
             // read type of set
             IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
             // Only one set for now (i don't see any need to ever introduce any other version)
-            std :: unique_ptr< Set > set = std::make_unique<Set>(num, this); //classFactory.createSet(name.c_str(), num, this)
+            std::unique_ptr< Set > set = std::make_unique<Set>(num, this); //classFactory.createSet(name.c_str(), num, this)
             if ( !set ) {
                 OOFEM_ERROR("Couldn't create set: %s", name.c_str());
             }
@@ -1208,13 +1208,17 @@ Domain :: giveSpatialLocalizer()
 // return connectivity Table - if no defined - creates new one
 //
 {
-    //  if (spatialLocalizer == NULL) spatialLocalizer = new DummySpatialLocalizer(1, this);
+//     if (spatialLocalizer == NULL) spatialLocalizer = new DummySpatialLocalizer(1, this);
     if ( spatialLocalizer ) {
         return spatialLocalizer.get();
     } else {
         OOFEM_LOG_ERROR("Spatial localizer init failure");
         return nullptr;      
     }
+}
+
+void Domain :: setSpatialLocalizer(std::unique_ptr<SpatialLocalizer> sl){
+    spatialLocalizer = std::move(sl);
 }
 
 
