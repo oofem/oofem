@@ -92,7 +92,7 @@ class IDNLMaterial;
  *   Calculating the strains and stresses at its Gauss points.
  * - Printing its output in the data file and updating itself.
  */
-class StructuralElement : public Element
+class OOFEM_EXPORT StructuralElement : public Element
 {
 protected:
     /// Initial displacement vector, describes the initial nodal displacements when element has been casted.

@@ -11,7 +11,7 @@ namespace FTensor
        allowing iterating over a array. */
 
     //mutable T *restrict data[Tensor_Dim];
-    mutable T *__restrict__ data[Tensor_Dim];
+    mutable T *__restrict data[Tensor_Dim];
 
   public:
     /* Initializations for varying numbers of elements. */

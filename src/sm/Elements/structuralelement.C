@@ -66,7 +66,7 @@
 
 
 namespace oofem {
-StructuralElement :: StructuralElement(int n, Domain *aDomain) :
+    StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     Element(n, aDomain)
 {}
 

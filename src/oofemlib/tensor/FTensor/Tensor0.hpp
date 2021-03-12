@@ -18,8 +18,7 @@ namespace FTensor
 
   template <class T> class Tensor0<T *>
   {
-    //mutable T *restrict data;
-    mutable T *__restrict__ data;
+    mutable T *__restrict data;
 
   public:
     Tensor0(T *d) : data(d) {}
