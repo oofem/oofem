@@ -199,22 +199,23 @@ private:
     BCTracker bcTracker;
     
     /**
-     * Map from an element's global number to its place
+     * Map from an element's global number (label) to its place
      * in the element array. Added by ES 140326.
      */
-    std::unordered_map< int, int > mElementPlaceInArray;
+    // elementGlobal2LocalMap
+    std::unordered_map< int, int > elementGlobal2LocalMap;
 
     /**
-     * Map from a dofmans's global number to its place
+     * Map from a dofmans's global number (label) to its place
      * in the dofman array.
      */
-    std::unordered_map< int, int > mDofManPlaceInArray;
+    std::unordered_map< int, int > dofmanGlobal2LocalMap;
 
     /**
      * Map from material number to elements that have the
      * given material number. Added by ES 140718.
      */
-    std::unordered_map< int, IntArray> mMapMaterialNum2El;
+    std::unordered_map< int, IntArray> materialNum2ElMap;
 
     /// Topology description
     std :: unique_ptr< TopologyDescription > topology;

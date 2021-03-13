@@ -98,23 +98,24 @@ public:
 class OOFEM_EXPORT MapBasedEntityRenumberingFunctor : public EntityRenumberingFunctor
 {
 private:
-    std :: map< int, int > &dofmanMap, &elemMap;
+    std :: unordered_map< int, int > &dofmanMap, &elemMap;
 
 public:
-    MapBasedEntityRenumberingFunctor(std :: map< int, int > & _dofmanMap, std :: map< int, int > & _elemMap) :
+    MapBasedEntityRenumberingFunctor(std :: unordered_map< int, int > & _dofmanMap, std :: unordered_map< int, int > & _elemMap) :
         dofmanMap(_dofmanMap), elemMap(_elemMap)
     { }
 
     int operator() (int n, EntityRenumberingScheme ers) override
     {
-        std :: map< int, int > :: const_iterator it;
         if ( ers == ERS_DofManager ) {
-            if ( ( it = dofmanMap.find(n) ) != dofmanMap.end() ) {
-                return it->second;
+            auto pos = dofmanMap.find(n);
+            if (pos != dofmanMap.end()) {
+                return pos->second;
             }
         } else if ( ers == ERS_Element ) {
-            if ( ( it = elemMap.find(n) ) != elemMap.end() ) {
-                return it->second;
+            auto pos = elemMap.find(n);
+            if ( pos != elemMap.end() ) {
+                return pos->second;
             }
         } else {
             OOFEM_ERROR("unsupported EntityRenumberingScheme");
