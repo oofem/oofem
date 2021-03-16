@@ -65,8 +65,8 @@ Node2NodeLagrangianMultiplierContact :: initializeFrom(InputRecord &ir)
 
     // these are internal lagrange multipliers used to enforce the no penetration for the contacting bodies
     for ( int pos = 0; pos < masterSet.giveSize(); ++pos ) {
-        lmdm.push_back(std :: unique_ptr< Node >(new Node(0, domain) ) );
-        lmdm.at(pos)->appendDof(new MasterDof(this->lmdm.at(pos).get(), ( DofIDItem ) ( this->giveDomain()->giveNextFreeDofID() ) ) );
+        lmdm.emplace_back(/*std::make_unique<Node>*/ new Node(0, domain) );
+        lmdm.at(pos)->appendDof(new MasterDof(this->lmdm.at(pos), ( DofIDItem ) ( this->giveDomain()->giveNextFreeDofID() ) ) );
     }
 }
 
@@ -84,9 +84,10 @@ Node2NodeLagrangianMultiplierContact :: assemble(SparseMtrx &answer, TimeStep *t
     FloatMatrix K;
     IntArray loc, c_loc;
 
-    IntArray dofIdArray = {
-        D_u, D_v
-    };
+    IntArray dofIdArray = this->giveDomain()->giveDefaultNodeDofIDArry();
+    /*IntArray dofIdArray = {
+        D_u, D_w
+    };*/
 
     if ( masterSet.giveSize() != slaveSet.giveSize() ) {
         OOFEM_ERROR("Number of master nodes does not match number of slave nodes")
@@ -148,9 +149,10 @@ Node2NodeLagrangianMultiplierContact :: assembleVector(FloatArray &answer, TimeS
 
 
     //IntArray dofIdArray = {D_u, D_v, D_w};
-    IntArray dofIdArray = {
-        D_u, D_v
-    };
+    IntArray dofIdArray = this->giveDomain()->giveDefaultNodeDofIDArry();
+    /*IntArray dofIdArray = {
+        D_u, D_w
+    };*/
 
 
     if ( type == InternalForcesVector ) {
@@ -162,7 +164,7 @@ Node2NodeLagrangianMultiplierContact :: assembleVector(FloatArray &answer, TimeS
             FloatArray n;
             Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos) );
             Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos) );
-            this->computeNormalMatrixAt(n, masterNode, slaveNode, tStep);
+            this->computeNvMatrixAt(n, masterNode, slaveNode, tStep);
             Dof *mdof = * ( lmdm.at(pos - 1)->begin() );
             n.times(mdof->giveUnknown(mode, tStep) );
             masterNode->giveLocationArray(dofIdArray, loc, s);
@@ -207,7 +209,7 @@ Node2NodeLagrangianMultiplierContact :: computeTangentFromContact(FloatMatrix &a
     double gap;
     FloatArray Nv;
     this->computeGap(gap, masterNode, slaveNode, tStep);
-    this->computeNormalMatrixAt(Nv, masterNode, slaveNode, tStep);
+    this->computeNvMatrixAt(Nv, masterNode, slaveNode, tStep);
     answer.initFromVector(Nv, false);
 
     return gap;
@@ -243,7 +245,7 @@ Node2NodeLagrangianMultiplierContact :: computeGap(double &answer, Node *masterN
 
 
 void
-Node2NodeLagrangianMultiplierContact :: computeNormalMatrixAt(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *TimeStep)
+Node2NodeLagrangianMultiplierContact :: computeNvMatrixAt(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *TimeStep)
 {
     const auto &xs = slaveNode->giveCoordinates();
     const auto &xm = masterNode->giveCoordinates();
@@ -279,9 +281,10 @@ Node2NodeLagrangianMultiplierContact :: giveLagrangianMultiplierLocationArray(co
 {
     int size = this->masterSet.giveSize();
     answer.resize(size);
-    IntArray dofIdArray = {
-        D_u, D_v
-    };
+    IntArray dofIdArray = this->giveDomain()->giveDefaultNodeDofIDArry();
+    /*IntArray dofIdArray = {
+        D_u, D_w
+    };*/
 
     // assemble location array
     IntArray l(1);
@@ -298,9 +301,11 @@ Node2NodeLagrangianMultiplierContact :: giveLocationArrays(std :: vector< IntArr
     IntArray r_loc, c_loc;
     rows.resize(3 * masterSet.giveSize() );
     cols.resize(3 * masterSet.giveSize() );
-    IntArray dofIdArray = {
-        D_u, D_v
-    };
+    IntArray dofIdArray = this->giveDomain()->giveDefaultNodeDofIDArry();
+    /*IntArray dofIdArray = {
+        D_u, D_w
+    };*/
+    
     std :: vector< IntArray >lambdaeq;
     this->giveLagrangianMultiplierLocationArray(r_s, lambdaeq);
 
@@ -315,8 +320,8 @@ Node2NodeLagrangianMultiplierContact :: giveLocationArrays(std :: vector< IntArr
         rows [ 0 + 3 * ( pos - 1 ) ] = r_loc;
         cols [ 0 + 3 * ( pos - 1 ) ] = lambdaeq.at(pos - 1);
         // row block
-        cols [ 1 + 3 * ( pos - 1 ) ] = c_loc;
-        rows [ 1 + 3 * ( pos - 1 ) ] = lambdaeq.at(pos - 1);
+        rows [ 1 + 3 * ( pos - 1 ) ] = c_loc;
+        cols [ 1 + 3 * ( pos - 1 ) ] = lambdaeq.at(pos - 1);
         // diagonal enry (some sparse mtrx implementation requaire this)
         rows [ 2 + 3 * ( pos - 1 ) ] = lambdaeq.at(pos - 1);
         cols [ 2 + 3 * ( pos - 1 ) ] = lambdaeq.at(pos - 1);

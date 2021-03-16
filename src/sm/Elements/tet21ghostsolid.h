@@ -105,7 +105,9 @@ protected:
     static FEI3dTetLin interpolation_lin;
 
     void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS) override;
-    void computeBHmatrixAt(GaussPoint *, FloatMatrix &) override;
+
+    using NLStructuralElement::computeBHmatrixAt;
+    void computeBHmatrixAt(const FloatArray &ncoords, FloatMatrix &answer) override;
     void computeGaussPoints() override;
 
     /// Ordering of momentum balance equations in element. Used to assemble the element stiffness

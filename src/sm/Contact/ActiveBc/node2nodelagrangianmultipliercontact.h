@@ -39,8 +39,8 @@
 #include "activebc.h"
 
 
-///@name Input fields for _IFT_ContactElement
-//@{
+ ///@name Input fields for _IFT_ContactElement
+ //@{
 #define _IFT_Node2NodeLagrangianMultiplierContact_Name "n2nlagrangianmultipliercontact"
 #define _IFT_Node2NodeLagrangianMultiplierContact_useTangent "usetangent"
 
@@ -53,62 +53,152 @@
 //@}
 
 namespace oofem {
-class Domain;
-class SparseMtrx;
-class TimeStep;
-class DofManager;
-class GaussPoint;
-class UnknownNumberingScheme;
-class FloatMatrix;
-class IntegrationRule;
-class ContactElement;
-class Node;
+    class Domain;
+    class SparseMtrx;
+    class TimeStep;
+    class DofManager;
+    class GaussPoint;
+    class UnknownNumberingScheme;
+    class FloatMatrix;
+    class IntegrationRule;
+    class ContactElement;
+    class Node;
 
-class OOFEM_EXPORT Node2NodeLagrangianMultiplierContact : public ActiveBoundaryCondition
-{
-protected:
-    bool useTangent; ///< Determines if tangent should be used.
-    IntArray slaveSet;
-    IntArray masterSet;
-    std :: vector< std :: shared_ptr< DofManager > >lmdm;
-public:
+    class OOFEM_EXPORT Node2NodeLagrangianMultiplierContact : public ActiveBoundaryCondition
+    {
+    protected:
+        bool useTangent; ///< Determines if tangent should be used.
+        IntArray slaveSet;
+        IntArray masterSet;
+	std :: vector< std :: shared_ptr< DofManager > >lmdm;
 
-    /// Constructor.
-    Node2NodeLagrangianMultiplierContact(int n, Domain *d);
-    //: ActiveBoundaryCondition(n, d) { }
-    /// Destructor.
-    virtual ~Node2NodeLagrangianMultiplierContact() {};
+    public:
 
-    void initializeFrom(InputRecord &ir) override;
+		/**
+		* Constructor. Creates Node2NodeLagrangianMultiplierContact with given number belonging to domain aDomain.
+		* @param n Node2NodeLagrangianMultiplierContact's number in domain
+		* @param d reference to Node2NodeLagrangianMultiplierContact's domain
+		*/
+        Node2NodeLagrangianMultiplierContact(int n, Domain *d);
+        /// Destructor.
+        virtual ~Node2NodeLagrangianMultiplierContact() {};
 
-    void assemble(SparseMtrx &answer, TimeStep *tStep,
-                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0,
-                  void*lock=nullptr) override;
+		/**
+		 * Initializes boundary condition from a given InputRecord
+		 * @param ir Pointer to the InputRecord
+		 * @return An IRResultType object.
+		 */
+        void initializeFrom(InputRecord &ir);
 
-    void assembleVector(FloatArray &answer, TimeStep *tStep,
-                        CharType type, ValueModeType mode,
-                        const UnknownNumberingScheme &s, FloatArray *eNorms = NULL,
-                        void *lock=nullptr) override;
+		/**
+		 * Assembles contact contribution to the stiffness matrix. All contact pairs are
+		 * processed iteratively.
+		 *
+		 * @param answer [out] A SparseMtrx object for assembly of the answer
+		 * @param tStep The current time step
+		 * @param type Requested type of matrix. Function is only implemented for tangential stiffness
+		 * @param r_s
+		 * @param c_s
+		 * @param scale
+		 */
+        virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
+			      CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0,void *lock=nullptr) override;
+
+		/**
+		 * Assembles contact contribution to force vector. All contact pairs are
+		 * processed iteratively.
+		 *
+		 * @param answer [out] A SparseMtrx object for assembly of the answer
+		 * @param tStep The current time step
+		 * @param type Requested type of matrix. Function is only implemented for external forces vector
+		 * @param mode
+		 * @param s
+		 * @param eNorms
+		 */
+        virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
+            CharType type, ValueModeType mode,
+				    const UnknownNumberingScheme &s, FloatArray *eNorms = NULL, void *lock=nullptr) override;
 
 
-    const char *giveClassName() const override { return "Node2NodeLagrangianMultiplierContact"; }
-    const char *giveInputRecordName() const override { return _IFT_Node2NodeLagrangianMultiplierContact_Name; }
+	const char *giveClassName() const override { return "Node2NodeLagrangianMultiplierContact"; }
+        const char *giveInputRecordName() const override { return _IFT_Node2NodeLagrangianMultiplierContact_Name; }
 
-    int giveNumberOfInternalDofManagers() override { return masterSet.giveSize(); }
-    DofManager *giveInternalDofManager(int i) override { return this->lmdm.at(i - 1).get(); }
-
-
-
-    double computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
-    void computeGap(double &answer,  Node *masterNode, Node *slaveNode, TimeStep *tStep);
-
-    void computeNormalMatrixAt(FloatArray &answer,  Node *masterNode, Node *slaveNode, TimeStep *TimeStep);
+        int giveNumberOfInternalDofManagers() override { return masterSet.giveSize(); }
+        DofManager *giveInternalDofManager(int i) override { return this->lmdm.at(i - 1).get(); }
 
 
-    void computeExternalForcesFromContact(FloatArray &answer,  Node *masterNode, Node *slaveNode, TimeStep *tStep);
+    private:
 
-    void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
-    void giveLagrangianMultiplierLocationArray(const UnknownNumberingScheme &r_s, std :: vector< IntArray > &answer);
-};
+		/**
+		 * Computes the tangential stiffness matrix from contact of two nodes, given as:
+		 * K_c = [ 0  Nv 
+				  Nv  0 ]
+		 * where Nv is the normal matrix of contact
+		 *
+		 * @param answer [out] a column matrix
+		 * @param masterNode the master node concerned
+		 * @param slaveNode the slave node concerned
+		 * @param tStep the current time step
+		 */
+		double computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
+        
+		/**
+		 * Computes the size of gap between two nodes. Gap is negative if the nodes are on the opposite
+		 * side of each other than in the undeformed configuration. Precise computation involves
+		 * computing the dot product of undeformed and deformed distance vector between the nodes
+		 *
+		 * @param answer [out] the size of the gap
+		 * @param masterNode the master node concerned
+		 * @param slaveNode the slave node concerned
+		 * @param tStep the current time step
+		 */
+		void computeGap(double &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
+
+		/**
+		 * Computes the normal matrix of contact. Computes the projection (distance vector), normalizes it
+		 * and assembles into a column matrix in the form N = {n -n}^T
+		 *
+		 * @param answer [out] a column matrix
+		 * @param masterNode the master node concerned
+		 * @param slaveNode the slave node concerned
+		 * @param tStep the current time step
+		 */
+        void computeNvMatrixAt(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *TimeStep);
+
+		/**
+		 * Computes the vector of external forces from contact of two nodes, given as:
+		 * f_ext = g_c
+		 * where g_c is the gap
+		 *
+		 * @param answer [out] a column matrix (of only one member)
+		 * @param masterNode the master node concerned
+		 * @param slaveNode the slave node concerned
+		 * @param tStep the current time step
+		 */
+        void computeExternalForcesFromContact(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep);
+
+		/**
+		 * Gives the location array of the created LMs
+		 * 
+		 * @param answer [out] a column matrix (of only one member)
+		 * @param rs a numbering scheme to be used
+		 */
+        void giveLagrangianMultiplierLocationArray(const UnknownNumberingScheme &r_s, std::vector< IntArray > &answer);
+
+    public:
+
+		/**
+		 * Computes which DOFs interact with which through the contact condition. Useful for
+		 * creation of global sparse matrices.
+		 *
+		 * @param rows [out] - row indices
+		 * @param cols [out] - column indices
+		 * @param type
+		 * @param r_s unknown numbering scheme for rows
+		 * @param c_s unknown numbering scheme for columns
+		 */
+        void giveLocationArrays(std::vector< IntArray > &rows, std::vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
+    };
+>>>>>>> contact
 } // end namespace oofem
-#endif // node2nodecontact_h
+#endif // node2nodelagrangianmultipliercontact_h

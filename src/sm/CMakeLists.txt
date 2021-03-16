@@ -365,6 +365,16 @@ set (sm_unsorted
     Contact/celnode2node.C
     Contact/ActiveBc/node2nodepenaltycontact.C
     Contact/ActiveBc/node2nodelagrangianmultipliercontact.C
+    Contact/ActiveBc/node2nodelagrangianmultipliercontact.C
+    Contact/ActiveBc/node2segmentpenaltycontact.C
+    Contact/ActiveBc/node2segmentlagrangemultipliercontact.C
+    Contact/ContactSegment/elemedgecontactsegment.C
+    Contact/ContactSegment/functioncontactsegment.C
+    Contact/ContactSegment/qelemedgecontactsegment.C
+    Contact/ContactSegment/polynomialcontactsegment.C
+    Contact/ContactSegment/nrfunctioncontactsegment2d.C
+    Contact/ContactSegment/circlecontactsegment.C
+    Contact/ContactSegment/boundarycontactsegment.C
     )
 
   

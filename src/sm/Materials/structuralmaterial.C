@@ -325,8 +325,6 @@ StructuralMaterial :: giveFirstPKStressVector_PlaneStrain(const FloatArrayF< 5 >
 
 
 
-
-
 FloatArray
 StructuralMaterial :: giveFirstPKStressVector_StressControl(const FloatArray &reducedvF, const IntArray &F_control, GaussPoint *gp, TimeStep *tStep) const
 {
@@ -371,8 +369,6 @@ StructuralMaterial :: giveFirstPKStressVector_StressControl(const FloatArray &re
     OOFEM_ERROR("Iteration did not converge");
     return FloatArray();
 }
-
-
 
 
 FloatArrayF< 4 >
@@ -2376,4 +2372,70 @@ StructuralMaterial :: giveInputRecord(DynamicInputRecord &input)
     Material :: giveInputRecord(input);
     input.setField(this->referenceTemperature, _IFT_StructuralMaterial_referencetemperature);
 }
+
+void StructuralMaterial::compute_2order_tensor_cross_product(FloatMatrix &answer, const FloatArray &a, const FloatArray &b)
+{
+    //the hardcoded dimensions are a terrible placeholder only suitable for 2D applications
+    FloatMatrix fullAnswer;
+    fullAnswer.resize(3, 3);
+    FloatArray a3,b3;
+    StructuralMaterial :: giveFullVectorFormF( a3, a, _PlaneStress );
+    StructuralMaterial :: giveFullVectorFormF( b3, b, _PlaneStress );
+	    
+    FloatMatrix lc;
+    lc.beLeviCivitaTensor();
+
+    for ( int i = 1; i <= 3; i++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
+            for ( int k = 1; k <= 3; k++ ) {
+                for ( int m = 1; m <= 3; m++ ) {
+                    for ( int l = 1; l <= 3; l++ ) {
+                        for ( int n = 1; n <= 3; n++ ) {
+			  fullAnswer.at(i, j) += lc.at(giveVI(i, k), l) * lc.at(giveVI(j, m), n) * a3.at(giveVI(k, m)) * b3.at(giveVI(l, n));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    answer = {{fullAnswer.at(1,1), fullAnswer.at(2,1)},{fullAnswer.at(1,2), fullAnswer.at(2,2)}};
+
+
+    
+}
+
+
+void
+StructuralMaterial::compute_tensor_cross_product_tensor(FloatMatrix &answer, const FloatArray &a)
+{
+    //the hardcoded dimensions are a terrible placeholder only suitable for 2D applications
+    answer.resize(4, 4); 
+
+    
+    FloatMatrix fullAnswer;
+    fullAnswer.resize(9, 9);
+    FloatArray a3,b3;
+    StructuralMaterial :: giveFullVectorFormF( a3, a, _PlaneStress );
+    FloatMatrix lc;
+    lc.beLeviCivitaTensor();
+
+    for ( int i = 1; i <= 2; i++ ) {
+      for ( int j = 1; j <= 2; j++ ) {
+	for ( int r = 1; r <= 2; r++ ) {
+	  for ( int s = 1; s <= 2; s++ ) {
+	    for ( int k = 1; k <= 2; k++ ) {
+	      for ( int m = 1; m <= 2; m++ ) {
+		fullAnswer.at(giveVI(i, j), giveVI(r, s)) += lc.at(giveVI(i, r), k) * lc.at(giveVI(j, s), m) * a3.at(giveVI(k, m));
+	      }
+	    }
+	  }
+	}
+      }
+    }
+
+    answer = {{fullAnswer.at(1,1), fullAnswer.at(2,1), fullAnswer.at(6,1), fullAnswer.at(9,1)},{fullAnswer.at(1,2), fullAnswer.at(2,2), fullAnswer.at(6,2), fullAnswer.at(9,2)},{fullAnswer.at(1,6), fullAnswer.at(2,6), fullAnswer.at(6,6), fullAnswer.at(9,6)},{fullAnswer.at(1,9), fullAnswer.at(2,9), fullAnswer.at(6,9), fullAnswer.at(9,9)}};
+    
+}
+
 } // end namespace oofem

@@ -115,6 +115,28 @@ public:
 
 
 /**
+ * Wrapper around element definition to provide deformed FEICellGeometry interface.
+ */
+class OOFEM_EXPORT FEIElementDeformedGeometryWrapper : public FEICellGeometry
+{
+protected:
+    const Element *elem;
+    mutable FloatArray actualCoords;
+    TimeStep *tStep;
+    double alpha;
+
+public:
+    FEIElementDeformedGeometryWrapper(const Element * elem);
+    FEIElementDeformedGeometryWrapper(const Element * elem, TimeStep *tStep);
+    virtual ~FEIElementDeformedGeometryWrapper() { }
+    int giveNumberOfVertices() const;
+    const FloatArray &giveVertexCoordinates(int i) const;
+    void setTimeStep(TimeStep *ts){tStep = ts;}
+    void setAlpha(double alpha){this->alpha = alpha;}
+
+  };
+ 
+/**
  * Wrapper around cell with vertex coordinates stored in FloatArray**.
  */
 class OOFEM_EXPORT FEIVertexListGeometryWrapper : public FEICellGeometry
@@ -260,6 +282,19 @@ public:
      * @todo
      */
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo) = 0;
+    
+    /**
+     * Evaluates the derivatives of basis functions on the requested boundary
+     * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.
+     * @param answer Array to be filled with the basis function derivatives.
+     * @param boundary Boundary number.
+     * @param lcoords The local coordinates (on the boundary local coordinate system).
+     * @param cellgeo Underlying cell geometry.
+     * @return The determinant of the boundary transformation Jacobian.
+     */
+    virtual void boundaryEdgeEvaldNdx(FloatMatrix& answer, int boundary, const FloatArray& lcoords, const FEICellGeometry &cellgeo) {
+        OOFEM_ERROR("not implemented");
+    }
     /**
      * Evaluates the determinant of the transformation Jacobian on the requested boundary.
      * Boundaries are defined as the corner nodes for 1D geometries, edges for 2D geometries and surfaces for 3D geometries.

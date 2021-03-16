@@ -964,26 +964,37 @@ double product(const FloatArray & x)
 
 // End of IML compat
 
-void FloatArray :: beVectorForm(const FloatMatrix &aMatrix)
+void FloatArray::beVectorForm(const FloatMatrix &aMatrix)
 {
     // Rewrites the matrix on vector form, order: 11, 22, 33, 23, 13, 12, 32, 31, 21
+    // Or 11, 22, 12, 21
 #  ifndef NDEBUG
-    if (  aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3 ) {
-        OOFEM_ERROR("matrix dimension is not 3x3");
+    if ( (aMatrix.giveNumberOfColumns() != 3 || aMatrix.giveNumberOfColumns() != 3) && (aMatrix.giveNumberOfColumns() != 2 || aMatrix.giveNumberOfColumns() != 2) ) {
+        OOFEM_ERROR("matrix dimension is not 3x3 or 2x2");
     }
 
 #  endif
-    *this = {
-        aMatrix.at(1, 1),
-        aMatrix.at(2, 2),
-        aMatrix.at(3, 3),
-        aMatrix.at(2, 3),
-        aMatrix.at(1, 3),
-        aMatrix.at(1, 2),
-        aMatrix.at(3, 2),
-        aMatrix.at(3, 1),
-        aMatrix.at(2, 1)
-    };
+    if ( aMatrix.giveNumberOfColumns() == 3 ) {
+        *this = {
+            aMatrix.at(1, 1),
+            aMatrix.at(2, 2),
+            aMatrix.at(3, 3),
+            aMatrix.at(2, 3),
+            aMatrix.at(1, 3),
+            aMatrix.at(1, 2),
+            aMatrix.at(3, 2),
+            aMatrix.at(3, 1),
+            aMatrix.at(2, 1)
+        };
+    }
+    else {
+        *this = {
+            aMatrix.at(1, 1),
+            aMatrix.at(2, 2),
+            aMatrix.at(1, 2),
+            aMatrix.at(2, 1),
+        };
+    }
 }
 
 void FloatArray :: beSymVectorFormOfStrain(const FloatMatrix &aMatrix)

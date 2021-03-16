@@ -74,7 +74,17 @@ void XfemElementInterface :: XfemElementInterface_createEnrBHmatrixAt(FloatMatri
     ComputeBOrBHMatrix(oAnswer, iGP, iEl, true, iGP.giveNaturalCoordinates());
 }
 
-void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH, const FloatArray &iNaturalGpCoord)
+void XfemElementInterface::XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, const FloatArray& ncoords, Element &iEl)
+{
+    ComputeBOrBHMatrix(oAnswer, iEl, true, ncoords);
+}
+
+void XfemElementInterface::ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH, const FloatArray &iNaturalGpCoord)
+{
+    ComputeBOrBHMatrix(oAnswer, iEl, iComputeBH, iNaturalGpCoord);
+}
+
+void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, Element &iEl, bool iComputeBH, const FloatArray &iNaturalGpCoord)
 {
     /*
      * Computes the B or BH matrix.
