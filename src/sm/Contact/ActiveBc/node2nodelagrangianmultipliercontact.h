@@ -70,7 +70,7 @@ protected:
     bool useTangent; ///< Determines if tangent should be used.
     IntArray slaveSet;
     IntArray masterSet;
-    std :: vector< std :: unique_ptr< DofManager > >lmdm;
+    std :: vector< std :: shared_ptr< DofManager > >lmdm;
 public:
 
     /// Constructor.

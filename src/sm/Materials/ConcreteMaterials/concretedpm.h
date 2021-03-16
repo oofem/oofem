@@ -745,6 +745,9 @@ public:
                     TimeStep *tStep) override;
 
     void restoreConsistency(GaussPoint *gp) override;
+    void saveContext(DataStream &stream, ContextMode mode) override;
+    void restoreContext(DataStream &stream, ContextMode mode) override;
+
 
 protected:
     MaterialStatus *CreateStatus(GaussPoint *gp) const override;

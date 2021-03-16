@@ -1444,6 +1444,33 @@ approximation of displacement field. Can be used to glue together two elements w
 \elementDescription{Note}{Element requires material model with \_3dInterface support.}
 \end{elementsummary}
 
+\subsubsection{IntElSurfQuad1 element}
+Implementation of a three dimensional interface element with linear
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared quad surface. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative surface are numbered first, followed by nodes on the positive part. The numbering of surface nodes on positive surface (+) determines the positive normal (right hand rule). Requires material model with \_3dInterface support. The element features are summarized in Table~\ref{Interface3dquadlinsummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+  \input{interf3dquad_lin.tikz}
+ \end{makeimage}
+ \caption{IntElSurfQuad1 element with linear interpolation. Definition and node numbering convention}
+ \label{interf3dquad_lin_fig}
+\end{figure}
+
+\begin{elementsummary}{IntElSurfQuad1}{3D  interface element with linear approximation}{-}{IntElSurfQuad1 element summary}{Interface3dquadlinsummary}
+%\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
+\elementDescription{Unknowns}{Three dofs (u-displacement, v-displacement, w-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all components using one point integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0}
+\elementDescription{Status}{Reliable}
+\elementDescription{Note}{Element requires material model with \_3dInterface support.}
+\end{elementsummary}
+
+
 %-----------------------------------------------------------------------------------------------
 \clearpage
 \subsection{Free warping analysis elements}

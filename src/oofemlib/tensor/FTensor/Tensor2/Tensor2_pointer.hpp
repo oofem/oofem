@@ -8,7 +8,7 @@ namespace FTensor
   class Tensor2<T *, Tensor_Dim0, Tensor_Dim1>
   {
     //mutable T *restrict data[Tensor_Dim0][Tensor_Dim1];
-    mutable T *__restrict__ data[Tensor_Dim0][Tensor_Dim1];
+    mutable T *__restrict data[Tensor_Dim0][Tensor_Dim1];
 
   public:
     /* Initializations for varying numbers of elements. */

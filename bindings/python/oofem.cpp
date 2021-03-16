@@ -116,6 +116,7 @@ void test (oofem::Element& e) {
 template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
     public:    
         // inherit the constructor
+public:
         using ElementBase::ElementBase;
     private:
         // trampoline (need one for each virtual method)
@@ -174,6 +175,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
     template <class StructuralElementBase = oofem::StructuralElement> class PyStructuralElement : public PyElement<StructuralElementBase> {
     public:
         // inherit the constructor
+    public:
         using PyElement<StructuralElementBase>::PyElement;
     private:
         // trampoline (need one for each virtual method)
@@ -207,6 +209,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
     template <class IntegrationPointStatusBase = oofem::IntegrationPointStatus> class PyIntegrationPointStatus : public IntegrationPointStatusBase {
     public:
         // inherit the constructor
+    public:
         using IntegrationPointStatusBase::IntegrationPointStatusBase;
     private:
         // trampoline (need one for each virtual method)
@@ -218,6 +221,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
     template <class MaterialStatusBase = oofem::MaterialStatus> class PyMaterialStatus : public PyIntegrationPointStatus<MaterialStatusBase> {
     public:
         // inherit the constructor
+    public:
         using PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus;
     private:
         // trampoline (need one for each virtual method)

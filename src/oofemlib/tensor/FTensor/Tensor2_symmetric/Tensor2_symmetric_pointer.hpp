@@ -7,7 +7,7 @@ namespace FTensor
   template <class T, int Tensor_Dim> class Tensor2_symmetric<T *, Tensor_Dim>
   {
     //mutable T *restrict data[(Tensor_Dim * (Tensor_Dim + 1)) / 2];
-    mutable T *__restrict__ data[(Tensor_Dim * (Tensor_Dim + 1)) / 2];
+    mutable T *__restrict data[(Tensor_Dim * (Tensor_Dim + 1)) / 2];
 
   public:
     template <class... U> Tensor2_symmetric(U *... d) : data{d...}

@@ -553,12 +553,12 @@ public:
     bool registerLoadBalancer( const char *name, std::unique_ptr<LoadBalancer> ( *creator )( Domain * ) );
 };
 
-extern ClassFactory &classFactory;
+extern OOFEM_EXPORT ClassFactory &classFactory;
 
 /**
  * This function must be used by all code that run at link time to ensure that the classFactory is constructed first.
  * See "static initialization order fiasco" for explanation.
  */
-ClassFactory &GiveClassFactory();
+OOFEM_EXPORT ClassFactory &GiveClassFactory();
 } // end namespace oofem
 #endif // clasfactort_h

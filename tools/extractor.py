@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 #  Extractor.py        (c) 2009 Borek Patzak, www.oofem.org

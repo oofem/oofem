@@ -113,7 +113,7 @@ class GaussPoint;
  * @author Jim Brouzoulis
  * @author Mikael Öhman
  */
-class StructuralMaterial : public Material
+class OOFEM_EXPORT StructuralMaterial : public Material
 {
 protected:
     /// Reference temperature (temperature, when material has been built into structure).

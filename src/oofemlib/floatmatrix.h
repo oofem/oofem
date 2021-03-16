@@ -616,13 +616,13 @@ public:
 //@name operators
 //@{
 /// Vector multiplication by scalar
-FloatMatrix &operator *= ( FloatMatrix & x, const double & a ); 
-FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
-FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
-FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
-FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
-FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
-FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
+OOFEM_EXPORT FloatMatrix &operator *= ( FloatMatrix & x, const double & a );
+OOFEM_EXPORT FloatMatrix operator *( const FloatMatrix & a, const FloatMatrix & b ) ;
+OOFEM_EXPORT FloatArray operator *( const FloatMatrix & a, const FloatArray & b ) ;
+OOFEM_EXPORT FloatMatrix operator +( const FloatMatrix & a, const FloatMatrix & b ) ;
+OOFEM_EXPORT FloatMatrix operator -( const FloatMatrix & a, const FloatMatrix & b ) ;
+OOFEM_EXPORT FloatMatrix &operator += ( FloatMatrix & a, const FloatMatrix & b ) ;
+OOFEM_EXPORT FloatMatrix &operator -= ( FloatMatrix & a, const FloatMatrix & b ) ;
 
 //@}
 

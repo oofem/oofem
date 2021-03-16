@@ -45,6 +45,7 @@
 #include "problemmode.h"
 #include "nodalrecoverymodel.h"
 #include "vtkxmlexportmodule.h"
+#include "octreelocalizer.h"
 
 
 namespace oofem {
@@ -74,7 +75,10 @@ DofManValueField::DofManValueField(FieldType ft, int nNodes, int nElements, cons
     this->domain->crossSectionList.clear();
     this->domain->crossSectionList.resize(1);
     this->domain->crossSectionList[0] = std::move(this->crossSect);
-    //this->domain->setCrossSection(1, this->crossSect);
+    std::unique_ptr< SpatialLocalizer > spatialLocalizer;
+    spatialLocalizer = std::make_unique<OctreeSpatialLocalizer>(this->domain);
+    spatialLocalizer->init();    
+    this->domain->setSpatialLocalizer(std::move(spatialLocalizer));
 }
 
 
