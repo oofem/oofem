@@ -1564,6 +1564,6 @@ MPSMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
         return RheoChainMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 
-    return 1; // to make the compiler happy
+    return 0; // to make the compiler happy
 }
 } // end namespace oofem

@@ -65,7 +65,7 @@ class Set;
  * @author Erik Svenning
  *  Created on: Nov 6, 2013
  */
-class MaterialStatusMapperInterface
+class OOFEM_EXPORT MaterialStatusMapperInterface
 {
 protected:
     std::unique_ptr< MaterialMappingAlgorithm > mpMaterialMapper;

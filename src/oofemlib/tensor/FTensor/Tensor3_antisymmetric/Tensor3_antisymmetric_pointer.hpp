@@ -9,7 +9,7 @@ namespace FTensor
   {
     //mutable T *restrict
     //  data[Tensor_Dim0][(Tensor_Dim12 * (Tensor_Dim12 - 1)) / 2];
-    mutable T *__restrict__
+    mutable T *__restrict
       data[Tensor_Dim0][(Tensor_Dim12 * (Tensor_Dim12 - 1)) / 2];
     
     

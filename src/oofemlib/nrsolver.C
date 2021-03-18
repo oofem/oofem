@@ -765,6 +765,11 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 if ( forceErr > rtolf.at(1) ) {
                     answer = false;
                 }
+		if ( (forceErr > 0.0) && (nite == 0)) {
+		  // if forceError > 0 and first iteration we report no convergence to actually
+		  // apply the loading
+		  answer = false;
+		}
 
                 if ( engngModel->giveProblemScale() == macroScale  && numPrintouts <= maxNumPrintouts ) {
                     OOFEM_LOG_INFO(zeroFNorm ? " *%.3e" : "  %.3e", forceErr);

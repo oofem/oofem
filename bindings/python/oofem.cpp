@@ -115,6 +115,7 @@ void test (oofem::Element& e) {
 */
 template <class ElementBase = oofem::Element> class PyElement : public ElementBase {
         // inherit the constructor
+public:
         using ElementBase::ElementBase;
         // trampoline (need one for each virtual method)
         int giveNumberOfDofs() override {
@@ -171,6 +172,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     template <class StructuralElementBase = oofem::StructuralElement> class PyStructuralElement : public PyElement<StructuralElementBase> {
         // inherit the constructor
+    public:
         using PyElement<StructuralElementBase>::PyElement;
         // trampoline (need one for each virtual method)
         void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) override {
@@ -202,6 +204,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     template <class IntegrationPointStatusBase = oofem::IntegrationPointStatus> class PyIntegrationPointStatus : public IntegrationPointStatusBase {
         // inherit the constructor
+    public:
         using IntegrationPointStatusBase::IntegrationPointStatusBase;
         // trampoline (need one for each virtual method)
         const char *giveClassName() const override {
@@ -211,6 +214,7 @@ template <class ElementBase = oofem::Element> class PyElement : public ElementBa
 
     template <class MaterialStatusBase = oofem::MaterialStatus> class PyMaterialStatus : public PyIntegrationPointStatus<MaterialStatusBase> {
         // inherit the constructor
+    public:
         using PyIntegrationPointStatus<MaterialStatusBase>::PyIntegrationPointStatus;
         // trampoline (need one for each virtual method)
         void printOutputAt(FILE *file, TimeStep *tStep) const override {

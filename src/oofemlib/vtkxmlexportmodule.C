@@ -194,7 +194,7 @@ VTKXMLExportModule::giveCellType(Element *elem)
         vtkCellType = 10;
     } else if ( elemGT == EGT_tetra_2 ) {
         vtkCellType = 24;
-    } else if ( elemGT == EGT_quad_1 || elemGT == EGT_quad_1_interface ) {
+    } else if ( elemGT == EGT_quad_1) {
         vtkCellType = 9;
     } else if ( elemGT == EGT_quad_21_interface ) {
         vtkCellType = 30;
@@ -202,7 +202,7 @@ VTKXMLExportModule::giveCellType(Element *elem)
         vtkCellType = 23;
     } else if ( elemGT == EGT_quad9_2 ) {
         vtkCellType = 23;
-    } else if ( elemGT == EGT_hexa_1 ) {
+    } else if ( elemGT == EGT_hexa_1  || elemGT == EGT_quad_1_interface ) {
         vtkCellType = 12;
     } else if ( elemGT == EGT_hexa_2 ) {
         vtkCellType = 25;
@@ -226,7 +226,7 @@ VTKXMLExportModule::giveNumberOfNodesPerCell(int cellType)
     case 1:
         return 1;
 
-    case 3:
+     case 3:
         return 2;
 
     case 5:
@@ -293,7 +293,7 @@ VTKXMLExportModule::giveElementCell(IntArray &answer, Element *elem)
         };
     } else if ( elemGT == EGT_quad_1_interface ) {
         nodeMapping = {
-            1, 2, 4, 3
+            1, 2, 4, 3, 5, 6, 8, 7
         };
     } else if ( elemGT == EGT_quad_21_interface ) {
         nodeMapping = {
