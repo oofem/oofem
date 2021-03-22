@@ -58,10 +58,8 @@ This is a freely available, high-performance, and portable implementation of MPI
 * For high performance eigenvalue solvers, oofem uses SLEPc. The toolkit can be downloaded from SLEPc project home page 
 (http://www.grycap.upv.es/slepc). 
 
-### Installation
+## Installation
 
-Quick instructions for UNIX:
-----------------------------
 * unpack sources 
 * create an out-of-tree build directory
 ```
@@ -78,25 +76,25 @@ Quick instructions for UNIX:
   make
 ```
 
-## Running the tests
+### Running the tests
 To run the tests, go to your build directory and run ctest
 ```
 ctest
 ```
 
 
-## Additional instructions 
-Instead of cmake you can use ccmake which uses an ncurses interface, 
-or cmake-gui for a GUI. Use the command make help for a list of all targets. 
+### Additional instructions 
+* Instead of cmake you can use ccmake which uses an ncurses interface, 
+  or cmake-gui for a GUI. Use the command make help for a list of all targets. 
 
-You can find detailed installation (including installation on Windows)
- instruction on OOFEM wiki (http://www.oofem.org/wiki/doku.php?id=installation)
+* You can find detailed installation (including installation on Windows)
+  instruction on OOFEM wiki (http://www.oofem.org/wiki/doku.php?id=installation)
 
-To get support check out oofem wiki (www.oofem.org/wiki) and
-oofem forum (www.oofem.org/forum) as well.
+* To get support check out oofem wiki (www.oofem.org/wiki) and
+  oofem forum (www.oofem.org/forum) as well.
 
 
-## Running oofem 
+### Running oofem 
 The oofem program prints out the available options when run without
 any option. To run a specific job, you can enter
 ```
@@ -111,7 +109,7 @@ You may find OOFEM documentation [here](http://oofem.org/en/manual).
 Please consult oofem home page (http://www.oofem.org) for 
 more documentation, manuals and new versions.
 
-# Authors
+## Authors
 
 See the list of [contributors](http://www.oofem.org/doku.php?id=en:credits) who participated in this project.
 
