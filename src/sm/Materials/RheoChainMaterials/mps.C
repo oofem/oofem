@@ -1560,10 +1560,14 @@ MPSMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
         answer.at(1) = giveEModulus(gp, tStep);
         status->giveStoredEmodulus();
         return 1;
+    } else  if (type == IST_EquivalentTime) {
+        answer.resize(1);
+        answer.zero();
+        answer.at(1) = status->giveEquivalentTime();
+        return 1;
     } else {
         return RheoChainMaterial :: giveIPValue(answer, gp, type, tStep);
     }
-
     return 0; // to make the compiler happy
 }
 } // end namespace oofem
