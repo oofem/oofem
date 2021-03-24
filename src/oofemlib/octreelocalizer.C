@@ -209,6 +209,9 @@ OctreeSpatialLocalizer :: OctreeSpatialLocalizer(Domain* d) : SpatialLocalizer(d
     octreeMask(3),
     elementIPListsInitialized(false)
 {
+#ifdef _OPENMP
+    omp_init_lock(&ElementIPDataStructureLock);
+#endif
 }
 
 
@@ -325,11 +328,16 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
     //
     int nelems = this->domain->giveNumberOfElements();
     FloatArray jGpCoords;
-
     if ( this->elementIPListsInitialized ) {
         return;
     }
-
+#ifdef _OPENMP
+    omp_set_lock(&ElementIPDataStructureLock); // if not initialized yet; one thread can proceed with init; others have to wait until init completed
+    if ( this->elementIPListsInitialized ) {
+        omp_unset_lock(&ElementIPDataStructureLock); 
+        return;
+    }
+#endif   
     // insert IP records into tree (the tree topology is determined by nodes)
     for ( int i = 1; i <= nelems; i++ ) {
         // only default IP are taken into account
@@ -366,6 +374,10 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
 
     //this->insertElementsUsingNodalConnectivitiesIntoOctree (this->rootCell);
     this->elementIPListsInitialized = true;
+#ifdef _OPENMP
+    omp_unset_lock(&ElementIPDataStructureLock);
+#endif
+
 }
 
 
@@ -1518,13 +1530,31 @@ int
 OctreeSpatialLocalizer :: init(bool force)
 {
     if ( force ) {
-        rootCell = nullptr;
-        elementIPListsInitialized = false;
-        elementListsInitialized.zero();
+        int ans;
+#ifdef _OPENMP
+#pragma omp single
+#endif
+        {
+            rootCell = nullptr;
+            elementIPListsInitialized = false;
+            elementListsInitialized.zero();
+            ans = this->buildOctreeDataStructure();
+            //this->initElementIPDataStructure();
+        }
+        return ans;
     }
 
     if ( !rootCell ) {
-        return this->buildOctreeDataStructure();
+        int ans;
+#ifdef _OPENMP
+#pragma omp single
+#endif
+        {
+            OOFEM_LOG_INFO("OctreeLocalizer: init\n");
+            ans = this->buildOctreeDataStructure();
+            //this->initElementIPDataStructure();
+        }
+        return ans;
     } else {
         return 0;
     }

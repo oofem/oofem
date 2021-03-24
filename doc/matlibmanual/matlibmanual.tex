@@ -264,7 +264,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain, 1dMat\\
 %\end{center}
 \end{table}
 
-\subsubsection{Hyperelastic material - HyperMat}
+\subsubsection{Hyperelastic material - Simo-Pister Material}
 This material model can describe elastic behavior at large strains.
 A hyperelastic model postulates the existence of free energy potential. Existence of the potential implies reversibility of deformations and no energy dissipation during loading process. Here we use the free energy function introduced in \cite{SimoHughes}
 \begin{equation}\label{freeEnergy}
@@ -283,7 +283,7 @@ The model description and parameters are summarized in Tab.~\ref{hyperElMat_tabl
 \hline
 Description & Hyperelastic material\\
 \hline
-Record Format & \descitem{HyperMat}  \elemparam{}{in}
+Record Format & \descitem{SimoPisterMat}  \elemparam{}{in}
 \elemparam{d}{rn} \elemparam{K}{rn} \elemparam{G}{rn} \\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
@@ -342,7 +342,7 @@ The model description and parameters are summarized in Tab.~\ref{MooneyRivlin_ta
 		\hline
 		Description & Mooney-Rivlin\\
 		\hline
-		Record Format & \descitem{MooneyRivlin}  \elemparam{}{in}
+		Record Format & \descitem{MooneyRivlinCompressibleMat}  \elemparam{}{in}
 		\elemparam{d}{rn} \elemparam{K}{rn} \elemparam{C1}{rn} \elemparam{C2}{rn}\\
 		Parameters &- \param{} material number\\
 		&- \param{d} material density\\
@@ -354,6 +354,66 @@ The model description and parameters are summarized in Tab.~\ref{MooneyRivlin_ta
 	\end{mmt}
 	\caption{Compressible Mooney-Rivlin - summary.}
 	\label{MooneyRivlin_table}
+	%\end{center}
+\end{table}
+
+
+
+
+\subsubsection{Hyperelastic material - Compressible Ogden}
+The Ogden strain energy function is expressed by
+\begin{equation}\label{freeEnergyOgdenDeviatoricStretch}
+\rho_0 \psi = \sum_{I=1}^N \frac{\mu_I}{\alpha_I} \left( \bar{\lambda}_1^{\alpha_I}+\bar{\lambda}_2^{\alpha_I}+\bar{\lambda}_3^{\alpha_I}-3\right)+ U(J)
+\end{equation}
+where $\mu_I$ and $\alpha_I$ are material constants, $U(J)$ is the volumetric part of energy, $J$ is the Jacobian (determinant of the deformation gradient, corresponding to the ratio of the current and initial volume),  $\bar{\lambda}_i = J^{-\frac{1}{3}} {\lambda}_i$ are the deviatoric stretches.
+
+The model description and parameters are summarized in Tab.~\ref{CompressibleOgden_table}.
+\begin{table}[!htb]
+	%\begin{center}
+	\begin{mmt}
+		\hline
+		Description & Ogden material\\
+		\hline
+		Record Format & \descitem{OgdenCompressibleMat}  \elemparam{}{in}
+		\elemparam{d}{rn} \elemparam{K}{rn} \elemparam{alpha}{ra} \elemparam{mu}{ra}\\
+		Parameters &- \param{} material number\\
+		&- \param{d} material density\\
+		&- \param{K} bulk modulus\\
+		&- \param{alpha} array of material constants\\
+		&- \param{mu} array of material constants\\
+                alpha and mu have to have the same size\\
+		\hline
+	\end{mmt}
+	\caption{Compressible Ogden material - summary.}
+	\label{CompressibleOgden_table}
+	%\end{center}
+\end{table}
+
+
+\subsubsection{Hyperelastic material - Blatz-Ko}
+The Mooney-Rivlin strain energy function is expressed by
+\begin{equation}\label{freeEnergyBlatzKo}
+\rho_0 \psi = \frac{\mu}{2}\left(\frac{I_2}{I_3} + 2\sqrt{I_3}-5 \right)
+\end{equation}
+where $\mu$ is initial shear modulus, $I_2$ and $I_3$ are the second and third invariants of the Cauchy-Green tensor $\mbf{C}$.
+
+The model description and parameters are summarized in Tab.~\ref{BlatzKo_table}.
+\begin{table}[!htb]
+	%\begin{center}
+	\begin{mmt}
+		\hline
+		Description & Blatz-Ko material\\
+		\hline
+		Record Format & \descitem{blatzkomat}  \elemparam{}{in}
+		\elemparam{d}{rn} \elemparam{mu}{rn}\\
+		Parameters &- \param{} material number\\
+		&- \param{d} material density\\
+		&- \param{mu} shear modulus\\
+                $\nu$ is fixed to 0.25\\
+		\hline
+	\end{mmt}
+	\caption{Blatz-Ko material - summary.}
+	\label{BlatzKo_table}
 	%\end{center}
 \end{table}
 
@@ -682,7 +742,7 @@ the incremental definition of cumulative plastic strain
 \begin{equation}\label{VMcumPlasStrain}
 \dot{\kappa} = \| \epspd \|,
 \end{equation}
-the linear hardening law
+the linear hardening law (for \param{htype} = 0)
 \begin{equation}\label{VMlinearHardeningLaw}
 \sigma_Y(\kappa) = \sigma_0 + H\kappa,
 \end{equation}
@@ -718,13 +778,16 @@ The model description and parameters are summarized in Tab.~\ref{misesMat_table}
 Description & Mises plasticity model with isotropic hardening\\
 \hline
 Record Format & \descitem{MisesMat}  \elemparam{}{in}
-\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\\
+\elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{sig0}{rn} \elemparam{H}{rn} \optelemparam{htype}{in} \optelemparam{h\_eps}{ra} \optelemparam{h(eps)}{ra} \elemparam{omega\_crit}{rn}\elemparam{a}{rn}\\
 Parameters &- \param{} material number\\
 &- \param{d} material density\\
 &- \param{E} Young's modulus\\
 &- \param{n} Poisson's ratio\\
-&- \param{sig0} initial yield stress in uniaxial tension (compression)\\
-&- \param{H} hardening modulus (can be negative in the case of plastic softening)\\
+&- \param{sig0} initial yield stress in uniaxial tension (compression) (Required if htype = 0, which is default)\\
+&- \param{H} hardening modulus (can be negative in the case of plastic softening) (Required if htype = 0, which is default)\\
+&- \param{htype} hardening type (Optional parameter. Default = 0)\\
+&- \param{h\_eps} array of plastic strains (Required if htype = 1)\\
+&- \param{h(eps)} array of yield stresses (Required if htype = 1)\\
 &- \param{omega\_crit} critical damage in damage law (\ref{damagelawmp})\\
 &- \param{a} exponent in damage law (\ref{damagelawmp})\\
 Supported modes& 1dMat, PlaneStrain, 3dMat, 3dMatF\\
@@ -4214,7 +4277,7 @@ Variables $\kappa_{dt1}$ and $\kappa_{dt2}$ are defined by the rate equations
 \dot\kappa_{dt2} &=&  \frac{\dot\kappa_{dt}}{x_s(\bar\rho,\bar\sigma_V)}
 \end{eqnarray}
 where 
-\begin{equation}\label{eq:xs}
+\begin{equation}\label{eq:xs2}
     x_s(\bar\rho,\bar\sigma_V) =
     1+(A_s-1)\frac{\sqrt{6}\langle-\bar\sigma_V\rangle}{\bar\rho}
 \end{equation}
@@ -4223,7 +4286,7 @@ we have $\langle-\bar\sigma_V\rangle=0$ and $x_s=1$. Under compression,
 $x_s$ increases (provided that parameter $A_s$ is greater than 1),
 which slows down the evolution of variables $\kappa_{dt1}$ and $\kappa_{dt2}$
 and consequently of damage. For uniaxial compression, we have
-$\bar\sigma_V/\bar\rho=-1/\sqrt{6}$ and formula (\ref{eq:xs}) gives $x_s=A_s$.
+$\bar\sigma_V/\bar\rho=-1/\sqrt{6}$ and formula (\ref{eq:xs2}) gives $x_s=A_s$.
 
 The specific form of the dependence of damage variable $\omega_t$ on 
 $\kappa_{dt}$, $\kappa_{dt1}$ and $\kappa_{dt2}$ is dictated by the desired
@@ -4584,6 +4647,106 @@ developed for concrete. The material model assumes an additive split of the tota
 into the viscoelastic and cracking part. The viscoelastic material handles the
 stress-independent strains, i.e. shrinkage and thermal dilation.
 
+\subsubsection*{Incremental stiffness matrix}
+In the case of an elastic (initial) stiffness or uncracked material, the
+stiffness matrix $\bar{\mbf{D}}_{ve}$ is evaluated as the product of incremental stiffness of the
+viscoelastic material $\bar{E}$ and the unit elastic
+stiffness matrix $\mbf{D}_v$.
+The evaluation of the incremental modulus $\bar{E}$ is
+computationally demanding, therefore within one time step it is stored
+in the material status. The value of stiffness depends on the history
+  of relative humidity and temperature at given Gauss point and
+  depends entirely on the viscoelastic material.
+
+
+Secant stiffness matrix is obtained by adding the secant compliance of
+the cohesive cracks to the viscoelastic compliance matrix and by subsequent
+inversion of the result. 
+%
+\begin{equation}
+\mbf{D} =   \left( \bar{\mbf{D}}^{-1}_{ve} + \mbf{D}^{-1}_{cr}  \right)^{-1}
+\end{equation}
+
+Tangent stiffness matrix is computed as 
+\begin{equation}
+\mbf{D} = \bar{\mbf{D}}_{ve} - \bar{\mbf{D}}_{ve} \left(\bar{\mbf{D}}_{ve} + \mbf{D}_{cr} \right)^{-1} \bar{\mbf{D}}_{ve}
+\end{equation}
+where $\mbf{D}_{cr}$ is the tangent stiffness of the cracked material.
+
+The secant and tangent matrix are constructed in the local
+coordinate system corresponding to the orientation of the cracks and
+then are rotated to the global
+coordinate system. The individual components of $\mbf{D}_{cr}$ are managed by
+\emph{ConcreteFCM} material model.
+
+\subsubsection*{Algorithm for stress evaluation}
+%
+The stress evaluation algorithm can be decomposed into 3 subsequent steps:
+%
+\begin{enumerate}
+
+\item Call the viscoelastic material to compute the stress-dependent strain increment
+\begin{equation}
+\Delta \varepsilon_\sigma  = \Delta \varepsilon - \Delta \varepsilon''
+- \Delta \varepsilon_{sh} - \Delta \varepsilon_T  
+\end{equation}
+where $\Delta \varepsilon$ is the total strain increment, $\Delta
+\varepsilon''$ is the strain increment due to creep, $\Delta
+\varepsilon_{sh}$ is the shrinkage increment, and $\Delta
+\varepsilon_T$ is the thermal dilation increment.
+
+\item Call the fixed-crack material to compute the new stress vector
+  $\sigma_{i+1}$ 
+  fulfilling the nonlinear equation
+%
+  \begin{equation}
+\sigma_{i+1} = \sigma_{i} + \bar{\mbf{D}}_{ve} \left ( \Delta
+\varepsilon_\sigma - \Delta
+\varepsilon_{cr} \right)
+  \end{equation}
+ %
+where $\sigma_{i}$ is the old stress vector and $\Delta
+\varepsilon_{cr}$ is the increment of crack strain, and update the new crack strain vector 
+  \begin{equation}
+\varepsilon_{cr,i+1} = \varepsilon_{cr,i} + \Delta \varepsilon_{cr} 
+  \end{equation}
+  
+\item Pass the difference of the total strain and the cracking strain
+  to the viscoelastic material and perform a regular viscoelastic step.
+%
+\begin{equation}  
+\sigma_{i+1} = \sigma_{i} + \bar{\mbf{D}}_{ve} \left ( \Delta
+\varepsilon - \Delta \varepsilon_{cr}  - \Delta \varepsilon''
+- \Delta \varepsilon_{sh} - \Delta \varepsilon_T  \right)
+\end{equation}
+%
+\end{enumerate}  
+
+
+\vspace{1em}
+Before the onset of cracking, the material is modeled as isotropic
+linear viscoelastic characterized by its compliance function, Poisson's
+ratio, and the evolution of shrinkage which can depend both on
+equivalent time and change in relative humidity provided that the
+problem is solved as coupled.
+
+Cracking is initiated when principal stress reaches tensile
+strength. Further loading is governed by a softening law. Proper
+amount energy dissipation is guaranteed by the crack-band approach,
+the width of the crack band is given by the size of the finite element
+projected in the direction of the principal stress.
+
+Multiple cracking is allowed, the maximum number of cracks is controlled by \param{ncracks} parameter. Only mutually perpendicular cracks are supported. If cracking occurs in more directions, the behavior on the crack planes is considered to be independent.
+The secant stiffness is used for unloading and reloading. In
+compression regime full stiffness is restored.
+
+It is worth emphasizing that the status of the viscoelastic material
+tracks and keeps only a part of the total deformation equal to the
+difference of the total strain and the cracking strain.
+
+
+\subsubsection*{Evolution of tensile strength and fracture energy}
+
 The current implementation supports both constant and time-evolving
 values of tensile strength and fracture energy.
 \textbf{Constant} values are used when the keyword \param{timeDepFracturing}
@@ -4689,6 +4852,7 @@ Supported modes& 3dMat, PlaneStress, PlaneStrain\\
 \label{concretefcmviscoelastic_table}
 \end{longtable}
 %
+\subsubsection*{Examples}
 The following lines show a sample syntax specifying the viscoelastic
 fixed crack model with the compliance defined by the MPS model.
 Volume density is 24 kN/m$^3$, thermal dilation coefficient
@@ -5497,14 +5661,31 @@ Supported modes& 2dlattice, 3dlattice\\
 
 \subsubsection{Plasticity damage lattice model}
 
-This combined plasticity damage model for lattice elements has been developed to describe the failure process of geomaterials such as concrete and rock. The plasticity part is based on the effective stress and damage is evaluated by the plastic strain.
+This combined plasticity damage model for lattice elements has been developed to describe the failure process of geomaterials such as concrete and rock. The plasticity part is based on the effective stress and damage is evaluated by the plastic strain. The model was first introduced in \cite{GraDav11} without hardening and then extended to hardening in \cite{AthWheGra18}.
+
 The main stress-strain law has the form
 \begin{equation}
 \boldsymbol{\sigma} = \left(1-\omega\right) \mathbf{D}_{\rm e} \left(\boldsymbol{\varepsilon}-\boldsymbol{\varepsilon}_{\rm p} \right)
 \end{equation}
 where $\boldsymbol{\sigma}$ is a vector of tractions and rotational components, $\omega$ is the damage variable and $\mathbf{D}_{\rm e}$ is the elastic stiffness matrix, $\boldsymbol{\varepsilon}$ is a vector of strains obtained from displacement jumps smeared over the element length and rotational components and $\boldsymbol{\varepsilon}_{\rm p}$ are the plastic strains.
 
-The model is described first in \textit{P. Grassl and T. Davies. "Lattice modelling of corrosion induced cracking and bond in reinforced concrete". Cement and Concrete Composites, Volume 33, pp. 918-924, 2011.} and then later in more detail in \textit{I. Athanasiadis, S. Wheeler and P. Grassl. "Hydro-mechanical network modelling of particulate composites", International Journal of Solids and Structures. Vol. 130-131, Pages 49-60, 2018}. The model parameters are summarised in Tab.~\ref{latticeplastdam_table}.
+The plasticity part is based on the effective stresses and uses only a subset of the strains and stresses which are the normal stress $\sigma_{\rm n}$ and the two shear stresses $\sigma_{\rm s}$ and $\sigma_{\rm t}$. The yield surface is composed of two ellipse which are arranged so that the transition of the two ellipses is smooth (Figure~\ref{plastdamyieldfig}).
+%
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.6\textwidth]{./plastdamyieldfig.pdf}
+ \caption{Latticeplastdam yield surface, which is composed of ellipse with a smooth transition.}
+ \label{plastdamyieldfig}
+\end{figure}
+%
+The resulting yield function $f$ is
+\begin{equation}
+f = \left\{ \begin{array}{l} \alpha^2\bar{\sigma}_{\rm n}^2 + 2 \dfrac{\alpha^2\left(f_{\rm c} - \alpha \beta f_{\rm t}\right)}{\left(1+\alpha \beta\right)} q \bar{\sigma}_{\rm n} + \bar{\sigma}_{\rm q}^2 - \dfrac{2 \alpha^2 f_{\rm c}f_{\rm t} + \alpha^2 \left(1-\alpha \beta \right) f_{\rm t}^2}{1+\alpha \beta} q^2 \\ \mbox{if $\bar{\sigma}_{\rm n} \geq -\dfrac{f_{\rm c} - \alpha \beta f_{\rm t}}{1+\alpha \beta} q$} \vspace{0.5cm}\\
+  \dfrac{\bar{\sigma}_{\rm n}^2}{\beta^2} + 2 \dfrac{f_{\rm c} - \alpha \beta f_{\rm t}}{\beta^2 \left(1+\alpha \beta \right)} q \bar{\sigma}_{\rm n} + \bar{\sigma}_{\rm q}^2 + \dfrac{\left(1-\alpha \beta\right) f_{\rm c}^2 -2 \alpha \beta f_{\rm c} f_{\rm t} }{\beta^2 \left(1+\alpha \beta \right)} q^2\\ \mbox{if $\bar{\sigma}_{\rm n} < - \dfrac{f_{\rm c} - \alpha \beta f_{\rm t}}{1+\alpha \beta} q$} \end{array} \right.
+  \end{equation}
+here parameters $\alpha$ and $\beta$ are the slopes, and $f_{\rm c}$ and $f_{\rm t}$ are the strength parameters shown in Figure~\ref{plastdamyieldfig}. The hardening function $q$ controls the shape of the yield function.
+
+The model parameters are summarised in Tab.~\ref{latticeplastdam_table}.
 
 \begin{table}[!htb]
 %\begin{center}
@@ -6853,7 +7034,8 @@ In Rock Under Compression, International Journal of Fracture Mechanics
 \bibitem{Bazant-97-I} Z.P. Ba\v{z}ant, A.B. Hauggaard, F. Ulm: Microprestress-solidification theory for concrete creep. {I}: Aging and drying effects. Journal of Engineering Mechanics 123(11), 1188–1194, 1997.
 \bibitem{JirHav14a} M. Jir\'{a}sek, P. Havl\'{a}sek: Microprestress-Solidification Theory of Concrete Creep: Reformulation and Improvement. Cement and Concrete Research 60, 51–62, 2014.
 \bibitem{fib:2010} International Federation for Structural Concrete (\textit{fib}): The \textit{fib} Model Code for Concrete Structures 2010.
-
+\bibitem{GraDav11} P. Grassl and T. Davies: Lattice modelling of corrosion induced cracking and bond in reinforced concrete. Cement and Concrete Composites, 33, 918-924, 2011.
+\bibitem{AthWheGra18} I. Athanasiadis, S. Wheeler and P. Grassl: Hydro-mechanical network modelling of particulate composites. International Journal of Solids and Structures 130-131, 49-60, 2018.
 \end{thebibliography}
 
 \end{document}

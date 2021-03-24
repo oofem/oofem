@@ -66,11 +66,11 @@ namespace oofem {
     ENUM_ITEM(_2dInterface) \
     ENUM_ITEM(_1dInterface) \
   \
-    ENUM_ITEM(_1dHeat) /* 1d heat */ \
+    ENUM_ITEM(_1dHeat) /* 1d heat or 1d mass*/ \
     ENUM_ITEM(_1dHeMo) /* 1d heat and mass (one component) transfer */ \
-    ENUM_ITEM(_2dHeat) /* 2d heat */ \
+    ENUM_ITEM(_2dHeat) /* 2d heat or 2d mass */ \
     ENUM_ITEM(_2dHeMo) /* 2d heat and mass (one component) transfer */ \
-    ENUM_ITEM(_3dHeat) /* 3d heat */ \
+    ENUM_ITEM(_3dHeat) /* 3d heat or 3d mass */ \
     ENUM_ITEM(_3dHeMo) /* 3d heat and mass (one component) transfer */ \
   \
     ENUM_ITEM(_2dFlow) \

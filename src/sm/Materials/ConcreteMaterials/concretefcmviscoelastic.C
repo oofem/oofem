@@ -139,45 +139,29 @@ ConcreteFCMViscoElastic :: computeStressIndependentStrainVector(GaussPoint *gp, 
   int
 ConcreteFCMViscoElastic :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
+    ConcreteFCMViscoElasticStatus *status = static_cast< ConcreteFCMViscoElasticStatus * > ( gp->giveMaterialStatus() );
 
-  ConcreteFCMViscoElasticStatus *status = static_cast< ConcreteFCMViscoElasticStatus * > ( gp->giveMaterialStatus() );
-
-  if ( ( type == IST_DryingShrinkageTensor ) ||
-       ( type == IST_AutogenousShrinkageTensor ) ||
-       ( type == IST_TotalShrinkageTensor ) ||
-       ( type == IST_CreepStrainTensor ) ||
-       ( type == IST_DryingShrinkageTensor ) ||
-       ( type == IST_ThermalStrainTensor ) ) {
-
-     RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
-    return rheoMat->giveIPValue(answer, status->giveSlaveGaussPointVisco(), type, tStep);	
-  }
-  
-  if ( type == IST_TensileStrength ) {
-    answer.resize(1);
-    answer.at(1) = status->giveTensileStrength();   
-    return 1.;
-
-  } else if ( type == IST_ResidualTensileStrength ) {
-
-    double sigma;
-    int nCracks;
-    double emax;
-    
-    nCracks = status->giveNumberOfTempCracks();
-    
-    sigma = status->giveTensileStrength();
-    
-    for ( int i = 1; i <= nCracks; i++ ) {
-      
-      emax = status->giveMaxCrackStrain(i);
-      
-      if (emax > 0.) {
-	emax /= this->giveNumberOfCracksInDirection(gp, i);
-	
-	sigma = this->giveNormalCrackingStress(gp, tStep, emax, i);
-	sigma = min( sigma, this->giveTensileStrength(gp, tStep) );
-      }
+    if ( type == IST_TensileStrength ) {
+        answer.resize(1);
+        answer.at(1) = status->giveTensileStrength();   
+        return 1.;
+    } else if ( type == IST_ResidualTensileStrength ) {
+        double sigma;
+        int nCracks;
+        double emax;
+        
+        nCracks = status->giveNumberOfTempCracks();
+        sigma = status->giveTensileStrength();
+        
+        for ( int i = 1; i <= nCracks; i++ ) {
+            emax = status->giveMaxCrackStrain(i);
+            
+            if (emax > 0.) {
+            emax /= this->giveNumberOfCracksInDirection(gp, i);
+            
+            sigma = this->giveNormalCrackingStress(gp, tStep, emax, i);
+            sigma = min( sigma, this->giveTensileStrength(gp, tStep) );
+        }
     }
     
     answer.resize(1);
@@ -185,11 +169,45 @@ ConcreteFCMViscoElastic :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inter
     answer.at(1) =  sigma;
 
     return 1;
-  }
-  
-  ConcreteFCM :: giveIPValue(answer, gp, type, tStep);
+    } else if ( type == IST_CrackIndex ) {
+        double sigmaMax;
+        int nCracks;
+        double emax;
+        
+        nCracks = status->giveNumberOfTempCracks();
+        sigmaMax = 0;
+        
+        for ( int i = 1; i <= nCracks; i++ ) {
+            double sigma;
+            emax = status->giveMaxCrackStrain(i);
+            
+            if (emax > 0.) {
+            emax /= this->giveNumberOfCracksInDirection(gp, i);
+            
+            sigma = this->giveNormalCrackingStress(gp, tStep, emax, i);
+            sigmaMax = max( sigma, sigmaMax);
+        }
+    }
+    
+    answer.resize(1);
+    answer.zero();
+    answer.at(1) = min(sigmaMax / status->giveTensileStrength(),1.0);
 
-  return 1.;
+    return 1;
+    }
+//   if ( ( type == IST_DryingShrinkageTensor ) ||
+//        ( type == IST_AutogenousShrinkageTensor ) ||
+//        ( type == IST_TotalShrinkageTensor ) ||
+//        ( type == IST_CreepStrainTensor ) ||
+//        ( type == IST_DryingShrinkageTensor ) ||
+//        ( type == IST_ThermalStrainTensor ) ) {
+
+    RheoChainMaterial *rheoMat = static_cast< RheoChainMaterial * >( domain->giveMaterial(this->viscoMat) );
+    if(rheoMat->giveIPValue(answer, status->giveSlaveGaussPointVisco(), type, tStep)){
+        return 1;
+    }
+  
+    return ConcreteFCM :: giveIPValue(answer, gp, type, tStep);
 }
 
 
@@ -233,19 +251,19 @@ ConcreteFCMViscoElastic :: giveTensileStrength(GaussPoint *gp, TimeStep *tStep)
       equivalentTime = this->giveEquivalentTime(gp, tStep);
       
       if ( ConcreteFCM :: Ft > 0. ) { // user-specified 28-day strength
-	fcm28mod = pow ( ConcreteFCM :: Ft * this->stiffnessFactor / 0.3e6, 3./2. ) + 8.;
-	fcm = exp( fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * fcm28mod;
-      } else { 	// returns fcm in MPa - formula 5.5-51
-	fcm = exp( this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
+    fcm28mod = pow ( ConcreteFCM :: Ft * this->stiffnessFactor / 0.3e6, 3./2. ) + 8.;
+    fcm = exp( fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * fcm28mod;
+      } else {     // returns fcm in MPa - formula 5.5-51
+    fcm = exp( this->fib_s * ( 1. - sqrt(28. * this->timeFactor / equivalentTime) ) ) * this->fib_fcm28;
       }
 
       // ftm adjusted according to the stiffnessFactor (MPa by default)
       if ( fcm >= 58. ) {
-	ftm = 2.12 * log ( 1. + 0.1 * fcm ) * 1.e6 / this->stiffnessFactor;
+    ftm = 2.12 * log ( 1. + 0.1 * fcm ) * 1.e6 / this->stiffnessFactor;
       } else if ( fcm <= 20. ) {
-	ftm = 0.07862 * fcm * 1.e6 / this->stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
+    ftm = 0.07862 * fcm * 1.e6 / this->stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
       } else {
-	ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / this->stiffnessFactor; //5.1-3a
+    ftm = 0.3 * pow(fcm - 8., 2. / 3.) * 1.e6 / this->stiffnessFactor; //5.1-3a
       }
       
       // ftm adjusted according to the stiffnessFactor (MPa by default)
@@ -257,7 +275,7 @@ ConcreteFCMViscoElastic :: giveTensileStrength(GaussPoint *gp, TimeStep *tStep)
       } else {
         // smooth transition
         ftm = 0.3 * pow(fcm - ( 8. * ( fcm - 8. ) / ( 20. - 8. ) ), 2. / 3.) * 1.e6 / this->stiffnessFactor;
-	}*/
+    }*/
       
       status->setTensileStrength(ftm);
       
@@ -294,9 +312,9 @@ ConcreteFCMViscoElastic :: giveFractureEnergy(GaussPoint *gp, TimeStep *tStep)
       
       // 1)
       if ( ConcreteFCM :: Gf > 0. ) {
-	Gf28 = ConcreteFCM :: Gf;
+    Gf28 = ConcreteFCM :: Gf;
       } else {
-	Gf28 = 73. * pow(fib_fcm28, 0.18) / this->stiffnessFactor;
+    Gf28 = 73. * pow(fib_fcm28, 0.18) / this->stiffnessFactor;
       }
 
       // 2)
@@ -304,19 +322,19 @@ ConcreteFCMViscoElastic :: giveFractureEnergy(GaussPoint *gp, TimeStep *tStep)
 
       if ( ConcreteFCM :: Ft > 0. ) { // user-specified 28-day strength
 
-	ftm28 = ConcreteFCM :: Ft;
-	
+    ftm28 = ConcreteFCM :: Ft;
+    
       } else {
       
-	if ( fib_fcm28 >= 58. ) {
-	  ftm28 = 2.12 * log ( 1. + 0.1 * fib_fcm28 ) * 1.e6 / this->stiffnessFactor;
-	  
-	} else if ( fib_fcm28 <= 20. ) {
-	  ftm28 = 0.07862 * fib_fcm28 * 1.e6 / this->stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
-	} else {
-	  ftm28 = 0.3 * pow(fib_fcm28 - 8., 2. / 3.) * 1.e6 / this->stiffnessFactor; //5.1-3a
-	}
-	
+    if ( fib_fcm28 >= 58. ) {
+      ftm28 = 2.12 * log ( 1. + 0.1 * fib_fcm28 ) * 1.e6 / this->stiffnessFactor;
+      
+    } else if ( fib_fcm28 <= 20. ) {
+      ftm28 = 0.07862 * fib_fcm28 * 1.e6 / this->stiffnessFactor; // 12^(2/3) * 0.3 / 20 = 0.07862
+    } else {
+      ftm28 = 0.3 * pow(fib_fcm28 - 8., 2. / 3.) * 1.e6 / this->stiffnessFactor; //5.1-3a
+    }
+    
       }
 
       // 3)

@@ -113,7 +113,7 @@ class GaussPoint;
  * @author Jim Brouzoulis
  * @author Mikael Öhman
  */
-class StructuralMaterial : public Material
+class OOFEM_EXPORT StructuralMaterial : public Material
 {
 protected:
     /// Reference temperature (temperature, when material has been built into structure).
@@ -218,9 +218,11 @@ public:
     virtual FloatArrayF< 9 >giveFirstPKStressVector_3d(const FloatArrayF< 9 > &vF, GaussPoint *gp, TimeStep *tStep) const;
     /// Default implementation relies on giveFirstPKStressVector_3d
     virtual FloatArrayF< 5 >giveFirstPKStressVector_PlaneStrain(const FloatArrayF< 5 > &vF, GaussPoint *gp, TimeStep *tStep) const;
-    /// Default implementation relies on giveFirstPKStressVector_3d
+    /// Iteratively calls giveRealStressVector_3d to find the stress controlled equal to zero·
+    virtual FloatArray giveFirstPKStressVector_StressControl(const FloatArray &reducedvF, const IntArray &FControl, GaussPoint *gp, TimeStep *tStep) const;
+    /// Default implementation relies on giveFirstPKStressVector_StressControl
     virtual FloatArrayF< 4 >giveFirstPKStressVector_PlaneStress(const FloatArrayF< 4 > &vF, GaussPoint *gp, TimeStep *tStep) const;
-    /// Default implementation relies on giveFirstPKStressVector_3d
+    /// Default implementation relies on giveFirstPKStressVector_StressControl
     virtual FloatArrayF< 1 >giveFirstPKStressVector_1d(const FloatArrayF< 1 > &vF, GaussPoint *gp, TimeStep *tStep) const;
     //@}
 

@@ -53,6 +53,10 @@
 #include "unknownnumberingscheme.h"
 #include "assemblercallback.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureDirichlet);
 
@@ -393,7 +397,10 @@ void MixedGradientPressureDirichlet :: setPrescribedDeviatoricGradientFromVoigt(
 
 
 void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep,
-                                                      CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
+                                                      CharType type, ValueModeType mode, 
+                                                      const UnknownNumberingScheme &s, 
+                                                      FloatArray *eNorms,
+                                                      void* lock)
 {
     if ( type != ExternalForcesVector ) {
         return;
@@ -403,10 +410,16 @@ void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeSt
     int vol_loc = vol->giveEquationNumber(s);
     if ( vol_loc ) {
         double rve_size = this->domainSize();
+#ifdef _OPENMP
+        if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+#endif
         answer.at(vol_loc) -= rve_size * pressure; // Note the negative sign (pressure as opposed to mean stress)
         if ( eNorms ) {
             eNorms->at( vol->giveDofID() ) = rve_size * pressure * rve_size * pressure;
         }
+#ifdef _OPENMP
+        if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+#endif
     }
 }
 

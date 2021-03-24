@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
 #  Extractor.py        (c) 2009 Borek Patzak, www.oofem.org
@@ -195,6 +195,10 @@ def elemKwdToString(kwd):
         return 'strains'
     elif (kwd == '13') : 
         return 'damage'
+    elif (kwd == '91') : 
+        return 'F'
+    elif (kwd == '92') : 
+        return 'P'
     elif (kwd == '39') : 
         return 'DoH'
     elif (kwd == '98') : 

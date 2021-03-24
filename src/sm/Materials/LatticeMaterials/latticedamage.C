@@ -490,6 +490,8 @@ LatticeDamage :: computeDeltaDissipation3d(double omega,
 double
 LatticeDamage :: give(int aProperty, GaussPoint *gp) const
 {
+  this->giveStatus(gp);
+  
     double answer;
     if ( RandomMaterialExtensionInterface :: give(aProperty, gp, answer) ) {
         if ( answer < 0.1 ) { //Introduce cut off to avoid numerical problems

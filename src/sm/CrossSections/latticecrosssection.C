@@ -138,6 +138,11 @@ LatticeCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalS
     return this->giveLatticeMaterial()->giveIPValue(answer, ip, type, tStep);
 }
 
+double
+LatticeCrossSection :: give(int aProperty, GaussPoint *gp) const
+{
+    return this->giveMaterial(gp)->give(aProperty, gp);
+}
 
 Material *LatticeCrossSection :: giveMaterial(IntegrationPoint *ip) const
 {

@@ -1,0 +1,55 @@
+testMooneyRivlin1.out
+test of Neo-Hookean Material usign Mooney-Rivlin material with C_1 = 10, C_2 = 0, and K = 0. See ogden1.in for the same case modeled by compressible Ogden material with C_2 = 0
+###########################################
+NonLinearStatic nsteps 1 renumber 1 nmodules 1 controllmode 1 rtolv 1.e-11 stiffMode 0 manrmsteps 1 maxiter 10
+errorcheck
+###########################################
+Domain 3d
+OutputManager tstep_all dofman_all element_all
+###################################################################
+ndofman 4 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 2 nset 3
+#########################---Nodes---###############################
+node    1   coords 2   0.0      0.0
+node    2   coords 2   1.0    	0.0
+node    3   coords 2   1.0    	1.0
+node    4   coords 2   0.0      1.0
+########################---Elements---#############################
+quad1PlaneStrain 1 nodes 4 1 2 3 4 mat 1 crossSect 1 nlgeo 1
+####################---Cross-Sections---###########################
+SimpleCS 1 thick 1.0 set 1 material 1
+#######################---Materials---#############################
+MooneyRivlinCompressibleMat 1 d 1  C1 10 C2 0  K 0
+#######################---Boundary cond.---########################
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 2 0 0 set 2
+BoundaryCondition 2 loadTimeFunction 2 dofs 1 2 values 1 0.3 set 3
+#######################---Time functions---########################
+ConstantFunction 1 f(t) 1.0
+PiecewiseLinFunction 2 nPoints 3 t 3 -1 0. 2000. f(t) 3 0. 1 2001.
+###########################---Sets---##############################
+Set 1 elementranges {(1 1)}
+Set 2 nodes 2 1 2
+Set 3 nodes 2 3 4
+###################################################################
+#%BEGIN_CHECK% tolerance 1.e-6
+## check reactions 
+#REACTION tStep 1 number 1 dof 1 value  1.32687871e+00
+#REACTION tStep 1 number 1 dof 2 value -2.34573944e+00
+#REACTION tStep 1 number 2 dof 1 value -1.32687871e+00
+#REACTION tStep 1 number 2 dof 2 value -2.34573944e+00
+#REACTION tStep 1 number 3 dof 2 value  2.34573944e+00
+#REACTION tStep 1 number 4 dof 2 value  2.34573944e+00 
+###################################################################
+## check all nodes
+#NODE tStep 1 number 3 dof 1 unknown d value   1.02869813e-01
+#NODE tStep 1 number 4 dof 1 unknown d value  -1.02869813e-01
+## check element deformation gradient
+#ELEMENT tStep 1 number 1 gp 1 keyword 91 component 1  value  1.16226173e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 91 component 2  value  1.3000e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 91 component 6  value  5.9392e-02
+## check element first Piola-Kirchhoff stress
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 1  value  3.5622e-02
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 2  value  3.99442062e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 3  value -5.28772644e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 6  value  9.0211e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 92 component 9  value  8.04901071e-01
+#%END_CHECK%

@@ -3,6 +3,8 @@
 namespace py = pybind11;
 #include <string>
 #include <iostream>
+// for alternative tokens like 'or' 
+#include <ciso646>
 
 #include "oofemtxtdatareader.h"
 #include "classfactory.h"
@@ -11,6 +13,12 @@ namespace py = pybind11;
 #include "outputmanager.h"
 #include "modulemanager.h"
 #include "set.h"
+
+
+#ifdef _MSC_VER 
+#define strncasecmp _strnicmp
+#define strcasecmp _stricmp
+#endif
 
 using namespace oofem;
 

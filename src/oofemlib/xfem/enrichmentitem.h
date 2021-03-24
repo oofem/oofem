@@ -113,6 +113,7 @@ public:
 
     void initializeFrom(InputRecord &ir) override;
     virtual int instanciateYourself(DataReader &dr) = 0;
+    virtual void postInitialize() = 0;
 
     /**
      * Note the special treatment here, the "normal" syntax

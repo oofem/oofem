@@ -62,7 +62,7 @@ class Domain;
  * - printingYourself()
  * - updating Yourself after a new equilibrium state has been reached.
  */
-class StructuralMaterialStatus : public MaterialStatus, public MaterialStatusMapperInterface
+class OOFEM_EXPORT StructuralMaterialStatus : public MaterialStatus, public MaterialStatusMapperInterface
 {
 protected:
     /// Equilibrated strain vector in reduced form

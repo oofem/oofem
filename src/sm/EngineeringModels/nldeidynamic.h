@@ -54,6 +54,7 @@
 #define _IFT_NlDEIDynamic_tau "tau"
 #define _IFT_NlDEIDynamic_py "py"
 #define _IFT_NlDEIDynamic_nonlocalext "nonlocalext"
+#define _IFT_NlDEIDynamic_reduct "reduct"
 //@}
 
 namespace oofem {
@@ -106,7 +107,8 @@ protected:
     double deltaT;
     /// Flag indicating the need for initialization.
     int initFlag;
-
+    /// Optional reduction factor for time step deltaT
+    double reductionFactor;
     // dynamic relaxation specific vars
     /// Flag indicating whether dynamic relaxation takes place.
     int drFlag;

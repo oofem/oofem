@@ -132,20 +132,21 @@ public:
 
     void assembleVector(FloatArray &answer, TimeStep *tStep,
                         CharType type, ValueModeType mode,
-                        const UnknownNumberingScheme &s, FloatArray *eNorm=nullptr) override;
+                        const UnknownNumberingScheme &s, FloatArray *eNorm=nullptr, void* lock=nullptr) override;
 
     void computeExtForceElContrib(FloatArray &oContrib, TracSegArray &iEl, int iDim, TimeStep *tStep);
     void computeIntForceGPContrib(FloatArray &oContrib_disp, IntArray &oDisp_loc_array, FloatArray &oContrib_trac, IntArray &oTrac_loc_array,TracSegArray &iEl, GaussPoint &iGP, int iDim, TimeStep *tStep, const FloatArray &iBndCoord, const double &iScaleFac, ValueModeType mode, CharType type, const UnknownNumberingScheme &s);
 
 
     void assemble(SparseMtrx &answer, TimeStep *tStep,
-                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
+                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0, void* lock=nullptr) override;
 
     virtual void assembleExtraDisplock(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void assembleGPContrib(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, TracSegArray &iEl, GaussPoint &iGP, double k);
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, 
+                          TracSegArray &iEl, GaussPoint &iGP, double k, void* lock=nullptr);
 
     void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                             const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;

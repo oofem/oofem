@@ -1,0 +1,3449 @@
+\documentclass[a4paper]{report}
+\usepackage{amsmath}
+\usepackage{ifluatex}
+\ifluatex
+ \usepackage{fontspec}
+  %\setmainfont[Ligatures=TeX]{xits}
+  %\setmathfont[math-style=ISO]{xits-math}
+ \setmainfont[Ligatures=TeX]{Latin Modern Roman}
+ \fontspec[SmallCapsFeatures={Letters=SmallCaps}]{Latin Modern Roman}
+ \usepackage{unicode-math}
+ \setmathfont[math-style=ISO]{lmmath-regular.otf}
+ %\setmathfont[math-style=ISO]{xits-math.otf}
+\else
+ \usepackage[utf8]{inputenc}
+\fi
+\usepackage{microtype}
+\usepackage{html}
+\usepackage{graphicx}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{listings}   
+%\usepackage{tikz}
+%\usepackage{hyperref}
+\usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
+\usepackage{tabularx}
+\usepackage{ifthen}
+
+\input{../include/include.tex}
+
+\renewcommand{\topfraction}{1.99}	% 99% of page top can be a float
+\renewcommand{\bottomfraction}{0.99}	% 99% of page bottom can be a float
+\renewcommand{\textfraction}{0.01}	% only 1% of page must to be the text
+\renewcommand{\floatpagefraction}{0.99} % 99% of whole page can be a float
+\setcounter{totalnumber}{5} %maximum floating objects on one page
+
+\newcommand{\mbf}[1]{\boldsymbol{#1}}
+\newcommand{\grad}{\vect{\nabla}}
+\newcommand{\vect}[1]{\boldsymbol{#1}} % not for Greek letters
+\newcommand{\tens}[1]{\boldsymbol{#1}} % A second-order tensor
+
+\newcommand{\strain}{\varepsilon}
+\newcommand{\stress}{\sigma}
+\newcommand{\dev}{\mathrm{dev}}
+\newcommand{\vol}{\mathrm{vol}}
+
+\newcommand{\pard}[2]{\frac{\partial{#1}}{\partial{#2}}}
+
+\newcommand{\param}[1]{\texttt{#1}} % Use when referring to attributes in text.
+\newcommand{\optional}[1]{[#1]} % Denotes optional parameter
+\newcommand{\field}[2]{\param{#1}~\#{\tiny(#2)}} % Attribute #1 = identifier, #2 = type
+\newcommand{\optField}[2]{\optional{\field{#1}{#2}}}
+\newcommand{\fieldnotype}[1]{\param{#1}}
+\newcommand{\optFieldnotype}[1]{[\param{#1}]}
+\newcommand{\componentNum}{(\param{num}\#){\tiny(in)}} % For the component number.
+\newcommand{\entKeyword}[1]{*\textbf{#1}} % For general keywords, e.g. ``engnmodel''
+\newcommand{\entKeywordInst}[1]{\textbf{#1}} % For specific keywords, e.g. ``nlinearstatic''
+\newcommand{\entKeywordWithVal}[2]{*\textbf{#1}~\#{\tiny(#2)}} % For general keywords, e.g. ``engnmodel''
+\newcommand{\entKeywordInstWithVal}[2]{\textbf{#1}~\#{\tiny(#2)}} % For specific keywords, e.g. ``nlinearstatic''
+
+%editing macros
+\newcommand{\missing}[1]{}
+\definecolor{gray}{rgb}{0.5, 0.5, 0.5}
+\definecolor{Navy}{rgb}{0.0, 0.0, 0.5}
+% macros for items related to parallel
+\begin{htmlonly}
+  % no xcolor support in latex2html
+  \newcommand{\Pmode}[1]{\sffamily {#1}}
+  \newcommand{\Pparam}[1]{\param{#1}}
+  \newcommand{\oofemParallel}[1]{{$\langle${#1}$\rangle$}}
+\end{htmlonly}
+%begin{latexonly}
+  \newcommand{\Pmode}[1]{\sffamily \color{Navy} {#1}}
+  \newcommand{\Pparam}[1]{\param{#1}}
+  \newcommand{\oofemParallel}[1]{{$\langle${#1}$\rangle$}}
+%end{latexonly}
+
+\newcommand{\PentKeyword}[1]{\oofemParallel{\entKeyword{#1}}}
+\newcommand{\PentKeywordInst}[1]{\oofemParallel{\entKeywordInst{#1}}}
+\newcommand{\Pfield}[2]{\oofemParallel{\field{#1}{#2}}}
+\newcommand{\Pfieldnotype}[1]{\oofemParallel{\fieldnotype{#1}}}
+\newcommand{\PoptField}[2]{\oofemParallel{\optField{#1}{#2}}}
+\newcommand{\PoptFieldnotype}[1]{\oofemParallel{\optFieldnotype{#1}}}
+\definecolor{lightgray}{gray}{0.9}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}%
+
+
+\begin{htmlonly}
+%\newenvironment{record}[1][]{\rowcolors{1}{lightgray}{lightgray}\begin{tabular}{|ll}}{\end{tabular}\\}
+\newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
+\newcommand{\recentry}[2]{{#1}&{#2}\\}
+\end{htmlonly}
+%begin{latexonly}
+\newcounter{rcc}
+%\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\begin{tabular*}{#1}{|ll@{\extracolsep{\fill}}r}}{\end{tabular*}\\}
+%\newenvironment{record}[1][\textwidth]{\begin{tabular*}{#1}{|llr}}{\end{tabular*}\\}
+\newenvironment{record}[1][\textwidth]{\setcounter{rcc}{0}\rowcolors{1}{lightgray}{lightgray}\tabularx{#1}{llR} \hline}
+               {\endtabularx}
+\newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}&}
+%end{latexonly}
+
+\lstdefinelanguage{oofeminput}
+{
+morekeywords={Node, node, Truss2d}, 
+morecomment=[l]{\#},
+emph={coords, bc, ic, nodes, mat, crossSect}, 
+}
+
+\lstdefinestyle{oofem}{
+  belowcaptionskip=1\baselineskip,
+  frame=single,
+  rulecolor=\color{gray},
+  xleftmargin=\parindent,
+  basicstyle=\footnotesize,
+  keywordstyle=\color{red}\bfseries,
+  commentstyle=\itshape, %%\color{green!40!black},
+  emphstyle=\color{red},
+  captionpos=b,
+}
+
+%%\bodytext{
+%%bgcolor="#e5f5ff" text="#000000" link="#0000FF" vlink="#FF0000"
+%%alink="#FF0000"
+%%}
+
+%%\definecolor{oofembgr}{RGB}{229,245,255}
+%%\pagecolor{oofembgr}
+
+\begin{document}
+%begin{latexonly}
+\title{
+\oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}}
+Input Data Format Specification}
+\author{\bp \\ \\
+Czech Technical University\\
+Faculty of Civil Engineering\\
+Department of Structural Mechanics\\
+Th\'akurova 7, 166 29 Prague, Czech Republic
+}
+\maketitle
+%end{latexonly}
+\begin{htmlonly}
+\begin{center}
+  \oofemlnk{\centerline{\includegraphics[width=0.7\textwidth]{oofem-logo-contour}}}
+{\Large Input Data Format Specification} \\ \\
+{\bp \\
+Czech Technical University\\
+Faculty of Civil Engineering\\
+Department of Structural Mechanics\\
+Th\'akurova 7, 166 29 Prague, Czech Republic
+}
+\end{htmlonly}
+
+\newpage
+\tableofcontents
+\newpage
+\chapter{Introduction}
+This manual describes in details the format and structure of OOFEM
+text input file. Input file can be prepared in any text editor or can be generated
+by a conversion program or FEM pre-processor.
+
+\Pmode{Some parts of this document are relevant only to the parallel enabled version of the code.
+These parts are distinguished by typing the text in sans serif font family.}
+\Pmode{The parallel model is based on domain decomposition. In this mode a set of input files must be provided, each one corresponding to 
+particular process and related domain partition. The corresponding domain partition input file is referred as partition input file. 
+The name of partition input file is composed from two parts, the fist part (referred as base
+name) is user-defined, the second part (called partition name), divided from first part by
+full-stop, is corresponding partition rank number. The partitions are numbered
+from zero. All partitions input files must have the
+same base name.
+
+The parallel version requires the unique global numbering  for
+dof managers (nodes) and elements. The global
+numbering is necessary to link partitions together. However, the dof
+managers and optionally elements at interpartion boundaries,
+should be explicitly  marked, in order to distinguish different type
+of relations between their remote counterparts (see further).
+}
+
+\section{Running the code}
+\label{_running_the_code}
+The program can be executed by typing\\
+\texttt{oofem [option [parameter]] ...}\\
+on the command line prompt with the following command line options:\\[1em]
+\begin{tabularx}{\textwidth}{l|X}
+\hline
+\textbf{\mbox{-v}} & Prints oofem version.\\
+\textbf{\mbox{-f~string}} & path to oofem input file name, if not present, program interactively
+reads this parameter.\Pmode{When invoking the solver in parallel mode, only base name of input file should be specified, 
+the partition name is appended automatically. On the other hand, the partition name is not appended to output file name, as specified
+in output file record (see section \ref{_OutputFileRecord}).}\\
+\textbf{\mbox{-r~int}} & Restarts the analysis from given solution step. The corresponding
+context file (*.osf) must exist.\\
+\textbf{\mbox{-rn}} & Turns on the equation renumbering. Default is off.\\
+\textbf{\mbox{-ar~int}} & 
+Restarts the adaptive computation from given solution step.
+Requires the corresponding context file (*.osf) and domain input file
+(*.din) to exists. The domain input file describes the new mesh, its
+syntax is identical to syntax of input file, but it does not contains
+the output file record, job description record and analysis record.\\
+\textbf{\mbox{-l~int}} & Sets treshold for log messages (Errors=0, Warnings=1,
+Relevant=2, Info=3, Debug=4).\\
+\textbf{\mbox{-qo~string}} & Redirect the standard output stream (stdout) to given file.\\
+\textbf{\mbox{-qe~string}} & Redirect standard error stream (stderr) to given file.\\
+\textbf{\mbox{-c}} & Forces the creation of context file for each solution step.\\
+\hline
+\end{tabularx}\\[1em]
+
+\Pmode{
+The parallel version uses the MPI (Message Passing Interface) standard for message-passing communication. Thus, to execute OOFEM program for parallel (indicated by the \texttt{-p} flag),
+users must know the procedure for executing/scheduling MPI jobs on the particular system(s).
+For instance, when using the MPICH implementation of MPI and many others, the following command initiates a program that uses eight processors: \\[2mm]
+\texttt{mpirun -np 8 oofem -p program\_options}
+}
+
+
+
+
+\section{Syntax and general rules}
+
+Input file is composed of records. In the current implementation, each record is represented by one line in input file.
+The order of records in file is compulsory, and it has following structure:
+\begin{enumerate}
+\item output file record, see section \ref{_OutputFileRecord},
+\item job description record, see section \ref{_JobDescriptionRecord},
+\item analysis record, see section \ref{_AnalysisRecord},
+\item domain record, see section \ref{_DomainRecord},
+\item output manager record, see section \ref{_OutputManagerRecord},
+\item components size record, see section \ref{_ComponentsSizeRecord},
+\item node record(s), see section \ref{_NodeElementSideRecords},
+\item element record(s), see section \ref{_ElementsRecords},
+\item set record(s), see section \ref{_SetRecords},
+\item cross section record(s), see section \ref{_CrossSectionRecords},
+\item material type  record(s), see section \ref{_MaterialTypeRecords},
+\item nonlocal barriers record(s), see section \ref{_NonlocalBarrierRecords},
+\item load, boundary  conditions record(s), see section
+  \ref{_LoadBoundaryInitialConditions},
+\item initial conditions record(s), see section \ref{_InitialConditions},
+\item time functions record(s), see section \ref{_TimeFunctionsRecords}.
+\item optional xfem manager and associated record(s), see section \ref{_XFEMManagerRecords}
+\end{enumerate}
+When input line begins with '\#' character, then it is ignored  by the parser and
+can serve as a comment inside input file.
+
+The individual records consist of record keyword followed by one or more attributes. Each attribute is identified by
+its keyword, which can be followed by attribute value(s). Some attributes have no values.
+The order of attributes in the record is optional.
+
+Sometimes, the record keyword itself can be variable, taking on a restricted range of possible values.
+As an example, OOFEM has element record, desribing particulat element, and record keyword determines the  particular element type.
+In this case, the record keyword is preceded by star. We call such record keyword as entity keyword. The possible
+substitutions for entity keyword are typed using \entKeywordInst{Typewriter} font family.
+Often, some attributes are specific to particular entity keyword. Then the general format of record is described and entity specific attributes are described separately. The possible attributes are then union of general and entity specific attributes.
+
+\begin{lstlisting}[style=oofem, language=oofeminput, caption={Example of input records}]
+# nodal records
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2. dofidmask 3 1 2 3
+# element record
+Truss2d 1 nodes 2 1 2 crossSect 1
+\end{lstlisting}
+
+Each attribute value has a specific type, which describe its size and layout. To describe the type of an attribute, the following notation is used: 
+\field{Keyword}{type}, where type determines the attribute type and \# is the placeholder for the attribute value.
+The possible types of attribute values are following:
+\begin{itemize}
+\item \textbf{in} - integer number.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val1}]
+val1 25
+\end{lstlisting}
+
+\item \textbf{rn} - real number.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val2}]
+val2 -0.234e-3
+\end{lstlisting}
+\item \textbf{ch} - character (usually for description of unknown type ('d' for
+displacement, 't' for temperature, etc.).
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val3}]
+val3 t
+\end{lstlisting}
+
+\item \textbf{ia} - integer array. The format of integer array is
+``size~val(1)~...~val(size)'', where size, val(1),...,val(size) are
+integer numbers. Values are separated by one or more spaces. As an example, consider the integer array attribute called \param{nodes}$=\{1,4,23\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={nodes}]
+nodes 3 1 4 23
+\end{lstlisting}
+\item \textbf{ra} - real array. The format of real array is
+``size~val(1)~...~val(size)'', where size is integer number and val(1),
+..., val(size) are real numbers. Values are separated by one or more spaces. As an example, consider the real array attribute called \param{coords}$=\{1.0,2.0,3.0\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={coords}]
+coords 3 1.0 2.0 3.0
+\end{lstlisting}
+\item \textbf{rm} - real matrix, format of real matrix is\\
+``rows~columns~\{val(1,1)~val(1,2)~...;~val(2,1)~...\}'', where ``rows'' and ``columns'' are integer numbers and val(1,1),
+..., are real numbers. Columns are seperated by space or comma and lines by semicolon.
+As an example, consider the real matrix attribute called $\param{mat1}=\left[\begin{array}{ccc}1.0&-1.0&0.0\\2.0&2.5&5.0\end{array}\right]$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={mat1}]
+mat1 2 3 \{1.0 -1.0; 0.0 2.0; 2.5 5.0\}
+\end{lstlisting}
+
+\item \textbf{dc} - dictionary. Dictionary consist of pairs, each pair has key
+(character type) and its associated value (integer type).
+Format of dictionary is
+``size~key(1)~val(1)~...~key(size)~val(size)'', where size is integer
+number, key(1),...,key(size) are single character values, and val(1),
+..., val(size) are real numbers. Values are separated by one or more spaces;
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={dict1}]
+dict1 2 a 1.0 v 0.0 
+\end{lstlisting}
+\item \textbf{rl} - range list. Range list syntax is \{ number1 .. numberN (start1
+end1) (start2 end2)\}. The enclosing brackets are compulsory. The range
+list represent list of integer values. Single values can be specified
+using single values (number1, .., NumberN). The range of values
+(all numbers from startI to endI including startI and endI can be
+specified using range value in the form (startI endI). The range is
+described using its start and end values enclosed in parenthesis.
+Any number of ranges and single values can be used to specify range list.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={range1}]
+range1 { 1 7 8 (10 20) (25 30) }
+\end{lstlisting}
+\item \textbf{et} - entity type. For  example, it describes the finite element
+type. Possible type values are mentioned in specific sections.
+\item \textbf{s} - character string. The string have to be enclosed
+in quotes ("") following after corresponding keyword.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={string1}]
+string1 ``string example''
+\end{lstlisting}
+\item \textbf{expr} - function expression. The expression have to be enclosed
+in quotes (""). The expression is evaluated by internal parser and
+represent mathematical expressions as a function of certain variables.
+The variable names and meaning are described in specific sections.
+The usual arithmetic operators like -,+,*,/ are supported and their
+evaluation order is taken into account. The evaluation order can be
+changed using parenthesis. Several built-in functions are supported
+(sqrt, sin, cos, tan, atan, asin and acos) - these must be typed using
+lowercase letters and their arguments must be enclosed in parenthesis.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={expr1}]
+expr1 ``2.0*sin(t)/3.0''
+\end{lstlisting}
+
+\end{itemize}
+
+The general format of record is \\
+
+\noindent
+\begin{record}
+  \recentry{\field{record\_keyword}{type}}{\optField{attribute1\_keyword}{type}}
+  \recentry{}{...}
+  \recentry{}{\optField{attributeXX\_keyword}{type}}
+\end{record}
+
+The keywords and their values are separated by one or more spaces. Please note, that a single record cooresponds to one input line in input file. 
+
+%In a special case of analysis record, the input record can be followed
+%by optional meta-step input records (see section
+%\ref{_AnalysisRecord}). Then certain attributes originally in analysis
+%record should appear in meta-step record instead. This is marked by
+%adding ``M'' superscript to keyword. Then the attribute format is \field{Keyword$^M$}{type}.
+
+When some attribute is enclosed in brackets [~], then it's use is optional
+and often overwrites the default behavior or adds additional (but
+optional) information or property (for example adds a loading to
+node).
+
+\Pmode{If any attribute (and thus its keyword and value) is enclosed within angle brackets $\langle$~$\rangle$ then it is related to parallel version of oofem is not available in sequential version.}
+
+{\flushleft \bf Example of input record.}\\
+As an example, consider the following record description:\\
+\begin{record}
+  \recentry{\entKeywordInstWithVal{Particle}{in}}{\field{color}{in} \field{mass}{rn}}
+  \recentry{}{\field{coords}{ra} \field{name}{s}}
+\end{record}
+The following listing shows the corresponding, properly formatted, input record:
+\begin{lstlisting}[style=oofem, language=oofeminput, caption={Corresponding input record}, moreemph={color, mass, name}, morekeywords={Particle}]
+Particle 2 color 5 mass 0.18 coords 3 0.0 1.0 2.0 name "P1_36"
+\end{lstlisting}
+
+
+\chapter{Output and Job description Records}
+\section{Output file record}
+\label{_OutputFileRecord}
+This record has no keywords and contains a character string, which
+describes the path to output file. If the file with the same name exists,
+it will be overwritten.
+
+\section{Job description record}
+\label{_JobDescriptionRecord}
+This record has no keywords and contains a character string, which
+describes the job. This description will appear in the output
+file.
+
+\chapter{Analysis record}
+\label{_AnalysisRecord}
+This record describes the type of analysis, which should be
+performed. The analysis record can be splitted into optional meta-step input records (see below). 
+Then certain attributes originally in analysis record can be specified independently for each meta-step. This is marked by
+adding ``M'' superscript to keyword. Then the attribute format is \field{Keyword$^M$}{type}.
+
+The general format of this record can be specified in
+\begin{itemize}
+\item ``standard-syntax''\\
+  \begin{record}[0.9\textwidth]
+    \recentry{\entKeyword{AnalysisType}}{\field{nsteps}{in}}
+    \recentry{}{\optField{renumber}{in}}
+    \recentry{}{\optField{profileopt}{in}}
+    \recentry{}{\field{attributes}{string}}
+    \recentry{}{\optField{ninitmodules}{in}}
+    \recentry{}{\optField{nmodules}{in}}
+    \recentry{}{\optField{nxfemman}{in}}
+  \end{record}
+\item ``meta step-syntax''\\
+  \begin{record}[0.9\textwidth]
+    \recentry{\entKeyword{AnalysisType}}{\field{nmsteps}{in}}
+    \recentry{}{\optField{ninitmodules}{in}}
+    \recentry{}{\optField{nmodules}{in}}
+    \recentry{}{\optField{nxfemman}{in}}
+  \end{record}\\
+  immediately followed by \param{nmsteps} meta step records with the following syntax:\\
+  \begin{record}[0.9\textwidth]
+    \recentry{}{\field{nsteps}{in} \field{attributes}{string}}
+  \end{record}\\
+  
+  The \param{nmsteps} parameter determines the number of ``metasteps''. The
+meta step represent sequence of solution steps with common attributes.
+There is expected to be \param{nmsteps} subsequent metastep records.
+The meaning of meta step record parameters (or analysis record
+parameters in ``standard syntax'') is following:
+\begin{itemize}
+\item \param{nsteps} - determines number of subsequent solution steps
+within me\-ta\-step.
+\item \param{renumber} - Turns out renumbering after each time step.
+Necessary when Dirichlet boundary conditions change during simulation.
+Can also be turned out by the executeable flag \texttt{-rn}.
+\item \param{profileopt} - Nonzero value turns on the
+equation renumbering to optimize the profile of characteristic matrix
+(uses Sloan algorithm). By default, profile optimization is not
+performed. It will not work in parallel mode.
+\item \param{attributes} - contains the metastep related attributes of
+analysis (and solver), which are valid for corresponding solution
+steps within meta step. If used in standard syntax, the attributes are
+valid for all solution step.
+\item \param{ninitmodules} - number of initialization module records for given
+problem. The initialization modules are specified after meta step section (or
+after analysis record, if no metasteps are present). Initialization modules
+allow to initialize the state variables by values previously computed by 
+external software. The available initialization modules are described in section
+\ref{InitModulesSec}.
+\item \param{nmodules} - number of export module records for given
+problem. The export modules are specified after initialization modules. Export modules
+allow to export computed data into external software for
+postprocessing. The available export modules are described in section
+\ref{ExportModulesSec}.
+\item \param{nxfemman} - 1 implies that an XFEM manager is created, 0 implies
+that no XFEM manager is created. The XFEM manager stores a list of enrichment
+items. The syntax of the XFEM manager record and related records is described in
+section \ref{_XFEMManagerRecords}.
+\item \param{eetype} - optional error estimator type used for the problem.
+Used for adaptive analysis, but can also be used to compute and write error estimates to the output files. See adaptive engineering models for details.
+\end{itemize}
+
+\end{itemize}
+Not all of analysis types support the metastep syntax, and if
+not mentioned, the standard-syntax is expected.
+Currently, supported analysis types are
+
+\begin{itemize}
+\item Linear static analysis, see section \ref{LinearStatic},
+\item Eigen value dynamic, see section \ref{EigenValueDynamic},
+\item Direct explicit  nonlinear dynamics, see section
+\ref{NlDEIDynamic},
+\item Direct explicit (linear) dynamics, see section \ref{DEIDynamic},
+\item Implicit linear dynamic, see section \ref{DIIDynamic},
+\item Incremental \textbf{linear} static problem, see section \ref{IncrementalLinearStatic},
+\item Non-linear static analysis, see section \ref{NonLinearStatic}.
+\end{itemize}
+
+\section{Structural Problems}
+\subsection{StaticStructural}
+\label{StaticStructural}
+\begin{record}
+  \recentry{\entKeywordInst{StaticStructural}}{\field{nsteps}{in}}
+  \recentry{}{\optField{deltat}{...}}
+  \recentry{}{\optField{prescribedtimes}{...}}
+  \recentry{}{\optField{stiffmode}{...}}
+  \recentry{}{\optField{nonlocalext}{...}}
+  \recentry{}{\optField{sparselinsolverparams}{...}}
+\end{record}
+
+Static structural analysis. Can be used to solve linear and nonlinear static structural problems, supporting changes in boundary conditions (applied load and supports).
+The problem can be solved under direct load or displacement control, indirect control, or by
+their arbitrary combination.
+Note, that the individual solution steps are used to describe the history of applied incremental loading. The load cases are not supported, for each load case the new analysis has to be performed. To analyze linear static problem with multiple load combinations, please use LinearStatic solver.
+
+By default all material nonlinearities will be taken into account, geometrical not.
+To include geometrically nonlinear effect one must specify level of non-linearity in element records.
+
+The  \param{sparselinsolverparams} parameter describes the sparse
+linear solver attributes and is explained in section \ref{sparselinsolver}.
+\Pmode{Can be used in parallel mode. The input record must be the same
+ for all processors. At present, parallel version requires PETSc module.}
+The optional parameter \param{deltat} defines the length of time step (equal to 1.0 by default). The times corresponding to individual solution times can be specified using optional parameter \param{prescribedtimes}, allowing to input array of discrete solution times, the number of solution steps is then equal to the size of this array. 
+\Pmode{The \param{nonlocalext} turns on the nonlocal constitutive
+extension. The extension considers a band of remote elements involved
+in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
+this approach for node-cut partitioning)}.
+
+\missing{Metasteps support}
+
+\subsection{Linear static analysis}
+\label{LinearStatic}
+\begin{record}
+  \recentry{\entKeywordInst{LinearStatic}}{\field{nsteps}{in}}
+  \recentry{}{\optField{sparselinsolverparams}{...}}
+  \recentry{}{\optField{sparselinsolverparams}{...}}
+\end{record}
+
+Linear static analysis.
+Parameter \param{nsteps} indicates the number of loading cases.
+Problem supports multiple load cases, where number of load cases correspods to number of solution steps, individual load vectors are formed in individual time-steps.
+However, the static system is assumed to be the same for all load cases. For each load case an auxiliary time-step is generated with time equal to load case number.
+
+The  \param{sparselinsolverparams} parameter describes the sparse
+linear solver attributes and is explained in section \ref{sparselinsolver}.
+\Pmode{Can be used in parallel mode. The input record must be the same
+for all processors. At present, parallel version requires PETSc module.}
+
+
+\subsection{LinearStability}
+\label{LinearStability}
+\begin{record}
+  \recentry{\entKeywordInst{LinearStability}}{\field{nroot}{in}}
+  \recentry{}{\field{rtolv}{rn}}
+  \recentry{}{\optField{eigensolverparams}{...}}
+\end{record}
+Solves linear stability problem. Only first \param{nroot} smallest
+eigenvalues and corresponding eigenvectors will be computed.
+Relative convergence tolerance is specified using \param{rtolv} parameter.
+
+The \param{eigensolverparams} parameter describes the sparse
+linear solver attributes and is explained in section \ref{eigensolverssection}.
+\Pmode{Can be used in parallel mode. The input record must be the same
+for all processors. Parallel version requires PETSc and SLEPc modules.}
+
+\subsection{EigenValueDynamic}
+\label{EigenValueDynamic}
+\begin{record}
+  \recentry{\entKeywordInst{EigenValueDynamic}}{\field{nroot}{in}}
+  \recentry{}{\field{rtolv}{rn}}
+  \recentry{}{\optField{eigensolverparams}{...}}
+\end{record}
+
+Represents the eigen value dynamic analysis.
+Only \param{nroot} smallest eigenvalues and corresponding
+eigenvectors will be computed. Relative convergence criteria is
+governed using \param{rtolv} parameter.
+
+The \param{eigensolverparams} parameter describes the sparse
+linear solver attributes and is explained in section \ref{eigensolverssection}.
+\Pmode{Can be used in parallel mode. The input record must be the same
+for all processors. Parallel version requires PETSc and SLEPc modules.}
+
+
+\subsection{NlDEIDynamic}
+\label{NlDEIDynamic}
+\begin{record}
+  \recentry{\entKeywordInst{NlDEIDynamic}}{\field{nsteps}{in}}
+  \recentry{}{\field{dumpcoef}{rn}}
+  \recentry{}{\optField{deltaT}{rn}}
+\end{record}
+
+Represents the direct explicit  nonlinear dynamic  integration.
+The central difference method with diagonal mass matrix is used,
+damping matrix is assumed to be proportional to mass matrix, $\mbf{C}
+= \mathrm{dumpcoef} * \mbf{M}$, where
+$\mbf{M}$ is diagonal mass matrix.
+Parameter \param{nsteps} specifies how many time steps will be analyzed.
+\param{deltaT} is time step length used for integration, which may be reduced by program in order to satisfy solution stability conditions.
+Parameter \param{reduct} is a scaling factor (smaller than 1), which is multiplied with the determined step length adjusted by the program.
+If \param{deltaT} is reduced internally, then \param{nsteps} is adjusted so that the total analysis time remains the same.
+
+The parallel version has the following additional syntax:\\ \\
+\begin{record}
+  \recentry{}{\PoptFieldnotype{nonlocalext}}
+\end{record}
+
+\noindent
+\Pmode{
+The \param{nonlocalext} turns on the nonlocal constitutive
+extension. The extension considers a band of remote elements involved
+in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
+this approach for node-cut partitioning).
+}
+
+\subsection{DEIDynamic}
+\label{DEIDynamic}
+
+\begin{record}
+  \recentry{\entKeywordInst{DEIDynamic}}{\field{nsteps}{in}}
+  \recentry{}{\field{dumpcoef}{rn}}
+  \recentry{}{\optField{deltaT}{rn}}
+\end{record}
+
+Represent the \textbf{linear} explicit
+integration scheme for dynamic problem solution. The central difference method with diagonal mass matrix is used,
+damping matrix is assumed to be proportional to mass matrix, $\mbf{C} = \mathrm{dumpcoef} * \mbf{M}$, where
+$\mbf{M}$ is diagonal mass matrix. \param{deltaT} is time step length used for
+integration, which may be reduced by program in order to satisfy
+solution stability conditions. Parameter \param{nsteps} specifies
+how many time steps will be analyzed.
+
+\subsection{DIIDynamic}
+\label{DIIDynamic}
+
+\begin{record}
+  \recentry{\entKeywordInst{DIIDynamic}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn}}
+  \recentry{}{\field{alpha}{rn}}
+  \recentry{}{\field{beta}{rn}}
+  \recentry{}{\field{Psi}{rn}}
+\end{record}
+
+Represents direct implicit integration of linear dynamic
+problems. Damping is modeled as Rayleigh damping $(\mbf{c} =
+\rm{alpha}*\mbf{M} + \rm{beta} * \mbf{K})$. Parameter \param{Psi} determines
+integration method used, for\param{Psi} = 1 the Newmark and for \param{Psi} $\ge$ 1.37 the Wilson method
+will be used. Parameter \param{deltaT} is required time integration
+step length.
+
+\subsection{IncrementalLinearStatic}
+\label{IncrementalLinearStatic}
+
+\begin{record}
+  \recentry{\entKeywordInst{IncrLinearStatic}}{\field{endOfTimeOfInterest}{rn}}
+  \recentry{}{\field{pre\-scri\-bed\-Ti\-mes}{ra}}
+\end{record}
+
+
+Represents incremental \textbf{linear} static problem.
+The problem is solved as series of linear solutions and is intended to
+be used for solving linear creep problems or incremental perfect plasticity.
+
+Supports the changes of static scheme (applying, removing and changing  boundary conditions)
+during the analysis.
+
+Response is computed in times defined by \param{pre\-scri\-bed\-Ti\-mes}
+array. These times should include times, when generally the  boundary
+conditions are changing, and in other times of interest. (For linear creep
+analysis, the values should be uniformly distributed on log-time scale, if no change in
+loading or boundary conditions). The time at the end of interested is
+specified using \param{endOfTimeOfInterest} parameter.
+
+\subsection{NonLinearStatic}
+\label{NonLinearStatic}
+\entKeywordInst{NonLinearStatic} \\
+Non-linear static analysis. The problem can be solved under
+direct load or displacement control, indirect control, or by
+their arbitrary combination.
+\Pmode{Can be used in parallel mode. The input record must be the same
+for all processors. At present, parallel version requires PETSc module.}
+By default all
+material nonlinearities will be included, geometrical not.
+To include geometrically nonlinear effect one must specify
+level of non-linearity in element records.
+There are two different ways, how to specify the parameters - the
+extended and standard syntax.
+\subsubsection{Extended syntax}
+The extended syntax uses the ``metastep'' concept and has the
+following format:
+%%\begin{enumerate}
+%%\item[0]
+
+\noindent
+\begin{record}
+  \recentry{\entKeywordInst{NonLinearStatic}}{\optField{nmsteps}{in}}
+  \recentry{}{\field{nsteps}{in}}
+  \recentry{}{\optField{contextOutputStep}{in}}
+  \recentry{}{\optField{sparselinsolverparams}{string}}
+  \recentry{}{\optField{nonlinform}{in}}
+  \recentry{}{\PoptField{nonlocstiff}{in}}
+  \recentry{}{\PoptFieldnotype{nonlocalext}}
+  \recentry{}{\PoptFieldnotype{loadbalancing}}
+\end{record}
+This record is immediately followed by metastep records with the format described below.
+The analysis parameters have following meaning
+\begin{itemize}
+\item \param{nmsteps} - determines the number of
+``metasteps'', default is 1.
+\item \param{nsteps} - determines number of solution steps.
+\item \param{contextOutputStep} - causes the context file to be
+created for every con\-text\-Out\-put\-Step-th step and when needed. Useful for
+postprocessing.
+\item The  \param{sparselinsolverparams} parameter describes the sparse
+linear solver attributes and is explained in section \ref{sparselinsolver}.
+\item \param{nonlinform} - formulation of non-linear problem. If == 1 (default), total Lagrangian formulation in undeformed original shape is used (first-order theory). If == 2, the equlibrated displacements are added to original ones and updated in each time step (second-order theory).
+\item \Pmode{\param{nonlocstiff} - determines whether the tangent stiffness
+extension for nonlocal models is activated. If == 0 (default) this
+option is not active. If == 1 the support for nonlocal tangent
+stiffness is activated.}
+\item \Pmode{The \param{nonlocalext} turns on the nonlocal constitutive
+extension. The extension considers a band of remote elements involved
+in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
+this approach for node-cut partitioning)}.
+\item \Pmode{The  \param{loadbalancing} parameter describes the dynamic load balancing
+attributes and is explained in section \ref{dynamicloadbalancing}}.
+\end{itemize}
+
+%The metasteps \componentNum\ is the metastep number and the
+%\param{nsteps} - determines number of solution steps for corresponding
+%metastep.
+\noindent
+The metastep record has the following general syntax:\\
+\begin{record}
+  \recentry{\hspace{10mm}}{\field{nsteps}{in}}
+  \recentry{}{\optField{controlmode}{in}}
+  \recentry{}{\optField{deltat}{rn}}
+  \recentry{}{\optField{stiffmode}{in}}
+  \recentry{}{\optField{refloadmode}{in}}
+  \recentry{}{\field{solverParams}{}}
+  \recentry{}{\optField{sparselinsolverparams}{string}}
+  \recentry{}{\optField{donotfixload}{}}
+\end{record}
+
+where
+\begin{itemize}
+\item[-] \param{controlmode} - determines the type of solution
+control used for corresponding meta step. if == 0 then indirect
+control will be used to control solution process (arc-length method, default). if == 1
+then direct displacement or load control will be used (Newton-Raphson solver). In the later
+mode, one can apply the prescribed load increments as well as
+control displacements.
+\item[-] \param{deltaT} - is time step length. If not specified, it is
+set equal to 1,0. Each solution step has associated the corresponding
+intrinsic time, at which the loading is generated. The \param{deltaT}
+determines the spacing between solution steps on time scale.
+\item[-] \param{stiffMode} - If == 0 (default) then tangent stiffness will be used
+at new step beginning and whenever numerical method will ask for
+stiffness update. If == 1 the use of secant tangent will be forced.
+The secant stiffness will be used at new step beginning
+and whenever numerical method will ask for stiffness update.
+If == 2 then original elastic stiffness will
+be used during the whole solution process.
+\item[-] The \param{refloadmode} parameter determines how the reference force load vector
+is obtained from given totalLoadVector and initialLoadVector.
+The initialLoadVector describes the part of loading which does not scale. Works only for force loading, other non-force components (temperature, prescribed displacements should always given in total values).
+If \param{refloadmode} is 0 (rlm\_total, default) then the reference incremental load vector is defined as
+totalLoadVector assembled at given time.
+If \param{refloadmode} is 1 (rlm\_inceremental) then the reference load vector is
+obtained as incremental load vector at given time.
+\item[-] \param{solverParams} - parameters of solver. The solver type
+is determined using \param{controlmode}.
+\item[-] The  \param{sparselinsolverparams} parameter describes the sparse
+linear solver attributes and is explained in section
+\ref{sparselinsolver}.
+\item[-] By default, reached load at the end of
+metastep will be maintained in subsequent steps as fixed, non scaling
+load and load level will be reset to zero. This can be changed using keyword \param{donotfixload}, which if
+present, causes the loading to continue, not resetting the load
+level. For the indirect control the reached loading will not be
+fixed, however, the new reference loading vector will be assembled for
+the new metastep.
+\end{itemize}
+
+The direct control corresponds to \param{controlmode}=1 and the Newton-Raphson solver is used.
+Under the direct control, the total load
+vector assembled for specific solution step represents the load level,
+where equilibrium is searched. The implementation supports also
+displacement control -  it is possible to prescribe one or more
+displacements by applying ``quasi prescribed'' boundary
+condition(s)\footnote{Hovewer, the problem does not support the
+changes of static system. But it is possible to apply direct
+displacement control without requiring BC applied (see nrsolver
+documentation). Therefore it is possible to combine
+direct displacement control with direct load control or indirect
+control.}
+The load level then represents the
+time, where the equilibrium has been found. The Newton-Raphson solver parameters (\param{solverParams}) for
+load-control are:\\
+\begin{record}
+  \recentry{\hspace{10mm}}{\field{maxiter}{in}}
+  \recentry{}{\optField{minsteplength}{in}}
+  \recentry{}{\optField{minIter}{in}}
+  \recentry{}{\optField{manrmsteps}{in}}
+  \recentry{}{\optField{ddm}{ia} \optField{ddv}{ra} \optField{ddltf}{in}}
+  \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
+  \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
+  \recentry{}{\optional{\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}  }}
+  \recentry{}{\field{rtolv}{rn} \optField{rtolf}{rn} \optField{rtold}{tn}}
+  \recentry{}{\optField{initialGuess}{rn}}
+\end{record}
+where
+\begin{itemize}
+\item \param{maxiter} determines the maximum
+number of iterations allowed to reach equilibrium. If equilibrium is
+not reached, the step length (corresponding to time) is reduced.
+\item \param{minsteplength} parameter is the minimum step length
+allowed.
+\item \param{minIter} - minimum number of iterations which always proceed during the iterative solution.
+\item If \param{manrmsteps} parameter is nonzero, then the modified
+N-R scheme is used, with the stiffness updated after
+\param{manrmsteps} steps.
+\item \param{ddm} is array specifying the degrees of freedom,
+which displacements are controlled.
+Let the number of these DOFs is N.
+The format of \param{ddm} array is 2*N dofman1 idof1
+dofman2 idof2 ... dofmanN idofN, where the dofmani is the number of i-th dof manager  and idofi is the
+corresponding DOF number.
+\item \param{ddv} is array of relative weights of controlled
+displacements, the size should be equal to N. The actual value of
+prescribed dofs is defined as a product of its weight and the value of
+load time function specified using \param{ddltf} parameter (see
+below).
+\item \param{ddltf} number of load time function, which is used to
+evaluate the actual displacements of controlled dofs.
+\item \param {linesearch} nonzero value turns on line search
+  algorithm. The \param{lsearchtol} defines tolerance (default value
+  is 0.8), amplification
+  factor can be specified using \param{lsearchamp} parameter (should
+  be in interval $(1,10)$), and parameter \param{lsearchmaxeta}
+  defines maximum limit on the length of iterative step (allowed range
+  is $(1.5,15)$).
+\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
+\item \param{rtolv} determines relative convergence norm (both for displacement
+iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define
+independent relative convergence crteria for unbalanced forces and displacement
+iterative change. If the default convergence criteria is used,
+the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
+\item \param{initialGuess} is an optional parameter with default vaue 0, for which the first iteration of each step starts from the previously converged state and applies the prescribed displacement increments. This can lead to very high strains in elements connected to the nodes with changing prescribed displacements and the state can be far from equilibrium, which may results into slow convergence and strain localization near the boundary. If \param{initialGuess} is set to 1, the contribution of the prescribed displacement increments to the internal nodal forces is linearized and moved to the right-hand side, which often results into an initial solution closer to equilibrium. For instance, if the step is actually elastic, equilibrium is fully restored after the second iteration, while the default method may require more iterations.  
+\end{itemize}
+
+The indirect solver corresponds to \param{controlmode}=0 and the CALM
+solver is used. The value of reference load vector is determined by
+\param{refloadmode} parameter mentioned above at the first step of
+each metastep. {\em However, the user must ensure that the same value of
+reference load vector could be obtained for all solution steps of
+particular metastep (this is necessary for restart and adaptivity to work)}.
+The corresponding meta step solver parameters (\param{solverParams}) are:\\
+\begin{record}
+  \recentry{\hspace{10mm}}{\field{Psi}{rn}}
+  \recentry{}{\field{MaxIter}{in}}
+  \recentry{}{\field{stepLength}{rn}}
+  \recentry{}{\optField{min\-Step\-Le\-ngth}{in}}
+  \recentry{}{\optField{initialStepLength}{rn}}
+  \recentry{}{\optField{forcedInitialStepLength}{rn}}
+  \recentry{}{\optField{reqIterations}{in}}
+  \recentry{}{\optField{maxrestarts}{in}}
+  \recentry{}{\optField{minIter}{in}}
+  \recentry{}{\optField{manrmsteps}{in}}
+  \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ra}}
+  \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
+  \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
+  \recentry{}{\optional{\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}}}
+  \recentry{}{\field{rtolv}{rn} \optField{rtolf}{rn} \optField{rtold}{rn}}
+  \recentry{}{\optField{pert}{ia} \optField{pertw}{ra}}
+  \recentry{}{\optField{rpa}{rn} \optField{rseed}{in}}
+\end{record}
+where
+\begin{itemize}
+\item \param{Psi} - CALM $\Psi$ control parameter. For $\Psi$ = 0
+displacement control is applied. For nonzero values the load control
+applies together with displacement control (ALM). For large $\Psi$
+load control apply.
+\item \param{MaxIter} - determines the maximum number of iteration allowed to
+reach equilibrium state. If this limit is reached, restart follows
+with smaller step length.
+\item \param{stepLength} - determines the maximum value of arc-length (step length).
+\item \param{min\-Step\-Le\-ngth} - minimum step length. The step length will never be
+smaller. If convergence problems are encountered and step length cannot
+be decreased, computation terminates.
+\item \param{initialsteplength} - determines the initial step length (the arc-length). If not provided, the maximum step length (determined by \param{stepLength} parameter) will be used as the value of initial step length. 
+\item \param{forcedInitialStepLength} - When simulation is restarted, the last predicted step length is used. Use \param{forcedInitialStepLength} parameter to override the value of step length. This parameter will also override the value of initial step length set by \param{initialsteplength} parameter.
+\item \param{reqIterations} - approximate number of iterations controlled by changing the step length.
+\item \param{maxrestarts} - maximum number of restarting computation when convergence not reached up to \param{MaxIter}.
+\item \param{minIter} - minimum number of iterations which always proceed during the iterative solution. \param{reqIterations} are set to be the same, \param{MaxIter} are increased if lower.
+\item \param{manrmsteps} - Forces the use of accelerated
+Newton Raphson met\-hod, where stiffness is updated after
+\param{manrmsteps} steps. By default, the modified NR
+method is used (no stiffness update).
+\item \param{hpcmode} Parameter determining the alm mode.
+Possible values are: 0 - (default) full ALM with quadratic constrain and
+all dofs, 1 - (default, if \param{hpc} parameter used) full ALM with quadratic constrain, taking into account
+only selected dofs (see \param{hpc} param), 2 - linearized constrain
+in displacements only, taking into account only selected dofs with
+given weight (see \param{hpc} and \param{hpcw} parameters).
+\item \param{hpc} - Special parameter for Hyper-plane control, when only
+selected DOFs are taken account in ALM step length
+condition. Important mainly for material nonlinear problems with
+strong localization. This array selects the degrees of freedom,
+which displacements are controlled. Let the number of these DOFs be N.
+The format of \param{ddm} array is 2*N dofman1 idof1
+dofman2 idof2 ... dofmanN idofN, where the dofmani is the number of i-th dof manager  and idofi is the
+corresponding DOF number.
+\item \param{hpcw} Array of DOF weights in linear constraint. The
+dof ordering is determined by \param{hpc} parameter, the size of the array should
+be N.
+\item \param{linesearch} nonzero value turns on line search
+  algorithm. The \param{lsearchtol} defines tolerance, amplification
+  factor can be specified using \param{lsearchamp} parameter (should
+  be in interval $(1,10)$), and parameter \param{lsearchmaxeta}
+  defines maximum limit on the length of iterative step (allowed range
+  is $(1.5,15)$).
+\item \param{nccdg} allows to define one or more DOF groups, that are used for evaluation of convergence criteria. Each DOF is checked if it is a member of particular group and in this case its contribution is taken into account when evaluating the convergence criteria for that group. By default, if \param{nccdg} is not specified, one group containing all DOF types is created. The value of \param{nccdg} parameter defines the number of DOF type groups. For each group, the corresponding DOF types need to be specified using \param{ccdg\#} parameter, where '\#' should be replaced by group number (numbering starts from 1). This array contains the DofIDItem values, that identify the physical meaning of DOFs in the group. The values and their physical meaning is defined by DofIDItem enum type (see src/oofemlib/dofiditem.h for reference).
+\item \param{rtolv} determines relative convergence norm (both for displacement
+iterative change vector and for residual unbalanced force vector). Optionally, the \param{rtolf} and \param{rtold} parameters can be used to define
+independent relative convergence crteria for unbalanced forces and displacement
+iterative change. If the default convergence criteria is used,
+the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
+\item \param{pert} Array specifying DOFs that should be perturbed after the first iteration of each step. 
+Let the number of these DOFs be M.
+The format of \param{ddm} array is 2*M dofman1 idof1
+dofman2 idof2 ... dofmanN idofN, where the dofmani is the number of i-th dof manager  and idofi is the
+corresponding DOF number.
+\item \param{pertw} Array of DOF perturbations. The
+dof ordering is determined by \param{pert} parameter, the size of the array should
+be M.
+\item \param{rpa} Amplitude of random perturbation that is applied to each DOF.
+\item \param{rseed} Seed for the random generator that generates random perturbations.
+\end{itemize}
+
+\subsubsection{Standard syntax}
+In this case, all parameters (for analysis as well as for the solver)
+are supplied in analysis record. The default meta step is created for
+all solution steps required. Then the meta step attributes are
+specified within analysis record. The format of analysis record is
+then following\\
+
+\noindent
+\begin{record}
+  \recentry{\entKeywordInst{NonLinearStatic}}{\field{nsteps}{in}}
+  \recentry{}{\optField{nonlocstiff}{in}}
+  \recentry{}{\optField{contextOutputStep}{in}}
+  \recentry{}{\optField{controlmode}{in}}
+  \recentry{}{\optField{deltat}{rn}}
+  \recentry{}{\field{rtolv}{rn}}
+  \recentry{}{\optField{stiffmode}{in}}
+  \recentry{}{\field{lstype}{in}}
+  \recentry{}{\field{smtype}{in}}
+  \recentry{}{\field{solverParams}{}}
+  \recentry{}{\optField{nonlinform}{in}}
+  \recentry{}{\PoptField{nonlocstiff}{in}}
+  \recentry{}{\PoptFieldnotype{nonlocalext}}
+  \recentry{}{\PoptFieldnotype{loadbalancing}}
+\end{record}
+The meaning of parameters is the same as for extended syntax.
+
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. The scheme should be compatible with the solver type. See section
+\ref{sparselinsolver} for further details.
+
+
+%
+\subsection{Adaptive linear static}
+\label{AdaptiveLinearStatic}
+\begin{record}
+  \recentry{\entKeywordInst{Adaptlinearstatic}}{\field{nsteps}{in}}
+  \recentry{}{\optField{sparselinsolverparams}{...}}
+  \recentry{}{\optField{meshpackage}{in}}
+  \recentry{}{\field{errorestimatorparams}{...}}
+\end{record}
+Adaptive linear static analysis. Multiple loading cases are not
+supported. Due to linearity of a problem, the complete reanalysis from
+the beginning is done after adaptive remeshing.
+After first step the error is estimated, information about required density is generated
+(using mesher interface) and solution terminates. If the error
+criteria is not satisfied, then the new mesh
+and corresponding input file is generated and new analysis should be
+performed until the error is acceptable.
+Currently, the available error estimator for linear problems is
+Zienkiewicz-Zhu. Please note, that adaptive framework requires
+specific functionality provided by elements and material models. For
+details, see element and material model manuals.
+\begin{itemize}
+\item[-]
+Parameter \param{nsteps} indicates the number of loading cases.
+Should be set to 1.
+\item[-]
+The  \param{sparselinsolverparams} parameter describes the sparse
+linear solver attributes and is explained in section \ref{sparselinsolver}.
+\item[-]
+The \param{meshpackage} parameter selects the mesh package interface,
+which is used to generate information about required mesh density for
+new remeshing. The supported interfaces are explained in section
+\ref{meshpackages}. By default, the T3d interface is used.
+\item[-]
+The \param{errorerestimatorparams} parameter contains the parameters
+of Zien\-kie\-wicz Zhu Error Estimator. These are described in section \ref{errorestimators}.
+\end{itemize}
+
+
+\subsection{Adaptive nonlinear static}
+
+\begin{record}
+  \recentry{\entKeywordInst{Adaptnlinearstatic}}{\field{Nonlinearstaticparams}{}}
+  \recentry{}{\optField{equilmc}{in}}
+  \recentry{}{\optField{meshpackage}{in}}
+  \recentry{}{\optField{eetype}{in}}
+  \recentry{}{\field{errorestimatorparams}{...}}
+\end{record}
+
+Represents Adaptive Non-LinearStatic problem. Solution is performed  as a series of increments (loading or displacement).
+The error is estimated at the end of each load increment (after
+equilibrium is reached), and based on reached error, the computation
+continues, or the new mesh densities are generated and solution
+stops. Then the new discretization should be generated.
+The truly adaptive approach is supported, so the computation can be
+restarted from the last step (see section \ref{_running_the_code}), solution is mapped to new mesh (separate
+solution step) and new load increment is applied. Of course, one can start the analysis from
+the very beginning using new mesh. Currently, the available
+estimators/indicators include only linear
+Zienkiewicz-Zhu estimator and scalar error indicator. Please note, that adaptive framework requires
+specific functionality provided by elements and material models. For
+details, see element and material model manuals.
+\begin{itemize}
+\item[-]
+Set of parameters \param{Nonlinearstaticparams} are related to
+nonlinear analysis. They are described in section
+\ref{NonLinearStatic}.
+\item[-]
+Parameter \param{equilmc} determines, whether after mapping of primary
+and internal variables to new mesh the equilibrium is restored or not
+before new load increment is applied. The possible values are: 0
+(default), when no equilibrium is restored, and 1 forcing the
+equilibrium to be restored before applying new step.
+\item[-]
+The \param{meshpackage} parameter selects the mesh package interface,
+which is used to generate information about required mesh density for
+new remeshing. The supported interfaces are explained in section
+\ref{meshpackages}. By default, the T3d interface is used.
+\item[-]
+Parameter \param{eetype} determines the type of error
+estimator/indicator to be used. The parameters
+\param{errorestimatorparams} represent set of parameters corresponding
+to selected error estimator. For description, follow to section
+\ref{errorestimators}.
+\end{itemize}
+%
+
+\subsection{Free warping analysis}
+\label{FreeWarping}
+\begin{record}
+\recentry{\entKeywordInst{FreeWarping}}{\field{nsteps}{in}}
+\end{record}
+
+Free warping analysis computes the deplanation function of cross section with arbitrary shape. It is done by solving the Laplace's equation with automatically generated boundary conditions corresponding to the free warping problem.
+
+This type of analysis supports only \param{TrWarp} elements and \param{WarpingCS} cross sections. One external node must be defined for each warping cross section. The coordinates of this node can be arbitrary but this node must be defined with parametr  \param{DofIDMask 1 24} and one boundary condition which represents relative twist acting on corresponding warping cross section. No additional loads make sence in free warping analysis.
+
+Parameter \param{nsteps} indicates the number of loading cases.
+Series of loading cases is maintained as sequence of time-steps.
+For each load case an auxiliary time-step is generated with time
+equal to load case number.
+Load vectors for each load case are formed as load vectors at
+this auxiliary time.
+
+\missing{QClinearStatic}
+
+
+\section{Transport Problems}
+\subsection{Stationary transport problem}
+\label{StationaryTransport}
+
+\begin{record}
+  \recentry{\entKeywordInst{StationaryProblem}}{\field{nsteps}{in}}
+  \recentry{}{\optField{sparselinsolverparams}{...}}
+  \recentry{}{\optField{exportfields}{ia}}
+\end{record}
+
+Stationary transport problem.
+Series of loading cases is maintained as sequence of time-steps.
+For each load case an auxiliary time-step is generated with time
+equal to load case number.
+Load vectors for each load case are formed as load vectors at
+this auxiliary time.
+The  \param{sparselinsolverparams} parameter describes the sparse
+linear solver attributes and is explained in section \ref{sparselinsolver}.
+
+If the present problem is used within the context
+of staggered-like analysis, the temperature field obtained by the
+solution can be exported and made available to any subsequent
+analyses. For example, temperature field obtained by present analysis
+can be taken into account in subsequent mechanical analysis.
+To allow this, the temperature must be ``exported''. This can be done
+by adding array \param{exportfields}. This array contains the field
+identifiers, which tell the problem to register its primary unknowns
+under given identifiers. See file {\it field.h}.
+Then the subsequent analyses can get access to exported fields 
+and take them into account, if they support such feature.
+
+\subsection{Transient transport problem}
+\label{TransientTransport}
+
+\begin{record}
+  \recentry{\entKeywordInst{TransientTransport}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn} $|$ \field{dTfunction}{in} $|$ {\field{prescribedtimes}{ra}}}
+  \recentry{}{\field{alpha}{rn}}
+  \recentry{}{\optField{initT}{rn}}
+  \recentry{}{\optFieldnotype{lumped}}
+  \recentry{}{\optFieldnotype{keeptangent}}
+  \recentry{}{\optField{exportfields}{ia}}
+\end{record}
+
+\textbf{Nonlinear} implicit
+integration scheme for transient transport problems. The generalized
+midpoint rule (sometimes called $\alpha$-method) is used for time discretization, with alpha parameter,
+which has limits $0\le\alpha\le1$. For $\alpha=0$ explicit Euler
+forward method is obtained, for $\alpha=0.5$ implicit trapezoidal rule
+is recovered, which is unconditionally stable, second-order accurate
+in $\Delta t$, and $\alpha=1.0$ yields implicit Euler backward method,
+which is unconditionally stable, and first-order accurate
+in $\Delta t$. \param{deltaT} is time step length used for
+integration, \param{nsteps} parameter specifies
+number of time steps to be solved. It is possible to define \param{dTfunction}
+with a number referring to corresponding time function, see section~\ref{_TimeFunctionsRecords}.
+Variable time step is advantageous when calculating large time intervals.
+
+The \param{initT} sets the initial time for integration, 0. by default.
+If \param{lumped} is set, then the stabilization of numerical
+algorithm using lumped capacity matrix will be used, reducing the
+initial oscillations.
+See section \ref{StationaryTransport} for an explanation on
+\param{exportfields}.
+
+This transport problem supports sets and changes in number of equations. It is possible to impose/remove Dirichlet boundary conditions during solution.
+
+
+
+\subsection{Transient transport problem - linear case - obsolete}
+\label{LinearTransientTransport}
+
+\begin{record}
+  \recentry{\entKeywordInst{NonStationaryProblem}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn} $|$ \field{deltaTfunction}{in}}
+  \recentry{}{\field{alpha}{rn}}
+  \recentry{}{\optField{initT}{rn}}
+  \recentry{}{\optFieldnotype{lumpedcapa}}
+  \recentry{}{\optField{sparselinsolverparams}{..}}
+  \recentry{}{\optField{exportfields}{ia}}
+  \recentry{}{\optFieldnotype{changingProblemSize}}
+\end{record}
+
+\textbf{Linear} implicit
+integration scheme for transient transport problems. The generalized
+midpoint rule (sometimes called $\alpha$-method) is used for time discretization, with alpha parameter,
+which has limits $0\le\alpha\le1$. For $\alpha=0$ explicit Euler
+forward method is obtained, for $\alpha=0.5$ implicit trapezoidal rule
+is recovered, which is unconditionally stable, second-order accurate
+in $\Delta t$, and $\alpha=1.0$ yields implicit Euler backward method,
+which is unconditionally stable, and first-order accurate
+in $\Delta t$. \param{deltaT} is time step length used for
+integration, \param{nsteps} parameter specifies
+number of time steps to be solved. It is possible to define \param{deltaTfunction}
+with a number referring to corresponding time function, see section~\ref{_TimeFunctionsRecords}.
+Variable time step is advantageous when calculating large time intervals. It is strongly suggested
+to use nonlinear transport solver due to stability reasons, see section~\ref{TransientTransport}.
+
+The \param{initT} sets the initial time for integration, 0 by default.
+If \param{lumpedcapa} is set, then the stabilization of numerical
+algorithm using lumped capacity matrix will be used, reducing the
+initial oscillations.
+See section \ref{StationaryTransport} for an explanation on
+\param{exportfields}.
+
+This linear transport problem supports changes in number of equations. It is possible to impose/remove
+Dirichlet boundary conditions during solution. This feature is enabled with \param{changingProblemSize}, which ensures
+storing solution values on nodes (DoFs) directly. If the problem does not grow/decrease during solution, it is more efficient
+to use conventional solution strategy and the parameter should not be mentioned.
+
+Note: This problem type \textbf{requires transport module} and it
+can be used only when this module is included in your oofem
+configuration.
+
+
+
+
+\subsection{Transient transport problem - nonlinear case - obsolete}
+\label{TransientTransport}
+
+\begin{record}
+  \recentry{\entKeywordInst{NlTransientTransportProblem}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn} $|$  \field{deltaTfunction}{in}}
+  \recentry{}{\field{alpha}{rn}}
+  \recentry{}{\optField{initT}{rn}}
+  \recentry{}{\optField{lumpedcapa}{}}
+  \recentry{}{\optField{nsmax}{in}}
+  \recentry{}{\field{rtol}{rn}}
+  \recentry{}{\optField{manrmsteps}{in}}
+  \recentry{}{\optField{sparselinsolverparams}{...}}
+  \recentry{}{\optField{exportfields}{ia}}
+  \recentry{}{\optFieldnotype{changingProblemSize}}
+\end{record}
+
+Implicit integration scheme for transient transport problems. The generalized
+midpoint rule (sometimes called $\alpha$-method) is used for time discretization, with alpha parameter,
+which has limits $0\le\alpha\le1$. For $\alpha=0$ explicit Euler
+forward method is obtained, for $\alpha=0.5$ implicit trapezoidal rule
+is recovered, which is unconditionally stable, second-order accurate
+in $\Delta t$, and $\alpha=1.0$ yields implicit Euler backward method,
+which is unconditionally stable, and first-order accurate
+in $\Delta t$. See matlibmanual.pdf for solution algorithm.
+
+\param{deltaT} is time step length used for integration, \param{nsteps} parameter specifies
+number of time steps to be solved. For \param{deltaTfunction} and \param{initT} see section~\ref{LinearTransientTransport}.
+Parameter \param{maxiter} determines the maximum
+number of iterations allowed to reach equilibrium (default is 30). Norms of
+residual physical quantity (heat, mass) described by solution vector and 
+the change of solution vector are determined in each iteration.
+The convergence is reached, when the norms are less than the value given by \param{rtol}.
+If \param{manrmsteps} parameter is nonzero, then the modified
+N-R scheme is used, with the left-hand side matrix updated after
+\param{manrmsteps} steps.
+\param{nsmax} maximum number of iterations per time step, default is 30.
+If \param{lumpedcapa} is set, then the stabilization of numerical
+algorithm using lumped capacity matrix will be used, reducing the
+initial oscillations.
+
+See the Section~\ref{StationaryTransport} for an explanation on
+\param{exportfields}. The meaning 
+of \param{changingProblemSize} is given in Section~\ref{LinearTransientTransport}.
+
+Note: This problem type \textbf{requires transport module} and it
+can be used only when this module is included in your oofem
+configuration.
+
+\section{Fluid Dynamic Problems}
+\subsection{Transient incompressible flow - CBS Algorithm}
+\label{cbsIncomp}
+\begin{record}
+  \recentry{\entKeywordInst{CBS}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{}}
+  \recentry{}{\optField{theta1}{in}}
+  \recentry{}{\optField{theta2}{in}}
+  \recentry{}{\optField{cmflag}{in}}
+  \recentry{}{[\field{scaleflag}{in} \field{lscale}{in} \field{uscale}{in} \field{dscale}{in}]}
+  \recentry{}{\optField{lstype}{in} \optField{smtype}{in}}
+\end{record}
+
+Solves the transient incompressible flow using algorithm based on
+Characteristics Based Split (CBS, for reference see O.C.Zienkiewics
+and R.L.Taylor: The Finite Element Method, 3rd volume,
+Butterworth-Heinemann, 2000). At present, only semi-implicit form
+of the algorithm is available and energy equation, yielding the
+temperature field, is not solved.
+Parameter \param{nsteps} determines number of solution
+steps. Parameter \param{deltaT} is time step length used for
+integration. This time step will be automatically adjusted to satisfy
+integration stability limits $\Delta t \le {\frac{h}{\vert\mbf{u}\vert}}$ and $\Delta t \le {\frac{h^2}{2\nu}}$, if necessary.
+Parameters \param{theta1} and \param{theta2} are integration constants, $\theta_1, \theta_2 \in \langle{\frac12}, 1\rangle$.
+If \param{cmflag} is given a nonzero value, then
+consistent mass matrix will be used instead of (default) lumped one.
+
+The characteristic equations can be solved in non-dimensional form. To
+enable this, the \param{scaleflag} should have a nonzero value,
+and the following parameters should be provided: \param{lscale},
+\param{uscale}, and \param{dscale} representing typical length,
+velocity, and density scales.
+
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. The scheme should be compatible with the solver type. See section
+\ref{sparselinsolver} for further details.
+
+\subsection{Transient incompressible flow\\SUPG/PSPG Algorithm}
+\label{supgIncomp}
+\begin{record}
+  \recentry{\entKeywordInst{SUPG}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn}}
+  \recentry{}{\field{rtolv}{rn}}
+  \recentry{}{\optField{atolv}{rn}}
+  \recentry{}{\optField{stopmaxiter}{in}}
+  \recentry{}{\optField{alpha}{rn}}
+  \recentry{}{\optField{cmflag}{in}}
+  \recentry{}{\optField{deltatltf}{in}}
+  \recentry{}{\optField{miflag}{in}}
+  \recentry{}{\optional{\field{scaleflag}{in} \field{lscale}{in} \field{uscale}{in} \field{dscale}{in}}}
+  \recentry{}{\optField{lstype}{in} \optField{smtype}{in}}
+\end{record}
+
+Solves the transient incompressible flow using stabilized formulation
+based on SUPG and PSPG
+stabilization terms. The stabilization provides
+stability and accuracy in the solution of
+advection-dominated problems and permits usage of equal-order
+interpolation functions for velocity and pressure. Furthermore,
+stabilized formulation significantly improves convergence rate in
+iterative solution of large nonlinear systems of equations.
+
+By changing the value $\alpha$, different methods from
+``Generalized mid-point family'' can be chosen, i.e.,
+Forward Euler ($\alpha=0$), Midpoint rule ($\alpha=0.5$),
+ Galerkin ($\alpha=2/3$), and  Backward Euler ($\alpha=1$). Except
+the first one, all the methods are implicit and require matrix inversion for solution.
+Some results form an energy method analysis suggest unconditional
+stability for $\alpha\ge 0.5$ for the generalized mid-point family. As
+far as accuracy is concerned, the midpoint rule is to be generally preferred.
+
+Parameter \param{nsteps} determines number of solution
+steps. Parameter \param{deltaT} is time step length used for
+integration. Alternatively, the load time function can be used to
+determine time step length for particular solution step. The load time
+function number is determined by parameter \param{deltatltf} and its
+value evaluated for solution step number should yield the step length.
+
+Parameters \param{rtolv} and \param{atolv} allow to
+specify relative and absolute errors norms for residual vector.
+The equilibrium iteration process will stopped when both error limits
+are satisfied or when the number of iteration exceeds the value given
+by parameter \param{stopmaxiter}.
+
+If \param{cmflag} is given a nonzero value, then
+consistent mass matrix will be used instead of (default) lumped one.
+
+The algorithm allows to solve the flow of two immiscible fluids in
+fixed spatial domain (currently only in 2d). This can be also used for
+solving free surface problems, where one of the fluids should
+represent air. To enable multi-fluid analysis, user should set parameter \param{miflag}. The supported values are described in section~\ref{materialinterfaces}.
+Please note, that the initial distribution of reference fluid
+volume should be provided as well as
+constitutive models for both fluids.
+
+
+The characteristic equations can be solved in non-dimensional form. To
+enable this, the \param{scaleflag} should have a nonzero value,
+and the following parameters should be provided: \param{lscale},
+\param{uscale}, and \param{dscale} representing typical length,
+velocity, and density scales.
+
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. Please note that the present algorithm leads to a
+non-symmetric matrix. The scheme should be compatible with the solver type. See section
+\ref{sparselinsolver} for further details.
+
+\subsection{Transient incompressible flow\\PFEM Algorithm}
+\label{pfemIncomp}
+\begin{record}
+  \recentry{\entKeywordInst{PFEM}}{\field{nsteps}{in}}
+  \recentry{}{\field{deltaT}{rn}}
+  \recentry{}{\field{material}{in}}
+  \recentry{}{\field{cs}{in}}
+  \recentry{}{\field{pressure}{in}}
+  \recentry{}{\optField{mindeltat}{rn}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
+  \recentry{}{\optField{alphashapecoef}{rn}}
+  \recentry{}{\optField{removalratio}{rn}}
+  \recentry{}{\optField{scheme}{in}}
+  \recentry{}{\optField{lstype}{in} \optField{smtype}{in}}
+\end{record}
+
+Solves the transient incompressible flow using particle finite element
+method based on the Lagrangian formulation of Navier-Stokes equations.
+
+Mesh nodes are represented by PFEMParticles~\ref{pfemparticles}, which 
+can freely move and even separate from the main domain. To integrate 
+governing equations in each solution step, a temporary mesh, built from 
+particles, is needed. The mesh is rebuilt from scratch in each solution 
+step to prevent large distortion of elements. Paramters \param{cs} and
+\param{material} assign types from cross section and material record to 
+created elements. Thus, the problem is defined without any elements in
+the input file.
+
+Mesh is generated using Delaunay triangulation and Alpha shape technique
+for the identification of the free surface. The parameter
+\param{alphashapecoef} should reflect initial distribution of PFEMParticles.
+Value approximately equal to 1,5-multiple of shortest distance of two 
+neighboring particles has been found well. On the free surface the zero-pressure
+boundary condition is enforced. This  must be defined in boundary condition
+record under the number defined by \param{pressure}.
+
+Parameter \param{scheme} controls whether the  equation system for the 
+components of the auxiliary velocity is solved explicitly (0) or implicitly
+(1). The last is the default option.
+
+Parameter \param{nsteps} determines number of solution
+steps. Parameter \param{deltaT} is time step length used for
+integration. To ensure numerical stability, step length is adapted upon mesh
+geometry and velocity of paricular nodes. To avoid to short time length a minimal
+size can be defined by \param{mindeltat}. Alternatively prescribing limit
+\param{removalratio} of the element edge length too close particles can be removed
+from solution.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure difference of two subsequent iteration
+step. Default values are 1.e-8. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
+
+Parameter \param{lstype} allows to select the solver for the linear system of
+equations. Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. Please note that the present algorithm leads to a
+non-symmetric matrix. The scheme should be compatible with the solver type. See section
+\ref{sparselinsolver} for further details.
+
+
+\section{Coupled Problems}
+\subsection{Staggered Problem}
+\label{staggeredproblem}
+\begin{record}
+  \recentry{\entKeywordInst{StaggeredProblem}}{(\field{nsteps}{in} \field{deltaT}{rn}) $|$ \field{timeDefinedByProb}{in}}
+  \recentry{}{\field{prob1}{s} \field{prob2}{s}}
+  %%\recentry{}{\optField{dtf}{in}
+  \recentry{}{\optField{stepMultiplier}{rn}}
+\end{record}
+
+Represent so-called staggered analysis. This can be described as an
+sequence of sub-problems, where the result of some sub-problem in the
+sequence can depend on results of previous sub-problems in sequence.
+Typical example is heat transfer analysis followed by mechanical
+analysis taking into account the temperature field generated by the
+heat transfer analysis. Similar analysis can be done when coupling
+moisture transport with concrete drying strain.
+
+The actual implementation supports only sequence of two sub-problems.
+The sub-problems are described using sub-problem input files. The
+syntax of sub-problem input file is the same as for standalone
+problem. The only addition is that sub-problems should export their
+solution fields so that they became available for subsequent
+sub-problems. See the Section~\ref{StationaryTransport}.
+
+The subproblem input files are described using
+\param{prob1} and \param{prob2} parameters, which are strings
+containing a path to sub-problem input files, the \param{prob1}
+contains input file path of the first sub-problem, which runs first
+for each solution step, the \param{prob2} contains input file path of
+the second sub-problem. 
+
+There are two options how to control a time step sequence. The first approach
+uses \param{timeDefinedByProb} which uses time sequence from the corresponding subproblem. 
+The subproblem may specify arbitrary loading steps and allows high flexibility.
+The second approach uses the staggered problem to take control over time. Therefore any
+sub-problem time-stepping parameters are ignored (even if they are
+required by sub-problem input syntax) and only staggered-problem
+parameters are relevant. \param{deltaT} is than a time step length used for
+integration, \param{nsteps} parameter specifies
+number of time steps to be solved. \param{stepMultiplier} multiplies all 
+times with a given constant. Default is 1.
+
+Note: This problem type \textbf{is included in transport module} and it
+can be used only when this module is configured.
+Note: All material models derived from StructuralMaterial base will
+take into account the external registered temperature field, if
+provided.
+
+\subsection{FluidStructure Problem}
+\label{fluidstructureproblem}
+\begin{record}
+  \recentry{\entKeywordInst{FluidStructureProblem}}{\field{nsteps}{in} \field{deltaT}{rn}}
+  \recentry{}{\field{prob1}{s} \field{prob2}{s}}
+  \recentry{}{\optField{maxiter}{in}}
+  \recentry{}{\optField{rtolv}{rn}}
+  \recentry{}{\optField{rtolp}{rn}}
+\end{record}
+
+Represents a fluid-structure analysis based on StaggeredProblem but providing
+iterative synchronization of sub-problems. The implementation uses the the PFEM
+model~\ref{pfemIncomp} for the fluid part. For the structural part a full dynamic
+analysis using implicit direct integration DIIDynamic\ref{DIIDynamic} is considered.
+
+The coupling of both phases is based on the idea of enforcing compatibility on the 
+interface. Special fluid particle are attached to every structural node on the 
+interface that can be hit by the fluid. These special particles have no degrees of 
+freedom associated, so no equations are solved on them. However, their movement is 
+fully determined by associated structural nodes. Their velocities governed by the 
+solid part affect the fluid equation naturally.
+
+This iterative procedure is based on the so-called Dirichlet-Neumann approach.
+Dirichlet boundary conditions are the prescribed velocities on the fluid side of
+the interface, whereas applied forces on the structural side represent the Neumann
+boundary conditions.
+
+The convergence criterion is based on the difference of the pressure and velocity
+values on the interface from the subsequent iterative steps. Once they are smaller
+than prescribed tolerance, the iteration is terminated and solution can proceed to
+the next step.
+
+The subproblem input files are described using
+\param{prob1} and \param{prob2} parameters, which are strings
+containing a path to sub-problem input files, the \param{prob1}
+contains input file path of the first sub-problem, which runs first
+for each solution step, the \param{prob2} contains input file path of
+the second sub-problem. The time step sequence is controlled by the number of steps
+\param{nsteps} and the time step length \param{deltaT}.
+
+Optional parameters \param{rtolv} and \param{rtolp} allow to
+specify relative norms for velocity and pressure differnce of two subsequent iteration
+step. Default values are 1.e-3. By default maximal 50 iterations are performed, if
+not specified by \param{maxiter}.
+
+Note: This problem type \textbf{is included in PFEM module} and it
+can be used only when this module is configured.
+
+
+\chapter{Domain record(s)}
+\label{_DomainRecord}
+This set of records describes the whole domain and its type. Depending
+on the type of problem, there may be one or several domain records. If not
+indicated, one domain record is default for all problem types.
+
+The domain type is used to resolve the
+default number of DOFs in node and their physical meaning. Format is following\\
+\begin{record}
+  \recentry{\fieldnotype{domain}}{\entKeyword{domainType}}
+\end{record}\\
+The \entKeyword{domainType} can be one from the following
+\begin{itemize}
+\item The \entKeywordInst{2dPlaneStress} and \entKeywordInst{2d-Truss}
+modes declare two default dofs per node (u-displacement, v-displacement),
+\item The \entKeywordInst{3d} mode declares three default dofs per
+node (u-displacement, v-displacement, w-displacement),
+\item The \entKeywordInst{2dMindlinPlate} mode declares three default
+dofs per node (w-displacent, u-rotation, v-rotation). Strain vector contains
+$\kappa_{xx}$, $\kappa_{yy}$, $\kappa_{xy}$, $\gamma_{xz}$, $\gamma_{yz}$. Stress vector
+contains $m_{xx}$, $m_{yy}$, $m_{xy}$, $q_{xz}$, $q_{yz}$.
+
+\item The \entKeywordInst{3dShell} mode declares six default dofs
+per node (displacement and rotation along each axis).
+\item The \entKeywordInst{2dBeam} mode declares three default dofs per
+node (u-displacement, w-displacement, v-rotation).
+\item The \entKeywordInst{2dIncompFlow} mode declares three default
+  dofs per node (u-velocity, v-velocity, and pressure).
+The default number of dofs per node as well as their physical meaning
+can be overloaded in particular dof manager record (see section
+\ref{_NodeElementSideRecords}).
+
+The further records describe particular domain components -
+OutputManagers, DofManagers, Elements, CrossSection models, Material
+Models, Boundary and Initial Conditions and Load time functions.
+
+\end{itemize}
+
+
+\section{Output manager record}
+\label{_OutputManagerRecord}
+The output manager controls output. It can filter output to specific
+solution steps, and within these selected steps allows also to filter
+output only to specific dof managers and elements. The format of
+output manager record is \\
+\begin{record}
+  \recentry{\entKeywordInst{OutputManager}}{[\fieldnotype{tstep\_all}]}
+  \recentry{}{\optField{tstep\_step}{in}}
+  \recentry{}{\optField{tsteps\_out}{rl}}
+  \recentry{}{[\fieldnotype{dofman\_all}]}
+  \recentry{}{\optField{dofman\_output}{rl}}
+  \recentry{}{\optField{dofman\_except}{rl}}
+  \recentry{}{[\fieldnotype{element\_all}]}
+  \recentry{}{\optField{element\_output}{rl}}
+  \recentry{}{\optField{element\_except}{rl}}
+\end{record}
+To select all solution steps, in which output will be performed, use
+\param{tstep\_all}. To select each \param{tstep\_step}-nth step, use
+\param{tstep\_step} parameter. In order to select only specific
+solution steps, the \param{tsteps\_out}list can be specified,
+supplying solution step number list in which output will be done.
+The combination of \param{tstep\_step} and
+\param{tsteps\_out} parameters is allowed.
+
+Output manager allows also to filter output to only specific dof
+managers and elements. If these specific members are selected, the
+output happens only in selected solution steps.
+The \param{dofman\_all} and \param{element\_all} parameters select
+all dof managers or elements respectively. Parameter arrays
+\param{dofman\_output} and \param{element\_output} allow to select
+only specific members. Numbers of selected members are then contained
+in \param{dofman\_output} or \param{element\_output} lists
+respectively. The previously selected members can be explicitly
+de-selected by specifying their component numbers in \param{dofman\_except} or
+\param{element\_except} lists. A few examples:\\
+\param{dofman\_output} \{1 3\}~~~prints nodes 1,3\\
+\param{dofman\_output} \{(1 3)\}~~~prints nodes 1,2,3\\
+\param{element\_output} \{1 3\}~~~prints elements 1,3\\
+\param{element\_output} \{(1 3)\}~~~prints elements 1,2,3\\
+\param{element\_output} \{(1 3) 5 6\}~~~prints elements 1,2,3,5,6\\
+
+\subsection{Components size record}
+\label{_ComponentsSizeRecord}
+This record describes the number of components in related domain. The
+particular records will follow immediately in input file. The general format is:\\
+\begin{record}
+  \recentry{}{\field{ndofman}{in}}
+  \recentry{}{\field{nelem}{in}}
+  \recentry{}{\field{ncrosssect}{in}}
+  \recentry{}{\field{nmat}{in}}
+  \recentry{}{\field{nbc}{in}}
+  \recentry{}{\field{nic}{in}}
+  \recentry{}{\field{nltf}{in}}
+  \recentry{}{\optField{nbarrier}{in}}
+\end{record}
+where \param{ndofman} represents number of dof managers (e.g. nodes) and their associated records,
+\param{nelem} represents number of elements and their associated records, \param{ncrosssect} is
+number of cross sections and their records, \param{nmatdnMat}{} is number of material
+models and their records, \param{nbc}{} represents number of boundary
+conditions (including loads) and their
+records, \param{nic} parameter determines the number of initial
+conditions, and \param{nltf} represents number of time functions and
+their associated records. The optional parameter \param{nbarrier}
+represents the number of nonlocal barriers and their records. If not
+specified, no barriers are assumed.
+
+\section{Dof manager records}
+\label{_NodeElementSideRecords}
+These records describe individual DofManager records (i.e. nodes or element sides (if they manage some DOFs)). The general format is following:
+
+\noindent
+\begin{record}
+  \recentry{\entKeyword{DofManagerType}}{\componentNum}
+  \recentry{}{[\field{load}{ra}]}
+  \recentry{}{[\field{DofIDMask}{ia}]}
+  \recentry{}{\optField{bc}{ia}}
+  \recentry{}{\optField{ic}{ia}}
+  \recentry{}{[\field{doftype}{ia} \field{masterMask}{ia}]}
+  \recentry{}{\PoptFieldnotype{shared} $|$ \PoptFieldnotype{remote} $|$ \PoptFieldnotype{null}}
+  \recentry{}{\PoptField{partitions}{ia}}
+\end{record}
+The order of particular records is optional, the dof manager number is determined by \componentNum\ parameter.
+The numbering of individual dof managers is arbitrary, it could be even non-continuous. In this context, one could think of dof manager number as a label that is assigned to individual dof manager and by which the dof manager is referenced.
+\Pmode{In parallel mode, the label represents a global id across all partitions.}
+
+
+By default, the nodal DOFs are determined by asking all the connected elements. Specifying additional dofs can be done using the using the \param{DofIDMask} array which determines their physical interpretation.
+Each item of \param{DofIDMask} array describes the physical meaning of corresponding DOF in dof manager. Currently the following values are supported: \{u-displacement=1, v-displacement=2, w-displacement=3, u-rotation=4, v-ro\-ta\-tion=5, w-rotation=6, u-velocity=7, v-velocity=8, w-velocity=9, temperature=10, pressure=11, special dofs for gradient-type constitutive models=12 and 13, mass concentration=14, special dofs for extended finite elements (XFEM)=15--30\}.
+\textbf{It is not allowed to have two DOFs with the same physical meaning in the same DofManager.}
+
+The applied primary (Dirichlet) boundary conditions are specified using
+"bc" record, while natural boundary conditions using "load" parameter.
+\begin{itemize}
+\item The size of "bc" array (primary bc) should be equal to number of DOFs in dof manager and i-th value relates to i-th DOF - the ordering and physical meaning of DOFs is determined by domain record and can be optionally specified for each dof manager individually (see next paragraph). The values of this array are corresponding boundary condition record numbers or zero, if no primary bc is applied to corresponding DOF. The compatible boundary condition type are required: primary conditions require "BoundaryCondition" records.
+\item The load "array" contains record numbers of natural boundary conditions that are applied. The required record type for natural condition is "NodalLoad". The actual value is the summation of all contributions, if more than one natural bc is applied. See section on boundary conditions for the syntax. Please note, that the values of natural bc for individual DOFs are specified in its record, not in dofmanager record.
+\end{itemize}
+
+By default, if "bc" and/or "load" parameters are omitted, no primary and/or natural bc are applied. Analogously, initial conditions are represented using \param{ic} array. The size of \param{ic} array should be equal to number of DOFs in dof manager. The values of this array are corresponding initial condition record numbers or zero, if no initial condition is applied to corresponding DOF (in this case zero value is assumed as value of initial condition).
+
+Parameters \param{dofType} and \param{masterMask} allows to connect some dof manager's dofs
+(so-called ``slave'' dofs)
+to corresponding dof (according to their physical meaning) of another
+dof manager (so-called ``master'' dof). The master slave principle
+allows for example simple modeling of structure hinges, where multiple
+elements are connected by introducing multiple nodes (with same
+coordinates) sharing the same displacement dofs and each one possessing
+their own rotational dofs.
+Parameter
+\param{dofType} determines the type of (slave) dof to
+create. Currently supported values are 0 for master DOF, 1 for simpleSlave DOF (linked to another single master DOF), and 2 for general
+slave dof, that can depend on different DOFs belonging to different
+dof managers.
+If \param{dofType} is not specified, then by default all DOFs are
+created as master DOFs. If provided, masterMask is also required.
+The meaning of \param{masterMask} parameter is
+depending on type of particular dofManager, and will be described in
+corresponding sections.
+
+\Pmode{
+The \param{shared} indicates, that dofmanager is shared by
+neighboring partitions. The contributions from all contributing
+domains are summed. Typical for node cut algorithm (see figures \ref{nodecut-lm}
+and \ref{nodecut-nlm}).
+
+Remote DofManager is indicated by \param{remote} parameter.
+Then DofManager in active domain is only mirror of some remote
+DofManager and it is necessary to copy remote values into local
+ones. Typical for element cut (see fig. \ref{elmentcut-lm}).
+The \param{null} parameter indicates so-called null DofManager. The
+null DofManager should be shared only by remote elements (these are
+only introduced for nonlocal constitutive model to allow effective
+local averaging, so only local material value to be averaged are
+transferred for these remote elements). Null nodes are therefore used
+only for computing real integration point coordinates of remote
+elements and there is no reason to maintain their unknowns (they have
+no equation number assigned, see fig. \ref{nodecut-nlm}). They do not
+contribute to local partition governing equation.
+Only one of the \param{null} \param{remote} \param{shared} parameters can
+be used for particular DofManagers. If no one is used, the DofManager
+is maintained as local for particular partition.
+
+The list of remote partitions sharing corresponding DofManager or list
+containing  remote partition containing remote DofManager counterpart is
+specified using \param{partitions} parameter. The local partition
+should not be included in the list.
+The slaves are allowed, but masters have to be in the same
+partition. The masters can be again remote copies.
+}
+
+
+Supported DofManagerType keywords are
+\begin{itemize}
+\item Node record
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{Node}}{\field{coords}{ra}}
+  \recentry{}{[\field{lcs}{ra}]}
+\end{record}\\
+Represent an abstraction for finite element node.
+The node coordinates in space (given by global coordinate system) are described
+using \param{coords} attribute. This array contains x, y and possibly z
+(depends on problem under consideration) coordinate of node.
+By default, the coordinate system in node is global coordinate system.
+User defined local coordinate system in node is described using \param{lcs} array. This
+array contains six numbers, where the first three numbers represent
+a directional vector of the local x-axis, and the next three numbers represent
+a directional vector of the local y-axis. The local z-axis is determined
+using a vector product. A right-hand coordinate system is assumed.
+If user defined local coordinate system in node is specified, then the
+boundary conditions and applied loading are specified in this local coordinate system.
+The reactions and displacements are also in \param{lcs} system at the output.
+
+The node can create only master DOFs and SimpleSlave DOFs, so the
+allowable values of \param{dofType} array are in range {0,1}.
+For the Node dof manager, the \param{masterMask} is the array of size
+equal to number of DOFs, and the i-th value determines the
+master dof manager, to which i-th dof is directly linked (the dof with
+same physical meaning are linked together).
+The local coordinate
+system in node with same linked dofs is supported, but it should be exactly the
+same as on master.
+
+
+\item Rigid arm record
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{RigidArmNode}}{\field{coords}{ra}}
+  \recentry{}{\field{master}{in}}
+  \recentry{}{\optField{masterMask}{ia}}
+  \recentry{}{[\field{lcs}{ra}]}
+\end{record}\\
+Represent node connected to other node (called master) using rigid
+arm. Rigid arm node DOFs can be linked to master (via rigid arm transformation) or can be independent. The rigid arm node allows to avoid very
+stiff elements used for modelling the rigid-arm connection.
+The rigid arm node maps its dofs to master dofs using simple transformations
+(small rotations are assumed). Therefore, the contribution to rigid
+arm node can be localized directly to master related equations.
+{\em The rigid arm node can not have its own boundary or initial conditions, they are
+determined completely from master dof conditions. Currently it is
+possible to map only certain dofs - see \param{dofType}. Linked DOFs
+should have dofType value equal to 2, non-linked (primary) DOFs 0.}
+
+Rigid arm node can be loaded
+independently of master. The node coordinates in space (given by
+global coordinate system) are described using \param{coords}
+field. This array contains x, y and possibly z (depends on problem
+under consideration) coordinate of node. The \param{master} parameter is the
+master node number, to which rigid arm node dofs are mapped.
+The rigid arm node and master can have arbvitrary local coordinate systems (if not specified, global one is assumed).
+
+The optional parameter \param{masterMask} allows to specify how
+particular mapped DOF depends on master DOFs. The size of \param{masterMask} array
+should be equal to number of DOFs. For all linked DOFs (with
+corresponding dofType value equal to 2) the corresponding value of
+\param{masterMask} array should be 1.
+
+The local coordinate system in rigid arm node  is supported, 
+the coordinate system in master and slave can be different. 
+If no lcs is set, global one is assumed.the global cs applies.
+
+\item Hanging node
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{HangingNode}}{\field{coords}{ra}}
+  \recentry{}{\field{dofType}{in}}
+  \recentry{}{\optField{masterElement}{in}}
+  \recentry{}{\optField{masterRegion}{in}}
+\end{record}
+
+Hanging node is connected to an a master element using generalized interpolation.
+Hanging node posses no degrees of freedom (except unlined dofs) - all values are
+interpolated from corresponding master elements and its DOFs.
+arbitrary FE mesh of concrete specimen or to facilitate the local
+refinement of FE mesh. The hanging nodes can be in a chain.
+
+The contributions of hanging node are localized directly to master related equations.
+The hanging node can have its own boundary or initial conditions, but
+only for primary unlinked DOFs. For linked DOFs, these conditions are
+determined completely from master DOF conditions.
+The local coordinate system should be same for all master nodes.
+The hanging node can be loaded independently of its master.
+
+Values of array \param{dofType} can have following values:
+0-primary DOF, 2-linked DOF.
+
+The value of \param{masterElement} specifies the element number to which the hanging node is attached.
+The node can be attached to any arbitrary coordinate within the master element.
+The element must support the necessary interpolation classes.
+The same interpolation for unknowns and geometry is assumed.
+
+The no (or -1) value for \param{masterElement} is supplied, then the node will locate the element closest to its coordinate.
+If no (or zero) value for \param{masterRegion} is supplied, then all regions will be searched,
+otherwise only the elements in cross section with number \param{masterRegion}.
+If \param{masterElement} is directly supplied \param{masterRegion} is unused.
+
+\item Slave node
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{SlaveNode}}{\field{coords}{ra}}
+  \recentry{}{\field{dofType}{in}}
+  \recentry{}{\field{masterDofMan}{ia}}
+  \recentry{}{\field{weights}{ra}}
+\end{record}
+
+Works identical to hanging node, but the weights (\param{weights}) are not computed from any element,
+but given explicitly, as well as the connected dof managers (\param{masterDMan}).
+
+\item Element side
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{ElementSide}}{}
+\end{record}\\
+Represents an abstraction for element side, which holds some unknowns.
+
+\item PFEMParticle \label{pfemparticles}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PFEMParticle}}{\field{coords}{ra}}
+\end{record}\\
+Represent the particle used in PFEM analysis.
+
+\item InteractionPFEMParticle \label{interactionparticle}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionPFEMParticle}}{\field{coords}{ra}}
+  \recentry{}{\field{bc}{ia}}
+  \recentry{}{\field{coupledNode}{in}}
+\end{record}\\
+Represent a special particle used in the PFEM-part of the FluidStructureProblem. The particle is 
+attached to \param{coupledNode} from the structural counter part. InteractionBoundaryCondition~\ref{interactionbc} must be prescribed under \param{bc} to access the velocities from solid nodes.
+
+\end{itemize}
+
+\section{Element records}
+\label{_ElementsRecords}
+These records specify a description of particular elements. The
+general format is following:
+
+\noindent
+\begin{record}
+  \recentry{\entKeyword{ElementType}}{\componentNum}
+  \recentry{}{\field{mat}{in} \field{crossSect}{in} \field{nodes}{ia}}
+  \recentry{}{\optField{bodyLoads}{ia} \optField{boundaryLoads}{ia}}
+  \recentry{}{\optField{activityltf}{in} \optField{lcs}{ra}}
+  \recentry{}{\PoptField{partitions}{ia} \PoptFieldnotype{remote}}
+\end{record}
+
+The order of element records is optional, the element number is determined by \componentNum\ parameter.
+The numbering of individual elements is arbitrary, it could be even non-continuous. In this context, one could think of element number as a label that is assigned to individual elements and by which the element is referenced.
+\Pmode{In parallel mode, the label represents a global id across all partitions.}
+
+Element
+material is described by parameter \param{mat}, which contains corresponding
+material record number. Element cross
+section is determined by cross section  with  \param{crossSect}
+record number. Element dof managers (nodes, sides, etc.) defining element geometry are specified using
+\param{nodes} array.
+
+Body load acting on element is specified using \param{bodyLoads} array. Components
+of this array are corresponding load record numbers. The loads should
+have the proper type (body load type), otherwise error will be generated.
+
+Boundary load acting on element boundary is specified using
+\param{boundaryLoads} array. The format of this array is
+\begin{displaymath}
+2\cdot size \; lnum(1)~id(1)~\dots~lnum(size)~id(size),
+\end{displaymath}
+where $size$ is total number of loadings applied to element,
+$lnum(i)$ is the applied load number, and $id(i)$
+is the corresponding entity number, to which the load is applied (for example
+a side or a surface number). The entity numbering is element dependent and
+is described in element specific sections. The applied loads must be
+of proper type (boundary load type), otherwise error is generated.
+
+The support for element insertion and removal during the analysis is provided. One can specify optional time function (identified by its id using \param{activityltf} parameter). The nonzero value of this time function indicates, whether the element is active (nonzero value, the default) or inactive (zero value) at particulat solution step. Tested for structural and transport elements. This feature allows considering temperature evolution of layered casting of concrete, where certain layers needs to be inactive before they are cast. See a corresponding example in oofem
+tests how to enforce hydrating material model, boundary conditions and element activity acting concurrently.
+
+Orientation of local coordinates can be specified using \param{lcs} array. This array contains six numbers,
+where the first three numbers represent a directional vector of local
+x-axis, and the next three numbers represent a directional vector of local
+y-axis. The local z-axis is determined using the vector product. The \param{lcs} array on the element is particularly useful for modeling of orthotropic materials which follow the element orientation. On a beam or truss element, the \param{lcs} array has no effect and the 1D element orientation is aligned with the global $xx$ component.
+
+\Pmode{
+The \param{remote} forces the element to be remote element. Remote
+element does not contribute to local partition governing equation.
+They are introduced in order to implement band of elements involved
+in computation of nonlocal variables (see fig. \ref{nodecut-nlm} illustrating
+this approach for node-cut partitioning). They role is to provide
+local mirror of corresponding remote partition element integration point values which undergo
+nonlocal averaging on local partition.
+%This mirroring will lead to
+%minimized communication pattern when exchanging remote element data,
+%because values are transferred only once, instead of fine grain
+%communication when each local element possibly requests its remote
+%data over network.
+If not used, element is assumed to be local partition element.
+When \param{remote} is used, the \param{partitions} parameter should
+contain remote partition number, where
+corresponding element is local (this array should have size equal to one).
+}
+
+
+Available material models, their outline and
+corresponding parameters are described in separate \textbf{Element Library Manual.}
+
+
+\section{Set records}
+\label{_SetRecords}
+
+Sets specify regions of the geometry as a combination of volumes, surfaces, edges, and nodes.
+The main usage of sets are to connect regions of elements to a given cross section or apply a boundary condition, though sets can be used for many other things as well.
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{Set}}{\componentNum}
+  \recentry{}{\optField{elements}{ia} \optField{elementranges}{rl} \optional{allElements}}
+  \recentry{}{\optField{nodes}{ia} \optField{noderanges}{rl} \optional{allNodes}}
+  \recentry{}{\optField{elementboundaries}{ia} \optField{elementedges}{ia}}
+\end{record}
+
+Volumes (elements) and nodes can be specified using either a list, \param{elements}, \param{nodes}, or with a range list \param{elementranges}, \param{noderanges}.
+Edges \param{elementedges}, and surfaces \param{elementboundaries}, are specified in a interleaved list, every other number specifying the element, and edge/surface number (the total length of the list being twice the number of surfaces/edges).
+The internal numbering of edges/surfaces is available in the \textbf{Element Library Manual}.
+
+Note that edge loads (singular loads given in ``newton per length'' (or equivalent), should be applied to \param{elementedges}, surface loads ``newton per area'' on \param{elementboundaries}, and bulk loads ``newton per volume'' on \param{elements}.
+
+Example 1: A deadweight (gravity) load would be applied to the \param{elements} in a set, while a distributed line load would be applied to the midline ``edge'' of the beam element, thus should be applied to a \param{elementedges} set. In the latter case, the midline of the beam is defined as the first (and only) ``edge'' of the beam.
+
+Example 2: Axisymmetric structural element analysis: A deadweight load would be applied to \param{elements} in a set. A external pressure would be defined as a surface load an be applied to the \param{elementboundaries} in a set. The element integrates the load (analytically) around the axis, so the load would still count as a surface load.
+
+
+\section{Cross section records}
+\label{_CrossSectionRecords}
+These records specify a cross section model descriptions. The general format is
+following:
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeyword{CrossSectType}}{\componentNum}
+\end{record}
+
+The order of particular cross section records is optional, cross section model number is determined by \componentNum\ parameter.
+The numbering should start from one and should end at n, where n is the number of records.
+
+The crossSectType keyword can be one from following possibilities
+\begin{itemize}
+\item 
+Integral cross section with constant properties\\
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{SimpleCS}}{\optField{thick}{rn} \optField{width}{rn} \optField{area}{rn}}
+  \recentry{}{\optField{iy}{rn} \optField{iz}{rn} \optField{ik}{rn}}
+  \recentry{}{\optField{shearareay}{rn} \optField{shearareaz}{rn} \field{beamshearcoeff}{rn}}
+\end{record}\\
+Represents integral type of cross section model. In current
+implementation, such cross section is described using cross section
+thick (\param{thickVal}) and width (\param{widthVal}). For some
+problems (for example 3d), the corresponding volume and cross section dimensions are
+determined using element geometry, and then you can omit some (or all) parameters (refer to documentation of individual elements for required cross section properties). Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
+inertia moment along y and z axis and torsion inertia moment. Parameter \param{beamshearcoeff} allows to set shear correction factor, or equivalent 
+shear areas (\param{shearareay} and \param{shearareaz} parameters) can be provided. 
+These cross section properties are assumed to be defined in local coordinate system of element.\\
+
+\item
+Integral cross section with variable properties\\
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{VariableCS}}{\optField{thick}{expr} \optField{width}{expr} \optField{area}{expr}}
+  \recentry{}{\optField{iy}{expr} \optField{iz}{expr} \optField{ik}{expr}}
+  \recentry{}{\optField{shearareay}{expr} \optField{shearareaz}{expr} }
+\end{record}\\
+Represents integral type of cross section model, where individual cross section parameters can be expressed as an arbitrary function of global coordinates x,y,z. Similar to SimpleCS, for some problems (for example 3d), the corresponding volume and cross section dimensions are
+determined using element geometry, then you can omit many (or some) parameters (refer to documentation of individual elements for required cross section properties). 
+Parameter \param{area} allows to set cross section area, parameters \param{iz}, \param{iz}, and \param{ik} represent 
+inertia moment along y and z axis and torsion inertia moment. Parameters (\param{shearareay} and \param{shearareaz} determine shear area, which is required by beam and plate elements. All cross section properties are assumed to be defined in local coordinate system of element.\\
+
+\item
+Layered cross section \\
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{LayeredCS}}{\field{nLayers}{in}}
+  \recentry{}{\field{LayerMaterials}{ia}}
+  \recentry{}{\field{Thicks}{ra} \field{Widths}{ra}}
+  \recentry{}{\field{mid\-Surf}{rn}}
+\end{record}\\
+Represents the layered cross section model, based on
+geometrical hypothesis, that cross sections remain planar after
+deformation. Number of layers is
+determined by \param{nLayers} parameter. Materials for each
+layer are specified by \param{LayerMaterials} array. For each layer is
+necessary to input
+geometrical characteristic, thick - using \param{Thicks} array, and
+width - using
+\param{Widths} array. Position of mid surface is determined by its
+distance from
+bottom of cross section using \param{mid\-Surf} parameter (normal and
+momentum forces are then computed with regard to it's position).
+Elements using this cross section model must implement layered cross
+section extension. For information see element library manual.
+\item
+Fibered cross section\\
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{FiberedCS}}{\field{nfibers}{in} \field{fibermaterials}{ia}}
+  \recentry{}{\field{thicks}{ra} \field{widths}{ra} \field{thick}{rn} \field{width}{rn}}
+  \recentry{}{\field{fiberycentrecoords}{ra} \field{fiberzcentrecoords}{ra}}
+\end{record}\\
+Cross section represented as a set of rectangular fibers. It is based on
+geometrical hypothesis, that cross sections remain planar after
+deformation (3d generalization of layered approach for beams).
+Paramater \param{nfibers} determines the number of fibers that together form the overall cross section.
+The model requires to specify a material model corresponding to particular fiber using \param{fibermaterials} array. This array should contain for each fibre corresponding material model number (the material model specified on element level has no meaning in this particular case).
+\textbf{The geometry of cross section is determined from fiber dimensions and fiber positions, all input in local coordinate system of the beam (yz plane).} The thick and width of each fiber are determined using \param{thicks} and \param{widths} arrays. The overall thick and width are specified using parameters \param{thick} and \param{width}. Positions of particular fibers are specified by providing coordinates of center of each fiber using \param{fiberycentrecoords} array for y-coordinates and \param{fiberzcentrecoords} array for z-coordinates.
+%%\item \entKeywordInst{HeatCS} \field{thick}{rn}
+%%\field{width}{rn}\\
+%%Represents cross section abstraction for heat transfer problems.
+%%The input parameters are: thick - determined using \param{thick} parameter
+%%and width - determined using \param{width} parameter of cross section.
+
+\item
+Warping cross section \\
+\begin{record}[0.9\textwidth]
+\recentry{\entKeywordInst{WarpingCS}}{\field{WarpingNode}{in}}
+\end{record}\\
+Represents the cross section for Free warping analysis, see section \ref{FreeWarping}. The \param{WarpingNode} parametr defines the number of external node with prescribed boundary condition which corresponds to the relative twist of warping cross section.
+
+\end{itemize}
+
+\section{Material type  records}
+\label{_MaterialTypeRecords}
+These records specify a material model  description. The general format is
+following:
+
+\noindent
+\begin{record}
+  \recentry{\entKeyword{MaterialType}}{\componentNum\ \field{d}{rn}}
+\end{record}
+
+The order of particular material records is optional, the material number is determined by \componentNum\ parameter.
+The numbering should start from one and should end at n, where n is the number of records.
+Material density is compulsory parameter and it's value is given by
+\param{d} parameter.
+
+Available material models, their outline and
+corresponding parameters are described in separate \textbf{Material Library Manual}.
+
+\section{Nonlocal barrier records}
+\label{_NonlocalBarrierRecords}
+Nonlocal material models of integral type are based on replacement of
+certain suitable local quantity in local constitutive law by their
+nonlocal counterparts, that are obtained as weighted average over
+some characteristic volume. The weighted average is computed as a sum
+of a remote value multiplied by weight function value. The weight
+function typically depend on a distance between remote and receiver
+points and decreases with increasing distance. In some cases, it is
+necessary to disregard mutual interaction between some points (for
+example if they are on the opposite sides of a thin notch, which
+prevents the nonlocal interactions to take place). The barriers are
+the way how to introduce these constrains. The barrier represent a
+curve (in 2D) or surface (in 3D). When the line connecting receiver and
+remote point intersects a barrier, the barriers is activated and the
+corresponding interaction is not taken into account.
+
+Currently, the supported barrier types are following:
+\begin{itemize}
+\item
+  Polyline barrier
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{polylinebarrier}}{\componentNum\ \field{vertexnodes}{ia}}
+  \recentry{}{\optField{xcoordindx}{in} \optField{ycoordindx}{in}}
+\end{record}\\
+This represents a polyline barrier for 2D problems. Barrier is a
+polyline, defined as a sequence of nodes representing vertices.
+The vertices are specified using parameter \param{vertexnodes} array,
+which contains the node numbers. The optional parameters
+\param{xcoordindx} and \param{ycoordindx} allow to select the plane
+(xy, yz, or xz), where the barrier is defined. The \param{xcoordindx} is the
+first coordinate index, \param{ycoordindx} is the second. The default values
+are 1 for \param{xcoordindx} and 2 for \param{ycoordindx}, representing barrier in xy plane.
+\item Symmetry barrier
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{symmetrybarrier}}{\componentNum\ \field{origin}{ra}}
+  \recentry{}{\field{normals}{ra} \field{activemask}{ia}}
+\end{record}\\
+Implementation of symmetry barier, that allows to specify up to three planes (orthogonal ones) of symmetry.
+This barrier allows to  model the symmetry of the averaged field on the boundary without
+the need of modeling the other part of structure across the plane of symmetry.
+It is based on modifying the integration weights of source points to take into account
+the symmetry.
+The potential symmetry planes are determined by specifying orthogonal right-handed coordinate system,
+where axes represent the normals of corresponding symmetry planes.
+Parameter \param{origin} determines the origin of the coordinate system, the \param{normals} array
+contains three components of x-axis direction vector,
+followed by three components of y-axis direction vector (expressed in global coordinate system).
+The z-axis is determined from the orthogonality conditions.
+Parameter \param{activemask} allows to specify active symmetry planes; i-th nonzero value activates the symmetry barrier for plane
+with normal determined by corresponding coordinate axis (x=1, y=2, z=3).
+\end{itemize}
+
+\section{Load and boundary conditions}
+\label{_LoadBoundaryInitialConditions}
+These records specify description of  boundary conditions. The general format is
+following:
+
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum}
+  \recentry{}{\field{loadTimeFunction}{in}}
+  \recentry{}{\optField{valType}{in} \optField{dofs}{ia}}
+  \recentry{}{\optField{is\-Impo\-sed\-Ti\-me\-Fun\-ction}{in}}
+\end{record}
+
+The order of particular  records is optional, boundary condition number is determined by \componentNum\ parameter.
+The numbering should start from one and should end at n, where n is the number of records.
+Time function value (given by \param{loadTimeFunction} parameter) is a multiplier, using which
+each  component (value of loading or value of boundary condition)
+describes its time variation.
+The optional parameter \param{valType} allows to determine the
+physical meaning of bc value, which is sometimes required. Supported
+values are (1 - temperature, 2 - force/traction,
+3 - pressure, 4 - humudity, 5 - velocity, 6 - displacement).
+Another optional parameter \param{dofs} is used to determine which dofs the boundary condition should act
+upon. It is not relevant for all BCs..
+
+The nonzero value of \param{isImposedTimeFunction} time function
+indicates that given boundary condition is active, zero value
+indicates not active boundary condition in given time (the bc does not
+exist). By default, the boundary condition applies at any time.
+
+
+Currently, EntType keyword can be one from
+\begin{itemize}
+\item Dirichlet boundary condition
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{BoundaryCondition}}{\field{prescribedvalue}{rn}}
+  \recentry{}{\optField{d}{rn}}
+\end{record}
+
+Represents boundary condition.
+Prescribed value is specified using \param{prescribedvalue} parameter.
+The physical meaning of value is fully determined by corresponding DOF.
+Optionally, the prescribed value can be specified using \param{d}
+parameter. It is introduced for compatibility reasons. If
+\param{prescribedvalue} is specified, then \param{d} is ignored.
+
+\item Prescribed gradient boundary condition (Dirichlet type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PrescribedGradient}}{\field{gradient}{rm}}
+  \recentry{}{\optField{cCoords}{ra}}
+\end{record}
+
+Prescribes $ v_i = d_{ij}(x_j-\bar{x}_j) $ or $ s = d_{1j}(x_j - \bar{x}_j) $
+where $ v_i $ are primary unknowns, $x_j$ is the coordinate of the node, $\bar x$ is \param{cCoords} and $d$ is \param{gradient}.
+The parameter \param{cCoords} defaults to zero.
+This is typical boundary condition in multiscale analysis where $ d = \partial_x s$
+would a macroscopic gradient at the integration point, i.e. this is a boundary condition for prolongation.
+It is also convenient to use when one wants to test a arbitrary specimen for shear. 
+
+\item Mixed prescribed gradient / pressure boundary condition (Active type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{MixedGradientPressure*}}{\field{devGradient}{ra}}
+  \recentry{}{\field{pressure}{rn}}
+  \recentry{}{\optField{cCoord}{ra}}
+\end{record}
+
+All boundary conditions of ensures that the deviatoric gradient and pressure is at least weakly fullfilled on the prescribed domain. They are used for computational homogenization of incompressible flow or elasticity problems.
+
+\item Mixed prescribed gradient / pressure boundary condition (Weakly periodic type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{MixedGradientPressureWeaklyPeriodic}}{\field{order}{rn}}
+\end{record}
+
+Prescribes a periodic constant (unknown) stress tensor along the specified boundaries. For \param{order} set to 1, one obtains the same results as the Neumann boundary condition.
+
+
+\item Mixed prescribed gradient / pressure boundary condition (Neumann type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{MixedGradientPressureNeumann}}{}
+\end{record}
+
+Prescribes a constant (unknown) deviatoric stress tensor along the specified boundaries.
+Additional unknowns appears, $\tens{\sigma}_\dev$, which is handled by the boundary condition itself (no control from the input file).
+The input devGradient is weakly fulfilled (homogenized over the elementsides). As with the the Dirichlet type, the volumetric gradient is free.
+This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. In that case, the element sides should cover the entire RVE boundary.
+It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
+Symmetry is not assumed, so rigid body rotations are removed, but translations need to be prescribed separately.
+
+\item Mixed prescribed gradient / pressure boundary condition (Dirichlet type)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{MixedGradientPressureDirichlet}}{}
+\end{record}
+
+Prescribes $ v_i = d_{\dev,ij}(x_j-\bar{x}_j) + d_\vol(x_i-\bar{x}_i)$, and a pressure $p$.
+where $ v_i $ are primary unknowns, $x_j$ is the coordinate of the node, $\bar x$ is \param{cCoords} and $d_\dev$ is \param{devGradient}.
+The parameter \param{cCoords} defaults to zero.
+An additional unknown appears, $d_\vol$, which is handled by the boundary condition itself (no control from the input file).
+This unknown is in a way related to the applied pressure.
+This is useful in multiscale computations of RVE's that experience incompressible behavior, typically fluid problems. 
+It is also convenient to use when one wants to test a arbitrary specimen for shear, with a free volumetric part (in which case the pressure is set to zero).
+
+
+
+\item Nodal fluxes (loads)
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{NodalLoad}}{\field{components}{ra}} \recentry{}{\optField{cstype}{in}}
+\end{record}
+
+Concentrated nodal load. The components of nodal load vector
+are given by \param{components} parameter. The size of this vector
+corresponds to a total number of nodal DOFs, and i-th value
+corresponds to i-th DOF in associated dof manager. The load can be defined in global coordinate system (\param{cstype} =
+0) or in entity - specific local coordinate system
+(\param{cstype} = 1, default).
+\item \mbox{}
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PrescribedTractionPressureBC}}{}
+\end{record}
+
+Represents pressure boundary condition (of Dirichlet type) due to
+prescribed tractions.
+In CBS algorithm formulation the prescribed traction
+boundary condition leads indirectly to pressure boundary condition in
+corresponding nodes. This boundary condition implements this pressure
+bc. The value of bc is determined from applied tractions, that  should be specified on element edges/surfaces using
+suitable boundary loads.
+
+\item Linear constraint boundary condition
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{LinearConstraintBC}}{\field{weights}{ra}} 
+  \recentry{}{\optField{weightsLtf}{ia}}
+  \recentry{}{\field{dofmans}{in}} \recentry{}{\field{dofs}{in}} 
+  \recentry{}{\field{rhs}{rn}} \recentry{}{\optField{rhsLtf}{in}}
+  \recentry{}{\field{lhstype}{ia}} \recentry{}{\field{rhsType}{ia}}
+\end{record}
+
+This boundary condition implements a linear constraint in the form $\sum_i w_ir_i = c$,
+where $r_i$ are unknowns related to DOFs determined by \param{dofmans} and \param{dofs}, the weights are determined by \param{weights} and \param{weightsLtf}. The constant is determined by \param{rhs} and \param{rhsLtf} parameters. This boundary condition is introduced as additional stationary condition using Lagrange multiplier, which is an additional degree of freedom introduced by this boundary condition.
+
+The individual DOFs are determined using dof manager numbers (\param{dofmans} array) and corresponding DOF indices (\param{dofs}). The weights corresponding to participating DOFs are specified using \param{weights} array. The weights are multiplied by value returned by load time function, associated to individual weight using optional \param{weightsLtf} array. By default, all weights are set to 1. The constant $c$ is determined by \param{rhs} parameter and it is multiplied by the value of load time function, specified using \param{rhsLtf} parameter, or by 1 by default. The characteristic component, to which this boundary condition contributes must be identified using \param{lhstype} and \param{rhsType} parameters, values of which are corresponding to CharType enum. The left hand side contribution is assembled into terms identified by \param{lhstype}. The rhs contribution is assembled into the term identified by \param{rhsType} parameter. Note, that multiple values are allowed, this allows to select all variants of stifness matrix, for example. Note, that the size of \param{dofmans}, \param{dofs}, \param{weights}, \param{weightsLtf} arrays should be equal.
+
+\item InteractionBoundaryCondition \label{interactionbc}
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionBoundaryCondition}}{}
+\end{record}
+
+Is a special boundary condition prescribed on InteractionPFEMParticles~\ref{interactionparticle} in the PFEM part of the FluidStructureProblem. This sort of particles is regarded as it would have prescribed velocities, but the values change dynamically, as the solid part deforms. The velocities are obtained from coupled structural nodes.
+
+\end{itemize}
+\paragraph{Body loads}
+\begin{itemize}
+\item Volume flux (load)
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{DeadWeight}}{\field{components}{ra}}
+\end{record}\\
+Represents dead weight loading applied on element volume (for
+structural elements). For transport problems, it represents the
+internal source, i.e. the rate of (heat) generated per unit volume.
+The magnitude of load for specific i-th DOF is computed as product of material density,
+corresponding volume and i-th member of \param{components} array.
+\item Structural temperature load
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{StructTemperatureLoad}~}{\field{components}{ra}}
+\end{record}
+
+Represents temperature loading imposed to some elements. The members of
+\param{components} array represent the change of temperature (or change
+of temperature gradient) corresponding to
+specific element strain components. See element library manual for details.
+
+\item Structural eigenstrain load
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{StructEigenstrainLoad}~}{\field{components}{ra}}
+\end{record}
+Prescribes eigenstrain (or stress-free strain) to a structural element. The array of \param{components} is defined in the global coordinate system. The number of components corresponds to a material mode, e.g. plane stress has three components and 3D six. Periodic boundary conditions can be imposed using eigenstrains and master-slave nodes. Consider decomposition of strain into average and fluctuating part
+\begin{equation}
+\tens{\strain}(\vect{x}) = \langle \tens{\strain} \rangle + \tens{\strain}^*(\vect{x})
+\end{equation}
+where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the domain and the solution gives the fluctuating part $\tens{\strain}^*(\vect{x})$. Master-slave nodes have to interconnect opposing boundary nodes of a unit cell.
+
+
+\end{itemize}
+\paragraph{Boundary loads}
+\begin{itemize}
+\item Constant edge fluxes (load)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{ConstantEdgeLoad}}{}
+  \recentry{}{\field{loadType}{in}}
+  \recentry{}{\field{components}{ra}}
+  \recentry{}{\optField{dofexcludemask}{ia}}
+  \recentry{}{\optField{csType}{in}}
+  \recentry{}{\optField{properties}{dc}}
+  \recentry{}{\optField{propertytf}{dc}}
+\end{record}
+\item Constant surface fluxes (load)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{ConstantSurfaceLoad}}{}
+  \recentry{}{\field{loadType}{in}}
+  \recentry{}{\field{components}{ra}}
+  \recentry{}{\optField{dofexcludemask}{ia}}
+  \recentry{}{\optField{csType}{in}}
+  \recentry{}{\optField{properties}{dc}}
+  \recentry{}{\optField{propertytf}{dc}}
+\end{record}
+
+Represent constant edge/surface loads or boundary conditions.
+Parameter \param{loadType} distinguishes the type of boundary condition. Supported values are specified in bctype.h:
+\begin{itemize}
+\item \param{loadType} = 2 prescribed flux input (Neumann boundary condition),
+\item \param{loadType} = 3 uniform distributed load or the convection (Newton) BC. Parameter \param{components} contains the
+environmental values (temperature of the environment) corresponding to
+element unknowns, and \param{properties} dictionary should contain
+value of transfer (convection) coefficient (assumed to be a constant) under the key 'a',
+\item \param{loadType} = 7 specifies radiative boundary condition (Stefan-Boltzmann). It requires to specify emmisivity $\varepsilon\in\langle 0,1\rangle$, the \param{components} array contains the environmental values (temperature of the environment). Default units are Celsius. Optional parameter \param{temperOffset} = 0 can be used to calculate in Kelvin.
+\end{itemize}
+
+If the boundary condition corresponds to distributed force load, the \param{components} array contains components of distributed load corresponding to element unknowns.
+The load is specified for all DOFs of object to which is associated.
+For some types of boundary conditions the zero value of load does not mean that the load is not applied (Newton's type of bc, for example).
+Then some mask, which allows to exclude specific dofs is necessary.
+The \param{dofexcludemask} parameter is introduced to alow this.
+It should have the same size as \param{components} array, and by
+default is filled with zeroes. If some value of dofExcludeMask is set
+to nonzero, then the corresponding componentArray
+is set to zero and load is not applied for this DOF.
+If the boundary condition corresponds to prescribed flux input, then
+the \param{components} array contains the components of prescribed
+input flux corresponding to element unknowns.
+
+The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time function evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
+
+The load can be defined in global coordinate system (\param{csType} =
+0, default) or in entity - specific local coordinate system
+(\param{csType} = 1).
+\item Linear edge flux (load)
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{LinearEdgeLoad}}{}
+  \recentry{}{\field{loadType}{in}}
+  \recentry{}{\field{components}{ra}}
+  \recentry{}{\optField{dofexcludemask}{ia}}
+  \recentry{}{\optField{csType}{in}}
+\end{record}
+
+Represents linear edge load. The meanings of parameters \param{csType} and \param{loadType} are the same as for
+\entKeywordInst{ConstantEdgeLoad}.
+In \param{components} array are stored load components for corresponding unknowns at the
+beginning of edge, followed by values valid for end of edge.
+The load can be defined in global coordinate system (\param{csType} = 0, default) or in entity - specific local coordinate system
+(\param{csType} = 1).
+\item InteractionLoad
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{InteractionLoad}}{\field{ndofs}{in}}
+  \recentry{}{\field{loadType}{in}}
+  \recentry{}{\field{Components}{ra}}
+  \recentry{}{\optField{csType}{in}}
+  \recentry{}{\field{coupledparticles}{ia}}
+\end{record}
+
+Represents a fluid pressure induced load in the solid part of the FluidStructureProblem. 
+The meanings of parameters \param{ndofs},
+\param{csType}, and \param{loadType} are the same as for
+\entKeywordInst{LinearEdgeLoad}. In \param{Components}
+array are stored load components for corresponding unknowns at the
+beginning of edge (\param{ndofs} values), followed by values valid for
+end of edge (\param{ndofs} values). The load should be defined in global 
+coordinate system (\param{csType} = 0) as it acts in normal direction of the edge.
+Array \param{coupledparticles} assign PFEMParticles from the fluid part of the problem 
+providing fluid pressure.
+
+\end{itemize}
+
+
+\section{Initial conditions}
+\label{_InitialConditions}
+These records specify description of initial conditions. The general format is
+following:
+
+\noindent
+\begin{record}
+  \recentry{\entKeywordInst{InitialCondition}}{\componentNum}
+  \recentry{}{\field{conditions}{dc}}
+\end{record}
+The order of particular  records is optional, load, boundary or initial condition number is determined by \componentNum\ parameter.
+The numbering should start from one and should end at n, where n is the number of records.
+Initial parameters are listed in \param{conditions} dictionary using keys followed by their initial values.
+Now 'v' key represents velocity and 'a' key represents acceleration.
+
+
+
+\section{Time functions records}
+\label{_TimeFunctionsRecords}
+These records specify description of time functions, which generally describe
+time variation of components during solution. The  general format is
+following:
+
+\noindent
+\begin{record}
+  \recentry{\entKeyword{TimeFunctType}}{\componentNum}
+  \recentry{}{\optField{initialValue}{rn}}
+\end{record}
+
+The order of these records is optional, time function number is determined by \componentNum\ parameter.
+The \param{initialValue} parameter allows to control the way, how increment of receiver is evaluated for the first solution step.
+This first solution step increment is evaluated as the difference of value of receiver at this first step and given initial value (which is by default set to zero).
+The increments of receiver in subsequent steps are computed as a difference between receiver evaluated at given solution step and in previous step.
+
+The numbering should start from one and should end at n, where n is the number of records.
+
+Currently, TimeFunctType keyword can be one from
+\begin{itemize}
+\item Constant function
+
+\noindent
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{ConstantFunction}}{\field{f(t)}{rn}}
+\end{record}
+
+Represents the constant time function, with value \param{f(t)}.
+
+\item Peak function
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PeakFunction}}{\field{t}{rn}}
+  \recentry{}{\field{f(t)}{rn}}
+\end{record}
+
+Represents peak time function. If time is equal to \param{t}
+value, then the value of time function is given by \param{f(t)} value,
+otherwise zero value is returned.
+
+\item Piecewise function
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{PiecewiseLinFunction}}{[\field{nPoints}{in} {\field{t}{ra} \field{f(t)}{ra}}] [ \field{datafile}{"string"}]}
+\end{record}
+
+Represents the piecewise time function. The particular time values in
+\param{t} array should be sorted according to time scale. Corresponding time
+function values are in \param{f(t)} array. Value for time, which
+is not present in \param{t} is computed using liner interpolation scheme.
+Number of time-value pairs is in \param{nPoints} parameter.
+
+The second alternative allows reading input data from an external ASCII file. A hash commented line (\#) is 
+skipped during reading. File name should be eclosed with " ".
+
+
+\item Heaviside-like time function
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{HeavisideLTF}}{\field{origin}{rn}}
+  \recentry{}{\field{value}{rn}}
+\end{record}
+
+Up to time, given by
+parameter \param{origin}, the value of time function is zero. If time
+greater than \param{origin} parameter, the value is
+equal to parameter \param{value} value.
+\item User defined
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{UsrDefLTF}}{\field{f(t)}{expr}}
+  \recentry{}{\optField{dfdt(t)}{expr}}
+  \recentry{}{\optField{d2fdt2(t)}{expr}}
+\end{record}
+
+Represents user defined time function.
+The expressions can depend on ``t'' parameter, for which actual time will be substituted and
+expression evaluated. The function is defined using \param{f(t)} parameter, and optionally, its first and second time derivatives using \param{dfdt(t)} and \param{d2fdt2(t)} parameters.
+The first and second derivatives may be required, this depend on type of analysis.
+
+Very general, but relatively slow.
+\end{itemize}
+
+\section{Xfem manager record and associated records}
+\label{_XFEMManagerRecords}
+This record specifies the number of enrichment items and simulation options
+common for all enrichment items. Functions used for enrichment (e.g. Heaviside,
+abs or branch functions) are not specified here, they are specified for each
+enrichment item separately. The same holds for the geometrical representation of
+each enrichment item (e.g. a polygon line or a circle). Currently, OOFEM
+supports XFEM simulations of cracks and material interfaces in 2D. The input
+format for the XFEM manager is:\\
+\begin{record}
+  \recentry{\entKeywordInst{XfemManager}}{\field{numberofenrichmentitems}{in}}
+  \recentry{}{\field{numberofgppertri}{in}}
+  \recentry{}{\field{debugvtk}{in}}
+  \recentry{}{\field{vtkexport}{in}}
+  \recentry{}{\field{exportfields}{in}}
+\end{record}
+where \param{numberofenrichmentitems} represents number of enrichment items,
+\param{numberofgppertri} denotes the number of Gauss points in each subtriangle
+of a cut element (default 12) and \param{debugvtk} controls if additional debug
+vtk files should be written (1 activates the option, 0 is default).
+
+The specification of an enrichment item may consist of several lines, see e.g.
+the test \textit{sm/xFemCrackValBranch.in}. First, the enrichment item type is
+specified together with some optional parameters according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum}
+  \recentry{}{\field{enrichmentfront}{in}}
+  \recentry{}{\field{propagationlaw}{in}}
+\end{record}
+where \param{enrichmentfront} specifies an enrichment front (we may for example
+employ branch functions at a crack tip and Heaviside enrichment along the rest
+of the crack, hence the ``front'' of the enrichment is treated separately) and
+\param{propagationlaw} specifies a rule for crack propagation (this feature is
+still highly experimental though). Specification of an \param{enrichmentfront}
+and a \param{propagationlaw} is optional.
+
+The next line specifies the enrichment function to be used:\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum}
+\end{record}
+
+This is followed by a line specifying the geometric description (e.g. a polygon
+line or a circle) according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra attributes}
+\end{record}
+where the number and type of extra attributes to specify will vary depending on the
+geometry chosen, e.g. center and radius for a circle or a number of points for a
+polygon line.
+
+If an enrichment front was specified previously, the type and properties of the
+enrichment front are specified on the next line according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra attributes}
+\end{record}
+
+If a propagation law was specified previously, it's type and properties are also
+specified on a separate line according to\\
+\noindent
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra attributes}
+\end{record}
+
+
+\chapter{Appendix}
+\section{Sparse linear solver parameters}
+\label{sparselinsolver}
+The sparselinsolverparams field has the following general syntax:\\
+\begin{record}
+  \recentry{\hspace{20mm}}{\optField{lstype$^M$}{in}}
+  \recentry{}{\optField{smtype}{in}}
+  \recentry{}{\field{solverParams$^M$}{string}}
+\end{record}
+where parameter \param{lstype} allows to select the solver for the linear system of
+equations. Currently supported values are 0 (default) for a direct solver
+(ST\_Direct), 1 for an Iterative Method Library (IML) solver (ST\_IML),
+2 for a Spooles direct solver, 3 for Petsc
+library family of solvers, and 4 for a DirectSparseSolver (ST\_DSS).
+Parameter \param{smtype} allows to select the sparse matrix storage
+scheme. The scheme should be compatible with the solver type.
+Currently supported values (marked as ``id'') are summarized in table
+(\ref{linsolvstoragecompattable}). The 0 value is default and selects
+the symmetric skyline (SMT\_Skyline). Possible storage formats
+include unsymmetric skyline (SMT\_SkylineU),
+compressed column (SMT\_CompCol), dynamically growing compressed
+column (SMT\_DynCompCol), symmetric compressed column
+(SMT\_SymCompCol), spooles library storage format (SMT\_SpoolesMtrx),
+PETSc library matrix representation (SMT\_PetscMtrx, a sparse
+serial/parallel matrix in AIJ format), and DSS compatible matrix
+representations (SMT\_DSS\_*).
+The allowed \param{lstype} and \param{smtype} combinations are
+summarized in the table (\ref{linsolvstoragecompattable}), together
+with solver parameters related to specific solver.
+
+\begin{table}[ht]
+\begin{center}
+%%\scalebox{0.50}{
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
+\hline
+Storage format & id & \multicolumn{5}{c|}{Sparse solver, \param{lstype}} \\
+\hline
+& \param{smtype} & \tiny{Direct (0)} &\tiny{IML (1)} &\tiny{Spooles (2)}& \tiny{Petsc (3)}& \tiny{DSS (4)}& \tiny{MKLPardiso (6)}& \tiny{SuperLU\_MT (7)}\\
+&                &                   &               &                  &                 &               & \tiny{Pardiso.org(8)}&                       \\
+
+\hline
+\small{SMT\_Skyline}       & 0&+&+& & & & &\\
+\small{SMT\_SkylineU}      & 1&+&+& & & & & \\
+\small{SMT\_CompCol}       & 2& &+& & & &+&+\\
+\small{SMT\_DynCompCol}    & 3& &+& & & & & \\
+\small{SMT\_SymCompCol}    & 4& &+& & & & & \\
+\small{SMT\_DynCompRow}    & 5& &+& & & & & \\
+\small{SMT\_SpoolesMtrx}   & 6& & &+& & & & \\
+\small{SMT\_PetscMtrx }    & 7& & & &+& & & \\
+\small{SMT\_DSS\_sym\_LDL} & 8& & & & &+ & &\\
+\small{SMT\_DSS\_sym\_LL}  & 9& & & & &+ & &\\
+\small{SMT\_DSS\_unsym\_LU}&10& & & & &+ & &\\
+\hline
+\end{tabular}
+%%}
+\caption{Solver and storage scheme compatibility.}
+\label{linsolvstoragecompattable}
+\end{center}
+\end{table}
+
+The solver parameters in \param{solverParams} depend on the solver
+type and are summarized in table (\ref{sparsesolverparams}).
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+Solver type & id & Solver parameters/notes \\
+\hline
+ST\_Direct  &0&\\
+ST\_IML     &1& \optField{stype}{in} \field{lstol}{rn} \field{lsiter}{in}\field{lsprecond}{in}\\
+            & & \optField{precondattributes}{string}\\
+            & & Included in OOFEM, requires to compile with USE\_IML\\
+ST\_Spooles &2& \optField{msglvl}{in} \optField{msgfile}{s}\\
+            & & http://www.netlib.org/linalg/spooles/spooles.2.2.html\\
+ST\_Petsc   &3& See Petsc manual, for details\footnotemark\\
+ST\_DSS     &4& Sparse direct solver, included in OOFEM\\
+            & & Requires to compile with USE\_DSS\\
+ST\_MKLPardiso&6&Requires Intel MKL Pardiso \\
+ST\_SuperLU\_MT&7&SuperLU for shared memory machines\\
+               & &http://crd-legacy.lbl.gov/~xiaoye/SuperLU/\\
+ST\_PardisoProjectOrg&8&Requires Pardiso solver(http://www.pardiso-project.org/)\\
+\hline
+\end{tabular}
+\caption{Solver parameters.}
+\label{sparsesolverparams}
+\end{center}
+\end{table}
+\footnotetext[2]{User can set several run-time options, e.g.,
+     \mbox{-ksp\_type}~$[$cg, gmres, bicg, bcgs$]$
+     \mbox{-pc\_type}~$[$jacobi, bjacobi,none,ilu,...$]$
+     \mbox{-ksp\_monitor} \mbox{-ksp\_rtol}~$<$rtol$>$ \mbox{-ksp\_view} \mbox{-ksp\_converged\_reason}.
+     These options will override those that are default (PETSC KSPSetFromOptions() routine is called after any other customization
+     routines).}
+The \param{stype} allows to select particular iterative solver from IML library, currently supported values are 0 (default) for Conjugate-Gradient solver, 1 for GMRES solver. Parameter \param{lstol} represents the maximum value of residual after the
+final iteration and the \param{lsiter} is maximum number of iteration for iterative solver.
+The \param{precondattributes} parameters contains the optional
+preconditioner parameters.
+The \param{lsprecond} parameter determines the type of preconditioner to be
+used. The possible values of \param{lsprecond} together with supported
+storage schemes and their descriptions are summarized in table
+(\ref{precondtable}).
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Precond type & id & Compatible storage & Description and parameters \\
+\hline\hline
+IML\_VoidPrec &0& all & No preconditioning\\
+\hline
+IML\_DiagPrec &1& all & Diagonal preconditioning\\
+\hline
+IML\_ILUPrec  &2& SMT\_CompCol & Incomplete LU Decomposition\\
+              & & SMT\_DynCompCol&with no fill up\\
+\hline
+IML\_ILUPrec  &3& SMT\_DynCompRow & Incomplete LU (ILUT) with\\
+              & &                 &  fillup. \\
+              & &                 & The \param{precondattributes} are:\\
+              & &                 & \optField{droptol}{rn} \optField{partfill}{in}.\\
+              & &                 & \param{droptol} dropping tolerance\\
+              & &                 & \param{partfill} level of fill-up\\
+\hline
+IML\_ICPrec   &4& SMT\_SymCompCol&Incomplete Cholesky\\
+              & & SMT\_CompCol   &with no fill up\\
+\hline
+\end{tabular}
+\caption{Preconditioning summary.}
+\label{precondtable}
+\end{center}
+\end{table}
+
+\section{Eigen value solvers}
+\label{eigensolverssection}
+The eigensolverparams field has the following general syntax:\\
+\begin{record}
+  \recentry{\hspace{20mm}}{\optField{stype$^M$}{in}}
+  \recentry{}{\optField{smtype}{in}}
+  \recentry{}{\field{solverParams$^M$}{string}}
+\end{record}
+where parameter \param{stype} allows to select solver type. Parameter \param{smtype} allows to select sparse matrix storage
+scheme. The scheme should be compatible with solver type. Currently supported values of \param{stype} are summarized in table~\ref{eigenvaluesolverparamtable}.
+
+\begin{table}[ht]
+\begin{center}
+%%\scalebox{0.50}{
+\begin{tabular}{|l|l|l|}
+\hline
+Solver type & stype id & solver parameters \\
+Subspace Iteration & 0 (default) & \\
+Inverse Iteration& 1 & \\
+SLEPc solver& 2 & requires ``smtype 7''\\
+&& see also SLEPc manual \\
+\hline
+\end{tabular}
+\caption{Eigen Solver parameters.}
+\label{eigenvaluesolverparamtable}
+\end{center}
+\end{table}
+
+
+\section{\Pmode{Dynamic load balancing parameters}}
+\label{dynamicloadbalancing}
+There are in general two basic factors causing load imbalance between individual subdomains: (i) one comming from application nature, such as switching from linear to nonlinear response in certain regions or local adaptive refinment, and (ii) external factors, caused by resourse realocation, typical for nondedicated cluster environments, where indivudual processors are shared by different applications and users, leading to time variation in allocated processing power. The load balance recovery is achieved by repartitioning of the problem domain and transferring the work (represented typically by finite elements) from one subdomain to another.
+This section describes the structure and syntax of parameters related to dynamic load balancing.
+The corresponding part of analysis record has the following general syntax:\\
+
+\noindent
+\begin{record}
+  \recentry{\hspace{20mm}}{\optField{lbflag$^M$}{in}}
+  \recentry{}{\optField{forcelb1}{in}}
+  \recentry{}{\optField{wtp}{ia}}
+  \recentry{}{\optField{lbstep}{in}}
+  \recentry{}{\optField{relwct}{rn}}
+  \recentry{}{\optField{abswct}{rn}}
+  \recentry{}{\optField{minwct}{rn}}
+\end{record}
+where the parameters have following meaning:
+\begin{itemize}
+\item \param{lbflag}, when set to nonzero value activates the dynamic load balancing. Default value is zero.
+\item \param{forcelb1} forces the load rebalancing after the first solution step, when set to nonzero value.
+\item \param{wtp} allows to activate optional load balancing plugins. At present, the only supported value is 1, that activates nonlocal plugin, necessary for nonlocal averaging to work properly when dynamic load balancing is active.
+\item \param{lbstep} rebalancing, if needed, is performed only every lbstep solution step.
+Default value is 1 (recover balance after every step, if necessary).
+\item \param{relwcr} sets relative wall-clock imbalance treshold. When achieved relative imbalance between wall clock solution time of individual processors is greater than provided treshold, the rebalancing procedure will be activated.
+\item \param{abswct} sets absolute wall-clock imbalance treshold. When achieved absolute imbalance between wall clock solution time of individual processors is greater than provided treshold, the rebalancing procedure will be activated.
+\item \param{minwct} minimum absolute imbalance to perform relative imbalance check using \param{relwcr} parameter,  otherwise only absolute check is done. Default value is 0.
+\end{itemize}
+At present, the load balancing support requires ParMETIS module to be configured and compiled.
+
+
+%
+\section{Error estimators and indicators}
+\label{errorestimators}
+The currently supported values of \param{eetype} are in table
+\ref{eetypestable}.
+\begin{itemize}
+\item
+EET\_SEI - Represents scalar error indicator.
+It indicates element error based on the value of some suitable scalar
+value (for example damage level, plastic strain level) obtained from the
+element integration points and corresponding material model.
+\item
+EET\_ZZEE - The implementation of Zienkiewicz Zhu Error
+Estimator. It requires the special element algorithms, which may not
+be available for all element types.
+
+Please note, that in the actual version, the error on the element level is evaluated using default integration rule. For example, in case of ZZ error estimator, the error (L2 or energy norm) is evaluated from the difference of computed and ``recovered'' stresses, which are approximated using the same interpolation functions as displacements). Therefore, in many cases, the default integration rule order is not sufficient and higher integration must be used on elements (consult element library manual and related NIP parameter).
+
+\item
+EET\_CZZSI - The implementation of combined criteria: Zienkiewicz Zhu Error Estimator for elastic regime and
+scalar error indicator in non-linear regime.
+\end{itemize}
+
+\begin{table}[ht]
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Error estimator/indicator & \param{eetype}\\
+\hline
+EET\_SEI & 0 \\
+EET\_ZZEE& 1 \\
+EET\_CZZSI& 2\\
+\hline
+\end{tabular}
+\caption{Supported error estimators and indicators.}
+\label{eetypestable}
+\end{center}
+\end{table}
+
+The sets of parameters (\param{errorestimatorparams} field) used to
+configure each error estimator are different
+\begin{itemize}
+\item
+EET\_SEI\\
+\begin{record}[0.9\textwidth]
+  \recentry{\hspace{2cm}}{\optField{regionskipmap}{ia}}
+  \recentry{}{\field{vartype}{in}}
+  \recentry{}{\field{minlim}{rn} \field{maxlim}{rn}}
+  \recentry{}{\field{mindens}{rn} \field{maxdens}{rn} \field{defdens}{rn}}
+  \recentry{}{\optField{remeshingdensityratio}{rn}}
+\end{record}
+\begin{itemize}
+\item \param{regionskipmap} parameter allows to skip some regions. The
+error is not evaluated in these regions and default mesh density is
+used. The size of this array should be equal to number of regions and
+nonzero entry indicates region to skip.
+\item \param{vartype} parameter determines the type of internal
+variable to be used as error indicator. Currently supported value is
+1, representing damage based indicator.
+\item If the indicator value is in range given by parameters (\param{minlim},
+ \param{maxlim}) then the proposed mesh density is linearly
+interpolated within range given by parameters (\param{mindens}, \param{maxdens}). If
+indicator value is less than value of \param{minlim} parameter then
+value of \param{defdens} parameter is used as
+required density, if it is larger than \param{maxlim} then
+\param{maxdens} is used as required density.
+\item
+\param{remeshingdensityratio} parameter determines the allowed ratio
+between proposed density and actual density.
+The remeshing is forced, whenever the actual ratio is smaller than
+this value. Default value is equal to 0.80.
+\end{itemize}
+\item
+EET\_ZZEE\\
+\begin{record}[0.9\textwidth]
+  \recentry{\hspace{2cm}}{\optField{regionskipmap}{ia}}
+  \recentry{}{\field{normtype}{in}}
+  \recentry{}{\field{requirederror}{rn}}
+  \recentry{}{\field{minelemsize}{rn}}
+\end{record}
+
+\begin{itemize}
+\item \param{regionskipmap} parameter allows to skip some regions. The
+error is not evaluated in these regions and default mesh density is
+used. The size of this array should be equal to number of regions and
+nonzero entry indicates region to skip.
+\item \param{normtype} Allows select the type of norm used in
+evaluation of error. Default value is to use L2 norm (equal to 0),
+value equal to 1 uses the energy norm.
+\item \param{requirederror} parameter determines the required error to
+obtain (in percents/100).
+\item{minelemsize} parameter allows to set minimum limit on element size.
+\end{itemize}
+\item
+EET\_CZZSI - combination of parameters for EET\_SEI and EET\_ZZEE; the
+in elastic regions are driven using EET\_SEI, the elastic are driven
+by EET\_ZZEE.
+\end{itemize}
+
+
+\section{Material interfaces}
+\label{materialinterfaces}
+The material interfaces are used to represent and track the position of
+various interfaces on fixed grids. Typical examples include free surface,
+evolving interface between two materials, etc.
+Available representations include:
+
+\begin{tabular}{|l|l|l|}
+\hline
+MI & miflag & Compatibility  \\
+\hline
+LEPlic & 0 & 2D triangular \\
+LevelSet & 1 & 2D triangular \\
+\hline
+\end{tabular}
+
+\begin{itemize}
+\item LEPlic- representation based on Volume-Of-Fluid approach; the initial distribution of VOF fractions should be specified for each element (see element manual)\\
+  \begin{record}[0.9\textwidth]
+    \recentry{}{\optField{refvol}{rn}}
+  \end{record}
+\begin{itemize}
+\item
+parameter \param{refvol} allows to set initial volume of reference fluid, then the reference volume is computed in each step and printed, so the accuracy and mass conservation can be monitored.
+\end{itemize}
+\item
+LevelSet- level set based representation\\
+\begin{record}[0.9\textwidth]
+  \recentry{}{\mbox{[\field{levelset}{ra} OR \field{refmatpolyx}{ra} \field{refmatpolyy}{ra}]}}
+  \recentry{}{\optField{lsra}{in} \optField{rdt}{rn} \optField{rerr}{rn}}
+\end{record}
+\begin{itemize}
+\item \param{levelset} allows to specify the initial level set values for all nodes directly. The size should be equal to total number of nodes within the domain.
+\item Parameters \param{refmatpolyx} and \param{refmatpolyy} allow to initialize level set by specifying interface geometry as 2d polygon. Then polygon describes the initial zero level set, and level set values are then defined as signed distance from this polygon. Positive values are on the left side when walking along polygon. The parameter \param{refmatpolyx} specifies the x-coordinates of polygon vertices, parameter \param{refmatpolyy} y-corrdinates. Please note, that level set must be initialized, either using \param{levelset} parameter or using \param{refmatpolyx} and \param{refmatpolyy}.
+\item Parameter \param{lsra} allows to select level set reinitialization algorithm. Currently supported values are 0 (no re-initialization), 1 (re-initializes the level set representation by solving $d_{\tau} = S(\phi)(1-\vert\grad d\vert)$ to steady state, default), 2 (uses fast  marching method to build signed distance level set representation).
+\item Parameters \param{rdt} \param{rerr} are used to control reinitialization algorithm for \param{lsra} = 0. \param{rdt} allows to change time step of integration algorithm and parameter \param{rerr} allows to change default error limit used to detect steady state.
+\end{itemize}
+\end{itemize}
+
+\section{Mesh generator interfaces}
+\label{meshpackages}
+The mesh generator interface is responsible to provide a link to
+specific mesh generator. The supported values of \param{meshpackage}
+parameter are
+\begin{itemize}
+\item
+MPT\_T3D:  \param{meshpackage} = 0. T3d mesh interface. Default. Supports both 1d, 2d
+(triangles) and 3d (tetrahedras) meshes. Reliable.
+\item
+MPT\_TARGE2:	\param{meshpackage} = 1. Interface to Targe2 2D
+mesh generator.
+\item
+MPT\_SUBDIVISION: \param{meshpackage}=3. Built-in subdivision algorithm. Supports triangular 2D and tetrahedral 3D meshes. Can operate in parallel mode.
+\end{itemize}
+%
+\section{Initialization modules}
+\label{InitModulesSec}
+Initialization modules allow to initialize the state variables using data 
+previously computed by external software. The number of initialization module records is specified in
+analysis record using \param{ninitmodules} parameter (see the initial part of section \ref{_AnalysisRecord}). The general format
+is the following:\\
+\begin{record}
+  \recentry{\entKeyword{EntType}}{\field{initfile}{string}}
+\end{record}
+The file name following the keyword ``initfile'' specifies
+the path to the file that contains the initialization data
+and should be given without quotes.
+
+Currently, the only supported initialization module is
+\begin{itemize}
+\item Gauss point initialization module
+
+\begin{record}[0.9\textwidth]
+  \recentry{GPInitModule}{\field{initfile}{string}}  \end{record}
+\begin{itemize}
+\item
+Each Gauss point is represented by one line in the initialization file.
+\item
+The Gauss points should be given in a specific order, based on the element number and the Gauss point number, in agreement with the mesh specified in later sections.
+\item
+Each line referring to a Gauss point should contain the following data:
+
+\begin{record}
+  \recentry{}{\field{elnum}{in} \field{gpnum}{in} \field{coords}{ra} \field{ng}{in}}
+  \recentry{}{\field{var\_1\_id}{in} \field{values\_1}{ra}}
+  \recentry{}{ ...}
+  \recentry{}{\field{var\_ng\_id}{in} \field{values\_ng}{ra}}
+\end{record}
+   \item \param{elnum} is the element number
+   \item \param{gpnum} is the Gauss point number
+   \item \param{coords} are the coordinates of the Gauss point
+   \item \param{ng} is the number of groups of variables that will follow
+   \item \param{var\_1\_id} is the identification number of variable group number 1 (according to the definitions in internalstatetype.h)
+   \item \param{values\_1} are the values of variables in group number 1
+   \item \param{var\_ng\_id} is the identification number of variable group number ng
+   \item \param{values\_ng} are the values of variables in group number ng
+\item Example:\\ \mbox{``37 4 3 0.02 0.04 0.05 3 52 1 0.23 62 1 0.049 1 6 0 -2.08e+07 0 0 0 0''} means that Gauss point number 4 of element number 37 has coordinates $x=0.02$, $y=0.04$ and $z=0.05$ and the initial values are specified for 3 groups of variables;\\ 
+the first group (variable ID 52) is of type IST\_DamageScalar (see internalstatetype.h) and contains 1 variable (since it is a scalar) with value 0.23;\\
+ the second group (ID 62) is of type IST\_CumPlasticStrain
+and contains 1 variable with value 0.049;\\
+ the third group is of type IST\_StressTensor
+and contains 6 variables (stress components $\sigma_x$, $\sigma_y$, etc.) with values
+0, -2.08e+07, 0, 0, 0, 0
+\end{itemize}
+\end{itemize}
+
+\section{Export modules}
+\label{ExportModulesSec}
+Export modules allow to export computed data into external software for
+post-processing. The number of export module records is specified in
+analysis record using \param{nmodules} parameter (see the initial part of section \ref{_AnalysisRecord}). The general format
+is the following:\\
+\begin{record}
+  \recentry{\entKeyword{EntType}}{[\fieldnotype{tstep\_all}]}
+  \recentry{}{\optField{tstep\_step}{in}}
+  \recentry{}{\optField{tsteps\_out}{rl}}
+  \recentry{}{\optField{subtsteps\_out}{in}}
+  \recentry{}{[\fieldnotype{domain\_all}]}
+  \recentry{}{\optField{domain\_mask}{in}}
+\end{record}
+
+To select all solution steps, in which output will be performed, use
+\param{tstep\_all}. To select each \param{tstep\_step}-nth step, use
+\param{tstep\_step} parameter. In order to select only specific
+solution steps, the \param{tsteps\_out} list can be specified,
+supplying solution step number list in which output will be done.
+To select output for all domain of the problem the \param{domain\_all}
+keyword can be used. To select only specific domains,
+\param{domain\_mask} array can be used, where the values of the array
+specify the domain numbers to be exported.
+If the parameter \param{subtsteps\_out} = 1, it turns on the export of intermediate results, 
+for example during the substepping or individual equilibrium iterations. This option requires support from the solver.
+
+Currently, the supported export modules are following
+\begin{itemize}
+\item VTK export, \textbf{DEPRECATED - Use VTKXML}
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{vtk}}{\optField{vars}{ia}}
+  \recentry{}{\optField{primvars}{ia}}
+  \recentry{}{\optField{cellvars}{ia}}
+  \recentry{}{\optField{stype}{in}}
+  \recentry{}{\optField{regionstoskip}{ia}}
+\end{record}
+
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{vtkxml}}{\optField{vars}{ia}}
+  \recentry{}{\optField{primvars}{ia}}
+  \recentry{}{\optField{cellvars}{ia}}
+  \recentry{}{\optField{ipvars}{ia}}
+  \recentry{}{\optField{stype}{in}}
+  \recentry{}{\optField{regionsets}{ia}}
+  \recentry{}{\optField{timeScale}{rn}}
+\end{record}
+
+\begin{itemize}
+\item The vtk module is obsolete, use vtkxml instead. Vtkxml allows to export results recovered on region by region basis and has more features.
+
+\item The array \param{vars} contains identifiers for those internal
+variables which are to be exported. These variables will be smoothed and transfered to nodes. The id values are defined by
+InternalStateType enumeration, which is defined in include file
+``src/oofemlib/internal\-statetype.h''.
+
+\item The array \param{primvars}
+contains identifiers of primary variables to be exported.
+The possible values correspond to the values of enumerated type
+UnknownType, which is again defined in ``src/oofemlib/unknown\-type.h''.
+Please note, that the values corresponding to enumerated type values
+start from zero, if not specified directly and that not all values are
+supported by particular material model or analysis type.
+
+\item The array \param{cellvars} contains identifiers of constant variables defined
+on an element (cell), e.g. a material number. Identifier numbers are specified in
+``src/oofemlib/internalstatetype.h''.
+
+\item The array \param{ipvars} contains identifiers for those internal
+variables which are to be exported. These variables will be directly exported (no smoothing) as point dataset, where each point corresponds to individual integration point. A separate vtu file for these raw, point data will be created. 
+The id values are defined by
+InternalStateType enumeration, which is defined in include file
+``src/oofemlib/internal\-statetype.h''.
+
+
+\item The parameter \param{stype} allows to select smoothing procedure for
+internal variables, which is used to compute nodal values from values
+in integration points. The supported values are $0$ for simple nodal averageing (generally supported only by triangular and tetrahedral elements), $1$ for Zienkiewicz Zhu recovery (default), and $2$ for Superconvergent Patch Recovery (SPR, based on least square fitting).
+
+\item The export is done on region basis, on each region, the nodal recovery is performed independently and results are exported in a separate piece. This allows to take into account for discntinuities, or to export variables defined only by particular material model. The region volumes are defined using sets containing individual elements. By default the one region is created, containing all element in the problem domain. The optional parameter \param{regionsets} allows to use user-defined.  The individual values refer to numbers (ids) of domain sets. Note, that regions are determined solely using elements.
+
+{\footnotesize vtkxml tstep\_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2 regionsets 2 1 2}
+
+\item \param{timeScale} scales time in output. In transport problem, basic units are seconds. Setting timeScale = 2.777777e-4 (=1/3600.) converts all time data in vtkXML from seconds to hours.
+
+\end{itemize}
+
+By default vtk and vtkxml modules perform recovery over the whole domain. The VTKXML module can operate in region-by-region mode (see \param{nvr} and \param{vrmap} parameters). In this case, the smoothing is performed only over particular virtual region, where only elements in this virtual region participate. 
+
+\item Homogenization of IP quantities in the global coordinate system (such as stress, strain, damage, heat flow). Corresponding IP quantities are summed and averaged over the volume. It is possible to select region sets from which the averaging occurs. The averaging works for all domains with an extension to trusses. A truss is considered as a volume element with oriented stress and strain components along the truss axis. The transformation to global components occurs before averaging.
+
+\begin{record}[0.9\textwidth]
+  \recentry{\entKeywordInst{hom}}{}
+  \recentry{}{\field{ists}{ia}}
+  \recentry{}{\optField{scale}{rn}}
+  \recentry{}{\optField{regionSets}{ia}}
+  \recentry{}{\optFieldnotype{strain\_energy}}
+\end{record}
+
+\begin{itemize}
+
+\item An integer array \param{ists} specifies internal state types for export which are defined in internalstatetype.h file.
+
+\item The parameter \param{scale} multiplies all averaged IP quantities. \param{scale}=1 by default.
+
+\item An integer array \param{regionSets} specifies region sets for averaging. All domain is averaged by default.
+
+\item \param{strain\_energy} calculates strain energy over selected elements (defined by sets) by
+\begin{equation}
+W^*=\int_V \int \sigma \mathrm{d} (\varepsilon-\varepsilon_{eig}) \mathrm{d} V
+\end{equation}
+where $\sigma$ is the stress tensor, $\varepsilon$ stands for the strain tensor and $\varepsilon_{eig}$ is eigenstrain tensor (originates from temperature load or prescribed eigenstrain). Strain energy increment and total strain energy is reported in each step. The integration uses mid-point rule for stress and yields exact results for linear elastic materials.
+
+\end{itemize}
+
+\item Gauss point export is useful if one needs to plot a certain variable
+(such as damage) as a function of a spatial coordinate using tools like
+gnuplot. It generates files with data organized in columns, each row
+representing one Gauss point. In this way, one can plot e.g.\ the damage
+distribution along a one-dimensional bar.
+
+\begin{record}[0.9\textwidth]
+  \recentry{gpexportmodule}{\optField{vars}{ia}}
+  \recentry{}{\optField{ncoords}{in}}
+\end{record}
+
+\begin{itemize}
+\item The array \param{vars} contains identifiers for those internal
+variables which are to be exported. The id values are defined by
+InternalStateType enumeration, which is defined in include file
+``src/oofemlib/internal\-statetype.h''.
+\item Parameter \param{ncoords} specifies the number of spatial coordinates to be exported at each Gauss point. Depending on the spatial dimension of the
+domain, the points can have one, two or three coordinates. If  \param{ncoords}
+is set to -1, only those coordinates that are actually used are exported.
+ If  \param{ncoords} is set to 0, no coordinates are exported.
+If  \param{ncoords}
+is set to a positive integer, exactly \param{ncoords} coordinates are exported.
+If  \param{ncoords} exceeds the actual number of coordinates, the actual
+coordinates are supplemented by zeros. For instance, if we deal with a 2D
+problem, the actual number of coordinates is 2. For  \param{ncoords}=3,
+the two actual coordinates followed by 0 will be exported.
+For  \param{ncoords}=1, only the first coordinate will be exported.
+\end{itemize}
+The Gauss point export module creates a file with extension ``gp''
+after each step for which the output is performed. This file contains
+a header with lines starting by the symbol \#, followed by the actual data
+section.
+Each data line corresponds to one Gauss point and contains the following
+data:
+\begin{enumerate}
+\item element number,
+ \item    material number,
+ \item     Gauss point number,
+  \item   contributing volume around Gauss point,
+\item Gauss point global coordinates (written as a real array of length \param{ncoords}),
+\item internal variables according to the specification in \param{vars} (each written as a real array of the corresponding length).
+\end{enumerate}
+Example:\\
+``GPExportModule 1 tstep\_step 100 domain\_all ncoords 2 vars 5 4 13 31 64 65''
+\\
+means that the *.gp file will be written after each 100 steps and will contain
+for each of the Gauss points in the entire domain its 2 coordinates and also internal
+variables of type 4, 13, 31, 64 and 65, which are the strain tensor, damage tensor, maximum equivalent strain level, stress work density and dissipated work density. Of course, the material model must be able to deliver such variables. 
+The size of the strain tensor depends on the spatial dimension, and the size
+of the damage tensor depends on the spatial dimension and type of model
+(e.g., for a simple isotropic damage model it will have just 1 component
+while for an anisotropic damage model it may have more). The other variables
+in this example are scalars, but they will be written as arrays of length 1,
+so the actual value will always be preceded by ``1'' as the length of the array. Since certain internal variables have the meaning of densities (per unit volume
+or area, again depending on the spatial dimension), it is useful to have
+access to the contributing volume  of the Gauss point. The product of this
+contributing volume and the density gives an additive contribution to the
+total value of the corresponding variable. This can be exploited e.g.\ to
+evaluate the total dissipated energy over the entire domain.
+\end{itemize}
+
+
+
+
+\clearpage
+\chapter{Examples}
+\section {Beam structure}
+This example for a simple beam structure gives basic overview of the input file (found under tests/sm/beam2d\_1.in).
+Structure geometry and its constitutive and geometrical properties are shown in Fig. (\ref{ex01}).
+The linear static analysis is required, the influence of shear is neglected.
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{ex01}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{ex01}}
+%end{latexonly}
+\caption{Example 1 - beam2d\_1.in}
+\label{ex01}
+
+\end{figure}
+{\small\begin{verbatim}
+beam2d_1.out
+Simple Beam Structure - linear analysis
+#only momentum influence to the displacements is taken into account
+#beamShearCoeff is artificially enlarged.
+StaticStructural nsteps 3 nmodules 0
+domain 2dBeam
+OutputManager tstep_all dofman_all element_all
+ndofman 6 nelem 5 ncrosssect 1 nmat 1 nbc 6 nic 0 nltf 3 nset 7
+node 1 coords 3 0.  0.  0.
+node 2 coords 3 2.4 0.  0.
+node 3 coords 3 3.8 0.  0.
+node 4 coords 3 5.8 0.  1.5
+node 5 coords 3 7.8 0.  3.0
+node 6 coords 3 2.4 0.  3.0
+Beam2d 1 nodes 2 1 2 
+Beam2d 2 nodes 2 2 3 DofsToCondense 1 6  
+Beam2d 3 nodes 2 3 4 DofsToCondense 1 3 
+Beam2d 4 nodes 2 4 5
+Beam2d 5 nodes 2 6 2 DofsToCondense 1 6 
+SimpleCS 1 area 1.e8 Iy 0.0039366 beamShearCoeff 1.e18 thick 0.54 material 1 set 1
+IsoLE 1 d 1. E 30.e6 n 0.2 tAlpha 1.2e-5
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 4
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 5 values 1 0.0 set 5
+BoundaryCondition 3 loadTimeFunction 2 dofs 3 1 3 5 values 3 0.0 0.0 -0.006e-3 set 6
+ConstantEdgeLoad 4 loadTimeFunction 1 Components 3 0.0 10.0 0.0 loadType 3 set 3
+NodalLoad 5 loadTimeFunction 1 dofs 3 1 3 5 Components 3 -18.0 24.0 0.0 set 2
+StructTemperatureLoad 6 loadTimeFunction 3 Components 2 30.0 -20.0 set 7
+PeakFunction 1 t 1.0 f(t) 1.
+PeakFunction 2 t 2.0 f(t) 1.
+PeakFunction 3 t 3.0 f(t) 1.
+Set 1 elementranges {(1 5)}
+Set 2 nodes 1 4
+Set 3 elementedges 2 1 1
+Set 4 nodes 2 1 5
+Set 5 nodes 1 3
+Set 6 nodes 1 6
+Set 7 elements 2 1 2
+\end{verbatim}}
+
+\section {Plane stress example}
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{ex02}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{ex02}}
+%end{latexonly}
+\caption{Example 2}
+\label{ex02}
+\end{figure}
+{\small\begin{verbatim}
+patch100.out
+Patch test of PlaneStress2d elements -> pure compression
+LinearStatic nsteps 1
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 5 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 3
+node 1 coords 3  0.0   0.0   0.0
+node 2 coords 3  0.0   4.0   0.0
+node 3 coords 3  2.0   2.0   0.0
+node 4 coords 3  3.0   1.0   0.0
+node 5 coords 3  8.0   0.8   0.0
+node 6 coords 3  7.0   3.0   0.0
+node 7 coords 3  9.0   0.0   0.0
+node 8 coords 3  9.0   4.0   0.0
+PlaneStress2d 1 nodes 4 1 4 3 2  NIP 1
+PlaneStress2d 2 nodes 4 1 7 5 4  NIP 1
+PlaneStress2d 3 nodes 4 4 5 6 3  NIP 1
+PlaneStress2d 4 nodes 4 3 6 8 2  NIP 1
+PlaneStress2d 5 nodes 4 5 7 8 6  NIP 1
+Set 1 elementranges {(1 5)}
+Set 2 nodes 2 1 2
+Set 3 nodes 2 7 8
+SimpleCS 1 thick 1.0 width 1.0 material 1 set 1
+IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0
+BoundaryCondition 1 loadTimeFunction 1 dofs 2 1 2 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 2 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 2 components 2 2.5 0.0 set 3
+ConstantFunction 1 f(t) 1.0
+\end{verbatim}}
+%\vspace*{1.5cm}
+%\begin{flushright}
+%	 Printed on \today
+%\end{flushright}
+
+
+%\vfill
+\section{Examples - parallel mode}
+\subsection{Node-cut example}
+The example shows explicit direct integration analysis of
+simple structure with two DOFs.
+The geometry and partitioning is sketched in
+fig. \ref{nodecut-ex01}.
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{poofem_ex01}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{poofem_ex01}}
+%end{latexonly}
+\caption{Node-cut partitioning example: (a) whole geometry,
+(b) partition~0, (c) partition~1.}
+\label{nodecut-ex01}
+\end{figure}
+
+\begin{verbatim}
+#
+# partition 0
+#
+partest.out.0
+Parallel test of explicit oofem computation
+#
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0
+domain 2dTruss
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+#
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2. Shared partitions 1 1
+Truss2d 1 nodes 2 1 2
+Set 1 elements 1 1
+Set 2 nodes 2 1 2
+Set 3 nodes 1 1
+Set 4 nodes 0
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
+ConstantFunction 1 f(t) 1.0
+
+#
+# partition 1
+#
+partest.out.1
+Parallel test of explicit oofem computation
+#
+NlDEIDynamic nsteps 3 dumpcoef 0.0 deltaT 1.0
+domain 2dTruss
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+#
+Node 2 coords 3 0. 0. 2. Shared partitions 1 0
+Node 3 coords 3 0. 0. 4.
+Truss2d 2 nodes 2 2 3
+Set 1 elements 1 2
+Set 2 nodes 2 2 3
+Set 3 nodes 0
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
+ConstantFunction 1 f(t) 1.0
+\end{verbatim}
+
+\subsection{Element-cut example}
+The example shows explicit direct integration analysis of
+simple structure with two DOFs. The geometry and partitioning is sketched in
+fig. \ref{nodecut-ex01}.
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{poofem_ex02}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{poofem_ex02}}
+%end{latexonly}
+\caption{Element-cut partitioning example: (a) whole geometry,
+(b) partition~0, (c) partition~1.}
+\label{elmentcut-ex02}
+\end{figure}
+
+\begin{verbatim}
+#
+# partition 0
+#
+partest2.out.0
+Parallel test of explicit oofem computation
+#
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0
+domain 2dTruss
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 3 nelem 2 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+#
+Node 1 coords 3 0. 0. 0.
+Node 2 coords 3 0. 0. 2.
+Node 3 coords 3 0. 0. 4. Remote partitions 1 1
+Truss2d 1 nodes 2 1 2
+Truss2d 2 nodes 2 2 3
+Set 1 elements 2 1 2
+Set 2 nodes 3 1 2 3
+Set 3 nodes 1 1
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
+ConstantFunction 1 f(t) 1.0
+
+
+#
+# partition 1
+#
+partest2.out.1
+Parallel test of explicit oofem computation
+#
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0
+domain 2dTruss
+#
+OutputManager tstep_all dofman_all element_all
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 4
+#
+Node 2 coords 3 0. 0. 2 Remote partitions 1 0
+Node 3 coords 3 0. 0. 4
+Truss2d 2 nodes 2 2 3
+Set 1 elements 1 2
+Set 2 nodes 2 2 3
+Set 3 nodes 0
+Set 4 nodes 1 3
+SimpleCS 1 thick 0.1 width 10.0 material 1 set 1
+IsoLE 1 tAlpha 0.000012 d 10.0 E 1.0 n 0.2
+BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2
+BoundaryCondition 2 loadTimeFunction 1 dofs 1 3 values 1 0.0 set 3
+NodalLoad 3 loadTimeFunction 1 dofs 2 1 3 components 2 0. 1.0 set 4
+ConstantFunction 1 f(t) 1.0
+\end{verbatim}
+
+%\addcontentsline{toc}{section}{References}
+%\begin{thebibliography}{9}
+
+\section{Figures}
+%\subsection {Node cut mode}
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{nodecut0cb}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{nodecut0cb}}
+%end{latexonly}
+\caption{Node-cut partitioning.}
+\label{nodecut}
+\end{figure}
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{nodecut1cb}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{nodecut1cb}}
+%end{latexonly}
+\caption{Node-cut partitioning - local constitutive mode.}
+\label{nodecut-lm}
+\end{figure}
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{nodecutnonloc1}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{nodecutnonloc1}}
+%end{latexonly}
+\caption{Node-cut partitioning - nonlocal constitutive mode.}
+\label{nodecut-nlm}
+\end{figure}
+
+%\subsection {Element cut mode}
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{elementcut0}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{elementcut0}}
+%end{latexonly}
+\caption{Element-cut partitioning.}
+\label{elmentcut}
+\end{figure}
+
+\begin{figure}[htb]
+\begin{htmlonly}
+  \centerline{\includegraphics[width=0.7\textwidth]{elementcut1}}
+\end{htmlonly}
+%begin{latexonly}
+\centerline{\includegraphics[width=0.7\textwidth]{elementcut1}}
+%end{latexonly}
+\caption{Element-cut partitioning, local constitutive mode.}
+\label{elmentcut-lm}
+\end{figure}
+
+\end{document}
+
+
+

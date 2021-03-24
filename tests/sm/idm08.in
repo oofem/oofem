@@ -11,6 +11,7 @@ node 2 coords 3  2.0   0.0   0.0
 node 3 coords 3  2.0   3.0   0.0
 node 4 coords 3  0.0   3.0   0.0
 PlaneStress2d 1 nodes 4 1 2 3 4  mat 1
+#L4axisymm 1 nodes 4 1 2 3 4  mat 1
 SimpleCS 1 thick 0.15 material 1 set 1
 idm1 1 d 1.0  E 10. n 0.2  e0 0.0001 gf 1.5 equivstraintype 7 griff_n 10. talpha 0.0 damlaw 1
 BoundaryCondition 1 loadTimeFunction 1 dofs 1 1 values 1 0.0 set 2

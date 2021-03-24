@@ -91,6 +91,17 @@ void XfemStructureManager :: initializeFrom(InputRecord &ir)
     }
 }
 
+void XfemStructureManager :: postInitialize() {
+    XfemManager :: postInitialize();
+
+    if ( mSplitCracks ) {
+            splitCracks();
+        }
+        mergeCloseCracks();
+        updateNodeEnrichmentItemMap();
+
+}
+
 void XfemStructureManager :: giveInputRecord(DynamicInputRecord &input)
 {
     XfemManager :: giveInputRecord(input);
@@ -112,14 +123,7 @@ int XfemStructureManager :: instanciateYourself(DataReader &dr)
 {
     int result = XfemManager :: instanciateYourself(dr);
 
-    if ( mSplitCracks ) {
-        splitCracks();
-    }
-
-    mergeCloseCracks();
-
-    updateNodeEnrichmentItemMap();
-
+    
     return result;
 }
 

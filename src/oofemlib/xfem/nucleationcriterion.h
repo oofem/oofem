@@ -58,6 +58,7 @@ public:
 
     virtual void initializeFrom(InputRecord &ir);
     virtual int instanciateYourself(DataReader &dr);
+    virtual void postInitialize() {}
 
     virtual void appendInputRecords(DynamicDataReader &oDR);
 

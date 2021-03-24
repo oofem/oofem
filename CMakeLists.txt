@@ -19,7 +19,7 @@ set (oofem_VERSION_MINOR 6)
 set (oofem_VERSION_PATCH 0) # Unused
 set (oofem_HOMEPAGE "http://www.oofem.org")
 set (bp_HOMEPAGE "http://ksm.fsv.cvut.cz/%7Ebp/bp.html")
-set (oofem_COPYRIGHT "Copyright (C) 1994-2017 Borek Patzak")
+set (oofem_COPYRIGHT "Copyright (C) 1994-2020 Borek Patzak")
 set (oofem_EMAIL "oofem@fsv.cvut.cz")
 
 set(CMAKE_MODULE_PATH  ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -42,7 +42,7 @@ else ()
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 endif ()
 
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 set (CMAKE_CXX_FLAGS_DEBUG "-DDEBUG ${CMAKE_CXX_FLAGS_DEBUG}")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

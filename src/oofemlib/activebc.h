@@ -102,9 +102,10 @@ public:
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      * @param scale Scaling factor.
+     * @param omp_lock optional OMP lock to ensure correct update of answer
      */
     virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) { }
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0, void* lock=nullptr) { }
 
     /**
      * Assembles B.C. contributions to specified vector.
@@ -114,11 +115,12 @@ public:
      * @param mode Mode of value.
      * @param s Numbering scheme.
      * @param eNorms Norms for each dofid.
+     * @param omp_lock optional OMP lock to ensure correct update of answer
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr) { }
+                                const UnknownNumberingScheme &s, FloatArray *eNorms=nullptr, void*lock=nullptr) { }
 
     /**
      * Gives a list of location arrays that will be assembled.

@@ -46,7 +46,7 @@ namespace oofem {
 /**
  * This class implements a boundary version of the 3-dimensional mindlin theory Linear Isoparametric
  * beam element, with reduced integration. Useful for prescribing periodicity in multiscale analyses.
- * MACROSCOPIC INPUT: STRAIN TENSOR (3D, 6 COMPONENTS, VOIGT NOTATION: exx eyy ezz gyz gxz gxy)
+ * MACROSCOPIC INPUT: STRAIN TENSOR (3D, 6 COMPONENTS, VOIGT NOTATION: Exx Eyy Ezz Gyz Gxz Gxy)
  *
  * @author: Adam Sciegaj
  */
