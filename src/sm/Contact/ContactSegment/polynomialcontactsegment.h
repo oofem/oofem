@@ -42,26 +42,25 @@
 #define _IFT_PolynomialContactSegment_coeffs "coeffs"
 
 namespace oofem {
-    class PolynomialContactSegment : public NRFunctionContactSegment2D
-    {
-    public:
-        PolynomialContactSegment(int n, Domain *aDomain) : NRFunctionContactSegment2D(n, aDomain) { ; }
-        ~PolynomialContactSegment() {};
+class PolynomialContactSegment : public NRFunctionContactSegment2D
+{
+public:
+    PolynomialContactSegment(int n, Domain *aDomain) : NRFunctionContactSegment2D(n, aDomain) {; }
+    ~PolynomialContactSegment() {};
 
-        IRResultType initializeFrom(InputRecord * ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-        const char *giveClassName() const override { return "Polynomialcontactsegment"; }
-        const char *giveInputRecordName() const override { return _IFT_PolynomialContactSegment_Name; }
+    const char *giveClassName() const override { return "Polynomialcontactsegment"; }
+    const char *giveInputRecordName() const override { return _IFT_PolynomialContactSegment_Name; }
 
-    private:
-        int order;
-        FloatArray coeffs;
+private:
+    int order;
+    FloatArray coeffs;
 
-    protected:
+protected:
 
-        double functionValue(const double x) const override;
-        double derivativeValue(const double x) const override;
-        double doubleDerivativeValue(const double x) const override;
-    };
-
+    double functionValue(const double x) const override;
+    double derivativeValue(const double x) const override;
+    double doubleDerivativeValue(const double x) const override;
+};
 }

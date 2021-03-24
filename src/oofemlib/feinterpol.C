@@ -67,21 +67,14 @@ const FloatArray&
 FEIElementDeformedGeometryWrapper :: giveVertexCoordinates(int i) const
 {
   
-  if(tStep == NULL) {
-    return (elem->giveNode(i)->giveNodeCoordinates());
-  }
-  
-  
-  FloatArray u;
   if(tStep != NULL) {
-    actualCoords = elem->giveNode(i)->giveNodeCoordinates();
-    //if(tStep->giveSubStepNumber() > 0) {
+    FloatArray u;
+    actualCoords = elem->giveNode(i)->giveCoordinates();
     elem->giveNode(i)->giveUnknownVector(u, {D_u, D_v, D_w}, VM_Total, tStep);
     u.times(alpha);
     actualCoords.add(u);
-    //}
   } else {
-    actualCoords = elem->giveNode(i)->giveNodeCoordinates();
+    actualCoords = elem->giveNode(i)->giveCoordinates();
   }
   
   return actualCoords;

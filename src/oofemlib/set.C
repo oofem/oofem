@@ -57,9 +57,18 @@ void Set :: initializeFrom(InputRecord &ir)
     if ( ir.hasField(_IFT_Set_allNodes) ) { // generate a list with all the node numbers
        this->nodes.enumerate(this->giveDomain()->giveNumberOfDofManagers()); 
     } else {
+        nodeListIsOrdered = ir.hasField(_IFT_Set_orderedNodeList);
         IR_GIVE_OPTIONAL_FIELD(ir, inputNodes, _IFT_Set_nodes);
         IR_GIVE_OPTIONAL_FIELD(ir, inputNodeRanges, _IFT_Set_nodeRanges);
-        this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
+	if(nodeListIsOrdered) {
+	    IntArray nR;
+	    this->nodes = inputNodes;
+	    this->computeIntArray(nR, {}, inputNodeRanges);
+	    this->nodes.followedBy(nR);
+	    this->totalNodes = this->nodes;
+	} else {
+	    this->computeIntArray(this->nodes, inputNodes, inputNodeRanges);
+	}
     }
 
     if ( ir.hasField(_IFT_Set_allElements) ) { // generate a list with all the element numbers

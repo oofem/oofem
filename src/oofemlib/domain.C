@@ -657,7 +657,7 @@ Domain :: instanciateYourself(DataReader &dr)
     contactSegmentList.clear();
     contactSegmentList.resize(ncontactseg);
     for ( int i = 1; i <= ncontactseg; i++ ) {
-        ir = dr.giveInputRecord(DataReader :: IR_contactSegmentRec, i);
+        auto &ir = dr.giveInputRecord(DataReader :: IR_contactSegmentRec, i);
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
@@ -679,7 +679,7 @@ Domain :: instanciateYourself(DataReader &dr)
 	  OOFEM_ERROR("Contact segmenet entry already exist (num=%d)", num);
 	}
 	
-	ir->finish();
+	ir.finish();
 	
     }
 

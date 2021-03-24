@@ -46,8 +46,8 @@
 #include "unknownnumberingscheme.h"
 
 
- ///@name Input fields for _IFT_ContactElement
- //@{
+///@name Input fields for _IFT_ContactElement
+//@{
 #define _IFT_Node2SegmentLagrangianMultiplierContact_Name "n2slagrangianmultipliercontact"
 #define _IFT_Node2SegmentLagrangianMultiplierContact_useTangent "usetangent"
 
@@ -62,58 +62,57 @@
 //@}
 
 namespace oofem {
-    /*class Domain;
-    class SparseMtrx;
-    class TimeStep;
-    class DofManager;
-    class GaussPoint;
-    class UnknownNumberingScheme;
-    class FloatMatrix;
-    class IntegrationRule;
-    class ContactElement;
-    class Node;
-*/
-    class OOFEM_EXPORT Node2SegmentLagrangianMultiplierContact : public ActiveBoundaryCondition
-    {
-    private:
-        bool useTangent; ///< Determines if tangent should be used.
-        IntArray nodeSet;
-        IntArray segmentSet;
-        std::vector<  DofManager * >lmdm;
-        int lm_num; ///< Determines the number of Lagrange multiplier DOFs (because all nodes are checked against all segments)
-	FloatArray prescribedNormal;
-    public:
+/*class Domain;
+ * class SparseMtrx;
+ * class TimeStep;
+ * class DofManager;
+ * class GaussPoint;
+ * class UnknownNumberingScheme;
+ * class FloatMatrix;
+ * class IntegrationRule;
+ * class ContactElement;
+ * class Node;
+ */
+class OOFEM_EXPORT Node2SegmentLagrangianMultiplierContact : public ActiveBoundaryCondition
+{
+private:
+    bool useTangent;     ///< Determines if tangent should be used.
+    IntArray nodeSet;
+    IntArray segmentSet;
+    std::vector<  DofManager * >lmdm;
+    int lm_num;     ///< Determines the number of Lagrange multiplier DOFs (because all nodes are checked against all segments)
+    FloatArray prescribedNormal;
+public:
 
-        /// Constructor.
-        Node2SegmentLagrangianMultiplierContact(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
-        /// Destructor.
-        virtual ~Node2SegmentLagrangianMultiplierContact() {};
+    /// Constructor.
+    Node2SegmentLagrangianMultiplierContact(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
+    /// Destructor.
+    virtual ~Node2SegmentLagrangianMultiplierContact() {};
 
-        virtual IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir) override;
 
-        virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0, void *lock = nullptr) override;
 
-        virtual void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms = NULL, void *lock = nullptr) override;
 
-        virtual const char *giveClassName() const { return "Node2SegmentLagrangianMultiplierContact"; }
-        virtual const char *giveInputRecordName() const { return _IFT_Node2SegmentLagrangianMultiplierContact_Name; }
+    virtual const char *giveClassName() const override { return "Node2SegmentLagrangianMultiplierContact"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_Node2SegmentLagrangianMultiplierContact_Name; }
 
-        int giveNumberOfInternalDofManagers() override { return lm_num; }
-        DofManager *giveInternalDofManager(int i) override { return this->lmdm.at(i - 1); }
+    int giveNumberOfInternalDofManagers() override { return lm_num; }
+    DofManager *giveInternalDofManager(int i) override { return this->lmdm.at(i - 1); }
 
-        void giveLocationArrays(std::vector< IntArray > &rows, std::vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
-        
+    void giveLocationArrays(std::vector< IntArray > &rows, std::vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
 
-    private:
-        double computeTangentFromContact(FloatMatrix &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
 
-        void computeGap(double &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
+private:
+    double computeTangentFromContact(FloatMatrix &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
 
-        void computeNvMatrixAt(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *TimeStep);
+    void computeGap(double &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
 
-        void computeExternalForcesFromContact(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
+    void computeNvMatrixAt(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *TimeStep);
 
-        void giveLagrangianMultiplierLocationArray(const UnknownNumberingScheme &r_s, std::vector< IntArray > &answer);
+    void computeExternalForcesFromContact(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
 
-    };
+    void giveLagrangianMultiplierLocationArray(const UnknownNumberingScheme &r_s, std::vector< IntArray > &answer);
+};
 } // end namespace oofem

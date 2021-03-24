@@ -40,6 +40,9 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+#The following line is neede, otherwise
+#Sphinx error: master file /doc/oofemInput/contents.rst not found is thrown
+master_doc = 'index'
 
 # -- Options for HTML output -------------------------------------------------
 

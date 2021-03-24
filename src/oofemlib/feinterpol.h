@@ -129,8 +129,8 @@ public:
     FEIElementDeformedGeometryWrapper(const Element * elem);
     FEIElementDeformedGeometryWrapper(const Element * elem, TimeStep *tStep);
     virtual ~FEIElementDeformedGeometryWrapper() { }
-    int giveNumberOfVertices() const;
-    const FloatArray &giveVertexCoordinates(int i) const;
+    int giveNumberOfVertices() const override;
+    const FloatArray &giveVertexCoordinates(int i) const override;
     void setTimeStep(TimeStep *ts){tStep = ts;}
     void setAlpha(double alpha){this->alpha = alpha;}
 

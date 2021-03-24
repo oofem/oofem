@@ -42,27 +42,24 @@
 #define _IFT_ContactSegment_normMode "normmode"
 
 namespace oofem {
-    class ContactSegment : public FEMComponent
-    {
-    public:
-		ContactSegment(int n, Domain *aDomain) : FEMComponent(n, aDomain){;}
-		~ContactSegment() {};
-
-		virtual IRResultType initializeFrom(InputRecord* ir) override {
-			//@todo is this actually still necessary since the change of approach to normal computation?
-			IRResultType result;
-
-			normmode = NM_Never;
-			int normmodeint = 0;
-			IR_GIVE_OPTIONAL_FIELD(ir, normmodeint, _IFT_ContactSegment_normMode);
-			if ( result == IRRT_OK ) {
-              normmode = (NormalizationMode)normmodeint;
-              if ( normmodeint < 0 || normmodeint > 2 ) OOFEM_ERROR("Contact segment normalization mode can be only 0, 1 or 2");
-			}
-
-			 return FEMComponent::initializeFrom(ir);
-		};
-
+  class ContactSegment : public FEMComponent
+  {
+  public:
+    ContactSegment(int n, Domain *aDomain) : FEMComponent(n, aDomain){;}
+    ~ContactSegment() {};
+    
+    void initializeFrom(InputRecord &ir) override {
+      FEMComponent::initializeFrom(ir);  
+      normmode = NM_Never;
+      int normmodeint = 0;
+      IR_GIVE_OPTIONAL_FIELD(ir, normmodeint, _IFT_ContactSegment_normMode);
+      normmode = (NormalizationMode)normmodeint;
+      if ( normmodeint < 0 || normmodeint > 2 ) {
+	OOFEM_ERROR("Contact segment normalization mode can be only 0, 1 or 2");
+      }
+      
+    }
+    
 		/**
 		 * Computes the normal vector to the segment at the contact point of the given node.
 		 * Contact point in this context is the point on the segment closest to the node,

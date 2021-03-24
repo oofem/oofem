@@ -58,6 +58,8 @@ file is compulsory, and it has following structure:
 #. element record(s), see section ElementsRecords_,
 
 #. set record(s), see section SetRecords_,
+   
+#. contact segment record(s), see section ContactSegmentRecords_,
 
 #. cross section record(s), see section CrossSectionRecords_,
 
@@ -1444,18 +1446,24 @@ Components size record
   format is:
 | ``ndofman #(in)`` ``nelem #(in)``
   ``ncrosssect #(in)`` ``nmat #(in)`` ``nbc #(in)``
-  ``nic #(in)`` ``nltf #(in)`` [``nbarrier #(in)``]
+  ``nic #(in)`` ``nltf #(in)`` [``nbarrier #(in)``] [``nset #(in)``]
+  [``ncontactseg #(in)``]
    where
   ``ndofman`` represents number of dof managers (e.g. nodes) and their
   associated records, ``nelem`` represents number of elements and their
   associated records, ``ncrosssect`` is number of cross sections and
   their records, ``nmatdnMat`` is number of material models and their
   records, ``nbc`` represents number of boundary conditions (including
-  loads) and their records, ``nic`` parameter determines the number of
-  initial conditions, and ``nltf`` represents number of time functions
-  and their associated records. The optional parameter ``nbarrier``
-  represents the number of nonlocal barriers and their records. If not
-  specified, no barriers are assumed.
+  loads and contact conditions) and their records, ``nic`` parameter
+  determines the number of initial conditions, and ``nltf`` represents
+  number of time functions and their associated records. The optional
+  parameter ``nbarrier`` represents the number of nonlocal barriers
+  and their records. If not specified, no barriers are assumed.
+  The optional parameter ``nset`` represents the number of
+  sets(set of nodes, element, element boundaries). If not specified,
+  no sets are assumed. The optional parameter ``ncontactseg``
+  represents the number of contact segments(union of element edges,
+  element surfaces, analytically defined contact plane, ...).  
 
 .. _NodeElementSideRecords:
 
@@ -1494,6 +1502,7 @@ DofManager.**
 
 The applied primary (Dirichlet) boundary conditions are specified using
 "bc" record, while natural boundary conditions using "load" parameter.
+Moreover, contact boundary conditions can be introduced. 
 
 -  The size of "bc" array (primary bc) should be equal to number of DOFs
    in dof manager and i-th value relates to i-th DOF - the ordering and
@@ -1777,6 +1786,24 @@ would be applied to ``elements`` in a set. A external pressure would be
 defined as a surface load an be applied to the ``elementboundaries`` in
 a set. The element integrates the load (analytically) around the axis,
 so the load would still count as a surface load.
+
+.. _ContactSegmentRecords:
+
+Contact segment records
+-----------------------
+
+These records specify a description of a particular contact segment.
+The contact segments can be represented by union of element edges and
+element surfaces, but also by an analytical function. Currently,
+only 2D contact segments are supported.
+The general format is following:
+
+``ContactSegmentType`` ``#(in)``
+
+Currently supported contact segments contain
+``Linear2dElementEdgeContactSegment`` ``#(in)`` ``edgeset #(in)`` 
+
+
 
 .. _CrossSectionRecords:
 
@@ -2133,6 +2160,31 @@ Currently, EntType keyword can be one from
    is regarded as it would have prescribed velocities, but the values
    change dynamically, as the solid part deforms. The velocities are
    obtained from coupled structural nodes.
+
+-  Contact Boundary conditions
+
+   ``n2npenaltycontact`` ``masterset #(in)`` ``slaveset #(in)``
+   ``penalty #(ra)``
+   
+   Is a contact boundary condition, with node-to-node discretization.
+   The non-penetration condition is treated using penalty method.
+   Only this contact condition currently supports large strain analysis.
+   
+   ``n2nlagrangianmultipliercontact`` ``masterset #(in)`` ``slaveset #(in)``
+   
+   Is a contact boundary condition, with node-to-node discretization.
+   The non-penetration condition is treated using method of Lagrangian multipliers.
+   
+   ``n2spenaltycontact`` ``nodeset #(in)`` ``segmentnumber #(in)``
+   ``penalty #(ra)``
+   
+   Is a contact boundary condition, with node-to-segment discretization.
+   The non-penetration condition is treated using penalty method.
+   
+   ``n2slagrangianmultipliercontact`` ``nodeset #(in)`` ``segmentnumber #(in)``
+   
+   Is a contact boundary condition, with node-to-segment discretization.
+   The non-penetration condition is treated using method of Lagrangian multipliers.
 
 - Body loads
 

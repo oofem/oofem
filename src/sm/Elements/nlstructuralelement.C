@@ -540,8 +540,7 @@ void NLStructuralElement::computeEdgeBHmatrixAt(FloatMatrix & answer, int edge, 
     FloatMatrix BH;
     this->computeBHmatrixAt(ncoords, BH);
 
-    IntArray edgeNodes;
-    this->giveBoundaryEdgeNodes(edgeNodes, edge);
+    IntArray edgeNodes = giveBoundaryEdgeNodes(edge);
 
     //determine number of dofs per node
     int dofsPerNode = giveNode(edgeNodes.at(1))->giveNumberOfDofs();

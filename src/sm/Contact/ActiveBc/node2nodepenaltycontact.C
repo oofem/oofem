@@ -43,179 +43,195 @@
 #include "classfactory.h"
 
 #ifdef _OPENMP
-#include <omp.h>
+ #include <omp.h>
 #endif
 
 namespace oofem {
-    REGISTER_BoundaryCondition(Node2NodePenaltyContact);
+REGISTER_BoundaryCondition(Node2NodePenaltyContact);
 
 
-<<<<<<< HEAD
+
 void
-Node2NodePenaltyContact :: initializeFrom(InputRecord &ir)
+Node2NodePenaltyContact::initializeFrom(InputRecord &ir)
 {
-    ActiveBoundaryCondition :: initializeFrom(ir);
+    ActiveBoundaryCondition::initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->penalty, _IFT_Node2NodePenaltyContact_penalty);
     this->useTangent = ir.hasField(_IFT_Node2NodePenaltyContact_useTangent);
 
 
-    IR_GIVE_FIELD(ir, this->masterSet, _IFT_Node2NodePenaltyContact_masterSet);
-    IR_GIVE_FIELD(ir, this->slaveSet, _IFT_Node2NodePenaltyContact_slaveSet);
+    IR_GIVE_FIELD(ir, this->masterSetNumber, _IFT_Node2NodePenaltyContact_masterSet);
+    IR_GIVE_FIELD(ir, this->slaveSetNumber, _IFT_Node2NodePenaltyContact_slaveSet);
+
+    IR_GIVE_OPTIONAL_FIELD(ir, this->prescribedNormal, _IFT_Node2NodePenaltyContact_prescribedNormal);
+}
+
+void
+Node2NodePenaltyContact::postInitialize()
+{
+    masterSet = domain->giveSet(this->masterSetNumber)->giveNodeList();
+    slaveSet  = domain->giveSet(this->slaveSetNumber)->giveNodeList();
 }
 
 
-  void
-  Node2NodePenaltyContact::initializeFrom(InputRecord &ir)
-  {
-    ActiveBoundaryCondition::initializeFrom(ir);
-    
-    IR_GIVE_FIELD(ir, this.penalty, _IFT_Node2NodePenaltyContact_penalty);
-    this->useTangent = ir.hasField(_IFT_Node2NodePenaltyContact_useTangent);
-    
-    
-    IR_GIVE_FIELD(ir, this->masterSet, _IFT_Node2NodePenaltyContact_masterSet);
-    IR_GIVE_FIELD(ir, this->slaveSet, _IFT_Node2NodePenaltyContact_slaveSet);
-    
-    IR_GIVE_OPTIONAL_FIELD(ir, this->prescribedNormal, _IFT_Node2NodePenaltyContact_prescribedNormal);
-    
-  }
+
 
 void
-Node2NodePenaltyContact :: assemble(SparseMtrx &answer, TimeStep *tStep,
-                                    CharType type, const UnknownNumberingScheme &r_s, 
-                                    const UnknownNumberingScheme &c_s, double scale,
-                                    void* lock)
+Node2NodePenaltyContact::assemble(SparseMtrx &answer, TimeStep *tStep,
+                                  CharType type, const UnknownNumberingScheme &r_s,
+                                  const UnknownNumberingScheme &c_s, double scale,
+                                  void *lock)
 {
     if ( !this->useTangent || type != TangentStiffnessMatrix ) {
         return;
     }
 
 
-        FloatMatrix K;
-        IntArray loc, c_loc;
+    FloatMatrix K;
+    IntArray loc, c_loc;
 
-        IntArray dofIdArray = {
-            D_u, D_v
-        };
-	if ( masterSet.giveSize() != slaveSet.giveSize() ) {
-            OOFEM_ERROR("Number of master nodes does not match number of slave nodes")
+    IntArray dofIdArray = {
+        D_u, D_v
+    };
+    if ( masterSet.giveSize() != slaveSet.giveSize() ) {
+        OOFEM_ERROR("Number of master nodes does not match number of slave nodes")
+    }
+
+    for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
+        Node *masterNode = this->giveDomain()->giveNode( masterSet.at(pos) );
+        Node *slaveNode = this->giveDomain()->giveNode( slaveSet.at(pos) );
+
+        masterNode->giveLocationArray(dofIdArray, loc, r_s);
+        slaveNode->giveLocationArray(dofIdArray, c_loc, c_s);
+        loc.followedBy(c_loc);
+
+        this->computeTangentFromContact(K, masterNode, slaveNode, tStep);
+#ifdef _OPENMP
+        if ( lock ) {
+            omp_set_lock( static_cast< omp_lock_t * >( lock ) );
         }
-
-	 for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
-            Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos));
-            Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos));
-
-            masterNode->giveLocationArray(dofIdArray, loc, r_s);
-            slaveNode->giveLocationArray(dofIdArray, c_loc, c_s);
-            loc.followedBy(c_loc);
-
-	    this->computeTangentFromContact(K, masterNode, slaveNode, tStep);
-#ifdef _OPENMP
-	    if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
 #endif
-	    answer.assemble(loc, K);
+        answer.assemble(loc, K);
 #ifdef _OPENMP
-	    if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+        if ( lock ) {
+            omp_unset_lock( static_cast< omp_lock_t * >( lock ) );
+        }
 #endif
-	 }
+    }
 }
 
 void
-Node2NodePenaltyContact :: assembleVector(FloatArray &answer, TimeStep *tStep,
-                                          CharType type, ValueModeType mode,
-                                          const UnknownNumberingScheme &s, FloatArray *eNorms,
-                                          void*lock)
+Node2NodePenaltyContact::assembleVector(FloatArray &answer, TimeStep *tStep,
+                                        CharType type, ValueModeType mode,
+                                        const UnknownNumberingScheme &s, FloatArray *eNorms,
+                                        void *lock)
 {
     if ( type != ExternalForcesVector ) {
         return;
     }
+
+    //IntArray dofIdArray = {D_u, D_v, D_w};
+    IntArray dofIdArray = {
+        D_u, D_v
+    };
+
+    IntArray loc, c_loc;
+    FloatArray fext;
+
     if ( masterSet.giveSize() != slaveSet.giveSize() ) {
-      OOFEM_ERROR("Number of master nodes does not match number of slave nodes");
+        OOFEM_ERROR("Number of master nodes does not match number of slave nodes");
     }
 
     for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
-      Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos));
-      Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos));
-      
-      masterNode->giveLocationArray(dofIdArray, loc, r_s);
-      slaveNode->giveLocationArray(dofIdArray, c_loc, c_s);
-      loc.followedBy(c_loc);
+        Node *masterNode = this->giveDomain()->giveNode( masterSet.at(pos) );
+        Node *slaveNode = this->giveDomain()->giveNode( slaveSet.at(pos) );
+
+        masterNode->giveLocationArray(dofIdArray, loc, s);
+        slaveNode->giveLocationArray(dofIdArray, c_loc, s);
+        this->computeExternalForcesFromContact(fext, masterNode, slaveNode, tStep);
+        loc.followedBy(c_loc);
 #ifdef _OPENMP
-      if (lock) omp_set_lock(static_cast<omp_lock_t*>(lock));
+        if ( lock ) {
+            omp_set_lock( static_cast< omp_lock_t * >( lock ) );
+        }
 #endif
-      answer.assemble(fext, loc);
+        answer.assemble(fext, loc);
 #ifdef _OPENMP
-      if (lock) omp_unset_lock(static_cast<omp_lock_t*>(lock));
+        if ( lock ) {
+            omp_unset_lock( static_cast< omp_lock_t * >( lock ) );
+        }
 #endif
     }
 }
 
 
 
-    void Node2NodePenaltyContact::giveLocationArrays(std::vector< IntArray > &rows, std::vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
-    {
-        IntArray r_loc, c_loc;
-        rows.resize(masterSet.giveSize()*2);
-        cols.resize(masterSet.giveSize()*2);
-        IntArray dofIdArray = {
-            D_u, D_v
-        };
-
-        int arraypos = 0;
-        for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
-            Node *masterNode = this->giveDomain()->giveNode(masterSet.at(pos));
-            Node *slaveNode = this->giveDomain()->giveNode(slaveSet.at(pos));
-
-            masterNode->giveLocationArray(dofIdArray, r_loc, r_s);
-            slaveNode->giveLocationArray(dofIdArray, c_loc, c_s);
-
-            // column block
-            rows[arraypos] = r_loc;
-            cols[arraypos] = c_loc;
-            rows[arraypos + 1] = c_loc;
-            cols[arraypos + 1] = r_loc;
-
-            //arraypos++;
-            arraypos += 2;
-        }
-    }
-
-
-
-
-
-
-
-
-
-    void Node2NodePenaltyContact::computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
-    {
-        double gap;
-        FloatArray Nv;
-        this->computeGap(gap, masterNode, slaveNode, tStep);
-        this->computeNvMatrixAt(Nv, masterNode, slaveNode, tStep);
-        answer.beDyadicProductOf(Nv, Nv);
-        answer.times(this->penalty);
-        if ( gap > 0.0 ) {
-            answer.zero();
-        }
-    }
-<<<<<<< HEAD
-}
-
-void
-Node2NodePenaltyContact :: computeGap(double &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
+void Node2NodePenaltyContact::giveLocationArrays(std::vector< IntArray > &rows, std::vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
+    IntArray r_loc, c_loc;
+    rows.resize(masterSet.giveSize() * 2);
+    cols.resize(masterSet.giveSize() * 2);
+    IntArray dofIdArray = {
+        D_u, D_v
+    };
+
+    int arraypos = 0;
+    for ( int pos = 1; pos <= masterSet.giveSize(); ++pos ) {
+        Node *masterNode = this->giveDomain()->giveNode( masterSet.at(pos) );
+        Node *slaveNode = this->giveDomain()->giveNode( slaveSet.at(pos) );
+
+        masterNode->giveLocationArray(dofIdArray, r_loc, r_s);
+        slaveNode->giveLocationArray(dofIdArray, c_loc, c_s);
+
+        // column block
+        rows [ arraypos ] = r_loc;
+        cols [ arraypos ] = c_loc;
+        rows [ arraypos + 1 ] = c_loc;
+        cols [ arraypos + 1 ] = r_loc;
+
+        //arraypos++;
+        arraypos += 2;
+    }
+}
+
+
+
+
+
+
+
+
+
+void Node2NodePenaltyContact::computeTangentFromContact(FloatMatrix &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
+{
+    double gap;
+    FloatArray Nv;
+    this->computeGap(gap, masterNode, slaveNode, tStep);
+    this->computeNvMatrixAt(Nv, masterNode, slaveNode, tStep);
+    answer.beDyadicProductOf(Nv, Nv);
+    answer.times(this->penalty);
+    if ( gap > 0.0 ) {
+        answer.zero();
+    }
+}
+
+void Node2NodePenaltyContact::computeGap(double &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
+{
+    //int dimension = masterNode->giveNumberOfDofs();
     FloatArray uS, uM;
     auto xs = slaveNode->giveCoordinates();
     auto xm = masterNode->giveCoordinates();
-    FloatArray normal = xs - xm;
+    FloatArray normal;
+    if ( prescribedNormal.giveSize() == masterNode->giveNumberOfDofs() ) {
+        normal = prescribedNormal;
+    } else   {
+        normal = xs - xm;
+    }
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
-        OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
-                    masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
-    } else {
+        OOFEM_ERROR( "Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
+                     masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
+    } else   {
         normal.times(1.0 / norm);
     }
 
@@ -228,93 +244,43 @@ Node2NodePenaltyContact :: computeGap(double &answer, Node *masterNode, Node *sl
 }
 
 
-void
-Node2NodePenaltyContact :: computeNormalMatrixAt(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *TimeStep)
+void Node2NodePenaltyContact::computeNvMatrixAt(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *TimeStep)
 {
-    const auto &xs = slaveNode->giveCoordinates();
-    const auto &xm = masterNode->giveCoordinates();
-    auto normal = xs - xm;
+    //int dimension = masterNode->giveNumberOfDofs();
+
+    FloatArray normal;
+    if ( prescribedNormal.giveSize() == masterNode->giveNumberOfDofs() ) {
+        normal = prescribedNormal;
+    } else   {
+        const auto &xs = slaveNode->giveCoordinates();
+        const auto &xm = masterNode->giveCoordinates();
+        normal = xs - xm;
+    }
     double norm = normal.computeNorm();
     if ( norm < 1.0e-8 ) {
-        OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
-                    masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
-    } else {
+        OOFEM_ERROR( "Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
+                     masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() );
+    } else   {
         normal.times(1.0 / norm);
-=======
-
-    void Node2NodePenaltyContact::computeGap(double &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
-    {
-        int dimension = masterNode->giveNumberOfDofs();
-        FloatArray xs, xm, uS, uM;
-        xs = *slaveNode->giveCoordinates();
-        xm = *masterNode->giveCoordinates();
-        FloatArray normal;
-        if ( prescribedNormal.giveSize() == masterNode->giveNumberOfDofs() ) {
-            normal = prescribedNormal;
-        }
-        else {
-            normal = xs - xm;
-        }
-        double norm = normal.computeNorm();
-        if ( norm < 1.0e-8 ) {
-            OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
-                masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber());
-        }
-        else {
-            normal.times(1.0 / norm);
-        }
-
-        slaveNode->giveUnknownVector(uS, {D_u, D_v}, VM_Total, tStep, true);
-        masterNode->giveUnknownVector(uM, {D_u, D_v}, VM_Total, tStep, true);
-        xs.add(uS);
-        xm.add(uM);
-        FloatArray dx = xs - xm;
-        answer = dx.dotProduct(normal);
     }
+    // The normal is not updated for node2node which is for small deformations only
+    // C = {n -n}
+    answer = {
+        normal.at(1), normal.at(2),
+        -normal.at(1), -normal.at(2)
+    };
+}
 
 
-    void Node2NodePenaltyContact::computeNvMatrixAt(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *TimeStep)
-    {
-        int dimension = masterNode->giveNumberOfDofs();
-        
-        FloatArray normal;
-        if ( prescribedNormal.giveSize() == masterNode->giveNumberOfDofs() ) {
-            normal = prescribedNormal;
-        }
-        else {
-            FloatArray xs, xm;
-            xs = *slaveNode->giveCoordinates();
-            xm = *masterNode->giveCoordinates();
-            normal = xs - xm;
-        }
-        double norm = normal.computeNorm();
-        if ( norm < 1.0e-8 ) {
-            OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.",
-                masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber());
-        }
-        else {
-            normal.times(1.0 / norm);
-        }
-        // The normal is not updated for node2node which is for small deformations only
-        // C = {n -n}
-        answer = {
-            normal.at(1), normal.at(2),
-            -normal.at(1), -normal.at(2)
-        };
->>>>>>> contact
+void Node2NodePenaltyContact::computeExternalForcesFromContact(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
+{
+    double gap;
+    this->computeGap(gap, masterNode, slaveNode, tStep);
+    this->computeNvMatrixAt(answer, masterNode, slaveNode, tStep);
+    if ( gap < 0.0 ) {
+        answer.times(penalty * gap);
+    } else   {
+        answer.times(0);
     }
-
-
-    void Node2NodePenaltyContact::computeExternalForcesFromContact(FloatArray &answer, Node *masterNode, Node *slaveNode, TimeStep *tStep)
-    {
-        double gap;
-        this->computeGap(gap, masterNode, slaveNode, tStep);
-        this->computeNvMatrixAt(answer, masterNode, slaveNode, tStep);
-        if ( gap < 0.0 ) {
-            answer.times(penalty * gap);
-        }
-        else {
-            answer.times(0);
-        }
-    }
+}
 } // namespace oofem

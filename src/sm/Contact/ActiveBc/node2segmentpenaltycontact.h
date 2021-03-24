@@ -67,11 +67,11 @@ class Node;
 class OOFEM_EXPORT Node2SegmentPenaltyContact : public ActiveBoundaryCondition
 {
 private:
-  bool useTangent; ///< Determines if tangent should be used.
-  double penalty;
-  IntArray nodeSet;
-  IntArray segmentSet;
-  FloatArray prescribedNormal;
+    bool useTangent; ///< Determines if tangent should be used.
+    double penalty;
+    IntArray nodeSet;
+    IntArray segmentSet;
+    FloatArray prescribedNormal;
 public:
 
     /// Constructor.
@@ -79,29 +79,28 @@ public:
     /// Destructor.
     virtual ~Node2SegmentPenaltyContact() {};
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    void initializeFrom(InputRecord &ir) override;
 
-    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0) override;
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, double scale = 1.0, void *lock = nullptr) override;
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) override;
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms = NULL, void *lock = nullptr) override;
 
 
-    virtual const char *giveClassName() const { return "Node2SegmentPenaltyContact"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Node2SegmentPenaltyContact_Name; }
+    virtual const char *giveClassName() const override { return "Node2SegmentPenaltyContact"; }
+    virtual const char *giveInputRecordName() const override { return _IFT_Node2SegmentPenaltyContact_Name; }
 
 
 
     void giveLocationArrays(std::vector< IntArray > &rows, std::vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) override;
 
 private:
-    void  computeTangentFromContact(FloatMatrix & answer, Node * node, ContactSegment * segment, TimeStep * tStep);
+    void  computeTangentFromContact(FloatMatrix &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
     void computeGap(double &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
-    void computeExternalForcesFromContact(FloatArray & answer, Node * node, ContactSegment * segment, TimeStep * tStep);
+    void computeExternalForcesFromContact(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
     void giveLocationArray(IntArray &loc, const UnknownNumberingScheme &ns, const Node *node, const ContactSegment *segment);
-    void computeNvMatrixAt(FloatArray & answer, Node * node, ContactSegment * segment, TimeStep * tStep);
-    void computeTvMatrixAt( FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep );
-    void computeBvMatrixAt( FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep );
-
+    void computeNvMatrixAt(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
+    void computeTvMatrixAt(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
+    void computeBvMatrixAt(FloatArray &answer, Node *node, ContactSegment *segment, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // node2nodecontact_h

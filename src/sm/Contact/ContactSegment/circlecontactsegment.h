@@ -44,30 +44,28 @@
 #include "classfactory.h"
 
 #define _IFT_CircleContactSegment_Name "circlecontactsegment"
- //#define _IFT_FunctionContactSegment_function "function"
+//#define _IFT_FunctionContactSegment_function "function"
 #define _IFT_CircleContactSegment_centerpoint "centerpoint"
 #define _IFT_CircleContactSegment_radius "radius"
 
 namespace oofem {
-    class CircleContactSegment : public FunctionContactSegment
-    {
-    public:
-        CircleContactSegment(int n, Domain *aDomain) : FunctionContactSegment(n, aDomain) { ; }
-        ~CircleContactSegment() {};
+class CircleContactSegment : public FunctionContactSegment
+{
+public:
+    CircleContactSegment(int n, Domain *aDomain) : FunctionContactSegment(n, aDomain) {; }
+    ~CircleContactSegment() {};
 
-        IRResultType initializeFrom(InputRecord * ir) override;
+    void initializeFrom(InputRecord &ir) override;
 
-        const char *giveClassName() const override { return "Circlecontactsegment"; }
-        const char *giveInputRecordName() const override { return _IFT_CircleContactSegment_Name; }
+    const char *giveClassName() const override { return "Circlecontactsegment"; }
+    const char *giveInputRecordName() const override { return _IFT_CircleContactSegment_Name; }
 
-    private:
-        double radius;
-        FloatArray centerPoint;
+private:
+    double radius;
+    FloatArray centerPoint;
 
-    protected:
+protected:
 
-        void computeContactPoint(FloatArray& answer, FloatArray& normal, const FloatArray& nodeCoords) override;
-
-    };
-
+    void computeContactPoint(FloatArray &answer, FloatArray &normal, const FloatArray &nodeCoords) override;
+};
 }
