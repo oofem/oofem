@@ -627,7 +627,9 @@ StructuralMaterial :: give3dMaterialStiffnessMatrix_dPdF(MatResponseMode mode,
 {
     auto status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
     const auto &vF = status->giveTempFVector();
-    const auto &vS = status->giveTempStressVector();
+    FloatArray vS;
+    StructuralMaterial :: giveFullSymVectorForm(vS, status->giveTempStressVector(), gp->giveMaterialMode() );
+
     auto dSdE = this->give3dMaterialStiffnessMatrix(mode, gp, tStep);
     return convert_dSdE_2_dPdF_3D(dSdE, vS, vF);
 }
