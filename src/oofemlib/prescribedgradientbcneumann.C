@@ -382,22 +382,23 @@ void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Elem
         // Evaluate the normal;
         double detJ = interp->boundaryEvalNormal(normal, iBndIndex, lcoords, cellgeo);
 
-        interp->boundaryEvalN(n, iBndIndex, lcoords, cellgeo);
+        // Compute global coordinates of Gauss point
+        FloatArray globalCoord;
+
+        interp->boundaryLocal2Global(globalCoord, iBndIndex, lcoords, cellgeo);
+
+        // Compute local coordinates on the element
+        FloatArray bulkElLocCoords;
+        e->computeLocalCoordinates(bulkElLocCoords, globalCoord);
+
         // If cracks cross the edge, special treatment is necessary.
         // Exploit the XfemElementInterface to minimize duplication of code.
         if ( xfemElInt != NULL && domain->hasXfemManager() ) {
-            // Compute global coordinates of Gauss point
-            FloatArray globalCoord;
 
-            interp->boundaryLocal2Global(globalCoord, iBndIndex, lcoords, cellgeo);
-
-            // Compute local coordinates on the element
-            FloatArray locCoord;
-            e->computeLocalCoordinates(locCoord, globalCoord);
-
-            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, * e, false);
+            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, bulkElLocCoords, * e, false);
         } else {
             // Evaluate the velocity/displacement coefficients
+            interp->evalN(n, bulkElLocCoords, cellgeo);
             nMatrix.beNMatrixOf(n, nsd);
         }
 

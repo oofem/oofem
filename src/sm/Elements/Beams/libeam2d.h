@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2021   Borek Patzak
  *
  *
  *
@@ -39,6 +39,8 @@
 #include "sm/CrossSections/layeredcrosssection.h"
 
 #define _IFT_LIBeam2d_Name "libeam2d"
+#define _IFT_LIBeam2d_XZ "xz"
+#define _IFT_LIBeam2d_XY "xy"
 
 namespace oofem {
 class FEI2dLineLin;
@@ -51,10 +53,13 @@ class LIBeam2d : public StructuralElement, public LayeredCrossSectionInterface
 {
 protected:
     /// Interpolation
-    static FEI2dLineLin interpolation;
+    static FEI2dLineLin interpolationXZ;
+    static FEI2dLineLin interpolationXY;
 
 public:
     double pitch, length;
+    bool xz = true;
+    bool xy = false; //by default element in xz plane
 
     LIBeam2d(int n, Domain * aDomain);
     virtual ~LIBeam2d() { }
