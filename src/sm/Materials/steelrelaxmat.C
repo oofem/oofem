@@ -55,8 +55,6 @@ SteelRelaxMat :: hasMaterialModeCapability(MaterialMode mode) const
     return mode == _1dMat;
 }
 
-
-
 // reads the model parameters from the input file
 void
 SteelRelaxMat :: initializeFrom(InputRecord &ir)
@@ -90,11 +88,7 @@ SteelRelaxMat :: initializeFrom(InputRecord &ir)
     IR_GIVE_OPTIONAL_FIELD(ir, this->k2, _IFT_SteelRelaxMat_k2);
     IR_GIVE_OPTIONAL_FIELD(ir, this->rho1000, _IFT_SteelRelaxMat_rho1000);
 
-    //IR_GIVE_OPTIONAL_FIELD(ir, this->stiffnessFactor, _IFT_SteelRelaxMat_stiffnessFactor);
-
     IR_GIVE_FIELD(ir, this->timeFactor, _IFT_SteelRelaxMat_timeFactor);
-
-    //    IR_GIVE_OPTIONAL_FIELD(ir, this->prestress, _IFT_SteelRelaxMat_prestress);
 
     IR_GIVE_FIELD(ir, this->charStrength, _IFT_SteelRelaxMat_charStrength);
 
@@ -110,7 +104,6 @@ SteelRelaxMat :: initializeFrom(InputRecord &ir)
     // tolerance = 1 Pa
     // MPa -> SF = 1e6 -> tol = 1
     // Pa -> SF = 1 -> tol = 1
-    //this->tolerance =  1. / this->stiffnessFactor;
     this->tolerance =  1. / 1.e6;
     IR_GIVE_OPTIONAL_FIELD(ir, this->tolerance, _IFT_SteelRelaxMat_tolerance);
 }
@@ -148,20 +141,17 @@ SteelRelaxMat :: giveRealStressVector(FloatArray &answer,
     if ( this->Approach == EquivTime_EC2 ) {
         double lossIncrement;
 
-        StructuralMaterial :: giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Incremental);
-
-        strainIncrement.beDifferenceOf( reducedStrain, status->giveStrainVector() );
-        stressIncrement = strainIncrement.at(1) * this->E;
-
-        //   subtract stress increment due to prestress losses in the current time step
-
-
         if ( status->giveStressVector().giveSize() ) {
             stressVector = status->giveStressVector();
         } else {
             stressVector.resize(1);
             stressVector.zero();
         }
+	
+	StructuralMaterial :: giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Incremental);
+
+        strainIncrement.beDifferenceOf( reducedStrain, status->giveStrainVector() );
+        stressIncrement = strainIncrement.at(1) * this->E;
 
         stressVector.at(1) += stressIncrement;
 
@@ -172,6 +162,7 @@ SteelRelaxMat :: giveRealStressVector(FloatArray &answer,
 
         status->letTempStrainVectorBe(totalStrain);
         status->letTempStressVectorBe(stressVector);
+	
     } else if ( this->Approach == Bazant_EC2 ) {
         double prevIterTempStress;
         int i = 0;
@@ -186,7 +177,7 @@ SteelRelaxMat :: giveRealStressVector(FloatArray &answer,
                 stressVector.zero();
             }
 
-            // subtracts both thermal strain increment and strain due to cable relaxation
+            // get strain increment without strain due to cable relaxation and thermal strain
             this->giveStressDependentPartOfStrainVector(reducedStrain, gp, totalStrain, tStep, VM_Incremental);
 
             strainIncrement.beDifferenceOf( reducedStrain, status->giveStrainVector() );
@@ -207,7 +198,7 @@ SteelRelaxMat :: giveRealStressVector(FloatArray &answer,
         } while ( fabs( prevIterTempStress - status->giveTempStressVector().at(1) ) >= this->tolerance );
 
 
-        if ( i > 30 ) {
+        if ( i > 50 ) {
             OOFEM_WARNING("Criterion of the algorithm reached in %d iterations, consider increasing tolerance", i);
         }
     }
@@ -261,6 +252,7 @@ SteelRelaxMat :: evalStressRelaxationAtConstStrain(double &answer, GaussPoint *g
     double prestress;
 
     SteelRelaxMatStatus *status = static_cast< SteelRelaxMatStatus * >( this->giveStatus(gp) );
+    // prestress loss is not calculated in the time step when prestressing is applied
     prestress = status->givePrestress();
 
     answer = 0.;
@@ -276,7 +268,7 @@ SteelRelaxMat :: evalStressRelaxationAtConstStrain(double &answer, GaussPoint *g
     }
 }
 
-
+// this method is active only in the case of EC2 approach
 void
 SteelRelaxMat :: computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoint *gp, TimeStep *tStep, double stress)
 {
@@ -293,7 +285,7 @@ SteelRelaxMat :: computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoin
 
     // "initial" value of prestress is the sum of the current stress plus the cumulative subsequent relaxation
     prestress = stress + lossesUpTillNow;
-    status->setPrestress(prestress);
+    status->setTempPrestress(prestress);
 
     answer = 0.;
 
@@ -303,94 +295,67 @@ SteelRelaxMat :: computeIncrOfPrestressLossAtVarStrain(double &answer, GaussPoin
         k = 0.75 * ( 1. - mu );
         lambda = 1000. * this->timeFactor / 24.;
 
-
         // compute total loss for updated prestress and time equiv
         double t_equiv;
         t_equiv = pow( ( lossesUpTillNow / ( prestress * rho ) ), ( 1. / k ) ) * lambda;
         this->evalStressRelaxationAtConstStrain( loss, gp, t_equiv + tStep->giveTimeIncrement() );
 
-
         // set temporary sum of losses
         status->setTempRelaxIntVariable(loss);
 
         // subtract the preceding sum of losses to get the increment
-        loss -= lossesUpTillNow;
-
-        answer = loss;
+        answer = loss - lossesUpTillNow;
     }
 }
-
-
-
-
 
 
 
 void
 SteelRelaxMat :: computeStressRelaxationStrainVector(FloatArray &answer, GaussPoint *gp, const FloatArray &totalStrain, TimeStep *tStep, ValueModeType mode)
 {
-    // here we deal with total strain vector with subtracted tempreature
-
     SteelRelaxMatStatus *status = static_cast< SteelRelaxMatStatus * >( this->giveStatus(gp) );
-
     double averageStress = 0.;
-    int n = 0;
     double mu = 0.;
-
     double k, rho, lambda;
-
     double dt = tStep->giveTimeIncrement();
 
-    FloatArray temperFreeStrain, temperFreeStrainIncrement;
-    StructuralMaterial :: giveStressDependentPartOfStrainVector(temperFreeStrain, gp, totalStrain, tStep, VM_Total);
+    // get average strain due to stress relaxation
+    double averageRelaxationStrain = 0.5 * ( status->giveTempRelaxIntVariable() + status->giveRelaxIntVariable() );
 
-    double averageMechStrain = temperFreeStrain.at(1);
-
-    double prestress;
-    prestress = status->givePrestress();
-
-    if ( prestress > 0. ) {
-        temperFreeStrainIncrement = totalStrain; // result = eps i+1 tot
-        temperFreeStrainIncrement.subtract( status->giveStrainVector() ); // result = delta eps tot
-
-        // epsilon temperature increment
-        auto deltaEpsTemperature = this->computeStressIndependentStrainVector(gp, tStep, VM_Incremental);
-
-        temperFreeStrainIncrement.subtract(deltaEpsTemperature); // results = delta epsilon stress
-
-        averageMechStrain -= 0.5 * temperFreeStrainIncrement.at(1);
+    // get average stress
+    int n = 0;
+    if ( status->giveStressVector().at(1) > 0. ) {
+      averageStress += status->giveStressVector().at(1);
+      n++;
     }
+    
+    if ( status->giveTempStressVector().at(1) > 0 ) {
+      averageStress += status->giveTempStressVector().at(1);
+      n++;
+    }
+
+    if ( n > 0 ) {
+      averageStress /= n;
+    }
+
+    if ( ! status->givePrestress() ) {
+      status->setTempPrestress(averageStress);
+    }
+
+		       
+    double averageMechStrain = averageRelaxationStrain + averageStress / this->E;
 
     double F = averageMechStrain * this->E;
-
-
-    if ( prestress == 0. ) {
-        prestress = F;
-        status->setPrestress(prestress);
-    }
-
+    
     double relaxStrainIncrement;
-
-    // different approach for the first step and for the following steps
+    // different approach for the first step after prestressing and for the following steps
+    // when the prestressing is applied, the losses are assumed as zero
     if (  status->giveRelaxIntVariable() == 0. ) {
-        // assume that the strain is constant and equal to zero - eval from Eurocode function
+        // use Eurocode function for the first prestress loss
         this->evalStressRelaxationAtConstStrain(relaxStrainIncrement, gp, dt);
         // convert into strain
         relaxStrainIncrement /= this->E;
     } else {
-        if ( status->giveStressVector().giveSize() ) {
-            averageStress += status->giveStressVector().at(1);
-            n++;
-        }
-
-        if ( status->giveTempStressVector().giveSize() ) {
-            averageStress += status->giveTempStressVector().at(1);
-            n++;
-        }
-
-        if ( n > 0 ) {
-            averageStress /= n;
-        }
 
         // governing equations 3.28-3.30 rewritten to the following form
         //
@@ -407,7 +372,9 @@ SteelRelaxMat :: computeStressRelaxationStrainVector(FloatArray &answer, GaussPo
         //       ... timeFactor = 1 for day / 24 for hour / 86400 for sec, etc.
 
         relaxStrainIncrement = 0.;
+	double prestress = status->giveTempPrestress();
 
+	
         if ( averageStress > this->relRelaxBound * this->charStrength ) {
             mu = prestress / this->charStrength;
             rho = this->k1 * this->rho1000 * exp(this->k2 * mu) * 1.e-5;
@@ -454,7 +421,7 @@ SteelRelaxMatStatus :: printOutputAt(FILE *file, TimeStep *tStep) const
     fprintf(file, "%.4e ", relaxIntVariable);
     fprintf(file, "\n");
 
-    fprintf(file, " initialPrestress  ");
+    fprintf(file, " prestress  ");
     fprintf(file, "%.4e ", prestress);
     fprintf(file, "\n");
 }
@@ -466,6 +433,7 @@ void SteelRelaxMatStatus :: initTempStatus()
     StructuralMaterialStatus :: initTempStatus();
 
     tempRelaxIntVariable = relaxIntVariable;
+    tempPrestress = prestress;
 }
 
 
@@ -476,6 +444,12 @@ SteelRelaxMatStatus :: updateYourself(TimeStep *tStep)
     StructuralMaterialStatus :: updateYourself(tStep);
 
     relaxIntVariable = tempRelaxIntVariable;
+
+    prestress = tempPrestress;
+    
+    //    if ( this->prestress > 0.) {
+    // prestressFlag = true
+	
 }
 
 

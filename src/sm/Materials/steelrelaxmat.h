@@ -162,6 +162,8 @@ public:
 
     bool hasMaterialModeCapability(MaterialMode mode) const override;
 
+    bool hasCastingTimeSupport() const override { return true; }
+
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) const override { return true; }
 
     const char *giveInputRecordName() const override { return _IFT_SteelRelaxMat_Name; }
@@ -187,6 +189,9 @@ protected:
     double tempRelaxIntVariable = 0.;
 
     double prestress = 0.;
+    double tempPrestress = 0.;
+    // becomes activated at the end of the time step when the material becomes prestressed
+  //    bool prestressedFlag = false;
 
 public:
     SteelRelaxMatStatus(GaussPoint *g);
@@ -195,7 +200,8 @@ public:
     double giveTempRelaxIntVariable() const { return tempRelaxIntVariable; }
     double giveRelaxIntVariable() const { return relaxIntVariable; }
 
-    void setPrestress(double src) { prestress = src; }
+    void setTempPrestress(double src) { tempPrestress = src; }
+    double giveTempPrestress() const { return tempPrestress; }
     double givePrestress() const { return prestress; }
 
     void printOutputAt(FILE *file, TimeStep *tStep) const override;

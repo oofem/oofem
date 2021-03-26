@@ -67,8 +67,8 @@ ConstantFunction 1 f(t) 1.0
 HeavisideLTF 2 origin 0.0 value 1.0
 #
 #%BEGIN_CHECK% tolerance 5.e-3
-#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.237900e+02 
-#ELEMENT tStep 10 number 3 gp 1 keyword 1 component 1 value 7.349400e+02
-#ELEMENT tStep 25 number 1 gp 1 keyword 1 component 1 value 6.012400e+02
-#ELEMENT tStep 25 number 3 gp 1 keyword 1 component 1 value 6.171000e+02
+#ELEMENT tStep 10 number 1 gp 1 keyword 1 component 1 value 7.35062615e+02
+#ELEMENT tStep 10 number 3 gp 1 keyword 1 component 1 value 7.34992211e+02
+#ELEMENT tStep 25 number 1 gp 1 keyword 1 component 1 value 6.19512976e+02
+#ELEMENT tStep 25 number 3 gp 1 keyword 1 component 1 value 6.18253822e+02
 #%END_CHECK%
