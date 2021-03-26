@@ -149,6 +149,9 @@ set (sm_interface_elements
 
 set (sm_boundary_conditions
     Deprecated/prescribedgenstrainshell7.C
+        prescribedgradientbcdirichletRC.C
+        prescribedgradientbcneumannRC.C
+        prescribedgradientmultiple.C
     )
 
 set (sm_crosssection
@@ -232,6 +235,7 @@ set (sm_material
     Materials/RheoChainMaterials/mpsdammat.C
     Materials/RheoChainMaterials/eurocode2creep.C
     Materials/structuralfe2material.C
+    Materials/structuralslipfe2material.C
     Materials/rcsd.C 
     Materials/rcsde.C 
     Materials/rcsdnl.C

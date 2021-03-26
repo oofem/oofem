@@ -62,6 +62,9 @@
 #ifdef __SM_MODULE
 #include "sm/Elements/nlstructuralelement.h"
 #include "sm/EngineeringModels/structengngmodel.h"
+#include "sm/prescribedgradientbcdirichletRC.h"
+#include "sm/prescribedgradientbcneumannRC.h"
+#include "sm/prescribedgradientmultiple.h"
 #endif
 
 
@@ -450,7 +453,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     */
 
     // Output weak periodic boundary conditions
-    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1;
+    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1, pgdcount=1, pgncount=1, pgmcount=1;
 
     for ( auto &gbc : domain->giveBcs() ) {
         WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( gbc.get() );
@@ -486,6 +489,39 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             }
             fprintf(FID, "];\n");
             mcount++;
+        }
+        PrescribedGradientBCDirichletRC *pgd = dynamic_cast<PrescribedGradientBCDirichletRC *>( gbc.get() );
+        if (pgd) {
+            FloatArray stress;
+            pgd->computeField(stress, tStep);
+            fprintf(FID, "\tspecials.prescribedgradientbcdirichletrc{%u}.stress=[", pgdcount);
+            for ( auto i : stress ) {
+                fprintf(FID, "%15e\t", i);
+            }
+            fprintf(FID, "];\n");
+            pgd++;
+        }
+        PrescribedGradientBCNeumannRC *pgn = dynamic_cast<PrescribedGradientBCNeumannRC *>( gbc.get() );
+        if (pgn) {
+            FloatArray stress;
+            pgn->computeField(stress, tStep);
+            fprintf(FID, "\tspecials.prescribedgradientbcneumannrc{%u}.stress=[", pgncount);
+            for ( auto i : stress ) {
+                fprintf(FID, "%15e\t", i);
+            }
+            fprintf(FID, "];\n");
+            pgn++;
+        }
+        PrescribedGradientMultiple *pgm = dynamic_cast<PrescribedGradientMultiple *>( gbc.get() );
+        if (pgm) {
+            FloatArray stress;
+            pgm->computeField(stress, tStep);
+            fprintf(FID, "\tspecials.prescribedgradientmultiple{%u}.stress=[", pgmcount);
+            for ( auto i : stress ) {
+                fprintf(FID, "%15e\t", i);
+            }
+            fprintf(FID, "];\n");
+            pgm++;
         }
     }
 }

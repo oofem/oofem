@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2021   Borek Patzak
  *
  *
  *
@@ -55,7 +55,7 @@ namespace oofem {
  */
 class Concrete3 : public RCM2Material
 {
-    enum Concrete3_softeningMode { linearSoftening, exponentialSoftening };
+    enum Concrete3_softeningMode { linearSoftening, exponentialSoftening, hordijkSoftening };
 
 private:
     //double shearRetFactor; // shearRetentionFactor

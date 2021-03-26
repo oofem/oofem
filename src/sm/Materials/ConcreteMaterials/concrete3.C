@@ -10,7 +10,7 @@
  *
  *             OOFEM : Object Oriented Finite Element Code
  *
- *               Copyright (C) 1993 - 2013   Borek Patzak
+ *               Copyright (C) 1993 - 2021   Borek Patzak
  *
  *
  *
@@ -137,9 +137,17 @@ Concrete3 :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
         Ft = this->computeStrength(gp, Le);
 
         return 2.0 * Gf / ( Le * Ft );
-    } else {
+    } else if ( softeningMode == exponentialSoftening ) {
         //return Gf/(Le*Ft); // Exponential softening
         return 1.e6; // Exponential softening
+    } else {
+        RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
+        double Le, Gf, Ft;
+
+        Le = status->giveCharLength(i);
+        Gf = this->give(pscm_Gf, gp);
+        Ft = this->computeStrength(gp, Le);
+        return 5.136* Gf/(Le*Ft); // Hordijk softening
     }
 }
 
@@ -247,6 +255,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
 {
     //double Ee, Gf;
     double Cf, Gf, Ft, Le, ef, minEffStrainForFullyOpenCrack;
+    double emax, c1 {3.}, c2 {6.93};
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
 
     //
@@ -258,6 +267,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     Gf = this->give(pscm_Gf, gp);
     Ft = this->give(pscm_Ft, gp); ///@todo This isn't used. Is it right?! / Micke
     Le = status->giveCharLength(i);
+    emax = status->giveTempMaxCrackStrain(i);
 
     Ft = this->computeStrength(gp, Le);
     minEffStrainForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
@@ -266,25 +276,37 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( softeningMode == linearSoftening ) {
                 if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                    ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                    ( emax >= minEffStrainForFullyOpenCrack ) ) {
                     // fully open crack - no stiffness
                     Cf = 0.;
-                } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
+                } else if ( crackStrain >= emax ) {
                     // further softening
                     Cf = -Ft / minEffStrainForFullyOpenCrack;
                 } else {
                     // unloading or reloading regime
-                    Cf = Ft * ( minEffStrainForFullyOpenCrack - status->giveTempMaxCrackStrain(i) ) /
-                         ( status->giveTempMaxCrackStrain(i) * minEffStrainForFullyOpenCrack );
+                    Cf = Ft * ( minEffStrainForFullyOpenCrack - emax ) /
+                         ( emax * minEffStrainForFullyOpenCrack );
                 }
-            } else { // exponential softening
+            } else if ( softeningMode == exponentialSoftening ) { // exponential softening
                 ef = Gf / ( Le * Ft );
-                if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
+                if ( crackStrain >= emax ) {
                     // further softening
                     Cf = -Ft / ef *exp(-crackStrain / ef);
                 } else {
                     // unloading or reloading regime
-                    Cf = Ft / status->giveTempMaxCrackStrain(i) * exp(-status->giveTempMaxCrackStrain(i) / ef);
+                    Cf = Ft / emax * exp(-emax / ef);
+                }
+            } else { //Hodrijk softening
+                ef = 5.136 * Gf / ( Le * Ft );
+                if ( (crackStrain >= ef) || (emax >= ef) ) {
+                    Cf = 0;
+                } else if ( crackStrain >= emax ) {
+                    //further softening - negative stiffness
+                    //this is derivative of the stress wrt to strain in the softening region
+                    Cf = Ft * ( ( 3. * c1 * c1 * c1 * crackStrain * crackStrain * exp(-( c2 * crackStrain ) / ef) ) /  ( ef * ef * ef ) - ( c2 * exp(-( c2 * crackStrain ) / ef) * ( c1 * c1 * c1 * crackStrain * crackStrain * crackStrain + ef * ef * ef ) ) / ( ef * ef * ef * ef ) - ( exp(-c2) * ( c1 * c1 * c1 + 1. ) ) / ef );
+                } else {
+                    // unloading or reloading regime
+                    Cf = Ft / emax * ( ( 1. + pow( ( c1 * emax / ef ), 3. ) ) * exp(-c2 * emax / ef) - emax / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
                 }
             }
         } else {
@@ -294,17 +316,20 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( softeningMode == linearSoftening ) {
                 if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                    ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                    ( emax >= minEffStrainForFullyOpenCrack ) ) {
                     // fully open crack - no stiffness
                     Cf = 0.;
                 } else {
                     // unloading or reloading regime
-                    Cf = Ft * ( minEffStrainForFullyOpenCrack - status->giveTempMaxCrackStrain(i) ) /
-                         ( status->giveTempMaxCrackStrain(i) * minEffStrainForFullyOpenCrack );
+                    Cf = Ft * ( minEffStrainForFullyOpenCrack - emax ) /
+                         ( emax * minEffStrainForFullyOpenCrack );
                 }
-            } else { // exponential softening
+            } else if ( softeningMode == exponentialSoftening ) { // exponential softening
                 ef = Gf / ( Le * Ft );
-                Cf = Ft / status->giveTempMaxCrackStrain(i) * exp(-status->giveTempMaxCrackStrain(i) / ef);
+                Cf = Ft / emax * exp(-emax / ef);
+            } else { // Hordijk softening
+                ef = 5.136 * Gf / ( Le * Ft );
+                Cf = Ft / emax * ( ( 1. + pow( ( c1 * emax / ef ), 3. ) ) * exp(-c2 * emax / ef) - emax / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
             }
         } else {
             Cf = 0.;
@@ -363,7 +388,7 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
 // returns receivers Normal Stress in crack i  for given cracking strain
 //
 {
-    double Cf, Ft, Gf, Le, answer, ef, minEffStrainForFullyOpenCrack;
+    double Cf, Ft, Gf, Le, answer, ef, minEffStrainForFullyOpenCrack, c1 {3.}, c2 {6.93}, emax;
     RCM2MaterialStatus *status = static_cast< RCM2MaterialStatus * >( this->giveStatus(gp) );
     minEffStrainForFullyOpenCrack = this->giveMinCrackStrainsForFullyOpenCrack(gp, i);
 
@@ -371,14 +396,15 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
     Le = status->giveCharLength(i);
     Ft = this->computeStrength(gp, Le);
     Gf = this->give(pscm_Gf, gp);
+    emax = status->giveTempMaxCrackStrain(i);
 
     if ( this->checkSizeLimit(gp, Le) ) {
         if ( softeningMode == linearSoftening ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                ( emax >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 answer = 0.;
-            } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
+            } else if ( crackStrain >= emax ) {
                 // further softening
                 answer = Ft + Cf * crackStrain;
             } else if ( crackStrain <= 0. ) {
@@ -388,19 +414,35 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
             } else {
                 // unloading or reloading regime
                 answer = crackStrain * Ft *
-                         ( minEffStrainForFullyOpenCrack - status->giveTempMaxCrackStrain(i) ) /
-                         ( status->giveTempMaxCrackStrain(i) * minEffStrainForFullyOpenCrack );
+                         ( minEffStrainForFullyOpenCrack - emax ) /
+                         ( emax * minEffStrainForFullyOpenCrack );
             }
-        } else { // Exponential softening
+        } else if ( softeningMode == linearSoftening ) { // Exponential softening
             ef = Gf / ( Le * Ft );
-            if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
+            if ( crackStrain >= emax ) {
                 // further softening
                 answer = Ft * exp(-crackStrain / ef);
             } else {
                 // crack closing
                 // or unloading or reloading regime
-                answer = Ft * crackStrain / status->giveTempMaxCrackStrain(i) *
-                exp(-status->giveTempMaxCrackStrain(i) / ef);
+                answer = Ft * crackStrain / emax *
+                exp(-emax / ef);
+            }
+        } else { // Hordijk softening
+            ef = 5.136 * Gf / ( Le * Ft );
+            if ( (crackStrain >= ef) || (emax >= ef) ) {
+                //fully open crack - no stiffness
+                answer = 0;
+            } else if ( crackStrain >= emax ) {
+                // further softening
+                answer = Ft * ( ( 1. + pow( ( c1 * crackStrain / ef ), 3. ) ) * exp(-c2 * crackStrain / ef) - crackStrain / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
+            } else if ( crackStrain <= 0) {
+                answer = 0;
+            }
+            else {
+                // crack closing
+                // or unloading or reloading regime
+                answer = Ft * crackStrain / emax * ( ( 1. + pow( ( c1 * emax / ef ), 3. ) ) * exp(-c2 * emax / ef) - emax / ef * ( 1. + c1 * c1 * c1 ) * exp(-c2) );
             }
         }
     } else {
@@ -442,8 +484,10 @@ Concrete3 :: initializeFrom(InputRecord &ir)
 
     int exmode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, exmode, _IFT_Concrete3_exp_soft);
-    if ( exmode ) {
+    if ( exmode == 1 ) {
         softeningMode = exponentialSoftening;
+    } else if ( exmode == 2){
+        softeningMode = hordijkSoftening;
     } else {
         softeningMode = linearSoftening;
     }
