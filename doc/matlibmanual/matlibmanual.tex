@@ -4081,7 +4081,7 @@ Note that the effective element size $h$ is obtained by projecting the element.
 For instance, if the element is a cube of edge length 100 mm, its effective
 size in the direction of the body diagonal can be 173 mm. 
 
-\subsubsection{CDPM2}
+\subsubsection{Damage-plastic model for concrete - CDPM2}
 
 This model is an extension of the ConcreteDPM presented in \ref{sec:cdpm}.
 CDPM2 has been developed by Grassl and coworkers for modelling the failure of concrete for both static and dynamic loading. It is is described in detail in \cite{GraXenNys13}.
@@ -4467,7 +4467,7 @@ The dynamic increase factor (DIF) for strength is computed according to Model Co
 
 The {\bf parameters of CDPM2} for OOFEM input file are summarised in Tab.~\ref{cdpm2_table}.
 By default, two damage variables are used, i.e., the effective stress is transformed into
-nominal stress using equation (\ref{cdpm2:efftonominal}). If parameter {\em isoflag} is set to 1,
+nominal stress using equation (\ref{cdpm2:efftonominal}). If parameter {\em damflag} is set to 3,
 only $\omega_t$ is used and the effective stress is reduced by $1-\omega_t$.
 
 
@@ -4480,7 +4480,7 @@ only $\omega_t$ is used and the effective stress is reduced by $1-\omega_t$.
 \hline
 Description & CDPM2\\
 \hline
-Record Format & \descitem{con2dpm}  \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn} \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} [\elemparam{stype}{in}] [\elemparam{ft1}{rn}] [\elemparam{wf1}{rn}] [\elemparam{efc}{rn}] [\elemparam{ecc}{rn}] [\elemparam{kinit}{rn}] [\elemparam{Ahard}{rn}] [\elemparam{Bhard}{rn}] [\elemparam{Chard}{rn}] [\elemparam{Dhard}{rn}] [\elemparam{Asoft}{rn}] [\elemparam{helem}{rn}] [\elemparam{dilation}{rn}] [\elemparam{hp}{rn}] [\elemparam{isoflag}{in}] [\elemparam{sratetype}{in}] \elemparam{eratetype}{in} [\elemparam{yieldtol}{rn}] [\elemparam{newtoniter}{in}] \\
+Record Format & \descitem{con2dpm}  \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn} \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} [\elemparam{stype}{in}] [\elemparam{ft1}{rn}] [\elemparam{wf1}{rn}] [\elemparam{efc}{rn}] [\elemparam{ecc}{rn}] [\elemparam{kinit}{rn}] [\elemparam{Ahard}{rn}] [\elemparam{Bhard}{rn}] [\elemparam{Chard}{rn}] [\elemparam{Dhard}{rn}] [\elemparam{Asoft}{rn}] [\elemparam{helem}{rn}] [\elemparam{dilation}{rn}] [\elemparam{hp}{rn}] [\elemparam{damflag}{in}] [\elemparam{sratetype}{in}] \elemparam{eratetype}{in} [\elemparam{yieldtol}{rn}] [\elemparam{newtoniter}{in}] \\
 Parameters &- \param{d} material density\\
 &- \param{E} Young modulus\\
 &- \param{n} Poisson ratio\\
@@ -4507,7 +4507,7 @@ Parameters &- \param{d} material density\\
 &- \param{helem} element size $h$, optional (if not specified, the actual element size is used)\\
 &- \param{dilation} dilation factor, optional, default value 0.85\\
 &- \param{hp} hardening modulus, optional, default value 0.5\\
-&- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
+&- \param{damflag} flag which allows for the use of different damage formulations. Default value is 1. If set to zero, no damage is used. If set to 3, only the tensile damage varialbe is used.\\
 &- \param{sratetype}  Dynamic increase factor (DIF) for strength
 \begin{itemize}\setlength{\itemsep}{-3pt}
 \item[0 -] DIF = 1  (no rate effect)
