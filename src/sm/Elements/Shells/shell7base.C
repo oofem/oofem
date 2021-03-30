@@ -1912,7 +1912,7 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
 
         for ( int layer = 1; layer <= numCells; layer++ ) {
             std :: unique_ptr< IntegrationRule > &iRuleL = integrationRulesArray [ layer - 1 ];
-            VTKXMLExportModule::computeIPAverage(average, iRuleL.get(), this, type, tStep);
+            VTKBaseExportModule::computeIPAverage(average, iRuleL.get(), this, type, tStep);
             
             if ( average.giveSize() == 6 ) {
                 vtkPiece.setCellVar(i, layer, convV6ToV9Stress(average) );

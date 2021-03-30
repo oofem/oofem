@@ -99,7 +99,7 @@ VTKXMLPeriodicExportModule :: giveSwitches(IntArray &answer, int location) {
 
 
 void
-VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region)
+VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region)
 {
     // Stores all neccessary data (of a region) in a VTKPiece so it can be exported later.
 
@@ -109,15 +109,16 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
     int nnodes = d->giveNumberOfDofManagers();
 
     this->giveSmoother(); // make sure smoother is created
-
-    // output nodes Region By Region
-    int numNodes, numRegionEl;
-    IntArray mapG2L, mapL2G;
-
-
+    
     // Assemble local->global and global->local region map and get number of
     // single cells to process, the composite cells exported individually.
-    this->initRegionNodeNumbering(mapG2L, mapL2G, numNodes, numRegionEl, d, tStep, region);
+    this->initRegionNodeNumbering(vtkPiece, d, tStep, region);
+    const int numNodes = vtkPiece.giveNumberOfNodes();
+    const int numRegionEl = vtkPiece.giveNumberOfCells();
+    const IntArray& mapG2L = vtkPiece.getMapG2L();
+    const IntArray& mapL2G = vtkPiece.getMapL2G();
+
+
     if ( numNodes > 0 && numRegionEl > 0 ) {
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
@@ -147,7 +148,7 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
 
         int offset = 0;
         int cellNum = 0;
-        IntArray elems = this->giveRegionSet(region)->giveElementList();
+        IntArray elems = region.giveElementList();
         int helpCounter = 0;
         for ( int ei = 1; ei <= elems.giveSize(); ei++ ) {
             int elNum = elems.at(ei);
@@ -214,32 +215,30 @@ VTKXMLPeriodicExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep,
 
 
         // Export primary, internal and XFEM variables as nodal quantities
-        this->exportPrimaryVars(vtkPiece, mapG2L, mapL2G, region, tStep);
+        this->exportPrimaryVars(vtkPiece, region, primaryVarsToExport, *primVarSmoother, tStep);
+        this->exportIntVars (vtkPiece, region, internalVarsToExport, *smoother, tStep);
 
-        this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
+        this->exportCellVars(vtkPiece, cellVarsToExport, tStep);
 
-
-        const IntArray &elements = this->giveRegionSet(region)->giveElementList();
-        this->exportCellVars(vtkPiece, elements, tStep);
     } // end of default piece for simple geometry elements
 }
 
 int
-VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
-                                                      IntArray &regionL2GNodalNumbers,
-                                                      int &regionDofMans,
-                                                      int &regionSingleCells,
-                                                      Domain *domain, TimeStep *tStep, int reg)
+VTKXMLPeriodicExportModule :: initRegionNodeNumbering(VTKPiece& vtkPiece,
+                                                      Domain *domain, TimeStep *tStep, Set& region)
 {
     int nnodes = domain->giveNumberOfDofManagers();
     int elementNode, node;
     int currOffset = 1;
     Element *element;
 
-    regionDofMans = 0;
-    regionSingleCells = 0;
+    int regionDofMans = 0;
+    int regionSingleCells = 0;
+    IntArray& regionG2LNodalNumbers = vtkPiece.getMapG2L();
+    IntArray& regionL2GNodalNumbers = vtkPiece.getMapL2G();
 
-    IntArray elements = this->giveRegionSet(reg)->giveElementList();
+
+    IntArray elements = region.giveElementList();
 
     int extraNodes = 0.;
     for ( int ie = 1; ie <= elements.giveSize(); ie++ ) {
@@ -423,6 +422,10 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
         }
     }
 
+
+    vtkPiece.setNumberOfNodes(regionDofMans);   
+    vtkPiece.setNumberOfCells(regionSingleCells);
+ 
     uniqueNodeTable.resizeWithData(nnodes + uniqueNodes, 3);
     regionDofMans = nnodes + uniqueNodes;
     regionG2LNodalNumbers.resizeWithValues(regionDofMans);
@@ -438,14 +441,15 @@ VTKXMLPeriodicExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNu
 }
 
 
-void
-VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
+void VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) 
 {
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
     FloatArray valueArray;
-    this->givePrimVarSmoother()->clear(); // Makes sure primary smoother is up-to-date with potentially new mesh.
+    smoother.clear(); // Makes sure primary smoother is up-to-date with potentially new mesh.
 
+    //const IntArray& mapG2L = vtkPiece.getMapG2L();
+    const IntArray& mapL2G = vtkPiece.getMapL2G();
     vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), mapL2G.giveSize() );
 
     //Get the macroscopic field (deformation gradients, curvatures etc.)
@@ -468,7 +472,7 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
             if ( inode <= nnodes && mapL2G.at(inode) <= nnodes && mapL2G.at(inode) != 0 ) { //no special treatment for master nodes
                 DofManager *dman = d->giveNode(mapL2G.at(inode) );
 
-                this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
+                this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region, smoother);
                 vtkPiece.setPrimaryVarInNode(i, inode, std :: move(valueArray) );
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
@@ -482,7 +486,7 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
                     giveSwitches(switches, locationMap.at(pos) );
                     //get the master unknown
                     FloatArray helpArray;
-                    this->getNodalVariableFromPrimaryField(helpArray, dman, tStep, type, region);
+                    this->getNodalVariableFromPrimaryField(helpArray, dman, tStep, type, region, smoother);
                     //recalculate the image unknown
                     if ( type == DisplacementVector ) {
                         if ( dofIdArray.giveSize() == 9 ) { //Macroscale: 3D SOLID, LTRSpaceBoundary
@@ -555,15 +559,17 @@ VTKXMLPeriodicExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &ma
     }
 }
 
-void
-VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
+void 
+VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     int nnodes = d->giveNumberOfDofManagers();
     InternalStateType isType;
     FloatArray answer;
 
-    this->giveSmoother()->clear(); // Makes sure smoother is up-to-date with potentially new mesh.
+    smoother.clear(); // Makes sure smoother is up-to-date with potentially new mesh.
+    //const IntArray& mapG2L = vtkPiece.getMapG2L();
+    const IntArray& mapL2G = vtkPiece.getMapL2G();
 
     // Export of Internal State Type fields
     vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), mapL2G.giveSize() );
@@ -573,7 +579,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L
         for ( int nodeNum = 1; nodeNum <= mapL2G.giveSize(); nodeNum++ ) {
             if ( nodeNum <= nnodes && mapL2G.at(nodeNum) <= nnodes && mapL2G.at(nodeNum) != 0 ) { //no special treatment for master nodes
                 Node *node = d->giveNode(mapL2G.at(nodeNum) );
-                this->getNodalVariableFromIS(answer, node, tStep, isType, region);
+                this->getNodalVariableFromIS(answer, node, tStep, isType, region, smoother);
                 vtkPiece.setInternalVarInNode(field, nodeNum, answer);
             } else { //special treatment for image nodes
                 //find the periodic node, enough to find the first occurrence
@@ -584,7 +590,7 @@ VTKXMLPeriodicExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L
 
                 if ( pos ) {
                     Node *node = d->giveNode(periodicMap.at(pos) );
-                    this->getNodalVariableFromIS(answer, node, tStep, isType, region);
+                    this->getNodalVariableFromIS(answer, node, tStep, isType, region, smoother);
                     vtkPiece.setInternalVarInNode(field, nodeNum, answer);
                 } else { //fill with zeroes
                     InternalStateValueType valType = giveInternalStateValueType(isType);

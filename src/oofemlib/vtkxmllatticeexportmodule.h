@@ -96,21 +96,16 @@ public:
 
     bool writeVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep);
 
-    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int region) override;
+    void setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, Set& region) override;
 
     void writeCellVarsCross(VTKPiece &vtkPiece);
 
     void setupVTKPieceCross(VTKPiece &vtkPiece, TimeStep *tStep, int region);
 
-    int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
-                                int &regionDofMans,
-                                int &totalcells,
-                                Domain *domain, TimeStep *tStep, int reg) override;
+    int initRegionNodeNumbering(VTKPiece& piece, Domain *domain, TimeStep *tStep, Set& region) override;
 
-
-    void exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;
-
-    void exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep) override;
+    void exportPrimaryVars(VTKPiece &piece, Set& region, IntArray& primaryVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
+    void exportIntVars(VTKPiece &piece, Set& region, IntArray& internalVarsToExport, NodalRecoveryModel& smoother, TimeStep *tStep) override;
 };
 } // end namespace oofem
 #endif // vtkxmllatticeexportmodule_h
