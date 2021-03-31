@@ -40,6 +40,7 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
+#include "function.h"
 
 namespace oofem {
 REGISTER_Material(MPSMaterial);
@@ -397,6 +398,10 @@ MPSMaterial :: initializeFrom(InputRecord &ir)
         throw ValueInputException(ir, _IFT_MPSMaterial_B4_eps_au_infty,
                                   "autogenous shrinkage cannot be described according to fib and B4 simultaneously");
     }
+
+    
+    hydrationTimescaleTF = 0;
+    IR_GIVE_OPTIONAL_FIELD(ir, hydrationTimescaleTF, _IFT_MPSMaterial_hydrationTimescaleTF);
 }
 
 
@@ -1471,23 +1476,29 @@ MPSMaterial :: computePsiS(GaussPoint *gp, TimeStep *tStep) const
     }
 }
 
+//for equivalent time
 double
 MPSMaterial :: computePsiE(GaussPoint *gp, TimeStep *tStep) const
 {
+    double hydrationTimescale = 1.;
+    if( hydrationTimescaleTF ) {
+       hydrationTimescale = domain->giveFunction(hydrationTimescaleTF)->evaluateAtTime( tStep->giveIntrinsicTime() );
+    }
+    
     if ( this->CoupledAnalysis == MPS_humidity ) {
         double AverageHum = this->giveHumidity(gp, tStep, 2);
         double betaEH = 1. / ( 1. +  pow( ( alphaE * ( 1. - AverageHum ) ), 4. ) );
-        return betaEH;
+        return hydrationTimescale*betaEH;
     } else if ( this->CoupledAnalysis == MPS_temperature ) {
         double AverageTemp = this->giveTemperature(gp, tStep, 2);
         double betaET = exp(QEtoR * ( 1. /  this->roomTemperature - 1. / AverageTemp ) );
-        return betaET;
+        return hydrationTimescale*betaET;
     } else if ( this->CoupledAnalysis == MPS_full ) {
         double AverageHum = this->giveHumidity(gp, tStep, 2);
         double AverageTemp = this->giveTemperature(gp, tStep, 2);
         double betaEH = 1. / ( 1. +  pow( ( alphaE * ( 1. - AverageHum ) ), 4. ) );
         double betaET = exp(QEtoR * ( 1. /  this->roomTemperature - 1. / AverageTemp ) );
-        return betaEH * betaET;
+        return hydrationTimescale * betaEH * betaET;
     } else {
         OOFEM_ERROR(" mode is not supported");
         return 0.;
